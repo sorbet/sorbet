@@ -1,5 +1,9 @@
+workspace(name = "com_stripe_sruby")
+
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository", "new_git_repository")
 
+BAZEL_VERSION = "0.5.4"
+BAZEL_VERSION_SHA = "2157b05309614d6af0e4bbc6065987aede590822634a0522161f3af5d647abc9"
 
 new_http_archive(
     name = "gtest",
