@@ -1,6 +1,6 @@
 FROM dockerregistry.local.corp.stripe.com/stripe/ubuntu-16.04:latest
 
-RUN apt-get update && apt-get install -y clang-4.0 clang-format-4.0
+RUN apt-get update && apt-get install -y clang-4.0 clang-format-4.0 unzip
 
 RUN /usr/stripe/bin/docker/stripe-install-go 1.9 d70eadefce8e160638a9a6db97f7192d8463069ab33138893ad3bf31b0650a79
 ENV GOPATH /gopath
