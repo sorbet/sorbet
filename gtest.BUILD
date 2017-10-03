@@ -37,6 +37,7 @@ cc_library(
     deps = [
         ":gtest_prod",
     ],
+    linkopts = ["-pthread"],
 )
 
 cc_library(
