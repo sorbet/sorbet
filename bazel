@@ -1,0 +1,128 @@
+#!/bin/bash
+
+# update this to move to later versions of this repo:
+# https://github.com/bazelbuild/bazel
+
+ORIGINAL_PWD=$PWD
+TMPDIR="${TMPDIR:-/tmp}"
+RND_UID=$(date "+%s")
+
+function try_goto_cmd_location() {
+  BASH_LOC=${BASH_SOURCE[0]}
+  if [ ! -z "$BASH_LOC" ]; then
+    DIR_NAME=$(dirname "$BASH_LOC")
+    CMD_LOC="$( cd "$DIR_NAME" && pwd )"
+    if [ ! -z "$CMD_LOC" ]; then
+      cd $CMD_LOC
+    fi
+  fi
+}
+
+# If we are executed as a sub-process we won't be able to do this
+# So we do it as a try
+try_goto_cmd_location
+
+set -e
+
+if [ -z "$BAZEL_REMOTE_SOURCE" ]; then
+  export BAZEL_REMOTE_SOURCE=https://github.com/bazelbuild/bazel/releases/download
+fi
+
+findWorkspace() {
+  OLD_PWD=$PWD
+  if [ ! -f WORKSPACE ]; then
+    cd ..
+    if [ "$PWD" = "$OLD_PWD" ]; then
+      echo "Didn't find the workspace"
+      exit 1
+    fi
+
+    findWorkspace
+  fi
+}
+
+findWorkspace
+
+REPO_ROOT=$PWD
+cd $ORIGINAL_PWD
+
+BAZEL_RC_PATH=${TMPDIR}/bazel_bazel_rc_${RND_UID}
+echo "" > $BAZEL_RC_PATH
+
+if [ -f $REPO_ROOT/tools/default_bazel_rc ]; then
+  cat $REPO_ROOT/tools/default_bazel_rc >> $BAZEL_RC_PATH
+fi
+
+if [ -f /etc/bazelrc ]; then
+  cat /etc/bazelrc >> $BAZEL_RC_PATH
+fi
+
+if [ -f $HOME/.bazelrc ]; then
+  cat $HOME/.bazelrc >> $BAZEL_RC_PATH
+fi
+
+if [ -f $REPO_ROOT/.bazelrc ]; then
+  cat $REPO_ROOT/.bazelrc >> $BAZEL_RC_PATH
+fi
+
+
+export BAZEL_VERSION=$(cat $REPO_ROOT/WORKSPACE | egrep '^BAZEL_VERSION\s*=\s*' | sed -e 's/.*=//g' -e 's/ //g' -e 's/"//g')
+
+# So we can compare what we download against an expected SHA 256
+export BAZEL_VERSION_SHA=$(cat $REPO_ROOT/WORKSPACE | egrep '^BAZEL_VERSION_SHA\s*=\s*' | sed -e 's/.*=//g' -e 's/ //g' -e 's/"//g')
+export BAZEL_ZIP_PATH=$(cat $REPO_ROOT/WORKSPACE | egrep '^BAZEL_ZIP_PATH\s*=\s*' | sed -e 's/.*=//g' -e 's/ //g' -e 's/"//g')
+
+if [ -z BAZEL_VERSION_SHA ]; then
+  echo "Must supply a BAZEL_VERSION in the workspace"
+  exit 1
+fi
+if [ -z "$BAZEL_VERSION_SHA" ]; then
+  echo "Must supply a BAZEL_VERSION_SHA in the workspace"
+  exit 1
+fi
+if [ -z "$BAZEL_BIN_LOC" ]; then
+  BAZEL_BIN_LOC=~/.bazel
+fi
+
+mkdir -p $BAZEL_BIN_LOC
+export BAZEL_EXEC_PATH=$BAZEL_BIN_LOC/$BAZEL_VERSION
+
+if [ -f "$BAZEL_EXEC_PATH" ]; then
+   exec $BAZEL_EXEC_PATH --bazelrc $BAZEL_RC_PATH "$@"
+fi
+
+RND_UID=$(date "+%s")
+export BUILD_DIR=${TMPDIR}/bazel_b_${RND_UID}
+mkdir -p $BUILD_DIR
+
+( # Opens a subshell
+  set -e
+  echo "Building Bazel, this will take ~2mins"
+
+  cd $BUILD_DIR
+  ZIP_NAME="bazel-${BAZEL_VERSION}-dist.zip"
+  echo $PWD
+  if [ -z $BAZEL_ZIP_PATH ]; then
+    BAZEL_ZIP_PATH=$BAZEL_REMOTE_SOURCE/${BAZEL_VERSION}/$ZIP_NAME
+  fi
+  curl -O -L $BAZEL_ZIP_PATH
+
+  GENERATED_SHA_256=$(shasum -a 256 $ZIP_NAME | awk '{print $1}')
+
+  if [ "$GENERATED_SHA_256" != "$BAZEL_VERSION_SHA" ]; then
+    echo "Sha 256 does not match, expected: $BAZEL_VERSION_SHA"
+    echo "But found $GENERATED_SHA_256"
+    echo "Recommend you:  update the sha to the expected"
+    echo "and then re-run this script"
+    exit 1
+  fi
+
+
+  unzip $ZIP_NAME > /dev/null
+  ./compile.sh > /dev/null
+  mv output/bazel $BAZEL_EXEC_PATH
+)
+rm -rf $BUILD_DIR
+
+cd $ORIGINAL_PWD
+exec $BAZEL_EXEC_PATH --bazelrc $BAZEL_RC_PATH "$@"
