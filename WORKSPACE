@@ -25,10 +25,10 @@ new_git_repository(
 cc_library(
     name = "spdlog",
     srcs = [],
-    hdrs = [
-        "include/spdlog/spdlog.h",
-        "include/spdlog/tweakme.h",
-    ],
+    hdrs = glob([
+        "include/spdlog/**/*.h",
+        "include/spdlog/**/*.cc",
+    ]),
     copts = [
         "-Iexternal/spdlog/",
     ],
