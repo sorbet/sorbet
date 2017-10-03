@@ -3,7 +3,7 @@ cc_test(
     srcs = ["hello-test.cc"],
     copts = ["-Iexternal/gtest/include"],
     deps = [
-        "@gtest//:main",
+        "@gtest//:gtest",
         "//main:hello-greet",
     ],
 )
