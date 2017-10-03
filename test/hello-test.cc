@@ -1,6 +1,8 @@
 #include "gtest/gtest.h"
 #include "main/hello-greet.h"
 #include "spdlog/spdlog.h"
+#include <cxxopts.hpp>
+
 
 
 TEST(HelloTest, GetGreet) {
@@ -13,3 +15,8 @@ TEST(HelloTest, GetSpdlog) {
         auto console = spd::stdout_color_mt("console");
         console->info("Welcome to spdlog!");
 }
+
+TEST(HelloTest, GetCXXopts) {
+       cxxopts::Options options("MyProgram", "One line description of MyProgram");
+}
+

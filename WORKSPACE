@@ -40,3 +40,26 @@ cc_library(
 )
 """
 )
+
+
+new_git_repository(
+   name="cxxopts",
+   remote="https://github.com/jarro2783/cxxopts.git",
+   commit="0b7686949d01f6475cc13ba0693725aefb76fc0c",
+   build_file_content="""
+cc_library(
+    name = "cxxopts",
+    srcs = [],
+    hdrs = [
+        "include/cxxopts.hpp",
+    ],
+    copts = [
+        "-Iexternal/cxxopts/",
+    ],
+    includes = [
+        "include/",
+    ],
+    visibility = ["//visibility:public"],
+)
+"""
+)
