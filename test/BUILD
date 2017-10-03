@@ -6,6 +6,7 @@ cc_test(
         "@gtest//:gtest",
         "@gtest//:gtest_main",
         "@spdlog//:spdlog",
+        "@cxxopts//:cxxopts",
         "//main:hello-greet",
     ],
 )

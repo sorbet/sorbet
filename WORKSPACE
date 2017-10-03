@@ -29,10 +29,10 @@ new_git_repository(
 cc_library(
     name = "spdlog",
     srcs = [],
-    hdrs = [
-        "include/spdlog/spdlog.h",
-        "include/spdlog/tweakme.h",
-    ],
+    hdrs = glob([
+        "include/spdlog/**/*.h",
+        "include/spdlog/**/*.cc",
+    ]),
     copts = [
         "-Iexternal/spdlog/",
     ],
@@ -41,6 +41,29 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     linkopts = ["-pthread"],
+)
+"""
+)
+
+
+new_git_repository(
+   name="cxxopts",
+   remote="https://github.com/jarro2783/cxxopts.git",
+   commit="0b7686949d01f6475cc13ba0693725aefb76fc0c",
+   build_file_content="""
+cc_library(
+    name = "cxxopts",
+    srcs = [],
+    hdrs = [
+        "include/cxxopts.hpp",
+    ],
+    copts = [
+        "-Iexternal/cxxopts/",
+    ],
+    includes = [
+        "include/",
+    ],
+    visibility = ["//visibility:public"],
 )
 """
 )
