@@ -5,6 +5,7 @@ cc_test(
     deps = [
         "@gtest//:gtest",
         "@gtest//:gtest_main",
+        "@spdlog//:spdlog",
         "//main:hello-greet",
     ],
 )
