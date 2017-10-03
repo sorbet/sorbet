@@ -1,0 +1,5 @@
+startup --output_base=/cache/bazel --output_user_root=/cache/bazel_user
+common --color yes
+
+test --spawn_strategy=standalone --genrule_strategy=standalone --test_output errors --experimental_multi_threaded_digest --jobs 30
+build --spawn_strategy=standalone --genrule_strategy=standalone --experimental_multi_threaded_digest --jobs 30
