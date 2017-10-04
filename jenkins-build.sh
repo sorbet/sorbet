@@ -10,4 +10,4 @@ export BAZEL_BIN_LOC=/cache/bazel_binary
 
 cp bazelrc-jenkins .bazelrc
 
-bazel test //... --test_output=errors
+LSAN_OPTIONS=verbosity=1:log_threads=1 bazel test //... --test_output=errors
