@@ -96,8 +96,23 @@ toolchain {
   compilation_mode_flags {
     mode: DBG
     # Enable debug symbols.
-    compiler_flag: "-g"
+    compiler_flag: "-g3"
+
+    # enable sanitize
+    compiler_flag: "-fsanitize=address"
+    compiler_flag: "-fstack-protector"
+    compiler_flag: "-fsanitize=undefined"
+    linker_flag: "-fsanitize=address"
+    linker_flag: "-fstack-protector"
+    linker_flag: "-fsanitize=undefined"
+
+    # enable self-checking capabilities of libcpp
+    compiler_flag: "-D_LIBCPP_DEBUG2=2"
+
+    # enable self-checking capabilities of glibc
+    compiler_flag: "-D_GLIBCXX_DEBUG"
   }
+
   compilation_mode_flags {
     mode: OPT
 
@@ -112,13 +127,25 @@ toolchain {
     # Profile first and / or use FDO if you need better performance than this.
     compiler_flag: "-O2"
 
+    compiler_flag: "-flto"
+
     # Disable assertions
     compiler_flag: "-DNDEBUG"
 
     # Removal of unused code and data at link time (can this increase binary size in some cases?).
+    # Dmitry: it can't
     compiler_flag: "-ffunction-sections"
     compiler_flag: "-fdata-sections"
+    compiler_flag: "-fdata-sections"
+
+    # Helps a lot with profiling
+    compiler_flag:  "-fno-omit-frame-pointer"
+
+    compiler_flag: "-fsanitize=address"
+    linker_flag: "-fsanitize=address"
+
     linker_flag: "-Wl,--gc-sections"
+
   }
   linking_mode_flags { mode: DYNAMIC }
 }
