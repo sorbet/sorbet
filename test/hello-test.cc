@@ -1,22 +1,17 @@
-#include "gtest/gtest.h"
 #include "main/hello-greet.h"
 #include "spdlog/spdlog.h"
+#include "gtest/gtest.h"
 #include <cxxopts.hpp>
 
-
-
-TEST(HelloTest, GetGreet) {
-  EXPECT_EQ(get_greet("Bazel"), "Hello Bazel");
-}
+TEST(HelloTest, GetGreet) { EXPECT_EQ(get_greet("Bazel"), "Hello Bazel"); }
 
 namespace spd = spdlog;
 
 TEST(HelloTest, GetSpdlog) {
-        auto console = spd::stdout_color_mt("console");
-        console->info("Welcome to spdlog!");
+  auto console = spd::stdout_color_mt("console");
+  console->info("Welcome to spdlog!");
 }
 
 TEST(HelloTest, GetCXXopts) {
-       cxxopts::Options options("MyProgram", "One line description of MyProgram");
+  cxxopts::Options options("MyProgram", "One line description of MyProgram");
 }
-
