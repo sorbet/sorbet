@@ -23,6 +23,9 @@ cleanup() {
 
 trap cleanup EXIT
 
+## uncomment the line below to dump format
+#clang-format -style=file -dump-config
+
 for src in "${cxx_src[@]}"; do
     clang-format -style=file "$src" > "$src.formatted"
     if ! cmp -s "$src" "$src.formatted"; then
