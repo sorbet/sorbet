@@ -1,0 +1,11 @@
+/.cargo-in-container
+/cc/grammars/stack.hh
+/cc/grammars/typedruby24.cc
+/cc/grammars/typedruby24.hh
+/cc/lexer.cc
+/include/ruby_parser/diagnostic_class.hh
+/src/diagnostics.rs
+/src/ffi_builder.rs
+/target
+*.o
+Cargo.lock

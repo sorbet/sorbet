@@ -1,0 +1,7 @@
+.cargo-in-container
+.git
+*.o
+librubyparser.a
+target
+library
+tests/ruby
