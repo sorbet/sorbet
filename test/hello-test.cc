@@ -1,3 +1,4 @@
+#include "common/common.h"
 #include "main/hello-greet.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
