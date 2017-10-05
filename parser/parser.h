@@ -6,7 +6,7 @@
 namespace sruby {
 namespace parser {
 
-using ast = void *;
+using ast = const void *;
 
 class resultImpl;
 
@@ -28,9 +28,10 @@ public:
 
 private:
     result(std::unique_ptr<resultImpl> &&impl);
-    std::unique_ptr<resultImpl> impl_;
 
     friend result parse_ruby(const std::string &src);
+
+    std::unique_ptr<resultImpl> impl_;
 };
 
 result parse_ruby(const std::string &src);

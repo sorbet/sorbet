@@ -6,7 +6,6 @@
 namespace sruby {
 namespace parser {
 
-
 using std::string;
 using std::unique_ptr;
 
@@ -14,7 +13,7 @@ class resultImpl {
 public:
     friend class result;
 
-    resultImpl(const string &src) : driver(src, builder) {}
+    resultImpl(const string &src) : driver(src, builder::interface) {}
 
     ruby_parser::typedruby24 driver;
 };
@@ -32,8 +31,12 @@ result::~result() {}
 
 result parse_ruby(const string &src) {
     unique_ptr<resultImpl> impl(new resultImpl(src));
-    impl->driver.parse(nullptr);
-    return result(std::move(impl));
+    result result(std::move(impl));
+
+    builder builder(result);
+    builder.build(&result.impl_->driver);
+
+    return result;
 }
 };
 };
