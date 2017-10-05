@@ -1,6 +1,7 @@
 #include "main/hello-greet.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
+#include "ruby_parser/driver.hh"
 #include <cxxopts.hpp>
 
 TEST(HelloTest, GetGreet) {
