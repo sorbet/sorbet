@@ -26,3 +26,9 @@ def externals():
     commit="0b7686949d01f6475cc13ba0693725aefb76fc0c",
     build_file="//:cxxopts.BUILD",
   )
+
+  native.new_local_repository(
+    name="parser",
+    path="third_party/parser",
+    build_file="//third_party:parser.BUILD",
+  )

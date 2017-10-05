@@ -1,4 +1,5 @@
 #include "main/hello-greet.h"
+#include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <cxxopts.hpp>
@@ -12,6 +13,10 @@ namespace spd = spdlog;
 TEST(HelloTest, GetSpdlog) {
     auto console = spd::stdout_color_mt("console");
     console->info("Welcome to spdlog!");
+}
+
+TEST(HelloTest, SimpleParse) {
+    sruby::parser::parse_ruby("def hello_world; p :hello; end");
 }
 
 TEST(HelloTest, GetCXXopts) {

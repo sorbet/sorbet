@@ -1,0 +1,3 @@
+#!/bin/sh
+fp="$(realpath $1)"
+cd "$(dirname $0)/../tests/ruby" && exec bundle exec ./parse.rb $fp

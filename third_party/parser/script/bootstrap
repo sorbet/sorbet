@@ -1,0 +1,12 @@
+#!/bin/sh
+# usage: script/bootstrap
+# Build a Docker image for development + CI.
+
+set -eu
+
+# bootstrap is a noöp in the container
+[ -f /etc/github/in-container ] && exit 0
+
+cd "$(dirname "$0")/.."
+make clean all
+docker build -t ruby_parser-build .
