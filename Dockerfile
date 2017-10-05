@@ -8,6 +8,9 @@ RUN export JAVA_HOME
 
 RUN apt-get update && apt-get install -y clang-4.0 clang-format-4.0
 
+# Dependencies for the parser
+RUN apt-get update && apt-get install -y ragel bison ruby
+
 RUN /usr/stripe/bin/docker/stripe-install-go 1.9 d70eadefce8e160638a9a6db97f7192d8463069ab33138893ad3bf31b0650a79
 ENV GOPATH /gopath
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
