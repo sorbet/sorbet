@@ -21,6 +21,13 @@ public:
 };
 
 builder::builder(result &r) : impl_(new builderImpl(r)) {}
+builder::~builder() {}
+
+
+ast builder::build(ruby_parser::base_driver *driver) {
+    return driver->parse(impl_.get());
+}
+
 };
 };
 
