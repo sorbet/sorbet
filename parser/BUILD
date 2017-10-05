@@ -2,6 +2,7 @@ cc_library(
     name = "parser",
     srcs = [
         "builder.cc",
+        "builder.h",
         "parser.cc",
     ],
     hdrs = [

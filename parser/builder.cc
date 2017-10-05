@@ -1,15 +1,44 @@
+#include "parser/builder.h"
 #include "ruby_parser/builder.hh"
-
-namespace sruby {
-namespace parser {
 
 using ruby_parser::foreign_ptr;
 using ruby_parser::self_ptr;
 using ruby_parser::token;
 using ruby_parser::node_list;
 
+namespace sruby {
+namespace parser {
+
+class builderImpl {
+public:
+    builderImpl(result &r) : result_(r) {}
+
+    result &result_;
+
+    ast accessible(ast node) {
+        return nullptr;
+    }
+};
+
+builder::builder(result &r) : impl_(new builderImpl(r)) {}
+builder::~builder() {}
+
+
+ast builder::build(ruby_parser::base_driver *driver) {
+    return driver->parse(impl_.get());
+}
+
+};
+};
+
+namespace {
+
+using sruby::parser::builderImpl;
+using sruby::parser::ast;
+
 foreign_ptr accessible(self_ptr builder, foreign_ptr node) {
-    return nullptr;
+    builderImpl *impl = const_cast<builderImpl *>(reinterpret_cast<const builderImpl *>(builder));
+    return impl->accessible(reinterpret_cast<ast>(node));
 }
 
 foreign_ptr alias(self_ptr builder, const token *alias, foreign_ptr to, foreign_ptr from) {
@@ -567,8 +596,11 @@ foreign_ptr words_compose(self_ptr builder, const token *begin, const node_list 
 foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
     return nullptr;
 }
+};
 
-struct ruby_parser::builder builder = {
+namespace sruby {
+namespace parser {
+struct ruby_parser::builder builder::interface = {
     accessible,
     alias,
     arg,
@@ -703,5 +735,5 @@ struct ruby_parser::builder builder = {
     words_compose,
     xstring_compose,
 };
-};
-};
+}
+}
