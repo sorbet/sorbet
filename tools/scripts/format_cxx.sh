@@ -11,7 +11,7 @@ fi
 cd $(dirname $0)/../..
 
 cxx_src=(
-    $(find . -name '*.cxx' -o -name '*.h' -o -name '*.cc')
+    $(find . -path ./third_party -prune -false -o -name '*.cxx' -o -name '*.h' -o -name '*.cc')
 )
 misformatted=()
 
