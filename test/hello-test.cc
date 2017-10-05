@@ -16,7 +16,7 @@ TEST(HelloTest, GetSpdlog) {
 }
 
 TEST(HelloTest, SimpleParse) {
-  sruby::parser::parse_ruby("def hello_world; p :hello; end");
+    sruby::parser::parse_ruby("def hello_world; p :hello; end");
 }
 
 TEST(HelloTest, GetCXXopts) {
