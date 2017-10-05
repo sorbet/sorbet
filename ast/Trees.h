@@ -80,7 +80,7 @@ public:
   bool operator!() { return !_id; }
 
 private:
-  u4 x;
+  u4 _id;
 };
 
 CheckSize(SymbolRef, 4, 4)
@@ -379,9 +379,9 @@ public:
 
   spdlog::logger &logger;
 
-  SymbolRef noSymbol() { return SymbolRef(0); }
-
-  SymbolRef defn_javaLangString();
+  static constexpr  SymbolRef noSymbol() { return SymbolRef(0); }
+  static constexpr SymbolRef defn_top() { return SymbolRef(1); }
+  static constexpr SymbolRef denf_bottom() { return SymbolRef(2); }
 
   static constexpr SymbolRef defn_javaLangObject() { return SymbolRef(1); }
 
@@ -403,7 +403,7 @@ public:
 
   static constexpr SymbolRef defn_void() { return SymbolRef(10); }
 
-  static constexpr SymbolRef defn_top() { return SymbolRef(11); }
+
 
   static constexpr SymbolRef defn_null() { return SymbolRef(12); }
 
