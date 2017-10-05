@@ -96,15 +96,6 @@ toolchain {
   compilation_mode_flags {
     mode: DBG
     # Enable debug symbols.
-    compiler_flag: "-g3"
-
-    # enable sanitize
-    compiler_flag: "-fsanitize=address"
-    compiler_flag: "-fstack-protector"
-    compiler_flag: "-fsanitize=undefined"
-    linker_flag: "-fsanitize=address"
-    linker_flag: "-fstack-protector"
-    linker_flag: "-fsanitize=undefined"
 
     # enable self-checking capabilities of libcpp
     compiler_flag: "-D_LIBCPP_DEBUG2=2"
@@ -138,11 +129,8 @@ toolchain {
     compiler_flag: "-fdata-sections"
     compiler_flag: "-fdata-sections"
 
-    # Helps a lot with profiling
+    # Helps a lot with profiling. Needs to be repeated after -O2
     compiler_flag:  "-fno-omit-frame-pointer"
-
-    compiler_flag: "-fsanitize=address"
-    linker_flag: "-fsanitize=address"
 
     linker_flag: "-Wl,--gc-sections"
 
