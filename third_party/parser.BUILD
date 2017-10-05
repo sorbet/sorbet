@@ -39,9 +39,11 @@ cc_library(
         ":bison_parser",
     ],
     hdrs = glob(["include/**/*.hh"]),
-    copts = ["-std=c++14"],
+    copts = [
+        "-std=c++14",
+        "-I$(GENDIR)/external/parser/cc",
+    ],
     includes = [
-        "cc",
         "include",
         "include/ruby_parser",
     ],
