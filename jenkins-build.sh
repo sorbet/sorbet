@@ -10,4 +10,10 @@ export BAZEL_BIN_LOC=/cache/bazel_binary
 
 cp bazelrc-jenkins .bazelrc
 
-LSAN_OPTIONS=verbosity=1:log_threads=1 bazel test //... --test_output=errors
+export LSAN_OPTIONS=verbosity=1:log_threads=1
+
+# Disable leak sanatizer. Does not work in docker
+# https://github.com/google/sanitizers/issues/764
+export ASAN_OPTIONS=detect_leaks=0
+
+bazel test //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0" --test_env="LSAN_OPTIONS=verbosity=1:log_threads=1"
