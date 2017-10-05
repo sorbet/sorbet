@@ -1,1 +1,3 @@
+/.bazelrc
 /bazel-*
+/compile_commands.json

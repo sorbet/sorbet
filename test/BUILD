@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 cc_test(
     name = "hello-test",
     srcs = ["hello-test.cc"],
