@@ -8,9 +8,8 @@
 namespace sruby {
 namespace parser {
 
-class builderImpl;
 class Result;
-using ast = const void *;
+class Node;
 
 class Builder {
 public:
@@ -19,7 +18,7 @@ public:
 
     static ruby_parser::builder interface;
 
-    ast build(ruby_parser::base_driver *driver);
+    std::unique_ptr<Node> build(ruby_parser::base_driver *driver);
 
     class Impl;
 

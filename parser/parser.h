@@ -8,7 +8,7 @@
 namespace sruby {
 namespace parser {
 
-using ast = const void *;
+class Node;
 
 /*
  * parser::Result contains the result of parsing a piece of Ruby source. It is
@@ -19,7 +19,7 @@ using ast = const void *;
 class Result {
 public:
     const ruby_parser::diagnostics_t &diagnostics();
-    ast ast();
+    Node *ast();
 
     ~Result();
 

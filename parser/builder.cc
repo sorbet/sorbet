@@ -1,4 +1,6 @@
 #include "parser/builder.h"
+#include "parser/Trees.h"
+
 #include "ruby_parser/builder.hh"
 
 using ruby_parser::foreign_ptr;
@@ -7,6 +9,7 @@ using ruby_parser::token;
 using ruby_parser::node_list;
 
 using sruby::ast::ContextBase;
+using std::unique_ptr;
 
 namespace sruby {
 namespace parser {
@@ -18,18 +21,554 @@ public:
     ContextBase &ctx_;
     Result &result_;
 
-    ast accessible(ast node) {
+    Loc tok_loc(const token *tok) {
+        return Loc{(u4)tok->start(), (u4)tok->end()};
+    }
+
+    Node *accessible(Node *node) {
+        return nullptr;
+    }
+
+    Node *alias(const token *alias, Node *to, Node *from) {
+        return nullptr;
+    }
+
+    Node *arg(const token *name) {
+        return nullptr;
+    }
+
+    Node *args(const token *begin, const node_list *args, const token *end, bool check_args) {
+        return nullptr;
+    }
+
+    Node *array(const token *begin, const node_list *elements, const token *end) {
+        return nullptr;
+    }
+
+    Node *assign(Node *lhs, const token *eql, Node *rhs) {
+        return nullptr;
+    }
+
+    Node *assignable(Node *node) {
+        return nullptr;
+    }
+
+    Node *associate(const token *begin, const node_list *pairs, const token *end) {
+        return nullptr;
+    }
+
+    Node *attr_asgn(Node *receiver, const token *dot, const token *selector) {
+        return nullptr;
+    }
+
+    Node *back_ref(const token *tok) {
+        return nullptr;
+    }
+
+    Node *begin(const token *begin, Node *body, const token *end) {
+        return nullptr;
+    }
+
+    Node *begin_body(Node *body, const node_list *rescue_bodies, const token *else_tok, Node *else_,
+                     const token *ensure_tok, Node *ensure) {
+        return nullptr;
+    }
+
+    Node *begin_keyword(const token *begin, Node *body, const token *end) {
+        return nullptr;
+    }
+
+    Node *binary_op(Node *receiver, const token *oper, Node *arg) {
+        return nullptr;
+    }
+
+    Node *block(Node *method_call, const token *begin, Node *args, Node *body, const token *end) {
+        return nullptr;
+    }
+
+    Node *block_pass(const token *amper, Node *arg) {
+        return nullptr;
+    }
+
+    Node *blockarg(const token *amper, const token *name) {
+        return nullptr;
+    }
+
+    Node *call_lambda(const token *lambda) {
+        return nullptr;
+    }
+
+    Node *call_method(Node *receiver, const token *dot, const token *selector, const token *lparen,
+                      const node_list *args, const token *rparen) {
+        return nullptr;
+    }
+
+    Node *case_(const token *case_, Node *expr, const node_list *when_bodies, const token *else_tok, Node *else_body,
+                const token *end) {
+        return nullptr;
+    }
+
+    Node *character(const token *char_) {
+        return nullptr;
+    }
+
+    Node *complex(const token *tok) {
+        return nullptr;
+    }
+
+    Node *compstmt(const node_list *node) {
+        return nullptr;
+    }
+
+    Node *condition(const token *cond_tok, Node *cond, const token *then, Node *if_true, const token *else_,
+                    Node *if_false, const token *end) {
+        return nullptr;
+    }
+
+    Node *condition_mod(Node *if_true, Node *if_false, Node *cond) {
+        return nullptr;
+    }
+
+    Node *const_(const token *name) {
+        return nullptr;
+    }
+
+    Node *const_fetch(Node *scope, const token *colon, const token *name) {
+        return nullptr;
+    }
+
+    Node *const_global(const token *colon, const token *name) {
+        return nullptr;
+    }
+
+    Node *const_op_assignable(Node *node) {
+        return nullptr;
+    }
+
+    Node *cvar(const token *tok) {
+        return nullptr;
+    }
+
+    Node *dedent_string(Node *node, size_t dedent_level) {
+        return nullptr;
+    }
+
+    Node *def_class(const token *class_, Node *name, const token *lt_, Node *superclass, Node *body,
+                    const token *end_) {
+        return nullptr;
+    }
+
+    Node *def_method(const token *def, const token *name, Node *args, Node *body, const token *end) {
+        return nullptr;
+    }
+
+    Node *def_module(const token *module, Node *name, Node *body, const token *end_) {
+        return nullptr;
+    }
+
+    Node *def_sclass(const token *class_, const token *lshft_, Node *expr, Node *body, const token *end_) {
+        return nullptr;
+    }
+
+    Node *def_singleton(const token *def, Node *definee, const token *dot, const token *name, Node *args, Node *body,
+                        const token *end) {
+        return nullptr;
+    }
+
+    Node *encoding_literal(const token *tok) {
+        return nullptr;
+    }
+
+    Node *false_(const token *tok) {
+        return nullptr;
+    }
+
+    Node *file_literal(const token *tok) {
+        return nullptr;
+    }
+
+    Node *float_(const token *tok) {
+        return nullptr;
+    }
+
+    Node *float_complex(const token *tok) {
+        return nullptr;
+    }
+
+    Node *for_(const token *for_, Node *iterator, const token *in_, Node *iteratee, const token *do_, Node *body,
+               const token *end) {
+        return nullptr;
+    }
+
+    Node *gvar(const token *tok) {
+        return nullptr;
+    }
+
+    Node *ident(const token *tok) {
+        return new Ident(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
+    }
+
+    Node *index(Node *receiver, const token *lbrack, const node_list *indexes, const token *rbrack) {
+        return nullptr;
+    }
+
+    Node *index_asgn(Node *receiver, const token *lbrack, const node_list *indexes, const token *rbrack) {
+        return nullptr;
+    }
+
+    Node *integer(const token *tok) {
+        return nullptr;
+    }
+
+    Node *ivar(const token *tok) {
+        return nullptr;
+    }
+
+    Node *keyword_break(const token *keyword, const token *lparen, const node_list *args, const token *rparen) {
+        return nullptr;
+    }
+
+    Node *keyword_defined(const token *keyword, Node *arg) {
+        return nullptr;
+    }
+
+    Node *keyword_next(const token *keyword, const token *lparen, const node_list *args, const token *rparen) {
+        return nullptr;
+    }
+
+    Node *keyword_redo(const token *keyword) {
+        return nullptr;
+    }
+
+    Node *keyword_retry(const token *keyword) {
+        return nullptr;
+    }
+
+    Node *keyword_return(const token *keyword, const token *lparen, const node_list *args, const token *rparen) {
+        return nullptr;
+    }
+
+    Node *keyword_super(const token *keyword, const token *lparen, const node_list *args, const token *rparen) {
+        return nullptr;
+    }
+
+    Node *keyword_yield(const token *keyword, const token *lparen, const node_list *args, const token *rparen) {
+        return nullptr;
+    }
+
+    Node *keyword_zsuper(const token *keyword) {
+        return nullptr;
+    }
+
+    Node *kwarg(const token *name) {
+        return nullptr;
+    }
+
+    Node *kwoptarg(const token *name, Node *value) {
+        return nullptr;
+    }
+
+    Node *kwrestarg(const token *dstar, const token *name) {
+        return nullptr;
+    }
+
+    Node *kwsplat(const token *dstar, Node *arg) {
+        return nullptr;
+    }
+
+    Node *line_literal(const token *tok) {
+        return nullptr;
+    }
+
+    Node *logical_and(Node *lhs, const token *op, Node *rhs) {
+        return nullptr;
+    }
+
+    Node *logical_or(Node *lhs, const token *op, Node *rhs) {
+        return nullptr;
+    }
+
+    Node *loop_until(const token *keyword, Node *cond, const token *do_, Node *body, const token *end) {
+        return nullptr;
+    }
+
+    Node *loop_until_mod(Node *body, Node *cond) {
+        return nullptr;
+    }
+
+    Node *loop_while(const token *keyword, Node *cond, const token *do_, Node *body, const token *end) {
+        return nullptr;
+    }
+
+    Node *loop_while_mod(Node *body, Node *cond) {
+        return nullptr;
+    }
+
+    Node *match_op(Node *receiver, const token *oper, Node *arg) {
+        return nullptr;
+    }
+
+    Node *multi_assign(Node *mlhs, Node *rhs) {
+        return nullptr;
+    }
+
+    Node *multi_lhs(const token *begin, const node_list *items, const token *end) {
+        return nullptr;
+    }
+
+    Node *multi_lhs1(const token *begin, Node *item, const token *end) {
+        return nullptr;
+    }
+
+    Node *negate(const token *uminus, Node *numeric) {
+        return nullptr;
+    }
+
+    Node *nil(const token *tok) {
+        return nullptr;
+    }
+
+    Node *not_op(const token *not_, const token *begin, Node *receiver, const token *end) {
+        return nullptr;
+    }
+
+    Node *nth_ref(const token *tok) {
+        return nullptr;
+    }
+
+    Node *op_assign(Node *lhs, const token *op, Node *rhs) {
+        return nullptr;
+    }
+
+    Node *optarg_(const token *name, const token *eql, Node *value) {
+        return nullptr;
+    }
+
+    Node *pair(Node *key, const token *assoc, Node *value) {
+        return nullptr;
+    }
+
+    Node *pair_keyword(const token *key, Node *value) {
+        return nullptr;
+    }
+
+    Node *pair_quoted(const token *begin, const node_list *parts, const token *end, Node *value) {
+        return nullptr;
+    }
+
+    Node *postexe(const token *begin, Node *node, const token *rbrace) {
+        return nullptr;
+    }
+
+    Node *preexe(const token *begin, Node *node, const token *rbrace) {
+        return nullptr;
+    }
+
+    Node *procarg0(Node *arg) {
+        return nullptr;
+    }
+
+    Node *prototype(Node *genargs, Node *args, Node *return_type) {
+        return nullptr;
+    }
+
+    Node *range_exclusive(Node *lhs, const token *oper, Node *rhs) {
+        return nullptr;
+    }
+
+    Node *range_inclusive(Node *lhs, const token *oper, Node *rhs) {
+        return nullptr;
+    }
+
+    Node *rational(const token *tok) {
+        return nullptr;
+    }
+
+    Node *rational_complex(const token *tok) {
+        return nullptr;
+    }
+
+    Node *regexp_compose(const token *begin, const node_list *parts, const token *end, Node *options) {
+        return nullptr;
+    }
+
+    Node *regexp_options(const token *regopt) {
+        return nullptr;
+    }
+
+    Node *rescue_body(const token *rescue, Node *exc_list, const token *assoc, Node *exc_var, const token *then,
+                      Node *body) {
+        return nullptr;
+    }
+
+    Node *restarg(const token *star, const token *name) {
+        return nullptr;
+    }
+
+    Node *self_(const token *tok) {
+        return nullptr;
+    }
+
+    Node *shadowarg(const token *name) {
+        return nullptr;
+    }
+
+    Node *splat(const token *star, Node *arg) {
+        return nullptr;
+    }
+
+    Node *string(const token *string_) {
+        return nullptr;
+    }
+
+    Node *string_compose(const token *begin, const node_list *parts, const token *end) {
+        return nullptr;
+    }
+
+    Node *string_internal(const token *string_) {
+        return nullptr;
+    }
+
+    Node *symbol(const token *symbol) {
+        return nullptr;
+    }
+
+    Node *symbol_compose(const token *begin, const node_list *parts, const token *end) {
+        return nullptr;
+    }
+
+    Node *symbol_internal(const token *symbol) {
+        return nullptr;
+    }
+
+    Node *symbols_compose(const token *begin, const node_list *parts, const token *end) {
+        return nullptr;
+    }
+
+    Node *ternary(Node *cond, const token *question, Node *if_true, const token *colon, Node *if_false) {
+        return nullptr;
+    }
+
+    Node *tr_any(const token *special) {
+        return nullptr;
+    }
+
+    Node *tr_arg_instance(Node *base, const node_list *types, const token *end) {
+        return nullptr;
+    }
+
+    Node *tr_array(const token *begin, Node *type_, const token *end) {
+        return nullptr;
+    }
+
+    Node *tr_cast(const token *begin, Node *expr, const token *colon, Node *type_, const token *end) {
+        return nullptr;
+    }
+
+    Node *tr_class(const token *special) {
+        return nullptr;
+    }
+
+    Node *tr_consubtype(Node *sub, Node *super_) {
+        return nullptr;
+    }
+
+    Node *tr_conunify(Node *a, Node *b) {
+        return nullptr;
+    }
+
+    Node *tr_cpath(Node *cpath) {
+        return nullptr;
+    }
+
+    Node *tr_genargs(const token *begin, const node_list *genargs, const node_list *constraints, const token *end) {
+        return nullptr;
+    }
+
+    Node *tr_gendecl(Node *cpath, const token *begin, const node_list *genargs, const node_list *constraints,
+                     const token *end) {
+        return nullptr;
+    }
+
+    Node *tr_gendeclarg(const token *tok, Node *constraint) {
+        return nullptr;
+    }
+
+    Node *tr_geninst(Node *cpath, const token *begin, const node_list *genargs, const token *end) {
+        return nullptr;
+    }
+
+    Node *tr_hash(const token *begin, Node *key_type, const token *assoc, Node *value_type, const token *end) {
+        return nullptr;
+    }
+
+    Node *tr_instance(const token *special) {
+        return nullptr;
+    }
+
+    Node *tr_ivardecl(const token *name, Node *type_) {
+        return nullptr;
+    }
+
+    Node *tr_nil(const token *nil) {
+        return nullptr;
+    }
+
+    Node *tr_nillable(const token *tilde, Node *type_) {
+        return nullptr;
+    }
+
+    Node *tr_or(Node *a, Node *b) {
+        return nullptr;
+    }
+
+    Node *tr_proc(const token *begin, Node *args, const token *end) {
+        return nullptr;
+    }
+
+    Node *tr_self(const token *special) {
+        return nullptr;
+    }
+
+    Node *tr_tuple(const token *begin, const node_list *types, const token *end) {
+        return nullptr;
+    }
+
+    Node *true_(const token *tok) {
+        return nullptr;
+    }
+
+    Node *typed_arg(Node *type_, Node *arg) {
+        return nullptr;
+    }
+
+    Node *unary_op(const token *oper, Node *receiver) {
+        return nullptr;
+    }
+
+    Node *undef_method(const token *undef, const node_list *name_list) {
+        return nullptr;
+    }
+
+    Node *when(const token *when, const node_list *patterns, const token *then, Node *body) {
+        return nullptr;
+    }
+
+    Node *word(const node_list *parts) {
+        return nullptr;
+    }
+
+    Node *words_compose(const token *begin, const node_list *parts, const token *end) {
+        return nullptr;
+    }
+
+    Node *xstring_compose(const token *begin, const node_list *parts, const token *end) {
         return nullptr;
     }
 };
 
-Builder::Builder(ContextBase &ctx, Result &r) :
-        impl_(new Builder::Impl(ctx, r)) {}
+Builder::Builder(ContextBase &ctx, Result &r) : impl_(new Builder::Impl(ctx, r)) {}
 Builder::~Builder() {}
-
-ast Builder::build(ruby_parser::base_driver *driver) {
-    return driver->parse(impl_.get());
-}
 
 }; // namespace parser
 }; // namespace sruby
@@ -37,14 +576,18 @@ ast Builder::build(ruby_parser::base_driver *driver) {
 namespace {
 
 using sruby::parser::Builder;
-using sruby::parser::ast;
+using sruby::parser::Node;
 
 Builder::Impl *cast_builder(self_ptr builder) {
     return const_cast<Builder::Impl *>(reinterpret_cast<const Builder::Impl *>(builder));
 }
 
+Node *cast_node(foreign_ptr node) {
+    return const_cast<Node *>(reinterpret_cast<const Node *>(node));
+}
+
 foreign_ptr accessible(self_ptr builder, foreign_ptr node) {
-    return cast_builder(builder)->accessible(reinterpret_cast<ast>(node));
+    return cast_builder(builder)->accessible(cast_node(node));
 }
 
 foreign_ptr alias(self_ptr builder, const token *alias, foreign_ptr to, foreign_ptr from) {
@@ -226,7 +769,7 @@ foreign_ptr gvar(self_ptr builder, const token *tok) {
 }
 
 foreign_ptr ident(self_ptr builder, const token *tok) {
-    return nullptr;
+    return cast_builder(builder)->ident(tok);
 }
 
 foreign_ptr index(self_ptr builder, foreign_ptr receiver, const token *lbrack, const node_list *indexes,
@@ -606,6 +1149,11 @@ foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_lis
 
 namespace sruby {
 namespace parser {
+
+unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver) {
+    return unique_ptr<Node>(cast_node(driver->parse(impl_.get())));
+}
+
 struct ruby_parser::builder Builder::interface = {
     accessible,
     alias,
