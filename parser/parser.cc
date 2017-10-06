@@ -36,5 +36,5 @@ Result parse_ruby(const string &src) {
 
     return result;
 }
-};
-};
+}; // namespace parser
+}; // namespace sruby

@@ -23,13 +23,12 @@ public:
 Builder::Builder(Result &r) : impl_(new Builder::Impl(r)) {}
 Builder::~Builder() {}
 
-
 ast Builder::build(ruby_parser::base_driver *driver) {
     return driver->parse(impl_.get());
 }
 
-};
-};
+}; // namespace parser
+}; // namespace sruby
 
 namespace {
 
@@ -599,7 +598,7 @@ foreign_ptr words_compose(self_ptr builder, const token *begin, const node_list 
 foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
     return nullptr;
 }
-};
+}; // namespace
 
 namespace sruby {
 namespace parser {
@@ -739,4 +738,4 @@ struct ruby_parser::builder Builder::interface = {
     xstring_compose,
 };
 }
-}
+} // namespace sruby
