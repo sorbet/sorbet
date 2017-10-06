@@ -34,22 +34,20 @@ public:
 
     ~ContextBase();
 
-    SymbolRef fillPreregistedSym(SymbolRef which, SymbolRef owner, NameRef name);
+    SymbolRef fillPreregistedSym(SymbolRef which, SymbolRef owner, NameRef name); // need to be implemented from scratch
 
     SymbolRef prePregisterSym();
 
     SymbolRef enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args, bool isMethod,
                           bool isCompletion);
 
-    SymbolRef getTopLevelClassSymbol(NameRef name, u1 dims = 0);
+    SymbolRef getTopLevelClassSymbol(NameRef name);
 
-    SymbolRef newInnerClass(SymbolRef owner, NameRef name);
+    SymbolRef newInnerClass(SymbolRef owner, NameRef name); // Needs to be implemented from scratch
 
     NameRef enterNameUTF8(UTF8Desc nm);
 
-    NameRef enterNameUnique(NameRef separator, u2 num, NameKind kind, std::vector<NameRef> &&originals);
-
-    NameRef enterNameSigned(NameRef orig, NameRef result, std::vector<NameRef> &&args);
+    NameRef enterNameUnique(NameRef separator, u2 num, NameKind kind, NameRef original);
 
     int indexClassOrJar(const char *name);
 

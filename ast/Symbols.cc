@@ -1,1 +1,30 @@
 #include "Symbols.h"
+#include "Context.h"
+
+namespace sruby {
+namespace ast {
+
+bool SymbolRef::operator==(const SymbolRef &rhs) const {
+    return _id == rhs._id;
+}
+
+bool SymbolRef::operator!=(const SymbolRef &rhs) const {
+    return !(rhs == *this);
+}
+
+bool SymbolRef::isPrimitive() const {
+    Error::notImplemented();
+}
+bool SymbolInfo::isConstructor(ContextBase &ctx) const {
+    return this->name._id == 1;
+}
+SymbolInfo &SymbolRef::info(ContextBase &ctx, bool allowNone) const {
+    Error::check(_id < ctx.symbols_used);
+    if (!allowNone)
+        Error::check(this->exists());
+
+    return ctx.symbols[this->_id];
+}
+
+} // namespace ast
+} // namespace sruby

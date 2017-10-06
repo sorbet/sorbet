@@ -46,7 +46,7 @@ public:
 
     bool isPrimitive() const;
 
-    SymbolInfo &info(ContextBase &ctx, bool lazy = false) const;
+    SymbolInfo &info(ContextBase &ctx, bool allowNone = false) const;
 
     bool operator==(const SymbolRef &rhs) const;
 

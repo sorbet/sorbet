@@ -3,6 +3,7 @@
 
 #include "common/common.h"
 #include <string>
+#include <vector>
 
 namespace sruby {
 namespace ast {
@@ -103,10 +104,11 @@ CheckSize(RawName, 16, 8);
 
 struct UniqueName {
     NameRef original;
+    NameRef separator;
     u2 num;
 };
 
-CheckSize(UniqueName, 8, 4)
+CheckSize(UniqueName, 12, 4)
 
     class Name {
 public:
@@ -138,6 +140,9 @@ public:
 
 private:
     unsigned int hash(ContextBase &ctx) const;
+
+public:
+    static unsigned int hashNames(std::vector<NameRef> &lhs, ContextBase &ctx);
 };
 
 CheckSize(Name, 24, 8);
