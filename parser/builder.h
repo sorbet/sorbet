@@ -20,9 +20,9 @@ public:
     ast build(ruby_parser::base_driver *driver);
 
     class Impl;
-private:
 
+private:
     std::unique_ptr<Impl> impl_;
 };
-};
-};
+}; // namespace parser
+}; // namespace sruby

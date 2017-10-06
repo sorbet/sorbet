@@ -37,5 +37,5 @@ private:
 };
 
 Result parse_ruby(const std::string &src);
-}
-};
+} // namespace parser
+}; // namespace sruby
