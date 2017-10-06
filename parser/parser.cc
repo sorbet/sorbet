@@ -9,31 +9,29 @@ namespace parser {
 using std::string;
 using std::unique_ptr;
 
-class resultImpl {
+class Result::Impl {
 public:
-    friend class result;
-
-    resultImpl(const string &src) : driver(src, builder::interface) {}
+    Impl(const string &src) : driver(src, Builder::interface) {}
 
     ruby_parser::typedruby24 driver;
 };
 
-const ruby_parser::diagnostics_t &result::diagnostics() {
+const ruby_parser::diagnostics_t &Result::diagnostics() {
     return impl_->driver.diagnostics;
 }
 
-ast result::ast() {
+ast Result::ast() {
     return nullptr;
 }
 
-result::result(std::unique_ptr<resultImpl> &&impl) : impl_(std::move(impl)) {}
-result::~result() {}
+Result::Result(std::unique_ptr<Result::Impl> &&impl) : impl_(std::move(impl)) {}
+Result::~Result() {}
 
-result parse_ruby(const string &src) {
-    unique_ptr<resultImpl> impl(new resultImpl(src));
-    result result(std::move(impl));
+Result parse_ruby(const string &src) {
+    unique_ptr<Result::Impl> impl(new Result::Impl(src));
+    Result result(std::move(impl));
 
-    builder builder(result);
+    Builder builder(result);
     builder.build(&result.impl_->driver);
 
     return result;
