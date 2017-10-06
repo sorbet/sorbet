@@ -11,7 +11,7 @@ using ast = const void *;
 class resultImpl;
 
 /*
- * parser::result contains the result of parsing a piece of Ruby source. It is
+ * parser::Result contains the result of parsing a piece of Ruby source. It is
  * the owner of all memory allocated during the parse or referenced by the
  * returned objects, and must outlive any references to the AST or diagnostics
  * information.
