@@ -6,13 +6,16 @@ using ruby_parser::self_ptr;
 using ruby_parser::token;
 using ruby_parser::node_list;
 
+using sruby::ast::ContextBase;
+
 namespace sruby {
 namespace parser {
 
 class Builder::Impl {
 public:
-    Impl(Result &r) : result_(r) {}
+    Impl(ContextBase &ctx, Result &r) : ctx_(ctx), result_(r) {}
 
+    ContextBase &ctx_;
     Result &result_;
 
     ast accessible(ast node) {
@@ -20,7 +23,8 @@ public:
     }
 };
 
-Builder::Builder(Result &r) : impl_(new Builder::Impl(r)) {}
+Builder::Builder(ContextBase &ctx, Result &r) :
+        impl_(new Builder::Impl(ctx, r)) {}
 Builder::~Builder() {}
 
 ast Builder::build(ruby_parser::base_driver *driver) {
@@ -366,7 +370,7 @@ foreign_ptr op_assign(self_ptr builder, foreign_ptr lhs, const token *op, foreig
     return nullptr;
 }
 
-foreign_ptr optarg(self_ptr builder, const token *name, const token *eql, foreign_ptr value) {
+foreign_ptr optarg_(self_ptr builder, const token *name, const token *eql, foreign_ptr value) {
     return nullptr;
 }
 
@@ -680,7 +684,7 @@ struct ruby_parser::builder Builder::interface = {
     not_op,
     nth_ref,
     op_assign,
-    optarg,
+    optarg_,
     pair,
     pair_keyword,
     pair_quoted,

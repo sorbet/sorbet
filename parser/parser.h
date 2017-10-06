@@ -1,14 +1,14 @@
 #include <memory>
 #include <string>
 
+#include "ast/Context.h"
+
 #include "ruby_parser/diagnostic.hh"
 
 namespace sruby {
 namespace parser {
 
 using ast = const void *;
-
-class resultImpl;
 
 /*
  * parser::Result contains the result of parsing a piece of Ruby source. It is
@@ -31,11 +31,11 @@ public:
 private:
     Result(std::unique_ptr<Impl> &&impl);
 
-    friend Result parse_ruby(const std::string &src);
+    friend Result parse_ruby(sruby::ast::ContextBase &ctx, const std::string &src);
 
     std::unique_ptr<Impl> impl_;
 };
 
-Result parse_ruby(const std::string &src);
+Result parse_ruby(sruby::ast::ContextBase &ctx, const std::string &src);
 } // namespace parser
 }; // namespace sruby

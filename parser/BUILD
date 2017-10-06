@@ -9,5 +9,8 @@ cc_library(
         "parser.h",
     ],
     visibility = ["//visibility:public"],
-    deps = ["@parser//:parser"],
+    deps = [
+        "//ast",
+        "@parser//:parser",
+    ],
 )

@@ -6,6 +6,7 @@
 namespace sruby {
 namespace parser {
 
+using sruby::ast::ContextBase;
 using std::string;
 using std::unique_ptr;
 
@@ -27,11 +28,11 @@ ast Result::ast() {
 Result::Result(std::unique_ptr<Result::Impl> &&impl) : impl_(std::move(impl)) {}
 Result::~Result() {}
 
-Result parse_ruby(const string &src) {
+Result parse_ruby(ContextBase &ctx, const string &src) {
     unique_ptr<Result::Impl> impl(new Result::Impl(src));
     Result result(std::move(impl));
 
-    Builder builder(result);
+    Builder builder(ctx, result);
     builder.build(&result.impl_->driver);
 
     return result;

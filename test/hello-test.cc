@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "ast/Trees.h"
 #include "main/hello-greet.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
@@ -17,7 +18,9 @@ TEST(HelloTest, GetSpdlog) {
 }
 
 TEST(HelloTest, SimpleParse) {
-    sruby::parser::parse_ruby("def hello_world; p :hello; end");
+    auto console = spd::stdout_color_mt("console");
+    sruby::ast::ContextBase ctx(*console);
+    sruby::parser::parse_ruby(ctx, "def hello_world; p :hello; end");
 }
 
 TEST(HelloTest, GetCXXopts) {

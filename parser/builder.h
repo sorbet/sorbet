@@ -1,6 +1,8 @@
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/driver.hh"
 
+#include "ast/Context.h"
+
 #include <memory>
 
 namespace sruby {
@@ -12,7 +14,7 @@ using ast = const void *;
 
 class Builder {
 public:
-    Builder(Result &);
+    Builder(sruby::ast::ContextBase &, Result &);
     ~Builder();
 
     static ruby_parser::builder interface;
