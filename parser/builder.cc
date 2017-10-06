@@ -9,22 +9,22 @@ using ruby_parser::node_list;
 namespace sruby {
 namespace parser {
 
-class builderImpl {
+class Builder::Impl {
 public:
-    builderImpl(result &r) : result_(r) {}
+    Impl(Result &r) : result_(r) {}
 
-    result &result_;
+    Result &result_;
 
     ast accessible(ast node) {
         return nullptr;
     }
 };
 
-builder::builder(result &r) : impl_(new builderImpl(r)) {}
-builder::~builder() {}
+Builder::Builder(Result &r) : impl_(new Builder::Impl(r)) {}
+Builder::~Builder() {}
 
 
-ast builder::build(ruby_parser::base_driver *driver) {
+ast Builder::build(ruby_parser::base_driver *driver) {
     return driver->parse(impl_.get());
 }
 
@@ -33,12 +33,15 @@ ast builder::build(ruby_parser::base_driver *driver) {
 
 namespace {
 
-using sruby::parser::builderImpl;
+using sruby::parser::Builder;
 using sruby::parser::ast;
 
+Builder::Impl *cast_builder(self_ptr builder) {
+    return const_cast<Builder::Impl *>(reinterpret_cast<const Builder::Impl *>(builder));
+}
+
 foreign_ptr accessible(self_ptr builder, foreign_ptr node) {
-    builderImpl *impl = const_cast<builderImpl *>(reinterpret_cast<const builderImpl *>(builder));
-    return impl->accessible(reinterpret_cast<ast>(node));
+    return cast_builder(builder)->accessible(reinterpret_cast<ast>(node));
 }
 
 foreign_ptr alias(self_ptr builder, const token *alias, foreign_ptr to, foreign_ptr from) {
@@ -600,7 +603,7 @@ foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_lis
 
 namespace sruby {
 namespace parser {
-struct ruby_parser::builder builder::interface = {
+struct ruby_parser::builder Builder::interface = {
     accessible,
     alias,
     arg,

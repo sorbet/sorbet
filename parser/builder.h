@@ -7,20 +7,22 @@ namespace sruby {
 namespace parser {
 
 class builderImpl;
-class result;
+class Result;
 using ast = const void *;
 
-class builder {
+class Builder {
 public:
-    builder(result &);
-    ~builder();
+    Builder(Result &);
+    ~Builder();
 
     static ruby_parser::builder interface;
 
     ast build(ruby_parser::base_driver *driver);
 
+    class Impl;
 private:
-    std::unique_ptr<builderImpl> impl_;
+
+    std::unique_ptr<Impl> impl_;
 };
 };
 };
