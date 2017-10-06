@@ -128,8 +128,6 @@ public:
     }
 
 private:
-    static void _backtrace(std::ostream &os);
-
     static inline void _raise(std::ostream &) {}
 
     template <typename TArg, typename... TArgs>
@@ -144,7 +142,6 @@ template <typename... TArgs>[[noreturn]] void Error::raise(const TArgs &... args
     _raise(message, args...);
 
     std::stringstream stackTrace;
-    _backtrace(stackTrace);
 
     throw SRubyException(message.str(), stackTrace.str());
 }
