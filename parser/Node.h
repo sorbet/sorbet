@@ -16,7 +16,7 @@ struct Loc {
 class Node {
 public:
     Node(Loc loc) : loc(loc) {}
-    virtual ~Node();
+    virtual ~Node() = default;
 
     Loc loc;
 };
