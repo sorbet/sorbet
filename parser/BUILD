@@ -1,14 +1,11 @@
 cc_library(
     name = "parser",
     srcs = [
-        "Trees.cc",
-        "builder.cc",
-        "builder.h",
-        "parser.cc",
-    ],
+        "Builder.h",
+    ] + glob(["*.cc"]),
     hdrs = [
-        "Trees.h",
-        "parser.h",
+        "Node.h",
+        "Result.h",
     ],
     visibility = ["//visibility:public"],
     deps = [

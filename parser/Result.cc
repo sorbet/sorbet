@@ -1,6 +1,6 @@
-#include "parser/parser.h"
-#include "parser/builder.h"
-#include "parser/Trees.h"
+#include "parser/Result.h"
+#include "parser/Builder.h"
+#include "parser/Node.h"
 
 #include "ruby_parser/driver.hh"
 

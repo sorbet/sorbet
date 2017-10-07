@@ -1,5 +1,5 @@
-#include "parser/builder.h"
-#include "parser/Trees.h"
+#include "parser/Builder.h"
+#include "parser/Node.h"
 
 #include "ruby_parser/builder.hh"
 

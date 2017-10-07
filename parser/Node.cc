@@ -1,4 +1,4 @@
-#include "parser/Trees.h"
+#include "parser/Node.h"
 
 namespace sruby {
 namespace parser {
