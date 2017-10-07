@@ -30,7 +30,7 @@ toolchain {
   tool_path { name: "cpp" path: "/usr/bin/clang-cpp-4.0" }
   tool_path { name: "dwp" path: "/usr/bin/dwp" }
   tool_path { name: "gcc" path: "/usr/bin/clang-4.0" }
-  cxx_flag: "-std=c++0x"
+  cxx_flag: "-std=c++14"
   linker_flag: "-lstdc++"
   linker_flag: "-B/usr/bin/"
 
