@@ -26,6 +26,10 @@ public:
         return Loc{(u4)tok->start(), (u4)tok->end()};
     }
 
+    Loc tok_loc(const token *begin, const token *end) {
+        return Loc{(u4)begin->start(), (u4)end->end()};
+    }
+
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         return nullptr;
     }
@@ -158,16 +162,16 @@ public:
 
     unique_ptr<Node> def_class(const token *class_, unique_ptr<Node> name, const token *lt_,
                                unique_ptr<Node> superclass, unique_ptr<Node> body, const token *end_) {
-        return nullptr;
+        return make_unique<Class>(tok_loc(class_, end_), move(name), move(superclass), move(body));
     }
 
     unique_ptr<Node> def_method(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
                                 const token *end) {
-        return nullptr;
+        return make_unique<DefMethod>(tok_loc(def, end), ctx_.enterNameUTF8(name->string()), move(args), move(body));
     }
 
     unique_ptr<Node> def_module(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
-        return nullptr;
+        return make_unique<Module>(tok_loc(module, end_), move(name), move(body));
     }
 
     unique_ptr<Node> def_sclass(const token *class_, const token *lshft_, unique_ptr<Node> expr, unique_ptr<Node> body,
