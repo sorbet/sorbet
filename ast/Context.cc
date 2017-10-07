@@ -1,7 +1,3 @@
-//
-// Created by Dmitry Petrashko on 10/5/17.
-//
-
 #include "Context.h"
 #include "Hashing.h"
 
@@ -160,6 +156,50 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     strings_last_page_used += nm.to;
 
     return idx;
+}
+
+void moveNames(std::pair<unsigned int, unsigned int> *from, std::pair<unsigned int, unsigned int> *to,
+               unsigned int szFrom, unsigned int szTo) {
+    // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
+    DEBUG_ONLY(Error::check((szTo & (szTo - 1)) == 0));
+    DEBUG_ONLY(Error::check((szFrom & (szFrom - 1)) == 0));
+    unsigned int mask = szTo - 1;
+    for (unsigned int orig = 0; orig < szFrom; orig++) {
+        if (from[orig].second) {
+            auto hs = from[orig].first;
+            unsigned int probe = 1;
+            auto buchetId = hs & mask;
+            while (to[buchetId].second != 0) {
+                buchetId = (buchetId + probe) & mask;
+                probe++;
+            }
+            to[buchetId] = from[orig];
+        }
+    }
+}
+
+void ContextBase::expandNames() {
+    Error::check(max_name_count == names_used);
+    auto oldNames = names;
+    max_name_count = max_name_count * 2;
+    names_by_hash_size = max_name_count * 2;
+    names = (Name *)malloc(sizeof(Name) * max_name_count);
+    memcpy(names, oldNames, sizeof(Name) * names_used);
+    auto names_by_hash2 = (std::pair<unsigned int, unsigned int> *)calloc(
+        names_by_hash_size, sizeof(std::pair<unsigned int, unsigned int>));
+    moveNames(names_by_hash, names_by_hash2, max_name_count, names_by_hash_size);
+    free(oldNames);
+    free(names_by_hash);
+    names_by_hash = names_by_hash2;
+}
+
+void ContextBase::expandSymbols() {
+    Error::check(max_symbol_count == symbols_used);
+    auto oldSymbols = symbols;
+    max_symbol_count = max_symbol_count * 2;
+    symbols = (SymbolInfo *)malloc(sizeof(SymbolInfo) * max_symbol_count);
+    memcpy(symbols, oldSymbols, sizeof(SymbolInfo) * symbols_used);
+    free(oldSymbols);
 }
 
 NameRef ContextBase::enterNameUnique(NameRef separator, u2 num, NameKind kind, NameRef original) {
