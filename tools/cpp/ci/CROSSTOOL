@@ -118,7 +118,7 @@ toolchain {
     # Profile first and / or use FDO if you need better performance than this.
     compiler_flag: "-O2"
 
-    compiler_flag: "-flto"
+    # compiler_flag: "-flto"
 
     # Disable assertions
     compiler_flag: "-DNDEBUG"
@@ -133,7 +133,8 @@ toolchain {
     compiler_flag:  "-fno-omit-frame-pointer"
 
     linker_flag: "-Wl,--gc-sections"
-
+    # linker_flag: "-flto"
+    # linker_flag: "-Wl,-plugin /usr/lib/llvm-4.0/lib/LLVMgold.so"
   }
   linking_mode_flags { mode: DYNAMIC }
 }
