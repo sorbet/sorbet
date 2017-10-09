@@ -9,7 +9,7 @@ namespace parser {
 
 using sruby::ast::NameRef;
 using std::unique_ptr;
-    using std::vector;
+using std::vector;
 using std::move;
 
 struct Loc {
@@ -25,5 +25,5 @@ public:
 };
 
 #include "parser/Node_gen.h"
-};
-};
+}; // namespace parser
+}; // namespace sruby

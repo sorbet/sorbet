@@ -1,5 +1,5 @@
-#include "common/common.h"
 #include "ast/Trees.h"
+#include "common/common.h"
 #include "main/hello-greet.h"
 #include "parser/Result.h"
 #include "spdlog/spdlog.h"
@@ -13,7 +13,6 @@ TEST(HelloTest, GetGreet) {
 namespace spd = spdlog;
 
 auto console = spd::stdout_color_mt("console");
-
 
 TEST(HelloTest, GetSpdlog) {
     console->info("Welcome to spdlog!");
