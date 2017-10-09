@@ -1,14 +1,18 @@
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
     name = "parser",
     srcs = [
+        "Builder.cc",
         "Builder.h",
+        "Node.cc",
         "Node_gen.h",
-    ] + glob(["*.cc"]),
+        "Result.cc",
+    ],
     hdrs = [
         "Node.h",
         "Result.h",
     ],
-    visibility = ["//visibility:public"],
     deps = [
         "//ast",
         "@parser//:parser",
@@ -27,4 +31,18 @@ genrule(
     outs = ["Node_gen.h"],
     cmd = "$(location :generate_ast) > $@",
     tools = [":generate_ast"],
+)
+
+cc_test(
+    name = "parser_test",
+    srcs = [
+        "parser_test.cc",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    deps = [
+        ":parser",
+        "@gtest//:gtest",
+        "@gtest//:gtest_main",
+        "@spdlog//:spdlog",
+    ],
 )
