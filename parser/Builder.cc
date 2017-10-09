@@ -9,9 +9,17 @@ using ruby_parser::token;
 using ruby_parser::node_list;
 
 using sruby::ast::ContextBase;
+using sruby::ast::UTF8Desc;
+
 using std::vector;
 using std::unique_ptr;
 using std::make_unique;
+
+#define BUILDER_UNIMPLEMENTED()                                                                                        \
+    ({                                                                                                                 \
+        ctx_.logger.critical("unimplemented builder: {}", __func__);                                                   \
+        Error::notImplemented();                                                                                       \
+    })
 
 namespace sruby {
 namespace parser {
@@ -27,138 +35,233 @@ public:
         return Loc{(u4)tok->start(), (u4)tok->end()};
     }
 
+    Loc maybe_loc(unique_ptr<Node> &node) {
+        if (node == nullptr) {
+            return Loc::none();
+        }
+        return node->loc;
+    }
+
     Loc tok_loc(const token *begin, const token *end) {
         return Loc{(u4)begin->start(), (u4)end->end()};
     }
 
+    Loc loc_join(Loc begin, Loc end) {
+        if (begin.is_none())
+            return end;
+        if (end.is_none())
+            return begin;
+
+        return Loc{begin.begin_pos, end.end_pos};
+    }
+
+    Loc collection_loc(const token *begin, vector<unique_ptr<Node>> &elts, const token *end) {
+        if (begin != nullptr) {
+            DEBUG_ONLY(Error::check(end != nullptr));
+            return tok_loc(begin, end);
+        }
+        DEBUG_ONLY(Error::check(end == nullptr));
+        if (elts.size() == 0)
+            return Loc::none();
+        return loc_join(elts.front()->loc, elts.back()->loc);
+    }
+
+    Loc collection_loc(vector<unique_ptr<Node>> &elts) {
+        return collection_loc(nullptr, elts, nullptr);
+    }
+
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> alias(const token *alias, unique_ptr<Node> to, unique_ptr<Node> from) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> arg(const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> args(const token *begin, vector<unique_ptr<Node>> args, const token *end, bool check_args) {
-        return nullptr;
+        if (begin == nullptr && args.size() == 0 && end == nullptr)
+            return nullptr;
+        return make_unique<Args>(collection_loc(begin, args, end), move(args));
     }
 
     unique_ptr<Node> array(const token *begin, vector<unique_ptr<Node>> elements, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> associate(const token *begin, vector<unique_ptr<Node>> pairs, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> back_ref(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> begin(const token *begin, unique_ptr<Node> body, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> begin_body(unique_ptr<Node> body, vector<unique_ptr<Node>> rescue_bodies, const token *else_tok,
                                 unique_ptr<Node> else_, const token *ensure_tok, unique_ptr<Node> ensure) {
-        return nullptr;
+        if (rescue_bodies.size() > 0) {
+            if (else_ == nullptr) {
+                body = make_unique<Rescue>(loc_join(maybe_loc(body), rescue_bodies.back()->loc), move(body),
+                                           move(rescue_bodies), nullptr);
+            } else {
+                body = make_unique<Rescue>(loc_join(maybe_loc(body), else_->loc), move(body), move(rescue_bodies),
+                                           move(else_));
+            }
+        } else if (else_ != nullptr) {
+            // TODO: We're losing the source-level information that there was an
+            // `else` here.
+            vector<unique_ptr<Node>> stmts;
+            stmts.push_back(move(body));
+            stmts.push_back(move(else_));
+            body = make_unique<Begin>(collection_loc(stmts), move(stmts));
+        }
+
+        if (ensure_tok != nullptr) {
+            Loc loc;
+            if (body != nullptr) {
+                loc = body->loc;
+            } else {
+                loc = tok_loc(ensure_tok);
+            }
+            loc = loc_join(loc, maybe_loc(ensure));
+            body = make_unique<Ensure>(loc, move(body), move(ensure));
+        }
+
+        return body;
     }
 
     unique_ptr<Node> begin_keyword(const token *begin, unique_ptr<Node> body, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> binary_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> block(unique_ptr<Node> method_call, const token *begin, unique_ptr<Node> args,
                            unique_ptr<Node> body, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> block_pass(const token *amper, unique_ptr<Node> arg) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> blockarg(const token *amper, const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> call_lambda(const token *lambda) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> call_method(unique_ptr<Node> receiver, const token *dot, const token *selector,
                                  const token *lparen, vector<unique_ptr<Node>> args, const token *rparen) {
-        return nullptr;
+        Loc selector_loc, start_loc;
+        if (selector != nullptr)
+            selector_loc = tok_loc(selector);
+        else
+            selector_loc = tok_loc(dot);
+        if (receiver == nullptr)
+            start_loc = selector_loc;
+        else
+            start_loc = receiver->loc;
+
+        Loc loc;
+        if (rparen != nullptr)
+            loc = loc_join(start_loc, tok_loc(rparen));
+        else if (args.size() > 0)
+            loc = loc_join(start_loc, args.back()->loc);
+        else
+            loc = loc_join(start_loc, selector_loc);
+
+        NameRef method;
+        if (selector == nullptr)
+            method = ctx_.enterNameUTF8(UTF8Desc{"call", (int)std::strlen("call")});
+        else
+            method = ctx_.enterNameUTF8(selector->string());
+
+        if (dot && dot->string() == "&.")
+            return make_unique<CSend>(loc, move(receiver), method, move(args));
+        else
+            return make_unique<Send>(loc, move(receiver), method, move(args));
     }
 
     unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, vector<unique_ptr<Node>> when_bodies,
                            const token *else_tok, unique_ptr<Node> else_body, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> character(const token *char_) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> complex(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
-    unique_ptr<Node> compstmt(vector<unique_ptr<Node>> node) {
-        return nullptr;
+    unique_ptr<Node> compstmt(vector<unique_ptr<Node>> nodes) {
+        switch (nodes.size()) {
+            case 0:
+                return nullptr;
+            case 1:
+                return move(nodes.back());
+            default:
+                return make_unique<Begin>(collection_loc(nodes), move(nodes));
+        }
     }
 
     unique_ptr<Node> condition(const token *cond_tok, unique_ptr<Node> cond, const token *then,
                                unique_ptr<Node> if_true, const token *else_, unique_ptr<Node> if_false,
                                const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> condition_mod(unique_ptr<Node> if_true, unique_ptr<Node> if_false, unique_ptr<Node> cond) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> const_(const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> const_fetch(unique_ptr<Node> scope, const token *colon, const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> const_global(const token *colon, const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> const_op_assignable(unique_ptr<Node> node) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> cvar(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedent_level) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> def_class(const token *class_, unique_ptr<Node> name, const token *lt_,
@@ -177,41 +280,41 @@ public:
 
     unique_ptr<Node> def_sclass(const token *class_, const token *lshft_, unique_ptr<Node> expr, unique_ptr<Node> body,
                                 const token *end_) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> def_singleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,
                                    unique_ptr<Node> args, unique_ptr<Node> body, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> encoding_literal(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> false_(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> file_literal(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> float_(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> float_complex(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> for_(const token *for_, unique_ptr<Node> iterator, const token *in_, unique_ptr<Node> iteratee,
                           const token *do_, unique_ptr<Node> body, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> gvar(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> ident(const token *tok) {
@@ -220,377 +323,377 @@ public:
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
                            const token *rbrack) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
                                 const token *rbrack) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> integer(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> ivar(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                    const token *rparen) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_defined(const token *keyword, unique_ptr<Node> arg) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                   const token *rparen) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_redo(const token *keyword) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_retry(const token *keyword) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_return(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                     const token *rparen) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_super(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                    const token *rparen) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                    const token *rparen) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> keyword_zsuper(const token *keyword) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> kwarg(const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> kwsplat(const token *dstar, unique_ptr<Node> arg) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> line_literal(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> logical_and(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> logical_or(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> loop_until(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
                                 const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> loop_until_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> loop_while(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
                                 const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> loop_while_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> match_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> multi_assign(unique_ptr<Node> mlhs, unique_ptr<Node> rhs) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> multi_lhs(const token *begin, vector<unique_ptr<Node>> items, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> negate(const token *uminus, unique_ptr<Node> numeric) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> nil(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> pair(unique_ptr<Node> key, const token *assoc, unique_ptr<Node> value) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
                                  unique_ptr<Node> value) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> postexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> preexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> procarg0(unique_ptr<Node> arg) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> prototype(unique_ptr<Node> genargs, unique_ptr<Node> args, unique_ptr<Node> return_type) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> range_exclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> range_inclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> rational(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> rational_complex(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> regexp_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
                                     unique_ptr<Node> options) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> regexp_options(const token *regopt) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> exc_list, const token *assoc,
                                  unique_ptr<Node> exc_var, const token *then, unique_ptr<Node> body) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> restarg(const token *star, const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> self_(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> shadowarg(const token *name) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> string(const token *string_) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> string_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> string_internal(const token *string_) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> symbol(const token *symbol) {
-        return nullptr;
+        return make_unique<Symbol>(tok_loc(symbol), symbol->string());
     }
 
     unique_ptr<Node> symbol_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> symbol_internal(const token *symbol) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> symbols_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> ternary(unique_ptr<Node> cond, const token *question, unique_ptr<Node> if_true, const token *colon,
                              unique_ptr<Node> if_false) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_any(const token *special) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_arg_instance(unique_ptr<Node> base, vector<unique_ptr<Node>> types, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_array(const token *begin, unique_ptr<Node> type_, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_cast(const token *begin, unique_ptr<Node> expr, const token *colon, unique_ptr<Node> type_,
                              const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_class(const token *special) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_consubtype(unique_ptr<Node> sub, unique_ptr<Node> super_) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_conunify(unique_ptr<Node> a, unique_ptr<Node> b) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_cpath(unique_ptr<Node> cpath) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_genargs(const token *begin, vector<unique_ptr<Node>> genargs,
                                 vector<unique_ptr<Node>> constraints, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_gendecl(unique_ptr<Node> cpath, const token *begin, vector<unique_ptr<Node>> genargs,
                                 vector<unique_ptr<Node>> constraints, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_gendeclarg(const token *tok, unique_ptr<Node> constraint) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_geninst(unique_ptr<Node> cpath, const token *begin, vector<unique_ptr<Node>> genargs,
                                 const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_hash(const token *begin, unique_ptr<Node> key_type, const token *assoc,
                              unique_ptr<Node> value_type, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_instance(const token *special) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_ivardecl(const token *name, unique_ptr<Node> type_) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_nil(const token *nil) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_nillable(const token *tilde, unique_ptr<Node> type_) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_or(unique_ptr<Node> a, unique_ptr<Node> b) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_proc(const token *begin, unique_ptr<Node> args, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_self(const token *special) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> tr_tuple(const token *begin, vector<unique_ptr<Node>> types, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> true_(const token *tok) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> typed_arg(unique_ptr<Node> type_, unique_ptr<Node> arg) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> undef_method(const token *undef, vector<unique_ptr<Node>> name_list) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> when(const token *when, vector<unique_ptr<Node>> patterns, const token *then,
                           unique_ptr<Node> body) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> word(vector<unique_ptr<Node>> parts) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> words_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> xstring_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        return nullptr;
+        BUILDER_UNIMPLEMENTED();
     }
 };
 

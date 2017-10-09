@@ -102,7 +102,7 @@ NodeDef nodes[] = {
     {"Regexp", vector<FieldDef>({{"regex", NodeVec}, {"opts", Node}})},
     {"Regopt", vector<FieldDef>({{"opts", String}})},
     {"Resbody", vector<FieldDef>({{"exception", Node}, {"var", Node}, {"body", Node}})},
-    {"Rescue", vector<FieldDef>({{"body", Node}, {"rescue", Node}, {"else_", Node}})},
+    {"Rescue", vector<FieldDef>({{"body", Node}, {"rescue", NodeVec}, {"else_", Node}})},
     {"Restarg", vector<FieldDef>({{"name", Name}})},
     {"Retry", vector<FieldDef>()},
     {"Return", vector<FieldDef>({{"exprs", NodeVec}})},
