@@ -1,4 +1,3 @@
-
 #include "Trees.h"
 
 namespace sruby {

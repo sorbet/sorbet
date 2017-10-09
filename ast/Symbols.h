@@ -77,17 +77,17 @@ public:
     // for method - full method type. it is not used to refer to fields. No
     // fields. Yet.
     //    std::vector<Tree> definition;
-    std::vector<SymbolRef> argumentsOrInterfaces;
+    std::vector<SymbolRef> argumentsOrMixins;
 
     inline std::vector<SymbolRef> &arguments() {
         Error::check(!isClass());
-        return argumentsOrInterfaces;
+        return argumentsOrMixins;
     }
 
-    inline std::vector<SymbolRef> &interfaces(ContextBase &ctx) {
+    inline std::vector<SymbolRef> &mixins(ContextBase &ctx) {
         Error::check(isClass());
         ensureCompleted(ctx);
-        return argumentsOrInterfaces;
+        return argumentsOrMixins;
     }
 
     SymbolRef resultOrParentOrLoader;

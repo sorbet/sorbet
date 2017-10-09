@@ -1,7 +1,3 @@
-//
-// Created by Dmitry Petrashko on 10/5/17.
-//
-
 #ifndef SRUBY_CONTEXT_H
 #define SRUBY_CONTEXT_H
 
@@ -142,6 +138,16 @@ private:
     SymbolRef synthesizeClass(UTF8Desc name);
 };
 // CheckSize(ContextBase, 152, 8);
+// Historically commented out because size of unordered_map was different between different versions of stdlib
+
+class Context {
+public:
+    ContextBase &state;
+    SymbolRef owner;
+    operator ContextBase &() {
+        return state;
+    }
+};
 
 } // namespace ast
 } // namespace sruby
