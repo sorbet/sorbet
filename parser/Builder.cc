@@ -4,16 +4,16 @@
 #include "ruby_parser/builder.hh"
 
 using ruby_parser::foreign_ptr;
+using ruby_parser::node_list;
 using ruby_parser::self_ptr;
 using ruby_parser::token;
-using ruby_parser::node_list;
 
 using sruby::ast::ContextBase;
 using sruby::ast::UTF8Desc;
 
-using std::vector;
-using std::unique_ptr;
 using std::make_unique;
+using std::unique_ptr;
+using std::vector;
 
 #define BUILDER_UNIMPLEMENTED()                                                                                        \
     ({                                                                                                                 \
@@ -71,7 +71,10 @@ public:
     }
 
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
-        BUILDER_UNIMPLEMENTED();
+        if (Ident *id = dynamic_cast<Ident *>(node.get())) {
+            BUILDER_UNIMPLEMENTED();
+        }
+        return node;
     }
 
     unique_ptr<Node> alias(const token *alias, unique_ptr<Node> to, unique_ptr<Node> from) {
@@ -241,15 +244,16 @@ public:
     }
 
     unique_ptr<Node> const_(const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Const>(tok_loc(name), nullptr, ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> const_fetch(unique_ptr<Node> scope, const token *colon, const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Const>(loc_join(scope->loc, tok_loc(name)), move(scope), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> const_global(const token *colon, const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Const>(loc_join(tok_loc(colon), tok_loc(name)), make_unique<Cbase>(tok_loc(colon)),
+                                  ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> const_op_assignable(unique_ptr<Node> node) {
