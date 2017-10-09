@@ -8,9 +8,6 @@ cc_library(
         "Node.h",
         "Result.h",
     ],
-    copts = [
-        "-I$(GENDIR)/parser/",
-    ],
     visibility = ["//visibility:public"],
     deps = [
         "//ast",

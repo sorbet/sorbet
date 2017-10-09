@@ -2,12 +2,14 @@
 #include "common/common.h"
 
 #include <memory>
+#include <vector>
 
 namespace sruby {
 namespace parser {
 
 using sruby::ast::NameRef;
 using std::unique_ptr;
+    using std::vector;
 using std::move;
 
 struct Loc {
@@ -22,6 +24,6 @@ public:
     Loc loc;
 };
 
-#include "Node_gen.h"
+#include "parser/Node_gen.h"
 };
 };
