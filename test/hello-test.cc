@@ -12,13 +12,14 @@ TEST(HelloTest, GetGreet) {
 
 namespace spd = spdlog;
 
+auto console = spd::stdout_color_mt("console");
+
+
 TEST(HelloTest, GetSpdlog) {
-    auto console = spd::stdout_color_mt("console");
     console->info("Welcome to spdlog!");
 }
 
 TEST(HelloTest, SimpleParse) {
-    auto console = spd::stdout_color_mt("parse");
     sruby::ast::ContextBase ctx(*console);
     sruby::parser::parse_ruby(ctx, "def hello_world; p :hello; end");
 }
