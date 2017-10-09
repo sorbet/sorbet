@@ -18,7 +18,7 @@ TEST(HelloTest, GetSpdlog) {
 }
 
 TEST(HelloTest, SimpleParse) {
-    auto console = spd::stdout_color_mt("console");
+    auto console = spd::stdout_color_mt("parse");
     sruby::ast::ContextBase ctx(*console);
     sruby::parser::parse_ruby(ctx, "def hello_world; p :hello; end");
 }
