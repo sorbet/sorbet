@@ -168,12 +168,12 @@ void moveNames(std::pair<unsigned int, unsigned int> *from, std::pair<unsigned i
         if (from[orig].second) {
             auto hs = from[orig].first;
             unsigned int probe = 1;
-            auto buchetId = hs & mask;
-            while (to[buchetId].second != 0) {
-                buchetId = (buchetId + probe) & mask;
+            auto bucketId = hs & mask;
+            while (to[bucketId].second != 0) {
+                bucketId = (bucketId + probe) & mask;
                 probe++;
             }
-            to[buchetId] = from[orig];
+            to[bucketId] = from[orig];
         }
     }
 }
