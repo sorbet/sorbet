@@ -30,7 +30,7 @@ static const char *nil_str = "nil";
 static UTF8Desc nil_DESC{(char *)nil_str, (int)std::strlen(nil_str)};
 
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
-    max_name_count = 262144;   // 6MB
+    max_name_count = 262144;                // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
     names = (Name *)malloc(max_name_count * sizeof(Name));

@@ -111,14 +111,13 @@ public:
     }
 
     Context(ContextBase &state, SymbolRef owner) : state(state), owner(owner) {}
-    Context(const Context &other): state(other.state), owner(other.owner) {}
+    Context(const Context &other) : state(other.state), owner(other.owner) {}
 
     Context withOwner(SymbolRef sym) {
         auto r = Context(*this);
         r.owner = sym;
         return r;
     }
-
 };
 
 } // namespace ast

@@ -128,7 +128,7 @@ GENERATE_HAS_MEMBER(transformInsSeq);
                                                                                                                        \
     template <class FUNC, bool has> class PostPoneCalling_##X {                                                        \
     public:                                                                                                            \
-        static Stat *call(Context ctx, X *cd, FUNC &what) {                                                     \
+        static Stat *call(Context ctx, X *cd, FUNC &what) {                                                            \
             Error::raise("should never be called. Incorrect use of TreeMap?");                                         \
             return nullptr;                                                                                            \
         }                                                                                                              \
@@ -136,14 +136,14 @@ GENERATE_HAS_MEMBER(transformInsSeq);
                                                                                                                        \
     template <class FUNC> class PostPoneCalling_##X<FUNC, true> {                                                      \
     public:                                                                                                            \
-        static Stat *call(Context ctx, X *cd, FUNC &func) {                                                                         \
-            return func.transform##X(ctx, cd);                                                                              \
+        static Stat *call(Context ctx, X *cd, FUNC &func) {                                                            \
+            return func.transform##X(ctx, cd);                                                                         \
         }                                                                                                              \
     };                                                                                                                 \
                                                                                                                        \
     template <class FUNC> class PostPoneCalling_##X<FUNC, false> {                                                     \
     public:                                                                                                            \
-        static Stat *call(Context ctx, X *cd, FUNC &func) {                                                                         \
+        static Stat *call(Context ctx, X *cd, FUNC &func) {                                                            \
             return cd;                                                                                                 \
         }                                                                                                              \
     };
@@ -392,7 +392,8 @@ private:
             return v;
         } else if (ConstantLit *v = dynamic_cast<ConstantLit *>(what)) {
             if (HAS_MEMBER_transformConstantLit<FUNC>::value) {
-                return PostPoneCalling_ConstantLit<FUNC, HAS_MEMBER_transformConstantLit<FUNC>::value>::call(ctx, v, func);
+                return PostPoneCalling_ConstantLit<FUNC, HAS_MEMBER_transformConstantLit<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
             }
             return v;
         } else if (ArraySplat *v = dynamic_cast<ArraySplat *>(what)) {
@@ -403,7 +404,8 @@ private:
                 v->arg.reset(dynamic_cast<Expr *>(narg));
             }
             if (HAS_MEMBER_transformArraySplat<FUNC>::value) {
-                return PostPoneCalling_ArraySplat<FUNC, HAS_MEMBER_transformArraySplat<FUNC>::value>::call(ctx, v, func);
+                return PostPoneCalling_ArraySplat<FUNC, HAS_MEMBER_transformArraySplat<FUNC>::value>::call(ctx, v,
+                                                                                                           func);
             }
             return v;
         } else if (HashSplat *v = dynamic_cast<HashSplat *>(what)) {
