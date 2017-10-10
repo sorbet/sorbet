@@ -77,7 +77,6 @@ class Breakable : public ControlFlow {
 public:
     u1 break_tag;
 
-
     Breakable(u1 break_tag);
 };
 
@@ -201,7 +200,6 @@ public:
 class ArraySplat : public Expr {
 public:
     std::unique_ptr<Expr> arg;
-
 
     ArraySplat(std::unique_ptr<Expr> arg);
 };

@@ -82,7 +82,7 @@ ContextBase::~ContextBase() {
     names_by_hash = nullptr;
 }
 
-SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector <SymbolRef> &args,
+SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args,
                                    bool isMethod) {
     DEBUG_ONLY(Error::check(owner.exists()));
     auto &ownerScope = owner.info(*this, true);
