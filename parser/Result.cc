@@ -4,10 +4,10 @@
 
 #include "ruby_parser/driver.hh"
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {
 
-using sruby::ast::ContextBase;
+using ruby_typer::ast::ContextBase;
 using std::string;
 using std::unique_ptr;
 
@@ -40,4 +40,4 @@ Result parse_ruby(ContextBase &ctx, const string &src) {
     return result;
 }
 }; // namespace parser
-}; // namespace sruby
+}; // namespace ruby_typer

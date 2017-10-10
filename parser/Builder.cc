@@ -8,12 +8,12 @@ using ruby_parser::self_ptr;
 using ruby_parser::token;
 using ruby_parser::node_list;
 
-using sruby::ast::ContextBase;
+using ruby_typer::ast::ContextBase;
 using std::vector;
 using std::unique_ptr;
 using std::make_unique;
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {
 
 class Builder::Impl {
@@ -598,12 +598,12 @@ Builder::Builder(ContextBase &ctx, Result &r) : impl_(new Builder::Impl(ctx, r))
 Builder::~Builder() {}
 
 }; // namespace parser
-}; // namespace sruby
+}; // namespace ruby_typer
 
 namespace {
 
-using sruby::parser::Builder;
-using sruby::parser::Node;
+using ruby_typer::parser::Builder;
+using ruby_typer::parser::Node;
 
 Builder::Impl *cast_builder(self_ptr builder) {
     return const_cast<Builder::Impl *>(reinterpret_cast<const Builder::Impl *>(builder));
@@ -1206,7 +1206,7 @@ foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_lis
 }
 }; // namespace
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {
 
 unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver) {
@@ -1349,4 +1349,4 @@ struct ruby_parser::builder Builder::interface = {
     xstring_compose,
 };
 } // namespace parser
-} // namespace sruby
+} // namespace ruby_typer

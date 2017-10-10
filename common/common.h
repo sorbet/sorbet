@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-namespace sruby {
+namespace ruby_typer {
 
 #ifdef NDEBUG
 constexpr bool debug_mode = false;
@@ -38,8 +38,8 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
 
 #define CheckSize(T, ExpSize, ExpAlign)                                                                                \
     inline void _##T##is##ExpSize##_bytes_long_() {                                                                    \
-        sruby::check_size<T, ExpSize> UNUSED(_##T##is##ExpSize##_bytes_long);                                          \
-        sruby::check_align<T, ExpAlign> UNUSED(_##T##is##ExpAlign##_bytes_aligned);                                    \
+        ruby_typer::check_size<T, ExpSize> UNUSED(_##T##is##ExpSize##_bytes_long);                                          \
+        ruby_typer::check_align<T, ExpAlign> UNUSED(_##T##is##ExpAlign##_bytes_aligned);                                    \
     }
 
 /**

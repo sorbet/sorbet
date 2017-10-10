@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
             break;
     }
 
-    sruby::ast::ContextBase ctx(*console);
+    ruby_typer::ast::ContextBase ctx(*console);
 
     clock_t begin = clock();
     for (auto &fileName : files) {
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
         source.reserve(size);
         is.read((char *)source.c_str(), size);
         is.close();
-        sruby::parser::parse_ruby(ctx, source);
+        ruby_typer::parser::parse_ruby(ctx, source);
     }
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;

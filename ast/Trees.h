@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
 class Stat {
@@ -262,6 +262,6 @@ class EmptyTree : public Expr {};
  */
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer
 
 #endif // SRUBY_TREES_H

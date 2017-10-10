@@ -7,7 +7,7 @@
 
 #include "Names.h"
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 static constexpr unsigned int HASH_MULT = 65599; // sdbm
 static constexpr unsigned int HASH_MULT2 = 31;   // for names
@@ -34,5 +34,5 @@ inline unsigned int _hash(UTF8Desc utf8) {
     return res * HASH_MULT2 + _NameKind2Id_UTF8(UTF8);
 }
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer
 #endif // SRUBY_HASHING_H

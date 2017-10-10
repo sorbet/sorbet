@@ -1,5 +1,5 @@
 #include "parser/Node.h"
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {};
-} // namespace sruby
+} // namespace ruby_typer

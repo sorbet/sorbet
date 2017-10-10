@@ -8,7 +8,7 @@
 using std::unique_ptr;
 using std::make_unique;
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
 class FUNC_EXAMPLE {
@@ -469,6 +469,6 @@ public:
 };
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer
 
 #endif // SRUBY_TREEMAP_H
