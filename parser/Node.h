@@ -4,10 +4,10 @@
 #include <memory>
 #include <vector>
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {
 
-using sruby::ast::NameRef;
+using ruby_typer::ast::NameRef;
 using std::unique_ptr;
 using std::vector;
 using std::move;
@@ -34,4 +34,4 @@ public:
 
 #include "parser/Node_gen.h"
 }; // namespace parser
-}; // namespace sruby
+}; // namespace ruby_typer

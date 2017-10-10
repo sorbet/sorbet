@@ -11,11 +11,12 @@ using ruby_parser::node_list;
 using ruby_parser::self_ptr;
 using ruby_parser::token;
 
-using sruby::ast::ContextBase;
-using sruby::ast::UTF8Desc;
-
+using ruby_typer::ast::ContextBase;
+using ruby_typer::ast::UTF8Desc;
 using std::make_unique;
 using std::unique_ptr;
+using std::unique_ptr;
+using std::vector;
 using std::vector;
 
 #define BUILDER_UNIMPLEMENTED()                                                                                        \
@@ -24,7 +25,7 @@ using std::vector;
         Error::notImplemented();                                                                                       \
     })
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {
 
 class Builder::Impl {
@@ -105,7 +106,7 @@ public:
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (Ident *id = dynamic_cast<Ident *>(node.get())) {
             auto &name = id->name.name(ctx_);
-            DEBUG_ONLY(Error::check(name.kind == sruby::ast::UTF8));
+            DEBUG_ONLY(Error::check(name.kind == ast::UTF8));
             if (driver_->lex.is_declared(name.toString(ctx_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {
@@ -877,12 +878,12 @@ Builder::Builder(ContextBase &ctx, Result &r) : impl_(new Builder::Impl(ctx, r))
 Builder::~Builder() {}
 
 }; // namespace parser
-}; // namespace sruby
+}; // namespace ruby_typer
 
 namespace {
 
-using sruby::parser::Builder;
-using sruby::parser::Node;
+using ruby_typer::parser::Builder;
+using ruby_typer::parser::Node;
 
 Builder::Impl *cast_builder(self_ptr builder) {
     return const_cast<Builder::Impl *>(reinterpret_cast<const Builder::Impl *>(builder));
@@ -1488,7 +1489,7 @@ foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_lis
 }
 }; // namespace
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {
 
 unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver) {
@@ -1632,4 +1633,4 @@ struct ruby_parser::builder Builder::interface = {
     xstring_compose,
 };
 } // namespace parser
-} // namespace sruby
+} // namespace ruby_typer

@@ -7,7 +7,7 @@
 #include "spdlog/spdlog.h"
 #include <vector>
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 class Name;
 class NameRef;
@@ -77,18 +77,15 @@ public:
 
 private:
     static constexpr int STRINGS_PAGE_SIZE = 4096;
-    std::vector<std::unique_ptr<char>> strings;
+    std::vector<std::unique_ptr<std::vector<char>>> strings;
     u2 strings_last_page_used = STRINGS_PAGE_SIZE;
-    Name *names;
+    std::vector<Name> names;
     std::vector<SymbolInfo> symbols;
     unsigned int max_zips_count;
     unsigned int zips_used;
     unsigned int max_files_count;
     unsigned int files_used;
-    std::pair<unsigned int, unsigned int> *names_by_hash;
-    unsigned int max_name_count;
-    unsigned int names_by_hash_size;
-    unsigned int names_used;
+    std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::unordered_map<NameRef, SymbolRef> classes;
 
     void expandNames();
@@ -121,6 +118,6 @@ public:
 };
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer
 
 #endif // SRUBY_CONTEXT_H

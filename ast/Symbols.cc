@@ -1,7 +1,7 @@
 #include "Symbols.h"
 #include "Context.h"
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
 bool SymbolRef::operator==(const SymbolRef &rhs) const {
@@ -27,4 +27,4 @@ SymbolInfo &SymbolRef::info(ContextBase &ctx, bool allowNone) const {
 }
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer

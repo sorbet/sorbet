@@ -2,10 +2,10 @@
 #include "Context.h"
 #include "Hashing.h"
 #include <numeric> // accumulate
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
-sruby::ast::Name::~Name() noexcept {
+ruby_typer::ast::Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE)
         unique.~UniqueName();
 }
@@ -39,10 +39,10 @@ std::string Name::toString(ContextBase &ctx) const {
 }
 
 Name &NameRef::name(ContextBase &ctx) const {
-    DEBUG_ONLY(Error::check(_id <= ctx.names_used));
+    DEBUG_ONLY(Error::check(_id < ctx.names.size()));
     DEBUG_ONLY(Error::check(exists()));
     return ctx.names[_id];
 }
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer

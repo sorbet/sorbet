@@ -1,7 +1,7 @@
 #include "Context.h"
 #include "Hashing.h"
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
 SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
@@ -30,17 +30,16 @@ static const char *nil_str = "nil";
 static UTF8Desc nil_DESC{(char *)nil_str, (int)std::strlen(nil_str)};
 
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
-    max_name_count = 262144;                // 6MB
+    unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
-    names = (Name *)malloc(max_name_count * sizeof(Name));
+    names.reserve(max_name_count);
     symbols.reserve(max_symbol_count);
-    names_by_hash_size = 2 * max_name_count;
-    names_by_hash = (std::pair<unsigned int, unsigned int> *)calloc(names_by_hash_size,
-                                                                    sizeof(std::pair<unsigned int, unsigned int>));
+    int names_by_hash_size = 2 * max_name_count;
+    names_by_hash.resize(names_by_hash_size);
     DEBUG_ONLY(Error::check((names_by_hash_size & (names_by_hash_size - 1)) == 0));
 
-    names_used = 1; // first name is used in hashes to indicate empty cell
+    names.emplace_back(); // first name is used in hashes to indicate empty cell
     // Second name is always <init>, see SymbolInfo::isConstructor
     auto init_id = enterNameUTF8(init_DESC);
     DEBUG_ONLY(Error::check(init_id._id == 1));
@@ -65,15 +64,9 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     Error::check(symbols.size() == 5);
 }
 
-ContextBase::~ContextBase() {
-    for (int i = 0; i < names_used; i++) {
-        names[i].~Name();
-    }
-    free(names);
-    free(names_by_hash);
-    names = nullptr;
-    names_by_hash = nullptr;
-}
+ContextBase::~ContextBase() {}
+
+constexpr decltype(ContextBase::STRINGS_PAGE_SIZE) ContextBase::STRINGS_PAGE_SIZE;
 
 SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args,
                                    bool isMethod) {
@@ -116,7 +109,7 @@ SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
 
 NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     const auto hs = _hash(nm);
-    unsigned int hashTableSize = names_by_hash_size;
+    unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
     unsigned int probe_count = 1;
@@ -134,9 +127,9 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     }
     DEBUG_ONLY(if (probe_count == hashTableSize) { Error::raise("Full table?"); });
 
-    if (names_used == max_name_count) {
+    if (names.size() == names.capacity()) {
         expandNames();
-        hashTableSize = names_by_hash_size;
+        hashTableSize = names_by_hash.size();
         mask = hashTableSize - 1;
         bucketId = hs & mask; // look for place in the new size
         probe_count = 1;
@@ -146,19 +139,20 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
         }
     }
 
+    auto idx = names.size();
     auto &bucket = names_by_hash[bucketId];
     bucket.first = hs;
-    bucket.second = names_used;
+    bucket.second = idx;
+    names.emplace_back();
 
-    auto idx = names_used++;
-    Error::check(nm.to < STRINGS_PAGE_SIZE);
+    Error::check(nm.to < ContextBase::STRINGS_PAGE_SIZE);
 
-    if (strings_last_page_used + nm.to > STRINGS_PAGE_SIZE) {
-        strings.push_back(std::unique_ptr<char>((char *)malloc(STRINGS_PAGE_SIZE)));
+    if (strings_last_page_used + nm.to > ContextBase::STRINGS_PAGE_SIZE) {
+        strings.push_back(std::make_unique<std::vector<char>>(ContextBase::STRINGS_PAGE_SIZE));
         // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
         strings_last_page_used = 0;
     }
-    char *from = strings.back().get() + strings_last_page_used;
+    char *from = strings.back()->data() + strings_last_page_used;
 
     memcpy(from, nm.from, nm.to);
     names[idx].kind = NameKind::UTF8;
@@ -190,24 +184,20 @@ void moveNames(std::pair<unsigned int, unsigned int> *from, std::pair<unsigned i
 }
 
 void ContextBase::expandNames() {
-    Error::check(max_name_count == names_used);
-    auto oldNames = names;
-    max_name_count = max_name_count * 2;
-    names_by_hash_size = max_name_count * 2;
-    names = (Name *)malloc(sizeof(Name) * max_name_count);
-    memcpy(names, oldNames, sizeof(Name) * names_used);
-    auto names_by_hash2 = (std::pair<unsigned int, unsigned int> *)calloc(
-        names_by_hash_size, sizeof(std::pair<unsigned int, unsigned int>));
-    moveNames(names_by_hash, names_by_hash2, max_name_count, names_by_hash_size);
-    free(oldNames);
-    free(names_by_hash);
-    names_by_hash = names_by_hash2;
+    Error::check(names.size() == names.capacity());
+    Error::check(names.capacity() * 2 == names_by_hash.capacity());
+    Error::check(names_by_hash.size() == names_by_hash.capacity());
+
+    names.reserve(names.size() * 2);
+    std::vector<std::pair<unsigned int, unsigned int>> new_names_by_hash(names_by_hash.capacity() * 2);
+    moveNames(names_by_hash.data(), new_names_by_hash.data(), names_by_hash.capacity(), new_names_by_hash.capacity());
+    names_by_hash.swap(new_names_by_hash);
 }
 
 NameRef ContextBase::enterNameUnique(NameRef separator, u2 num, NameKind kind, NameRef original) {
-    Error::check(separator.id() < names_used);
+    Error::check(separator.id() < names.size());
     const auto hs = _hash_mix_unique(separator.id(), UNIQUE, num, original.id());
-    unsigned int hashTableSize = names_by_hash_size;
+    unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
     unsigned int probe_count = 1;
@@ -227,9 +217,9 @@ NameRef ContextBase::enterNameUnique(NameRef separator, u2 num, NameKind kind, N
         Error::raise("Full table?");
     }
 
-    if (names_used == max_name_count) {
+    if (names.size() == names.capacity()) {
         expandNames();
-        hashTableSize = names_by_hash_size;
+        hashTableSize = names_by_hash.size();
         mask = hashTableSize - 1;
 
         bucketId = hs & mask; // look for place in the new size
@@ -242,9 +232,10 @@ NameRef ContextBase::enterNameUnique(NameRef separator, u2 num, NameKind kind, N
 
     auto &bucket = names_by_hash[bucketId];
     bucket.first = hs;
-    bucket.second = names_used;
+    bucket.second = names.size();
 
-    auto idx = names_used++;
+    auto idx = names.size();
+    names.emplace_back();
 
     names[idx].kind = UNIQUE;
     names[idx].unique.num = num;
@@ -269,4 +260,4 @@ SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
 }
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer

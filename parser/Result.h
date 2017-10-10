@@ -5,7 +5,7 @@
 
 #include "ruby_parser/diagnostic.hh"
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {
 
 class Node;
@@ -31,11 +31,11 @@ public:
 private:
     Result(std::unique_ptr<Impl> &&impl);
 
-    friend Result parse_ruby(sruby::ast::ContextBase &ctx, const std::string &src);
+    friend Result parse_ruby(ruby_typer::ast::ContextBase &ctx, const std::string &src);
 
     std::unique_ptr<Impl> impl_;
 };
 
-Result parse_ruby(sruby::ast::ContextBase &ctx, const std::string &src);
+Result parse_ruby(ruby_typer::ast::ContextBase &ctx, const std::string &src);
 } // namespace parser
-}; // namespace sruby
+}; // namespace ruby_typer

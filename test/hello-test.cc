@@ -8,7 +8,7 @@
 #include "gtest/gtest.h"
 #include <cxxopts.hpp>
 
-namespace sruby {
+namespace ruby_typer {
 using namespace ast;
 
 TEST(HelloTest, GetGreet) {
@@ -166,8 +166,8 @@ TEST(TreeMap, CountTrees) {
         }
     };
 
-    sruby::ast::ContextBase cb(*console);
-    sruby::ast::Context ctx(cb, cb.defn_root());
+    ruby_typer::ast::ContextBase cb(*console);
+    ruby_typer::ast::Context ctx(cb, cb.defn_root());
     static const char *foo_str = "Foo";
     static UTF8Desc foo_DESC{(char *)foo_str, (int)std::strlen(foo_str)};
 
@@ -188,4 +188,4 @@ TEST(TreeMap, CountTrees) {
     auto r = TreeMap<Counter>::apply(ctx, c, std::move(tree));
     EXPECT_EQ(c.count, 3);
 }
-} // namespace sruby
+} // namespace ruby_typer

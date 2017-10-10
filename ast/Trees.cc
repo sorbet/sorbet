@@ -1,6 +1,6 @@
 #include "Trees.h"
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
@@ -88,4 +88,4 @@ InsSeq::InsSeq(std::vector<std::unique_ptr<Stat>> &&stats, std::unique_ptr<Expr>
     : stats(std::move(stats)), expr(std::move(expr)) {}
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer

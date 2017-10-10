@@ -1,14 +1,14 @@
 #ifndef SRUBY_TREEMAP_H
 #define SRUBY_TREEMAP_H
 
-#include "ast.h"
+#include "Trees.h"
 #include "memory"
 #include <type_traits> // To use 'std::integral_constant'.
 
 using std::unique_ptr;
 using std::make_unique;
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
 class FUNC_EXAMPLE {
@@ -469,6 +469,6 @@ public:
 };
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer
 
 #endif // SRUBY_TREEMAP_H
