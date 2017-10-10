@@ -19,7 +19,7 @@ bool SymbolInfo::isConstructor(ContextBase &ctx) const {
     return this->name._id == 1;
 }
 SymbolInfo &SymbolRef::info(ContextBase &ctx, bool allowNone) const {
-    Error::check(_id < ctx.symbols_used);
+    Error::check(_id < ctx.symbols.size());
     if (!allowNone)
         Error::check(this->exists());
 

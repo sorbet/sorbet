@@ -2,4 +2,4 @@
 
 namespace sruby {
 namespace parser {};
-}
+} // namespace sruby

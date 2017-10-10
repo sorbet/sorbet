@@ -1348,5 +1348,5 @@ struct ruby_parser::builder Builder::interface = {
     words_compose,
     xstring_compose,
 };
-}
+} // namespace parser
 } // namespace sruby

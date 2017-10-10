@@ -4,6 +4,7 @@ cc_test(
     name = "hello-test",
     srcs = ["hello-test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    linkstatic = 1,
     deps = [
         "//common",
         "//main:hello-greet",
