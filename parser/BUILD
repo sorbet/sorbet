@@ -56,7 +56,10 @@ cc_test(
         "parser_test.cc",
     ],
     copts = ["-Iexternal/gtest/include"],
-    data = glob(["fixtures/*.rb"]),
+    data = glob([
+        "fixtures/*.rb",
+        "fixtures/*.rb.exp",
+    ]),
     deps = [
         ":parser",
         "@gtest//:gtest",
