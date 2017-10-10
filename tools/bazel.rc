@@ -1,1 +1,23 @@
-build --copt="--std=c++14 -fno-omit-frame-pointer -fsanitize=address -fstack-protector -fsanitize=undefined -g3" --linkopt=-fsanitize=address --strip=never
+# C / C++ Options
+build --copt=--std=c++14
+build --cxxopt=--std=c++14
+
+build --copt=-fno-omit-frame-pointer
+build --cxxopt=-fno-omit-frame-pointer
+
+build --copt=-fsanitize=address
+build --cxxopt=-fsanitize=address
+
+build --copt=-fstack-protector
+build --cxxopt=-fstack-protector
+
+build --copt=-fsanitize=undefined
+build --cxxopt=-fsanitize=undefined
+
+build --copt=-g3
+build --cxxopt=-g3
+
+build --linkopt=-fsanitize=address
+build --linkopt=-fsanitize=undefined
+
+build --strip=never
