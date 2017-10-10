@@ -36,151 +36,152 @@ TEST(TreeMap, CountTrees) {
     class Counter {
     public:
         int count = 0;
-        Stat *transformClassDef(ClassDef *original) {
+        Stat *transformClassDef(Context ctx, ClassDef *original) {
             count++;
             return original;
         }
-        Stat *transformMethodDef(MethodDef *original) {
-            count++;
-            return original;
-        }
-
-        Stat *transformSelfMethodDef(SelfMethodDef *original) {
+        Stat *transformMethodDef(Context ctx, MethodDef *original) {
             count++;
             return original;
         }
 
-        Stat *transformSelfMethodDef(ConstDef *original) {
+        Stat *transformSelfMethodDef(Context ctx, SelfMethodDef *original) {
             count++;
             return original;
         }
 
-        Stat *transformIf(If *original) {
+        Stat *transformSelfMethodDef(Context ctx, ConstDef *original) {
             count++;
             return original;
         }
 
-        Stat *transformWhile(While *original) {
+        Stat *transformIf(Context ctx, If *original) {
             count++;
             return original;
         }
 
-        Stat *transformFor(For *original) {
+        Stat *transformWhile(Context ctx, While *original) {
             count++;
             return original;
         }
 
-        Stat *transformBreak(Break *original) {
+        Stat *transformFor(Context ctx, For *original) {
             count++;
             return original;
         }
 
-        Stat *transformNext(Next *original) {
+        Stat *transformBreak(Context ctx, Break *original) {
             count++;
             return original;
         }
 
-        Stat *transformReturn(Return *original) {
+        Stat *transformNext(Context ctx, Next *original) {
             count++;
             return original;
         }
 
-        Stat *transformRescue(Rescue *original) {
+        Stat *transformReturn(Context ctx, Return *original) {
             count++;
             return original;
         }
 
-        Stat *transformIdent(Ident *original) {
+        Stat *transformRescue(Context ctx, Rescue *original) {
             count++;
             return original;
         }
 
-        Stat *transformAssign(Assign *original) {
+        Stat *transformIdent(Context ctx, Ident *original) {
             count++;
             return original;
         }
 
-        Stat *transformSend(Send *original) {
+        Stat *transformAssign(Context ctx, Assign *original) {
             count++;
             return original;
         }
 
-        Stat *transformNew(New *original) {
+        Stat *transformSend(Context ctx, Send *original) {
             count++;
             return original;
         }
 
-        Stat *transformNamedArg(NamedArg *original) {
+        Stat *transformNew(Context ctx, New *original) {
             count++;
             return original;
         }
 
-        Stat *transformHash(Hash *original) {
+        Stat *transformNamedArg(Context ctx, NamedArg *original) {
             count++;
             return original;
         }
 
-        Stat *transformArray(Array *original) {
+        Stat *transformHash(Context ctx, Hash *original) {
             count++;
             return original;
         }
 
-        Stat *transformFloatLit(FloatLit *original) {
+        Stat *transformArray(Context ctx, Array *original) {
             count++;
             return original;
         }
 
-        Stat *transformIntLit(IntLit *original) {
+        Stat *transformFloatLit(Context ctx, FloatLit *original) {
             count++;
             return original;
         }
 
-        Stat *transformStringLit(StringLit *original) {
+        Stat *transformIntLit(Context ctx, IntLit *original) {
             count++;
             return original;
         }
 
-        Stat *transformConstantLit(ConstantLit *original) {
+        Stat *transformStringLit(Context ctx, StringLit *original) {
             count++;
             return original;
         }
 
-        Stat *transformArraySplat(ArraySplat *original) {
+        Stat *transformConstantLit(Context ctx, ConstantLit *original) {
             count++;
             return original;
         }
 
-        Stat *transformHashSplat(HashSplat *original) {
+        Stat *transformArraySplat(Context ctx, ArraySplat *original) {
             count++;
             return original;
         }
 
-        Stat *transformSelf(Self *original) {
+        Stat *transformHashSplat(Context ctx, HashSplat *original) {
             count++;
             return original;
         }
 
-        Stat *transformClosure(Closure *original) {
+        Stat *transformSelf(Context ctx, Self *original) {
             count++;
             return original;
         }
 
-        Stat *transformInsSeq(InsSeq *original) {
+        Stat *transformClosure(Context ctx, Closure *original) {
+            count++;
+            return original;
+        }
+
+        Stat *transformInsSeq(Context ctx, InsSeq *original) {
             count++;
             return original;
         }
     };
 
-    sruby::ast::ContextBase ctx(*console);
+    sruby::ast::ContextBase cb(*console);
+    sruby::ast::Context ctx(cb, cb.defn_root());
     static const char *foo_str = "Foo";
     static UTF8Desc foo_DESC{(char *)foo_str, (int)std::strlen(foo_str)};
 
-    auto name = ctx.enterNameUTF8(foo_DESC);
-    auto classSym = ctx.getTopLevelClassSymbol(name);
-    auto argTypes = std::vector<SymbolRef>{ctx.defn_top()};
-    auto methodSym = ctx.enterSymbol(classSym, name, ctx.defn_top(), argTypes, true);
+    auto name = ctx.state.enterNameUTF8(foo_DESC);
+    auto classSym = ctx.state.getTopLevelClassSymbol(name);
+    auto argTypes = std::vector<SymbolRef>{ctx.state.defn_top()};
+    auto methodSym = ctx.state.enterSymbol(classSym, name, ctx.state.defn_top(), argTypes, true);
     auto empty = std::vector<SymbolRef>();
-    auto argumentSym = ctx.enterSymbol(methodSym, name, ctx.defn_top(), empty, false);
+    auto argumentSym = ctx.state.enterSymbol(methodSym, name, ctx.state.defn_top(), empty, false);
     std::unique_ptr<Expr> rhs(new IntLit(5));
     auto args = std::vector<SymbolRef>{argumentSym};
 
@@ -188,7 +189,8 @@ TEST(TreeMap, CountTrees) {
 
     std::unique_ptr<Stat> tree(new ClassDef(classSym, std::move(classRhs)));
     Counter c;
-    auto r = TreeMap<Counter>::apply(c, std::move(tree));
+
+    auto r = TreeMap<Counter>::apply(ctx, c, std::move(tree));
     EXPECT_EQ(c.count, 3);
 }
 } // namespace sruby

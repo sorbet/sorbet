@@ -128,7 +128,7 @@ GENERATE_HAS_MEMBER(transformInsSeq);
                                                                                                                        \
     template <class FUNC, bool has> class PostPoneCalling_##X {                                                        \
     public:                                                                                                            \
-        static Stat *call(X *cd, FUNC &what) {                                                                         \
+        static Stat *call(Context ctx, X *cd, FUNC &what) {                                                     \
             Error::raise("should never be called. Incorrect use of TreeMap?");                                         \
             return nullptr;                                                                                            \
         }                                                                                                              \
@@ -136,14 +136,14 @@ GENERATE_HAS_MEMBER(transformInsSeq);
                                                                                                                        \
     template <class FUNC> class PostPoneCalling_##X<FUNC, true> {                                                      \
     public:                                                                                                            \
-        static Stat *call(X *cd, FUNC &func) {                                                                         \
-            return func.transform##X(cd);                                                                              \
+        static Stat *call(Context ctx, X *cd, FUNC &func) {                                                                         \
+            return func.transform##X(ctx, cd);                                                                              \
         }                                                                                                              \
     };                                                                                                                 \
                                                                                                                        \
     template <class FUNC> class PostPoneCalling_##X<FUNC, false> {                                                     \
     public:                                                                                                            \
-        static Stat *call(X *cd, FUNC &func) {                                                                         \
+        static Stat *call(Context ctx, X *cd, FUNC &func) {                                                                         \
             return cd;                                                                                                 \
         }                                                                                                              \
     };
@@ -187,61 +187,61 @@ private:
 
     TreeMap(FUNC &func) : func(func) {}
 
-    Stat *mapIt(Stat *what) {
+    Stat *mapIt(Stat *what, Context ctx) {
         // TODO: reorder by frequency
         if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr)
             return what;
         if (ClassDef *v = dynamic_cast<ClassDef *>(what)) {
             auto orhs = v->rhs.get();
-            auto nrhs = mapIt(orhs);
+            auto nrhs = mapIt(orhs, ctx.withOwner(v->symbol));
             if (nrhs != orhs) {
                 v->rhs.reset(nrhs);
             }
             if (HAS_MEMBER_transformClassDef<FUNC>::value) {
-                return PostPoneCalling_ClassDef<FUNC, HAS_MEMBER_transformClassDef<FUNC>::value>::call(v, func);
+                return PostPoneCalling_ClassDef<FUNC, HAS_MEMBER_transformClassDef<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (MethodDef *v = dynamic_cast<MethodDef *>(what)) {
             auto orhs = v->rhs.get();
-            auto nrhs = mapIt(orhs);
+            auto nrhs = mapIt(orhs, ctx.withOwner(v->symbol));
             if (nrhs != orhs) {
                 Error::check(dynamic_cast<Expr *>(nrhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expr *>(nrhs));
             }
             if (HAS_MEMBER_transformMethodDef<FUNC>::value) {
-                return PostPoneCalling_MethodDef<FUNC, HAS_MEMBER_transformMethodDef<FUNC>::value>::call(v, func);
+                return PostPoneCalling_MethodDef<FUNC, HAS_MEMBER_transformMethodDef<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (SelfMethodDef *v = dynamic_cast<SelfMethodDef *>(what)) {
             auto orhs = v->rhs.get();
-            auto nrhs = mapIt(orhs);
+            auto nrhs = mapIt(orhs, ctx.withOwner(v->symbol));
             if (nrhs != orhs) {
                 Error::check(dynamic_cast<Expr *>(nrhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expr *>(nrhs));
             }
             if (HAS_MEMBER_transformSelfMethodDef<FUNC>::value) {
-                return PostPoneCalling_SelfMethodDef<FUNC, HAS_MEMBER_transformSelfMethodDef<FUNC>::value>::call(v,
+                return PostPoneCalling_SelfMethodDef<FUNC, HAS_MEMBER_transformSelfMethodDef<FUNC>::value>::call(ctx, v,
                                                                                                                  func);
             }
             return v;
         } else if (ConstDef *v = dynamic_cast<ConstDef *>(what)) {
             auto orhs = v->rhs.get();
-            auto nrhs = mapIt(orhs);
+            auto nrhs = mapIt(orhs, ctx.withOwner(v->symbol));
             if (nrhs != orhs) {
                 Error::check(dynamic_cast<Expr *>(nrhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expr *>(nrhs));
             }
             if (HAS_MEMBER_transformConstDef<FUNC>::value) {
-                return PostPoneCalling_ConstDef<FUNC, HAS_MEMBER_transformConstDef<FUNC>::value>::call(v, func);
+                return PostPoneCalling_ConstDef<FUNC, HAS_MEMBER_transformConstDef<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (If *v = dynamic_cast<If *>(what)) {
             auto cond = v->cond.get();
             auto thenp = v->thenp.get();
             auto elsep = v->elsep.get();
-            auto ncond = mapIt(cond);
-            auto nthenp = mapIt(thenp);
-            auto nelsep = mapIt(elsep);
+            auto ncond = mapIt(cond, ctx);
+            auto nthenp = mapIt(thenp, ctx);
+            auto nelsep = mapIt(elsep, ctx);
             if (ncond != cond) {
                 Error::check(dynamic_cast<Expr *>(ncond) != nullptr);
                 v->cond.reset(dynamic_cast<Expr *>(ncond));
@@ -255,14 +255,14 @@ private:
                 v->elsep.reset(dynamic_cast<Expr *>(nelsep));
             }
             if (HAS_MEMBER_transformIf<FUNC>::value) {
-                return PostPoneCalling_If<FUNC, HAS_MEMBER_transformIf<FUNC>::value>::call(v, func);
+                return PostPoneCalling_If<FUNC, HAS_MEMBER_transformIf<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (While *v = dynamic_cast<While *>(what)) {
             auto cond = v->cond.get();
             auto body = v->body.get();
-            auto ncond = mapIt(cond);
-            auto nbody = mapIt(body);
+            auto ncond = mapIt(cond, ctx);
+            auto nbody = mapIt(body, ctx);
             if (ncond != cond) {
                 Error::check(dynamic_cast<Expr *>(ncond) != nullptr);
                 v->cond.reset(dynamic_cast<Expr *>(ncond));
@@ -271,42 +271,42 @@ private:
                 v->body.reset(nbody);
             }
             if (HAS_MEMBER_transformWhile<FUNC>::value) {
-                return PostPoneCalling_While<FUNC, HAS_MEMBER_transformWhile<FUNC>::value>::call(v, func);
+                return PostPoneCalling_While<FUNC, HAS_MEMBER_transformWhile<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (For *v = dynamic_cast<For *>(what)) {
             Error::notImplemented();
         } else if (Break *v = dynamic_cast<Break *>(what)) {
             if (HAS_MEMBER_transformBreak<FUNC>::value) {
-                return PostPoneCalling_Break<FUNC, HAS_MEMBER_transformBreak<FUNC>::value>::call(v, func);
+                return PostPoneCalling_Break<FUNC, HAS_MEMBER_transformBreak<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Next *v = dynamic_cast<Next *>(what)) {
             if (HAS_MEMBER_transformNext<FUNC>::value) {
-                return PostPoneCalling_Next<FUNC, HAS_MEMBER_transformNext<FUNC>::value>::call(v, func);
+                return PostPoneCalling_Next<FUNC, HAS_MEMBER_transformNext<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Return *v = dynamic_cast<Return *>(what)) {
             auto oexpr = v->expr.get();
-            auto nexpr = mapIt(oexpr);
+            auto nexpr = mapIt(oexpr, ctx);
             if (oexpr != nexpr) {
                 Error::check(dynamic_cast<Expr *>(nexpr) != nullptr);
                 v->expr.reset(dynamic_cast<Expr *>(nexpr));
             }
             if (HAS_MEMBER_transformReturn<FUNC>::value) {
-                return PostPoneCalling_Return<FUNC, HAS_MEMBER_transformReturn<FUNC>::value>::call(v, func);
+                return PostPoneCalling_Return<FUNC, HAS_MEMBER_transformReturn<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Ident *v = dynamic_cast<Ident *>(what)) {
             if (HAS_MEMBER_transformIdent<FUNC>::value) {
-                return PostPoneCalling_Ident<FUNC, HAS_MEMBER_transformIdent<FUNC>::value>::call(v, func);
+                return PostPoneCalling_Ident<FUNC, HAS_MEMBER_transformIdent<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Assign *v = dynamic_cast<Assign *>(what)) {
             auto olhs = v->lhs.get();
             auto orhs = v->rhs.get();
-            auto nlhs = mapIt(olhs);
-            auto nrhs = mapIt(orhs);
+            auto nlhs = mapIt(olhs, ctx);
+            auto nrhs = mapIt(orhs, ctx);
             if (nlhs != olhs) {
                 Error::check(dynamic_cast<Expr *>(nlhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expr *>(nlhs));
@@ -316,12 +316,12 @@ private:
                 v->rhs.reset(dynamic_cast<Expr *>(nrhs));
             }
             if (HAS_MEMBER_transformAssign<FUNC>::value) {
-                return PostPoneCalling_Assign<FUNC, HAS_MEMBER_transformAssign<FUNC>::value>::call(v, func);
+                return PostPoneCalling_Assign<FUNC, HAS_MEMBER_transformAssign<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Send *v = dynamic_cast<Send *>(what)) {
             auto orecv = v->recv.get();
-            auto nrecv = mapIt(orecv);
+            auto nrecv = mapIt(orecv, ctx);
             auto &vec = v->args;
             if (nrecv != orecv) {
                 Error::check(dynamic_cast<Expr *>(nrecv) != nullptr);
@@ -331,7 +331,7 @@ private:
             while (i < vec.size()) {
                 auto &el = vec[i];
                 auto oarg = el.get();
-                auto narg = mapIt(oarg);
+                auto narg = mapIt(oarg, ctx);
                 if (oarg != narg) {
                     Error::check(dynamic_cast<Expr *>(narg) != nullptr);
                     el.reset(dynamic_cast<Expr *>(narg));
@@ -340,7 +340,7 @@ private:
             }
 
             if (HAS_MEMBER_transformSend<FUNC>::value) {
-                return PostPoneCalling_Send<FUNC, HAS_MEMBER_transformSend<FUNC>::value>::call(v, func);
+                return PostPoneCalling_Send<FUNC, HAS_MEMBER_transformSend<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (New *v = dynamic_cast<New *>(what)) {
@@ -349,7 +349,7 @@ private:
             while (i < args.size()) {
                 auto &el = args[i];
                 auto oarg = el.get();
-                auto narg = mapIt(oarg);
+                auto narg = mapIt(oarg, ctx);
                 if (oarg != narg) {
                     Error::check(dynamic_cast<Expr *>(narg) != nullptr);
                     el.reset(dynamic_cast<Expr *>(narg));
@@ -357,18 +357,18 @@ private:
                 i++;
             }
             if (HAS_MEMBER_transformNew<FUNC>::value) {
-                return PostPoneCalling_New<FUNC, HAS_MEMBER_transformNew<FUNC>::value>::call(v, func);
+                return PostPoneCalling_New<FUNC, HAS_MEMBER_transformNew<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (NamedArg *v = dynamic_cast<NamedArg *>(what)) {
             auto oarg = v->arg.get();
-            auto narg = mapIt(oarg);
+            auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
                 Error::check(dynamic_cast<Expr *>(narg) != nullptr);
                 v->arg.reset(dynamic_cast<Expr *>(narg));
             }
             if (HAS_MEMBER_transformNamedArg<FUNC>::value) {
-                return PostPoneCalling_NamedArg<FUNC, HAS_MEMBER_transformNamedArg<FUNC>::value>::call(v, func);
+                return PostPoneCalling_NamedArg<FUNC, HAS_MEMBER_transformNamedArg<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Hash *v = dynamic_cast<Hash *>(what)) {
@@ -377,49 +377,49 @@ private:
             Error::notImplemented();
         } else if (FloatLit *v = dynamic_cast<FloatLit *>(what)) {
             if (HAS_MEMBER_transformFloatLit<FUNC>::value) {
-                return PostPoneCalling_FloatLit<FUNC, HAS_MEMBER_transformFloatLit<FUNC>::value>::call(v, func);
+                return PostPoneCalling_FloatLit<FUNC, HAS_MEMBER_transformFloatLit<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (IntLit *v = dynamic_cast<IntLit *>(what)) {
             if (HAS_MEMBER_transformIntLit<FUNC>::value) {
-                return PostPoneCalling_IntLit<FUNC, HAS_MEMBER_transformIntLit<FUNC>::value>::call(v, func);
+                return PostPoneCalling_IntLit<FUNC, HAS_MEMBER_transformIntLit<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (StringLit *v = dynamic_cast<StringLit *>(what)) {
             if (HAS_MEMBER_transformStringLit<FUNC>::value) {
-                return PostPoneCalling_StringLit<FUNC, HAS_MEMBER_transformStringLit<FUNC>::value>::call(v, func);
+                return PostPoneCalling_StringLit<FUNC, HAS_MEMBER_transformStringLit<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (ConstantLit *v = dynamic_cast<ConstantLit *>(what)) {
             if (HAS_MEMBER_transformConstantLit<FUNC>::value) {
-                return PostPoneCalling_ConstantLit<FUNC, HAS_MEMBER_transformConstantLit<FUNC>::value>::call(v, func);
+                return PostPoneCalling_ConstantLit<FUNC, HAS_MEMBER_transformConstantLit<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (ArraySplat *v = dynamic_cast<ArraySplat *>(what)) {
             auto oarg = v->arg.get();
-            auto narg = mapIt(oarg);
+            auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
                 Error::check(dynamic_cast<Expr *>(narg) != nullptr);
                 v->arg.reset(dynamic_cast<Expr *>(narg));
             }
             if (HAS_MEMBER_transformArraySplat<FUNC>::value) {
-                return PostPoneCalling_ArraySplat<FUNC, HAS_MEMBER_transformArraySplat<FUNC>::value>::call(v, func);
+                return PostPoneCalling_ArraySplat<FUNC, HAS_MEMBER_transformArraySplat<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (HashSplat *v = dynamic_cast<HashSplat *>(what)) {
             auto oarg = v->arg.get();
-            auto narg = mapIt(oarg);
+            auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
                 Error::check(dynamic_cast<Expr *>(narg) != nullptr);
                 v->arg.reset(dynamic_cast<Expr *>(narg));
             }
             if (HAS_MEMBER_transformHashSplat<FUNC>::value) {
-                return PostPoneCalling_HashSplat<FUNC, HAS_MEMBER_transformHashSplat<FUNC>::value>::call(v, func);
+                return PostPoneCalling_HashSplat<FUNC, HAS_MEMBER_transformHashSplat<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Self *v = dynamic_cast<Self *>(what)) {
             if (HAS_MEMBER_transformSelf<FUNC>::value) {
-                return PostPoneCalling_Self<FUNC, HAS_MEMBER_transformSelf<FUNC>::value>::call(v, func);
+                return PostPoneCalling_Self<FUNC, HAS_MEMBER_transformSelf<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Closure *v = dynamic_cast<Closure *>(what)) {
@@ -431,20 +431,20 @@ private:
             while (i < stats.size()) {
                 auto &el = stats[i];
                 auto oexp = el.get();
-                auto nexp = mapIt(oexp);
+                auto nexp = mapIt(oexp, ctx);
                 if (oexp != nexp) {
                     el.reset(nexp);
                 }
                 i++;
             }
-            auto nexpr = mapIt(oexpr);
+            auto nexpr = mapIt(oexpr, ctx);
             if (nexpr != oexpr) {
                 Error::check(dynamic_cast<Expr *>(nexpr) != nullptr);
                 v->expr.reset(dynamic_cast<Expr *>(nexpr));
             }
 
             if (HAS_MEMBER_transformInsSeq<FUNC>::value) {
-                return PostPoneCalling_InsSeq<FUNC, HAS_MEMBER_transformInsSeq<FUNC>::value>::call(v, func);
+                return PostPoneCalling_InsSeq<FUNC, HAS_MEMBER_transformInsSeq<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else {
@@ -453,10 +453,10 @@ private:
     }
 
 public:
-    static unique_ptr<Stat> apply(FUNC &func, unique_ptr<Stat> to) {
+    static unique_ptr<Stat> apply(Context ctx, FUNC &func, unique_ptr<Stat> to) {
         Stat *underlying = to.get();
         TreeMap walker(func);
-        Stat *res = walker.mapIt(underlying);
+        Stat *res = walker.mapIt(underlying, ctx);
 
         if (res == underlying) {
             return to;
