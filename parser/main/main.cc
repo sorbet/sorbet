@@ -22,8 +22,9 @@ int main(int argc, char **argv) {
     std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
 
     cxxopts::Options options("parse_ruby", "Parse ruby code and print it");
-    options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]")(
-        "h,help", "Show help")("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
+    options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
+    options.add_options()("h,help", "Show help");
+    options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
     options.parse_positional("files");
 
     try {
@@ -33,7 +34,7 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    if (options["h"].as<bool>()) {
+    if (options["h"].as<bool>() || files.empty()) {
         console->info("{}\n", options.help());
         return 0;
     }
@@ -69,7 +70,7 @@ int main(int argc, char **argv) {
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
 
-    console_err->info("Total {} files. Done in {} ms, nt size: {}, st size: {}\n", argc - 1, elapsed_secs, -1, -1);
+    console_err->info("Total {} files. Done in {} ms, nt size: {}, st size: {}\n", files.size(), elapsed_secs, -1, -1);
 
     return 0;
 }
