@@ -64,6 +64,7 @@ int main(int argc, char **argv) {
         source.reserve(size);
         is.read((char *)source.c_str(), size);
         is.close();
+        sruby::parser::parse_ruby(ctx, source);
     }
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
