@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
     cxxopts::Options options("parse_ruby", "Parse ruby code and print it");
     options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
+    options.add_options()("q,quiet", "Be quiet");
     options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
     options.parse_positional("files");
 
@@ -69,7 +70,9 @@ int main(int argc, char **argv) {
         auto r = ruby_typer::parser::parse_ruby(ctx, src);
         auto ast = r.ast();
         if (ast) {
-            cout << ast->toString(ctx, 0);
+            if (!options["q"].as<bool>()) {
+                cout << ast->toString(ctx, 0);
+            }
         } else {
             cout << " got null" << endl;
         }
