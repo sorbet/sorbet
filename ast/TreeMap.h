@@ -1,7 +1,7 @@
 #ifndef SRUBY_TREEMAP_H
 #define SRUBY_TREEMAP_H
 
-#include "ast.h"
+#include "Trees.h"
 #include "memory"
 #include <type_traits> // To use 'std::integral_constant'.
 
