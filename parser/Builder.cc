@@ -666,10 +666,6 @@ public:
         return arg;
     }
 
-    unique_ptr<Node> prototype(unique_ptr<Node> genargs, unique_ptr<Node> args, unique_ptr<Node> return_type) {
-        BUILDER_UNIMPLEMENTED();
-    }
-
     unique_ptr<Node> range_exclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
         return make_unique<ERange>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
     }
@@ -714,6 +710,10 @@ public:
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
+        BUILDER_UNIMPLEMENTED();
+    }
+
+    unique_ptr<Node> splat_mlhs(const token *star, unique_ptr<Node> arg) {
         BUILDER_UNIMPLEMENTED();
     }
 
@@ -812,7 +812,7 @@ public:
         BUILDER_UNIMPLEMENTED();
     }
 
-    unique_ptr<Node> tr_ivardecl(const token *name, unique_ptr<Node> type_) {
+    unique_ptr<Node> tr_ivardecl(const token *def, const token *name, unique_ptr<Node> type_) {
         BUILDER_UNIMPLEMENTED();
     }
 
@@ -832,6 +832,14 @@ public:
         BUILDER_UNIMPLEMENTED();
     }
 
+    unique_ptr<Node> tr_prototype(unique_ptr<Node> genargs, unique_ptr<Node> args, unique_ptr<Node> return_type) {
+        BUILDER_UNIMPLEMENTED();
+    }
+
+    unique_ptr<Node> tr_returnsig(const token *arrow, unique_ptr<Node> ret) {
+        BUILDER_UNIMPLEMENTED();
+    }
+
     unique_ptr<Node> tr_self(const token *special) {
         BUILDER_UNIMPLEMENTED();
     }
@@ -840,11 +848,11 @@ public:
         BUILDER_UNIMPLEMENTED();
     }
 
-    unique_ptr<Node> true_(const token *tok) {
+    unique_ptr<Node> tr_typed_arg(unique_ptr<Node> type_, unique_ptr<Node> arg) {
         BUILDER_UNIMPLEMENTED();
     }
 
-    unique_ptr<Node> typed_arg(unique_ptr<Node> type_, unique_ptr<Node> arg) {
+    unique_ptr<Node> true_(const token *tok) {
         BUILDER_UNIMPLEMENTED();
     }
 
@@ -1276,10 +1284,6 @@ foreign_ptr procarg0(self_ptr builder, foreign_ptr arg) {
     return cast_builder(builder)->procarg0(cast_node(arg)).release();
 }
 
-foreign_ptr prototype(self_ptr builder, foreign_ptr genargs, foreign_ptr args, foreign_ptr return_type) {
-    return cast_builder(builder)->prototype(cast_node(genargs), cast_node(args), cast_node(return_type)).release();
-}
-
 foreign_ptr range_exclusive(self_ptr builder, foreign_ptr lhs, const token *oper, foreign_ptr rhs) {
     return cast_builder(builder)->range_exclusive(cast_node(lhs), oper, cast_node(rhs)).release();
 }
@@ -1326,6 +1330,10 @@ foreign_ptr shadowarg(self_ptr builder, const token *name) {
 
 foreign_ptr splat(self_ptr builder, const token *star, foreign_ptr arg) {
     return cast_builder(builder)->splat(star, cast_node(arg)).release();
+}
+
+foreign_ptr splat_mlhs(self_ptr builder, const token *star, foreign_ptr arg) {
+    return cast_builder(builder)->splat_mlhs(star, cast_node(arg)).release();
 }
 
 foreign_ptr string(self_ptr builder, const token *string_) {
@@ -1428,8 +1436,8 @@ foreign_ptr tr_instance(self_ptr builder, const token *special) {
     return cast_builder(builder)->tr_instance(special).release();
 }
 
-foreign_ptr tr_ivardecl(self_ptr builder, const token *name, foreign_ptr type_) {
-    return cast_builder(builder)->tr_ivardecl(name, cast_node(type_)).release();
+foreign_ptr tr_ivardecl(self_ptr builder, const token *def, const token *name, foreign_ptr type_) {
+    return cast_builder(builder)->tr_ivardecl(def, name, cast_node(type_)).release();
 }
 
 foreign_ptr tr_nil(self_ptr builder, const token *nil) {
@@ -1448,6 +1456,14 @@ foreign_ptr tr_proc(self_ptr builder, const token *begin, foreign_ptr args, cons
     return cast_builder(builder)->tr_proc(begin, cast_node(args), end).release();
 }
 
+foreign_ptr tr_prototype(self_ptr builder, foreign_ptr genargs, foreign_ptr args, foreign_ptr return_type) {
+    return cast_builder(builder)->tr_prototype(cast_node(genargs), cast_node(args), cast_node(return_type)).release();
+}
+
+foreign_ptr tr_returnsig(self_ptr builder, const token *arrow, foreign_ptr ret) {
+    return cast_builder(builder)->tr_returnsig(arrow, cast_node(ret)).release();
+}
+
 foreign_ptr tr_self(self_ptr builder, const token *special) {
     return cast_builder(builder)->tr_self(special).release();
 }
@@ -1456,12 +1472,12 @@ foreign_ptr tr_tuple(self_ptr builder, const token *begin, const node_list *type
     return cast_builder(builder)->tr_tuple(begin, convert_node_list(types), end).release();
 }
 
-foreign_ptr true_(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->true_(tok).release();
+foreign_ptr tr_typed_arg(self_ptr builder, foreign_ptr type_, foreign_ptr arg) {
+    return cast_builder(builder)->tr_typed_arg(cast_node(type_), cast_node(arg)).release();
 }
 
-foreign_ptr typed_arg(self_ptr builder, foreign_ptr type_, foreign_ptr arg) {
-    return cast_builder(builder)->typed_arg(cast_node(type_), cast_node(arg)).release();
+foreign_ptr true_(self_ptr builder, const token *tok) {
+    return cast_builder(builder)->true_(tok).release();
 }
 
 foreign_ptr unary_op(self_ptr builder, const token *oper, foreign_ptr receiver) {
@@ -1582,7 +1598,6 @@ struct ruby_parser::builder Builder::interface = {
     postexe,
     preexe,
     procarg0,
-    prototype,
     range_exclusive,
     range_inclusive,
     rational,
@@ -1594,6 +1609,7 @@ struct ruby_parser::builder Builder::interface = {
     self_,
     shadowarg,
     splat,
+    splat_mlhs,
     string,
     string_compose,
     string_internal,
@@ -1621,10 +1637,12 @@ struct ruby_parser::builder Builder::interface = {
     tr_nillable,
     tr_or,
     tr_proc,
+    tr_prototype,
+    tr_returnsig,
     tr_self,
     tr_tuple,
+    tr_typed_arg,
     true_,
-    typed_arg,
     unary_op,
     undef_method,
     when,

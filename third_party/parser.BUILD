@@ -23,12 +23,12 @@ genrule(
 genrule(
     name = "gen_cpp_diagnostics",
     srcs = [
-        "script/mkdiagnostics",
+        "codegen/diagnostics.rb",
     ],
     outs = [
         "include/ruby_parser/diagnostic_class.hh",
     ],
-    cmd = "$(location script/mkdiagnostics) cpp > $@",
+    cmd = "$(location codegen/diagnostics.rb) --cpp=$@",
 )
 
 cc_library(
@@ -42,6 +42,7 @@ cc_library(
     copts = [
         "-std=c++14",
         "-I$(GENDIR)/external/parser/cc",
+        "-I$(GENDIR)/external/parser/cc/grammars",
     ],
     includes = [
         "include",
