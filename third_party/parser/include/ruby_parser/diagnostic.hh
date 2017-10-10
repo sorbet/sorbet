@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "token.hh"
+#include "diagnostic_class.hh"
 
 namespace ruby_parser {
 

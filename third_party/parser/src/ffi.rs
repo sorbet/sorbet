@@ -2,10 +2,9 @@
 
 extern crate libc;
 
-use ::ast::{Node, Loc, SourceFile, Diagnostic, Level};
+use ::ast::{Node, Loc, SourceFile, Diagnostic, Level, Error};
 use ::builder::Builder;
 use ::parser::ParserOptions;
-use ::diagnostics::Error;
 use self::libc::{size_t, c_char};
 use std::ffi::{CStr, CString};
 use std::vec::Vec;
@@ -98,7 +97,7 @@ struct CDiagnostic {
     end_pos: size_t,
 }
 
-include!("ffi_builder.rs");
+include!(concat!(env!("OUT_DIR"), "/ffi_builder.rs"));
 
 extern "C" {
     fn rbdriver_typedruby24_new(source: *const u8, source_length: size_t, builder: *const BuilderInterface) -> *mut DriverPtr;

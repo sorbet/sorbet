@@ -1,8 +1,7 @@
 use ffi::{Token, Driver};
 use std::rc::Rc;
-use ast::{Node, Id, Loc, SourceFile, RubyString};
+use ast::{Node, Id, Loc, SourceFile, RubyString, Error};
 use std::collections::HashSet;
-use diagnostics::Error;
 
 #[cfg(feature = "regex")]
 use onig::Regex;
@@ -236,7 +235,7 @@ impl<'a> Builder<'a> {
         let (_, name) = match *arg {
             // nodes that wrap other arg nodes:
             Node::Procarg0(_, ref arg) |
-                Node::TypedArg(_, _, ref arg) => {
+                Node::TyTypedArg(_, _, ref arg) => {
                     return self.check_duplicate_args_inner(names, arg);
                 },
                 Node::Mlhs(_, ref mlhs_items) => {
@@ -1190,13 +1189,6 @@ impl<'a> Builder<'a> {
         }
     }
 
-    pub fn prototype(&self, genargs: Option<Rc<Node>>, args: Option<Rc<Node>>, return_type: Option<Rc<Node>>) -> Node {
-        let loc = join_option_exprs(&[genargs.clone(), args.clone(), return_type.clone()])
-            .expect("at least one argument to prototype must be Some");
-
-        Node::Prototype(loc, genargs, args, return_type)
-    }
-
     pub fn range_exclusive(&self, lhs: Option<Rc<Node>>, _oper: Option<Token>, rhs: Option<Rc<Node>>) -> Node {
         let lhs = lhs.unwrap();
         let rhs = rhs.unwrap();
@@ -1277,11 +1269,17 @@ impl<'a> Builder<'a> {
     }
 
     pub fn splat(&self, star: Option<Token>, arg: Option<Rc<Node>>) -> Node {
+        let arg = arg.unwrap();
+
+        Node::Splat(self.loc(&star).join(arg.loc()), arg)
+    }
+
+    pub fn splat_mlhs(&self, star: Option<Token>, arg: Option<Rc<Node>>) -> Node {
         let loc = match arg {
             Some(ref box_arg) => self.loc(&star).join(box_arg.loc()),
             None => self.loc(&star),
         };
-        Node::Splat(loc, arg)
+        Node::SplatLhs(loc, arg)
     }
 
     pub fn string(&self, string_: Option<Token>) -> Node {
@@ -1448,11 +1446,12 @@ impl<'a> Builder<'a> {
         Node::TyInstance(self.loc(&special))
     }
 
-    pub fn tr_ivardecl(&self, name: Option<Token>, type_: Option<Rc<Node>>) -> Node {
+    pub fn tr_ivardecl(&self, def: Option<Token>, name: Option<Token>, type_: Option<Rc<Node>>) -> Node {
+        let decl_loc = self.tok_join(&def, &name);
         let name = self.tok_id(&name);
         let type_ = type_.unwrap();
 
-        Node::TyIvardecl(name.0.join(type_.loc()), name, type_)
+        Node::TyIvardecl(decl_loc.join(type_.loc()), name, type_)
     }
 
     pub fn tr_nil(&self, nil: Option<Token>) -> Node {
@@ -1475,6 +1474,19 @@ impl<'a> Builder<'a> {
         Node::TyProc(self.tok_join(&begin, &end), args)
     }
 
+    pub fn tr_prototype(&self, genargs: Option<Rc<Node>>, args: Option<Rc<Node>>, return_type: Option<Rc<Node>>) -> Node {
+        let loc = join_option_exprs(&[genargs.clone(), args.clone(), return_type.clone()])
+            .expect("at least one argument to prototype must be Some");
+
+        Node::TyPrototype(loc, genargs, args, return_type)
+    }
+
+    pub fn tr_returnsig(&self, arrow: Option<Token>, ret: Option<Rc<Node>>) -> Node {
+        let loc = self.loc(&arrow);
+        let ret = ret.unwrap();
+        Node::TyReturnSig(loc.join(ret.loc()), ret)
+    }
+
     pub fn tr_self(&self, special: Option<Token>) -> Node {
         Node::TySelf(self.loc(&special))
     }
@@ -1483,14 +1495,14 @@ impl<'a> Builder<'a> {
         Node::TyTuple(self.tok_join(&begin, &end), types)
     }
 
-    pub fn true_(&self, tok: Option<Token>) -> Node {
-        Node::True(self.loc(&tok))
-    }
-
-    pub fn typed_arg(&self, type_: Option<Rc<Node>>, arg: Option<Rc<Node>>) -> Node {
+    pub fn tr_typed_arg(&self, type_: Option<Rc<Node>>, arg: Option<Rc<Node>>) -> Node {
         let type_ = type_.unwrap();
         let arg = arg.unwrap();
-        Node::TypedArg(type_.loc().join(arg.loc()), type_, arg)
+        Node::TyTypedArg(type_.loc().join(arg.loc()), type_, arg)
+    }
+
+    pub fn true_(&self, tok: Option<Token>) -> Node {
+        Node::True(self.loc(&tok))
     }
 
     pub fn unary_op(&self, oper: Option<Token>, receiver: Option<Rc<Node>>) -> Node {
