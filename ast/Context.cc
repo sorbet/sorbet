@@ -75,6 +75,8 @@ ContextBase::~ContextBase() {
     names_by_hash = nullptr;
 }
 
+constexpr decltype(ContextBase::STRINGS_PAGE_SIZE) ContextBase::STRINGS_PAGE_SIZE;
+
 SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args,
                                    bool isMethod) {
     DEBUG_ONLY(Error::check(owner.exists()));
@@ -151,14 +153,14 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     bucket.second = names_used;
 
     auto idx = names_used++;
-    Error::check(nm.to < STRINGS_PAGE_SIZE);
+    Error::check(nm.to < ContextBase::STRINGS_PAGE_SIZE);
 
-    if (strings_last_page_used + nm.to > STRINGS_PAGE_SIZE) {
-        strings.push_back(std::unique_ptr<char>((char *)malloc(STRINGS_PAGE_SIZE)));
+    if (strings_last_page_used + nm.to > ContextBase::STRINGS_PAGE_SIZE) {
+        strings.push_back(std::make_unique<std::vector<char>>(ContextBase::STRINGS_PAGE_SIZE));
         // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
         strings_last_page_used = 0;
     }
-    char *from = strings.back().get() + strings_last_page_used;
+    char *from = strings.back()->data() + strings_last_page_used;
 
     memcpy(from, nm.from, nm.to);
     names[idx].kind = NameKind::UTF8;

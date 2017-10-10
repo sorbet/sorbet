@@ -77,7 +77,7 @@ public:
 
 private:
     static constexpr int STRINGS_PAGE_SIZE = 4096;
-    std::vector<std::unique_ptr<char>> strings;
+    std::vector<std::unique_ptr<std::vector<char>>> strings;
     u2 strings_last_page_used = STRINGS_PAGE_SIZE;
     Name *names;
     std::vector<SymbolInfo> symbols;
