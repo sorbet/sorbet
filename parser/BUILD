@@ -22,6 +22,19 @@ cc_binary(
     ],
 )
 
+cc_binary(
+    name = "parse_ast",
+    srcs = [
+        "main/main.cc",
+    ],
+    linkstatic = 1,
+    deps = [
+        "//parser",
+        "@cxxopts//:cxxopts",
+        "@spdlog//:spdlog",
+    ],
+)
+
 genrule(
     name = "generate_node_h",
     outs = ["Node_gen.h"],
