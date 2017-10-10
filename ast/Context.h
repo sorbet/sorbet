@@ -34,9 +34,9 @@ public:
 
     SymbolRef prePregisterSym();
 
-    SymbolRef enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args, bool isMethod,
-                          bool isCompletion);
+    SymbolRef enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args, bool isMethod);
 
+    /** Creates a new top-level class if not exists already */
     SymbolRef getTopLevelClassSymbol(NameRef name);
 
     SymbolRef newInnerClass(SymbolRef owner, NameRef name); // Needs to be implemented from scratch
@@ -63,52 +63,16 @@ public:
     static constexpr SymbolRef defn_top() {
         return SymbolRef(1);
     }
-    static constexpr SymbolRef denf_bottom() {
+    static constexpr SymbolRef defn_bottom() {
         return SymbolRef(2);
     }
 
-    static constexpr SymbolRef defn_javaLangObject() {
-        return SymbolRef(1);
-    }
-
-    static constexpr SymbolRef defn_int() {
-        return SymbolRef(2);
-    }
-
-    static constexpr SymbolRef defn_long() {
+    static constexpr SymbolRef defn_root() {
         return SymbolRef(3);
     }
 
-    static constexpr SymbolRef defn_float() {
+    static constexpr SymbolRef defn_nil() {
         return SymbolRef(4);
-    }
-
-    static constexpr SymbolRef defn_double() {
-        return SymbolRef(5);
-    }
-
-    static constexpr SymbolRef defn_char() {
-        return SymbolRef(6);
-    }
-
-    static constexpr SymbolRef defn_short() {
-        return SymbolRef(7);
-    }
-
-    static constexpr SymbolRef defn_bool() {
-        return SymbolRef(8);
-    }
-
-    static constexpr SymbolRef defn_byte() {
-        return SymbolRef(9);
-    }
-
-    static constexpr SymbolRef defn_void() {
-        return SymbolRef(10);
-    }
-
-    static constexpr SymbolRef defn_null() {
-        return SymbolRef(12);
     }
 
 private:

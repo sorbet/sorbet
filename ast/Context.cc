@@ -23,6 +23,12 @@ static UTF8Desc top_DESC{(char *)top_str, (int)std::strlen(top_str)};
 static const char *bottom_str = "<bottom>";
 static UTF8Desc bottom_DESC{(char *)bottom_str, (int)std::strlen(bottom_str)};
 
+static const char *root_str = "<root>";
+static UTF8Desc root_DESC{(char *)root_str, (int)std::strlen(root_str)};
+
+static const char *nil_str = "nil";
+static UTF8Desc nil_DESC{(char *)nil_str, (int)std::strlen(nil_str)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     max_name_count = 262144;   // 6MB
     max_symbol_count = 524288; // 32MB
@@ -43,48 +49,21 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
     SymbolRef bottom_id = synthesizeClass(bottom_DESC);
-    //  SymbolRef int_id = synthesizeClass(int_DESC);
-    //  SymbolRef long_id = synthesizeClass(long_DESC);
-    //  SymbolRef float_id = synthesizeClass(float_DESC);
-    //  SymbolRef double_id = synthesizeClass(double_DESC);
-    //  SymbolRef char_id = synthesizeClass(char_DESC);
-    //  SymbolRef short_id = synthesizeClass(short_DESC);
-    //  SymbolRef bool_id = synthesizeClass(bool_DESC);
-    //  SymbolRef byte_id = synthesizeClass(byte_DESC);
-    //  SymbolRef void_id = synthesizeClass(void_DESC);
-    //  SymbolRef top_id = synthesizeClass(TOP_DESC);
-    //  SymbolRef null_id = synthesizeClass(null_DESC);
+    SymbolRef root_id = synthesizeClass(root_DESC);
+    SymbolRef nil_id = synthesizeClass(nil_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
-    Error::check(bottom_id == denf_bottom());
-    //  Error::check(int_id == defn_int());
-    //  Error::check(long_id == defn_long());
-    //  Error::check(float_id == defn_float());
-    //  Error::check(double_id == defn_double());
-    //  Error::check(char_id == defn_char());
-    //  Error::check(short_id == defn_short());
-    //  Error::check(bool_id == defn_bool());
-    //  Error::check(byte_id == defn_byte());
-    //  Error::check(void_id == defn_void());
-    //  Error::check(top_id == defn_top());
-    //  Error::check(null_id == defn_null());
+    Error::check(bottom_id == defn_bottom());
+    Error::check(root_id == defn_root());
+    Error::check(nil_id == defn_nil());
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
-     * 2: int();
-     * 3: long();
-     * 4: float();
-     * 5: double();
-     * 6: char();
-     * 7: short();
-     * 8: bool();
-     * 9: byte();
-     * 10: void();
-     * 11: TOP;
-     * 12: null
+     * 3: <root>;
+     * 4: nil;
      */
-    Error::check(symbols_used == 3);
+    Error::check(symbols_used == 5);
 }
 
 ContextBase::~ContextBase() {
@@ -101,6 +80,49 @@ ContextBase::~ContextBase() {
     names = nullptr;
     symbols = nullptr;
     names_by_hash = nullptr;
+}
+
+SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector <SymbolRef> &args,
+                                   bool isMethod) {
+    DEBUG_ONLY(Error::check(owner.exists()));
+    auto &ownerScope = owner.info(*this, true);
+    auto from = ownerScope.members.begin();
+    auto to = ownerScope.members.end();
+    while (from != to) {
+        auto &el = *from;
+        if (el.first == name) {
+            auto &otherInfo = el.second.info(*this, true);
+            if (otherInfo.result() == result && otherInfo.arguments() == args)
+                return from->second;
+        }
+        from++;
+    }
+
+    bool changed = false;
+
+    if (symbols_used == max_symbol_count) {
+        expandSymbols();
+        changed = true;
+    }
+    auto ret = SymbolRef(symbols_used++);
+    auto &info = ret.info(*this, true);
+    new (&info) SymbolInfo();
+    info.name = name;
+    info.flags = 0;
+
+    info.owner = owner;
+    info.resultOrParentOrLoader = result;
+    if (isMethod)
+        info.setMethod();
+    else
+        info.setField();
+
+    info.argumentsOrMixins.swap(args);
+    if (!changed)
+        ownerScope.members.push_back(std::make_pair(name, ret));
+    else
+        owner.info(*this, true).members.push_back(std::make_pair(name, ret));
+    return ret;
 }
 
 NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
@@ -263,6 +285,7 @@ SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
     auto &info = current.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
     new (&info) SymbolInfo();
     info.name = name;
+    info.owner = defn_root();
     info.flags = 0;
     info.setClass();
     return current;
