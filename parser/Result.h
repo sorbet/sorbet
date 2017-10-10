@@ -24,7 +24,7 @@ public:
     ~Result();
 
     Result(const Result &) = delete;
-    Result(Result &&) = default;
+    Result(Result &&);
 
     class Impl;
 

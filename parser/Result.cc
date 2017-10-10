@@ -39,5 +39,7 @@ Result parse_ruby(ContextBase &ctx, const string &src) {
 
     return result;
 }
+
+ruby_typer::parser::Result::Result(Result &&) {}
 }; // namespace parser
 }; // namespace ruby_typer
