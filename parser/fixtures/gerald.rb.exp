@@ -1,0 +1,1785 @@
+Begin {
+  stmts = [
+    Send {
+      NULL
+      method = require_relative
+      args = [
+        DString {
+          nodes = [
+            String {
+              val = "../../../extn"
+            }
+          ]
+        }
+      ]
+    }
+    Send {
+      Const {
+        Const {
+          NULL
+          name = Opus
+        }
+        name = AutogenLoader
+      }
+      method = init
+      args = [
+        FileLiteral {
+        }
+      ]
+    }
+    Module {
+      Const {
+        Const {
+          Const {
+            NULL
+            name = Opus
+          }
+          name = CIBot
+        }
+        name = Gerald
+      }
+      Begin {
+        stmts = [
+          Class {
+            Const {
+              NULL
+              name = MatchTimeout
+            }
+            Const {
+              NULL
+              name = StandardError
+            }
+            Begin {
+              stmts = [
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "rule_token"
+                    }
+                  ]
+                }
+                DefMethod {
+                  name = initialize
+                  Args {
+                    args = [
+                      Arg {
+                        name = message
+                      }
+                      Kwoptarg {
+                        name = rule_token
+                        DString {
+                          nodes = [
+                            String {
+                              val = ""
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                  Begin {
+                    stmts = [
+                      Super {
+                        args = [
+                          LVar {
+                            name = message
+                          }
+                        ]
+                      }
+                      IVarAsgn {
+                        name = @rule_token
+                        LVar {
+                          name = rule_token
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+          Class {
+            Const {
+              NULL
+              name = Matcher
+            }
+            NULL
+            Begin {
+              stmts = [
+                Send {
+                  NULL
+                  method = include
+                  args = [
+                    Const {
+                      Const {
+                        NULL
+                        name = Chalk
+                      }
+                      name = Log
+                    }
+                  ]
+                }
+                ConstAsgn {
+                  NULL
+                  name = MAX_AFFECTED_FILES
+                  Integer {
+                    val = "100"
+                  }
+                }
+                DefMethod {
+                  name = initialize
+                  NULL
+                  Begin {
+                    stmts = [
+                      Masgn {
+                        Mlhs {
+                          exprs = [
+                            IVarLhs {
+                              name = @rules
+                            }
+                            LVarLhs {
+                              name = invalid_rules
+                            }
+                          ]
+                        }
+                        Send {
+                          Send {
+                            Send {
+                              Const {
+                                Const {
+                                  Const {
+                                    Const {
+                                      NULL
+                                      name = Opus
+                                    }
+                                    name = CIBot
+                                  }
+                                  name = Model
+                                }
+                                name = GeraldRule
+                              }
+                              method = query_by
+                              args = [
+                                Symbol {
+                                  val = "deleted_at_is_nil"
+                                }
+                              ]
+                            }
+                            method = load_all
+                            args = [
+                              Hash {
+                                pairs = [
+                                ]
+                              }
+                            ]
+                          }
+                          method = partition
+                          args = [
+                            BlockPass {
+                              Symbol {
+                                val = "valid?"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                      If {
+                        Send {
+                          Send {
+                            LVar {
+                              name = invalid_rules
+                            }
+                            method = empty?
+                            args = [
+                            ]
+                          }
+                          method = !
+                          args = [
+                          ]
+                        }
+                        Begin {
+                          stmts = [
+                            LVarAsgn {
+                              name = invalid_rule_ids
+                              Send {
+                                Send {
+                                  LVar {
+                                    name = invalid_rules
+                                  }
+                                  method = map
+                                  args = [
+                                    BlockPass {
+                                      Symbol {
+                                        val = "token"
+                                      }
+                                    }
+                                  ]
+                                }
+                                method = join
+                                args = [
+                                  DString {
+                                    nodes = [
+                                      String {
+                                        val = ","
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                            Send {
+                              Send {
+                                NULL
+                                method = log
+                                args = [
+                                ]
+                              }
+                              method = warn
+                              args = [
+                                Send {
+                                  DString {
+                                    nodes = [
+                                      String {
+                                        val = "Gerald skipping invalid rules: "
+                                      }
+                                    ]
+                                  }
+                                  method = +
+                                  args = [
+                                    LVar {
+                                      name = invalid_rule_ids
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                        NULL
+                      }
+                    ]
+                  }
+                }
+                DefMethod {
+                  name = match
+                  Args {
+                    args = [
+                      Arg {
+                        name = match_context
+                      }
+                    ]
+                  }
+                  Begin {
+                    stmts = [
+                      If {
+                        Send {
+                          Send {
+                            Send {
+                              Send {
+                                LVar {
+                                  name = match_context
+                                }
+                                method = diff
+                                args = [
+                                ]
+                              }
+                              method = affected_files
+                              args = [
+                              ]
+                            }
+                            method = count
+                            args = [
+                            ]
+                          }
+                          method = >
+                          args = [
+                            Const {
+                              NULL
+                              name = MAX_AFFECTED_FILES
+                            }
+                          ]
+                        }
+                        Begin {
+                          stmts = [
+                            Send {
+                              Send {
+                                NULL
+                                method = log
+                                args = [
+                                ]
+                              }
+                              method = warn
+                              args = [
+                                DString {
+                                  nodes = [
+                                    DString {
+                                      nodes = [
+                                        String {
+                                          val = "Gerald skipping large PR with "
+                                        }
+                                        Begin {
+                                          stmts = [
+                                            Send {
+                                              Send {
+                                                Send {
+                                                  LVar {
+                                                    name = match_context
+                                                  }
+                                                  method = diff
+                                                  args = [
+                                                  ]
+                                                }
+                                                method = affected_files
+                                                args = [
+                                                ]
+                                              }
+                                              method = count
+                                              args = [
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        String {
+                                          val = " affected files"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                            Return {
+                              exprs = [
+                                Array {
+                                  elts = [
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                        NULL
+                      }
+                      LVarAsgn {
+                        name = budget
+                        Send {
+                          Const {
+                            NULL
+                            name = MatchTimeBudget
+                          }
+                          method = new
+                          args = [
+                          ]
+                        }
+                      }
+                      Block {
+                        Send {
+                          IVar {
+                            name = @rules
+                          }
+                          method = select
+                          args = [
+                          ]
+                        }
+                        Args {
+                          args = [
+                            Arg {
+                              name = r
+                            }
+                          ]
+                        }
+                        Block {
+                          Send {
+                            LVar {
+                              name = budget
+                            }
+                            method = time_rule
+                            args = [
+                              LVar {
+                                name = r
+                              }
+                            ]
+                          }
+                          NULL
+                          Send {
+                            LVar {
+                              name = r
+                            }
+                            method = matches?
+                            args = [
+                              LVar {
+                                name = match_context
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+          Class {
+            Const {
+              NULL
+              name = MatchContext
+            }
+            NULL
+            Begin {
+              stmts = [
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "repo"
+                    }
+                  ]
+                }
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "assignee"
+                    }
+                  ]
+                }
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "gh_user"
+                    }
+                  ]
+                }
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "merge_branch"
+                    }
+                  ]
+                }
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "body"
+                    }
+                  ]
+                }
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "title"
+                    }
+                  ]
+                }
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "diff"
+                    }
+                  ]
+                }
+                Send {
+                  NULL
+                  method = attr_reader
+                  args = [
+                    Symbol {
+                      val = "openapi_diff"
+                    }
+                  ]
+                }
+                DefMethod {
+                  name = initialize
+                  Args {
+                    args = [
+                      Arg {
+                        name = repo
+                      }
+                      Arg {
+                        name = assignee
+                      }
+                      Arg {
+                        name = gh_user
+                      }
+                      Arg {
+                        name = merge_branch
+                      }
+                      Arg {
+                        name = body
+                      }
+                      Arg {
+                        name = title
+                      }
+                      Arg {
+                        name = diff
+                      }
+                      Arg {
+                        name = openapi_diff
+                      }
+                    ]
+                  }
+                  Begin {
+                    stmts = [
+                      IVarAsgn {
+                        name = @repo
+                        LVar {
+                          name = repo
+                        }
+                      }
+                      IVarAsgn {
+                        name = @assignee
+                        LVar {
+                          name = assignee
+                        }
+                      }
+                      IVarAsgn {
+                        name = @gh_user
+                        LVar {
+                          name = gh_user
+                        }
+                      }
+                      IVarAsgn {
+                        name = @merge_branch
+                        LVar {
+                          name = merge_branch
+                        }
+                      }
+                      IVarAsgn {
+                        name = @body
+                        LVar {
+                          name = body
+                        }
+                      }
+                      IVarAsgn {
+                        name = @title
+                        LVar {
+                          name = title
+                        }
+                      }
+                      IVarAsgn {
+                        name = @diff
+                        LVar {
+                          name = diff
+                        }
+                      }
+                      IVarAsgn {
+                        name = @openapi_diff
+                        LVar {
+                          name = openapi_diff
+                        }
+                      }
+                    ]
+                  }
+                }
+                DefMethod {
+                  name = user_stripe_suffix?
+                  NULL
+                  Send {
+                    Send {
+                      IVar {
+                        name = @repo
+                      }
+                      method = start_with?
+                      args = [
+                        DString {
+                          nodes = [
+                            String {
+                              val = "stripe-internal/"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                    method = !
+                    args = [
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+          Class {
+            Const {
+              NULL
+              name = MatchTimeBudget
+            }
+            NULL
+            Begin {
+              stmts = [
+                ConstAsgn {
+                  NULL
+                  name = TOTAL_TIME_MS
+                  Integer {
+                    val = "10000"
+                  }
+                }
+                ConstAsgn {
+                  NULL
+                  name = PER_RULE_MS
+                  Integer {
+                    val = "2000"
+                  }
+                }
+                DefMethod {
+                  name = initialize
+                  NULL
+                  IVarAsgn {
+                    name = @start
+                    Send {
+                      Const {
+                        NULL
+                        name = Time
+                      }
+                      method = now
+                      args = [
+                      ]
+                    }
+                  }
+                }
+                DefMethod {
+                  name = check!
+                  NULL
+                  Begin {
+                    stmts = [
+                      LVarAsgn {
+                        name = dur_ms
+                        Send {
+                          Begin {
+                            stmts = [
+                              Send {
+                                Send {
+                                  Const {
+                                    NULL
+                                    name = Time
+                                  }
+                                  method = now
+                                  args = [
+                                  ]
+                                }
+                                method = -
+                                args = [
+                                  IVar {
+                                    name = @start
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                          method = *
+                          args = [
+                            Integer {
+                              val = "1000"
+                            }
+                          ]
+                        }
+                      }
+                      If {
+                        Send {
+                          LVar {
+                            name = dur_ms
+                          }
+                          method = >
+                          args = [
+                            Const {
+                              NULL
+                              name = TOTAL_TIME_MS
+                            }
+                          ]
+                        }
+                        Send {
+                          NULL
+                          method = raise
+                          args = [
+                            Send {
+                              Const {
+                                NULL
+                                name = MatchTimeout
+                              }
+                              method = new
+                              args = [
+                                DString {
+                                  nodes = [
+                                    DString {
+                                      nodes = [
+                                        String {
+                                          val = "Gerald match time budged exceeded "
+                                        }
+                                        Begin {
+                                          stmts = [
+                                            Const {
+                                              NULL
+                                              name = TOTAL_TIME_MS
+                                            }
+                                          ]
+                                        }
+                                        String {
+                                          val = "ms"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                        NULL
+                      }
+                    ]
+                  }
+                }
+                DefMethod {
+                  name = time_rule
+                  Args {
+                    args = [
+                      Arg {
+                        name = rule
+                      }
+                    ]
+                  }
+                  Begin {
+                    stmts = [
+                      LVarAsgn {
+                        name = rule_start
+                        Send {
+                          Const {
+                            NULL
+                            name = Time
+                          }
+                          method = now
+                          args = [
+                          ]
+                        }
+                      }
+                      LVarAsgn {
+                        name = res
+                        Yield {
+                          exprs = [
+                          ]
+                        }
+                      }
+                      LVarAsgn {
+                        name = dur_ms
+                        Send {
+                          Begin {
+                            stmts = [
+                              Send {
+                                Send {
+                                  Const {
+                                    NULL
+                                    name = Time
+                                  }
+                                  method = now
+                                  args = [
+                                  ]
+                                }
+                                method = -
+                                args = [
+                                  LVar {
+                                    name = rule_start
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                          method = *
+                          args = [
+                            Integer {
+                              val = "1000"
+                            }
+                          ]
+                        }
+                      }
+                      If {
+                        Send {
+                          LVar {
+                            name = dur_ms
+                          }
+                          method = >
+                          args = [
+                            Const {
+                              NULL
+                              name = PER_RULE_MS
+                            }
+                          ]
+                        }
+                        Send {
+                          NULL
+                          method = raise
+                          args = [
+                            Send {
+                              Const {
+                                NULL
+                                name = MatchTimeout
+                              }
+                              method = new
+                              args = [
+                                DString {
+                                  nodes = [
+                                    DString {
+                                      nodes = [
+                                        String {
+                                          val = "Gerald rule '"
+                                        }
+                                        Begin {
+                                          stmts = [
+                                            Send {
+                                              LVar {
+                                                name = rule
+                                              }
+                                              method = token
+                                              args = [
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        String {
+                                          val = "' exceeded per-rule time budget actual="
+                                        }
+                                        Begin {
+                                          stmts = [
+                                            Send {
+                                              LVar {
+                                                name = dur_ms
+                                              }
+                                              method = to_i
+                                              args = [
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        String {
+                                          val = "ms budget="
+                                        }
+                                        Begin {
+                                          stmts = [
+                                            Const {
+                                              NULL
+                                              name = PER_RULE_MS
+                                            }
+                                          ]
+                                        }
+                                        String {
+                                          val = "ms"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                                Hash {
+                                  pairs = [
+                                    Pair {
+                                      Symbol {
+                                        val = "rule_token"
+                                      }
+                                      Send {
+                                        LVar {
+                                          name = rule
+                                        }
+                                        method = token
+                                        args = [
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                        NULL
+                      }
+                      Send {
+                        NULL
+                        method = check!
+                        args = [
+                        ]
+                      }
+                      LVar {
+                        name = res
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+          Class {
+            Const {
+              NULL
+              name = Diff
+            }
+            NULL
+            Begin {
+              stmts = [
+                DefMethod {
+                  name = initialize
+                  Args {
+                    args = [
+                      Arg {
+                        name = raw_diff
+                      }
+                    ]
+                  }
+                  Begin {
+                    stmts = [
+                      IVarAsgn {
+                        name = @raw
+                        LVar {
+                          name = raw_diff
+                        }
+                      }
+                      IVarAsgn {
+                        name = @parsed
+                        Send {
+                          NULL
+                          method = parse
+                          args = [
+                            LVar {
+                              name = raw_diff
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+                DefMethod {
+                  name = affected_files
+                  NULL
+                  Send {
+                    Send {
+                      Send {
+                        NULL
+                        method = added_files
+                        args = [
+                        ]
+                      }
+                      method = +
+                      args = [
+                        Send {
+                          NULL
+                          method = deleted_files
+                          args = [
+                          ]
+                        }
+                      ]
+                    }
+                    method = +
+                    args = [
+                      Send {
+                        NULL
+                        method = changed_files
+                        args = [
+                        ]
+                      }
+                    ]
+                  }
+                }
+                DefMethod {
+                  name = added_files
+                  NULL
+                  Block {
+                    Send {
+                      Block {
+                        Send {
+                          IVar {
+                            name = @parsed
+                          }
+                          method = select
+                          args = [
+                          ]
+                        }
+                        Args {
+                          args = [
+                            Arg {
+                              name = part
+                            }
+                          ]
+                        }
+                        Send {
+                          Send {
+                            LVar {
+                              name = part
+                            }
+                            method = []
+                            args = [
+                              Symbol {
+                                val = "a_name"
+                              }
+                            ]
+                          }
+                          method = ==
+                          args = [
+                            DString {
+                              nodes = [
+                                String {
+                                  val = "/dev/null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                      method = map
+                      args = [
+                      ]
+                    }
+                    Args {
+                      args = [
+                        Arg {
+                          name = part
+                        }
+                      ]
+                    }
+                    Send {
+                      LVar {
+                        name = part
+                      }
+                      method = []
+                      args = [
+                        Symbol {
+                          val = "b_name"
+                        }
+                      ]
+                    }
+                  }
+                }
+                DefMethod {
+                  name = deleted_files
+                  NULL
+                  Block {
+                    Send {
+                      Block {
+                        Send {
+                          IVar {
+                            name = @parsed
+                          }
+                          method = select
+                          args = [
+                          ]
+                        }
+                        Args {
+                          args = [
+                            Arg {
+                              name = part
+                            }
+                          ]
+                        }
+                        Send {
+                          Send {
+                            LVar {
+                              name = part
+                            }
+                            method = []
+                            args = [
+                              Symbol {
+                                val = "b_name"
+                              }
+                            ]
+                          }
+                          method = ==
+                          args = [
+                            DString {
+                              nodes = [
+                                String {
+                                  val = "/dev/null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                      method = map
+                      args = [
+                      ]
+                    }
+                    Args {
+                      args = [
+                        Arg {
+                          name = part
+                        }
+                      ]
+                    }
+                    Send {
+                      LVar {
+                        name = part
+                      }
+                      method = []
+                      args = [
+                        Symbol {
+                          val = "a_name"
+                        }
+                      ]
+                    }
+                  }
+                }
+                DefMethod {
+                  name = changed_files
+                  NULL
+                  Block {
+                    Send {
+                      Block {
+                        Send {
+                          IVar {
+                            name = @parsed
+                          }
+                          method = select
+                          args = [
+                          ]
+                        }
+                        Args {
+                          args = [
+                            Arg {
+                              name = part
+                            }
+                          ]
+                        }
+                        Send {
+                          Send {
+                            LVar {
+                              name = part
+                            }
+                            method = []
+                            args = [
+                              Symbol {
+                                val = "a_name"
+                              }
+                            ]
+                          }
+                          method = ==
+                          args = [
+                            Send {
+                              LVar {
+                                name = part
+                              }
+                              method = []
+                              args = [
+                                Symbol {
+                                  val = "b_name"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                      method = map
+                      args = [
+                      ]
+                    }
+                    Args {
+                      args = [
+                        Arg {
+                          name = part
+                        }
+                      ]
+                    }
+                    Send {
+                      LVar {
+                        name = part
+                      }
+                      method = []
+                      args = [
+                        Symbol {
+                          val = "b_name"
+                        }
+                      ]
+                    }
+                  }
+                }
+                DefMethod {
+                  name = added_lines
+                  NULL
+                  Send {
+                    Block {
+                      Send {
+                        IVar {
+                          name = @parsed
+                        }
+                        method = map
+                        args = [
+                        ]
+                      }
+                      Args {
+                        args = [
+                          Arg {
+                            name = part
+                          }
+                        ]
+                      }
+                      Send {
+                        LVar {
+                          name = part
+                        }
+                        method = []
+                        args = [
+                          Symbol {
+                            val = "added_lines"
+                          }
+                        ]
+                      }
+                    }
+                    method = flatten
+                    args = [
+                    ]
+                  }
+                }
+                DefMethod {
+                  name = removed_lines
+                  NULL
+                  Send {
+                    Block {
+                      Send {
+                        IVar {
+                          name = @parsed
+                        }
+                        method = map
+                        args = [
+                        ]
+                      }
+                      Args {
+                        args = [
+                          Arg {
+                            name = part
+                          }
+                        ]
+                      }
+                      Send {
+                        LVar {
+                          name = part
+                        }
+                        method = []
+                        args = [
+                          Symbol {
+                            val = "removed_lines"
+                          }
+                        ]
+                      }
+                    }
+                    method = flatten
+                    args = [
+                    ]
+                  }
+                }
+                DefMethod {
+                  name = changed_lines
+                  NULL
+                  Send {
+                    Send {
+                      NULL
+                      method = added_lines
+                      args = [
+                      ]
+                    }
+                    method = +
+                    args = [
+                      Send {
+                        NULL
+                        method = removed_lines
+                        args = [
+                        ]
+                      }
+                    ]
+                  }
+                }
+                DefMethod {
+                  name = changed_openapi?
+                  NULL
+                  Send {
+                    Send {
+                      NULL
+                      method = changed_files
+                      args = [
+                      ]
+                    }
+                    method = include?
+                    args = [
+                      Const {
+                        Const {
+                          Const {
+                            Const {
+                              Const {
+                                NULL
+                                name = Opus
+                              }
+                              name = CIBot
+                            }
+                            name = Actions
+                          }
+                          name = OpenAPI
+                        }
+                        name = SPEC_PATH
+                      }
+                    ]
+                  }
+                }
+                Send {
+                  NULL
+                  method = private
+                  args = [
+                    DefMethod {
+                      name = parse
+                      Args {
+                        args = [
+                          Arg {
+                            name = diff
+                          }
+                        ]
+                      }
+                      Begin {
+                        stmts = [
+                          LVarAsgn {
+                            name = parts
+                            Send {
+                              Send {
+                                LVar {
+                                  name = diff
+                                }
+                                method = split
+                                args = [
+                                  Regexp {
+                                    regex = [
+                                      String {
+                                        val = "^diff [^\n]*\n"
+                                      }
+                                    ]
+                                    Regopt {
+                                      opts = "m"
+                                    }
+                                  }
+                                ]
+                              }
+                              method = []
+                              args = [
+                                IRange {
+                                  Integer {
+                                    val = "1"
+                                  }
+                                  Integer {
+                                    val = "-1"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                          OrAsgn {
+                            LVarLhs {
+                              name = parts
+                            }
+                            Array {
+                              elts = [
+                              ]
+                            }
+                          }
+                          Send {
+                            Block {
+                              Send {
+                                LVar {
+                                  name = parts
+                                }
+                                method = map
+                                args = [
+                                ]
+                              }
+                              Args {
+                                args = [
+                                  Arg {
+                                    name = part
+                                  }
+                                ]
+                              }
+                              Begin {
+                                stmts = [
+                                  LVarAsgn {
+                                    name = lines
+                                    Send {
+                                      LVar {
+                                        name = part
+                                      }
+                                      method = split
+                                      args = [
+                                        DString {
+                                          nodes = [
+                                            String {
+                                              val = "
+"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                  LVarAsgn {
+                                    name = a_name
+                                    LVarAsgn {
+                                      name = b_name
+                                      Nil {
+                                      }
+                                    }
+                                  }
+                                  LVarAsgn {
+                                    name = added_lines
+                                    Array {
+                                      elts = [
+                                      ]
+                                    }
+                                  }
+                                  LVarAsgn {
+                                    name = removed_lines
+                                    Array {
+                                      elts = [
+                                      ]
+                                    }
+                                  }
+                                  Block {
+                                    Send {
+                                      LVar {
+                                        name = lines
+                                      }
+                                      method = each
+                                      args = [
+                                      ]
+                                    }
+                                    Args {
+                                      args = [
+                                        Arg {
+                                          name = line
+                                        }
+                                      ]
+                                    }
+                                    If {
+                                      Send {
+                                        LVar {
+                                          name = line
+                                        }
+                                        method = start_with?
+                                        args = [
+                                          DString {
+                                            nodes = [
+                                              String {
+                                                val = "index "
+                                              }
+                                            ]
+                                          }
+                                          DString {
+                                            nodes = [
+                                              String {
+                                                val = "@@"
+                                              }
+                                            ]
+                                          }
+                                          DString {
+                                            nodes = [
+                                              String {
+                                                val = "new file mode"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                      Next {
+                                        exprs = [
+                                        ]
+                                      }
+                                      If {
+                                        Send {
+                                          LVar {
+                                            name = line
+                                          }
+                                          method = start_with?
+                                          args = [
+                                            DString {
+                                              nodes = [
+                                                String {
+                                                  val = "---"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                        Begin {
+                                          stmts = [
+                                            LVarAsgn {
+                                              name = a_name
+                                              Send {
+                                                LVar {
+                                                  name = line
+                                                }
+                                                method = []
+                                                args = [
+                                                  IRange {
+                                                    Integer {
+                                                      val = "4"
+                                                    }
+                                                    Integer {
+                                                      val = "-1"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                            If {
+                                              And {
+                                                NULL
+                                                NULL
+                                              }
+                                              LVarAsgn {
+                                                name = a_name
+                                                Send {
+                                                  LVar {
+                                                    name = a_name
+                                                  }
+                                                  method = []
+                                                  args = [
+                                                    IRange {
+                                                      Integer {
+                                                        val = "2"
+                                                      }
+                                                      Integer {
+                                                        val = "-1"
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                              NULL
+                                            }
+                                          ]
+                                        }
+                                        If {
+                                          Send {
+                                            LVar {
+                                              name = line
+                                            }
+                                            method = start_with?
+                                            args = [
+                                              DString {
+                                                nodes = [
+                                                  String {
+                                                    val = "+++"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                          Begin {
+                                            stmts = [
+                                              LVarAsgn {
+                                                name = b_name
+                                                Send {
+                                                  LVar {
+                                                    name = line
+                                                  }
+                                                  method = []
+                                                  args = [
+                                                    IRange {
+                                                      Integer {
+                                                        val = "4"
+                                                      }
+                                                      Integer {
+                                                        val = "-1"
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              }
+                                              If {
+                                                And {
+                                                  NULL
+                                                  NULL
+                                                }
+                                                LVarAsgn {
+                                                  name = b_name
+                                                  Send {
+                                                    LVar {
+                                                      name = b_name
+                                                    }
+                                                    method = []
+                                                    args = [
+                                                      IRange {
+                                                        Integer {
+                                                          val = "2"
+                                                        }
+                                                        Integer {
+                                                          val = "-1"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                }
+                                                NULL
+                                              }
+                                            ]
+                                          }
+                                          If {
+                                            Send {
+                                              LVar {
+                                                name = line
+                                              }
+                                              method = start_with?
+                                              args = [
+                                                DString {
+                                                  nodes = [
+                                                    String {
+                                                      val = "+"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                            Send {
+                                              LVar {
+                                                name = added_lines
+                                              }
+                                              method = <<
+                                              args = [
+                                                Send {
+                                                  LVar {
+                                                    name = line
+                                                  }
+                                                  method = []
+                                                  args = [
+                                                    IRange {
+                                                      Integer {
+                                                        val = "1"
+                                                      }
+                                                      Integer {
+                                                        val = "-1"
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                            If {
+                                              Send {
+                                                LVar {
+                                                  name = line
+                                                }
+                                                method = start_with?
+                                                args = [
+                                                  DString {
+                                                    nodes = [
+                                                      String {
+                                                        val = "-"
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                              Send {
+                                                LVar {
+                                                  name = removed_lines
+                                                }
+                                                method = <<
+                                                args = [
+                                                  Send {
+                                                    LVar {
+                                                      name = line
+                                                    }
+                                                    method = []
+                                                    args = [
+                                                      IRange {
+                                                        Integer {
+                                                          val = "1"
+                                                        }
+                                                        Integer {
+                                                          val = "-1"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                              NULL
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                  If {
+                                    Send {
+                                      LVar {
+                                        name = a_name
+                                      }
+                                      method = nil?
+                                      args = [
+                                      ]
+                                    }
+                                    Next {
+                                      exprs = [
+                                      ]
+                                    }
+                                    NULL
+                                  }
+                                  Hash {
+                                    pairs = [
+                                      Pair {
+                                        Symbol {
+                                          val = "a_name"
+                                        }
+                                        LVar {
+                                          name = a_name
+                                        }
+                                      }
+                                      Pair {
+                                        Symbol {
+                                          val = "b_name"
+                                        }
+                                        LVar {
+                                          name = b_name
+                                        }
+                                      }
+                                      Pair {
+                                        Symbol {
+                                          val = "added_lines"
+                                        }
+                                        LVar {
+                                          name = added_lines
+                                        }
+                                      }
+                                      Pair {
+                                        Symbol {
+                                          val = "removed_lines"
+                                        }
+                                        LVar {
+                                          name = removed_lines
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                            method = compact
+                            args = [
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
