@@ -1,7 +1,7 @@
 #include "Context.h"
 #include "Hashing.h"
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
 SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
@@ -260,4 +260,4 @@ SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
 }
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer

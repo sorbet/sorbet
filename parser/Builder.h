@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace sruby {
+namespace ruby_typer {
 namespace parser {
 
 class Result;
@@ -13,7 +13,7 @@ class Node;
 
 class Builder {
 public:
-    Builder(sruby::ast::ContextBase &, Result &);
+    Builder(ruby_typer::ast::ContextBase &, Result &);
     ~Builder();
 
     static ruby_parser::builder interface;
@@ -26,4 +26,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 }; // namespace parser
-}; // namespace sruby
+}; // namespace ruby_typer

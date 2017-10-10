@@ -7,7 +7,7 @@
 #include "spdlog/spdlog.h"
 #include <vector>
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 class Name;
 class NameRef;
@@ -118,6 +118,6 @@ public:
 };
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer
 
 #endif // SRUBY_CONTEXT_H

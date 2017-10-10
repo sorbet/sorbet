@@ -1,10 +1,10 @@
 #include "Names.h"
 #include "Hashing.h"
 #include <numeric> // accumulate
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 
-sruby::ast::Name::~Name() noexcept {
+ruby_typer::ast::Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE)
         unique.~UniqueName();
 }
@@ -30,4 +30,4 @@ unsigned int Name::hash(ContextBase &ctx) const {
 }
 
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer

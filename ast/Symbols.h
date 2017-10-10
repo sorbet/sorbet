@@ -5,7 +5,7 @@
 #include "common/common.h"
 #include <vector>
 
-namespace sruby {
+namespace ruby_typer {
 namespace ast {
 class SymbolInfo;
 class ContextBase;
@@ -176,6 +176,6 @@ private:
 
 CheckSize(SymbolInfo, 64, 8);
 } // namespace ast
-} // namespace sruby
+} // namespace ruby_typer
 
 #endif // SRUBY_SYMBOLS_H
