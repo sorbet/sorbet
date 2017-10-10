@@ -76,6 +76,9 @@ struct UTF8Desc {
         return os;
     }
 
+    UTF8Desc(const char *from, int to) : from(from), to(to) {}
+    UTF8Desc(const std::string &str) : from(str.c_str()), to(str.size()) {}
+
     inline bool operator==(const UTF8Desc &rhs) const {
         return (to == rhs.to) && ((from == rhs.from) || !strncmp(from, rhs.from, to));
     }

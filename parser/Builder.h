@@ -1,23 +1,24 @@
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/driver.hh"
 
+#include "ast/Context.h"
+
 #include <memory>
 
 namespace sruby {
 namespace parser {
 
-class builderImpl;
 class Result;
-using ast = const void *;
+class Node;
 
 class Builder {
 public:
-    Builder(Result &);
+    Builder(sruby::ast::ContextBase &, Result &);
     ~Builder();
 
     static ruby_parser::builder interface;
 
-    ast build(ruby_parser::base_driver *driver);
+    std::unique_ptr<Node> build(ruby_parser::base_driver *driver);
 
     class Impl;
 

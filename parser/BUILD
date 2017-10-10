@@ -1,13 +1,30 @@
 cc_library(
     name = "parser",
     srcs = [
-        "builder.cc",
-        "builder.h",
-        "parser.cc",
-    ],
+        "Builder.h",
+        "Node_gen.h",
+    ] + glob(["*.cc"]),
     hdrs = [
-        "parser.h",
+        "Node.h",
+        "Result.h",
     ],
     visibility = ["//visibility:public"],
-    deps = ["@parser//:parser"],
+    deps = [
+        "//ast",
+        "@parser//:parser",
+    ],
+)
+
+cc_binary(
+    name = "generate_ast",
+    srcs = [
+        "tools/generate_ast.cc",
+    ],
+)
+
+genrule(
+    name = "generate_node_h",
+    outs = ["Node_gen.h"],
+    cmd = "$(location :generate_ast) > $@",
+    tools = [":generate_ast"],
 )

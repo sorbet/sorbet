@@ -8,5 +8,8 @@ compilation_database(
         "//test:hello-test",
         "//main:hello-world",
         "//main:hello-greet",
+        "//ast",
+        "//common",
+        "//parser",
     ],
 )
