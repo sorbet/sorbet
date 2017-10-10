@@ -31,14 +31,13 @@ static UTF8Desc nil_DESC{(char *)nil_str, (int)std::strlen(nil_str)};
 
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     max_name_count = 262144;   // 6MB
-    max_symbol_count = 524288; // 32MB
+    unsigned int max_symbol_count = 524288; // 32MB
 
-    symbols = (SymbolInfo *)malloc(max_symbol_count * sizeof(SymbolInfo));
     names = (Name *)malloc(max_name_count * sizeof(Name));
+    symbols.reserve(max_symbol_count);
     names_by_hash_size = 2 * max_name_count;
     names_by_hash = (std::pair<unsigned int, unsigned int> *)calloc(names_by_hash_size,
                                                                     sizeof(std::pair<unsigned int, unsigned int>));
-    symbols_used = 0;
     DEBUG_ONLY(Error::check((names_by_hash_size & (names_by_hash_size - 1)) == 0));
 
     names_used = 1; // first name is used in hashes to indicate empty cell
@@ -63,22 +62,16 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
      * 3: <root>;
      * 4: nil;
      */
-    Error::check(symbols_used == 5);
+    Error::check(symbols.size() == 5);
 }
 
 ContextBase::~ContextBase() {
     for (int i = 0; i < names_used; i++) {
         names[i].~Name();
     }
-    for (int i = 0; i < symbols_used; i++) {
-        symbols[i].~SymbolInfo();
-    }
-
     free(names);
     free(names_by_hash);
-    free(symbols);
     names = nullptr;
-    symbols = nullptr;
     names_by_hash = nullptr;
 }
 
@@ -98,15 +91,11 @@ SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
         from++;
     }
 
-    bool changed = false;
+    bool reallocate = symbols.size() == symbols.capacity();
 
-    if (symbols_used == max_symbol_count) {
-        expandSymbols();
-        changed = true;
-    }
-    auto ret = SymbolRef(symbols_used++);
+    auto ret = SymbolRef(symbols.size());
+    symbols.emplace_back();
     auto &info = ret.info(*this, true);
-    new (&info) SymbolInfo();
     info.name = name;
     info.flags = 0;
 
@@ -118,7 +107,7 @@ SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
         info.setField();
 
     info.argumentsOrMixins.swap(args);
-    if (!changed)
+    if (!reallocate)
         ownerScope.members.push_back(std::make_pair(name, ret));
     else
         owner.info(*this, true).members.push_back(std::make_pair(name, ret));
@@ -215,15 +204,6 @@ void ContextBase::expandNames() {
     names_by_hash = names_by_hash2;
 }
 
-void ContextBase::expandSymbols() {
-    Error::check(max_symbol_count == symbols_used);
-    auto oldSymbols = symbols;
-    max_symbol_count = max_symbol_count * 2;
-    symbols = (SymbolInfo *)malloc(sizeof(SymbolInfo) * max_symbol_count);
-    memcpy(symbols, oldSymbols, sizeof(SymbolInfo) * symbols_used);
-    free(oldSymbols);
-}
-
 NameRef ContextBase::enterNameUnique(NameRef separator, u2 num, NameKind kind, NameRef original) {
     Error::check(separator.id() < names_used);
     const auto hs = _hash_mix_unique(separator.id(), UNIQUE, num, original.id());
@@ -278,12 +258,9 @@ SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
     if (current.exists()) {
         return current; // return fast
     }
-
-    if (symbols_used == max_symbol_count)
-        expandSymbols();
-    current = symbols_used++;
+    current = symbols.size();
+    symbols.emplace_back();
     auto &info = current.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
-    new (&info) SymbolInfo();
     info.name = name;
     info.owner = defn_root();
     info.flags = 0;

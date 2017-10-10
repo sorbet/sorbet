@@ -80,9 +80,7 @@ private:
     std::vector<std::unique_ptr<char>> strings;
     u2 strings_last_page_used = STRINGS_PAGE_SIZE;
     Name *names;
-    SymbolInfo *symbols;
-    unsigned int max_symbol_count;
-    unsigned int symbols_used;
+    std::vector<SymbolInfo> symbols;
     unsigned int max_zips_count;
     unsigned int zips_used;
     unsigned int max_files_count;
