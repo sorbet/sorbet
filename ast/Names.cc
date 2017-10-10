@@ -1,4 +1,5 @@
 #include "Names.h"
+#include "Context.h"
 #include "Hashing.h"
 #include <numeric> // accumulate
 namespace ruby_typer {
@@ -27,6 +28,20 @@ unsigned int Name::hash(ContextBase &ctx) const {
         }
             DEBUG_ONLY(default : Error::raise("Unknown name kind?", kind);)
     }
+}
+
+std::string Name::toString(ContextBase &ctx) const {
+    if (kind == UTF8) {
+        return raw.utf8.toString();
+    } else {
+        Error::notImplemented();
+    }
+}
+
+Name &NameRef::name(ContextBase &ctx) const {
+    DEBUG_ONLY(Error::check(_id < ctx.names.size()));
+    DEBUG_ONLY(Error::check(exists()));
+    return ctx.names[_id];
 }
 
 } // namespace ast

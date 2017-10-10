@@ -23,11 +23,6 @@ TEST(HelloTest, GetSpdlog) {
     console->info("Welcome to spdlog!");
 }
 
-TEST(HelloTest, SimpleParse) {
-    ruby_typer::ast::ContextBase ctx(*console);
-    ruby_typer::parser::parse_ruby(ctx, "def hello_world; p :hello; end");
-}
-
 TEST(HelloTest, GetCXXopts) {
     cxxopts::Options options("MyProgram", "One line description of MyProgram");
 }

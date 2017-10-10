@@ -11,5 +11,6 @@ compilation_database(
         "//ast",
         "//common",
         "//parser",
+        "//parser:parser_test",
     ],
 )
