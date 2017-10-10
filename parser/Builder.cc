@@ -2,6 +2,9 @@
 #include "parser/Node.h"
 
 #include "ruby_parser/builder.hh"
+#include "ruby_parser/diagnostic.hh"
+
+#include <typeinfo>
 
 using ruby_parser::foreign_ptr;
 using ruby_parser::node_list;
@@ -29,6 +32,7 @@ public:
     Impl(ContextBase &ctx, Result &r) : ctx_(ctx), result_(r) {}
 
     ContextBase &ctx_;
+    ruby_parser::base_driver *driver_;
     Result &result_;
 
     Loc tok_loc(const token *tok) {
@@ -70,9 +74,43 @@ public:
         return collection_loc(nullptr, elts, nullptr);
     }
 
+    unique_ptr<Node> transform_condition(unique_ptr<Node> cond) {
+        if (Begin *b = dynamic_cast<Begin *>(cond.get())) {
+            if (b->stmts.size() == 1)
+                b->stmts[0] = transform_condition(move(b->stmts[0]));
+        } else if (And *a = dynamic_cast<And *>(cond.get())) {
+            a->left = transform_condition(move(a->right));
+            a->left = transform_condition(move(a->right));
+        } else if (Or *o = dynamic_cast<Or *>(cond.get())) {
+            o->left = transform_condition(move(o->right));
+            o->left = transform_condition(move(o->right));
+        } else if (IRange *ir = dynamic_cast<IRange *>(cond.get())) {
+            return make_unique<IFlipflop>(ir->loc, transform_condition(move(ir->from)),
+                                          transform_condition(move(ir->to)));
+        } else if (ERange *er = dynamic_cast<ERange *>(cond.get())) {
+            return make_unique<EFlipflop>(er->loc, transform_condition(move(er->from)),
+                                          transform_condition(move(er->to)));
+        } else if (Regexp *re = dynamic_cast<Regexp *>(cond.get())) {
+            return make_unique<MatchCurLine>(re->loc, move(cond));
+        }
+        return cond;
+    }
+
+    void error(ruby_parser::dclass err, Loc loc) {
+        driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.begin_pos, loc.end_pos, "");
+    }
+
+    /* Begin callback methods */
+
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (Ident *id = dynamic_cast<Ident *>(node.get())) {
-            BUILDER_UNIMPLEMENTED();
+            auto &name = id->name.name(ctx_);
+            DEBUG_ONLY(Error::check(name.kind == sruby::ast::UTF8));
+            if (driver_->lex.is_declared(name.toString(ctx_))) {
+                return make_unique<LVar>(node->loc, id->name);
+            } else {
+                return make_unique<Send>(node->loc, nullptr, id->name, vector<unique_ptr<Node>>());
+            }
         }
         return node;
     }
@@ -82,7 +120,7 @@ public:
     }
 
     unique_ptr<Node> arg(const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Arg>(tok_loc(name), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> args(const token *begin, vector<unique_ptr<Node>> args, const token *end, bool check_args) {
@@ -92,19 +130,47 @@ public:
     }
 
     unique_ptr<Node> array(const token *begin, vector<unique_ptr<Node>> elements, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Array>(collection_loc(begin, elements, end), move(elements));
     }
 
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
+        Loc loc = loc_join(lhs->loc, rhs->loc);
+
+        if (Send *s = dynamic_cast<Send *>(lhs.get())) {
+            s->args.push_back(move(rhs));
+            return make_unique<Send>(loc, move(s->receiver), s->method, move(s->args));
+        } else if (CSend *s = dynamic_cast<CSend *>(lhs.get())) {
+            s->args.push_back(move(rhs));
+            return make_unique<CSend>(loc, move(s->receiver), s->method, move(s->args));
+        } else if (LVarLhs *l = dynamic_cast<LVarLhs *>(lhs.get())) {
+            return make_unique<LVarAsgn>(loc, l->name, move(rhs));
+        } else if (ConstLhs *c = dynamic_cast<ConstLhs *>(lhs.get())) {
+            return make_unique<ConstAsgn>(loc, move(c->scope), c->name, move(rhs));
+        } else if (CVarLhs *c = dynamic_cast<CVarLhs *>(lhs.get())) {
+            return make_unique<CVarAsgn>(loc, c->name, move(rhs));
+        } else if (IVarLhs *c = dynamic_cast<IVarLhs *>(lhs.get())) {
+            return make_unique<IVarAsgn>(loc, c->name, move(rhs));
+        } else if (GVarLhs *c = dynamic_cast<GVarLhs *>(lhs.get())) {
+            return make_unique<GVarAsgn>(loc, c->name, move(rhs));
+        }
         BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
+        if (Ident *id = dynamic_cast<Ident *>(node.get())) {
+            auto &name = id->name.name(ctx_);
+            driver_->lex.declare(name.toString(ctx_));
+            return make_unique<LVarLhs>(id->loc, id->name);
+        } else if (IVar *iv = dynamic_cast<IVar *>(node.get())) {
+            return make_unique<IVarLhs>(iv->loc, iv->name);
+        } else if (Const *c = dynamic_cast<Const *>(node.get())) {
+            return make_unique<ConstLhs>(c->loc, move(c->scope), move(c->name));
+        }
         BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> associate(const token *begin, vector<unique_ptr<Node>> pairs, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Hash>(collection_loc(begin, pairs, end), move(pairs));
     }
 
     unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
@@ -116,7 +182,22 @@ public:
     }
 
     unique_ptr<Node> begin(const token *begin, unique_ptr<Node> body, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc;
+        if (begin != nullptr)
+            loc = loc_join(tok_loc(begin), tok_loc(end));
+        else
+            loc = body->loc;
+
+        if (body == nullptr) {
+            return make_unique<Begin>(loc, vector<unique_ptr<Node>>());
+        }
+        if (Begin *b = dynamic_cast<Begin *>(body.get()))
+            return body;
+        if (Mlhs *m = dynamic_cast<Mlhs *>(body.get()))
+            return body;
+        vector<unique_ptr<Node>> stmts;
+        stmts.push_back(move(body));
+        return make_unique<Begin>(loc, move(stmts));
     }
 
     unique_ptr<Node> begin_body(unique_ptr<Node> body, vector<unique_ptr<Node>> rescue_bodies, const token *else_tok,
@@ -157,16 +238,49 @@ public:
     }
 
     unique_ptr<Node> binary_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(receiver->loc, arg->loc);
+
+        vector<unique_ptr<Node>> args;
+        args.push_back(move(arg));
+
+        return make_unique<Send>(loc, move(receiver), ctx_.enterNameUTF8(oper->string()), move(args));
     }
 
     unique_ptr<Node> block(unique_ptr<Node> method_call, const token *begin, unique_ptr<Node> args,
                            unique_ptr<Node> body, const token *end) {
+        if (Yield *y = dynamic_cast<Yield *>(method_call.get())) {
+            error(ruby_parser::dclass::BlockGivenToYield, y->loc);
+            return make_unique<Yield>(y->loc, vector<unique_ptr<Node>>());
+        }
+
+        vector<unique_ptr<Node>> *callargs = nullptr;
+        if (Send *s = dynamic_cast<Send *>(method_call.get())) {
+            callargs = &s->args;
+        }
+        if (CSend *s = dynamic_cast<CSend *>(method_call.get())) {
+            callargs = &s->args;
+        }
+        if (Super *s = dynamic_cast<Super *>(method_call.get())) {
+            callargs = &s->args;
+        }
+        if (callargs != nullptr && callargs->size() > 0) {
+            if (BlockPass *bp = dynamic_cast<BlockPass *>(callargs->back().get()))
+                error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
+        }
+
+        Node &n = *method_call;
+        const std::type_info &ty = typeid(n);
+        if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper) ||
+            ty == typeid(Lambda)) {
+            return make_unique<Block>(loc_join(method_call->loc, tok_loc(end)), move(method_call), move(args),
+                                      move(body));
+        }
+
         BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> block_pass(const token *amper, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<BlockPass>(loc_join(tok_loc(amper), arg->loc), move(arg));
     }
 
     unique_ptr<Node> blockarg(const token *amper, const token *name) {
@@ -236,11 +350,27 @@ public:
     unique_ptr<Node> condition(const token *cond_tok, unique_ptr<Node> cond, const token *then,
                                unique_ptr<Node> if_true, const token *else_, unique_ptr<Node> if_false,
                                const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(cond_tok), cond->loc);
+        if (then != nullptr)
+            loc = loc_join(loc, tok_loc(then));
+        if (if_true != nullptr)
+            loc = loc_join(loc, if_true->loc);
+        if (else_ != nullptr)
+            loc = loc_join(loc, tok_loc(else_));
+        if (if_false != nullptr)
+            loc = loc_join(loc, if_false->loc);
+        if (end != nullptr)
+            loc = loc_join(loc, tok_loc(end));
+        return make_unique<If>(loc, transform_condition(move(cond)), move(if_true), move(if_false));
     }
 
     unique_ptr<Node> condition_mod(unique_ptr<Node> if_true, unique_ptr<Node> if_false, unique_ptr<Node> cond) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = cond->loc;
+        if (if_true != nullptr)
+            loc = loc_join(loc, if_true->loc);
+        else
+            loc = loc_join(loc, if_false->loc);
+        return make_unique<If>(loc, transform_condition(move(cond)), move(if_true), move(if_false));
     }
 
     unique_ptr<Node> const_(const token *name) {
@@ -265,7 +395,9 @@ public:
     }
 
     unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedent_level) {
-        BUILDER_UNIMPLEMENTED();
+        // TODO: implement dedenting for dedent_level != 0
+        Error::check(dedent_level == 0);
+        return node;
     }
 
     unique_ptr<Node> def_class(const token *class_, unique_ptr<Node> name, const token *lt_,
@@ -301,7 +433,7 @@ public:
     }
 
     unique_ptr<Node> file_literal(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<FileLiteral>(tok_loc(tok));
     }
 
     unique_ptr<Node> float_(const token *tok) {
@@ -327,7 +459,8 @@ public:
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
                            const token *rbrack) {
-        BUILDER_UNIMPLEMENTED();
+        auto meth = ctx_.enterNameUTF8((std::string) "[]");
+        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver), meth, move(indexes));
     }
 
     unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
@@ -336,11 +469,11 @@ public:
     }
 
     unique_ptr<Node> integer(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Integer>(tok_loc(tok), tok->string());
     }
 
     unique_ptr<Node> ivar(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<IVar>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
@@ -354,30 +487,39 @@ public:
 
     unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                   const token *rparen) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Next>(loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen)), move(args));
     }
 
     unique_ptr<Node> keyword_redo(const token *keyword) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Redo>(tok_loc(keyword));
     }
 
     unique_ptr<Node> keyword_retry(const token *keyword) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Retry>(tok_loc(keyword));
     }
 
     unique_ptr<Node> keyword_return(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                     const token *rparen) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
+        return make_unique<Return>(loc, move(args));
     }
 
     unique_ptr<Node> keyword_super(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                    const token *rparen) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = tok_loc(keyword);
+        Loc argloc = collection_loc(lparen, args, rparen);
+        if (!argloc.is_none())
+            loc = loc_join(loc, argloc);
+        return make_unique<Super>(loc, move(args));
     }
 
     unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                    const token *rparen) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
+        if (args.size() > 0 && dynamic_cast<BlockPass *>(args.back().get()) != nullptr) {
+            error(ruby_parser::dclass::BlockGivenToYield, loc);
+        }
+        return make_unique<Yield>(loc, move(args));
     }
 
     unique_ptr<Node> keyword_zsuper(const token *keyword) {
@@ -389,7 +531,8 @@ public:
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Kwoptarg>(loc_join(tok_loc(name), value->loc), ctx_.enterNameUTF8(name->string()),
+                                     move(value));
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
@@ -405,11 +548,11 @@ public:
     }
 
     unique_ptr<Node> logical_and(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<And>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
     }
 
     unique_ptr<Node> logical_or(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Or>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
     }
 
     unique_ptr<Node> loop_until(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
@@ -435,11 +578,11 @@ public:
     }
 
     unique_ptr<Node> multi_assign(unique_ptr<Node> mlhs, unique_ptr<Node> rhs) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Masgn>(loc_join(mlhs->loc, rhs->loc), move(mlhs), move(rhs));
     }
 
     unique_ptr<Node> multi_lhs(const token *begin, vector<unique_ptr<Node>> items, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Mlhs>(collection_loc(begin, items, end), move(items));
     }
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
@@ -447,15 +590,33 @@ public:
     }
 
     unique_ptr<Node> negate(const token *uminus, unique_ptr<Node> numeric) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(uminus), numeric->loc);
+        if (Integer *i = dynamic_cast<Integer *>(numeric.get()))
+            return make_unique<Integer>(loc, "-" + i->val);
+        if (Float *i = dynamic_cast<Float *>(numeric.get()))
+            return make_unique<Float>(loc, "-" + i->val);
+        Error::raise("unexpected numeric type");
     }
 
     unique_ptr<Node> nil(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Nil>(tok_loc(tok));
     }
 
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        const char *meth = "!";
+        auto bang = ctx_.enterNameUTF8(UTF8Desc{meth, (int)std::strlen(meth)});
+        if (receiver != nullptr) {
+            Loc loc;
+            if (end != nullptr)
+                loc = loc_join(tok_loc(not_), tok_loc(end));
+            else
+                loc = loc_join(tok_loc(not_), receiver->loc);
+            return make_unique<Send>(loc, move(receiver), bang, vector<unique_ptr<Node>>());
+        }
+
+        DEBUG_ONLY(Error::check(begin != nullptr && end != nullptr));
+        auto body = make_unique<Begin>(loc_join(tok_loc(begin), tok_loc(end)), vector<unique_ptr<Node>>());
+        return make_unique<Send>(loc_join(tok_loc(not_), body->loc), move(body), bang, vector<unique_ptr<Node>>());
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
@@ -463,7 +624,15 @@ public:
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        BUILDER_UNIMPLEMENTED();
+        if (dynamic_cast<Backref *>(lhs.get()) != nullptr || dynamic_cast<NthRef *>(lhs.get()) != nullptr)
+            error(ruby_parser::dclass::BackrefAssignment, lhs->loc);
+
+        if (op->string() == "&&")
+            return make_unique<AndAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
+        if (op->string() == "||")
+            return make_unique<OrAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
+        return make_unique<OpAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), ctx_.enterNameUTF8(op->string()),
+                                   move(rhs));
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
@@ -475,7 +644,8 @@ public:
     }
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Pair>(loc_join(tok_loc(key), value->loc), make_unique<Symbol>(tok_loc(key), key->string()),
+                                 move(value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
@@ -492,7 +662,7 @@ public:
     }
 
     unique_ptr<Node> procarg0(unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return arg;
     }
 
     unique_ptr<Node> prototype(unique_ptr<Node> genargs, unique_ptr<Node> args, unique_ptr<Node> return_type) {
@@ -500,11 +670,11 @@ public:
     }
 
     unique_ptr<Node> range_exclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<ERange>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
     }
 
     unique_ptr<Node> range_inclusive(unique_ptr<Node> lhs, const token *oper, unique_ptr<Node> rhs) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<IRange>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
     }
 
     unique_ptr<Node> rational(const token *tok) {
@@ -517,11 +687,12 @@ public:
 
     unique_ptr<Node> regexp_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
                                     unique_ptr<Node> options) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(loc_join(tok_loc(begin), tok_loc(end)), maybe_loc(options));
+        return make_unique<Regexp>(loc, move(parts), move(options));
     }
 
     unique_ptr<Node> regexp_options(const token *regopt) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Regopt>(tok_loc(regopt), regopt->string());
     }
 
     unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> exc_list, const token *assoc,
@@ -546,15 +717,16 @@ public:
     }
 
     unique_ptr<Node> string(const token *string_) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<String>(tok_loc(string_), string_->string());
     }
 
     unique_ptr<Node> string_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = collection_loc(begin, parts, end);
+        return make_unique<DString>(loc, move(parts));
     }
 
     unique_ptr<Node> string_internal(const token *string_) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<String>(tok_loc(string_), string_->string());
     }
 
     unique_ptr<Node> symbol(const token *symbol) {
@@ -721,8 +893,11 @@ unique_ptr<Node> cast_node(foreign_ptr node) {
 }
 
 vector<unique_ptr<Node>> convert_node_list(const node_list *cargs) {
-    node_list *args = const_cast<node_list *>(cargs);
     vector<unique_ptr<Node>> out;
+    if (cargs == nullptr)
+        return out;
+
+    node_list *args = const_cast<node_list *>(cargs);
     for (int i = 0; i < args->size(); i++) {
         out.push_back(cast_node(args->at(i)));
     }
@@ -1317,6 +1492,7 @@ namespace sruby {
 namespace parser {
 
 unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver) {
+    impl_->driver_ = driver;
     return cast_node(driver->parse(impl_.get()));
 }
 
