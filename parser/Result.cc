@@ -1,7 +1,5 @@
-#include "parser/Result.h"
 #include "parser/Builder.h"
-#include "parser/Node.h"
-
+#include "parser/parser.h"
 #include "ruby_parser/driver.hh"
 
 namespace ruby_typer {

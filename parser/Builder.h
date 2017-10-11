@@ -1,3 +1,6 @@
+#ifndef SRUBY_PARSER_BUILDER_H
+#define SRUBY_PARSER_BUILDER_H
+
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/driver.hh"
 
@@ -27,3 +30,5 @@ private:
 };
 }; // namespace parser
 }; // namespace ruby_typer
+
+#endif

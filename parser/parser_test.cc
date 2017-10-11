@@ -1,7 +1,6 @@
-#include "ast/Trees.h"
+#include "ast/ast.h"
 #include "common/common.h"
-#include "parser/Node.h"
-#include "parser/Result.h"
+#include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <fstream>

@@ -1,3 +1,6 @@
+#ifndef SRUBY_PARSER_RESULT_H
+#define SRUBY_PARSER_RESULT_H
+
 #include <memory>
 #include <string>
 
@@ -39,3 +42,5 @@ private:
 Result parse_ruby(ruby_typer::ast::ContextBase &ctx, const std::string &src);
 } // namespace parser
 }; // namespace ruby_typer
+
+#endif

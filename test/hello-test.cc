@@ -1,9 +1,7 @@
-#include "../ast/Context.h"
-#include "ast/TreeMap.h"
-#include "ast/Trees.h"
+#include "ast/ast.h"
 #include "common/common.h"
 #include "main/hello-greet.h"
-#include "parser/Result.h"
+#include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <cxxopts.hpp>
