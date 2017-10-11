@@ -35,72 +35,75 @@ NodeDef nodes[] = {
     {"Args", vector<FieldDef>({{"args", NodeVec}})},
     // inline array with elements
     {"Array", vector<FieldDef>({{"elts", NodeVec}})},
-    //  ??? not used in gerald.rb
+    // Used for $`, $& etc magic regex globals
     {"Backref", vector<FieldDef>({{"name", Name}})},
-    //  top level, bodies of classes, modules and methods
+    // wraps any set of statements implicitly grouped by syntax (e.g. def, class bodies)
     {"Begin", vector<FieldDef>({{"stmts", NodeVec}})},
-    //  Node is always a send, which is previous call, args is arguments of body
+    // Node is always a send, which is previous call, args is arguments of body
     {"Block", vector<FieldDef>({{"send", Node}, {"args", Node}, {"body", Node}})},
-    //  ??? not used in gerald.rb
+    // Wraps a `&foo` argument in an argument list
     {"Blockarg", vector<FieldDef>({{"name", Name}})},
     //  e.g. map(&:token)
     {"BlockPass", vector<FieldDef>({{"block", Node}})},
+    // `break` keyword
     {"Break", vector<FieldDef>({{"exprs", NodeVec}})},
-    // not used in gerald.rb
+    // case statement; whens is a list of (when cond expr) nodes
     {"Case", vector<FieldDef>({{"condition", Node}, {"whens", NodeVec}, {"else_", Node}})},
-    // not used in gerald.rb
+    // appears in the `scope` of a `::Constant` `Const` node
     {"Cbase", vector<FieldDef>()},
-    // superclass is Null if emtpy superclass, body is Begin
+    // superclass is Null if empty superclass, body is Begin if multiple statements
     {"Class", vector<FieldDef>({{"name", Node}, {"superclass", Node}, {"body", Node}})},
     {"Complex", vector<FieldDef>({{"value", String}})},
     // Used as path to Select, scope is Null for end of specified list
     {"Const", vector<FieldDef>({{"scope", Node}, {"name", Name}})},
-    // ???, not used in gerald.rb
+    // Used inside a `Mlhs` if a constant is part of multiple assignment
     {"ConstLhs", vector<FieldDef>({{"scope", Node}, {"name", Name}})},
-    // ???, not used in gerald.rb
+    // Constant assignment
     {"ConstAsgn", vector<FieldDef>({{"scope", Node}, {"name", Name}, {"expr", Node}})},
-    // ???, not used in gerald.rb
+    // &. "conditional-send"/safe-navigation operator
     {"CSend", vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}})},
-    // ???, not used in gerald.rb
+    // @@foo class variable
     {"CVar", vector<FieldDef>({{"name", Name}})},
-    // ???, not used in gerald.rb
-    {"CVarLhs", vector<FieldDef>({{"name", Name}})},
-    // ???, not used in gerald.rb
+    // @@foo class variable assignment
     {"CVarAsgn", vector<FieldDef>({{"name", Name}, {"expr", Node}})},
+    // @@foo class variable in the lhs of an Mlhs
+    {"CVarLhs", vector<FieldDef>({{"name", Name}})},
     // args may be NULL, body does not have to be a block.
     {"DefMethod", vector<FieldDef>({{"name", Name}, {"args", Node}, {"body", Node}})},
-    // ???, not used in gerald.rb
+    // defined?() built-in pseudo-function
     {"Defined", vector<FieldDef>({{"value", Node}})},
-    // ???, not used in gerald.rb
+    // def <expr>.name singleton-class method def
     {"DefS", vector<FieldDef>({{"name", Name}, {"singleton", Node}, {"args", Node}, {"body", Node}})},
     // string interpolation, all nodes are concatenated in a single string
     {"DString", vector<FieldDef>({{"nodes", NodeVec}})},
-    // ???, not used in gerald.rb
+    // symbol interoplation, :"foo#{bar}"
     {"DSymbol", vector<FieldDef>({{"nodes", NodeVec}})},
-    // ???, not used in gerald.rb
+    // ... flip-flop operator inside a conditional
     {"EFlipflop", vector<FieldDef>({{"left", Node}, {"right", Node}})},
+    // __ENCODING__
     {"EncodingLiteral", vector<FieldDef>()},
     {"Ensure", vector<FieldDef>({{"body", Node}, {"ensure", Node}})},
     {"ERange", vector<FieldDef>({{"from", Node}, {"to", Node}})},
     {"False", vector<FieldDef>()},
     // __FILE__
     {"FileLiteral", vector<FieldDef>()},
-    // ???, not used in gerald.rb
+    // For loop
     {"For", vector<FieldDef>({{"vars", Node}, {"expr", Node}, {"body", Node}})},
     {"Float", vector<FieldDef>({{"val", String}})},
-    // ???, not used in gerald.rb
+    // Global variable ($foo)
     {"GVar", vector<FieldDef>({{"name", Name}})},
-    // ???, not used in gerald.rb
+    // Global variable assignment
     {"GVarAsgn", vector<FieldDef>({{"name", Name}, {"expr", Node}})},
-    // ???, not used in gerald.rb
+    // Global variable in the lhs of an mlhs
     {"GVarLhs", vector<FieldDef>({{"name", Name}})},
     // entries are `Pair`s,
     {"Hash", vector<FieldDef>({{"pairs", NodeVec}})},
+    // Bareword identifier (foo); I *think* should only exist transiently while parsing
     {"Ident", vector<FieldDef>({{"name", Name}})},
     {"If", vector<FieldDef>({{"condition", Node}, {"then_", Node}, {"else_", Node}})},
-    // ???, not used in gerald.rb
+    // .. flip-flop operator inside a conditional
     {"IFlipflop", vector<FieldDef>({{"left", Node}, {"right", Node}})},
-    // inclusive range. Could the subnodes be non-integers?
+    // inclusive range. Subnodes need not be integers nor literals
     {"IRange", vector<FieldDef>({{"from", Node}, {"to", Node}})},
     {"Integer", vector<FieldDef>({{"val", String}})},
     // instance variable reference
@@ -109,13 +112,15 @@ NodeDef nodes[] = {
     {"IVarAsgn", vector<FieldDef>({{"name", Name}, {"expr", Node}})},
     // @rules in `@rules, invalid_rules = ...`
     {"IVarLhs", vector<FieldDef>({{"name", Name}})},
-    // ???, not used in gerald.rb
+    // Required keyword argument inside an (args)
     {"Kwarg", vector<FieldDef>({{"name", Name}})},
-    // ???, not used in gerald.rb
+    // explicit `begin` keyword
     {"Kwbegin", vector<FieldDef>({{"vars", NodeVec}})},
     // optional arg with default value provided
     {"Kwoptarg", vector<FieldDef>({{"name", Name}, {"default_", Node}})},
+    // **kwargs arg
     {"Kwrestarg", vector<FieldDef>({{"name", Name}})},
+    // **foo splat
     {"Kwsplat", vector<FieldDef>({{"expr", Node}})},
     {"Lambda", vector<FieldDef>()},
     {"LineLiteral", vector<FieldDef>()},
@@ -124,61 +129,67 @@ NodeDef nodes[] = {
     {"LVarAsgn", vector<FieldDef>({{"name", Name}, {"expr", Node}})},
     // invalid_rules in `@rules, invalid_rules = ...`
     {"LVarLhs", vector<FieldDef>({{"name", Name}})},
-    // not used in gerald.rb
+    // [regex literal] =~ value; autovivifies local vars from match grops
     {"MatchAsgn", vector<FieldDef>({{"regex", Node}, {"expr", Node}})},
+    // /foo/ regex literal inside an `if`; implicitly matches against $_
     {"MatchCurLine", vector<FieldDef>({{"cond", Node}})},
     // multiple left hand sides: `@rules, invalid_rules = ...`
     {"Masgn", vector<FieldDef>({{"lhs", Node}, {"rhs", Node}})},
     // multiple left hand sides: `@rules, invalid_rules = ...`
     {"Mlhs", vector<FieldDef>({{"exprs", NodeVec}})},
     {"Module", vector<FieldDef>({{"name", Node}, {"body", Node}})},
-    // next. ??? arguments ???
+    // next(args); `next` is like `return` but for blocks
     {"Next", vector<FieldDef>({{"exprs", NodeVec}})},
     {"Nil", vector<FieldDef>()},
-    // not used in gerald.rb
+    // $1, $2, etc
     {"NthRef", vector<FieldDef>({{"ref", Uint}})},
-    // not used in gerald.rb, seems to be  ${op}=
+    // foo += 6 for += and other ops
     {"OpAsgn", vector<FieldDef>({{"left", Node}, {"op", Name}, {"right", Node}})},
-    // not used in gerald.rb, seems to be ||
+    // logical or
     {"Or", vector<FieldDef>({{"left", Node}, {"right", Node}})},
-    // not used in gerald.rb, seems to be ||=
+    // foo ||= bar
     {"OrAsgn", vector<FieldDef>({{"left", Node}, {"right", Node}})},
-    // not used in gerald.rb
+    // optional argument inside an (args) list
     {"Optarg", vector<FieldDef>({{"name", Name}, {"default_", Node}})},
     // entries of Hash
     {"Pair", vector<FieldDef>({{"key", Node}, {"value", Node}})},
-    // not used in gerald.rb
+    // END {...}
     {"Postexe", vector<FieldDef>({{"body", Node}})},
-    // not used in gerald.rb
+    // BEGIN{...}
     {"Preexe", vector<FieldDef>({{"body", Node}})},
-    // not used in gerald.rb
+    // wraps the sole argument of a 1-arg block for some reason
     {"Procarg0", vector<FieldDef>({{"arg", Node}})},
-    // not used in gerald.rb
+    //
     {"Rational", vector<FieldDef>({{"val", String}})},
-    // not used in gerald.rb
+    // `redo` keyword
     {"Redo", vector<FieldDef>()},
-    // regular expression. ??? why multiple ???
+    // regular expression; string interpolation in body is flattened into the array
     {"Regexp", vector<FieldDef>({{"regex", NodeVec}, {"opts", Node}})},
     // opts of regexp
     {"Regopt", vector<FieldDef>({{"opts", String}})},
-    // not used in gerald.rb
+    // body of a rescue
     {"Resbody", vector<FieldDef>({{"exception", Node}, {"var", Node}, {"body", Node}})},
-    // not used in gerald.rb
+    // begin; ..; rescue; end; rescue is an array of Resbody
     {"Rescue", vector<FieldDef>({{"body", Node}, {"rescue", NodeVec}, {"else_", Node}})},
-    // not used in gerald.rb, likely repeated arg
+    // *arg argument inside an (args)
     {"Restarg", vector<FieldDef>({{"name", Name}})},
+    // `retry` keyword
     {"Retry", vector<FieldDef>()},
+    // `return` keyword
     {"Return", vector<FieldDef>({{"exprs", NodeVec}})},
-    // not used in gerald.rb, likely self class
+    // class << expr; body; end;
     {"SClass", vector<FieldDef>({{"expr", Node}, {"body", Node}})},
     {"Self", vector<FieldDef>()},
     // invocation
     {"Send", vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}})},
     // not used in gerald.rb ???
     {"ShadowArg", vector<FieldDef>({{"name", Name}})},
+    // *foo splat operator
     {"Splat", vector<FieldDef>({{"var", Node}})},
+    // string literal
     {"String", vector<FieldDef>({{"val", String}})},
     {"Super", vector<FieldDef>({{"args", NodeVec}})},
+    // symbol literal
     {"Symbol", vector<FieldDef>({{"val", String}})},
     {"True", vector<FieldDef>()},
     {"Undef", vector<FieldDef>({{"exprs", NodeVec}})},
