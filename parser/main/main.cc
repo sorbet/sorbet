@@ -12,6 +12,18 @@
 namespace spd = spdlog;
 using namespace std;
 
+void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const std::string &src) {
+    auto r = ruby_typer::parser::parse_ruby(ctx, src);
+    auto ast = r.ast();
+    if (ast) {
+        if (!opts["q"].as<bool>()) {
+            cout << ast->toString(ctx, 0) << endl;
+        }
+    } else {
+        cout << " got null" << endl;
+    }
+}
+
 int main(int argc, char **argv) {
     std::vector<std::string> files;
     //    spd::set_async_mode(1024);
@@ -25,6 +37,7 @@ int main(int argc, char **argv) {
     options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
     options.add_options()("q,quiet", "Be quiet");
+    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
     options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
     options.parse_positional("files");
 
@@ -35,7 +48,7 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    if (options["h"].as<bool>() || files.empty()) {
+    if (options["h"].as<bool>() || (options.count("e") == 0 && files.empty())) {
         console->info("{}\n", options.help());
         return 0;
     }
@@ -56,22 +69,20 @@ int main(int argc, char **argv) {
     ruby_typer::ast::ContextBase ctx(*console);
 
     clock_t begin = clock();
-    for (auto &fileName : files) {
-
-        auto r = ruby_typer::parser::parse_ruby(ctx, ruby_typer::File::read(fileName.c_str()));
-        auto ast = r.ast();
-        if (ast) {
-            if (!options["q"].as<bool>()) {
-                cout << ast->toString(ctx, 0);
-            }
-        } else {
-            cout << " got null" << endl;
+    int count = 0;
+    if (options.count("e")) {
+        count = 1;
+        parse_and_print(ctx, options, options["e"].as<string>());
+    } else {
+        count = files.size();
+        for (auto &fileName : files) {
+            parse_and_print(ctx, options, ruby_typer::File::read(fileName.c_str()));
         }
     }
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
 
-    console_err->info("Total {} files. Done in {} ms, nt size: {}, st size: {}\n", files.size(), elapsed_secs, -1, -1);
+    console_err->info("Total {} files. Done in {} ms, nt size: {}, st size: {}\n", count, elapsed_secs, -1, -1);
 
     return 0;
 }
