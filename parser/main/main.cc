@@ -15,6 +15,17 @@ using namespace std;
 void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const std::string &src) {
     auto r = ruby_typer::parser::parse_ruby(ctx, src);
     auto ast = r.ast();
+    if (r.diagnostics().size() > 0) {
+        vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
+        for (auto &diag : r.diagnostics()) {
+            counts[static_cast<int>(diag.level())]++;
+        }
+        cerr << "parser reported " << r.diagnostics().size() << " errors:" << endl;
+        cerr << " NOTE: " << counts[static_cast<int>(ruby_parser::dlevel::NOTE)] << endl;
+        cerr << " WARNING: " << counts[static_cast<int>(ruby_parser::dlevel::WARNING)] << endl;
+        cerr << " ERROR: " << counts[static_cast<int>(ruby_parser::dlevel::ERROR)] << endl;
+        cerr << " FATAL: " << counts[static_cast<int>(ruby_parser::dlevel::FATAL)] << endl;
+    }
     if (ast) {
         if (!opts["q"].as<bool>()) {
             cout << ast->toString(ctx, 0) << endl;
