@@ -145,6 +145,11 @@ template <typename... TArgs>[[noreturn]] void Error::raise(const TArgs &... args
 
     throw SRubyException(message.str(), stackTrace.str());
 }
+
+class File {
+public:
+    static std::string read(const char *filename);
+};
 }
 
 #endif

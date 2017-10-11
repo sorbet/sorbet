@@ -4,7 +4,6 @@
 #include "spdlog/spdlog.h"
 #include <ctime>
 #include <cxxopts.hpp>
-#include <fstream>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -58,16 +57,8 @@ int main(int argc, char **argv) {
 
     clock_t begin = clock();
     for (auto &fileName : files) {
-        std::ifstream fin(fileName);
-        // Determine the file length
-        ruby_typer::Error::check(fin.good());
-        std::string src;
-        fin.seekg(0, std::ios::end);
-        src.reserve(fin.tellg());
-        fin.seekg(0, std::ios::beg);
 
-        src.assign((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
-        auto r = ruby_typer::parser::parse_ruby(ctx, src);
+        auto r = ruby_typer::parser::parse_ruby(ctx, ruby_typer::File::read(fileName.c_str()));
         auto ast = r.ast();
         if (ast) {
             if (!options["q"].as<bool>()) {
