@@ -10,6 +10,13 @@ You can read more in our [design doc](https://hackpad.corp.stripe.com/Design-Doc
 We build using [bazel](https://bazel.build/); Run `./bazel test
 //test/...` to build and run the tests.
 
+# Code convenctions
+
+ - use smart pointers for storage, references for arguments; 
+ - no c-style allocators. Use vectors instead.
+ - undefined behaviour is prohibited. All builds have [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) enabled;
+ - all memory accesses are checked by [ASan](https://github.com/google/sanitizers/wiki/AddressSanitizer).
+
 ## Dependencies
 
 - [ragel](http://www.colm.net/open-source/ragel/)
