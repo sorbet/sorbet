@@ -1,4 +1,4 @@
-#include "parser/Node.h"
+#include "parser/parser.h"
 
 namespace ruby_typer {
 namespace parser {

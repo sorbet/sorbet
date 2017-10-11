@@ -1,4 +1,4 @@
-#include "ast/Names.h"
+#include "ast/ast.h"
 #include "common/common.h"
 
 #include <memory>

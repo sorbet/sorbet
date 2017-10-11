@@ -1,5 +1,5 @@
 #include "parser/Builder.h"
-#include "parser/Node.h"
+#include "parser/parser.h"
 
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/diagnostic.hh"
