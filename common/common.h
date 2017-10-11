@@ -14,9 +14,9 @@ constexpr bool debug_mode = false;
 constexpr bool debug_mode = true;
 #endif
 
-#define DEBUG_ONLY(X)                                                                                                  \
-    if (debug_mode) {                                                                                                  \
-        X;                                                                                                             \
+#define DEBUG_ONLY(X) \
+    if (debug_mode) { \
+        X;            \
     }
 
 template <typename ToCheck, std::size_t ExpectedSize, std::size_t RealSize = sizeof(ToCheck)> struct check_size {
@@ -36,10 +36,10 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
 #define UNUSED(x) x
 #endif
 
-#define CheckSize(T, ExpSize, ExpAlign)                                                                                \
-    inline void _##T##is##ExpSize##_bytes_long_() {                                                                    \
-        ruby_typer::check_size<T, ExpSize> UNUSED(_##T##is##ExpSize##_bytes_long);                                          \
-        ruby_typer::check_align<T, ExpAlign> UNUSED(_##T##is##ExpAlign##_bytes_aligned);                                    \
+#define CheckSize(T, ExpSize, ExpAlign)                                                  \
+    inline void _##T##is##ExpSize##_bytes_long_() {                                      \
+        ruby_typer::check_size<T, ExpSize> UNUSED(_##T##is##ExpSize##_bytes_long);       \
+        ruby_typer::check_align<T, ExpAlign> UNUSED(_##T##is##ExpAlign##_bytes_aligned); \
     }
 
 /**
