@@ -5,6 +5,7 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <functional>
 
 namespace ruby_typer {
 
