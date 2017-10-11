@@ -74,7 +74,7 @@ NodeDef nodes[] = {
     // defined?() built-in pseudo-function
     {"Defined", vector<FieldDef>({{"value", Node}})},
     // def <expr>.name singleton-class method def
-    {"DefS", vector<FieldDef>({{"name", Name}, {"singleton", Node}, {"args", Node}, {"body", Node}})},
+    {"DefS", vector<FieldDef>({{"singleton", Node}, {"name", Name}, {"args", Node}, {"body", Node}})},
     // string interpolation, all nodes are concatenated in a single string
     {"DString", vector<FieldDef>({{"nodes", NodeVec}})},
     // symbol interoplation, :"foo#{bar}"
@@ -196,7 +196,7 @@ NodeDef nodes[] = {
     {"Undef", vector<FieldDef>({{"exprs", NodeVec}})},
     {"Until", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
     {"UntilPost", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
-    {"When", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
+    {"When", vector<FieldDef>({{"patterns", NodeVec}, {"body", Node}})},
     {"While", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
     // is there a non-syntactic difference in behaviour between post and non-post while?
     {"WhilePost", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
