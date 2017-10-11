@@ -4,6 +4,8 @@
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <fstream>
+#include <string>
+#include <vector>
 
 namespace spd = spdlog;
 
@@ -19,9 +21,18 @@ TEST(ParserTest, FixtureParse) {
     auto console = spd::stdout_color_mt("fixtures");
     ruby_typer::ast::ContextBase ctx(*console);
 
-    auto src = ruby_typer::File::read("parser/fixtures/gerald.rb");
-    auto exp = ruby_typer::File::read("parser/fixtures/gerald.rb.exp");
+    for (auto &path : std::vector<std::string>({
+             "parser/fixtures/gerald.rb",
+             "parser/fixtures/misc.rb",
+         })) {
+        auto expPath = path + ".exp";
 
-    auto got = ruby_typer::parser::parse_ruby(ctx, src);
-    ASSERT_EQ(got.ast()->toString(ctx), exp);
+        SCOPED_TRACE(path);
+
+        auto src = ruby_typer::File::read(path.c_str());
+        auto exp = ruby_typer::File::read(expPath.c_str());
+        auto got = ruby_typer::parser::parse_ruby(ctx, src);
+        EXPECT_EQ(0, got.diagnostics().size());
+        EXPECT_EQ(exp, got.ast()->toString(ctx) + "\n");
+    }
 }
