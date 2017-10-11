@@ -16,25 +16,16 @@ using namespace std;
 void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &src) {
     auto r = ruby_typer::parser::parse_ruby(ctx, src);
     auto ast = r.ast();
-    if (r.diagnostics().size() > 0) {
-        vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
-        for (auto &diag : r.diagnostics()) {
-            counts[static_cast<int>(diag.level())]++;
-        }
-        cerr << "parser reported " << r.diagnostics().size() << " errors:" << endl;
-        cerr << " NOTE: " << counts[static_cast<int>(ruby_parser::dlevel::NOTE)] << endl;
-        cerr << " WARNING: " << counts[static_cast<int>(ruby_parser::dlevel::WARNING)] << endl;
-        cerr << " ERROR: " << counts[static_cast<int>(ruby_parser::dlevel::ERROR)] << endl;
-        cerr << " FATAL: " << counts[static_cast<int>(ruby_parser::dlevel::FATAL)] << endl;
-    }
-    if (ast) {
-        ruby_typer::ast::Context context(ctx, ctx.defn_root());
-        auto des = ruby_typer::ast::desugar::node2Tree(context, ast);
-        if (!opts["q"].as<bool>()) {
-            cout << des->toString(ctx, 0) << endl;
-        }
-    } else {
+    if (!ast) {
         cout << " got null" << endl;
+        return;
+    }
+
+    ruby_typer::ast::Context context(ctx, ctx.defn_root());
+    auto tree = ruby_typer::ast::desugar::node2Tree(context, ast);
+    namer::Namer::run(ctx, std::move(tree));
+    if (!opts["q"].as<bool>()) {
+        cout << des->toString(ctx, 0) << endl;
     }
 }
 
@@ -47,7 +38,7 @@ int main(int argc, char **argv) {
     shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
     shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
 
-    cxxopts::Options options("parse_ruby", "Parse ruby code and print it");
+    cxxopts::Options options("namer", "Parse ruby code and print the names");
     options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
     options.add_options()("q,quiet", "Be quiet");

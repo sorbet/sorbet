@@ -97,8 +97,17 @@ public:
         return SymbolRef(9);
     }
 
+    static constexpr SymbolRef defn_object() {
+        return SymbolRef(10);
+    }
+
+    static constexpr SymbolRef defn_junk() {
+        return SymbolRef(11);
+    }
+
+    // Keep as last and update to match the last entry
     static constexpr SymbolRef defn_last_synthetic_sym() {
-        return SymbolRef(9);
+        return defn_junk();
     }
 
 private:

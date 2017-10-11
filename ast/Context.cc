@@ -84,6 +84,12 @@ static UTF8Desc todo_gvar_DESC{(char *)todo_gvar_str, (int)strlen(todo_gvar_str)
 static const char *todo_lvar_str = "<todo lvar sym>";
 static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)strlen(todo_lvar_str)};
 
+static const char *object_str = "Object";
+static UTF8Desc object_DESC{(char *)object_str, (int)std::strlen(object_str)};
+
+static const char *junk_str = "<<JUNK>>";
+static UTF8Desc junk_DESC{(char *)junk_str, (int)std::strlen(junk_str)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -134,6 +140,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     SymbolRef ivar_id = synthesizeClass(todo_ivar_DESC);
     SymbolRef gvar_id = synthesizeClass(todo_gvar_DESC);
     SymbolRef cvar_id = synthesizeClass(todo_cvar_DESC);
+    SymbolRef object_id = synthesizeClass(object_DESC);
+    SymbolRef junk_id = synthesizeClass(junk_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -145,6 +153,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     Error::check(ivar_id == defn_ivar_todo());
     Error::check(gvar_id == defn_gvar_todo());
     Error::check(cvar_id == defn_cvar_todo());
+    Error::check(object_id == defn_object());
+    Error::check(junk_id == defn_junk());
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
@@ -155,6 +165,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
      * 7: <todo ivar>
      * 8: <todo gvar>
      * 9: <todo cvar>
+     * 10: Object;
+     * 11: <<JUNK>>;
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }
@@ -367,6 +379,14 @@ SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef
     auto tempName = this->freshNameUnique(kind, name);
     vector<SymbolRef> empty;
     return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
+}
+
+unsigned int ContextBase::symbolsUsed() {
+    return symbols.size();
+}
+
+unsigned int ContextBase::namesUsed() {
+    return names.size();
 }
 
 } // namespace ast

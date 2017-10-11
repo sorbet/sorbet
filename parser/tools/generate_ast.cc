@@ -276,7 +276,7 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
     out << "    return \"" << node.name << "\";" << endl;
     out << "  };" << endl << endl;
 
-    out << "  std::string " << node.name << "::toString(ast::ContextBase &ctx, int tabs) { " << endl
+    out << "  std::string " << node.name << "::toString(ast::ContextBase &ctx, int tabs) {" << endl
         << "    std::stringstream buf;" << endl;
     out << "    buf << \"" << node.name << " {\" << std::endl;" << endl;
     // Generate fields
