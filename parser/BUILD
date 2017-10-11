@@ -6,14 +6,14 @@ cc_library(
         "Builder.cc",
         "Builder.h",
         "Node.cc",
+        "Node.h",
         "Node_gen.cc",
         "Node_gen.h",
         "Result.cc",
+        "Result.h",
     ],
     hdrs = [
-        "Node.h",
-        "Result.h",
-        "parser.h"
+        "parser.h",
     ],
     deps = [
         "//ast",
