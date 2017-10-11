@@ -1,7 +1,7 @@
 Begin {
   stmts = [
     Send {
-      NULL
+      receiver = NULL
       method = require_relative
       args = [
         DString {
@@ -14,9 +14,9 @@ Begin {
       ]
     }
     Send {
-      Const {
-        Const {
-          NULL
+      receiver = Const {
+        scope = Const {
+          scope = NULL
           name = Opus
         }
         name = AutogenLoader
@@ -28,31 +28,31 @@ Begin {
       ]
     }
     Module {
-      Const {
-        Const {
-          Const {
-            NULL
+      name = Const {
+        scope = Const {
+          scope = Const {
+            scope = NULL
             name = Opus
           }
           name = CIBot
         }
         name = Gerald
       }
-      Begin {
+      body = Begin {
         stmts = [
           Class {
-            Const {
-              NULL
+            name = Const {
+              scope = NULL
               name = MatchTimeout
             }
-            Const {
-              NULL
+            superclass = Const {
+              scope = NULL
               name = StandardError
             }
-            Begin {
+            body = Begin {
               stmts = [
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -62,14 +62,14 @@ Begin {
                 }
                 DefMethod {
                   name = initialize
-                  Args {
+                  args = Args {
                     args = [
                       Arg {
                         name = message
                       }
                       Kwoptarg {
                         name = rule_token
-                        DString {
+                        default_ = DString {
                           nodes = [
                             String {
                               val = ""
@@ -79,7 +79,7 @@ Begin {
                       }
                     ]
                   }
-                  Begin {
+                  body = Begin {
                     stmts = [
                       Super {
                         args = [
@@ -90,7 +90,7 @@ Begin {
                       }
                       IVarAsgn {
                         name = @rule_token
-                        LVar {
+                        expr = LVar {
                           name = rule_token
                         }
                       }
@@ -101,20 +101,20 @@ Begin {
             }
           }
           Class {
-            Const {
-              NULL
+            name = Const {
+              scope = NULL
               name = Matcher
             }
-            NULL
-            Begin {
+            superclass = NULL
+            body = Begin {
               stmts = [
                 Send {
-                  NULL
+                  receiver = NULL
                   method = include
                   args = [
                     Const {
-                      Const {
-                        NULL
+                      scope = Const {
+                        scope = NULL
                         name = Chalk
                       }
                       name = Log
@@ -122,19 +122,19 @@ Begin {
                   ]
                 }
                 ConstAsgn {
-                  NULL
+                  scope = NULL
                   name = MAX_AFFECTED_FILES
-                  Integer {
+                  expr = Integer {
                     val = "100"
                   }
                 }
                 DefMethod {
                   name = initialize
-                  NULL
-                  Begin {
+                  args = NULL
+                  body = Begin {
                     stmts = [
                       Masgn {
-                        Mlhs {
+                        lhs = Mlhs {
                           exprs = [
                             IVarLhs {
                               name = @rules
@@ -144,14 +144,14 @@ Begin {
                             }
                           ]
                         }
-                        Send {
-                          Send {
-                            Send {
-                              Const {
-                                Const {
-                                  Const {
-                                    Const {
-                                      NULL
+                        rhs = Send {
+                          receiver = Send {
+                            receiver = Send {
+                              receiver = Const {
+                                scope = Const {
+                                  scope = Const {
+                                    scope = Const {
+                                      scope = NULL
                                       name = Opus
                                     }
                                     name = CIBot
@@ -178,7 +178,7 @@ Begin {
                           method = partition
                           args = [
                             BlockPass {
-                              Symbol {
+                              block = Symbol {
                                 val = "valid?"
                               }
                             }
@@ -186,9 +186,9 @@ Begin {
                         }
                       }
                       If {
-                        Send {
-                          Send {
-                            LVar {
+                        condition = Send {
+                          receiver = Send {
+                            receiver = LVar {
                               name = invalid_rules
                             }
                             method = empty?
@@ -199,19 +199,19 @@ Begin {
                           args = [
                           ]
                         }
-                        Begin {
+                        then_ = Begin {
                           stmts = [
                             LVarAsgn {
                               name = invalid_rule_ids
-                              Send {
-                                Send {
-                                  LVar {
+                              expr = Send {
+                                receiver = Send {
+                                  receiver = LVar {
                                     name = invalid_rules
                                   }
                                   method = map
                                   args = [
                                     BlockPass {
-                                      Symbol {
+                                      block = Symbol {
                                         val = "token"
                                       }
                                     }
@@ -230,8 +230,8 @@ Begin {
                               }
                             }
                             Send {
-                              Send {
-                                NULL
+                              receiver = Send {
+                                receiver = NULL
                                 method = log
                                 args = [
                                 ]
@@ -239,7 +239,7 @@ Begin {
                               method = warn
                               args = [
                                 Send {
-                                  DString {
+                                  receiver = DString {
                                     nodes = [
                                       String {
                                         val = "Gerald skipping invalid rules: "
@@ -257,28 +257,28 @@ Begin {
                             }
                           ]
                         }
-                        NULL
+                        else_ = NULL
                       }
                     ]
                   }
                 }
                 DefMethod {
                   name = match
-                  Args {
+                  args = Args {
                     args = [
                       Arg {
                         name = match_context
                       }
                     ]
                   }
-                  Begin {
+                  body = Begin {
                     stmts = [
                       If {
-                        Send {
-                          Send {
-                            Send {
-                              Send {
-                                LVar {
+                        condition = Send {
+                          receiver = Send {
+                            receiver = Send {
+                              receiver = Send {
+                                receiver = LVar {
                                   name = match_context
                                 }
                                 method = diff
@@ -296,16 +296,16 @@ Begin {
                           method = >
                           args = [
                             Const {
-                              NULL
+                              scope = NULL
                               name = MAX_AFFECTED_FILES
                             }
                           ]
                         }
-                        Begin {
+                        then_ = Begin {
                           stmts = [
                             Send {
-                              Send {
-                                NULL
+                              receiver = Send {
+                                receiver = NULL
                                 method = log
                                 args = [
                                 ]
@@ -322,9 +322,9 @@ Begin {
                                         Begin {
                                           stmts = [
                                             Send {
-                                              Send {
-                                                Send {
-                                                  LVar {
+                                              receiver = Send {
+                                                receiver = Send {
+                                                  receiver = LVar {
                                                     name = match_context
                                                   }
                                                   method = diff
@@ -360,13 +360,13 @@ Begin {
                             }
                           ]
                         }
-                        NULL
+                        else_ = NULL
                       }
                       LVarAsgn {
                         name = budget
-                        Send {
-                          Const {
-                            NULL
+                        expr = Send {
+                          receiver = Const {
+                            scope = NULL
                             name = MatchTimeBudget
                           }
                           method = new
@@ -375,24 +375,24 @@ Begin {
                         }
                       }
                       Block {
-                        Send {
-                          IVar {
+                        send = Send {
+                          receiver = IVar {
                             name = @rules
                           }
                           method = select
                           args = [
                           ]
                         }
-                        Args {
+                        args = Args {
                           args = [
                             Arg {
                               name = r
                             }
                           ]
                         }
-                        Block {
-                          Send {
-                            LVar {
+                        body = Block {
+                          send = Send {
+                            receiver = LVar {
                               name = budget
                             }
                             method = time_rule
@@ -402,9 +402,9 @@ Begin {
                               }
                             ]
                           }
-                          NULL
-                          Send {
-                            LVar {
+                          args = NULL
+                          body = Send {
+                            receiver = LVar {
                               name = r
                             }
                             method = matches?
@@ -423,15 +423,15 @@ Begin {
             }
           }
           Class {
-            Const {
-              NULL
+            name = Const {
+              scope = NULL
               name = MatchContext
             }
-            NULL
-            Begin {
+            superclass = NULL
+            body = Begin {
               stmts = [
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -440,7 +440,7 @@ Begin {
                   ]
                 }
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -449,7 +449,7 @@ Begin {
                   ]
                 }
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -458,7 +458,7 @@ Begin {
                   ]
                 }
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -467,7 +467,7 @@ Begin {
                   ]
                 }
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -476,7 +476,7 @@ Begin {
                   ]
                 }
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -485,7 +485,7 @@ Begin {
                   ]
                 }
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -494,7 +494,7 @@ Begin {
                   ]
                 }
                 Send {
-                  NULL
+                  receiver = NULL
                   method = attr_reader
                   args = [
                     Symbol {
@@ -504,7 +504,7 @@ Begin {
                 }
                 DefMethod {
                   name = initialize
-                  Args {
+                  args = Args {
                     args = [
                       Arg {
                         name = repo
@@ -532,53 +532,53 @@ Begin {
                       }
                     ]
                   }
-                  Begin {
+                  body = Begin {
                     stmts = [
                       IVarAsgn {
                         name = @repo
-                        LVar {
+                        expr = LVar {
                           name = repo
                         }
                       }
                       IVarAsgn {
                         name = @assignee
-                        LVar {
+                        expr = LVar {
                           name = assignee
                         }
                       }
                       IVarAsgn {
                         name = @gh_user
-                        LVar {
+                        expr = LVar {
                           name = gh_user
                         }
                       }
                       IVarAsgn {
                         name = @merge_branch
-                        LVar {
+                        expr = LVar {
                           name = merge_branch
                         }
                       }
                       IVarAsgn {
                         name = @body
-                        LVar {
+                        expr = LVar {
                           name = body
                         }
                       }
                       IVarAsgn {
                         name = @title
-                        LVar {
+                        expr = LVar {
                           name = title
                         }
                       }
                       IVarAsgn {
                         name = @diff
-                        LVar {
+                        expr = LVar {
                           name = diff
                         }
                       }
                       IVarAsgn {
                         name = @openapi_diff
-                        LVar {
+                        expr = LVar {
                           name = openapi_diff
                         }
                       }
@@ -587,10 +587,10 @@ Begin {
                 }
                 DefMethod {
                   name = user_stripe_suffix?
-                  NULL
-                  Send {
-                    Send {
-                      IVar {
+                  args = NULL
+                  body = Send {
+                    receiver = Send {
+                      receiver = IVar {
                         name = @repo
                       }
                       method = start_with?
@@ -613,35 +613,35 @@ Begin {
             }
           }
           Class {
-            Const {
-              NULL
+            name = Const {
+              scope = NULL
               name = MatchTimeBudget
             }
-            NULL
-            Begin {
+            superclass = NULL
+            body = Begin {
               stmts = [
                 ConstAsgn {
-                  NULL
+                  scope = NULL
                   name = TOTAL_TIME_MS
-                  Integer {
+                  expr = Integer {
                     val = "10000"
                   }
                 }
                 ConstAsgn {
-                  NULL
+                  scope = NULL
                   name = PER_RULE_MS
-                  Integer {
+                  expr = Integer {
                     val = "2000"
                   }
                 }
                 DefMethod {
                   name = initialize
-                  NULL
-                  IVarAsgn {
+                  args = NULL
+                  body = IVarAsgn {
                     name = @start
-                    Send {
-                      Const {
-                        NULL
+                    expr = Send {
+                      receiver = Const {
+                        scope = NULL
                         name = Time
                       }
                       method = now
@@ -652,18 +652,18 @@ Begin {
                 }
                 DefMethod {
                   name = check!
-                  NULL
-                  Begin {
+                  args = NULL
+                  body = Begin {
                     stmts = [
                       LVarAsgn {
                         name = dur_ms
-                        Send {
-                          Begin {
+                        expr = Send {
+                          receiver = Begin {
                             stmts = [
                               Send {
-                                Send {
-                                  Const {
-                                    NULL
+                                receiver = Send {
+                                  receiver = Const {
+                                    scope = NULL
                                     name = Time
                                   }
                                   method = now
@@ -688,25 +688,25 @@ Begin {
                         }
                       }
                       If {
-                        Send {
-                          LVar {
+                        condition = Send {
+                          receiver = LVar {
                             name = dur_ms
                           }
                           method = >
                           args = [
                             Const {
-                              NULL
+                              scope = NULL
                               name = TOTAL_TIME_MS
                             }
                           ]
                         }
-                        Send {
-                          NULL
+                        then_ = Send {
+                          receiver = NULL
                           method = raise
                           args = [
                             Send {
-                              Const {
-                                NULL
+                              receiver = Const {
+                                scope = NULL
                                 name = MatchTimeout
                               }
                               method = new
@@ -721,7 +721,7 @@ Begin {
                                         Begin {
                                           stmts = [
                                             Const {
-                                              NULL
+                                              scope = NULL
                                               name = TOTAL_TIME_MS
                                             }
                                           ]
@@ -737,27 +737,27 @@ Begin {
                             }
                           ]
                         }
-                        NULL
+                        else_ = NULL
                       }
                     ]
                   }
                 }
                 DefMethod {
                   name = time_rule
-                  Args {
+                  args = Args {
                     args = [
                       Arg {
                         name = rule
                       }
                     ]
                   }
-                  Begin {
+                  body = Begin {
                     stmts = [
                       LVarAsgn {
                         name = rule_start
-                        Send {
-                          Const {
-                            NULL
+                        expr = Send {
+                          receiver = Const {
+                            scope = NULL
                             name = Time
                           }
                           method = now
@@ -767,20 +767,20 @@ Begin {
                       }
                       LVarAsgn {
                         name = res
-                        Yield {
+                        expr = Yield {
                           exprs = [
                           ]
                         }
                       }
                       LVarAsgn {
                         name = dur_ms
-                        Send {
-                          Begin {
+                        expr = Send {
+                          receiver = Begin {
                             stmts = [
                               Send {
-                                Send {
-                                  Const {
-                                    NULL
+                                receiver = Send {
+                                  receiver = Const {
+                                    scope = NULL
                                     name = Time
                                   }
                                   method = now
@@ -805,25 +805,25 @@ Begin {
                         }
                       }
                       If {
-                        Send {
-                          LVar {
+                        condition = Send {
+                          receiver = LVar {
                             name = dur_ms
                           }
                           method = >
                           args = [
                             Const {
-                              NULL
+                              scope = NULL
                               name = PER_RULE_MS
                             }
                           ]
                         }
-                        Send {
-                          NULL
+                        then_ = Send {
+                          receiver = NULL
                           method = raise
                           args = [
                             Send {
-                              Const {
-                                NULL
+                              receiver = Const {
+                                scope = NULL
                                 name = MatchTimeout
                               }
                               method = new
@@ -838,7 +838,7 @@ Begin {
                                         Begin {
                                           stmts = [
                                             Send {
-                                              LVar {
+                                              receiver = LVar {
                                                 name = rule
                                               }
                                               method = token
@@ -853,7 +853,7 @@ Begin {
                                         Begin {
                                           stmts = [
                                             Send {
-                                              LVar {
+                                              receiver = LVar {
                                                 name = dur_ms
                                               }
                                               method = to_i
@@ -868,7 +868,7 @@ Begin {
                                         Begin {
                                           stmts = [
                                             Const {
-                                              NULL
+                                              scope = NULL
                                               name = PER_RULE_MS
                                             }
                                           ]
@@ -883,11 +883,11 @@ Begin {
                                 Hash {
                                   pairs = [
                                     Pair {
-                                      Symbol {
+                                      key = Symbol {
                                         val = "rule_token"
                                       }
-                                      Send {
-                                        LVar {
+                                      value = Send {
+                                        receiver = LVar {
                                           name = rule
                                         }
                                         method = token
@@ -901,10 +901,10 @@ Begin {
                             }
                           ]
                         }
-                        NULL
+                        else_ = NULL
                       }
                       Send {
-                        NULL
+                        receiver = NULL
                         method = check!
                         args = [
                         ]
@@ -919,34 +919,34 @@ Begin {
             }
           }
           Class {
-            Const {
-              NULL
+            name = Const {
+              scope = NULL
               name = Diff
             }
-            NULL
-            Begin {
+            superclass = NULL
+            body = Begin {
               stmts = [
                 DefMethod {
                   name = initialize
-                  Args {
+                  args = Args {
                     args = [
                       Arg {
                         name = raw_diff
                       }
                     ]
                   }
-                  Begin {
+                  body = Begin {
                     stmts = [
                       IVarAsgn {
                         name = @raw
-                        LVar {
+                        expr = LVar {
                           name = raw_diff
                         }
                       }
                       IVarAsgn {
                         name = @parsed
-                        Send {
-                          NULL
+                        expr = Send {
+                          receiver = NULL
                           method = parse
                           args = [
                             LVar {
@@ -960,11 +960,11 @@ Begin {
                 }
                 DefMethod {
                   name = affected_files
-                  NULL
-                  Send {
-                    Send {
-                      Send {
-                        NULL
+                  args = NULL
+                  body = Send {
+                    receiver = Send {
+                      receiver = Send {
+                        receiver = NULL
                         method = added_files
                         args = [
                         ]
@@ -972,7 +972,7 @@ Begin {
                       method = +
                       args = [
                         Send {
-                          NULL
+                          receiver = NULL
                           method = deleted_files
                           args = [
                           ]
@@ -982,7 +982,7 @@ Begin {
                     method = +
                     args = [
                       Send {
-                        NULL
+                        receiver = NULL
                         method = changed_files
                         args = [
                         ]
@@ -992,28 +992,28 @@ Begin {
                 }
                 DefMethod {
                   name = added_files
-                  NULL
-                  Block {
-                    Send {
-                      Block {
-                        Send {
-                          IVar {
+                  args = NULL
+                  body = Block {
+                    send = Send {
+                      receiver = Block {
+                        send = Send {
+                          receiver = IVar {
                             name = @parsed
                           }
                           method = select
                           args = [
                           ]
                         }
-                        Args {
+                        args = Args {
                           args = [
                             Arg {
                               name = part
                             }
                           ]
                         }
-                        Send {
-                          Send {
-                            LVar {
+                        body = Send {
+                          receiver = Send {
+                            receiver = LVar {
                               name = part
                             }
                             method = []
@@ -1039,15 +1039,15 @@ Begin {
                       args = [
                       ]
                     }
-                    Args {
+                    args = Args {
                       args = [
                         Arg {
                           name = part
                         }
                       ]
                     }
-                    Send {
-                      LVar {
+                    body = Send {
+                      receiver = LVar {
                         name = part
                       }
                       method = []
@@ -1061,28 +1061,28 @@ Begin {
                 }
                 DefMethod {
                   name = deleted_files
-                  NULL
-                  Block {
-                    Send {
-                      Block {
-                        Send {
-                          IVar {
+                  args = NULL
+                  body = Block {
+                    send = Send {
+                      receiver = Block {
+                        send = Send {
+                          receiver = IVar {
                             name = @parsed
                           }
                           method = select
                           args = [
                           ]
                         }
-                        Args {
+                        args = Args {
                           args = [
                             Arg {
                               name = part
                             }
                           ]
                         }
-                        Send {
-                          Send {
-                            LVar {
+                        body = Send {
+                          receiver = Send {
+                            receiver = LVar {
                               name = part
                             }
                             method = []
@@ -1108,15 +1108,15 @@ Begin {
                       args = [
                       ]
                     }
-                    Args {
+                    args = Args {
                       args = [
                         Arg {
                           name = part
                         }
                       ]
                     }
-                    Send {
-                      LVar {
+                    body = Send {
+                      receiver = LVar {
                         name = part
                       }
                       method = []
@@ -1130,28 +1130,28 @@ Begin {
                 }
                 DefMethod {
                   name = changed_files
-                  NULL
-                  Block {
-                    Send {
-                      Block {
-                        Send {
-                          IVar {
+                  args = NULL
+                  body = Block {
+                    send = Send {
+                      receiver = Block {
+                        send = Send {
+                          receiver = IVar {
                             name = @parsed
                           }
                           method = select
                           args = [
                           ]
                         }
-                        Args {
+                        args = Args {
                           args = [
                             Arg {
                               name = part
                             }
                           ]
                         }
-                        Send {
-                          Send {
-                            LVar {
+                        body = Send {
+                          receiver = Send {
+                            receiver = LVar {
                               name = part
                             }
                             method = []
@@ -1164,7 +1164,7 @@ Begin {
                           method = ==
                           args = [
                             Send {
-                              LVar {
+                              receiver = LVar {
                                 name = part
                               }
                               method = []
@@ -1181,15 +1181,15 @@ Begin {
                       args = [
                       ]
                     }
-                    Args {
+                    args = Args {
                       args = [
                         Arg {
                           name = part
                         }
                       ]
                     }
-                    Send {
-                      LVar {
+                    body = Send {
+                      receiver = LVar {
                         name = part
                       }
                       method = []
@@ -1203,26 +1203,26 @@ Begin {
                 }
                 DefMethod {
                   name = added_lines
-                  NULL
-                  Send {
-                    Block {
-                      Send {
-                        IVar {
+                  args = NULL
+                  body = Send {
+                    receiver = Block {
+                      send = Send {
+                        receiver = IVar {
                           name = @parsed
                         }
                         method = map
                         args = [
                         ]
                       }
-                      Args {
+                      args = Args {
                         args = [
                           Arg {
                             name = part
                           }
                         ]
                       }
-                      Send {
-                        LVar {
+                      body = Send {
+                        receiver = LVar {
                           name = part
                         }
                         method = []
@@ -1240,26 +1240,26 @@ Begin {
                 }
                 DefMethod {
                   name = removed_lines
-                  NULL
-                  Send {
-                    Block {
-                      Send {
-                        IVar {
+                  args = NULL
+                  body = Send {
+                    receiver = Block {
+                      send = Send {
+                        receiver = IVar {
                           name = @parsed
                         }
                         method = map
                         args = [
                         ]
                       }
-                      Args {
+                      args = Args {
                         args = [
                           Arg {
                             name = part
                           }
                         ]
                       }
-                      Send {
-                        LVar {
+                      body = Send {
+                        receiver = LVar {
                           name = part
                         }
                         method = []
@@ -1277,10 +1277,10 @@ Begin {
                 }
                 DefMethod {
                   name = changed_lines
-                  NULL
-                  Send {
-                    Send {
-                      NULL
+                  args = NULL
+                  body = Send {
+                    receiver = Send {
+                      receiver = NULL
                       method = added_lines
                       args = [
                       ]
@@ -1288,7 +1288,7 @@ Begin {
                     method = +
                     args = [
                       Send {
-                        NULL
+                        receiver = NULL
                         method = removed_lines
                         args = [
                         ]
@@ -1298,10 +1298,10 @@ Begin {
                 }
                 DefMethod {
                   name = changed_openapi?
-                  NULL
-                  Send {
-                    Send {
-                      NULL
+                  args = NULL
+                  body = Send {
+                    receiver = Send {
+                      receiver = NULL
                       method = changed_files
                       args = [
                       ]
@@ -1309,11 +1309,11 @@ Begin {
                     method = include?
                     args = [
                       Const {
-                        Const {
-                          Const {
-                            Const {
-                              Const {
-                                NULL
+                        scope = Const {
+                          scope = Const {
+                            scope = Const {
+                              scope = Const {
+                                scope = NULL
                                 name = Opus
                               }
                               name = CIBot
@@ -1328,25 +1328,25 @@ Begin {
                   }
                 }
                 Send {
-                  NULL
+                  receiver = NULL
                   method = private
                   args = [
                     DefMethod {
                       name = parse
-                      Args {
+                      args = Args {
                         args = [
                           Arg {
                             name = diff
                           }
                         ]
                       }
-                      Begin {
+                      body = Begin {
                         stmts = [
                           LVarAsgn {
                             name = parts
-                            Send {
-                              Send {
-                                LVar {
+                            expr = Send {
+                              receiver = Send {
+                                receiver = LVar {
                                   name = diff
                                 }
                                 method = split
@@ -1357,7 +1357,7 @@ Begin {
                                         val = "^diff [^\n]*\n"
                                       }
                                     ]
-                                    Regopt {
+                                    opts = Regopt {
                                       opts = "m"
                                     }
                                   }
@@ -1366,10 +1366,10 @@ Begin {
                               method = []
                               args = [
                                 IRange {
-                                  Integer {
+                                  from = Integer {
                                     val = "1"
                                   }
-                                  Integer {
+                                  to = Integer {
                                     val = "-1"
                                   }
                                 }
@@ -1377,37 +1377,37 @@ Begin {
                             }
                           }
                           OrAsgn {
-                            LVarLhs {
+                            left = LVarLhs {
                               name = parts
                             }
-                            Array {
+                            right = Array {
                               elts = [
                               ]
                             }
                           }
                           Send {
-                            Block {
-                              Send {
-                                LVar {
+                            receiver = Block {
+                              send = Send {
+                                receiver = LVar {
                                   name = parts
                                 }
                                 method = map
                                 args = [
                                 ]
                               }
-                              Args {
+                              args = Args {
                                 args = [
                                   Arg {
                                     name = part
                                   }
                                 ]
                               }
-                              Begin {
+                              body = Begin {
                                 stmts = [
                                   LVarAsgn {
                                     name = lines
-                                    Send {
-                                      LVar {
+                                    expr = Send {
+                                      receiver = LVar {
                                         name = part
                                       }
                                       method = split
@@ -1425,45 +1425,45 @@ Begin {
                                   }
                                   LVarAsgn {
                                     name = a_name
-                                    LVarAsgn {
+                                    expr = LVarAsgn {
                                       name = b_name
-                                      Nil {
+                                      expr = Nil {
                                       }
                                     }
                                   }
                                   LVarAsgn {
                                     name = added_lines
-                                    Array {
+                                    expr = Array {
                                       elts = [
                                       ]
                                     }
                                   }
                                   LVarAsgn {
                                     name = removed_lines
-                                    Array {
+                                    expr = Array {
                                       elts = [
                                       ]
                                     }
                                   }
                                   Block {
-                                    Send {
-                                      LVar {
+                                    send = Send {
+                                      receiver = LVar {
                                         name = lines
                                       }
                                       method = each
                                       args = [
                                       ]
                                     }
-                                    Args {
+                                    args = Args {
                                       args = [
                                         Arg {
                                           name = line
                                         }
                                       ]
                                     }
-                                    If {
-                                      Send {
-                                        LVar {
+                                    body = If {
+                                      condition = Send {
+                                        receiver = LVar {
                                           name = line
                                         }
                                         method = start_with?
@@ -1491,13 +1491,13 @@ Begin {
                                           }
                                         ]
                                       }
-                                      Next {
+                                      then_ = Next {
                                         exprs = [
                                         ]
                                       }
-                                      If {
-                                        Send {
-                                          LVar {
+                                      else_ = If {
+                                        condition = Send {
+                                          receiver = LVar {
                                             name = line
                                           }
                                           method = start_with?
@@ -1511,21 +1511,21 @@ Begin {
                                             }
                                           ]
                                         }
-                                        Begin {
+                                        then_ = Begin {
                                           stmts = [
                                             LVarAsgn {
                                               name = a_name
-                                              Send {
-                                                LVar {
+                                              expr = Send {
+                                                receiver = LVar {
                                                   name = line
                                                 }
                                                 method = []
                                                 args = [
                                                   IRange {
-                                                    Integer {
+                                                    from = Integer {
                                                       val = "4"
                                                     }
-                                                    Integer {
+                                                    to = Integer {
                                                       val = "-1"
                                                     }
                                                   }
@@ -1533,36 +1533,36 @@ Begin {
                                               }
                                             }
                                             If {
-                                              And {
-                                                NULL
-                                                NULL
+                                              condition = And {
+                                                left = NULL
+                                                right = NULL
                                               }
-                                              LVarAsgn {
+                                              then_ = LVarAsgn {
                                                 name = a_name
-                                                Send {
-                                                  LVar {
+                                                expr = Send {
+                                                  receiver = LVar {
                                                     name = a_name
                                                   }
                                                   method = []
                                                   args = [
                                                     IRange {
-                                                      Integer {
+                                                      from = Integer {
                                                         val = "2"
                                                       }
-                                                      Integer {
+                                                      to = Integer {
                                                         val = "-1"
                                                       }
                                                     }
                                                   ]
                                                 }
                                               }
-                                              NULL
+                                              else_ = NULL
                                             }
                                           ]
                                         }
-                                        If {
-                                          Send {
-                                            LVar {
+                                        else_ = If {
+                                          condition = Send {
+                                            receiver = LVar {
                                               name = line
                                             }
                                             method = start_with?
@@ -1576,21 +1576,21 @@ Begin {
                                               }
                                             ]
                                           }
-                                          Begin {
+                                          then_ = Begin {
                                             stmts = [
                                               LVarAsgn {
                                                 name = b_name
-                                                Send {
-                                                  LVar {
+                                                expr = Send {
+                                                  receiver = LVar {
                                                     name = line
                                                   }
                                                   method = []
                                                   args = [
                                                     IRange {
-                                                      Integer {
+                                                      from = Integer {
                                                         val = "4"
                                                       }
-                                                      Integer {
+                                                      to = Integer {
                                                         val = "-1"
                                                       }
                                                     }
@@ -1598,36 +1598,36 @@ Begin {
                                                 }
                                               }
                                               If {
-                                                And {
-                                                  NULL
-                                                  NULL
+                                                condition = And {
+                                                  left = NULL
+                                                  right = NULL
                                                 }
-                                                LVarAsgn {
+                                                then_ = LVarAsgn {
                                                   name = b_name
-                                                  Send {
-                                                    LVar {
+                                                  expr = Send {
+                                                    receiver = LVar {
                                                       name = b_name
                                                     }
                                                     method = []
                                                     args = [
                                                       IRange {
-                                                        Integer {
+                                                        from = Integer {
                                                           val = "2"
                                                         }
-                                                        Integer {
+                                                        to = Integer {
                                                           val = "-1"
                                                         }
                                                       }
                                                     ]
                                                   }
                                                 }
-                                                NULL
+                                                else_ = NULL
                                               }
                                             ]
                                           }
-                                          If {
-                                            Send {
-                                              LVar {
+                                          else_ = If {
+                                            condition = Send {
+                                              receiver = LVar {
                                                 name = line
                                               }
                                               method = start_with?
@@ -1641,23 +1641,23 @@ Begin {
                                                 }
                                               ]
                                             }
-                                            Send {
-                                              LVar {
+                                            then_ = Send {
+                                              receiver = LVar {
                                                 name = added_lines
                                               }
                                               method = <<
                                               args = [
                                                 Send {
-                                                  LVar {
+                                                  receiver = LVar {
                                                     name = line
                                                   }
                                                   method = []
                                                   args = [
                                                     IRange {
-                                                      Integer {
+                                                      from = Integer {
                                                         val = "1"
                                                       }
-                                                      Integer {
+                                                      to = Integer {
                                                         val = "-1"
                                                       }
                                                     }
@@ -1665,9 +1665,9 @@ Begin {
                                                 }
                                               ]
                                             }
-                                            If {
-                                              Send {
-                                                LVar {
+                                            else_ = If {
+                                              condition = Send {
+                                                receiver = LVar {
                                                   name = line
                                                 }
                                                 method = start_with?
@@ -1681,23 +1681,23 @@ Begin {
                                                   }
                                                 ]
                                               }
-                                              Send {
-                                                LVar {
+                                              then_ = Send {
+                                                receiver = LVar {
                                                   name = removed_lines
                                                 }
                                                 method = <<
                                                 args = [
                                                   Send {
-                                                    LVar {
+                                                    receiver = LVar {
                                                       name = line
                                                     }
                                                     method = []
                                                     args = [
                                                       IRange {
-                                                        Integer {
+                                                        from = Integer {
                                                           val = "1"
                                                         }
-                                                        Integer {
+                                                        to = Integer {
                                                           val = "-1"
                                                         }
                                                       }
@@ -1705,7 +1705,7 @@ Begin {
                                                   }
                                                 ]
                                               }
-                                              NULL
+                                              else_ = NULL
                                             }
                                           }
                                         }
@@ -1713,51 +1713,51 @@ Begin {
                                     }
                                   }
                                   If {
-                                    Send {
-                                      LVar {
+                                    condition = Send {
+                                      receiver = LVar {
                                         name = a_name
                                       }
                                       method = nil?
                                       args = [
                                       ]
                                     }
-                                    Next {
+                                    then_ = Next {
                                       exprs = [
                                       ]
                                     }
-                                    NULL
+                                    else_ = NULL
                                   }
                                   Hash {
                                     pairs = [
                                       Pair {
-                                        Symbol {
+                                        key = Symbol {
                                           val = "a_name"
                                         }
-                                        LVar {
+                                        value = LVar {
                                           name = a_name
                                         }
                                       }
                                       Pair {
-                                        Symbol {
+                                        key = Symbol {
                                           val = "b_name"
                                         }
-                                        LVar {
+                                        value = LVar {
                                           name = b_name
                                         }
                                       }
                                       Pair {
-                                        Symbol {
+                                        key = Symbol {
                                           val = "added_lines"
                                         }
-                                        LVar {
+                                        value = LVar {
                                           name = added_lines
                                         }
                                       }
                                       Pair {
-                                        Symbol {
+                                        key = Symbol {
                                           val = "removed_lines"
                                         }
-                                        LVar {
+                                        value = LVar {
                                           name = removed_lines
                                         }
                                       }

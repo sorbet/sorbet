@@ -209,6 +209,7 @@ void emit_node_classfile(NodeDef &node) {
                      << ".name(ctx).toString(ctx) << std::endl;" << endl;
                 break;
             case Node:
+                cout << "    buf << \"" << arg.name << " = \";" << endl;
                 cout << "    printNode(buf, " << arg.name << ", ctx, tabs + 1);" << endl;
                 break;
             case NodeVec:
