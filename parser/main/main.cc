@@ -1,6 +1,5 @@
 #include "ast/ast.h"
-#include "parser/Node.h"
-#include "parser/Result.h"
+#include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include <ctime>
 #include <cxxopts.hpp>
