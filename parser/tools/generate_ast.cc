@@ -259,8 +259,8 @@ void emit_node_header(NodeDef &node) {
 
 void emit_node_classfile(NodeDef &node) {
 
-    cout << "  std::string "<< node.name <<"::nodeName() {" << endl;
-    cout << "    return \"" << node.name <<"\";" << endl;
+    cout << "  std::string " << node.name << "::nodeName() {" << endl;
+    cout << "    return \"" << node.name << "\";" << endl;
     cout << "  };" << endl << endl;
 
     cout << "  std::string " << node.name << "::toString(ast::ContextBase &ctx, int tabs) { " << endl
