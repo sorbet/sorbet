@@ -13,6 +13,7 @@ cc_library(
     hdrs = [
         "Node.h",
         "Result.h",
+        "parser.h"
     ],
     deps = [
         "//ast",
