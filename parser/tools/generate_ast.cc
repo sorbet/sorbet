@@ -185,11 +185,18 @@ void emit_node_header(NodeDef &node) {
     }
     cout << endl;
     cout << "  virtual std::string toString(ast::ContextBase &ctx, int tabs = 0);" << endl;
+    cout << "  virtual std::string nodeName();" << endl;
+
     cout << "};" << endl;
     cout << endl;
 }
 
 void emit_node_classfile(NodeDef &node) {
+
+    cout << "  std::string "<< node.name <<"::nodeName() {" << endl;
+    cout << "    return \"" << node.name <<"\";" << endl;
+    cout << "  };" << endl << endl;
+
     cout << "  std::string " << node.name << "::toString(ast::ContextBase &ctx, int tabs) { " << endl
          << "    std::stringstream buf;" << endl;
     cout << "    buf << \"" << node.name << " {\" << std::endl;" << endl;

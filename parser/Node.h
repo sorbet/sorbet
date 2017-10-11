@@ -30,6 +30,7 @@ public:
     Node(Loc loc) : loc(loc) {}
     virtual ~Node() = default;
     virtual std::string toString(ast::ContextBase &ctx, int tabs = 0) = 0;
+    virtual std::string nodeName() = 0;
     Loc loc;
 
 protected:
