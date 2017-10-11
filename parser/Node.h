@@ -8,15 +8,15 @@ namespace ruby_typer {
 namespace parser {
 
 using ruby_typer::ast::NameRef;
+using std::move;
 using std::unique_ptr;
 using std::vector;
-using std::move;
 
 struct Loc {
     u4 begin_pos, end_pos;
 
     static Loc none() {
-        return Loc{(u4)-1, (u4) -1};
+        return Loc{(u4)-1, (u4)-1};
     }
 
     bool is_none() {

@@ -19,10 +19,10 @@ using std::unique_ptr;
 using std::vector;
 using std::vector;
 
-#define BUILDER_UNIMPLEMENTED()                                                                                        \
-    ({                                                                                                                 \
-        ctx_.logger.critical("unimplemented builder: {}", __func__);                                                   \
-        Error::notImplemented();                                                                                       \
+#define BUILDER_UNIMPLEMENTED()                                      \
+    ({                                                               \
+        ctx_.logger.critical("unimplemented builder: {}", __func__); \
+        Error::notImplemented();                                     \
     })
 
 namespace ruby_typer {

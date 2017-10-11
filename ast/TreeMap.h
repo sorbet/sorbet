@@ -5,8 +5,8 @@
 #include "memory"
 #include <type_traits> // To use 'std::integral_constant'.
 
-using std::unique_ptr;
 using std::make_unique;
+using std::unique_ptr;
 
 namespace ruby_typer {
 namespace ast {
@@ -76,24 +76,24 @@ public:
  * GENERATE_HAS_MEMBER(att)  // Creates 'has_member_att'.
  * `HAS_MEMBER_att<C>::value` can be used to statically test if C has a member att
  */
-#define GENERATE_HAS_MEMBER(X)                                                                                         \
-    template <typename T> class HAS_MEMBER_##X {                                                                       \
-        struct Fallback {                                                                                              \
-            int X;                                                                                                     \
-        };                                                                                                             \
-        struct Derived : T, Fallback {};                                                                               \
-                                                                                                                       \
-        template <typename U, U> struct Check;                                                                         \
-                                                                                                                       \
-        typedef char ArrayOfOne[1];                                                                                    \
-        typedef char ArrayOfTwo[2];                                                                                    \
-                                                                                                                       \
-        template <typename U> static ArrayOfOne &func(Check<int Fallback::*, &U::X> *);                                \
-        template <typename U> static ArrayOfTwo &func(...);                                                            \
-                                                                                                                       \
-    public:                                                                                                            \
-        typedef HAS_MEMBER_##X type;                                                                                   \
-        enum { value = sizeof(func<Derived>(0)) == 2 };                                                                \
+#define GENERATE_HAS_MEMBER(X)                                                          \
+    template <typename T> class HAS_MEMBER_##X {                                        \
+        struct Fallback {                                                               \
+            int X;                                                                      \
+        };                                                                              \
+        struct Derived : T, Fallback {};                                                \
+                                                                                        \
+        template <typename U, U> struct Check;                                          \
+                                                                                        \
+        typedef char ArrayOfOne[1];                                                     \
+        typedef char ArrayOfTwo[2];                                                     \
+                                                                                        \
+        template <typename U> static ArrayOfOne &func(Check<int Fallback::*, &U::X> *); \
+        template <typename U> static ArrayOfTwo &func(...);                             \
+                                                                                        \
+    public:                                                                             \
+        typedef HAS_MEMBER_##X type;                                                    \
+        enum { value = sizeof(func<Derived>(0)) == 2 };                                 \
     };
 
 GENERATE_HAS_MEMBER(transformClassDef);
@@ -124,28 +124,28 @@ GENERATE_HAS_MEMBER(transformSelf);
 GENERATE_HAS_MEMBER(transformClosure);
 GENERATE_HAS_MEMBER(transformInsSeq);
 
-#define GENERATE_POSTPONE_CLASS(X)                                                                                     \
-                                                                                                                       \
-    template <class FUNC, bool has> class PostPoneCalling_##X {                                                        \
-    public:                                                                                                            \
-        static Stat *call(Context ctx, X *cd, FUNC &what) {                                                            \
-            Error::raise("should never be called. Incorrect use of TreeMap?");                                         \
-            return nullptr;                                                                                            \
-        }                                                                                                              \
-    };                                                                                                                 \
-                                                                                                                       \
-    template <class FUNC> class PostPoneCalling_##X<FUNC, true> {                                                      \
-    public:                                                                                                            \
-        static Stat *call(Context ctx, X *cd, FUNC &func) {                                                            \
-            return func.transform##X(ctx, cd);                                                                         \
-        }                                                                                                              \
-    };                                                                                                                 \
-                                                                                                                       \
-    template <class FUNC> class PostPoneCalling_##X<FUNC, false> {                                                     \
-    public:                                                                                                            \
-        static Stat *call(Context ctx, X *cd, FUNC &func) {                                                            \
-            return cd;                                                                                                 \
-        }                                                                                                              \
+#define GENERATE_POSTPONE_CLASS(X)                                             \
+                                                                               \
+    template <class FUNC, bool has> class PostPoneCalling_##X {                \
+    public:                                                                    \
+        static Stat *call(Context ctx, X *cd, FUNC &what) {                    \
+            Error::raise("should never be called. Incorrect use of TreeMap?"); \
+            return nullptr;                                                    \
+        }                                                                      \
+    };                                                                         \
+                                                                               \
+    template <class FUNC> class PostPoneCalling_##X<FUNC, true> {              \
+    public:                                                                    \
+        static Stat *call(Context ctx, X *cd, FUNC &func) {                    \
+            return func.transform##X(ctx, cd);                                 \
+        }                                                                      \
+    };                                                                         \
+                                                                               \
+    template <class FUNC> class PostPoneCalling_##X<FUNC, false> {             \
+    public:                                                                    \
+        static Stat *call(Context ctx, X *cd, FUNC &func) {                    \
+            return cd;                                                         \
+        }                                                                      \
     };
 
 GENERATE_POSTPONE_CLASS(ClassDef);
