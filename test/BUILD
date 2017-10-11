@@ -15,3 +15,17 @@ cc_test(
         "@spdlog//:spdlog",
     ],
 )
+
+# Passes with --config=dbg but I'm not smart enough to figure out how to make it
+# only run when in that config
+# sh_test(
+#     name = "backtrace-test",
+#     size = "small",
+#     srcs = ["backtrace-test.sh"],
+#     data = ["backtrace-test-raise"],
+# )
+
+cc_binary(
+    name = "backtrace-test-raise",
+    srcs = ["backtrace-test-raise.cc"],
+)
