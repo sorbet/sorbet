@@ -81,7 +81,10 @@ impl<'a, 'b: 'a> SexpNode<'a, 'b> {
         self.result = self.result.and_then(|_| {
             if self.fmt.print_str {
                 self.fmt.buf.write_char(' ')?;
-                escape_rb(self.fmt, value.string().unwrap())
+                match value.string() {
+                    Some(ref string) => escape_rb(self.fmt, string),
+                    None => write!(self.fmt, "[BINARY STRING]"),
+                }
             } else {
                 write!(self.fmt, " [STRING]")
             }
@@ -710,15 +713,6 @@ impl Sexp for Node {
                 };
                 builder.finish()
             }
-            (&Node::Prototype(ref __self_0, ref __self_1, ref __self_2,
-                              ref __self_3),) => {
-                let mut builder = __arg_0.new_node("prototype");
-                let _ = builder.field(__self_0);
-                let _ = builder.field(__self_1);
-                let _ = builder.field(__self_2);
-                let _ = builder.field(__self_3);
-                builder.finish()
-            }
             (&Node::Rational(ref __self_0, ref __self_1),) => {
                 let mut builder = __arg_0.new_node("rational");
                 let _ = builder.field(__self_0);
@@ -806,6 +800,12 @@ impl Sexp for Node {
                 builder.finish()
             }
             (&Node::Splat(ref __self_0, ref __self_1),) => {
+                let mut builder = __arg_0.new_node("splat");
+                let _ = builder.field(__self_0);
+                let _ = builder.field(__self_1);
+                builder.finish()
+            }
+            (&Node::SplatLhs(ref __self_0, ref __self_1),) => {
                 let mut builder = __arg_0.new_node("splat");
                 let _ = builder.field(__self_0);
                 if __self_1.is_some() {
@@ -953,15 +953,23 @@ impl Sexp for Node {
                 let _ = builder.field(__self_2);
                 builder.finish()
             }
-            (&Node::TypedArg(ref __self_0, ref __self_1, ref __self_2),) => {
-                let mut builder = __arg_0.new_node("typed-arg");
+            (&Node::TyProc(ref __self_0, ref __self_1),) => {
+                let mut builder = __arg_0.new_node("ty-proc");
+                let _ = builder.field(__self_0);
+                let _ = builder.field(__self_1);
+                builder.finish()
+            }
+            (&Node::TyPrototype(ref __self_0, ref __self_1, ref __self_2,
+                              ref __self_3),) => {
+                let mut builder = __arg_0.new_node("ty-prototype");
                 let _ = builder.field(__self_0);
                 let _ = builder.field(__self_1);
                 let _ = builder.field(__self_2);
+                let _ = builder.field(__self_3);
                 builder.finish()
             }
-            (&Node::TyProc(ref __self_0, ref __self_1),) => {
-                let mut builder = __arg_0.new_node("ty-proc");
+            (&Node::TyReturnSig(ref __self_0, ref __self_1),) => {
+                let mut builder = __arg_0.new_node("ty-return-sig");
                 let _ = builder.field(__self_0);
                 let _ = builder.field(__self_1);
                 builder.finish()
@@ -975,6 +983,13 @@ impl Sexp for Node {
                 let mut builder = __arg_0.new_node("ty-tuple");
                 let _ = builder.field(__self_0);
                 let _ = builder.field(__self_1);
+                builder.finish()
+            }
+            (&Node::TyTypedArg(ref __self_0, ref __self_1, ref __self_2),) => {
+                let mut builder = __arg_0.new_node("ty-typed-arg");
+                let _ = builder.field(__self_0);
+                let _ = builder.field(__self_1);
+                let _ = builder.field(__self_2);
                 builder.finish()
             }
             (&Node::Undef(ref __self_0, ref __self_1),) => {
@@ -1036,6 +1051,25 @@ impl Sexp for Node {
                 builder.finish()
             }
         }
+    }
+}
+
+impl Node {
+    pub fn debug_ast(&self) -> String {
+        let mut output = String::new();
+
+        let result = {
+            let mut formatter = SexpFormatter {
+                indent: 0,
+                buf: &mut output,
+                print_loc: false,
+                print_str: true,
+            };
+            self.sexp(&mut formatter)
+        };
+
+        result.unwrap();
+        output
     }
 }
 

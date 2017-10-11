@@ -573,7 +573,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     }
                 | kDEF tIVAR tCOLON tr_type
                     {
-                      $$ = driver.build.tr_ivardecl(self, $2, $4);
+                      $$ = driver.build.tr_ivardecl(self, $1, $2, $4);
                     }
                 | expr
 
@@ -762,46 +762,46 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | mlhs_head tSTAR mlhs_node
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.splat(self, $2, $3));
+                      list->push_back(driver.build.splat_mlhs(self, $2, $3));
                       $$ = list;
                     }
                 | mlhs_head tSTAR mlhs_node tCOMMA mlhs_post
                     {
                       auto &head = $1;
-                      head->push_back(driver.build.splat(self, $2, $3));
+                      head->push_back(driver.build.splat_mlhs(self, $2, $3));
                       head->concat($5);
                       $$ = head;
                     }
                 | mlhs_head tSTAR
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.splat(self, $2, nullptr));
+                      list->push_back(driver.build.splat_mlhs(self, $2, nullptr));
                       $$ = list;
                     }
                 | mlhs_head tSTAR tCOMMA mlhs_post
                     {
                       auto &head = $1;
-                      head->push_back(driver.build.splat(self, $2, nullptr));
+                      head->push_back(driver.build.splat_mlhs(self, $2, nullptr));
                       head->concat($4);
                       $$ = head;
                     }
                 | tSTAR mlhs_node
                     {
-                      $$ = driver.alloc.node_list(driver.build.splat(self, $1, $2));
+                      $$ = driver.alloc.node_list(driver.build.splat_mlhs(self, $1, $2));
                     }
                 | tSTAR mlhs_node tCOMMA mlhs_post
                     {
-                      node_list *items = driver.alloc.node_list(driver.build.splat(self, $1, $2));
+                      node_list *items = driver.alloc.node_list(driver.build.splat_mlhs(self, $1, $2));
                       items->concat($4);
                       $$ = items;
                     }
                 | tSTAR
                     {
-                      $$ = driver.alloc.node_list(driver.build.splat(self, $1, nullptr));
+                      $$ = driver.alloc.node_list(driver.build.splat_mlhs(self, $1, nullptr));
                     }
                 | tSTAR tCOMMA mlhs_post
                     {
-                      node_list *items = driver.alloc.node_list(driver.build.splat(self, $1, nullptr));
+                      node_list *items = driver.alloc.node_list(driver.build.splat_mlhs(self, $1, nullptr));
                       items->concat($3);
                       $$ = items;
                     }
@@ -1887,7 +1887,7 @@ opt_block_args_tail:
                       auto return_sig = $3;
 
                       if (return_sig) {
-                        $$ = driver.build.prototype(self, nullptr, args, return_sig);
+                        $$ = driver.build.tr_prototype(self, nullptr, args, return_sig);
                       } else {
                         $$ = args;
                       }
@@ -2558,7 +2558,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       DIAGCHECK();
 
                       if (genargs || returnsig) {
-                        $$ = driver.build.prototype(self, genargs, args, returnsig);
+                        $$ = driver.build.tr_prototype(self, genargs, args, returnsig);
                       } else {
                         $$ = args;
                       }
@@ -2578,7 +2578,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       DIAGCHECK();
 
                       if (genargs || returnsig) {
-                        $$ = driver.build.prototype(self, genargs, args, returnsig);
+                        $$ = driver.build.tr_prototype(self, genargs, args, returnsig);
                       } else {
                         $$ = args;
                       }
@@ -2756,7 +2756,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto arg = driver.build.arg(self, $2);
 
                       if (argsig) {
-                        $$ = driver.build.typed_arg(self, argsig, arg);
+                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
                       } else {
                         $$ = arg;
                       }
@@ -2793,7 +2793,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto argsig = $1;
                       auto arg = driver.build.kwoptarg(self, $2, $3);
                       if (argsig) {
-                        $$ = driver.build.typed_arg(self, argsig, arg);
+                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
                       } else {
                         $$ = arg;
                       }
@@ -2803,7 +2803,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto argsig = $1;
                       auto arg = driver.build.kwarg(self, $2);
                       if (argsig) {
-                        $$ = driver.build.typed_arg(self, argsig, arg);
+                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
                       } else {
                         $$ = arg;
                       }
@@ -2815,7 +2815,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto arg = driver.build.kwoptarg(self, $2, $3);
 
                       if (argsig) {
-                        $$ = driver.build.typed_arg(self, argsig, arg);
+                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
                       } else {
                         $$ = arg;
                       }
@@ -2826,7 +2826,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto arg = driver.build.kwarg(self, $2);
 
                       if (argsig) {
-                        $$ = driver.build.typed_arg(self, argsig, arg);
+                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
                       } else {
                         $$ = arg;
                       }
@@ -2866,7 +2866,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto kwrestarg = driver.build.kwrestarg(self, $2, ident);
 
                       if (argsig) {
-                        kwrestarg = driver.build.typed_arg(self, argsig, kwrestarg);
+                        kwrestarg = driver.build.tr_typed_arg(self, argsig, kwrestarg);
                       }
 
                       $$ = driver.alloc.node_list(kwrestarg);
@@ -2877,7 +2877,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto kwrestarg = driver.build.kwrestarg(self, $2, nullptr);
 
                       if (argsig) {
-                        kwrestarg = driver.build.typed_arg(self, argsig, kwrestarg);
+                        kwrestarg = driver.build.tr_typed_arg(self, argsig, kwrestarg);
                       }
 
                       $$ = driver.alloc.node_list(kwrestarg);
@@ -2888,7 +2888,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto argsig = $1;
                       auto arg = driver.build.optarg(self, $2, $3, $4);
                       if (argsig) {
-                        $$ = driver.build.typed_arg(self, argsig, arg);
+                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
                       } else {
                         $$ = arg;
                       }
@@ -2899,7 +2899,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto argsig = $1;
                       auto arg = driver.build.optarg(self, $2, $3, $4);
                       if (argsig) {
-                        $$ = driver.build.typed_arg(self, argsig, arg);
+                        $$ = driver.build.tr_typed_arg(self, argsig, arg);
                       } else {
                         $$ = arg;
                       }
@@ -2939,7 +2939,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto restarg = driver.build.restarg(self, $2, ident);
 
                       if (argsig) {
-                        restarg = driver.build.typed_arg(self, argsig, restarg);
+                        restarg = driver.build.tr_typed_arg(self, argsig, restarg);
                       }
 
                       $$ = driver.alloc.node_list(restarg);
@@ -2950,7 +2950,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto restarg = driver.build.restarg(self, $2, nullptr);
 
                       if (argsig) {
-                        restarg = driver.build.typed_arg(self, argsig, restarg);
+                        restarg = driver.build.tr_typed_arg(self, argsig, restarg);
                       }
 
                       $$ = driver.alloc.node_list(restarg);
@@ -2968,7 +2968,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto blockarg = driver.build.blockarg(self, $2, ident);
 
                       if (argsig) {
-                        blockarg = driver.build.typed_arg(self, argsig, blockarg);
+                        blockarg = driver.build.tr_typed_arg(self, argsig, blockarg);
                       }
 
                       $$ = driver.alloc.node_list(blockarg);
@@ -2979,7 +2979,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto blockarg = driver.build.blockarg(self, $2, nullptr);
 
                       if (argsig) {
-                        blockarg = driver.build.typed_arg(self, argsig, blockarg);
+                        blockarg = driver.build.tr_typed_arg(self, argsig, blockarg);
                       }
 
                       $$ = driver.alloc.node_list(blockarg);
@@ -3133,7 +3133,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       auto returnsig = $3;
 
                       auto prototype = returnsig
-                        ? driver.build.prototype(self, nullptr, blockproto, returnsig)
+                        ? driver.build.tr_prototype(self, nullptr, blockproto, returnsig)
                         : blockproto;
 
                       $$ = driver.build.tr_proc(self, $1, prototype, $4);
@@ -3184,7 +3184,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
 
     tr_returnsig: tASSOC tr_type
                     {
-                      $$ = $2;
+                      $$ = driver.build.tr_returnsig(self, $1, $2);
                     }
                 |
                     {

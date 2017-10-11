@@ -143,16 +143,16 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, const std::string& sourc
   , herebody_s(nullptr)
   , in_kwarg(false)
 {
-  // ensure the stack capacity is non-zero so we can just double in
+  // ensure the stack is non-empty so we can just double in
   // check_stack_capacity:
-  stack.reserve(16);
+  stack.resize(16);
 
   static_env.push(environment());
 }
 
 void lexer::check_stack_capacity() {
-  if (stack.size() == stack.capacity()) {
-    stack.reserve(stack.capacity() * 2);
+    if (stack.size() == (uint)top) {
+    stack.resize(stack.size() * 2);
   }
 }
 
