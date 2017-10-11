@@ -6,6 +6,7 @@ cc_library(
         "Builder.cc",
         "Builder.h",
         "Node.cc",
+        "Node_gen.cc",
         "Node_gen.h",
         "Result.cc",
     ],
@@ -41,8 +42,11 @@ cc_binary(
 
 genrule(
     name = "generate_node_h",
-    outs = ["Node_gen.h"],
-    cmd = "$(location :generate_ast) > $@",
+    outs = [
+        "Node_gen.h",
+        "Node_gen.cc",
+    ],
+    cmd = "$(location :generate_ast) $(location Node_gen.h) $(location Node_gen.cc)",
     tools = [":generate_ast"],
 )
 
@@ -52,7 +56,10 @@ cc_test(
         "parser_test.cc",
     ],
     copts = ["-Iexternal/gtest/include"],
-    data = glob(["fixtures/*.rb"]),
+    data = glob([
+        "fixtures/*.rb",
+        "fixtures/*.rb.exp",
+    ]),
     deps = [
         ":parser",
         "@gtest//:gtest",

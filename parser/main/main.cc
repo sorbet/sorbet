@@ -1,4 +1,5 @@
 #include "ast/ast.h"
+#include "parser/Node.h"
 #include "parser/Result.h"
 #include "spdlog/spdlog.h"
 #include <ctime>
@@ -24,6 +25,7 @@ int main(int argc, char **argv) {
     cxxopts::Options options("parse_ruby", "Parse ruby code and print it");
     options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
+    options.add_options()("q,quiet", "Be quiet");
     options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
     options.parse_positional("files");
 
@@ -56,16 +58,24 @@ int main(int argc, char **argv) {
 
     clock_t begin = clock();
     for (auto &fileName : files) {
-        std::ifstream is(fileName);
+        std::ifstream fin(fileName);
         // Determine the file length
-        is.seekg(0, std::ios_base::end);
-        std::size_t size = is.tellg();
-        is.seekg(0, std::ios_base::beg);
-        std::string source;
-        source.reserve(size);
-        is.read((char *)source.c_str(), size);
-        is.close();
-        ruby_typer::parser::parse_ruby(ctx, source);
+        ruby_typer::Error::check(fin.good());
+        std::string src;
+        fin.seekg(0, std::ios::end);
+        src.reserve(fin.tellg());
+        fin.seekg(0, std::ios::beg);
+
+        src.assign((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
+        auto r = ruby_typer::parser::parse_ruby(ctx, src);
+        auto ast = r.ast();
+        if (ast) {
+            if (!options["q"].as<bool>()) {
+                cout << ast->toString(ctx, 0);
+            }
+        } else {
+            cout << " got null" << endl;
+        }
     }
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;

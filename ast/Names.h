@@ -49,8 +49,6 @@ public:
         return !(rhs == *this);
     }
 
-    std::string show(ContextBase &ctx) const;
-
     inline int id() const {
         return _id;
     }

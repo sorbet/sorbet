@@ -156,10 +156,11 @@ std::string field_type(FieldType arg) {
     }
 }
 
-void emit_node_class(NodeDef &node) {
+void emit_node_header(NodeDef &node) {
     cout << "class " << node.name << " : public Node {" << endl;
     cout << "public:" << endl;
 
+    // generate constructor
     cout << "    " << node.name << "(Loc loc";
     for (auto &arg : node.fields) {
         cout << ", " << arg_type(arg.type) << arg.name;
@@ -178,17 +179,74 @@ void emit_node_class(NodeDef &node) {
     cout << " {}" << endl;
     cout << endl;
 
+    // Generate fields
     for (auto &arg : node.fields) {
         cout << "    " << field_type(arg.type) << " " << arg.name << ";" << endl;
     }
-
+    cout << endl;
+    cout << "  virtual std::string toString(ast::ContextBase &ctx, int tabs = 0);" << endl;
     cout << "};" << endl;
     cout << endl;
 }
 
-int main(int argc, char **argv) {
-    for (auto &node : nodes) {
-        emit_node_class(node);
+void emit_node_classfile(NodeDef &node) {
+    cout << "  std::string " << node.name << "::toString(ast::ContextBase &ctx, int tabs) { " << endl
+         << "    std::stringstream buf;" << endl;
+    cout << "    buf << \"" << node.name << " {\" << std::endl;" << endl;
+    // Generate fields
+    for (auto &arg : node.fields) {
+        cout << "    printTabs(buf, tabs + 1);" << endl;
+        switch (arg.type) {
+            case Name:
+                cout << "    buf << \"" << arg.name << " = \" << " << arg.name
+                     << ".name(ctx).toString(ctx) << std::endl;" << endl;
+                break;
+            case Node:
+                cout << "    printNode(buf, " << arg.name << ", ctx, tabs + 1);" << endl;
+                break;
+            case NodeVec:
+                cout << "    buf << \"" << arg.name << " = [\" << std::endl;" << endl;
+                cout << "    for (auto &&a: " << arg.name << ") {" << endl;
+                cout << "      printTabs(buf, tabs + 2);" << endl;
+                cout << "      printNode(buf, a, ctx, tabs + 2); " << endl;
+                cout << "    }" << endl;
+                cout << "    printTabs(buf, tabs + 1);";
+                cout << "    buf << \"]\" << std::endl;" << endl;
+                break;
+            case String:
+                cout << "    buf << \"" << arg.name << " = \\\"\" << " << arg.name << "<< \"\\\"\" << std::endl;"
+                     << endl;
+                break;
+            case Uint:
+                cout << "    buf << \"" << arg.name << " = \" << " << arg.name << " << std::endl;" << endl;
+                break;
+        }
     }
+    cout << "    printTabs(buf, tabs);" << endl;
+    cout << "    buf << \"}\";" << endl;
+    cout << "    return buf.str();" << endl;
+    cout << "  }" << endl;
+    cout << endl;
+}
+
+int main(int argc, char **argv) {
+    // emmit headef file
+    auto headerfile = argv[1];
+    freopen(headerfile, "w", stdout);
+    for (auto &node : nodes) {
+        emit_node_header(node);
+    }
+
+    auto classfile = argv[2];
+    freopen(classfile, "w", stdout);
+    cout << "#include \"parser/Node.h\"" << endl << endl;
+    cout << "namespace ruby_typer {" << endl;
+    cout << "namespace parser {" << endl;
+    for (auto &node : nodes) {
+
+        emit_node_classfile(node);
+    }
+    cout << "}" << endl;
+    cout << "}" << endl;
     return 0;
 }

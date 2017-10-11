@@ -1,5 +1,6 @@
 #include "ast/Trees.h"
 #include "common/common.h"
+#include "parser/Node.h"
 #include "parser/Result.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
@@ -28,5 +29,15 @@ TEST(ParserTest, FixtureParse) {
 
     src.assign((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
 
-    ruby_typer::parser::parse_ruby(ctx, src);
+    std::ifstream fexp("parser/fixtures/gerald.rb.exp");
+    ASSERT_TRUE(fexp.good());
+    std::string exp;
+    fexp.seekg(0, std::ios::end);
+    exp.reserve(fin.tellg());
+    fexp.seekg(0, std::ios::beg);
+
+    exp.assign((std::istreambuf_iterator<char>(fexp)), std::istreambuf_iterator<char>());
+
+    auto got = ruby_typer::parser::parse_ruby(ctx, src);
+    ASSERT_EQ(got.ast()->toString(ctx), exp);
 }
