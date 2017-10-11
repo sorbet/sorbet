@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -233,105 +234,113 @@ std::string field_type(FieldType arg) {
     }
 }
 
-void emit_node_header(NodeDef &node) {
-    cout << "class " << node.name << " : public Node {" << endl;
-    cout << "public:" << endl;
+void emit_node_header(ostream &out, NodeDef &node) {
+    out << "class " << node.name << " : public Node {" << endl;
+    out << "public:" << endl;
 
     // generate constructor
-    cout << "    " << node.name << "(Loc loc";
+    out << "    " << node.name << "(Loc loc";
     for (auto &arg : node.fields) {
-        cout << ", " << arg_type(arg.type) << arg.name;
+        out << ", " << arg_type(arg.type) << arg.name;
     }
-    cout << ")" << endl;
-    cout << "        : Node(loc)";
+    out << ")" << endl;
+    out << "        : Node(loc)";
     for (auto &arg : node.fields) {
-        cout << ", " << arg.name << "(";
+        out << ", " << arg.name << "(";
         if (arg.type == Node || arg.type == NodeVec)
-            cout << "move(";
-        cout << arg.name;
+            out << "move(";
+        out << arg.name;
         if (arg.type == Node || arg.type == NodeVec)
-            cout << ")";
-        cout << ")";
+            out << ")";
+        out << ")";
     }
-    cout << " {}" << endl;
-    cout << endl;
+    out << " {}" << endl;
+    out << endl;
 
     // Generate fields
     for (auto &arg : node.fields) {
-        cout << "    " << field_type(arg.type) << " " << arg.name << ";" << endl;
+        out << "    " << field_type(arg.type) << " " << arg.name << ";" << endl;
     }
-    cout << endl;
-    cout << "  virtual std::string toString(ast::ContextBase &ctx, int tabs = 0);" << endl;
-    cout << "  virtual std::string nodeName();" << endl;
+    out << endl;
+    out << "  virtual std::string toString(ast::ContextBase &ctx, int tabs = 0);" << endl;
+    out << "  virtual std::string nodeName();" << endl;
 
-    cout << "};" << endl;
-    cout << endl;
+    out << "};" << endl;
+    out << endl;
 }
 
-void emit_node_classfile(NodeDef &node) {
+void emit_node_classfile(ostream &out, NodeDef &node) {
+    out << "  std::string " << node.name << "::nodeName() {" << endl;
+    out << "    return \"" << node.name << "\";" << endl;
+    out << "  };" << endl << endl;
 
-    cout << "  std::string " << node.name << "::nodeName() {" << endl;
-    cout << "    return \"" << node.name << "\";" << endl;
-    cout << "  };" << endl << endl;
-
-    cout << "  std::string " << node.name << "::toString(ast::ContextBase &ctx, int tabs) { " << endl
-         << "    std::stringstream buf;" << endl;
-    cout << "    buf << \"" << node.name << " {\" << std::endl;" << endl;
+    out << "  std::string " << node.name << "::toString(ast::ContextBase &ctx, int tabs) { " << endl
+        << "    std::stringstream buf;" << endl;
+    out << "    buf << \"" << node.name << " {\" << std::endl;" << endl;
     // Generate fields
     for (auto &arg : node.fields) {
-        cout << "    printTabs(buf, tabs + 1);" << endl;
+        out << "    printTabs(buf, tabs + 1);" << endl;
         switch (arg.type) {
             case Name:
-                cout << "    buf << \"" << arg.name << " = \" << " << arg.name
-                     << ".name(ctx).toString(ctx) << std::endl;" << endl;
+                out << "    buf << \"" << arg.name << " = \" << " << arg.name
+                    << ".name(ctx).toString(ctx) << std::endl;" << endl;
                 break;
             case Node:
-                cout << "    buf << \"" << arg.name << " = \";" << endl;
-                cout << "    printNode(buf, " << arg.name << ", ctx, tabs + 1);" << endl;
+                out << "    buf << \"" << arg.name << " = \";" << endl;
+                out << "    printNode(buf, " << arg.name << ", ctx, tabs + 1);" << endl;
                 break;
             case NodeVec:
-                cout << "    buf << \"" << arg.name << " = [\" << std::endl;" << endl;
-                cout << "    for (auto &&a: " << arg.name << ") {" << endl;
-                cout << "      printTabs(buf, tabs + 2);" << endl;
-                cout << "      printNode(buf, a, ctx, tabs + 2); " << endl;
-                cout << "    }" << endl;
-                cout << "    printTabs(buf, tabs + 1);";
-                cout << "    buf << \"]\" << std::endl;" << endl;
+                out << "    buf << \"" << arg.name << " = [\" << std::endl;" << endl;
+                out << "    for (auto &&a: " << arg.name << ") {" << endl;
+                out << "      printTabs(buf, tabs + 2);" << endl;
+                out << "      printNode(buf, a, ctx, tabs + 2); " << endl;
+                out << "    }" << endl;
+                out << "    printTabs(buf, tabs + 1);";
+                out << "    buf << \"]\" << std::endl;" << endl;
                 break;
             case String:
-                cout << "    buf << \"" << arg.name << " = \\\"\" << " << arg.name << "<< \"\\\"\" << std::endl;"
-                     << endl;
+                out << "    buf << \"" << arg.name << " = \\\"\" << " << arg.name << "<< \"\\\"\" << std::endl;"
+                    << endl;
                 break;
             case Uint:
-                cout << "    buf << \"" << arg.name << " = \" << " << arg.name << " << std::endl;" << endl;
+                out << "    buf << \"" << arg.name << " = \" << " << arg.name << " << std::endl;" << endl;
                 break;
         }
     }
-    cout << "    printTabs(buf, tabs);" << endl;
-    cout << "    buf << \"}\";" << endl;
-    cout << "    return buf.str();" << endl;
-    cout << "  }" << endl;
-    cout << endl;
+    out << "    printTabs(buf, tabs);" << endl;
+    out << "    buf << \"}\";" << endl;
+    out << "    return buf.str();" << endl;
+    out << "  }" << endl;
+    out << endl;
 }
 
 int main(int argc, char **argv) {
-    // emmit headef file
-    auto headerfile = argv[1];
-    freopen(headerfile, "w", stdout);
-    for (auto &node : nodes) {
-        emit_node_header(node);
+    // emit headef file
+    {
+        ofstream header(argv[1], ios::trunc);
+        if (!header.good()) {
+            cerr << "unable to open " << argv[1] << endl;
+            return 1;
+        }
+        for (auto &node : nodes) {
+            emit_node_header(header, node);
+        }
     }
 
-    auto classfile = argv[2];
-    freopen(classfile, "w", stdout);
-    cout << "#include \"parser/Node.h\"" << endl << endl;
-    cout << "namespace ruby_typer {" << endl;
-    cout << "namespace parser {" << endl;
-    for (auto &node : nodes) {
-
-        emit_node_classfile(node);
+    {
+        ofstream classfile(argv[2], ios::trunc);
+        if (!classfile.good()) {
+            cerr << "unable to open " << argv[2] << endl;
+            return 1;
+        }
+        classfile << "#include \"parser/Node.h\"" << endl << endl;
+        classfile << "namespace ruby_typer {" << endl;
+        classfile << "namespace parser {" << endl;
+        for (auto &node : nodes) {
+            emit_node_classfile(classfile, node);
+        }
+        classfile << "}" << endl;
+        classfile << "}" << endl;
     }
-    cout << "}" << endl;
-    cout << "}" << endl;
     return 0;
 }
