@@ -1,0 +1,84 @@
+Begin {
+  stmts = [
+    Alias {
+      from = Symbol {
+        val = "foo"
+      }
+      to = Symbol {
+        val = "bar"
+      }
+    }
+    IVarAsgn {
+      name = @iv
+      expr = Integer {
+        val = "1"
+      }
+    }
+    CVarAsgn {
+      name = @@cv
+      expr = Integer {
+        val = "1"
+      }
+    }
+    GVarAsgn {
+      name = $gv
+      expr = Integer {
+        val = "1"
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = x
+              args = [
+              ]
+            }
+            method = var=
+            args = [
+            ]
+          }
+          LVarLhs {
+            name = y
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Nil {
+          }
+          Nil {
+          }
+        ]
+      }
+    }
+    Kwbegin {
+      stmts = [
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Nil {
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Send {
+          receiver = NULL
+          method = a
+          args = [
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = b
+          args = [
+          ]
+        }
+      ]
+    }
+  ]
+}

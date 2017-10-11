@@ -117,7 +117,7 @@ public:
     }
 
     unique_ptr<Node> alias(const token *alias, unique_ptr<Node> to, unique_ptr<Node> from) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Alias>(loc_join(tok_loc(alias), from->loc), move(to), move(from));
     }
 
     unique_ptr<Node> arg(const token *name) {
@@ -154,7 +154,7 @@ public:
         } else if (GVarLhs *c = dynamic_cast<GVarLhs *>(lhs.get())) {
             return make_unique<GVarAsgn>(loc, c->name, move(rhs));
         }
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("unimplemented lhs: ", lhs->nodeName());
     }
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
@@ -166,8 +166,17 @@ public:
             return make_unique<IVarLhs>(iv->loc, iv->name);
         } else if (Const *c = dynamic_cast<Const *>(node.get())) {
             return make_unique<ConstLhs>(c->loc, move(c->scope), move(c->name));
+        } else if (CVar *cv = dynamic_cast<CVar *>(node.get())) {
+            return make_unique<CVarLhs>(cv->loc, cv->name);
+        } else if (GVar *gv = dynamic_cast<GVar *>(node.get())) {
+            return make_unique<GVarLhs>(gv->loc, gv->name);
+        } else if (dynamic_cast<Backref *>(node.get()) != nullptr || dynamic_cast<NthRef *>(node.get()) != nullptr) {
+            error(ruby_parser::dclass::BackrefAssignment, node->loc);
+            return make_unique<Nil>(node->loc);
+        } else {
+            error(ruby_parser::dclass::InvalidAssignment, node->loc);
+            return make_unique<Nil>(node->loc);
         }
-        BUILDER_UNIMPLEMENTED();
     }
 
     unique_ptr<Node> associate(const token *begin, vector<unique_ptr<Node>> pairs, const token *end) {
@@ -175,11 +184,16 @@ public:
     }
 
     unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
-        BUILDER_UNIMPLEMENTED();
+        auto method = ctx_.enterNameUTF8(selector->string() + "=");
+        Loc loc = loc_join(receiver->loc, tok_loc(selector));
+        if (dot && dot->string() == "&.") {
+            return make_unique<CSend>(loc, move(receiver), method, vector<unique_ptr<Node>>());
+        }
+        return make_unique<Send>(loc, move(receiver), method, vector<unique_ptr<Node>>());
     }
 
     unique_ptr<Node> back_ref(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Backref>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> begin(const token *begin, unique_ptr<Node> body, const token *end) {
@@ -235,7 +249,17 @@ public:
     }
 
     unique_ptr<Node> begin_keyword(const token *begin, unique_ptr<Node> body, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(begin), tok_loc(end));
+        if (body != nullptr) {
+            if (Begin *b = dynamic_cast<Begin *>(body.get())) {
+                return make_unique<Kwbegin>(loc, move(b->stmts));
+            } else {
+                vector<unique_ptr<Node>> nodes;
+                nodes.push_back(move(body));
+                return make_unique<Kwbegin>(loc, move(nodes));
+            }
+        }
+        return make_unique<Kwbegin>(loc, vector<unique_ptr<Node>>());
     }
 
     unique_ptr<Node> binary_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
@@ -392,7 +416,7 @@ public:
     }
 
     unique_ptr<Node> cvar(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<CVar>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedent_level) {
@@ -451,7 +475,7 @@ public:
     }
 
     unique_ptr<Node> gvar(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<GVar>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> ident(const token *tok) {

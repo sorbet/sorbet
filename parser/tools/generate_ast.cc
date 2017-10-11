@@ -116,7 +116,7 @@ NodeDef nodes[] = {
     // Required keyword argument inside an (args)
     {"Kwarg", vector<FieldDef>({{"name", Name}})},
     // explicit `begin` keyword
-    {"Kwbegin", vector<FieldDef>({{"vars", NodeVec}})},
+    {"Kwbegin", vector<FieldDef>({{"stmts", NodeVec}})},
     // optional arg with default value provided
     {"Kwoptarg", vector<FieldDef>({{"name", Name}, {"default_", Node}})},
     // **kwargs arg
