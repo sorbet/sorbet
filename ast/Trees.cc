@@ -38,15 +38,14 @@ void printTabs(std::stringstream &to, int count) {
     }
 }
 
-ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Stat> rhs) : Decl(symbol), rhs(std::move(rhs)) {}
+ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Expr> name, std::vector<std::unique_ptr<Stat>> &rhs, bool isModule)
+    : Decl(symbol), rhs(std::move(rhs)), name(std::move(name)), isModule(isModule) {}
 
-MethodDef::MethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs)
-    : Decl(symbol), rhs(std::move(rhs)), args(std::move(args)) {}
+MethodDef::MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expr>> &args,
+                     std::unique_ptr<Expr> rhs, bool isSelf)
+    : Decl(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), isSelf(isSelf) {}
 
 Decl::Decl(SymbolRef symbol) : symbol(symbol) {}
-
-SelfMethodDef::SelfMethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs)
-    : Decl(symbol), rhs(std::move(rhs)), args(std::move(args)) {}
 
 ConstDef::ConstDef(SymbolRef symbol, std::unique_ptr<Expr> rhs) : Decl(symbol), rhs(std::move(rhs)) {}
 
@@ -87,7 +86,7 @@ IntLit::IntLit(int value) : value(value) {}
 
 StringLit::StringLit(NameRef value) : value(value) {}
 
-ConstantLit::ConstantLit(NameRef cnst) : cnst(cnst) {}
+ConstantLit::ConstantLit(std::unique_ptr<Expr> scope, NameRef cnst) : cnst(cnst), scope(std::move(scope)) {}
 
 ArraySplat::ArraySplat(std::unique_ptr<Expr> arg) : arg(std::move(arg)) {}
 
@@ -96,6 +95,10 @@ HashSplat::HashSplat(std::unique_ptr<Expr> arg) : arg(std::move(arg)) {}
 Self::Self(SymbolRef claz) : claz(claz) {}
 
 Closure::Closure(SymbolRef method) : method(method) {}
+
+NotSupported::NotSupported(const std::string &why) : why(why) {}
+
+Symbol::Symbol(NameRef name) : name(name) {}
 
 std::string Closure::toString(ContextBase &ctx, int tabs) {
     return "closure(" + this->method.info(ctx).name.name(ctx).toString(ctx) + ")";

@@ -21,10 +21,6 @@ public:
 
     Stat *transformMethodDef(MethodDef *original);
 
-    Stat *transformSelfMethodDef(SelfMethodDef *original);
-
-    Stat *transformSelfMethodDef(ConstDef *original);
-
     Stat *transformIf(If *original);
 
     Stat *transformWhile(While *original);
@@ -98,7 +94,6 @@ public:
 
 GENERATE_HAS_MEMBER(transformClassDef);
 GENERATE_HAS_MEMBER(transformMethodDef);
-GENERATE_HAS_MEMBER(transformSelfMethodDef);
 GENERATE_HAS_MEMBER(transformConstDef);
 GENERATE_HAS_MEMBER(transformIf);
 GENERATE_HAS_MEMBER(transformWhile);
@@ -150,7 +145,6 @@ GENERATE_HAS_MEMBER(transformInsSeq);
 
 GENERATE_POSTPONE_CLASS(ClassDef);
 GENERATE_POSTPONE_CLASS(MethodDef);
-GENERATE_POSTPONE_CLASS(SelfMethodDef);
 GENERATE_POSTPONE_CLASS(ConstDef);
 GENERATE_POSTPONE_CLASS(If);
 GENERATE_POSTPONE_CLASS(While);
@@ -192,11 +186,14 @@ private:
         if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr)
             return what;
         if (ClassDef *v = dynamic_cast<ClassDef *>(what)) {
-            auto orhs = v->rhs.get();
-            auto nrhs = mapIt(orhs, ctx.withOwner(v->symbol));
-            if (nrhs != orhs) {
-                v->rhs.reset(nrhs);
+            for (auto &def : v->rhs) {
+                auto orhs = def.get();
+                auto nrhs = mapIt(orhs, ctx.withOwner(v->symbol));
+                if (nrhs != orhs) {
+                    def.reset(nrhs);
+                }
             }
+
             if (HAS_MEMBER_transformClassDef<FUNC>::value) {
                 return PostPoneCalling_ClassDef<FUNC, HAS_MEMBER_transformClassDef<FUNC>::value>::call(ctx, v, func);
             }
@@ -210,18 +207,6 @@ private:
             }
             if (HAS_MEMBER_transformMethodDef<FUNC>::value) {
                 return PostPoneCalling_MethodDef<FUNC, HAS_MEMBER_transformMethodDef<FUNC>::value>::call(ctx, v, func);
-            }
-            return v;
-        } else if (SelfMethodDef *v = dynamic_cast<SelfMethodDef *>(what)) {
-            auto orhs = v->rhs.get();
-            auto nrhs = mapIt(orhs, ctx.withOwner(v->symbol));
-            if (nrhs != orhs) {
-                Error::check(dynamic_cast<Expr *>(nrhs) != nullptr);
-                v->rhs.reset(dynamic_cast<Expr *>(nrhs));
-            }
-            if (HAS_MEMBER_transformSelfMethodDef<FUNC>::value) {
-                return PostPoneCalling_SelfMethodDef<FUNC, HAS_MEMBER_transformSelfMethodDef<FUNC>::value>::call(ctx, v,
-                                                                                                                 func);
             }
             return v;
         } else if (ConstDef *v = dynamic_cast<ConstDef *>(what)) {

@@ -21,7 +21,7 @@ class Expr : public Stat {};
 
 class ControlFlow : public Expr {};
 
-class Decl : public Stat {
+class Decl : public Expr {
 public:
     SymbolRef symbol;
 
@@ -38,9 +38,11 @@ public:
         return symbol.info(ctx).mixins(ctx);
     }
 
-    std::unique_ptr<Stat> rhs;
+    std::vector<std::unique_ptr<Stat>> rhs;
+    std::unique_ptr<Expr> name;
+    bool isModule;
 
-    ClassDef(SymbolRef symbol, std::unique_ptr<Stat> rhs);
+    ClassDef(SymbolRef symbol, std::unique_ptr<Expr> name, std::vector<std::unique_ptr<Stat>> &rhs, bool isModule);
 
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
@@ -48,18 +50,12 @@ public:
 class MethodDef : public Decl {
 public:
     std::unique_ptr<Expr> rhs;
-    std::vector<SymbolRef> args;
+    std::vector<std::unique_ptr<Expr>> args;
+    NameRef name;
+    bool isSelf;
 
-    MethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs);
-    virtual std::string toString(ContextBase &ctx, int tabs = 0);
-};
-
-class SelfMethodDef : public Decl {
-public:
-    std::unique_ptr<Expr> rhs;
-    std::vector<SymbolRef> args;
-
-    SelfMethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs);
+    MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expr>> &args, std::unique_ptr<Expr> rhs,
+              bool isSelf);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
@@ -142,6 +138,15 @@ public:
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
+class Symbol : public Expr {
+public:
+    NameRef name;
+
+    Symbol(NameRef name);
+
+    virtual std::string toString(ContextBase &ctx, int tabs);
+};
+
 class Assign : public Expr {
 public:
     std::unique_ptr<Expr> lhs;
@@ -212,10 +217,11 @@ public:
 };
 
 class ConstantLit : public Expr {
-    NameRef cnst;
-
 public:
-    ConstantLit(NameRef cnst);
+    NameRef cnst;
+    std::unique_ptr<Expr> scope;
+
+    ConstantLit(std::unique_ptr<Expr> scope, NameRef cnst);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
@@ -266,7 +272,11 @@ class EmptyTree : public Expr {
 };
 
 class NotSupported : public Expr {
+    std::string why;
+
 public:
+    NotSupported(const std::string &why);
+
     virtual std::string toString(ContextBase &ctx, int tabs);
 };
 

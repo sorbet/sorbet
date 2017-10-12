@@ -38,16 +38,6 @@ TEST(TreeMap, CountTrees) {
             return original;
         }
 
-        Stat *transformSelfMethodDef(Context ctx, SelfMethodDef *original) {
-            count++;
-            return original;
-        }
-
-        Stat *transformSelfMethodDef(Context ctx, ConstDef *original) {
-            count++;
-            return original;
-        }
-
         Stat *transformIf(Context ctx, If *original) {
             count++;
             return original;
@@ -176,11 +166,17 @@ TEST(TreeMap, CountTrees) {
     auto empty = std::vector<SymbolRef>();
     auto argumentSym = ctx.state.enterSymbol(methodSym, name, ctx.state.defn_top(), empty, false);
     std::unique_ptr<Expr> rhs(new IntLit(5));
-    auto args = std::vector<SymbolRef>{argumentSym};
+    auto arg = std::unique_ptr<Expr>(new Ident(argumentSym));
+    auto args = std::vector<unique_ptr<Expr>>();
+    args.emplace_back(std::move(arg));
 
-    std::unique_ptr<Stat> classRhs(new MethodDef(methodSym, args, std::move(rhs)));
+    std::unique_ptr<Stat> methodDef(new MethodDef(methodSym, name, args, std::move(rhs), false));
+    auto emptyTree = std::unique_ptr<Expr>(new EmptyTree());
+    auto cnst = std::unique_ptr<Expr>(new ConstantLit(std::move(emptyTree), name));
 
-    std::unique_ptr<Stat> tree(new ClassDef(classSym, std::move(classRhs)));
+    std::vector<std::unique_ptr<Stat>> classrhs;
+    classrhs.emplace_back(std::move(methodDef));
+    std::unique_ptr<Stat> tree(new ClassDef(classSym, std::move(cnst), classrhs, false));
     Counter c;
 
     auto r = TreeMap<Counter>::apply(ctx, c, std::move(tree));
