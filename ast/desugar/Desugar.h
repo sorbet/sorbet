@@ -1,7 +1,3 @@
-//
-// Created by Dmitry Petrashko on 10/11/17.
-//
-
 #ifndef SRUBY_DESUGAR_H
 #define SRUBY_DESUGAR_H
 

@@ -1,7 +1,3 @@
-//
-// Created by Dmitry Petrashko on 10/6/17.
-//
-
 #ifndef SRUBY_HASHING_H
 #define SRUBY_HASHING_H
 
