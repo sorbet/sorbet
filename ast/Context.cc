@@ -264,5 +264,11 @@ SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
     return current;
 }
 
+SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
+    auto tempName = this->enterNameUnique(kind, freshNameId++, name);
+    std::vector<SymbolRef> empty;
+    return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
+}
+
 } // namespace ast
 } // namespace ruby_typer

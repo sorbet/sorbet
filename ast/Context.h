@@ -41,6 +41,8 @@ public:
 
     SymbolRef newInnerClass(SymbolRef owner, NameRef name); // Needs to be implemented from scratch
 
+    SymbolRef newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
+
     NameRef enterNameUTF8(UTF8Desc nm);
 
     NameRef enterNameUnique(UniqueNameKind uniqueNameKind, u2 num, NameRef original);
@@ -95,6 +97,7 @@ private:
     void complete(SymbolRef id, SymbolInfo &currentInfo);
 
     SymbolRef synthesizeClass(UTF8Desc name);
+    u2 freshNameId = 0;
 };
 // CheckSize(ContextBase, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
