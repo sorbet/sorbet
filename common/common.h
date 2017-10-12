@@ -20,11 +20,11 @@ constexpr bool debug_mode = true;
     }
 
 template <typename ToCheck, std::size_t ExpectedSize, std::size_t RealSize = sizeof(ToCheck)> struct check_size {
-    static_assert(ExpectedSize == RealSize, "Size is off!");
+    static_assert(debug_mode || ExpectedSize == RealSize, "Size is off!");
 };
 
 template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = alignof(ToCheck)> struct check_align {
-    static_assert(ExpectedAlign == RealAlign, "Align is off!");
+    static_assert(debug_mode || ExpectedAlign == RealAlign, "Align is off!");
 };
 
 #ifdef UNUSED
