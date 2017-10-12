@@ -1,5 +1,6 @@
 #include "parser/parser.h"
 
+template class std::unique_ptr<ruby_typer::parser::Node>;
 namespace ruby_typer {
 namespace parser {
 
