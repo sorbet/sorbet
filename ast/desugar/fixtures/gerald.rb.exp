@@ -1,0 +1,119 @@
+begin
+  <emtpyTree>.require_relative("../../../extn".to_s())
+  <emtpyTree>::Opus::AutogenLoader.init(<Not Supported (FileLiteral)>)
+  module <emtpyTree>::Opus::CIBot::Gerald<<todo sym>>
+    class <emtpyTree>::MatchTimeout<<todo sym>>
+      <emtpyTree>.attr_reader(:rule_token)
+      def initialize<<todo sym>>(<Not Supported (Arg)>, <Not Supported (Kwoptarg)>)
+        begin
+          <Not Supported (Super)>
+          <Not Supported (IVarAsgn)>
+        end
+
+    end
+    class <emtpyTree>::Matcher<<todo sym>>
+      <emtpyTree>.include(<emtpyTree>::Chalk::Log)
+      <Not Supported (ConstAsgn)>
+      def initialize<<todo sym>>()
+        begin
+          <Not Supported (Masgn)>
+          <Not Supported (If)>
+        end
+
+      def match<<todo sym>>(<Not Supported (Arg)>)
+        begin
+          <Not Supported (If)>
+          <Not Supported (LVarAsgn)>
+          <Not Supported (Block)>
+        end
+
+    end
+    class <emtpyTree>::MatchContext<<todo sym>>
+      <emtpyTree>.attr_reader(:repo)
+      <emtpyTree>.attr_reader(:assignee)
+      <emtpyTree>.attr_reader(:gh_user)
+      <emtpyTree>.attr_reader(:merge_branch)
+      <emtpyTree>.attr_reader(:body)
+      <emtpyTree>.attr_reader(:title)
+      <emtpyTree>.attr_reader(:diff)
+      <emtpyTree>.attr_reader(:openapi_diff)
+      def initialize<<todo sym>>(<Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>)
+        begin
+          <Not Supported (IVarAsgn)>
+          <Not Supported (IVarAsgn)>
+          <Not Supported (IVarAsgn)>
+          <Not Supported (IVarAsgn)>
+          <Not Supported (IVarAsgn)>
+          <Not Supported (IVarAsgn)>
+          <Not Supported (IVarAsgn)>
+          <Not Supported (IVarAsgn)>
+        end
+
+      def user_stripe_suffix?<<todo sym>>()
+        <Not Supported (IVar)>.start_with?("stripe-internal/".to_s()).!()
+
+    end
+    class <emtpyTree>::MatchTimeBudget<<todo sym>>
+      <Not Supported (ConstAsgn)>
+      <Not Supported (ConstAsgn)>
+      def initialize<<todo sym>>()
+        <Not Supported (IVarAsgn)>
+
+      def check!<<todo sym>>()
+        begin
+          <Not Supported (LVarAsgn)>
+          <Not Supported (If)>
+        end
+
+      def time_rule<<todo sym>>(<Not Supported (Arg)>)
+        begin
+          <Not Supported (LVarAsgn)>
+          <Not Supported (LVarAsgn)>
+          <Not Supported (LVarAsgn)>
+          <Not Supported (If)>
+          <emtpyTree>.check!()
+          <Not Supported (LVar)>
+        end
+
+    end
+    class <emtpyTree>::Diff<<todo sym>>
+      def initialize<<todo sym>>(<Not Supported (Arg)>)
+        begin
+          <Not Supported (IVarAsgn)>
+          <Not Supported (IVarAsgn)>
+        end
+
+      def affected_files<<todo sym>>()
+        <emtpyTree>.added_files().+(<emtpyTree>.deleted_files()).+(<emtpyTree>.changed_files())
+
+      def added_files<<todo sym>>()
+        <Not Supported (Block)>
+
+      def deleted_files<<todo sym>>()
+        <Not Supported (Block)>
+
+      def changed_files<<todo sym>>()
+        <Not Supported (Block)>
+
+      def added_lines<<todo sym>>()
+        <Not Supported (Block)>.flatten()
+
+      def removed_lines<<todo sym>>()
+        <Not Supported (Block)>.flatten()
+
+      def changed_lines<<todo sym>>()
+        <emtpyTree>.added_lines().+(<emtpyTree>.removed_lines())
+
+      def changed_openapi?<<todo sym>>()
+        <emtpyTree>.changed_files().include?(<emtpyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
+
+      <emtpyTree>.private(def parse<<todo sym>>(<Not Supported (Arg)>)
+        begin
+          <Not Supported (LVarAsgn)>
+          <Not Supported (OrAsgn)>
+          <Not Supported (Block)>.compact()
+        end
+)
+    end
+  end
+end

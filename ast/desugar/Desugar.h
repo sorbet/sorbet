@@ -13,10 +13,7 @@ namespace ruby_typer {
 namespace ast {
 namespace desugar {
 
-class Desugar {
-public:
-    static std::unique_ptr<Stat> yesPlease(Context ctx, std::unique_ptr<parser::Node> &what);
-};
+std::unique_ptr<Stat> node2Tree(Context ctx, parser::Node *what);
 } // namespace desugar
 } // namespace ast
 } // namespace ruby_typer

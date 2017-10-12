@@ -1,8 +1,8 @@
-#include "ast/ast.h"
-#include "parser/parser.h"
-#include "ast/desugar/Desugar.h"
-#include "spdlog/spdlog.h"
 #include "../../ast.h"
+#include "ast/ast.h"
+#include "ast/desugar/Desugar.h"
+#include "parser/parser.h"
+#include "spdlog/spdlog.h"
 #include <ctime>
 #include <cxxopts.hpp>
 #include <iostream>
@@ -29,12 +29,10 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
     }
     if (ast) {
         ruby_typer::ast::Context context(ctx, ctx.defn_root());
-        std::unique_ptr<ruby_typer::parser::Node> nd(ast);
-        auto des = ruby_typer::ast::desugar::Desugar::yesPlease(context, nd);
+        auto des = ruby_typer::ast::desugar::node2Tree(context, ast);
         if (!opts["q"].as<bool>()) {
             cout << des->toString(ctx, 0) << endl;
         }
-        nd.release();
     } else {
         cout << " got null" << endl;
     }

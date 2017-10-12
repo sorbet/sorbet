@@ -1,0 +1,24 @@
+begin
+  <Not Supported (Alias)>
+  <Not Supported (IVarAsgn)>
+  <Not Supported (CVarAsgn)>
+  <Not Supported (GVarAsgn)>
+  <Not Supported (Masgn)>
+  <Not Supported (Kwbegin)>
+  <Not Supported (Kwbegin)>
+  <Not Supported (Kwbegin)>
+  def foo<<todo sym>>(<Not Supported (Blockarg)>)
+    <emtpyTree>
+
+  <Not Supported (Block)>
+  <Not Supported (Case)>
+  "x".to_s()
+  <Not Supported (Integer)>.+(<Not Supported (Complex)>)
+  <Not Supported (Float)>
+  <Not Supported (Complex)>
+  <Not Supported (DefS)>
+  <Not Supported (SClass)>
+  <Not Supported (Or)>
+  <Not Supported (For)>
+  <Not Supported (While)>
+end

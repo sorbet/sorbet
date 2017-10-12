@@ -26,7 +26,7 @@ std::unique_ptr<Stat> mkSend(std::unique_ptr<Stat> &recv, NameRef fun, std::vect
     for (auto &a : args) {
         nargs.emplace_back(stat2Expr(a));
     }
-    return std::make_unique<Send>(std::move(recvChecked), Names::andAnd(), std::move(nargs));
+    return std::make_unique<Send>(std::move(recvChecked), fun, std::move(nargs));
 }
 
 std::unique_ptr<Stat> mkSend1(std::unique_ptr<Stat> &recv, NameRef fun, std::unique_ptr<Stat> &arg1) {
@@ -34,7 +34,7 @@ std::unique_ptr<Stat> mkSend1(std::unique_ptr<Stat> &recv, NameRef fun, std::uni
     auto argChecked = stat2Expr(arg1);
     auto nargs = std::vector<std::unique_ptr<Expr>>();
     nargs.emplace_back(std::move(argChecked));
-    return std::make_unique<Send>(std::move(recvChecked), Names::andAnd(), std::move(nargs));
+    return std::make_unique<Send>(std::move(recvChecked), fun, std::move(nargs));
 }
 
 std::unique_ptr<Stat> mkSend1(std::unique_ptr<Stat> &&recv, NameRef fun, std::unique_ptr<Stat> &&arg1) {
@@ -52,7 +52,7 @@ std::unique_ptr<Stat> mkSend1(std::unique_ptr<Stat> &recv, NameRef fun, std::uni
 std::unique_ptr<Stat> mkSend0(std::unique_ptr<Stat> &recv, NameRef fun) {
     auto recvChecked = stat2Expr(recv);
     auto nargs = std::vector<std::unique_ptr<Expr>>();
-    return std::make_unique<Send>(std::move(recvChecked), Names::andAnd(), std::move(nargs));
+    return std::make_unique<Send>(std::move(recvChecked), fun, std::move(nargs));
 }
 
 std::unique_ptr<Stat> mkSend0(std::unique_ptr<Stat> &&recv, NameRef fun) {
@@ -81,23 +81,22 @@ std::unique_ptr<Stat> mkEmptyTree() {
     return std::make_unique<EmptyTree>();
 }
 
-    std::unique_ptr<Stat> mkInsSeq(std::vector<std::unique_ptr<Stat>> &&stats, std::unique_ptr<Expr> &&expr) {
-        return std::make_unique<InsSeq>(std::move(stats), std::move(expr));
-    }
+std::unique_ptr<Stat> mkInsSeq(std::vector<std::unique_ptr<Stat>> &&stats, std::unique_ptr<Expr> &&expr) {
+    return std::make_unique<InsSeq>(std::move(stats), std::move(expr));
+}
 
-std::unique_ptr<Stat> Desugar::yesPlease(Context ctx, std::unique_ptr<parser::Node> &what) {
+std::unique_ptr<Stat> node2TreeImpl(Context ctx, std::unique_ptr<parser::Node> &what) {
     if (what.get() == nullptr)
-        return std::unique_ptr<EmptyTree>();
+        return std::make_unique<EmptyTree>();
     std::unique_ptr<Stat> result;
     typecase(what.get(),
              [&](parser::And *a) {
-                 auto send =
-                     mkSend1(Desugar::yesPlease(ctx, a->left), Names::andAnd(), Desugar::yesPlease(ctx, a->right));
+                 auto send = mkSend1(node2TreeImpl(ctx, a->left), Names::andAnd(), node2TreeImpl(ctx, a->right));
                  result.swap(send);
              },
              [&](parser::AndAsgn *a) {
-                 auto recv = Desugar::yesPlease(ctx, a->left);
-                 auto arg = Desugar::yesPlease(ctx, a->right);
+                 auto recv = node2TreeImpl(ctx, a->left);
+                 auto arg = node2TreeImpl(ctx, a->right);
                  auto argChecked = stat2Expr(arg);
                  if (auto s = dynamic_cast<Send *>(recv.get())) {
                      Error::check(s->args.empty());
@@ -121,24 +120,51 @@ std::unique_ptr<Stat> Desugar::yesPlease(Context ctx, std::unique_ptr<parser::No
                  }
              },
              [&](parser::Send *a) {
-                 auto rec = Desugar::yesPlease(ctx, a->receiver);
+                 auto rec = node2TreeImpl(ctx, a->receiver);
                  std::vector<std::unique_ptr<Stat>> args;
                  for (auto &stat : a->args) {
-                     args.emplace_back(stat2Expr(Desugar::yesPlease(ctx, stat)));
+                     args.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
                  };
 
                  auto send = mkSend(rec, a->method, args);
                  result.swap(send);
+             },
+             [&](parser::DString *a) {
+                 auto it = a->nodes.begin();
+                 auto end = a->nodes.end();
+                 auto res = mkSend0(node2TreeImpl(ctx, *it), Names::to_s());
+                 ++it;
+                 for (; it != end; ++it) {
+                     auto &stat = *it;
+                     auto narg = node2TreeImpl(ctx, stat);
+                     auto n = mkSend1(res, Names::concat(), mkSend0(narg, Names::to_s()));
+                     res.reset(n.release());
+                 };
+
+                 result.swap(res);
+             },
+             [&](parser::Symbol *a) {
+                 auto res = std::unique_ptr<Stat>(new ast::Symbol(ctx.state.enterNameUTF8(a->val)));
+                 result.swap(res);
+             },
+             [&](parser::String *a) {
+                 auto res = std::unique_ptr<Stat>(new StringLit(ctx.state.enterNameUTF8(a->val)));
+                 result.swap(res);
+             },
+             [&](parser::Const *a) {
+                 auto scope = node2TreeImpl(ctx, a->scope);
+                 auto res = std::unique_ptr<Stat>(new ConstantLit(stat2Expr(scope), a->name));
+                 result.swap(res);
              },
              [&](parser::Begin *a) {
                  std::vector<std::unique_ptr<Stat>> stats;
                  auto end = --a->stmts.end();
                  for (auto it = a->stmts.begin(); it != end; ++it) {
                      auto &stat = *it;
-                     stats.emplace_back(Desugar::yesPlease(ctx, stat));
+                     stats.emplace_back(node2TreeImpl(ctx, stat));
                  };
                  auto &last = a->stmts.back();
-                 auto expr = Desugar::yesPlease(ctx, last);
+                 auto expr = node2TreeImpl(ctx, last);
                  if (auto *epx = dynamic_cast<Expr *>(expr.get())) {
                      auto exp = stat2Expr(expr);
                      auto block = mkInsSeq(std::move(stats), std::move(exp));
@@ -149,9 +175,51 @@ std::unique_ptr<Stat> Desugar::yesPlease(Context ctx, std::unique_ptr<parser::No
                      result.swap(block);
                  }
              },
-             [&](parser::Node *) {
-                 result.reset(new NotSupported());
-             });
+             [&](parser::Module *module) {
+                 std::vector<std::unique_ptr<Stat>> body;
+                 if (auto *a = dynamic_cast<parser::Begin *>(module->body.get())) {
+                     for (auto &stat : a->stmts) {
+                         body.emplace_back(node2TreeImpl(ctx, stat));
+                     };
+                 } else {
+                     body.emplace_back(node2TreeImpl(ctx, module->body));
+                 }
+                 auto res = std::unique_ptr<Stat>(
+                     new ClassDef(ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, module->name)), body, true));
+                 result.swap(res);
+             },
+             [&](parser::Class *claz) {
+                 std::vector<std::unique_ptr<Stat>> body;
+                 if (auto *a = dynamic_cast<parser::Begin *>(claz->body.get())) {
+                     for (auto &stat : a->stmts) {
+                         body.emplace_back(node2TreeImpl(ctx, stat));
+                     };
+                 } else {
+                     body.emplace_back(node2TreeImpl(ctx, claz->body));
+                 }
+                 auto res = std::unique_ptr<Stat>(
+                     new ClassDef(ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, claz->name)), body, false));
+                 result.swap(res);
+             },
+             [&](parser::DefMethod *method) {
+                 std::vector<std::unique_ptr<Expr>> args;
+                 if (auto *oargs = dynamic_cast<parser::Args *>(method->args.get())) {
+                     for (auto &arg : oargs->args) {
+                         args.emplace_back(stat2Expr(node2TreeImpl(ctx, arg)));
+                     }
+                 } else if (auto *arg = dynamic_cast<parser::Arg *>(method->args.get())) {
+                     args.emplace_back(stat2Expr(node2TreeImpl(ctx, method->args)));
+                 } else if (method->args.get() == nullptr) {
+                     // do nothing
+                 } else {
+                     Error::notImplemented();
+                 }
+                 auto res = std::unique_ptr<Stat>(new MethodDef(ctx.state.defn_todo(), method->name, args,
+                                                                stat2Expr(node2TreeImpl(ctx, method->body)), false));
+                 result.swap(res);
+             },
+             [&](parser::Node *a) { result.reset(new NotSupported(a->nodeName())); });
+    Error::check(result.get());
     return result;
     /*
      *  // alias bar foo
@@ -201,8 +269,6 @@ std::unique_ptr<Stat> Desugar::yesPlease(Context ctx, std::unique_ptr<parser::No
     {"Defined", vector<FieldDef>({{"value", Node}})},
     // def <expr>.name singleton-class method def
     {"DefS", vector<FieldDef>({{"name", Name}, {"singleton", Node}, {"args", Node}, {"body", Node}})},
-    // string interpolation, all nodes are concatenated in a single string
-    {"DString", vector<FieldDef>({{"nodes", NodeVec}})},
     // symbol interoplation, :"foo#{bar}"
     {"DSymbol", vector<FieldDef>({{"nodes", NodeVec}})},
     // ... flip-flop operator inside a conditional
@@ -329,6 +395,13 @@ std::unique_ptr<Stat> Desugar::yesPlease(Context ctx, std::unique_ptr<parser::No
     {"Yield", vector<FieldDef>({{"exprs", NodeVec}})},
     {"ZSuper", vector<FieldDef>()},
      */
+}
+
+std::unique_ptr<Stat> node2Tree(Context ctx, parser::Node *what) {
+    auto adapter = std::unique_ptr<Node>(what);
+    auto result = node2TreeImpl(ctx, adapter);
+    adapter.release();
+    return result;
 }
 } // namespace desugar
 } // namespace ast
