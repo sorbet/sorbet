@@ -265,7 +265,10 @@ class EmptyTree : public Expr {
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class NotSupported : public Expr {};
+class NotSupported : public Expr {
+public:
+    virtual std::string toString(ContextBase &ctx, int tabs);
+};
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

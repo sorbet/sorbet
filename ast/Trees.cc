@@ -262,5 +262,8 @@ std::string New::toString(ContextBase &ctx, int tabs) {
     return buf.str();
 }
 
+    std::string NotSupported::toString(ContextBase &ctx, int tabs) {
+        return "<Not Supported>";
+    }
 } // namespace ast
 } // namespace ruby_typer

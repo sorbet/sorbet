@@ -14,7 +14,8 @@ namespace ast {
 namespace desugar {
 
 class Desugar {
-    static std::unique_ptr<Stat> yesPlease(parser::Node *what);
+public:
+    static std::unique_ptr<Stat> yesPlease(Context ctx, std::unique_ptr<parser::Node> &what);
 };
 } // namespace desugar
 } // namespace ast

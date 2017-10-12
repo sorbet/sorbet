@@ -7,3 +7,17 @@ cc_library(
         "//parser",
     ],
 )
+
+
+cc_binary(
+    name = "desugar_ast",
+    srcs = [
+        "main/main.cc",
+    ],
+    linkstatic = 1,
+    deps = [
+        "//ast/desugar",
+        "@cxxopts//:cxxopts",
+        "@spdlog//:spdlog",
+    ],
+)
