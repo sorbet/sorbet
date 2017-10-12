@@ -2,7 +2,7 @@
 #include <sstream>
 
 // makes lldb work. Don't remove please
-template class std::unique_ptr<ruby_typer::ast::Expr>;
+template class std::unique_ptr<ruby_typer::ast::Expression>;
 template class std::unique_ptr<ruby_typer::ast::Statement>;
 
 namespace ruby_typer {
@@ -42,24 +42,24 @@ void printTabs(std::stringstream &to, int count) {
     }
 }
 
-ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Expr> name, std::vector<std::unique_ptr<Statement>> &rhs,
+ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Statement>> &rhs,
                    bool isModule)
-    : Decl(symbol), rhs(std::move(rhs)), name(std::move(name)), isModule(isModule) {}
+    : Declaration(symbol), rhs(std::move(rhs)), name(std::move(name)), isModule(isModule) {}
 
-MethodDef::MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expr>> &args,
-                     std::unique_ptr<Expr> rhs, bool isSelf)
-    : Decl(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), isSelf(isSelf) {}
+MethodDef::MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
+                     std::unique_ptr<Expression> rhs, bool isSelf)
+    : Declaration(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), isSelf(isSelf) {}
 
-Decl::Decl(SymbolRef symbol) : symbol(symbol) {}
+Declaration::Declaration(SymbolRef symbol) : symbol(symbol) {}
 
-ConstDef::ConstDef(SymbolRef symbol, std::unique_ptr<Expr> rhs) : Decl(symbol), rhs(std::move(rhs)) {}
+ConstDef::ConstDef(SymbolRef symbol, std::unique_ptr<Expression> rhs) : Declaration(symbol), rhs(std::move(rhs)) {}
 
-If::If(std::unique_ptr<Expr> cond, std::unique_ptr<Expr> thenp, std::unique_ptr<Expr> elsep)
+If::If(std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp, std::unique_ptr<Expression> elsep)
     : cond(std::move(cond)), thenp(std::move(thenp)), elsep(std::move(elsep)) {}
 
 Breakable::Breakable(u1 break_tag) : break_tag(break_tag) {}
 
-While::While(u1 break_tag, std::unique_ptr<Expr> cond, std::unique_ptr<Statement> body)
+While::While(u1 break_tag, std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body)
     : Breakable(break_tag), cond(std::move(cond)), body(std::move(body)) {}
 
 Break::Break(u1 break_tag) : break_tag(break_tag) {}
@@ -70,20 +70,21 @@ std::string Next::toString(ContextBase &ctx, int tabs) {
     return "next";
 }
 
-Return::Return(std::unique_ptr<Expr> expr) : expr(std::move(expr)) {}
+Return::Return(std::unique_ptr<Expression> expr) : expr(std::move(expr)) {}
 
 Ident::Ident(SymbolRef symbol) : symbol(symbol) {}
 
-Assign::Assign(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs) : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+Assign::Assign(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
+    : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
 
-Send::Send(std::unique_ptr<Expr> recv, NameRef fun, std::vector<std::unique_ptr<Expr>> &&args)
+Send::Send(std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args)
     :
 
       recv(std::move(recv)), fun(std::move(fun)), args(std::move(args)) {}
 
-New::New(SymbolRef claz, std::vector<std::unique_ptr<Expr>> &&args) : claz(claz), args(std::move(args)) {}
+New::New(SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args) : claz(claz), args(std::move(args)) {}
 
-NamedArg::NamedArg(NameRef name, std::unique_ptr<Expr> arg) : name(name), arg(std::move(arg)) {}
+NamedArg::NamedArg(NameRef name, std::unique_ptr<Expression> arg) : name(name), arg(std::move(arg)) {}
 
 FloatLit::FloatLit(float value) : value(value) {}
 
@@ -91,11 +92,11 @@ IntLit::IntLit(int value) : value(value) {}
 
 StringLit::StringLit(NameRef value) : value(value) {}
 
-ConstantLit::ConstantLit(std::unique_ptr<Expr> scope, NameRef cnst) : cnst(cnst), scope(std::move(scope)) {}
+ConstantLit::ConstantLit(std::unique_ptr<Expression> scope, NameRef cnst) : cnst(cnst), scope(std::move(scope)) {}
 
-ArraySplat::ArraySplat(std::unique_ptr<Expr> arg) : arg(std::move(arg)) {}
+ArraySplat::ArraySplat(std::unique_ptr<Expression> arg) : arg(std::move(arg)) {}
 
-HashSplat::HashSplat(std::unique_ptr<Expr> arg) : arg(std::move(arg)) {}
+HashSplat::HashSplat(std::unique_ptr<Expression> arg) : arg(std::move(arg)) {}
 
 Self::Self(SymbolRef claz) : claz(claz) {}
 
@@ -109,7 +110,7 @@ std::string Closure::toString(ContextBase &ctx, int tabs) {
     return "closure(" + this->method.info(ctx).name.name(ctx).toString(ctx) + ")";
 }
 
-InsSeq::InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expr> expr)
+InsSeq::InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expression> expr)
     : stats(std::move(stats)), expr(std::move(expr)) {}
 
 std::string ConstDef::toString(ContextBase &ctx, int tabs) {

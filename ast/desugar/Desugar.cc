@@ -10,20 +10,20 @@ namespace ast {
 namespace desugar {
 using namespace parser;
 
-std::unique_ptr<Expr> stat2Expr(std::unique_ptr<Statement> &expr) {
-    Error::check(dynamic_cast<Expr *>(expr.get()));
-    return std::unique_ptr<Expr>(dynamic_cast<Expr *>(expr.release()));
+std::unique_ptr<Expression> stat2Expr(std::unique_ptr<Statement> &expr) {
+    Error::check(dynamic_cast<Expression *>(expr.get()));
+    return std::unique_ptr<Expression>(dynamic_cast<Expression *>(expr.release()));
 }
 
-std::unique_ptr<Expr> stat2Expr(std::unique_ptr<Statement> &&expr) {
+std::unique_ptr<Expression> stat2Expr(std::unique_ptr<Statement> &&expr) {
     return stat2Expr(expr);
 }
 
 std::unique_ptr<Statement> mkSend(std::unique_ptr<Statement> &recv, NameRef fun,
                                   std::vector<std::unique_ptr<Statement>> &args) {
-    Error::check(dynamic_cast<Expr *>(recv.get()));
+    Error::check(dynamic_cast<Expression *>(recv.get()));
     auto recvChecked = stat2Expr(recv);
-    auto nargs = std::vector<std::unique_ptr<Expr>>();
+    auto nargs = std::vector<std::unique_ptr<Expression>>();
     for (auto &a : args) {
         nargs.emplace_back(stat2Expr(a));
     }
@@ -33,7 +33,7 @@ std::unique_ptr<Statement> mkSend(std::unique_ptr<Statement> &recv, NameRef fun,
 std::unique_ptr<Statement> mkSend1(std::unique_ptr<Statement> &recv, NameRef fun, std::unique_ptr<Statement> &arg1) {
     auto recvChecked = stat2Expr(recv);
     auto argChecked = stat2Expr(arg1);
-    auto nargs = std::vector<std::unique_ptr<Expr>>();
+    auto nargs = std::vector<std::unique_ptr<Expression>>();
     nargs.emplace_back(std::move(argChecked));
     return std::make_unique<Send>(std::move(recvChecked), fun, std::move(nargs));
 }
@@ -52,7 +52,7 @@ std::unique_ptr<Statement> mkSend1(std::unique_ptr<Statement> &recv, NameRef fun
 
 std::unique_ptr<Statement> mkSend0(std::unique_ptr<Statement> &recv, NameRef fun) {
     auto recvChecked = stat2Expr(recv);
-    auto nargs = std::vector<std::unique_ptr<Expr>>();
+    auto nargs = std::vector<std::unique_ptr<Expression>>();
     return std::make_unique<Send>(std::move(recvChecked), fun, std::move(nargs));
 }
 
@@ -83,7 +83,8 @@ std::unique_ptr<Statement> mkEmptyTree() {
     return std::make_unique<EmptyTree>();
 }
 
-std::unique_ptr<Statement> mkInsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expr> &&expr) {
+std::unique_ptr<Statement> mkInsSeq(std::vector<std::unique_ptr<Statement>> &&stats,
+                                    std::unique_ptr<Expression> &&expr) {
     return std::make_unique<InsSeq>(std::move(stats), std::move(expr));
 }
 
@@ -167,7 +168,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  };
                  auto &last = a->stmts.back();
                  auto expr = node2TreeImpl(ctx, last);
-                 if (auto *epx = dynamic_cast<Expr *>(expr.get())) {
+                 if (auto *epx = dynamic_cast<Expression *>(expr.get())) {
                      auto exp = stat2Expr(expr);
                      auto block = mkInsSeq(std::move(stats), std::move(exp));
                      result.swap(block);
@@ -204,7 +205,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  result.swap(res);
              },
              [&](parser::DefMethod *method) {
-                 std::vector<std::unique_ptr<Expr>> args;
+                 std::vector<std::unique_ptr<Expression>> args;
                  if (auto *oargs = dynamic_cast<parser::Args *>(method->args.get())) {
                      for (auto &arg : oargs->args) {
                          args.emplace_back(stat2Expr(node2TreeImpl(ctx, arg)));
