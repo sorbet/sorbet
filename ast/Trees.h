@@ -14,6 +14,7 @@ class Stat {
 public:
     Stat() = default;
     virtual ~Stat() = default;
+    virtual std::string toString(ContextBase &ctx, int tabs = 0) = 0;
 };
 
 class Expr : public Stat {};
@@ -40,6 +41,8 @@ public:
     std::unique_ptr<Stat> rhs;
 
     ClassDef(SymbolRef symbol, std::unique_ptr<Stat> rhs);
+
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class MethodDef : public Decl {
@@ -48,6 +51,7 @@ public:
     std::vector<SymbolRef> args;
 
     MethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class SelfMethodDef : public Decl {
@@ -56,6 +60,7 @@ public:
     std::vector<SymbolRef> args;
 
     SelfMethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class ConstDef : public Decl {
@@ -63,6 +68,7 @@ public:
     std::unique_ptr<Expr> rhs;
 
     ConstDef(SymbolRef symbol, std::unique_ptr<Expr> rhs);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class If : public ControlFlow {
@@ -71,6 +77,7 @@ public:
     std::unique_ptr<Expr> thenp;
     std::unique_ptr<Expr> elsep;
     If(std::unique_ptr<Expr> cond, std::unique_ptr<Expr> thenp, std::unique_ptr<Expr> elsep);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Breakable : public ControlFlow {
@@ -86,6 +93,7 @@ public:
     std::unique_ptr<Stat> body;
 
     While(u1 break_tag, std::unique_ptr<Expr> cond, std::unique_ptr<Stat> body);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class For : public Breakable {
@@ -97,6 +105,7 @@ public:
     u1 break_tag;
 
     Break(u1 break_tag);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Next : public ControlFlow {
@@ -104,6 +113,7 @@ public:
     u1 break_tag;
 
     Next(u1 break_tag);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Return : public ControlFlow {
@@ -111,6 +121,7 @@ public:
     std::unique_ptr<Expr> expr;
 
     Return(std::unique_ptr<Expr> expr);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Rescue : public ControlFlow {
@@ -119,6 +130,8 @@ public:
     SymbolRef binder;
     SymbolRef binder_type;
     std::unique_ptr<Expr> handler;
+
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Ident : public Expr {
@@ -126,6 +139,7 @@ public:
     SymbolRef symbol;
 
     Ident(SymbolRef symbol);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Assign : public Expr {
@@ -134,6 +148,7 @@ public:
     std::unique_ptr<Expr> rhs;
 
     Assign(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Send : public Expr {
@@ -143,6 +158,7 @@ public:
     std::vector<std::unique_ptr<Expr>> args;
 
     Send(std::unique_ptr<Expr> recv, NameRef fun, std::vector<std::unique_ptr<Expr>> &&args);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class New : public Expr {
@@ -151,6 +167,7 @@ public:
     std::vector<std::unique_ptr<Expr>> args;
 
     New(SymbolRef claz, std::vector<std::unique_ptr<Expr>> &&args);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class NamedArg : public Expr {
@@ -159,6 +176,7 @@ public:
     std::unique_ptr<Expr> arg;
 
     NamedArg(NameRef name, std::unique_ptr<Expr> arg);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Hash : public Expr {
@@ -174,6 +192,7 @@ public:
     float value;
 
     FloatLit(float value);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class IntLit : public Expr {
@@ -181,6 +200,7 @@ public:
     int value;
 
     IntLit(int value);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class StringLit : public Expr {
@@ -188,6 +208,7 @@ public:
     NameRef value;
 
     StringLit(NameRef value);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class ConstantLit : public Expr {
@@ -195,6 +216,7 @@ class ConstantLit : public Expr {
 
 public:
     ConstantLit(NameRef cnst);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class ArraySplat : public Expr {
@@ -202,6 +224,7 @@ public:
     std::unique_ptr<Expr> arg;
 
     ArraySplat(std::unique_ptr<Expr> arg);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class HashSplat : public Expr {
@@ -209,6 +232,7 @@ public:
     std::unique_ptr<Expr> arg;
 
     HashSplat(std::unique_ptr<Expr> arg);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Self : public Expr {
@@ -216,6 +240,7 @@ public:
     SymbolRef claz;
 
     Self(SymbolRef claz);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Closure : public Expr {
@@ -223,6 +248,7 @@ public:
     SymbolRef method;
 
     Closure(SymbolRef method);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class InsSeq : public Expr {
@@ -231,9 +257,15 @@ public:
     std::unique_ptr<Expr> expr;
 
     InsSeq(std::vector<std::unique_ptr<Stat>> &&stats, std::unique_ptr<Expr> expr);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class EmptyTree : public Expr {};
+class EmptyTree : public Expr {
+
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
+class NotSupported : public Expr {};
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

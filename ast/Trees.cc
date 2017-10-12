@@ -1,4 +1,5 @@
 #include "Trees.h"
+#include <sstream>
 
 namespace ruby_typer {
 namespace ast {
@@ -29,6 +30,14 @@ namespace ast {
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
+void printTabs(std::stringstream &to, int count) {
+    int i = 0;
+    while (i < count) {
+        to << "  ";
+        i++;
+    }
+}
+
 ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Stat> rhs) : Decl(symbol), rhs(std::move(rhs)) {}
 
 MethodDef::MethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs)
@@ -52,6 +61,10 @@ While::While(u1 break_tag, std::unique_ptr<Expr> cond, std::unique_ptr<Stat> bod
 Break::Break(u1 break_tag) : break_tag(break_tag) {}
 
 Next::Next(u1 break_tag) : break_tag(break_tag) {}
+
+std::string Next::toString(ContextBase &ctx, int tabs) {
+    return "next";
+}
 
 Return::Return(std::unique_ptr<Expr> expr) : expr(std::move(expr)) {}
 
@@ -84,8 +97,170 @@ Self::Self(SymbolRef claz) : claz(claz) {}
 
 Closure::Closure(SymbolRef method) : method(method) {}
 
+std::string Closure::toString(ContextBase &ctx, int tabs) {
+    return "closure(" + this->method.info(ctx).name.name(ctx).toString(ctx) + ")";
+}
+
 InsSeq::InsSeq(std::vector<std::unique_ptr<Stat>> &&stats, std::unique_ptr<Expr> expr)
     : stats(std::move(stats)), expr(std::move(expr)) {}
+
+std::string ConstDef::toString(ContextBase &ctx, int tabs) {
+    return "constdef " + this->symbol.info(ctx).name.name(ctx).toString(ctx) + " = " +
+           this->rhs->toString(ctx, tabs + 1);
+}
+
+std::string ClassDef::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+    buf << "class " << this->symbol.info(ctx).name.name(ctx).toString(ctx) << std::endl;
+    printTabs(buf, tabs + 1);
+    buf << this->rhs->toString(ctx, tabs + 1) << std::endl;
+    return buf.str();
+}
+
+std::string InsSeq::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+    buf << "begin" << std::endl;
+    for (auto &a : this->stats) {
+        printTabs(buf, tabs + 1);
+        buf << a->toString(ctx, tabs + 1) << std::endl;
+    }
+
+    printTabs(buf, tabs);
+    buf << "end";
+    return buf.str();
+}
+
+std::string MethodDef::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+
+    buf << "def " << this->symbol.info(ctx).name.name(ctx).toString(ctx) << "(";
+    for (auto &a : this->args) {
+        buf << a.info(ctx).name.name(ctx).toString(ctx) << ", ";
+    }
+    buf << ")" << std::endl;
+    printTabs(buf, tabs + 1);
+    buf << this->rhs->toString(ctx, tabs + 1) << std::endl;
+    return buf.str();
+}
+
+std::string SelfMethodDef::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+
+    buf << "selfdef " << this->symbol.info(ctx).name.name(ctx).toString(ctx) << "(";
+    for (auto &a : this->args) {
+        buf << a.info(ctx).name.name(ctx).toString(ctx) << ", ";
+    }
+    buf << ")" << std::endl;
+    printTabs(buf, tabs + 1);
+    buf << this->rhs->toString(ctx, tabs + 1) << std::endl;
+    return buf.str();
+}
+
+std::string If::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+
+    buf << "if " << this->cond->toString(ctx, tabs + 1) << std::endl;
+    printTabs(buf, tabs + 1);
+    buf << this->thenp->toString(ctx, tabs + 1) << std::endl;
+    printTabs(buf, tabs);
+    buf << "else " << std::endl;
+    printTabs(buf, tabs + 1);
+    buf << this->elsep->toString(ctx, tabs + 1) << std::endl;
+    printTabs(buf, tabs);
+    buf << "end";
+    return buf.str();
+}
+
+std::string While::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+
+    buf << "while " << this->cond->toString(ctx, tabs + 1) << std::endl;
+    printTabs(buf, tabs + 1);
+    buf << this->body->toString(ctx, tabs + 1) << std::endl;
+    printTabs(buf, tabs);
+    buf << "end";
+    return buf.str();
+}
+
+std::string EmptyTree::toString(ContextBase &ctx, int tabs) {
+    return "<emtpyTree>";
+}
+
+std::string ArraySplat::toString(ContextBase &ctx, int tabs) {
+    return "*" + this->arg->toString(ctx, tabs + 1);
+}
+
+std::string StringLit::toString(ContextBase &ctx, int tabs) {
+    return this->value.name(ctx).toString(ctx);
+}
+
+std::string ConstantLit::toString(ContextBase &ctx, int tabs) {
+    return ":" + this->cnst.name(ctx).toString(ctx);
+}
+
+std::string Ident::toString(ContextBase &ctx, int tabs) {
+    return this->symbol.info(ctx).name.name(ctx).toString(ctx);
+}
+
+std::string HashSplat::toString(ContextBase &ctx, int tabs) {
+    return "**" + this->arg->toString(ctx, tabs + 1);
+}
+
+std::string Return::toString(ContextBase &ctx, int tabs) {
+    return "return " + this->expr->toString(ctx, tabs + 1);
+}
+
+std::string Self::toString(ContextBase &ctx, int tabs) {
+    return "self(" + this->claz.info(ctx).name.name(ctx).toString(ctx) + ")";
+}
+
+std::string Break::toString(ContextBase &ctx, int tabs) {
+    return "break";
+}
+
+std::string IntLit::toString(ContextBase &ctx, int tabs) {
+    return std::to_string(this->value);
+}
+
+std::string NamedArg::toString(ContextBase &ctx, int tabs) {
+    return this->name.name(ctx).toString(ctx) + " : " + this->arg->toString(ctx, tabs + 1);
+}
+
+std::string FloatLit::toString(ContextBase &ctx, int tabs) {
+    return std::to_string(this->value);
+}
+
+std::string Assign::toString(ContextBase &ctx, int tabs) {
+    return this->lhs->toString(ctx, tabs) + " = " + this->rhs->toString(ctx, tabs);
+}
+
+std::string Rescue::toString(ContextBase &ctx, int tabs) {
+    return "Rescue";
+}
+
+std::string Send::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+    buf << this->recv->toString(ctx, tabs) << "." << this->fun.name(ctx).toString(ctx) << "(";
+
+    for (auto &a : this->args) {
+        buf << a->toString(ctx, tabs) << ", ";
+    }
+    buf << ")";
+
+    return buf.str();
+}
+
+std::string New::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+    buf << "new " << this->claz.info(ctx).name.name(ctx).toString(ctx) << "(";
+
+    for (auto &a : this->args) {
+        buf << a->toString(ctx, tabs) << ", ";
+    }
+    buf << ")";
+
+    return buf.str();
+}
 
 } // namespace ast
 } // namespace ruby_typer

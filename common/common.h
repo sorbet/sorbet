@@ -2,10 +2,10 @@
 #define SRUBY_COMMON_HPP
 
 #include <cstring>
+#include <functional>
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <functional>
 
 namespace ruby_typer {
 
