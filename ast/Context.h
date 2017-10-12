@@ -43,7 +43,7 @@ public:
 
     NameRef enterNameUTF8(UTF8Desc nm);
 
-    NameRef enterNameUnique(NameRef separator, u2 num, NameKind kind, NameRef original);
+    NameRef enterNameUnique(UniqueNameKind uniqueNameKind, u2 num, NameRef original);
 
     int indexClassOrJar(const char *name);
 
