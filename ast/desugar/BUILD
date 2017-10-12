@@ -8,7 +8,6 @@ cc_library(
     ],
 )
 
-
 cc_binary(
     name = "desugar_ast",
     srcs = [
@@ -16,7 +15,7 @@ cc_binary(
     ],
     linkstatic = 1,
     deps = [
-        "//ast/desugar:desugar",
+        "//ast/desugar",
         "@cxxopts//:cxxopts",
         "@spdlog//:spdlog",
     ],

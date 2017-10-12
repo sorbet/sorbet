@@ -1,12 +1,13 @@
 #include "Trees.h"
 #include <sstream>
 
+template class std::unique_ptr<ruby_typer::ast::Expr>;
+template class std::unique_ptr<ruby_typer::ast::Stat>;
+
 namespace ruby_typer {
 namespace ast {
 
 // makes lldb work
-template class std::unique_ptr<ruby_typer::ast::Expr>;
-template class std::unique_ptr<ruby_typer::ast::Stat>;
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *
