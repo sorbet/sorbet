@@ -128,6 +128,14 @@ public:
     static inline NameRef andAnd() {
         return NameRef(2);
     }
+
+    static inline NameRef to_s() {
+        return NameRef(3);
+    }
+
+    static inline NameRef concat() {
+        return NameRef(4);
+    }
 };
 
 class Name {

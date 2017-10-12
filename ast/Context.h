@@ -77,6 +77,10 @@ public:
         return SymbolRef(4);
     }
 
+    static constexpr SymbolRef defn_todo() {
+        return SymbolRef(5);
+    }
+
 private:
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::unique_ptr<std::vector<char>>> strings;
