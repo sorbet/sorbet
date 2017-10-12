@@ -10,14 +10,14 @@
 namespace ruby_typer {
 namespace ast {
 
-class Stat {
+class Statement {
 public:
-    Stat() = default;
-    virtual ~Stat() = default;
+    Statement() = default;
+    virtual ~Statement() = default;
     virtual std::string toString(ContextBase &ctx, int tabs = 0) = 0;
 };
 
-class Expr : public Stat {};
+class Expr : public Statement {};
 
 class ControlFlow : public Expr {};
 
@@ -38,11 +38,11 @@ public:
         return symbol.info(ctx).mixins(ctx);
     }
 
-    std::vector<std::unique_ptr<Stat>> rhs;
+    std::vector<std::unique_ptr<Statement>> rhs;
     std::unique_ptr<Expr> name;
     bool isModule;
 
-    ClassDef(SymbolRef symbol, std::unique_ptr<Expr> name, std::vector<std::unique_ptr<Stat>> &rhs, bool isModule);
+    ClassDef(SymbolRef symbol, std::unique_ptr<Expr> name, std::vector<std::unique_ptr<Statement>> &rhs, bool isModule);
 
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
@@ -86,9 +86,9 @@ public:
 class While : public Breakable {
 public:
     std::unique_ptr<Expr> cond;
-    std::unique_ptr<Stat> body;
+    std::unique_ptr<Statement> body;
 
-    While(u1 break_tag, std::unique_ptr<Expr> cond, std::unique_ptr<Stat> body);
+    While(u1 break_tag, std::unique_ptr<Expr> cond, std::unique_ptr<Statement> body);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
@@ -259,10 +259,10 @@ public:
 
 class InsSeq : public Expr {
 public:
-    std::vector<std::unique_ptr<Stat>> stats;
+    std::vector<std::unique_ptr<Statement>> stats;
     std::unique_ptr<Expr> expr;
 
-    InsSeq(std::vector<std::unique_ptr<Stat>> &&stats, std::unique_ptr<Expr> expr);
+    InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expr> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 

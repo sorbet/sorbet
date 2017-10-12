@@ -109,7 +109,6 @@ CheckSize(RawName, 16, 8);
 
 enum UniqueNameKind : u2 {
     Desugar,
-
 };
 
 struct UniqueName {

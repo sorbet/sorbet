@@ -1,13 +1,12 @@
 #include "Trees.h"
 #include <sstream>
 
+// makes lldb work. Don't remove please
 template class std::unique_ptr<ruby_typer::ast::Expr>;
-template class std::unique_ptr<ruby_typer::ast::Stat>;
+template class std::unique_ptr<ruby_typer::ast::Statement>;
 
 namespace ruby_typer {
 namespace ast {
-
-// makes lldb work
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *
@@ -43,7 +42,8 @@ void printTabs(std::stringstream &to, int count) {
     }
 }
 
-ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Expr> name, std::vector<std::unique_ptr<Stat>> &rhs, bool isModule)
+ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Expr> name, std::vector<std::unique_ptr<Statement>> &rhs,
+                   bool isModule)
     : Decl(symbol), rhs(std::move(rhs)), name(std::move(name)), isModule(isModule) {}
 
 MethodDef::MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expr>> &args,
@@ -59,7 +59,7 @@ If::If(std::unique_ptr<Expr> cond, std::unique_ptr<Expr> thenp, std::unique_ptr<
 
 Breakable::Breakable(u1 break_tag) : break_tag(break_tag) {}
 
-While::While(u1 break_tag, std::unique_ptr<Expr> cond, std::unique_ptr<Stat> body)
+While::While(u1 break_tag, std::unique_ptr<Expr> cond, std::unique_ptr<Statement> body)
     : Breakable(break_tag), cond(std::move(cond)), body(std::move(body)) {}
 
 Break::Break(u1 break_tag) : break_tag(break_tag) {}
@@ -109,7 +109,7 @@ std::string Closure::toString(ContextBase &ctx, int tabs) {
     return "closure(" + this->method.info(ctx).name.name(ctx).toString(ctx) + ")";
 }
 
-InsSeq::InsSeq(std::vector<std::unique_ptr<Stat>> &&stats, std::unique_ptr<Expr> expr)
+InsSeq::InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expr> expr)
     : stats(std::move(stats)), expr(std::move(expr)) {}
 
 std::string ConstDef::toString(ContextBase &ctx, int tabs) {
