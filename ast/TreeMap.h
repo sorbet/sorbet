@@ -63,7 +63,7 @@ public:
 
     Statement *transformSelf(Self *original);
 
-    Statement *transformClosure(Closure *original);
+    Statement *transformBlock(Block *original);
 
     Statement *transformInsSeq(InsSeq *original);
 };
@@ -116,7 +116,7 @@ GENERATE_HAS_MEMBER(transformConstantLit);
 GENERATE_HAS_MEMBER(transformArraySplat);
 GENERATE_HAS_MEMBER(transformHashSplat);
 GENERATE_HAS_MEMBER(transformSelf);
-GENERATE_HAS_MEMBER(transformClosure);
+GENERATE_HAS_MEMBER(transformBlock);
 GENERATE_HAS_MEMBER(transformInsSeq);
 
 #define GENERATE_POSTPONE_CLASS(X)                                             \
@@ -166,7 +166,7 @@ GENERATE_POSTPONE_CLASS(ConstantLit);
 GENERATE_POSTPONE_CLASS(ArraySplat);
 GENERATE_POSTPONE_CLASS(HashSplat);
 GENERATE_POSTPONE_CLASS(Self);
-GENERATE_POSTPONE_CLASS(Closure);
+GENERATE_POSTPONE_CLASS(Block);
 GENERATE_POSTPONE_CLASS(InsSeq);
 
 /**
@@ -409,7 +409,7 @@ private:
                 return PostPoneCalling_Self<FUNC, HAS_MEMBER_transformSelf<FUNC>::value>::call(ctx, v, func);
             }
             return v;
-        } else if (Closure *v = dynamic_cast<Closure *>(what)) {
+        } else if (Block *v = dynamic_cast<Block *>(what)) {
             Error::notImplemented();
         } else if (InsSeq *v = dynamic_cast<InsSeq *>(what)) {
             auto &stats = v->stats;

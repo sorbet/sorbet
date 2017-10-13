@@ -16,7 +16,7 @@ namespace ast {
  * Pre-CFG-Node <-
  *                 \ Instruction <- assign, send, [new], ident, named_arg, hash, array, literals(symbols, ints, floats,
  * strings, constants, nil), constants(resolver will desugar it into literals), array_splat(*), hash_splat(**), self,
- * insseq, closure)
+ * insseq, Block)
  *
  *                  \ Definition  <-  class(name, parent, mixins, body)
  *                                    module
@@ -108,7 +108,7 @@ HashSplat::HashSplat(std::unique_ptr<Expression> arg) : arg(std::move(arg)) {}
 
 Self::Self(SymbolRef claz) : claz(claz) {}
 
-Closure::Closure(SymbolRef method) : method(method) {}
+Block::Block(std::unique_ptr<Send> send, std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> rhs): send(std::move(send)),  rhs(std::move(rhs)), args(std::move(args)) {};
 
 NotSupported::NotSupported(const std::string &why) : why(why) {}
 

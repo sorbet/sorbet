@@ -143,7 +143,7 @@ TEST(TreeMap, CountTrees) {
             return original;
         }
 
-        Statement *transformClosure(Context ctx, Closure *original) {
+        Statement *transformBlock(Context ctx, Block *original) {
             count++;
             return original;
         }

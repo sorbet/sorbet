@@ -266,7 +266,7 @@ public:
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class Closure : public Expression {
+class Block : public Expression {
 public:
     SymbolRef method;
 
@@ -305,7 +305,7 @@ public:
  * Pre-CFG-Node <-
  *                 \ Instruction <- assign, send, [new], ident, named_arg, hash, array, literals(symbols, ints, floats,
  * strings, constants, nil), constants(resolver will desugar it into literals), array_splat(*), hash_splat(**), self,
- * insseq, closure)
+ * insseq, Block)
  *
  *                  \ Definition  <-  class(name, parent, mixins, body)
  *                                    module
