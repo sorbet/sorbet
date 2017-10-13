@@ -108,7 +108,9 @@ HashSplat::HashSplat(std::unique_ptr<Expression> arg) : arg(std::move(arg)) {}
 
 Self::Self(SymbolRef claz) : claz(claz) {}
 
-Block::Block(std::unique_ptr<Send> send, std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> rhs): send(std::move(send)),  rhs(std::move(rhs)), args(std::move(args)) {};
+Block::Block(std::unique_ptr<Send> send, std::vector<std::unique_ptr<Expression>> &args,
+             std::unique_ptr<Expression> rhs)
+    : send(std::move(send)), rhs(std::move(rhs)), args(std::move(args)){};
 
 NotSupported::NotSupported(const std::string &why) : why(why) {}
 
@@ -314,19 +316,18 @@ std::string Array::toString(ContextBase &ctx, int tabs) {
     return buf.str();
 }
 
-
-    std::string Block::toString(ContextBase &ctx, int tabs) {
-        std::stringstream buf;
-        buf << this->send->toString(ctx, tabs);
-        buf << " do |";
-        printElems(ctx, buf, this->args, tabs + 1);
-        buf << "|" << std::endl;
-        printTabs(buf, tabs + 1);
-        buf << this->rhs->toString(ctx, tabs + 1) << std::endl;
-        printTabs(buf, tabs);
-        buf << "end";
-        return buf.str();
-    }
+std::string Block::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+    buf << this->send->toString(ctx, tabs);
+    buf << " do |";
+    printElems(ctx, buf, this->args, tabs + 1);
+    buf << "|" << std::endl;
+    printTabs(buf, tabs + 1);
+    buf << this->rhs->toString(ctx, tabs + 1) << std::endl;
+    printTabs(buf, tabs);
+    buf << "end";
+    return buf.str();
+}
 
 std::string Symbol::toString(ContextBase &ctx, int tabs) {
     return ":" + this->name.name(ctx).toString(ctx);
