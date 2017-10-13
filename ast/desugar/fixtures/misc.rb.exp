@@ -1,8 +1,8 @@
 begin
   <Not Supported (Alias)>
-  <Not Supported (IVarAsgn)>
-  <Not Supported (CVarAsgn)>
-  <Not Supported (GVarAsgn)>
+  @iv<todo ivar sym> = 1
+  @@cv<todo cvar sym> = 1
+  $gv<todo gvar sym> = 1
   <Not Supported (Masgn)>
   <Not Supported (Kwbegin)>
   <Not Supported (Kwbegin)>
@@ -13,12 +13,12 @@ begin
   <Not Supported (Block)>
   <Not Supported (Case)>
   "x".to_s()
-  <Not Supported (Integer)>.+(<Not Supported (Complex)>)
+  1.+(<Not Supported (Complex)>)
   <Not Supported (Float)>
   <Not Supported (Complex)>
   <Not Supported (DefS)>
   <Not Supported (SClass)>
-  <Not Supported (Or)>
+  <Not Supported (True)>.||(<Not Supported (False)>)
   <Not Supported (For)>
   <Not Supported (While)>
 end
