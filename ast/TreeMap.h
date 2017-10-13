@@ -17,55 +17,55 @@ public:
     // Not including the member will skip the branch
     // you may return the same pointer that you are given
     // caller is repsonsible to handle it
-    Statement *transformClassDef(ClassDef *original);
+    ClassDef *transformClassDef(ClassDef *original);
 
-    Statement *transformMethodDef(MethodDef *original);
+    MethodDef *transformMethodDef(MethodDef *original);
 
-    Statement *transformIf(If *original);
+    If *transformIf(If *original);
 
-    Statement *transformWhile(While *original);
+    While *transformWhile(While *original);
 
-    Statement *transformFor(For *original);
+    For *transformFor(For *original);
 
-    Statement *transformBreak(Break *original);
+    Break *transformBreak(Break *original);
 
-    Statement *transformNext(Next *original);
+    Next *transformNext(Next *original);
 
-    Statement *transformReturn(Return *original);
+    Return *transformReturn(Return *original);
 
-    Statement *transformRescue(Rescue *original);
+    Rescue *transformRescue(Rescue *original);
 
-    Statement *transformIdent(Ident *original);
+    Ident *transformIdent(Ident *original);
 
-    Statement *transformAssign(Assign *original);
+    Assign *transformAssign(Assign *original);
 
-    Statement *transformSend(Send *original);
+    Send *transformSend(Send *original);
 
-    Statement *transformNew(New *original);
+    New *transformNew(New *original);
 
-    Statement *transformNamedArg(NamedArg *original);
+    NamedArg *transformNamedArg(NamedArg *original);
 
-    Statement *transformHash(Hash *original);
+    Hash *transformHash(Hash *original);
 
-    Statement *transformArray(Array *original);
+    Array *transformArray(Array *original);
 
-    Statement *transformFloatLit(FloatLit *original);
+    FloatLit *transformFloatLit(FloatLit *original);
 
-    Statement *transformIntLit(IntLit *original);
+    IntLit *transformIntLit(IntLit *original);
 
-    Statement *transformStringLit(StringLit *original);
+    StringLit *transformStringLit(StringLit *original);
 
-    Statement *transformConstantLit(ConstantLit *original);
+    ConstantLit *transformConstantLit(ConstantLit *original);
 
-    Statement *transformArraySplat(ArraySplat *original);
+    ArraySplat *transformArraySplat(ArraySplat *original);
 
-    Statement *transformHashSplat(HashSplat *original);
+    HashSplat *transformHashSplat(HashSplat *original);
 
-    Statement *transformSelf(Self *original);
+    Self *transformSelf(Self *original);
 
-    Statement *transformBlock(Block *original);
+    Block *transformBlock(Block *original);
 
-    Statement *transformInsSeq(InsSeq *original);
+    InsSeq *transformInsSeq(InsSeq *original);
 };
 
 /**
@@ -123,7 +123,7 @@ GENERATE_HAS_MEMBER(transformInsSeq);
                                                                                \
     template <class FUNC, bool has> class PostPoneCalling_##X {                \
     public:                                                                    \
-        static Statement *call(Context ctx, X *cd, FUNC &what) {               \
+        static X *call(Context ctx, X *cd, FUNC &what) {                       \
             Error::raise("should never be called. Incorrect use of TreeMap?"); \
             return nullptr;                                                    \
         }                                                                      \
@@ -131,14 +131,14 @@ GENERATE_HAS_MEMBER(transformInsSeq);
                                                                                \
     template <class FUNC> class PostPoneCalling_##X<FUNC, true> {              \
     public:                                                                    \
-        static Statement *call(Context ctx, X *cd, FUNC &func) {               \
+        static X *call(Context ctx, X *cd, FUNC &func) {                       \
             return func.transform##X(ctx, cd);                                 \
         }                                                                      \
     };                                                                         \
                                                                                \
     template <class FUNC> class PostPoneCalling_##X<FUNC, false> {             \
     public:                                                                    \
-        static Statement *call(Context ctx, X *cd, FUNC &func) {               \
+        static X *call(Context ctx, X *cd, FUNC &func) {                       \
             return cd;                                                         \
         }                                                                      \
     };
@@ -175,17 +175,22 @@ GENERATE_POSTPONE_CLASS(InsSeq);
  * FUNC may maintain internal state.
  * @tparam tree transformer, see FUNC_EXAMPLE
  */
-template <class FUNC> class TreeMap {
+template <class FUNC> class PreOrderTreeMap {
 private:
     FUNC &func;
 
-    TreeMap(FUNC &func) : func(func) {}
+    PreOrderTreeMap(FUNC &func) : func(func) {}
 
     Statement *mapIt(Statement *what, Context ctx) {
         // TODO: reorder by frequency
         if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr)
             return what;
         if (ClassDef *v = dynamic_cast<ClassDef *>(what)) {
+
+            if (HAS_MEMBER_transformClassDef<FUNC>::value) {
+                v = PostPoneCalling_ClassDef<FUNC, HAS_MEMBER_transformClassDef<FUNC>::value>::call(ctx, v, func);
+            }
+
             for (auto &def : v->rhs) {
                 auto originalDef = def.get();
                 auto newDef = mapIt(originalDef, ctx.withOwner(v->symbol));
@@ -194,33 +199,33 @@ private:
                 }
             }
 
-            if (HAS_MEMBER_transformClassDef<FUNC>::value) {
-                return PostPoneCalling_ClassDef<FUNC, HAS_MEMBER_transformClassDef<FUNC>::value>::call(ctx, v, func);
-            }
             return v;
         } else if (MethodDef *v = dynamic_cast<MethodDef *>(what)) {
+            if (HAS_MEMBER_transformMethodDef<FUNC>::value) {
+                v = PostPoneCalling_MethodDef<FUNC, HAS_MEMBER_transformMethodDef<FUNC>::value>::call(ctx, v, func);
+            }
             auto originalRhs = v->rhs.get();
             auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
             if (newRhs != originalRhs) {
                 Error::check(dynamic_cast<Expression *>(newRhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expression *>(newRhs));
-            }
-            if (HAS_MEMBER_transformMethodDef<FUNC>::value) {
-                return PostPoneCalling_MethodDef<FUNC, HAS_MEMBER_transformMethodDef<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (ConstDef *v = dynamic_cast<ConstDef *>(what)) {
+            if (HAS_MEMBER_transformConstDef<FUNC>::value) {
+                v = PostPoneCalling_ConstDef<FUNC, HAS_MEMBER_transformConstDef<FUNC>::value>::call(ctx, v, func);
+            }
             auto originalRhs = v->rhs.get();
             auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
             if (newRhs != originalRhs) {
                 Error::check(dynamic_cast<Expression *>(newRhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expression *>(newRhs));
             }
-            if (HAS_MEMBER_transformConstDef<FUNC>::value) {
-                return PostPoneCalling_ConstDef<FUNC, HAS_MEMBER_transformConstDef<FUNC>::value>::call(ctx, v, func);
-            }
             return v;
         } else if (If *v = dynamic_cast<If *>(what)) {
+            if (HAS_MEMBER_transformIf<FUNC>::value) {
+                v = PostPoneCalling_If<FUNC, HAS_MEMBER_transformIf<FUNC>::value>::call(ctx, v, func);
+            }
             auto originalCond = v->cond.get();
             auto originalThen = v->thenp.get();
             auto originalElse = v->elsep.get();
@@ -239,11 +244,11 @@ private:
                 Error::check(dynamic_cast<Expression *>(newElse) != nullptr);
                 v->elsep.reset(dynamic_cast<Expression *>(newElse));
             }
-            if (HAS_MEMBER_transformIf<FUNC>::value) {
-                return PostPoneCalling_If<FUNC, HAS_MEMBER_transformIf<FUNC>::value>::call(ctx, v, func);
-            }
             return v;
         } else if (While *v = dynamic_cast<While *>(what)) {
+            if (HAS_MEMBER_transformWhile<FUNC>::value) {
+                v = PostPoneCalling_While<FUNC, HAS_MEMBER_transformWhile<FUNC>::value>::call(ctx, v, func);
+            }
             auto originalCond = v->cond.get();
             auto originalBody = v->body.get();
             auto newCond = mapIt(originalCond, ctx);
@@ -255,9 +260,7 @@ private:
             if (newBody != originalBody) {
                 v->body.reset(newBody);
             }
-            if (HAS_MEMBER_transformWhile<FUNC>::value) {
-                return PostPoneCalling_While<FUNC, HAS_MEMBER_transformWhile<FUNC>::value>::call(ctx, v, func);
-            }
+
             return v;
         } else if (For *v = dynamic_cast<For *>(what)) {
             Error::notImplemented();
@@ -272,15 +275,16 @@ private:
             }
             return v;
         } else if (Return *v = dynamic_cast<Return *>(what)) {
+            if (HAS_MEMBER_transformReturn<FUNC>::value) {
+                v = PostPoneCalling_Return<FUNC, HAS_MEMBER_transformReturn<FUNC>::value>::call(ctx, v, func);
+            }
             auto oexpr = v->expr.get();
             auto nexpr = mapIt(oexpr, ctx);
             if (oexpr != nexpr) {
                 Error::check(dynamic_cast<Expression *>(nexpr) != nullptr);
                 v->expr.reset(dynamic_cast<Expression *>(nexpr));
             }
-            if (HAS_MEMBER_transformReturn<FUNC>::value) {
-                return PostPoneCalling_Return<FUNC, HAS_MEMBER_transformReturn<FUNC>::value>::call(ctx, v, func);
-            }
+
             return v;
         } else if (Ident *v = dynamic_cast<Ident *>(what)) {
             if (HAS_MEMBER_transformIdent<FUNC>::value) {
@@ -288,6 +292,9 @@ private:
             }
             return v;
         } else if (Assign *v = dynamic_cast<Assign *>(what)) {
+            if (HAS_MEMBER_transformAssign<FUNC>::value) {
+                v = PostPoneCalling_Assign<FUNC, HAS_MEMBER_transformAssign<FUNC>::value>::call(ctx, v, func);
+            }
             auto olhs = v->lhs.get();
             auto orhs = v->rhs.get();
             auto nlhs = mapIt(olhs, ctx);
@@ -300,11 +307,12 @@ private:
                 Error::check(dynamic_cast<Expression *>(nrhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expression *>(nrhs));
             }
-            if (HAS_MEMBER_transformAssign<FUNC>::value) {
-                return PostPoneCalling_Assign<FUNC, HAS_MEMBER_transformAssign<FUNC>::value>::call(ctx, v, func);
-            }
+
             return v;
         } else if (Send *v = dynamic_cast<Send *>(what)) {
+            if (HAS_MEMBER_transformSend<FUNC>::value) {
+                v = PostPoneCalling_Send<FUNC, HAS_MEMBER_transformSend<FUNC>::value>::call(ctx, v, func);
+            }
             auto orecv = v->recv.get();
             auto nrecv = mapIt(orecv, ctx);
             auto &vec = v->args;
@@ -324,11 +332,11 @@ private:
                 i++;
             }
 
-            if (HAS_MEMBER_transformSend<FUNC>::value) {
-                return PostPoneCalling_Send<FUNC, HAS_MEMBER_transformSend<FUNC>::value>::call(ctx, v, func);
-            }
             return v;
         } else if (New *v = dynamic_cast<New *>(what)) {
+            if (HAS_MEMBER_transformNew<FUNC>::value) {
+                v = PostPoneCalling_New<FUNC, HAS_MEMBER_transformNew<FUNC>::value>::call(ctx, v, func);
+            }
             auto &args = v->args;
             auto i = 0;
             while (i < args.size()) {
@@ -341,20 +349,19 @@ private:
                 }
                 i++;
             }
-            if (HAS_MEMBER_transformNew<FUNC>::value) {
-                return PostPoneCalling_New<FUNC, HAS_MEMBER_transformNew<FUNC>::value>::call(ctx, v, func);
-            }
+
             return v;
         } else if (NamedArg *v = dynamic_cast<NamedArg *>(what)) {
+            if (HAS_MEMBER_transformNamedArg<FUNC>::value) {
+                v = PostPoneCalling_NamedArg<FUNC, HAS_MEMBER_transformNamedArg<FUNC>::value>::call(ctx, v, func);
+            }
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
                 Error::check(dynamic_cast<Expression *>(narg) != nullptr);
                 v->arg.reset(dynamic_cast<Expression *>(narg));
             }
-            if (HAS_MEMBER_transformNamedArg<FUNC>::value) {
-                return PostPoneCalling_NamedArg<FUNC, HAS_MEMBER_transformNamedArg<FUNC>::value>::call(ctx, v, func);
-            }
+
             return v;
         } else if (Hash *v = dynamic_cast<Hash *>(what)) {
             Error::notImplemented();
@@ -382,26 +389,26 @@ private:
             }
             return v;
         } else if (ArraySplat *v = dynamic_cast<ArraySplat *>(what)) {
+            if (HAS_MEMBER_transformArraySplat<FUNC>::value) {
+                v = PostPoneCalling_ArraySplat<FUNC, HAS_MEMBER_transformArraySplat<FUNC>::value>::call(ctx, v, func);
+            }
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
                 Error::check(dynamic_cast<Expression *>(narg) != nullptr);
                 v->arg.reset(dynamic_cast<Expression *>(narg));
             }
-            if (HAS_MEMBER_transformArraySplat<FUNC>::value) {
-                return PostPoneCalling_ArraySplat<FUNC, HAS_MEMBER_transformArraySplat<FUNC>::value>::call(ctx, v,
-                                                                                                           func);
-            }
+
             return v;
         } else if (HashSplat *v = dynamic_cast<HashSplat *>(what)) {
+            if (HAS_MEMBER_transformHashSplat<FUNC>::value) {
+                v = PostPoneCalling_HashSplat<FUNC, HAS_MEMBER_transformHashSplat<FUNC>::value>::call(ctx, v, func);
+            }
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
                 Error::check(dynamic_cast<Expression *>(narg) != nullptr);
                 v->arg.reset(dynamic_cast<Expression *>(narg));
-            }
-            if (HAS_MEMBER_transformHashSplat<FUNC>::value) {
-                return PostPoneCalling_HashSplat<FUNC, HAS_MEMBER_transformHashSplat<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Self *v = dynamic_cast<Self *>(what)) {
@@ -412,6 +419,9 @@ private:
         } else if (Block *v = dynamic_cast<Block *>(what)) {
             Error::notImplemented();
         } else if (InsSeq *v = dynamic_cast<InsSeq *>(what)) {
+            if (HAS_MEMBER_transformInsSeq<FUNC>::value) {
+                v = PostPoneCalling_InsSeq<FUNC, HAS_MEMBER_transformInsSeq<FUNC>::value>::call(ctx, v, func);
+            }
             auto &stats = v->stats;
             auto oexpr = v->expr.get();
             auto i = 0;
@@ -430,9 +440,6 @@ private:
                 v->expr.reset(dynamic_cast<Expression *>(nexpr));
             }
 
-            if (HAS_MEMBER_transformInsSeq<FUNC>::value) {
-                return PostPoneCalling_InsSeq<FUNC, HAS_MEMBER_transformInsSeq<FUNC>::value>::call(ctx, v, func);
-            }
             return v;
         } else {
             Error::raise("should never happen. Forgot to add new tree kind?");
@@ -442,7 +449,7 @@ private:
 public:
     static unique_ptr<Statement> apply(Context ctx, FUNC &func, unique_ptr<Statement> to) {
         Statement *underlying = to.get();
-        TreeMap walker(func);
+        PreOrderTreeMap walker(func);
         Statement *res = walker.mapIt(underlying, ctx);
 
         if (res == underlying) {

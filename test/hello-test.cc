@@ -25,130 +25,130 @@ TEST(HelloTest, GetCXXopts) {
     cxxopts::Options options("MyProgram", "One line description of MyProgram");
 }
 
-TEST(TreeMap, CountTrees) {
+TEST(PreOrderTreeMap, CountTrees) {
     class Counter {
     public:
         int count = 0;
-        Statement *transformClassDef(Context ctx, ClassDef *original) {
+        ClassDef *transformClassDef(Context ctx, ClassDef *original) {
             count++;
             return original;
         }
-        Statement *transformMethodDef(Context ctx, MethodDef *original) {
-            count++;
-            return original;
-        }
-
-        Statement *transformIf(Context ctx, If *original) {
+        MethodDef *transformMethodDef(Context ctx, MethodDef *original) {
             count++;
             return original;
         }
 
-        Statement *transformWhile(Context ctx, While *original) {
+        If *transformIf(Context ctx, If *original) {
             count++;
             return original;
         }
 
-        Statement *transformFor(Context ctx, For *original) {
+        While *transformWhile(Context ctx, While *original) {
             count++;
             return original;
         }
 
-        Statement *transformBreak(Context ctx, Break *original) {
+        For *transformFor(Context ctx, For *original) {
             count++;
             return original;
         }
 
-        Statement *transformNext(Context ctx, Next *original) {
+        Break *transformBreak(Context ctx, Break *original) {
             count++;
             return original;
         }
 
-        Statement *transformReturn(Context ctx, Return *original) {
+        Next *transformNext(Context ctx, Next *original) {
             count++;
             return original;
         }
 
-        Statement *transformRescue(Context ctx, Rescue *original) {
+        Return *transformReturn(Context ctx, Return *original) {
             count++;
             return original;
         }
 
-        Statement *transformIdent(Context ctx, Ident *original) {
+        Rescue *transformRescue(Context ctx, Rescue *original) {
             count++;
             return original;
         }
 
-        Statement *transformAssign(Context ctx, Assign *original) {
+        Ident *transformIdent(Context ctx, Ident *original) {
             count++;
             return original;
         }
 
-        Statement *transformSend(Context ctx, Send *original) {
+        Assign *transformAssign(Context ctx, Assign *original) {
             count++;
             return original;
         }
 
-        Statement *transformNew(Context ctx, New *original) {
+        Send *transformSend(Context ctx, Send *original) {
             count++;
             return original;
         }
 
-        Statement *transformNamedArg(Context ctx, NamedArg *original) {
+        New *transformNew(Context ctx, New *original) {
             count++;
             return original;
         }
 
-        Statement *transformHash(Context ctx, Hash *original) {
+        NamedArg *transformNamedArg(Context ctx, NamedArg *original) {
             count++;
             return original;
         }
 
-        Statement *transformArray(Context ctx, Array *original) {
+        Hash *transformHash(Context ctx, Hash *original) {
             count++;
             return original;
         }
 
-        Statement *transformFloatLit(Context ctx, FloatLit *original) {
+        Array *transformArray(Context ctx, Array *original) {
             count++;
             return original;
         }
 
-        Statement *transformIntLit(Context ctx, IntLit *original) {
+        FloatLit *transformFloatLit(Context ctx, FloatLit *original) {
             count++;
             return original;
         }
 
-        Statement *transformStringLit(Context ctx, StringLit *original) {
+        IntLit *transformIntLit(Context ctx, IntLit *original) {
             count++;
             return original;
         }
 
-        Statement *transformConstantLit(Context ctx, ConstantLit *original) {
+        StringLit *transformStringLit(Context ctx, StringLit *original) {
             count++;
             return original;
         }
 
-        Statement *transformArraySplat(Context ctx, ArraySplat *original) {
+        ConstantLit *transformConstantLit(Context ctx, ConstantLit *original) {
             count++;
             return original;
         }
 
-        Statement *transformHashSplat(Context ctx, HashSplat *original) {
+        ArraySplat *transformArraySplat(Context ctx, ArraySplat *original) {
             count++;
             return original;
         }
 
-        Statement *transformSelf(Context ctx, Self *original) {
+        HashSplat *transformHashSplat(Context ctx, HashSplat *original) {
             count++;
             return original;
         }
 
-        Statement *transformBlock(Context ctx, Block *original) {
+        Self *transformSelf(Context ctx, Self *original) {
             count++;
             return original;
         }
 
-        Statement *transformInsSeq(Context ctx, InsSeq *original) {
+        Block *transformBlock(Context ctx, Block *original) {
+            count++;
+            return original;
+        }
+
+        InsSeq *transformInsSeq(Context ctx, InsSeq *original) {
             count++;
             return original;
         }
@@ -179,7 +179,7 @@ TEST(TreeMap, CountTrees) {
     std::unique_ptr<Statement> tree(new ClassDef(classSym, std::move(cnst), classrhs, false));
     Counter c;
 
-    auto r = TreeMap<Counter>::apply(ctx, c, std::move(tree));
+    auto r = PreOrderTreeMap<Counter>::apply(ctx, c, std::move(tree));
     EXPECT_EQ(c.count, 3);
 }
 } // namespace ruby_typer
