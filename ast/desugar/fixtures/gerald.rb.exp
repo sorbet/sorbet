@@ -4,26 +4,42 @@ begin
   module <emtpyTree>::Opus::CIBot::Gerald<<todo sym>>
     class <emtpyTree>::MatchTimeout<<todo sym>>
       <emtpyTree>.attr_reader(:rule_token)
-      def initialize<<todo sym>>(<Not Supported (Arg)>, <Not Supported (Kwoptarg)>)
+      def initialize<<todo sym>>(message<todo lvar sym>, <Not Supported (Kwoptarg)>)
         begin
-          <Not Supported (Super)>
-          <Not Supported (IVarAsgn)>
+          super(message<todo lvar sym>)
+          @rule_token<todo ivar sym> = rule_token<todo lvar sym>
         end
 
     end
     class <emtpyTree>::Matcher<<todo sym>>
       <emtpyTree>.include(<emtpyTree>::Chalk::Log)
-      <Not Supported (ConstAsgn)>
+      <emtpyTree>::MAX_AFFECTED_FILES = 100
       def initialize<<todo sym>>()
         begin
           <Not Supported (Masgn)>
-          <Not Supported (If)>
+          if invalid_rules<todo lvar sym>.empty?().!()
+            begin
+              invalid_rule_ids<todo lvar sym> = invalid_rules<todo lvar sym>.map(<Not Supported (BlockPass)>).join(",".to_s())
+              <emtpyTree>.log().warn("Gerald skipping invalid rules: ".to_s().+(invalid_rule_ids<todo lvar sym>))
+            end
+          else 
+            <emtpyTree>
+          end
         end
 
-      def match<<todo sym>>(<Not Supported (Arg)>)
+      def match<<todo sym>>(match_context<todo lvar sym>)
         begin
-          <Not Supported (If)>
-          <Not Supported (LVarAsgn)>
+          if match_context<todo lvar sym>.diff().affected_files().count().>(<emtpyTree>::MAX_AFFECTED_FILES)
+            begin
+              <emtpyTree>.log().warn("Gerald skipping large PR with ".to_s().concat(begin
+                    match_context<todo lvar sym>.diff().affected_files().count()
+                  end.to_s()).concat(" affected files".to_s()).to_s())
+              <Not Supported (Return)>
+            end
+          else 
+            <emtpyTree>
+          end
+          budget<todo lvar sym> = <emtpyTree>::MatchTimeBudget.new()
           <Not Supported (Block)>
         end
 
@@ -37,50 +53,70 @@ begin
       <emtpyTree>.attr_reader(:title)
       <emtpyTree>.attr_reader(:diff)
       <emtpyTree>.attr_reader(:openapi_diff)
-      def initialize<<todo sym>>(<Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>, <Not Supported (Arg)>)
+      def initialize<<todo sym>>(repo<todo lvar sym>, assignee<todo lvar sym>, gh_user<todo lvar sym>, merge_branch<todo lvar sym>, body<todo lvar sym>, title<todo lvar sym>, diff<todo lvar sym>, openapi_diff<todo lvar sym>)
         begin
-          <Not Supported (IVarAsgn)>
-          <Not Supported (IVarAsgn)>
-          <Not Supported (IVarAsgn)>
-          <Not Supported (IVarAsgn)>
-          <Not Supported (IVarAsgn)>
-          <Not Supported (IVarAsgn)>
-          <Not Supported (IVarAsgn)>
-          <Not Supported (IVarAsgn)>
+          @repo<todo ivar sym> = repo<todo lvar sym>
+          @assignee<todo ivar sym> = assignee<todo lvar sym>
+          @gh_user<todo ivar sym> = gh_user<todo lvar sym>
+          @merge_branch<todo ivar sym> = merge_branch<todo lvar sym>
+          @body<todo ivar sym> = body<todo lvar sym>
+          @title<todo ivar sym> = title<todo lvar sym>
+          @diff<todo ivar sym> = diff<todo lvar sym>
+          @openapi_diff<todo ivar sym> = openapi_diff<todo lvar sym>
         end
 
       def user_stripe_suffix?<<todo sym>>()
-        <Not Supported (IVar)>.start_with?("stripe-internal/".to_s()).!()
+        @repo<todo ivar sym>.start_with?("stripe-internal/".to_s()).!()
 
     end
     class <emtpyTree>::MatchTimeBudget<<todo sym>>
-      <Not Supported (ConstAsgn)>
-      <Not Supported (ConstAsgn)>
+      <emtpyTree>::TOTAL_TIME_MS = 10000
+      <emtpyTree>::PER_RULE_MS = 2000
       def initialize<<todo sym>>()
-        <Not Supported (IVarAsgn)>
+        @start<todo ivar sym> = <emtpyTree>::Time.now()
 
       def check!<<todo sym>>()
         begin
-          <Not Supported (LVarAsgn)>
-          <Not Supported (If)>
+          dur_ms<todo lvar sym> = begin
+            <emtpyTree>::Time.now().-(@start<todo ivar sym>)
+          end.*(1000)
+          if dur_ms<todo lvar sym>.>(<emtpyTree>::TOTAL_TIME_MS)
+            <emtpyTree>.raise(<emtpyTree>::MatchTimeout.new("Gerald match time budged exceeded ".to_s().concat(begin
+                    <emtpyTree>::TOTAL_TIME_MS
+                  end.to_s()).concat("ms".to_s()).to_s()))
+          else 
+            <emtpyTree>
+          end
         end
 
-      def time_rule<<todo sym>>(<Not Supported (Arg)>)
+      def time_rule<<todo sym>>(rule<todo lvar sym>)
         begin
-          <Not Supported (LVarAsgn)>
-          <Not Supported (LVarAsgn)>
-          <Not Supported (LVarAsgn)>
-          <Not Supported (If)>
+          rule_start<todo lvar sym> = <emtpyTree>::Time.now()
+          res<todo lvar sym> = <Not Supported (Yield)>
+          dur_ms<todo lvar sym> = begin
+            <emtpyTree>::Time.now().-(rule_start<todo lvar sym>)
+          end.*(1000)
+          if dur_ms<todo lvar sym>.>(<emtpyTree>::PER_RULE_MS)
+            <emtpyTree>.raise(<emtpyTree>::MatchTimeout.new("Gerald rule '".to_s().concat(begin
+                    rule<todo lvar sym>.token()
+                  end.to_s()).concat("' exceeded per-rule time budget actual=".to_s()).concat(begin
+                    dur_ms<todo lvar sym>.to_i()
+                  end.to_s()).concat("ms budget=".to_s()).concat(begin
+                    <emtpyTree>::PER_RULE_MS
+                  end.to_s()).concat("ms".to_s()).to_s(), <Not Supported (Hash)>))
+          else 
+            <emtpyTree>
+          end
           <emtpyTree>.check!()
-          <Not Supported (LVar)>
+          res<todo lvar sym>
         end
 
     end
     class <emtpyTree>::Diff<<todo sym>>
-      def initialize<<todo sym>>(<Not Supported (Arg)>)
+      def initialize<<todo sym>>(raw_diff<todo lvar sym>)
         begin
-          <Not Supported (IVarAsgn)>
-          <Not Supported (IVarAsgn)>
+          @raw<todo ivar sym> = raw_diff<todo lvar sym>
+          @parsed<todo ivar sym> = <emtpyTree>.parse(raw_diff<todo lvar sym>)
         end
 
       def affected_files<<todo sym>>()
@@ -107,12 +143,12 @@ begin
       def changed_openapi?<<todo sym>>()
         <emtpyTree>.changed_files().include?(<emtpyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
 
-      <emtpyTree>.private(def parse<<todo sym>>(<Not Supported (Arg)>)
-        begin
-          <Not Supported (LVarAsgn)>
-          <Not Supported (OrAsgn)>
-          <Not Supported (Block)>.compact()
-        end
+      <emtpyTree>.private(def parse<<todo sym>>(diff<todo lvar sym>)
+          begin
+            parts<todo lvar sym> = diff<todo lvar sym>.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
+            <Not Supported (OrAsgn)>
+            <Not Supported (Block)>.compact()
+          end
 )
     end
   end
