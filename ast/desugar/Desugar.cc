@@ -281,6 +281,22 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_cvar_todo()));
                  result.swap(res);
              },
+             [&](parser::IVar *var) {
+                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_ivar_todo()));
+                 result.swap(res);
+             },
+             [&](parser::LVarLhs *var) {
+                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_lvar_todo()));
+                 result.swap(res);
+             },
+             [&](parser::GVarLhs *var) {
+                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_gvar_todo()));
+                 result.swap(res);
+             },
+             [&](parser::CVarLhs *var) {
+                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_cvar_todo()));
+                 result.swap(res);
+             },
              [&](parser::IVarAsgn *asgn) {
                  auto lhs = std::unique_ptr<Statement>(new Ident(asgn->name, ContextBase::defn_ivar_todo()));
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
