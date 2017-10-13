@@ -109,7 +109,6 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
              [&](parser::AndAsgn *a) {
                  auto recv = node2TreeImpl(ctx, a->left);
                  auto arg = node2TreeImpl(ctx, a->right);
-                 auto argChecked = stat2Expr(arg);
                  if (auto s = dynamic_cast<Send *>(recv.get())) {
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
