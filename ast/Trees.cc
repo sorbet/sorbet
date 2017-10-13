@@ -116,10 +116,6 @@ Symbol::Symbol(NameRef name) : name(name) {}
 
 Array::Array(std::vector<std::unique_ptr<Expression>> &elems) : elems(std::move(elems)) {}
 
-std::string Closure::toString(ContextBase &ctx, int tabs) {
-    return "closure(" + this->method.info(ctx).name.name(ctx).toString(ctx) + ")";
-}
-
 InsSeq::InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expression> expr)
     : stats(std::move(stats)), expr(std::move(expr)) {}
 
@@ -317,6 +313,20 @@ std::string Array::toString(ContextBase &ctx, int tabs) {
     buf << "]";
     return buf.str();
 }
+
+
+    std::string Block::toString(ContextBase &ctx, int tabs) {
+        std::stringstream buf;
+        buf << this->send->toString(ctx, tabs);
+        buf << " do |";
+        printElems(ctx, buf, this->args, tabs + 1);
+        buf << "|" << std::endl;
+        printTabs(buf, tabs + 1);
+        buf << this->rhs->toString(ctx, tabs + 1) << std::endl;
+        printTabs(buf, tabs);
+        buf << "end";
+        return buf.str();
+    }
 
 std::string Symbol::toString(ContextBase &ctx, int tabs) {
     return ":" + this->name.name(ctx).toString(ctx);

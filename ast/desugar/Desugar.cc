@@ -264,6 +264,26 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      ctx.state.defn_todo(), method->name, args, stat2Expr(node2TreeImpl(ctx, method->body)), false));
                  result.swap(res);
              },
+             [&](parser::Block *block) {
+                 std::vector<std::unique_ptr<Expression>> args;
+                 auto recv = node2TreeImpl(ctx, block->send);
+                 Error::check(dynamic_cast<Send *>(recv.get()));
+                 std::unique_ptr<Send> send(dynamic_cast<Send *>(recv.release()));
+                 if (auto *oargs = dynamic_cast<parser::Args *>(block->args.get())) {
+                     for (auto &arg : oargs->args) {
+                         args.emplace_back(stat2Expr(node2TreeImpl(ctx, arg)));
+                     }
+                 } else if (auto *arg = dynamic_cast<parser::Arg *>(block->args.get())) {
+                     args.emplace_back(stat2Expr(node2TreeImpl(ctx, block->args)));
+                 } else if (block->args.get() == nullptr) {
+                     // do nothing
+                 } else {
+                     Error::notImplemented();
+                 }
+                 auto res = std::unique_ptr<Statement>(
+                     new Block(std::move(send), args, stat2Expr(node2TreeImpl(ctx, block->body))));
+                 result.swap(res);
+             },
 
              [&](parser::IVar *var) {
                  auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_ivar_todo()));
@@ -353,7 +373,13 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
 
              [&](parser::Return *ret) {
                  if (ret->exprs.size() > 1) {
-                     Error::notImplemented();
+                     std::vector<std::unique_ptr<Expression>> elems;
+                     for (auto &stat : ret->exprs) {
+                         elems.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
+                     };
+                     auto arr = std::unique_ptr<Expression>(new Array(elems));
+                     auto res = std::unique_ptr<Statement>(new Return(std::move(arr)));
+                     result.swap(res);
                  } else if (ret->exprs.size() == 1) {
                      auto res = std::unique_ptr<Statement>(new Return(stat2Expr(node2TreeImpl(ctx, ret->exprs[0]))));
                      result.swap(res);

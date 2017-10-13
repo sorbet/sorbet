@@ -268,9 +268,11 @@ public:
 
 class Block : public Expression {
 public:
-    SymbolRef method;
+    std::unique_ptr<Send> send;
+    std::unique_ptr<Expression> rhs;
+    std::vector<std::unique_ptr<Expression>> args;
 
-    Closure(SymbolRef method);
+    Block(std::unique_ptr<Send> send, std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> rhs);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 

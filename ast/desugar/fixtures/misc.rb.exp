@@ -9,8 +9,9 @@ begin
   <Not Supported (Kwbegin)>
   def foo<<todo sym>>(<Not Supported (Blockarg)>)
     <emtpyTree>
-
-  <Not Supported (Block)>
+  <emtpyTree>.lambda() do ||
+    <emtpyTree>
+  end
   <Not Supported (Case)>
   "x".to_s()
   1.+(<Not Supported (Complex)>)
