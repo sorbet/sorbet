@@ -29,126 +29,126 @@ TEST(PreOrderTreeMap, CountTrees) {
     class Counter {
     public:
         int count = 0;
-        ClassDef *transformClassDef(Context ctx, ClassDef *original) {
+        ClassDef *preTransformClassDef(Context ctx, ClassDef *original) {
             count++;
             return original;
         }
-        MethodDef *transformMethodDef(Context ctx, MethodDef *original) {
-            count++;
-            return original;
-        }
-
-        If *transformIf(Context ctx, If *original) {
+        MethodDef *preTransformMethodDef(Context ctx, MethodDef *original) {
             count++;
             return original;
         }
 
-        While *transformWhile(Context ctx, While *original) {
+        If *preTransformIf(Context ctx, If *original) {
             count++;
             return original;
         }
 
-        For *transformFor(Context ctx, For *original) {
+        While *preTransformWhile(Context ctx, While *original) {
             count++;
             return original;
         }
 
-        Break *transformBreak(Context ctx, Break *original) {
+        For *preTransformFor(Context ctx, For *original) {
             count++;
             return original;
         }
 
-        Next *transformNext(Context ctx, Next *original) {
+        Break *postTransformBreak(Context ctx, Break *original) {
             count++;
             return original;
         }
 
-        Return *transformReturn(Context ctx, Return *original) {
+        Next *postTransformNext(Context ctx, Next *original) {
             count++;
             return original;
         }
 
-        Rescue *transformRescue(Context ctx, Rescue *original) {
+        Return *preTransformReturn(Context ctx, Return *original) {
             count++;
             return original;
         }
 
-        Ident *transformIdent(Context ctx, Ident *original) {
+        Rescue *preTransformRescue(Context ctx, Rescue *original) {
             count++;
             return original;
         }
 
-        Assign *transformAssign(Context ctx, Assign *original) {
+        Ident *postTransformIdent(Context ctx, Ident *original) {
             count++;
             return original;
         }
 
-        Send *transformSend(Context ctx, Send *original) {
+        Assign *preTransformAssign(Context ctx, Assign *original) {
             count++;
             return original;
         }
 
-        New *transformNew(Context ctx, New *original) {
+        Send *preTransformSend(Context ctx, Send *original) {
             count++;
             return original;
         }
 
-        NamedArg *transformNamedArg(Context ctx, NamedArg *original) {
+        New *preTransformNew(Context ctx, New *original) {
             count++;
             return original;
         }
 
-        Hash *transformHash(Context ctx, Hash *original) {
+        NamedArg *preTransformNamedArg(Context ctx, NamedArg *original) {
             count++;
             return original;
         }
 
-        Array *transformArray(Context ctx, Array *original) {
+        Hash *preTransformHash(Context ctx, Hash *original) {
             count++;
             return original;
         }
 
-        FloatLit *transformFloatLit(Context ctx, FloatLit *original) {
+        Array *preTransformArray(Context ctx, Array *original) {
             count++;
             return original;
         }
 
-        IntLit *transformIntLit(Context ctx, IntLit *original) {
+        FloatLit *postTransformFloatLit(Context ctx, FloatLit *original) {
             count++;
             return original;
         }
 
-        StringLit *transformStringLit(Context ctx, StringLit *original) {
+        IntLit *postTransformIntLit(Context ctx, IntLit *original) {
             count++;
             return original;
         }
 
-        ConstantLit *transformConstantLit(Context ctx, ConstantLit *original) {
+        StringLit *postTransformStringLit(Context ctx, StringLit *original) {
             count++;
             return original;
         }
 
-        ArraySplat *transformArraySplat(Context ctx, ArraySplat *original) {
+        ConstantLit *postTransformConstantLit(Context ctx, ConstantLit *original) {
             count++;
             return original;
         }
 
-        HashSplat *transformHashSplat(Context ctx, HashSplat *original) {
+        ArraySplat *preTransformArraySplat(Context ctx, ArraySplat *original) {
             count++;
             return original;
         }
 
-        Self *transformSelf(Context ctx, Self *original) {
+        HashSplat *preTransformHashSplat(Context ctx, HashSplat *original) {
             count++;
             return original;
         }
 
-        Block *transformBlock(Context ctx, Block *original) {
+        Self *preTransformSelf(Context ctx, Self *original) {
             count++;
             return original;
         }
 
-        InsSeq *transformInsSeq(Context ctx, InsSeq *original) {
+        Block *preTransformBlock(Context ctx, Block *original) {
+            count++;
+            return original;
+        }
+
+        InsSeq *preTransformInsSeq(Context ctx, InsSeq *original) {
             count++;
             return original;
         }
@@ -179,7 +179,7 @@ TEST(PreOrderTreeMap, CountTrees) {
     std::unique_ptr<Statement> tree(new ClassDef(classSym, std::move(cnst), classrhs, false));
     Counter c;
 
-    auto r = PreOrderTreeMap<Counter>::apply(ctx, c, std::move(tree));
+    auto r = TreeMap<Counter>::apply(ctx, c, std::move(tree));
     EXPECT_EQ(c.count, 3);
 }
 } // namespace ruby_typer

@@ -17,55 +17,72 @@ public:
     // Not including the member will skip the branch
     // you may return the same pointer that you are given
     // caller is repsonsible to handle it
-    ClassDef *transformClassDef(ClassDef *original);
+    ClassDef *preTransformClassDef(ClassDef *original);
+    Statement *postTransformClassDef(ClassDef *original);
 
-    MethodDef *transformMethodDef(MethodDef *original);
+    MethodDef *preTransformMethodDef(MethodDef *original);
+    Statement *postTransformMethodDef(MethodDef *original);
 
-    If *transformIf(If *original);
+    If *preTransformIf(If *original);
+    Statement *postTransformIf(If *original);
 
-    While *transformWhile(While *original);
+    While *preTransformWhile(While *original);
+    Statement *postTransformWhile(While *original);
 
-    For *transformFor(For *original);
+    For *preTransformFor(For *original);
+    Statement *postTransformFor(For *original);
 
-    Break *transformBreak(Break *original);
+    Statement *postTransformBreak(Break *original);
 
-    Next *transformNext(Next *original);
+    Statement *postTransformNext(Next *original);
 
-    Return *transformReturn(Return *original);
+    Return *preTransformReturn(Return *original);
+    Statement *postTransformReturn(Return *original);
 
-    Rescue *transformRescue(Rescue *original);
+    Rescue *preTransformRescue(Rescue *original);
+    Statement *postTransformRescue(Rescue *original);
 
-    Ident *transformIdent(Ident *original);
+    Statement *postTransformIdent(Ident *original);
 
-    Assign *transformAssign(Assign *original);
+    Assign *preTransformAssign(Assign *original);
+    Statement *postTransformAssign(Assign *original);
 
-    Send *transformSend(Send *original);
+    Send *preTransformSend(Send *original);
+    Statement *postTransformSend(Send *original);
 
-    New *transformNew(New *original);
+    New *preTransformNew(New *original);
+    Statement *postTransformNew(New *original);
 
-    NamedArg *transformNamedArg(NamedArg *original);
+    NamedArg *preTransformNamedArg(NamedArg *original);
+    Statement *postTransformNamedArg(NamedArg *original);
 
-    Hash *transformHash(Hash *original);
+    Hash *preTransformHash(Hash *original);
+    Statement *postTransformHash(Hash *original);
 
-    Array *transformArray(Array *original);
+    Array *preTransformArray(Array *original);
+    Statement *postransformArray(Array *original);
 
-    FloatLit *transformFloatLit(FloatLit *original);
+    Statement *postTransformFloatLit(FloatLit *original);
 
-    IntLit *transformIntLit(IntLit *original);
+    Statement *postTransformIntLit(IntLit *original);
 
-    StringLit *transformStringLit(StringLit *original);
+    Statement *postTransformStringLit(StringLit *original);
 
-    ConstantLit *transformConstantLit(ConstantLit *original);
+    Statement *postTransformConstantLit(ConstantLit *original);
 
-    ArraySplat *transformArraySplat(ArraySplat *original);
+    ArraySplat *preTransformArraySplat(ArraySplat *original);
+    Statement *postTransformArraySplat(ArraySplat *original);
 
-    HashSplat *transformHashSplat(HashSplat *original);
+    HashSplat *preTransformHashSplat(HashSplat *original);
+    Statement *postTransformHashSplat(HashSplat *original);
 
-    Self *transformSelf(Self *original);
+    Statement *postTransformSelf(Self *original);
 
-    Block *transformBlock(Block *original);
+    Block *preTransformBlock(Block *original);
+    Statement *postTransformBlock(Block *original);
 
-    InsSeq *transformInsSeq(InsSeq *original);
+    InsSeq *preTransformInsSeq(InsSeq *original);
+    Statement *postTransformInsSeq(InsSeq *original);
 };
 
 /**
@@ -92,36 +109,55 @@ public:
         enum { value = sizeof(func<Derived>(0)) == 2 };                                 \
     };
 
-GENERATE_HAS_MEMBER(transformClassDef);
-GENERATE_HAS_MEMBER(transformMethodDef);
-GENERATE_HAS_MEMBER(transformConstDef);
-GENERATE_HAS_MEMBER(transformIf);
-GENERATE_HAS_MEMBER(transformWhile);
-GENERATE_HAS_MEMBER(transformFor);
-GENERATE_HAS_MEMBER(transformBreak);
-GENERATE_HAS_MEMBER(transformNext);
-GENERATE_HAS_MEMBER(transformReturn);
-GENERATE_HAS_MEMBER(transformRescue);
-GENERATE_HAS_MEMBER(transformIdent);
-GENERATE_HAS_MEMBER(transformAssign);
-GENERATE_HAS_MEMBER(transformSend);
-GENERATE_HAS_MEMBER(transformNew);
-GENERATE_HAS_MEMBER(transformNamedArg);
-GENERATE_HAS_MEMBER(transformHash);
-GENERATE_HAS_MEMBER(transformArray);
-GENERATE_HAS_MEMBER(transformFloatLit);
-GENERATE_HAS_MEMBER(transformIntLit);
-GENERATE_HAS_MEMBER(transformStringLit);
-GENERATE_HAS_MEMBER(transformConstantLit);
-GENERATE_HAS_MEMBER(transformArraySplat);
-GENERATE_HAS_MEMBER(transformHashSplat);
-GENERATE_HAS_MEMBER(transformSelf);
-GENERATE_HAS_MEMBER(transformBlock);
-GENERATE_HAS_MEMBER(transformInsSeq);
+GENERATE_HAS_MEMBER(preTransformClassDef);
+GENERATE_HAS_MEMBER(preTransformMethodDef);
+GENERATE_HAS_MEMBER(preTransformConstDef);
+GENERATE_HAS_MEMBER(preTransformIf);
+GENERATE_HAS_MEMBER(preTransformWhile);
+GENERATE_HAS_MEMBER(preTransformFor);
+GENERATE_HAS_MEMBER(preTransformReturn);
+GENERATE_HAS_MEMBER(preTransformRescue);
+GENERATE_HAS_MEMBER(preTransformAssign);
+GENERATE_HAS_MEMBER(preTransformSend);
+GENERATE_HAS_MEMBER(preTransformNew);
+GENERATE_HAS_MEMBER(preTransformNamedArg);
+GENERATE_HAS_MEMBER(preTransformHash);
+GENERATE_HAS_MEMBER(preTransformArray);
+GENERATE_HAS_MEMBER(preTransformArraySplat);
+GENERATE_HAS_MEMBER(preTransformHashSplat);
+GENERATE_HAS_MEMBER(preTransformBlock);
+GENERATE_HAS_MEMBER(preTransformInsSeq);
 
-#define GENERATE_POSTPONE_CLASS(X)                                             \
+GENERATE_HAS_MEMBER(postTransformClassDef);
+GENERATE_HAS_MEMBER(postTransformMethodDef);
+GENERATE_HAS_MEMBER(postTransformConstDef);
+GENERATE_HAS_MEMBER(postTransformIf);
+GENERATE_HAS_MEMBER(postTransformWhile);
+GENERATE_HAS_MEMBER(postTransformFor);
+GENERATE_HAS_MEMBER(postTransformBreak);
+GENERATE_HAS_MEMBER(postTransformNext);
+GENERATE_HAS_MEMBER(postTransformReturn);
+GENERATE_HAS_MEMBER(postTransformRescue);
+GENERATE_HAS_MEMBER(postTransformIdent);
+GENERATE_HAS_MEMBER(postTransformAssign);
+GENERATE_HAS_MEMBER(postTransformSend);
+GENERATE_HAS_MEMBER(postTransformNew);
+GENERATE_HAS_MEMBER(postTransformNamedArg);
+GENERATE_HAS_MEMBER(postTransformHash);
+GENERATE_HAS_MEMBER(postTransformArray);
+GENERATE_HAS_MEMBER(postTransformFloatLit);
+GENERATE_HAS_MEMBER(postTransformIntLit);
+GENERATE_HAS_MEMBER(postTransformStringLit);
+GENERATE_HAS_MEMBER(postTransformConstantLit);
+GENERATE_HAS_MEMBER(postTransformArraySplat);
+GENERATE_HAS_MEMBER(postTransformHashSplat);
+GENERATE_HAS_MEMBER(postTransformSelf);
+GENERATE_HAS_MEMBER(postTransformBlock);
+GENERATE_HAS_MEMBER(postTransformInsSeq);
+
+#define GENERATE_POSTPONE_PRECLASS(X)                                          \
                                                                                \
-    template <class FUNC, bool has> class PostPoneCalling_##X {                \
+    template <class FUNC, bool has> class PostPonePreTransform_##X {           \
     public:                                                                    \
         static X *call(Context ctx, X *cd, FUNC &what) {                       \
             Error::raise("should never be called. Incorrect use of TreeMap?"); \
@@ -129,45 +165,87 @@ GENERATE_HAS_MEMBER(transformInsSeq);
         }                                                                      \
     };                                                                         \
                                                                                \
-    template <class FUNC> class PostPoneCalling_##X<FUNC, true> {              \
+    template <class FUNC> class PostPonePreTransform_##X<FUNC, true> {         \
     public:                                                                    \
         static X *call(Context ctx, X *cd, FUNC &func) {                       \
-            return func.transform##X(ctx, cd);                                 \
+            return func.preTransform##X(ctx, cd);                              \
         }                                                                      \
     };                                                                         \
                                                                                \
-    template <class FUNC> class PostPoneCalling_##X<FUNC, false> {             \
+    template <class FUNC> class PostPonePreTransform_##X<FUNC, false> {        \
     public:                                                                    \
         static X *call(Context ctx, X *cd, FUNC &func) {                       \
             return cd;                                                         \
         }                                                                      \
     };
 
-GENERATE_POSTPONE_CLASS(ClassDef);
-GENERATE_POSTPONE_CLASS(MethodDef);
-GENERATE_POSTPONE_CLASS(ConstDef);
-GENERATE_POSTPONE_CLASS(If);
-GENERATE_POSTPONE_CLASS(While);
-GENERATE_POSTPONE_CLASS(For);
-GENERATE_POSTPONE_CLASS(Break);
-GENERATE_POSTPONE_CLASS(Next);
-GENERATE_POSTPONE_CLASS(Return);
-GENERATE_POSTPONE_CLASS(Ident);
-GENERATE_POSTPONE_CLASS(Assign);
-GENERATE_POSTPONE_CLASS(Send);
-GENERATE_POSTPONE_CLASS(New);
-GENERATE_POSTPONE_CLASS(NamedArg);
-GENERATE_POSTPONE_CLASS(Hash);
-GENERATE_POSTPONE_CLASS(Array);
-GENERATE_POSTPONE_CLASS(FloatLit);
-GENERATE_POSTPONE_CLASS(IntLit);
-GENERATE_POSTPONE_CLASS(StringLit);
-GENERATE_POSTPONE_CLASS(ConstantLit);
-GENERATE_POSTPONE_CLASS(ArraySplat);
-GENERATE_POSTPONE_CLASS(HashSplat);
-GENERATE_POSTPONE_CLASS(Self);
-GENERATE_POSTPONE_CLASS(Block);
-GENERATE_POSTPONE_CLASS(InsSeq);
+#define GENERATE_POSTPONE_POSTCLASS(X)                                         \
+                                                                               \
+    template <class FUNC, bool has> class PostPonePostTransform_##X {          \
+    public:                                                                    \
+        static Statement *call(Context ctx, X *cd, FUNC &what) {               \
+            Error::raise("should never be called. Incorrect use of TreeMap?"); \
+            return nullptr;                                                    \
+        }                                                                      \
+    };                                                                         \
+                                                                               \
+    template <class FUNC> class PostPonePostTransform_##X<FUNC, true> {        \
+    public:                                                                    \
+        static Statement *call(Context ctx, X *cd, FUNC &func) {               \
+            return func.postTransform##X(ctx, cd);                             \
+        }                                                                      \
+    };                                                                         \
+                                                                               \
+    template <class FUNC> class PostPonePostTransform_##X<FUNC, false> {       \
+    public:                                                                    \
+        static Statement *call(Context ctx, X *cd, FUNC &func) {               \
+            return cd;                                                         \
+        }                                                                      \
+    };
+
+GENERATE_POSTPONE_PRECLASS(ClassDef);
+GENERATE_POSTPONE_PRECLASS(MethodDef);
+GENERATE_POSTPONE_PRECLASS(ConstDef);
+GENERATE_POSTPONE_PRECLASS(If);
+GENERATE_POSTPONE_PRECLASS(While);
+GENERATE_POSTPONE_PRECLASS(For);
+GENERATE_POSTPONE_PRECLASS(Return);
+GENERATE_POSTPONE_PRECLASS(Assign);
+GENERATE_POSTPONE_PRECLASS(Send);
+GENERATE_POSTPONE_PRECLASS(New);
+GENERATE_POSTPONE_PRECLASS(NamedArg);
+GENERATE_POSTPONE_PRECLASS(Hash);
+GENERATE_POSTPONE_PRECLASS(Array);
+GENERATE_POSTPONE_PRECLASS(ArraySplat);
+GENERATE_POSTPONE_PRECLASS(HashSplat);
+GENERATE_POSTPONE_PRECLASS(Block);
+GENERATE_POSTPONE_PRECLASS(InsSeq);
+
+GENERATE_POSTPONE_POSTCLASS(ClassDef);
+GENERATE_POSTPONE_POSTCLASS(MethodDef);
+GENERATE_POSTPONE_POSTCLASS(ConstDef);
+GENERATE_POSTPONE_POSTCLASS(If);
+GENERATE_POSTPONE_POSTCLASS(While);
+GENERATE_POSTPONE_POSTCLASS(For);
+GENERATE_POSTPONE_POSTCLASS(Break);
+GENERATE_POSTPONE_POSTCLASS(Next);
+GENERATE_POSTPONE_POSTCLASS(Return);
+GENERATE_POSTPONE_POSTCLASS(Ident);
+GENERATE_POSTPONE_POSTCLASS(Assign);
+GENERATE_POSTPONE_POSTCLASS(Send);
+GENERATE_POSTPONE_POSTCLASS(New);
+GENERATE_POSTPONE_POSTCLASS(NamedArg);
+GENERATE_POSTPONE_POSTCLASS(Hash);
+GENERATE_POSTPONE_POSTCLASS(Array);
+GENERATE_POSTPONE_POSTCLASS(FloatLit);
+GENERATE_POSTPONE_POSTCLASS(IntLit);
+GENERATE_POSTPONE_POSTCLASS(StringLit);
+GENERATE_POSTPONE_POSTCLASS(ConstantLit);
+GENERATE_POSTPONE_POSTCLASS(ArraySplat);
+GENERATE_POSTPONE_POSTCLASS(HashSplat);
+GENERATE_POSTPONE_POSTCLASS(Self);
+GENERATE_POSTPONE_POSTCLASS(Block);
+GENERATE_POSTPONE_POSTCLASS(InsSeq);
 
 /**
  * Given a tree transformer FUNC transform a tree.
@@ -175,11 +253,11 @@ GENERATE_POSTPONE_CLASS(InsSeq);
  * FUNC may maintain internal state.
  * @tparam tree transformer, see FUNC_EXAMPLE
  */
-template <class FUNC> class PreOrderTreeMap {
+template <class FUNC> class TreeMap {
 private:
     FUNC &func;
 
-    PreOrderTreeMap(FUNC &func) : func(func) {}
+    TreeMap(FUNC &func) : func(func) {}
 
     Statement *mapIt(Statement *what, Context ctx) {
         // TODO: reorder by frequency
@@ -187,8 +265,9 @@ private:
             return what;
         if (ClassDef *v = dynamic_cast<ClassDef *>(what)) {
 
-            if (HAS_MEMBER_transformClassDef<FUNC>::value) {
-                v = PostPoneCalling_ClassDef<FUNC, HAS_MEMBER_transformClassDef<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
+                v = PostPonePreTransform_ClassDef<FUNC, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(ctx, v,
+                                                                                                            func);
             }
 
             for (auto &def : v->rhs) {
@@ -199,10 +278,16 @@ private:
                 }
             }
 
+            if (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
+                return PostPonePostTransform_ClassDef<FUNC, HAS_MEMBER_postTransformClassDef<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
+            }
+
             return v;
         } else if (MethodDef *v = dynamic_cast<MethodDef *>(what)) {
-            if (HAS_MEMBER_transformMethodDef<FUNC>::value) {
-                v = PostPoneCalling_MethodDef<FUNC, HAS_MEMBER_transformMethodDef<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformMethodDef<FUNC>::value) {
+                v = PostPonePreTransform_MethodDef<FUNC, HAS_MEMBER_preTransformMethodDef<FUNC>::value>::call(ctx, v,
+                                                                                                              func);
             }
             auto originalRhs = v->rhs.get();
             auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
@@ -210,10 +295,17 @@ private:
                 Error::check(dynamic_cast<Expression *>(newRhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expression *>(newRhs));
             }
+
+            if (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
+                return PostPonePostTransform_MethodDef<FUNC, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(
+                    ctx, v, func);
+            }
+
             return v;
         } else if (ConstDef *v = dynamic_cast<ConstDef *>(what)) {
-            if (HAS_MEMBER_transformConstDef<FUNC>::value) {
-                v = PostPoneCalling_ConstDef<FUNC, HAS_MEMBER_transformConstDef<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformConstDef<FUNC>::value) {
+                v = PostPonePreTransform_ConstDef<FUNC, HAS_MEMBER_preTransformConstDef<FUNC>::value>::call(ctx, v,
+                                                                                                            func);
             }
             auto originalRhs = v->rhs.get();
             auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
@@ -221,10 +313,16 @@ private:
                 Error::check(dynamic_cast<Expression *>(newRhs) != nullptr);
                 v->rhs.reset(dynamic_cast<Expression *>(newRhs));
             }
+
+            if (HAS_MEMBER_postTransformConstDef<FUNC>::value) {
+                return PostPonePostTransform_ConstDef<FUNC, HAS_MEMBER_postTransformConstDef<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
+            }
+
             return v;
         } else if (If *v = dynamic_cast<If *>(what)) {
-            if (HAS_MEMBER_transformIf<FUNC>::value) {
-                v = PostPoneCalling_If<FUNC, HAS_MEMBER_transformIf<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformIf<FUNC>::value) {
+                v = PostPonePreTransform_If<FUNC, HAS_MEMBER_preTransformIf<FUNC>::value>::call(ctx, v, func);
             }
             auto originalCond = v->cond.get();
             auto originalThen = v->thenp.get();
@@ -244,10 +342,13 @@ private:
                 Error::check(dynamic_cast<Expression *>(newElse) != nullptr);
                 v->elsep.reset(dynamic_cast<Expression *>(newElse));
             }
+            if (HAS_MEMBER_postTransformIf<FUNC>::value) {
+                return PostPonePostTransform_If<FUNC, HAS_MEMBER_postTransformIf<FUNC>::value>::call(ctx, v, func);
+            }
             return v;
         } else if (While *v = dynamic_cast<While *>(what)) {
-            if (HAS_MEMBER_transformWhile<FUNC>::value) {
-                v = PostPoneCalling_While<FUNC, HAS_MEMBER_transformWhile<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformWhile<FUNC>::value) {
+                v = PostPonePreTransform_While<FUNC, HAS_MEMBER_preTransformWhile<FUNC>::value>::call(ctx, v, func);
             }
             auto originalCond = v->cond.get();
             auto originalBody = v->body.get();
@@ -261,22 +362,28 @@ private:
                 v->body.reset(newBody);
             }
 
+            if (HAS_MEMBER_postTransformWhile<FUNC>::value) {
+                return PostPonePostTransform_While<FUNC, HAS_MEMBER_postTransformWhile<FUNC>::value>::call(ctx, v,
+                                                                                                           func);
+            }
+
             return v;
         } else if (For *v = dynamic_cast<For *>(what)) {
             Error::notImplemented();
         } else if (Break *v = dynamic_cast<Break *>(what)) {
-            if (HAS_MEMBER_transformBreak<FUNC>::value) {
-                return PostPoneCalling_Break<FUNC, HAS_MEMBER_transformBreak<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_postTransformBreak<FUNC>::value) {
+                return PostPonePostTransform_Break<FUNC, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(ctx, v,
+                                                                                                           func);
             }
             return v;
         } else if (Next *v = dynamic_cast<Next *>(what)) {
-            if (HAS_MEMBER_transformNext<FUNC>::value) {
-                return PostPoneCalling_Next<FUNC, HAS_MEMBER_transformNext<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_postTransformNext<FUNC>::value) {
+                return PostPonePostTransform_Next<FUNC, HAS_MEMBER_postTransformNext<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Return *v = dynamic_cast<Return *>(what)) {
-            if (HAS_MEMBER_transformReturn<FUNC>::value) {
-                v = PostPoneCalling_Return<FUNC, HAS_MEMBER_transformReturn<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformReturn<FUNC>::value) {
+                v = PostPonePreTransform_Return<FUNC, HAS_MEMBER_preTransformReturn<FUNC>::value>::call(ctx, v, func);
             }
             auto oexpr = v->expr.get();
             auto nexpr = mapIt(oexpr, ctx);
@@ -285,15 +392,21 @@ private:
                 v->expr.reset(dynamic_cast<Expression *>(nexpr));
             }
 
+            if (HAS_MEMBER_postTransformReturn<FUNC>::value) {
+                return PostPonePostTransform_Return<FUNC, HAS_MEMBER_postTransformReturn<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+            }
+
             return v;
         } else if (Ident *v = dynamic_cast<Ident *>(what)) {
-            if (HAS_MEMBER_transformIdent<FUNC>::value) {
-                return PostPoneCalling_Ident<FUNC, HAS_MEMBER_transformIdent<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_postTransformIdent<FUNC>::value) {
+                return PostPonePostTransform_Ident<FUNC, HAS_MEMBER_postTransformIdent<FUNC>::value>::call(ctx, v,
+                                                                                                           func);
             }
             return v;
         } else if (Assign *v = dynamic_cast<Assign *>(what)) {
-            if (HAS_MEMBER_transformAssign<FUNC>::value) {
-                v = PostPoneCalling_Assign<FUNC, HAS_MEMBER_transformAssign<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformAssign<FUNC>::value) {
+                v = PostPonePreTransform_Assign<FUNC, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(ctx, v, func);
             }
             auto olhs = v->lhs.get();
             auto orhs = v->rhs.get();
@@ -308,10 +421,15 @@ private:
                 v->rhs.reset(dynamic_cast<Expression *>(nrhs));
             }
 
+            if (HAS_MEMBER_postTransformAssign<FUNC>::value) {
+                return PostPonePostTransform_Assign<FUNC, HAS_MEMBER_postTransformAssign<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+            }
+
             return v;
         } else if (Send *v = dynamic_cast<Send *>(what)) {
-            if (HAS_MEMBER_transformSend<FUNC>::value) {
-                v = PostPoneCalling_Send<FUNC, HAS_MEMBER_transformSend<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformSend<FUNC>::value) {
+                v = PostPonePreTransform_Send<FUNC, HAS_MEMBER_preTransformSend<FUNC>::value>::call(ctx, v, func);
             }
             auto orecv = v->recv.get();
             auto nrecv = mapIt(orecv, ctx);
@@ -332,10 +450,14 @@ private:
                 i++;
             }
 
+            if (HAS_MEMBER_postTransformSend<FUNC>::value) {
+                return PostPonePostTransform_Send<FUNC, HAS_MEMBER_postTransformSend<FUNC>::value>::call(ctx, v, func);
+            }
+
             return v;
         } else if (New *v = dynamic_cast<New *>(what)) {
-            if (HAS_MEMBER_transformNew<FUNC>::value) {
-                v = PostPoneCalling_New<FUNC, HAS_MEMBER_transformNew<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformNew<FUNC>::value) {
+                v = PostPonePreTransform_New<FUNC, HAS_MEMBER_preTransformNew<FUNC>::value>::call(ctx, v, func);
             }
             auto &args = v->args;
             auto i = 0;
@@ -350,16 +472,26 @@ private:
                 i++;
             }
 
+            if (HAS_MEMBER_postTransformNew<FUNC>::value) {
+                return PostPonePostTransform_New<FUNC, HAS_MEMBER_postTransformNew<FUNC>::value>::call(ctx, v, func);
+            }
+
             return v;
         } else if (NamedArg *v = dynamic_cast<NamedArg *>(what)) {
-            if (HAS_MEMBER_transformNamedArg<FUNC>::value) {
-                v = PostPoneCalling_NamedArg<FUNC, HAS_MEMBER_transformNamedArg<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformNamedArg<FUNC>::value) {
+                v = PostPonePreTransform_NamedArg<FUNC, HAS_MEMBER_preTransformNamedArg<FUNC>::value>::call(ctx, v,
+                                                                                                            func);
             }
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
                 Error::check(dynamic_cast<Expression *>(narg) != nullptr);
                 v->arg.reset(dynamic_cast<Expression *>(narg));
+            }
+
+            if (HAS_MEMBER_postTransformNamedArg<FUNC>::value) {
+                return PostPonePostTransform_NamedArg<FUNC, HAS_MEMBER_postTransformNamedArg<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
             }
 
             return v;
@@ -368,29 +500,33 @@ private:
         } else if (Array *v = dynamic_cast<Array *>(what)) {
             Error::notImplemented();
         } else if (FloatLit *v = dynamic_cast<FloatLit *>(what)) {
-            if (HAS_MEMBER_transformFloatLit<FUNC>::value) {
-                return PostPoneCalling_FloatLit<FUNC, HAS_MEMBER_transformFloatLit<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_postTransformFloatLit<FUNC>::value) {
+                return PostPonePostTransform_FloatLit<FUNC, HAS_MEMBER_postTransformFloatLit<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
             }
             return v;
         } else if (IntLit *v = dynamic_cast<IntLit *>(what)) {
-            if (HAS_MEMBER_transformIntLit<FUNC>::value) {
-                return PostPoneCalling_IntLit<FUNC, HAS_MEMBER_transformIntLit<FUNC>::value>::call(ctx, v, func);
-            }
-            return v;
-        } else if (StringLit *v = dynamic_cast<StringLit *>(what)) {
-            if (HAS_MEMBER_transformStringLit<FUNC>::value) {
-                return PostPoneCalling_StringLit<FUNC, HAS_MEMBER_transformStringLit<FUNC>::value>::call(ctx, v, func);
-            }
-            return v;
-        } else if (ConstantLit *v = dynamic_cast<ConstantLit *>(what)) {
-            if (HAS_MEMBER_transformConstantLit<FUNC>::value) {
-                return PostPoneCalling_ConstantLit<FUNC, HAS_MEMBER_transformConstantLit<FUNC>::value>::call(ctx, v,
+            if (HAS_MEMBER_postTransformIntLit<FUNC>::value) {
+                return PostPonePostTransform_IntLit<FUNC, HAS_MEMBER_postTransformIntLit<FUNC>::value>::call(ctx, v,
                                                                                                              func);
             }
             return v;
+        } else if (StringLit *v = dynamic_cast<StringLit *>(what)) {
+            if (HAS_MEMBER_postTransformStringLit<FUNC>::value) {
+                return PostPonePostTransform_StringLit<FUNC, HAS_MEMBER_postTransformStringLit<FUNC>::value>::call(
+                    ctx, v, func);
+            }
+            return v;
+        } else if (ConstantLit *v = dynamic_cast<ConstantLit *>(what)) {
+            if (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
+                return PostPonePostTransform_ConstantLit<FUNC, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(
+                    ctx, v, func);
+            }
+            return v;
         } else if (ArraySplat *v = dynamic_cast<ArraySplat *>(what)) {
-            if (HAS_MEMBER_transformArraySplat<FUNC>::value) {
-                v = PostPoneCalling_ArraySplat<FUNC, HAS_MEMBER_transformArraySplat<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformArraySplat<FUNC>::value) {
+                v = PostPonePreTransform_ArraySplat<FUNC, HAS_MEMBER_preTransformArraySplat<FUNC>::value>::call(ctx, v,
+                                                                                                                func);
             }
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
@@ -399,10 +535,16 @@ private:
                 v->arg.reset(dynamic_cast<Expression *>(narg));
             }
 
+            if (HAS_MEMBER_postTransformArraySplat<FUNC>::value) {
+                return PostPonePostTransform_ArraySplat<FUNC, HAS_MEMBER_postTransformArraySplat<FUNC>::value>::call(
+                    ctx, v, func);
+            }
+
             return v;
         } else if (HashSplat *v = dynamic_cast<HashSplat *>(what)) {
-            if (HAS_MEMBER_transformHashSplat<FUNC>::value) {
-                v = PostPoneCalling_HashSplat<FUNC, HAS_MEMBER_transformHashSplat<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformHashSplat<FUNC>::value) {
+                v = PostPonePreTransform_HashSplat<FUNC, HAS_MEMBER_preTransformHashSplat<FUNC>::value>::call(ctx, v,
+                                                                                                              func);
             }
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
@@ -410,17 +552,22 @@ private:
                 Error::check(dynamic_cast<Expression *>(narg) != nullptr);
                 v->arg.reset(dynamic_cast<Expression *>(narg));
             }
+
+            if (HAS_MEMBER_postTransformHashSplat<FUNC>::value) {
+                return PostPonePostTransform_HashSplat<FUNC, HAS_MEMBER_postTransformHashSplat<FUNC>::value>::call(
+                    ctx, v, func);
+            }
             return v;
         } else if (Self *v = dynamic_cast<Self *>(what)) {
-            if (HAS_MEMBER_transformSelf<FUNC>::value) {
-                return PostPoneCalling_Self<FUNC, HAS_MEMBER_transformSelf<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_postTransformSelf<FUNC>::value) {
+                return PostPonePostTransform_Self<FUNC, HAS_MEMBER_postTransformSelf<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Block *v = dynamic_cast<Block *>(what)) {
             Error::notImplemented();
         } else if (InsSeq *v = dynamic_cast<InsSeq *>(what)) {
-            if (HAS_MEMBER_transformInsSeq<FUNC>::value) {
-                v = PostPoneCalling_InsSeq<FUNC, HAS_MEMBER_transformInsSeq<FUNC>::value>::call(ctx, v, func);
+            if (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
+                v = PostPonePreTransform_InsSeq<FUNC, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(ctx, v, func);
             }
             auto &stats = v->stats;
             auto oexpr = v->expr.get();
@@ -440,6 +587,11 @@ private:
                 v->expr.reset(dynamic_cast<Expression *>(nexpr));
             }
 
+            if (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
+                return PostPonePostTransform_InsSeq<FUNC, HAS_MEMBER_postTransformInsSeq<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+            }
+
             return v;
         } else {
             Error::raise("should never happen. Forgot to add new tree kind?");
@@ -449,7 +601,7 @@ private:
 public:
     static unique_ptr<Statement> apply(Context ctx, FUNC &func, unique_ptr<Statement> to) {
         Statement *underlying = to.get();
-        PreOrderTreeMap walker(func);
+        TreeMap walker(func);
         Statement *res = walker.mapIt(underlying, ctx);
 
         if (res == underlying) {
