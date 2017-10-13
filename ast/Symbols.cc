@@ -26,5 +26,9 @@ SymbolInfo &SymbolRef::info(ContextBase &ctx, bool allowNone) const {
     return ctx.symbols[this->_id];
 }
 
+bool SymbolRef::isSynthetic() const {
+    return this->_id <= ContextBase::defn_last_synthetic_sym()._id;
+}
+
 } // namespace ast
 } // namespace ruby_typer

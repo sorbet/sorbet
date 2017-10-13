@@ -24,7 +24,7 @@ unsigned int Name::hash(ContextBase &ctx) const {
         case UTF8:
             return _hash(raw.utf8);
         case UNIQUE: {
-            return _hash_mix_unique(unique.separator.id(), UNIQUE, unique.num, unique.original.id());
+            return _hash_mix_unique((u2)unique.uniqueNameKind, UNIQUE, unique.num, unique.original.id());
         }
             DEBUG_ONLY(default : Error::raise("Unknown name kind?", kind);)
     }

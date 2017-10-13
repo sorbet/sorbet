@@ -10,24 +10,25 @@
 namespace ruby_typer {
 namespace ast {
 
-class Stat {
+class Statement {
 public:
-    Stat() = default;
-    virtual ~Stat() = default;
+    Statement() = default;
+    virtual ~Statement() = default;
+    virtual std::string toString(ContextBase &ctx, int tabs = 0) = 0;
 };
 
-class Expr : public Stat {};
+class Expression : public Statement {};
 
-class ControlFlow : public Expr {};
+class ControlFlow : public Expression {};
 
-class Decl : public Stat {
+class Declaration : public Expression {
 public:
     SymbolRef symbol;
 
-    Decl(SymbolRef symbol);
+    Declaration(SymbolRef symbol);
 };
 
-class ClassDef : public Decl {
+class ClassDef : public Declaration {
 public:
     inline SymbolRef parent(Context ctx) {
         return symbol.info(ctx).parent(ctx);
@@ -37,40 +38,43 @@ public:
         return symbol.info(ctx).mixins(ctx);
     }
 
-    std::unique_ptr<Stat> rhs;
+    std::vector<std::unique_ptr<Statement>> rhs;
+    std::unique_ptr<Expression> name;
+    bool isModule;
 
-    ClassDef(SymbolRef symbol, std::unique_ptr<Stat> rhs);
+    ClassDef(SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Statement>> &rhs,
+             bool isModule);
+
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class MethodDef : public Decl {
+class MethodDef : public Declaration {
 public:
-    std::unique_ptr<Expr> rhs;
-    std::vector<SymbolRef> args;
+    std::unique_ptr<Expression> rhs;
+    std::vector<std::unique_ptr<Expression>> args;
+    NameRef name;
+    bool isSelf;
 
-    MethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs);
+    MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
+              std::unique_ptr<Expression> rhs, bool isSelf);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class SelfMethodDef : public Decl {
+class ConstDef : public Declaration {
 public:
-    std::unique_ptr<Expr> rhs;
-    std::vector<SymbolRef> args;
+    std::unique_ptr<Expression> rhs;
 
-    SelfMethodDef(SymbolRef symbol, std::vector<SymbolRef> args, std::unique_ptr<Expr> rhs);
-};
-
-class ConstDef : public Decl {
-public:
-    std::unique_ptr<Expr> rhs;
-
-    ConstDef(SymbolRef symbol, std::unique_ptr<Expr> rhs);
+    ConstDef(SymbolRef symbol, std::unique_ptr<Expression> rhs);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class If : public ControlFlow {
 public:
-    std::unique_ptr<Expr> cond;
-    std::unique_ptr<Expr> thenp;
-    std::unique_ptr<Expr> elsep;
-    If(std::unique_ptr<Expr> cond, std::unique_ptr<Expr> thenp, std::unique_ptr<Expr> elsep);
+    std::unique_ptr<Expression> cond;
+    std::unique_ptr<Expression> thenp;
+    std::unique_ptr<Expression> elsep;
+    If(std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp, std::unique_ptr<Expression> elsep);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Breakable : public ControlFlow {
@@ -82,10 +86,11 @@ public:
 
 class While : public Breakable {
 public:
-    std::unique_ptr<Expr> cond;
-    std::unique_ptr<Stat> body;
+    std::unique_ptr<Expression> cond;
+    std::unique_ptr<Statement> body;
 
-    While(u1 break_tag, std::unique_ptr<Expr> cond, std::unique_ptr<Stat> body);
+    While(u1 break_tag, std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class For : public Breakable {
@@ -97,6 +102,7 @@ public:
     u1 break_tag;
 
     Break(u1 break_tag);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Next : public ControlFlow {
@@ -104,136 +110,194 @@ public:
     u1 break_tag;
 
     Next(u1 break_tag);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Return : public ControlFlow {
 public:
-    std::unique_ptr<Expr> expr;
+    std::unique_ptr<Expression> expr;
 
-    Return(std::unique_ptr<Expr> expr);
+    Return(std::unique_ptr<Expression> expr);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
 class Rescue : public ControlFlow {
 public:
-    std::unique_ptr<Expr> body;
+    std::unique_ptr<Expression> body;
     SymbolRef binder;
     SymbolRef binder_type;
-    std::unique_ptr<Expr> handler;
+    std::unique_ptr<Expression> handler;
+
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class Ident : public Expr {
+class Ident : public Expression {
 public:
     SymbolRef symbol;
+    NameRef name;
 
     Ident(SymbolRef symbol);
+    Ident(NameRef name, SymbolRef symbol);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class Assign : public Expr {
-public:
-    std::unique_ptr<Expr> lhs;
-    std::unique_ptr<Expr> rhs;
-
-    Assign(std::unique_ptr<Expr> lhs, std::unique_ptr<Expr> rhs);
-};
-
-class Send : public Expr {
-public:
-    std::unique_ptr<Expr> recv;
-    NameRef fun;
-    std::vector<std::unique_ptr<Expr>> args;
-
-    Send(std::unique_ptr<Expr> recv, NameRef fun, std::vector<std::unique_ptr<Expr>> &&args);
-};
-
-class New : public Expr {
-public:
-    SymbolRef claz;
-    std::vector<std::unique_ptr<Expr>> args;
-
-    New(SymbolRef claz, std::vector<std::unique_ptr<Expr>> &&args);
-};
-
-class NamedArg : public Expr {
+class Symbol : public Expression {
 public:
     NameRef name;
-    std::unique_ptr<Expr> arg;
 
-    NamedArg(NameRef name, std::unique_ptr<Expr> arg);
+    Symbol(NameRef name);
+
+    virtual std::string toString(ContextBase &ctx, int tabs);
 };
 
-class Hash : public Expr {
+class Assign : public Expression {
+public:
+    std::unique_ptr<Expression> lhs;
+    std::unique_ptr<Expression> rhs;
+
+    Assign(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
+class Send : public Expression {
+public:
+    std::unique_ptr<Expression> recv;
+    NameRef fun;
+    std::vector<std::unique_ptr<Expression>> args;
+
+    Send(std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
+class New : public Expression {
+public:
+    SymbolRef claz;
+    std::vector<std::unique_ptr<Expression>> args;
+
+    New(SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
+class Super : public Expression {
+public:
+    std::vector<std::unique_ptr<Expression>> args;
+
+    Super(std::vector<std::unique_ptr<Expression>> &&args);
+
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
+class NamedArg : public Expression {
+public:
+    NameRef name;
+    std::unique_ptr<Expression> arg;
+
+    NamedArg(NameRef name, std::unique_ptr<Expression> arg);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
+class Hash : public Expression {
     // TODO
 };
 
-class Array : public Expr {
-    // TODO
+class Array : public Expression {
+public:
+    std::vector<std::unique_ptr<Expression>> elems;
+
+    Array(std::vector<std::unique_ptr<Expression>> &elems);
+
+    virtual std::string toString(ContextBase &ctx, int tabs);
 };
 
-class FloatLit : public Expr {
+class FloatLit : public Expression {
 public:
     float value;
 
     FloatLit(float value);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class IntLit : public Expr {
+class IntLit : public Expression {
 public:
     int value;
 
     IntLit(int value);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class StringLit : public Expr {
+class StringLit : public Expression {
 public:
     NameRef value;
 
     StringLit(NameRef value);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class ConstantLit : public Expr {
+class ConstantLit : public Expression {
+public:
     NameRef cnst;
+    std::unique_ptr<Expression> scope;
 
-public:
-    ConstantLit(NameRef cnst);
+    ConstantLit(std::unique_ptr<Expression> scope, NameRef cnst);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class ArraySplat : public Expr {
+class ArraySplat : public Expression {
 public:
-    std::unique_ptr<Expr> arg;
+    std::unique_ptr<Expression> arg;
 
-    ArraySplat(std::unique_ptr<Expr> arg);
+    ArraySplat(std::unique_ptr<Expression> arg);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class HashSplat : public Expr {
+class HashSplat : public Expression {
 public:
-    std::unique_ptr<Expr> arg;
+    std::unique_ptr<Expression> arg;
 
-    HashSplat(std::unique_ptr<Expr> arg);
+    HashSplat(std::unique_ptr<Expression> arg);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class Self : public Expr {
+class Self : public Expression {
 public:
     SymbolRef claz;
 
     Self(SymbolRef claz);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class Closure : public Expr {
+class Block : public Expression {
 public:
-    SymbolRef method;
+    std::unique_ptr<Send> send;
+    std::unique_ptr<Expression> rhs;
+    std::vector<std::unique_ptr<Expression>> args;
 
-    Closure(SymbolRef method);
+    Block(std::unique_ptr<Send> send, std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> rhs);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class InsSeq : public Expr {
+class InsSeq : public Expression {
 public:
-    std::vector<std::unique_ptr<Stat>> stats;
-    std::unique_ptr<Expr> expr;
+    std::vector<std::unique_ptr<Statement>> stats;
+    std::unique_ptr<Expression> expr;
 
-    InsSeq(std::vector<std::unique_ptr<Stat>> &&stats, std::unique_ptr<Expr> expr);
+    InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expression> expr);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
-class EmptyTree : public Expr {};
+class EmptyTree : public Expression {
+
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
+class NotSupported : public Expression {
+    std::string why;
+
+public:
+    NotSupported(const std::string &why);
+
+    virtual std::string toString(ContextBase &ctx, int tabs);
+};
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *
@@ -243,7 +307,7 @@ class EmptyTree : public Expr {};
  * Pre-CFG-Node <-
  *                 \ Instruction <- assign, send, [new], ident, named_arg, hash, array, literals(symbols, ints, floats,
  * strings, constants, nil), constants(resolver will desugar it into literals), array_splat(*), hash_splat(**), self,
- * insseq, closure)
+ * insseq, Block)
  *
  *                  \ Definition  <-  class(name, parent, mixins, body)
  *                                    module

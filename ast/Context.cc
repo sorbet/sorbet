@@ -1,5 +1,6 @@
 #include "Context.h"
 #include "Hashing.h"
+#include "common/common.h"
 
 namespace ruby_typer {
 namespace ast {
@@ -13,6 +14,18 @@ SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
 
 static const char *init = "initialize";
 static UTF8Desc init_DESC{(char *)init, (int)std::strlen(init)};
+
+static const char *andAnd = "&&";
+static UTF8Desc andAnd_DESC{(char *)andAnd, (int)std::strlen(andAnd)};
+
+static const char *orOr = "||";
+static UTF8Desc orOr_DESC{(char *)orOr, (int)std::strlen(orOr)};
+
+static const char *to_s = "to_s";
+static UTF8Desc to_s_DESC{(char *)to_s, (int)std::strlen(to_s)};
+
+static const char *concat = "concat";
+static UTF8Desc concat_DESC{(char *)concat, (int)std::strlen(concat)};
 
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)std::strlen(no_symbol_str)};
@@ -29,6 +42,21 @@ static UTF8Desc root_DESC{(char *)root_str, (int)std::strlen(root_str)};
 static const char *nil_str = "nil";
 static UTF8Desc nil_DESC{(char *)nil_str, (int)std::strlen(nil_str)};
 
+static const char *todo_str = "<todo sym>";
+static UTF8Desc todo_DESC{(char *)todo_str, (int)std::strlen(todo_str)};
+
+static const char *todo_ivar_str = "<todo ivar sym>";
+static UTF8Desc todo_ivar_DESC{(char *)todo_ivar_str, (int)std::strlen(todo_ivar_str)};
+
+static const char *todo_cvar_str = "<todo cvar sym>";
+static UTF8Desc todo_cvar_DESC{(char *)todo_cvar_str, (int)std::strlen(todo_cvar_str)};
+
+static const char *todo_gvar_str = "<todo gvar sym>";
+static UTF8Desc todo_gvar_DESC{(char *)todo_gvar_str, (int)std::strlen(todo_gvar_str)};
+
+static const char *todo_lvar_str = "<todo lvar sym>";
+static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)std::strlen(todo_lvar_str)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -42,26 +70,50 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     names.emplace_back(); // first name is used in hashes to indicate empty cell
     // Second name is always <init>, see SymbolInfo::isConstructor
     auto init_id = enterNameUTF8(init_DESC);
-    DEBUG_ONLY(Error::check(init_id._id == 1));
+    auto andAnd_id = enterNameUTF8(andAnd_DESC);
+    auto orOr_id = enterNameUTF8(orOr_DESC);
+    auto to_s_id = enterNameUTF8(to_s_DESC);
+    auto concat_id = enterNameUTF8(concat_DESC);
+
+    DEBUG_ONLY(Error::check(init_id == Names::initialize()));
+    DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
+    DEBUG_ONLY(Error::check(orOr_id == Names::orOr()));
+    DEBUG_ONLY(Error::check(to_s_id == Names::to_s()));
+    DEBUG_ONLY(Error::check(concat_id == Names::concat()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
     SymbolRef bottom_id = synthesizeClass(bottom_DESC);
     SymbolRef root_id = synthesizeClass(root_DESC);
     SymbolRef nil_id = synthesizeClass(nil_DESC);
+    SymbolRef todo_id = synthesizeClass(todo_DESC);
+    SymbolRef lvar_id = synthesizeClass(todo_lvar_DESC);
+    SymbolRef ivar_id = synthesizeClass(todo_ivar_DESC);
+    SymbolRef gvar_id = synthesizeClass(todo_gvar_DESC);
+    SymbolRef cvar_id = synthesizeClass(todo_cvar_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
     Error::check(bottom_id == defn_bottom());
     Error::check(root_id == defn_root());
     Error::check(nil_id == defn_nil());
+    Error::check(todo_id == defn_todo());
+    Error::check(lvar_id == defn_lvar_todo());
+    Error::check(ivar_id == defn_ivar_todo());
+    Error::check(gvar_id == defn_gvar_todo());
+    Error::check(cvar_id == defn_cvar_todo());
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
      * 3: <root>;
      * 4: nil;
+     * 5: <todo>
+     * 6: <todo lvar>
+     * 7: <todo ivar>
+     * 8: <todo gvar>
+     * 9: <todo cvar>
      */
-    Error::check(symbols.size() == 5);
+    Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }
 
 ContextBase::~ContextBase() {}
@@ -194,9 +246,8 @@ void ContextBase::expandNames() {
     names_by_hash.swap(new_names_by_hash);
 }
 
-NameRef ContextBase::enterNameUnique(NameRef separator, u2 num, NameKind kind, NameRef original) {
-    Error::check(separator.id() < names.size());
-    const auto hs = _hash_mix_unique(separator.id(), UNIQUE, num, original.id());
+NameRef ContextBase::enterNameUnique(UniqueNameKind uniqueNameKind, u2 num, NameRef original) {
+    const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
     unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
     auto bucketId = hs & mask;
@@ -206,7 +257,7 @@ NameRef ContextBase::enterNameUnique(NameRef separator, u2 num, NameKind kind, N
         auto &bucket = names_by_hash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
-            if (nm2.kind == UNIQUE && nm2.unique.separator == separator && nm2.unique.num == num &&
+            if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original)
                 return bucket.second;
         }
@@ -239,7 +290,7 @@ NameRef ContextBase::enterNameUnique(NameRef separator, u2 num, NameKind kind, N
 
     names[idx].kind = UNIQUE;
     names[idx].unique.num = num;
-    names[idx].unique.separator = separator;
+    names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
     return idx;
 }
@@ -257,6 +308,12 @@ SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
     info.flags = 0;
     info.setClass();
     return current;
+}
+
+SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
+    auto tempName = this->enterNameUnique(kind, freshNameId++, name);
+    std::vector<SymbolRef> empty;
+    return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
 }
 
 } // namespace ast

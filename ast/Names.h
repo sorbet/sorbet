@@ -59,6 +59,10 @@ public:
         return _id != 0;
     }
 
+    inline NameRef addEq() const {
+        return NameRef(2);
+    }
+
 public:
     int _id;
 };
@@ -103,15 +107,40 @@ struct RawName {
 };
 CheckSize(RawName, 16, 8);
 
+enum UniqueNameKind : u2 {
+    Desugar,
+};
+
 struct UniqueName {
     NameRef original;
-    NameRef separator;
+    UniqueNameKind uniqueNameKind;
     u2 num;
 };
 
-CheckSize(UniqueName, 12, 4)
+CheckSize(UniqueName, 8, 4)
 
-    class Name {
+    class Names {
+public:
+    static inline NameRef initialize() {
+        return NameRef(1);
+    }
+    static inline NameRef andAnd() {
+        return NameRef(2);
+    }
+    static inline NameRef orOr() {
+        return NameRef(3);
+    }
+
+    static inline NameRef to_s() {
+        return NameRef(4);
+    }
+
+    static inline NameRef concat() {
+        return NameRef(5);
+    }
+};
+
+class Name {
 public:
     NameKind kind;
 
