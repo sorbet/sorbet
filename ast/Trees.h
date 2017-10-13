@@ -134,8 +134,10 @@ public:
 class Ident : public Expression {
 public:
     SymbolRef symbol;
+    NameRef name;
 
     Ident(SymbolRef symbol);
+    Ident(NameRef name, SymbolRef symbol);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
@@ -173,6 +175,15 @@ public:
     std::vector<std::unique_ptr<Expression>> args;
 
     New(SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
+class Super : public Expression {
+public:
+    std::vector<std::unique_ptr<Expression>> args;
+
+    Super(std::vector<std::unique_ptr<Expression>> &&args);
+
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 

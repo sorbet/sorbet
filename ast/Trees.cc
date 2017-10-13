@@ -72,7 +72,13 @@ std::string Next::toString(ContextBase &ctx, int tabs) {
 
 Return::Return(std::unique_ptr<Expression> expr) : expr(std::move(expr)) {}
 
-Ident::Ident(SymbolRef symbol) : symbol(symbol) {}
+Ident::Ident(SymbolRef symbol) : symbol(symbol), name(0) {
+    Error::check(!symbol.isSynthetic()); // symbol is a valid symbol
+}
+
+Ident::Ident(NameRef name, SymbolRef symbol) : symbol(symbol), name(name) {
+    Error::check(symbol.isSynthetic()); // symbol is a sentinel
+}
 
 Assign::Assign(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
     : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
@@ -81,6 +87,8 @@ Send::Send(std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::uniqu
     :
 
       recv(std::move(recv)), fun(std::move(fun)), args(std::move(args)) {}
+
+Super::Super(std::vector<std::unique_ptr<Expression>> &&args) : args(std::move(args)) {}
 
 New::New(SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args) : claz(claz), args(std::move(args)) {}
 
@@ -218,7 +226,11 @@ std::string ConstantLit::toString(ContextBase &ctx, int tabs) {
 }
 
 std::string Ident::toString(ContextBase &ctx, int tabs) {
-    return this->symbol.info(ctx).name.name(ctx).toString(ctx);
+    if (!symbol.isSynthetic()) {
+        return this->symbol.info(ctx).name.name(ctx).toString(ctx);
+    } else {
+        return this->name.name(ctx).toString(ctx) + this->symbol.info(ctx).name.name(ctx).toString(ctx);
+    }
 }
 
 std::string HashSplat::toString(ContextBase &ctx, int tabs) {
@@ -257,35 +269,39 @@ std::string Rescue::toString(ContextBase &ctx, int tabs) {
     return "Rescue";
 }
 
-std::string Send::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
-    buf << this->recv->toString(ctx, tabs) << "." << this->fun.name(ctx).toString(ctx) << "(";
+void printArgs(ContextBase &ctx, std::stringstream &buf, std::vector<std::unique_ptr<Expression>> &args, int tabs) {
+    buf << "(";
+    ;
     bool first = true;
-    for (auto &a : this->args) {
+    for (auto &a : args) {
         if (!first) {
             buf << ", ";
         }
         first = false;
-        buf << a->toString(ctx, tabs);
+        buf << a->toString(ctx, tabs + 1);
     }
     buf << ")";
+}
+
+std::string Send::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+    buf << this->recv->toString(ctx, tabs) << "." << this->fun.name(ctx).toString(ctx);
+    printArgs(ctx, buf, this->args, tabs);
 
     return buf.str();
 }
 
 std::string New::toString(ContextBase &ctx, int tabs) {
     std::stringstream buf;
-    buf << "new " << this->claz.info(ctx).name.name(ctx).toString(ctx) << "(";
-    bool first = true;
-    for (auto &a : this->args) {
-        if (!first) {
-            buf << ", ";
-        }
-        first = false;
-        buf << a->toString(ctx, tabs);
-    }
-    buf << ")";
+    buf << "new " << this->claz.info(ctx).name.name(ctx).toString(ctx);
+    printArgs(ctx, buf, this->args, tabs);
+    return buf.str();
+}
 
+std::string Super::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+    buf << "super";
+    printArgs(ctx, buf, this->args, tabs);
     return buf.str();
 }
 
