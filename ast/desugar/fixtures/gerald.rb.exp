@@ -184,7 +184,7 @@ begin
           begin
             parts<todo lvar sym> = diff<todo lvar sym>.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if parts<todo lvar sym>
-              <emtpyTree>
+              parts<todo lvar sym>
             else 
               parts<todo lvar sym> = []
             end
