@@ -341,6 +341,27 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  auto res = std::unique_ptr<Statement>(new IntLit(std::stoi(integer->val)));
                  result.swap(res);
              },
+             [&](parser::Array *array) {
+                 std::vector<std::unique_ptr<Expression>> elems;
+                 for (auto &stat : array->elts) {
+                     elems.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
+                 };
+
+                 auto res = std::unique_ptr<Statement>(new Array(elems));
+                 result.swap(res);
+             },
+
+             [&](parser::Return *ret) {
+                 if (ret->exprs.size() > 1) {
+                     Error::notImplemented();
+                 } else if (ret->exprs.size() == 1) {
+                     auto res = std::unique_ptr<Statement>(new Return(stat2Expr(node2TreeImpl(ctx, ret->exprs[0]))));
+                     result.swap(res);
+                 } else {
+                     auto res = std::unique_ptr<Statement>(new Return(stat2Expr(mkEmptyTree())));
+                     result.swap(res);
+                 }
+             },
              [&](parser::If *a) {
                  auto cond = node2TreeImpl(ctx, a->condition);
                  auto thenp = node2TreeImpl(ctx, a->then_);
