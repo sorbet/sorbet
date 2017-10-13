@@ -124,13 +124,13 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      recv.release();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
-                     auto elsep = mkEmptyTree();
+                     auto elsep = mkIdent(tempSym);
                      auto iff = mkIf(cond, body, elsep);
                      result.swap(iff);
                  } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
                      auto cond = cpIdent(*i);
                      auto body = mkAssign(recv, arg);
-                     auto elsep = mkEmptyTree();
+                     auto elsep = cpIdent(*i);
                      auto iff = mkIf(cond, body, elsep);
                      result.swap(iff);
                  } else {
@@ -147,13 +147,13 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      recv.release();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
-                     auto elsep = mkEmptyTree();
+                     auto elsep = mkIdent(tempSym);
                      auto iff = mkIf(cond, elsep, body);
                      result.swap(iff);
                  } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
                      auto cond = cpIdent(*i);
                      auto body = mkAssign(recv, arg);
-                     auto elsep = mkEmptyTree();
+                     auto elsep = cpIdent(*i);
                      auto iff = mkIf(cond, elsep, body);
                      result.swap(iff);
 
