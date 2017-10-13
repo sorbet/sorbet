@@ -81,6 +81,26 @@ public:
         return SymbolRef(5);
     }
 
+    static constexpr SymbolRef defn_lvar_todo() {
+        return SymbolRef(6);
+    }
+
+    static constexpr SymbolRef defn_ivar_todo() {
+        return SymbolRef(7);
+    }
+
+    static constexpr SymbolRef defn_gvar_todo() {
+        return SymbolRef(8);
+    }
+
+    static constexpr SymbolRef defn_cvar_todo() {
+        return SymbolRef(9);
+    }
+
+    static constexpr SymbolRef defn_last_synthetic_sym() {
+        return SymbolRef(9);
+    }
+
 private:
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::unique_ptr<std::vector<char>>> strings;

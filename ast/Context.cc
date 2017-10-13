@@ -18,6 +18,9 @@ static UTF8Desc init_DESC{(char *)init, (int)std::strlen(init)};
 static const char *andAnd = "&&";
 static UTF8Desc andAnd_DESC{(char *)andAnd, (int)std::strlen(andAnd)};
 
+static const char *orOr = "||";
+static UTF8Desc orOr_DESC{(char *)orOr, (int)std::strlen(orOr)};
+
 static const char *to_s = "to_s";
 static UTF8Desc to_s_DESC{(char *)to_s, (int)std::strlen(to_s)};
 
@@ -42,6 +45,18 @@ static UTF8Desc nil_DESC{(char *)nil_str, (int)std::strlen(nil_str)};
 static const char *todo_str = "<todo sym>";
 static UTF8Desc todo_DESC{(char *)todo_str, (int)std::strlen(todo_str)};
 
+static const char *todo_ivar_str = "<todo ivar sym>";
+static UTF8Desc todo_ivar_DESC{(char *)todo_ivar_str, (int)std::strlen(todo_ivar_str)};
+
+static const char *todo_cvar_str = "<todo cvar sym>";
+static UTF8Desc todo_cvar_DESC{(char *)todo_cvar_str, (int)std::strlen(todo_cvar_str)};
+
+static const char *todo_gvar_str = "<todo gvar sym>";
+static UTF8Desc todo_gvar_DESC{(char *)todo_gvar_str, (int)std::strlen(todo_gvar_str)};
+
+static const char *todo_lvar_str = "<todo lvar sym>";
+static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)std::strlen(todo_lvar_str)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -56,10 +71,13 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     // Second name is always <init>, see SymbolInfo::isConstructor
     auto init_id = enterNameUTF8(init_DESC);
     auto andAnd_id = enterNameUTF8(andAnd_DESC);
+    auto orOr_id = enterNameUTF8(orOr_DESC);
     auto to_s_id = enterNameUTF8(to_s_DESC);
     auto concat_id = enterNameUTF8(concat_DESC);
+
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
+    DEBUG_ONLY(Error::check(orOr_id == Names::orOr()));
     DEBUG_ONLY(Error::check(to_s_id == Names::to_s()));
     DEBUG_ONLY(Error::check(concat_id == Names::concat()));
 
@@ -69,6 +87,10 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     SymbolRef root_id = synthesizeClass(root_DESC);
     SymbolRef nil_id = synthesizeClass(nil_DESC);
     SymbolRef todo_id = synthesizeClass(todo_DESC);
+    SymbolRef lvar_id = synthesizeClass(todo_lvar_DESC);
+    SymbolRef ivar_id = synthesizeClass(todo_ivar_DESC);
+    SymbolRef gvar_id = synthesizeClass(todo_gvar_DESC);
+    SymbolRef cvar_id = synthesizeClass(todo_cvar_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -76,14 +98,22 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     Error::check(root_id == defn_root());
     Error::check(nil_id == defn_nil());
     Error::check(todo_id == defn_todo());
+    Error::check(lvar_id == defn_lvar_todo());
+    Error::check(ivar_id == defn_ivar_todo());
+    Error::check(gvar_id == defn_gvar_todo());
+    Error::check(cvar_id == defn_cvar_todo());
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
      * 3: <root>;
      * 4: nil;
      * 5: <todo>
+     * 6: <todo lvar>
+     * 7: <todo ivar>
+     * 8: <todo gvar>
+     * 9: <todo cvar>
      */
-    Error::check(symbols.size() == 6);
+    Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }
 
 ContextBase::~ContextBase() {}
