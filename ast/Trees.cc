@@ -114,6 +114,8 @@ NotSupported::NotSupported(const std::string &why) : why(why) {}
 
 Symbol::Symbol(NameRef name) : name(name) {}
 
+Array::Array(std::vector<std::unique_ptr<Expression>> &elems) : elems(std::move(elems)) {}
+
 std::string Closure::toString(ContextBase &ctx, int tabs) {
     return "closure(" + this->method.info(ctx).name.name(ctx).toString(ctx) + ")";
 }
@@ -134,10 +136,10 @@ std::string ClassDef::toString(ContextBase &ctx, int tabs) {
         buf << "class ";
     }
     buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << ">" << std::endl;
-    ;
+
     for (auto &a : this->rhs) {
         printTabs(buf, tabs + 1);
-        buf << a->toString(ctx, tabs + 1) << std::endl;
+        buf << a->toString(ctx, tabs + 1) << std::endl << std::endl;
     }
     printTabs(buf, tabs);
     buf << "end";
@@ -179,7 +181,7 @@ std::string MethodDef::toString(ContextBase &ctx, int tabs) {
     }
     buf << ")" << std::endl;
     printTabs(buf, tabs + 1);
-    buf << this->rhs->toString(ctx, tabs + 1) << std::endl;
+    buf << this->rhs->toString(ctx, tabs + 1);
     return buf.str();
 }
 
@@ -269,9 +271,7 @@ std::string Rescue::toString(ContextBase &ctx, int tabs) {
     return "Rescue";
 }
 
-void printArgs(ContextBase &ctx, std::stringstream &buf, std::vector<std::unique_ptr<Expression>> &args, int tabs) {
-    buf << "(";
-    ;
+void printElems(ContextBase &ctx, std::stringstream &buf, std::vector<std::unique_ptr<Expression>> &args, int tabs) {
     bool first = true;
     for (auto &a : args) {
         if (!first) {
@@ -280,6 +280,11 @@ void printArgs(ContextBase &ctx, std::stringstream &buf, std::vector<std::unique
         first = false;
         buf << a->toString(ctx, tabs + 1);
     }
+};
+
+void printArgs(ContextBase &ctx, std::stringstream &buf, std::vector<std::unique_ptr<Expression>> &args, int tabs) {
+    buf << "(";
+    printElems(ctx, buf, args, tabs);
     buf << ")";
 }
 
@@ -305,6 +310,14 @@ std::string Super::toString(ContextBase &ctx, int tabs) {
     return buf.str();
 }
 
+std::string Array::toString(ContextBase &ctx, int tabs) {
+    std::stringstream buf;
+    buf << "[";
+    printElems(ctx, buf, this->elems, tabs);
+    buf << "]";
+    return buf.str();
+}
+
 std::string Symbol::toString(ContextBase &ctx, int tabs) {
     return ":" + this->name.name(ctx).toString(ctx);
 }
@@ -312,6 +325,5 @@ std::string Symbol::toString(ContextBase &ctx, int tabs) {
 std::string NotSupported::toString(ContextBase &ctx, int tabs) {
     return "<Not Supported (" + why + ")>";
 }
-
 } // namespace ast
 } // namespace ruby_typer

@@ -201,7 +201,12 @@ class Hash : public Expression {
 };
 
 class Array : public Expression {
-    // TODO
+public:
+    std::vector<std::unique_ptr<Expression>> elems;
+
+    Array(std::vector<std::unique_ptr<Expression>> &elems);
+
+    virtual std::string toString(ContextBase &ctx, int tabs);
 };
 
 class FloatLit : public Expression {
