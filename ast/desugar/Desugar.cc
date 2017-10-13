@@ -64,6 +64,14 @@ std::unique_ptr<Statement> mkIdent(SymbolRef symbol) {
     return std::unique_ptr<Statement>(new Ident(symbol));
 }
 
+std::unique_ptr<Statement> cpIdent(Ident &id) {
+    if (id.symbol.isSynthetic()) {
+        return std::unique_ptr<Statement>(new Ident(id.name, id.symbol));
+    } else {
+        return std::unique_ptr<Statement>(new Ident(id.symbol));
+    }
+}
+
 std::unique_ptr<Statement> mkAssign(std::unique_ptr<Statement> &lhs, std::unique_ptr<Statement> &rhs) {
     auto lhsChecked = stat2Expr(lhs);
     auto rhsChecked = stat2Expr(rhs);
@@ -120,10 +128,33 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      auto iff = mkIf(cond, body, elsep);
                      result.swap(iff);
                  } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
-                     auto cond = mkIdent(i->symbol);
-                     auto body = mkAssign(i->symbol, arg);
+                     auto cond = cpIdent(*i);
+                     auto body = mkAssign(recv, arg);
                      auto elsep = mkEmptyTree();
                      auto iff = mkIf(cond, body, elsep);
+                     result.swap(iff);
+                 } else {
+                     Error::notImplemented();
+                 }
+             },
+             [&](parser::OrAsgn *a) {
+                 auto recv = node2TreeImpl(ctx, a->left);
+                 auto arg = node2TreeImpl(ctx, a->right);
+                 if (auto s = dynamic_cast<Send *>(recv.get())) {
+                     Error::check(s->args.empty());
+                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
+                     auto temp = mkAssign(tempSym, std::move(s->recv));
+                     recv.release();
+                     auto cond = mkSend0(mkIdent(tempSym), s->fun);
+                     auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
+                     auto elsep = mkEmptyTree();
+                     auto iff = mkIf(cond, elsep, body);
+                     result.swap(iff);
+                 } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
+                     auto cond = cpIdent(*i);
+                     auto body = mkAssign(recv, arg);
+                     auto elsep = mkEmptyTree();
+                     auto iff = mkIf(cond, elsep, body);
                      result.swap(iff);
 
                  } else {
