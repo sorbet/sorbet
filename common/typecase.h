@@ -1,5 +1,12 @@
 #ifndef SRUBY_TYPECASE_H
 #define SRUBY_TYPECASE_H
+
+#include <functional>
+#include <string>
+#include "Error.h"
+#include "common.h"
+
+namespace ruby_typer {
 // taken from https://stackoverflow.com/questions/22822836/type-switch-construct-in-c11
 // should be replaced by variant when we're good with c++17
 
@@ -32,7 +39,7 @@ template <typename Base, typename T> bool typecaseHelper(Base *base, std::functi
 }
 
 template <typename Base> void typecase(Base *) {
-    Error::check(false);
+    ruby_typer::Error::check(false);
 }
 
 template <typename Base, typename FirstSubclass, typename... RestOfSubclasses>
@@ -47,6 +54,7 @@ void typecase(Base *base, FirstSubclass &&first, RestOfSubclasses &&... rest) {
         typecase(base, rest...);
     }
 }
+} // namespace ruby_typer
 
 // End typecase code
 #endif // SRUBY_TYPECASE_H
