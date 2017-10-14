@@ -1,10 +1,10 @@
 #ifndef SRUBY_TYPECASE_H
 #define SRUBY_TYPECASE_H
 
-#include <functional>
-#include <string>
 #include "Error.h"
 #include "common.h"
+#include <functional>
+#include <string>
 
 namespace ruby_typer {
 // taken from https://stackoverflow.com/questions/22822836/type-switch-construct-in-c11
