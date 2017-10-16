@@ -24,6 +24,7 @@ cc_test(
     deps = [
         "//ast/desugar",
         "@gtest//:gtest",
+        "@gtest//:gtest_main",
         "@spdlog//:spdlog",
     ],
 )

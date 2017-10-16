@@ -4,6 +4,7 @@
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
+#include <algorithm>
 #include <cstdio>
 #include <dirent.h>
 #include <fstream>
@@ -21,37 +22,88 @@ struct Expectations {
     std::unordered_map<std::string, std::string> expactations;
 };
 
-std::vector<Expectations> inputs;
+std::vector<Expectations> getInputs();
 
-TEST(CorpusTest, PerPhaseTest) {
-    auto console = spd::stdout_color_mt("fixtures");
+std::string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
+    std::string res = arg.param.folder + arg.param.sourceFile;
+    res.erase(res.size() - strlen(".rb"), strlen(".rb"));
+    std::replace(res.begin(), res.end(), '/', '_');
+    return res;
+}
+
+class ExpectationTest : public testing::TestWithParam<Expectations> {
+public:
+    virtual ~ExpectationTest() {}
+    virtual void SetUp() {
+        exp_ = GetParam();
+    }
+    virtual void TearDown() {}
+
+protected:
+    Expectations exp_;
+};
+
+// taken from https://stackoverflow.com/questions/16491675/how-to-send-custom-message-in-google-c-testing-framework
+namespace testing {
+namespace internal {
+enum GTestColor { COLOR_DEFAULT, COLOR_RED, COLOR_GREEN, COLOR_YELLOW };
+
+extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
+} // namespace internal
+} // namespace testing
+
+#define PRINTF(...)                                                                        \
+    do {                                                                                   \
+        testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, "[          ] "); \
+        testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN, __VA_ARGS__);     \
+    } while (0)
+
+// C++ stream interface
+class TestCout : public std::stringstream {
+public:
+    ~TestCout() {
+        PRINTF("%s", str().c_str());
+    }
+};
+
+#define TEST_COUT TestCout()
+
+TEST_P(ExpectationTest, PerPhaseTest) {
+    Expectations test = GetParam();
+    auto inputPath = test.folder + test.sourceFile;
+
+    auto console = spd::stdout_color_mt("fixtures: " + inputPath);
     ruby_typer::ast::ContextBase ctx(*console);
     ruby_typer::ast::Context context(ctx, ctx.defn_root());
 
-    for (auto &test : inputs) {
-        auto inputPath = test.folder + test.sourceFile;
+    if (test.expactations.find("parser") != test.expactations.end()) {
+        auto checker = test.folder + test.expactations["parser"];
+        SCOPED_TRACE(checker);
 
-        if (test.expactations.find("parser") != test.expactations.end()) {
-            auto checker = test.folder + test.expactations["parser"];
+        auto src = ruby_typer::File::read(inputPath.c_str());
+        auto exp = ruby_typer::File::read(checker.c_str());
+        auto parsed = ruby_typer::parser::parse_ruby(ctx, src);
+
+        EXPECT_EQ(0, parsed.diagnostics().size());
+        EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
+        if (exp == parsed.ast()->toString(ctx) + "\n") {
+            TEST_COUT << "Parser OK" << std::endl;
+        }
+        if (test.expactations.find("desugar") != test.expactations.end()) {
+            auto checker = test.folder + test.expactations["desugar"];
+            auto exp = ruby_typer::File::read(checker.c_str());
             SCOPED_TRACE(checker);
 
-            auto src = ruby_typer::File::read(inputPath.c_str());
-            auto exp = ruby_typer::File::read(checker.c_str());
-            auto parsed = ruby_typer::parser::parse_ruby(ctx, src);
-
-            EXPECT_EQ(0, parsed.diagnostics().size());
-            EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
-            if (test.expactations.find("desugar") != test.expactations.end()) {
-                auto checker = test.folder + test.expactations["desugar"];
-                auto exp = ruby_typer::File::read(checker.c_str());
-                SCOPED_TRACE(checker);
-
-                auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
-                EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
+            auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
+            EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
+            if (exp == desugared->toString(ctx) + "\n") {
+                TEST_COUT << "Desugar OK" << std::endl;
             }
         }
     }
 }
+
+INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs()), prettyPrintTest);
 
 bool endsWith(const std::string &a, const std::string &b) {
     if (b.size() > a.size())
@@ -62,6 +114,8 @@ bool endsWith(const std::string &a, const std::string &b) {
 static bool startsWith(const std::string &str, const std::string &prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.c_str(), prefix.size());
 }
+
+std::vector<Expectations> inputs;
 
 // substrantially modified from https://stackoverflow.com/a/8438663
 void listDir(const char *name) {
@@ -120,15 +174,7 @@ void listDir(const char *name) {
     closedir(dir);
 }
 
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
+std::vector<Expectations> getInputs() {
     listDir("test_corpus/pos");
-    for (auto &exp : inputs) {
-        std::cout << exp.sourceFile << " {";
-        for (auto &check : exp.expactations) {
-            std::cout << check.first << " : " << check.second << ", ";
-        }
-        std::cout << "}" << std::endl;
-    }
-    return RUN_ALL_TESTS();
+    return inputs;
 }
