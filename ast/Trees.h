@@ -233,6 +233,14 @@ public:
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
 };
 
+class BoolLit : public Expression {
+public:
+    bool value;
+
+    BoolLit(bool value);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+};
+
 class ConstantLit : public Expression {
 public:
     NameRef cnst;

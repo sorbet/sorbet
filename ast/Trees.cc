@@ -66,6 +66,8 @@ Break::Break(u1 break_tag) : break_tag(break_tag) {}
 
 Next::Next(u1 break_tag) : break_tag(break_tag) {}
 
+BoolLit::BoolLit(bool value) : value(value) {}
+
 std::string Next::toString(ContextBase &ctx, int tabs) {
     return "next";
 }
@@ -258,6 +260,10 @@ std::string NamedArg::toString(ContextBase &ctx, int tabs) {
 }
 
 std::string FloatLit::toString(ContextBase &ctx, int tabs) {
+    return std::to_string(this->value);
+}
+
+std::string BoolLit::toString(ContextBase &ctx, int tabs) {
     return std::to_string(this->value);
 }
 
