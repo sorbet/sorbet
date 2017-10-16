@@ -2,6 +2,7 @@ cc_library(
     name = "desugar",
     srcs = glob(["*.cc"]),
     hdrs = glob(["*.h"]),
+    visibility = ["//visibility:public"],
     deps = [
         "//ast",
         "//parser",

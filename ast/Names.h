@@ -138,6 +138,20 @@ public:
     static inline NameRef concat() {
         return NameRef(5);
     }
+
+    static inline NameRef call() {
+        return NameRef(6);
+    }
+
+    // !
+    static inline NameRef bang() {
+        return NameRef(7);
+    }
+
+    // []
+    static inline NameRef squareBrackets() {
+        return NameRef(8);
+    }
 };
 
 class Name {

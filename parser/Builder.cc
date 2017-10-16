@@ -338,7 +338,7 @@ public:
 
         NameRef method;
         if (selector == nullptr)
-            method = ctx_.enterNameUTF8(UTF8Desc{"call", (int)std::strlen("call")});
+            method = ast::Names::bang();
         else
             method = ctx_.enterNameUTF8(selector->string());
 
@@ -488,8 +488,8 @@ public:
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
                            const token *rbrack) {
-        auto meth = ctx_.enterNameUTF8((std::string) "[]");
-        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver), meth, move(indexes));
+        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver), ast::Names::squareBrackets(),
+                                 move(indexes));
     }
 
     unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
@@ -632,20 +632,19 @@ public:
     }
 
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
-        const char *meth = "!";
-        auto bang = ctx_.enterNameUTF8(UTF8Desc{meth, (int)std::strlen(meth)});
         if (receiver != nullptr) {
             Loc loc;
             if (end != nullptr)
                 loc = loc_join(tok_loc(not_), tok_loc(end));
             else
                 loc = loc_join(tok_loc(not_), receiver->loc);
-            return make_unique<Send>(loc, move(receiver), bang, vector<unique_ptr<Node>>());
+            return make_unique<Send>(loc, move(receiver), ast::Names::bang(), vector<unique_ptr<Node>>());
         }
 
         DEBUG_ONLY(Error::check(begin != nullptr && end != nullptr));
         auto body = make_unique<Begin>(loc_join(tok_loc(begin), tok_loc(end)), vector<unique_ptr<Node>>());
-        return make_unique<Send>(loc_join(tok_loc(not_), body->loc), move(body), bang, vector<unique_ptr<Node>>());
+        return make_unique<Send>(loc_join(tok_loc(not_), body->loc), move(body), ast::Names::bang(),
+                                 vector<unique_ptr<Node>>());
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
