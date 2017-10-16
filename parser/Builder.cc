@@ -494,7 +494,9 @@ public:
 
     unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
                                 const token *rbrack) {
-        BUILDER_UNIMPLEMENTED();
+        vector<unique_ptr<Node>> args;
+        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver),
+                                 ast::Names::squareBracketsEq(), move(args));
     }
 
     unique_ptr<Node> integer(const token *tok) {
@@ -507,11 +509,12 @@ public:
 
     unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                    const token *rparen) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
+        return make_unique<Break>(loc, move(args));
     }
 
     unique_ptr<Node> keyword_defined(const token *keyword, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Defined>(loc_join(tok_loc(keyword), arg->loc), move(arg));
     }
 
     unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
@@ -552,11 +555,11 @@ public:
     }
 
     unique_ptr<Node> keyword_zsuper(const token *keyword) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<ZSuper>(tok_loc(keyword));
     }
 
     unique_ptr<Node> kwarg(const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Kwarg>(tok_loc(name), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
@@ -565,15 +568,15 @@ public:
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Kwrestarg>(loc_join(tok_loc(dstar), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> kwsplat(const token *dstar, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Kwsplat>(loc_join(tok_loc(dstar), arg->loc), move(arg));
     }
 
     unique_ptr<Node> line_literal(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<LineLiteral>(tok_loc(tok));
     }
 
     unique_ptr<Node> logical_and(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
@@ -586,11 +589,11 @@ public:
 
     unique_ptr<Node> loop_until(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
                                 const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Until>(loc_join(tok_loc(keyword), tok_loc(end)), move(cond), move(body));
     }
 
     unique_ptr<Node> loop_until_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<UntilPost>(loc_join(body->loc, cond->loc), move(cond), move(body));
     }
 
     unique_ptr<Node> loop_while(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
@@ -599,11 +602,14 @@ public:
     }
 
     unique_ptr<Node> loop_while_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<WhilePost>(loc_join(body->loc, cond->loc), move(cond), move(body));
     }
 
     unique_ptr<Node> match_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(receiver->loc, arg->loc);
+        vector<unique_ptr<Node>> args;
+        args.emplace_back(move(arg));
+        return make_unique<Send>(loc, move(receiver), ctx_.enterNameUTF8(oper->string()), move(args));
     }
 
     unique_ptr<Node> multi_assign(unique_ptr<Node> mlhs, unique_ptr<Node> rhs) {
@@ -615,7 +621,12 @@ public:
     }
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        if (Mlhs *mlhs = dynamic_cast<Mlhs *>(item.get())) {
+            return item;
+        }
+        vector<unique_ptr<Node>> args;
+        args.emplace_back(move(item));
+        return make_unique<Mlhs>(collection_loc(begin, args, end), move(args));
     }
 
     unique_ptr<Node> negate(const token *uminus, unique_ptr<Node> numeric) {
@@ -648,7 +659,7 @@ public:
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<NthRef>(tok_loc(tok), std::atoi(tok->string().c_str()));
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
@@ -664,11 +675,12 @@ public:
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Optarg>(loc_join(tok_loc(name), value->loc), ctx_.enterNameUTF8(name->string()),
+                                   move(value));
     }
 
     unique_ptr<Node> pair(unique_ptr<Node> key, const token *assoc, unique_ptr<Node> value) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Pair>(loc_join(key->loc, value->loc), move(key), move(value));
     }
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
@@ -678,7 +690,8 @@ public:
 
     unique_ptr<Node> pair_quoted(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
                                  unique_ptr<Node> value) {
-        BUILDER_UNIMPLEMENTED();
+        auto sym = make_unique<DSymbol>(loc_join(tok_loc(begin), tok_loc(end)), move(parts));
+        return make_unique<Pair>(loc_join(tok_loc(begin), value->loc), move(sym), move(value));
     }
 
     unique_ptr<Node> postexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {

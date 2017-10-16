@@ -52,3 +52,47 @@ true || false
 # loops
 for x in arr; end
 while 0 != 1; end
+
+# index assignment
+x[1] = 0
+
+# break
+break
+break 1
+break 1,2
+
+# defined
+defined?(X)
+
+
+# zsuper
+super
+
+# kwargs
+def foo(x:,y:1,**z); end
+
+# kwsplat
+{**x}
+
+__LINE__
+
+
+# loops
+while true; nil; end
+nil while true
+
+until true; nil; end
+nil until true
+
+# mlhs1
+a, ((x,)) = 1
+
+# nth_ref
+$4
+
+# optarg
+def foo(x=1); end
+
+
+# pair and pair_quoted
+{x => y, "foo": 1}

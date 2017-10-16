@@ -152,6 +152,11 @@ public:
     static inline NameRef squareBrackets() {
         return NameRef(8);
     }
+
+    // []=
+    static inline NameRef squareBracketsEq() {
+        return NameRef(9);
+    }
 };
 
 class Name {

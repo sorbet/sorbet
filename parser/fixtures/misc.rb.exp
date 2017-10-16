@@ -195,5 +195,160 @@ Begin {
       }
       body = NULL
     }
+    Send {
+      receiver = LVar {
+        name = x
+      }
+      method = []=
+      args = [
+        Integer {
+          val = "0"
+        }
+      ]
+    }
+    Break {
+      exprs = [
+      ]
+    }
+    Break {
+      exprs = [
+        Integer {
+          val = "1"
+        }
+      ]
+    }
+    Break {
+      exprs = [
+        Integer {
+          val = "1"
+        }
+        Integer {
+          val = "2"
+        }
+      ]
+    }
+    Defined {
+      value = Const {
+        scope = NULL
+        name = X
+      }
+    }
+    ZSuper {
+    }
+    DefMethod {
+      name = foo
+      args = Args {
+        args = [
+          Kwarg {
+            name = x
+          }
+          Kwoptarg {
+            name = y
+            default_ = Integer {
+              val = "1"
+            }
+          }
+          Kwrestarg {
+            name = z
+          }
+        ]
+      }
+      body = NULL
+    }
+    Hash {
+      pairs = [
+        Kwsplat {
+          expr = LVar {
+            name = x
+          }
+        }
+      ]
+    }
+    LineLiteral {
+    }
+    While {
+      cond = True {
+      }
+      body = Nil {
+      }
+    }
+    WhilePost {
+      cond = True {
+      }
+      body = Nil {
+      }
+    }
+    Until {
+      cond = True {
+      }
+      body = Nil {
+      }
+    }
+    UntilPost {
+      cond = True {
+      }
+      body = Nil {
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = a
+          }
+          Mlhs {
+            exprs = [
+              LVarLhs {
+                name = x
+              }
+            ]
+          }
+        ]
+      }
+      rhs = Integer {
+        val = "1"
+      }
+    }
+    NthRef {
+      ref = 4
+    }
+    DefMethod {
+      name = foo
+      args = Args {
+        args = [
+          Optarg {
+            name = x
+            default_ = Integer {
+              val = "1"
+            }
+          }
+        ]
+      }
+      body = NULL
+    }
+    Hash {
+      pairs = [
+        Pair {
+          key = LVar {
+            name = x
+          }
+          value = LVar {
+            name = y
+          }
+        }
+        Pair {
+          key = DSymbol {
+            nodes = [
+              String {
+                val = "foo"
+              }
+            ]
+          }
+          value = Integer {
+            val = "1"
+          }
+        }
+      ]
+    }
   ]
 }
