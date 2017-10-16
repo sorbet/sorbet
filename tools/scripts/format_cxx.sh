@@ -45,14 +45,14 @@ fi
 if [ "$mode" = "fix" ]; then
     echo "Formatted the following files:" >&2
 else
-    echo -ne "\e[1;31m"
+    echo -ne "\e[1;31m" >&2
     echo "The following files are misformatted!" >&2
-    echo -ne "\e[0m"
+    echo -ne "\e[0m" >&2
     echo -e "Run \e[97;1;42m ./tools/scripts/format_cxx.sh \e[0m to format." >&2
 fi
 
 for src in "${misformatted[@]}"; do
-    echo "$src"
+    echo "$src" >&2
 done
 
 exit 1
