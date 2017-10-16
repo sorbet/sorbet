@@ -181,6 +181,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
              [&](parser::DString *a) {
                  auto it = a->nodes.begin();
                  auto end = a->nodes.end();
+                 Error::check(it != end);
                  auto res = mkSend0(node2TreeImpl(ctx, *it), Names::to_s());
                  ++it;
                  for (; it != end; ++it) {
