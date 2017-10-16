@@ -234,8 +234,8 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  } else {
                      body.emplace_back(node2TreeImpl(ctx, module->body));
                  }
-                 auto res = std::unique_ptr<Statement>(
-                     new ClassDef(ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, module->name)), body, true));
+                 auto res = std::unique_ptr<Statement>(new ClassDef(
+                     ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, module->name)), body, ClassDefKind::Module));
                  result.swap(res);
              },
              [&](parser::Class *claz) {
@@ -247,8 +247,8 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  } else {
                      body.emplace_back(node2TreeImpl(ctx, claz->body));
                  }
-                 auto res = std::unique_ptr<Statement>(
-                     new ClassDef(ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, claz->name)), body, false));
+                 auto res = std::unique_ptr<Statement>(new ClassDef(
+                     ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, claz->name)), body, ClassDefKind::Class));
                  result.swap(res);
              },
              [&](parser::Arg *arg) {

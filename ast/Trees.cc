@@ -43,8 +43,8 @@ void printTabs(std::stringstream &to, int count) {
 }
 
 ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Statement>> &rhs,
-                   bool isModule)
-    : Declaration(symbol), rhs(std::move(rhs)), name(std::move(name)), isModule(isModule) {}
+                   ClassDefKind kind)
+    : Declaration(symbol), rhs(std::move(rhs)), name(std::move(name)), kind(kind) {}
 
 MethodDef::MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
                      std::unique_ptr<Expression> rhs, bool isSelf)
@@ -130,7 +130,7 @@ std::string ConstDef::toString(ContextBase &ctx, int tabs) {
 
 std::string ClassDef::toString(ContextBase &ctx, int tabs) {
     std::stringstream buf;
-    if (isModule) {
+    if (kind == ClassDefKind::Module) {
         buf << "module ";
     } else {
         buf << "class ";
