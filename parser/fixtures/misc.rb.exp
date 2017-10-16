@@ -475,10 +475,61 @@ Begin {
         }
       ]
     }
+    Array {
+      elts = [
+        DString {
+          nodes = [
+            String {
+              val = "a"
+            }
+          ]
+        }
+        DString {
+          nodes = [
+            String {
+              val = "b"
+            }
+          ]
+        }
+      ]
+    }
     XString {
       nodes = [
         String {
           val = "true"
+        }
+      ]
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = proc
+        args = [
+        ]
+      }
+      args = Args {
+        args = [
+          Shadowarg {
+            name = x
+          }
+        ]
+      }
+      body = NULL
+    }
+    Break {
+      exprs = [
+        Block {
+          send = Send {
+            receiver = NULL
+            method = foo
+            args = [
+              Integer {
+                val = "1"
+              }
+            ]
+          }
+          args = NULL
+          body = NULL
         }
       ]
     }

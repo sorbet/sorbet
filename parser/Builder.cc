@@ -301,7 +301,20 @@ public:
                                       move(body));
         }
 
-        BUILDER_UNIMPLEMENTED();
+        vector<unique_ptr<Node>> *exprs;
+        typecase(method_call.get(), [&](Break *b) { exprs = &b->exprs; },
+
+                 [&](Return *r) { exprs = &r->exprs; },
+
+                 [&](Next *n) { exprs = &n->exprs; },
+
+                 [&](Node *n) { Error::raise("Unexpected send node: ", n->nodeName()); });
+
+        auto &send = exprs->front();
+        Loc block_loc = loc_join(send->loc, tok_loc(end));
+        unique_ptr<Node> block = make_unique<Block>(block_loc, move(send), move(args), move(body));
+        exprs->front().swap(block);
+        return method_call;
     }
 
     unique_ptr<Node> block_pass(const token *amper, unique_ptr<Node> arg) {
@@ -759,7 +772,7 @@ public:
     }
 
     unique_ptr<Node> shadowarg(const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Shadowarg>(tok_loc(name), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
@@ -954,7 +967,6 @@ public:
     }
 
     unique_ptr<Node> word(vector<unique_ptr<Node>> parts) {
-        BUILDER_UNIMPLEMENTED();
         Loc loc = collection_loc(parts);
         return make_unique<DString>(loc, move(parts));
     }

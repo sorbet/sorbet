@@ -124,6 +124,13 @@ undef x, y
 
 # words
 %w{a b}
+%W{a b}
 
-# shellout
+# shellout (xstring)
 %x{true}
+
+# shadowarg
+proc{|;x|}
+
+# Whacky parsing edge case around keyword break and blocks
+break foo 1 do end
