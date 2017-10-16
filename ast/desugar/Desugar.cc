@@ -128,7 +128,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
                      auto temp = mkAssign(tempSym, std::move(s->recv));
-                     recv.release();
+                     recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
                      auto elsep = mkIdent(tempSym);
@@ -151,7 +151,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
                      auto temp = mkAssign(tempSym, std::move(s->recv));
-                     recv.release();
+                     recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
                      auto elsep = mkIdent(tempSym);
