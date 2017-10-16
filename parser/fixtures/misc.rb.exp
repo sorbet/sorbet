@@ -322,6 +322,9 @@ Begin {
               val = "1"
             }
           }
+          Restarg {
+            name = y
+          }
         ]
       }
       body = NULL
@@ -347,6 +350,135 @@ Begin {
           value = Integer {
             val = "1"
           }
+        }
+      ]
+    }
+    Preexe {
+      body = Send {
+        receiver = NULL
+        method = foo
+        args = [
+        ]
+      }
+    }
+    Postexe {
+      body = Send {
+        receiver = NULL
+        method = bar
+        args = [
+        ]
+      }
+    }
+    Rational {
+      val = "4"
+    }
+    Complex {
+      value = "5"
+    }
+    Kwbegin {
+      stmts = [
+        Rescue {
+          body = NULL
+          rescue = [
+            Resbody {
+              exception = Array {
+                elts = [
+                  Const {
+                    scope = NULL
+                    name = E
+                  }
+                ]
+              }
+              var = LVarLhs {
+                name = x
+              }
+              body = Nil {
+              }
+            }
+          ]
+          else_ = NULL
+        }
+      ]
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          SplatLhs {
+            var = LVarLhs {
+              name = x
+            }
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Splat {
+            var = LVar {
+              name = y
+            }
+          }
+        ]
+      }
+    }
+    DSymbol {
+      nodes = [
+        String {
+          val = "foo"
+        }
+        Begin {
+          stmts = [
+            Send {
+              receiver = NULL
+              method = bar
+              args = [
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    Array {
+      elts = [
+        Symbol {
+          val = "sym"
+        }
+      ]
+    }
+    If {
+      condition = LVar {
+        name = x
+      }
+      then_ = Integer {
+        val = "1"
+      }
+      else_ = Integer {
+        val = "7"
+      }
+    }
+    Undef {
+      exprs = [
+        Symbol {
+          val = "x"
+        }
+        Symbol {
+          val = "y"
+        }
+      ]
+    }
+    Array {
+      elts = [
+        String {
+          val = "a"
+        }
+        String {
+          val = "b"
+        }
+      ]
+    }
+    XString {
+      nodes = [
+        String {
+          val = "true"
         }
       ]
     }

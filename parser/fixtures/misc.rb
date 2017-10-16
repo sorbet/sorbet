@@ -90,9 +90,40 @@ a, ((x,)) = 1
 # nth_ref
 $4
 
-# optarg
-def foo(x=1); end
-
+# optarg, restarg
+def foo(x=1, *y); end
 
 # pair and pair_quoted
 {x => y, "foo": 1}
+
+BEGIN{foo}
+END{bar}
+
+# rationals
+4r
+5ri
+
+# rescue, resbody
+begin
+rescue E=>x
+  nil
+end
+
+# splat, splat_mlhs
+*x = *y
+
+# symbols
+:"foo#{bar}"
+%i{sym}
+
+
+# ternary
+x ? 1 : 7
+
+undef x, y
+
+# words
+%w{a b}
+
+# shellout
+%x{true}

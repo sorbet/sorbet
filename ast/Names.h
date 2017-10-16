@@ -157,6 +157,16 @@ public:
     static inline NameRef squareBracketsEq() {
         return NameRef(9);
     }
+
+    // @+
+    static inline NameRef unaryPlus() {
+        return NameRef(10);
+    }
+
+    // @-
+    static inline NameRef unaryMinus() {
+        return NameRef(11);
+    }
 };
 
 class Name {

@@ -39,6 +39,12 @@ static UTF8Desc squareBrackets_DESC{(char *)squareBrackets, (int)std::strlen(squ
 static const char *squareBracketsEq = "[]=";
 static UTF8Desc squareBracketsEq_DESC{(char *)squareBracketsEq, (int)std::strlen(squareBracketsEq)};
 
+static const char *unaryPlus = "+@";
+static UTF8Desc unaryPlus_DESC{(char *)unaryPlus, (int)std::strlen(unaryPlus)};
+
+static const char *unaryMinus = "-@";
+static UTF8Desc unaryMinus_DESC{(char *)unaryMinus, (int)std::strlen(unaryMinus)};
+
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)std::strlen(no_symbol_str)};
 
@@ -90,6 +96,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     auto bang_id = enterNameUTF8(bang_DESC);
     auto squareBrackets_id = enterNameUTF8(squareBrackets_DESC);
     auto squareBracketsEq_id = enterNameUTF8(squareBracketsEq_DESC);
+    auto unaryPlus_id = enterNameUTF8(unaryPlus_DESC);
+    auto unaryMinus_id = enterNameUTF8(unaryMinus_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -100,6 +108,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     DEBUG_ONLY(Error::check(bang_id == Names::bang()));
     DEBUG_ONLY(Error::check(squareBrackets_id == Names::squareBrackets()));
     DEBUG_ONLY(Error::check(squareBracketsEq_id == Names::squareBracketsEq()));
+    DEBUG_ONLY(Error::check(unaryPlus_id == Names::unaryPlus()));
+    DEBUG_ONLY(Error::check(unaryMinus_id == Names::unaryMinus()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject

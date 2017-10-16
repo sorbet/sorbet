@@ -606,6 +606,10 @@ public:
     }
 
     unique_ptr<Node> match_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
+        // TODO(nelhage): If the LHS here is a regex literal with (?<...>..)
+        // groups, Ruby will autovivify the match groups as locals. If we were
+        // to support that, we'd need to analyze that here and call
+        // `driver_->lex.declare`.
         Loc loc = loc_join(receiver->loc, arg->loc);
         vector<unique_ptr<Node>> args;
         args.emplace_back(move(arg));
@@ -695,11 +699,11 @@ public:
     }
 
     unique_ptr<Node> postexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Postexe>(loc_join(tok_loc(begin), tok_loc(rbrace)), move(node));
     }
 
     unique_ptr<Node> preexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Preexe>(loc_join(tok_loc(begin), tok_loc(rbrace)), move(node));
     }
 
     unique_ptr<Node> procarg0(unique_ptr<Node> arg) {
@@ -715,11 +719,13 @@ public:
     }
 
     unique_ptr<Node> rational(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Rational>(tok_loc(tok), tok->string());
     }
 
     unique_ptr<Node> rational_complex(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        // TODO(nelhage): We're losing this information that this was marked as
+        // a Rational in the source.
+        return make_unique<Complex>(tok_loc(tok), tok->string());
     }
 
     unique_ptr<Node> regexp_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
@@ -734,11 +740,18 @@ public:
 
     unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> exc_list, const token *assoc,
                                  unique_ptr<Node> exc_var, const token *then, unique_ptr<Node> body) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = tok_loc(rescue);
+        if (exc_list != nullptr)
+            loc = loc_join(loc, exc_list->loc);
+        if (exc_var != nullptr)
+            loc = loc_join(loc, exc_var->loc);
+        if (body != nullptr)
+            loc = loc_join(loc, body->loc);
+        return make_unique<Resbody>(loc, move(exc_list), move(exc_var), move(body));
     }
 
     unique_ptr<Node> restarg(const token *star, const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Restarg>(loc_join(tok_loc(star), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> self_(const token *tok) {
@@ -750,11 +763,11 @@ public:
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Splat>(loc_join(tok_loc(star), arg->loc), move(arg));
     }
 
     unique_ptr<Node> splat_mlhs(const token *star, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<SplatLhs>(loc_join(tok_loc(star), arg->loc), move(arg));
     }
 
     unique_ptr<Node> string(const token *string_) {
@@ -775,20 +788,32 @@ public:
     }
 
     unique_ptr<Node> symbol_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<DSymbol>(collection_loc(begin, parts, end), move(parts));
     }
 
     unique_ptr<Node> symbol_internal(const token *symbol) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Symbol>(tok_loc(symbol), symbol->string());
     }
 
     unique_ptr<Node> symbols_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = collection_loc(begin, parts, end);
+        vector<unique_ptr<Node>> out_parts;
+        for (auto &p : parts) {
+            if (String *s = dynamic_cast<String *>(p.get())) {
+                out_parts.emplace_back(make_unique<Symbol>(s->loc, s->val));
+            } else if (DString *d = dynamic_cast<DString *>(p.get())) {
+                out_parts.emplace_back(make_unique<DSymbol>(d->loc, move(d->nodes)));
+            } else {
+                out_parts.push_back(move(p));
+            }
+        }
+        return make_unique<Array>(loc, move(out_parts));
     }
 
     unique_ptr<Node> ternary(unique_ptr<Node> cond, const token *question, unique_ptr<Node> if_true, const token *colon,
                              unique_ptr<Node> if_false) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(cond->loc, if_false->loc);
+        return make_unique<If>(loc, transform_condition(move(cond)), move(if_true), move(if_false));
     }
 
     unique_ptr<Node> tr_any(const token *special) {
@@ -897,11 +922,23 @@ public:
     }
 
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(oper), receiver->loc);
+        NameRef op;
+        if (oper->string() == "+")
+            op = ast::Names::unaryPlus();
+        else if (oper->string() == "-")
+            op = ast::Names::unaryMinus();
+        else
+            op = ctx_.enterNameUTF8(oper->string());
+
+        return make_unique<Send>(loc, move(receiver), op, vector<unique_ptr<Node>>());
     }
 
     unique_ptr<Node> undef_method(const token *undef, vector<unique_ptr<Node>> name_list) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = tok_loc(undef);
+        if (name_list.size() > 0)
+            loc = loc_join(loc, name_list.back()->loc);
+        return make_unique<Undef>(loc, move(name_list));
     }
 
     unique_ptr<Node> when(const token *when, vector<unique_ptr<Node>> patterns, const token *then,
@@ -918,14 +955,16 @@ public:
 
     unique_ptr<Node> word(vector<unique_ptr<Node>> parts) {
         BUILDER_UNIMPLEMENTED();
+        Loc loc = collection_loc(parts);
+        return make_unique<DString>(loc, move(parts));
     }
 
     unique_ptr<Node> words_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Array>(collection_loc(begin, parts, end), move(parts));
     }
 
     unique_ptr<Node> xstring_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<XString>(collection_loc(begin, parts, end), move(parts));
     }
 };
 
