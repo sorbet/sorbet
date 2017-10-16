@@ -188,7 +188,7 @@ NodeDef nodes[] = {
     // *foo splat operator
     {"Splat", vector<FieldDef>({{"var", Node}})},
     // string literal
-    {"String", vector<FieldDef>({{"val", String}})},
+    {"String", vector<FieldDef>({{"val", Name}})},
     {"Super", vector<FieldDef>({{"args", NodeVec}})},
     // symbol literal
     {"Symbol", vector<FieldDef>({{"val", Name}})},

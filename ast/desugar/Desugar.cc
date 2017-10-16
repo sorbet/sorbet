@@ -92,6 +92,11 @@ std::unique_ptr<Statement> mkIf(std::unique_ptr<Statement> &cond, std::unique_pt
     return std::make_unique<If>(stat2Expr(cond), stat2Expr(thenp), stat2Expr(elsep));
 }
 
+std::unique_ptr<Statement> mkIf(std::unique_ptr<Statement> &&cond, std::unique_ptr<Statement> &&thenp,
+                                std::unique_ptr<Statement> &&elsep) {
+    return mkIf(cond, thenp, elsep);
+}
+
 std::unique_ptr<Statement> mkEmptyTree() {
     return std::make_unique<EmptyTree>();
 }
@@ -194,11 +199,11 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  result.swap(res);
              },
              [&](parser::Symbol *a) {
-                 auto res = std::unique_ptr<Statement>(new ast::Symbol(ctx.state.enterNameUTF8(a->val)));
+                 auto res = std::unique_ptr<Statement>(new ast::Symbol(a->val));
                  result.swap(res);
              },
              [&](parser::String *a) {
-                 auto res = std::unique_ptr<Statement>(new StringLit(ctx.state.enterNameUTF8(a->val)));
+                 auto res = std::unique_ptr<Statement>(new StringLit(a->val));
                  result.swap(res);
              },
              [&](parser::Const *a) {
