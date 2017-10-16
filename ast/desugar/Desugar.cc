@@ -100,6 +100,13 @@ std::unique_ptr<Statement> mkInsSeq(std::vector<std::unique_ptr<Statement>> &&st
                                     std::unique_ptr<Expression> &&expr) {
     return std::make_unique<InsSeq>(std::move(stats), std::move(expr));
 }
+std::unique_ptr<Statement> mkTrue() {
+    return std::make_unique<BoolLit>(true);
+}
+
+std::unique_ptr<Statement> mkFalse() {
+    return std::make_unique<BoolLit>(false);
+}
 
 std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::Node> &what) {
     if (what.get() == nullptr)
@@ -107,12 +114,12 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
     std::unique_ptr<Statement> result;
     typecase(what.get(),
              [&](parser::And *a) {
-                 auto send = mkSend1(node2TreeImpl(ctx, a->left), Names::andAnd(), node2TreeImpl(ctx, a->right));
-                 result.swap(send);
+                 auto iff = mkIf(node2TreeImpl(ctx, a->left), node2TreeImpl(ctx, a->right), mkFalse());
+                 result.swap(iff);
              },
              [&](parser::Or *a) {
-                 auto send = mkSend1(node2TreeImpl(ctx, a->left), Names::orOr(), node2TreeImpl(ctx, a->right));
-                 result.swap(send);
+                 auto iff = mkIf(node2TreeImpl(ctx, a->left), mkTrue(), node2TreeImpl(ctx, a->right));
+                 result.swap(iff);
              },
              [&](parser::AndAsgn *a) {
                  auto recv = node2TreeImpl(ctx, a->left);

@@ -191,7 +191,7 @@ NodeDef nodes[] = {
     {"String", vector<FieldDef>({{"val", String}})},
     {"Super", vector<FieldDef>({{"args", NodeVec}})},
     // symbol literal
-    {"Symbol", vector<FieldDef>({{"val", String}})},
+    {"Symbol", vector<FieldDef>({{"val", Name}})},
     {"True", vector<FieldDef>()},
     {"Undef", vector<FieldDef>({{"exprs", NodeVec}})},
     {"Until", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
