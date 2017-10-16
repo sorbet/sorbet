@@ -28,7 +28,8 @@ TEST(DesugarTest, FixtureParse) {
     ruby_typer::ast::Context context(ctx, ctx.defn_root());
 
     for (auto &path : std::vector<std::string>({
-             "ast/desugar/fixtures/gerald.rb", "ast/desugar/fixtures/misc.rb",
+             "ast/desugar/fixtures/gerald.rb",
+             "ast/desugar/fixtures/misc.rb",
          })) {
         auto expPath = path + ".exp";
 
