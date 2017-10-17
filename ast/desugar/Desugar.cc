@@ -126,12 +126,22 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
     std::unique_ptr<Statement> result;
     typecase(what.get(),
              [&](parser::And *a) {
-                 auto iff = mkIf(node2TreeImpl(ctx, a->left), node2TreeImpl(ctx, a->right), mkFalse());
-                 result.swap(iff);
+                 auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
+                 auto temp = mkAssign(tempSym, node2TreeImpl(ctx, a->left));
+
+                 auto iff = mkIf(mkIdent(tempSym), node2TreeImpl(ctx, a->right), mkIdent(tempSym));
+                 auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+
+                 result.swap(wrapped);
              },
              [&](parser::Or *a) {
-                 auto iff = mkIf(node2TreeImpl(ctx, a->left), mkTrue(), node2TreeImpl(ctx, a->right));
-                 result.swap(iff);
+                 auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
+                 auto temp = mkAssign(tempSym, node2TreeImpl(ctx, a->left));
+
+                 auto iff = mkIf(mkIdent(tempSym), mkIdent(tempSym), node2TreeImpl(ctx, a->right));
+                 auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+
+                 result.swap(wrapped);
              },
              [&](parser::AndAsgn *a) {
                  auto recv = node2TreeImpl(ctx, a->left);
@@ -139,7 +149,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  if (auto s = dynamic_cast<Send *>(recv.get())) {
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
-                     auto temp = mkAssign(tempSym, std::move(s->recv)); // <<-- bug
+                     auto temp = mkAssign(tempSym, std::move(s->recv));
                      recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
@@ -163,7 +173,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  if (auto s = dynamic_cast<Send *>(recv.get())) {
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
-                     auto temp = mkAssign(tempSym, std::move(s->recv)); // <<-- bug
+                     auto temp = mkAssign(tempSym, std::move(s->recv));
                      recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);

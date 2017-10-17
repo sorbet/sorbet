@@ -33,6 +33,8 @@ unsigned int Name::hash(ContextBase &ctx) const {
 std::string Name::toString(ContextBase &ctx) const {
     if (kind == UTF8) {
         return raw.utf8.toString();
+    } else if (kind == UNIQUE) {
+        return this->unique.original.name(ctx).toString(ctx) + "$" + std::to_string(this->unique.num);
     } else {
         Error::notImplemented();
     }
