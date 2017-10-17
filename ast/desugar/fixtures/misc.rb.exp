@@ -20,9 +20,9 @@ begin
   <Not Supported (DefS)>
   <Not Supported (SClass)>
   begin
-    &&$0 = true
-    if &&$0
-      &&$0
+    ||$0 = true
+    if ||$0
+      ||$0
     else 
       false
     end
