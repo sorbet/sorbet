@@ -146,7 +146,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      auto cond = cpIdent(*i);
                      mkIf(std::move(cond), std::move(lhs), node2TreeImpl(ctx, a->right));
                  } else {
-                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
+                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::orOr(), ctx.owner);
                      auto temp = mkAssign(tempSym, lhs);
 
                      auto iff = mkIf(mkIdent(tempSym), mkIdent(tempSym), node2TreeImpl(ctx, a->right));
