@@ -126,22 +126,34 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
     std::unique_ptr<Statement> result;
     typecase(what.get(),
              [&](parser::And *a) {
-                 auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
-                 auto temp = mkAssign(tempSym, node2TreeImpl(ctx, a->left));
+                 auto lhs = node2TreeImpl(ctx, a->left);
+                 if (auto i = dynamic_cast<Ident *>(lhs.get())) {
+                     auto cond = cpIdent(*i);
+                     mkIf(std::move(cond), node2TreeImpl(ctx, a->right), std::move(lhs));
+                 } else {
+                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
+                     auto temp = mkAssign(tempSym, lhs);
 
-                 auto iff = mkIf(mkIdent(tempSym), node2TreeImpl(ctx, a->right), mkIdent(tempSym));
-                 auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+                     auto iff = mkIf(mkIdent(tempSym), node2TreeImpl(ctx, a->right), mkIdent(tempSym));
+                     auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
 
-                 result.swap(wrapped);
+                     result.swap(wrapped);
+                 }
              },
              [&](parser::Or *a) {
-                 auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
-                 auto temp = mkAssign(tempSym, node2TreeImpl(ctx, a->left));
+                 auto lhs = node2TreeImpl(ctx, a->left);
+                 if (auto i = dynamic_cast<Ident *>(lhs.get())) {
+                     auto cond = cpIdent(*i);
+                     mkIf(std::move(cond), std::move(lhs), node2TreeImpl(ctx, a->right));
+                 } else {
+                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
+                     auto temp = mkAssign(tempSym, lhs);
 
-                 auto iff = mkIf(mkIdent(tempSym), mkIdent(tempSym), node2TreeImpl(ctx, a->right));
-                 auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+                     auto iff = mkIf(mkIdent(tempSym), mkIdent(tempSym), node2TreeImpl(ctx, a->right));
+                     auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
 
-                 result.swap(wrapped);
+                     result.swap(wrapped);
+                 }
              },
              [&](parser::AndAsgn *a) {
                  auto recv = node2TreeImpl(ctx, a->left);
