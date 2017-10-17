@@ -105,6 +105,13 @@ std::unique_ptr<Statement> mkInsSeq(std::vector<std::unique_ptr<Statement>> &&st
                                     std::unique_ptr<Expression> &&expr) {
     return std::make_unique<InsSeq>(std::move(stats), std::move(expr));
 }
+
+std::unique_ptr<Statement> mkInsSeq1(std::unique_ptr<Statement> stat, std::unique_ptr<Expression> &&expr) {
+    vector<std::unique_ptr<Statement>> stats;
+    stats.emplace_back(std::move(stat));
+    return std::make_unique<InsSeq>(std::move(stats), std::move(expr));
+}
+
 std::unique_ptr<Statement> mkTrue() {
     return std::make_unique<BoolLit>(true);
 }
@@ -132,13 +139,14 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  if (auto s = dynamic_cast<Send *>(recv.get())) {
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
-                     auto temp = mkAssign(tempSym, std::move(s->recv));
+                     auto temp = mkAssign(tempSym, std::move(s->recv)); // <<-- bug
                      recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
                      auto elsep = mkIdent(tempSym);
                      auto iff = mkIf(cond, body, elsep);
-                     result.swap(iff);
+                     auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+                     result.swap(wrapped);
                  } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
                      auto cond = cpIdent(*i);
                      auto body = mkAssign(recv, arg);
@@ -155,13 +163,14 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  if (auto s = dynamic_cast<Send *>(recv.get())) {
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
-                     auto temp = mkAssign(tempSym, std::move(s->recv));
+                     auto temp = mkAssign(tempSym, std::move(s->recv)); // <<-- bug
                      recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
                      auto elsep = mkIdent(tempSym);
                      auto iff = mkIf(cond, elsep, body);
-                     result.swap(iff);
+                     auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+                     result.swap(wrapped);
                  } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
                      auto cond = cpIdent(*i);
                      auto body = mkAssign(recv, arg);
@@ -293,7 +302,8 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  } else {
                      Error::notImplemented();
                  }
-                 std::unique_ptr<Statement> res = std::make_unique<Block>(std::move(send), args, stat2Expr(node2TreeImpl(ctx, block->body)));
+                 std::unique_ptr<Statement> res =
+                     std::make_unique<Block>(std::move(send), args, stat2Expr(node2TreeImpl(ctx, block->body)));
                  result.swap(res);
              },
 
@@ -393,7 +403,8 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      std::unique_ptr<Statement> res = std::make_unique<Return>(std::move(arr));
                      result.swap(res);
                  } else if (ret->exprs.size() == 1) {
-                     std::unique_ptr<Statement> res = std::make_unique<Return>(stat2Expr(node2TreeImpl(ctx, ret->exprs[0])));
+                     std::unique_ptr<Statement> res =
+                         std::make_unique<Return>(stat2Expr(node2TreeImpl(ctx, ret->exprs[0])));
                      result.swap(res);
                  } else {
                      std::unique_ptr<Statement> res = std::make_unique<Return>(stat2Expr(mkEmptyTree()));
