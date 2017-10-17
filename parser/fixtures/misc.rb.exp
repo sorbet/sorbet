@@ -2,10 +2,10 @@ Begin {
   stmts = [
     Alias {
       from = Symbol {
-        val = "foo"
+        val = foo
       }
       to = Symbol {
-        val = "bar"
+        val = bar
       }
     }
     IVarAsgn {
@@ -130,7 +130,7 @@ Begin {
     DString {
       nodes = [
         String {
-          val = "x"
+          val = x
         }
       ]
     }

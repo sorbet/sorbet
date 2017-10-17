@@ -24,13 +24,14 @@ TEST(DesugarTest, SimpleParse) {
 
 TEST(DesugarTest, FixtureParse) {
     auto console = spd::stdout_color_mt("fixtures");
-    ruby_typer::ast::ContextBase ctx(*console);
-    ruby_typer::ast::Context context(ctx, ctx.defn_root());
 
     for (auto &path : std::vector<std::string>({
              "ast/desugar/fixtures/gerald.rb", "ast/desugar/fixtures/misc.rb",
          })) {
         auto expPath = path + ".exp";
+        ruby_typer::ast::ContextBase ctx(*console);
+        ruby_typer::ast::Context context(ctx, ctx.defn_root());
+
 
         SCOPED_TRACE(path);
 

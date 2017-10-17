@@ -362,7 +362,7 @@ public:
     }
 
     unique_ptr<Node> character(const token *char_) {
-        return make_unique<String>(tok_loc(char_), char_->string());
+        return make_unique<String>(tok_loc(char_), ctx_.enterNameUTF8(char_->string()));
     }
 
     unique_ptr<Node> complex(const token *tok) {
@@ -695,8 +695,8 @@ public:
     }
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
-        return make_unique<Pair>(loc_join(tok_loc(key), value->loc), make_unique<Symbol>(tok_loc(key), key->string()),
-                                 move(value));
+        return make_unique<Pair>(loc_join(tok_loc(key), value->loc),
+                                 make_unique<Symbol>(tok_loc(key), ctx_.enterNameUTF8(key->string())), move(value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
@@ -778,7 +778,7 @@ public:
     }
 
     unique_ptr<Node> string(const token *string_) {
-        return make_unique<String>(tok_loc(string_), string_->string());
+        return make_unique<String>(tok_loc(string_), ctx_.enterNameUTF8(string_->string()));
     }
 
     unique_ptr<Node> string_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
@@ -787,11 +787,11 @@ public:
     }
 
     unique_ptr<Node> string_internal(const token *string_) {
-        return make_unique<String>(tok_loc(string_), string_->string());
+        return make_unique<String>(tok_loc(string_), ctx_.enterNameUTF8(string_->string()));
     }
 
     unique_ptr<Node> symbol(const token *symbol) {
-        return make_unique<Symbol>(tok_loc(symbol), symbol->string());
+        return make_unique<Symbol>(tok_loc(symbol), ctx_.enterNameUTF8(symbol->string()));
     }
 
     unique_ptr<Node> symbol_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {

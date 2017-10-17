@@ -19,7 +19,14 @@ begin
   <Not Supported (Complex)>
   <Not Supported (DefS)>
   <Not Supported (SClass)>
-  <Not Supported (True)>.||(<Not Supported (False)>)
+  begin
+    ||$0 = true
+    if ||$0
+      ||$0
+    else 
+      false
+    end
+  end
   <Not Supported (For)>
   <Not Supported (While)>
 end

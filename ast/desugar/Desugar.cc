@@ -61,14 +61,14 @@ std::unique_ptr<Statement> mkSend0(std::unique_ptr<Statement> &&recv, NameRef fu
 }
 
 std::unique_ptr<Statement> mkIdent(SymbolRef symbol) {
-    return std::unique_ptr<Statement>(new Ident(symbol));
+    return std::make_unique<Ident>(symbol);
 }
 
 std::unique_ptr<Statement> cpIdent(Ident &id) {
     if (id.symbol.isSynthetic()) {
-        return std::unique_ptr<Statement>(new Ident(id.name, id.symbol));
+        return std::make_unique<Ident>(id.name, id.symbol);
     } else {
-        return std::unique_ptr<Statement>(new Ident(id.symbol));
+        return std::make_unique<Ident>(id.symbol);
     }
 }
 
@@ -92,6 +92,11 @@ std::unique_ptr<Statement> mkIf(std::unique_ptr<Statement> &cond, std::unique_pt
     return std::make_unique<If>(stat2Expr(cond), stat2Expr(thenp), stat2Expr(elsep));
 }
 
+std::unique_ptr<Statement> mkIf(std::unique_ptr<Statement> &&cond, std::unique_ptr<Statement> &&thenp,
+                                std::unique_ptr<Statement> &&elsep) {
+    return mkIf(cond, thenp, elsep);
+}
+
 std::unique_ptr<Statement> mkEmptyTree() {
     return std::make_unique<EmptyTree>();
 }
@@ -101,18 +106,54 @@ std::unique_ptr<Statement> mkInsSeq(std::vector<std::unique_ptr<Statement>> &&st
     return std::make_unique<InsSeq>(std::move(stats), std::move(expr));
 }
 
+std::unique_ptr<Statement> mkInsSeq1(std::unique_ptr<Statement> stat, std::unique_ptr<Expression> &&expr) {
+    vector<std::unique_ptr<Statement>> stats;
+    stats.emplace_back(std::move(stat));
+    return std::make_unique<InsSeq>(std::move(stats), std::move(expr));
+}
+
+std::unique_ptr<Statement> mkTrue() {
+    return std::make_unique<BoolLit>(true);
+}
+
+std::unique_ptr<Statement> mkFalse() {
+    return std::make_unique<BoolLit>(false);
+}
+
 std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::Node> &what) {
     if (what.get() == nullptr)
         return std::make_unique<EmptyTree>();
     std::unique_ptr<Statement> result;
     typecase(what.get(),
              [&](parser::And *a) {
-                 auto send = mkSend1(node2TreeImpl(ctx, a->left), Names::andAnd(), node2TreeImpl(ctx, a->right));
-                 result.swap(send);
+                 auto lhs = node2TreeImpl(ctx, a->left);
+                 if (auto i = dynamic_cast<Ident *>(lhs.get())) {
+                     auto cond = cpIdent(*i);
+                     mkIf(std::move(cond), node2TreeImpl(ctx, a->right), std::move(lhs));
+                 } else {
+                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
+                     auto temp = mkAssign(tempSym, lhs);
+
+                     auto iff = mkIf(mkIdent(tempSym), node2TreeImpl(ctx, a->right), mkIdent(tempSym));
+                     auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+
+                     result.swap(wrapped);
+                 }
              },
              [&](parser::Or *a) {
-                 auto send = mkSend1(node2TreeImpl(ctx, a->left), Names::orOr(), node2TreeImpl(ctx, a->right));
-                 result.swap(send);
+                 auto lhs = node2TreeImpl(ctx, a->left);
+                 if (auto i = dynamic_cast<Ident *>(lhs.get())) {
+                     auto cond = cpIdent(*i);
+                     mkIf(std::move(cond), std::move(lhs), node2TreeImpl(ctx, a->right));
+                 } else {
+                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::orOr(), ctx.owner);
+                     auto temp = mkAssign(tempSym, lhs);
+
+                     auto iff = mkIf(mkIdent(tempSym), mkIdent(tempSym), node2TreeImpl(ctx, a->right));
+                     auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+
+                     result.swap(wrapped);
+                 }
              },
              [&](parser::AndAsgn *a) {
                  auto recv = node2TreeImpl(ctx, a->left);
@@ -121,12 +162,13 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
                      auto temp = mkAssign(tempSym, std::move(s->recv));
-                     recv.release();
+                     recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
                      auto elsep = mkIdent(tempSym);
                      auto iff = mkIf(cond, body, elsep);
-                     result.swap(iff);
+                     auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+                     result.swap(wrapped);
                  } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
                      auto cond = cpIdent(*i);
                      auto body = mkAssign(recv, arg);
@@ -144,12 +186,13 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      Error::check(s->args.empty());
                      auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
                      auto temp = mkAssign(tempSym, std::move(s->recv));
-                     recv.release();
+                     recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
                      auto body = mkSend1(mkIdent(tempSym), s->fun.addEq(), arg);
                      auto elsep = mkIdent(tempSym);
                      auto iff = mkIf(cond, elsep, body);
-                     result.swap(iff);
+                     auto wrapped = mkInsSeq1(std::move(temp), stat2Expr(iff));
+                     result.swap(wrapped);
                  } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
                      auto cond = cpIdent(*i);
                      auto body = mkAssign(recv, arg);
@@ -174,6 +217,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
              [&](parser::DString *a) {
                  auto it = a->nodes.begin();
                  auto end = a->nodes.end();
+                 Error::check(it != end);
                  auto res = mkSend0(node2TreeImpl(ctx, *it), Names::to_s());
                  ++it;
                  for (; it != end; ++it) {
@@ -186,16 +230,16 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  result.swap(res);
              },
              [&](parser::Symbol *a) {
-                 auto res = std::unique_ptr<Statement>(new ast::Symbol(ctx.state.enterNameUTF8(a->val)));
+                 std::unique_ptr<Statement> res = std::make_unique<ast::Symbol>(a->val);
                  result.swap(res);
              },
              [&](parser::String *a) {
-                 auto res = std::unique_ptr<Statement>(new StringLit(ctx.state.enterNameUTF8(a->val)));
+                 std::unique_ptr<Statement> res = std::make_unique<StringLit>(a->val);
                  result.swap(res);
              },
              [&](parser::Const *a) {
                  auto scope = node2TreeImpl(ctx, a->scope);
-                 auto res = std::unique_ptr<Statement>(new ConstantLit(stat2Expr(scope), a->name));
+                 std::unique_ptr<Statement> res = std::make_unique<ConstantLit>(stat2Expr(scope), a->name);
                  result.swap(res);
              },
              [&](parser::Begin *a) {
@@ -226,8 +270,8 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  } else {
                      body.emplace_back(node2TreeImpl(ctx, module->body));
                  }
-                 auto res = std::unique_ptr<Statement>(
-                     new ClassDef(ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, module->name)), body, true));
+                 std::unique_ptr<Statement> res = std::make_unique<ClassDef>(
+                     ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, module->name)), body, ClassDefKind::Module);
                  result.swap(res);
              },
              [&](parser::Class *claz) {
@@ -239,12 +283,12 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  } else {
                      body.emplace_back(node2TreeImpl(ctx, claz->body));
                  }
-                 auto res = std::unique_ptr<Statement>(
-                     new ClassDef(ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, claz->name)), body, false));
+                 std::unique_ptr<Statement> res = std::make_unique<ClassDef>(
+                     ctx.state.defn_todo(), stat2Expr(node2TreeImpl(ctx, claz->name)), body, ClassDefKind::Class);
                  result.swap(res);
              },
              [&](parser::Arg *arg) {
-                 auto res = std::unique_ptr<Statement>(new Ident(arg->name, ContextBase::defn_lvar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
                  result.swap(res);
              },
              [&](parser::DefMethod *method) {
@@ -260,8 +304,8 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  } else {
                      Error::notImplemented();
                  }
-                 auto res = std::unique_ptr<Statement>(new MethodDef(
-                     ctx.state.defn_todo(), method->name, args, stat2Expr(node2TreeImpl(ctx, method->body)), false));
+                 std::unique_ptr<Statement> res = std::make_unique<MethodDef>(
+                     ctx.state.defn_todo(), method->name, args, stat2Expr(node2TreeImpl(ctx, method->body)), false);
                  result.swap(res);
              },
              [&](parser::Block *block) {
@@ -280,70 +324,70 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  } else {
                      Error::notImplemented();
                  }
-                 auto res = std::unique_ptr<Statement>(
-                     new Block(std::move(send), args, stat2Expr(node2TreeImpl(ctx, block->body))));
+                 std::unique_ptr<Statement> res =
+                     std::make_unique<Block>(std::move(send), args, stat2Expr(node2TreeImpl(ctx, block->body)));
                  result.swap(res);
              },
 
              [&](parser::IVar *var) {
-                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_ivar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(var->name, ContextBase::defn_ivar_todo());
                  result.swap(res);
              },
              [&](parser::LVar *var) {
-                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_lvar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(var->name, ContextBase::defn_lvar_todo());
                  result.swap(res);
              },
              [&](parser::GVar *var) {
-                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_gvar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(var->name, ContextBase::defn_gvar_todo());
                  result.swap(res);
              },
              [&](parser::CVar *var) {
-                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_cvar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(var->name, ContextBase::defn_cvar_todo());
                  result.swap(res);
              },
              [&](parser::IVar *var) {
-                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_ivar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(var->name, ContextBase::defn_ivar_todo());
                  result.swap(res);
              },
              [&](parser::LVarLhs *var) {
-                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_lvar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(var->name, ContextBase::defn_lvar_todo());
                  result.swap(res);
              },
              [&](parser::GVarLhs *var) {
-                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_gvar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(var->name, ContextBase::defn_gvar_todo());
                  result.swap(res);
              },
              [&](parser::CVarLhs *var) {
-                 auto res = std::unique_ptr<Statement>(new Ident(var->name, ContextBase::defn_cvar_todo()));
+                 std::unique_ptr<Statement> res = std::make_unique<Ident>(var->name, ContextBase::defn_cvar_todo());
                  result.swap(res);
              },
              [&](parser::IVarAsgn *asgn) {
-                 auto lhs = std::unique_ptr<Statement>(new Ident(asgn->name, ContextBase::defn_ivar_todo()));
+                 std::unique_ptr<Statement> lhs = std::make_unique<Ident>(asgn->name, ContextBase::defn_ivar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
              },
              [&](parser::LVarAsgn *asgn) {
-                 auto lhs = std::unique_ptr<Statement>(new Ident(asgn->name, ContextBase::defn_lvar_todo()));
+                 std::unique_ptr<Statement> lhs = std::make_unique<Ident>(asgn->name, ContextBase::defn_lvar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
              },
              [&](parser::GVarAsgn *asgn) {
-                 auto lhs = std::unique_ptr<Statement>(new Ident(asgn->name, ContextBase::defn_gvar_todo()));
+                 std::unique_ptr<Statement> lhs = std::make_unique<Ident>(asgn->name, ContextBase::defn_gvar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
              },
              [&](parser::CVarAsgn *asgn) {
-                 auto lhs = std::unique_ptr<Statement>(new Ident(asgn->name, ContextBase::defn_cvar_todo()));
+                 std::unique_ptr<Statement> lhs = std::make_unique<Ident>(asgn->name, ContextBase::defn_cvar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
              },
              [&](parser::ConstAsgn *constAsgn) {
                  auto scope = node2TreeImpl(ctx, constAsgn->scope);
-                 auto lhs = std::unique_ptr<Statement>(new ConstantLit(stat2Expr(scope), constAsgn->name));
+                 std::unique_ptr<Statement> lhs = std::make_unique<ConstantLit>(stat2Expr(scope), constAsgn->name);
                  auto rhs = node2TreeImpl(ctx, constAsgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
@@ -354,11 +398,11 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      args.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
                  };
 
-                 auto res = std::unique_ptr<Statement>(new Super(std::move(args)));
+                 std::unique_ptr<Statement> res = std::make_unique<Super>(std::move(args));
                  result.swap(res);
              },
              [&](parser::Integer *integer) {
-                 auto res = std::unique_ptr<Statement>(new IntLit(std::stoi(integer->val)));
+                 std::unique_ptr<Statement> res = std::make_unique<IntLit>(std::stoi(integer->val));
                  result.swap(res);
              },
              [&](parser::Array *array) {
@@ -367,7 +411,7 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      elems.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
                  };
 
-                 auto res = std::unique_ptr<Statement>(new Array(elems));
+                 std::unique_ptr<Statement> res = std::make_unique<Array>(elems);
                  result.swap(res);
              },
 
@@ -377,14 +421,15 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                      for (auto &stat : ret->exprs) {
                          elems.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
                      };
-                     auto arr = std::unique_ptr<Expression>(new Array(elems));
-                     auto res = std::unique_ptr<Statement>(new Return(std::move(arr)));
+                     std::unique_ptr<Expression> arr = std::make_unique<Array>(elems);
+                     std::unique_ptr<Statement> res = std::make_unique<Return>(std::move(arr));
                      result.swap(res);
                  } else if (ret->exprs.size() == 1) {
-                     auto res = std::unique_ptr<Statement>(new Return(stat2Expr(node2TreeImpl(ctx, ret->exprs[0]))));
+                     std::unique_ptr<Statement> res =
+                         std::make_unique<Return>(stat2Expr(node2TreeImpl(ctx, ret->exprs[0])));
                      result.swap(res);
                  } else {
-                     auto res = std::unique_ptr<Statement>(new Return(stat2Expr(mkEmptyTree())));
+                     std::unique_ptr<Statement> res = std::make_unique<Return>(stat2Expr(mkEmptyTree()));
                      result.swap(res);
                  }
              },
@@ -394,6 +439,14 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  auto elsep = node2TreeImpl(ctx, a->else_);
                  auto iff = mkIf(cond, thenp, elsep);
                  result.swap(iff);
+             },
+             [&](parser::True *t) {
+                 auto res = mkTrue();
+                 result.swap(res);
+             },
+             [&](parser::False *t) {
+                 auto res = mkFalse();
+                 result.swap(res);
              },
 
              [&](parser::Node *a) { result.reset(new NotSupported(a->nodeName())); });

@@ -43,8 +43,8 @@ void printTabs(std::stringstream &to, int count) {
 }
 
 ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Statement>> &rhs,
-                   bool isModule)
-    : Declaration(symbol), rhs(std::move(rhs)), name(std::move(name)), isModule(isModule) {}
+                   ClassDefKind kind)
+    : Declaration(symbol), rhs(std::move(rhs)), name(std::move(name)), kind(kind) {}
 
 MethodDef::MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
                      std::unique_ptr<Expression> rhs, bool isSelf)
@@ -65,6 +65,8 @@ While::While(u1 break_tag, std::unique_ptr<Expression> cond, std::unique_ptr<Sta
 Break::Break(u1 break_tag) : break_tag(break_tag) {}
 
 Next::Next(u1 break_tag) : break_tag(break_tag) {}
+
+BoolLit::BoolLit(bool value) : value(value) {}
 
 std::string Next::toString(ContextBase &ctx, int tabs) {
     return "next";
@@ -128,7 +130,7 @@ std::string ConstDef::toString(ContextBase &ctx, int tabs) {
 
 std::string ClassDef::toString(ContextBase &ctx, int tabs) {
     std::stringstream buf;
-    if (isModule) {
+    if (kind == ClassDefKind::Module) {
         buf << "module ";
     } else {
         buf << "class ";
@@ -259,6 +261,13 @@ std::string NamedArg::toString(ContextBase &ctx, int tabs) {
 
 std::string FloatLit::toString(ContextBase &ctx, int tabs) {
     return std::to_string(this->value);
+}
+
+std::string BoolLit::toString(ContextBase &ctx, int tabs) {
+    if (this->value)
+        return "true";
+    else
+        return "false";
 }
 
 std::string Assign::toString(ContextBase &ctx, int tabs) {
