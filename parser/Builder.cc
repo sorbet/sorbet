@@ -799,7 +799,7 @@ public:
     }
 
     unique_ptr<Node> symbol_internal(const token *symbol) {
-        return make_unique<Symbol>(tok_loc(symbol), symbol->string());
+        return make_unique<Symbol>(tok_loc(symbol), ctx_.enterNameUTF8(symbol->string()));
     }
 
     unique_ptr<Node> symbols_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {

@@ -343,7 +343,7 @@ Begin {
           key = DSymbol {
             nodes = [
               String {
-                val = "foo"
+                val = foo
               }
             ]
           }
@@ -423,7 +423,7 @@ Begin {
     DSymbol {
       nodes = [
         String {
-          val = "foo"
+          val = foo
         }
         Begin {
           stmts = [
@@ -440,7 +440,7 @@ Begin {
     Array {
       elts = [
         Symbol {
-          val = "sym"
+          val = sym
         }
       ]
     }
@@ -458,20 +458,20 @@ Begin {
     Undef {
       exprs = [
         Symbol {
-          val = "x"
+          val = x
         }
         Symbol {
-          val = "y"
+          val = y
         }
       ]
     }
     Array {
       elts = [
         String {
-          val = "a"
+          val = a
         }
         String {
-          val = "b"
+          val = b
         }
       ]
     }
@@ -480,14 +480,14 @@ Begin {
         DString {
           nodes = [
             String {
-              val = "a"
+              val = a
             }
           ]
         }
         DString {
           nodes = [
             String {
-              val = "b"
+              val = b
             }
           ]
         }
@@ -496,7 +496,7 @@ Begin {
     XString {
       nodes = [
         String {
-          val = "true"
+          val = true
         }
       ]
     }
