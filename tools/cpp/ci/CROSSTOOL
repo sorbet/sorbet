@@ -103,6 +103,9 @@ toolchain {
 
     # enable self-checking capabilities of glibc
     compiler_flag: "-D_GLIBCXX_DEBUG"
+
+    compiler_flag: "-g3"
+    linker_flag: "-g3"
   }
 
   compilation_mode_flags {
