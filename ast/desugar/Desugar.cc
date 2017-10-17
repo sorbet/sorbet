@@ -440,6 +440,14 @@ std::unique_ptr<Statement> node2TreeImpl(Context ctx, std::unique_ptr<parser::No
                  auto iff = mkIf(cond, thenp, elsep);
                  result.swap(iff);
              },
+             [&](parser::True *t) {
+                 auto res = mkTrue();
+                 result.swap(res);
+             },
+             [&](parser::False *t) {
+                 auto res = mkFalse();
+                 result.swap(res);
+             },
 
              [&](parser::Node *a) { result.reset(new NotSupported(a->nodeName())); });
     Error::check(result.get());
