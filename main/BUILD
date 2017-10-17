@@ -13,7 +13,6 @@ cc_binary(
     deps = [
         ":hello-greet",
         "//common",
-        "//ast/desugar",
         #        "//lib:hello-time",
     ],
 )
