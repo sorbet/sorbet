@@ -264,7 +264,10 @@ std::string FloatLit::toString(ContextBase &ctx, int tabs) {
 }
 
 std::string BoolLit::toString(ContextBase &ctx, int tabs) {
-    return std::to_string(this->value);
+    if (this->value)
+        return "true";
+    else
+        return "false";
 }
 
 std::string Assign::toString(ContextBase &ctx, int tabs) {

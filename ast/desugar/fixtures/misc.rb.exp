@@ -19,10 +19,13 @@ begin
   <Not Supported (Complex)>
   <Not Supported (DefS)>
   <Not Supported (SClass)>
-  if <Not Supported (True)>
-    1
-  else 
-    <Not Supported (False)>
+  begin
+    &&$0 = true
+    if &&$0
+      &&$0
+    else 
+      false
+    end
   end
   <Not Supported (For)>
   <Not Supported (While)>
