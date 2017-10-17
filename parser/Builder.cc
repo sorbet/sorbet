@@ -19,12 +19,6 @@ using std::unique_ptr;
 using std::vector;
 using std::vector;
 
-#define BUILDER_UNIMPLEMENTED()                                      \
-    ({                                                               \
-        ctx_.logger.critical("unimplemented builder: {}", __func__); \
-        Error::notImplemented();                                     \
-    })
-
 namespace ruby_typer {
 namespace parser {
 
@@ -301,7 +295,20 @@ public:
                                       move(body));
         }
 
-        BUILDER_UNIMPLEMENTED();
+        vector<unique_ptr<Node>> *exprs;
+        typecase(method_call.get(), [&](Break *b) { exprs = &b->exprs; },
+
+                 [&](Return *r) { exprs = &r->exprs; },
+
+                 [&](Next *n) { exprs = &n->exprs; },
+
+                 [&](Node *n) { Error::raise("Unexpected send node: ", n->nodeName()); });
+
+        auto &send = exprs->front();
+        Loc block_loc = loc_join(send->loc, tok_loc(end));
+        unique_ptr<Node> block = make_unique<Block>(block_loc, move(send), move(args), move(body));
+        exprs->front().swap(block);
+        return method_call;
     }
 
     unique_ptr<Node> block_pass(const token *amper, unique_ptr<Node> arg) {
@@ -338,7 +345,7 @@ public:
 
         NameRef method;
         if (selector == nullptr)
-            method = ctx_.enterNameUTF8(UTF8Desc{"call", (int)std::strlen("call")});
+            method = ast::Names::bang();
         else
             method = ctx_.enterNameUTF8(selector->string());
 
@@ -488,13 +495,15 @@ public:
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
                            const token *rbrack) {
-        auto meth = ctx_.enterNameUTF8((std::string) "[]");
-        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver), meth, move(indexes));
+        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver), ast::Names::squareBrackets(),
+                                 move(indexes));
     }
 
     unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
                                 const token *rbrack) {
-        BUILDER_UNIMPLEMENTED();
+        vector<unique_ptr<Node>> args;
+        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver),
+                                 ast::Names::squareBracketsEq(), move(args));
     }
 
     unique_ptr<Node> integer(const token *tok) {
@@ -507,11 +516,12 @@ public:
 
     unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
                                    const token *rparen) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
+        return make_unique<Break>(loc, move(args));
     }
 
     unique_ptr<Node> keyword_defined(const token *keyword, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Defined>(loc_join(tok_loc(keyword), arg->loc), move(arg));
     }
 
     unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
@@ -552,11 +562,11 @@ public:
     }
 
     unique_ptr<Node> keyword_zsuper(const token *keyword) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<ZSuper>(tok_loc(keyword));
     }
 
     unique_ptr<Node> kwarg(const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Kwarg>(tok_loc(name), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
@@ -565,15 +575,15 @@ public:
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Kwrestarg>(loc_join(tok_loc(dstar), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> kwsplat(const token *dstar, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Kwsplat>(loc_join(tok_loc(dstar), arg->loc), move(arg));
     }
 
     unique_ptr<Node> line_literal(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<LineLiteral>(tok_loc(tok));
     }
 
     unique_ptr<Node> logical_and(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
@@ -586,11 +596,11 @@ public:
 
     unique_ptr<Node> loop_until(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
                                 const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Until>(loc_join(tok_loc(keyword), tok_loc(end)), move(cond), move(body));
     }
 
     unique_ptr<Node> loop_until_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<UntilPost>(loc_join(body->loc, cond->loc), move(cond), move(body));
     }
 
     unique_ptr<Node> loop_while(const token *keyword, unique_ptr<Node> cond, const token *do_, unique_ptr<Node> body,
@@ -599,11 +609,18 @@ public:
     }
 
     unique_ptr<Node> loop_while_mod(unique_ptr<Node> body, unique_ptr<Node> cond) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<WhilePost>(loc_join(body->loc, cond->loc), move(cond), move(body));
     }
 
     unique_ptr<Node> match_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        // TODO(nelhage): If the LHS here is a regex literal with (?<...>..)
+        // groups, Ruby will autovivify the match groups as locals. If we were
+        // to support that, we'd need to analyze that here and call
+        // `driver_->lex.declare`.
+        Loc loc = loc_join(receiver->loc, arg->loc);
+        vector<unique_ptr<Node>> args;
+        args.emplace_back(move(arg));
+        return make_unique<Send>(loc, move(receiver), ctx_.enterNameUTF8(oper->string()), move(args));
     }
 
     unique_ptr<Node> multi_assign(unique_ptr<Node> mlhs, unique_ptr<Node> rhs) {
@@ -615,7 +632,12 @@ public:
     }
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        if (Mlhs *mlhs = dynamic_cast<Mlhs *>(item.get())) {
+            return item;
+        }
+        vector<unique_ptr<Node>> args;
+        args.emplace_back(move(item));
+        return make_unique<Mlhs>(collection_loc(begin, args, end), move(args));
     }
 
     unique_ptr<Node> negate(const token *uminus, unique_ptr<Node> numeric) {
@@ -632,24 +654,23 @@ public:
     }
 
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
-        const char *meth = "!";
-        auto bang = ctx_.enterNameUTF8(UTF8Desc{meth, (int)std::strlen(meth)});
         if (receiver != nullptr) {
             Loc loc;
             if (end != nullptr)
                 loc = loc_join(tok_loc(not_), tok_loc(end));
             else
                 loc = loc_join(tok_loc(not_), receiver->loc);
-            return make_unique<Send>(loc, move(receiver), bang, vector<unique_ptr<Node>>());
+            return make_unique<Send>(loc, move(receiver), ast::Names::bang(), vector<unique_ptr<Node>>());
         }
 
         DEBUG_ONLY(Error::check(begin != nullptr && end != nullptr));
         auto body = make_unique<Begin>(loc_join(tok_loc(begin), tok_loc(end)), vector<unique_ptr<Node>>());
-        return make_unique<Send>(loc_join(tok_loc(not_), body->loc), move(body), bang, vector<unique_ptr<Node>>());
+        return make_unique<Send>(loc_join(tok_loc(not_), body->loc), move(body), ast::Names::bang(),
+                                 vector<unique_ptr<Node>>());
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<NthRef>(tok_loc(tok), std::atoi(tok->string().c_str()));
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
@@ -665,11 +686,12 @@ public:
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Optarg>(loc_join(tok_loc(name), value->loc), ctx_.enterNameUTF8(name->string()),
+                                   move(value));
     }
 
     unique_ptr<Node> pair(unique_ptr<Node> key, const token *assoc, unique_ptr<Node> value) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Pair>(loc_join(key->loc, value->loc), move(key), move(value));
     }
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
@@ -679,15 +701,16 @@ public:
 
     unique_ptr<Node> pair_quoted(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
                                  unique_ptr<Node> value) {
-        BUILDER_UNIMPLEMENTED();
+        auto sym = make_unique<DSymbol>(loc_join(tok_loc(begin), tok_loc(end)), move(parts));
+        return make_unique<Pair>(loc_join(tok_loc(begin), value->loc), move(sym), move(value));
     }
 
     unique_ptr<Node> postexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Postexe>(loc_join(tok_loc(begin), tok_loc(rbrace)), move(node));
     }
 
     unique_ptr<Node> preexe(const token *begin, unique_ptr<Node> node, const token *rbrace) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Preexe>(loc_join(tok_loc(begin), tok_loc(rbrace)), move(node));
     }
 
     unique_ptr<Node> procarg0(unique_ptr<Node> arg) {
@@ -703,11 +726,13 @@ public:
     }
 
     unique_ptr<Node> rational(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Rational>(tok_loc(tok), tok->string());
     }
 
     unique_ptr<Node> rational_complex(const token *tok) {
-        BUILDER_UNIMPLEMENTED();
+        // TODO(nelhage): We're losing this information that this was marked as
+        // a Rational in the source.
+        return make_unique<Complex>(tok_loc(tok), tok->string());
     }
 
     unique_ptr<Node> regexp_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
@@ -722,11 +747,18 @@ public:
 
     unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> exc_list, const token *assoc,
                                  unique_ptr<Node> exc_var, const token *then, unique_ptr<Node> body) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = tok_loc(rescue);
+        if (exc_list != nullptr)
+            loc = loc_join(loc, exc_list->loc);
+        if (exc_var != nullptr)
+            loc = loc_join(loc, exc_var->loc);
+        if (body != nullptr)
+            loc = loc_join(loc, body->loc);
+        return make_unique<Resbody>(loc, move(exc_list), move(exc_var), move(body));
     }
 
     unique_ptr<Node> restarg(const token *star, const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Restarg>(loc_join(tok_loc(star), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> self_(const token *tok) {
@@ -734,15 +766,15 @@ public:
     }
 
     unique_ptr<Node> shadowarg(const token *name) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Shadowarg>(tok_loc(name), ctx_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Splat>(loc_join(tok_loc(star), arg->loc), move(arg));
     }
 
     unique_ptr<Node> splat_mlhs(const token *star, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<SplatLhs>(loc_join(tok_loc(star), arg->loc), move(arg));
     }
 
     unique_ptr<Node> string(const token *string_) {
@@ -763,121 +795,133 @@ public:
     }
 
     unique_ptr<Node> symbol_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<DSymbol>(collection_loc(begin, parts, end), move(parts));
     }
 
     unique_ptr<Node> symbol_internal(const token *symbol) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Symbol>(tok_loc(symbol), symbol->string());
     }
 
     unique_ptr<Node> symbols_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = collection_loc(begin, parts, end);
+        vector<unique_ptr<Node>> out_parts;
+        for (auto &p : parts) {
+            if (String *s = dynamic_cast<String *>(p.get())) {
+                out_parts.emplace_back(make_unique<Symbol>(s->loc, s->val));
+            } else if (DString *d = dynamic_cast<DString *>(p.get())) {
+                out_parts.emplace_back(make_unique<DSymbol>(d->loc, move(d->nodes)));
+            } else {
+                out_parts.push_back(move(p));
+            }
+        }
+        return make_unique<Array>(loc, move(out_parts));
     }
 
     unique_ptr<Node> ternary(unique_ptr<Node> cond, const token *question, unique_ptr<Node> if_true, const token *colon,
                              unique_ptr<Node> if_false) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(cond->loc, if_false->loc);
+        return make_unique<If>(loc, transform_condition(move(cond)), move(if_true), move(if_false));
     }
 
     unique_ptr<Node> tr_any(const token *special) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_arg_instance(unique_ptr<Node> base, vector<unique_ptr<Node>> types, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_array(const token *begin, unique_ptr<Node> type_, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_cast(const token *begin, unique_ptr<Node> expr, const token *colon, unique_ptr<Node> type_,
                              const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_class(const token *special) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_consubtype(unique_ptr<Node> sub, unique_ptr<Node> super_) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_conunify(unique_ptr<Node> a, unique_ptr<Node> b) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_cpath(unique_ptr<Node> cpath) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_genargs(const token *begin, vector<unique_ptr<Node>> genargs,
                                 vector<unique_ptr<Node>> constraints, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_gendecl(unique_ptr<Node> cpath, const token *begin, vector<unique_ptr<Node>> genargs,
                                 vector<unique_ptr<Node>> constraints, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_gendeclarg(const token *tok, unique_ptr<Node> constraint) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_geninst(unique_ptr<Node> cpath, const token *begin, vector<unique_ptr<Node>> genargs,
                                 const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_hash(const token *begin, unique_ptr<Node> key_type, const token *assoc,
                              unique_ptr<Node> value_type, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_instance(const token *special) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_ivardecl(const token *def, const token *name, unique_ptr<Node> type_) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_nil(const token *nil) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_nillable(const token *tilde, unique_ptr<Node> type_) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_or(unique_ptr<Node> a, unique_ptr<Node> b) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_proc(const token *begin, unique_ptr<Node> args, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_prototype(unique_ptr<Node> genargs, unique_ptr<Node> args, unique_ptr<Node> return_type) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_returnsig(const token *arrow, unique_ptr<Node> ret) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_self(const token *special) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_tuple(const token *begin, vector<unique_ptr<Node>> types, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_typed_arg(unique_ptr<Node> type_, unique_ptr<Node> arg) {
-        BUILDER_UNIMPLEMENTED();
+        Error::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> true_(const token *tok) {
@@ -885,11 +929,23 @@ public:
     }
 
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = loc_join(tok_loc(oper), receiver->loc);
+        NameRef op;
+        if (oper->string() == "+")
+            op = ast::Names::unaryPlus();
+        else if (oper->string() == "-")
+            op = ast::Names::unaryMinus();
+        else
+            op = ctx_.enterNameUTF8(oper->string());
+
+        return make_unique<Send>(loc, move(receiver), op, vector<unique_ptr<Node>>());
     }
 
     unique_ptr<Node> undef_method(const token *undef, vector<unique_ptr<Node>> name_list) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = tok_loc(undef);
+        if (name_list.size() > 0)
+            loc = loc_join(loc, name_list.back()->loc);
+        return make_unique<Undef>(loc, move(name_list));
     }
 
     unique_ptr<Node> when(const token *when, vector<unique_ptr<Node>> patterns, const token *then,
@@ -905,15 +961,16 @@ public:
     }
 
     unique_ptr<Node> word(vector<unique_ptr<Node>> parts) {
-        BUILDER_UNIMPLEMENTED();
+        Loc loc = collection_loc(parts);
+        return make_unique<DString>(loc, move(parts));
     }
 
     unique_ptr<Node> words_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<Array>(collection_loc(begin, parts, end), move(parts));
     }
 
     unique_ptr<Node> xstring_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
-        BUILDER_UNIMPLEMENTED();
+        return make_unique<XString>(collection_loc(begin, parts, end), move(parts));
     }
 };
 

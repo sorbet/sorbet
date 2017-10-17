@@ -184,9 +184,10 @@ NodeDef nodes[] = {
     // invocation
     {"Send", vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}})},
     // not used in gerald.rb ???
-    {"ShadowArg", vector<FieldDef>({{"name", Name}})},
+    {"Shadowarg", vector<FieldDef>({{"name", Name}})},
     // *foo splat operator
     {"Splat", vector<FieldDef>({{"var", Node}})},
+    {"SplatLhs", vector<FieldDef>({{"var", Node}})},
     // string literal
     {"String", vector<FieldDef>({{"val", String}})},
     {"Super", vector<FieldDef>({{"args", NodeVec}})},
@@ -200,6 +201,7 @@ NodeDef nodes[] = {
     {"While", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
     // is there a non-syntactic difference in behaviour between post and non-post while?
     {"WhilePost", vector<FieldDef>({{"cond", Node}, {"body", Node}})},
+    {"XString", vector<FieldDef>({{"nodes", NodeVec}})},
     {"Yield", vector<FieldDef>({{"exprs", NodeVec}})},
     {"ZSuper", vector<FieldDef>()},
 };
