@@ -115,16 +115,15 @@ static bool startsWith(const std::string &str, const std::string &prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.c_str(), prefix.size());
 }
 
-std::vector<Expectations> inputs;
-
 // substrantially modified from https://stackoverflow.com/a/8438663
-void listDir(const char *name) {
+std::vector<Expectations> listDir(const char *name) {
+    std::vector<Expectations> result;
     DIR *dir;
     struct dirent *entry;
     std::vector<std::string> names;
 
     if (!(dir = opendir(name))) {
-        return;
+        return result;
     }
 
     while ((entry = readdir(dir)) != NULL) {
@@ -134,7 +133,8 @@ void listDir(const char *name) {
                 continue;
             char path[1024];
             snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
-            listDir(path);
+            auto nested = listDir(path);
+            result.insert(result.end(), nested.begin(), nested.end());
         } else {
             names.emplace_back(entry->d_name);
         }
@@ -146,7 +146,7 @@ void listDir(const char *name) {
 
         if (endsWith(s, ".rb")) {
             if (!current.sourceFile.empty()) {
-                inputs.push_back(current);
+                result.push_back(current);
 
                 current.sourceFile.clear();
                 current.expectations.clear();
@@ -165,16 +165,16 @@ void listDir(const char *name) {
         }
     }
     if (!current.sourceFile.empty()) {
-        inputs.push_back(current);
+        result.push_back(current);
 
         current.sourceFile.clear();
         current.expectations.clear();
     }
 
     closedir(dir);
+    return result;
 }
 
 std::vector<Expectations> getInputs() {
-    listDir("test_corpus/pos");
-    return inputs;
+    return listDir("test_corpus/pos");
 }
