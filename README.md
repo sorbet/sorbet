@@ -12,7 +12,7 @@ We build using [bazel](https://bazel.build/); Run `./bazel test
 
 # Code convenctions
 
- - use smart pointers for storage, references for arguments; 
+ - use smart pointers for storage, references for arguments;
  - no c-style allocators. Use vectors instead.
  - undefined behaviour is prohibited. All builds have [UBSan](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html) enabled;
  - all memory accesses are checked by [ASan](https://github.com/google/sanitizers/wiki/AddressSanitizer).
@@ -40,10 +40,6 @@ sudo apt install ragel bison clang-4.0
 
 And then copy `bazelrc-ubuntu` to `.bazelrc` to configure bazel to use
 the `clang-4.0` toolchain.
-
-You will also need to download and install `clang-5.0.0` from
-[their download page](http://releases.llvm.org/download.html#5.0.0)
-and add their `clang-format` to your `$PATH`.
 
 You do not need to install `bazel`; The `./bazel` tool will download
 and build an appropriate version of bazel. If you have a global
