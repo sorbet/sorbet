@@ -1,6 +1,25 @@
 package(default_visibility = ["//visibility:public"])
 
 cc_test(
+    name = "test_corpus",
+    size = "enormous",
+    srcs = [
+        "test_corpus.cc",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    data = glob([
+        "testdata/**/*.rb",
+        "testdata/**/*.rb.*.exp",
+    ]),
+    deps = [
+        "//ast/desugar",
+        "@gtest//:gtest",
+        "@gtest//:gtest_main",
+        "@spdlog//:spdlog",
+    ],
+)
+
+cc_test(
     name = "hello-test",
     srcs = ["hello-test.cc"],
     copts = ["-Iexternal/gtest/include"],

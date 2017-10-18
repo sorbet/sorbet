@@ -45,11 +45,11 @@ protected:
 
 // taken from https://stackoverflow.com/questions/16491675/how-to-send-custom-message-in-google-c-testing-framework
 namespace testing {
-namespace internal {
-enum GTestColor { COLOR_DEFAULT, COLOR_RED, COLOR_GREEN, COLOR_YELLOW };
+    namespace internal {
+        enum GTestColor { COLOR_DEFAULT, COLOR_RED, COLOR_GREEN, COLOR_YELLOW };
 
-extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
-} // namespace internal
+        extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
+    } // namespace internal
 } // namespace testing
 
 #define PRINTF(...)                                                                        \
@@ -69,38 +69,38 @@ public:
 #define TEST_COUT TestCout()
 
 TEST_P(ExpectationTest, PerPhaseTest) {
-    Expectations test = GetParam();
-    auto inputPath = test.folder + test.sourceFile;
+Expectations test = GetParam();
+auto inputPath = test.folder + test.sourceFile;
 
-    auto console = spd::stdout_color_mt("fixtures: " + inputPath);
-    ruby_typer::ast::ContextBase ctx(*console);
-    ruby_typer::ast::Context context(ctx, ctx.defn_root());
+auto console = spd::stdout_color_mt("fixtures: " + inputPath);
+ruby_typer::ast::ContextBase ctx(*console);
+ruby_typer::ast::Context context(ctx, ctx.defn_root());
 
-    if (test.expectations.find("parser") != test.expectations.end()) {
-        auto checker = test.folder + test.expectations["parser"];
-        SCOPED_TRACE(checker);
+if (test.expectations.find("parser") != test.expectations.end()) {
+auto checker = test.folder + test.expectations["parser"];
+SCOPED_TRACE(checker);
 
-        auto src = ruby_typer::File::read(inputPath.c_str());
-        auto exp = ruby_typer::File::read(checker.c_str());
-        auto parsed = ruby_typer::parser::parse_ruby(ctx, src);
+auto src = ruby_typer::File::read(inputPath.c_str());
+auto exp = ruby_typer::File::read(checker.c_str());
+auto parsed = ruby_typer::parser::parse_ruby(ctx, src);
 
-        EXPECT_EQ(0, parsed.diagnostics().size());
-        EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
-        if (exp == parsed.ast()->toString(ctx) + "\n") {
-            TEST_COUT << "Parser OK" << std::endl;
-        }
-        if (test.expectations.find("desugar") != test.expectations.end()) {
-            auto checker = test.folder + test.expectations["desugar"];
-            auto exp = ruby_typer::File::read(checker.c_str());
-            SCOPED_TRACE(checker);
+EXPECT_EQ(0, parsed.diagnostics().size());
+EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
+if (exp == parsed.ast()->toString(ctx) + "\n") {
+TEST_COUT << "Parser OK" << std::endl;
+}
+if (test.expectations.find("desugar") != test.expectations.end()) {
+auto checker = test.folder + test.expectations["desugar"];
+auto exp = ruby_typer::File::read(checker.c_str());
+SCOPED_TRACE(checker);
 
-            auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
-            EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
-            if (exp == desugared->toString(ctx) + "\n") {
-                TEST_COUT << "Desugar OK" << std::endl;
-            }
-        }
-    }
+auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
+EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
+if (exp == desugared->toString(ctx) + "\n") {
+TEST_COUT << "Desugar OK" << std::endl;
+}
+}
+}
 }
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs()), prettyPrintTest);
@@ -176,5 +176,5 @@ std::vector<Expectations> listDir(const char *name) {
 }
 
 std::vector<Expectations> getInputs() {
-    return listDir("test_corpus/pos");
+    return listDir("test/testdata");
 }

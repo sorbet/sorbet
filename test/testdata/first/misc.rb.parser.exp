@@ -1,0 +1,199 @@
+Begin {
+  stmts = [
+    Alias {
+      from = Symbol {
+        val = "foo"
+      }
+      to = Symbol {
+        val = "bar"
+      }
+    }
+    IVarAsgn {
+      name = @iv
+      expr = Integer {
+        val = "1"
+      }
+    }
+    CVarAsgn {
+      name = @@cv
+      expr = Integer {
+        val = "1"
+      }
+    }
+    GVarAsgn {
+      name = $gv
+      expr = Integer {
+        val = "1"
+      }
+    }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = x
+              args = [
+              ]
+            }
+            method = var=
+            args = [
+            ]
+          }
+          LVarLhs {
+            name = y
+          }
+        ]
+      }
+      rhs = Array {
+        elts = [
+          Nil {
+          }
+          Nil {
+          }
+        ]
+      }
+    }
+    Kwbegin {
+      stmts = [
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Nil {
+        }
+      ]
+    }
+    Kwbegin {
+      stmts = [
+        Send {
+          receiver = NULL
+          method = a
+          args = [
+          ]
+        }
+        Send {
+          receiver = NULL
+          method = b
+          args = [
+          ]
+        }
+      ]
+    }
+    DefMethod {
+      name = foo
+      args = Args {
+        args = [
+          Blockarg {
+            name = x
+          }
+        ]
+      }
+      body = NULL
+    }
+    Block {
+      send = Send {
+        receiver = NULL
+        method = lambda
+        args = [
+        ]
+      }
+      args = NULL
+      body = NULL
+    }
+    Case {
+      condition = Send {
+        receiver = NULL
+        method = x
+        args = [
+        ]
+      }
+      whens = [
+        When {
+          patterns = [
+            LVar {
+              name = y
+            }
+          ]
+          body = Integer {
+            val = "1"
+          }
+        }
+      ]
+      else_ = Send {
+        receiver = NULL
+        method = z
+        args = [
+        ]
+      }
+    }
+    DString {
+      nodes = [
+        String {
+          val = "x"
+        }
+      ]
+    }
+    Send {
+      receiver = Integer {
+        val = "1"
+      }
+      method = +
+      args = [
+        Complex {
+          value = "4"
+        }
+      ]
+    }
+    Float {
+      val = "0.5"
+    }
+    Complex {
+      value = "1.5"
+    }
+    DefS {
+      singleton = Self {
+      }
+      name = classmeth
+      args = NULL
+      body = NULL
+    }
+    SClass {
+      expr = Self {
+      }
+      body = NULL
+    }
+    Or {
+      left = True {
+      }
+      right = False {
+      }
+    }
+    For {
+      vars = LVarLhs {
+        name = x
+      }
+      expr = Send {
+        receiver = NULL
+        method = arr
+        args = [
+        ]
+      }
+      body = NULL
+    }
+    While {
+      cond = Send {
+        receiver = Integer {
+          val = "0"
+        }
+        method = !=
+        args = [
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      body = NULL
+    }
+  ]
+}
