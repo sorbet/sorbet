@@ -19,15 +19,6 @@ RUN mkdir -p "$GOPATH" && \
   go generate github.com/bazelbuild/buildifier/build && \
   go install github.com/bazelbuild/buildifier/buildifier
 
-# Upgrade to clang-format 5.0.0
-#
-# Eventually we probably want to force this entire toolchain, too, but
-# we can defer that.
-RUN curl -Lo /tmp/clang-5.0.0.tar.xz http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-linux-x86_64-ubuntu14.04.tar.xz && \
-  tar -C /usr/local -Jxf /tmp/clang-5.0.0.tar.xz && \
-  rm -f /tmp/clang-5.0.0.tar.xz
-RUN ln -nsf /usr/local/clang+llvm-5.0.0-linux-x86_64-ubuntu16.04/bin/clang-format /usr/bin/clang-format
-
 WORKDIR /src
 
 ENV PATH $PATH:/src/

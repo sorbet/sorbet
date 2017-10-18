@@ -26,7 +26,8 @@ TEST(DesugarTest, FixtureParse) {
     auto console = spd::stdout_color_mt("fixtures");
 
     for (auto &path : std::vector<std::string>({
-             "ast/desugar/fixtures/gerald.rb", "ast/desugar/fixtures/misc.rb",
+             "ast/desugar/fixtures/gerald.rb",
+             "ast/desugar/fixtures/misc.rb",
          })) {
         auto expPath = path + ".exp";
         ruby_typer::ast::ContextBase ctx(*console);

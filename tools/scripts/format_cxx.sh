@@ -10,6 +10,8 @@ fi
 
 cd $(dirname $0)/../..
 
+bazel build //tools:clang-format
+
 cxx_src=(
     $(find . -path ./third_party -prune -false -o -name '*.cxx' -o -name '*.h' -o -name '*.cc')
 )
@@ -27,7 +29,7 @@ trap cleanup EXIT
 #clang-format -style=file -dump-config
 
 for src in "${cxx_src[@]}"; do
-    clang-format -style=file "$src" > "$src.formatted"
+    bazel-bin/tools/clang-format -style=file "$src" > "$src.formatted"
     if ! cmp -s "$src" "$src.formatted"; then
         misformatted=("${misformatted[@]}" "$src")
         if [ "$mode" = "fix" ]; then
@@ -45,14 +47,14 @@ fi
 if [ "$mode" = "fix" ]; then
     echo "Formatted the following files:" >&2
 else
-    echo -ne "\e[1;31m"
+    echo -ne "\e[1;31m" >&2
     echo "The following files are misformatted!" >&2
-    echo -ne "\e[0m"
+    echo -ne "\e[0m" >&2
     echo -e "Run \e[97;1;42m ./tools/scripts/format_cxx.sh \e[0m to format." >&2
 fi
 
 for src in "${misformatted[@]}"; do
-    echo "$src"
+    echo "$src" >&2
 done
 
 exit 1

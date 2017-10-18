@@ -22,7 +22,8 @@ TEST(ParserTest, FixtureParse) {
     ruby_typer::ast::ContextBase ctx(*console);
 
     for (auto &path : std::vector<std::string>({
-             "parser/fixtures/gerald.rb", "parser/fixtures/misc.rb",
+             "parser/fixtures/gerald.rb",
+             "parser/fixtures/misc.rb",
          })) {
         auto expPath = path + ".exp";
 
