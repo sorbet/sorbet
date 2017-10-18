@@ -1,22 +1,27 @@
 
 #include "CFG.h"
 #include <sstream>
+#include <algorithm>
+
+// helps debugging
+template class std::unique_ptr<ruby_typer::cfg::CFG>;
 
 namespace ruby_typer {
 namespace cfg {
 
+
 std::unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     std::unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
-    auto retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), md.symbol);
+    auto retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
     auto cont = res->walk(ctx, md.rhs.get(), res->entry(), *res.get(), retSym);
-    auto retSym1 = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), md.symbol);
+    auto retSym1 = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
 
     cont->exprs.emplace_back(retSym1, std::make_unique<Return>(retSym)); // dead assign.
-    cont->bexit.cond = 0;
+    cont->bexit.cond = 2;
     cont->bexit.thenb = res->deadBlock();
     cont->bexit.elseb = res->deadBlock();
-    return std::move(res);
+    return res;
 }
 
 BasicBlock *CFG::freshBlock() {
@@ -27,7 +32,11 @@ BasicBlock *CFG::freshBlock() {
 }
 
 CFG::CFG() {
-    this->basicBlocks.resize(2);
+    freshBlock(); // entry;
+    freshBlock(); // dead code;
+    deadBlock()->bexit.elseb = deadBlock();
+    deadBlock()->bexit.thenb = deadBlock();
+    deadBlock()->bexit.cond = 2;
 }
 
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
@@ -42,23 +51,32 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
     typecase(what,
              [&](ast::While *a) {
                  auto headerBlock = inWhat.freshBlock();
-                 current->bexit.cond = 1;
-                 current->bexit.elseb = headerBlock;
-                 current->bexit.thenb = headerBlock;
+                 if (current != deadBlock()) {
+                     Error::check(!current->bexit.cond.exists());
+                     current->bexit.cond = 1;
+                     current->bexit.elseb = headerBlock;
+                     current->bexit.thenb = headerBlock;
+                 }
                  auto condSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::whileTemp(), inWhat.symbol);
                  auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym);
                  auto bodyBlock = inWhat.freshBlock();
                  auto continueBlock = inWhat.freshBlock();
-                 headerEnd->bexit.cond = condSym;
-                 headerEnd->bexit.thenb = bodyBlock;
-                 headerEnd->bexit.elseb = continueBlock;
+                 if (headerEnd != deadBlock()) {
+                     Error::check(!headerEnd->bexit.cond.exists());
+                     headerEnd->bexit.cond = condSym;
+                     headerEnd->bexit.thenb = bodyBlock;
+                     headerEnd->bexit.elseb = continueBlock;
+                 }
                  // finishHeader
                  auto bodySym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
 
                  auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym);
-                 body->bexit.cond = 1;
-                 body->bexit.elseb = headerBlock;
-                 body->bexit.thenb = headerBlock;
+                 if (body != deadBlock()) {
+                     Error::check(!body->bexit.cond.exists());
+                     body->bexit.cond = 1;
+                     body->bexit.elseb = headerBlock;
+                     body->bexit.thenb = headerBlock;
+                 }
                  continueBlock->exprs.emplace_back(target, std::make_unique<Nil>());
                  ret = continueBlock;
              },
@@ -66,29 +84,43 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  auto retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
                  auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym);
                  cont->exprs.emplace_back(target, std::make_unique<Return>(retSym)); // dead assign.
-                 cont->bexit.cond = 0;
-                 cont->bexit.thenb = deadBlock();
-                 cont->bexit.elseb = deadBlock();
+                 if (cont != deadBlock()) {
+                     Error::check(!cont->bexit.cond.exists());
+                     cont->bexit.cond = 2;
+                     cont->bexit.thenb = deadBlock();
+                     cont->bexit.elseb = deadBlock();
+                 }
                  ret = deadBlock();
              },
              [&](ast::If *a) {
                  auto ifSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::ifTemp(), inWhat.symbol);
+                 Error::check(ifSym.exists());
                  auto thenBlock = inWhat.freshBlock();
                  auto elseBlock = inWhat.freshBlock();
                  auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym);
-                 cont->bexit.cond = ifSym;
-                 current->bexit.thenb = thenBlock;
-                 current->bexit.elseb = elseBlock;
+                 if (cont != deadBlock()) {
+                     Error::check(!cont->bexit.cond.exists());
+                     cont->bexit.cond = ifSym;
+                     cont->bexit.thenb = thenBlock;
+                     cont->bexit.elseb = elseBlock;
+                 }
+
                  auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target);
-                 auto elseEnd = walk(ctx, a->elsep.get(), thenBlock, inWhat, target);
+                 auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target);
                  if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
                      ret = inWhat.freshBlock();
-                     thenEnd->bexit.cond = 1;
-                     thenEnd->bexit.elseb = ret;
-                     thenEnd->bexit.thenb = ret;
-                     elseEnd->bexit.cond = 1;
-                     elseEnd->bexit.elseb = ret;
-                     elseEnd->bexit.thenb = ret;
+                     if (thenEnd != deadBlock()) {
+                         Error::check(!thenEnd->bexit.cond.exists());
+                         thenEnd->bexit.cond = 1;
+                         thenEnd->bexit.elseb = ret;
+                         thenEnd->bexit.thenb = ret;
+                     }
+                     if (elseBlock != deadBlock()) {
+                         Error::check(!elseEnd->bexit.cond.exists());
+                         elseEnd->bexit.cond = 1;
+                         elseEnd->bexit.elseb = ret;
+                         elseEnd->bexit.thenb = ret;
+                     }
                  } else {
                      ret = deadBlock();
                  }
