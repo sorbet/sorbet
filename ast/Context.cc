@@ -66,20 +66,23 @@ static UTF8Desc star_DESC{(char *)star, (int)strlen(star)};
 static const char *starStar = "**";
 static UTF8Desc starStar_DESC{(char *)starStar, (int)strlen(starStar)};
 
-static const char *whileTemp = "whileTemp";
+static const char *whileTemp = "whileTmp";
 static UTF8Desc whileTemp_DESC{(char *)whileTemp, (int)std::strlen(whileTemp)};
 
-static const char *ifTemp = "ifTemp";
+static const char *ifTemp = "ifTmp";
 static UTF8Desc ifTemp_DESC{(char *)ifTemp, (int)std::strlen(ifTemp)};
 
-static const char *returnTemp = "returnTemp";
+static const char *returnTemp = "returnTmp";
 static UTF8Desc retunTemp_DESC{(char *)returnTemp, (int)std::strlen(returnTemp)};
 
-static const char *statTemp = "statTemp";
+static const char *statTemp = "statTmp";
 static UTF8Desc statTemp_DESC{(char *)statTemp, (int)std::strlen(statTemp)};
 
-static const char *assignTemp = "assignTemp";
+static const char *assignTemp = "assignTmp";
 static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)std::strlen(assignTemp)};
+
+static const char *returnMethodTemp = "<ret>";
+static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)std::strlen(returnMethodTemp)};
 
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
@@ -147,6 +150,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     auto returnTemp_id = enterNameUTF8(retunTemp_DESC);
     auto statTemp_id = enterNameUTF8(statTemp_DESC);
     auto assignTemp_id = enterNameUTF8(assignTemp_DESC);
+    auto returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));

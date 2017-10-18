@@ -206,6 +206,11 @@ public:
     static inline NameRef assignTemp() {
         return NameRef(18);
     }
+
+    // used in CFG for temporary
+    static inline NameRef returnMethodTemp() {
+        return NameRef(17);
+    }
 };
 
 class Name {
