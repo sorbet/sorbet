@@ -1,6 +1,7 @@
 #include "Context.h"
 #include "Hashing.h"
 #include "common/common.h"
+#include <algorithm>
 
 namespace ruby_typer {
 namespace ast {
@@ -228,13 +229,22 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     names.emplace_back();
 
     Error::check(nm.to < ContextBase::STRINGS_PAGE_SIZE);
+    char *from = nullptr;
+    if (nm.to > ContextBase::STRINGS_PAGE_SIZE) {
+        strings.push_back(std::make_unique<std::vector<char>>(nm.to));
+        from = strings.back()->data();
+        if (strings.size() > 1) {
+            std::swap(*(strings.end() - 1), *(strings.end() - 2));
+        }
+    } else {
 
-    if (strings_last_page_used + nm.to > ContextBase::STRINGS_PAGE_SIZE) {
-        strings.push_back(std::make_unique<std::vector<char>>(ContextBase::STRINGS_PAGE_SIZE));
-        // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
-        strings_last_page_used = 0;
+        if (strings_last_page_used + nm.to > ContextBase::STRINGS_PAGE_SIZE) {
+            strings.push_back(std::make_unique<std::vector<char>>(ContextBase::STRINGS_PAGE_SIZE));
+            // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
+            strings_last_page_used = 0;
+        }
+        from = strings.back()->data() + strings_last_page_used;
     }
-    char *from = strings.back()->data() + strings_last_page_used;
 
     memcpy(from, nm.from, nm.to);
     names[idx].kind = NameKind::UTF8;
