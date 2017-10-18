@@ -353,5 +353,107 @@ string Symbol::toString(ContextBase &ctx, int tabs) {
 string NotSupported::toString(ContextBase &ctx, int tabs) {
     return "<Not Supported (" + why + ")>";
 }
+
+std::string Rescue::nodeName() {
+    return "Rescue";
+}
+std::string Next::nodeName() {
+    return "Next";
+}
+std::string ClassDef::nodeName() {
+    return "ClassDef";
+}
+
+std::string ConstDef::nodeName() {
+    return "ConstDef";
+}
+std::string MethodDef::nodeName() {
+    return "MethodDef";
+}
+std::string If::nodeName() {
+    return "If";
+}
+std::string While::nodeName() {
+    return "While";
+}
+std::string Ident::nodeName() {
+    return "Ident";
+}
+
+std::string Return::nodeName() {
+    return "Return";
+}
+std::string Break::nodeName() {
+    return "Break";
+}
+
+std::string Symbol::nodeName() {
+    return "Symbol";
+}
+
+std::string Assign::nodeName() {
+    return "Assign";
+}
+
+std::string Send::nodeName() {
+    return "Send";
+}
+
+std::string New::nodeName() {
+    return "New";
+}
+
+std::string Super::nodeName() {
+    return "Super";
+}
+std::string NamedArg::nodeName() {
+    return "NamedArg";
+}
+
+std::string Array::nodeName() {
+    return "Array";
+}
+
+std::string FloatLit::nodeName() {
+    return "FloatLit";
+}
+
+std::string IntLit::nodeName() {
+    return "IntLit";
+}
+
+std::string StringLit::nodeName() {
+    return "StringLit";
+}
+
+std::string BoolLit::nodeName() {
+    return "BoolLit";
+}
+
+std::string ConstantLit::nodeName() {
+    return "ConstantLit";
+}
+
+std::string ArraySplat::nodeName() {
+    return "ArraySplat";
+}
+
+std::string HashSplat::nodeName() {
+    return "HashSplat";
+}
+
+std::string Self::nodeName() {
+    return "Self";
+}
+
+std::string Block::nodeName() {
+    return "Block";
+}
+std::string InsSeq::nodeName() {
+    return "InsSeq";
+}
+std::string EmptyTree::nodeName() {
+    return "EmptyTree";
+}
 } // namespace ast
 } // namespace ruby_typer
