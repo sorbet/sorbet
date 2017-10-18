@@ -90,16 +90,17 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
         if (exp == parsed.ast()->toString(ctx) + "\n") {
             TEST_COUT << "Parser OK" << endl;
-        }
-        if (test.expectations.find("desugar") != test.expectations.end()) {
-            auto checker = test.folder + test.expectations["desugar"];
-            auto exp = ruby_typer::File::read(checker.c_str());
-            SCOPED_TRACE(checker);
 
-            auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
-            EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
-            if (exp == desugared->toString(ctx) + "\n") {
-                TEST_COUT << "Desugar OK" << endl;
+            if (test.expectations.find("desugar") != test.expectations.end()) {
+                auto checker = test.folder + test.expectations["desugar"];
+                auto exp = ruby_typer::File::read(checker.c_str());
+                SCOPED_TRACE(checker);
+
+                auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
+                EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
+                if (exp == desugared->toString(ctx) + "\n") {
+                    TEST_COUT << "Desugar OK" << endl;
+                }
             }
 
             if (test.expectations.find("namer") != test.expectations.end()) {
