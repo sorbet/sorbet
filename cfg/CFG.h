@@ -8,7 +8,6 @@
 #include <memory>
 
 namespace ruby_typer {
-namespace ast {
 namespace cfg {
 
 // TODO: convert it to implicitly numbered instead of explicitly bound
@@ -18,59 +17,59 @@ namespace cfg {
 class Instruction {
 public:
     virtual ~Instruction() = default;
-    virtual std::string toString(Context ctx) = 0;
+    virtual std::string toString(ast::Context ctx) = 0;
 };
 
 class Ident : public Instruction {
-    SymbolRef what;
+    ast::SymbolRef what;
 
 public:
-    Ident(const SymbolRef &what);
-    virtual std::string toString(Context ctx);
+    Ident(const ast::SymbolRef &what);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class Send : public Instruction {
 public:
-    SymbolRef recv;
-    NameRef fun;
-    std::vector<SymbolRef> args;
-    virtual std::string toString(Context ctx);
+    ast::SymbolRef recv;
+    ast::NameRef fun;
+    std::vector<ast::SymbolRef> args;
+    virtual std::string toString(ast::Context ctx);
 };
 
 class LoadArg : public Instruction {
     int argId;
-    SymbolRef tpe;
+    ast::SymbolRef tpe;
 };
 
 class Return : public Instruction {
 public:
-    SymbolRef what;
+    ast::SymbolRef what;
 
-    Return(const SymbolRef &what);
-    virtual std::string toString(Context ctx);
+    Return(const ast::SymbolRef &what);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class New : public Instruction {
 public:
-    SymbolRef claz;
-    std::vector<SymbolRef> args;
+    ast::SymbolRef claz;
+    std::vector<ast::SymbolRef> args;
 
-    New(const SymbolRef &claz, std::vector<SymbolRef> &args);
-    virtual std::string toString(Context ctx);
+    New(const ast::SymbolRef &claz, std::vector<ast::SymbolRef> &args);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class Super : public Instruction {
 public:
-    std::vector<SymbolRef> args;
+    std::vector<ast::SymbolRef> args;
 
-    Super(std::vector<SymbolRef> &args);
-    virtual std::string toString(Context ctx);
+    Super(std::vector<ast::SymbolRef> &args);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class NamedArg : public Instruction {
 public:
-    NameRef name;
-    SymbolRef value;
+    ast::NameRef name;
+    ast::SymbolRef value;
 };
 
 class FloatLit : public Instruction {
@@ -78,7 +77,7 @@ public:
     float value;
 
     FloatLit(float value);
-    virtual std::string toString(Context ctx);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class IntLit : public Instruction {
@@ -86,15 +85,15 @@ public:
     int value;
 
     IntLit(int value);
-    virtual std::string toString(Context ctx);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class StringLit : public Instruction {
 public:
-    NameRef value;
+    ast::NameRef value;
 
-    StringLit(NameRef value) : value(value){};
-    virtual std::string toString(Context ctx);
+    StringLit(ast::NameRef value) : value(value){};
+    virtual std::string toString(ast::Context ctx);
 };
 
 class NotSupported : public Instruction {
@@ -102,7 +101,7 @@ public:
     std::string why;
 
     NotSupported(std::string why) : why(why){};
-    virtual std::string toString(Context ctx);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class BoolLit : public Instruction {
@@ -110,67 +109,67 @@ public:
     bool value;
 
     BoolLit(bool value) : value(value){};
-    virtual std::string toString(Context ctx);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class ConstantLit : public Instruction {
-    NameRef cnst;
+    ast::NameRef cnst;
 
 public:
-    ConstantLit(NameRef cnst) : cnst(cnst) {}
-    virtual std::string toString(Context ctx);
+    ConstantLit(ast::NameRef cnst) : cnst(cnst) {}
+    virtual std::string toString(ast::Context ctx);
 };
 
 class ArraySplat : public Instruction {
 public:
-    NameRef arg;
+    ast::NameRef arg;
 
-    ArraySplat(NameRef arg) : arg(arg){};
+    ArraySplat(ast::NameRef arg) : arg(arg){};
 };
 
 class HashSplat : public Instruction {
 public:
-    NameRef arg;
+    ast::NameRef arg;
 
-    HashSplat(NameRef arg) : arg(arg){};
+    HashSplat(ast::NameRef arg) : arg(arg){};
 };
 
 class Nil : public Instruction {
 public:
     Nil(){};
-    virtual std::string toString(Context ctx);
+    virtual std::string toString(ast::Context ctx);
 };
 
 class Self : public Instruction {
 public:
-    SymbolRef claz;
+    ast::SymbolRef claz;
 
-    Self(SymbolRef claz) : claz(claz){};
-    virtual std::string toString(Context ctx);
+    Self(ast::SymbolRef claz) : claz(claz){};
+    virtual std::string toString(ast::Context ctx);
 };
 
 class Block : public Instruction {
 public:
-    SymbolRef method;
+    ast::SymbolRef method;
 
-    Block(SymbolRef method) : method(method){};
+    Block(ast::SymbolRef method) : method(method){};
 };
 
 class BasicBlock;
 
 class BlockExit {
 public:
-    SymbolRef cond;
+    ast::SymbolRef cond;
     BasicBlock *thenb;
     BasicBlock *elseb;
 };
 
 class Binding {
 public:
-    SymbolRef bind;
+    ast::SymbolRef bind;
     std::unique_ptr<Instruction> value;
 
-    Binding(const SymbolRef &bind, std::unique_ptr<Instruction> value);
+    Binding(const ast::SymbolRef &bind, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;
     Binding() = default;
 };
@@ -182,15 +181,15 @@ public:
     BlockExit bexit;
 
     BasicBlock(){};
-    std::string toString(Context ctx);
+    std::string toString(ast::Context ctx);
 };
 
 class CFG {
 
 public:
-    SymbolRef symbol;
+    ast::SymbolRef symbol;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
-    static std::unique_ptr<CFG> buildFor(Context ctx, ast::MethodDef &md);
+    static std::unique_ptr<CFG> buildFor(ast::Context ctx, ast::MethodDef &md);
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
     }
@@ -199,16 +198,15 @@ public:
         return basicBlocks[1].get();
     };
 
-    std::string toString(Context ctx);
+    std::string toString(ast::Context ctx);
 
 private:
     CFG();
-    BasicBlock *walk(Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, SymbolRef target);
+    BasicBlock *walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target);
     BasicBlock *freshBlock();
 };
 
 } // namespace cfg
-} // namespace ast
 } // namespace ruby_typer
 
 #endif // SRUBY_CFG_H

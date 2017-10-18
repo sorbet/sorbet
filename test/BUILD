@@ -16,6 +16,7 @@ cc_test(
         "@gtest//:gtest",
         "@gtest//:gtest_main",
         "@spdlog//:spdlog",
+        "//cfg:cfg"
     ],
 )
 

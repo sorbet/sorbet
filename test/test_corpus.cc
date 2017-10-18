@@ -5,6 +5,7 @@
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
+#include "cfg/CFG.h"
 #include <algorithm>
 #include <cstdio>
 #include <dirent.h>
@@ -70,6 +71,15 @@ public:
 
 #define TEST_COUT TestCout()
 
+
+class CFG_Collector {
+    vector<string> cfgs;
+    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef* m) {
+        cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
+        return m;
+    }
+};
+
 TEST_P(ExpectationTest, PerPhaseTest) {
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
@@ -100,6 +110,22 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
                 if (exp == desugared->toString(ctx) + "\n") {
                     TEST_COUT << "Desugar OK" << endl;
+                    if (test.expectations.find("cfg") != test.expectations.end()) {
+                        auto checker = test.folder + test.expectations["cfg"];
+                        SCOPED_TRACE(checker);
+
+                        CFG_Collector collector;
+                        auto exp = ruby_typer::File::read(checker.c_str());
+                        auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(desugared));
+                        stringstream got;
+                        for (auto &cfg: collector.cfgs) {
+                            got << cfg << endl  << endl;
+                        }
+                        EXPECT_EQ(exp, got.str() + "\n");
+                        if (exp == got.str() + "\n") {
+                            TEST_COUT << "CFG OK" << endl;
+                        }
+                    }
                 }
             }
 

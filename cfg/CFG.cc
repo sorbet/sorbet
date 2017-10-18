@@ -3,15 +3,14 @@
 #include <sstream>
 
 namespace ruby_typer {
-namespace ast {
 namespace cfg {
 
-std::unique_ptr<CFG> CFG::buildFor(Context ctx, ast::MethodDef &md) {
+std::unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     std::unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
-    auto retSym = ctx.state.newTemporary(UniqueNameKind::CFG, Names::returnTemp(), md.symbol);
+    auto retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), md.symbol);
     auto cont = res->walk(ctx, md.rhs.get(), res->entry(), *res.get(), retSym);
-    auto retSym1 = ctx.state.newTemporary(UniqueNameKind::CFG, Names::returnTemp(), md.symbol);
+    auto retSym1 = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), md.symbol);
 
     cont->exprs.emplace_back(retSym1, std::make_unique<Return>(retSym)); // dead assign.
     cont->bexit.cond = 0;
@@ -34,7 +33,7 @@ CFG::CFG() {
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFG::walk(Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, SymbolRef target) {
+BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
@@ -46,7 +45,7 @@ BasicBlock *CFG::walk(Context ctx, ast::Statement *what, BasicBlock *current, CF
                  current->bexit.cond = 1;
                  current->bexit.elseb = headerBlock;
                  current->bexit.thenb = headerBlock;
-                 auto condSym = ctx.state.newTemporary(UniqueNameKind::CFG, Names::whileTemp(), inWhat.symbol);
+                 auto condSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::whileTemp(), inWhat.symbol);
                  auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym);
                  auto bodyBlock = inWhat.freshBlock();
                  auto continueBlock = inWhat.freshBlock();
@@ -54,7 +53,7 @@ BasicBlock *CFG::walk(Context ctx, ast::Statement *what, BasicBlock *current, CF
                  headerEnd->bexit.thenb = bodyBlock;
                  headerEnd->bexit.elseb = continueBlock;
                  // finishHeader
-                 auto bodySym = ctx.state.newTemporary(UniqueNameKind::CFG, Names::statTemp(), inWhat.symbol);
+                 auto bodySym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
 
                  auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym);
                  body->bexit.cond = 1;
@@ -64,7 +63,7 @@ BasicBlock *CFG::walk(Context ctx, ast::Statement *what, BasicBlock *current, CF
                  ret = continueBlock;
              },
              [&](ast::Return *a) {
-                 auto retSym = ctx.state.newTemporary(UniqueNameKind::CFG, Names::returnTemp(), inWhat.symbol);
+                 auto retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
                  auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym);
                  cont->exprs.emplace_back(target, std::make_unique<Return>(retSym)); // dead assign.
                  cont->bexit.cond = 0;
@@ -73,7 +72,7 @@ BasicBlock *CFG::walk(Context ctx, ast::Statement *what, BasicBlock *current, CF
                  ret = deadBlock();
              },
              [&](ast::If *a) {
-                 auto ifSym = ctx.state.newTemporary(UniqueNameKind::CFG, Names::ifTemp(), inWhat.symbol);
+                 auto ifSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::ifTemp(), inWhat.symbol);
                  auto thenBlock = inWhat.freshBlock();
                  auto elseBlock = inWhat.freshBlock();
                  auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym);
@@ -131,7 +130,7 @@ BasicBlock *CFG::walk(Context ctx, ast::Statement *what, BasicBlock *current, CF
              },
              [&](ast::InsSeq *a) {
                  for (auto &exp : a->stats) {
-                     auto temp = ctx.state.newTemporary(UniqueNameKind::CFG, Names::statTemp(), inWhat.symbol);
+                     auto temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
                      current = walk(ctx, exp.get(), current, inWhat, temp);
                  }
                  ret = walk(ctx, a->expr.get(), current, inWhat, target);
@@ -148,7 +147,7 @@ BasicBlock *CFG::walk(Context ctx, ast::Statement *what, BasicBlock *current, CF
     return ret;
 }
 
-std::string CFG::toString(Context ctx) {
+std::string CFG::toString(ast::Context ctx) {
     std::stringstream buf;
     buf << "digraph " << this->symbol.info(ctx).name.name(ctx).toString(ctx) << " {" << std::endl;
     buf << "bb0 [shape=invhouse];" << std::endl;
@@ -161,7 +160,7 @@ std::string CFG::toString(Context ctx) {
     return buf.str();
 }
 
-std::string BasicBlock::toString(Context ctx) {
+std::string BasicBlock::toString(ast::Context ctx) {
     std::stringstream buf;
     for (auto &exp : this->exprs) {
         buf << exp.bind.info(ctx).name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
@@ -171,17 +170,17 @@ std::string BasicBlock::toString(Context ctx) {
     return buf.str();
 }
 
-Binding::Binding(const SymbolRef &bind, std::unique_ptr<Instruction> value) : bind(bind), value(std::move(value)) {}
+Binding::Binding(const ast::SymbolRef &bind, std::unique_ptr<Instruction> value) : bind(bind), value(std::move(value)) {}
 
-Return::Return(const SymbolRef &what) : what(what) {}
+Return::Return(const ast::SymbolRef &what) : what(what) {}
 
-std::string Return::toString(Context ctx) {
+std::string Return::toString(ast::Context ctx) {
     return "return " + this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-New::New(const SymbolRef &claz, std::vector<SymbolRef> &args) : claz(claz), args(std::move(args)) {}
+New::New(const ast::SymbolRef &claz, std::vector<ast::SymbolRef> &args) : claz(claz), args(std::move(args)) {}
 
-std::string New::toString(Context ctx) {
+std::string New::toString(ast::Context ctx) {
     std::stringstream buf;
     buf << "new " << this->claz.info(ctx).name.name(ctx).toString(ctx) << "(";
     bool isFirst = true;
@@ -196,9 +195,9 @@ std::string New::toString(Context ctx) {
     return buf.str();
 }
 
-Super::Super(std::vector<SymbolRef> &args) : args(std::move(args)) {}
+Super::Super(std::vector<ast::SymbolRef> &args) : args(std::move(args)) {}
 
-std::string Super::toString(Context ctx) {
+std::string Super::toString(ast::Context ctx) {
     std::stringstream buf;
     buf << "super(";
     bool isFirst = true;
@@ -215,23 +214,23 @@ std::string Super::toString(Context ctx) {
 
 FloatLit::FloatLit(float value) : value(value) {}
 
-std::string FloatLit::toString(Context ctx) {
+std::string FloatLit::toString(ast::Context ctx) {
     return std::to_string(this->value);
 }
 
 IntLit::IntLit(int value) : value(value) {}
 
-std::string IntLit::toString(Context ctx) {
+std::string IntLit::toString(ast::Context ctx) {
     return std::to_string(this->value);
 }
 
-Ident::Ident(const SymbolRef &what) : what(what) {}
+Ident::Ident(const ast::SymbolRef &what) : what(what) {}
 
-std::string Ident::toString(Context ctx) {
+std::string Ident::toString(ast::Context ctx) {
     return this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-std::string Send::toString(Context ctx) {
+std::string Send::toString(ast::Context ctx) {
     std::stringstream buf;
     buf << this->recv.info(ctx).name.name(ctx).toString(ctx) << "." << this->fun.name(ctx).toString(ctx) << "(";
     bool isFirst = true;
@@ -246,11 +245,11 @@ std::string Send::toString(Context ctx) {
     return buf.str();
 }
 
-std::string StringLit::toString(Context ctx) {
+std::string StringLit::toString(ast::Context ctx) {
     return this->value.name(ctx).toString(ctx);
 }
 
-std::string BoolLit::toString(Context ctx) {
+std::string BoolLit::toString(ast::Context ctx) {
     if (value) {
         return "true";
     } else {
@@ -258,21 +257,20 @@ std::string BoolLit::toString(Context ctx) {
     }
 }
 
-std::string ConstantLit::toString(Context ctx) {
+std::string ConstantLit::toString(ast::Context ctx) {
     return this->cnst.name(ctx).toString(ctx);
 }
 
-std::string Nil::toString(Context ctx) {
+std::string Nil::toString(ast::Context ctx) {
     return "nil";
 }
 
-std::string Self::toString(Context ctx) {
+std::string Self::toString(ast::Context ctx) {
     return "self";
 }
 
-std::string NotSupported::toString(Context ctx) {
+std::string NotSupported::toString(ast::Context ctx) {
     return "NotSupported(" + why + ")";
 }
 } // namespace cfg
-} // namespace ast
 } // namespace ruby_typer
