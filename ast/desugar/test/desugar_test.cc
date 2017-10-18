@@ -21,25 +21,3 @@ TEST(DesugarTest, SimpleParse) {
     ruby_typer::ast::Context context(ctx, ctx.defn_root());
     auto o1 = ruby_typer::ast::desugar::node2Tree(context, i1.ast());
 }
-
-TEST(DesugarTest, FixtureParse) {
-    auto console = spd::stdout_color_mt("fixtures");
-
-    for (auto &path : std::vector<std::string>({
-             "ast/desugar/fixtures/gerald.rb",
-             "ast/desugar/fixtures/misc.rb",
-         })) {
-        auto expPath = path + ".exp";
-        ruby_typer::ast::ContextBase ctx(*console);
-        ruby_typer::ast::Context context(ctx, ctx.defn_root());
-
-        SCOPED_TRACE(path);
-
-        auto src = ruby_typer::File::read(path.c_str());
-        auto exp = ruby_typer::File::read(expPath.c_str());
-        auto parsed = ruby_typer::parser::parse_ruby(ctx, src);
-        auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
-        EXPECT_EQ(0, parsed.diagnostics().size());
-        EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
-    }
-}
