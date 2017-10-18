@@ -66,6 +66,21 @@ static UTF8Desc star_DESC{(char *)star, (int)strlen(star)};
 static const char *starStar = "**";
 static UTF8Desc starStar_DESC{(char *)starStar, (int)strlen(starStar)};
 
+static const char *whileTemp = "whileTemp";
+static UTF8Desc whileTemp_DESC{(char *)whileTemp, (int)std::strlen(whileTemp)};
+
+static const char *ifTemp = "ifTemp";
+static UTF8Desc ifTemp_DESC{(char *)ifTemp, (int)std::strlen(ifTemp)};
+
+static const char *returnTemp = "returnTemp";
+static UTF8Desc retunTemp_DESC{(char *)returnTemp, (int)std::strlen(returnTemp)};
+
+static const char *statTemp = "statTemp";
+static UTF8Desc statTemp_DESC{(char *)statTemp, (int)std::strlen(statTemp)};
+
+static const char *assignTemp = "statTemp";
+static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)std::strlen(assignTemp)};
+
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
 
@@ -127,6 +142,11 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     auto unaryMinus_id = enterNameUTF8(unaryMinus_DESC);
     auto star_id = enterNameUTF8(star_DESC);
     auto starStar_id = enterNameUTF8(starStar_DESC);
+    auto whileTemp_id = enterNameUTF8(whileTemp_DESC);
+    auto ifTemp_id = enterNameUTF8(ifTemp_DESC);
+    auto returnTemp_id = enterNameUTF8(retunTemp_DESC);
+    auto statTemp_id = enterNameUTF8(statTemp_DESC);
+    auto assignTemp_id = enterNameUTF8(assignTemp_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -141,6 +161,11 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(unaryMinus_id == Names::unaryMinus()));
     DEBUG_ONLY(Error::check(star_id == Names::star()));
     DEBUG_ONLY(Error::check(starStar_id == Names::starStar()));
+    DEBUG_ONLY(Error::check(whileTemp_id == Names::whileTemp()));
+    DEBUG_ONLY(Error::check(ifTemp_id == Names::ifTemp()));
+    DEBUG_ONLY(Error::check(returnTemp_id == Names::returnTemp()));
+    DEBUG_ONLY(Error::check(statTemp_id == Names::statTemp()));
+    DEBUG_ONLY(Error::check(assignTemp_id == Names::assignTemp()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject

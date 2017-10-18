@@ -112,6 +112,7 @@ CheckSize(RawName, 16, 8);
 enum UniqueNameKind : u2 {
     Parser,
     Desugar,
+    CFG
 };
 
 struct UniqueName {
@@ -179,6 +180,31 @@ public:
     // **
     static inline NameRef starStar() {
         return NameRef(13);
+    }
+
+    // used in CFG for temporary
+    static inline NameRef whileTemp() {
+        return NameRef(14);
+    }
+
+    // used in CFG for temporary
+    static inline NameRef ifTemp() {
+        return NameRef(15);
+    }
+
+    // used in CFG for temporary
+    static inline NameRef returnTemp() {
+        return NameRef(16);
+    }
+
+    // used in CFG for temporary
+    static inline NameRef statTemp() {
+        return NameRef(17);
+    }
+
+    // used in CFG for temporary
+    static inline NameRef assignTemp() {
+        return NameRef(18);
     }
 };
 
