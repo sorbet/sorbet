@@ -18,7 +18,7 @@ std::unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     auto retSym1 = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
 
     cont->exprs.emplace_back(retSym1, std::make_unique<Return>(retSym)); // dead assign.
-    cont->bexit.cond = 2;
+    cont->bexit.cond = ast::ContextBase::defn_cfg_never();
     cont->bexit.thenb = res->deadBlock();
     cont->bexit.elseb = res->deadBlock();
     return res;
@@ -36,7 +36,7 @@ CFG::CFG() {
     freshBlock(); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
-    deadBlock()->bexit.cond = 2;
+    deadBlock()->bexit.cond = ast::ContextBase::defn_cfg_never();
 }
 
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
@@ -53,7 +53,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  auto headerBlock = inWhat.freshBlock();
                  if (current != deadBlock()) {
                      Error::check(!current->bexit.cond.exists());
-                     current->bexit.cond = 1;
+                     current->bexit.cond = ast::ContextBase::defn_cfg_always();
                      current->bexit.elseb = headerBlock;
                      current->bexit.thenb = headerBlock;
                  }
@@ -73,7 +73,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym);
                  if (body != deadBlock()) {
                      Error::check(!body->bexit.cond.exists());
-                     body->bexit.cond = 1;
+                     body->bexit.cond = ast::ContextBase::defn_cfg_always();
                      body->bexit.elseb = headerBlock;
                      body->bexit.thenb = headerBlock;
                  }
@@ -86,7 +86,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  cont->exprs.emplace_back(target, std::make_unique<Return>(retSym)); // dead assign.
                  if (cont != deadBlock()) {
                      Error::check(!cont->bexit.cond.exists());
-                     cont->bexit.cond = 2;
+                     cont->bexit.cond = ast::ContextBase::defn_cfg_never();
                      cont->bexit.thenb = deadBlock();
                      cont->bexit.elseb = deadBlock();
                  }
@@ -111,13 +111,13 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                      ret = inWhat.freshBlock();
                      if (thenEnd != deadBlock()) {
                          Error::check(!thenEnd->bexit.cond.exists());
-                         thenEnd->bexit.cond = 1;
+                         thenEnd->bexit.cond = ast::ContextBase::defn_cfg_always();
                          thenEnd->bexit.elseb = ret;
                          thenEnd->bexit.thenb = ret;
                      }
                      if (elseBlock != deadBlock()) {
                          Error::check(!elseEnd->bexit.cond.exists());
-                         elseEnd->bexit.cond = 1;
+                         elseEnd->bexit.cond = ast::ContextBase::defn_cfg_always();
                          elseEnd->bexit.elseb = ret;
                          elseEnd->bexit.thenb = ret;
                      }
