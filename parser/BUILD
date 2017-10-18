@@ -5,6 +5,7 @@ cc_library(
     srcs = [
         "Builder.cc",
         "Builder.h",
+        "Dedenter.h",
         "Node.cc",
         "Node.h",
         "Node_gen.cc",

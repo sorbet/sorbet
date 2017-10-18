@@ -1,5 +1,6 @@
 #include "ast/ast.h"
 #include "common/common.h"
+#include "parser/Dedenter.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
@@ -15,4 +16,23 @@ TEST(ParserTest, SimpleParse) {
     ruby_typer::parser::parse_ruby(ctx, "def hello_world; p :hello; end");
     ruby_typer::parser::parse_ruby(ctx, "class A; class B; end; end");
     ruby_typer::parser::parse_ruby(ctx, "class A::B; module B; end; end");
+}
+
+struct DedentTest {
+    int level;
+    std::string in;
+    std::string out;
+};
+
+TEST(ParserTest, TestDedent) {
+    std::vector<DedentTest> cases = {
+        {2, "    hi", "  hi"},
+        {10, "  \t    hi", "  hi"},
+        {2, "  a\n   b\n  c\n", "a\n   b\n  c\n"},
+    };
+    for (auto &tc : cases) {
+        ruby_typer::parser::Dedenter dedent(tc.level);
+        std::string got = dedent.dedent(tc.in);
+        EXPECT_EQ(got, tc.out);
+    }
 }
