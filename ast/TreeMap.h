@@ -17,72 +17,72 @@ public:
     // Not including the member will skip the branch
     // you may return the same pointer that you are given
     // caller is repsonsible to handle it
-    ClassDef *preTransformClassDef(ClassDef *original);
-    Statement *postTransformClassDef(ClassDef *original);
+    ClassDef *preTransformClassDef(Context ctx, ClassDef *original);
+    Statement *postTransformClassDef(Context ctx, ClassDef *original);
 
-    MethodDef *preTransformMethodDef(MethodDef *original);
-    Statement *postTransformMethodDef(MethodDef *original);
+    MethodDef *preTransformMethodDef(Context ctx, MethodDef *original);
+    Statement *postTransformMethodDef(Context ctx, MethodDef *original);
 
-    If *preTransformIf(If *original);
-    Statement *postTransformIf(If *original);
+    If *preTransformIf(Context ctx, If *original);
+    Statement *postTransformIf(Context ctx, If *original);
 
-    While *preTransformWhile(While *original);
-    Statement *postTransformWhile(While *original);
+    While *preTransformWhile(Context ctx, While *original);
+    Statement *postTransformWhile(Context ctx, While *original);
 
-    For *preTransformFor(For *original);
-    Statement *postTransformFor(For *original);
+    For *preTransformFor(Context ctx, For *original);
+    Statement *postTransformFor(Context ctx, For *original);
 
-    Statement *postTransformBreak(Break *original);
+    Statement *postTransformBreak(Context ctx, Break *original);
 
-    Statement *postTransformNext(Next *original);
+    Statement *postTransformNext(Context ctx, Next *original);
 
-    Return *preTransformReturn(Return *original);
-    Statement *postTransformReturn(Return *original);
+    Return *preTransformReturn(Context ctx, Return *original);
+    Statement *postTransformReturn(Context ctx, Return *original);
 
-    Rescue *preTransformRescue(Rescue *original);
-    Statement *postTransformRescue(Rescue *original);
+    Rescue *preTransformRescue(Context ctx, Rescue *original);
+    Statement *postTransformRescue(Context ctx, Rescue *original);
 
-    Statement *postTransformIdent(Ident *original);
+    Statement *postTransformIdent(Context ctx, Ident *original);
 
-    Assign *preTransformAssign(Assign *original);
-    Statement *postTransformAssign(Assign *original);
+    Assign *preTransformAssign(Context ctx, Assign *original);
+    Statement *postTransformAssign(Context ctx, Assign *original);
 
-    Send *preTransformSend(Send *original);
-    Statement *postTransformSend(Send *original);
+    Send *preTransformSend(Context ctx, Send *original);
+    Statement *postTransformSend(Context ctx, Send *original);
 
-    New *preTransformNew(New *original);
-    Statement *postTransformNew(New *original);
+    New *preTransformNew(Context ctx, New *original);
+    Statement *postTransformNew(Context ctx, New *original);
 
-    NamedArg *preTransformNamedArg(NamedArg *original);
-    Statement *postTransformNamedArg(NamedArg *original);
+    NamedArg *preTransformNamedArg(Context ctx, NamedArg *original);
+    Statement *postTransformNamedArg(Context ctx, NamedArg *original);
 
-    Hash *preTransformHash(Hash *original);
-    Statement *postTransformHash(Hash *original);
+    Hash *preTransformHash(Context ctx, Hash *original);
+    Statement *postTransformHash(Context ctx, Hash *original);
 
-    Array *preTransformArray(Array *original);
-    Statement *postransformArray(Array *original);
+    Array *preTransformArray(Context ctx, Array *original);
+    Statement *postransformArray(Context ctx, Array *original);
 
-    Statement *postTransformFloatLit(FloatLit *original);
+    Statement *postTransformFloatLit(Context ctx, FloatLit *original);
 
-    Statement *postTransformIntLit(IntLit *original);
+    Statement *postTransformIntLit(Context ctx, IntLit *original);
 
-    Statement *postTransformStringLit(StringLit *original);
+    Statement *postTransformStringLit(Context ctx, StringLit *original);
 
-    Statement *postTransformConstantLit(ConstantLit *original);
+    Statement *postTransformConstantLit(Context ctx, ConstantLit *original);
 
-    ArraySplat *preTransformArraySplat(ArraySplat *original);
-    Statement *postTransformArraySplat(ArraySplat *original);
+    ArraySplat *preTransformArraySplat(Context ctx, ArraySplat *original);
+    Statement *postTransformArraySplat(Context ctx, ArraySplat *original);
 
-    HashSplat *preTransformHashSplat(HashSplat *original);
-    Statement *postTransformHashSplat(HashSplat *original);
+    HashSplat *preTransformHashSplat(Context ctx, HashSplat *original);
+    Statement *postTransformHashSplat(Context ctx, HashSplat *original);
 
-    Statement *postTransformSelf(Self *original);
+    Statement *postTransformSelf(Context ctx, Self *original);
 
-    Block *preTransformBlock(Block *original);
-    Statement *postTransformBlock(Block *original);
+    Block *preTransformBlock(Context ctx, Block *original);
+    Statement *postTransformBlock(Context ctx, Block *original);
 
-    InsSeq *preTransformInsSeq(InsSeq *original);
-    Statement *postTransformInsSeq(InsSeq *original);
+    InsSeq *preTransformInsSeq(Context ctx, InsSeq *original);
+    Statement *postTransformInsSeq(Context ctx, InsSeq *original);
 };
 
 /**
