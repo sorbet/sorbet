@@ -151,7 +151,7 @@ lexer::lexer(diagnostics_t &diag, ruby_version version, const std::string& sourc
 }
 
 void lexer::check_stack_capacity() {
-    if (stack.size() == (uint)top) {
+    if (stack.size() == (size_t)top) {
     stack.resize(stack.size() * 2);
   }
 }
@@ -204,7 +204,7 @@ char lexer::unescape(uint32_t codepoint) {
     }
 }
 
-static const lexer::token_table PUNCTUATION = {
+static const lexer::token_table_entry PUNCTUATION[] = {
   { "=", token_type::tEQL },
   { "&", token_type::tAMPER2 },
   { "|", token_type::tPIPE },
@@ -255,9 +255,10 @@ static const lexer::token_table PUNCTUATION = {
   { "`", token_type::tBACK_REF2 },
   { "!@", token_type::tBANG },
   { "&.", token_type::tANDDOT },
+  { NULL, token_type::error },
 };
 
-static const lexer::token_table PUNCTUATION_BEGIN = {
+static const lexer::token_table_entry PUNCTUATION_BEGIN[] = {
   { "&", token_type::tAMPER },
   { "*", token_type::tSTAR },
   { "**", token_type::tDSTAR },
@@ -267,9 +268,10 @@ static const lexer::token_table PUNCTUATION_BEGIN = {
   { "(", token_type::tLPAREN },
   { "{", token_type::tLBRACE },
   { "[", token_type::tLBRACK },
+  { NULL, token_type::error },
 };
 
-static const lexer::token_table KEYWORDS = {
+static const lexer::token_table_entry KEYWORDS[] = {
   { "if", token_type::kIF_MOD },
   { "unless", token_type::kUNLESS_MOD },
   { "while", token_type::kWHILE_MOD },
@@ -311,9 +313,10 @@ static const lexer::token_table KEYWORDS = {
   { "__FILE__", token_type::k__FILE__ },
   { "__LINE__", token_type::k__LINE__ },
   { "__ENCODING__", token_type::k__ENCODING__ },
+  { NULL, token_type::error },
 };
 
-static const lexer::token_table KEYWORDS_BEGIN = {
+static const lexer::token_table_entry KEYWORDS_BEGIN[] = {
   { "if", token_type::kIF },
   { "unless", token_type::kUNLESS },
   { "while", token_type::kWHILE },
@@ -353,6 +356,7 @@ static const lexer::token_table KEYWORDS_BEGIN = {
   { "__FILE__", token_type::k__FILE__ },
   { "__LINE__", token_type::k__LINE__ },
   { "__ENCODING__", token_type::k__ENCODING__ },
+  { NULL, token_type::error },
 };
 
 static size_t utf8_encode_char(int32_t uc, std::string &dst) {
@@ -483,9 +487,17 @@ void lexer::emit_do(bool do_block) {
   }
 }
 
-void lexer::emit_table(const token_table& table) {
+void lexer::emit_table(const token_table_entry* table) {
   auto value = tok();
-  emit(table.at(value), value);
+
+  for (; table->token; ++table) {
+    if (value == table->token) {
+      emit(table->type, value);
+      return;
+    }
+  }
+
+  abort();
 }
 
 void lexer::emit_num(const std::string& num) {
@@ -1051,7 +1063,7 @@ void lexer::set_state_expr_value() {
     if (current_literal.heredoc()) {
       auto line = tok(herebody_s, ts);
 
-      while (line.back() == '\r') {
+      while (!line.empty() && line.back() == '\r') {
         line.pop_back();
       }
 
@@ -2002,17 +2014,22 @@ void lexer::set_state_expr_value() {
 
       '?' c_space_nl
       => {
-        static const std::map<char, std::string> escape_map {
+        static const struct escape_map_ent { char c; const char* s; } escape_map[] {
           { ' ',  "\\s" },
           { '\r', "\\r" },
           { '\n', "\\n" },
           { '\t', "\\t" },
           { '\v', "\\v" },
           { '\f', "\\f" },
+          { 0, 0 },
         };
 
-        auto& escape = escape_map.at(ts[1]);
-        diagnostic_(dlevel::WARNING, dclass::InvalidEscapeUse, escape);
+        for (const struct escape_map_ent* ent = escape_map; ent->c; ++ent) {
+          if (ts[1] == ent->c) {
+            diagnostic_(dlevel::WARNING, dclass::InvalidEscapeUse, ent->s);
+            break;
+          }
+        }
 
         p = ts - 1;
         fgoto expr_end;

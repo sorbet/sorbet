@@ -32,8 +32,3 @@ size_t token::end() const {
 const std::string& token::string() const {
   return _string;
 }
-
-std::ostream& operator<<(std::ostream& os, const token& tok) {
-  os << tok.type_name() << "(" << tok.string() << ")";
-  return os;
-}

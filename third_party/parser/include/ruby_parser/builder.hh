@@ -134,6 +134,7 @@ struct builder {
 	foreign_ptr(*tr_nil)(self_ptr builder, const token* nil);
 	foreign_ptr(*tr_nillable)(self_ptr builder, const token* tilde, foreign_ptr type_);
 	foreign_ptr(*tr_or)(self_ptr builder, foreign_ptr a, foreign_ptr b);
+	foreign_ptr(*tr_paren)(self_ptr builder, const token* begin, foreign_ptr node, const token* end);
 	foreign_ptr(*tr_proc)(self_ptr builder, const token* begin, foreign_ptr args, const token* end);
 	foreign_ptr(*tr_prototype)(self_ptr builder, foreign_ptr genargs, foreign_ptr args, foreign_ptr return_type);
 	foreign_ptr(*tr_returnsig)(self_ptr builder, const token* arrow, foreign_ptr ret);
