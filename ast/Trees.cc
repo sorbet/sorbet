@@ -350,9 +350,14 @@ string Symbol::toString(ContextBase &ctx, int tabs) {
     return ":" + this->name.name(ctx).toString(ctx);
 }
 
-string NotSupported::toString(ContextBase &ctx, int tabs) {
-    return "<Not Supported (" + why + ")>";
+
+std::string NotSupported::toString(ContextBase &ctx, int tabs) {
+    return nodeName();
 }
+
+std::string NotSupported::nodeName() {
+        return "<Not Supported (" + why + ")>";
+    }
 
 std::string Rescue::nodeName() {
     return "Rescue";
