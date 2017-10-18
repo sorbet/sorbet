@@ -45,6 +45,12 @@ static UTF8Desc unaryPlus_DESC{(char *)unaryPlus, (int)std::strlen(unaryPlus)};
 static const char *unaryMinus = "-@";
 static UTF8Desc unaryMinus_DESC{(char *)unaryMinus, (int)std::strlen(unaryMinus)};
 
+static const char *star = "*";
+static UTF8Desc star_DESC{(char *)star, (int)std::strlen(star)};
+
+static const char *starStar = "**";
+static UTF8Desc starStar_DESC{(char *)starStar, (int)std::strlen(starStar)};
+
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)std::strlen(no_symbol_str)};
 
@@ -98,6 +104,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     auto squareBracketsEq_id = enterNameUTF8(squareBracketsEq_DESC);
     auto unaryPlus_id = enterNameUTF8(unaryPlus_DESC);
     auto unaryMinus_id = enterNameUTF8(unaryMinus_DESC);
+    auto star_id = enterNameUTF8(star_DESC);
+    auto starStar_id = enterNameUTF8(starStar_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -110,6 +118,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     DEBUG_ONLY(Error::check(squareBracketsEq_id == Names::squareBracketsEq()));
     DEBUG_ONLY(Error::check(unaryPlus_id == Names::unaryPlus()));
     DEBUG_ONLY(Error::check(unaryMinus_id == Names::unaryMinus()));
+    DEBUG_ONLY(Error::check(star_id == Names::star()));
+    DEBUG_ONLY(Error::check(starStar_id == Names::starStar()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -276,7 +286,8 @@ void ContextBase::expandNames() {
     names_by_hash.swap(new_names_by_hash);
 }
 
-NameRef ContextBase::enterNameUnique(UniqueNameKind uniqueNameKind, u2 num, NameRef original) {
+NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original) {
+    u2 num = freshNameId++;
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
     unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
@@ -341,7 +352,7 @@ SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
 }
 
 SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
-    auto tempName = this->enterNameUnique(kind, freshNameId++, name);
+    auto tempName = this->freshNameUnique(kind, name);
     std::vector<SymbolRef> empty;
     return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
 }

@@ -108,6 +108,7 @@ struct RawName {
 CheckSize(RawName, 16, 8);
 
 enum UniqueNameKind : u2 {
+    Parser,
     Desugar,
 };
 
@@ -166,6 +167,16 @@ public:
     // @-
     static inline NameRef unaryMinus() {
         return NameRef(11);
+    }
+
+    // *
+    static inline NameRef star() {
+        return NameRef(12);
+    }
+
+    // **
+    static inline NameRef starStar() {
+        return NameRef(13);
     }
 };
 

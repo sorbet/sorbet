@@ -628,7 +628,16 @@ public:
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
-        return make_unique<Kwrestarg>(loc_join(tok_loc(dstar), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
+        Loc loc = tok_loc(dstar);
+        NameRef nm;
+
+        if (name != nullptr) {
+            loc = loc_join(loc, tok_loc(name));
+            nm = ctx_.enterNameUTF8(name->string());
+        } else {
+            nm = ctx_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::starStar());
+        }
+        return make_unique<Kwrestarg>(loc, nm);
     }
 
     unique_ptr<Node> kwsplat(const token *dstar, unique_ptr<Node> arg) {
@@ -811,7 +820,16 @@ public:
     }
 
     unique_ptr<Node> restarg(const token *star, const token *name) {
-        return make_unique<Restarg>(loc_join(tok_loc(star), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
+        Loc loc = tok_loc(star);
+        NameRef nm;
+
+        if (name != nullptr) {
+            loc = loc_join(loc, tok_loc(name));
+            nm = ctx_.enterNameUTF8(name->string());
+        } else {
+            nm = ctx_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::star());
+        }
+        return make_unique<Restarg>(loc, nm);
     }
 
     unique_ptr<Node> self_(const token *tok) {
@@ -827,7 +845,8 @@ public:
     }
 
     unique_ptr<Node> splat_mlhs(const token *star, unique_ptr<Node> arg) {
-        return make_unique<SplatLhs>(loc_join(tok_loc(star), arg->loc), move(arg));
+        Loc loc = loc_join(tok_loc(star), maybe_loc(arg));
+        return make_unique<SplatLhs>(loc, move(arg));
     }
 
     unique_ptr<Node> string(const token *string_) {

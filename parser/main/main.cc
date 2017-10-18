@@ -86,6 +86,7 @@ int main(int argc, char **argv) {
     } else {
         count = files.size();
         for (auto &fileName : files) {
+            console->debug("Parsing {}...", fileName);
             parse_and_print(ctx, options, ruby_typer::File::read(fileName.c_str()));
         }
     }
