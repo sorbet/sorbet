@@ -33,7 +33,6 @@ TEST(DesugarTest, FixtureParse) {
         ruby_typer::ast::ContextBase ctx(*console);
         ruby_typer::ast::Context context(ctx, ctx.defn_root());
 
-
         SCOPED_TRACE(path);
 
         auto src = ruby_typer::File::read(path.c_str());
