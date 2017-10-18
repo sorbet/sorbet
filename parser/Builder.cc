@@ -953,6 +953,10 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
+    unique_ptr<Node> tr_paren(const token *begin, unique_ptr<Node> node, const token *end) {
+        Error::raise("Unsupported TypedRuby syntax");
+    }
+
     unique_ptr<Node> tr_proc(const token *begin, unique_ptr<Node> args, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
@@ -1597,6 +1601,10 @@ foreign_ptr tr_or(self_ptr builder, foreign_ptr a, foreign_ptr b) {
     return cast_builder(builder)->tr_or(cast_node(a), cast_node(b)).release();
 }
 
+foreign_ptr tr_paren(self_ptr builder, const token *begin, foreign_ptr node, const token *end) {
+    return cast_builder(builder)->tr_paren(begin, cast_node(node), end).release();
+}
+
 foreign_ptr tr_proc(self_ptr builder, const token *begin, foreign_ptr args, const token *end) {
     return cast_builder(builder)->tr_proc(begin, cast_node(args), end).release();
 }
@@ -1781,6 +1789,7 @@ struct ruby_parser::builder Builder::interface = {
     tr_nil,
     tr_nillable,
     tr_or,
+    tr_paren,
     tr_proc,
     tr_prototype,
     tr_returnsig,
