@@ -13,7 +13,7 @@ cd $(dirname $0)/../..
 bazel build //tools:clang-format
 
 cxx_src=(
-    $(find . -path ./third_party -prune -false -o -name '*.cxx' -o -name '*.h' -o -name '*.cc')
+    $(find . -path ./third_party -prune -false -o -name ".*" -prune -false -o -name '*.cxx' -o -name '*.h' -o -name '*.cc' )
 )
 misformatted=()
 
