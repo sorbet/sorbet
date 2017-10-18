@@ -47,7 +47,7 @@ package(default_visibility = ["//visibility:public"])
     native.new_http_archive(
         name="clang_5_0_0_darwin",
         url="http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-apple-darwin.tar.xz",
-        build_file="//clang.BUILD",
+        build_file="//:clang.BUILD",
         sha256="326be172ccb61210c9ae5dced27204977e249ec6589521cc30f82fd0904b0671",
         type="tar.xz",
         strip_prefix="clang+llvm-5.0.0-x86_64-apple-darwin/",
