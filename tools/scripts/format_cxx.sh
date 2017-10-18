@@ -10,6 +10,8 @@ fi
 
 cd $(dirname $0)/../..
 
+bazel build //tools:clang-format
+
 cxx_src=(
     $(find . -path ./third_party -prune -false -o -name '*.cxx' -o -name '*.h' -o -name '*.cc')
 )
@@ -27,7 +29,7 @@ trap cleanup EXIT
 #clang-format -style=file -dump-config
 
 for src in "${cxx_src[@]}"; do
-    clang-format -style=file "$src" > "$src.formatted"
+    bazel-bin/tools/clang-format -style=file "$src" > "$src.formatted"
     if ! cmp -s "$src" "$src.formatted"; then
         misformatted=("${misformatted[@]}" "$src")
         if [ "$mode" = "fix" ]; then
