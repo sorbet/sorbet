@@ -78,7 +78,7 @@ static UTF8Desc retunTemp_DESC{(char *)returnTemp, (int)std::strlen(returnTemp)}
 static const char *statTemp = "statTemp";
 static UTF8Desc statTemp_DESC{(char *)statTemp, (int)std::strlen(statTemp)};
 
-static const char *assignTemp = "statTemp";
+static const char *assignTemp = "assignTemp";
 static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)std::strlen(assignTemp)};
 
 static const char *no_symbol_str = "<none>";
