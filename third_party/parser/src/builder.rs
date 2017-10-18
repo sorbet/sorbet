@@ -1469,6 +1469,10 @@ impl<'a> Builder<'a> {
         Node::TyOr(a.loc().join(b.loc()), a, b)
     }
 
+    pub fn tr_paren(&self, begin: Option<Token>, inner: Option<Rc<Node>>, end: Option<Token>) -> Node {
+        Node::TyParen(self.tok_join(&begin, &end), inner.unwrap())
+    }
+
     pub fn tr_proc(&self, begin: Option<Token>, args: Option<Rc<Node>>, end: Option<Token>) -> Node {
         let args = args.unwrap();
         Node::TyProc(self.tok_join(&begin, &end), args)

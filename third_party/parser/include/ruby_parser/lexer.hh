@@ -29,7 +29,10 @@ namespace ruby_parser {
   class lexer {
   public:
     using environment = std::set<std::string>;
-    using token_table = std::map<std::string, token_type>;
+    struct token_table_entry {
+        const char* token;
+        token_type type;
+    };
 
     enum class num_xfrm_type {
       NONE,
@@ -105,7 +108,7 @@ namespace ruby_parser {
     void emit(token_type type, const std::string& str);
     void emit(token_type type, const std::string& str, const char* start, const char* end);
     void emit_do(bool do_block = false);
-    void emit_table(const token_table& table);
+    void emit_table(const token_table_entry* table);
     void emit_num(const std::string& num);
     diagnostic::range range(const char *start, const char *end);
     void diagnostic_(dlevel level, dclass type, const std::string &data = "");

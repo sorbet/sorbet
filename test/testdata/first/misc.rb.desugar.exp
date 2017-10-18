@@ -20,13 +20,57 @@ begin
   <Not Supported (DefS)>
   <Not Supported (SClass)>
   begin
-    ||$0 = true
-    if ||$0
-      ||$0
+    ||$2 = true
+    if ||$2
+      ||$2
     else 
       false
     end
   end
   <Not Supported (For)>
   <Not Supported (While)>
+  x<todo lvar sym>.[]=(0)
+  <Not Supported (Break)>
+  <Not Supported (Break)>
+  <Not Supported (Break)>
+  <Not Supported (Defined)>
+  <Not Supported (ZSuper)>
+  def foo<<todo sym>>(<Not Supported (Kwarg)>, <Not Supported (Kwoptarg)>, <Not Supported (Kwrestarg)>)
+    <emtpyTree>
+  <Not Supported (Hash)>
+  <Not Supported (LineLiteral)>
+  <Not Supported (While)>
+  <Not Supported (WhilePost)>
+  <Not Supported (Until)>
+  <Not Supported (UntilPost)>
+  <Not Supported (Masgn)>
+  <Not Supported (NthRef)>
+  def foo<<todo sym>>(<Not Supported (Optarg)>, <Not Supported (Restarg)>)
+    <emtpyTree>
+  <Not Supported (Hash)>
+  <Not Supported (Preexe)>
+  <Not Supported (Postexe)>
+  <Not Supported (Rational)>
+  <Not Supported (Complex)>
+  <Not Supported (Kwbegin)>
+  <Not Supported (Masgn)>
+  <Not Supported (DSymbol)>
+  [:sym]
+  if x<todo lvar sym>
+    1
+  else 
+    7
+  end
+  <Not Supported (Undef)>
+  ["a", "b"]
+  ["a".to_s(), "b".to_s()]
+  <Not Supported (XString)>
+  <emtpyTree>.proc() do |<Not Supported (Shadowarg)>|
+    <emtpyTree>
+  end
+  <Not Supported (Break)>
+  def foo<<todo sym>>(<Not Supported (Restarg)>)
+    <emtpyTree>
+  def foo<<todo sym>>(<Not Supported (Kwrestarg)>)
+    <emtpyTree>
 end

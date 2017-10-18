@@ -953,6 +953,12 @@ impl Sexp for Node {
                 let _ = builder.field(__self_2);
                 builder.finish()
             }
+            (&Node::TyParen(ref __self_0, ref __self_1),) => {
+                let mut builder = __arg_0.new_node("ty-paren");
+                let _ = builder.field(__self_0);
+                let _ = builder.field(__self_1);
+                builder.finish()
+            }
             (&Node::TyProc(ref __self_0, ref __self_1),) => {
                 let mut builder = __arg_0.new_node("ty-proc");
                 let _ = builder.field(__self_0);

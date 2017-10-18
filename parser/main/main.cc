@@ -11,6 +11,12 @@
 namespace spd = spdlog;
 using namespace std;
 
+struct stats {
+    unsigned int files;
+    unsigned int lines;
+    unsigned long bytes;
+};
+
 void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const std::string &src) {
     auto r = ruby_typer::parser::parse_ruby(ctx, src);
     auto ast = r.ast();
@@ -78,21 +84,29 @@ int main(int argc, char **argv) {
 
     ruby_typer::ast::ContextBase ctx(*console);
 
+    stats st;
     clock_t begin = clock();
-    int count = 0;
     if (options.count("e")) {
-        count = 1;
-        parse_and_print(ctx, options, options["e"].as<string>());
+        string src = options["e"].as<string>();
+        st.files++;
+        st.lines++;
+        st.bytes += src.size();
+        parse_and_print(ctx, options, src);
     } else {
-        count = files.size();
+        st.files = files.size();
         for (auto &fileName : files) {
-            parse_and_print(ctx, options, ruby_typer::File::read(fileName.c_str()));
+            console->debug("Parsing {}...", fileName);
+            string src = ruby_typer::File::read(fileName.c_str());
+            st.bytes += src.size();
+            st.lines += std::count(src.begin(), src.end(), '\n');
+            parse_and_print(ctx, options, src);
         }
     }
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
 
-    console_err->info("Total {} files. Done in {} ms, nt size: {}, st size: {}\n", count, elapsed_secs, -1, -1);
+    console_err->info("Total {} files. Done in {} ms, lines: {}, bytes: {}\n", st.files, elapsed_secs, st.lines,
+                      st.bytes);
 
     return 0;
 }

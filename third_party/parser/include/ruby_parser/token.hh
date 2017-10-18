@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <string>
 #include <memory>
-#include <iostream>
 
 // these token values are mirrored in src/grammars/*.y
 // any changes *must* be applied to the grammars as well.
@@ -179,8 +178,6 @@ namespace ruby_parser {
     size_t start() const;
     size_t end() const;
     const std::string& string() const;
-
-    friend std::ostream& operator<<(std::ostream& os, const token& tok);
   };
 
   using token_t = token*;

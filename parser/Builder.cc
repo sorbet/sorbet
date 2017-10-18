@@ -1,4 +1,5 @@
 #include "parser/Builder.h"
+#include "parser/Dedenter.h"
 #include "parser/parser.h"
 
 #include "ruby_parser/builder.hh"
@@ -14,13 +15,41 @@ using ruby_parser::token;
 using ruby_typer::ast::ContextBase;
 using ruby_typer::ast::UTF8Desc;
 using std::make_unique;
+using std::string;
 using std::unique_ptr;
-using std::unique_ptr;
-using std::vector;
 using std::vector;
 
 namespace ruby_typer {
 namespace parser {
+
+string Dedenter::dedent(const string &str) {
+    string out;
+    for (auto ch : str) {
+        if (spaces_to_remove > 0) {
+            switch (ch) {
+                case ' ':
+                    spaces_to_remove--;
+                    break;
+                case '\n':
+                    spaces_to_remove = dedent_level;
+                    break;
+                case '\t': {
+                    int indent = dedent_level - spaces_to_remove;
+                    spaces_to_remove -= (8 - indent % 8);
+                    break;
+                }
+                default:
+                    Error::raise("unexpected whitespace: '", ch, "'");
+            }
+        } else {
+            out.push_back(ch);
+        }
+    }
+    if (!out.empty() && out.back() == '\n') {
+        spaces_to_remove = dedent_level;
+    }
+    return out;
+}
 
 class Builder::Impl {
 public:
@@ -428,9 +457,33 @@ public:
     }
 
     unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedent_level) {
-        // TODO: implement dedenting for dedent_level != 0
-        Error::check(dedent_level == 0);
-        return node;
+        if (dedent_level == 0)
+            return node;
+
+        Dedenter dedenter(dedent_level);
+        unique_ptr<Node> result;
+
+        typecase(node.get(),
+
+                 [&](String *s) {
+                     std::string dedented = dedenter.dedent(s->val.name(ctx_).toString(ctx_));
+                     result = make_unique<String>(s->loc, ctx_.enterNameUTF8(dedented));
+                 },
+
+                 [&](DString *d) {
+                     for (auto &p : d->nodes) {
+                         if (String *s = dynamic_cast<String *>(p.get())) {
+                             std::string dedented = dedenter.dedent(s->val.name(ctx_).toString(ctx_));
+                             unique_ptr<Node> newstr = make_unique<String>(s->loc, ctx_.enterNameUTF8(dedented));
+                             p.swap(newstr);
+                         }
+                     }
+                     result = move(node);
+                 },
+
+                 [&](Node *n) { Error::raise("Unexpected dedent node: ", n->nodeName()); });
+
+        return result;
     }
 
     unique_ptr<Node> def_class(const token *class_, unique_ptr<Node> name, const token *lt_,
@@ -575,7 +628,16 @@ public:
     }
 
     unique_ptr<Node> kwrestarg(const token *dstar, const token *name) {
-        return make_unique<Kwrestarg>(loc_join(tok_loc(dstar), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
+        Loc loc = tok_loc(dstar);
+        NameRef nm;
+
+        if (name != nullptr) {
+            loc = loc_join(loc, tok_loc(name));
+            nm = ctx_.enterNameUTF8(name->string());
+        } else {
+            nm = ctx_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::starStar());
+        }
+        return make_unique<Kwrestarg>(loc, nm);
     }
 
     unique_ptr<Node> kwsplat(const token *dstar, unique_ptr<Node> arg) {
@@ -758,7 +820,16 @@ public:
     }
 
     unique_ptr<Node> restarg(const token *star, const token *name) {
-        return make_unique<Restarg>(loc_join(tok_loc(star), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
+        Loc loc = tok_loc(star);
+        NameRef nm;
+
+        if (name != nullptr) {
+            loc = loc_join(loc, tok_loc(name));
+            nm = ctx_.enterNameUTF8(name->string());
+        } else {
+            nm = ctx_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::star());
+        }
+        return make_unique<Restarg>(loc, nm);
     }
 
     unique_ptr<Node> self_(const token *tok) {
@@ -774,7 +845,8 @@ public:
     }
 
     unique_ptr<Node> splat_mlhs(const token *star, unique_ptr<Node> arg) {
-        return make_unique<SplatLhs>(loc_join(tok_loc(star), arg->loc), move(arg));
+        Loc loc = loc_join(tok_loc(star), maybe_loc(arg));
+        return make_unique<SplatLhs>(loc, move(arg));
     }
 
     unique_ptr<Node> string(const token *string_) {
@@ -897,6 +969,10 @@ public:
     }
 
     unique_ptr<Node> tr_or(unique_ptr<Node> a, unique_ptr<Node> b) {
+        Error::raise("Unsupported TypedRuby syntax");
+    }
+
+    unique_ptr<Node> tr_paren(const token *begin, unique_ptr<Node> node, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
@@ -1428,7 +1504,7 @@ foreign_ptr splat_mlhs(self_ptr builder, const token *star, foreign_ptr arg) {
     return cast_builder(builder)->splat_mlhs(star, cast_node(arg)).release();
 }
 
-foreign_ptr string(self_ptr builder, const token *string_) {
+foreign_ptr string_(self_ptr builder, const token *string_) {
     return cast_builder(builder)->string(string_).release();
 }
 
@@ -1542,6 +1618,10 @@ foreign_ptr tr_nillable(self_ptr builder, const token *tilde, foreign_ptr type_)
 
 foreign_ptr tr_or(self_ptr builder, foreign_ptr a, foreign_ptr b) {
     return cast_builder(builder)->tr_or(cast_node(a), cast_node(b)).release();
+}
+
+foreign_ptr tr_paren(self_ptr builder, const token *begin, foreign_ptr node, const token *end) {
+    return cast_builder(builder)->tr_paren(begin, cast_node(node), end).release();
 }
 
 foreign_ptr tr_proc(self_ptr builder, const token *begin, foreign_ptr args, const token *end) {
@@ -1702,7 +1782,7 @@ struct ruby_parser::builder Builder::interface = {
     shadowarg,
     splat,
     splat_mlhs,
-    string,
+    string_,
     string_compose,
     string_internal,
     symbol,
@@ -1728,6 +1808,7 @@ struct ruby_parser::builder Builder::interface = {
     tr_nil,
     tr_nillable,
     tr_or,
+    tr_paren,
     tr_proc,
     tr_prototype,
     tr_returnsig,
