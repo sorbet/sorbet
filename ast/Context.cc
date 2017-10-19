@@ -394,8 +394,7 @@ unsigned int ContextBase::namesUsed() {
 std::string ContextBase::toString() {
     std::ostringstream os;
     for (auto element: classes) {
-        os << "NameRef: " << element.first.toString(*this) << std::endl;
-        os << "SymbolRef: " << element.second.toString(*this) << std::endl;
+        os << element.second.toString(*this);
     }
     return os.str();
 }

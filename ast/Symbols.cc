@@ -31,17 +31,23 @@ bool SymbolRef::isSynthetic() const {
     return this->_id <= ContextBase::defn_last_synthetic_sym()._id;
 }
 
-std::string SymbolRef::toString(ContextBase &ctx) const {
+void printTabs(std::ostringstream &to, int count) {
+    int i = 0;
+    while (i < count) {
+        to << "  ";
+        i++;
+    }
+}
+
+std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     std::ostringstream os;
     auto myInfo = info(ctx, true);
     auto name = myInfo.name.toString(ctx);
     auto members = myInfo.members;
-    os << name;
-    if (members.size() > 0) {
-        os << " with children:" << std::endl;
-        for (auto pair: members) {
-            os << pair.second.toString(ctx);
-        }
+    printTabs(os, tabs);
+    os << name << std::endl;
+    for (auto pair: members) {
+        os << pair.second.toString(ctx, tabs + 1);
     }
     return os.str();
 }
