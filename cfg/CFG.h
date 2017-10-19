@@ -166,7 +166,12 @@ public:
 
 class Binding {
 public:
+    /**
+     * This is inefficient as it pollutes global symbol table and in the future (when we start working on perfromance)
+     * we should consider using references to instructions similarly to how LuaJIT does it.
+     */
     ast::SymbolRef bind;
+
     std::unique_ptr<Instruction> value;
 
     Binding(const ast::SymbolRef &bind, std::unique_ptr<Instruction> value);
@@ -185,7 +190,10 @@ public:
 };
 
 class CFG {
-
+    /**
+     * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
+     * because they all have lifetime identical with each other and the CFG.
+     */
 public:
     ast::SymbolRef symbol;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;

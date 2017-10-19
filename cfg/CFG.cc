@@ -191,9 +191,9 @@ string CFG::toString(ast::Context ctx) {
         auto text = this->basicBlocks[i]->toString(ctx);
         buf << "    bb" << i << " [label = \"" << text << "\"];" << endl;
         auto thenI = find_if(this->basicBlocks.begin(), this->basicBlocks.end(),
-                                  [&](auto &a) { return a.get() == this->basicBlocks[i]->bexit.thenb; });
+                             [&](auto &a) { return a.get() == this->basicBlocks[i]->bexit.thenb; });
         auto elseI = find_if(this->basicBlocks.begin(), this->basicBlocks.end(),
-                                  [&](auto &a) { return a.get() == this->basicBlocks[i]->bexit.elseb; });
+                             [&](auto &a) { return a.get() == this->basicBlocks[i]->bexit.elseb; });
         buf << "    bb" << i << " -> bb" << thenI - this->basicBlocks.begin() << ";" << endl;
         if (this->basicBlocks[i]->bexit.cond != ctx.state.defn_cfg_always() &&
             this->basicBlocks[i]->bexit.cond != ctx.state.defn_cfg_never()) {
@@ -214,8 +214,7 @@ string BasicBlock::toString(ast::Context ctx) {
     return buf.str();
 }
 
-Binding::Binding(const ast::SymbolRef &bind, unique_ptr<Instruction> value)
-    : bind(bind), value(move(value)) {}
+Binding::Binding(const ast::SymbolRef &bind, unique_ptr<Instruction> value) : bind(bind), value(move(value)) {}
 
 Return::Return(const ast::SymbolRef &what) : what(what) {}
 
