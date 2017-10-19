@@ -16,6 +16,7 @@ using ruby_typer::ast::ContextBase;
 using ruby_typer::ast::UTF8Desc;
 using std::make_unique;
 using std::string;
+using std::type_info;
 using std::unique_ptr;
 using std::vector;
 
@@ -317,7 +318,7 @@ public:
         }
 
         Node &n = *method_call;
-        const std::type_info &ty = typeid(n);
+        const type_info &ty = typeid(n);
         if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper) ||
             ty == typeid(Lambda)) {
             return make_unique<Block>(loc_join(method_call->loc, tok_loc(end)), move(method_call), move(args),
@@ -732,7 +733,7 @@ public:
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
-        return make_unique<NthRef>(tok_loc(tok), std::atoi(tok->string().c_str()));
+        return make_unique<NthRef>(tok_loc(tok), atoi(tok->string().c_str()));
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {

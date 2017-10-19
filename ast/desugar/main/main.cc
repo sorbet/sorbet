@@ -13,7 +13,7 @@
 namespace spd = spdlog;
 using namespace std;
 
-void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const std::string &src) {
+void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &src) {
     auto r = ruby_typer::parser::parse_ruby(ctx, src);
     auto ast = r.ast();
     if (r.diagnostics().size() > 0) {
@@ -39,20 +39,20 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
 }
 
 int main(int argc, char **argv) {
-    std::vector<std::string> files;
+    vector<string> files;
     //    spd::set_async_mode(1024);
-    auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_st>();
+    auto color_sink = make_shared<spdlog::sinks::ansicolor_stdout_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
-    std::shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
-    std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
+    shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
+    shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
 
     cxxopts::Options options("parse_ruby", "Parse ruby code and print it");
     options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
     options.add_options()("q,quiet", "Be quiet");
-    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
-    options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
+    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
+    options.add_options()("files", "Input files", cxxopts::value<vector<string>>(files));
     options.parse_positional("files");
 
     try {

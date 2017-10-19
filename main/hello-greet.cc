@@ -1,6 +1,8 @@
 #include "main/hello-greet.h"
 #include <string>
 
-std::string get_greet(const std::string &who) {
+using namespace std;
+
+string get_greet(const string &who) {
     return "Hello " + who;
 }
