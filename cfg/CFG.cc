@@ -223,11 +223,11 @@ string Return::toString(ast::Context ctx) {
     return "return " + this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-New::New(const ast::SymbolRef &claz, vector<ast::SymbolRef> &args) : claz(claz), args(move(args)) {}
+New::New(const ast::SymbolRef &claz, vector<ast::SymbolRef> &args) : klass(klass), args(move(args)) {}
 
 string New::toString(ast::Context ctx) {
     stringstream buf;
-    buf << "new " << this->claz.info(ctx).name.name(ctx).toString(ctx) << "(";
+    buf << "new " << this->klass.info(ctx).name.name(ctx).toString(ctx) << "(";
     bool isFirst = true;
     for (auto arg : this->args) {
         if (!isFirst) {

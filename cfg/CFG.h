@@ -51,10 +51,10 @@ public:
 
 class New : public Instruction {
 public:
-    ast::SymbolRef claz;
+    ast::SymbolRef klass;
     std::vector<ast::SymbolRef> args;
 
-    New(const ast::SymbolRef &claz, std::vector<ast::SymbolRef> &args);
+    New(const ast::SymbolRef &klass, std::vector<ast::SymbolRef> &args);
     virtual std::string toString(ast::Context ctx);
 };
 
@@ -142,9 +142,9 @@ public:
 
 class Self : public Instruction {
 public:
-    ast::SymbolRef claz;
+    ast::SymbolRef klass;
 
-    Self(ast::SymbolRef claz) : claz(claz){};
+    Self(ast::SymbolRef klass) : klass(klass){};
     virtual std::string toString(ast::Context ctx);
 };
 
