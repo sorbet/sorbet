@@ -32,4 +32,38 @@ digraph <todo sym> {
     bb4 -> bb1;
 }
 
+digraph <todo sym> {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "ifTmp$9 = true\nifTmp$9"];
+    bb0 -> bb2;
+    bb0 -> bb3;
+
+    bb1 [label = "<never>"];
+    bb1 -> bb1;
+    bb2 [label = "returnTmp$10 = 1\n<ret>$8 = return returnTmp$10\n<never>"];
+    bb2 -> bb1;
+    bb3 [label = "<ret>$8 = 2\n<ret>$11 = return <ret>$8\n<never>"];
+    bb3 -> bb1;
+}
+
+digraph <todo sym> {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "ifTmp$13 = true\nifTmp$13"];
+    bb0 -> bb2;
+    bb0 -> bb3;
+
+    bb1 [label = "<never>"];
+    bb1 -> bb1;
+    bb2 [label = "<ret>$12 = 1\n<always>"];
+    bb2 -> bb4;
+    bb3 [label = "returnTmp$14 = 2\n<ret>$12 = return returnTmp$14\n<never>"];
+    bb3 -> bb1;
+    bb4 [label = "<ret>$15 = return <ret>$12\n<never>"];
+    bb4 -> bb1;
+}
+
 

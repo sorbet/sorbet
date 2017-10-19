@@ -120,9 +120,15 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
             auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target);
             auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target);
             if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
-                ret = inWhat.freshBlock();
-                unconditionalJump(thenEnd, ret, inWhat);
-                unconditionalJump(elseEnd, ret, inWhat);
+                if (thenEnd == deadBlock()) {
+                    ret = elseEnd;
+                } else if (thenEnd == deadBlock()) {
+                    ret = thenEnd;
+                } else {
+                    ret = freshBlock();
+                    unconditionalJump(thenEnd, ret, inWhat);
+                    unconditionalJump(elseEnd, ret, inWhat);
+                }
             } else {
                 ret = deadBlock();
             }

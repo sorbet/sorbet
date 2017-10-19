@@ -52,6 +52,56 @@ Class {
           }
         }
       }
+      DefMethod {
+        name = return_in_one_branch1
+        args = Args {
+          args = [
+          ]
+        }
+        body = If {
+          condition = Begin {
+            stmts = [
+              True {
+              }
+            ]
+          }
+          then_ = Return {
+            exprs = [
+              Integer {
+                val = "1"
+              }
+            ]
+          }
+          else_ = Integer {
+            val = "2"
+          }
+        }
+      }
+      DefMethod {
+        name = return_in_one_branch2
+        args = Args {
+          args = [
+          ]
+        }
+        body = If {
+          condition = Begin {
+            stmts = [
+              True {
+              }
+            ]
+          }
+          then_ = Integer {
+            val = "1"
+          }
+          else_ = Return {
+            exprs = [
+              Integer {
+                val = "2"
+              }
+            ]
+          }
+        }
+      }
     ]
   }
 }
