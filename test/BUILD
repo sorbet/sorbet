@@ -13,10 +13,11 @@ cc_test(
     ]),
     deps = [
         "//namer",
+        "//ast/desugar",
+        "//cfg",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
         "@spdlog//:spdlog",
-        "//cfg:cfg"
     ],
 )
 

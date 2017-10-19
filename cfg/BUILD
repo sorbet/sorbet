@@ -17,8 +17,8 @@ cc_binary(
     ],
     linkstatic = 1,
     deps = [
-        "//ast/desugar",
         "cfg",
+        "//ast/desugar",
         "@cxxopts//:cxxopts",
         "@spdlog//:spdlog",
     ],
