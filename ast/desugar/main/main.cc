@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
     shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
 
-    cxxopts::Options options("parse_ruby", "Parse ruby code and print it");
+    cxxopts::Options options("desugar_ast", "Parse ruby code, desugar and print it");
     options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
     options.add_options()("q,quiet", "Be quiet");
