@@ -12,9 +12,9 @@ namespace spd = spdlog;
 using namespace std;
 
 struct stats {
-    unsigned int files;
-    unsigned int lines;
-    unsigned long bytes;
+    unsigned int files = 0;
+    unsigned int lines = 0;
+    unsigned long bytes = 0;
 };
 
 void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &path, const string &src) {
