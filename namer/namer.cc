@@ -5,12 +5,6 @@
 namespace ruby_typer {
 namespace namer {
 
-ast::SymbolRef enterNameSymbol(ast::Context ctx, ast::SymbolRef owner, ast::NameRef name) {
-    auto args = std::vector<ast::SymbolRef>();
-    auto result = ast::ContextBase::defn_junk();
-    return ctx.state.enterSymbol(owner, name, result, args, false);
-}
-
 /**
  * Used with TreeMap to return you a SymbolRef collapsing all the `Foo::Bar::Baz`.
  */
@@ -25,7 +19,9 @@ public:
     }
 
     ast::ConstantLit *postTransformConstantLit(ast::Context ctx, ast::ConstantLit *c) {
-        this->name = enterNameSymbol(ctx, getName(), c->cnst);
+        auto args = std::vector<ast::SymbolRef>();
+        auto result = ast::ContextBase::defn_junk();
+        this->name = ctx.state.enterSymbol(getName(), c->cnst, result, args, false);
         return c;
     }
 
