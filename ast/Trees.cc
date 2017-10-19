@@ -5,6 +5,8 @@
 template class std::unique_ptr<ruby_typer::ast::Expression>;
 template class std::unique_ptr<ruby_typer::ast::Statement>;
 
+using namespace std;
+
 namespace ruby_typer {
 namespace ast {
 
@@ -34,7 +36,7 @@ namespace ast {
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
-void printTabs(std::stringstream &to, int count) {
+void printTabs(stringstream &to, int count) {
     int i = 0;
     while (i < count) {
         to << "  ";
@@ -42,25 +44,24 @@ void printTabs(std::stringstream &to, int count) {
     }
 }
 
-ClassDef::ClassDef(SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Statement>> &rhs,
-                   ClassDefKind kind)
-    : Declaration(symbol), rhs(std::move(rhs)), name(std::move(name)), kind(kind) {}
+ClassDef::ClassDef(SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
+    : Declaration(symbol), rhs(move(rhs)), name(move(name)), kind(kind) {}
 
-MethodDef::MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
-                     std::unique_ptr<Expression> rhs, bool isSelf)
-    : Declaration(symbol), rhs(std::move(rhs)), args(std::move(args)), name(name), isSelf(isSelf) {}
+MethodDef::MethodDef(SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs,
+                     bool isSelf)
+    : Declaration(symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {}
 
 Declaration::Declaration(SymbolRef symbol) : symbol(symbol) {}
 
-ConstDef::ConstDef(SymbolRef symbol, std::unique_ptr<Expression> rhs) : Declaration(symbol), rhs(std::move(rhs)) {}
+ConstDef::ConstDef(SymbolRef symbol, unique_ptr<Expression> rhs) : Declaration(symbol), rhs(move(rhs)) {}
 
-If::If(std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp, std::unique_ptr<Expression> elsep)
-    : cond(std::move(cond)), thenp(std::move(thenp)), elsep(std::move(elsep)) {}
+If::If(unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
+    : cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
 Breakable::Breakable(u1 break_tag) : break_tag(break_tag) {}
 
-While::While(u1 break_tag, std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body)
-    : Breakable(break_tag), cond(std::move(cond)), body(std::move(body)) {}
+While::While(u1 break_tag, unique_ptr<Expression> cond, unique_ptr<Statement> body)
+    : Breakable(break_tag), cond(move(cond)), body(move(body)) {}
 
 Break::Break(u1 break_tag) : break_tag(break_tag) {}
 
@@ -68,11 +69,11 @@ Next::Next(u1 break_tag) : break_tag(break_tag) {}
 
 BoolLit::BoolLit(bool value) : value(value) {}
 
-std::string Next::toString(ContextBase &ctx, int tabs) {
+string Next::toString(ContextBase &ctx, int tabs) {
     return "next";
 }
 
-Return::Return(std::unique_ptr<Expression> expr) : expr(std::move(expr)) {}
+Return::Return(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
 Ident::Ident(SymbolRef symbol) : symbol(symbol), name(0) {
     Error::check(!symbol.isSynthetic()); // symbol is a valid symbol
@@ -82,19 +83,18 @@ Ident::Ident(NameRef name, SymbolRef symbol) : symbol(symbol), name(name) {
     Error::check(symbol.isSynthetic()); // symbol is a sentinel
 }
 
-Assign::Assign(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs)
-    : lhs(std::move(lhs)), rhs(std::move(rhs)) {}
+Assign::Assign(unique_ptr<Expression> lhs, unique_ptr<Expression> rhs) : lhs(move(lhs)), rhs(move(rhs)) {}
 
-Send::Send(std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args)
+Send::Send(unique_ptr<Expression> recv, NameRef fun, vector<unique_ptr<Expression>> &&args)
     :
 
-      recv(std::move(recv)), fun(std::move(fun)), args(std::move(args)) {}
+      recv(move(recv)), fun(move(fun)), args(move(args)) {}
 
-Super::Super(std::vector<std::unique_ptr<Expression>> &&args) : args(std::move(args)) {}
+Super::Super(vector<unique_ptr<Expression>> &&args) : args(move(args)) {}
 
-New::New(SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args) : claz(claz), args(std::move(args)) {}
+New::New(SymbolRef claz, vector<unique_ptr<Expression>> &&args) : claz(claz), args(move(args)) {}
 
-NamedArg::NamedArg(NameRef name, std::unique_ptr<Expression> arg) : name(name), arg(std::move(arg)) {}
+NamedArg::NamedArg(NameRef name, unique_ptr<Expression> arg) : name(name), arg(move(arg)) {}
 
 FloatLit::FloatLit(float value) : value(value) {}
 
@@ -102,67 +102,66 @@ IntLit::IntLit(int value) : value(value) {}
 
 StringLit::StringLit(NameRef value) : value(value) {}
 
-ConstantLit::ConstantLit(std::unique_ptr<Expression> scope, NameRef cnst) : cnst(cnst), scope(std::move(scope)) {}
+ConstantLit::ConstantLit(unique_ptr<Expression> scope, NameRef cnst) : cnst(cnst), scope(move(scope)) {}
 
-ArraySplat::ArraySplat(std::unique_ptr<Expression> arg) : arg(std::move(arg)) {}
+ArraySplat::ArraySplat(unique_ptr<Expression> arg) : arg(move(arg)) {}
 
-HashSplat::HashSplat(std::unique_ptr<Expression> arg) : arg(std::move(arg)) {}
+HashSplat::HashSplat(unique_ptr<Expression> arg) : arg(move(arg)) {}
 
 Self::Self(SymbolRef claz) : claz(claz) {}
 
-Block::Block(std::unique_ptr<Send> send, std::vector<std::unique_ptr<Expression>> &args,
-             std::unique_ptr<Expression> rhs)
-    : send(std::move(send)), rhs(std::move(rhs)), args(std::move(args)){};
+Block::Block(unique_ptr<Send> send, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs)
+    : send(move(send)), rhs(move(rhs)), args(move(args)){};
 
-NotSupported::NotSupported(const std::string &why) : why(why) {}
+NotSupported::NotSupported(const string &why) : why(why) {}
 
 Symbol::Symbol(NameRef name) : name(name) {}
 
-Array::Array(std::vector<std::unique_ptr<Expression>> &elems) : elems(std::move(elems)) {}
+Array::Array(vector<unique_ptr<Expression>> &elems) : elems(move(elems)) {}
 
-InsSeq::InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expression> expr)
-    : stats(std::move(stats)), expr(std::move(expr)) {}
+InsSeq::InsSeq(vector<unique_ptr<Statement>> &&stats, unique_ptr<Expression> expr)
+    : stats(move(stats)), expr(move(expr)) {}
 
-std::string ConstDef::toString(ContextBase &ctx, int tabs) {
+string ConstDef::toString(ContextBase &ctx, int tabs) {
     return "constdef " + this->symbol.info(ctx).name.name(ctx).toString(ctx) + " = " +
            this->rhs->toString(ctx, tabs + 1);
 }
 
-std::string ClassDef::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
+string ClassDef::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
     if (kind == ClassDefKind::Module) {
         buf << "module ";
     } else {
         buf << "class ";
     }
-    buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << ">" << std::endl;
+    buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << ">" << endl;
 
     for (auto &a : this->rhs) {
         printTabs(buf, tabs + 1);
-        buf << a->toString(ctx, tabs + 1) << std::endl << std::endl;
+        buf << a->toString(ctx, tabs + 1) << endl << endl;
     }
     printTabs(buf, tabs);
     buf << "end";
     return buf.str();
 }
 
-std::string InsSeq::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
-    buf << "begin" << std::endl;
+string InsSeq::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << "begin" << endl;
     for (auto &a : this->stats) {
         printTabs(buf, tabs + 1);
-        buf << a->toString(ctx, tabs + 1) << std::endl;
+        buf << a->toString(ctx, tabs + 1) << endl;
     }
 
     printTabs(buf, tabs + 1);
-    buf << expr->toString(ctx, tabs + 1) << std::endl;
+    buf << expr->toString(ctx, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "end";
     return buf.str();
 }
 
-std::string MethodDef::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
+string MethodDef::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
 
     if (isSelf) {
         buf << "def self.";
@@ -179,55 +178,55 @@ std::string MethodDef::toString(ContextBase &ctx, int tabs) {
         first = false;
         buf << a->toString(ctx, tabs + 1);
     }
-    buf << ")" << std::endl;
+    buf << ")" << endl;
     printTabs(buf, tabs + 1);
     buf << this->rhs->toString(ctx, tabs + 1);
     return buf.str();
 }
 
-std::string If::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
+string If::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
 
-    buf << "if " << this->cond->toString(ctx, tabs + 1) << std::endl;
+    buf << "if " << this->cond->toString(ctx, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
-    buf << this->thenp->toString(ctx, tabs + 1) << std::endl;
+    buf << this->thenp->toString(ctx, tabs + 1) << endl;
     printTabs(buf, tabs);
-    buf << "else " << std::endl;
+    buf << "else " << endl;
     printTabs(buf, tabs + 1);
-    buf << this->elsep->toString(ctx, tabs + 1) << std::endl;
-    printTabs(buf, tabs);
-    buf << "end";
-    return buf.str();
-}
-
-std::string While::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
-
-    buf << "while " << this->cond->toString(ctx, tabs + 1) << std::endl;
-    printTabs(buf, tabs + 1);
-    buf << this->body->toString(ctx, tabs + 1) << std::endl;
+    buf << this->elsep->toString(ctx, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "end";
     return buf.str();
 }
 
-std::string EmptyTree::toString(ContextBase &ctx, int tabs) {
+string While::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
+
+    buf << "while " << this->cond->toString(ctx, tabs + 1) << endl;
+    printTabs(buf, tabs + 1);
+    buf << this->body->toString(ctx, tabs + 1) << endl;
+    printTabs(buf, tabs);
+    buf << "end";
+    return buf.str();
+}
+
+string EmptyTree::toString(ContextBase &ctx, int tabs) {
     return "<emtpyTree>";
 }
 
-std::string ArraySplat::toString(ContextBase &ctx, int tabs) {
+string ArraySplat::toString(ContextBase &ctx, int tabs) {
     return "*" + this->arg->toString(ctx, tabs + 1);
 }
 
-std::string StringLit::toString(ContextBase &ctx, int tabs) {
+string StringLit::toString(ContextBase &ctx, int tabs) {
     return "\"" + this->value.name(ctx).toString(ctx) + "\"";
 }
 
-std::string ConstantLit::toString(ContextBase &ctx, int tabs) {
+string ConstantLit::toString(ContextBase &ctx, int tabs) {
     return this->scope->toString(ctx, tabs) + "::" + this->cnst.name(ctx).toString(ctx);
 }
 
-std::string Ident::toString(ContextBase &ctx, int tabs) {
+string Ident::toString(ContextBase &ctx, int tabs) {
     if (!symbol.isSynthetic()) {
         return this->symbol.info(ctx).name.name(ctx).toString(ctx);
     } else {
@@ -235,50 +234,50 @@ std::string Ident::toString(ContextBase &ctx, int tabs) {
     }
 }
 
-std::string HashSplat::toString(ContextBase &ctx, int tabs) {
+string HashSplat::toString(ContextBase &ctx, int tabs) {
     return "**" + this->arg->toString(ctx, tabs + 1);
 }
 
-std::string Return::toString(ContextBase &ctx, int tabs) {
+string Return::toString(ContextBase &ctx, int tabs) {
     return "return " + this->expr->toString(ctx, tabs + 1);
 }
 
-std::string Self::toString(ContextBase &ctx, int tabs) {
+string Self::toString(ContextBase &ctx, int tabs) {
     return "self(" + this->claz.info(ctx).name.name(ctx).toString(ctx) + ")";
 }
 
-std::string Break::toString(ContextBase &ctx, int tabs) {
+string Break::toString(ContextBase &ctx, int tabs) {
     return "break";
 }
 
-std::string IntLit::toString(ContextBase &ctx, int tabs) {
-    return std::to_string(this->value);
+string IntLit::toString(ContextBase &ctx, int tabs) {
+    return to_string(this->value);
 }
 
-std::string NamedArg::toString(ContextBase &ctx, int tabs) {
+string NamedArg::toString(ContextBase &ctx, int tabs) {
     return this->name.name(ctx).toString(ctx) + " : " + this->arg->toString(ctx, tabs + 1);
 }
 
-std::string FloatLit::toString(ContextBase &ctx, int tabs) {
-    return std::to_string(this->value);
+string FloatLit::toString(ContextBase &ctx, int tabs) {
+    return to_string(this->value);
 }
 
-std::string BoolLit::toString(ContextBase &ctx, int tabs) {
+string BoolLit::toString(ContextBase &ctx, int tabs) {
     if (this->value)
         return "true";
     else
         return "false";
 }
 
-std::string Assign::toString(ContextBase &ctx, int tabs) {
+string Assign::toString(ContextBase &ctx, int tabs) {
     return this->lhs->toString(ctx, tabs) + " = " + this->rhs->toString(ctx, tabs);
 }
 
-std::string Rescue::toString(ContextBase &ctx, int tabs) {
+string Rescue::toString(ContextBase &ctx, int tabs) {
     return "Rescue";
 }
 
-void printElems(ContextBase &ctx, std::stringstream &buf, std::vector<std::unique_ptr<Expression>> &args, int tabs) {
+void printElems(ContextBase &ctx, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
     bool first = true;
     for (auto &a : args) {
         if (!first) {
@@ -289,60 +288,60 @@ void printElems(ContextBase &ctx, std::stringstream &buf, std::vector<std::uniqu
     }
 };
 
-void printArgs(ContextBase &ctx, std::stringstream &buf, std::vector<std::unique_ptr<Expression>> &args, int tabs) {
+void printArgs(ContextBase &ctx, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
     buf << "(";
     printElems(ctx, buf, args, tabs);
     buf << ")";
 }
 
-std::string Send::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
+string Send::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
     buf << this->recv->toString(ctx, tabs) << "." << this->fun.name(ctx).toString(ctx);
     printArgs(ctx, buf, this->args, tabs);
 
     return buf.str();
 }
 
-std::string New::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
+string New::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
     buf << "new " << this->claz.info(ctx).name.name(ctx).toString(ctx);
     printArgs(ctx, buf, this->args, tabs);
     return buf.str();
 }
 
-std::string Super::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
+string Super::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
     buf << "super";
     printArgs(ctx, buf, this->args, tabs);
     return buf.str();
 }
 
-std::string Array::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
+string Array::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
     buf << "[";
     printElems(ctx, buf, this->elems, tabs);
     buf << "]";
     return buf.str();
 }
 
-std::string Block::toString(ContextBase &ctx, int tabs) {
-    std::stringstream buf;
+string Block::toString(ContextBase &ctx, int tabs) {
+    stringstream buf;
     buf << this->send->toString(ctx, tabs);
     buf << " do |";
     printElems(ctx, buf, this->args, tabs + 1);
-    buf << "|" << std::endl;
+    buf << "|" << endl;
     printTabs(buf, tabs + 1);
-    buf << this->rhs->toString(ctx, tabs + 1) << std::endl;
+    buf << this->rhs->toString(ctx, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "end";
     return buf.str();
 }
 
-std::string Symbol::toString(ContextBase &ctx, int tabs) {
+string Symbol::toString(ContextBase &ctx, int tabs) {
     return ":" + this->name.name(ctx).toString(ctx);
 }
 
-std::string NotSupported::toString(ContextBase &ctx, int tabs) {
+string NotSupported::toString(ContextBase &ctx, int tabs) {
     return "<Not Supported (" + why + ")>";
 }
 } // namespace ast

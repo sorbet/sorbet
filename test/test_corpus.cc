@@ -15,19 +15,20 @@
 #include <vector>
 
 namespace spd = spdlog;
+using namespace std;
 
 struct Expectations {
-    std::string folder;
-    std::string sourceFile;
-    std::unordered_map<std::string, std::string> expectations;
+    string folder;
+    string sourceFile;
+    unordered_map<string, string> expectations;
 };
 
-std::vector<Expectations> getInputs();
+vector<Expectations> getInputs();
 
-std::string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
-    std::string res = arg.param.folder + arg.param.sourceFile;
+string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
+    string res = arg.param.folder + arg.param.sourceFile;
     res.erase(res.size() - strlen(".rb"), strlen(".rb"));
-    std::replace(res.begin(), res.end(), '/', '_');
+    replace(res.begin(), res.end(), '/', '_');
     return res;
 }
 
@@ -59,7 +60,7 @@ extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
     } while (0)
 
 // C++ stream interface
-class TestCout : public std::stringstream {
+class TestCout : public stringstream {
 public:
     ~TestCout() {
         PRINTF("%s", str().c_str());
@@ -87,7 +88,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         EXPECT_EQ(0, parsed.diagnostics().size());
         EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
         if (exp == parsed.ast()->toString(ctx) + "\n") {
-            TEST_COUT << "Parser OK" << std::endl;
+            TEST_COUT << "Parser OK" << endl;
         }
         if (test.expectations.find("desugar") != test.expectations.end()) {
             auto checker = test.folder + test.expectations["desugar"];
@@ -97,7 +98,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
             EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
             if (exp == desugared->toString(ctx) + "\n") {
-                TEST_COUT << "Desugar OK" << std::endl;
+                TEST_COUT << "Desugar OK" << endl;
             }
         }
     }
@@ -105,22 +106,22 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs()), prettyPrintTest);
 
-bool endsWith(const std::string &a, const std::string &b) {
+bool endsWith(const string &a, const string &b) {
     if (b.size() > a.size())
         return false;
-    return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
+    return equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
 }
 
-static bool startsWith(const std::string &str, const std::string &prefix) {
+static bool startsWith(const string &str, const string &prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.c_str(), prefix.size());
 }
 
 // substrantially modified from https://stackoverflow.com/a/8438663
-std::vector<Expectations> listDir(const char *name) {
-    std::vector<Expectations> result;
+vector<Expectations> listDir(const char *name) {
+    vector<Expectations> result;
     DIR *dir;
     struct dirent *entry;
-    std::vector<std::string> names;
+    vector<string> names;
 
     if (!(dir = opendir(name))) {
         return result;
@@ -139,7 +140,7 @@ std::vector<Expectations> listDir(const char *name) {
             names.emplace_back(entry->d_name);
         }
     }
-    std::sort(names.begin(), names.end());
+    sort(names.begin(), names.end());
 
     Expectations current;
     for (auto &s : names) {
@@ -158,7 +159,7 @@ std::vector<Expectations> listDir(const char *name) {
             if (startsWith(s, current.sourceFile)) {
                 auto kind_start = s.c_str() + current.sourceFile.size() + 1;
                 auto kind_end = s.c_str() + s.size() - strlen(".exp");
-                std::string kind(kind_start, kind_end - kind_start);
+                string kind(kind_start, kind_end - kind_start);
                 current.expectations[kind] = s;
             }
         } else {
@@ -175,6 +176,6 @@ std::vector<Expectations> listDir(const char *name) {
     return result;
 }
 
-std::vector<Expectations> getInputs() {
+vector<Expectations> getInputs() {
     return listDir("test/testdata");
 }

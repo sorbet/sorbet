@@ -9,6 +9,7 @@
 #include <vector>
 
 namespace spd = spdlog;
+using namespace std;
 
 TEST(ParserTest, SimpleParse) {
     auto console = spd::stdout_color_mt("parse");
@@ -20,19 +21,19 @@ TEST(ParserTest, SimpleParse) {
 
 struct DedentTest {
     int level;
-    std::string in;
-    std::string out;
+    string in;
+    string out;
 };
 
 TEST(ParserTest, TestDedent) {
-    std::vector<DedentTest> cases = {
+    vector<DedentTest> cases = {
         {2, "    hi", "  hi"},
         {10, "  \t    hi", "  hi"},
         {2, "  a\n   b\n  c\n", "a\n   b\n  c\n"},
     };
     for (auto &tc : cases) {
         ruby_typer::parser::Dedenter dedent(tc.level);
-        std::string got = dedent.dedent(tc.in);
+        string got = dedent.dedent(tc.in);
         EXPECT_EQ(got, tc.out);
     }
 }

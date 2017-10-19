@@ -3,6 +3,8 @@
 #include "common/common.h"
 #include <algorithm>
 
+using namespace std;
+
 namespace ruby_typer {
 namespace ast {
 
@@ -14,73 +16,73 @@ SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
 }
 
 static const char *init = "initialize";
-static UTF8Desc init_DESC{(char *)init, (int)std::strlen(init)};
+static UTF8Desc init_DESC{(char *)init, (int)strlen(init)};
 
 static const char *andAnd = "&&";
-static UTF8Desc andAnd_DESC{(char *)andAnd, (int)std::strlen(andAnd)};
+static UTF8Desc andAnd_DESC{(char *)andAnd, (int)strlen(andAnd)};
 
 static const char *orOr = "||";
-static UTF8Desc orOr_DESC{(char *)orOr, (int)std::strlen(orOr)};
+static UTF8Desc orOr_DESC{(char *)orOr, (int)strlen(orOr)};
 
 static const char *to_s = "to_s";
-static UTF8Desc to_s_DESC{(char *)to_s, (int)std::strlen(to_s)};
+static UTF8Desc to_s_DESC{(char *)to_s, (int)strlen(to_s)};
 
 static const char *concat = "concat";
-static UTF8Desc concat_DESC{(char *)concat, (int)std::strlen(concat)};
+static UTF8Desc concat_DESC{(char *)concat, (int)strlen(concat)};
 
 static const char *call = "call";
-static UTF8Desc call_DESC{(char *)call, (int)std::strlen(call)};
+static UTF8Desc call_DESC{(char *)call, (int)strlen(call)};
 
 static const char *bang = "!";
-static UTF8Desc bang_DESC{(char *)bang, (int)std::strlen(bang)};
+static UTF8Desc bang_DESC{(char *)bang, (int)strlen(bang)};
 
 static const char *squareBrackets = "[]";
-static UTF8Desc squareBrackets_DESC{(char *)squareBrackets, (int)std::strlen(squareBrackets)};
+static UTF8Desc squareBrackets_DESC{(char *)squareBrackets, (int)strlen(squareBrackets)};
 
 static const char *squareBracketsEq = "[]=";
-static UTF8Desc squareBracketsEq_DESC{(char *)squareBracketsEq, (int)std::strlen(squareBracketsEq)};
+static UTF8Desc squareBracketsEq_DESC{(char *)squareBracketsEq, (int)strlen(squareBracketsEq)};
 
 static const char *unaryPlus = "+@";
-static UTF8Desc unaryPlus_DESC{(char *)unaryPlus, (int)std::strlen(unaryPlus)};
+static UTF8Desc unaryPlus_DESC{(char *)unaryPlus, (int)strlen(unaryPlus)};
 
 static const char *unaryMinus = "-@";
-static UTF8Desc unaryMinus_DESC{(char *)unaryMinus, (int)std::strlen(unaryMinus)};
+static UTF8Desc unaryMinus_DESC{(char *)unaryMinus, (int)strlen(unaryMinus)};
 
 static const char *star = "*";
-static UTF8Desc star_DESC{(char *)star, (int)std::strlen(star)};
+static UTF8Desc star_DESC{(char *)star, (int)strlen(star)};
 
 static const char *starStar = "**";
-static UTF8Desc starStar_DESC{(char *)starStar, (int)std::strlen(starStar)};
+static UTF8Desc starStar_DESC{(char *)starStar, (int)strlen(starStar)};
 
 static const char *no_symbol_str = "<none>";
-static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)std::strlen(no_symbol_str)};
+static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
 
 static const char *top_str = "<top>";
-static UTF8Desc top_DESC{(char *)top_str, (int)std::strlen(top_str)};
+static UTF8Desc top_DESC{(char *)top_str, (int)strlen(top_str)};
 
 static const char *bottom_str = "<bottom>";
-static UTF8Desc bottom_DESC{(char *)bottom_str, (int)std::strlen(bottom_str)};
+static UTF8Desc bottom_DESC{(char *)bottom_str, (int)strlen(bottom_str)};
 
 static const char *root_str = "<root>";
-static UTF8Desc root_DESC{(char *)root_str, (int)std::strlen(root_str)};
+static UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
 
 static const char *nil_str = "nil";
-static UTF8Desc nil_DESC{(char *)nil_str, (int)std::strlen(nil_str)};
+static UTF8Desc nil_DESC{(char *)nil_str, (int)strlen(nil_str)};
 
 static const char *todo_str = "<todo sym>";
-static UTF8Desc todo_DESC{(char *)todo_str, (int)std::strlen(todo_str)};
+static UTF8Desc todo_DESC{(char *)todo_str, (int)strlen(todo_str)};
 
 static const char *todo_ivar_str = "<todo ivar sym>";
-static UTF8Desc todo_ivar_DESC{(char *)todo_ivar_str, (int)std::strlen(todo_ivar_str)};
+static UTF8Desc todo_ivar_DESC{(char *)todo_ivar_str, (int)strlen(todo_ivar_str)};
 
 static const char *todo_cvar_str = "<todo cvar sym>";
-static UTF8Desc todo_cvar_DESC{(char *)todo_cvar_str, (int)std::strlen(todo_cvar_str)};
+static UTF8Desc todo_cvar_DESC{(char *)todo_cvar_str, (int)strlen(todo_cvar_str)};
 
 static const char *todo_gvar_str = "<todo gvar sym>";
-static UTF8Desc todo_gvar_DESC{(char *)todo_gvar_str, (int)std::strlen(todo_gvar_str)};
+static UTF8Desc todo_gvar_DESC{(char *)todo_gvar_str, (int)strlen(todo_gvar_str)};
 
 static const char *todo_lvar_str = "<todo lvar sym>";
-static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)std::strlen(todo_lvar_str)};
+static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)strlen(todo_lvar_str)};
 
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     unsigned int max_name_count = 262144;   // 6MB
@@ -161,7 +163,7 @@ ContextBase::~ContextBase() {}
 
 constexpr decltype(ContextBase::STRINGS_PAGE_SIZE) ContextBase::STRINGS_PAGE_SIZE;
 
-SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args,
+SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
                                    bool isMethod) {
     DEBUG_ONLY(Error::check(owner.exists()));
     auto &ownerScope = owner.info(*this, true);
@@ -194,9 +196,9 @@ SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
 
     info.argumentsOrMixins.swap(args);
     if (!reallocate)
-        ownerScope.members.push_back(std::make_pair(name, ret));
+        ownerScope.members.push_back(make_pair(name, ret));
     else
-        owner.info(*this, true).members.push_back(std::make_pair(name, ret));
+        owner.info(*this, true).members.push_back(make_pair(name, ret));
     return ret;
 }
 
@@ -241,15 +243,15 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     Error::check(nm.to < ContextBase::STRINGS_PAGE_SIZE);
     char *from = nullptr;
     if (nm.to > ContextBase::STRINGS_PAGE_SIZE) {
-        strings.push_back(std::make_unique<std::vector<char>>(nm.to));
+        strings.push_back(make_unique<vector<char>>(nm.to));
         from = strings.back()->data();
         if (strings.size() > 1) {
-            std::swap(*(strings.end() - 1), *(strings.end() - 2));
+            swap(*(strings.end() - 1), *(strings.end() - 2));
         }
     } else {
 
         if (strings_last_page_used + nm.to > ContextBase::STRINGS_PAGE_SIZE) {
-            strings.push_back(std::make_unique<std::vector<char>>(ContextBase::STRINGS_PAGE_SIZE));
+            strings.push_back(make_unique<vector<char>>(ContextBase::STRINGS_PAGE_SIZE));
             // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
             strings_last_page_used = 0;
         }
@@ -265,8 +267,8 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     return idx;
 }
 
-void moveNames(std::pair<unsigned int, unsigned int> *from, std::pair<unsigned int, unsigned int> *to,
-               unsigned int szFrom, unsigned int szTo) {
+void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsigned int> *to, unsigned int szFrom,
+               unsigned int szTo) {
     // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
     DEBUG_ONLY(Error::check((szTo & (szTo - 1)) == 0));
     DEBUG_ONLY(Error::check((szFrom & (szFrom - 1)) == 0));
@@ -291,7 +293,7 @@ void ContextBase::expandNames() {
     Error::check(names_by_hash.size() == names_by_hash.capacity());
 
     names.reserve(names.size() * 2);
-    std::vector<std::pair<unsigned int, unsigned int>> new_names_by_hash(names_by_hash.capacity() * 2);
+    vector<pair<unsigned int, unsigned int>> new_names_by_hash(names_by_hash.capacity() * 2);
     moveNames(names_by_hash.data(), new_names_by_hash.data(), names_by_hash.capacity(), new_names_by_hash.capacity());
     names_by_hash.swap(new_names_by_hash);
 }
@@ -363,7 +365,7 @@ SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
 
 SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     auto tempName = this->freshNameUnique(kind, name);
-    std::vector<SymbolRef> empty;
+    vector<SymbolRef> empty;
     return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
 }
 

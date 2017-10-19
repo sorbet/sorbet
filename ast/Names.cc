@@ -2,6 +2,9 @@
 #include "Context.h"
 #include "Hashing.h"
 #include <numeric> // accumulate
+
+using namespace std;
+
 namespace ruby_typer {
 namespace ast {
 
@@ -10,9 +13,9 @@ ruby_typer::ast::Name::~Name() noexcept {
         unique.~UniqueName();
 }
 
-unsigned int Name::hashNames(std::vector<NameRef> &lhs, ContextBase &ctx) {
-    return std::accumulate(lhs.begin(), lhs.end(), 0,
-                           [&ctx](int acc, NameRef &necc) -> int { return mix(acc, necc.id()); }) *
+unsigned int Name::hashNames(vector<NameRef> &lhs, ContextBase &ctx) {
+    return accumulate(lhs.begin(), lhs.end(), 0,
+                      [&ctx](int acc, NameRef &necc) -> int { return mix(acc, necc.id()); }) *
                8 +
            lhs.size();
 }
@@ -30,11 +33,11 @@ unsigned int Name::hash(ContextBase &ctx) const {
     }
 }
 
-std::string Name::toString(ContextBase &ctx) const {
+string Name::toString(ContextBase &ctx) const {
     if (kind == UTF8) {
         return raw.utf8.toString();
     } else if (kind == UNIQUE) {
-        return this->unique.original.name(ctx).toString(ctx) + "$" + std::to_string(this->unique.num);
+        return this->unique.original.name(ctx).toString(ctx) + "$" + to_string(this->unique.num);
     } else {
         Error::notImplemented();
     }
