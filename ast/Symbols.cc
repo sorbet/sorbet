@@ -1,5 +1,6 @@
 #include "Symbols.h"
 #include "Context.h"
+#include <sstream>
 
 namespace ruby_typer {
 namespace ast {
@@ -29,6 +30,22 @@ SymbolInfo &SymbolRef::info(ContextBase &ctx, bool allowNone) const {
 bool SymbolRef::isSynthetic() const {
     return this->_id <= ContextBase::defn_last_synthetic_sym()._id;
 }
+
+std::string SymbolRef::toString(ContextBase &ctx) const {
+    std::ostringstream os;
+    auto myInfo = info(ctx, true);
+    auto name = myInfo.name.toString(ctx);
+    auto members = myInfo.members;
+    os << name;
+    if (members.size() > 0) {
+        os << " with children:" << std::endl;
+        for (auto pair: members) {
+            os << pair.second.toString(ctx);
+        }
+    }
+    return os.str();
+}
+
 
 } // namespace ast
 } // namespace ruby_typer

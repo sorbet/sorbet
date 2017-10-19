@@ -2,6 +2,8 @@
 #include "Hashing.h"
 #include "common/common.h"
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -387,6 +389,15 @@ unsigned int ContextBase::symbolsUsed() {
 
 unsigned int ContextBase::namesUsed() {
     return names.size();
+}
+
+std::string ContextBase::toString() {
+    std::ostringstream os;
+    for (auto element: classes) {
+        os << "NameRef: " << element.first.toString(*this) << std::endl;
+        os << "SymbolRef: " << element.second.toString(*this) << std::endl;
+    }
+    return os.str();
 }
 
 } // namespace ast

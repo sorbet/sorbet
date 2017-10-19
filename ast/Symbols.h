@@ -56,6 +56,8 @@ public:
         return !_id;
     }
 
+    std::string toString(ContextBase &ctx) const;
+
 private:
     u4 _id;
 };

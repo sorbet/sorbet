@@ -57,6 +57,8 @@ public:
 
     void sanityCheck() const;
 
+    std::string toString();
+
     spdlog::logger &logger;
 
     static constexpr SymbolRef noSymbol() {

@@ -63,6 +63,8 @@ public:
         return NameRef(2);
     }
 
+    std::string toString(ContextBase &ctx) const;
+
 public:
     int _id;
 };
