@@ -62,6 +62,8 @@ public:
     Array *preTransformArray(Context ctx, Array *original);
     Statement *postransformArray(Context ctx, Array *original);
 
+    Statement *postTransformFloatLit(Context ctx, BoolLit *original);
+
     Statement *postTransformFloatLit(Context ctx, FloatLit *original);
 
     Statement *postTransformIntLit(Context ctx, IntLit *original);
@@ -156,6 +158,7 @@ GENERATE_HAS_MEMBER(postTransformNew);
 GENERATE_HAS_MEMBER(postTransformNamedArg);
 GENERATE_HAS_MEMBER(postTransformHash);
 GENERATE_HAS_MEMBER(postTransformArray);
+GENERATE_HAS_MEMBER(postTransformBoolLit);
 GENERATE_HAS_MEMBER(postTransformFloatLit);
 GENERATE_HAS_MEMBER(postTransformIntLit);
 GENERATE_HAS_MEMBER(postTransformStringLit);
@@ -248,6 +251,7 @@ GENERATE_POSTPONE_POSTCLASS(New);
 GENERATE_POSTPONE_POSTCLASS(NamedArg);
 GENERATE_POSTPONE_POSTCLASS(Hash);
 GENERATE_POSTPONE_POSTCLASS(Array);
+GENERATE_POSTPONE_POSTCLASS(BoolLit);
 GENERATE_POSTPONE_POSTCLASS(FloatLit);
 GENERATE_POSTPONE_POSTCLASS(IntLit);
 GENERATE_POSTPONE_POSTCLASS(StringLit);
@@ -524,6 +528,12 @@ private:
             if (HAS_MEMBER_postTransformFloatLit<FUNC>::value) {
                 return PostPonePostTransform_FloatLit<FUNC, HAS_MEMBER_postTransformFloatLit<FUNC>::value>::call(ctx, v,
                                                                                                                  func);
+            }
+            return v;
+        } else if (BoolLit *v = dynamic_cast<BoolLit *>(what)) {
+            if (HAS_MEMBER_postTransformBoolLit<FUNC>::value) {
+                return PostPonePostTransform_BoolLit<FUNC, HAS_MEMBER_postTransformBoolLit<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
             }
             return v;
         } else if (IntLit *v = dynamic_cast<IntLit *>(what)) {
