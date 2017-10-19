@@ -209,7 +209,7 @@ public:
 
     // used in CFG for temporary
     static inline NameRef returnMethodTemp() {
-        return NameRef(17);
+        return NameRef(19);
     }
 };
 
