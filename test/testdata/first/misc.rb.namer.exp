@@ -2,7 +2,7 @@
 <bottom>
 <none>
 <root>
-  ||$2
+field  ||$2
 <todo cvar sym>
 <todo gvar sym>
 <todo ivar sym>
@@ -10,8 +10,8 @@
 <todo sym>
 <top>
 Object
-  foo
-  foo
-  foo
+method  foo
+method  foo
+method  foo
 nil
 

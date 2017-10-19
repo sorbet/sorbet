@@ -48,7 +48,14 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     os << name << std::endl;
     std::vector<std::string> children;
     for (auto pair : members) {
-        children.push_back(pair.second.toString(ctx, tabs + 1));
+        auto info = pair.second.info(ctx);
+        std::string type = "unknown";
+        if (info.isClass()) { type = "class"; }
+        else if (info.isArray()) { type = "array"; }
+        else if (info.isField()) { type = "field"; }
+        else if (info.isMethod()) { type = "method"; }
+
+        children.push_back(type + pair.second.toString(ctx, tabs + 1));
     }
     std::sort(children.begin(), children.end());
     for (auto row : children) {
