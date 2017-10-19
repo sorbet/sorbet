@@ -40,6 +40,34 @@ CFG::CFG() {
     deadBlock()->bexit.cond = ast::ContextBase::defn_cfg_never();
 }
 
+void conditionalJump(BasicBlock *from, ast::SymbolRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat) {
+    if (from != inWhat.deadBlock()) {
+        Error::check(!from->bexit.cond.exists());
+        from->bexit.cond = cond;
+        from->bexit.thenb = thenb;
+        from->bexit.elseb = elseb;
+    }
+}
+
+void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat) {
+    if (from != inWhat.deadBlock()) {
+        Error::check(!from->bexit.cond.exists());
+        from->bexit.cond = ast::ContextBase::defn_cfg_always();
+        from->bexit.elseb = to;
+        from->bexit.thenb = to;
+    }
+}
+
+void jumpToDead(BasicBlock *from, CFG &inWhat) {
+    auto *db = inWhat.deadBlock();
+    if (from != db) {
+        Error::check(!from->bexit.cond.exists());
+        from->bexit.cond = ast::ContextBase::defn_cfg_never();
+        from->bexit.elseb = db;
+        from->bexit.thenb = db;
+    }
+}
+
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
@@ -53,12 +81,8 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
         what,
         [&](ast::While *a) {
             auto headerBlock = inWhat.freshBlock();
-            if (current != deadBlock()) {
-                Error::check(!current->bexit.cond.exists());
-                current->bexit.cond = ast::ContextBase::defn_cfg_always();
-                current->bexit.elseb = headerBlock;
-                current->bexit.thenb = headerBlock;
-            }
+            unconditionalJump(current, headerBlock, inWhat);
+
             auto condSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::whileTemp(), inWhat.symbol);
             auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym);
             auto bodyBlock = inWhat.freshBlock();
@@ -73,12 +97,8 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
             auto bodySym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
 
             auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym);
-            if (body != deadBlock()) {
-                Error::check(!body->bexit.cond.exists());
-                body->bexit.cond = ast::ContextBase::defn_cfg_always();
-                body->bexit.elseb = headerBlock;
-                body->bexit.thenb = headerBlock;
-            }
+            unconditionalJump(body, headerBlock, inWhat);
+
             continueBlock->exprs.emplace_back(target, make_unique<Nil>());
             ret = continueBlock;
         },
@@ -86,12 +106,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
             auto retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
             auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym);
             cont->exprs.emplace_back(target, make_unique<Return>(retSym)); // dead assign.
-            if (cont != deadBlock()) {
-                Error::check(!cont->bexit.cond.exists());
-                cont->bexit.cond = ast::ContextBase::defn_cfg_never();
-                cont->bexit.thenb = deadBlock();
-                cont->bexit.elseb = deadBlock();
-            }
+            jumpToDead(cont, inWhat);
             ret = deadBlock();
         },
         [&](ast::If *a) {
@@ -100,29 +115,14 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
             auto thenBlock = inWhat.freshBlock();
             auto elseBlock = inWhat.freshBlock();
             auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym);
-            if (cont != deadBlock()) {
-                Error::check(!cont->bexit.cond.exists());
-                cont->bexit.cond = ifSym;
-                cont->bexit.thenb = thenBlock;
-                cont->bexit.elseb = elseBlock;
-            }
+            conditionalJump(cont, ifSym, thenBlock, elseBlock, inWhat);
 
             auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target);
             auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target);
             if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
                 ret = inWhat.freshBlock();
-                if (thenEnd != deadBlock()) {
-                    Error::check(!thenEnd->bexit.cond.exists());
-                    thenEnd->bexit.cond = ast::ContextBase::defn_cfg_always();
-                    thenEnd->bexit.elseb = ret;
-                    thenEnd->bexit.thenb = ret;
-                }
-                if (elseBlock != deadBlock()) {
-                    Error::check(!elseEnd->bexit.cond.exists());
-                    elseEnd->bexit.cond = ast::ContextBase::defn_cfg_always();
-                    elseEnd->bexit.elseb = ret;
-                    elseEnd->bexit.thenb = ret;
-                }
+                unconditionalJump(thenEnd, ret, inWhat);
+                unconditionalJump(elseEnd, ret, inWhat);
             } else {
                 ret = deadBlock();
             }
