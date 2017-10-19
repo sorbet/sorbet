@@ -369,8 +369,7 @@ private:
 
             return v;
         } else if (For *v = dynamic_cast<For *>(what)) {
-            // Error::notImplemented();
-            return what;
+            Error::notImplemented();
         } else if (Break *v = dynamic_cast<Break *>(what)) {
             if (HAS_MEMBER_postTransformBreak<FUNC>::value) {
                 return PostPonePostTransform_Break<FUNC, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(ctx, v,
