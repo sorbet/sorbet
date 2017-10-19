@@ -191,7 +191,9 @@ std::string CFG::toString(ast::Context ctx) {
         auto thenI = std::find_if(this->basicBlocks.begin(), this->basicBlocks.end(), [&](auto &a) { return a.get() == this->basicBlocks[i]->bexit.thenb; });
         auto elseI = std::find_if(this->basicBlocks.begin(), this->basicBlocks.end(), [&](auto &a) { return a.get() == this->basicBlocks[i]->bexit.elseb; });
         buf << "    bb"<< i<< " -> bb" << thenI - this->basicBlocks.begin() << ";" << std::endl;
-        buf << "    bb"<< i<< " -> bb" << elseI - this->basicBlocks.begin() << ";" << std::endl << std::endl;
+        if (this->basicBlocks[i]->bexit.cond != ctx.state.defn_cfg_always() && this->basicBlocks[i]->bexit.cond != ctx.state.defn_cfg_never()) {
+            buf << "    bb" << i << " -> bb" << elseI - this->basicBlocks.begin() << ";" << std::endl << std::endl;
+        }
     }
     buf << "}";
     return buf.str();
