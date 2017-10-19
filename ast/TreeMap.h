@@ -526,6 +526,9 @@ private:
                     ctx, v, func);
             }
             return v;
+        } else if (BoolLit *v = dynamic_cast<BoolLit *>(what)) {
+            // Error::notImplemented();
+            return what;
         } else if (ArraySplat *v = dynamic_cast<ArraySplat *>(what)) {
             if (HAS_MEMBER_preTransformArraySplat<FUNC>::value) {
                 v = PostPonePreTransform_ArraySplat<FUNC, HAS_MEMBER_preTransformArraySplat<FUNC>::value>::call(ctx, v,

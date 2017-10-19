@@ -1,0 +1,39 @@
+<<JUNK>>
+Object
+<todo cvar sym>
+<todo gvar sym>
+<todo ivar sym>
+<todo lvar sym>
+<todo sym>
+nil
+<root>
+  &&$0
+  &&$1
+  Gerald
+    MatchTimeout
+      initialize
+    Matcher
+      initialize
+      match
+    MatchContext
+      initialize
+      user_stripe_suffix?
+    MatchTimeBudget
+      initialize
+      check!
+      time_rule
+    Diff
+      initialize
+      affected_files
+      added_files
+      deleted_files
+      changed_files
+      added_lines
+      removed_lines
+      changed_lines
+      changed_openapi?
+      parse
+<bottom>
+<top>
+<none>
+

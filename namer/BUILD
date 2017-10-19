@@ -12,6 +12,7 @@ cc_library(
         "//parser",
         "//ast/desugar",
     ],
+    visibility = ["//visibility:public"],
 )
 
 cc_binary(

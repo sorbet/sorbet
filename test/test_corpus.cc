@@ -1,5 +1,6 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "namer/namer.h"
 #include "common/common.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
@@ -99,6 +100,20 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
             if (exp == desugared->toString(ctx) + "\n") {
                 TEST_COUT << "Desugar OK" << endl;
+            }
+
+            // TODO This needs to be refactored so we don't need a desguar file
+            // before looking for a namer file
+            if (test.expectations.find("namer") != test.expectations.end()) {
+                auto checker = test.folder + test.expectations["namer"];
+                auto exp = ruby_typer::File::read(checker.c_str());
+                SCOPED_TRACE(checker);
+
+                auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
+                EXPECT_EQ(exp, ctx.toString() + "\n");
+                if (exp == ctx.toString() + "\n") {
+                    TEST_COUT << "Namer OK" << std::endl;
+                }
             }
         }
     }
