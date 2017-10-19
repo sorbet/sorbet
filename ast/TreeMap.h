@@ -62,7 +62,7 @@ public:
     Array *preTransformArray(Context ctx, Array *original);
     Statement *postransformArray(Context ctx, Array *original);
 
-    Statement *postTransformFloatLit(Context ctx, BoolLit *original);
+    Statement *postTransformBoolLit(Context ctx, BoolLit *original);
 
     Statement *postTransformFloatLit(Context ctx, FloatLit *original);
 
