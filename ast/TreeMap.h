@@ -128,6 +128,17 @@ GENERATE_HAS_MEMBER(preTransformHashSplat);
 GENERATE_HAS_MEMBER(preTransformBlock);
 GENERATE_HAS_MEMBER(preTransformInsSeq);
 
+// used to check for ABSENCE of method
+GENERATE_HAS_MEMBER(preTransformBreak);
+GENERATE_HAS_MEMBER(preTransformNext);
+GENERATE_HAS_MEMBER(preTransformIdent);
+GENERATE_HAS_MEMBER(preTransformBoolLit);
+GENERATE_HAS_MEMBER(preTransformStringLit);
+GENERATE_HAS_MEMBER(preTransformFloatLit);
+GENERATE_HAS_MEMBER(preTransformIntLit);
+GENERATE_HAS_MEMBER(preTransformConstantLit);
+GENERATE_HAS_MEMBER(preTransformSelf);
+
 GENERATE_HAS_MEMBER(postTransformClassDef);
 GENERATE_HAS_MEMBER(postTransformMethodDef);
 GENERATE_HAS_MEMBER(postTransformConstDef);
@@ -256,6 +267,16 @@ GENERATE_POSTPONE_POSTCLASS(InsSeq);
 template <class FUNC> class TreeMap {
 private:
     FUNC &func;
+
+    static_assert(!HAS_MEMBER_preTransformBreak<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformNext<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformIdent<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformBoolLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformStringLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformFloatLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformIntLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformSelf<FUNC>::value, "use post*Transform instead");
 
     TreeMap(FUNC &func) : func(func) {}
 
