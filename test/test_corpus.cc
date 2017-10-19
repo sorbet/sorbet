@@ -73,6 +73,7 @@ public:
 #define TEST_COUT TestCout()
 
 class CFG_Collector {
+public:
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
         cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
