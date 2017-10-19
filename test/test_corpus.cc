@@ -102,8 +102,6 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 TEST_COUT << "Desugar OK" << endl;
             }
 
-            // TODO This needs to be refactored so we don't need a desguar file
-            // before looking for a namer file
             if (test.expectations.find("namer") != test.expectations.end()) {
                 auto checker = test.folder + test.expectations["namer"];
                 auto exp = ruby_typer::File::read(checker.c_str());
