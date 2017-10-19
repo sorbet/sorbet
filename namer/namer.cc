@@ -11,6 +11,9 @@ ast::SymbolRef enterNameSymbol(ast::Context ctx, ast::SymbolRef owner, ast::Name
     return ctx.state.enterSymbol(owner, name, result, args, false);
 }
 
+/**
+ * Used with TreeMap to return you a SymbolRef collapsing all the `Foo::Bar::Baz`.
+ */
 class NamespaceCollapeser {
 public:
     NamespaceCollapeser(ast::SymbolRef name) {
@@ -30,6 +33,10 @@ private:
     ast::SymbolRef name;
 };
 
+/**
+ * Used with TreeMap to insert all the class and method symbols into the symbol
+ * table.
+ */
 class NameInserter {
 public:
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
