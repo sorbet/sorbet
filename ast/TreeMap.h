@@ -369,7 +369,8 @@ private:
 
             return v;
         } else if (For *v = dynamic_cast<For *>(what)) {
-            Error::notImplemented();
+            // Error::notImplemented();
+            return what;
         } else if (Break *v = dynamic_cast<Break *>(what)) {
             if (HAS_MEMBER_postTransformBreak<FUNC>::value) {
                 return PostPonePostTransform_Break<FUNC, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(ctx, v,
@@ -496,9 +497,11 @@ private:
 
             return v;
         } else if (Hash *v = dynamic_cast<Hash *>(what)) {
-            Error::notImplemented();
+            // Error::notImplemented();
+            return what;
         } else if (Array *v = dynamic_cast<Array *>(what)) {
-            Error::notImplemented();
+            // Error::notImplemented();
+            return what;
         } else if (FloatLit *v = dynamic_cast<FloatLit *>(what)) {
             if (HAS_MEMBER_postTransformFloatLit<FUNC>::value) {
                 return PostPonePostTransform_FloatLit<FUNC, HAS_MEMBER_postTransformFloatLit<FUNC>::value>::call(ctx, v,
@@ -558,13 +561,18 @@ private:
                     ctx, v, func);
             }
             return v;
+        } else if (Symbol *v = dynamic_cast<Symbol *>(what)) {
+            return what;
+        } else if (Super *v = dynamic_cast<Super *>(what)) {
+            return what;
         } else if (Self *v = dynamic_cast<Self *>(what)) {
             if (HAS_MEMBER_postTransformSelf<FUNC>::value) {
                 return PostPonePostTransform_Self<FUNC, HAS_MEMBER_postTransformSelf<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Block *v = dynamic_cast<Block *>(what)) {
-            Error::notImplemented();
+            // Error::notImplemented();
+            return what;
         } else if (InsSeq *v = dynamic_cast<InsSeq *>(what)) {
             if (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
                 v = PostPonePreTransform_InsSeq<FUNC, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(ctx, v, func);
