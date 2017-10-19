@@ -593,6 +593,8 @@ private:
             }
 
             return v;
+        } else if (NotSupported *v = dynamic_cast<NotSupported *>(what)) {
+          return what;
         } else {
             Error::raise("should never happen. Forgot to add new tree kind?");
         }
