@@ -7,12 +7,12 @@ cc_library(
     hdrs = [
         "namer.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "//ast",
-        "//parser",
         "//ast/desugar",
+        "//parser",
     ],
-    visibility = ["//visibility:public"],
 )
 
 cc_binary(
