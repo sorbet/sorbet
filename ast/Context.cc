@@ -393,12 +393,12 @@ unsigned int ContextBase::namesUsed() {
 
 std::string ContextBase::toString() {
     std::vector<std::string> children;
-    for (auto element: classes) {
+    for (auto element : classes) {
         children.push_back(element.second.toString(*this));
     }
     std::sort(children.begin(), children.end());
     std::ostringstream os;
-    for (auto child: children) {
+    for (auto child : children) {
         os << child;
     }
     return os.str();

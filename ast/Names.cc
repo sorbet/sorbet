@@ -52,6 +52,5 @@ std::string NameRef::toString(ContextBase &ctx) const {
     return name(ctx).toString(ctx);
 }
 
-
 } // namespace ast
 } // namespace ruby_typer

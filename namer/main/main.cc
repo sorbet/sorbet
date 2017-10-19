@@ -1,8 +1,8 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
-#include "namer/namer.h"
 #include <ctime>
 #include <cxxopts.hpp>
 #include <iostream>

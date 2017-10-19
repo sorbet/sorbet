@@ -1,7 +1,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
-#include "namer/namer.h"
 #include "common/common.h"
+#include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"

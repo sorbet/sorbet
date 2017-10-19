@@ -47,16 +47,15 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     printTabs(os, tabs);
     os << name << std::endl;
     std::vector<std::string> children;
-    for (auto pair: members) {
+    for (auto pair : members) {
         children.push_back(pair.second.toString(ctx, tabs + 1));
     }
     std::sort(children.begin(), children.end());
-    for (auto row: children) {
+    for (auto row : children) {
         os << row;
     }
     return os.str();
 }
-
 
 } // namespace ast
 } // namespace ruby_typer
