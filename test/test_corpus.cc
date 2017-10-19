@@ -1,21 +1,21 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "cfg/CFG.h"
 #include "common/common.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
-#include "cfg/CFG.h"
 #include <algorithm>
 #include <cstdio>
 #include <dirent.h>
 #include <fstream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <sys/types.h>
 #include <unordered_map>
 #include <vector>
-#include <sstream>
 
 namespace spd = spdlog;
 using namespace std;
@@ -72,10 +72,9 @@ public:
 
 #define TEST_COUT TestCout()
 
-
 class CFG_Collector {
     vector<string> cfgs;
-    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef* m) {
+    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
         cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
         return m;
     }
@@ -120,8 +119,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
                         auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(desugared));
                         stringstream got;
-                        for (auto &cfg: collector.cfgs) {
-                            got << cfg << endl  << endl;
+                        for (auto &cfg : collector.cfgs) {
+                            got << cfg << endl << endl;
                         }
                         EXPECT_EQ(exp, got.str() + "\n");
                         if (exp == got.str() + "\n") {

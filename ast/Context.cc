@@ -178,7 +178,6 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(assignTemp_id == Names::assignTemp()));
     DEBUG_ONLY(Error::check(returnMethodTemp_id == Names::returnMethodTemp()));
 
-
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
     SymbolRef bottom_id = synthesizeClass(bottom_DESC);
@@ -193,7 +192,6 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef junk_id = synthesizeClass(junk_DESC);
     SymbolRef always_id = synthesizeClass(always_DESC);
     SymbolRef never_id = synthesizeClass(never_DESC);
-
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());

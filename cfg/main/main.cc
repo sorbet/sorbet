@@ -13,11 +13,10 @@
 namespace spd = spdlog;
 using namespace std;
 
-
 class CFG_Collector {
 public:
     std::vector<std::string> cfgs;
-    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef* m) {
+    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
         cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
         return m;
     }
@@ -44,7 +43,7 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
 
         auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, std::move(desugared));
         std::stringstream buf;
-        for (auto &cfg: collector.cfgs) {
+        for (auto &cfg : collector.cfgs) {
             buf << cfg << std::endl << std::endl;
         }
         auto got = buf.str();
