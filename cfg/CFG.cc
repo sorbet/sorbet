@@ -183,8 +183,8 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
 std::string CFG::toString(ast::Context ctx) {
     std::stringstream buf;
     buf << "digraph " << this->symbol.info(ctx).name.name(ctx).toString(ctx) << " {" << std::endl;
-    buf << "    bb0 [shape=invhouse];" << std::endl;
-    buf << "    bb1 [shape =parallelogram];" << std::endl << std::endl;
+    buf << "    bb0 [shape = invhouse];" << std::endl;
+    buf << "    bb1 [shape = parallelogram];" << std::endl << std::endl;
     for (int i = 0; i < this->basicBlocks.size(); i++) {
         auto text = this->basicBlocks[i]->toString(ctx);
         buf << "    bb" << i << " [label = \"" << text << "\"];" << std::endl;

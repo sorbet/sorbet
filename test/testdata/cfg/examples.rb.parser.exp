@@ -1,0 +1,57 @@
+Class {
+  name = Const {
+    scope = NULL
+    name = Examples
+  }
+  superclass = NULL
+  body = Begin {
+    stmts = [
+      DefMethod {
+        name = i_like_ifs
+        args = Args {
+          args = [
+          ]
+        }
+        body = If {
+          condition = True {
+          }
+          then_ = Return {
+            exprs = [
+              Integer {
+                val = "1"
+              }
+            ]
+          }
+          else_ = Return {
+            exprs = [
+              Integer {
+                val = "2"
+              }
+            ]
+          }
+        }
+      }
+      DefMethod {
+        name = i_like_exps
+        args = Args {
+          args = [
+          ]
+        }
+        body = If {
+          condition = Begin {
+            stmts = [
+              True {
+              }
+            ]
+          }
+          then_ = Integer {
+            val = "1"
+          }
+          else_ = Integer {
+            val = "2"
+          }
+        }
+      }
+    ]
+  }
+}

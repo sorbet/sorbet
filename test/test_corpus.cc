@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <unordered_map>
 #include <vector>
+#include <sstream>
 
 namespace spd = spdlog;
 using namespace std;
@@ -116,6 +117,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
                         CFG_Collector collector;
                         auto exp = ruby_typer::File::read(checker.c_str());
+
                         auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(desugared));
                         stringstream got;
                         for (auto &cfg: collector.cfgs) {
