@@ -1,39 +1,39 @@
 <<JUNK>>
-Object
-<todo cvar sym>
-<todo gvar sym>
-<todo ivar sym>
-<todo lvar sym>
-<todo sym>
-nil
+<bottom>
+<none>
 <root>
   &&$0
   &&$1
   Gerald
+    Diff
+      added_files
+      added_lines
+      affected_files
+      changed_files
+      changed_lines
+      changed_openapi?
+      deleted_files
+      initialize
+      parse
+      removed_lines
+    MatchContext
+      initialize
+      user_stripe_suffix?
+    MatchTimeBudget
+      check!
+      initialize
+      time_rule
     MatchTimeout
       initialize
     Matcher
       initialize
       match
-    MatchContext
-      initialize
-      user_stripe_suffix?
-    MatchTimeBudget
-      initialize
-      check!
-      time_rule
-    Diff
-      initialize
-      affected_files
-      added_files
-      deleted_files
-      changed_files
-      added_lines
-      removed_lines
-      changed_lines
-      changed_openapi?
-      parse
-<bottom>
+<todo cvar sym>
+<todo gvar sym>
+<todo ivar sym>
+<todo lvar sym>
+<todo sym>
 <top>
-<none>
+Object
+nil
 

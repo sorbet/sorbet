@@ -46,8 +46,13 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     auto members = myInfo.members;
     printTabs(os, tabs);
     os << name << std::endl;
+    std::vector<std::string> children;
     for (auto pair: members) {
-        os << pair.second.toString(ctx, tabs + 1);
+        children.push_back(pair.second.toString(ctx, tabs + 1));
+    }
+    std::sort(children.begin(), children.end());
+    for (auto row: children) {
+        os << row;
     }
     return os.str();
 }

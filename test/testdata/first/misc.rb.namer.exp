@@ -1,17 +1,17 @@
 <<JUNK>>
-Object
-  foo
-  foo
-  foo
+<bottom>
+<none>
+<root>
+  ||$2
 <todo cvar sym>
 <todo gvar sym>
 <todo ivar sym>
 <todo lvar sym>
 <todo sym>
-nil
-<root>
-  ||$2
-<bottom>
 <top>
-<none>
+Object
+  foo
+  foo
+  foo
+nil
 
