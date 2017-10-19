@@ -140,7 +140,7 @@ TEST(PreOrderTreeMap, CountTrees) {
             return original;
         }
 
-        Self *preTransformSelf(Context ctx, Self *original) {
+        Self *postTransformSelf(Context ctx, Self *original) {
             count++;
             return original;
         }

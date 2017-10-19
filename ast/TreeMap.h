@@ -62,6 +62,8 @@ public:
     Array *preTransformArray(Context ctx, Array *original);
     Statement *postransformArray(Context ctx, Array *original);
 
+    Statement *postTransformFloatLit(Context ctx, BoolLit *original);
+
     Statement *postTransformFloatLit(Context ctx, FloatLit *original);
 
     Statement *postTransformIntLit(Context ctx, IntLit *original);
@@ -128,6 +130,17 @@ GENERATE_HAS_MEMBER(preTransformHashSplat);
 GENERATE_HAS_MEMBER(preTransformBlock);
 GENERATE_HAS_MEMBER(preTransformInsSeq);
 
+// used to check for ABSENCE of method
+GENERATE_HAS_MEMBER(preTransformBreak);
+GENERATE_HAS_MEMBER(preTransformNext);
+GENERATE_HAS_MEMBER(preTransformIdent);
+GENERATE_HAS_MEMBER(preTransformBoolLit);
+GENERATE_HAS_MEMBER(preTransformStringLit);
+GENERATE_HAS_MEMBER(preTransformFloatLit);
+GENERATE_HAS_MEMBER(preTransformIntLit);
+GENERATE_HAS_MEMBER(preTransformConstantLit);
+GENERATE_HAS_MEMBER(preTransformSelf);
+
 GENERATE_HAS_MEMBER(postTransformClassDef);
 GENERATE_HAS_MEMBER(postTransformMethodDef);
 GENERATE_HAS_MEMBER(postTransformConstDef);
@@ -145,6 +158,7 @@ GENERATE_HAS_MEMBER(postTransformNew);
 GENERATE_HAS_MEMBER(postTransformNamedArg);
 GENERATE_HAS_MEMBER(postTransformHash);
 GENERATE_HAS_MEMBER(postTransformArray);
+GENERATE_HAS_MEMBER(postTransformBoolLit);
 GENERATE_HAS_MEMBER(postTransformFloatLit);
 GENERATE_HAS_MEMBER(postTransformIntLit);
 GENERATE_HAS_MEMBER(postTransformStringLit);
@@ -237,6 +251,7 @@ GENERATE_POSTPONE_POSTCLASS(New);
 GENERATE_POSTPONE_POSTCLASS(NamedArg);
 GENERATE_POSTPONE_POSTCLASS(Hash);
 GENERATE_POSTPONE_POSTCLASS(Array);
+GENERATE_POSTPONE_POSTCLASS(BoolLit);
 GENERATE_POSTPONE_POSTCLASS(FloatLit);
 GENERATE_POSTPONE_POSTCLASS(IntLit);
 GENERATE_POSTPONE_POSTCLASS(StringLit);
@@ -256,6 +271,16 @@ GENERATE_POSTPONE_POSTCLASS(InsSeq);
 template <class FUNC> class TreeMap {
 private:
     FUNC &func;
+
+    static_assert(!HAS_MEMBER_preTransformBreak<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformNext<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformIdent<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformBoolLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformStringLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformFloatLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformIntLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformSelf<FUNC>::value, "use post*Transform instead");
 
     TreeMap(FUNC &func) : func(func) {}
 
@@ -503,6 +528,12 @@ private:
             if (HAS_MEMBER_postTransformFloatLit<FUNC>::value) {
                 return PostPonePostTransform_FloatLit<FUNC, HAS_MEMBER_postTransformFloatLit<FUNC>::value>::call(ctx, v,
                                                                                                                  func);
+            }
+            return v;
+        } else if (BoolLit *v = dynamic_cast<BoolLit *>(what)) {
+            if (HAS_MEMBER_postTransformBoolLit<FUNC>::value) {
+                return PostPonePostTransform_BoolLit<FUNC, HAS_MEMBER_postTransformBoolLit<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
             }
             return v;
         } else if (IntLit *v = dynamic_cast<IntLit *>(what)) {
