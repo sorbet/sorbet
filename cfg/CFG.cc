@@ -26,9 +26,7 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
 }
 
 BasicBlock *CFG::freshBlock() {
-    this->basicBlocks.emplace_back();
-    auto &back = this->basicBlocks.back();
-    back.reset(new BasicBlock());
+    this->basicBlocks.emplace_back(new BasicBlock());
     return this->basicBlocks.back().get();
 }
 
