@@ -151,6 +151,13 @@ public:
     virtual std::string nodeName();
 };
 
+class Nil : public Expression {
+public:
+    Nil(){};
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string nodeName();
+};
+
 class Symbol : public Expression {
 public:
     NameRef name;

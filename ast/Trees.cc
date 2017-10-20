@@ -456,5 +456,13 @@ std::string InsSeq::nodeName() {
 std::string EmptyTree::nodeName() {
     return "EmptyTree";
 }
+
+std::string Nil::toString(ContextBase &ctx, int tabs) {
+    return "nil";
+}
+
+std::string Nil::nodeName() {
+    return "Nil";
+}
 } // namespace ast
 } // namespace ruby_typer
