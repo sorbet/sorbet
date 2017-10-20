@@ -16,9 +16,14 @@ begin
     assignTmp$3
   end
   xaaaaz<todo lvar sym> = [<emtpyTree>.yayayaya(), <emtpyTree>.tutututu()]
-  <Not Supported (Kwbegin)>
-  <Not Supported (Kwbegin)>
-  <Not Supported (Kwbegin)>
+  <emtpyTree>
+  begin
+    nil
+  end
+  begin
+    <emtpyTree>.a()
+    <emtpyTree>.b()
+  end
   def foo<<todo sym>>(<Not Supported (Blockarg)>)
     <emtpyTree>
   <emtpyTree>.lambda() do ||
@@ -82,7 +87,9 @@ begin
   <Not Supported (Postexe)>
   <Not Supported (Rational)>
   <Not Supported (Complex)>
-  <Not Supported (Kwbegin)>
+  begin
+    <Not Supported (Rescue)>
+  end
   begin
     assignTmp$6 = [<Not Supported (Splat)>]
     <Not Supported (SplatLhs)>
