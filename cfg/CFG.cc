@@ -44,6 +44,8 @@ void conditionalJump(BasicBlock *from, ast::SymbolRef cond, BasicBlock *thenb, B
         from->bexit.cond = cond;
         from->bexit.thenb = thenb;
         from->bexit.elseb = elseb;
+        thenb->backEdges.push_back(from);
+        elseb->backEdges.push_back(from);
     }
 }
 
@@ -53,6 +55,7 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat) {
         from->bexit.cond = ast::ContextBase::defn_cfg_always();
         from->bexit.elseb = to;
         from->bexit.thenb = to;
+        to->backEdges.push_back(from);
     }
 }
 

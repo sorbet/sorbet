@@ -184,6 +184,7 @@ public:
     int args = 0;
     std::vector<Binding> exprs;
     BlockExit bexit;
+    std::vector<BasicBlock *> backEdges;
 
     BasicBlock(){};
     std::string toString(ast::Context ctx);
