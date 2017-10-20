@@ -348,6 +348,15 @@ NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return idx;
 }
 
+FileRef ContextBase::enterFile(UTF8Desc path, UTF8Desc source) {
+    auto idx = files.size();
+    files.emplace_back();
+    auto &file = files.back();
+    file.path_ = path.toString();
+    file.source_ = source.toString();
+    return FileRef(idx);
+}
+
 SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
     auto &current = classes[name];
     if (current.exists()) {

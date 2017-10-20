@@ -14,9 +14,9 @@ using namespace std;
 TEST(ParserTest, SimpleParse) {
     auto console = spd::stdout_color_mt("parse");
     ruby_typer::ast::ContextBase ctx(*console);
-    ruby_typer::parser::parse_ruby(ctx, "def hello_world; p :hello; end");
-    ruby_typer::parser::parse_ruby(ctx, "class A; class B; end; end");
-    ruby_typer::parser::parse_ruby(ctx, "class A::B; module B; end; end");
+    ruby_typer::parser::parse_ruby(ctx, "<test>", "def hello_world; p :hello; end");
+    ruby_typer::parser::parse_ruby(ctx, "<test>", "class A; class B; end; end");
+    ruby_typer::parser::parse_ruby(ctx, "<test>", "class A::B; module B; end; end");
 }
 
 struct DedentTest {

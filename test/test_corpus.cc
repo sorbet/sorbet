@@ -83,7 +83,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         auto src = ruby_typer::File::read(inputPath.c_str());
         auto exp = ruby_typer::File::read(checker.c_str());
-        auto parsed = ruby_typer::parser::parse_ruby(ctx, src);
+        auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
 
         EXPECT_EQ(0, parsed.diagnostics().size());
         EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");

@@ -1,6 +1,7 @@
 #ifndef SRUBY_CONTEXT_H
 #define SRUBY_CONTEXT_H
 
+#include "Files.h"
 #include "Names.h"
 #include "Symbols.h"
 #include "common/common.h"
@@ -20,6 +21,8 @@ class ContextBase {
     friend NameRef;
     friend SymbolInfo;
     friend SymbolRef;
+    friend File;
+    friend FileRef;
 
 public:
     ContextBase(spdlog::logger &logger);
@@ -46,6 +49,8 @@ public:
     NameRef enterNameUTF8(UTF8Desc nm);
 
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original);
+
+    FileRef enterFile(UTF8Desc path, UTF8Desc source);
 
     int indexClassOrJar(const char *name);
 
@@ -113,6 +118,7 @@ private:
     unsigned int files_used;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::unordered_map<NameRef, SymbolRef> classes;
+    std::vector<File> files;
 
     void expandNames();
 
