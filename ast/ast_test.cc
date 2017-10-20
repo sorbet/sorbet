@@ -43,7 +43,7 @@ TEST(ASTTest, TestOffset2Pos) {
 TEST(ASTTest, ErrorReporter) {
     ContextBase ctx(*console);
     FileRef f = ctx.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
-    ctx.errors.error(Loc{f, 0, 3}, "Use of metavariable: {}", "foo");
+    ctx.errors.error(Loc{f, 0, 3}, ErrorClass::Internal, "Use of metavariable: {}", "foo");
 }
 
 } // namespace ast

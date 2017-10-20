@@ -6,7 +6,7 @@ namespace ast {
 
 using namespace std;
 
-void Reporter::_error(Loc loc, const string &formatted) {
+void Reporter::_error(Loc loc, ErrorClass what, const string &formatted) {
     u4 begin_line, begin_col, end_line, end_col;
     loc.position(ctx_, begin_line, begin_col, end_line, end_col);
 
