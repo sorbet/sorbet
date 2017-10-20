@@ -120,7 +120,6 @@ private:
     unsigned int max_files_count;
     unsigned int files_used;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
-    std::unordered_map<NameRef, SymbolRef> classes;
 
     void expandNames();
 

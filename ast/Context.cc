@@ -12,9 +12,17 @@ namespace ast {
 
 SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
     auto nameId = enterNameUTF8(name);
-    auto symId = enterClassSymbol(defn_root(), nameId);
-    symId.info(*this, true).setCompleted();
-    return symId;
+
+    auto symRef = SymbolRef(symbols.size());
+    symbols.emplace_back();
+    auto &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
+    info.name = nameId;
+    info.owner = defn_root();
+    info.flags = 0;
+    info.setClass();
+
+    symRef.info(*this, true).setCompleted();
+    return symRef;
 }
 
 static const char *init = "initialize";
@@ -178,11 +186,6 @@ ContextBase::~ContextBase() {}
 constexpr decltype(ContextBase::STRINGS_PAGE_SIZE) ContextBase::STRINGS_PAGE_SIZE;
 
 SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
-    // This is special because bootstrapping problems
-    if (owner == defn_root()) {
-        return getTopLevelClassSymbol(name);
-    }
-
     // TODO Unify this with enterSymbol
     DEBUG_ONLY(Error::check(owner.exists()));
     auto &ownerScope = owner.info(*this, true);
@@ -395,21 +398,6 @@ NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return idx;
 }
 
-SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
-    auto &current = classes[name];
-    if (current.exists()) {
-        return current; // return fast
-    }
-    current = symbols.size();
-    symbols.emplace_back();
-    auto &info = current.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
-    info.name = name;
-    info.owner = defn_root();
-    info.flags = 0;
-    info.setClass();
-    return current;
-}
-
 SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     auto tempName = this->freshNameUnique(kind, name);
     vector<SymbolRef> empty;
@@ -426,7 +414,7 @@ unsigned int ContextBase::namesUsed() {
 
 std::string ContextBase::toString() {
     std::vector<std::string> children;
-    for (auto element : classes) {
+    for (auto element : defn_root().info(*this).members) {
         children.push_back(element.second.toString(*this));
     }
     std::sort(children.begin(), children.end());
