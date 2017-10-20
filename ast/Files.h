@@ -1,3 +1,7 @@
+#ifndef SRUBY_AST_FILES_H
+#define SRUBY_AST_FILES_H
+
+
 #include "Names.h"
 #include <string>
 
@@ -57,3 +61,5 @@ private:
 };
 } // namespace ast
 } // namespace ruby_typer
+
+#endif // SRUBY_AST_FILES_H

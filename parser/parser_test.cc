@@ -38,36 +38,3 @@ TEST(ParserTest, TestDedent) {
         EXPECT_EQ(got, tc.out);
     }
 }
-
-namespace ruby_typer {
-namespace parser {
-void offset2Pos(ast::UTF8Desc source, u4 off, u4 &line, u4 &col);
-}
-} // namespace ruby_typer
-
-struct Offset2PosTest {
-    string src;
-    u4 off;
-    u4 line;
-    u4 col;
-};
-
-TEST(ParserTest, TestOffset2Pos) {
-    vector<Offset2PosTest> cases = {
-        {"hello", 0, 1, 0},
-        {"line 1\nline 2", 1, 1, 1},
-        {"line 1\nline 2", 7, 2, 0},
-        {"line 1\nline 2", 11, 2, 4},
-        {"a long line with no newlines\n", 20, 1, 20},
-    };
-    int i = 0;
-    for (auto &tc : cases) {
-        SCOPED_TRACE(string("case: ") + to_string(i));
-
-        u4 col = -1, line = -1;
-        ruby_typer::parser::offset2Pos(tc.src, tc.off, line, col);
-        EXPECT_EQ(tc.col, col);
-        EXPECT_EQ(tc.line, line);
-        i++;
-    }
-}
