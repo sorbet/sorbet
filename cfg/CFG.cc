@@ -88,12 +88,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
             auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym);
             auto bodyBlock = inWhat.freshBlock();
             auto continueBlock = inWhat.freshBlock();
-            if (headerEnd != deadBlock()) {
-                Error::check(!headerEnd->bexit.cond.exists());
-                headerEnd->bexit.cond = condSym;
-                headerEnd->bexit.thenb = bodyBlock;
-                headerEnd->bexit.elseb = continueBlock;
-            }
+            conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, inWhat);
             // finishHeader
             auto bodySym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
 
