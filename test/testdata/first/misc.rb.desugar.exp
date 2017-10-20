@@ -3,7 +3,19 @@ begin
   @iv<todo ivar sym> = 1
   @@cv<todo cvar sym> = 1
   $gv<todo gvar sym> = 1
-  <Not Supported (Masgn)>
+  begin
+    assignTmp$2 = [nil, nil]
+    <emtpyTree>.x().var=(assignTmp$2.[](0))
+    y<todo lvar sym> = assignTmp$2.[](1)
+    assignTmp$2
+  end
+  begin
+    assignTmp$3 = <emtpyTree>.zaaaz()
+    baaaar<todo lvar sym> = assignTmp$3.[](0)
+    naaar<todo lvar sym> = assignTmp$3.[](1)
+    assignTmp$3
+  end
+  xaaaaz<todo lvar sym> = [<emtpyTree>.yayayaya(), <emtpyTree>.tutututu()]
   <Not Supported (Kwbegin)>
   <Not Supported (Kwbegin)>
   <Not Supported (Kwbegin)>
@@ -20,9 +32,9 @@ begin
   <Not Supported (DefS)>
   <Not Supported (SClass)>
   begin
-    ||$2 = true
-    if ||$2
-      ||$2
+    ||$4 = true
+    if ||$4
+      ||$4
     else 
       false
     end
@@ -56,7 +68,12 @@ begin
   while true.!()
     nil
   end
-  <Not Supported (Masgn)>
+  begin
+    assignTmp$5 = 1
+    a<todo lvar sym> = assignTmp$5.[](0)
+    <Not Supported (Mlhs)>
+    assignTmp$5
+  end
   <Not Supported (NthRef)>
   def foo<<todo sym>>(<Not Supported (Optarg)>, <Not Supported (Restarg)>)
     <emtpyTree>
@@ -66,7 +83,11 @@ begin
   <Not Supported (Rational)>
   <Not Supported (Complex)>
   <Not Supported (Kwbegin)>
-  <Not Supported (Masgn)>
+  begin
+    assignTmp$6 = [<Not Supported (Splat)>]
+    <Not Supported (SplatLhs)>
+    assignTmp$6
+  end
   <Not Supported (DSymbol)>
   [:sym]
   if x<todo lvar sym>

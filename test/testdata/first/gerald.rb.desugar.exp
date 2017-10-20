@@ -20,7 +20,12 @@ begin
 
       def initialize<<todo sym>>()
         begin
-          <Not Supported (Masgn)>
+          begin
+            assignTmp$0 = <emtpyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
+            <Not Supported (IVarLhs)>
+            invalid_rules<todo lvar sym> = assignTmp$0.[](1)
+            assignTmp$0
+          end
           if invalid_rules<todo lvar sym>.empty?().!()
             begin
               invalid_rule_ids<todo lvar sym> = invalid_rules<todo lvar sym>.map(<Not Supported (BlockPass)>).join(",".to_s())
@@ -203,11 +208,11 @@ begin
                       begin
                         a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                         if begin
-                            &&$0 = <emtpyTree>
-                            if &&$0
+                            &&$1 = <emtpyTree>
+                            if &&$1
                               <emtpyTree>
                             else 
-                              &&$0
+                              &&$1
                             end
                           end
                           a_name<todo lvar sym> = a_name<todo lvar sym>.[](<Not Supported (IRange)>)
@@ -220,11 +225,11 @@ begin
                         begin
                           b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                           if begin
-                              &&$1 = <emtpyTree>
-                              if &&$1
+                              &&$2 = <emtpyTree>
+                              if &&$2
                                 <emtpyTree>
                               else 
-                                &&$1
+                                &&$2
                               end
                             end
                             b_name<todo lvar sym> = b_name<todo lvar sym>.[](<Not Supported (IRange)>)

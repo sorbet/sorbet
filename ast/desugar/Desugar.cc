@@ -510,6 +510,34 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  auto iff = mkIf(cond, thenp, elsep);
                  result.swap(iff);
              },
+             [&](parser::Masgn *masgn) {
+                 parser::Mlhs *lhs = dynamic_cast<parser::Mlhs *>(masgn->lhs.get());
+                 Error::check(lhs != nullptr);
+                 auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::assignTemp(), ctx.owner);
+                 vector<unique_ptr<Statement>> stats;
+                 stats.emplace_back(mkAssign(tempSym, node2TreeImpl(ctx, masgn->rhs)));
+                 int i = 0;
+                 for(auto &c: lhs->exprs) {
+                     unique_ptr<Statement> lh = node2TreeImpl(ctx, c);
+                     if (ast::Send *snd = dynamic_cast<ast::Send *>(lh.get())) {
+                         Error::check(snd->args.size() == 0);
+                         unique_ptr<Expression>  getElement = stat2Expr(mkSend1(mkIdent(tempSym), Names::squareBrackets(), make_unique<IntLit>(i)));
+                         snd->args.emplace_back(std::move(getElement));
+                         stats.emplace_back(std::move(lh));
+                     } else if (ast::Ident *snd = dynamic_cast<ast::Ident *>(lh.get()))  {
+                         auto access = mkSend1(mkIdent(tempSym), Names::squareBrackets(), make_unique<IntLit>(i));
+                         unique_ptr<Statement> assign = mkAssign(lh, access);
+                         stats.emplace_back(std::move(assign));
+                     } else if (ast::NotSupported *snd = dynamic_cast<ast::NotSupported *>(lh.get())){
+                         stats.emplace_back(std::move(lh));
+                     } else {
+                         Error::notImplemented();
+                     }
+                     i++;
+                 }
+                 unique_ptr<Statement> res = mkInsSeq(move(stats), stat2Expr(mkIdent(tempSym)));
+                 result.swap(res);
+             },
              [&](parser::True *t) {
                  auto res = mkTrue();
                  result.swap(res);

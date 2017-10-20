@@ -54,6 +54,43 @@ Begin {
         ]
       }
     }
+    Masgn {
+      lhs = Mlhs {
+        exprs = [
+          LVarLhs {
+            name = baaaar
+          }
+          LVarLhs {
+            name = naaar
+          }
+        ]
+      }
+      rhs = Send {
+        receiver = NULL
+        method = zaaaz
+        args = [
+        ]
+      }
+    }
+    LVarAsgn {
+      name = xaaaaz
+      expr = Array {
+        elts = [
+          Send {
+            receiver = NULL
+            method = yayayaya
+            args = [
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = tutututu
+            args = [
+            ]
+          }
+        ]
+      }
+    }
     Kwbegin {
       stmts = [
       ]
