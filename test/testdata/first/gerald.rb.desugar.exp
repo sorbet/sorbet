@@ -22,7 +22,7 @@ begin
         begin
           begin
             assignTmp$0 = <emtpyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
-            <Not Supported (IVarLhs)>
+            @rules<todo ivar sym> = assignTmp$0.[](0)
             invalid_rules<todo lvar sym> = assignTmp$0.[](1)
             assignTmp$0
           end

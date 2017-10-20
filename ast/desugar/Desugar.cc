@@ -379,6 +379,10 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_cvar_todo());
                  result.swap(res);
              },
+             [&](parser::IVarLhs *var) {
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_ivar_todo());
+                 result.swap(res);
+             },
              [&](parser::IVarAsgn *asgn) {
                  unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, ContextBase::defn_ivar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
