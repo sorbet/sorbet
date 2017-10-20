@@ -44,18 +44,21 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     auto myInfo = info(ctx, true);
     auto name = myInfo.name.toString(ctx);
     auto members = myInfo.members;
+
     printTabs(os, tabs);
-    os << name << std::endl;
+    os << name;
+
+    std::string type = "unknown";
+    if (myInfo.isClass()) { type = "class"; }
+    else if (myInfo.isArray()) { type = "array"; }
+    else if (myInfo.isField()) { type = "field"; }
+    else if (myInfo.isMethod()) { type = "method"; }
+    os << " (" << type << ")";
+    os << std::endl;
+
     std::vector<std::string> children;
     for (auto pair : members) {
-        auto info = pair.second.info(ctx);
-        std::string type = "unknown";
-        if (info.isClass()) { type = "class"; }
-        else if (info.isArray()) { type = "array"; }
-        else if (info.isField()) { type = "field"; }
-        else if (info.isMethod()) { type = "method"; }
-
-        children.push_back(type + pair.second.toString(ctx, tabs + 1));
+        children.push_back(pair.second.toString(ctx, tabs + 1));
     }
     std::sort(children.begin(), children.end());
     for (auto row : children) {

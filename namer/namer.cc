@@ -19,9 +19,7 @@ public:
     }
 
     ast::ConstantLit *postTransformConstantLit(ast::Context ctx, ast::ConstantLit *c) {
-        auto args = std::vector<ast::SymbolRef>();
-        auto result = ast::ContextBase::defn_junk();
-        this->name = ctx.state.enterSymbol(getName(), c->cnst, result, args, false);
+        this->name = ctx.state.enterClassSymbol(getName(), c->cnst);
         return c;
     }
 

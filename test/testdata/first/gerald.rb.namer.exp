@@ -1,39 +1,39 @@
-<<JUNK>>
-<bottom>
-<none>
-<root>
-field  &&$0
-field  &&$1
-field  Gerald
-field    Diff
-method      added_files
-method      added_lines
-method      affected_files
-method      changed_files
-method      changed_lines
-method      changed_openapi?
-method      deleted_files
-method      initialize
-method      parse
-method      removed_lines
-field    MatchContext
-method      initialize
-method      user_stripe_suffix?
-field    MatchTimeBudget
-method      check!
-method      initialize
-method      time_rule
-field    MatchTimeout
-method      initialize
-field    Matcher
-method      initialize
-method      match
-<todo cvar sym>
-<todo gvar sym>
-<todo ivar sym>
-<todo lvar sym>
-<todo sym>
-<top>
-Object
-nil
+<<JUNK>> (class)
+<bottom> (class)
+<none> (class)
+<root> (class)
+  &&$0 (field)
+  &&$1 (field)
+<todo cvar sym> (class)
+<todo gvar sym> (class)
+<todo ivar sym> (class)
+<todo lvar sym> (class)
+<todo sym> (class)
+<top> (class)
+Gerald (class)
+  Diff (class)
+    added_files (method)
+    added_lines (method)
+    affected_files (method)
+    changed_files (method)
+    changed_lines (method)
+    changed_openapi? (method)
+    deleted_files (method)
+    initialize (method)
+    parse (method)
+    removed_lines (method)
+  MatchContext (class)
+    initialize (method)
+    user_stripe_suffix? (method)
+  MatchTimeBudget (class)
+    check! (method)
+    initialize (method)
+    time_rule (method)
+  MatchTimeout (class)
+    initialize (method)
+  Matcher (class)
+    initialize (method)
+    match (method)
+Object (class)
+nil (class)
 

@@ -1,17 +1,17 @@
-<<JUNK>>
-<bottom>
-<none>
-<root>
-field  ||$2
-<todo cvar sym>
-<todo gvar sym>
-<todo ivar sym>
-<todo lvar sym>
-<todo sym>
-<top>
-Object
-method  foo
-method  foo
-method  foo
-nil
+<<JUNK>> (class)
+<bottom> (class)
+<none> (class)
+<root> (class)
+  ||$2 (field)
+<todo cvar sym> (class)
+<todo gvar sym> (class)
+<todo ivar sym> (class)
+<todo lvar sym> (class)
+<todo sym> (class)
+<top> (class)
+Object (class)
+  foo (method)
+  foo (method)
+  foo (method)
+nil (class)
 

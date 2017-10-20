@@ -12,7 +12,7 @@ namespace ast {
 
 SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
     auto nameId = enterNameUTF8(name);
-    auto symId = getTopLevelClassSymbol(nameId);
+    auto symId = enterClassSymbol(defn_root(), nameId);
     symId.info(*this, true).setCompleted();
     return symId;
 }
@@ -176,6 +176,39 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
 ContextBase::~ContextBase() {}
 
 constexpr decltype(ContextBase::STRINGS_PAGE_SIZE) ContextBase::STRINGS_PAGE_SIZE;
+
+SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
+    // This is special because bootstrapping problems
+    if (owner == defn_root()) {
+        return getTopLevelClassSymbol(name);
+    }
+
+    // TODO Unify this with enterSymbol
+    DEBUG_ONLY(Error::check(owner.exists()));
+    auto &ownerScope = owner.info(*this, true);
+    for (auto &member : ownerScope.members) {
+        if (member.first == name) {
+            return member.second;
+        }
+    }
+
+    bool reallocate = symbols.size() == symbols.capacity();
+
+    auto ret = SymbolRef(symbols.size());
+    symbols.emplace_back();
+    auto &info = ret.info(*this, true);
+    info.name = name;
+    info.flags = 0;
+    info.owner = owner;
+    info.setClass();
+
+    if (!reallocate) {
+        ownerScope.members.push_back(make_pair(name, ret));
+    } else {
+        owner.info(*this, true).members.push_back(make_pair(name, ret));
+    }
+    return ret;
+}
 
 SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
                                    bool isMethod) {
