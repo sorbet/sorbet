@@ -1,7 +1,6 @@
 #ifndef SRUBY_AST_FILES_H
 #define SRUBY_AST_FILES_H
 
-
 #include "Names.h"
 #include <string>
 

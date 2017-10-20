@@ -2,9 +2,9 @@
 #define SRUBY_AST_H
 
 #include "Context.h"
+#include "Loc.h"
 #include "Names.h"
 #include "TreeMap.h"
 #include "Trees.h"
-#include "Loc.h"
 
 #endif // SRUBY_AST_H
