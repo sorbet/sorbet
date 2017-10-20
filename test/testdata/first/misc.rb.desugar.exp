@@ -28,21 +28,34 @@ begin
     end
   end
   <Not Supported (For)>
-  <Not Supported (While)>
+  while 0.!=(1)
+    <emtpyTree>
+  end
   x<todo lvar sym>.[]=(0)
-  <Not Supported (Break)>
-  <Not Supported (Break)>
-  <Not Supported (Break)>
+  break(<emtpyTree>)
+  break(1)
+  break([1, 2])
+  next(<emtpyTree>)
+  next(1)
+  next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
   def foo<<todo sym>>(<Not Supported (Kwarg)>, <Not Supported (Kwoptarg)>, <Not Supported (Kwrestarg)>)
     <emtpyTree>
   <Not Supported (Hash)>
   <Not Supported (LineLiteral)>
-  <Not Supported (While)>
-  <Not Supported (WhilePost)>
-  <Not Supported (Until)>
-  <Not Supported (UntilPost)>
+  while true
+    nil
+  end
+  while true
+    nil
+  end
+  while true.!()
+    nil
+  end
+  while true.!()
+    nil
+  end
   <Not Supported (Masgn)>
   <Not Supported (NthRef)>
   def foo<<todo sym>>(<Not Supported (Optarg)>, <Not Supported (Restarg)>)
@@ -68,7 +81,9 @@ begin
   <emtpyTree>.proc() do |<Not Supported (Shadowarg)>|
     <emtpyTree>
   end
-  <Not Supported (Break)>
+  break(<emtpyTree>.foo(1) do ||
+      <emtpyTree>
+    end)
   def foo<<todo sym>>(<Not Supported (Restarg)>)
     <emtpyTree>
   def foo<<todo sym>>(<Not Supported (Kwrestarg)>)

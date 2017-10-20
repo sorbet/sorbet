@@ -192,12 +192,12 @@ begin
               begin
                 lines<todo lvar sym> = part<todo lvar sym>.split("
 ".to_s())
-                a_name<todo lvar sym> = b_name<todo lvar sym> = <Not Supported (Nil)>
+                a_name<todo lvar sym> = b_name<todo lvar sym> = nil
                 added_lines<todo lvar sym> = []
                 removed_lines<todo lvar sym> = []
                 lines<todo lvar sym>.each() do |line<todo lvar sym>|
                   if line<todo lvar sym>.start_with?("index ".to_s(), "@@".to_s(), "new file mode".to_s())
-                    <Not Supported (Next)>
+                    next(<emtpyTree>)
                   else 
                     if line<todo lvar sym>.start_with?("---".to_s())
                       begin
@@ -247,7 +247,7 @@ begin
                   end
                 end
                 if a_name<todo lvar sym>.nil?()
-                  <Not Supported (Next)>
+                  next(<emtpyTree>)
                 else 
                   <emtpyTree>
                 end

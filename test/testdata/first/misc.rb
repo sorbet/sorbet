@@ -61,6 +61,12 @@ break
 break 1
 break 1,2
 
+
+# next
+next
+next 1
+next 1,2
+
 # defined
 defined?(X)
 

@@ -319,7 +319,34 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      make_unique<Block>(move(send), args, Expression::fromStatement(node2TreeImpl(ctx, block->body)));
                  result.swap(res);
              },
-
+             [&](parser::While *wl) {
+                 auto cond = node2TreeImpl(ctx, wl->cond);
+                 auto body = node2TreeImpl(ctx, wl->body);
+                 unique_ptr<Statement> res = make_unique<While>(stat2Expr(move(cond)), std::move(body));
+                 result.swap(res);
+             },
+             [&](parser::WhilePost *wl) {
+                 auto cond = node2TreeImpl(ctx, wl->cond);
+                 auto body = node2TreeImpl(ctx, wl->body);
+                 unique_ptr<Statement> res = make_unique<While>(stat2Expr(move(cond)), std::move(body));
+                 result.swap(res);
+             },
+             [&](parser::Until *wl) {
+                 auto cond = mkSend0(node2TreeImpl(ctx, wl->cond), Names::bang());
+                 auto body = node2TreeImpl(ctx, wl->body);
+                 unique_ptr<Statement> res = make_unique<While>(stat2Expr(move(cond)), std::move(body));
+                 result.swap(res);
+             },
+             [&](parser::UntilPost *wl) {
+                 auto cond = mkSend0(node2TreeImpl(ctx, wl->cond), Names::bang());
+                 auto body = node2TreeImpl(ctx, wl->body);
+                 unique_ptr<Statement> res = make_unique<While>(stat2Expr(move(cond)), move(body));
+                 result.swap(res);
+             },
+             [&](parser::Nil *wl) {
+                 unique_ptr<Statement> res = make_unique<Nil>();
+                 result.swap(res);
+             },
              [&](parser::IVar *var) {
                  unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_ivar_todo());
                  result.swap(res);
@@ -422,6 +449,57 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      result.swap(res);
                  } else {
                      unique_ptr<Statement> res = make_unique<Return>(Expression::fromStatement(mkEmptyTree()));
+                     result.swap(res);
+                 }
+             },
+             [&](parser::Return *ret) {
+                 if (ret->exprs.size() > 1) {
+                     vector<unique_ptr<Expression>> elems;
+                     for (auto &stat : ret->exprs) {
+                         elems.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
+                     };
+                     unique_ptr<Expression> arr = make_unique<Array>(elems);
+                     unique_ptr<Statement> res = make_unique<Return>(move(arr));
+                     result.swap(res);
+                 } else if (ret->exprs.size() == 1) {
+                     unique_ptr<Statement> res = make_unique<Return>(stat2Expr(node2TreeImpl(ctx, ret->exprs[0])));
+                     result.swap(res);
+                 } else {
+                     unique_ptr<Statement> res = make_unique<Return>(stat2Expr(mkEmptyTree()));
+                     result.swap(res);
+                 }
+             },
+             [&](parser::Break *ret) {
+                 if (ret->exprs.size() > 1) {
+                     vector<unique_ptr<Expression>> elems;
+                     for (auto &stat : ret->exprs) {
+                         elems.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
+                     };
+                     unique_ptr<Expression> arr = make_unique<Array>(elems);
+                     unique_ptr<Statement> res = make_unique<Break>(move(arr));
+                     result.swap(res);
+                 } else if (ret->exprs.size() == 1) {
+                     unique_ptr<Statement> res = make_unique<Break>(stat2Expr(node2TreeImpl(ctx, ret->exprs[0])));
+                     result.swap(res);
+                 } else {
+                     unique_ptr<Statement> res = make_unique<Break>(stat2Expr(mkEmptyTree()));
+                     result.swap(res);
+                 }
+             },
+             [&](parser::Next *ret) {
+                 if (ret->exprs.size() > 1) {
+                     vector<unique_ptr<Expression>> elems;
+                     for (auto &stat : ret->exprs) {
+                         elems.emplace_back(stat2Expr(node2TreeImpl(ctx, stat)));
+                     };
+                     unique_ptr<Expression> arr = make_unique<Array>(elems);
+                     unique_ptr<Statement> res = make_unique<Next>(move(arr));
+                     result.swap(res);
+                 } else if (ret->exprs.size() == 1) {
+                     unique_ptr<Statement> res = make_unique<Next>(stat2Expr(node2TreeImpl(ctx, ret->exprs[0])));
+                     result.swap(res);
+                 } else {
+                     unique_ptr<Statement> res = make_unique<Next>(stat2Expr(mkEmptyTree()));
                      result.swap(res);
                  }
              },

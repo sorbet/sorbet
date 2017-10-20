@@ -227,6 +227,27 @@ Begin {
         }
       ]
     }
+    Next {
+      exprs = [
+      ]
+    }
+    Next {
+      exprs = [
+        Integer {
+          val = "1"
+        }
+      ]
+    }
+    Next {
+      exprs = [
+        Integer {
+          val = "1"
+        }
+        Integer {
+          val = "2"
+        }
+      ]
+    }
     Defined {
       value = Const {
         scope = NULL
