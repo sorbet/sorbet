@@ -232,7 +232,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
              },
              [&](parser::Begin *a) {
                  if (a->stmts.size() > 0) {
-                     vector <unique_ptr<Statement>> stats;
+                     vector<unique_ptr<Statement>> stats;
                      auto end = --a->stmts.end();
                      for (auto it = a->stmts.begin(); it != end; ++it) {
                          auto &stat = *it;
@@ -536,6 +536,23 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      result.swap(res);
                  }
              },
+             [&](parser::Yield *ret) {
+                 if (ret->exprs.size() > 1) {
+                     vector<unique_ptr<Expression>> elems;
+                     for (auto &stat : ret->exprs) {
+                         elems.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
+                     };
+                     unique_ptr<Expression> arr = make_unique<Array>(elems);
+                     unique_ptr<Statement> res = make_unique<Yield>(move(arr));
+                     result.swap(res);
+                 } else if (ret->exprs.size() == 1) {
+                     unique_ptr<Statement> res = make_unique<Yield>(Expression::fromStatement(node2TreeImpl(ctx, ret->exprs[0])));
+                     result.swap(res);
+                 } else {
+                     unique_ptr<Statement> res = make_unique<Yield>(Expression::fromStatement(mkEmptyTree()));
+                     result.swap(res);
+                 }
+             },
              [&](parser::If *a) {
                  auto cond = node2TreeImpl(ctx, a->condition);
                  auto thenp = node2TreeImpl(ctx, a->then_);
@@ -550,18 +567,19 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  vector<unique_ptr<Statement>> stats;
                  stats.emplace_back(mkAssign(tempSym, node2TreeImpl(ctx, masgn->rhs)));
                  int i = 0;
-                 for(auto &c: lhs->exprs) {
+                 for (auto &c : lhs->exprs) {
                      unique_ptr<Statement> lh = node2TreeImpl(ctx, c);
                      if (ast::Send *snd = dynamic_cast<ast::Send *>(lh.get())) {
                          Error::check(snd->args.size() == 0);
-                         unique_ptr<Expression>  getElement = Expression::fromStatement(mkSend1(mkIdent(tempSym), Names::squareBrackets(), make_unique<IntLit>(i)));
+                         unique_ptr<Expression> getElement =
+                             Expression::fromStatement(mkSend1(mkIdent(tempSym), Names::squareBrackets(), make_unique<IntLit>(i)));
                          snd->args.emplace_back(std::move(getElement));
                          stats.emplace_back(std::move(lh));
-                     } else if (ast::Ident *snd = dynamic_cast<ast::Ident *>(lh.get()))  {
+                     } else if (ast::Ident *snd = dynamic_cast<ast::Ident *>(lh.get())) {
                          auto access = mkSend1(mkIdent(tempSym), Names::squareBrackets(), make_unique<IntLit>(i));
                          unique_ptr<Statement> assign = mkAssign(lh, access);
                          stats.emplace_back(std::move(assign));
-                     } else if (ast::NotSupported *snd = dynamic_cast<ast::NotSupported *>(lh.get())){
+                     } else if (ast::NotSupported *snd = dynamic_cast<ast::NotSupported *>(lh.get())) {
                          stats.emplace_back(std::move(lh));
                      } else {
                          Error::notImplemented();

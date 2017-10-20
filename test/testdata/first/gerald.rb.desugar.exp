@@ -117,7 +117,7 @@ begin
       def time_rule<<todo sym>>(rule<todo lvar sym>)
         begin
           rule_start<todo lvar sym> = <emtpyTree>::Time.now()
-          res<todo lvar sym> = <Not Supported (Yield)>
+          res<todo lvar sym> = yield(<emtpyTree>)
           dur_ms<todo lvar sym> = begin
             <emtpyTree>::Time.now().-(rule_start<todo lvar sym>)
           end.*(1000)

@@ -77,6 +77,8 @@ BoolLit::BoolLit(bool value) : value(value) {}
 
 Return::Return(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
+Yield::Yield(unique_ptr<Expression> expr) : expr(move(expr)) {}
+
 Ident::Ident(SymbolRef symbol) : symbol(symbol), name(0) {
     Error::check(!symbol.isSynthetic()); // symbol is a valid symbol
 }
@@ -244,6 +246,10 @@ string Return::toString(ContextBase &ctx, int tabs) {
     return "return " + this->expr->toString(ctx, tabs + 1);
 }
 
+string Yield::toString(ContextBase &ctx, int tabs) {
+    return "yield(" + this->expr->toString(ctx, tabs + 1) + ")";
+}
+
 string Next::toString(ContextBase &ctx, int tabs) {
     return "next(" + this->expr->toString(ctx, tabs + 1) + ")";
 }
@@ -357,6 +363,9 @@ std::string NotSupported::nodeName() {
 
 std::string Rescue::nodeName() {
     return "Rescue";
+}
+std::string Yield::nodeName() {
+    return "Next";
 }
 std::string Next::nodeName() {
     return "Next";

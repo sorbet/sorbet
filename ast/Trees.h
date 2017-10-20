@@ -129,6 +129,15 @@ public:
     virtual std::string nodeName();
 };
 
+class Yield : public ControlFlow {
+public:
+    std::unique_ptr<Expression> expr;
+
+    Yield(std::unique_ptr<Expression> expr);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string nodeName();
+};
+
 class Rescue : public ControlFlow {
 public:
     std::unique_ptr<Expression> body;
