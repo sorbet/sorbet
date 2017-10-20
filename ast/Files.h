@@ -13,7 +13,8 @@ public:
 
     FileRef(const FileRef &f) = default;
     FileRef(FileRef &&f) = default;
-    FileRef &operator=(FileRef &f) = default;
+    FileRef &operator=(const FileRef &f) = default;
+    FileRef &operator=(FileRef &&f) = default;
 
     bool operator==(const FileRef &rhs) const {
         return _id == rhs._id;

@@ -61,18 +61,18 @@ public:
     Result &result_;
 
     Loc tok_loc(const token *tok) {
-        return Loc{(u4)tok->start(), (u4)tok->end()};
+        return Loc{result_.file(), (u4)tok->start(), (u4)tok->end()};
     }
 
     Loc maybe_loc(unique_ptr<Node> &node) {
         if (node == nullptr) {
-            return Loc::none();
+            return Loc::none(result_.file());
         }
         return node->loc;
     }
 
     Loc tok_loc(const token *begin, const token *end) {
-        return Loc{(u4)begin->start(), (u4)end->end()};
+        return Loc{result_.file(), (u4)begin->start(), (u4)end->end()};
     }
 
     Loc loc_join(Loc begin, Loc end) {
@@ -80,8 +80,9 @@ public:
             return end;
         if (end.is_none())
             return begin;
+        Error::check(begin.file == end.file);
 
-        return Loc{begin.begin_pos, end.end_pos};
+        return Loc{result_.file(), begin.begin_pos, end.end_pos};
     }
 
     Loc collection_loc(const token *begin, vector<unique_ptr<Node>> &elts, const token *end) {
@@ -91,7 +92,7 @@ public:
         }
         DEBUG_ONLY(Error::check(end == nullptr));
         if (elts.size() == 0)
-            return Loc::none();
+            return Loc::none(result_.file());
         return loc_join(elts.front()->loc, elts.back()->loc);
     }
 
