@@ -67,20 +67,13 @@ ConstDef::ConstDef(SymbolRef symbol, unique_ptr<Expression> rhs) : Declaration(s
 If::If(unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
-Breakable::Breakable(u1 break_tag) : break_tag(break_tag) {}
+While::While(unique_ptr<Expression> cond, unique_ptr<Statement> body) : cond(move(cond)), body(move(body)) {}
 
-While::While(u1 break_tag, unique_ptr<Expression> cond, unique_ptr<Statement> body)
-    : Breakable(break_tag), cond(move(cond)), body(move(body)) {}
+Break::Break(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
-Break::Break(u1 break_tag) : break_tag(break_tag) {}
-
-Next::Next(u1 break_tag) : break_tag(break_tag) {}
+Next::Next(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
 BoolLit::BoolLit(bool value) : value(value) {}
-
-string Next::toString(ContextBase &ctx, int tabs) {
-    return "next";
-}
 
 Return::Return(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
@@ -251,12 +244,16 @@ string Return::toString(ContextBase &ctx, int tabs) {
     return "return " + this->expr->toString(ctx, tabs + 1);
 }
 
+string Next::toString(ContextBase &ctx, int tabs) {
+    return "next(" + this->expr->toString(ctx, tabs + 1) + ")";
+}
+
 string Self::toString(ContextBase &ctx, int tabs) {
     return "self(" + this->claz.info(ctx).name.name(ctx).toString(ctx) + ")";
 }
 
 string Break::toString(ContextBase &ctx, int tabs) {
-    return "break";
+    return "break(" + this->expr->toString(ctx, tabs + 1) + ")";
 }
 
 string IntLit::toString(ContextBase &ctx, int tabs) {

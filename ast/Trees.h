@@ -88,41 +88,34 @@ public:
     virtual std::string nodeName();
 };
 
-class Breakable : public ControlFlow {
-public:
-    u1 break_tag;
-
-    Breakable(u1 break_tag);
-};
-
-class While : public Breakable {
+class While : public ControlFlow {
 public:
     std::unique_ptr<Expression> cond;
     std::unique_ptr<Statement> body;
 
-    While(u1 break_tag, std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body);
+    While(std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
-class For : public Breakable {
+class For : public ControlFlow {
     // TODO
 };
 
 class Break : public ControlFlow {
 public:
-    u1 break_tag;
+    std::unique_ptr<Expression> expr;
 
-    Break(u1 break_tag);
+    Break(std::unique_ptr<Expression> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
 class Next : public ControlFlow {
 public:
-    u1 break_tag;
+    std::unique_ptr<Expression> expr;
 
-    Next(u1 break_tag);
+    Next(std::unique_ptr<Expression> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
