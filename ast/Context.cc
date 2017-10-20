@@ -84,7 +84,7 @@ static UTF8Desc todo_gvar_DESC{(char *)todo_gvar_str, (int)strlen(todo_gvar_str)
 static const char *todo_lvar_str = "<todo lvar sym>";
 static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)strlen(todo_lvar_str)};
 
-ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
+ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 

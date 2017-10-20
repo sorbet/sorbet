@@ -3,6 +3,7 @@
 
 #include "Files.h"
 #include "Names.h"
+#include "Reporter.h"
 #include "Symbols.h"
 #include "common/common.h"
 #include "spdlog/spdlog.h"
@@ -63,6 +64,7 @@ public:
     void sanityCheck() const;
 
     spdlog::logger &logger;
+    Reporter errors;
 
     static constexpr SymbolRef noSymbol() {
         return SymbolRef(0);
