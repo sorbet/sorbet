@@ -13,6 +13,8 @@ namespace ast {
 SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
     auto nameId = enterNameUTF8(name);
 
+    // This can't use enterClass since there is a chicken and egg problem.
+    // These will be added to defn_root().members later.
     auto symRef = SymbolRef(symbols.size());
     symbols.emplace_back();
     auto &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
@@ -179,6 +181,13 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
      * 11: <<JUNK>>;
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
+
+    // Add them back in since synthesizeClass couldn't
+    for (SymbolInfo info : symbols) {
+        if (info.owner != defn_root()) {
+          defn_root().info(*this).members.push_back(make_pair(info.name, info.owner));
+        }
+    }
 }
 
 ContextBase::~ContextBase() {}
