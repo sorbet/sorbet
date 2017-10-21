@@ -1,0 +1,13 @@
+begin
+  module <emtpyTree>::B<<todo sym>>
+    <emtpyTree>
+
+  end
+  module <emtpyTree>::A<<todo sym>>
+    class <emtpyTree>::B::C<<todo sym>>
+      <emtpyTree>
+
+    end
+
+  end
+end
