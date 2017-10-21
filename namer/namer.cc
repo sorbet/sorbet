@@ -1,7 +1,6 @@
 #include "namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
-#include <iostream>
 
 namespace ruby_typer {
 namespace namer {
