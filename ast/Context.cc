@@ -185,7 +185,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     // Add them back in since synthesizeClass couldn't
     for (SymbolInfo info : symbols) {
         if (info.owner != defn_root()) {
-          defn_root().info(*this).members.push_back(make_pair(info.name, info.owner));
+            defn_root().info(*this).members.push_back(make_pair(info.name, info.owner));
         }
     }
 }
