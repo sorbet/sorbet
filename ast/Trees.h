@@ -17,7 +17,11 @@ public:
     virtual std::string toString(ContextBase &ctx, int tabs = 0) = 0;
 };
 
-class Expression : public Statement {};
+class Expression : public Statement {
+public:
+    static std::unique_ptr<Expression> fromStatement(std::unique_ptr<Statement> &expr);
+    static std::unique_ptr<Expression> fromStatement(std::unique_ptr<Statement> &&expr);
+};
 
 class ControlFlow : public Expression {};
 

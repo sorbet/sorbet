@@ -9,10 +9,6 @@ namespace ruby_typer {
 namespace ast {
 namespace desugar {
 
-std::unique_ptr<Expression> stat2Expr(std::unique_ptr<Statement> &expr);
-
-std::unique_ptr<Expression> stat2Expr(std::unique_ptr<Statement> &&expr);
-
 std::unique_ptr<Statement> node2Tree(Context ctx, parser::Node *what);
 } // namespace desugar
 } // namespace ast
