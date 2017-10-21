@@ -1,0 +1,38 @@
+begin
+  class <emtpyTree>::NormalClass<<todo sym>>
+    def normal_method<<todo sym>>()
+      <emtpyTree>
+
+    <Not Supported (DefS)>
+
+    class <emtpyTree>::InnerClass<<todo sym>>
+      <emtpyTree>
+
+    end
+
+    module <emtpyTree>::InnerModule<<todo sym>>
+      <emtpyTree>
+
+    end
+
+  end
+  module <emtpyTree>::ANamespace<<todo sym>>
+    class <emtpyTree>::ObviousChild<<todo sym>>
+      <emtpyTree>
+
+    end
+
+  end
+  class <emtpyTree>::ANamespace::ClassInNamespace<<todo sym>>
+    <emtpyTree>
+
+  end
+  class <emtpyTree>::Parent<<todo sym>>
+    <emtpyTree>
+
+  end
+  class <emtpyTree>::Child<<todo sym>>
+    <emtpyTree>
+
+  end
+end
