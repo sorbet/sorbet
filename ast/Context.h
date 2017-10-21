@@ -36,10 +36,7 @@ public:
 
     SymbolRef enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args, bool isMethod);
 
-    /** Creates a new top-level class if not exists already */
-    SymbolRef getTopLevelClassSymbol(NameRef name);
-
-    SymbolRef newInnerClass(SymbolRef owner, NameRef name); // Needs to be implemented from scratch
+    SymbolRef enterClassSymbol(SymbolRef owner, NameRef name);
 
     SymbolRef newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
 
@@ -56,6 +53,8 @@ public:
     unsigned int symbolCapacity();
 
     void sanityCheck() const;
+
+    std::string toString();
 
     spdlog::logger &logger;
 
@@ -97,8 +96,17 @@ public:
         return SymbolRef(9);
     }
 
+    static constexpr SymbolRef defn_object() {
+        return SymbolRef(10);
+    }
+
+    static constexpr SymbolRef defn_junk() {
+        return SymbolRef(11);
+    }
+
+    // Keep as last and update to match the last entry
     static constexpr SymbolRef defn_last_synthetic_sym() {
-        return SymbolRef(9);
+        return defn_junk();
     }
 
 private:
@@ -112,7 +120,6 @@ private:
     unsigned int max_files_count;
     unsigned int files_used;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
-    std::unordered_map<NameRef, SymbolRef> classes;
 
     void expandNames();
 
@@ -121,6 +128,9 @@ private:
     void complete(SymbolRef id, SymbolInfo &currentInfo);
 
     SymbolRef synthesizeClass(UTF8Desc name);
+
+    SymbolRef getTopLevelClassSymbol(NameRef name);
+
     u2 freshNameId = 0;
 };
 // CheckSize(ContextBase, 152, 8);

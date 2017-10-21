@@ -2,3 +2,4 @@
 /bazel-*
 /compile_commands.json
 /.gdb_history
+/tags

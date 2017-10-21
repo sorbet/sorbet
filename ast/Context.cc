@@ -2,6 +2,8 @@
 #include "Hashing.h"
 #include "common/common.h"
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
@@ -10,9 +12,19 @@ namespace ast {
 
 SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
     auto nameId = enterNameUTF8(name);
-    auto symId = getTopLevelClassSymbol(nameId);
-    symId.info(*this, true).setCompleted();
-    return symId;
+
+    // This can't use enterClass since there is a chicken and egg problem.
+    // These will be added to defn_root().members later.
+    auto symRef = SymbolRef(symbols.size());
+    symbols.emplace_back();
+    auto &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
+    info.name = nameId;
+    info.owner = defn_root();
+    info.flags = 0;
+    info.setClass();
+
+    symRef.info(*this, true).setCompleted();
+    return symRef;
 }
 
 static const char *init = "initialize";
@@ -84,6 +96,12 @@ static UTF8Desc todo_gvar_DESC{(char *)todo_gvar_str, (int)strlen(todo_gvar_str)
 static const char *todo_lvar_str = "<todo lvar sym>";
 static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)strlen(todo_lvar_str)};
 
+static const char *object_str = "Object";
+static UTF8Desc object_DESC{(char *)object_str, (int)std::strlen(object_str)};
+
+static const char *junk_str = "<<JUNK>>";
+static UTF8Desc junk_DESC{(char *)junk_str, (int)std::strlen(junk_str)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -134,6 +152,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     SymbolRef ivar_id = synthesizeClass(todo_ivar_DESC);
     SymbolRef gvar_id = synthesizeClass(todo_gvar_DESC);
     SymbolRef cvar_id = synthesizeClass(todo_cvar_DESC);
+    SymbolRef object_id = synthesizeClass(object_DESC);
+    SymbolRef junk_id = synthesizeClass(junk_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -145,6 +165,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
     Error::check(ivar_id == defn_ivar_todo());
     Error::check(gvar_id == defn_gvar_todo());
     Error::check(cvar_id == defn_cvar_todo());
+    Error::check(object_id == defn_object());
+    Error::check(junk_id == defn_junk());
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
@@ -155,13 +177,50 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
      * 7: <todo ivar>
      * 8: <todo gvar>
      * 9: <todo cvar>
+     * 10: Object;
+     * 11: <<JUNK>>;
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
+
+    // Add them back in since synthesizeClass couldn't
+    for (SymbolInfo info : symbols) {
+        if (info.owner != defn_root()) {
+            defn_root().info(*this).members.push_back(make_pair(info.name, info.owner));
+        }
+    }
 }
 
 ContextBase::~ContextBase() {}
 
 constexpr decltype(ContextBase::STRINGS_PAGE_SIZE) ContextBase::STRINGS_PAGE_SIZE;
+
+SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
+    // TODO Unify this with enterSymbol
+    DEBUG_ONLY(Error::check(owner.exists()));
+    auto &ownerScope = owner.info(*this, true);
+    for (auto &member : ownerScope.members) {
+        if (member.first == name) {
+            return member.second;
+        }
+    }
+
+    bool reallocate = symbols.size() == symbols.capacity();
+
+    auto ret = SymbolRef(symbols.size());
+    symbols.emplace_back();
+    auto &info = ret.info(*this, true);
+    info.name = name;
+    info.flags = 0;
+    info.owner = owner;
+    info.setClass();
+
+    if (!reallocate) {
+        ownerScope.members.push_back(make_pair(name, ret));
+    } else {
+        owner.info(*this, true).members.push_back(make_pair(name, ret));
+    }
+    return ret;
+}
 
 SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
                                    bool isMethod) {
@@ -348,25 +407,31 @@ NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return idx;
 }
 
-SymbolRef ContextBase::getTopLevelClassSymbol(NameRef name) {
-    auto &current = classes[name];
-    if (current.exists()) {
-        return current; // return fast
-    }
-    current = symbols.size();
-    symbols.emplace_back();
-    auto &info = current.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
-    info.name = name;
-    info.owner = defn_root();
-    info.flags = 0;
-    info.setClass();
-    return current;
-}
-
 SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     auto tempName = this->freshNameUnique(kind, name);
     vector<SymbolRef> empty;
     return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
+}
+
+unsigned int ContextBase::symbolsUsed() {
+    return symbols.size();
+}
+
+unsigned int ContextBase::namesUsed() {
+    return names.size();
+}
+
+std::string ContextBase::toString() {
+    std::vector<std::string> children;
+    for (auto element : defn_root().info(*this).members) {
+        children.push_back(element.second.toString(*this));
+    }
+    std::sort(children.begin(), children.end());
+    std::ostringstream os;
+    for (auto child : children) {
+        os << child;
+    }
+    return os.str();
 }
 
 } // namespace ast
