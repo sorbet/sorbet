@@ -49,10 +49,15 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     os << name;
 
     std::string type = "unknown";
-    if (myInfo.isClass()) { type = "class"; }
-    else if (myInfo.isArray()) { type = "array"; }
-    else if (myInfo.isField()) { type = "field"; }
-    else if (myInfo.isMethod()) { type = "method"; }
+    if (myInfo.isClass()) {
+        type = "class";
+    } else if (myInfo.isArray()) {
+        type = "array";
+    } else if (myInfo.isField()) {
+        type = "field";
+    } else if (myInfo.isMethod()) {
+        type = "method";
+    }
     os << " (" << type << ")";
     os << std::endl;
 

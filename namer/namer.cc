@@ -12,7 +12,7 @@ namespace namer {
  */
 class NameInserter {
     ast::SymbolRef squashNames(ast::Context ctx, ast::SymbolRef owner, unique_ptr<ast::Expression> &node) {
-        auto constLit = dynamic_cast<ast::ConstantLit*>(node.get());
+        auto constLit = dynamic_cast<ast::ConstantLit *>(node.get());
         if (constLit == nullptr) {
             Error::check(node.get() != nullptr);
             return owner;
