@@ -1,43 +1,30 @@
 #include "namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include <iostream>
 
 namespace ruby_typer {
 namespace namer {
-
-/**
- * Used with TreeMap to return you a SymbolRef collapsing all the `Foo::Bar::Baz`.
- */
-class NamespaceCollapeser {
-public:
-    NamespaceCollapeser(ast::SymbolRef name) {
-        this->name = name;
-    }
-
-    ast::SymbolRef getName() {
-        return name;
-    }
-
-    ast::ConstantLit *postTransformConstantLit(ast::Context ctx, ast::ConstantLit *c) {
-        this->name = ctx.state.enterClassSymbol(getName(), c->cnst);
-        return c;
-    }
-
-private:
-    ast::SymbolRef name;
-};
 
 /**
  * Used with TreeMap to insert all the class and method symbols into the symbol
  * table.
  */
 class NameInserter {
+    ast::SymbolRef squashNames(ast::Context ctx, ast::SymbolRef owner, unique_ptr<ast::Expression> &node) {
+        auto constLit = dynamic_cast<ast::ConstantLit*>(node.get());
+        if (constLit == nullptr) {
+            Error::check(node.get() != nullptr);
+            return owner;
+        }
+
+        auto newOwner = squashNames(ctx, owner, constLit->scope);
+        return ctx.state.enterClassSymbol(newOwner, constLit->cnst);
+    }
+
 public:
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
-        NamespaceCollapeser nc(ctx.owner);
-        auto newName = ast::TreeMap<NamespaceCollapeser>::apply(ctx, nc, std::move(klass->name));
-        klass->name = ast::desugar::stat2Expr(newName);
-        klass->symbol = nc.getName();
+        klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         return klass;
     }
 
