@@ -566,6 +566,7 @@ private:
         } else if (Symbol *v = dynamic_cast<Symbol *>(what)) {
             return what;
         } else if (Super *v = dynamic_cast<Super *>(what)) {
+            // TODO Need to recursivly walk arguments
             return what;
         } else if (Self *v = dynamic_cast<Self *>(what)) {
             if (HAS_MEMBER_postTransformSelf<FUNC>::value) {
