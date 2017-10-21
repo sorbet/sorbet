@@ -357,6 +357,18 @@ std::string NotSupported::toString(ContextBase &ctx, int tabs) {
     return nodeName();
 }
 
+    std::string RestArg::toString(ContextBase &ctx, int tabs) {
+        return "*" + this->expr->toString(ctx, tabs);
+    }
+
+    std::string KeywordArg::toString(ContextBase &ctx, int tabs) {
+        return  this->name.name(ctx).toString(ctx) + " : " + this->expr->toString(ctx, tabs);
+    }
+
+    std::string OptionalArg::toString(ContextBase &ctx, int tabs) {
+        return  this->expr->toString(ctx, tabs) + " = " + this->default_->toString(ctx, tabs);
+    }
+
 std::string NotSupported::nodeName() {
     return "<Not Supported (" + why + ")>";
 }
@@ -472,6 +484,17 @@ std::string Nil::toString(ContextBase &ctx, int tabs) {
 
 std::string Nil::nodeName() {
     return "Nil";
+}
+
+std::string RestArg::nodeName() {
+    return "RestArg";
+}
+
+std::string KeywordArg::nodeName() {
+    return "KeywordArg";
+}
+std::string OptionalArg::nodeName() {
+    return "OptionalArg";
 }
 } // namespace ast
 } // namespace ruby_typer

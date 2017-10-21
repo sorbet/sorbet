@@ -310,13 +310,39 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  unique_ptr<Statement> res = make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
                  result.swap(res);
              },
+             [&](parser::Restarg *arg) {
+                 unique_ptr<Statement> res = make_unique<RestArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()));
+                 result.swap(res);
+             },
+//             [&](parser::Kwrestarg *arg) { // where is the actual field?
+//                 unique_ptr<Statement> res = make_unique<RestArg>( make_unique<KeywordArg>(argmake_unique<Ident>(arg->name, ContextBase::defn_lvar_todo())));
+//                 result.swap(res);
+//             },
+             [&](parser::Kwarg *arg) {
+                 unique_ptr<Statement> res = make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
+                 result.swap(res);
+             },
+             [&](parser::Kwoptarg *arg) {
+                 unique_ptr<Statement> res = make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
+                 result.swap(res);
+             },
+             [&](parser::Optarg *arg) {
+                 unique_ptr<Statement> res = make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
+                 result.swap(res);
+             },
+
              [&](parser::DefMethod *method) {
                  vector<unique_ptr<Expression>> args;
                  if (auto *oargs = dynamic_cast<parser::Args *>(method->args.get())) {
                      for (auto &arg : oargs->args) {
                          args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, arg)));
                      }
-                 } else if (auto *arg = dynamic_cast<parser::Arg *>(method->args.get())) {
+                 } else if (dynamic_cast<parser::Arg *>(method->args.get()) ||
+                            dynamic_cast<parser::Restarg *>(method->args.get()) ||
+                            dynamic_cast<parser::Kwrestarg *>(method->args.get()) ||
+                            dynamic_cast<parser::Kwarg *>(method->args.get()) ||
+                            dynamic_cast<parser::Kwoptarg *>(method->args.get()) ||
+                            dynamic_cast<parser::Optarg *>(method->args.get())) {
                      args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, method->args)));
                  } else if (method->args.get() == nullptr) {
                      // do nothing

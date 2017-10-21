@@ -24,6 +24,8 @@ public:
     static std::unique_ptr<Expression> fromStatement(std::unique_ptr<Statement> &&expr);
 };
 
+class Reference : public Expression {};
+
 class ControlFlow : public Expression {};
 
 class Declaration : public Expression {
@@ -149,13 +151,42 @@ public:
     virtual std::string nodeName();
 };
 
-class Ident : public Expression {
+class Ident : public Reference {
 public:
     SymbolRef symbol;
     NameRef name;
 
     Ident(SymbolRef symbol);
     Ident(NameRef name, SymbolRef symbol);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string nodeName();
+};
+
+class RestArg : public Reference {
+public:
+    std::unique_ptr<Reference> expr;
+
+    RestArg(std::unique_ptr<Reference> expr);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string nodeName();
+};
+
+class KeywordArg : public Reference {
+public:
+    std::unique_ptr<Reference> expr;
+    NameRef name;
+
+    KeywordArg(std::unique_ptr<Reference> expr, NameRef name);
+    virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string nodeName();
+};
+
+class OptionalArg : public Reference {
+public:
+    std::unique_ptr<Reference> expr;
+    std::unique_ptr<Expression> default_;
+
+    OptionalArg(std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
