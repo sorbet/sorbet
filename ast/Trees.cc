@@ -100,6 +100,13 @@ New::New(SymbolRef claz, vector<unique_ptr<Expression>> &&args) : claz(claz), ar
 
 NamedArg::NamedArg(NameRef name, unique_ptr<Expression> arg) : name(name), arg(move(arg)) {}
 
+RestArg::RestArg(unique_ptr<Reference> arg) : expr(move(arg)) {}
+
+KeywordArg::KeywordArg(std::unique_ptr<Reference> expr) : expr(move(expr)) {}
+
+OptionalArg::OptionalArg(std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_)
+    : expr(move(expr)), default_(move(default_)) {}
+
 FloatLit::FloatLit(float value) : value(value) {}
 
 IntLit::IntLit(int value) : value(value) {}
@@ -357,17 +364,17 @@ std::string NotSupported::toString(ContextBase &ctx, int tabs) {
     return nodeName();
 }
 
-    std::string RestArg::toString(ContextBase &ctx, int tabs) {
-        return "*" + this->expr->toString(ctx, tabs);
-    }
+std::string RestArg::toString(ContextBase &ctx, int tabs) {
+    return "*" + this->expr->toString(ctx, tabs);
+}
 
-    std::string KeywordArg::toString(ContextBase &ctx, int tabs) {
-        return  this->name.name(ctx).toString(ctx) + " : " + this->expr->toString(ctx, tabs);
-    }
+std::string KeywordArg::toString(ContextBase &ctx, int tabs) {
+    return this->expr->toString(ctx, tabs) + ":";
+}
 
-    std::string OptionalArg::toString(ContextBase &ctx, int tabs) {
-        return  this->expr->toString(ctx, tabs) + " = " + this->default_->toString(ctx, tabs);
-    }
+std::string OptionalArg::toString(ContextBase &ctx, int tabs) {
+    return this->expr->toString(ctx, tabs) + " = " + this->default_->toString(ctx, tabs);
+}
 
 std::string NotSupported::nodeName() {
     return "<Not Supported (" + why + ")>";

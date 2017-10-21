@@ -5,7 +5,7 @@ begin
     class <emtpyTree>::MatchTimeout<<todo sym>>
       <emtpyTree>.attr_reader(:rule_token)
 
-      def initialize<<todo sym>>(message<todo lvar sym>, <Not Supported (Kwoptarg)>)
+      def initialize<<todo sym>>(message<todo lvar sym>, rule_token<todo lvar sym>: = "".to_s())
         begin
           super(message<todo lvar sym>)
           @rule_token<todo ivar sym> = rule_token<todo lvar sym>

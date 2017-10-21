@@ -57,7 +57,7 @@ begin
   next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
-  def foo<<todo sym>>(<Not Supported (Kwarg)>, <Not Supported (Kwoptarg)>, <Not Supported (Kwrestarg)>)
+  def foo<<todo sym>>(x<todo lvar sym>:, y<todo lvar sym>: = 1, *z<todo lvar sym>:)
     <emtpyTree>
   <Not Supported (Hash)>
   <Not Supported (LineLiteral)>
@@ -80,7 +80,7 @@ begin
     assignTmp$5
   end
   <Not Supported (NthRef)>
-  def foo<<todo sym>>(<Not Supported (Optarg)>, <Not Supported (Restarg)>)
+  def foo<<todo sym>>(x<todo lvar sym> = 1, *y<todo lvar sym>)
     <emtpyTree>
   <Not Supported (Hash)>
   <Not Supported (Preexe)>
@@ -112,8 +112,8 @@ begin
   break(<emtpyTree>.foo(1) do ||
       <emtpyTree>
     end)
-  def foo<<todo sym>>(<Not Supported (Restarg)>)
+  def foo<<todo sym>>(**$0<todo lvar sym>)
     <emtpyTree>
-  def foo<<todo sym>>(<Not Supported (Kwrestarg)>)
+  def foo<<todo sym>>(***$1<todo lvar sym>:)
     <emtpyTree>
 end

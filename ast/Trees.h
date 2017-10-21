@@ -174,9 +174,8 @@ public:
 class KeywordArg : public Reference {
 public:
     std::unique_ptr<Reference> expr;
-    NameRef name;
 
-    KeywordArg(std::unique_ptr<Reference> expr, NameRef name);
+    KeywordArg(std::unique_ptr<Reference> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };

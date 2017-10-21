@@ -311,26 +311,32 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  result.swap(res);
              },
              [&](parser::Restarg *arg) {
-                 unique_ptr<Statement> res = make_unique<RestArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()));
+                 unique_ptr<Statement> res =
+                     make_unique<RestArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()));
                  result.swap(res);
              },
-//             [&](parser::Kwrestarg *arg) { // where is the actual field?
-//                 unique_ptr<Statement> res = make_unique<RestArg>( make_unique<KeywordArg>(argmake_unique<Ident>(arg->name, ContextBase::defn_lvar_todo())));
-//                 result.swap(res);
-//             },
+             [&](parser::Kwrestarg *arg) { // where is the actual field?
+                 unique_ptr<Statement> res = make_unique<RestArg>(
+                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo())));
+                 result.swap(res);
+             },
              [&](parser::Kwarg *arg) {
-                 unique_ptr<Statement> res = make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
+                 unique_ptr<Statement> res =
+                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()));
                  result.swap(res);
              },
              [&](parser::Kwoptarg *arg) {
-                 unique_ptr<Statement> res = make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
+                 unique_ptr<Statement> res = make_unique<OptionalArg>(
+                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo())),
+                     stat2Expr(node2TreeImpl(ctx, arg->default_)));
                  result.swap(res);
              },
              [&](parser::Optarg *arg) {
-                 unique_ptr<Statement> res = make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
+                 unique_ptr<Statement> res =
+                     make_unique<OptionalArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()),
+                                              stat2Expr(node2TreeImpl(ctx, arg->default_)));
                  result.swap(res);
              },
-
              [&](parser::DefMethod *method) {
                  vector<unique_ptr<Expression>> args;
                  if (auto *oargs = dynamic_cast<parser::Args *>(method->args.get())) {
