@@ -53,7 +53,6 @@ unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&stateme
     return fromStatement(statement);
 }
 
-
 ClassDef::ClassDef(SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
     : Declaration(symbol), rhs(move(rhs)), name(move(name)), kind(kind) {}
 

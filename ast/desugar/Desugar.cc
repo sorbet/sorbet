@@ -78,7 +78,8 @@ unique_ptr<Statement> mkAssign(SymbolRef symbol, unique_ptr<Statement> &&rhs) {
 }
 
 unique_ptr<Statement> mkIf(unique_ptr<Statement> &cond, unique_ptr<Statement> &thenp, unique_ptr<Statement> &elsep) {
-    return make_unique<If>(Expression::fromStatement(cond), Expression::fromStatement(thenp), Expression::fromStatement(elsep));
+    return make_unique<If>(Expression::fromStatement(cond), Expression::fromStatement(thenp),
+                           Expression::fromStatement(elsep));
 }
 
 unique_ptr<Statement> mkIf(unique_ptr<Statement> &&cond, unique_ptr<Statement> &&thenp, unique_ptr<Statement> &&elsep) {
@@ -258,7 +259,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      body.emplace_back(node2TreeImpl(ctx, module->body));
                  }
                  unique_ptr<Statement> res = make_unique<ClassDef>(
-                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, module->name)), body, ClassDefKind::Module);
+                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, module->name)), body,
+                     ClassDefKind::Module);
                  result.swap(res);
              },
              [&](parser::Class *claz) {
@@ -271,7 +273,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      body.emplace_back(node2TreeImpl(ctx, claz->body));
                  }
                  unique_ptr<Statement> res = make_unique<ClassDef>(
-                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, claz->name)), body, ClassDefKind::Class);
+                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, claz->name)), body,
+                     ClassDefKind::Class);
                  result.swap(res);
              },
              [&](parser::Arg *arg) {
@@ -291,8 +294,9 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  } else {
                      Error::notImplemented();
                  }
-                 unique_ptr<Statement> res = make_unique<MethodDef>(ctx.state.defn_todo(), method->name, args,
-                                                                    Expression::fromStatement(node2TreeImpl(ctx, method->body)), false);
+                 unique_ptr<Statement> res =
+                     make_unique<MethodDef>(ctx.state.defn_todo(), method->name, args,
+                                            Expression::fromStatement(node2TreeImpl(ctx, method->body)), false);
                  result.swap(res);
              },
              [&](parser::Block *block) {
@@ -374,7 +378,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
              },
              [&](parser::ConstAsgn *constAsgn) {
                  auto scope = node2TreeImpl(ctx, constAsgn->scope);
-                 unique_ptr<Statement> lhs = make_unique<ConstantLit>(Expression::fromStatement(scope), constAsgn->name);
+                 unique_ptr<Statement> lhs =
+                     make_unique<ConstantLit>(Expression::fromStatement(scope), constAsgn->name);
                  auto rhs = node2TreeImpl(ctx, constAsgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
@@ -412,7 +417,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      unique_ptr<Statement> res = make_unique<Return>(move(arr));
                      result.swap(res);
                  } else if (ret->exprs.size() == 1) {
-                     unique_ptr<Statement> res = make_unique<Return>(Expression::fromStatement(node2TreeImpl(ctx, ret->exprs[0])));
+                     unique_ptr<Statement> res =
+                         make_unique<Return>(Expression::fromStatement(node2TreeImpl(ctx, ret->exprs[0])));
                      result.swap(res);
                  } else {
                      unique_ptr<Statement> res = make_unique<Return>(Expression::fromStatement(mkEmptyTree()));
