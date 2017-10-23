@@ -39,6 +39,9 @@ public:
     Return *preTransformReturn(Context ctx, Return *original);
     Statement *postTransformReturn(Context ctx, Return *original);
 
+    Yield *preTransformYield(Context ctx, Yield *original);
+    Statement *postTransformYield(Context ctx, Yield *original);
+
     Rescue *preTransformRescue(Context ctx, Rescue *original);
     Statement *postTransformRescue(Context ctx, Rescue *original);
 
@@ -118,6 +121,7 @@ GENERATE_HAS_MEMBER(preTransformIf);
 GENERATE_HAS_MEMBER(preTransformWhile);
 GENERATE_HAS_MEMBER(preTransformFor);
 GENERATE_HAS_MEMBER(preTransformReturn);
+GENERATE_HAS_MEMBER(preTransformYield);
 GENERATE_HAS_MEMBER(preTransformRescue);
 GENERATE_HAS_MEMBER(preTransformAssign);
 GENERATE_HAS_MEMBER(preTransformSend);
@@ -150,6 +154,7 @@ GENERATE_HAS_MEMBER(postTransformFor);
 GENERATE_HAS_MEMBER(postTransformBreak);
 GENERATE_HAS_MEMBER(postTransformNext);
 GENERATE_HAS_MEMBER(postTransformReturn);
+GENERATE_HAS_MEMBER(postTransformYield);
 GENERATE_HAS_MEMBER(postTransformRescue);
 GENERATE_HAS_MEMBER(postTransformIdent);
 GENERATE_HAS_MEMBER(postTransformAssign);
@@ -224,6 +229,7 @@ GENERATE_POSTPONE_PRECLASS(If);
 GENERATE_POSTPONE_PRECLASS(While);
 GENERATE_POSTPONE_PRECLASS(For);
 GENERATE_POSTPONE_PRECLASS(Return);
+GENERATE_POSTPONE_PRECLASS(Yield);
 GENERATE_POSTPONE_PRECLASS(Assign);
 GENERATE_POSTPONE_PRECLASS(Send);
 GENERATE_POSTPONE_PRECLASS(New);
@@ -244,6 +250,7 @@ GENERATE_POSTPONE_POSTCLASS(For);
 GENERATE_POSTPONE_POSTCLASS(Break);
 GENERATE_POSTPONE_POSTCLASS(Next);
 GENERATE_POSTPONE_POSTCLASS(Return);
+GENERATE_POSTPONE_POSTCLASS(Yield);
 GENERATE_POSTPONE_POSTCLASS(Ident);
 GENERATE_POSTPONE_POSTCLASS(Assign);
 GENERATE_POSTPONE_POSTCLASS(Send);
@@ -423,13 +430,30 @@ private:
             }
 
             return v;
+        } else if (Yield *v = dynamic_cast<Yield *>(what)) {
+            if (HAS_MEMBER_preTransformYield<FUNC>::value) {
+                v = PostPonePreTransform_Yield<FUNC, HAS_MEMBER_preTransformYield<FUNC>::value>::call(ctx, v, func);
+            }
+            auto oexpr = v->expr.get();
+            auto nexpr = mapIt(oexpr, ctx);
+            if (oexpr != nexpr) {
+                Error::check(dynamic_cast<Expression *>(nexpr) != nullptr);
+                v->expr.reset(dynamic_cast<Expression *>(nexpr));
+            }
+
+            if (HAS_MEMBER_postTransformYield<FUNC>::value) {
+                return PostPonePostTransform_Yield<FUNC, HAS_MEMBER_postTransformYield<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+            }
+
+            return v;
         } else if (Ident *v = dynamic_cast<Ident *>(what)) {
             if (HAS_MEMBER_postTransformIdent<FUNC>::value) {
                 return PostPonePostTransform_Ident<FUNC, HAS_MEMBER_postTransformIdent<FUNC>::value>::call(ctx, v,
                                                                                                            func);
             }
             return v;
-        } else if (Assign *v = dynamic_cast<Assign *>(what)) {
+        }  else if (Assign *v = dynamic_cast<Assign *>(what)) {
             if (HAS_MEMBER_preTransformAssign<FUNC>::value) {
                 v = PostPonePreTransform_Assign<FUNC, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(ctx, v, func);
             }
