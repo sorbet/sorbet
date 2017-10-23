@@ -1,4 +1,4 @@
-class <emptyTree>::Examples<<todo sym>>
+class <emptyTree>::Examples<<todo sym>> << ()
   def i_like_ifs<<todo sym>>()
     if true
       return 1
