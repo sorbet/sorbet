@@ -49,10 +49,10 @@ public:
 
     std::vector<std::unique_ptr<Statement>> rhs;
     std::unique_ptr<Expression> name;
-    std::vector<std::unique_ptr<Expression>> parents;
+    std::vector<std::unique_ptr<Expression>> ancestors;
     ClassDefKind kind;
 
-    ClassDef(SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Expression>> &parents,
+    ClassDef(SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Expression>> &ancestors,
              std::vector<std::unique_ptr<Statement>> &rhs, ClassDefKind kind);
 
     virtual std::string toString(ContextBase &ctx, int tabs = 0);

@@ -53,9 +53,9 @@ unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&stateme
     return fromStatement(statement);
 }
 
-ClassDef::ClassDef(SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &parents,
+ClassDef::ClassDef(SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &ancestors,
                    vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
-    : Declaration(symbol), rhs(move(rhs)), parents(move(parents)), name(move(name)), kind(kind) {}
+    : Declaration(symbol), rhs(move(rhs)), ancestors(move(ancestors)), name(move(name)), kind(kind) {}
 
 MethodDef::MethodDef(SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs,
                      bool isSelf)
@@ -165,7 +165,7 @@ string ClassDef::toString(ContextBase &ctx, int tabs) {
     }
     buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << "> ";
     buf << "<< ";
-    printArgs(ctx, buf, this->parents, tabs);
+    printArgs(ctx, buf, this->ancestors, tabs);
 
     buf << endl;
 

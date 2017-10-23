@@ -287,9 +287,9 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  } else {
                      body.emplace_back(node2TreeImpl(ctx, module->body));
                  }
-                 vector<unique_ptr<Expression>> parents;
+                 vector<unique_ptr<Expression>> ancestors;
                  unique_ptr<Statement> res = make_unique<ClassDef>(
-                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, module->name)), parents, body,
+                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, module->name)), ancestors, body,
                      ClassDefKind::Module);
                  result.swap(res);
              },
@@ -302,12 +302,12 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  } else {
                      body.emplace_back(node2TreeImpl(ctx, claz->body));
                  }
-                 vector<unique_ptr<Expression>> parents;
+                 vector<unique_ptr<Expression>> ancestors;
                  if (claz->superclass != nullptr) {
-                     parents.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, claz->superclass)));
+                     ancestors.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, claz->superclass)));
                  }
                  unique_ptr<Statement> res = make_unique<ClassDef>(
-                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, claz->name)), parents, body,
+                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, claz->name)), ancestors, body,
                      ClassDefKind::Class);
                  result.swap(res);
              },
