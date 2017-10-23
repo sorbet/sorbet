@@ -222,7 +222,7 @@ string While::toString(ContextBase &ctx, int tabs) {
 }
 
 string EmptyTree::toString(ContextBase &ctx, int tabs) {
-    return "<emtpyTree>";
+    return "<emptyTree>";
 }
 
 string ArraySplat::toString(ContextBase &ctx, int tabs) {

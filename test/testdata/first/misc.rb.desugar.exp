@@ -5,29 +5,29 @@ begin
   $gv<todo gvar sym> = 1
   begin
     assignTmp$2 = [nil, nil]
-    <emtpyTree>.x().var=(assignTmp$2.[](0))
+    <emptyTree>.x().var=(assignTmp$2.[](0))
     y<todo lvar sym> = assignTmp$2.[](1)
     assignTmp$2
   end
   begin
-    assignTmp$3 = <emtpyTree>.zaaaz()
+    assignTmp$3 = <emptyTree>.zaaaz()
     baaaar<todo lvar sym> = assignTmp$3.[](0)
     naaar<todo lvar sym> = assignTmp$3.[](1)
     assignTmp$3
   end
-  xaaaaz<todo lvar sym> = [<emtpyTree>.yayayaya(), <emtpyTree>.tutututu()]
-  <emtpyTree>
+  xaaaaz<todo lvar sym> = [<emptyTree>.yayayaya(), <emtpyTree>.tutututu()]
+  <emptyTree>
   begin
     nil
   end
   begin
-    <emtpyTree>.a()
-    <emtpyTree>.b()
+    <emptyTree>.a()
+    <emptyTree>.b()
   end
   def foo<<todo sym>>(<Not Supported (Blockarg)>)
-    <emtpyTree>
-  <emtpyTree>.lambda() do ||
-    <emtpyTree>
+    <emptyTree>
+  <emptyTree>.lambda() do ||
+    <emptyTree>
   end
   <Not Supported (Case)>
   "x".to_s()
@@ -46,19 +46,19 @@ begin
   end
   <Not Supported (For)>
   while 0.!=(1)
-    <emtpyTree>
+    <emptyTree>
   end
   x<todo lvar sym>.[]=(0)
-  break(<emtpyTree>)
+  break(<emptyTree>)
   break(1)
   break([1, 2])
-  next(<emtpyTree>)
+  next(<emptyTree>)
   next(1)
   next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
   def foo<<todo sym>>(x<todo lvar sym>:, y<todo lvar sym>: = 1, *z<todo lvar sym>:)
-    <emtpyTree>
+    <emptyTree>
   <Not Supported (Hash)>
   <Not Supported (LineLiteral)>
   while true
@@ -81,7 +81,7 @@ begin
   end
   <Not Supported (NthRef)>
   def foo<<todo sym>>(x<todo lvar sym> = 1, *y<todo lvar sym>)
-    <emtpyTree>
+    <emptyTree>
   <Not Supported (Hash)>
   <Not Supported (Preexe)>
   <Not Supported (Postexe)>
@@ -106,14 +106,14 @@ begin
   ["a", "b"]
   ["a".to_s(), "b".to_s()]
   <Not Supported (XString)>
-  <emtpyTree>.proc() do |<Not Supported (Shadowarg)>|
-    <emtpyTree>
+  <emptyTree>.proc() do |<Not Supported (Shadowarg)>|
+    <emptyTree>
   end
-  break(<emtpyTree>.foo(1) do ||
-      <emtpyTree>
+  break(<emptyTree>.foo(1) do ||
+      <emptyTree>
     end)
   def foo<<todo sym>>(**$0<todo lvar sym>)
-    <emtpyTree>
+    <emptyTree>
   def foo<<todo sym>>(***$1<todo lvar sym>:)
-    <emtpyTree>
+    <emptyTree>
 end

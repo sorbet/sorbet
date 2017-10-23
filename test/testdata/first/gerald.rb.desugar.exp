@@ -1,9 +1,9 @@
 begin
-  <emtpyTree>.require_relative("../../../extn".to_s())
-  <emtpyTree>::Opus::AutogenLoader.init(<Not Supported (FileLiteral)>)
-  module <emtpyTree>::Opus::CIBot::Gerald<<todo sym>>
-    class <emtpyTree>::MatchTimeout<<todo sym>>
-      <emtpyTree>.attr_reader(:rule_token)
+  <emptyTree>.require_relative("../../../extn".to_s())
+  <emptyTree>::Opus::AutogenLoader.init(<Not Supported (FileLiteral)>)
+  module <emptyTree>::Opus::CIBot::Gerald<<todo sym>>
+    class <emptyTree>::MatchTimeout<<todo sym>>
+      <emptyTree>.attr_reader(:rule_token)
 
       def initialize<<todo sym>>(message<todo lvar sym>, rule_token<todo lvar sym>: = "".to_s())
         begin
@@ -13,15 +13,15 @@ begin
 
     end
 
-    class <emtpyTree>::Matcher<<todo sym>>
-      <emtpyTree>.include(<emtpyTree>::Chalk::Log)
+    class <emptyTree>::Matcher<<todo sym>>
+      <emptyTree>.include(<emtpyTree>::Chalk::Log)
 
-      <emtpyTree>::MAX_AFFECTED_FILES = 100
+      <emptyTree>::MAX_AFFECTED_FILES = 100
 
       def initialize<<todo sym>>()
         begin
           begin
-            assignTmp$0 = <emtpyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
+            assignTmp$0 = <emptyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
             @rules<todo ivar sym> = assignTmp$0.[](0)
             invalid_rules<todo lvar sym> = assignTmp$0.[](1)
             assignTmp$0
@@ -29,26 +29,26 @@ begin
           if invalid_rules<todo lvar sym>.empty?().!()
             begin
               invalid_rule_ids<todo lvar sym> = invalid_rules<todo lvar sym>.map(<Not Supported (BlockPass)>).join(",".to_s())
-              <emtpyTree>.log().warn("Gerald skipping invalid rules: ".to_s().+(invalid_rule_ids<todo lvar sym>))
+              <emptyTree>.log().warn("Gerald skipping invalid rules: ".to_s().+(invalid_rule_ids<todo lvar sym>))
             end
           else 
-            <emtpyTree>
+            <emptyTree>
           end
         end
 
       def match<<todo sym>>(match_context<todo lvar sym>)
         begin
-          if match_context<todo lvar sym>.diff().affected_files().count().>(<emtpyTree>::MAX_AFFECTED_FILES)
+          if match_context<todo lvar sym>.diff().affected_files().count().>(<emptyTree>::MAX_AFFECTED_FILES)
             begin
-              <emtpyTree>.log().warn("Gerald skipping large PR with ".to_s().concat(begin
+              <emptyTree>.log().warn("Gerald skipping large PR with ".to_s().concat(begin
                     match_context<todo lvar sym>.diff().affected_files().count()
                   end.to_s()).concat(" affected files".to_s()).to_s())
               return []
             end
           else 
-            <emtpyTree>
+            <emptyTree>
           end
-          budget<todo lvar sym> = <emtpyTree>::MatchTimeBudget.new()
+          budget<todo lvar sym> = <emptyTree>::MatchTimeBudget.new()
           @rules<todo ivar sym>.select() do |r<todo lvar sym>|
             budget<todo lvar sym>.time_rule(r<todo lvar sym>) do ||
               r<todo lvar sym>.matches?(match_context<todo lvar sym>)
@@ -58,22 +58,22 @@ begin
 
     end
 
-    class <emtpyTree>::MatchContext<<todo sym>>
-      <emtpyTree>.attr_reader(:repo)
+    class <emptyTree>::MatchContext<<todo sym>>
+      <emptyTree>.attr_reader(:repo)
 
-      <emtpyTree>.attr_reader(:assignee)
+      <emptyTree>.attr_reader(:assignee)
 
-      <emtpyTree>.attr_reader(:gh_user)
+      <emptyTree>.attr_reader(:gh_user)
 
-      <emtpyTree>.attr_reader(:merge_branch)
+      <emptyTree>.attr_reader(:merge_branch)
 
-      <emtpyTree>.attr_reader(:body)
+      <emptyTree>.attr_reader(:body)
 
-      <emtpyTree>.attr_reader(:title)
+      <emptyTree>.attr_reader(:title)
 
-      <emtpyTree>.attr_reader(:diff)
+      <emptyTree>.attr_reader(:diff)
 
-      <emtpyTree>.attr_reader(:openapi_diff)
+      <emptyTree>.attr_reader(:openapi_diff)
 
       def initialize<<todo sym>>(repo<todo lvar sym>, assignee<todo lvar sym>, gh_user<todo lvar sym>, merge_branch<todo lvar sym>, body<todo lvar sym>, title<todo lvar sym>, diff<todo lvar sym>, openapi_diff<todo lvar sym>)
         begin
@@ -92,61 +92,61 @@ begin
 
     end
 
-    class <emtpyTree>::MatchTimeBudget<<todo sym>>
-      <emtpyTree>::TOTAL_TIME_MS = 10000
+    class <emptyTree>::MatchTimeBudget<<todo sym>>
+      <emptyTree>::TOTAL_TIME_MS = 10000
 
-      <emtpyTree>::PER_RULE_MS = 2000
+      <emptyTree>::PER_RULE_MS = 2000
 
       def initialize<<todo sym>>()
-        @start<todo ivar sym> = <emtpyTree>::Time.now()
+        @start<todo ivar sym> = <emptyTree>::Time.now()
 
       def check!<<todo sym>>()
         begin
           dur_ms<todo lvar sym> = begin
-            <emtpyTree>::Time.now().-(@start<todo ivar sym>)
+            <emptyTree>::Time.now().-(@start<todo ivar sym>)
           end.*(1000)
-          if dur_ms<todo lvar sym>.>(<emtpyTree>::TOTAL_TIME_MS)
-            <emtpyTree>.raise(<emtpyTree>::MatchTimeout.new("Gerald match time budged exceeded ".to_s().concat(begin
-                    <emtpyTree>::TOTAL_TIME_MS
+          if dur_ms<todo lvar sym>.>(<emptyTree>::TOTAL_TIME_MS)
+            <emptyTree>.raise(<emtpyTree>::MatchTimeout.new("Gerald match time budged exceeded ".to_s().concat(begin
+                    <emptyTree>::TOTAL_TIME_MS
                   end.to_s()).concat("ms".to_s()).to_s()))
           else 
-            <emtpyTree>
+            <emptyTree>
           end
         end
 
       def time_rule<<todo sym>>(rule<todo lvar sym>)
         begin
-          rule_start<todo lvar sym> = <emtpyTree>::Time.now()
-          res<todo lvar sym> = yield(<emtpyTree>)
+          rule_start<todo lvar sym> = <emptyTree>::Time.now()
+          res<todo lvar sym> = yield(<emptyTree>)
           dur_ms<todo lvar sym> = begin
-            <emtpyTree>::Time.now().-(rule_start<todo lvar sym>)
+            <emptyTree>::Time.now().-(rule_start<todo lvar sym>)
           end.*(1000)
-          if dur_ms<todo lvar sym>.>(<emtpyTree>::PER_RULE_MS)
-            <emtpyTree>.raise(<emtpyTree>::MatchTimeout.new("Gerald rule '".to_s().concat(begin
+          if dur_ms<todo lvar sym>.>(<emptyTree>::PER_RULE_MS)
+            <emptyTree>.raise(<emtpyTree>::MatchTimeout.new("Gerald rule '".to_s().concat(begin
                     rule<todo lvar sym>.token()
                   end.to_s()).concat("' exceeded per-rule time budget actual=".to_s()).concat(begin
                     dur_ms<todo lvar sym>.to_i()
                   end.to_s()).concat("ms budget=".to_s()).concat(begin
-                    <emtpyTree>::PER_RULE_MS
+                    <emptyTree>::PER_RULE_MS
                   end.to_s()).concat("ms".to_s()).to_s(), <Not Supported (Hash)>))
           else 
-            <emtpyTree>
+            <emptyTree>
           end
-          <emtpyTree>.check!()
+          <emptyTree>.check!()
           res<todo lvar sym>
         end
 
     end
 
-    class <emtpyTree>::Diff<<todo sym>>
+    class <emptyTree>::Diff<<todo sym>>
       def initialize<<todo sym>>(raw_diff<todo lvar sym>)
         begin
           @raw<todo ivar sym> = raw_diff<todo lvar sym>
-          @parsed<todo ivar sym> = <emtpyTree>.parse(raw_diff<todo lvar sym>)
+          @parsed<todo ivar sym> = <emptyTree>.parse(raw_diff<todo lvar sym>)
         end
 
       def affected_files<<todo sym>>()
-        <emtpyTree>.added_files().+(<emtpyTree>.deleted_files()).+(<emtpyTree>.changed_files())
+        <emptyTree>.added_files().+(<emtpyTree>.deleted_files()).+(<emtpyTree>.changed_files())
 
       def added_files<<todo sym>>()
         @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
@@ -180,12 +180,12 @@ begin
         end.flatten()
 
       def changed_lines<<todo sym>>()
-        <emtpyTree>.added_lines().+(<emtpyTree>.removed_lines())
+        <emptyTree>.added_lines().+(<emtpyTree>.removed_lines())
 
       def changed_openapi?<<todo sym>>()
-        <emtpyTree>.changed_files().include?(<emtpyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
+        <emptyTree>.changed_files().include?(<emtpyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
 
-      <emtpyTree>.private(def parse<<todo sym>>(diff<todo lvar sym>)
+      <emptyTree>.private(def parse<<todo sym>>(diff<todo lvar sym>)
           begin
             parts<todo lvar sym> = diff<todo lvar sym>.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if parts<todo lvar sym>
@@ -202,22 +202,22 @@ begin
                 removed_lines<todo lvar sym> = []
                 lines<todo lvar sym>.each() do |line<todo lvar sym>|
                   if line<todo lvar sym>.start_with?("index ".to_s(), "@@".to_s(), "new file mode".to_s())
-                    next(<emtpyTree>)
+                    next(<emptyTree>)
                   else 
                     if line<todo lvar sym>.start_with?("---".to_s())
                       begin
                         a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                         if begin
-                            &&$1 = <emtpyTree>
+                            &&$1 = <emptyTree>
                             if &&$1
-                              <emtpyTree>
+                              <emptyTree>
                             else 
                               &&$1
                             end
                           end
                           a_name<todo lvar sym> = a_name<todo lvar sym>.[](<Not Supported (IRange)>)
                         else 
-                          <emtpyTree>
+                          <emptyTree>
                         end
                       end
                     else 
@@ -225,16 +225,16 @@ begin
                         begin
                           b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                           if begin
-                              &&$2 = <emtpyTree>
+                              &&$2 = <emptyTree>
                               if &&$2
-                                <emtpyTree>
+                                <emptyTree>
                               else 
                                 &&$2
                               end
                             end
                             b_name<todo lvar sym> = b_name<todo lvar sym>.[](<Not Supported (IRange)>)
                           else 
-                            <emtpyTree>
+                            <emptyTree>
                           end
                         end
                       else 
@@ -244,7 +244,7 @@ begin
                           if line<todo lvar sym>.start_with?("-".to_s())
                             removed_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
                           else 
-                            <emtpyTree>
+                            <emptyTree>
                           end
                         end
                       end
@@ -252,9 +252,9 @@ begin
                   end
                 end
                 if a_name<todo lvar sym>.nil?()
-                  next(<emtpyTree>)
+                  next(<emptyTree>)
                 else 
-                  <emtpyTree>
+                  <emptyTree>
                 end
                 <Not Supported (Hash)>
               end

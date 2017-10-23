@@ -1,11 +1,11 @@
 begin
-  module <emtpyTree>::B<<todo sym>>
-    <emtpyTree>
+  module <emptyTree>::B<<todo sym>>
+    <emptyTree>
 
   end
-  module <emtpyTree>::A<<todo sym>>
-    class <emtpyTree>::B::C<<todo sym>>
-      <emtpyTree>
+  module <emptyTree>::A<<todo sym>>
+    class <emptyTree>::B::C<<todo sym>>
+      <emptyTree>
 
     end
 
