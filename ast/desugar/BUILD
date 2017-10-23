@@ -15,6 +15,7 @@ cc_binary(
         "main/main.cc",
     ],
     linkstatic = 1,
+    visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
         "@cxxopts//:cxxopts",
@@ -32,6 +33,7 @@ cc_test(
         "fixtures/*.rb",
         "fixtures/*.rb.exp",
     ]),
+    visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
         "@gtest//:gtest",

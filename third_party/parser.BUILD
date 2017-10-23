@@ -1,5 +1,3 @@
-package(default_visibility = ["//visibility:public"])
-
 genrule(
     name = "ragel_lexer",
     srcs = ["cc/lexer.rl"],
@@ -48,4 +46,5 @@ cc_library(
         "include",
         "include/ruby_parser",
     ],
+    visibility = ["//visibility:public"],
 )
