@@ -3,7 +3,8 @@
 # A pretend Python dictionary with bash 3
 entry_points=( "cfg:cfg/cfg_ast"
         "parser:parser/parse_ast"
-        "desugar:ast/desugar/desugar_ast" )
+        "desugar:ast/desugar/desugar_ast"
+        "namer:namer/namer_print" )
 
 bazel build //ast/desugar:desugar_ast  //parser:parse_ast  //cfg:cfg_ast
 
