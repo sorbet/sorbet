@@ -15,7 +15,7 @@ begin
     naaar<todo lvar sym> = assignTmp$3.[](1)
     assignTmp$3
   end
-  xaaaaz<todo lvar sym> = [<emptyTree>.yayayaya(), <emtpyTree>.tutututu()]
+  xaaaaz<todo lvar sym> = [<emptyTree>.yayayaya(), <emptyTree>.tutututu()]
   <emptyTree>
   begin
     nil

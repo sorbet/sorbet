@@ -14,7 +14,7 @@ begin
     end
 
     class <emptyTree>::Matcher<<todo sym>>
-      <emptyTree>.include(<emtpyTree>::Chalk::Log)
+      <emptyTree>.include(<emptyTree>::Chalk::Log)
 
       <emptyTree>::MAX_AFFECTED_FILES = 100
 
@@ -106,7 +106,7 @@ begin
             <emptyTree>::Time.now().-(@start<todo ivar sym>)
           end.*(1000)
           if dur_ms<todo lvar sym>.>(<emptyTree>::TOTAL_TIME_MS)
-            <emptyTree>.raise(<emtpyTree>::MatchTimeout.new("Gerald match time budged exceeded ".to_s().concat(begin
+            <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald match time budged exceeded ".to_s().concat(begin
                     <emptyTree>::TOTAL_TIME_MS
                   end.to_s()).concat("ms".to_s()).to_s()))
           else 
@@ -122,7 +122,7 @@ begin
             <emptyTree>::Time.now().-(rule_start<todo lvar sym>)
           end.*(1000)
           if dur_ms<todo lvar sym>.>(<emptyTree>::PER_RULE_MS)
-            <emptyTree>.raise(<emtpyTree>::MatchTimeout.new("Gerald rule '".to_s().concat(begin
+            <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald rule '".to_s().concat(begin
                     rule<todo lvar sym>.token()
                   end.to_s()).concat("' exceeded per-rule time budget actual=".to_s()).concat(begin
                     dur_ms<todo lvar sym>.to_i()
@@ -146,7 +146,7 @@ begin
         end
 
       def affected_files<<todo sym>>()
-        <emptyTree>.added_files().+(<emtpyTree>.deleted_files()).+(<emtpyTree>.changed_files())
+        <emptyTree>.added_files().+(<emptyTree>.deleted_files()).+(<emptyTree>.changed_files())
 
       def added_files<<todo sym>>()
         @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
@@ -180,10 +180,10 @@ begin
         end.flatten()
 
       def changed_lines<<todo sym>>()
-        <emptyTree>.added_lines().+(<emtpyTree>.removed_lines())
+        <emptyTree>.added_lines().+(<emptyTree>.removed_lines())
 
       def changed_openapi?<<todo sym>>()
-        <emptyTree>.changed_files().include?(<emtpyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
+        <emptyTree>.changed_files().include?(<emptyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
 
       <emptyTree>.private(def parse<<todo sym>>(diff<todo lvar sym>)
           begin
