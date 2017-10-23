@@ -1,5 +1,5 @@
-&&$0 (field)
 &&$1 (field)
+&&$2 (field)
 Opus (class)
   CIBot (class)
     Gerald (class)
@@ -26,4 +26,5 @@ Opus (class)
       Matcher (class)
         initialize (method)
         match (method)
+assignTmp$0 (field)
 
