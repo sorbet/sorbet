@@ -12,9 +12,9 @@ cc_test(
         "testdata/**/*.rb.*.exp",
     ]),
     deps = [
-        "//namer",
         "//ast/desugar",
         "//cfg",
+        "//namer",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
         "@spdlog//:spdlog",

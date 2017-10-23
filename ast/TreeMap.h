@@ -443,7 +443,7 @@ private:
 
             if (HAS_MEMBER_postTransformYield<FUNC>::value) {
                 return PostPonePostTransform_Yield<FUNC, HAS_MEMBER_postTransformYield<FUNC>::value>::call(ctx, v,
-                                                                                                             func);
+                                                                                                           func);
             }
 
             return v;
@@ -453,7 +453,7 @@ private:
                                                                                                            func);
             }
             return v;
-        }  else if (Assign *v = dynamic_cast<Assign *>(what)) {
+        } else if (Assign *v = dynamic_cast<Assign *>(what)) {
             if (HAS_MEMBER_preTransformAssign<FUNC>::value) {
                 v = PostPonePreTransform_Assign<FUNC, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(ctx, v, func);
             }
