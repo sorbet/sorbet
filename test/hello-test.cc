@@ -162,7 +162,7 @@ TEST(PreOrderTreeMap, CountTrees) {
     static UTF8Desc foo_DESC{(char *)foo_str, (int)strlen(foo_str)};
 
     auto name = ctx.state.enterNameUTF8(foo_DESC);
-    auto classSym = ctx.state.getTopLevelClassSymbol(name);
+    auto classSym = ctx.state.enterClassSymbol(ruby_typer::ast::ContextBase::defn_root(), name);
     auto argTypes = vector<SymbolRef>{ctx.state.defn_top()};
     auto methodSym = ctx.state.enterSymbol(classSym, name, ctx.state.defn_top(), argTypes, true);
     auto empty = vector<SymbolRef>();

@@ -56,6 +56,8 @@ public:
         return !_id;
     }
 
+    std::string toString(ContextBase &ctx, int tabs = 0) const;
+
 private:
     u4 _id;
 };

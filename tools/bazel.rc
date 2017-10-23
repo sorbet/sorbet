@@ -17,6 +17,8 @@ build --cxxopt=-fsanitize=undefined
 build --linkopt=-fsanitize=address
 build --linkopt=-fsanitize=undefined
 
+build:dbg --copt=-O0
+build:dbg --cxxopt=-O0
 build:dbg --copt=-g3
 build:dbg --cxxopt=-g3
 build:dbg --linkopt=-g3

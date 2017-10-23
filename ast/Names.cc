@@ -48,6 +48,9 @@ Name &NameRef::name(ContextBase &ctx) const {
     DEBUG_ONLY(Error::check(exists()));
     return ctx.names[_id];
 }
+std::string NameRef::toString(ContextBase &ctx) const {
+    return name(ctx).toString(ctx);
+}
 
 } // namespace ast
 } // namespace ruby_typer
