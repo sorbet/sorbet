@@ -9,26 +9,29 @@ namespace ast {
 
 using namespace std;
 
-void offset2Pos(ast::UTF8Desc source, u4 off, u4 &line, u4 &col) {
+Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off) {
+    Loc::Detail pos;
+
     Error::check(off < source.to);
 
-    line = 1 + count(source.from, source.from + off, '\n');
+    pos.line = 1 + count(source.from, source.from + off, '\n');
 
     auto end = make_reverse_iterator(source.from + off);
     auto begin = make_reverse_iterator(source.from);
     auto nl = find(end, begin, '\n');
 
     if (nl == begin) {
-        col = off;
+        pos.column = off;
     } else {
-        col = nl - end;
+        pos.column = nl - end;
     }
+
+    return pos;
 }
 
-void Loc::position(ast::ContextBase &ctx, u4 &begin_line, u4 &begin_col, u4 &end_line, u4 &end_col) {
+pair<Loc::Detail, Loc::Detail> Loc::position(ast::ContextBase &ctx) {
     ast::File &file = this->file.file(ctx);
-    offset2Pos(file.source(), begin_pos, begin_line, begin_col);
-    offset2Pos(file.source(), end_pos, end_line, end_col);
+    return make_pair(offset2Pos(file.source(), begin_pos), offset2Pos(file.source(), end_pos));
 }
 
 } // namespace ast

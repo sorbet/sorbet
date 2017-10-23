@@ -7,11 +7,10 @@ namespace ast {
 using namespace std;
 
 void Reporter::_error(Loc loc, ErrorClass what, const string &formatted) {
-    u4 begin_line, begin_col, end_line, end_col;
-    loc.position(ctx_, begin_line, begin_col, end_line, end_col);
+    auto pos = loc.position(ctx_);
 
-    ctx_.logger.error("{}:{}:{}-{}:{}: {}", loc.file.file(ctx_).path(), begin_line, begin_col, end_line, end_col,
-                      formatted);
+    ctx_.logger.error("{}:{}:{}-{}:{}: {}", loc.file.file(ctx_).path(), pos.first.line, pos.first.column,
+                      pos.second.line, pos.second.column, formatted);
 }
 } // namespace ast
 } // namespace ruby_typer

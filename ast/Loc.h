@@ -28,7 +28,11 @@ public:
     Loc(const Loc &rhs) = default;
     Loc(Loc &&rhs) = default;
 
-    void position(ast::ContextBase &ctx, u4 &begin_line, u4 &begin_col, u4 &end_line, u4 &end_col);
+    struct Detail {
+        u4 line, column;
+    };
+
+    std::pair<Detail, Detail> position(ast::ContextBase &ctx);
 };
 } // namespace ast
 } // namespace ruby_typer

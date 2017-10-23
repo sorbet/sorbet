@@ -10,7 +10,7 @@ namespace ast {
 
 auto console = spd::stdout_color_mt("parse");
 
-void offset2Pos(ast::UTF8Desc source, u4 off, u4 &line, u4 &col);
+Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off);
 
 struct Offset2PosTest {
     string src;
@@ -31,11 +31,10 @@ TEST(ASTTest, TestOffset2Pos) {
     for (auto &tc : cases) {
         SCOPED_TRACE(string("case: ") + to_string(i));
 
-        u4 col = -1, line = -1;
-        offset2Pos(tc.src, tc.off, line, col);
+        auto detail = offset2Pos(tc.src, tc.off);
 
-        EXPECT_EQ(tc.col, col);
-        EXPECT_EQ(tc.line, line);
+        EXPECT_EQ(tc.col, detail.column);
+        EXPECT_EQ(tc.line, detail.line);
         i++;
     }
 }
