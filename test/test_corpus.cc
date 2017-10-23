@@ -84,64 +84,84 @@ public:
 TEST_P(ExpectationTest, PerPhaseTest) {
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
+    SCOPED_TRACE(inputPath);
 
     auto console = spd::stdout_color_mt("fixtures: " + inputPath);
     ruby_typer::ast::ContextBase ctx(*console);
     ruby_typer::ast::Context context(ctx, ctx.defn_root());
 
-    if (test.expectations.find("parser") != test.expectations.end()) {
-        auto checker = test.folder + test.expectations["parser"];
+    auto src = ruby_typer::File::read(inputPath.c_str());
+    auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
+
+    auto expectation = test.expectations.find("parser");
+    if (expectation == test.expectations.end())
+        return;
+
+    {
+        auto checker = test.folder + expectation->second;
         SCOPED_TRACE(checker);
 
-        auto src = ruby_typer::File::read(inputPath.c_str());
         auto exp = ruby_typer::File::read(checker.c_str());
-        auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
 
         EXPECT_EQ(0, parsed.diagnostics().size());
         EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
         if (exp == parsed.ast()->toString(ctx) + "\n") {
             TEST_COUT << "Parser OK" << endl;
+        }
+    }
 
-            if (test.expectations.find("desugar") != test.expectations.end()) {
-                auto checker = test.folder + test.expectations["desugar"];
-                auto exp = ruby_typer::File::read(checker.c_str());
-                SCOPED_TRACE(checker);
+    expectation = test.expectations.find("desugar");
+    if (expectation == test.expectations.end())
+        return;
 
-                auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
-                EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
-                if (exp == desugared->toString(ctx) + "\n") {
-                    TEST_COUT << "Desugar OK" << endl;
-                    if (test.expectations.find("cfg") != test.expectations.end()) {
-                        auto checker = test.folder + test.expectations["cfg"];
-                        SCOPED_TRACE(checker);
+    auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
+    {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
 
-                        CFG_Collector collector;
-                        auto exp = ruby_typer::File::read(checker.c_str());
+        EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
+        if (exp == desugared->toString(ctx) + "\n") {
+            TEST_COUT << "Desugar OK" << endl;
+        }
+    }
 
-                        auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(desugared));
-                        stringstream got;
-                        for (auto &cfg : collector.cfgs) {
-                            got << cfg << endl << endl;
-                        }
-                        EXPECT_EQ(exp, got.str() + "\n");
-                        if (exp == got.str() + "\n") {
-                            TEST_COUT << "CFG OK" << endl;
-                        }
-                    }
-                }
+    expectation = test.expectations.find("namer");
+    if (expectation == test.expectations.end())
+        return;
 
-                if (test.expectations.find("namer") != test.expectations.end()) {
-                    auto checker = test.folder + test.expectations["namer"];
-                    auto exp = ruby_typer::File::read(checker.c_str());
-                    SCOPED_TRACE(checker);
+    auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
+    {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
 
-                    auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
-                    EXPECT_EQ(exp, ctx.toString() + "\n");
-                    if (exp == ctx.toString() + "\n") {
-                        TEST_COUT << "Namer OK" << std::endl;
-                    }
-                }
-            }
+        EXPECT_EQ(exp, ctx.toString() + "\n");
+        if (exp == ctx.toString() + "\n") {
+            TEST_COUT << "Namer OK" << std::endl;
+        }
+    }
+
+    expectation = test.expectations.find("cfg");
+    if (expectation == test.expectations.end())
+        return;
+
+    CFG_Collector collector;
+    auto cfg = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(namedTree));
+
+    {
+        auto checker = test.folder + expectation->second;
+        SCOPED_TRACE(checker);
+
+        auto exp = ruby_typer::File::read(checker.c_str());
+
+        stringstream got;
+        for (auto &cfg : collector.cfgs) {
+            got << cfg << endl << endl;
+        }
+        EXPECT_EQ(exp, got.str() + "\n");
+        if (exp == got.str() + "\n") {
+            TEST_COUT << "CFG OK" << endl;
         }
     }
 }
