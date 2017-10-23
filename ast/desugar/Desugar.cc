@@ -289,8 +289,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  }
                  vector<unique_ptr<Expression>> ancestors;
                  unique_ptr<Statement> res = make_unique<ClassDef>(
-                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, module->name)), ancestors, body,
-                     ClassDefKind::Module);
+                     ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, module->name)), ancestors,
+                     body, ClassDefKind::Module);
                  result.swap(res);
              },
              [&](parser::Class *claz) {
