@@ -67,22 +67,17 @@ ConstDef::ConstDef(SymbolRef symbol, unique_ptr<Expression> rhs) : Declaration(s
 If::If(unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
-Breakable::Breakable(u1 break_tag) : break_tag(break_tag) {}
+While::While(unique_ptr<Expression> cond, unique_ptr<Statement> body) : cond(move(cond)), body(move(body)) {}
 
-While::While(u1 break_tag, unique_ptr<Expression> cond, unique_ptr<Statement> body)
-    : Breakable(break_tag), cond(move(cond)), body(move(body)) {}
+Break::Break(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
-Break::Break(u1 break_tag) : break_tag(break_tag) {}
-
-Next::Next(u1 break_tag) : break_tag(break_tag) {}
+Next::Next(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
 BoolLit::BoolLit(bool value) : value(value) {}
 
-string Next::toString(ContextBase &ctx, int tabs) {
-    return "next";
-}
-
 Return::Return(unique_ptr<Expression> expr) : expr(move(expr)) {}
+
+Yield::Yield(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
 Ident::Ident(SymbolRef symbol) : symbol(symbol), name(0) {
     Error::check(!symbol.isSynthetic()); // symbol is a valid symbol
@@ -104,6 +99,13 @@ Super::Super(vector<unique_ptr<Expression>> &&args) : args(move(args)) {}
 New::New(SymbolRef claz, vector<unique_ptr<Expression>> &&args) : claz(claz), args(move(args)) {}
 
 NamedArg::NamedArg(NameRef name, unique_ptr<Expression> arg) : name(name), arg(move(arg)) {}
+
+RestArg::RestArg(unique_ptr<Reference> arg) : expr(move(arg)) {}
+
+KeywordArg::KeywordArg(std::unique_ptr<Reference> expr) : expr(move(expr)) {}
+
+OptionalArg::OptionalArg(std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_)
+    : expr(move(expr)), default_(move(default_)) {}
 
 FloatLit::FloatLit(float value) : value(value) {}
 
@@ -251,12 +253,20 @@ string Return::toString(ContextBase &ctx, int tabs) {
     return "return " + this->expr->toString(ctx, tabs + 1);
 }
 
+string Yield::toString(ContextBase &ctx, int tabs) {
+    return "yield(" + this->expr->toString(ctx, tabs + 1) + ")";
+}
+
+string Next::toString(ContextBase &ctx, int tabs) {
+    return "next(" + this->expr->toString(ctx, tabs + 1) + ")";
+}
+
 string Self::toString(ContextBase &ctx, int tabs) {
     return "self(" + this->claz.info(ctx).name.name(ctx).toString(ctx) + ")";
 }
 
 string Break::toString(ContextBase &ctx, int tabs) {
-    return "break";
+    return "break(" + this->expr->toString(ctx, tabs + 1) + ")";
 }
 
 string IntLit::toString(ContextBase &ctx, int tabs) {
@@ -350,8 +360,148 @@ string Symbol::toString(ContextBase &ctx, int tabs) {
     return ":" + this->name.name(ctx).toString(ctx);
 }
 
-string NotSupported::toString(ContextBase &ctx, int tabs) {
+std::string NotSupported::toString(ContextBase &ctx, int tabs) {
+    return nodeName();
+}
+
+std::string RestArg::toString(ContextBase &ctx, int tabs) {
+    return "*" + this->expr->toString(ctx, tabs);
+}
+
+std::string KeywordArg::toString(ContextBase &ctx, int tabs) {
+    return this->expr->toString(ctx, tabs) + ":";
+}
+
+std::string OptionalArg::toString(ContextBase &ctx, int tabs) {
+    return this->expr->toString(ctx, tabs) + " = " + this->default_->toString(ctx, tabs);
+}
+
+std::string NotSupported::nodeName() {
     return "<Not Supported (" + why + ")>";
+}
+
+std::string Rescue::nodeName() {
+    return "Rescue";
+}
+std::string Yield::nodeName() {
+    return "Next";
+}
+std::string Next::nodeName() {
+    return "Next";
+}
+std::string ClassDef::nodeName() {
+    return "ClassDef";
+}
+
+std::string ConstDef::nodeName() {
+    return "ConstDef";
+}
+std::string MethodDef::nodeName() {
+    return "MethodDef";
+}
+std::string If::nodeName() {
+    return "If";
+}
+std::string While::nodeName() {
+    return "While";
+}
+std::string Ident::nodeName() {
+    return "Ident";
+}
+
+std::string Return::nodeName() {
+    return "Return";
+}
+std::string Break::nodeName() {
+    return "Break";
+}
+
+std::string Symbol::nodeName() {
+    return "Symbol";
+}
+
+std::string Assign::nodeName() {
+    return "Assign";
+}
+
+std::string Send::nodeName() {
+    return "Send";
+}
+
+std::string New::nodeName() {
+    return "New";
+}
+
+std::string Super::nodeName() {
+    return "Super";
+}
+std::string NamedArg::nodeName() {
+    return "NamedArg";
+}
+
+std::string Array::nodeName() {
+    return "Array";
+}
+
+std::string FloatLit::nodeName() {
+    return "FloatLit";
+}
+
+std::string IntLit::nodeName() {
+    return "IntLit";
+}
+
+std::string StringLit::nodeName() {
+    return "StringLit";
+}
+
+std::string BoolLit::nodeName() {
+    return "BoolLit";
+}
+
+std::string ConstantLit::nodeName() {
+    return "ConstantLit";
+}
+
+std::string ArraySplat::nodeName() {
+    return "ArraySplat";
+}
+
+std::string HashSplat::nodeName() {
+    return "HashSplat";
+}
+
+std::string Self::nodeName() {
+    return "Self";
+}
+
+std::string Block::nodeName() {
+    return "Block";
+}
+std::string InsSeq::nodeName() {
+    return "InsSeq";
+}
+std::string EmptyTree::nodeName() {
+    return "EmptyTree";
+}
+
+std::string Nil::toString(ContextBase &ctx, int tabs) {
+    return "nil";
+}
+
+std::string Nil::nodeName() {
+    return "Nil";
+}
+
+std::string RestArg::nodeName() {
+    return "RestArg";
+}
+
+std::string KeywordArg::nodeName() {
+    return "KeywordArg";
+}
+std::string OptionalArg::nodeName() {
+    return "OptionalArg";
 }
 } // namespace ast
 } // namespace ruby_typer

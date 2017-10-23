@@ -115,7 +115,7 @@ NodeDef nodes[] = {
     {"IVarLhs", vector<FieldDef>({{"name", Name}})},
     // Required keyword argument inside an (args)
     {"Kwarg", vector<FieldDef>({{"name", Name}})},
-    // explicit `begin` keyword
+    // explicit `begin` keyword. Is there a difference between explicit and implicit one?
     {"Kwbegin", vector<FieldDef>({{"stmts", NodeVec}})},
     // optional arg with default value provided
     {"Kwoptarg", vector<FieldDef>({{"name", Name}, {"default_", Node}})},

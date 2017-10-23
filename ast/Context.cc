@@ -66,6 +66,24 @@ static UTF8Desc star_DESC{(char *)star, (int)strlen(star)};
 static const char *starStar = "**";
 static UTF8Desc starStar_DESC{(char *)starStar, (int)strlen(starStar)};
 
+static const char *whileTemp = "whileTmp";
+static UTF8Desc whileTemp_DESC{(char *)whileTemp, (int)std::strlen(whileTemp)};
+
+static const char *ifTemp = "ifTmp";
+static UTF8Desc ifTemp_DESC{(char *)ifTemp, (int)std::strlen(ifTemp)};
+
+static const char *returnTemp = "returnTmp";
+static UTF8Desc retunTemp_DESC{(char *)returnTemp, (int)std::strlen(returnTemp)};
+
+static const char *statTemp = "statTmp";
+static UTF8Desc statTemp_DESC{(char *)statTemp, (int)std::strlen(statTemp)};
+
+static const char *assignTemp = "assignTmp";
+static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)std::strlen(assignTemp)};
+
+static const char *returnMethodTemp = "<ret>";
+static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)std::strlen(returnMethodTemp)};
+
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
 
@@ -102,6 +120,12 @@ static UTF8Desc object_DESC{(char *)object_str, (int)std::strlen(object_str)};
 static const char *junk_str = "<<JUNK>>";
 static UTF8Desc junk_DESC{(char *)junk_str, (int)std::strlen(junk_str)};
 
+static const char *always_str = "<always>";
+static UTF8Desc always_DESC{(char *)always_str, (int)std::strlen(always_str)};
+
+static const char *never_str = "<never>";
+static UTF8Desc never_DESC{(char *)never_str, (int)std::strlen(never_str)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -127,6 +151,12 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     auto unaryMinus_id = enterNameUTF8(unaryMinus_DESC);
     auto star_id = enterNameUTF8(star_DESC);
     auto starStar_id = enterNameUTF8(starStar_DESC);
+    auto whileTemp_id = enterNameUTF8(whileTemp_DESC);
+    auto ifTemp_id = enterNameUTF8(ifTemp_DESC);
+    auto returnTemp_id = enterNameUTF8(retunTemp_DESC);
+    auto statTemp_id = enterNameUTF8(statTemp_DESC);
+    auto assignTemp_id = enterNameUTF8(assignTemp_DESC);
+    auto returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -141,6 +171,12 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(unaryMinus_id == Names::unaryMinus()));
     DEBUG_ONLY(Error::check(star_id == Names::star()));
     DEBUG_ONLY(Error::check(starStar_id == Names::starStar()));
+    DEBUG_ONLY(Error::check(whileTemp_id == Names::whileTemp()));
+    DEBUG_ONLY(Error::check(ifTemp_id == Names::ifTemp()));
+    DEBUG_ONLY(Error::check(returnTemp_id == Names::returnTemp()));
+    DEBUG_ONLY(Error::check(statTemp_id == Names::statTemp()));
+    DEBUG_ONLY(Error::check(assignTemp_id == Names::assignTemp()));
+    DEBUG_ONLY(Error::check(returnMethodTemp_id == Names::returnMethodTemp()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -154,6 +190,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef cvar_id = synthesizeClass(todo_cvar_DESC);
     SymbolRef object_id = synthesizeClass(object_DESC);
     SymbolRef junk_id = synthesizeClass(junk_DESC);
+    SymbolRef always_id = synthesizeClass(always_DESC);
+    SymbolRef never_id = synthesizeClass(never_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -167,6 +205,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(cvar_id == defn_cvar_todo());
     Error::check(object_id == defn_object());
     Error::check(junk_id == defn_junk());
+    Error::check(always_id == defn_cfg_always());
+    Error::check(never_id == defn_cfg_never());
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
@@ -179,6 +219,8 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
      * 9: <todo cvar>
      * 10: Object;
      * 11: <<JUNK>>;
+     * 12: <always>
+     * 13: <never>
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 

@@ -3,10 +3,27 @@ begin
   @iv<todo ivar sym> = 1
   @@cv<todo cvar sym> = 1
   $gv<todo gvar sym> = 1
-  <Not Supported (Masgn)>
-  <Not Supported (Kwbegin)>
-  <Not Supported (Kwbegin)>
-  <Not Supported (Kwbegin)>
+  begin
+    assignTmp$2 = [nil, nil]
+    <emtpyTree>.x().var=(assignTmp$2.[](0))
+    y<todo lvar sym> = assignTmp$2.[](1)
+    assignTmp$2
+  end
+  begin
+    assignTmp$3 = <emtpyTree>.zaaaz()
+    baaaar<todo lvar sym> = assignTmp$3.[](0)
+    naaar<todo lvar sym> = assignTmp$3.[](1)
+    assignTmp$3
+  end
+  xaaaaz<todo lvar sym> = [<emtpyTree>.yayayaya(), <emtpyTree>.tutututu()]
+  <emtpyTree>
+  begin
+    nil
+  end
+  begin
+    <emtpyTree>.a()
+    <emtpyTree>.b()
+  end
   def foo<<todo sym>>(<Not Supported (Blockarg)>)
     <emtpyTree>
   <emtpyTree>.lambda() do ||
@@ -20,40 +37,64 @@ begin
   <Not Supported (DefS)>
   <Not Supported (SClass)>
   begin
-    ||$2 = true
-    if ||$2
-      ||$2
+    ||$4 = true
+    if ||$4
+      ||$4
     else 
       false
     end
   end
   <Not Supported (For)>
-  <Not Supported (While)>
+  while 0.!=(1)
+    <emtpyTree>
+  end
   x<todo lvar sym>.[]=(0)
-  <Not Supported (Break)>
-  <Not Supported (Break)>
-  <Not Supported (Break)>
+  break(<emtpyTree>)
+  break(1)
+  break([1, 2])
+  next(<emtpyTree>)
+  next(1)
+  next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
-  def foo<<todo sym>>(<Not Supported (Kwarg)>, <Not Supported (Kwoptarg)>, <Not Supported (Kwrestarg)>)
+  def foo<<todo sym>>(x<todo lvar sym>:, y<todo lvar sym>: = 1, *z<todo lvar sym>:)
     <emtpyTree>
   <Not Supported (Hash)>
   <Not Supported (LineLiteral)>
-  <Not Supported (While)>
-  <Not Supported (WhilePost)>
-  <Not Supported (Until)>
-  <Not Supported (UntilPost)>
-  <Not Supported (Masgn)>
+  while true
+    nil
+  end
+  while true
+    nil
+  end
+  while true.!()
+    nil
+  end
+  while true.!()
+    nil
+  end
+  begin
+    assignTmp$5 = 1
+    a<todo lvar sym> = assignTmp$5.[](0)
+    <Not Supported (Mlhs)>
+    assignTmp$5
+  end
   <Not Supported (NthRef)>
-  def foo<<todo sym>>(<Not Supported (Optarg)>, <Not Supported (Restarg)>)
+  def foo<<todo sym>>(x<todo lvar sym> = 1, *y<todo lvar sym>)
     <emtpyTree>
   <Not Supported (Hash)>
   <Not Supported (Preexe)>
   <Not Supported (Postexe)>
   <Not Supported (Rational)>
   <Not Supported (Complex)>
-  <Not Supported (Kwbegin)>
-  <Not Supported (Masgn)>
+  begin
+    <Not Supported (Rescue)>
+  end
+  begin
+    assignTmp$6 = [<Not Supported (Splat)>]
+    <Not Supported (SplatLhs)>
+    assignTmp$6
+  end
   <Not Supported (DSymbol)>
   [:sym]
   if x<todo lvar sym>
@@ -68,9 +109,11 @@ begin
   <emtpyTree>.proc() do |<Not Supported (Shadowarg)>|
     <emtpyTree>
   end
-  <Not Supported (Break)>
-  def foo<<todo sym>>(<Not Supported (Restarg)>)
+  break(<emtpyTree>.foo(1) do ||
+      <emtpyTree>
+    end)
+  def foo<<todo sym>>(**$0<todo lvar sym>)
     <emtpyTree>
-  def foo<<todo sym>>(<Not Supported (Kwrestarg)>)
+  def foo<<todo sym>>(***$1<todo lvar sym>:)
     <emtpyTree>
 end

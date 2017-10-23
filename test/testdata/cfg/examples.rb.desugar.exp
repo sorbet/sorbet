@@ -1,0 +1,36 @@
+class <emtpyTree>::Examples<<todo sym>>
+  def i_like_ifs<<todo sym>>()
+    if true
+      return 1
+    else 
+      return 2
+    end
+
+  def i_like_exps<<todo sym>>()
+    if begin
+        true
+      end
+      1
+    else 
+      2
+    end
+
+  def return_in_one_branch1<<todo sym>>()
+    if begin
+        true
+      end
+      return 1
+    else 
+      2
+    end
+
+  def return_in_one_branch2<<todo sym>>()
+    if begin
+        true
+      end
+      1
+    else 
+      return 2
+    end
+
+end

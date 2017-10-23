@@ -1,5 +1,6 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "cfg/CFG.h"
 #include "common/common.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -10,6 +11,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <sys/types.h>
 #include <unordered_map>
@@ -70,6 +72,15 @@ public:
 
 #define TEST_COUT TestCout()
 
+class CFG_Collector {
+public:
+    vector<string> cfgs;
+    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
+        cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
+        return m;
+    }
+};
+
 TEST_P(ExpectationTest, PerPhaseTest) {
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
@@ -90,27 +101,45 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
         if (exp == parsed.ast()->toString(ctx) + "\n") {
             TEST_COUT << "Parser OK" << endl;
-        }
-        if (test.expectations.find("desugar") != test.expectations.end()) {
-            auto checker = test.folder + test.expectations["desugar"];
-            auto exp = ruby_typer::File::read(checker.c_str());
-            SCOPED_TRACE(checker);
 
-            auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
-            EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
-            if (exp == desugared->toString(ctx) + "\n") {
-                TEST_COUT << "Desugar OK" << endl;
-            }
-
-            if (test.expectations.find("namer") != test.expectations.end()) {
-                auto checker = test.folder + test.expectations["namer"];
+            if (test.expectations.find("desugar") != test.expectations.end()) {
+                auto checker = test.folder + test.expectations["desugar"];
                 auto exp = ruby_typer::File::read(checker.c_str());
                 SCOPED_TRACE(checker);
 
-                auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
-                EXPECT_EQ(exp, ctx.toString() + "\n");
-                if (exp == ctx.toString() + "\n") {
-                    TEST_COUT << "Namer OK" << std::endl;
+                auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
+                EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
+                if (exp == desugared->toString(ctx) + "\n") {
+                    TEST_COUT << "Desugar OK" << endl;
+                    if (test.expectations.find("cfg") != test.expectations.end()) {
+                        auto checker = test.folder + test.expectations["cfg"];
+                        SCOPED_TRACE(checker);
+
+                        CFG_Collector collector;
+                        auto exp = ruby_typer::File::read(checker.c_str());
+
+                        auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(desugared));
+                        stringstream got;
+                        for (auto &cfg : collector.cfgs) {
+                            got << cfg << endl << endl;
+                        }
+                        EXPECT_EQ(exp, got.str() + "\n");
+                        if (exp == got.str() + "\n") {
+                            TEST_COUT << "CFG OK" << endl;
+                        }
+                    }
+                }
+
+                if (test.expectations.find("namer") != test.expectations.end()) {
+                    auto checker = test.folder + test.expectations["namer"];
+                    auto exp = ruby_typer::File::read(checker.c_str());
+                    SCOPED_TRACE(checker);
+
+                    auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
+                    EXPECT_EQ(exp, ctx.toString() + "\n");
+                    if (exp == ctx.toString() + "\n") {
+                        TEST_COUT << "Namer OK" << std::endl;
+                    }
                 }
             }
         }

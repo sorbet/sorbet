@@ -9,6 +9,8 @@ alias foo bar
 $gv = 1
 
 x.var, y = nil, nil
+baaaar, naaar = zaaaz
+xaaaaz = yayayaya, tutututu
 
 
 # `begin` keyword
@@ -60,6 +62,12 @@ x[1] = 0
 break
 break 1
 break 1,2
+
+
+# next
+next
+next 1
+next 1,2
 
 # defined
 defined?(X)

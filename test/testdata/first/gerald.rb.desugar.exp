@@ -5,7 +5,7 @@ begin
     class <emtpyTree>::MatchTimeout<<todo sym>>
       <emtpyTree>.attr_reader(:rule_token)
 
-      def initialize<<todo sym>>(message<todo lvar sym>, <Not Supported (Kwoptarg)>)
+      def initialize<<todo sym>>(message<todo lvar sym>, rule_token<todo lvar sym>: = "".to_s())
         begin
           super(message<todo lvar sym>)
           @rule_token<todo ivar sym> = rule_token<todo lvar sym>
@@ -20,7 +20,12 @@ begin
 
       def initialize<<todo sym>>()
         begin
-          <Not Supported (Masgn)>
+          begin
+            assignTmp$0 = <emtpyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
+            @rules<todo ivar sym> = assignTmp$0.[](0)
+            invalid_rules<todo lvar sym> = assignTmp$0.[](1)
+            assignTmp$0
+          end
           if invalid_rules<todo lvar sym>.empty?().!()
             begin
               invalid_rule_ids<todo lvar sym> = invalid_rules<todo lvar sym>.map(<Not Supported (BlockPass)>).join(",".to_s())
@@ -112,7 +117,7 @@ begin
       def time_rule<<todo sym>>(rule<todo lvar sym>)
         begin
           rule_start<todo lvar sym> = <emtpyTree>::Time.now()
-          res<todo lvar sym> = <Not Supported (Yield)>
+          res<todo lvar sym> = yield(<emtpyTree>)
           dur_ms<todo lvar sym> = begin
             <emtpyTree>::Time.now().-(rule_start<todo lvar sym>)
           end.*(1000)
@@ -192,22 +197,22 @@ begin
               begin
                 lines<todo lvar sym> = part<todo lvar sym>.split("
 ".to_s())
-                a_name<todo lvar sym> = b_name<todo lvar sym> = <Not Supported (Nil)>
+                a_name<todo lvar sym> = b_name<todo lvar sym> = nil
                 added_lines<todo lvar sym> = []
                 removed_lines<todo lvar sym> = []
                 lines<todo lvar sym>.each() do |line<todo lvar sym>|
                   if line<todo lvar sym>.start_with?("index ".to_s(), "@@".to_s(), "new file mode".to_s())
-                    <Not Supported (Next)>
+                    next(<emtpyTree>)
                   else 
                     if line<todo lvar sym>.start_with?("---".to_s())
                       begin
                         a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                         if begin
-                            &&$0 = <emtpyTree>
-                            if &&$0
+                            &&$1 = <emtpyTree>
+                            if &&$1
                               <emtpyTree>
                             else 
-                              &&$0
+                              &&$1
                             end
                           end
                           a_name<todo lvar sym> = a_name<todo lvar sym>.[](<Not Supported (IRange)>)
@@ -220,11 +225,11 @@ begin
                         begin
                           b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                           if begin
-                              &&$1 = <emtpyTree>
-                              if &&$1
+                              &&$2 = <emtpyTree>
+                              if &&$2
                                 <emtpyTree>
                               else 
-                                &&$1
+                                &&$2
                               end
                             end
                             b_name<todo lvar sym> = b_name<todo lvar sym>.[](<Not Supported (IRange)>)
@@ -247,7 +252,7 @@ begin
                   end
                 end
                 if a_name<todo lvar sym>.nil?()
-                  <Not Supported (Next)>
+                  next(<emtpyTree>)
                 else 
                   <emtpyTree>
                 end

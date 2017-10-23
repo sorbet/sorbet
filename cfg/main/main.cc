@@ -1,6 +1,6 @@
-#include "../../ast.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "cfg/CFG.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include <ctime>
@@ -12,6 +12,15 @@
 
 namespace spd = spdlog;
 using namespace std;
+
+class CFG_Collector {
+public:
+    std::vector<std::string> cfgs;
+    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
+        cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
+        return m;
+    }
+};
 
 void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &path, const string &src) {
     auto r = ruby_typer::parser::parse_ruby(ctx, path, src);
@@ -29,9 +38,17 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
     }
     if (ast) {
         ruby_typer::ast::Context context(ctx, ctx.defn_root());
-        auto des = ruby_typer::ast::desugar::node2Tree(context, ast);
+        auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
+        CFG_Collector collector;
+
+        auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, std::move(desugared));
+        std::stringstream buf;
+        for (auto &cfg : collector.cfgs) {
+            buf << cfg << std::endl << std::endl;
+        }
+        auto got = buf.str();
         if (!opts["q"].as<bool>()) {
-            cout << des->toString(ctx, 0) << endl;
+            cout << got << endl;
         }
     } else {
         cout << " got null" << endl;
@@ -39,20 +56,20 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
 }
 
 int main(int argc, char **argv) {
-    vector<string> files;
+    std::vector<std::string> files;
     //    spd::set_async_mode(1024);
-    auto color_sink = make_shared<spdlog::sinks::ansicolor_stdout_sink_st>();
+    auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
-    shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
-    shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
+    std::shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
+    std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
 
-    cxxopts::Options options("desugar_ast", "Parse ruby code, desugar and print it");
+    cxxopts::Options options("cfg_ast", "Parse ruby code, desguar it, build control flow graph and print it");
     options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
     options.add_options()("q,quiet", "Be quiet");
-    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
-    options.add_options()("files", "Input files", cxxopts::value<vector<string>>(files));
+    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
+    options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
     options.parse_positional("files");
 
     try {
