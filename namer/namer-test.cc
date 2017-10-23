@@ -28,7 +28,7 @@ private:
 };
 
 std::unique_ptr<ast::Statement> getTree(ast::ContextBase &cb, std::string str) {
-    auto result = parser::parse_ruby(cb, str);
+    auto result = parser::parse_ruby(cb, "<test>", str);
     ruby_typer::ast::Context ctx(cb, cb.defn_root());
     return ast::desugar::node2Tree(ctx, result.ast());
 }

@@ -1,7 +1,9 @@
 #ifndef SRUBY_CONTEXT_H
 #define SRUBY_CONTEXT_H
 
+#include "Files.h"
 #include "Names.h"
+#include "Reporter.h"
 #include "Symbols.h"
 #include "common/common.h"
 #include "spdlog/spdlog.h"
@@ -20,6 +22,8 @@ class ContextBase {
     friend NameRef;
     friend SymbolInfo;
     friend SymbolRef;
+    friend File;
+    friend FileRef;
 
 public:
     ContextBase(spdlog::logger &logger);
@@ -44,6 +48,8 @@ public:
 
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original);
 
+    FileRef enterFile(UTF8Desc path, UTF8Desc source);
+
     int indexClassOrJar(const char *name);
 
     unsigned int namesUsed();
@@ -57,6 +63,7 @@ public:
     std::string toString();
 
     spdlog::logger &logger;
+    Reporter errors;
 
     static constexpr SymbolRef noSymbol() {
         return SymbolRef(0);
@@ -120,6 +127,7 @@ private:
     unsigned int max_files_count;
     unsigned int files_used;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
+    std::vector<File> files;
 
     void expandNames();
 

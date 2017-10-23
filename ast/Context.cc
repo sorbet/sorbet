@@ -102,7 +102,7 @@ static UTF8Desc object_DESC{(char *)object_str, (int)std::strlen(object_str)};
 static const char *junk_str = "<<JUNK>>";
 static UTF8Desc junk_DESC{(char *)junk_str, (int)std::strlen(junk_str)};
 
-ContextBase::ContextBase(spdlog::logger &logger) : logger(logger) {
+ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
@@ -405,6 +405,15 @@ NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
     return idx;
+}
+
+FileRef ContextBase::enterFile(UTF8Desc path, UTF8Desc source) {
+    auto idx = files.size();
+    files.emplace_back();
+    auto &file = files.back();
+    file.path_ = path.toString();
+    file.source_ = source.toString();
+    return FileRef(idx);
 }
 
 SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {

@@ -21,6 +21,7 @@ class Node;
  */
 class Result {
 public:
+    ast::FileRef file();
     const ruby_parser::diagnostics_t &diagnostics();
     Node *ast();
 
@@ -34,12 +35,12 @@ public:
 private:
     Result(std::unique_ptr<Impl> &&impl);
 
-    friend Result parse_ruby(ruby_typer::ast::ContextBase &ctx, const std::string &src);
+    friend Result parse_ruby(ruby_typer::ast::ContextBase &ctx, const std::string &path, const std::string &src);
 
     std::unique_ptr<Impl> impl_;
 };
 
-Result parse_ruby(ruby_typer::ast::ContextBase &ctx, const std::string &src);
+Result parse_ruby(ruby_typer::ast::ContextBase &ctx, const std::string &path, const std::string &src);
 } // namespace parser
 }; // namespace ruby_typer
 

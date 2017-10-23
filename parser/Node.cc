@@ -1,4 +1,6 @@
 #include "parser/parser.h"
+#include <algorithm>
+#include <iterator>
 
 // makes lldb work. Do not remove please
 template class std::unique_ptr<ruby_typer::parser::Node>;

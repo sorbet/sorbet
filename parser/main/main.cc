@@ -17,8 +17,8 @@ struct stats {
     unsigned long bytes;
 };
 
-void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &src) {
-    auto r = ruby_typer::parser::parse_ruby(ctx, src);
+void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &path, const string &src) {
+    auto r = ruby_typer::parser::parse_ruby(ctx, path, src);
     auto ast = r.ast();
     if (r.diagnostics().size() > 0) {
         vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
         st.files++;
         st.lines++;
         st.bytes += src.size();
-        parse_and_print(ctx, options, src);
+        parse_and_print(ctx, options, "-e", src);
     } else {
         st.files = files.size();
         for (auto &fileName : files) {
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
             string src = ruby_typer::File::read(fileName.c_str());
             st.bytes += src.size();
             st.lines += count(src.begin(), src.end(), '\n');
-            parse_and_print(ctx, options, src);
+            parse_and_print(ctx, options, fileName, src);
         }
     }
     clock_t end = clock();

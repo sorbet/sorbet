@@ -8,22 +8,11 @@
 namespace ruby_typer {
 namespace parser {
 
-using ruby_typer::ast::NameRef;
+using ast::Loc;
+using ast::NameRef;
 using std::move;
 using std::unique_ptr;
 using std::vector;
-
-struct Loc {
-    u4 begin_pos, end_pos;
-
-    static Loc none() {
-        return Loc{(u4)-1, (u4)-1};
-    }
-
-    bool is_none() {
-        return begin_pos == (u4)-1 && end_pos == (u4)-1;
-    }
-};
 
 class Node {
 public:
