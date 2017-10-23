@@ -129,17 +129,17 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                         }
                     }
                 }
-            }
 
-            if (test.expectations.find("namer") != test.expectations.end()) {
-                auto checker = test.folder + test.expectations["namer"];
-                auto exp = ruby_typer::File::read(checker.c_str());
-                SCOPED_TRACE(checker);
+                if (test.expectations.find("namer") != test.expectations.end()) {
+                    auto checker = test.folder + test.expectations["namer"];
+                    auto exp = ruby_typer::File::read(checker.c_str());
+                    SCOPED_TRACE(checker);
 
-                auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
-                EXPECT_EQ(exp, ctx.toString() + "\n");
-                if (exp == ctx.toString() + "\n") {
-                    TEST_COUT << "Namer OK" << std::endl;
+                    auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
+                    EXPECT_EQ(exp, ctx.toString() + "\n");
+                    if (exp == ctx.toString() + "\n") {
+                        TEST_COUT << "Namer OK" << std::endl;
+                    }
                 }
             }
         }
