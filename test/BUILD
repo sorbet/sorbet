@@ -1,5 +1,3 @@
-package(default_visibility = ["//visibility:public"])
-
 cc_test(
     name = "test_corpus",
     size = "enormous",
@@ -11,6 +9,7 @@ cc_test(
         "testdata/**/*.rb",
         "testdata/**/*.rb.*.exp",
     ]),
+    visibility = ["//tools:__pkg__"],
     deps = [
         "//namer",
         "@gtest//:gtest",
@@ -24,6 +23,7 @@ cc_test(
     srcs = ["hello-test.cc"],
     copts = ["-Iexternal/gtest/include"],
     linkstatic = 1,
+    visibility = ["//tools:__pkg__"],
     deps = [
         "//common",
         "//main:hello-greet",

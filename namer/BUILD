@@ -21,6 +21,7 @@ cc_binary(
         "main/main.cc",
     ],
     linkstatic = 1,
+    visibility = ["//tools:__pkg__"],
     deps = [
         "namer",
         "@cxxopts//:cxxopts",
@@ -35,6 +36,7 @@ cc_test(
     ],
     copts = ["-Iexternal/gtest/include"],
     linkstatic = 1,
+    visibility = ["//tools:__pkg__"],
     deps = [
         "namer",
         "//ast/desugar",

@@ -1,5 +1,3 @@
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "hello-greet",
     srcs = ["hello-greet.cc"],
@@ -10,6 +8,7 @@ cc_library(
 cc_binary(
     name = "hello-world",
     srcs = ["hello-world.cc"],
+    visibility = ["//tools:__pkg__"],
     deps = [
         ":hello-greet",
         "//common",

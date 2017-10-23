@@ -1,5 +1,3 @@
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "parser",
     srcs = [
@@ -16,6 +14,7 @@ cc_library(
     hdrs = [
         "parser.h",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         "//ast",
         "@parser//:parser",
@@ -27,6 +26,7 @@ cc_binary(
     srcs = [
         "tools/generate_ast.cc",
     ],
+    visibility = ["//tools:__pkg__"],
 )
 
 cc_binary(
@@ -35,6 +35,7 @@ cc_binary(
         "main/main.cc",
     ],
     linkstatic = 1,
+    visibility = ["//tools:__pkg__"],
     deps = [
         "//parser",
         "@cxxopts//:cxxopts",
@@ -62,6 +63,7 @@ cc_test(
         "fixtures/*.rb",
         "fixtures/*.rb.exp",
     ]),
+    visibility = ["//tools:__pkg__"],
     deps = [
         ":parser",
         "@gtest//:gtest",
