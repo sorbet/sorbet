@@ -315,7 +315,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      make_unique<RestArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()));
                  result.swap(res);
              },
-             [&](parser::Kwrestarg *arg) { // where is the actual field?
+             [&](parser::Kwrestarg *arg) {
                  unique_ptr<Statement> res = make_unique<RestArg>(
                      make_unique<KeywordArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo())));
                  result.swap(res);
