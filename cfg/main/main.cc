@@ -22,8 +22,8 @@ public:
     }
 };
 
-void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const std::string &src) {
-    auto r = ruby_typer::parser::parse_ruby(ctx, src);
+void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &path, const string &src) {
+    auto r = ruby_typer::parser::parse_ruby(ctx, path, src);
     auto ast = r.ast();
     if (r.diagnostics().size() > 0) {
         vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
@@ -103,11 +103,11 @@ int main(int argc, char **argv) {
     int count = 0;
     if (options.count("e")) {
         count = 1;
-        parse_and_print(ctx, options, options["e"].as<string>());
+        parse_and_print(ctx, options, "-e", options["e"].as<string>());
     } else {
         count = files.size();
         for (auto &fileName : files) {
-            parse_and_print(ctx, options, ruby_typer::File::read(fileName.c_str()));
+            parse_and_print(ctx, options, fileName, ruby_typer::File::read(fileName.c_str()));
         }
     }
     clock_t end = clock();
