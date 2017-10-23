@@ -293,7 +293,7 @@ private:
 
     Statement *mapIt(Statement *what, Context ctx) {
         // TODO: reorder by frequency
-        if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr)
+        if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr || dynamic_cast<Nil *>(what) != nullptr)
             return what;
         if (ClassDef *v = dynamic_cast<ClassDef *>(what)) {
 
