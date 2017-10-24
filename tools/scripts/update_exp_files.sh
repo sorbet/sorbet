@@ -6,7 +6,7 @@ entry_points=( "cfg:cfg/cfg_ast"
         "desugar:ast/desugar/desugar_ast"
         "namer:namer/namer_print" )
 
-bazel build //ast/desugar:desugar_ast  //parser:parse_ast  //cfg:cfg_ast
+bazel build //ast/desugar:desugar_ast  //parser:parse_ast  //cfg:cfg_ast //namer:namer_print
 
 rb_src=(
     $(find ./test/testdata/ -name '*.rb')

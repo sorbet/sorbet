@@ -2,15 +2,15 @@ digraph <todo sym> {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "ifTmp$1 = true\nifTmp$1"];
+    bb0 [label = "()\nifTmp$1 = true\nifTmp$1"];
     bb0 -> bb2;
     bb0 -> bb3;
 
-    bb1 [label = "<ret>$4 = return <ret>$0\n<never>"];
+    bb1 [label = "(<ret>$0)\n<ret>$4 = return <ret>$0\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "returnTmp$2 = 1\n<ret>$0 = return returnTmp$2\n<never>"];
+    bb2 [label = "()\nreturnTmp$2 = 1\n<ret>$0 = return returnTmp$2\n<never>"];
     bb2 -> bb1;
-    bb3 [label = "returnTmp$3 = 2\n<ret>$0 = return returnTmp$3\n<never>"];
+    bb3 [label = "()\nreturnTmp$3 = 2\n<ret>$0 = return returnTmp$3\n<never>"];
     bb3 -> bb1;
 }
 
@@ -18,17 +18,17 @@ digraph <todo sym> {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "ifTmp$6 = true\nifTmp$6"];
+    bb0 [label = "()\nifTmp$6 = true\nifTmp$6"];
     bb0 -> bb2;
     bb0 -> bb3;
 
-    bb1 [label = "<never>"];
+    bb1 [label = "()\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "<ret>$5 = 1\n<always>"];
+    bb2 [label = "(<ret>$5)\n<ret>$5 = 1\n<always>"];
     bb2 -> bb4;
-    bb3 [label = "<ret>$5 = 2\n<always>"];
+    bb3 [label = "(<ret>$5)\n<ret>$5 = 2\n<always>"];
     bb3 -> bb4;
-    bb4 [label = "<ret>$7 = return <ret>$5\n<never>"];
+    bb4 [label = "(<ret>$5)\n<ret>$7 = return <ret>$5\n<never>"];
     bb4 -> bb1;
 }
 
@@ -36,15 +36,15 @@ digraph <todo sym> {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "ifTmp$9 = true\nifTmp$9"];
+    bb0 [label = "()\nifTmp$9 = true\nifTmp$9"];
     bb0 -> bb2;
     bb0 -> bb3;
 
-    bb1 [label = "<never>"];
+    bb1 [label = "()\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "returnTmp$10 = 1\n<ret>$8 = return returnTmp$10\n<never>"];
+    bb2 [label = "()\nreturnTmp$10 = 1\n<ret>$8 = return returnTmp$10\n<never>"];
     bb2 -> bb1;
-    bb3 [label = "<ret>$8 = 2\n<ret>$11 = return <ret>$8\n<never>"];
+    bb3 [label = "(<ret>$8)\n<ret>$8 = 2\n<ret>$11 = return <ret>$8\n<never>"];
     bb3 -> bb1;
 }
 
@@ -52,18 +52,104 @@ digraph <todo sym> {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "ifTmp$13 = true\nifTmp$13"];
+    bb0 [label = "()\nifTmp$13 = true\nifTmp$13"];
     bb0 -> bb2;
     bb0 -> bb3;
 
-    bb1 [label = "<never>"];
+    bb1 [label = "()\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "<ret>$12 = 1\n<always>"];
+    bb2 [label = "(<ret>$12)\n<ret>$12 = 1\n<always>"];
     bb2 -> bb4;
-    bb3 [label = "returnTmp$14 = 2\n<ret>$12 = return returnTmp$14\n<never>"];
+    bb3 [label = "()\nreturnTmp$14 = 2\n<ret>$12 = return returnTmp$14\n<never>"];
     bb3 -> bb1;
-    bb4 [label = "<ret>$15 = return <ret>$12\n<never>"];
+    bb4 [label = "(<ret>$12)\n<ret>$15 = return <ret>$12\n<never>"];
     bb4 -> bb1;
+}
+
+digraph <todo sym> {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\nifTmp$18 = true\nifTmp$18"];
+    bb0 -> bb2;
+    bb0 -> bb3;
+
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+    bb2 [label = "(a)\na = 1\nstatTmp$17 = a\n<always>"];
+    bb2 -> bb4;
+    bb3 [label = "(a)\na = 2\nstatTmp$17 = a\n<always>"];
+    bb3 -> bb4;
+    bb4 [label = "(a)\nifTmp$20 = false\nifTmp$20"];
+    bb4 -> bb5;
+    bb4 -> bb6;
+
+    bb5 [label = "(a, b)\nb = 1\nstatTmp$19 = b\n<always>"];
+    bb5 -> bb7;
+    bb6 [label = "(a, b)\nb = 2\nstatTmp$19 = b\n<always>"];
+    bb6 -> bb7;
+    bb7 [label = "(a, b)\n<ret>$16 = a.+(b)\n<ret>$21 = return <ret>$16\n<never>"];
+    bb7 -> bb1;
+}
+
+digraph <todo sym> {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\nifTmp$24 = true\nifTmp$24"];
+    bb0 -> bb2;
+    bb0 -> bb3;
+
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+    bb2 [label = "(a)\na = 1\nstatTmp$23 = a\n<always>"];
+    bb2 -> bb4;
+    bb3 [label = "(a)\na = 2\nstatTmp$23 = a\n<always>"];
+    bb3 -> bb4;
+    bb4 [label = "()\n<always>"];
+    bb4 -> bb5;
+    bb5 [label = "(b)\nwhileTmp$26 = true\nwhileTmp$26"];
+    bb5 -> bb6;
+    bb5 -> bb7;
+
+    bb6 [label = "(b)\nifTmp$28 = false\nifTmp$28"];
+    bb6 -> bb8;
+    bb6 -> bb9;
+
+    bb7 [label = "(b)\nstatTmp$25 = nil\n<ret>$22 = b\n<ret>$29 = return <ret>$22\n<never>"];
+    bb7 -> bb1;
+    bb8 [label = "(b)\nb = 1\nstatTmp$27 = b\n<always>"];
+    bb8 -> bb10;
+    bb9 [label = "(b)\nb = 2\nstatTmp$27 = b\n<always>"];
+    bb9 -> bb10;
+    bb10 [label = "(b)\n<always>"];
+    bb10 -> bb5;
+}
+
+digraph <todo sym> {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<always>"];
+    bb0 -> bb2;
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+    bb2 [label = "(b)\nwhileTmp$32 = true\nwhileTmp$32"];
+    bb2 -> bb3;
+    bb2 -> bb4;
+
+    bb3 [label = "(b)\nifTmp$34 = false\nifTmp$34"];
+    bb3 -> bb5;
+    bb3 -> bb6;
+
+    bb4 [label = "(b)\nstatTmp$31 = nil\n<ret>$30 = b\n<ret>$35 = return <ret>$30\n<never>"];
+    bb4 -> bb1;
+    bb5 [label = "(b)\nb = 1\nstatTmp$33 = b\n<always>"];
+    bb5 -> bb7;
+    bb6 [label = "(b)\nb = 2\nstatTmp$33 = b\n<always>"];
+    bb6 -> bb7;
+    bb7 [label = "(b)\n<always>"];
+    bb7 -> bb2;
 }
 
 

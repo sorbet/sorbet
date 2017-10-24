@@ -1,10 +1,10 @@
 begin
-  module <emptyTree>::B<<todo sym>> << ()
+  module <emptyTree>::B<<todo sym>> < ()
     <emptyTree>
 
   end
-  module <emptyTree>::A<<todo sym>> << ()
-    class <emptyTree>::B::C<<todo sym>> << ()
+  module <emptyTree>::A<<todo sym>> < ()
+    class <emptyTree>::B::C<<todo sym>> < ()
       <emptyTree>
 
     end

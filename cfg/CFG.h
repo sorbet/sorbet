@@ -14,6 +14,7 @@ namespace cfg {
 // implicitly numbered: result of every instruction can be uniquely referenced
 // by its position in a linear array.
 
+// When adding a new subtype, see if you need to add it to fillInBlockArguments
 class Instruction {
 public:
     virtual ~Instruction() = default;
@@ -21,9 +22,9 @@ public:
 };
 
 class Ident : public Instruction {
+public:
     ast::SymbolRef what;
 
-public:
     Ident(const ast::SymbolRef &what);
     virtual std::string toString(ast::Context ctx);
 };
@@ -33,12 +34,10 @@ public:
     ast::SymbolRef recv;
     ast::NameRef fun;
     std::vector<ast::SymbolRef> args;
-    virtual std::string toString(ast::Context ctx);
-};
 
-class LoadArg : public Instruction {
-    int argId;
-    ast::SymbolRef tpe;
+    Send(ast::SymbolRef recv, ast::NameRef fun, std::vector<ast::SymbolRef> &args);
+
+    virtual std::string toString(ast::Context ctx);
 };
 
 class Return : public Instruction {
@@ -181,7 +180,8 @@ public:
 
 class BasicBlock {
 public:
-    int args = 0;
+    std::vector<ast::SymbolRef> args;
+    int flags = 0;
     std::vector<Binding> exprs;
     BlockExit bexit;
     std::vector<BasicBlock *> backEdges;
@@ -198,6 +198,9 @@ class CFG {
 public:
     ast::SymbolRef symbol;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
+    /** Blocks in topoligical sort. All parent blocks are earlier than child blocks */
+    std::vector<BasicBlock *> forwardsTopoSort;
+    std::vector<BasicBlock *> backwardsTopoSort;
     static std::unique_ptr<CFG> buildFor(ast::Context ctx, ast::MethodDef &md);
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
@@ -213,6 +216,10 @@ private:
     CFG();
     BasicBlock *walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target);
     BasicBlock *freshBlock();
+    void fillInTopoSorts(ast::Context ctx);
+    void fillInBlockArguments(ast::Context ctx);
+    int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
+    int topoSortBwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
 };
 
 } // namespace cfg

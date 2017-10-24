@@ -102,6 +102,164 @@ Class {
           }
         }
       }
+      DefMethod {
+        name = variables
+        args = Args {
+          args = [
+          ]
+        }
+        body = Begin {
+          stmts = [
+            If {
+              condition = Begin {
+                stmts = [
+                  True {
+                  }
+                ]
+              }
+              then_ = LVarAsgn {
+                name = a
+                expr = Integer {
+                  val = "1"
+                }
+              }
+              else_ = LVarAsgn {
+                name = a
+                expr = Integer {
+                  val = "2"
+                }
+              }
+            }
+            If {
+              condition = Begin {
+                stmts = [
+                  False {
+                  }
+                ]
+              }
+              then_ = LVarAsgn {
+                name = b
+                expr = Integer {
+                  val = "1"
+                }
+              }
+              else_ = LVarAsgn {
+                name = b
+                expr = Integer {
+                  val = "2"
+                }
+              }
+            }
+            Send {
+              receiver = LVar {
+                name = a
+              }
+              method = +
+              args = [
+                LVar {
+                  name = b
+                }
+              ]
+            }
+          ]
+        }
+      }
+      DefMethod {
+        name = variables_and_loop
+        args = Args {
+          args = [
+          ]
+        }
+        body = Begin {
+          stmts = [
+            If {
+              condition = Begin {
+                stmts = [
+                  True {
+                  }
+                ]
+              }
+              then_ = LVarAsgn {
+                name = a
+                expr = Integer {
+                  val = "1"
+                }
+              }
+              else_ = LVarAsgn {
+                name = a
+                expr = Integer {
+                  val = "2"
+                }
+              }
+            }
+            While {
+              cond = True {
+              }
+              body = If {
+                condition = Begin {
+                  stmts = [
+                    False {
+                    }
+                  ]
+                }
+                then_ = LVarAsgn {
+                  name = b
+                  expr = Integer {
+                    val = "1"
+                  }
+                }
+                else_ = LVarAsgn {
+                  name = b
+                  expr = Integer {
+                    val = "2"
+                  }
+                }
+              }
+            }
+            LVar {
+              name = b
+            }
+          ]
+        }
+      }
+      DefMethod {
+        name = variables_loop_if
+        args = Args {
+          args = [
+          ]
+        }
+        body = Begin {
+          stmts = [
+            While {
+              cond = True {
+              }
+              body = If {
+                condition = Begin {
+                  stmts = [
+                    False {
+                    }
+                  ]
+                }
+                then_ = LVarAsgn {
+                  name = b
+                  expr = Integer {
+                    val = "1"
+                  }
+                }
+                else_ = LVarAsgn {
+                  name = b
+                  expr = Integer {
+                    val = "2"
+                  }
+                }
+              }
+            }
+            LVar {
+              name = b
+            }
+          ]
+        }
+      }
     ]
   }
 }

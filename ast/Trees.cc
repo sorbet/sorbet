@@ -163,8 +163,7 @@ string ClassDef::toString(ContextBase &ctx, int tabs) {
     } else {
         buf << "class ";
     }
-    buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << "> ";
-    buf << "<< ";
+    buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << "> < ";
     printArgs(ctx, buf, this->ancestors, tabs);
 
     buf << endl;
