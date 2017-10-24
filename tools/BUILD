@@ -12,5 +12,6 @@ compilation_database(
         "//parser:parser_test",
         "//ast/desugar:desugar_test",
         "//test:test_corpus",
+        "//main:ruby-typer"
     ],
 )
