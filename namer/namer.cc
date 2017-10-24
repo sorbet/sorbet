@@ -2,6 +2,8 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 
+#include <unordered_map>
+
 namespace ruby_typer {
 namespace namer {
 
@@ -10,6 +12,7 @@ namespace namer {
  * table.
  */
 class NameInserter {
+    friend class Namer;
     ast::SymbolRef squashNames(ast::Context ctx, ast::SymbolRef owner, unique_ptr<ast::Expression> &node) {
         auto constLit = dynamic_cast<ast::ConstantLit *>(node.get());
         if (constLit == nullptr) {
@@ -21,9 +24,17 @@ class NameInserter {
         return ctx.state.enterClassSymbol(newOwner, constLit->cnst);
     }
 
+    std::vector<std::unordered_map<ast::NameRef, ast::SymbolRef>> namesForLocals;
+
 public:
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+        namesForLocals.emplace_back();
+        return klass;
+    }
+
+    ast::ClassDef *postTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
+        namesForLocals.pop_back();
         return klass;
     }
 
@@ -37,7 +48,25 @@ public:
         auto result = ast::ContextBase::defn_todo();
 
         ctx.state.enterSymbol(ownerFromContext(ctx), method->name, result, args, true);
+        namesForLocals.emplace_back();
         return method;
+    }
+
+    ast::MethodDef *postTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
+        namesForLocals.pop_back();
+        return method;
+    }
+
+    ast::Ident *postTransformIdent(ast::Context ctx, ast::Ident *ident) {
+        if (ident->symbol.isPlaceHolder()) {
+            ast::SymbolRef &cur = namesForLocals.back()[ident->name];
+            if (!cur.exists()) {
+                std::vector<ast::SymbolRef> args;
+                cur = ctx.state.enterSymbol(ctx.owner, ident->name, ctx.state.defn_todo(), args, false);
+            }
+            ident->symbol = cur;
+        }
+        return ident;
     }
 
 private:
@@ -48,6 +77,10 @@ private:
             owner = ast::ContextBase::defn_object();
         }
         return owner;
+    }
+
+    NameInserter() {
+        namesForLocals.emplace_back();
     }
 };
 

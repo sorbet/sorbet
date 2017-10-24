@@ -177,7 +177,8 @@ TEST(PreOrderTreeMap, CountTrees) {
 
     vector<unique_ptr<Statement>> classrhs;
     classrhs.emplace_back(move(methodDef));
-    unique_ptr<Statement> tree(new ClassDef(classSym, move(cnst), classrhs, ClassDefKind::Class));
+    vector<unique_ptr<Expression>> parents;
+    unique_ptr<Statement> tree(new ClassDef(classSym, move(cnst), parents, classrhs, ClassDefKind::Class));
     Counter c;
 
     auto r = TreeMap<Counter>::apply(ctx, c, move(tree));

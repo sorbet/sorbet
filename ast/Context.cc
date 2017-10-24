@@ -267,6 +267,7 @@ SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
 SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
                                    bool isMethod) {
     DEBUG_ONLY(Error::check(owner.exists()));
+    Error::check(name.exists());
     auto &ownerScope = owner.info(*this, true);
     auto from = ownerScope.members.begin();
     auto to = ownerScope.members.end();

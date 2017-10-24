@@ -1,4 +1,4 @@
-class <emptyTree>::Examples<<todo sym>>
+class <emptyTree>::Examples<<todo sym>> < ()
   def i_like_ifs<<todo sym>>()
     if true
       return 1
@@ -31,6 +31,60 @@ class <emptyTree>::Examples<<todo sym>>
       1
     else 
       return 2
+    end
+
+  def variables<<todo sym>>()
+    begin
+      if begin
+          true
+        end
+        a<todo lvar sym> = 1
+      else 
+        a<todo lvar sym> = 2
+      end
+      if begin
+          false
+        end
+        b<todo lvar sym> = 1
+      else 
+        b<todo lvar sym> = 2
+      end
+      a<todo lvar sym>.+(b<todo lvar sym>)
+    end
+
+  def variables_and_loop<<todo sym>>()
+    begin
+      if begin
+          true
+        end
+        a<todo lvar sym> = 1
+      else 
+        a<todo lvar sym> = 2
+      end
+      while true
+        if begin
+            false
+          end
+          b<todo lvar sym> = 1
+        else 
+          b<todo lvar sym> = 2
+        end
+      end
+      b<todo lvar sym>
+    end
+
+  def variables_loop_if<<todo sym>>()
+    begin
+      while true
+        if begin
+            false
+          end
+          b<todo lvar sym> = 1
+        else 
+          b<todo lvar sym> = 2
+        end
+      end
+      b<todo lvar sym>
     end
 
 end

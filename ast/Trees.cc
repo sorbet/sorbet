@@ -53,8 +53,9 @@ unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&stateme
     return fromStatement(statement);
 }
 
-ClassDef::ClassDef(SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
-    : Declaration(symbol), rhs(move(rhs)), name(move(name)), kind(kind) {}
+ClassDef::ClassDef(SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &ancestors,
+                   vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
+    : Declaration(symbol), rhs(move(rhs)), ancestors(move(ancestors)), name(move(name)), kind(kind) {}
 
 MethodDef::MethodDef(SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs,
                      bool isSelf)
@@ -133,6 +134,23 @@ Array::Array(vector<unique_ptr<Expression>> &elems) : elems(move(elems)) {}
 InsSeq::InsSeq(vector<unique_ptr<Statement>> &&stats, unique_ptr<Expression> expr)
     : stats(move(stats)), expr(move(expr)) {}
 
+void printElems(ContextBase &ctx, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
+    bool first = true;
+    for (auto &a : args) {
+        if (!first) {
+            buf << ", ";
+        }
+        first = false;
+        buf << a->toString(ctx, tabs + 1);
+    }
+};
+
+void printArgs(ContextBase &ctx, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
+    buf << "(";
+    printElems(ctx, buf, args, tabs);
+    buf << ")";
+}
+
 string ConstDef::toString(ContextBase &ctx, int tabs) {
     return "constdef " + this->symbol.info(ctx).name.name(ctx).toString(ctx) + " = " +
            this->rhs->toString(ctx, tabs + 1);
@@ -145,7 +163,10 @@ string ClassDef::toString(ContextBase &ctx, int tabs) {
     } else {
         buf << "class ";
     }
-    buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << ">" << endl;
+    buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << "> < ";
+    printArgs(ctx, buf, this->ancestors, tabs);
+
+    buf << endl;
 
     for (auto &a : this->rhs) {
         printTabs(buf, tabs + 1);
@@ -294,23 +315,6 @@ string Assign::toString(ContextBase &ctx, int tabs) {
 
 string Rescue::toString(ContextBase &ctx, int tabs) {
     return "Rescue";
-}
-
-void printElems(ContextBase &ctx, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
-    bool first = true;
-    for (auto &a : args) {
-        if (!first) {
-            buf << ", ";
-        }
-        first = false;
-        buf << a->toString(ctx, tabs + 1);
-    }
-};
-
-void printArgs(ContextBase &ctx, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
-    buf << "(";
-    printElems(ctx, buf, args, tabs);
-    buf << ")";
 }
 
 string Send::toString(ContextBase &ctx, int tabs) {
