@@ -28,7 +28,6 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//common",
-        "//main:hello-greet",
         "//parser",
         "@cxxopts//:cxxopts",
         "@gtest//:gtest",

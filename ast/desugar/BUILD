@@ -14,20 +14,6 @@ cc_library(
     ],
 )
 
-cc_binary(
-    name = "desugar_ast",
-    srcs = [
-        "main/main.cc",
-    ],
-    linkstatic = 1,
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//ast/desugar",
-        "@cxxopts//:cxxopts",
-        "@spdlog//:spdlog",
-    ],
-)
-
 cc_test(
     name = "desugar_test",
     srcs = [

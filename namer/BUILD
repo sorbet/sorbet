@@ -15,20 +15,6 @@ cc_library(
     ],
 )
 
-cc_binary(
-    name = "namer_print",
-    srcs = [
-        "main/main.cc",
-    ],
-    linkstatic = 1,
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "namer",
-        "@cxxopts//:cxxopts",
-        "@spdlog//:spdlog",
-    ],
-)
-
 cc_test(
     name = "namer_test",
     srcs = [

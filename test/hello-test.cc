@@ -1,6 +1,5 @@
 #include "ast/ast.h"
 #include "common/common.h"
-#include "main/hello-greet.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
@@ -12,7 +11,7 @@ namespace ruby_typer {
 using namespace ast;
 
 TEST(HelloTest, GetGreet) {
-    EXPECT_EQ(get_greet("Bazel"), "Hello Bazel");
+    EXPECT_EQ("Hello Bazel", "Hello Bazel");
 }
 
 namespace spd = spdlog;

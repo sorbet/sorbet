@@ -29,20 +29,6 @@ cc_binary(
     visibility = ["//tools:__pkg__"],
 )
 
-cc_binary(
-    name = "parse_ast",
-    srcs = [
-        "main/main.cc",
-    ],
-    linkstatic = 1,
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "//parser",
-        "@cxxopts//:cxxopts",
-        "@spdlog//:spdlog",
-    ],
-)
-
 genrule(
     name = "generate_node_h",
     outs = [

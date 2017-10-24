@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # A pretend Python dictionary with bash 3
-entry_points=( "cfg:cfg/cfg_ast"
-        "parser:parser/parse_ast"
-        "desugar:ast/desugar/desugar_ast"
-        "namer:namer/namer_print" )
+entry_points=( "cfg:main/ruby-typer --print cfg"
+        "parser:main/ruby-typer --print parse-tree"
+        "desugar:main/ruby-typer --print ast"
+        "name-table:main/ruby-typer --print name-table"
+        "name-tree:main/ruby-typer --print name-tree")
 
-bazel build //ast/desugar:desugar_ast  //parser:parse_ast  //cfg:cfg_ast //namer:namer_print
+bazel build //main:ruby-typer
 
 rb_src=(
     $(find ./test/testdata/ -name '*.rb')

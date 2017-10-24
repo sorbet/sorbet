@@ -9,13 +9,9 @@ compilation_database(
     exec_root_marker = True,
     targets = [
         "//test:hello-test",
-        "//main:hello-world",
-        "//main:hello-greet",
         "//parser:parser_test",
-        "//parser:parse_ast",
-        "//ast/desugar:desugar_ast",
         "//ast/desugar:desugar_test",
         "//test:test_corpus",
-        "//namer:namer_print",
+        "//main:ruby-typer",
     ],
 )
