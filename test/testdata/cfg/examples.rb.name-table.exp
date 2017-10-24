@@ -6,3 +6,4 @@ class Examples ()
   method variables ()
   method variables_and_loop ()
   method variables_loop_if ()
+

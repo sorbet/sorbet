@@ -8,3 +8,4 @@ class NormalClass ()
   class InnerModule ()
   method normal_method ()
 class Parent ()
+

@@ -93,7 +93,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     auto src = ruby_typer::File::read(inputPath.c_str());
     auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
 
-    auto expectation = test.expectations.find("parser");
+    auto expectation = test.expectations.find("parse-tree");
     if (expectation == test.expectations.end())
         return;
 
@@ -106,11 +106,11 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         EXPECT_EQ(0, parsed.diagnostics().size());
         EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
         if (exp == parsed.ast()->toString(ctx) + "\n") {
-            TEST_COUT << "Parser OK" << endl;
+            TEST_COUT << "parser-tree OK" << endl;
         }
     }
 
-    expectation = test.expectations.find("desugar");
+    expectation = test.expectations.find("ast");
     if (expectation == test.expectations.end())
         return;
 
@@ -122,11 +122,11 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
         if (exp == desugared->toString(ctx) + "\n") {
-            TEST_COUT << "Desugar OK" << endl;
+            TEST_COUT << "ast OK" << endl;
         }
     }
 
-    expectation = test.expectations.find("namer");
+    expectation = test.expectations.find("name-tree");
     if (expectation == test.expectations.end())
         return;
 
@@ -136,9 +136,24 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
+        EXPECT_EQ(exp, namedTree->toString(ctx) + "\n");
+        if (exp == namedTree->toString(ctx) + "\n") {
+            TEST_COUT << "name-tree OK" << std::endl;
+        }
+    }
+
+    expectation = test.expectations.find("name-table");
+    if (expectation == test.expectations.end())
+        return;
+
+    {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
+
         EXPECT_EQ(exp, ctx.toString() + "\n");
         if (exp == ctx.toString() + "\n") {
-            TEST_COUT << "Namer OK" << std::endl;
+            TEST_COUT << "name-table OK" << std::endl;
         }
     }
 
@@ -161,7 +176,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
         EXPECT_EQ(exp, got.str() + "\n");
         if (exp == got.str() + "\n") {
-            TEST_COUT << "CFG OK" << endl;
+            TEST_COUT << "cfg OK" << endl;
         }
     }
 }

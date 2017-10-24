@@ -27,3 +27,4 @@ class Opus ()
 field &&$1 ()
 field &&$2 ()
 field assignTmp$0 ()
+

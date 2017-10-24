@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # A pretend Python dictionary with bash 3
-entry_points=( "cfg:main/ruby-typer --print cfg"
-        "parser:main/ruby-typer --print parse-tree"
-        "desugar:main/ruby-typer --print ast"
-        "name-table:main/ruby-typer --print name-table"
-        "name-tree:main/ruby-typer --print name-tree")
+entry_points=(
+    "cfg:main/ruby-typer --print cfg"
+    "parse-tree:main/ruby-typer --print parse-tree"
+    "ast:main/ruby-typer --print ast"
+    "name-table:main/ruby-typer --print name-table"
+    "name-tree:main/ruby-typer --print name-tree"
+)
 
 bazel build //main:ruby-typer
 
@@ -23,7 +25,8 @@ for src in "${rb_src[@]}"; do
         candidate="$src.$suffix.exp"
         if [ -e "$candidate" ]
             then
-                bazel-bin/$executable "$src" > "$candidate"
+                echo "$executable $src > $candidate"
+                bazel-bin/$executable "$src" 2> /dev/null | grep -v '\[console\] \[error\]' > "$candidate"
             fi
     done
 done
