@@ -1,7 +1,10 @@
 
 #include "CFG.h"
 #include <algorithm>
+#include <algorithm> // set_intersect
 #include <sstream>
+#include <unordered_map>
+#include <unordered_set>
 
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
@@ -11,6 +14,155 @@ using namespace std;
 namespace ruby_typer {
 namespace cfg {
 
+void CFG::fillInBlockArguments(ast::Context ctx) {
+    // Dmitry's algorithm for adding basic block arguments
+    // I don't remember this version being described in any book.
+    //
+    // Compute two upper bounds:
+    //  - one by accumulating all reads on the reverse graph
+    //  - one by accumulating all writes on direct graph
+    //
+    //  every node gets the intersection between two sets suggested by those overestimations.
+    //
+    // The solution should be |BB| + |symbols-mentioned| + |answer_size| in complexity.
+    // making this quadratic in anything will be bad.
+    unordered_map<ast::SymbolRef, unordered_set<BasicBlock *>> reads;
+    unordered_map<ast::SymbolRef, unordered_set<BasicBlock *>> writes;
+
+    for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
+        for (Binding &bind : bb->exprs) {
+            writes[bind.bind].insert(bb.get());
+            if (auto *v = dynamic_cast<Ident *>(bind.value.get())) {
+                reads[v->what].insert(bb.get());
+            } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
+                reads[v->recv].insert(bb.get());
+                for (auto arg : v->args) {
+                    reads[arg].insert(bb.get());
+                }
+            } else if (auto *v = dynamic_cast<New *>(bind.value.get())) {
+                for (auto arg : v->args) {
+                    reads[arg].insert(bb.get());
+                }
+            } else if (auto *v = dynamic_cast<Super *>(bind.value.get())) {
+                for (auto arg : v->args) {
+                    reads[arg].insert(bb.get());
+                }
+            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
+                reads[v->what].insert(bb.get());
+            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
+                reads[v->what].insert(bb.get());
+            } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
+                reads[v->value].insert(bb.get());
+            }
+        }
+        if (bb->bexit.cond != ctx.state.defn_cfg_never() && bb->bexit.cond != ctx.state.defn_cfg_always()) {
+            reads[bb->bexit.cond].insert(bb.get());
+        }
+    }
+
+    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> reads_by_block;
+    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> writes_by_block;
+
+    for (auto &rds : reads) {
+        auto &wts = writes[rds.first];
+        if (rds.second.size() == 1 && wts.size() == 1 && *(rds.second.begin()) == *(wts.begin())) {
+            wts.clear();
+            rds.second.clear(); // remove symref that never escapes a block.
+        } else if (wts.empty()) {
+            rds.second.clear();
+        }
+    }
+
+    for (auto &wts : writes) {
+        auto &rds = reads[wts.first];
+        if (rds.empty()) {
+            wts.second.clear();
+        }
+        for (BasicBlock *bb : rds) {
+            reads_by_block[bb].insert(wts.first);
+        }
+        for (BasicBlock *bb : wts.second) {
+            writes_by_block[bb].insert(wts.first);
+        }
+    }
+
+    // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
+    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> upper_bounds1;
+    for (auto it = this->forwardsTopoSort.begin(); it != this->forwardsTopoSort.end(); ++it) {
+        BasicBlock *bb = *it;
+        upper_bounds1[bb].insert(reads_by_block[bb].begin(), reads_by_block[bb].end());
+        if (bb->bexit.thenb != deadBlock()) {
+            upper_bounds1[bb].insert(upper_bounds1[bb->bexit.thenb].begin(), upper_bounds1[bb->bexit.thenb].end());
+        }
+        if (bb->bexit.elseb != deadBlock()) {
+            upper_bounds1[bb].insert(upper_bounds1[bb->bexit.elseb].begin(), upper_bounds1[bb->bexit.elseb].end());
+        }
+    }
+
+    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> upper_bounds2;
+
+    for (auto it = this->backwardsTopoSort.begin(); it != this->backwardsTopoSort.end(); ++it) {
+        BasicBlock *bb = *it;
+        upper_bounds2[bb].insert(writes_by_block[bb].begin(), writes_by_block[bb].end());
+        for (BasicBlock *edge : bb->backEdges) {
+            if (edge != deadBlock()) {
+                upper_bounds2[bb].insert(upper_bounds2[edge].begin(), upper_bounds2[edge].end());
+            }
+        }
+    }
+
+    for (auto &it : this->basicBlocks) {
+        auto set2 = upper_bounds2[it.get()];
+
+        for (auto el : upper_bounds1[it.get()]) {
+            if (set2.find(el) != set2.end()) {
+                it->args.push_back(el);
+            }
+        }
+    }
+
+    return;
+}
+
+int CFG::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
+    // Error::check(!marked[currentBB]) // graph is cyclic!
+    if ((currentBB->flags & 1) == 1) {
+        return nextFree;
+    } else {
+        currentBB->flags |= 1;
+        nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
+        nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
+        target[nextFree] = currentBB;
+        return nextFree + 1;
+    }
+}
+
+int CFG::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
+    if ((currentBB->flags & 2) == 2) {
+        return nextFree;
+    } else {
+        currentBB->flags |= 2;
+        for (BasicBlock *edge : currentBB->backEdges) {
+            nextFree = topoSortBwd(target, nextFree, edge);
+        }
+        target[nextFree] = currentBB;
+        return nextFree + 1;
+    }
+}
+
+void CFG::fillInTopoSorts(ast::Context ctx) {
+    auto &target1 = this->forwardsTopoSort;
+    target1.resize(this->basicBlocks.size());
+    this->topoSortFwd(target1, 0, this->entry());
+
+    auto &target2 = this->backwardsTopoSort;
+    target2.resize(this->basicBlocks.size());
+    this->topoSortBwd(target2, 0, this->deadBlock());
+    return;
+}
+
+void jumpToDead(BasicBlock *from, CFG &inWhat);
+
 unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
@@ -19,9 +171,10 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     auto retSym1 = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
 
     cont->exprs.emplace_back(retSym1, make_unique<Return>(retSym)); // dead assign.
-    cont->bexit.cond = ast::ContextBase::defn_cfg_never();
-    cont->bexit.thenb = res->deadBlock();
-    cont->bexit.elseb = res->deadBlock();
+    jumpToDead(cont, *res.get());
+
+    res->fillInTopoSorts(ctx);
+    res->fillInBlockArguments(ctx);
     return res;
 }
 
@@ -66,6 +219,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
         from->bexit.cond = ast::ContextBase::defn_cfg_never();
         from->bexit.elseb = db;
         from->bexit.thenb = db;
+        db->backEdges.push_back(from);
     }
 }
 
@@ -171,6 +325,31 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
             }
             ret = walk(ctx, a->expr.get(), current, inWhat, target);
         },
+        [&](ast::Send *s) {
+            ast::SymbolRef recv;
+            if (auto *i = dynamic_cast<ast::Ident *>(s->recv.get())) {
+                recv = i->symbol;
+            } else {
+                recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                current = walk(ctx, s->recv.get(), current, inWhat, recv);
+            }
+
+            vector<ast::SymbolRef> args;
+            for (auto &exp : s->args) {
+                ast::SymbolRef temp;
+                if (auto *i = dynamic_cast<ast::Ident *>(exp.get())) {
+                    temp = i->symbol;
+                } else {
+                    temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                    current = walk(ctx, exp.get(), current, inWhat, temp);
+                }
+                args.push_back(temp);
+            }
+            current->exprs.emplace_back(target, make_unique<Send>(recv, s->fun, args));
+
+            ret = current;
+        },
+
         [&](ast::Statement *n) {
             current->exprs.emplace_back(target, make_unique<NotSupported>(""));
             ret = current;
@@ -208,6 +387,16 @@ string CFG::toString(ast::Context ctx) {
 
 string BasicBlock::toString(ast::Context ctx) {
     stringstream buf;
+    buf << "(";
+    bool first = true;
+    for (ast::SymbolRef arg : this->args) {
+        if (!first) {
+            buf << ", ";
+        }
+        first = false;
+        buf << arg.info(ctx).name.name(ctx).toString(ctx);
+    }
+    buf << ")\\n";
     for (auto &exp : this->exprs) {
         buf << exp.bind.info(ctx).name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
         buf << "\\n"; // intentional! graphviz will do interpolation.
@@ -224,7 +413,10 @@ string Return::toString(ast::Context ctx) {
     return "return " + this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-New::New(const ast::SymbolRef &klaz, vector<ast::SymbolRef> &args) : klass(klass), args(move(args)) {}
+New::New(const ast::SymbolRef &klaz, vector<ast::SymbolRef> &args) : klass(klaz), args(move(args)) {}
+
+Send::Send(ast::SymbolRef recv, ast::NameRef fun, std::vector<ast::SymbolRef> &args)
+    : recv(recv), fun(fun), args(std::move(args)) {}
 
 string New::toString(ast::Context ctx) {
     stringstream buf;
