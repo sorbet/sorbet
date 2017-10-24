@@ -1,0 +1,7 @@
+class <emptyTree>::BlockTest<<todo sym>> < ()
+  def block_pass<<todo sym>>()
+    <emptyTree>.foo(1, 2, 3) do |x<todo lvar sym>, y<todo lvar sym>|
+      x<todo lvar sym>
+    end
+
+end

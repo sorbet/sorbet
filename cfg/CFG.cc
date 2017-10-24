@@ -360,17 +360,38 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                 }
                 args.push_back(temp);
             }
-            current->exprs.emplace_back(target, make_unique<Send>(recv, s->fun, args));
 
+            if (s->block != nullptr) {
+                auto headerBlock = inWhat.freshBlock();
+                auto postBlock = inWhat.freshBlock();
+                auto bodyBlock = inWhat.freshBlock();
+
+                unconditionalJump(current, headerBlock, inWhat);
+
+                conditionalJump(headerBlock, ctx.state.defn_cfg_block_call(), bodyBlock, postBlock, inWhat);
+
+                // TODO: handle block arguments somehow??
+                ast::SymbolRef blockrv =
+                    ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::blockReturnTemp(), inWhat.symbol);
+                auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv);
+
+                unconditionalJump(blockLast, headerBlock, inWhat);
+
+                current = postBlock;
+            }
+
+            current->exprs.emplace_back(target, make_unique<Send>(recv, s->fun, args));
             ret = current;
         },
 
         [&](ast::Statement *n) {
             current->exprs.emplace_back(target, make_unique<NotSupported>(""));
             ret = current;
-        });
-    /*[&](ast::Break *a) {}, [&](ast::Next *a) {}, [&](ast::Block *a) {},*/
-    //[&](ast::Send *a) {});
+        },
+
+        [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); });
+
+    /*[&](ast::Break *a) {}, [&](ast::Next *a) {},*/
     // For, Next, Rescue,
     // Symbol, Send, New, Super, NamedArg, Hash, Array,
     // ArraySplat, HashAplat, Block,

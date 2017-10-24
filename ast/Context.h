@@ -119,9 +119,13 @@ public:
         return SymbolRef(13);
     }
 
+    static constexpr SymbolRef defn_cfg_block_call() {
+        return SymbolRef(14);
+    }
+
     // Keep as last and update to match the last entry
     static constexpr SymbolRef defn_last_synthetic_sym() {
-        return defn_cfg_never();
+        return defn_cfg_block_call();
     }
 
 private:

@@ -207,6 +207,11 @@ public:
     static inline NameRef returnMethodTemp() {
         return NameRef(19);
     }
+
+    // used in CFG for block return value temporaries
+    static inline NameRef blockReturnTemp() {
+        return NameRef(20);
+    }
 };
 
 class Name {
