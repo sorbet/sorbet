@@ -60,7 +60,6 @@ public:
 
     std::string toString(ContextBase &ctx, int tabs = 0) const;
 
-private:
     u4 _id;
 };
 
@@ -182,4 +181,11 @@ CheckSize(SymbolInfo, 64, 8);
 } // namespace ast
 } // namespace ruby_typer
 
+namespace std {
+template <> struct hash<ruby_typer::ast::SymbolRef> {
+    std::size_t operator()(const ruby_typer::ast::SymbolRef k) const {
+        return k._id;
+    }
+};
+} // namespace std
 #endif // SRUBY_SYMBOLS_H
