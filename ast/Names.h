@@ -207,6 +207,11 @@ public:
     static inline NameRef returnMethodTemp() {
         return NameRef(19);
     }
+
+    // include
+    static inline NameRef include() {
+        return NameRef(20);
+    }
 };
 
 class Name {

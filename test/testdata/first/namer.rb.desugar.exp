@@ -31,8 +31,20 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Child<<todo sym>> < (<emptyTree>::Parent)
+  class <emptyTree>::Mixin<<todo sym>> < ()
     <emptyTree>
+
+  end
+  class <emptyTree>::Child<<todo sym>> < (<emptyTree>::Parent)
+    <emptyTree>.include(<emptyTree>::Mixin)
+
+    <emptyTree>.include(<emptyTree>::Mixin, <emptyTree>::Mixin)
+
+    <emptyTree>.include(3)
+
+    <emptyTree>.include(<emptyTree>::Mixin) do ||
+      <emptyTree>
+    end
 
   end
 end

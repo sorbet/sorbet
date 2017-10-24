@@ -18,5 +18,12 @@ end
 
 class Parent
 end
+class Mixin
+end
 class Child < Parent
+  include Mixin
+  include Mixin, Mixin # warning
+  include 3 # warning
+  include Mixin do
+  end # warning
 end

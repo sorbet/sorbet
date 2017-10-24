@@ -74,13 +74,71 @@ Begin {
     Class {
       name = Const {
         scope = NULL
+        name = Mixin
+      }
+      superclass = NULL
+      body = NULL
+    }
+    Class {
+      name = Const {
+        scope = NULL
         name = Child
       }
       superclass = Const {
         scope = NULL
         name = Parent
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          Block {
+            send = Send {
+              receiver = NULL
+              method = include
+              args = [
+                Const {
+                  scope = NULL
+                  name = Mixin
+                }
+              ]
+            }
+            args = NULL
+            body = NULL
+          }
+        ]
+      }
     }
   ]
 }

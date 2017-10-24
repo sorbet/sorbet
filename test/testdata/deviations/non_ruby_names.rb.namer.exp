@@ -1,5 +1,4 @@
-A (class)
-  B (class)
-    C (class)
-B (class)
-
+class A ()
+  class B ()
+    class C ()
+class B ()

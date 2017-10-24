@@ -126,6 +126,9 @@ static UTF8Desc always_DESC{(char *)always_str, (int)std::strlen(always_str)};
 static const char *never_str = "<never>";
 static UTF8Desc never_DESC{(char *)never_str, (int)std::strlen(never_str)};
 
+static const char *include = "include";
+static UTF8Desc include_DESC{(char *)include, (int)strlen(include)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -157,6 +160,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     auto statTemp_id = enterNameUTF8(statTemp_DESC);
     auto assignTemp_id = enterNameUTF8(assignTemp_DESC);
     auto returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
+    auto include_id = enterNameUTF8(include_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -177,6 +181,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(statTemp_id == Names::statTemp()));
     DEBUG_ONLY(Error::check(assignTemp_id == Names::assignTemp()));
     DEBUG_ONLY(Error::check(returnMethodTemp_id == Names::returnMethodTemp()));
+    DEBUG_ONLY(Error::check(include_id == Names::include()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject

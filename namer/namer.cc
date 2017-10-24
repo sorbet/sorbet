@@ -26,6 +26,34 @@ class NameInserter {
 
     std::vector<std::unordered_map<ast::NameRef, ast::SymbolRef>> namesForLocals;
 
+    unique_ptr<ast::Expression> addAncestor(ast::Context ctx, ast::ClassDef *klass, unique_ptr<ast::Statement> &node) {
+        auto send = dynamic_cast<ast::Send *>(node.get());
+        if (send == nullptr) {
+            Error::check(node.get() != nullptr);
+            return nullptr;
+        }
+
+        if (send->fun != ast::Names::include()) {
+            return nullptr;
+        }
+
+        if (send->args.size() != 1) {
+            ctx.state.errors.error(send->loc, ast::ErrorClass::IncludeMutiParam,
+                                   "`include` should only be passed a single constant. You passed {} parameters.",
+                                   send->args.size());
+            return nullptr;
+        }
+        auto constLit = dynamic_cast<ast::ConstantLit *>(send->args[0].get());
+        if (constLit == nullptr) {
+            ctx.state.errors.error(send->loc, ast::ErrorClass::IncludeNotConstant,
+                                   "`include` must be passed a constant literal. You passed {}.",
+                                   send->args[0]->toString(ctx));
+            return nullptr;
+        }
+        // TODO check that send->block is empty
+        return std::move(send->args[0]);
+    }
+
 public:
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
@@ -35,6 +63,17 @@ public:
 
     ast::ClassDef *postTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
         namesForLocals.pop_back();
+        klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+        for (auto it = klass->rhs.begin(); it != klass->rhs.end();) {
+            auto &line = *it;
+            auto newAncestor = addAncestor(ctx, klass, line);
+            if (newAncestor) {
+                klass->ancestors.emplace_back(std::move(newAncestor));
+                klass->rhs.erase(it);
+            } else {
+                it++;
+            }
+        }
         return klass;
     }
 

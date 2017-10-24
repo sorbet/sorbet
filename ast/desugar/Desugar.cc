@@ -641,6 +641,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
 
              [&](parser::Node *a) { result.reset(new NotSupported(a->nodeName())); });
     Error::check(result.get());
+    result->loc = what->loc;
     return result;
 }
 

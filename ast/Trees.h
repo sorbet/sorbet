@@ -16,6 +16,7 @@ public:
     virtual ~Statement() = default;
     virtual std::string toString(ContextBase &ctx, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
+    Loc loc;
 };
 
 class Expression : public Statement {
@@ -49,6 +50,8 @@ public:
 
     std::vector<std::unique_ptr<Statement>> rhs;
     std::unique_ptr<Expression> name;
+    // For unresolved names. Once they are resolved to Symbols they go into the
+    // SymbolInfo
     std::vector<std::unique_ptr<Expression>> ancestors;
     ClassDefKind kind;
 
