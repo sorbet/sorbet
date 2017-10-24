@@ -1,17 +1,13 @@
-cc_library(
-    name = "hello-greet",
-    srcs = ["hello-greet.cc"],
-    hdrs = ["hello-greet.h"],
-    visibility = ["//visibility:public"],
-)
-
 cc_binary(
-    name = "hello-world",
-    srcs = ["hello-world.cc"],
-    visibility = ["//tools:__pkg__"],
+    name = "ruby-typer",
+    srcs = ["main.cc"],
+    linkstatic = 1,
     deps = [
-        ":hello-greet",
-        "//common",
-        #        "//lib:hello-time",
+        "//ast/desugar",
+        "//cfg",
+        "//namer",
+        "//parser",
+        "@cxxopts//:cxxopts",
+        "@spdlog//:spdlog",
     ],
 )
