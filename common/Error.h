@@ -11,8 +11,7 @@ public:
      * @param message contains information about exceptional situation.
      * @param stackTrace the stack trace where this exception happened.
      */
-    SRubyException(const std::string &message)
-        : _message(message) {}
+    SRubyException(const std::string &message) : _message(message) {}
 
     /**
      * Returns information about the exceptional situation.
@@ -57,6 +56,7 @@ public:
     }
 
     static void print_backtrace();
+
 private:
     static inline void _raise(std::ostream &) {}
 

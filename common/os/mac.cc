@@ -1,7 +1,7 @@
 #ifdef __APPLE__
 #include <cstdio>
-#include <string>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
+#include <string>
 
 std::string exec(const char *cmd);
 

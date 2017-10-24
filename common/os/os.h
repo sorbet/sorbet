@@ -5,5 +5,4 @@ std::string addr2line(const std::string program_name, void const *const *addr, i
 
 std::string getProgramName();
 
-
-#endif //SRUBY_OS_H
+#endif // SRUBY_OS_H

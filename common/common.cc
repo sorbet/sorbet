@@ -1,13 +1,11 @@
 #include "common.h"
-#include <exception>
-#include <fstream>
-#include <iostream>
-#include <fstream>
-#include <vector>
 #include "os/os.h"
 #include <array>
+#include <exception>
 #include <execinfo.h>
-
+#include <fstream>
+#include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -50,7 +48,6 @@ string exec(const char *cmd) {
     }
     return result;
 }
-
 
 void filter_unnecessary(string &out) {
     string::size_type i = 0;
