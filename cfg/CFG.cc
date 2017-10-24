@@ -246,6 +246,8 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
      * for some code snippets. */
+    Error::check(!current->bexit.cond.exists());
+
     BasicBlock *ret = nullptr;
     typecase(
         what,
