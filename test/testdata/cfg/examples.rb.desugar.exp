@@ -33,4 +33,23 @@ class <emptyTree>::Examples<<todo sym>> << ()
       return 2
     end
 
+  def variables<<todo sym>>()
+    begin
+      if begin
+          true
+        end
+        a<todo lvar sym> = 1
+      else 
+        a<todo lvar sym> = 2
+      end
+      if begin
+          false
+        end
+        b<todo lvar sym> = 1
+      else 
+        b<todo lvar sym> = 2
+      end
+      a<todo lvar sym>.+(b<todo lvar sym>)
+    end
+
 end

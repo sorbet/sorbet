@@ -31,4 +31,22 @@ class Examples
       end
     end
 
+
+    def variables()
+    if (true)
+      a = 1
+    else
+      a = 2
+    end
+
+    if (false)
+      b = 1
+    else
+      b = 2
+    end
+
+    a + b
+
+    end
+
 end
