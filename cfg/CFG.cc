@@ -24,7 +24,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
     //
     //  every node gets the intersection between two sets suggested by those overestimations.
     //
-    // The solution should be |BB| + |symbols-mentioned| + |answer_size| in complexity.
+    // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
     unordered_map<ast::SymbolRef, unordered_set<BasicBlock *>> reads;
     unordered_map<ast::SymbolRef, unordered_set<BasicBlock *>> writes;
@@ -88,26 +88,39 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
 
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
     unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> upper_bounds1;
-    for (auto it = this->forwardsTopoSort.begin(); it != this->forwardsTopoSort.end(); ++it) {
-        BasicBlock *bb = *it;
-        upper_bounds1[bb].insert(reads_by_block[bb].begin(), reads_by_block[bb].end());
-        if (bb->bexit.thenb != deadBlock()) {
-            upper_bounds1[bb].insert(upper_bounds1[bb->bexit.thenb].begin(), upper_bounds1[bb->bexit.thenb].end());
-        }
-        if (bb->bexit.elseb != deadBlock()) {
-            upper_bounds1[bb].insert(upper_bounds1[bb->bexit.elseb].begin(), upper_bounds1[bb->bexit.elseb].end());
+    bool changed = true;
+
+    while (changed) {
+        changed = false;
+        for (auto it = this->forwardsTopoSort.begin(); it != this->forwardsTopoSort.end(); ++it) {
+            BasicBlock *bb = *it;
+            int sz = upper_bounds1[bb].size();
+            upper_bounds1[bb].insert(reads_by_block[bb].begin(), reads_by_block[bb].end());
+            if (bb->bexit.thenb != deadBlock()) {
+                upper_bounds1[bb].insert(upper_bounds1[bb->bexit.thenb].begin(), upper_bounds1[bb->bexit.thenb].end());
+            }
+            if (bb->bexit.elseb != deadBlock()) {
+                upper_bounds1[bb].insert(upper_bounds1[bb->bexit.elseb].begin(), upper_bounds1[bb->bexit.elseb].end());
+            }
+            changed = changed || (upper_bounds1[bb].size() != sz);
         }
     }
 
     unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> upper_bounds2;
 
-    for (auto it = this->backwardsTopoSort.begin(); it != this->backwardsTopoSort.end(); ++it) {
-        BasicBlock *bb = *it;
-        upper_bounds2[bb].insert(writes_by_block[bb].begin(), writes_by_block[bb].end());
-        for (BasicBlock *edge : bb->backEdges) {
-            if (edge != deadBlock()) {
-                upper_bounds2[bb].insert(upper_bounds2[edge].begin(), upper_bounds2[edge].end());
+    changed = true;
+    while (changed) {
+        changed = false;
+        for (auto it = this->backwardsTopoSort.begin(); it != this->backwardsTopoSort.end(); ++it) {
+            BasicBlock *bb = *it;
+            int sz = upper_bounds2[bb].size();
+            upper_bounds2[bb].insert(writes_by_block[bb].begin(), writes_by_block[bb].end());
+            for (BasicBlock *edge : bb->backEdges) {
+                if (edge != deadBlock()) {
+                    upper_bounds2[bb].insert(upper_bounds2[edge].begin(), upper_bounds2[edge].end());
+                }
             }
+            changed = changed || (upper_bounds2[bb].size() != sz);
         }
     }
 
