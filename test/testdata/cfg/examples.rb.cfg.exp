@@ -88,7 +88,7 @@ digraph <todo sym> {
     bb5 -> bb7;
     bb6 [label = "(a, b)\nb = 2\nstatTmp$19 = b\n<always>"];
     bb6 -> bb7;
-    bb7 [label = "(b, a)\n<ret>$16 = a.+(b)\n<ret>$21 = return <ret>$16\n<never>"];
+    bb7 [label = "(a, b)\n<ret>$16 = a.+(b)\n<ret>$21 = return <ret>$16\n<never>"];
     bb7 -> bb1;
 }
 

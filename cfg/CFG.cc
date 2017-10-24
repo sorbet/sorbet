@@ -1,7 +1,7 @@
 
 #include "CFG.h"
 #include <algorithm>
-#include <algorithm> // set_intersect
+#include <algorithm> // sort
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
@@ -119,6 +119,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 it->args.push_back(el);
             }
         }
+        std::sort(it->args.begin(), it->args.end(),
+                  [](ast::SymbolRef a, ast::SymbolRef b) -> bool { return a._id < b._id; });
     }
 
     return;
