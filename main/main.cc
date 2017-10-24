@@ -4,6 +4,7 @@
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
+#include <algorithm> // find
 #include <ctime>
 #include <cxxopts.hpp>
 #include <iostream>
@@ -29,11 +30,22 @@ public:
     }
 };
 
+static bool removeOption(std::vector<std::string> &prints, std::string option) {
+    auto it = find(prints.begin(), prints.end(), option);
+    if (it != prints.end()) {
+        prints.erase(it);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 static bool startsWith(const string &str, const string &prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.c_str(), prefix.size());
 }
 
-void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &path, const string &src) {
+void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, const string &path, const string &src,
+                     std::vector<std::string> &prints) {
     auto r = ruby_typer::parser::parse_ruby(ctx, path, src);
     auto ast = r.ast();
     if (r.diagnostics().size() > 0) {
@@ -48,24 +60,32 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
         cerr << " FATAL: " << counts[static_cast<int>(ruby_parser::dlevel::FATAL)] << endl;
     }
     if (ast) {
-        if (opts["p"].as<bool>()) {
+        if (removeOption(prints, "parse-tree")) {
             cout << ast->toString(ctx, 0) << endl;
+            if (prints.empty())
+                return;
         }
-        if (startsWith(opts["s"].as<string>(), "p"))
-            return;
+
         ruby_typer::ast::Context context(ctx, ctx.defn_root());
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
-        if (opts["d"].as<bool>()) {
-            cout << desugared->toString(ctx, 0) << endl;
+        if (removeOption(prints, "ast")) {
+            cout << desugared->toString(ctx) << endl;
+            if (prints.empty())
+                return;
         }
-        if (startsWith(opts["s"].as<string>(), "d"))
-            return;
+
         desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
-        if (opts["n"].as<bool>()) {
+        if (removeOption(prints, "name-table")) {
             cout << ctx.toString() << endl;
+            if (prints.empty())
+                return;
         }
-        if (startsWith(opts["s"].as<string>(), "n"))
-            return;
+        if (removeOption(prints, "name-tree")) {
+            cout << desugared->toString(ctx) << endl;
+            if (prints.empty())
+                return;
+        }
+
         CFG_Collector collector;
 
         auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, std::move(desugared));
@@ -74,11 +94,11 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
             buf << cfg << std::endl << std::endl;
         }
         auto got = buf.str();
-        if (opts["c"].as<bool>()) {
+        if (removeOption(prints, "cfg")) {
             cout << got << endl;
+            if (prints.empty())
+                return;
         }
-        if (startsWith(opts["s"].as<string>(), "c"))
-            return;
     } else {
         cout << " got null" << endl;
     }
@@ -86,6 +106,7 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
 
 int main(int argc, char **argv) {
     std::vector<std::string> files;
+    std::vector<std::string> prints;
     //    spd::set_async_mode(1024);
     auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
@@ -97,10 +118,8 @@ int main(int argc, char **argv) {
     options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
     options.add_options()("n,name-table", "Show name table");
-    options.add_options()("c,cfg", "Show control flow graph");
-    options.add_options()("p,parser", "Show parsed tree");
-    options.add_options()("d,desugar", "Show desugared tree");
-    options.add_options()("s,stop", "stop after phase", cxxopts::value<std::string>());
+    options.add_options()("p,print", "Print [parse-tree, ast, name-table, name-tree, cfg]",
+                          cxxopts::value<std::vector<std::string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
     options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
     options.parse_positional("files");
@@ -139,13 +158,13 @@ int main(int argc, char **argv) {
         st.files++;
         st.lines++;
         st.bytes += src.size();
-        parse_and_print(ctx, options, "-e", src);
+        parse_and_print(ctx, options, "-e", src, prints);
     } else {
 
         for (auto &fileName : files) {
             console->debug("Parsing {}...", fileName);
             string src = ruby_typer::File::read(fileName.c_str());
-            parse_and_print(ctx, options, fileName, src);
+            parse_and_print(ctx, options, fileName, src, prints);
         }
     }
     clock_t end = clock();
