@@ -10,10 +10,7 @@ compilation_database(
     targets = [
         "//test:hello-test",
         "//parser:parser_test",
-        "//parser:parse_ast",
-        "//ast/desugar:desugar_ast",
         "//ast/desugar:desugar_test",
         "//test:test_corpus",
-        "//namer:namer_print",
     ],
 )
