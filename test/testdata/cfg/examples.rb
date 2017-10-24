@@ -64,7 +64,20 @@ class Examples
         end
       end
 
-      a + b
+      b
+    end
+
+
+    def variables_loop_if()
+      while true
+        if (false)
+          b = 1
+        else
+          b = 2
+        end
+      end
+
+      b
     end
 
 end

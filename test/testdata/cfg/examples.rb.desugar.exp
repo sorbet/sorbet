@@ -70,7 +70,21 @@ class <emptyTree>::Examples<<todo sym>> < ()
           b<todo lvar sym> = 2
         end
       end
-      a<todo lvar sym>.+(b<todo lvar sym>)
+      b<todo lvar sym>
+    end
+
+  def variables_loop_if<<todo sym>>()
+    begin
+      while true
+        if begin
+            false
+          end
+          b<todo lvar sym> = 1
+        else 
+          b<todo lvar sym> = 2
+        end
+      end
+      b<todo lvar sym>
     end
 
 end

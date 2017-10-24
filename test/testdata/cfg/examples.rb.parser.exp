@@ -216,16 +216,46 @@ Class {
                 }
               }
             }
-            Send {
-              receiver = LVar {
-                name = a
+            LVar {
+              name = b
+            }
+          ]
+        }
+      }
+      DefMethod {
+        name = variables_loop_if
+        args = Args {
+          args = [
+          ]
+        }
+        body = Begin {
+          stmts = [
+            While {
+              cond = True {
               }
-              method = +
-              args = [
-                LVar {
-                  name = b
+              body = If {
+                condition = Begin {
+                  stmts = [
+                    False {
+                    }
+                  ]
                 }
-              ]
+                then_ = LVarAsgn {
+                  name = b
+                  expr = Integer {
+                    val = "1"
+                  }
+                }
+                else_ = LVarAsgn {
+                  name = b
+                  expr = Integer {
+                    val = "2"
+                  }
+                }
+              }
+            }
+            LVar {
+              name = b
             }
           ]
         }
