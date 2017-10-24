@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # A pretend Python dictionary with bash 3
-entry_points=( "cfg:main/ruby-typer --cfg --stop cfg"
-        "parser:main/ruby-typer --parser --stop parser"
-        "desugar:main/ruby-typer --desugar --stop desugar"
-        "namer:main/ruby-typer --name-table --stop namer" )
+entry_points=( "cfg:main/ruby-typer --print cfg"
+        "parser:main/ruby-typer --print parse-tree"
+        "desugar:main/ruby-typer --print ast"
+        "name-table:main/ruby-typer --print name-table"
+        "name-tree:main/ruby-typer --print name-tree")
 
 bazel build //main:ruby-typer
 
