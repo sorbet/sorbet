@@ -1,6 +1,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
+#include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include <ctime>
@@ -39,6 +40,7 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
     if (ast) {
         ruby_typer::ast::Context context(ctx, ctx.defn_root());
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
+        desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
         CFG_Collector collector;
 
         auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, std::move(desugared));

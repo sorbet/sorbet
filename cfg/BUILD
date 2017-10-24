@@ -19,6 +19,7 @@ cc_binary(
     deps = [
         "cfg",
         "//ast/desugar",
+        "//namer",
         "@cxxopts//:cxxopts",
         "@spdlog//:spdlog",
     ],
