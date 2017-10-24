@@ -2,12 +2,14 @@
 #include <exception>
 #include <fstream>
 #include <iostream>
+#include <fstream>
+#ifdef __APPLE__
 #define UNW_LOCAL_ONLY
 #include <cstdio>
 #include <cstdlib>
 #include <cxxabi.h>
-#include <fstream>
 #include <libunwind.h>
+#endif
 
 using namespace std;
 
@@ -36,6 +38,7 @@ public:
 } SetTerminateHandler;
 
 void ruby_typer::Error::print_backtrace() {
+#ifdef __APPLE__
     unw_cursor_t cursor;
     unw_context_t context;
 
@@ -66,4 +69,5 @@ void ruby_typer::Error::print_backtrace() {
             std::printf(" -- error: unable to obtain symbol name for this frame\n");
         }
     }
+#endif
 }
