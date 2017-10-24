@@ -92,4 +92,38 @@ digraph <todo sym> {
     bb7 -> bb1;
 }
 
+digraph <todo sym> {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\nifTmp$24 = true\nifTmp$24"];
+    bb0 -> bb2;
+    bb0 -> bb3;
+
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+    bb2 [label = "(a)\na = 1\nstatTmp$23 = a\n<always>"];
+    bb2 -> bb4;
+    bb3 [label = "(a)\na = 2\nstatTmp$23 = a\n<always>"];
+    bb3 -> bb4;
+    bb4 [label = "(a)\n<always>"];
+    bb4 -> bb5;
+    bb5 [label = "(a, b)\nwhileTmp$26 = true\nwhileTmp$26"];
+    bb5 -> bb6;
+    bb5 -> bb7;
+
+    bb6 [label = "()\nifTmp$28 = false\nifTmp$28"];
+    bb6 -> bb8;
+    bb6 -> bb9;
+
+    bb7 [label = "(a, b)\nstatTmp$25 = nil\n<ret>$22 = a.+(b)\n<ret>$29 = return <ret>$22\n<never>"];
+    bb7 -> bb1;
+    bb8 [label = "(b)\nb = 1\nstatTmp$27 = b\n<always>"];
+    bb8 -> bb10;
+    bb9 [label = "(b)\nb = 2\nstatTmp$27 = b\n<always>"];
+    bb9 -> bb10;
+    bb10 [label = "()\n<always>"];
+    bb10 -> bb5;
+}
+
 

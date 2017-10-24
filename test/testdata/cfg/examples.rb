@@ -33,20 +33,38 @@ class Examples
 
 
     def variables()
-    if (true)
-      a = 1
-    else
-      a = 2
+      if (true)
+        a = 1
+      else
+        a = 2
+      end
+
+      if (false)
+        b = 1
+      else
+        b = 2
+      end
+
+      a + b
     end
 
-    if (false)
-      b = 1
-    else
-      b = 2
-    end
 
-    a + b
+    def variables_and_loop()
+      if (true)
+        a = 1
+      else
+        a = 2
+      end
 
+      while true
+        if (false)
+          b = 1
+        else
+          b = 2
+        end
+      end
+
+      a + b
     end
 
 end

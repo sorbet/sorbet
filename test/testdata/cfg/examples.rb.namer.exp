@@ -4,4 +4,5 @@ Examples (class)
   return_in_one_branch1 (method)
   return_in_one_branch2 (method)
   variables (method)
+  variables_and_loop (method)
 
