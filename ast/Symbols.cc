@@ -31,6 +31,10 @@ bool SymbolRef::isSynthetic() const {
     return this->_id <= ContextBase::defn_last_synthetic_sym()._id;
 }
 
+bool SymbolRef::isPlaceHolder() const {
+    return this->_id >= ContextBase::defn_todo()._id && this->_id <= ContextBase::defn_cvar_todo()._id;
+}
+
 void printTabs(std::ostringstream &to, int count) {
     int i = 0;
     while (i < count) {

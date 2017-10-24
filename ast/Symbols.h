@@ -44,6 +44,8 @@ public:
 
     bool isSynthetic() const;
 
+    bool isPlaceHolder() const;
+
     bool isPrimitive() const;
 
     SymbolInfo &info(ContextBase &ctx, bool allowNone = false) const;
