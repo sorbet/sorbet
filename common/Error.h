@@ -58,6 +58,7 @@ public:
             raise("Not Implemented");
     }
 
+    static void print_backtrace();
 private:
     static inline void _raise(std::ostream &) {}
 
@@ -72,9 +73,9 @@ template <typename... TArgs>[[noreturn]] void Error::raise(const TArgs &... args
     std::stringstream message;
     _raise(message, args...);
 
-    std::stringstream stackTrace;
+    print_backtrace();
 
-    throw SRubyException(message.str(), stackTrace.str());
+    throw SRubyException(message.str());
 }
 } // namespace ruby_typer
 #endif // SRUBY_ERRO_H
