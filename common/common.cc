@@ -5,6 +5,8 @@
 #include <execinfo.h>
 #include <fstream>
 #include <iostream>
+#include <memory>
+#include <stdio.h>
 #include <vector>
 
 using namespace std;
