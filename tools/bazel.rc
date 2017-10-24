@@ -22,6 +22,9 @@ build:dbg --cxxopt=-O0
 build:dbg --copt=-g3
 build:dbg --cxxopt=-g3
 build:dbg --linkopt=-g3
+build:dbg --linkopt=-fno-pie
+build:dbg --copt=-fno-pie
+build:dbg --cxxopt=-fno-pie
 
 ### Debug symbols on OS X. ###
 # From https://github.com/RobotLocomotion/drake/blob/master/tools/cc_toolchain/bazel.rc

@@ -3,15 +3,24 @@
 #include <fstream>
 #include <iostream>
 #include <fstream>
+#include <vector>
 #ifdef __APPLE__
-#define UNW_LOCAL_ONLY
+#include <array>
 #include <cstdio>
-#include <cstdlib>
-#include <cxxabi.h>
-#include <libunwind.h>
+#include <err.h>
+#include <execinfo.h>
+#include <mach-o/dyld.h> /* _NSGetExecutablePath */
+#include <memory>
+#include <stdint.h>
+#include <unistd.h>
 #endif
 
 using namespace std;
+
+#define MAX_STACK_FRAMES 128
+static void *stack_traces[MAX_STACK_FRAMES];
+char addr2line_cmd[1024 * MAX_STACK_FRAMES] = {0};
+static char program_name[256];
 
 string ruby_typer::File::read(const char *filename) {
     ifstream fin(filename);
@@ -38,36 +47,79 @@ public:
 } SetTerminateHandler;
 
 void ruby_typer::Error::print_backtrace() {
+
 #ifdef __APPLE__
-    unw_cursor_t cursor;
-    unw_context_t context;
 
-    // Initialize cursor to current frame for local unwinding.
-    unw_getcontext(&context);
-    unw_init_local(&cursor, &context);
+string exec(const char *cmd) {
+    array<char, 128> buffer;
+    string result;
+    shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    if (!pipe)
+        throw runtime_error("popen() failed!");
+    while (!feof(pipe.get())) {
+        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+            result += buffer.data();
+    }
+    return result;
+}
 
-    // Unwind frames one by one, going up the frame stack.
-    while (unw_step(&cursor) > 0) {
-        unw_word_t offset, pc;
-        unw_get_reg(&cursor, UNW_REG_IP, &pc);
-        if (pc == 0) {
+string addr2line(char const *const program_name, void const *const *addr, int count) {
+    char addr2line_cmd[2048] = {0};
+
+    int s = sprintf(addr2line_cmd, "atos -o %.256s", program_name);
+    for (int i = 3; i < count; ++i) {
+        s += sprintf(addr2line_cmd + s, " %p", addr[i]);
+    }
+    addr2line_cmd[s] = 0;
+    //    printf(addr2line_cmd);
+
+    return exec(addr2line_cmd);
+}
+#endif
+
+void filter_unececary(string &out) {
+    string::size_type i = 0;
+    string::size_type j = 0;
+    vector<string> patterns{"typecase.h:", "__functional_base:", "functional:"};
+
+    while (i < out.length()) {
+        i = out.find('\n', i);
+        if (i == string::npos) {
             break;
         }
-        std::printf("0x%llx:", pc);
-
-        char sym[256];
-        if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) {
-            char *nameptr = sym;
-            int status;
-            char *demangled = abi::__cxa_demangle(sym, nullptr, nullptr, &status);
-            if (status == 0) {
-                nameptr = demangled;
-            }
-            std::printf(" (%s+0x%llx)\n", nameptr, offset);
-            std::free(demangled);
-        } else {
-            std::printf(" -- error: unable to obtain symbol name for this frame\n");
+        j = out.find('\n', i + 1);
+        if (j == string::npos) {
+            break;
         }
+        bool found = false;
+        string substr(out, i, j - i);
+        for (auto &subp : patterns) {
+            found = found || (substr.find(subp) != string::npos);
+        }
+        if (found) {
+            out.erase(i, j - i);
+        } else {
+            i = i + 1;
+        }
+    }
+}
+
+void ruby_typer::Error::print_backtrace() {
+#ifdef __APPLE__
+    int trace_size = 0;
+    char **messages = (char **)NULL;
+    uint32_t sz = 256;
+    _NSGetExecutablePath(program_name, &sz);
+
+    trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
+    messages = backtrace_symbols(stack_traces, trace_size);
+
+    string res = addr2line(program_name, stack_traces, trace_size);
+    filter_unececary(res);
+    fprintf(stderr, "%s", res.c_str());
+
+    if (messages) {
+        free(messages);
     }
 #endif
 }
