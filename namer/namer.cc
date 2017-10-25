@@ -68,16 +68,16 @@ public:
     ast::ClassDef *postTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
         namesForLocals.pop_back();
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
-        for (auto it = klass->rhs.begin(); it != klass->rhs.end();) {
-            auto &line = *it;
-            auto newAncestor = addAncestor(ctx, klass, line);
-            if (newAncestor) {
-                klass->ancestors.emplace_back(std::move(newAncestor));
-                klass->rhs.erase(it);
-            } else {
-                it++;
-            }
-        }
+        auto toRemove =
+            std::remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Statement> &line) {
+                auto newAncestor = addAncestor(ctx, klass, line);
+                if (newAncestor) {
+                    klass->ancestors.emplace_back(std::move(newAncestor));
+                    return true;
+                }
+                return false;
+            });
+        klass->rhs.erase(toRemove, klass->rhs.end());
         return klass;
     }
 
