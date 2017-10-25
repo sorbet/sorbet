@@ -86,6 +86,7 @@ unordered_set<string> knownPasses = {
     "parse-tree",
     "ast",
     "name-table",
+    "name-tree",
     "cfg",
 };
 
@@ -108,7 +109,40 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
-    expectation = test.expectations.find("name-tree");
+    auto expectation = test.expectations.find("parse-tree");
+    if (expectation == test.expectations.end())
+        return;
+
+    {
+        auto checker = test.folder + expectation->second;
+        SCOPED_TRACE(checker);
+
+        auto exp = ruby_typer::File::read(checker.c_str());
+
+        EXPECT_EQ(0, parsed.diagnostics().size());
+        EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
+        if (exp == parsed.ast()->toString(ctx) + "\n") {
+            TEST_COUT << "parse-tree OK" << endl;
+        }
+    }
+
+    expectation = test.expectations.find("ast");
+    if (expectation == test.expectations.end())
+        return;
+
+    auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
+    {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
+
+        EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
+        if (exp == desugared->toString(ctx) + "\n") {
+            TEST_COUT << "ast OK" << endl;
+        }
+    }
+
+    expectation = test.expectations.find("name-table");
     if (expectation == test.expectations.end())
         return;
 
@@ -118,13 +152,13 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, namedTree->toString(ctx) + "\n");
-        if (exp == namedTree->toString(ctx) + "\n") {
-            TEST_COUT << "name-tree OK" << std::endl;
+        EXPECT_EQ(exp, ctx.toString() + "\n");
+        if (exp == ctx.toString() + "\n") {
+            TEST_COUT << "name-table OK" << std::endl;
         }
     }
 
-    expectation = test.expectations.find("name-table");
+    expectation = test.expectations.find("name-tree");
     if (expectation == test.expectations.end())
         return;
 
@@ -133,9 +167,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, ctx.toString() + "\n");
-        if (exp == ctx.toString() + "\n") {
-            TEST_COUT << "name-table OK" << std::endl;
+        EXPECT_EQ(exp, namedTree->toString(ctx) + "\n");
+        if (exp == namedTree->toString(ctx) + "\n") {
+            TEST_COUT << "name-tree OK" << std::endl;
         }
     }
 
@@ -158,7 +192,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
         EXPECT_EQ(exp, got.str() + "\n");
         if (exp == got.str() + "\n") {
-            TEST_COUT << "cfg OK" << endl;
+            TEST_COUT << "CFG OK" << endl;
         }
     }
 }

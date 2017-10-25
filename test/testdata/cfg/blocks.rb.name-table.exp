@@ -1,3 +1,3 @@
-BlockTest (class)
-  block_pass (method)
+class BlockTest ()
+  method block_pass ()
 
