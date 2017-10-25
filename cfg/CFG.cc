@@ -53,7 +53,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 reads[v->what].insert(bb.get());
             } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
                 reads[v->value].insert(bb.get());
-            } else if (auto *v = dynamic_cast<BlockArg *>(bind.value.get())) {
+            } else if (auto *v = dynamic_cast<LoadArg *>(bind.value.get())) {
                 reads[v->receiver].insert(bb.get());
             }
         }
@@ -374,7 +374,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                     auto &arg = s->block->args[i];
 
                     if (auto id = dynamic_cast<ast::Ident *>(arg.get())) {
-                        headerBlock->exprs.emplace_back(id->symbol, make_unique<BlockArg>(recv, s->fun, i));
+                        headerBlock->exprs.emplace_back(id->symbol, make_unique<LoadArg>(recv, s->fun, i));
                     } else {
                         // TODO(nelhage): this will be an error once the namer
                         // is more complete and turns all args into Ident
@@ -558,9 +558,9 @@ string Self::toString(ast::Context ctx) {
     return "self";
 }
 
-string BlockArg::toString(ast::Context ctx) {
+string LoadArg::toString(ast::Context ctx) {
     stringstream buf;
-    buf << "block_arg(";
+    buf << "load_arg(";
     buf << this->receiver.info(ctx).name.name(ctx).toString(ctx);
     buf << "#";
     buf << this->method.name(ctx).toString(ctx);

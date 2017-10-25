@@ -6,7 +6,7 @@ digraph <todo sym> {
     bb0 -> bb2;
     bb1 [label = "()\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "(<todo lvar sym>, statTmp$1, statTmp$2, statTmp$3, statTmp$4)\n<todo lvar sym> = block_arg(statTmp$1#foo, 0)\n<todo lvar sym> = block_arg(statTmp$1#foo, 1)\n<block-call>"];
+    bb2 [label = "(<todo lvar sym>, statTmp$1, statTmp$2, statTmp$3, statTmp$4)\n<todo lvar sym> = load_arg(statTmp$1#foo, 0)\n<todo lvar sym> = load_arg(statTmp$1#foo, 1)\n<block-call>"];
     bb2 -> bb4;
     bb2 -> bb3;
 
