@@ -6,7 +6,7 @@ namespace ast {
 
 enum class ErrorClass {
     Internal, // Internal Compiler Error
-    IncludeMutiParam,
+    IncludeMutipleParam,
     IncludeNotConstant,
 };
 

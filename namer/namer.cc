@@ -38,7 +38,7 @@ class NameInserter {
         }
 
         if (send->args.size() != 1) {
-            ctx.state.errors.error(send->loc, ast::ErrorClass::IncludeMutiParam,
+            ctx.state.errors.error(send->loc, ast::ErrorClass::IncludeMutipleParam,
                                    "`include` should only be passed a single constant. You passed {} parameters.",
                                    send->args.size());
             return nullptr;
