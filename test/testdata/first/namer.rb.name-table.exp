@@ -7,5 +7,6 @@ class NormalClass ()
   class InnerClass ()
   class InnerModule ()
   method normal_method ()
+class OtherMixin ()
 class Parent ()
 

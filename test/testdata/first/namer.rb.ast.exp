@@ -31,7 +31,11 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Mixin<<todo sym>> < ()
+  module <emptyTree>::Mixin<<todo sym>> < ()
+    <emptyTree>
+
+  end
+  module <emptyTree>::OtherMixin<<todo sym>> < ()
     <emptyTree>
 
   end
@@ -45,6 +49,8 @@ begin
     <emptyTree>.include(<emptyTree>::Mixin) do ||
       <emptyTree>
     end
+
+    <emptyTree>.whatever().include(<emptyTree>::OtherMixin)
 
   end
 end

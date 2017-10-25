@@ -31,14 +31,24 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Mixin<Mixin> < ()
+  module <emptyTree>::Mixin<Mixin> < ()
     <emptyTree>
 
   end
-  class <emptyTree>::Child<Child> < (<emptyTree>::Parent, <emptyTree>::Mixin, <emptyTree>::Mixin)
+  module <emptyTree>::OtherMixin<OtherMixin> < ()
+    <emptyTree>
+
+  end
+  class <emptyTree>::Child<Child> < (<emptyTree>::Parent, <emptyTree>::OtherMixin)
+    <emptyTree>.include(<emptyTree>::Mixin)
+
     <emptyTree>.include(<emptyTree>::Mixin, <emptyTree>::Mixin)
 
     <emptyTree>.include(3)
+
+    <emptyTree>.include(<emptyTree>::Mixin) do ||
+      <emptyTree>
+    end
 
   end
 end

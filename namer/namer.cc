@@ -36,6 +36,10 @@ class NameInserter {
         if (send->fun != ast::Names::include()) {
             return nullptr;
         }
+        if (dynamic_cast<ast::EmptyTree *>(send->recv.get()) != nullptr) {
+            // ignore `something.include`
+            return nullptr;
+        }
 
         if (send->args.size() != 1) {
             ctx.state.errors.error(send->loc, ast::ErrorClass::IncludeMutipleParam,

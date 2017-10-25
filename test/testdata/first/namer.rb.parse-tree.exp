@@ -71,12 +71,18 @@ Begin {
       superclass = NULL
       body = NULL
     }
-    Class {
+    Module {
       name = Const {
         scope = NULL
         name = Mixin
       }
-      superclass = NULL
+      body = NULL
+    }
+    Module {
+      name = Const {
+        scope = NULL
+        name = OtherMixin
+      }
       body = NULL
     }
     Class {
@@ -136,6 +142,21 @@ Begin {
             }
             args = NULL
             body = NULL
+          }
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = whatever
+              args = [
+              ]
+            }
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = OtherMixin
+              }
+            ]
           }
         ]
       }
