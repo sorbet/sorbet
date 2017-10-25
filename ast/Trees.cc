@@ -149,8 +149,19 @@ void printArgs(ContextBase &ctx, stringstream &buf, vector<unique_ptr<Expression
 }
 
 string ConstDef::toString(ContextBase &ctx, int tabs) {
-    return "constdef " + this->symbol.info(ctx).name.name(ctx).toString(ctx) + " = " +
+
+    return "constdef " + this->symbol.info(ctx, true).name.name(ctx).toString(ctx) + " = " +
            this->rhs->toString(ctx, tabs + 1);
+}
+
+string ConstDef::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "rhs = " << rhs->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
 }
 
 string ClassDef::toString(ContextBase &ctx, int tabs) {
@@ -160,7 +171,7 @@ string ClassDef::toString(ContextBase &ctx, int tabs) {
     } else {
         buf << "class ";
     }
-    buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << "> < ";
+    buf << name->toString(ctx, tabs) << "<" << this->symbol.info(ctx, true).name.name(ctx).toString(ctx) << "> < ";
     printArgs(ctx, buf, this->ancestors, tabs);
 
     buf << endl;
@@ -171,6 +182,36 @@ string ClassDef::toString(ContextBase &ctx, int tabs) {
     }
     printTabs(buf, tabs);
     buf << "end";
+    return buf.str();
+}
+
+string ClassDef::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << "ClassDef{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "name = " << name->showRaw(ctx, tabs) << "<" << this->symbol.info(ctx, true).name.name(ctx).toString(ctx)
+        << ">" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "ancestors = [";
+    bool first = true;
+    for (auto &a : this->ancestors) {
+        if (!first) {
+            buf << ", ";
+        }
+        first = false;
+        buf << a->showRaw(ctx, tabs + 2);
+    }
+    buf << "]" << endl;
+
+    printTabs(buf, tabs + 1);
+    buf << "rhs = [" << endl;
+
+    for (auto &a : this->rhs) {
+        printTabs(buf, tabs + 1);
+        buf << a->showRaw(ctx, tabs + 2) << endl << endl;
+    }
+    printTabs(buf, tabs);
+    buf << "}";
     return buf.str();
 }
 
@@ -189,6 +230,25 @@ string InsSeq::toString(ContextBase &ctx, int tabs) {
     return buf.str();
 }
 
+string InsSeq::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "stats = [" << endl;
+    for (auto &a : this->stats) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(ctx, tabs + 2) << endl;
+    }
+    printTabs(buf, tabs + 1);
+    buf << "]," << endl;
+
+    printTabs(buf, tabs + 1);
+    buf << "expr = " << expr->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
 string MethodDef::toString(ContextBase &ctx, int tabs) {
     stringstream buf;
 
@@ -197,7 +257,7 @@ string MethodDef::toString(ContextBase &ctx, int tabs) {
     } else {
         buf << "def ";
     }
-    buf << name.name(ctx).toString(ctx) << "<" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << ">";
+    buf << name.name(ctx).toString(ctx) << "<" << this->symbol.info(ctx, true).name.name(ctx).toString(ctx) << ">";
     buf << "(";
     bool first = true;
     for (auto &a : this->args) {
@@ -210,6 +270,33 @@ string MethodDef::toString(ContextBase &ctx, int tabs) {
     buf << ")" << endl;
     printTabs(buf, tabs + 1);
     buf << this->rhs->toString(ctx, tabs + 1);
+    return buf.str();
+}
+
+string MethodDef::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << "MethodDef{" << endl;
+    printTabs(buf, tabs + 1);
+
+    buf << "self = " << isSelf << endl;
+    printTabs(buf, tabs + 1);
+    buf << "name = " << name.name(ctx).toString(ctx) << "<" << this->symbol.info(ctx, true).name.name(ctx).toString(ctx)
+        << ">" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "args = [";
+    bool first = true;
+    for (auto &a : this->args) {
+        if (!first) {
+            buf << ", ";
+        }
+        first = false;
+        buf << a->showRaw(ctx, tabs + 2);
+    }
+    buf << "]" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "rhs = " << this->rhs->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "}";
     return buf.str();
 }
 
@@ -228,6 +315,34 @@ string If::toString(ContextBase &ctx, int tabs) {
     return buf.str();
 }
 
+string If::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+
+    buf << "If{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "cond = " << this->cond->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "thenp = " << this->thenp->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "elsep = " << this->elsep->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
+string Assign::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+
+    buf << "Assign{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "lhs = " << this->lhs->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "rhs = " << this->rhs->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
 string While::toString(ContextBase &ctx, int tabs) {
     stringstream buf;
 
@@ -239,32 +354,98 @@ string While::toString(ContextBase &ctx, int tabs) {
     return buf.str();
 }
 
-string EmptyTree::toString(ContextBase &ctx, int tabs) {
-    return "<emptyTree>";
+string While::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+
+    buf << "While{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "cond = " << this->cond->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "body = " << this->body->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
 }
 
-string ArraySplat::toString(ContextBase &ctx, int tabs) {
-    return "*" + this->arg->toString(ctx, tabs + 1);
+string EmptyTree::toString(ContextBase &ctx, int tabs) {
+    return "<emptyTree>";
 }
 
 string StringLit::toString(ContextBase &ctx, int tabs) {
     return "\"" + this->value.name(ctx).toString(ctx) + "\"";
 }
 
+string StringLit::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ value = " + this->value.name(ctx).toString(ctx) + " }";
+}
+
 string ConstantLit::toString(ContextBase &ctx, int tabs) {
     return this->scope->toString(ctx, tabs) + "::" + this->cnst.name(ctx).toString(ctx);
 }
 
+string ConstantLit::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+
+    buf << "ConstantLit{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "scope = " << this->scope->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "cnst = " << this->cnst.name(ctx).toString(ctx) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
 string Ident::toString(ContextBase &ctx, int tabs) {
     if (!symbol.isSynthetic()) {
-        return this->symbol.info(ctx).name.name(ctx).toString(ctx);
+        return this->symbol.info(ctx, true).name.name(ctx).toString(ctx);
     } else {
-        return this->name.name(ctx).toString(ctx) + this->symbol.info(ctx).name.name(ctx).toString(ctx);
+        return this->name.name(ctx).toString(ctx) + this->symbol.info(ctx, true).name.name(ctx).toString(ctx);
     }
+}
+
+string Ident::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << "Ident{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "symbol = " << this->symbol.info(ctx, true).name.name(ctx).toString(ctx) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "name = " << (name.exists() ? this->name.name(ctx).toString(ctx) : "<none>") << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
 }
 
 string HashSplat::toString(ContextBase &ctx, int tabs) {
     return "**" + this->arg->toString(ctx, tabs + 1);
+}
+
+string ArraySplat::toString(ContextBase &ctx, int tabs) {
+    return "*" + this->arg->toString(ctx, tabs + 1);
+}
+
+string ArraySplat::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ arg = " + this->arg->showRaw(ctx, tabs + 1) + " }";
+}
+
+string HashSplat::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ arg = " + this->arg->showRaw(ctx, tabs + 1) + " }";
+}
+
+string Return::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ expr = " + this->expr->showRaw(ctx, tabs + 1) + " }";
+}
+
+string Yield::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ expr = " + this->expr->showRaw(ctx, tabs + 1) + " }";
+}
+
+string Next::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ expr = " + this->expr->showRaw(ctx, tabs + 1) + " }";
+}
+
+string Break::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ expr = " + this->expr->showRaw(ctx, tabs + 1) + " }";
 }
 
 string Return::toString(ContextBase &ctx, int tabs) {
@@ -291,8 +472,32 @@ string IntLit::toString(ContextBase &ctx, int tabs) {
     return to_string(this->value);
 }
 
+string IntLit::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ value = " + this->toString(ctx, 0) + " }";
+}
+
+string FloatLit::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ value = " + this->toString(ctx, 0) + " }";
+}
+
+string BoolLit::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ value = " + this->toString(ctx, 0) + " }";
+}
+
 string NamedArg::toString(ContextBase &ctx, int tabs) {
     return this->name.name(ctx).toString(ctx) + " : " + this->arg->toString(ctx, tabs + 1);
+}
+
+string NamedArg::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << "NamedArg{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "name = " << this->name.name(ctx).toString(ctx) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "arg = " << this->arg->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
 }
 
 string FloatLit::toString(ContextBase &ctx, int tabs) {
@@ -314,12 +519,89 @@ string Rescue::toString(ContextBase &ctx, int tabs) {
     return "Rescue";
 }
 
+string Rescue::showRaw(ContextBase &ctx, int tabs) {
+    return "Rescue";
+}
+
 string Send::toString(ContextBase &ctx, int tabs) {
     stringstream buf;
     buf << this->recv->toString(ctx, tabs) << "." << this->fun.name(ctx).toString(ctx);
     printArgs(ctx, buf, this->args, tabs);
     if (this->block != nullptr)
         buf << this->block->toString(ctx, tabs);
+
+    return buf.str();
+}
+
+string Send::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "recv = " << this->recv->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "name = " << this->fun.name(ctx).toString(ctx) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "block = ";
+    if (this->block) {
+        buf << this->block->showRaw(ctx, tabs + 2) << endl;
+    } else {
+        buf << "nullptr" << endl;
+    }
+    printTabs(buf, tabs + 1);
+    buf << "args = [" << endl;
+    for (auto &a : args) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(ctx, tabs + 2) << endl;
+    }
+    printTabs(buf, tabs);
+    buf << "}";
+
+    return buf.str();
+}
+
+string New::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "claz = " << this->claz.info(ctx).name.name(ctx).toString(ctx) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "args = [" << endl;
+    for (auto &a : args) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(ctx, tabs + 2) << endl;
+    }
+    printTabs(buf, tabs);
+    buf << "}";
+
+    return buf.str();
+}
+
+string Super::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "args = [" << endl;
+    for (auto &a : args) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(ctx, tabs + 2) << endl;
+    }
+    printTabs(buf, tabs);
+    buf << "}";
+
+    return buf.str();
+}
+
+string Array::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "elems = [" << endl;
+    for (auto &a : elems) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(ctx, tabs + 2) << endl;
+    }
+    printTabs(buf, tabs);
+    buf << "}";
 
     return buf.str();
 }
@@ -358,8 +640,30 @@ string Block::toString(ContextBase &ctx, int tabs) {
     return buf.str();
 }
 
+string Block::showRaw(ContextBase &ctx, int tabs) {
+    stringstream buf;
+    buf << "Block {" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "args = [" << endl;
+    for (auto &a : this->args) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(ctx, tabs + 2) << endl;
+    }
+    printTabs(buf, tabs + 1);
+    buf << "]" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "body = " << this->body->showRaw(ctx, tabs + 2) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
 string Symbol::toString(ContextBase &ctx, int tabs) {
     return ":" + this->name.name(ctx).toString(ctx);
+}
+
+std::string Symbol::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ name = " + this->name.name(ctx).toString(ctx) + " }";
 }
 
 std::string NotSupported::toString(ContextBase &ctx, int tabs) {
@@ -380,6 +684,10 @@ std::string OptionalArg::toString(ContextBase &ctx, int tabs) {
 
 std::string NotSupported::nodeName() {
     return "<Not Supported (" + why + ")>";
+}
+
+std::string NotSupported::showRaw(ContextBase &ctx, int tabs) {
+    return "Not Supported{ why = " + why + " }";
 }
 
 std::string Rescue::nodeName() {
@@ -480,9 +788,11 @@ std::string Self::nodeName() {
 std::string Block::nodeName() {
     return "Block";
 }
+
 std::string InsSeq::nodeName() {
     return "InsSeq";
 }
+
 std::string EmptyTree::nodeName() {
     return "EmptyTree";
 }
@@ -491,17 +801,39 @@ std::string Nil::toString(ContextBase &ctx, int tabs) {
     return "nil";
 }
 
+std::string Nil::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName();
+}
+std::string EmptyTree::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName();
+}
+
 std::string Nil::nodeName() {
     return "Nil";
+}
+std::string RestArg::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ expr = " + expr->showRaw(ctx, tabs) + " }";
 }
 
 std::string RestArg::nodeName() {
     return "RestArg";
 }
 
+std::string Self::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ claz = " + claz.toString(ctx) + " }";
+}
+std::string KeywordArg::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ expr = " + expr->showRaw(ctx, tabs) + " }";
+}
+
 std::string KeywordArg::nodeName() {
     return "KeywordArg";
 }
+
+std::string OptionalArg::showRaw(ContextBase &ctx, int tabs) {
+    return nodeName() + "{ expr = " + expr->showRaw(ctx, tabs) + " }";
+}
+
 std::string OptionalArg::nodeName() {
     return "OptionalArg";
 }

@@ -69,7 +69,11 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
         ruby_typer::ast::Context context(ctx, ctx.defn_root());
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
         if (removeOption(prints, "ast")) {
-            cout << desugared->toString(ctx) << endl;
+            if (opts["l"].as<bool>()) {
+                cout << desugared->showRaw(ctx) << endl;
+            } else {
+                cout << desugared->toString(ctx, 0) << endl;
+            }
             if (prints.empty())
                 return;
         }
@@ -81,7 +85,11 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
                 return;
         }
         if (removeOption(prints, "name-tree")) {
-            cout << desugared->toString(ctx) << endl;
+            if (opts["l"].as<bool>()) {
+                cout << desugared->showRaw(ctx) << endl;
+            } else {
+                cout << desugared->toString(ctx, 0) << endl;
+            }
             if (prints.empty())
                 return;
         }
