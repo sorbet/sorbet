@@ -5,6 +5,7 @@
 #include "common.h"
 #include <functional>
 #include <string>
+#include <typeinfo>
 
 namespace ruby_typer {
 // taken from https://stackoverflow.com/questions/22822836/type-switch-construct-in-c11
@@ -38,8 +39,8 @@ template <typename Base, typename T> bool typecaseHelper(Base *base, std::functi
     }
 }
 
-template <typename Base> void typecase(Base *) {
-    ruby_typer::Error::check(false);
+template <typename Base> void typecase(Base *b) {
+    ruby_typer::Error::check(false, typeid(b).name());
 }
 
 template <typename Base, typename FirstSubclass, typename... RestOfSubclasses>
