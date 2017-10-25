@@ -208,10 +208,10 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  Error::check(it != end);
                  unique_ptr<Statement> res;
                  unique_ptr<Statement> first = node2TreeImpl(ctx, *it);
-                 if (dynamic_cast<StringLit *>(first.get())) {
-                     res = std::move(first);
-                 } else {
+                 if (dynamic_cast<StringLit *>(first.get()) == nullptr) {
                      res = mkSend0(first, Names::to_s());
+                 } else {
+                     res = std::move(first);
                  }
                  ++it;
                  for (; it != end; ++it) {
