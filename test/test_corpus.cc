@@ -83,10 +83,7 @@ public:
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree",
-    "ast",
-    "name-table",
-    "cfg",
+    "parse-tree", "ast", "name-table", "name-tree", "cfg",
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) {
@@ -121,7 +118,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         EXPECT_EQ(0, parsed.diagnostics().size());
         EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
         if (exp == parsed.ast()->toString(ctx) + "\n") {
-            TEST_COUT << "Parser OK" << endl;
+            TEST_COUT << "parse-tree OK" << endl;
         }
     }
 
@@ -137,7 +134,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
         if (exp == desugared->toString(ctx) + "\n") {
-            TEST_COUT << "Desugar OK" << endl;
+            TEST_COUT << "ast OK" << endl;
         }
     }
 
@@ -153,7 +150,22 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         EXPECT_EQ(exp, ctx.toString() + "\n");
         if (exp == ctx.toString() + "\n") {
-            TEST_COUT << "Namer OK" << std::endl;
+            TEST_COUT << "name-table OK" << std::endl;
+        }
+    }
+
+    expectation = test.expectations.find("name-tree");
+    if (expectation == test.expectations.end())
+        return;
+
+    {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
+
+        EXPECT_EQ(exp, namedTree->toString(ctx) + "\n");
+        if (exp == namedTree->toString(ctx) + "\n") {
+            TEST_COUT << "name-tree OK" << std::endl;
         }
     }
 

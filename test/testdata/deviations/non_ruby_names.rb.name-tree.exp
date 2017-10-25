@@ -1,0 +1,13 @@
+begin
+  module <emptyTree>::B<B> < ()
+    <emptyTree>
+
+  end
+  module <emptyTree>::A<A> < ()
+    class <emptyTree>::B::C<C> < ()
+      <emptyTree>
+
+    end
+
+  end
+end

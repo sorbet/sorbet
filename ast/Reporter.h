@@ -6,6 +6,8 @@ namespace ast {
 
 enum class ErrorClass {
     Internal, // Internal Compiler Error
+    IncludeMutipleParam,
+    IncludeNotConstant,
 };
 
 class Reporter {

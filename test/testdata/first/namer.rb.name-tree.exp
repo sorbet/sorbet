@@ -1,0 +1,54 @@
+begin
+  class <emptyTree>::NormalClass<NormalClass> < ()
+    def normal_method<<todo sym>>()
+      <emptyTree>
+
+    <Not Supported (DefS)>
+
+    class <emptyTree>::InnerClass<InnerClass> < ()
+      <emptyTree>
+
+    end
+
+    module <emptyTree>::InnerModule<InnerModule> < ()
+      <emptyTree>
+
+    end
+
+  end
+  module <emptyTree>::ANamespace<ANamespace> < ()
+    class <emptyTree>::ObviousChild<ObviousChild> < ()
+      <emptyTree>
+
+    end
+
+  end
+  class <emptyTree>::ANamespace::ClassInNamespace<ClassInNamespace> < ()
+    <emptyTree>
+
+  end
+  class <emptyTree>::Parent<Parent> < ()
+    <emptyTree>
+
+  end
+  module <emptyTree>::Mixin<Mixin> < ()
+    <emptyTree>
+
+  end
+  module <emptyTree>::OtherMixin<OtherMixin> < ()
+    <emptyTree>
+
+  end
+  class <emptyTree>::Child<Child> < (<emptyTree>::Parent, <emptyTree>::OtherMixin)
+    <emptyTree>.include(<emptyTree>::Mixin)
+
+    <emptyTree>.include(<emptyTree>::Mixin, <emptyTree>::Mixin)
+
+    <emptyTree>.include(3)
+
+    <emptyTree>.include(<emptyTree>::Mixin) do ||
+      <emptyTree>
+    end
+
+  end
+end

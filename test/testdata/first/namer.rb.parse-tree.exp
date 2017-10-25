@@ -71,6 +71,20 @@ Begin {
       superclass = NULL
       body = NULL
     }
+    Module {
+      name = Const {
+        scope = NULL
+        name = Mixin
+      }
+      body = NULL
+    }
+    Module {
+      name = Const {
+        scope = NULL
+        name = OtherMixin
+      }
+      body = NULL
+    }
     Class {
       name = Const {
         scope = NULL
@@ -80,7 +94,72 @@ Begin {
         scope = NULL
         name = Parent
       }
-      body = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          Block {
+            send = Send {
+              receiver = NULL
+              method = include
+              args = [
+                Const {
+                  scope = NULL
+                  name = Mixin
+                }
+              ]
+            }
+            args = NULL
+            body = NULL
+          }
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = whatever
+              args = [
+              ]
+            }
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = OtherMixin
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }

@@ -50,7 +50,6 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     auto members = myInfo.members;
 
     printTabs(os, tabs);
-    os << name;
 
     std::string type = "unknown";
     if (myInfo.isClass()) {
@@ -62,7 +61,18 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     } else if (myInfo.isMethod()) {
         type = "method";
     }
-    os << " (" << type << ")";
+    os << type << " " << name;
+    os << " (";
+    bool first = true;
+    for (auto thing : myInfo.argumentsOrMixins) {
+        if (first) {
+            first = false;
+        } else {
+            os << ", ";
+        }
+        os << thing.info(ctx).name.toString(ctx);
+    }
+    os << ")";
     os << std::endl;
 
     std::vector<std::string> children;

@@ -18,5 +18,15 @@ end
 
 class Parent
 end
+module Mixin
+end
+module OtherMixin
+end
 class Child < Parent
+  include Mixin
+  include Mixin, Mixin # warning
+  include 3 # warning
+  include Mixin do
+  end # warning
+  whatever.include OtherMixin
 end
