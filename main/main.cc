@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
     std::vector<std::string> files;
     std::vector<std::string> prints;
     //    spd::set_async_mode(1024);
-    auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_st>();
+    auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stderr_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
     std::shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
