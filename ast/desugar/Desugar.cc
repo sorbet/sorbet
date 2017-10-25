@@ -234,6 +234,10 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  unique_ptr<Statement> res = make_unique<StringLit>(a->val);
                  result.swap(res);
              },
+             [&](parser::FileLiteral *a) {
+                 unique_ptr<Statement> res = make_unique<StringLit>(Names::currentFile());
+                 result.swap(res);
+             },
              [&](parser::Const *a) {
                  auto scope = node2TreeImpl(ctx, a->scope);
                  unique_ptr<Statement> res = make_unique<ConstantLit>(Expression::fromStatement(scope), a->name);
