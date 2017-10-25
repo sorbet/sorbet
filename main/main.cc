@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
 
     console_err->debug("Total {} files. Done in {} ms, lines: {}, bytes: {}\n", st.files, elapsed_secs, st.lines,
-                      st.bytes);
+                       st.bytes);
 
     return 0;
 }
