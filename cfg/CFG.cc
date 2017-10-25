@@ -94,8 +94,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
 
     while (changed) {
         changed = false;
-        for (auto it = this->forwardsTopoSort.begin(); it != this->forwardsTopoSort.end(); ++it) {
-            BasicBlock *bb = *it;
+        for (BasicBlock *bb : this->forwardsTopoSort) {
             int sz = upper_bounds1[bb].size();
             upper_bounds1[bb].insert(reads_by_block[bb].begin(), reads_by_block[bb].end());
             if (bb->bexit.thenb != deadBlock()) {
@@ -143,10 +142,10 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
 
 int CFG::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
     // Error::check(!marked[currentBB]) // graph is cyclic!
-    if ((currentBB->flags & 1) == 1) {
+    if ((currentBB->flags & FORWARD_TOPO_SORT_VISITED)) {
         return nextFree;
     } else {
-        currentBB->flags |= 1;
+        currentBB->flags |= FORWARD_TOPO_SORT_VISITED;
         nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
         nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
         target[nextFree] = currentBB;
@@ -155,10 +154,10 @@ int CFG::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *cur
 }
 
 int CFG::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
-    if ((currentBB->flags & 2) == 2) {
+    if ((currentBB->flags & BACKWARD_TOPO_SORT_VISITED)) {
         return nextFree;
     } else {
-        currentBB->flags |= 2;
+        currentBB->flags |= BACKWARD_TOPO_SORT_VISITED;
         for (BasicBlock *edge : currentBB->backEdges) {
             nextFree = topoSortBwd(target, nextFree, edge);
         }

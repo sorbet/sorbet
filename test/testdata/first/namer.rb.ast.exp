@@ -31,8 +31,26 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Child<<todo sym>> < (<emptyTree>::Parent)
+  module <emptyTree>::Mixin<<todo sym>> < ()
     <emptyTree>
+
+  end
+  module <emptyTree>::OtherMixin<<todo sym>> < ()
+    <emptyTree>
+
+  end
+  class <emptyTree>::Child<<todo sym>> < (<emptyTree>::Parent)
+    <emptyTree>.include(<emptyTree>::Mixin)
+
+    <emptyTree>.include(<emptyTree>::Mixin, <emptyTree>::Mixin)
+
+    <emptyTree>.include(3)
+
+    <emptyTree>.include(<emptyTree>::Mixin) do ||
+      <emptyTree>
+    end
+
+    <emptyTree>.whatever().include(<emptyTree>::OtherMixin)
 
   end
 end

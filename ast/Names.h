@@ -212,6 +212,11 @@ public:
     static inline NameRef blockReturnTemp() {
         return NameRef(20);
     }
+
+    // include
+    static inline NameRef include() {
+        return NameRef(21);
+    }
 };
 
 class Name {

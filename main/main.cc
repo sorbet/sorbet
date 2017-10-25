@@ -69,11 +69,12 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
         ruby_typer::ast::Context context(ctx, ctx.defn_root());
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
         if (removeOption(prints, "ast")) {
-            if (opts["l"].as<bool>()) {
-                cout << desugared->showRaw(ctx) << endl;
-            } else {
-                cout << desugared->toString(ctx, 0) << endl;
-            }
+            cout << desugared->toString(ctx, 0) << endl;
+            if (prints.empty())
+                return;
+        }
+        if (removeOption(prints, "ast-raw")) {
+            cout << desugared->showRaw(ctx) << endl;
             if (prints.empty())
                 return;
         }
@@ -85,11 +86,12 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
                 return;
         }
         if (removeOption(prints, "name-tree")) {
-            if (opts["l"].as<bool>()) {
-                cout << desugared->showRaw(ctx) << endl;
-            } else {
-                cout << desugared->toString(ctx, 0) << endl;
-            }
+            cout << desugared->toString(ctx, 0) << endl;
+            if (prints.empty())
+                return;
+        }
+        if (removeOption(prints, "name-tree-raw")) {
+            cout << desugared->showRaw(ctx) << endl;
             if (prints.empty())
                 return;
         }
@@ -116,17 +118,17 @@ int main(int argc, char **argv) {
     std::vector<std::string> files;
     std::vector<std::string> prints;
     //    spd::set_async_mode(1024);
-    auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stdout_sink_st>();
+    auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stderr_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
     std::shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
+    console->set_pattern("%v");
     std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
-    options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
+    options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
-    options.add_options()("n,name-table", "Show name table");
-    options.add_options()("p,print", "Print [parse-tree, ast, name-table, name-tree, cfg]",
+    options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
                           cxxopts::value<std::vector<std::string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
     options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
@@ -135,12 +137,16 @@ int main(int argc, char **argv) {
     try {
         options.parse(argc, argv);
     } catch (cxxopts::option_not_exists_exception e) {
-        console->info("{} \n {} \n", e.what(), options.help());
+        console->info("{}\n\n{}", e.what(), options.help());
         return 0;
     }
 
-    if (options["h"].as<bool>() || (options.count("e") == 0 && files.empty())) {
-        console->info("{}\n", options.help());
+    if (options["h"].as<bool>()) {
+        console->info("{}", options.help());
+        return 0;
+    }
+    if (options.count("e") == 0 && files.empty()) {
+        console->info("You must pass either `-e` or at least one ruby file.\n {} \n", options.help());
         return 0;
     }
 
@@ -171,7 +177,13 @@ int main(int argc, char **argv) {
 
         for (auto &fileName : files) {
             console->debug("Parsing {}...", fileName);
-            string src = ruby_typer::File::read(fileName.c_str());
+            string src;
+            try {
+                src = ruby_typer::File::read(fileName.c_str());
+            } catch (ruby_typer::FileNotFoundException e) {
+                console->error("File Not Found: {}", fileName);
+                return 1;
+            }
             parse_and_print(ctx, options, fileName, src, prints);
         }
     }
@@ -188,8 +200,8 @@ int main(int argc, char **argv) {
 
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
 
-    console_err->info("Total {} files. Done in {} ms, lines: {}, bytes: {}\n", st.files, elapsed_secs, st.lines,
-                      st.bytes);
+    console_err->debug("Total {} files. Done in {} ms, lines: {}, bytes: {}\n", st.files, elapsed_secs, st.lines,
+                       st.bytes);
 
     return 0;
 }

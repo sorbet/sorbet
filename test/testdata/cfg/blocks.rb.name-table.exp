@@ -1,0 +1,3 @@
+class BlockTest ()
+  method block_pass ()
+

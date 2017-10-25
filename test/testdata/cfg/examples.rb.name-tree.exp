@@ -1,0 +1,90 @@
+class <emptyTree>::Examples<Examples> < ()
+  def i_like_ifs<<todo sym>>()
+    if true
+      return 1
+    else 
+      return 2
+    end
+
+  def i_like_exps<<todo sym>>()
+    if begin
+        true
+      end
+      1
+    else 
+      2
+    end
+
+  def return_in_one_branch1<<todo sym>>()
+    if begin
+        true
+      end
+      return 1
+    else 
+      2
+    end
+
+  def return_in_one_branch2<<todo sym>>()
+    if begin
+        true
+      end
+      1
+    else 
+      return 2
+    end
+
+  def variables<<todo sym>>()
+    begin
+      if begin
+          true
+        end
+        a = 1
+      else 
+        a = 2
+      end
+      if begin
+          false
+        end
+        b = 1
+      else 
+        b = 2
+      end
+      a.+(b)
+    end
+
+  def variables_and_loop<<todo sym>>()
+    begin
+      if begin
+          true
+        end
+        a = 1
+      else 
+        a = 2
+      end
+      while true
+        if begin
+            false
+          end
+          b = 1
+        else 
+          b = 2
+        end
+      end
+      b
+    end
+
+  def variables_loop_if<<todo sym>>()
+    begin
+      while true
+        if begin
+            false
+          end
+          b = 1
+        else 
+          b = 2
+        end
+      end
+      b
+    end
+
+end

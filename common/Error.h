@@ -33,6 +33,11 @@ private:
     // std::stringstream _message;
 };
 
+class FileNotFoundException : SRubyException {
+public:
+    FileNotFoundException() : SRubyException("File not found") {}
+};
+
 class Error {
 public:
     template <typename... TArgs>[[noreturn]] static void raise(const TArgs &... args) __attribute__((noreturn));

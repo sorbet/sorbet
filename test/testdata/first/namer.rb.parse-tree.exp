@@ -1,0 +1,165 @@
+Begin {
+  stmts = [
+    Class {
+      name = Const {
+        scope = NULL
+        name = NormalClass
+      }
+      superclass = NULL
+      body = Begin {
+        stmts = [
+          DefMethod {
+            name = normal_method
+            args = NULL
+            body = NULL
+          }
+          DefS {
+            singleton = Self {
+            }
+            name = normal_static_method
+            args = NULL
+            body = NULL
+          }
+          Class {
+            name = Const {
+              scope = NULL
+              name = InnerClass
+            }
+            superclass = NULL
+            body = NULL
+          }
+          Module {
+            name = Const {
+              scope = NULL
+              name = InnerModule
+            }
+            body = NULL
+          }
+        ]
+      }
+    }
+    Module {
+      name = Const {
+        scope = NULL
+        name = ANamespace
+      }
+      body = Class {
+        name = Const {
+          scope = NULL
+          name = ObviousChild
+        }
+        superclass = NULL
+        body = NULL
+      }
+    }
+    Class {
+      name = Const {
+        scope = Const {
+          scope = NULL
+          name = ANamespace
+        }
+        name = ClassInNamespace
+      }
+      superclass = NULL
+      body = NULL
+    }
+    Class {
+      name = Const {
+        scope = NULL
+        name = Parent
+      }
+      superclass = NULL
+      body = NULL
+    }
+    Module {
+      name = Const {
+        scope = NULL
+        name = Mixin
+      }
+      body = NULL
+    }
+    Module {
+      name = Const {
+        scope = NULL
+        name = OtherMixin
+      }
+      body = NULL
+    }
+    Class {
+      name = Const {
+        scope = NULL
+        name = Child
+      }
+      superclass = Const {
+        scope = NULL
+        name = Parent
+      }
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+              Const {
+                scope = NULL
+                name = Mixin
+              }
+            ]
+          }
+          Send {
+            receiver = NULL
+            method = include
+            args = [
+              Integer {
+                val = "3"
+              }
+            ]
+          }
+          Block {
+            send = Send {
+              receiver = NULL
+              method = include
+              args = [
+                Const {
+                  scope = NULL
+                  name = Mixin
+                }
+              ]
+            }
+            args = NULL
+            body = NULL
+          }
+          Send {
+            receiver = Send {
+              receiver = NULL
+              method = whatever
+              args = [
+              ]
+            }
+            method = include
+            args = [
+              Const {
+                scope = NULL
+                name = OtherMixin
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

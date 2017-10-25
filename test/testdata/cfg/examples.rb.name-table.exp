@@ -1,0 +1,9 @@
+class Examples ()
+  method i_like_exps ()
+  method i_like_ifs ()
+  method return_in_one_branch1 ()
+  method return_in_one_branch2 ()
+  method variables ()
+  method variables_and_loop ()
+  method variables_loop_if ()
+

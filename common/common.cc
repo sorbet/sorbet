@@ -2,6 +2,7 @@
 #include "os/os.h"
 #include <array>
 #include <cstdarg>
+#include <cxxabi.h>
 #include <exception>
 #include <execinfo.h>
 #include <fstream>
@@ -17,8 +18,10 @@ static void *stack_traces[MAX_STACK_FRAMES];
 
 string ruby_typer::File::read(const char *filename) {
     ifstream fin(filename);
+    if (!fin.good()) {
+        throw ruby_typer::FileNotFoundException();
+    }
     // Determine the file length
-    ruby_typer::Error::check(fin.good());
     string src;
     fin.seekg(0, ios::end);
     src.reserve(fin.tellg());
@@ -52,7 +55,8 @@ public:
         // does not provide nice stack traces on linux.
         ruby_typer::Error::print_backtrace();
 #else
-        *(volatile char *)nullptr = 0;
+        cerr << "Unhandled exception. Forcing a crash so ASAN prints a stack trace." << endl;
+        raise(SIGSEGV);
 #endif
     }
 
@@ -116,4 +120,10 @@ void ruby_typer::Error::print_backtrace() {
     if (messages) {
         free(messages);
     }
+}
+
+std::string demangle(const char *mangled) {
+    int status;
+    unique_ptr<char[], void (*)(void *)> result(abi::__cxa_demangle(mangled, 0, 0, &status), std::free);
+    return result.get() ? std::string(result.get()) : "error occurred";
 }

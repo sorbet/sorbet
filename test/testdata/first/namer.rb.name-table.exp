@@ -1,0 +1,12 @@
+class ANamespace ()
+  class ClassInNamespace ()
+  class ObviousChild ()
+class Child ()
+class Mixin ()
+class NormalClass ()
+  class InnerClass ()
+  class InnerModule ()
+  method normal_method ()
+class OtherMixin ()
+class Parent ()
+
