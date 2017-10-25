@@ -55,7 +55,7 @@ unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&stateme
 
 ClassDef::ClassDef(SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &ancestors,
                    vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
-    : Declaration(symbol), rhs(move(rhs)), ancestors(move(ancestors)), name(move(name)), kind(kind) {}
+    : Declaration(symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
 MethodDef::MethodDef(SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs,
                      bool isSelf)
