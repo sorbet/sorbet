@@ -91,9 +91,7 @@ Ident::Ident(NameRef name, SymbolRef symbol) : symbol(symbol), name(name) {
 Assign::Assign(unique_ptr<Expression> lhs, unique_ptr<Expression> rhs) : lhs(move(lhs)), rhs(move(rhs)) {}
 
 Send::Send(unique_ptr<Expression> recv, NameRef fun, vector<unique_ptr<Expression>> &&args)
-    :
-
-      recv(move(recv)), fun(move(fun)), args(move(args)) {}
+    : recv(move(recv)), fun(move(fun)), args(move(args)) {}
 
 Super::Super(vector<unique_ptr<Expression>> &&args) : args(move(args)) {}
 
@@ -122,8 +120,7 @@ HashSplat::HashSplat(unique_ptr<Expression> arg) : arg(move(arg)) {}
 
 Self::Self(SymbolRef claz) : claz(claz) {}
 
-Block::Block(unique_ptr<Send> send, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs)
-    : send(move(send)), rhs(move(rhs)), args(move(args)){};
+Block::Block(vector<unique_ptr<Expression>> &args, unique_ptr<Expression> body) : args(move(args)), body(move(body)){};
 
 NotSupported::NotSupported(const string &why) : why(why) {}
 
@@ -321,6 +318,8 @@ string Send::toString(ContextBase &ctx, int tabs) {
     stringstream buf;
     buf << this->recv->toString(ctx, tabs) << "." << this->fun.name(ctx).toString(ctx);
     printArgs(ctx, buf, this->args, tabs);
+    if (this->block != nullptr)
+        buf << this->block->toString(ctx, tabs);
 
     return buf.str();
 }
@@ -349,12 +348,11 @@ string Array::toString(ContextBase &ctx, int tabs) {
 
 string Block::toString(ContextBase &ctx, int tabs) {
     stringstream buf;
-    buf << this->send->toString(ctx, tabs);
     buf << " do |";
     printElems(ctx, buf, this->args, tabs + 1);
     buf << "|" << endl;
     printTabs(buf, tabs + 1);
-    buf << this->rhs->toString(ctx, tabs + 1) << endl;
+    buf << this->body->toString(ctx, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "end";
     return buf.str();

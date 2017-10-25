@@ -53,6 +53,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 reads[v->what].insert(bb.get());
             } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
                 reads[v->value].insert(bb.get());
+            } else if (auto *v = dynamic_cast<LoadArg *>(bind.value.get())) {
+                reads[v->receiver].insert(bb.get());
             }
         }
         if (bb->bexit.cond != ctx.state.defn_cfg_never() && bb->bexit.cond != ctx.state.defn_cfg_always()) {
@@ -246,6 +248,8 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
      * for some code snippets. */
+    Error::check(!current->bexit.cond.exists());
+
     BasicBlock *ret = nullptr;
     typecase(
         what,
@@ -360,17 +364,49 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                 }
                 args.push_back(temp);
             }
-            current->exprs.emplace_back(target, make_unique<Send>(recv, s->fun, args));
 
+            if (s->block != nullptr) {
+                auto headerBlock = inWhat.freshBlock();
+                auto postBlock = inWhat.freshBlock();
+                auto bodyBlock = inWhat.freshBlock();
+
+                for (int i = 0; i < s->block->args.size(); ++i) {
+                    auto &arg = s->block->args[i];
+
+                    if (auto id = dynamic_cast<ast::Ident *>(arg.get())) {
+                        headerBlock->exprs.emplace_back(id->symbol, make_unique<LoadArg>(recv, s->fun, i));
+                    } else {
+                        // TODO(nelhage): this will be an error once the namer
+                        // is more complete and turns all args into Ident
+                    }
+                }
+
+                unconditionalJump(current, headerBlock, inWhat);
+
+                conditionalJump(headerBlock, ctx.state.defn_cfg_block_call(), bodyBlock, postBlock, inWhat);
+
+                // TODO: handle block arguments somehow??
+                ast::SymbolRef blockrv =
+                    ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::blockReturnTemp(), inWhat.symbol);
+                auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv);
+
+                unconditionalJump(blockLast, headerBlock, inWhat);
+
+                current = postBlock;
+            }
+
+            current->exprs.emplace_back(target, make_unique<Send>(recv, s->fun, args));
             ret = current;
         },
 
         [&](ast::Statement *n) {
             current->exprs.emplace_back(target, make_unique<NotSupported>(""));
             ret = current;
-        });
-    /*[&](ast::Break *a) {}, [&](ast::Next *a) {}, [&](ast::Block *a) {},*/
-    //[&](ast::Send *a) {});
+        },
+
+        [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); });
+
+    /*[&](ast::Break *a) {}, [&](ast::Next *a) {},*/
     // For, Next, Rescue,
     // Symbol, Send, New, Super, NamedArg, Hash, Array,
     // ArraySplat, HashAplat, Block,
@@ -520,6 +556,16 @@ string Nil::toString(ast::Context ctx) {
 
 string Self::toString(ast::Context ctx) {
     return "self";
+}
+
+string LoadArg::toString(ast::Context ctx) {
+    stringstream buf;
+    buf << "load_arg(";
+    buf << this->receiver.info(ctx).name.name(ctx).toString(ctx);
+    buf << "#";
+    buf << this->method.name(ctx).toString(ctx);
+    buf << ", " << this->arg << ")";
+    return buf.str();
 }
 
 string NotSupported::toString(ast::Context ctx) {
