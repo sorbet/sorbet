@@ -182,7 +182,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         EXPECT_EQ(exp, namedTree->showRaw(ctx) + "\n");
         if (exp == namedTree->showRaw(ctx) + "\n") {
-            TEST_COUT << "name-tree OK" << std::endl;
+            TEST_COUT << "name-tree-raw OK" << std::endl;
         }
     }
 
@@ -203,7 +203,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
         EXPECT_EQ(exp, got.str() + "\n");
         if (exp == got.str() + "\n") {
-            TEST_COUT << "CFG OK" << endl;
+            TEST_COUT << "cfg OK" << endl;
         }
     }
 }
