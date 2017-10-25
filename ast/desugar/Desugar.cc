@@ -206,12 +206,21 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  auto it = a->nodes.begin();
                  auto end = a->nodes.end();
                  Error::check(it != end);
-                 auto res = mkSend0(node2TreeImpl(ctx, *it), Names::to_s());
+                 unique_ptr<Statement> res;
+                 unique_ptr<Statement> first = node2TreeImpl(ctx, *it);
+                 if (dynamic_cast<StringLit *>(first.get())) {
+                     res = std::move(first);
+                 } else {
+                     res = mkSend0(first, Names::to_s());
+                 }
                  ++it;
                  for (; it != end; ++it) {
                      auto &stat = *it;
-                     auto narg = node2TreeImpl(ctx, stat);
-                     auto n = mkSend1(res, Names::concat(), mkSend0(narg, Names::to_s()));
+                     unique_ptr<Statement> narg = node2TreeImpl(ctx, stat);
+                     if (dynamic_cast<StringLit *>(narg.get()) == nullptr) {
+                         narg = mkSend0(narg, Names::to_s());
+                     }
+                     auto n = mkSend1(move(res), Names::concat(), move(narg));
                      res.reset(n.release());
                  };
 
