@@ -1,11 +1,11 @@
 begin
-  <emptyTree>.require_relative("../../../extn".to_s())
+  <emptyTree>.require_relative("../../../extn")
   <emptyTree>::Opus::AutogenLoader.init(<Not Supported (FileLiteral)>)
   module <emptyTree>::Opus::CIBot::Gerald<Gerald> < ()
     class <emptyTree>::MatchTimeout<MatchTimeout> < (<emptyTree>::StandardError)
       <emptyTree>.attr_reader(:rule_token)
 
-      def initialize<<todo sym>>(message<todo lvar sym>, rule_token<todo lvar sym>: = "".to_s())
+      def initialize<<todo sym>>(message<todo lvar sym>, rule_token<todo lvar sym>: = "")
         begin
           super(message<todo lvar sym>)
           @rule_token = rule_token
@@ -28,8 +28,8 @@ begin
           end
           if invalid_rules.empty?().!()
             begin
-              invalid_rule_ids = invalid_rules.map(<Not Supported (BlockPass)>).join(",".to_s())
-              <emptyTree>.log().warn("Gerald skipping invalid rules: ".to_s().+(invalid_rule_ids))
+              invalid_rule_ids = invalid_rules.map(<Not Supported (BlockPass)>).join(",")
+              <emptyTree>.log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
             end
           else 
             <emptyTree>
@@ -40,9 +40,9 @@ begin
         begin
           if match_context.diff().affected_files().count().>(<emptyTree>::MAX_AFFECTED_FILES)
             begin
-              <emptyTree>.log().warn("Gerald skipping large PR with ".to_s().concat(begin
+              <emptyTree>.log().warn("Gerald skipping large PR with ".concat(begin
                     match_context.diff().affected_files().count()
-                  end.to_s()).concat(" affected files".to_s()).to_s())
+                  end.to_s()).concat(" affected files").to_s())
               return []
             end
           else 
@@ -88,7 +88,7 @@ begin
         end
 
       def user_stripe_suffix?<<todo sym>>()
-        @repo.start_with?("stripe-internal/".to_s()).!()
+        @repo.start_with?("stripe-internal/").!()
 
     end
 
@@ -106,9 +106,9 @@ begin
             <emptyTree>::Time.now().-(@start)
           end.*(1000)
           if dur_ms.>(<emptyTree>::TOTAL_TIME_MS)
-            <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald match time budged exceeded ".to_s().concat(begin
+            <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
                     <emptyTree>::TOTAL_TIME_MS
-                  end.to_s()).concat("ms".to_s()).to_s()))
+                  end.to_s()).concat("ms").to_s()))
           else 
             <emptyTree>
           end
@@ -122,13 +122,13 @@ begin
             <emptyTree>::Time.now().-(rule_start)
           end.*(1000)
           if dur_ms.>(<emptyTree>::PER_RULE_MS)
-            <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald rule '".to_s().concat(begin
+            <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald rule '".concat(begin
                     rule.token()
-                  end.to_s()).concat("' exceeded per-rule time budget actual=".to_s()).concat(begin
+                  end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
                     dur_ms.to_i()
-                  end.to_s()).concat("ms budget=".to_s()).concat(begin
+                  end.to_s()).concat("ms budget=").concat(begin
                     <emptyTree>::PER_RULE_MS
-                  end.to_s()).concat("ms".to_s()).to_s(), <Not Supported (Hash)>))
+                  end.to_s()).concat("ms").to_s(), <Not Supported (Hash)>))
           else 
             <emptyTree>
           end
@@ -150,14 +150,14 @@ begin
 
       def added_files<<todo sym>>()
         @parsed.select() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:a_name).==("/dev/null".to_s())
+          part<todo lvar sym>.[](:a_name).==("/dev/null")
         end.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:b_name)
         end
 
       def deleted_files<<todo sym>>()
         @parsed.select() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:b_name).==("/dev/null".to_s())
+          part<todo lvar sym>.[](:b_name).==("/dev/null")
         end.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:a_name)
         end
@@ -196,15 +196,15 @@ begin
             parts.map() do |part<todo lvar sym>|
               begin
                 lines<todo lvar sym> = part<todo lvar sym>.split("
-".to_s())
+")
                 a_name<todo lvar sym> = b_name<todo lvar sym> = nil
                 added_lines<todo lvar sym> = []
                 removed_lines<todo lvar sym> = []
                 lines<todo lvar sym>.each() do |line<todo lvar sym>|
-                  if line<todo lvar sym>.start_with?("index ".to_s(), "@@".to_s(), "new file mode".to_s())
+                  if line<todo lvar sym>.start_with?("index ", "@@", "new file mode")
                     next(<emptyTree>)
                   else 
-                    if line<todo lvar sym>.start_with?("---".to_s())
+                    if line<todo lvar sym>.start_with?("---")
                       begin
                         a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                         if begin
@@ -221,7 +221,7 @@ begin
                         end
                       end
                     else 
-                      if line<todo lvar sym>.start_with?("+++".to_s())
+                      if line<todo lvar sym>.start_with?("+++")
                         begin
                           b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                           if begin
@@ -238,10 +238,10 @@ begin
                           end
                         end
                       else 
-                        if line<todo lvar sym>.start_with?("+".to_s())
+                        if line<todo lvar sym>.start_with?("+")
                           added_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
                         else 
-                          if line<todo lvar sym>.start_with?("-".to_s())
+                          if line<todo lvar sym>.start_with?("-")
                             removed_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
                           else 
                             <emptyTree>
