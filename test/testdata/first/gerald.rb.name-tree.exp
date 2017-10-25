@@ -47,7 +47,7 @@ begin
             <emptyTree>
           end
           budget = <emptyTree>::MatchTimeBudget.new()
-          @rules<todo ivar sym>.select() do |r<todo lvar sym>|
+          @rules.select() do |r<todo lvar sym>|
             budget<todo lvar sym>.time_rule(r<todo lvar sym>) do ||
               r<todo lvar sym>.matches?(match_context<todo lvar sym>)
             end
@@ -147,33 +147,33 @@ begin
         <emptyTree>.added_files().+(<emptyTree>.deleted_files()).+(<emptyTree>.changed_files())
 
       def added_files<<todo sym>>()
-        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
+        @parsed.select() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:a_name).==("/dev/null".to_s())
         end.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:b_name)
         end
 
       def deleted_files<<todo sym>>()
-        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
+        @parsed.select() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:b_name).==("/dev/null".to_s())
         end.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:a_name)
         end
 
       def changed_files<<todo sym>>()
-        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
+        @parsed.select() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:a_name).==(part<todo lvar sym>.[](:b_name))
         end.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:b_name)
         end
 
       def added_lines<<todo sym>>()
-        @parsed<todo ivar sym>.map() do |part<todo lvar sym>|
+        @parsed.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:added_lines)
         end.flatten()
 
       def removed_lines<<todo sym>>()
-        @parsed<todo ivar sym>.map() do |part<todo lvar sym>|
+        @parsed.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:removed_lines)
         end.flatten()
 
@@ -191,7 +191,7 @@ begin
             else 
               parts = []
             end
-            parts<todo lvar sym>.map() do |part<todo lvar sym>|
+            parts.map() do |part<todo lvar sym>|
               begin
                 lines<todo lvar sym> = part<todo lvar sym>.split("
 ".to_s())
