@@ -48,7 +48,12 @@ std::string strprintf(const char *format, ...) {
 class SetTerminateHandler {
 public:
     static void on_terminate() {
+#ifdef __APPLE__
+        // does not provide nice stack traces on linux.
         ruby_typer::Error::print_backtrace();
+#else
+        *(volatile char *)nullptr = 0;
+#endif
     }
 
     SetTerminateHandler() {
