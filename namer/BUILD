@@ -1,9 +1,12 @@
 cc_library(
     name = "namer",
-    srcs = [
-        "namer.cc",
-        "namer.h",
-    ],
+    srcs = glob(
+        ["*.cc"],
+        exclude = [
+            "*_test.cc",
+            "flycheck_*",
+        ],
+    ),
     hdrs = [
         "namer.h",
     ],
@@ -18,7 +21,7 @@ cc_library(
 cc_test(
     name = "namer_test",
     srcs = [
-        "namer-test.cc",
+        "namer_test.cc",
     ],
     copts = ["-Iexternal/gtest/include"],
     linkstatic = 1,
