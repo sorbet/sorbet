@@ -215,6 +215,9 @@ public:
 
     std::string toString(ast::Context ctx);
 
+    static inline int FORWARD_TOPO_SORT_VISITED = 1 << 0;
+    static inline int BACKWARD_TOPO_SORT_VISITED = 1 << 1;
+
 private:
     CFG();
     BasicBlock *walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target);
