@@ -171,7 +171,13 @@ int main(int argc, char **argv) {
 
         for (auto &fileName : files) {
             console->debug("Parsing {}...", fileName);
-            string src = ruby_typer::File::read(fileName.c_str());
+            string src;
+            try {
+                src = ruby_typer::File::read(fileName.c_str());
+            } catch (ruby_typer::FileNotFoundException e) {
+                console->error("File Not Found: {}", fileName);
+                return 1;
+            }
             parse_and_print(ctx, options, fileName, src, prints);
         }
     }

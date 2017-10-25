@@ -7,8 +7,10 @@ using namespace std;
 
 string ruby_typer::File::read(const char *filename) {
     ifstream fin(filename);
+    if (!fin.good()) {
+        throw ruby_typer::FileNotFoundException();
+    }
     // Determine the file length
-    ruby_typer::Error::check(fin.good());
     string src;
     fin.seekg(0, ios::end);
     src.reserve(fin.tellg());
