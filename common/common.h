@@ -77,6 +77,8 @@ public:
 };
 }
 
+std::string demangle(const char *mangled);
+
 #include "Error.h"
 #include "typecase.h"
 
