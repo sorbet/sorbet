@@ -94,8 +94,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
 
     while (changed) {
         changed = false;
-        for (auto it = this->forwardsTopoSort.begin(); it != this->forwardsTopoSort.end(); ++it) {
-            BasicBlock *bb = *it;
+        for (BasicBlock *bb : this->forwardsTopoSort) {
             int sz = upper_bounds1[bb].size();
             upper_bounds1[bb].insert(reads_by_block[bb].begin(), reads_by_block[bb].end());
             if (bb->bexit.thenb != deadBlock()) {
