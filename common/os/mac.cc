@@ -1,25 +1,25 @@
 #ifdef __APPLE__
+#include "common/common.h"
 #include <cstdio>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
 #include <string>
 
-std::string exec(const char *cmd);
+std::string exec(std::string cmd);
 
 std::string addr2line(const std::string program_name, void const *const *addr, int count) {
-    char addr2line_cmd[2048] = {0};
 
-    int s = sprintf(addr2line_cmd, "atos -o %.256s", program_name.c_str());
+    auto addr2line_cmd = strprintf("atos -o %.256s", program_name.c_str());
     for (int i = 3; i < count; ++i) {
-        s += sprintf(addr2line_cmd + s, " %p", addr[i]);
+        addr2line_cmd = strprintf("%s %p", addr2line_cmd.c_str(), addr[i]);
     }
-    addr2line_cmd[s] = 0;
-    //    printf(addr2line_cmd);
+
+    //    printf("%s\n", addr2line_cmd.c_str());
 
     return exec(addr2line_cmd);
 }
 std::string getProgramName() {
     char buf[512];
-    uint32_t sz;
+    uint32_t sz = 512;
     _NSGetExecutablePath(buf, &sz);
     std::string res(buf);
     return res;

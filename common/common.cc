@@ -56,10 +56,10 @@ public:
     }
 } SetTerminateHandler;
 
-string exec(const char *cmd) {
+string exec(std::string cmd) {
     array<char, 128> buffer;
     string result;
-    shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
     if (!pipe)
         throw runtime_error("popen() failed!");
     while (!feof(pipe.get())) {
