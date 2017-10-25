@@ -15,6 +15,7 @@
 #include <string>
 #include <sys/types.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace spd = spdlog;
@@ -81,6 +82,13 @@ public:
     }
 };
 
+unordered_set<string> knownPasses = {
+    "parse-tree",
+    "ast",
+    "name-table",
+    "cfg",
+};
+
 TEST_P(ExpectationTest, PerPhaseTest) {
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
@@ -93,36 +101,10 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     auto src = ruby_typer::File::read(inputPath.c_str());
     auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
 
-    auto expectation = test.expectations.find("parse-tree");
-    if (expectation == test.expectations.end())
-        return;
-
-    {
-        auto checker = test.folder + expectation->second;
-        SCOPED_TRACE(checker);
-
-        auto exp = ruby_typer::File::read(checker.c_str());
-
-        EXPECT_EQ(0, parsed.diagnostics().size());
-        EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
-        if (exp == parsed.ast()->toString(ctx) + "\n") {
-            TEST_COUT << "parser-tree OK" << endl;
-        }
-    }
-
-    expectation = test.expectations.find("ast");
-    if (expectation == test.expectations.end())
-        return;
-
-    auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
-    {
-        auto checker = test.folder + expectation->second;
-        auto exp = ruby_typer::File::read(checker.c_str());
-        SCOPED_TRACE(checker);
-
-        EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
-        if (exp == desugared->toString(ctx) + "\n") {
-            TEST_COUT << "ast OK" << endl;
+    for (auto &exp : test.expectations) {
+        auto it = knownPasses.find(exp.first);
+        if (it == knownPasses.end()) {
+            ADD_FAILURE() << "Unknown pass: " << exp.first;
         }
     }
 

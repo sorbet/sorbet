@@ -16,6 +16,7 @@ public:
     virtual ~Statement() = default;
     virtual std::string toString(ContextBase &ctx, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0) = 0;
     Loc loc;
 };
 
@@ -59,6 +60,8 @@ public:
              std::vector<std::unique_ptr<Statement>> &rhs, ClassDefKind kind);
 
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
+
     virtual std::string nodeName();
 };
 
@@ -72,6 +75,7 @@ public:
     MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
               std::unique_ptr<Expression> rhs, bool isSelf);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -81,6 +85,7 @@ public:
 
     ConstDef(SymbolRef symbol, std::unique_ptr<Expression> rhs);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -91,6 +96,7 @@ public:
     std::unique_ptr<Expression> elsep;
     If(std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp, std::unique_ptr<Expression> elsep);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -101,6 +107,7 @@ public:
 
     While(std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -114,6 +121,7 @@ public:
 
     Break(std::unique_ptr<Expression> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -123,6 +131,7 @@ public:
 
     Next(std::unique_ptr<Expression> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -132,6 +141,7 @@ public:
 
     Return(std::unique_ptr<Expression> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -141,6 +151,7 @@ public:
 
     Yield(std::unique_ptr<Expression> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -152,6 +163,7 @@ public:
     std::unique_ptr<Expression> handler;
 
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -163,6 +175,7 @@ public:
     Ident(SymbolRef symbol);
     Ident(NameRef name, SymbolRef symbol);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -172,6 +185,7 @@ public:
 
     RestArg(std::unique_ptr<Reference> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -181,6 +195,7 @@ public:
 
     KeywordArg(std::unique_ptr<Reference> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -191,6 +206,7 @@ public:
 
     OptionalArg(std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -198,6 +214,7 @@ class Nil : public Expression {
 public:
     Nil(){};
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -208,6 +225,7 @@ public:
     Symbol(NameRef name);
 
     virtual std::string toString(ContextBase &ctx, int tabs);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -218,6 +236,7 @@ public:
 
     Assign(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -234,6 +253,7 @@ public:
 
     Send(std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -244,6 +264,7 @@ public:
 
     New(SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -254,6 +275,7 @@ public:
     Super(std::vector<std::unique_ptr<Expression>> &&args);
 
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -264,6 +286,7 @@ public:
 
     NamedArg(NameRef name, std::unique_ptr<Expression> arg);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -278,6 +301,7 @@ public:
     Array(std::vector<std::unique_ptr<Expression>> &elems);
 
     virtual std::string toString(ContextBase &ctx, int tabs);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -287,6 +311,7 @@ public:
 
     FloatLit(float value);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -296,6 +321,7 @@ public:
 
     IntLit(int value);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -305,6 +331,7 @@ public:
 
     StringLit(NameRef value);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -314,6 +341,7 @@ public:
 
     BoolLit(bool value);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -324,6 +352,7 @@ public:
 
     ConstantLit(std::unique_ptr<Expression> scope, NameRef cnst);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -333,6 +362,7 @@ public:
 
     ArraySplat(std::unique_ptr<Expression> arg);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -342,6 +372,7 @@ public:
 
     HashSplat(std::unique_ptr<Expression> arg);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -351,6 +382,7 @@ public:
 
     Self(SymbolRef claz);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -361,6 +393,7 @@ public:
 
     Block(std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> body);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -371,12 +404,14 @@ public:
 
     InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expression> expr);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
 class EmptyTree : public Expression {
 
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -387,6 +422,7 @@ public:
     NotSupported(const std::string &why);
 
     virtual std::string toString(ContextBase &ctx, int tabs);
+    virtual std::string showRaw(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };
 
