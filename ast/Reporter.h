@@ -8,6 +8,7 @@ enum class ErrorClass {
     Internal, // Internal Compiler Error
     IncludeMutipleParam,
     IncludeNotConstant,
+    IncludePassedBlock,
 };
 
 class Reporter {

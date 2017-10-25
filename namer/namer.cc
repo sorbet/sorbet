@@ -55,6 +55,11 @@ class NameInserter {
                                    send->args[0]->toString(ctx));
             return nullptr;
         }
+        if (send->block != nullptr) {
+            ctx.state.errors.error(send->loc, ast::ErrorClass::IncludePassedBlock,
+                                   "`include` can not be passed a block.");
+            return nullptr;
+        }
         // TODO check that send->block is empty
         return std::move(send->args[0]);
     }
