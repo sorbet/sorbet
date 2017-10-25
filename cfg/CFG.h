@@ -201,7 +201,12 @@ class CFG {
 public:
     ast::SymbolRef symbol;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
-    /** Blocks in topoligical sort. All parent blocks are earlier than child blocks */
+    /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
+     *
+     * The name here goes from using forwards or backwards edges as dependencies in topological sort.
+     * This in indeed kind-a reverse to what order would node be in: for topological sort with forward edges
+     * the entry point is going to be the last node in sorted array.
+     */
     std::vector<BasicBlock *> forwardsTopoSort;
     std::vector<BasicBlock *> backwardsTopoSort;
     static std::unique_ptr<CFG> buildFor(ast::Context ctx, ast::MethodDef &md);
