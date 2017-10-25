@@ -1,5 +1,7 @@
 #ifndef SRUBY_ERRO_H
 #define SRUBY_ERRO_H
+
+#include <cstdio>
 namespace ruby_typer {
 class SRubyException {
 public:
@@ -9,18 +11,13 @@ public:
      * @param message contains information about exceptional situation.
      * @param stackTrace the stack trace where this exception happened.
      */
-    SRubyException(const std::string &message, const std::string &stackTrace = "")
-        : _message(message), _stackTrace(stackTrace) {}
+    SRubyException(const std::string &message) : _message(message) {}
 
     /**
      * Returns information about the exceptional situation.
      */
     inline const std::string &message() const {
         return _message;
-    }
-
-    inline const std::string &stackTrace() const {
-        return _stackTrace;
     }
 
     /**
@@ -63,6 +60,8 @@ public:
             raise("Not Implemented");
     }
 
+    static void print_backtrace();
+
 private:
     static inline void _raise(std::ostream &) {}
 
@@ -77,9 +76,9 @@ template <typename... TArgs>[[noreturn]] void Error::raise(const TArgs &... args
     std::stringstream message;
     _raise(message, args...);
 
-    std::stringstream stackTrace;
+    fprintf(stderr, "%s", message.str().c_str());
 
-    throw SRubyException(message.str(), stackTrace.str());
+    throw SRubyException(message.str());
 }
 } // namespace ruby_typer
 #endif // SRUBY_ERRO_H
