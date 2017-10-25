@@ -1,6 +1,6 @@
 begin
   <emptyTree>.require_relative("../../../extn")
-  <emptyTree>::Opus::AutogenLoader.init(<Not Supported (FileLiteral)>)
+  <emptyTree>::Opus::AutogenLoader.init("__FILE__")
   module <emptyTree>::Opus::CIBot::Gerald<<todo sym>> < ()
     class <emptyTree>::MatchTimeout<<todo sym>> < (<emptyTree>::StandardError)
       <emptyTree>.attr_reader(:rule_token)

@@ -217,6 +217,11 @@ public:
     static inline NameRef include() {
         return NameRef(21);
     }
+
+    // __FILE__
+    static inline NameRef currentFile() {
+        return NameRef(22);
+    }
 };
 
 class Name {

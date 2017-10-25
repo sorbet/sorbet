@@ -135,6 +135,9 @@ static UTF8Desc block_call_DESC{(char *)block_call_str, (int)std::strlen(block_c
 static const char *include = "include";
 static UTF8Desc include_DESC{(char *)include, (int)strlen(include)};
 
+static const char *currentFile = "__FILE__";
+static UTF8Desc currentFile_DESC{(char *)currentFile, (int)strlen(currentFile)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -168,6 +171,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     auto returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
     auto blockReturnTemp_id = enterNameUTF8(blockReturnTemp_DESC);
     auto include_id = enterNameUTF8(include_DESC);
+    auto currentFile_id = enterNameUTF8(currentFile_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -190,6 +194,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(returnMethodTemp_id == Names::returnMethodTemp()));
     DEBUG_ONLY(Error::check(blockReturnTemp_id == Names::blockReturnTemp()));
     DEBUG_ONLY(Error::check(include_id == Names::include()));
+    DEBUG_ONLY(Error::check(currentFile_id == Names::currentFile()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
