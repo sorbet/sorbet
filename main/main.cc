@@ -69,11 +69,12 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
         ruby_typer::ast::Context context(ctx, ctx.defn_root());
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
         if (removeOption(prints, "ast")) {
-            if (opts["l"].as<bool>()) {
-                cout << desugared->showRaw(ctx) << endl;
-            } else {
-                cout << desugared->toString(ctx, 0) << endl;
-            }
+            cout << desugared->toString(ctx, 0) << endl;
+            if (prints.empty())
+                return;
+        }
+        if (removeOption(prints, "ast-raw")) {
+            cout << desugared->showRaw(ctx) << endl;
             if (prints.empty())
                 return;
         }
@@ -85,11 +86,12 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
                 return;
         }
         if (removeOption(prints, "name-tree")) {
-            if (opts["l"].as<bool>()) {
-                cout << desugared->showRaw(ctx) << endl;
-            } else {
-                cout << desugared->toString(ctx, 0) << endl;
-            }
+            cout << desugared->toString(ctx, 0) << endl;
+            if (prints.empty())
+                return;
+        }
+        if (removeOption(prints, "name-tree-raw")) {
+            cout << desugared->showRaw(ctx) << endl;
             if (prints.empty())
                 return;
         }
@@ -124,10 +126,9 @@ int main(int argc, char **argv) {
     std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
-    options.add_options()("l,long", "Show long detailed output")("v,verbose", "Verbosity level [0-3]");
+    options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
-    options.add_options()("n,name-table", "Show name table");
-    options.add_options()("p,print", "Print [parse-tree, ast, name-table, name-tree, cfg]",
+    options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
                           cxxopts::value<std::vector<std::string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
     options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
