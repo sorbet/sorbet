@@ -120,6 +120,7 @@ int main(int argc, char **argv) {
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
     std::shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
+    console->set_pattern("%v");
     std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
@@ -135,12 +136,12 @@ int main(int argc, char **argv) {
     try {
         options.parse(argc, argv);
     } catch (cxxopts::option_not_exists_exception e) {
-        console->info("{} \n {} \n", e.what(), options.help());
+        console->info("{}\n\n{}", e.what(), options.help());
         return 0;
     }
 
     if (options["h"].as<bool>() || (options.count("e") == 0 && files.empty())) {
-        console->info("{}\n", options.help());
+        console->info("{}", options.help());
         return 0;
     }
 
