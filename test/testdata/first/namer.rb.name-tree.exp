@@ -39,16 +39,12 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Child<Child> < (<emptyTree>::Parent, <emptyTree>::OtherMixin)
-    <emptyTree>.include(<emptyTree>::Mixin)
-
+  class <emptyTree>::Child<Child> < (<emptyTree>::Parent, <emptyTree>::Mixin, <emptyTree>::Mixin)
     <emptyTree>.include(<emptyTree>::Mixin, <emptyTree>::Mixin)
 
     <emptyTree>.include(3)
 
-    <emptyTree>.include(<emptyTree>::Mixin) do ||
-      <emptyTree>
-    end
+    <emptyTree>.whatever().include(<emptyTree>::OtherMixin)
 
   end
 end
