@@ -140,8 +140,12 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    if (options["h"].as<bool>() || (options.count("e") == 0 && files.empty())) {
+    if (options["h"].as<bool>()) {
         console->info("{}", options.help());
+        return 0;
+    }
+    if (options.count("e") == 0 && files.empty()) {
+        console->info("You must pass either `-e` or at least one ruby file.\n {} \n", options.help());
         return 0;
     }
 
