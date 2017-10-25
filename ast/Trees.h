@@ -221,11 +221,16 @@ public:
     virtual std::string nodeName();
 };
 
+class Block;
+
 class Send : public Expression {
 public:
     std::unique_ptr<Expression> recv;
     NameRef fun;
     std::vector<std::unique_ptr<Expression>> args;
+
+    // null if no block passed
+    std::unique_ptr<Block> block;
 
     Send(std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
@@ -351,11 +356,10 @@ public:
 
 class Block : public Expression {
 public:
-    std::unique_ptr<Send> send;
-    std::unique_ptr<Expression> rhs;
     std::vector<std::unique_ptr<Expression>> args;
+    std::unique_ptr<Expression> body;
 
-    Block(std::unique_ptr<Send> send, std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> rhs);
+    Block(std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> body);
     virtual std::string toString(ContextBase &ctx, int tabs = 0);
     virtual std::string nodeName();
 };

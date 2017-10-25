@@ -374,15 +374,15 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      for (auto &arg : oargs->args) {
                          args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, arg)));
                      }
-                 } else if (auto *arg = dynamic_cast<parser::Arg *>(block->args.get())) {
-                     args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, block->args)));
                  } else if (block->args.get() == nullptr) {
                      // do nothing
                  } else {
                      Error::notImplemented();
                  }
-                 unique_ptr<Statement> res =
-                     make_unique<Block>(move(send), args, Expression::fromStatement(node2TreeImpl(ctx, block->body)));
+
+                 send->block = make_unique<Block>(args, Expression::fromStatement(node2TreeImpl(ctx, block->body)));
+                 unique_ptr<Statement> res(send.release());
+
                  result.swap(res);
              },
              [&](parser::While *wl) {

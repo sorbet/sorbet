@@ -84,6 +84,9 @@ static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)std::strlen(assignTemp)
 static const char *returnMethodTemp = "<ret>";
 static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)std::strlen(returnMethodTemp)};
 
+static const char *blockReturnTemp = "<blockret>";
+static UTF8Desc blockReturnTemp_DESC{(char *)blockReturnTemp, (int)std::strlen(blockReturnTemp)};
+
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
 
@@ -126,6 +129,9 @@ static UTF8Desc always_DESC{(char *)always_str, (int)std::strlen(always_str)};
 static const char *never_str = "<never>";
 static UTF8Desc never_DESC{(char *)never_str, (int)std::strlen(never_str)};
 
+static const char *block_call_str = "<block-call>";
+static UTF8Desc block_call_DESC{(char *)block_call_str, (int)std::strlen(block_call_str)};
+
 static const char *include = "include";
 static UTF8Desc include_DESC{(char *)include, (int)strlen(include)};
 
@@ -160,6 +166,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     auto statTemp_id = enterNameUTF8(statTemp_DESC);
     auto assignTemp_id = enterNameUTF8(assignTemp_DESC);
     auto returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
+    auto blockReturnTemp_id = enterNameUTF8(blockReturnTemp_DESC);
     auto include_id = enterNameUTF8(include_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
@@ -181,6 +188,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(statTemp_id == Names::statTemp()));
     DEBUG_ONLY(Error::check(assignTemp_id == Names::assignTemp()));
     DEBUG_ONLY(Error::check(returnMethodTemp_id == Names::returnMethodTemp()));
+    DEBUG_ONLY(Error::check(blockReturnTemp_id == Names::blockReturnTemp()));
     DEBUG_ONLY(Error::check(include_id == Names::include()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
@@ -197,6 +205,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef junk_id = synthesizeClass(junk_DESC);
     SymbolRef always_id = synthesizeClass(always_DESC);
     SymbolRef never_id = synthesizeClass(never_DESC);
+    SymbolRef block_call_id = synthesizeClass(block_call_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -212,6 +221,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(junk_id == defn_junk());
     Error::check(always_id == defn_cfg_always());
     Error::check(never_id == defn_cfg_never());
+    Error::check(block_call_id == defn_cfg_block_call());
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
@@ -226,6 +236,7 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
      * 11: <<JUNK>>;
      * 12: <always>
      * 13: <never>
+     * 14: <block-call>
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 

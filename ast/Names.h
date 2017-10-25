@@ -208,9 +208,14 @@ public:
         return NameRef(19);
     }
 
+    // used in CFG for block return value temporaries
+    static inline NameRef blockReturnTemp() {
+        return NameRef(20);
+    }
+
     // include
     static inline NameRef include() {
-        return NameRef(20);
+        return NameRef(21);
     }
 };
 
