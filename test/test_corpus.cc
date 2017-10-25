@@ -184,6 +184,21 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
+    expectation = test.expectations.find("name-tree-raw");
+    if (expectation == test.expectations.end())
+        return;
+
+    {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
+
+        EXPECT_EQ(exp, namedTree->showRaw(ctx) + "\n");
+        if (exp == namedTree->showRaw(ctx) + "\n") {
+            TEST_COUT << "name-tree OK" << std::endl;
+        }
+    }
+
     expectation = test.expectations.find("cfg");
     if (expectation == test.expectations.end())
         return;
