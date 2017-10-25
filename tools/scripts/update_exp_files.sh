@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 passes=(cfg parse-tree ast name-table name-tree)
 
