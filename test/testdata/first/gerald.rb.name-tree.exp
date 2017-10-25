@@ -13,9 +13,7 @@ begin
 
     end
 
-    class <emptyTree>::Matcher<Matcher> < ()
-      <emptyTree>.include(<emptyTree>::Chalk::Log)
-
+    class <emptyTree>::Matcher<Matcher> < (<emptyTree>::Chalk::Log)
       <emptyTree>::MAX_AFFECTED_FILES = 100
 
       def initialize<<todo sym>>()

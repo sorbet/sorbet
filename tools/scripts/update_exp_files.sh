@@ -12,7 +12,8 @@ for src in "${rb_src[@]}"; do
     for pass in "${passes[@]}" ; do
         candidate="$src.$pass.exp"
         if [ -e "$candidate" ]; then
-            bazel-bin/main/ruby-typer --print "$pass" "$src" > "$candidate"
+            echo "bazel-bin/main/ruby-typer --print $pass $src > $candidate"
+            bazel-bin/main/ruby-typer --print "$pass" "$src" | grep -v '\[console\] \[error\]' > "$candidate"
         fi
     done
 done
