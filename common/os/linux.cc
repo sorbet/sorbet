@@ -2,6 +2,7 @@
 #include "common/common.h"
 #include <cstdio>
 #include <limits.h>
+#include <signal.h>
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>

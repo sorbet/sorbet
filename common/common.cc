@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <signal.h>
 #include <stdio.h>
 #include <vector>
 
