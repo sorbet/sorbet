@@ -124,6 +124,7 @@ int main(int argc, char **argv) {
     std::shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
     console->set_pattern("%v");
     std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
+    console_err->set_pattern("%v");
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
@@ -188,6 +189,13 @@ int main(int argc, char **argv) {
         }
     }
     clock_t end = clock();
+
+    if (!prints.empty()) {
+        for (auto option : prints) {
+            console_err->error("Unknown --print option: {}", option);
+            return 1;
+        }
+    }
 
     if (!options.count("e")) {
         st.files = files.size();
