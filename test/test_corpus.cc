@@ -15,6 +15,7 @@
 #include <string>
 #include <sys/types.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace spd = spdlog;
@@ -81,6 +82,13 @@ public:
     }
 };
 
+unordered_set<string> knownPasses = {
+    "parse-tree",
+    "ast",
+    "name-table",
+    "cfg",
+};
+
 TEST_P(ExpectationTest, PerPhaseTest) {
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
@@ -93,7 +101,14 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     auto src = ruby_typer::File::read(inputPath.c_str());
     auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
 
-    auto expectation = test.expectations.find("parser");
+    for (auto &exp : test.expectations) {
+        auto it = knownPasses.find(exp.first);
+        if (it == knownPasses.end()) {
+            ADD_FAILURE() << "Unknown pass: " << exp.first;
+        }
+    }
+
+    auto expectation = test.expectations.find("parse-tree");
     if (expectation == test.expectations.end())
         return;
 
@@ -110,7 +125,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
-    expectation = test.expectations.find("desugar");
+    expectation = test.expectations.find("ast");
     if (expectation == test.expectations.end())
         return;
 
@@ -126,7 +141,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
-    expectation = test.expectations.find("namer");
+    expectation = test.expectations.find("name-table");
     if (expectation == test.expectations.end())
         return;
 
