@@ -147,11 +147,14 @@ public:
     virtual std::string toString(ast::Context ctx);
 };
 
-class Block : public Instruction {
+class BlockArg : public Instruction {
 public:
-    ast::SymbolRef method;
+    ast::SymbolRef receiver;
+    ast::NameRef method;
+    u4 arg;
 
-    Block(ast::SymbolRef method) : method(method){};
+    BlockArg(ast::SymbolRef receiver, ast::NameRef method, u4 arg) : receiver(receiver), method(method), arg(arg){};
+    virtual std::string toString(ast::Context ctx);
 };
 
 class BasicBlock;

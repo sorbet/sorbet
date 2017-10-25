@@ -53,6 +53,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 reads[v->what].insert(bb.get());
             } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
                 reads[v->value].insert(bb.get());
+            } else if (auto *v = dynamic_cast<BlockArg *>(bind.value.get())) {
+                reads[v->receiver].insert(bb.get());
             }
         }
         if (bb->bexit.cond != ctx.state.defn_cfg_never() && bb->bexit.cond != ctx.state.defn_cfg_always()) {
@@ -368,6 +370,17 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                 auto postBlock = inWhat.freshBlock();
                 auto bodyBlock = inWhat.freshBlock();
 
+                for (int i = 0; i < s->block->args.size(); ++i) {
+                    auto &arg = s->block->args[i];
+
+                    if (auto id = dynamic_cast<ast::Ident *>(arg.get())) {
+                        headerBlock->exprs.emplace_back(id->symbol, make_unique<BlockArg>(recv, s->fun, i));
+                    } else {
+                        // TODO(nelhage): this will be an error once the namer
+                        // is more complete and turns all args into Ident
+                    }
+                }
+
                 unconditionalJump(current, headerBlock, inWhat);
 
                 conditionalJump(headerBlock, ctx.state.defn_cfg_block_call(), bodyBlock, postBlock, inWhat);
@@ -543,6 +556,16 @@ string Nil::toString(ast::Context ctx) {
 
 string Self::toString(ast::Context ctx) {
     return "self";
+}
+
+string BlockArg::toString(ast::Context ctx) {
+    stringstream buf;
+    buf << "block_arg(";
+    buf << this->receiver.info(ctx).name.name(ctx).toString(ctx);
+    buf << "#";
+    buf << this->method.name(ctx).toString(ctx);
+    buf << ", " << this->arg << ")";
+    return buf.str();
 }
 
 string NotSupported::toString(ast::Context ctx) {
