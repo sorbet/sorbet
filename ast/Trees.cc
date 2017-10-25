@@ -81,11 +81,11 @@ Return::Return(unique_ptr<Expression> expr) : expr(move(expr)) {}
 Yield::Yield(unique_ptr<Expression> expr) : expr(move(expr)) {}
 
 Ident::Ident(SymbolRef symbol) : symbol(symbol), name(0) {
-    Error::check(!symbol.isSynthetic()); // symbol is a valid symbol
+    Error::check(!symbol.isPlaceHolder()); // symbol is a valid symbol
 }
 
 Ident::Ident(NameRef name, SymbolRef symbol) : symbol(symbol), name(name) {
-    Error::check(symbol.isSynthetic()); // symbol is a sentinel
+    Error::check(symbol.isPlaceHolder()); // symbol is a sentinel
 }
 
 Assign::Assign(unique_ptr<Expression> lhs, unique_ptr<Expression> rhs) : lhs(move(lhs)), rhs(move(rhs)) {}
@@ -397,7 +397,7 @@ string ConstantLit::showRaw(ContextBase &ctx, int tabs) {
 }
 
 string Ident::toString(ContextBase &ctx, int tabs) {
-    if (!symbol.isSynthetic()) {
+    if (!symbol.isPlaceHolder()) {
         return this->symbol.info(ctx, true).name.name(ctx).toString(ctx);
     } else {
         return this->name.name(ctx).toString(ctx) + this->symbol.info(ctx, true).name.name(ctx).toString(ctx);

@@ -243,6 +243,10 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  unique_ptr<Statement> res = make_unique<ConstantLit>(Expression::fromStatement(scope), a->name);
                  result.swap(res);
              },
+             [&](parser::Cbase *a) {
+                 unique_ptr<Statement> res = mkIdent(ContextBase::defn_root());
+                 result.swap(res);
+             },
              [&](parser::Begin *a) {
                  if (a->stmts.size() > 0) {
                      vector<unique_ptr<Statement>> stats;
