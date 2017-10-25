@@ -91,7 +91,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     auto inputPath = test.folder + test.sourceFile;
     SCOPED_TRACE(inputPath);
 
-    auto console = spd::stdout_color_mt("fixtures: " + inputPath);
+    auto console = spd::stderr_color_mt("fixtures: " + inputPath);
     ruby_typer::ast::ContextBase ctx(*console);
     ruby_typer::ast::Context context(ctx, ctx.defn_root());
 

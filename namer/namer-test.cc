@@ -12,7 +12,7 @@ namespace ruby_typer {
 namespace namer {
 namespace test {
 
-auto console = spd::stdout_color_mt("namer");
+auto console = spd::stderr_color_mt("namer");
 
 class NamerFixture : public ::testing::Test {
 public:

@@ -13,7 +13,7 @@ using ruby_typer::u4;
 using namespace std;
 
 TEST(ParserTest, SimpleParse) {
-    auto console = spd::stdout_color_mt("parse");
+    auto console = spd::stderr_color_mt("parse");
     ruby_typer::ast::ContextBase ctx(*console);
     ruby_typer::parser::parse_ruby(ctx, "<test>", "def hello_world; p :hello; end");
     ruby_typer::parser::parse_ruby(ctx, "<test>", "class A; class B; end; end");

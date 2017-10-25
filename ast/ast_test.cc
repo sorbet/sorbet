@@ -8,7 +8,7 @@ using namespace std;
 namespace ruby_typer {
 namespace ast {
 
-auto console = spd::stdout_color_mt("parse");
+auto console = spd::stderr_color_mt("parse");
 
 Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off);
 

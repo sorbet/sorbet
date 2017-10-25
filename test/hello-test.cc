@@ -16,7 +16,7 @@ TEST(HelloTest, GetGreet) {
 
 namespace spd = spdlog;
 
-auto console = spd::stdout_color_mt("console");
+auto console = spd::stderr_color_mt("console");
 
 TEST(HelloTest, GetSpdlog) {
     console->info("Welcome to spdlog!");
