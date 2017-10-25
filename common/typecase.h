@@ -40,7 +40,7 @@ template <typename Base, typename T> bool typecaseHelper(Base *base, std::functi
 }
 
 template <typename Base> void typecase(Base *b) {
-    ruby_typer::Error::check(false, typeid(b).name());
+    ruby_typer::Error::check(false, "not handled case: ", demangle(typeid(b).name()));
 }
 
 template <typename Base, typename FirstSubclass, typename... RestOfSubclasses>
