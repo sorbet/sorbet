@@ -1,6 +1,7 @@
 #include "common.h"
 #include "os/os.h"
 #include <array>
+#include <cstdarg>
 #include <exception>
 #include <execinfo.h>
 #include <fstream>
@@ -25,6 +26,23 @@ string ruby_typer::File::read(const char *filename) {
 
     src.assign((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
     return src;
+}
+
+std::string strprintf(const char *format, va_list vlist) {
+    char *buf = nullptr;
+    int ret = vasprintf(&buf, format, vlist);
+    ruby_typer::Error::check(ret >= 0);
+    std::string str = buf;
+    free(buf);
+    return str;
+}
+
+std::string strprintf(const char *format, ...) {
+    va_list vlist;
+    va_start(vlist, format);
+    auto str = strprintf(format, vlist);
+    va_end(vlist);
+    return str;
 }
 
 class SetTerminateHandler {

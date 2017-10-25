@@ -76,7 +76,9 @@ public:
     static std::string read(const char *filename);
 };
 }
+std::string strprintf(const char *__restrict, va_list) __printflike(1, 0);
 
+std::string strprintf(const char *__restrict, ...) __printflike(1, 2);
 #include "Error.h"
 #include "typecase.h"
 
