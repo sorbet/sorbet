@@ -138,6 +138,21 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
+    expectation = test.expectations.find("ast-raw");
+    if (expectation == test.expectations.end())
+        return;
+
+    {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
+
+        EXPECT_EQ(exp, desugared->showRaw(ctx) + "\n");
+        if (exp == desugared->showRaw(ctx) + "\n") {
+            TEST_COUT << "ast-raw OK" << endl;
+        }
+    }
+
     expectation = test.expectations.find("name-table");
     if (expectation == test.expectations.end())
         return;
