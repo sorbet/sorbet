@@ -30,7 +30,7 @@ begin
     <emptyTree>
   end
   <Not Supported (Case)>
-  "x".to_s()
+  "x"
   1.+(<Not Supported (Complex)>)
   <Not Supported (Float)>
   <Not Supported (Complex)>
@@ -104,7 +104,7 @@ begin
   end
   <Not Supported (Undef)>
   ["a", "b"]
-  ["a".to_s(), "b".to_s()]
+  ["a", "b"]
   <Not Supported (XString)>
   <emptyTree>.proc() do |<Not Supported (Shadowarg)>|
     <emptyTree>
