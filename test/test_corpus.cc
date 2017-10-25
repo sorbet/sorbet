@@ -83,11 +83,7 @@ public:
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree",
-    "ast",
-    "name-table",
-    "name-tree",
-    "cfg",
+    "parse-tree", "ast", "name-table", "name-tree", "cfg",
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) {
