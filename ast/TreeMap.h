@@ -4,6 +4,7 @@
 #include "Trees.h"
 #include "memory"
 #include <type_traits> // To use 'std::integral_constant'.
+#include <typeinfo>
 
 using std::make_unique;
 using std::unique_ptr;
@@ -662,7 +663,7 @@ private:
         } else if (NotSupported *v = dynamic_cast<NotSupported *>(what)) {
             return what;
         } else {
-            Error::raise("should never happen. Forgot to add new tree kind?");
+            Error::raise("should never happen. Forgot to add new tree kind?", typeid(what).name());
         }
     }
 
