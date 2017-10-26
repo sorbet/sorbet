@@ -38,18 +38,18 @@ class <emptyTree>::Examples<Examples> < ()
       if begin
           true
         end
-        a = 1
+        ::Examples#variables#a = 1
       else
-        a = 2
+        ::Examples#variables#a = 2
       end
       if begin
           false
         end
-        b = 1
+        ::Examples#variables#b = 1
       else
-        b = 2
+        ::Examples#variables#b = 2
       end
-      a.+(b)
+      ::Examples#variables#a.+(::Examples#variables#b)
     end
 
   def variables_and_loop<variables_and_loop>()
@@ -57,20 +57,20 @@ class <emptyTree>::Examples<Examples> < ()
       if begin
           true
         end
-        a = 1
+        ::Examples#variables_and_loop#a = 1
       else
-        a = 2
+        ::Examples#variables_and_loop#a = 2
       end
       while true
         if begin
             false
           end
-          b = 1
+          ::Examples#variables_and_loop#b = 1
         else
-          b = 2
+          ::Examples#variables_and_loop#b = 2
         end
       end
-      b
+      ::Examples#variables_and_loop#b
     end
 
   def variables_loop_if<variables_loop_if>()
@@ -79,12 +79,12 @@ class <emptyTree>::Examples<Examples> < ()
         if begin
             false
           end
-          b = 1
+          ::Examples#variables_loop_if#b = 1
         else
-          b = 2
+          ::Examples#variables_loop_if#b = 2
         end
       end
-      b
+      ::Examples#variables_loop_if#b
     end
 
 end

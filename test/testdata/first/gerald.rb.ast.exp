@@ -21,10 +21,10 @@ begin
       def initialize<<todo sym>>()
         begin
           begin
-            assignTmp$0 = <emptyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
-            @rules<todo ivar sym> = assignTmp$0.[](0)
-            invalid_rules<todo lvar sym> = assignTmp$0.[](1)
-            assignTmp$0
+            #assignTmp$0 = <emptyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
+            @rules<todo ivar sym> = #assignTmp$0.[](0)
+            invalid_rules<todo lvar sym> = #assignTmp$0.[](1)
+            #assignTmp$0
           end
           if invalid_rules<todo lvar sym>.empty?().!()
             begin
@@ -208,11 +208,11 @@ begin
                       begin
                         a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                         if begin
-                            &&$1 = <emptyTree>
-                            if &&$1
+                            #&&$1 = <emptyTree>
+                            if #&&$1
                               <emptyTree>
                             else
-                              &&$1
+                              #&&$1
                             end
                           end
                           a_name<todo lvar sym> = a_name<todo lvar sym>.[](<Not Supported (IRange)>)
@@ -225,11 +225,11 @@ begin
                         begin
                           b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
                           if begin
-                              &&$2 = <emptyTree>
-                              if &&$2
+                              #&&$2 = <emptyTree>
+                              if #&&$2
                                 <emptyTree>
                               else
-                                &&$2
+                                #&&$2
                               end
                             end
                             b_name<todo lvar sym> = b_name<todo lvar sym>.[](<Not Supported (IRange)>)

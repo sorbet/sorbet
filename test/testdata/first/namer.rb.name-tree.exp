@@ -40,15 +40,15 @@ begin
 
   end
   class <emptyTree>::Child<Child> < (<emptyTree>::Parent, <emptyTree>::Mixin)
-    <emptyTree>.include(<emptyTree>::Mixin, <emptyTree>::Mixin)
+    <emptyTree>.include(::Mixin, ::Mixin)
 
     <emptyTree>.include(3)
 
-    <emptyTree>.include(<emptyTree>::Mixin) do ||
+    <emptyTree>.include(::Mixin) do ||
       <emptyTree>
     end
 
-    <emptyTree>.whatever().include(<emptyTree>::OtherMixin)
+    <emptyTree>.whatever().include(::OtherMixin)
 
   end
 end

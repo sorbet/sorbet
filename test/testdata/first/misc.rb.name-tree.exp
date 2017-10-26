@@ -4,18 +4,18 @@ begin
   @@cv<todo cvar sym> = 1
   $gv<todo gvar sym> = 1
   begin
-    assignTmp$2 = [nil, nil]
-    <emptyTree>.x().var=(assignTmp$2.[](0))
-    y = assignTmp$2.[](1)
-    assignTmp$2
+    #assignTmp$2 = [nil, nil]
+    <emptyTree>.x().var=(#assignTmp$2.[](0))
+    #y = #assignTmp$2.[](1)
+    #assignTmp$2
   end
   begin
-    assignTmp$3 = <emptyTree>.zaaaz()
-    baaaar = assignTmp$3.[](0)
-    naaar = assignTmp$3.[](1)
-    assignTmp$3
+    #assignTmp$3 = <emptyTree>.zaaaz()
+    #baaaar = #assignTmp$3.[](0)
+    #naaar = #assignTmp$3.[](1)
+    #assignTmp$3
   end
-  xaaaaz = [<emptyTree>.yayayaya(), <emptyTree>.tutututu()]
+  #xaaaaz = [<emptyTree>.yayayaya(), <emptyTree>.tutututu()]
   <emptyTree>
   begin
     nil
@@ -37,9 +37,9 @@ begin
   <Not Supported (DefS)>
   <Not Supported (SClass)>
   begin
-    ||$4 = true
-    if ||$4
-      ||$4
+    #||$4 = true
+    if #||$4
+      #||$4
     else
       false
     end
@@ -48,7 +48,7 @@ begin
   while 0.!=(1)
     <emptyTree>
   end
-  x.[]=(0)
+  #x.[]=(0)
   break(<emptyTree>)
   break(1)
   break([1, 2])
@@ -74,10 +74,10 @@ begin
     nil
   end
   begin
-    assignTmp$5 = 1
-    a = assignTmp$5.[](0)
+    #assignTmp$5 = 1
+    #a = #assignTmp$5.[](0)
     <Not Supported (Mlhs)>
-    assignTmp$5
+    #assignTmp$5
   end
   <Not Supported (NthRef)>
   def foo<foo>(x<todo lvar sym> = 1, *y<todo lvar sym>)
@@ -91,13 +91,13 @@ begin
     <Not Supported (Rescue)>
   end
   begin
-    assignTmp$6 = [<Not Supported (Splat)>]
+    #assignTmp$6 = [<Not Supported (Splat)>]
     <Not Supported (SplatLhs)>
-    assignTmp$6
+    #assignTmp$6
   end
   <Not Supported (DSymbol)>
   [:sym]
-  if x
+  if #x
     1
   else
     7

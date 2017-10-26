@@ -80,6 +80,7 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
         }
 
         desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
+        desugared = ruby_typer::namer::Namer::resolve(context, move(desugared));
         if (removeOption(prints, "name-table")) {
             cout << ctx.toString() << endl;
             if (prints.empty())

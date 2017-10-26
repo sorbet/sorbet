@@ -9,6 +9,8 @@ enum class ErrorClass {
     IncludeMutipleParam,
     IncludeNotConstant,
     IncludePassedBlock,
+
+    DynamicConstant,
 };
 
 class Reporter {
