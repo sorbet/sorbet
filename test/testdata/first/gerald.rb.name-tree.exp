@@ -29,7 +29,7 @@ begin
               invalid_rule_ids = invalid_rules.map(<Not Supported (BlockPass)>).join(",")
               <emptyTree>.log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
             end
-          else 
+          else
             <emptyTree>
           end
         end
@@ -43,7 +43,7 @@ begin
                   end.to_s()).concat(" affected files").to_s())
               return []
             end
-          else 
+          else
             <emptyTree>
           end
           budget = <emptyTree>::MatchTimeBudget.new()
@@ -107,7 +107,7 @@ begin
             <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
                     <emptyTree>::TOTAL_TIME_MS
                   end.to_s()).concat("ms").to_s()))
-          else 
+          else
             <emptyTree>
           end
         end
@@ -127,7 +127,7 @@ begin
                   end.to_s()).concat("ms budget=").concat(begin
                     <emptyTree>::PER_RULE_MS
                   end.to_s()).concat("ms").to_s(), <Not Supported (Hash)>))
-          else 
+          else
             <emptyTree>
           end
           <emptyTree>.check!()
@@ -188,7 +188,7 @@ begin
             parts = diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if parts
               parts
-            else 
+            else
               parts = []
             end
             parts.map() do |part<todo lvar sym>|
@@ -201,7 +201,7 @@ begin
                 lines<todo lvar sym>.each() do |line<todo lvar sym>|
                   if line<todo lvar sym>.start_with?("index ", "@@", "new file mode")
                     next(<emptyTree>)
-                  else 
+                  else
                     if line<todo lvar sym>.start_with?("---")
                       begin
                         a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
@@ -209,16 +209,16 @@ begin
                             &&$1 = <emptyTree>
                             if &&$1
                               <emptyTree>
-                            else 
+                            else
                               &&$1
                             end
                           end
                           a_name<todo lvar sym> = a_name<todo lvar sym>.[](<Not Supported (IRange)>)
-                        else 
+                        else
                           <emptyTree>
                         end
                       end
-                    else 
+                    else
                       if line<todo lvar sym>.start_with?("+++")
                         begin
                           b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
@@ -226,22 +226,22 @@ begin
                               &&$2 = <emptyTree>
                               if &&$2
                                 <emptyTree>
-                              else 
+                              else
                                 &&$2
                               end
                             end
                             b_name<todo lvar sym> = b_name<todo lvar sym>.[](<Not Supported (IRange)>)
-                          else 
+                          else
                             <emptyTree>
                           end
                         end
-                      else 
+                      else
                         if line<todo lvar sym>.start_with?("+")
                           added_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
-                        else 
+                        else
                           if line<todo lvar sym>.start_with?("-")
                             removed_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
-                          else 
+                          else
                             <emptyTree>
                           end
                         end
@@ -251,7 +251,7 @@ begin
                 end
                 if a_name<todo lvar sym>.nil?()
                   next(<emptyTree>)
-                else 
+                else
                   <emptyTree>
                 end
                 <Not Supported (Hash)>

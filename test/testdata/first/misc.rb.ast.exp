@@ -40,7 +40,7 @@ begin
     ||$4 = true
     if ||$4
       ||$4
-    else 
+    else
       false
     end
   end
@@ -99,7 +99,7 @@ begin
   [:sym]
   if x<todo lvar sym>
     1
-  else 
+  else
     7
   end
   <Not Supported (Undef)>

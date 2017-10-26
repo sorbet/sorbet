@@ -307,7 +307,7 @@ string If::toString(ContextBase &ctx, int tabs) {
     printTabs(buf, tabs + 1);
     buf << this->thenp->toString(ctx, tabs + 1) << endl;
     printTabs(buf, tabs);
-    buf << "else " << endl;
+    buf << "else" << endl;
     printTabs(buf, tabs + 1);
     buf << this->elsep->toString(ctx, tabs + 1) << endl;
     printTabs(buf, tabs);
