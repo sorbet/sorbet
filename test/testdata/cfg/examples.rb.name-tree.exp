@@ -1,12 +1,12 @@
 class <emptyTree>::Examples<Examples> < ()
-  def i_like_ifs<<todo sym>>()
+  def i_like_ifs<i_like_ifs>()
     if true
       return 1
     else
       return 2
     end
 
-  def i_like_exps<<todo sym>>()
+  def i_like_exps<i_like_exps>()
     if begin
         true
       end
@@ -15,7 +15,7 @@ class <emptyTree>::Examples<Examples> < ()
       2
     end
 
-  def return_in_one_branch1<<todo sym>>()
+  def return_in_one_branch1<return_in_one_branch1>()
     if begin
         true
       end
@@ -24,7 +24,7 @@ class <emptyTree>::Examples<Examples> < ()
       2
     end
 
-  def return_in_one_branch2<<todo sym>>()
+  def return_in_one_branch2<return_in_one_branch2>()
     if begin
         true
       end
@@ -33,7 +33,7 @@ class <emptyTree>::Examples<Examples> < ()
       return 2
     end
 
-  def variables<<todo sym>>()
+  def variables<variables>()
     begin
       if begin
           true
@@ -52,7 +52,7 @@ class <emptyTree>::Examples<Examples> < ()
       a.+(b)
     end
 
-  def variables_and_loop<<todo sym>>()
+  def variables_and_loop<variables_and_loop>()
     begin
       if begin
           true
@@ -73,7 +73,7 @@ class <emptyTree>::Examples<Examples> < ()
       b
     end
 
-  def variables_loop_if<<todo sym>>()
+  def variables_loop_if<variables_loop_if>()
     begin
       while true
         if begin

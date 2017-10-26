@@ -5,10 +5,10 @@ begin
     class <emptyTree>::MatchTimeout<MatchTimeout> < (<emptyTree>::StandardError)
       <emptyTree>.attr_reader(:rule_token)
 
-      def initialize<<todo sym>>(message<todo lvar sym>, rule_token<todo lvar sym>: = "")
+      def initialize<initialize>(message<todo lvar sym>, rule_token<todo lvar sym>: = "")
         begin
           super(message<todo lvar sym>)
-          @rule_token = rule_token
+          @rule_token<todo ivar sym> = rule_token
         end
 
     end
@@ -16,11 +16,11 @@ begin
     class <emptyTree>::Matcher<Matcher> < (<emptyTree>::Chalk::Log)
       <emptyTree>::MAX_AFFECTED_FILES = 100
 
-      def initialize<<todo sym>>()
+      def initialize<initialize>()
         begin
           begin
             assignTmp$0 = <emptyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
-            @rules = assignTmp$0.[](0)
+            @rules<todo ivar sym> = assignTmp$0.[](0)
             invalid_rules = assignTmp$0.[](1)
             assignTmp$0
           end
@@ -34,7 +34,7 @@ begin
           end
         end
 
-      def match<<todo sym>>(match_context<todo lvar sym>)
+      def match<match>(match_context<todo lvar sym>)
         begin
           if match_context.diff().affected_files().count().>(<emptyTree>::MAX_AFFECTED_FILES)
             begin
@@ -47,7 +47,7 @@ begin
             <emptyTree>
           end
           budget = <emptyTree>::MatchTimeBudget.new()
-          @rules.select() do |r<todo lvar sym>|
+          @rules<todo ivar sym>.select() do |r<todo lvar sym>|
             budget<todo lvar sym>.time_rule(r<todo lvar sym>) do ||
               r<todo lvar sym>.matches?(match_context<todo lvar sym>)
             end
@@ -73,20 +73,20 @@ begin
 
       <emptyTree>.attr_reader(:openapi_diff)
 
-      def initialize<<todo sym>>(repo<todo lvar sym>, assignee<todo lvar sym>, gh_user<todo lvar sym>, merge_branch<todo lvar sym>, body<todo lvar sym>, title<todo lvar sym>, diff<todo lvar sym>, openapi_diff<todo lvar sym>)
+      def initialize<initialize>(repo<todo lvar sym>, assignee<todo lvar sym>, gh_user<todo lvar sym>, merge_branch<todo lvar sym>, body<todo lvar sym>, title<todo lvar sym>, diff<todo lvar sym>, openapi_diff<todo lvar sym>)
         begin
-          @repo = repo
-          @assignee = assignee
-          @gh_user = gh_user
-          @merge_branch = merge_branch
-          @body = body
-          @title = title
-          @diff = diff
-          @openapi_diff = openapi_diff
+          @repo<todo ivar sym> = repo
+          @assignee<todo ivar sym> = assignee
+          @gh_user<todo ivar sym> = gh_user
+          @merge_branch<todo ivar sym> = merge_branch
+          @body<todo ivar sym> = body
+          @title<todo ivar sym> = title
+          @diff<todo ivar sym> = diff
+          @openapi_diff<todo ivar sym> = openapi_diff
         end
 
-      def user_stripe_suffix?<<todo sym>>()
-        @repo.start_with?("stripe-internal/").!()
+      def user_stripe_suffix?<user_stripe_suffix?>()
+        @repo<todo ivar sym>.start_with?("stripe-internal/").!()
 
     end
 
@@ -95,13 +95,13 @@ begin
 
       <emptyTree>::PER_RULE_MS = 2000
 
-      def initialize<<todo sym>>()
-        @start = <emptyTree>::Time.now()
+      def initialize<initialize>()
+        @start<todo ivar sym> = <emptyTree>::Time.now()
 
-      def check!<<todo sym>>()
+      def check!<check!>()
         begin
           dur_ms = begin
-            <emptyTree>::Time.now().-(@start)
+            <emptyTree>::Time.now().-(@start<todo ivar sym>)
           end.*(1000)
           if dur_ms.>(<emptyTree>::TOTAL_TIME_MS)
             <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
@@ -112,7 +112,7 @@ begin
           end
         end
 
-      def time_rule<<todo sym>>(rule<todo lvar sym>)
+      def time_rule<time_rule>(rule<todo lvar sym>)
         begin
           rule_start = <emptyTree>::Time.now()
           res = yield(<emptyTree>)
@@ -137,53 +137,53 @@ begin
     end
 
     class <emptyTree>::Diff<Diff> < ()
-      def initialize<<todo sym>>(raw_diff<todo lvar sym>)
+      def initialize<initialize>(raw_diff<todo lvar sym>)
         begin
-          @raw = raw_diff
-          @parsed = <emptyTree>.parse(raw_diff)
+          @raw<todo ivar sym> = raw_diff
+          @parsed<todo ivar sym> = <emptyTree>.parse(raw_diff)
         end
 
-      def affected_files<<todo sym>>()
+      def affected_files<affected_files>()
         <emptyTree>.added_files().+(<emptyTree>.deleted_files()).+(<emptyTree>.changed_files())
 
-      def added_files<<todo sym>>()
-        @parsed.select() do |part<todo lvar sym>|
+      def added_files<added_files>()
+        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:a_name).==("/dev/null")
         end.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:b_name)
         end
 
-      def deleted_files<<todo sym>>()
-        @parsed.select() do |part<todo lvar sym>|
+      def deleted_files<deleted_files>()
+        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:b_name).==("/dev/null")
         end.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:a_name)
         end
 
-      def changed_files<<todo sym>>()
-        @parsed.select() do |part<todo lvar sym>|
+      def changed_files<changed_files>()
+        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:a_name).==(part<todo lvar sym>.[](:b_name))
         end.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:b_name)
         end
 
-      def added_lines<<todo sym>>()
-        @parsed.map() do |part<todo lvar sym>|
+      def added_lines<added_lines>()
+        @parsed<todo ivar sym>.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:added_lines)
         end.flatten()
 
-      def removed_lines<<todo sym>>()
-        @parsed.map() do |part<todo lvar sym>|
+      def removed_lines<removed_lines>()
+        @parsed<todo ivar sym>.map() do |part<todo lvar sym>|
           part<todo lvar sym>.[](:removed_lines)
         end.flatten()
 
-      def changed_lines<<todo sym>>()
+      def changed_lines<changed_lines>()
         <emptyTree>.added_lines().+(<emptyTree>.removed_lines())
 
-      def changed_openapi?<<todo sym>>()
+      def changed_openapi?<changed_openapi?>()
         <emptyTree>.changed_files().include?(<emptyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
 
-      <emptyTree>.private(def parse<<todo sym>>(diff<todo lvar sym>)
+      <emptyTree>.private(def parse<parse>(diff<todo lvar sym>)
           begin
             parts = diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if parts

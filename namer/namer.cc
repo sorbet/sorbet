@@ -96,7 +96,7 @@ public:
 
         auto result = ast::ContextBase::defn_todo();
 
-        ctx.state.enterSymbol(ownerFromContext(ctx), method->name, result, args, true);
+        method->symbol = ctx.state.enterSymbol(ownerFromContext(ctx), method->name, result, args, true);
         namesForLocals.emplace_back();
         return method;
     }
@@ -107,7 +107,7 @@ public:
     }
 
     ast::Ident *postTransformIdent(ast::Context ctx, ast::Ident *ident) {
-        if (ident->symbol.isPlaceHolder()) {
+        if (ident->symbol == ctx.state.defn_lvar_todo()) {
             ast::SymbolRef &cur = namesForLocals.back()[ident->name];
             if (!cur.exists()) {
                 std::vector<ast::SymbolRef> args;

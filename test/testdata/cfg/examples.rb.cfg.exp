@@ -1,4 +1,4 @@
-digraph <todo sym> {
+digraph i_like_ifs {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -14,7 +14,7 @@ digraph <todo sym> {
     bb3 -> bb1;
 }
 
-digraph <todo sym> {
+digraph i_like_exps {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -32,7 +32,7 @@ digraph <todo sym> {
     bb4 -> bb1;
 }
 
-digraph <todo sym> {
+digraph return_in_one_branch1 {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -48,7 +48,7 @@ digraph <todo sym> {
     bb3 -> bb1;
 }
 
-digraph <todo sym> {
+digraph return_in_one_branch2 {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -66,7 +66,7 @@ digraph <todo sym> {
     bb4 -> bb1;
 }
 
-digraph <todo sym> {
+digraph variables {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -92,7 +92,7 @@ digraph <todo sym> {
     bb7 -> bb1;
 }
 
-digraph <todo sym> {
+digraph variables_and_loop {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -126,7 +126,7 @@ digraph <todo sym> {
     bb10 -> bb5;
 }
 
-digraph <todo sym> {
+digraph variables_loop_if {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 

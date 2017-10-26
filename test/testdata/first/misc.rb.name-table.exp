@@ -1,6 +1,3 @@
-field $gv ()
-field @@cv ()
-field @iv ()
 field a ()
 field assignTmp$2 ()
 field assignTmp$3 ()

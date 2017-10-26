@@ -1,6 +1,6 @@
 begin
   class <emptyTree>::NormalClass<NormalClass> < ()
-    def normal_method<<todo sym>>()
+    def normal_method<normal_method>()
       <emptyTree>
 
     <Not Supported (DefS)>
