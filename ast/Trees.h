@@ -291,7 +291,15 @@ public:
 };
 
 class Hash : public Expression {
-    // TODO
+public:
+    std::vector<std::unique_ptr<Expression>> keys;
+    std::vector<std::unique_ptr<Expression>> values;
+
+    Hash(std::vector<std::unique_ptr<Expression>> &keys, std::vector<std::unique_ptr<Expression>> &values);
+
+    virtual std::string toString(GlobalState &ctx, int tabs);
+    virtual std::string showRaw(GlobalState &ctx, int tabs = 0);
+    virtual std::string nodeName();
 };
 
 class Array : public Expression {

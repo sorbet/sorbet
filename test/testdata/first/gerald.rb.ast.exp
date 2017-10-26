@@ -21,7 +21,7 @@ begin
       def initialize<<todo sym>>()
         begin
           begin
-            #assignTmp$0 = <emptyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all(<Not Supported (Hash)>).partition(<Not Supported (BlockPass)>)
+            #assignTmp$0 = <emptyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
             @rules<todo ivar sym> = #assignTmp$0.[](0)
             invalid_rules<todo lvar sym> = #assignTmp$0.[](1)
             #assignTmp$0
@@ -128,7 +128,7 @@ begin
                     dur_ms<todo lvar sym>.to_i()
                   end.to_s()).concat("ms budget=").concat(begin
                     <emptyTree>::PER_RULE_MS
-                  end.to_s()).concat("ms").to_s(), <Not Supported (Hash)>))
+                  end.to_s()).concat("ms").to_s(), {:rule_token => rule<todo lvar sym>.token()}))
           else
             <emptyTree>
           end
@@ -256,7 +256,7 @@ begin
                 else
                   <emptyTree>
                 end
-                <Not Supported (Hash)>
+                {:a_name => a_name<todo lvar sym>, :b_name => b_name<todo lvar sym>, :added_lines => added_lines<todo lvar sym>, :removed_lines => removed_lines<todo lvar sym>}
               end
             end.compact()
           end)
