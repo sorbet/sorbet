@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-passes=(cfg parse-tree ast name-table name-tree)
+passes=(cfg parse-tree ast ast-raw name-table name-tree name-tree-raw)
 
 bazel build //main:ruby-typer
 

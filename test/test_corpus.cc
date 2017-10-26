@@ -83,20 +83,13 @@ public:
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree", "ast", "name-table", "name-tree", "cfg",
+    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg",
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) {
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
     SCOPED_TRACE(inputPath);
-
-    auto console = spd::stderr_color_mt("fixtures: " + inputPath);
-    ruby_typer::ast::ContextBase ctx(*console);
-    ruby_typer::ast::Context context(ctx, ctx.defn_root());
-
-    auto src = ruby_typer::File::read(inputPath.c_str());
-    auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
 
     for (auto &exp : test.expectations) {
         auto it = knownPasses.find(exp.first);
@@ -105,11 +98,16 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
-    auto expectation = test.expectations.find("parse-tree");
-    if (expectation == test.expectations.end())
-        return;
+    auto console = spd::stderr_color_mt("fixtures: " + inputPath);
+    ruby_typer::ast::ContextBase ctx(*console);
+    ruby_typer::ast::Context context(ctx, ctx.defn_root());
 
-    {
+    // Parser
+    auto src = ruby_typer::File::read(inputPath.c_str());
+    auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
+
+    auto expectation = test.expectations.find("parse-tree");
+    if (expectation != test.expectations.end()) {
         auto checker = test.folder + expectation->second;
         SCOPED_TRACE(checker);
 
@@ -122,12 +120,11 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
-    expectation = test.expectations.find("ast");
-    if (expectation == test.expectations.end())
-        return;
-
+    // Desugarer
     auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
-    {
+
+    expectation = test.expectations.find("ast");
+    if (expectation != test.expectations.end()) {
         auto checker = test.folder + expectation->second;
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
@@ -138,12 +135,23 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
-    expectation = test.expectations.find("name-table");
-    if (expectation == test.expectations.end())
-        return;
+    expectation = test.expectations.find("ast-raw");
+    if (expectation != test.expectations.end()) {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
 
+        EXPECT_EQ(exp, desugared->showRaw(ctx) + "\n");
+        if (exp == desugared->showRaw(ctx) + "\n") {
+            TEST_COUT << "ast-raw OK" << endl;
+        }
+    }
+
+    // Namer
     auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
-    {
+
+    expectation = test.expectations.find("name-table");
+    if (expectation != test.expectations.end()) {
         auto checker = test.folder + expectation->second;
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
@@ -155,10 +163,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     expectation = test.expectations.find("name-tree");
-    if (expectation == test.expectations.end())
-        return;
-
-    {
+    if (expectation != test.expectations.end()) {
         auto checker = test.folder + expectation->second;
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
@@ -169,14 +174,24 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
     }
 
-    expectation = test.expectations.find("cfg");
-    if (expectation == test.expectations.end())
-        return;
+    expectation = test.expectations.find("name-tree-raw");
+    if (expectation != test.expectations.end()) {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
 
+        EXPECT_EQ(exp, namedTree->showRaw(ctx) + "\n");
+        if (exp == namedTree->showRaw(ctx) + "\n") {
+            TEST_COUT << "name-tree-raw OK" << std::endl;
+        }
+    }
+
+    // CFG
     CFG_Collector collector;
     auto cfg = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(namedTree));
 
-    {
+    expectation = test.expectations.find("cfg");
+    if (expectation != test.expectations.end()) {
         auto checker = test.folder + expectation->second;
         SCOPED_TRACE(checker);
 
@@ -188,7 +203,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
         EXPECT_EQ(exp, got.str() + "\n");
         if (exp == got.str() + "\n") {
-            TEST_COUT << "CFG OK" << endl;
+            TEST_COUT << "cfg OK" << endl;
         }
     }
 }
