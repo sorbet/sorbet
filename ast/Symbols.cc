@@ -19,6 +19,21 @@ bool SymbolRef::isPrimitive() const {
 bool SymbolInfo::isConstructor(ContextBase &ctx) const {
     return this->name._id == 1;
 }
+
+bool SymbolInfo::derrivesFrom(ContextBase &ctx, SymbolRef sym) {
+    // TODO: add baseClassSet
+    for (SymbolRef a : argumentsOrMixins) {
+        if (a == sym || a.info(ctx).derrivesFrom(ctx, sym))
+            return true;
+    }
+    return false;
+}
+
+SymbolRef SymbolInfo::ref(ContextBase &ctx) const {
+    auto id = this - ctx.symbols.data();
+    return SymbolRef(id / sizeof(SymbolInfo));
+}
+
 SymbolInfo &SymbolRef::info(ContextBase &ctx, bool allowNone) const {
     Error::check(_id < ctx.symbols.size());
     if (!allowNone)

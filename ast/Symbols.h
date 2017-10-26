@@ -87,6 +87,10 @@ public:
         return argumentsOrMixins;
     }
 
+    bool derrivesFrom(ContextBase &ctx, SymbolRef sym);
+
+    SymbolRef ref(ContextBase &ctx);
+
     inline std::vector<SymbolRef> &mixins(ContextBase &ctx) {
         Error::check(isClass());
         ensureCompleted(ctx);
