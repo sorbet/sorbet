@@ -2,7 +2,7 @@ class <emptyTree>::Examples<<todo sym>> < ()
   def i_like_ifs<<todo sym>>()
     if true
       return 1
-    else 
+    else
       return 2
     end
 
@@ -11,7 +11,7 @@ class <emptyTree>::Examples<<todo sym>> < ()
         true
       end
       1
-    else 
+    else
       2
     end
 
@@ -20,7 +20,7 @@ class <emptyTree>::Examples<<todo sym>> < ()
         true
       end
       return 1
-    else 
+    else
       2
     end
 
@@ -29,7 +29,7 @@ class <emptyTree>::Examples<<todo sym>> < ()
         true
       end
       1
-    else 
+    else
       return 2
     end
 
@@ -39,14 +39,14 @@ class <emptyTree>::Examples<<todo sym>> < ()
           true
         end
         a<todo lvar sym> = 1
-      else 
+      else
         a<todo lvar sym> = 2
       end
       if begin
           false
         end
         b<todo lvar sym> = 1
-      else 
+      else
         b<todo lvar sym> = 2
       end
       a<todo lvar sym>.+(b<todo lvar sym>)
@@ -58,7 +58,7 @@ class <emptyTree>::Examples<<todo sym>> < ()
           true
         end
         a<todo lvar sym> = 1
-      else 
+      else
         a<todo lvar sym> = 2
       end
       while true
@@ -66,7 +66,7 @@ class <emptyTree>::Examples<<todo sym>> < ()
             false
           end
           b<todo lvar sym> = 1
-        else 
+        else
           b<todo lvar sym> = 2
         end
       end
@@ -80,7 +80,7 @@ class <emptyTree>::Examples<<todo sym>> < ()
             false
           end
           b<todo lvar sym> = 1
-        else 
+        else
           b<todo lvar sym> = 2
         end
       end
