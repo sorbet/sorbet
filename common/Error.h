@@ -77,6 +77,7 @@ template <typename... TArgs>[[noreturn]] void Error::raise(const TArgs &... args
     _raise(message, args...);
 
     fprintf(stderr, "%s", message.str().c_str());
+    print_backtrace();
 
     throw SRubyException(message.str());
 }

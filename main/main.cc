@@ -114,7 +114,7 @@ void parse_and_print(ruby_typer::ast::ContextBase &ctx, cxxopts::Options &opts, 
     }
 }
 
-int main(int argc, char **argv) {
+int realmain(int argc, char **argv) {
     std::vector<std::string> files;
     std::vector<std::string> prints;
     //    spd::set_async_mode(1024);
@@ -212,4 +212,11 @@ int main(int argc, char **argv) {
                        st.bytes);
 
     return 0;
-}
+};
+
+int main(int argc, char **argv) {
+    try {
+        realmain(argc, argv);
+    } catch (ruby_typer::SRubyException e) {
+    }
+};

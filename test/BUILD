@@ -9,6 +9,7 @@ cc_test(
         "testdata/**/*.rb",
         "testdata/**/*.rb.*.exp",
     ]),
+    linkstatic = 1,
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
