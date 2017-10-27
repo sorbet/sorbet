@@ -79,9 +79,6 @@ public:
     ast::Statement *postTransformClassDef(ast::Context ctx, ast::ClassDef *original) {
         nesting_ = move(nesting_->parent);
 
-        if (auto name = maybeResolve(ctx, original->name.get()))
-            original->name.swap(name);
-
         for (auto &ancst : original->ancestors) {
             if (auto resolved = maybeResolve(ctx, ancst.get()))
                 ancst.swap(resolved);

@@ -1,4 +1,4 @@
-class ::Examples<Examples> < (::Object)
+class <emptyTree>::Examples<Examples> < (::Object)
   def i_like_ifs<i_like_ifs>()
     if true
       return 1
