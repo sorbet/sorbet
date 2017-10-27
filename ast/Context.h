@@ -128,6 +128,42 @@ public:
         return defn_cfg_block_call();
     }
 
+    static constexpr SymbolRef defn_Integer() {
+        return SymbolRef(15);
+    }
+
+    static constexpr SymbolRef defn_Float() {
+        return SymbolRef(16);
+    }
+
+    static constexpr SymbolRef defn_String() {
+        return SymbolRef(17);
+    }
+
+    static constexpr SymbolRef defn_Symbol() {
+        return SymbolRef(18);
+    }
+
+    static constexpr SymbolRef defn_Array() {
+        return SymbolRef(19);
+    }
+
+    static constexpr SymbolRef defn_Hash() {
+        return SymbolRef(20);
+    }
+
+    static constexpr SymbolRef defn_TrueClass() {
+        return SymbolRef(21);
+    }
+
+    static constexpr SymbolRef defn_FalseClass() {
+        return SymbolRef(22);
+    }
+
+    static constexpr SymbolRef defn_NilClass() {
+        return SymbolRef(23);
+    }
+
 private:
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::unique_ptr<std::vector<char>>> strings;

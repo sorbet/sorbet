@@ -138,6 +138,33 @@ static UTF8Desc include_DESC{(char *)include, (int)strlen(include)};
 static const char *currentFile = "__FILE__";
 static UTF8Desc currentFile_DESC{(char *)currentFile, (int)strlen(currentFile)};
 
+static const char *string_str = "String";
+static UTF8Desc string_DESC{(char *)string_str, (int)strlen(string_str)};
+
+static const char *integer_str = "Integer";
+static UTF8Desc integer_DESC{(char *)integer_str, (int)strlen(integer_str)};
+
+static const char *float_str = "Float";
+static UTF8Desc float_DESC{(char *)float_str, (int)strlen(float_str)};
+
+static const char *symbol_str = "Symbol";
+static UTF8Desc symbol_DESC{(char *)symbol_str, (int)strlen(symbol_str)};
+
+static const char *array_str = "Array";
+static UTF8Desc array_DESC{(char *)array_str, (int)strlen(array_str)};
+
+static const char *hash_str = "Hash";
+static UTF8Desc hash_DESC{(char *)hash_str, (int)strlen(hash_str)};
+
+static const char *trueClass_str = "TrueClass";
+static UTF8Desc trueClass_DESC{(char *)trueClass_str, (int)strlen(trueClass_str)};
+
+static const char *falseClass_str = "FalseClass";
+static UTF8Desc falseClass_DESC{(char *)falseClass_str, (int)strlen(falseClass_str)};
+
+static const char *nilClass_str = "NilClass";
+static UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
+
 ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -211,6 +238,15 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef always_id = synthesizeClass(always_DESC);
     SymbolRef never_id = synthesizeClass(never_DESC);
     SymbolRef block_call_id = synthesizeClass(block_call_DESC);
+    SymbolRef integer_id = synthesizeClass(integer_DESC);
+    SymbolRef float_id = synthesizeClass(float_DESC);
+    SymbolRef string_id = synthesizeClass(string_DESC);
+    SymbolRef symbol_id = synthesizeClass(symbol_DESC);
+    SymbolRef array_id = synthesizeClass(array_DESC);
+    SymbolRef hash_id = synthesizeClass(hash_DESC);
+    SymbolRef trueClass_id = synthesizeClass(trueClass_DESC);
+    SymbolRef falseClass_id = synthesizeClass(falseClass_DESC);
+    SymbolRef nilClass_id = synthesizeClass(nilClass_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -227,6 +263,16 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(always_id == defn_cfg_always());
     Error::check(never_id == defn_cfg_never());
     Error::check(block_call_id == defn_cfg_block_call());
+    Error::check(integer_id == defn_Integer());
+    Error::check(float_id == defn_Float());
+    Error::check(string_id == defn_String());
+    Error::check(symbol_id == defn_Symbol());
+    Error::check(array_id == defn_Array());
+    Error::check(hash_id == defn_Hash());
+    Error::check(trueClass_id == defn_TrueClass());
+    Error::check(falseClass_id == defn_FalseClass());
+    Error::check(nilClass_id == defn_NilClass());
+
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
@@ -242,6 +288,15 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
      * 12: <always>
      * 13: <never>
      * 14: <block-call>
+     * 15: Integer
+     * 16: Float
+     * 17: String
+     * 18: Symbol
+     * 19: Array
+     * 20: Hash
+     * 21: TrueClass
+     * 22: FalseClass
+     * 23: NilClass
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 
