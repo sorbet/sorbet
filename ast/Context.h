@@ -123,11 +123,6 @@ public:
         return SymbolRef(14);
     }
 
-    // Keep as last and update to match the last entry
-    static constexpr SymbolRef defn_last_synthetic_sym() {
-        return defn_cfg_block_call();
-    }
-
     static constexpr SymbolRef defn_Integer() {
         return SymbolRef(15);
     }
@@ -162,6 +157,11 @@ public:
 
     static constexpr SymbolRef defn_NilClass() {
         return SymbolRef(23);
+    }
+
+    // Keep as last and update to match the last entry
+    static constexpr SymbolRef defn_last_synthetic_sym() {
+        return defn_NilClass();
     }
 
 private:
