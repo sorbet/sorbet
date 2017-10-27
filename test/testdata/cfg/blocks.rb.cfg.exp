@@ -1,4 +1,4 @@
-digraph <todo sym> {
+digraph block_pass {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 

@@ -1,9 +1,12 @@
 #include "Symbols.h"
 #include "Context.h"
 #include <sstream>
+#include <string>
 
 namespace ruby_typer {
 namespace ast {
+
+using namespace std;
 
 bool SymbolRef::operator==(const SymbolRef &rhs) const {
     return _id == rhs._id;
@@ -84,6 +87,25 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
         os << row;
     }
     return os.str();
+}
+
+SymbolRef SymbolInfo::findMember(NameRef name) {
+    for (auto &member : members) {
+        if (member.first == name)
+            return member.second;
+    }
+    return SymbolRef(0);
+}
+
+string SymbolInfo::fullName(ContextBase &ctx) const {
+    string owner_str;
+    if (this->owner.exists() && this->owner != ctx.defn_root())
+        owner_str = this->owner.info(ctx).fullName(ctx);
+
+    if (this->isClass())
+        return owner_str + "::" + this->name.toString(ctx);
+    else
+        return owner_str + "#" + this->name.toString(ctx);
 }
 
 } // namespace ast

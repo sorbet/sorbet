@@ -1,0 +1,44 @@
+begin
+  class ::Outer1<Outer1> < (::Object)
+    <emptyTree>
+
+  end
+  class ::Outer2<Outer2> < (::Object)
+    class ::Outer2::C<C> < (::Object)
+      <emptyTree>
+
+    end
+
+    class ::Outer2::Inner1<Inner1> < (::Object)
+      class ::Outer2::Inner1::A<A> < (::Object)
+        <emptyTree>
+
+      end
+
+      class ::Outer2::Inner1::Inner2<Inner2> < (::Object)
+        ::Outer2::Inner1::A
+
+        ::Outer2::Inner1
+
+        ::Outer2::Inner1::Inner2
+
+        ::Outer1
+
+      end
+
+    end
+
+    class ::Outer2::Inner1::Inner2<Inner2> < (::Object)
+      ::Outer2::C
+
+      <emptyTree>::A
+
+    end
+
+    class ::Outer2::Other<Other> < (::Outer2::Inner1::Inner2)
+      <emptyTree>
+
+    end
+
+  end
+end

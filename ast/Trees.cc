@@ -398,7 +398,7 @@ string ConstantLit::showRaw(ContextBase &ctx, int tabs) {
 
 string Ident::toString(ContextBase &ctx, int tabs) {
     if (!symbol.isPlaceHolder()) {
-        return this->symbol.info(ctx, true).name.name(ctx).toString(ctx);
+        return this->symbol.info(ctx, true).fullName(ctx);
     } else {
         return this->name.name(ctx).toString(ctx) + this->symbol.info(ctx, true).name.name(ctx).toString(ctx);
     }

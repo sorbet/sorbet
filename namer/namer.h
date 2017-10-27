@@ -9,6 +9,8 @@ public:
     static unique_ptr<ast::Statement> run(ast::Context &ctx, unique_ptr<ast::Statement> tree);
 
 private:
+    static unique_ptr<ast::Statement> resolve(ast::Context &ctx, unique_ptr<ast::Statement> tree);
+
     Namer() = default;
 };
 
