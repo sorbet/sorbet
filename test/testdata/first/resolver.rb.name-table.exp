@@ -1,0 +1,8 @@
+class Outer1 ()
+class Outer2 ()
+  class C ()
+  class Inner1 ()
+    class A ()
+    class Inner2 ()
+  class Other ()
+

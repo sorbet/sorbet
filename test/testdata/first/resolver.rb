@@ -21,4 +21,7 @@ class Outer2
     C
     A # unresolved
   end
+
+  class Other < Inner1::Inner2
+  end
 end

@@ -28,10 +28,7 @@ struct Nesting {
 };
 
 class ResolveWalk {
-public:
-    ResolveWalk(ast::Context ctx, Resolver *resolv)
-        : resolv_(resolv), nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
-
+private:
     ast::SymbolRef resolveLhs(ast::Context ctx, ast::NameRef name) {
         Nesting *scope = nesting_.get();
         while (scope != nullptr) {
@@ -48,7 +45,6 @@ public:
         if (dynamic_cast<ast::EmptyTree *>(c->scope.get()) != nullptr) {
             return resolveLhs(ctx, c->cnst);
         } else if (ast::ConstantLit *scope = dynamic_cast<ast::ConstantLit *>(c->scope.get())) {
-
             auto resolved = resolveConstant(ctx, scope);
             if (!resolved.exists())
                 return resolved;
@@ -63,12 +59,41 @@ public:
         }
     }
 
+    unique_ptr<ast::Expression> maybeResolve(ast::Context ctx, ast::Expression *expr) {
+        if (ast::ConstantLit *cnst = dynamic_cast<ast::ConstantLit *>(expr)) {
+            ast::SymbolRef resolved = resolveConstant(ctx, cnst);
+            if (resolved.exists())
+                return make_unique<ast::Ident>(resolved);
+        }
+        return nullptr;
+    }
+
+public:
+    ResolveWalk(ast::Context ctx, Resolver *resolv)
+        : resolv_(resolv), nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
+
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *original) {
         nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
         return original;
     }
     ast::Statement *postTransformClassDef(ast::Context ctx, ast::ClassDef *original) {
         nesting_ = move(nesting_->parent);
+
+        if (auto name = maybeResolve(ctx, original->name.get()))
+            original->name.swap(name);
+
+        for (auto &ancst : original->ancestors) {
+            if (auto resolved = maybeResolve(ctx, ancst.get()))
+                ancst.swap(resolved);
+        }
+        if (original->ancestors.size() > 0) {
+            if (ast::Ident *id = dynamic_cast<ast::Ident *>(original->ancestors.front().get())) {
+                auto info = original->symbol.info(ctx);
+                info.resultOrParentOrLoader = id->symbol;
+                info.argumentsOrMixins.emplace_back(id->symbol);
+            }
+        }
+
         return original;
     }
 

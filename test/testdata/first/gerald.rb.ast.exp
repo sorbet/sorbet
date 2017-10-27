@@ -13,7 +13,7 @@ begin
 
     end
 
-    class <emptyTree>::Matcher<<todo sym>> < ()
+    class <emptyTree>::Matcher<<todo sym>> < (::Object)
       <emptyTree>.include(<emptyTree>::Chalk::Log)
 
       <emptyTree>::MAX_AFFECTED_FILES = 100
@@ -58,7 +58,7 @@ begin
 
     end
 
-    class <emptyTree>::MatchContext<<todo sym>> < ()
+    class <emptyTree>::MatchContext<<todo sym>> < (::Object)
       <emptyTree>.attr_reader(:repo)
 
       <emptyTree>.attr_reader(:assignee)
@@ -92,7 +92,7 @@ begin
 
     end
 
-    class <emptyTree>::MatchTimeBudget<<todo sym>> < ()
+    class <emptyTree>::MatchTimeBudget<<todo sym>> < (::Object)
       <emptyTree>::TOTAL_TIME_MS = 10000
 
       <emptyTree>::PER_RULE_MS = 2000
@@ -138,7 +138,7 @@ begin
 
     end
 
-    class <emptyTree>::Diff<<todo sym>> < ()
+    class <emptyTree>::Diff<<todo sym>> < (::Object)
       def initialize<<todo sym>>(raw_diff<todo lvar sym>)
         begin
           @raw<todo ivar sym> = raw_diff<todo lvar sym>
