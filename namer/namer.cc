@@ -135,7 +135,8 @@ private:
 
 unique_ptr<ast::Statement> Namer::run(ast::Context &ctx, unique_ptr<ast::Statement> tree) {
     NameInserter nameInserter;
-    return ast::TreeMap<NameInserter>::apply(ctx, nameInserter, std::move(tree));
+    tree = ast::TreeMap<NameInserter>::apply(ctx, nameInserter, std::move(tree));
+    return Namer::resolve(ctx, move(tree));
 }
 
 } // namespace namer

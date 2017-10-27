@@ -149,7 +149,6 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
     // Namer
     auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
-    namedTree = ruby_typer::namer::Namer::resolve(context, move(namedTree));
 
     expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
