@@ -1,45 +1,45 @@
 begin
-  class ::NormalClass<NormalClass> < (::Object)
+  class <emptyTree>::NormalClass<NormalClass> < (::Object)
     def normal_method<normal_method>()
       <emptyTree>
 
     <Not Supported (DefS)>
 
-    class ::NormalClass::InnerClass<InnerClass> < (::Object)
+    class <emptyTree>::InnerClass<InnerClass> < (::Object)
       <emptyTree>
 
     end
 
-    module ::NormalClass::InnerModule<InnerModule> < ()
-      <emptyTree>
-
-    end
-
-  end
-  module ::ANamespace<ANamespace> < ()
-    class ::ANamespace::ObviousChild<ObviousChild> < (::Object)
+    module <emptyTree>::InnerModule<InnerModule> < ()
       <emptyTree>
 
     end
 
   end
-  class ::ANamespace::ClassInNamespace<ClassInNamespace> < (::Object)
+  module <emptyTree>::ANamespace<ANamespace> < ()
+    class <emptyTree>::ObviousChild<ObviousChild> < (::Object)
+      <emptyTree>
+
+    end
+
+  end
+  class <emptyTree>::ANamespace::ClassInNamespace<ClassInNamespace> < (::Object)
     <emptyTree>
 
   end
-  class ::Parent<Parent> < (::Object)
+  class <emptyTree>::Parent<Parent> < (::Object)
     <emptyTree>
 
   end
-  module ::Mixin<Mixin> < ()
+  module <emptyTree>::Mixin<Mixin> < ()
     <emptyTree>
 
   end
-  module ::OtherMixin<OtherMixin> < ()
+  module <emptyTree>::OtherMixin<OtherMixin> < ()
     <emptyTree>
 
   end
-  class ::Child<Child> < (::Parent, ::Mixin)
+  class <emptyTree>::Child<Child> < (::Parent, ::Mixin)
     <emptyTree>.include(::Mixin, ::Mixin)
 
     <emptyTree>.include(3)
