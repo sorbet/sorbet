@@ -13,6 +13,7 @@ std::shared_ptr<ruby_typer::typer::Type> ruby_typer::typer::Types::lub(ast::Cont
     }
     if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+            Error::notImplemented();
             // both are proxy
         } else {
             // only 1st is proxy
@@ -105,8 +106,37 @@ std::shared_ptr<ruby_typer::typer::Type> ruby_typer::typer::Types::glb(ast::Cont
     Error::notImplemented();
 }
 
+bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+
+}
+
 bool ruby_typer::typer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
-    Error::notImplemented();
+    if (t1.get() == t2.get()) {
+        return true;
+    }
+    if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
+        if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+            bool result;
+            // TODO: simply compare as memory regions
+            ruby_typer::typecase(p1,
+            [&](ArrayType *a) {
+                ArrayType *a2 = dynamic_cast<ArrayType *>()
+            },
+            [&](HashType *a) {},
+            [&](Literal *a) {});
+            return
+            // both are proxy
+        } else {
+            // only 1st is proxy
+            std::shared_ptr<Type> &und = p1->underlying;
+            return isSubTypeGround(ctx, und, t2);
+        }
+    } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+        return false;
+    } else {
+        // none is proxy
+        return lubGround(ctx, t1, t2);
+    }
 }
 
 ruby_typer::typer::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
