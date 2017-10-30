@@ -5,8 +5,8 @@
 namespace ruby_typer {
 namespace parser {
 
-using ruby_typer::ast::GlobalState;
 using ruby_typer::ast::FileRef;
+using ruby_typer::ast::GlobalState;
 using std::string;
 using std::unique_ptr;
 
