@@ -3,12 +3,31 @@ cc_library(
     srcs = glob(
         ["*.cc"],
         # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
-        exclude = ["flycheck_*"],
+        exclude = [
+            "*_test.cc",
+            "flycheck_*",
+        ],
     ),
     hdrs = glob(["*.h"]),
     visibility = ["//visibility:public"],
     deps = [
         "//cfg",
         "//common",
+    ],
+)
+
+cc_test(
+    name = "infer_test",
+    srcs = [
+        "infer_test.cc",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    linkstatic = 1,
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "infer",
+        "@gtest//:gtest",
+        "@gtest//:gtest_main",
+        "@spdlog//:spdlog",
     ],
 )
