@@ -8,7 +8,7 @@ cc_binary(
         "//cfg",
         "//namer",
         "//parser",
-        "//typer",
+        "//infer",
         "@cxxopts//:cxxopts",
         "@spdlog//:spdlog",
     ],
