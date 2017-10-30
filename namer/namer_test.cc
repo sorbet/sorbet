@@ -41,13 +41,13 @@ TEST_F(NamerFixture, HelloWorld) {
     auto ctx = getCtx();
     auto tree = hello_world(ctx);
     namer::Namer::run(ctx, std::move(tree));
-    auto objectScope = ast::GlobalState::defn_object().info(ctx);
+    auto &objectScope = ast::GlobalState::defn_object().info(ctx);
     ASSERT_EQ(ast::GlobalState::defn_root(), objectScope.owner);
 
     ASSERT_EQ(1, objectScope.members.size());
     auto methodPair = objectScope.members[0];
     ASSERT_EQ("hello_world", methodPair.first.name(ctx).toString(ctx));
-    auto symbol = methodPair.second.info(ctx);
+    auto &symbol = methodPair.second.info(ctx);
     ASSERT_EQ(ast::GlobalState::defn_object(), symbol.owner);
     ASSERT_EQ(0, symbol.arguments().size());
     ASSERT_EQ(ast::GlobalState::defn_todo(), symbol.result());
@@ -73,12 +73,12 @@ TEST_F(NamerFixture, NameClass) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Foo; end");
     namer::Namer::run(ctx, std::move(tree));
-    auto rootScope = ast::GlobalState::defn_root().info(ctx);
+    auto &rootScope = ast::GlobalState::defn_root().info(ctx);
 
     ASSERT_EQ(1, rootScope.members.size());
     auto fooPair = rootScope.members[0];
     ASSERT_EQ("Foo", fooPair.first.name(ctx).toString(ctx));
-    auto fooInfo = fooPair.second.info(ctx);
+    auto &fooInfo = fooPair.second.info(ctx);
     ASSERT_EQ(0, fooInfo.members.size());
 }
 
@@ -86,11 +86,11 @@ TEST_F(NamerFixture, InsideClass) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Foo; def bar; end; end");
     namer::Namer::run(ctx, std::move(tree));
-    auto rootScope = ast::GlobalState::defn_root().info(ctx);
+    auto &rootScope = ast::GlobalState::defn_root().info(ctx);
 
     ASSERT_EQ(1, rootScope.members.size());
     auto fooSym = rootScope.members[0].second;
-    auto fooInfo = fooSym.info(ctx);
+    auto &fooInfo = fooSym.info(ctx);
     ASSERT_EQ(1, fooInfo.members.size());
 
     auto barPair = fooInfo.members[0];
