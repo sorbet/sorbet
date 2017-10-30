@@ -522,7 +522,61 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  unique_ptr<Statement> res = make_unique<Array>(elems);
                  result.swap(res);
              },
+             [&](parser::Hash *hash) {
+                 vector<unique_ptr<Expression>> keys;
+                 vector<unique_ptr<Expression>> values;
+                 unique_ptr<Statement> lastMerge;
 
+                 for (auto &pairAsExpression : hash->pairs) {
+                     parser::Pair *pair = dynamic_cast<parser::Pair *>(pairAsExpression.get());
+                     if (pair != nullptr) {
+                         auto key = Expression::fromStatement(node2TreeImpl(ctx, pair->key));
+                         auto value = Expression::fromStatement(node2TreeImpl(ctx, pair->value));
+                         keys.emplace_back(std::move(key));
+                         values.emplace_back(std::move(value));
+                     } else {
+                         parser::Kwsplat *splat = dynamic_cast<parser::Kwsplat *>(pairAsExpression.get());
+                         Error::check(splat);
+
+                         // Desguar
+                         //   {a: 'a', **x, remaining}
+                         // into
+                         //   {a: 'a'}.merge(x).merge(remaining)
+                         if (keys.size() == 0) {
+                             if (lastMerge != nullptr) {
+                                 lastMerge = mkSend1(lastMerge, Names::merge(), node2TreeImpl(ctx, splat->expr));
+                             } else {
+                                 lastMerge = node2TreeImpl(ctx, splat->expr);
+                             }
+                         } else {
+                             unique_ptr<Statement> current = make_unique<Hash>(keys, values);
+                             if (lastMerge != nullptr) {
+                                 lastMerge = mkSend1(lastMerge, Names::merge(), current);
+                             } else {
+                                 lastMerge = std::move(current);
+                             }
+                             lastMerge = mkSend1(lastMerge, Names::merge(), node2TreeImpl(ctx, splat->expr));
+                         }
+                     }
+                 };
+
+                 unique_ptr<Statement> res;
+                 if (keys.size() == 0) {
+                     if (lastMerge != nullptr) {
+                         res = std::move(lastMerge);
+                     } else {
+                         // Empty array
+                         res = make_unique<Hash>(keys, values);
+                     }
+                 } else {
+                     res = make_unique<Hash>(keys, values);
+                     if (lastMerge != nullptr) {
+                         res = mkSend1(lastMerge, Names::merge(), res);
+                     }
+                 }
+
+                 result.swap(res);
+             },
              [&](parser::Return *ret) {
                  if (ret->exprs.size() > 1) {
                      vector<unique_ptr<Expression>> elems;

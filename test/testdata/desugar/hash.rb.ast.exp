@@ -1,0 +1,12 @@
+begin
+  {}
+  {:a => "a"}
+  <emptyTree>.x()
+  <emptyTree>.x()
+  {:a => "a"}.merge(<emptyTree>.x())
+  {:a => "a"}.merge(<emptyTree>.x())
+  <emptyTree>.x().merge({:a => "a"})
+  <emptyTree>.x().merge({:a => "a"})
+  {:a => "a"}.merge(<emptyTree>.x()).merge(<emptyTree>.y()).merge({:b => "b", :c => "c"}).merge(<emptyTree>.y()).merge({:d => "d"})
+  {:a => "a"}.merge(<emptyTree>.x()).merge(<emptyTree>.y()).merge({:b => "b", :c => "c"}).merge(<emptyTree>.y()).merge({:d => "d"})
+end

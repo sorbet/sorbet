@@ -126,6 +126,9 @@ NotSupported::NotSupported(const string &why) : why(why) {}
 
 SymbolLit::SymbolLit(NameRef name) : name(name) {}
 
+Hash::Hash(vector<unique_ptr<Expression>> &keys, vector<unique_ptr<Expression>> &values)
+    : keys(move(keys)), values(move(values)) {}
+
 Array::Array(vector<unique_ptr<Expression>> &elems) : elems(move(elems)) {}
 
 InsSeq::InsSeq(vector<unique_ptr<Statement>> &&stats, unique_ptr<Expression> expr)
@@ -591,6 +594,34 @@ string Super::showRaw(GlobalState &ctx, int tabs) {
     return buf.str();
 }
 
+string Hash::showRaw(GlobalState &ctx, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "pairs = [" << endl;
+    int i = 0;
+    for (auto &key : keys) {
+        auto &value = values[i];
+
+        printTabs(buf, tabs + 2);
+        buf << "[" << endl;
+        printTabs(buf, tabs + 3);
+        buf << "key = " << key->showRaw(ctx, tabs + 4) << endl;
+        printTabs(buf, tabs + 3);
+        buf << "value = " << value->showRaw(ctx, tabs + 4) << endl;
+        printTabs(buf, tabs + 2);
+        buf << "]" << endl;
+
+        i++;
+    }
+    printTabs(buf, tabs + 1);
+    buf << "]" << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+
+    return buf.str();
+}
+
 string Array::showRaw(GlobalState &ctx, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
@@ -617,6 +648,26 @@ string Super::toString(GlobalState &ctx, int tabs) {
     stringstream buf;
     buf << "super";
     printArgs(ctx, buf, this->args, tabs);
+    return buf.str();
+}
+
+string Hash::toString(GlobalState &ctx, int tabs) {
+    stringstream buf;
+    buf << "{";
+    bool first = true;
+    int i = 0;
+    for (auto &key : this->keys) {
+        auto &value = this->values[i];
+        if (!first) {
+            buf << ", ";
+        }
+        first = false;
+        buf << key->toString(ctx, tabs + 1);
+        buf << " => ";
+        buf << value->toString(ctx, tabs + 1);
+        i++;
+    }
+    buf << "}";
     return buf.str();
 }
 
@@ -747,6 +798,10 @@ std::string Super::nodeName() {
 }
 std::string NamedArg::nodeName() {
     return "NamedArg";
+}
+
+std::string Hash::nodeName() {
+    return "Hash";
 }
 
 std::string Array::nodeName() {
