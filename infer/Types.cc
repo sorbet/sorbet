@@ -18,8 +18,79 @@ std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Cont
     }
     if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
-            Error::notImplemented();
             // both are proxy
+            std::shared_ptr<ruby_typer::infer::Type> result;
+            ruby_typer::typecase(
+                p1,
+                [&](ArrayType *a1) { // Warning: this implements COVARIANT arrays
+                    if (ArrayType *a2 = dynamic_cast<ArrayType *>(p2)) {
+                        if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
+                            std::vector<std::shared_ptr<ruby_typer::infer::Type>> elemLubs;
+                            int i = 0;
+                            for (auto &el2 : a2->elems) {
+                                elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
+                                ++i;
+                            }
+                            result = std::make_shared<ArrayType>(elemLubs);
+                        } else {
+                            result = std::make_shared<ClassType>(ast::GlobalState::defn_Array());
+                        }
+                    } else {
+                        result = lubGround(ctx, p1->underlying, p2->underlying);
+                    }
+                },
+                [&](HashType *h1) { // Warning: this implements COVARIANT hashes
+                    if (HashType *h2 = dynamic_cast<HashType *>(p2)) {
+                        if (h2->keys.size() == h1->keys.size()) {
+                            // have enough keys.
+                            int i = 0;
+                            std::vector<std::shared_ptr<ruby_typer::infer::Literal>> keys;
+                            std::vector<std::shared_ptr<ruby_typer::infer::Type>> valueLubs;
+                            for (auto &el2 : h2->keys) {
+                                ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
+                                Error::check(u2 != nullptr);
+                                auto fnd = std::find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                                    ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
+                                    return candidate->value == el2->value && u1 == u2; // from lambda
+                                });
+                                if (fnd != h1->keys.end()) {
+                                    keys.emplace_back(el2);
+                                    valueLubs.emplace_back(lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
+                                } else {
+                                    result = std::make_shared<ClassType>(ast::GlobalState::defn_Hash());
+                                    return;
+                                }
+                                result = std::make_shared<HashType>(keys, valueLubs);
+                                ++i;
+                            }
+                        } else {
+                            result = std::make_shared<ClassType>(ast::GlobalState::defn_Hash());
+                        }
+                    } else {
+                        result = lubGround(ctx, p1->underlying, p2->underlying);
+                    }
+                },
+                [&](Literal *l1) {
+                    if (Literal *l2 = dynamic_cast<Literal *>(p2)) {
+                        ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
+                        ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
+                        Error::check(u1 != nullptr && u2 != nullptr);
+                        if (u1->symbol == u2->symbol) {
+                            if (l1->value == l2->value) {
+                                result = t1;
+                            } else {
+                                result = l1->underlying;
+                            }
+                        } else {
+                            result = lubGround(ctx, l1->underlying, l2->underlying);
+                        }
+                    } else {
+                        result = lubGround(ctx, p1->underlying, p2->underlying);
+                    }
+
+                });
+            Error::check(result.get() != nullptr);
+            return result;
         } else {
             // only 1st is proxy
             std::shared_ptr<Type> &und = p1->underlying;
