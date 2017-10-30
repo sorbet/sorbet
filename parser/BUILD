@@ -42,9 +42,9 @@ genrule(
 cc_test(
     name = "parser_test",
     size = "small",
-    srcs = [
-        "parser_test.cc",
-    ],
+    srcs = glob([
+        "test/*.cc",
+    ]),
     copts = ["-Iexternal/gtest/include"],
     data = glob([
         "fixtures/*.rb",

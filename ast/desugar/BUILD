@@ -17,9 +17,9 @@ cc_library(
 cc_test(
     name = "desugar_test",
     size = "small",
-    srcs = [
-        "test/desugar_test.cc",
-    ],
+    srcs = glob([
+        "test/*.cc",
+    ]),
     copts = ["-Iexternal/gtest/include"],
     data = glob([
         "fixtures/*.rb",
