@@ -125,7 +125,7 @@ public:
 
 class HashType : public ProxyType {
 public:
-    std::vector<std::shared_ptr<Literal>> keys;
+    std::vector<std::shared_ptr<Literal>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
     HashType(std::vector<std::shared_ptr<Literal>> keys, std::vector<std::shared_ptr<Type>> values);
 

@@ -1,5 +1,7 @@
 #include "Types.h"
 #include "../common/common.h"
+#include <algorithm> // find_if
+
 using namespace ruby_typer;
 using namespace ruby_typer::typer;
 using namespace std;
@@ -107,6 +109,17 @@ std::shared_ptr<ruby_typer::typer::Type> ruby_typer::typer::Types::glb(ast::Cont
 }
 
 bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+    // pairs to cover: 1  (Class, Class)
+    //                 2  (Class, And)
+    //                 3  (Class, Or)
+    //                 4  (Class, Method)
+    //                 5  (And, And)
+    //                 6  (And, Or)
+    //                 7  (And, Method)
+    //                 8  (Or, Or)
+    //                 9  (Or, Method)
+    //                 10 (Method, Method)
+    
 
 }
 
@@ -119,11 +132,51 @@ bool ruby_typer::typer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
             bool result;
             // TODO: simply compare as memory regions
             ruby_typer::typecase(p1,
-            [&](ArrayType *a) {
+            [&](ArrayType *a1) { // Warning: this implements COVARIANT arrays
                 ArrayType *a2 = dynamic_cast<ArrayType *>(p2);
+                result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
+                if (result) {
+                    int i = 0;
+                    for (auto &el2: a2->elems) {
+                        result = isSubType(ctx, a1->elems[i], el2);
+                        if(!result) {
+                            break;
+                        }
+                        ++i;
+                    }
+                }
             },
-            [&](HashType *a) {},
-            [&](Literal *a) {});
+            [&](HashType *h1) { // Warning: this implements COVARIANT hashes
+                HashType *h2 = dynamic_cast<HashType *>(p2);
+                result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
+                if (!result) {
+                    return;
+                }
+                // have enough keys.
+                int i = 0;
+                for (auto &el2: h2->keys) {
+                    ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
+                    Error::check(u2 != nullptr);
+                    auto fnd = std::find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                        ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
+                        return candidate->value == el2->value && u1 == u2; // from lambda
+                    });
+                    result = fnd != h1->keys.end() && isSubType(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
+                    if (!result) {
+                        return;
+                    }
+                    ++i;
+                }
+            },
+            [&](Literal *l1) {
+                Literal *l2 = dynamic_cast<Literal *>(p2);
+                ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
+                ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
+                Error::check(u1 != nullptr && u2 != nullptr);
+                result = l2 != nullptr &&
+                        u1->symbol == u2->symbol &&
+                        l1->value == l2->value;
+            });
             return result;
              // both are proxy
         } else {
@@ -132,6 +185,7 @@ bool ruby_typer::typer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
             return isSubTypeGround(ctx, und, t2);
         }
     } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+        // non-proxies are never subtypes of proxies.
         return false;
     } else {
         // none is proxy
@@ -224,7 +278,6 @@ ruby_typer::typer::HashType::HashType(std::vector<std::shared_ptr<Literal>> keys
 std::string HashType::toString(ast::Context ctx, int tabs) {
     stringstream buf;
     buf << "HashType {" << endl;
-    int i = 0;
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
         printTabs(buf, tabs + 1);
