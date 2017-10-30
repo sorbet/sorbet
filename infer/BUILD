@@ -26,6 +26,8 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "infer",
+        "//ast/desugar",
+        "//namer",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
         "@spdlog//:spdlog",
