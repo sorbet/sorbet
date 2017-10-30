@@ -29,7 +29,7 @@ Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off) {
     return pos;
 }
 
-pair<Loc::Detail, Loc::Detail> Loc::position(ast::ContextBase &ctx) {
+pair<Loc::Detail, Loc::Detail> Loc::position(ast::GlobalState &ctx) {
     ast::File &file = this->file.file(ctx);
     return make_pair(offset2Pos(file.source(), begin_pos), offset2Pos(file.source(), end_pos));
 }

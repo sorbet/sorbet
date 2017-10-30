@@ -85,7 +85,7 @@ public:
         }
         if (original->ancestors.size() > 0) {
             if (ast::Ident *id = dynamic_cast<ast::Ident *>(original->ancestors.front().get())) {
-                auto info = original->symbol.info(ctx);
+                ast::Symbol &info = original->symbol.info(ctx);
                 info.resultOrParentOrLoader = id->symbol;
                 info.argumentsOrMixins.emplace_back(id->symbol);
             }
