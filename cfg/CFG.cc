@@ -184,7 +184,8 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     res->symbol = md.symbol;
     ast::SymbolRef retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
     auto cont = res->walk(ctx, md.rhs.get(), res->entry(), *res.get(), retSym);
-    ast::SymbolRef retSym1 = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
+    ast::SymbolRef retSym1 =
+        ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
 
     cont->exprs.emplace_back(retSym1, make_unique<Return>(retSym)); // dead assign.
     jumpToDead(cont, *res.get());
@@ -250,160 +251,164 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
     Error::check(!current->bexit.cond.exists());
 
     BasicBlock *ret = nullptr;
-    typecase(
-        what,
-        [&](ast::While *a) {
-            auto headerBlock = inWhat.freshBlock();
-            unconditionalJump(current, headerBlock, inWhat);
+    typecase(what,
+             [&](ast::While *a) {
+                 auto headerBlock = inWhat.freshBlock();
+                 unconditionalJump(current, headerBlock, inWhat);
 
-            ast::SymbolRef condSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::whileTemp(), inWhat.symbol);
-            auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym);
-            auto bodyBlock = inWhat.freshBlock();
-            auto continueBlock = inWhat.freshBlock();
-            conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, inWhat);
-            // finishHeader
-            ast::SymbolRef bodySym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                 ast::SymbolRef condSym =
+                     ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::whileTemp(), inWhat.symbol);
+                 auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym);
+                 auto bodyBlock = inWhat.freshBlock();
+                 auto continueBlock = inWhat.freshBlock();
+                 conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, inWhat);
+                 // finishHeader
+                 ast::SymbolRef bodySym =
+                     ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
 
-            auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym);
-            unconditionalJump(body, headerBlock, inWhat);
+                 auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym);
+                 unconditionalJump(body, headerBlock, inWhat);
 
-            continueBlock->exprs.emplace_back(target, make_unique<Nil>());
-            ret = continueBlock;
-        },
-        [&](ast::Return *a) {
-            ast::SymbolRef retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
-            auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym);
-            cont->exprs.emplace_back(target, make_unique<Return>(retSym)); // dead assign.
-            jumpToDead(cont, inWhat);
-            ret = deadBlock();
-        },
-        [&](ast::If *a) {
-            ast::SymbolRef ifSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::ifTemp(), inWhat.symbol);
-            Error::check(ifSym.exists());
-            auto thenBlock = inWhat.freshBlock();
-            auto elseBlock = inWhat.freshBlock();
-            auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym);
-            conditionalJump(cont, ifSym, thenBlock, elseBlock, inWhat);
+                 continueBlock->exprs.emplace_back(target, make_unique<Nil>());
+                 ret = continueBlock;
+             },
+             [&](ast::Return *a) {
+                 ast::SymbolRef retSym =
+                     ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
+                 auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym);
+                 cont->exprs.emplace_back(target, make_unique<Return>(retSym)); // dead assign.
+                 jumpToDead(cont, inWhat);
+                 ret = deadBlock();
+             },
+             [&](ast::If *a) {
+                 ast::SymbolRef ifSym =
+                     ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::ifTemp(), inWhat.symbol);
+                 Error::check(ifSym.exists());
+                 auto thenBlock = inWhat.freshBlock();
+                 auto elseBlock = inWhat.freshBlock();
+                 auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym);
+                 conditionalJump(cont, ifSym, thenBlock, elseBlock, inWhat);
 
-            auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target);
-            auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target);
-            if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
-                if (thenEnd == deadBlock()) {
-                    ret = elseEnd;
-                } else if (thenEnd == deadBlock()) {
-                    ret = thenEnd;
-                } else {
-                    ret = freshBlock();
-                    unconditionalJump(thenEnd, ret, inWhat);
-                    unconditionalJump(elseEnd, ret, inWhat);
-                }
-            } else {
-                ret = deadBlock();
-            }
-        },
-        [&](ast::IntLit *a) {
-            current->exprs.emplace_back(target, make_unique<IntLit>(a->value));
-            ret = current;
-        },
-        [&](ast::FloatLit *a) {
-            current->exprs.emplace_back(target, make_unique<FloatLit>(a->value));
-            ret = current;
-        },
-        [&](ast::StringLit *a) {
-            current->exprs.emplace_back(target, make_unique<StringLit>(a->value));
-            ret = current;
-        },
-        [&](ast::BoolLit *a) {
-            current->exprs.emplace_back(target, make_unique<BoolLit>(a->value));
-            ret = current;
-        },
-        [&](ast::ConstantLit *a) {
-            current->exprs.emplace_back(target, make_unique<ConstantLit>(a->cnst));
-            ret = current;
-        },
-        [&](ast::Ident *a) {
-            current->exprs.emplace_back(target, make_unique<Ident>(a->symbol));
-            ret = current;
-        },
-        [&](ast::Self *a) {
-            current->exprs.emplace_back(target, make_unique<Self>(a->claz));
-            ret = current;
-        },
-        [&](ast::Assign *a) {
-            auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
-            Error::check(lhsIdent != nullptr);
-            auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhsIdent->symbol);
-            rhsCont->exprs.emplace_back(target, make_unique<Ident>(lhsIdent->symbol));
-            ret = rhsCont;
-        },
-        [&](ast::InsSeq *a) {
-            for (auto &exp : a->stats) {
-                ast::SymbolRef temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                current = walk(ctx, exp.get(), current, inWhat, temp);
-            }
-            ret = walk(ctx, a->expr.get(), current, inWhat, target);
-        },
-        [&](ast::Send *s) {
-            ast::SymbolRef recv;
-            if (auto *i = dynamic_cast<ast::Ident *>(s->recv.get())) {
-                recv = i->symbol;
-            } else {
-                recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                current = walk(ctx, s->recv.get(), current, inWhat, recv);
-            }
+                 auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target);
+                 auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target);
+                 if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
+                     if (thenEnd == deadBlock()) {
+                         ret = elseEnd;
+                     } else if (thenEnd == deadBlock()) {
+                         ret = thenEnd;
+                     } else {
+                         ret = freshBlock();
+                         unconditionalJump(thenEnd, ret, inWhat);
+                         unconditionalJump(elseEnd, ret, inWhat);
+                     }
+                 } else {
+                     ret = deadBlock();
+                 }
+             },
+             [&](ast::IntLit *a) {
+                 current->exprs.emplace_back(target, make_unique<IntLit>(a->value));
+                 ret = current;
+             },
+             [&](ast::FloatLit *a) {
+                 current->exprs.emplace_back(target, make_unique<FloatLit>(a->value));
+                 ret = current;
+             },
+             [&](ast::StringLit *a) {
+                 current->exprs.emplace_back(target, make_unique<StringLit>(a->value));
+                 ret = current;
+             },
+             [&](ast::BoolLit *a) {
+                 current->exprs.emplace_back(target, make_unique<BoolLit>(a->value));
+                 ret = current;
+             },
+             [&](ast::ConstantLit *a) {
+                 current->exprs.emplace_back(target, make_unique<ConstantLit>(a->cnst));
+                 ret = current;
+             },
+             [&](ast::Ident *a) {
+                 current->exprs.emplace_back(target, make_unique<Ident>(a->symbol));
+                 ret = current;
+             },
+             [&](ast::Self *a) {
+                 current->exprs.emplace_back(target, make_unique<Self>(a->claz));
+                 ret = current;
+             },
+             [&](ast::Assign *a) {
+                 auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
+                 Error::check(lhsIdent != nullptr);
+                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhsIdent->symbol);
+                 rhsCont->exprs.emplace_back(target, make_unique<Ident>(lhsIdent->symbol));
+                 ret = rhsCont;
+             },
+             [&](ast::InsSeq *a) {
+                 for (auto &exp : a->stats) {
+                     ast::SymbolRef temp =
+                         ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                     current = walk(ctx, exp.get(), current, inWhat, temp);
+                 }
+                 ret = walk(ctx, a->expr.get(), current, inWhat, target);
+             },
+             [&](ast::Send *s) {
+                 ast::SymbolRef recv;
+                 if (auto *i = dynamic_cast<ast::Ident *>(s->recv.get())) {
+                     recv = i->symbol;
+                 } else {
+                     recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                     current = walk(ctx, s->recv.get(), current, inWhat, recv);
+                 }
 
-            vector<ast::SymbolRef> args;
-            for (auto &exp : s->args) {
-                ast::SymbolRef temp;
-                if (auto *i = dynamic_cast<ast::Ident *>(exp.get())) {
-                    temp = i->symbol;
-                } else {
-                    temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                    current = walk(ctx, exp.get(), current, inWhat, temp);
-                }
-                args.push_back(temp);
-            }
+                 vector<ast::SymbolRef> args;
+                 for (auto &exp : s->args) {
+                     ast::SymbolRef temp;
+                     if (auto *i = dynamic_cast<ast::Ident *>(exp.get())) {
+                         temp = i->symbol;
+                     } else {
+                         temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                         current = walk(ctx, exp.get(), current, inWhat, temp);
+                     }
+                     args.push_back(temp);
+                 }
 
-            if (s->block != nullptr) {
-                auto headerBlock = inWhat.freshBlock();
-                auto postBlock = inWhat.freshBlock();
-                auto bodyBlock = inWhat.freshBlock();
+                 if (s->block != nullptr) {
+                     auto headerBlock = inWhat.freshBlock();
+                     auto postBlock = inWhat.freshBlock();
+                     auto bodyBlock = inWhat.freshBlock();
 
-                for (int i = 0; i < s->block->args.size(); ++i) {
-                    auto &arg = s->block->args[i];
+                     for (int i = 0; i < s->block->args.size(); ++i) {
+                         auto &arg = s->block->args[i];
 
-                    if (auto id = dynamic_cast<ast::Ident *>(arg.get())) {
-                        headerBlock->exprs.emplace_back(id->symbol, make_unique<LoadArg>(recv, s->fun, i));
-                    } else {
-                        // TODO(nelhage): this will be an error once the namer
-                        // is more complete and turns all args into Ident
-                    }
-                }
+                         if (auto id = dynamic_cast<ast::Ident *>(arg.get())) {
+                             headerBlock->exprs.emplace_back(id->symbol, make_unique<LoadArg>(recv, s->fun, i));
+                         } else {
+                             // TODO(nelhage): this will be an error once the namer
+                             // is more complete and turns all args into Ident
+                         }
+                     }
 
-                unconditionalJump(current, headerBlock, inWhat);
+                     unconditionalJump(current, headerBlock, inWhat);
 
-                conditionalJump(headerBlock, ctx.state.defn_cfg_block_call(), bodyBlock, postBlock, inWhat);
+                     conditionalJump(headerBlock, ctx.state.defn_cfg_block_call(), bodyBlock, postBlock, inWhat);
 
-                // TODO: handle block arguments somehow??
-                ast::SymbolRef blockrv =
-                    ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::blockReturnTemp(), inWhat.symbol);
-                auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv);
+                     // TODO: handle block arguments somehow??
+                     ast::SymbolRef blockrv =
+                         ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::blockReturnTemp(), inWhat.symbol);
+                     auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv);
 
-                unconditionalJump(blockLast, headerBlock, inWhat);
+                     unconditionalJump(blockLast, headerBlock, inWhat);
 
-                current = postBlock;
-            }
+                     current = postBlock;
+                 }
 
-            current->exprs.emplace_back(target, make_unique<Send>(recv, s->fun, args));
-            ret = current;
-        },
+                 current->exprs.emplace_back(target, make_unique<Send>(recv, s->fun, args));
+                 ret = current;
+             },
 
-        [&](ast::Statement *n) {
-            current->exprs.emplace_back(target, make_unique<NotSupported>(""));
-            ret = current;
-        },
+             [&](ast::Statement *n) {
+                 current->exprs.emplace_back(target, make_unique<NotSupported>(""));
+                 ret = current;
+             },
 
-        [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); });
+             [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); });
 
     /*[&](ast::Break *a) {}, [&](ast::Next *a) {},*/
     // For, Next, Rescue,
