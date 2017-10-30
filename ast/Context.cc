@@ -11,13 +11,13 @@ namespace ruby_typer {
 namespace ast {
 
 SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
-    auto nameId = enterNameUTF8(name);
+    NameRef nameId = enterNameUTF8(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to defn_root().members later.
-    auto symRef = SymbolRef(symbols.size());
+    SymbolRef symRef = SymbolRef(symbols.size());
     symbols.emplace_back();
-    auto &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
+    Symbol &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
     info.name = nameId;
     info.owner = defn_root();
     info.flags = 0;
@@ -150,28 +150,28 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
 
     names.emplace_back(); // first name is used in hashes to indicate empty cell
     // Second name is always <init>, see Symbol::isConstructor
-    auto init_id = enterNameUTF8(init_DESC);
-    auto andAnd_id = enterNameUTF8(andAnd_DESC);
-    auto orOr_id = enterNameUTF8(orOr_DESC);
-    auto to_s_id = enterNameUTF8(to_s_DESC);
-    auto concat_id = enterNameUTF8(concat_DESC);
-    auto call_id = enterNameUTF8(call_DESC);
-    auto bang_id = enterNameUTF8(bang_DESC);
-    auto squareBrackets_id = enterNameUTF8(squareBrackets_DESC);
-    auto squareBracketsEq_id = enterNameUTF8(squareBracketsEq_DESC);
-    auto unaryPlus_id = enterNameUTF8(unaryPlus_DESC);
-    auto unaryMinus_id = enterNameUTF8(unaryMinus_DESC);
-    auto star_id = enterNameUTF8(star_DESC);
-    auto starStar_id = enterNameUTF8(starStar_DESC);
-    auto whileTemp_id = enterNameUTF8(whileTemp_DESC);
-    auto ifTemp_id = enterNameUTF8(ifTemp_DESC);
-    auto returnTemp_id = enterNameUTF8(retunTemp_DESC);
-    auto statTemp_id = enterNameUTF8(statTemp_DESC);
-    auto assignTemp_id = enterNameUTF8(assignTemp_DESC);
-    auto returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
-    auto blockReturnTemp_id = enterNameUTF8(blockReturnTemp_DESC);
-    auto include_id = enterNameUTF8(include_DESC);
-    auto currentFile_id = enterNameUTF8(currentFile_DESC);
+    NameRef init_id = enterNameUTF8(init_DESC);
+    NameRef andAnd_id = enterNameUTF8(andAnd_DESC);
+    NameRef orOr_id = enterNameUTF8(orOr_DESC);
+    NameRef to_s_id = enterNameUTF8(to_s_DESC);
+    NameRef concat_id = enterNameUTF8(concat_DESC);
+    NameRef call_id = enterNameUTF8(call_DESC);
+    NameRef bang_id = enterNameUTF8(bang_DESC);
+    NameRef squareBrackets_id = enterNameUTF8(squareBrackets_DESC);
+    NameRef squareBracketsEq_id = enterNameUTF8(squareBracketsEq_DESC);
+    NameRef unaryPlus_id = enterNameUTF8(unaryPlus_DESC);
+    NameRef unaryMinus_id = enterNameUTF8(unaryMinus_DESC);
+    NameRef star_id = enterNameUTF8(star_DESC);
+    NameRef starStar_id = enterNameUTF8(starStar_DESC);
+    NameRef whileTemp_id = enterNameUTF8(whileTemp_DESC);
+    NameRef ifTemp_id = enterNameUTF8(ifTemp_DESC);
+    NameRef returnTemp_id = enterNameUTF8(retunTemp_DESC);
+    NameRef statTemp_id = enterNameUTF8(statTemp_DESC);
+    NameRef assignTemp_id = enterNameUTF8(assignTemp_DESC);
+    NameRef returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
+    NameRef blockReturnTemp_id = enterNameUTF8(blockReturnTemp_DESC);
+    NameRef include_id = enterNameUTF8(include_DESC);
+    NameRef currentFile_id = enterNameUTF8(currentFile_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -260,7 +260,7 @@ constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZ
 SymbolRef GlobalState::enterClassSymbol(SymbolRef owner, NameRef name) {
     // TODO Unify this with enterSymbol
     DEBUG_ONLY(Error::check(owner.exists()));
-    auto &ownerScope = owner.info(*this, true);
+    Symbol &ownerScope = owner.info(*this, true);
     for (auto &member : ownerScope.members) {
         if (member.first == name) {
             return member.second;
@@ -269,9 +269,9 @@ SymbolRef GlobalState::enterClassSymbol(SymbolRef owner, NameRef name) {
 
     bool reallocate = symbols.size() == symbols.capacity();
 
-    auto ret = SymbolRef(symbols.size());
+    SymbolRef ret = SymbolRef(symbols.size());
     symbols.emplace_back();
-    auto &info = ret.info(*this, true);
+    Symbol &info = ret.info(*this, true);
     info.name = name;
     info.flags = 0;
     info.owner = owner;
@@ -289,7 +289,7 @@ SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
                                    bool isMethod) {
     DEBUG_ONLY(Error::check(owner.exists()));
     Error::check(name.exists());
-    auto &ownerScope = owner.info(*this, true);
+    Symbol &ownerScope = owner.info(*this, true);
     auto from = ownerScope.members.begin();
     auto to = ownerScope.members.end();
     while (from != to) {
@@ -304,9 +304,9 @@ SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
 
     bool reallocate = symbols.size() == symbols.capacity();
 
-    auto ret = SymbolRef(symbols.size());
+    SymbolRef ret = SymbolRef(symbols.size());
     symbols.emplace_back();
-    auto &info = ret.info(*this, true);
+    Symbol &info = ret.info(*this, true);
     info.name = name;
     info.flags = 0;
 
@@ -481,7 +481,7 @@ FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
 }
 
 SymbolRef GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
-    auto tempName = this->freshNameUnique(kind, name);
+    NameRef tempName = this->freshNameUnique(kind, name);
     vector<SymbolRef> empty;
     return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
 }

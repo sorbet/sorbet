@@ -119,7 +119,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      auto cond = cpIdent(*i);
                      mkIf(move(cond), node2TreeImpl(ctx, a->right), move(lhs));
                  } else {
-                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
+                     SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
                      auto temp = mkAssign(tempSym, lhs);
 
                      auto iff = mkIf(mkIdent(tempSym), node2TreeImpl(ctx, a->right), mkIdent(tempSym));
@@ -134,7 +134,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      auto cond = cpIdent(*i);
                      mkIf(move(cond), move(lhs), node2TreeImpl(ctx, a->right));
                  } else {
-                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::orOr(), ctx.owner);
+                     SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::orOr(), ctx.owner);
                      auto temp = mkAssign(tempSym, lhs);
 
                      auto iff = mkIf(mkIdent(tempSym), mkIdent(tempSym), node2TreeImpl(ctx, a->right));
@@ -148,7 +148,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  auto arg = node2TreeImpl(ctx, a->right);
                  if (auto s = dynamic_cast<Send *>(recv.get())) {
                      Error::check(s->args.empty());
-                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
+                     SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
                      auto temp = mkAssign(tempSym, move(s->recv));
                      recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
@@ -172,7 +172,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  auto arg = node2TreeImpl(ctx, a->right);
                  if (auto s = dynamic_cast<Send *>(recv.get())) {
                      Error::check(s->args.empty());
-                     auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
+                     SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
                      auto temp = mkAssign(tempSym, move(s->recv));
                      recv.reset();
                      auto cond = mkSend0(mkIdent(tempSym), s->fun);
@@ -623,7 +623,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
              [&](parser::Masgn *masgn) {
                  parser::Mlhs *lhs = dynamic_cast<parser::Mlhs *>(masgn->lhs.get());
                  Error::check(lhs != nullptr);
-                 auto tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::assignTemp(), ctx.owner);
+                 SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::assignTemp(), ctx.owner);
                  vector<unique_ptr<Statement>> stats;
                  stats.emplace_back(mkAssign(tempSym, node2TreeImpl(ctx, masgn->rhs)));
                  int i = 0;

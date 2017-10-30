@@ -130,7 +130,7 @@ public:
 
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (Ident *id = dynamic_cast<Ident *>(node.get())) {
-            auto &name = id->name.name(ctx_);
+            ast::Name &name = id->name.name(ctx_);
             DEBUG_ONLY(Error::check(name.kind == ast::UTF8));
             if (driver_->lex.is_declared(name.toString(ctx_))) {
                 return make_unique<LVar>(node->loc, id->name);
@@ -184,7 +184,7 @@ public:
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (Ident *id = dynamic_cast<Ident *>(node.get())) {
-            auto &name = id->name.name(ctx_);
+            ast::Name &name = id->name.name(ctx_);
             driver_->lex.declare(name.toString(ctx_));
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (IVar *iv = dynamic_cast<IVar *>(node.get())) {
@@ -209,7 +209,7 @@ public:
     }
 
     unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
-        auto method = ctx_.enterNameUTF8(selector->string() + "=");
+        NameRef method = ctx_.enterNameUTF8(selector->string() + "=");
         Loc loc = loc_join(receiver->loc, tok_loc(selector));
         if (dot && dot->string() == "&.") {
             return make_unique<CSend>(loc, move(receiver), method, vector<unique_ptr<Node>>());

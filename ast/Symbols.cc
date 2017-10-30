@@ -48,8 +48,8 @@ void printTabs(std::ostringstream &to, int count) {
 
 std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
     std::ostringstream os;
-    auto myInfo = info(ctx, true);
-    auto name = myInfo.name.toString(ctx);
+    Symbol &myInfo = info(ctx, true);
+    std::string name = myInfo.name.toString(ctx);
     auto members = myInfo.members;
 
     printTabs(os, tabs);
@@ -67,7 +67,7 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
     os << type << " " << name;
     os << " (";
     bool first = true;
-    for (auto thing : myInfo.argumentsOrMixins) {
+    for (SymbolRef thing : myInfo.argumentsOrMixins) {
         if (first) {
             first = false;
         } else {

@@ -168,7 +168,7 @@ public:
     Context(const Context &other) : state(other.state), owner(other.owner) {}
 
     Context withOwner(SymbolRef sym) {
-        auto r = Context(*this);
+        Context r = Context(*this);
         r.owner = sym;
         return r;
     }
