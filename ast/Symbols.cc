@@ -19,10 +19,10 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
 bool SymbolRef::isPrimitive() const {
     Error::notImplemented();
 }
-bool SymbolInfo::isConstructor(GlobalState &ctx) const {
+bool Symbol::isConstructor(GlobalState &ctx) const {
     return this->name._id == 1;
 }
-SymbolInfo &SymbolRef::info(GlobalState &ctx, bool allowNone) const {
+Symbol &SymbolRef::info(GlobalState &ctx, bool allowNone) const {
     Error::check(_id < ctx.symbols.size());
     if (!allowNone)
         Error::check(this->exists());
@@ -89,7 +89,7 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
     return os.str();
 }
 
-SymbolRef SymbolInfo::findMember(NameRef name) {
+SymbolRef Symbol::findMember(NameRef name) {
     for (auto &member : members) {
         if (member.first == name)
             return member.second;
@@ -97,7 +97,7 @@ SymbolRef SymbolInfo::findMember(NameRef name) {
     return SymbolRef(0);
 }
 
-string SymbolInfo::fullName(GlobalState &ctx) const {
+string Symbol::fullName(GlobalState &ctx) const {
     string owner_str;
     if (this->owner.exists() && this->owner != ctx.defn_root())
         owner_str = this->owner.info(ctx).fullName(ctx);

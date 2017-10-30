@@ -149,7 +149,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check((names_by_hash_size & (names_by_hash_size - 1)) == 0));
 
     names.emplace_back(); // first name is used in hashes to indicate empty cell
-    // Second name is always <init>, see SymbolInfo::isConstructor
+    // Second name is always <init>, see Symbol::isConstructor
     auto init_id = enterNameUTF8(init_DESC);
     auto andAnd_id = enterNameUTF8(andAnd_DESC);
     auto orOr_id = enterNameUTF8(orOr_DESC);
@@ -246,7 +246,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 
     // Add them back in since synthesizeClass couldn't
-    for (SymbolInfo info : symbols) {
+    for (Symbol info : symbols) {
         if (info.owner != defn_root()) {
             defn_root().info(*this).members.push_back(make_pair(info.name, info.owner));
         }

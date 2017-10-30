@@ -13,14 +13,14 @@ namespace ruby_typer {
 namespace ast {
 class Name;
 class NameRef;
-class SymbolInfo;
+class Symbol;
 class SymbolRef;
 struct UTF8Desc;
 
 class GlobalState {
     friend Name;
     friend NameRef;
-    friend SymbolInfo;
+    friend Symbol;
     friend SymbolRef;
     friend File;
     friend FileRef;
@@ -133,7 +133,7 @@ private:
     std::vector<std::unique_ptr<std::vector<char>>> strings;
     u2 strings_last_page_used = STRINGS_PAGE_SIZE;
     std::vector<Name> names;
-    std::vector<SymbolInfo> symbols;
+    std::vector<Symbol> symbols;
     unsigned int max_zips_count;
     unsigned int zips_used;
     unsigned int max_files_count;
@@ -145,7 +145,7 @@ private:
 
     void expandSymbols();
 
-    void complete(SymbolRef id, SymbolInfo &currentInfo);
+    void complete(SymbolRef id, Symbol &currentInfo);
 
     SymbolRef synthesizeClass(UTF8Desc name);
 

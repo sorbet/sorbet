@@ -52,7 +52,7 @@ public:
     std::vector<std::unique_ptr<Statement>> rhs;
     std::unique_ptr<Expression> name;
     // For unresolved names. Once they are resolved to Symbols they go into the
-    // SymbolInfo
+    // Symbol
     std::vector<std::unique_ptr<Expression>> ancestors;
     ClassDefKind kind;
 

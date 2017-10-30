@@ -7,7 +7,7 @@
 
 namespace ruby_typer {
 namespace ast {
-class SymbolInfo;
+class Symbol;
 class GlobalState;
 
 class SymbolRef {
@@ -48,7 +48,7 @@ public:
 
     bool isPrimitive() const;
 
-    SymbolInfo &info(GlobalState &ctx, bool allowNone = false) const;
+    Symbol &info(GlobalState &ctx, bool allowNone = false) const;
 
     bool operator==(const SymbolRef &rhs) const;
 
@@ -65,7 +65,7 @@ public:
 
 CheckSize(SymbolRef, 4, 4);
 
-class SymbolInfo {
+class Symbol {
 public:
     bool isConstructor(GlobalState &ctx) const;
 
@@ -180,7 +180,7 @@ private:
     void ensureCompleted(GlobalState &ctx);
 };
 
-CheckSize(SymbolInfo, 64, 8);
+CheckSize(Symbol, 64, 8);
 } // namespace ast
 } // namespace ruby_typer
 
