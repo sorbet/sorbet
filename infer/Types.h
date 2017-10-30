@@ -138,7 +138,7 @@ class HashType : public ProxyType {
 public:
     std::vector<std::shared_ptr<Literal>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
-    HashType(std::vector<std::shared_ptr<Literal>> keys, std::vector<std::shared_ptr<Type>> values);
+    HashType(std::vector<std::shared_ptr<Literal>> &keys, std::vector<std::shared_ptr<Type>> &values);
 
     virtual std::string toString(ast::Context ctx, int tabs);
     virtual std::string typeName();
@@ -147,7 +147,7 @@ public:
 class ArrayType : public ProxyType {
 public:
     std::vector<std::shared_ptr<Type>> elems;
-    ArrayType(std::vector<std::shared_ptr<Type>> elems);
+    ArrayType(std::vector<std::shared_ptr<Type>> &elems);
 
     virtual std::string toString(ast::Context ctx, int tabs);
     virtual std::string typeName();

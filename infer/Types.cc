@@ -283,8 +283,8 @@ std::string Literal::toString(ast::Context ctx, int tabs) {
     return "Literal[" + this->underlying->toString(ctx, tabs) + "]{" + to_string(value) + "}";
 }
 
-ruby_typer::infer::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> elements)
-    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Array())), elems(elements) {}
+ruby_typer::infer::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> &elements)
+    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Array())), elems(std::move(elements)) {}
 
 std::string ArrayType::typeName() {
     return "ArrayType";
@@ -327,9 +327,10 @@ std::string ArrayType::toString(ast::Context ctx, int tabs) {
     return buf.str();
 }
 
-ruby_typer::infer::HashType::HashType(std::vector<std::shared_ptr<Literal>> keys,
-                                      std::vector<std::shared_ptr<Type>> values)
-    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(keys), values(values) {}
+ruby_typer::infer::HashType::HashType(std::vector<std::shared_ptr<Literal>> &keys,
+                                      std::vector<std::shared_ptr<Type>> &values)
+    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(std::move(keys)),
+      values(std::move(values)) {}
 
 std::string HashType::toString(ast::Context ctx, int tabs) {
     stringstream buf;
