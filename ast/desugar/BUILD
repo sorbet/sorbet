@@ -16,6 +16,7 @@ cc_library(
 
 cc_test(
     name = "desugar_test",
+    size = "small",
     srcs = [
         "test/desugar_test.cc",
     ],

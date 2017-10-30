@@ -25,6 +25,7 @@ cc_library(
 cc_test(
     name = "ast_test",
     srcs = glob(["*_test.cc"]),
+    size = "small",
     visibility = ["//tools:__pkg__"],
     deps = [
         ":ast",

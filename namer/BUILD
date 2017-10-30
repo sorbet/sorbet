@@ -20,6 +20,7 @@ cc_library(
 
 cc_test(
     name = "namer_test",
+    size = "small",
     srcs = [
         "namer_test.cc",
     ],

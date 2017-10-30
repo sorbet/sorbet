@@ -41,6 +41,7 @@ genrule(
 
 cc_test(
     name = "parser_test",
+    size = "small",
     srcs = [
         "parser_test.cc",
     ],
