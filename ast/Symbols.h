@@ -67,6 +67,10 @@ CheckSize(SymbolRef, 4, 4);
 
 class Symbol {
 public:
+    Symbol(const Symbol &) = delete;
+    Symbol() = default;
+    Symbol(Symbol &&) noexcept = default;
+
     bool isConstructor(GlobalState &ctx) const;
 
     SymbolRef owner;
