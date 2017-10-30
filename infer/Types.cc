@@ -6,6 +6,9 @@ using namespace ruby_typer;
 using namespace ruby_typer::infer;
 using namespace std;
 
+// improve debugging.
+template class std::shared_ptr<ruby_typer::infer::Type>;
+
 std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
                                                    std::shared_ptr<Type> &t2);
 std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Context ctx, std::shared_ptr<Type> &t1,
