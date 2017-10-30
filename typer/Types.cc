@@ -92,9 +92,9 @@ std::shared_ptr<ruby_typer::typer::Type> lubGround(ast::Context ctx, std::shared
 
     ast::SymbolRef sym1 = c1->symbol;
     ast::SymbolRef sym2 = c2->symbol;
-    if (sym1.info(ctx).derrivesFrom(ctx, sym2)) {
+    if (sym1.info(ctx).derivesFrom(ctx, sym2)) {
         result = t1;
-    } else if (sym1.info(ctx).derrivesFrom(ctx, sym2)) {
+    } else if (sym1.info(ctx).derivesFrom(ctx, sym2)) {
         result = t2;
     } else {
         result = std::make_shared<AndType>(t1, t2);
@@ -120,12 +120,12 @@ bool ruby_typer::typer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
             // TODO: simply compare as memory regions
             ruby_typer::typecase(p1,
             [&](ArrayType *a) {
-                ArrayType *a2 = dynamic_cast<ArrayType *>()
+                ArrayType *a2 = dynamic_cast<ArrayType *>(p2);
             },
             [&](HashType *a) {},
             [&](Literal *a) {});
-            return
-            // both are proxy
+            return result;
+             // both are proxy
         } else {
             // only 1st is proxy
             std::shared_ptr<Type> &und = p1->underlying;
@@ -135,7 +135,7 @@ bool ruby_typer::typer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
         return false;
     } else {
         // none is proxy
-        return lubGround(ctx, t1, t2);
+        return isSubTypeGround(ctx, t1, t2);
     }
 }
 
@@ -156,17 +156,17 @@ ruby_typer::typer::MethodType::MethodType(ruby_typer::ast::SymbolRef symbol) : s
 
 // TODO: somehow reuse existing references instead of allocating new ones.
 ruby_typer::typer::Literal::Literal(int val)
-    : ProxyType(std::make_shared<ClassType>(ast::ContextBase::defn_Integer())), value(val) {}
+    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Integer())), value(val) {}
 
 ruby_typer::typer::Literal::Literal(float val)
-    : ProxyType(std::make_shared<ClassType>(ast::ContextBase::defn_Float())), value(*reinterpret_cast<int *>(&val)) {}
+    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Float())), value(*reinterpret_cast<int *>(&val)) {}
 
 ruby_typer::typer::Literal::Literal(ast::NameRef val)
-    : ProxyType(std::make_shared<ClassType>(ast::ContextBase::defn_String())), value(val._id) {}
+    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_String())), value(val._id) {}
 
 ruby_typer::typer::Literal::Literal(bool val)
     : ProxyType(
-          std::make_shared<ClassType>(val ? ast::ContextBase::defn_TrueClass() : ast::ContextBase::defn_FalseClass())),
+          std::make_shared<ClassType>(val ? ast::GlobalState::defn_TrueClass() : ast::GlobalState::defn_FalseClass())),
       value(val ? 1 : 0) {}
 
 std::string Literal::typeName() {
@@ -178,7 +178,7 @@ std::string Literal::toString(ast::Context ctx, int tabs) {
 }
 
 ruby_typer::typer::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> elements)
-    : ProxyType(std::make_shared<ClassType>(ast::ContextBase::defn_Array())), elems(elements) {}
+    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Array())), elems(elements) {}
 
 std::string ArrayType::typeName() {
     return "ArrayType";
@@ -219,7 +219,7 @@ std::string ArrayType::toString(ast::Context ctx, int tabs) {
 
 ruby_typer::typer::HashType::HashType(std::vector<std::shared_ptr<Literal>> keys,
                                       std::vector<std::shared_ptr<Type>> values)
-    : ProxyType(std::make_shared<ClassType>(ast::ContextBase::defn_Hash())), keys(keys), values(values) {}
+    : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(keys), values(values) {}
 
 std::string HashType::toString(ast::Context ctx, int tabs) {
     stringstream buf;

@@ -1,9 +1,12 @@
 #include "Symbols.h"
 #include "Context.h"
 #include <sstream>
+#include <string>
 
 namespace ruby_typer {
 namespace ast {
+
+using namespace std;
 
 bool SymbolRef::operator==(const SymbolRef &rhs) const {
     return _id == rhs._id;
@@ -16,25 +19,25 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
 bool SymbolRef::isPrimitive() const {
     Error::notImplemented();
 }
-bool SymbolInfo::isConstructor(ContextBase &ctx) const {
+bool Symbol::isConstructor(GlobalState &ctx) const {
     return this->name._id == 1;
 }
 
-bool SymbolInfo::derrivesFrom(ContextBase &ctx, SymbolRef sym) {
+bool Symbol::derivesFrom(GlobalState &ctx, SymbolRef sym) {
     // TODO: add baseClassSet
     for (SymbolRef a : argumentsOrMixins) {
-        if (a == sym || a.info(ctx).derrivesFrom(ctx, sym))
+        if (a == sym || a.info(ctx).derivesFrom(ctx, sym))
             return true;
     }
     return false;
 }
 
-SymbolRef SymbolInfo::ref(ContextBase &ctx) const {
+SymbolRef Symbol::ref(GlobalState &ctx) const {
     auto id = this - ctx.symbols.data();
-    return SymbolRef(id / sizeof(SymbolInfo));
+    return SymbolRef(id / sizeof(Symbol));
 }
 
-SymbolInfo &SymbolRef::info(ContextBase &ctx, bool allowNone) const {
+Symbol &SymbolRef::info(GlobalState &ctx, bool allowNone) const {
     Error::check(_id < ctx.symbols.size());
     if (!allowNone)
         Error::check(this->exists());
@@ -43,11 +46,11 @@ SymbolInfo &SymbolRef::info(ContextBase &ctx, bool allowNone) const {
 }
 
 bool SymbolRef::isSynthetic() const {
-    return this->_id <= ContextBase::defn_last_synthetic_sym()._id;
+    return this->_id <= GlobalState::defn_last_synthetic_sym()._id;
 }
 
 bool SymbolRef::isPlaceHolder() const {
-    return this->_id >= ContextBase::defn_todo()._id && this->_id <= ContextBase::defn_cvar_todo()._id;
+    return this->_id >= GlobalState::defn_todo()._id && this->_id <= GlobalState::defn_cvar_todo()._id;
 }
 
 void printTabs(std::ostringstream &to, int count) {
@@ -58,10 +61,10 @@ void printTabs(std::ostringstream &to, int count) {
     }
 }
 
-std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
+std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
     std::ostringstream os;
-    auto myInfo = info(ctx, true);
-    auto name = myInfo.name.toString(ctx);
+    Symbol &myInfo = info(ctx, true);
+    std::string name = myInfo.name.toString(ctx);
     auto members = myInfo.members;
 
     printTabs(os, tabs);
@@ -79,7 +82,7 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
     os << type << " " << name;
     os << " (";
     bool first = true;
-    for (auto thing : myInfo.argumentsOrMixins) {
+    for (SymbolRef thing : myInfo.argumentsOrMixins) {
         if (first) {
             first = false;
         } else {
@@ -99,6 +102,25 @@ std::string SymbolRef::toString(ContextBase &ctx, int tabs) const {
         os << row;
     }
     return os.str();
+}
+
+SymbolRef Symbol::findMember(NameRef name) {
+    for (auto &member : members) {
+        if (member.first == name)
+            return member.second;
+    }
+    return SymbolRef(0);
+}
+
+string Symbol::fullName(GlobalState &ctx) const {
+    string owner_str;
+    if (this->owner.exists() && this->owner != ctx.defn_root())
+        owner_str = this->owner.info(ctx).fullName(ctx);
+
+    if (this->isClass())
+        return owner_str + "::" + this->name.toString(ctx);
+    else
+        return owner_str + "#" + this->name.toString(ctx);
 }
 
 } // namespace ast

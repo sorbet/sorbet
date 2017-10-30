@@ -16,7 +16,7 @@ class Node;
 
 class Builder {
 public:
-    Builder(ruby_typer::ast::ContextBase &, Result &);
+    Builder(ruby_typer::ast::GlobalState &, Result &);
     ~Builder();
 
     static ruby_parser::builder interface;

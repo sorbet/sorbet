@@ -7,11 +7,11 @@
 
 namespace ruby_typer {
 namespace ast {
-class SymbolInfo;
-class ContextBase;
+class Symbol;
+class GlobalState;
 
 class SymbolRef {
-    friend class ContextBase;
+    friend class GlobalState;
 
 public:
     constexpr SymbolRef(u4 _id) : _id(_id){};
@@ -48,7 +48,7 @@ public:
 
     bool isPrimitive() const;
 
-    SymbolInfo &info(ContextBase &ctx, bool allowNone = false) const;
+    Symbol &info(GlobalState &ctx, bool allowNone = false) const;
 
     bool operator==(const SymbolRef &rhs) const;
 
@@ -58,16 +58,20 @@ public:
         return !_id;
     }
 
-    std::string toString(ContextBase &ctx, int tabs = 0) const;
+    std::string toString(GlobalState &ctx, int tabs = 0) const;
 
     u4 _id;
 };
 
 CheckSize(SymbolRef, 4, 4);
 
-class SymbolInfo {
+class Symbol {
 public:
-    bool isConstructor(ContextBase &ctx) const;
+    Symbol(const Symbol &) = delete;
+    Symbol() = default;
+    Symbol(Symbol &&) noexcept = default;
+
+    bool isConstructor(GlobalState &ctx) const;
 
     SymbolRef owner;
     /* isClass,   IsArray,  isField, isMethod
@@ -87,11 +91,11 @@ public:
         return argumentsOrMixins;
     }
 
-    bool derrivesFrom(ContextBase &ctx, SymbolRef sym);
+    bool derivesFrom(GlobalState &ctx, SymbolRef sym);
 
-    SymbolRef ref(ContextBase &ctx);
+    SymbolRef ref(GlobalState &ctx);
 
-    inline std::vector<SymbolRef> &mixins(ContextBase &ctx) {
+    inline std::vector<SymbolRef> &mixins(GlobalState &ctx) {
         Error::check(isClass());
         ensureCompleted(ctx);
         return argumentsOrMixins;
@@ -104,13 +108,13 @@ public:
         return resultOrParentOrLoader;
     }
 
-    inline SymbolRef parent(ContextBase &ctx) {
+    inline SymbolRef parent(GlobalState &ctx) {
         Error::check(isClass());
         ensureCompleted(ctx);
         return resultOrParentOrLoader;
     }
 
-    SymbolRef ref(ContextBase &ctx) const;
+    SymbolRef ref(GlobalState &ctx) const;
 
     inline bool isClass() const {
         return (flags & 0x8000) != 0;
@@ -172,16 +176,19 @@ public:
         resultOrParentOrLoader = idx;
     }
 
+    SymbolRef findMember(NameRef name);
+    std::string fullName(GlobalState &ctx) const;
+
     //    std::vector<Tree> implementation; // TODO: make into small vector too
     NameRef name; // todo: move out? it should not matter but it's important for
     // name resolution
     std::vector<std::pair<NameRef, SymbolRef>> members; // TODO: replace with https://github.com/greg7mdp/sparsepp &
     // optimize for absence
 private:
-    void ensureCompleted(ContextBase &ctx);
+    void ensureCompleted(GlobalState &ctx);
 };
 
-CheckSize(SymbolInfo, 64, 8);
+CheckSize(Symbol, 64, 8);
 } // namespace ast
 } // namespace ruby_typer
 

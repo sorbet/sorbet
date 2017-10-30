@@ -5,7 +5,7 @@
 
 namespace ruby_typer {
 namespace ast {
-class ContextBase;
+class GlobalState;
 
 class Loc {
 public:
@@ -32,7 +32,7 @@ public:
         u4 line, column;
     };
 
-    std::pair<Detail, Detail> position(ast::ContextBase &ctx);
+    std::pair<Detail, Detail> position(ast::GlobalState &ctx);
 };
 } // namespace ast
 } // namespace ruby_typer

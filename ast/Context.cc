@@ -10,14 +10,14 @@ using namespace std;
 namespace ruby_typer {
 namespace ast {
 
-SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
-    auto nameId = enterNameUTF8(name);
+SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
+    NameRef nameId = enterNameUTF8(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to defn_root().members later.
-    auto symRef = SymbolRef(symbols.size());
+    SymbolRef symRef = SymbolRef(symbols.size());
     symbols.emplace_back();
-    auto &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
+    Symbol &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
     info.name = nameId;
     info.owner = defn_root();
     info.flags = 0;
@@ -165,7 +165,7 @@ static UTF8Desc falseClass_DESC{(char *)falseClass_str, (int)strlen(falseClass_s
 static const char *nilClass_str = "NilClass";
 static UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
 
-ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this) {
+GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
@@ -176,29 +176,29 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check((names_by_hash_size & (names_by_hash_size - 1)) == 0));
 
     names.emplace_back(); // first name is used in hashes to indicate empty cell
-    // Second name is always <init>, see SymbolInfo::isConstructor
-    auto init_id = enterNameUTF8(init_DESC);
-    auto andAnd_id = enterNameUTF8(andAnd_DESC);
-    auto orOr_id = enterNameUTF8(orOr_DESC);
-    auto to_s_id = enterNameUTF8(to_s_DESC);
-    auto concat_id = enterNameUTF8(concat_DESC);
-    auto call_id = enterNameUTF8(call_DESC);
-    auto bang_id = enterNameUTF8(bang_DESC);
-    auto squareBrackets_id = enterNameUTF8(squareBrackets_DESC);
-    auto squareBracketsEq_id = enterNameUTF8(squareBracketsEq_DESC);
-    auto unaryPlus_id = enterNameUTF8(unaryPlus_DESC);
-    auto unaryMinus_id = enterNameUTF8(unaryMinus_DESC);
-    auto star_id = enterNameUTF8(star_DESC);
-    auto starStar_id = enterNameUTF8(starStar_DESC);
-    auto whileTemp_id = enterNameUTF8(whileTemp_DESC);
-    auto ifTemp_id = enterNameUTF8(ifTemp_DESC);
-    auto returnTemp_id = enterNameUTF8(retunTemp_DESC);
-    auto statTemp_id = enterNameUTF8(statTemp_DESC);
-    auto assignTemp_id = enterNameUTF8(assignTemp_DESC);
-    auto returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
-    auto blockReturnTemp_id = enterNameUTF8(blockReturnTemp_DESC);
-    auto include_id = enterNameUTF8(include_DESC);
-    auto currentFile_id = enterNameUTF8(currentFile_DESC);
+    // Second name is always <init>, see Symbol::isConstructor
+    NameRef init_id = enterNameUTF8(init_DESC);
+    NameRef andAnd_id = enterNameUTF8(andAnd_DESC);
+    NameRef orOr_id = enterNameUTF8(orOr_DESC);
+    NameRef to_s_id = enterNameUTF8(to_s_DESC);
+    NameRef concat_id = enterNameUTF8(concat_DESC);
+    NameRef call_id = enterNameUTF8(call_DESC);
+    NameRef bang_id = enterNameUTF8(bang_DESC);
+    NameRef squareBrackets_id = enterNameUTF8(squareBrackets_DESC);
+    NameRef squareBracketsEq_id = enterNameUTF8(squareBracketsEq_DESC);
+    NameRef unaryPlus_id = enterNameUTF8(unaryPlus_DESC);
+    NameRef unaryMinus_id = enterNameUTF8(unaryMinus_DESC);
+    NameRef star_id = enterNameUTF8(star_DESC);
+    NameRef starStar_id = enterNameUTF8(starStar_DESC);
+    NameRef whileTemp_id = enterNameUTF8(whileTemp_DESC);
+    NameRef ifTemp_id = enterNameUTF8(ifTemp_DESC);
+    NameRef returnTemp_id = enterNameUTF8(retunTemp_DESC);
+    NameRef statTemp_id = enterNameUTF8(statTemp_DESC);
+    NameRef assignTemp_id = enterNameUTF8(assignTemp_DESC);
+    NameRef returnMethodTemp_id = enterNameUTF8(returnMethodTemp_DESC);
+    NameRef blockReturnTemp_id = enterNameUTF8(blockReturnTemp_DESC);
+    NameRef include_id = enterNameUTF8(include_DESC);
+    NameRef currentFile_id = enterNameUTF8(currentFile_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -301,21 +301,21 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 
     // Add them back in since synthesizeClass couldn't
-    for (SymbolInfo info : symbols) {
+    for (Symbol &info : symbols) {
         if (info.owner != defn_root()) {
             defn_root().info(*this).members.push_back(make_pair(info.name, info.owner));
         }
     }
 }
 
-ContextBase::~ContextBase() {}
+GlobalState::~GlobalState() {}
 
-constexpr decltype(ContextBase::STRINGS_PAGE_SIZE) ContextBase::STRINGS_PAGE_SIZE;
+constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
+SymbolRef GlobalState::enterClassSymbol(SymbolRef owner, NameRef name) {
     // TODO Unify this with enterSymbol
     DEBUG_ONLY(Error::check(owner.exists()));
-    auto &ownerScope = owner.info(*this, true);
+    Symbol &ownerScope = owner.info(*this, true);
     for (auto &member : ownerScope.members) {
         if (member.first == name) {
             return member.second;
@@ -324,9 +324,9 @@ SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
 
     bool reallocate = symbols.size() == symbols.capacity();
 
-    auto ret = SymbolRef(symbols.size());
+    SymbolRef ret = SymbolRef(symbols.size());
     symbols.emplace_back();
-    auto &info = ret.info(*this, true);
+    Symbol &info = ret.info(*this, true);
     info.name = name;
     info.flags = 0;
     info.owner = owner;
@@ -340,11 +340,11 @@ SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
     return ret;
 }
 
-SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
+SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
                                    bool isMethod) {
     DEBUG_ONLY(Error::check(owner.exists()));
     Error::check(name.exists());
-    auto &ownerScope = owner.info(*this, true);
+    Symbol &ownerScope = owner.info(*this, true);
     auto from = ownerScope.members.begin();
     auto to = ownerScope.members.end();
     while (from != to) {
@@ -359,9 +359,9 @@ SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
 
     bool reallocate = symbols.size() == symbols.capacity();
 
-    auto ret = SymbolRef(symbols.size());
+    SymbolRef ret = SymbolRef(symbols.size());
     symbols.emplace_back();
-    auto &info = ret.info(*this, true);
+    Symbol &info = ret.info(*this, true);
     info.name = name;
     info.flags = 0;
 
@@ -380,7 +380,7 @@ SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
     return ret;
 }
 
-NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
+NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
     const auto hs = _hash(nm);
     unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
@@ -418,9 +418,9 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     bucket.second = idx;
     names.emplace_back();
 
-    Error::check(nm.to < ContextBase::STRINGS_PAGE_SIZE);
+    Error::check(nm.to < GlobalState::STRINGS_PAGE_SIZE);
     char *from = nullptr;
-    if (nm.to > ContextBase::STRINGS_PAGE_SIZE) {
+    if (nm.to > GlobalState::STRINGS_PAGE_SIZE) {
         strings.push_back(make_unique<vector<char>>(nm.to));
         from = strings.back()->data();
         if (strings.size() > 1) {
@@ -428,8 +428,8 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
         }
     } else {
 
-        if (strings_last_page_used + nm.to > ContextBase::STRINGS_PAGE_SIZE) {
-            strings.push_back(make_unique<vector<char>>(ContextBase::STRINGS_PAGE_SIZE));
+        if (strings_last_page_used + nm.to > GlobalState::STRINGS_PAGE_SIZE) {
+            strings.push_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
             // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
             strings_last_page_used = 0;
         }
@@ -465,7 +465,7 @@ void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsign
     }
 }
 
-void ContextBase::expandNames() {
+void GlobalState::expandNames() {
     Error::check(names.size() == names.capacity());
     Error::check(names.capacity() * 2 == names_by_hash.capacity());
     Error::check(names_by_hash.size() == names_by_hash.capacity());
@@ -476,7 +476,7 @@ void ContextBase::expandNames() {
     names_by_hash.swap(new_names_by_hash);
 }
 
-NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original) {
+NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original) {
     u2 num = freshNameId++;
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
     unsigned int hashTableSize = names_by_hash.size();
@@ -526,7 +526,7 @@ NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return idx;
 }
 
-FileRef ContextBase::enterFile(UTF8Desc path, UTF8Desc source) {
+FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
     auto idx = files.size();
     files.emplace_back();
     auto &file = files.back();
@@ -535,21 +535,21 @@ FileRef ContextBase::enterFile(UTF8Desc path, UTF8Desc source) {
     return FileRef(idx);
 }
 
-SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
-    auto tempName = this->freshNameUnique(kind, name);
+SymbolRef GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
+    NameRef tempName = this->freshNameUnique(kind, name);
     vector<SymbolRef> empty;
     return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
 }
 
-unsigned int ContextBase::symbolsUsed() {
+unsigned int GlobalState::symbolsUsed() {
     return symbols.size();
 }
 
-unsigned int ContextBase::namesUsed() {
+unsigned int GlobalState::namesUsed() {
     return names.size();
 }
 
-std::string ContextBase::toString() {
+std::string GlobalState::toString() {
     std::vector<std::string> children;
     for (auto element : defn_root().info(*this).members) {
         children.push_back(element.second.toString(*this));

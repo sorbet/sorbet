@@ -13,26 +13,26 @@ namespace ruby_typer {
 namespace ast {
 class Name;
 class NameRef;
-class SymbolInfo;
+class Symbol;
 class SymbolRef;
 struct UTF8Desc;
 
-class ContextBase {
+class GlobalState {
     friend Name;
     friend NameRef;
-    friend SymbolInfo;
+    friend Symbol;
     friend SymbolRef;
     friend File;
     friend FileRef;
 
 public:
-    ContextBase(spdlog::logger &logger);
+    GlobalState(spdlog::logger &logger);
 
-    ContextBase(const ContextBase &) = delete;
+    GlobalState(const GlobalState &) = delete;
 
-    ContextBase(ContextBase &&) = delete;
+    GlobalState(GlobalState &&) = delete;
 
-    ~ContextBase();
+    ~GlobalState();
 
     SymbolRef fillPreregistedSym(SymbolRef which, SymbolRef owner, NameRef name); // need to be implemented from scratch
 
@@ -169,7 +169,7 @@ private:
     std::vector<std::unique_ptr<std::vector<char>>> strings;
     u2 strings_last_page_used = STRINGS_PAGE_SIZE;
     std::vector<Name> names;
-    std::vector<SymbolInfo> symbols;
+    std::vector<Symbol> symbols;
     unsigned int max_zips_count;
     unsigned int zips_used;
     unsigned int max_files_count;
@@ -181,7 +181,7 @@ private:
 
     void expandSymbols();
 
-    void complete(SymbolRef id, SymbolInfo &currentInfo);
+    void complete(SymbolRef id, Symbol &currentInfo);
 
     SymbolRef synthesizeClass(UTF8Desc name);
 
@@ -189,22 +189,22 @@ private:
 
     u2 freshNameId = 0;
 };
-// CheckSize(ContextBase, 152, 8);
+// CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
 
 class Context {
 public:
-    ContextBase &state;
+    GlobalState &state;
     SymbolRef owner;
-    operator ContextBase &() {
+    operator GlobalState &() {
         return state;
     }
 
-    Context(ContextBase &state, SymbolRef owner) : state(state), owner(owner) {}
+    Context(GlobalState &state, SymbolRef owner) : state(state), owner(owner) {}
     Context(const Context &other) : state(other.state), owner(other.owner) {}
 
     Context withOwner(SymbolRef sym) {
-        auto r = Context(*this);
+        Context r = Context(*this);
         r.owner = sym;
         return r;
     }

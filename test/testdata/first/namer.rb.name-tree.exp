@@ -1,11 +1,11 @@
 begin
-  class <emptyTree>::NormalClass<NormalClass> < ()
-    def normal_method<<todo sym>>()
+  class <emptyTree>::NormalClass<NormalClass> < (::Object)
+    def normal_method<normal_method>()
       <emptyTree>
 
     <Not Supported (DefS)>
 
-    class <emptyTree>::InnerClass<InnerClass> < ()
+    class <emptyTree>::InnerClass<InnerClass> < (::Object)
       <emptyTree>
 
     end
@@ -17,17 +17,17 @@ begin
 
   end
   module <emptyTree>::ANamespace<ANamespace> < ()
-    class <emptyTree>::ObviousChild<ObviousChild> < ()
+    class <emptyTree>::ObviousChild<ObviousChild> < (::Object)
       <emptyTree>
 
     end
 
   end
-  class <emptyTree>::ANamespace::ClassInNamespace<ClassInNamespace> < ()
+  class <emptyTree>::ANamespace::ClassInNamespace<ClassInNamespace> < (::Object)
     <emptyTree>
 
   end
-  class <emptyTree>::Parent<Parent> < ()
+  class <emptyTree>::Parent<Parent> < (::Object)
     <emptyTree>
 
   end
@@ -39,16 +39,16 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Child<Child> < (<emptyTree>::Parent, <emptyTree>::Mixin)
-    <emptyTree>.include(<emptyTree>::Mixin, <emptyTree>::Mixin)
+  class <emptyTree>::Child<Child> < (::Parent, ::Mixin)
+    <emptyTree>.include(::Mixin, ::Mixin)
 
     <emptyTree>.include(3)
 
-    <emptyTree>.include(<emptyTree>::Mixin) do ||
+    <emptyTree>.include(::Mixin) do ||
       <emptyTree>
     end
 
-    <emptyTree>.whatever().include(<emptyTree>::OtherMixin)
+    <emptyTree>.whatever().include(::OtherMixin)
 
   end
 end

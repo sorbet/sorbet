@@ -1,11 +1,11 @@
 begin
-  class <emptyTree>::NormalClass<<todo sym>> < ()
+  class <emptyTree>::NormalClass<<todo sym>> < (::Object)
     def normal_method<<todo sym>>()
       <emptyTree>
 
     <Not Supported (DefS)>
 
-    class <emptyTree>::InnerClass<<todo sym>> < ()
+    class <emptyTree>::InnerClass<<todo sym>> < (::Object)
       <emptyTree>
 
     end
@@ -17,17 +17,17 @@ begin
 
   end
   module <emptyTree>::ANamespace<<todo sym>> < ()
-    class <emptyTree>::ObviousChild<<todo sym>> < ()
+    class <emptyTree>::ObviousChild<<todo sym>> < (::Object)
       <emptyTree>
 
     end
 
   end
-  class <emptyTree>::ANamespace::ClassInNamespace<<todo sym>> < ()
+  class <emptyTree>::ANamespace::ClassInNamespace<<todo sym>> < (::Object)
     <emptyTree>
 
   end
-  class <emptyTree>::Parent<<todo sym>> < ()
+  class <emptyTree>::Parent<<todo sym>> < (::Object)
     <emptyTree>
 
   end

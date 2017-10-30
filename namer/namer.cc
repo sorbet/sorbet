@@ -91,12 +91,12 @@ public:
         auto args = std::vector<ast::SymbolRef>();
         // Fill in the arity right with TODOs
         for (auto &UNUSED(_) : method->args) {
-            args.push_back(ast::ContextBase::defn_todo());
+            args.push_back(ast::GlobalState::defn_todo());
         }
 
-        auto result = ast::ContextBase::defn_todo();
+        ast::SymbolRef result = ast::GlobalState::defn_todo();
 
-        ctx.state.enterSymbol(ownerFromContext(ctx), method->name, result, args, true);
+        method->symbol = ctx.state.enterSymbol(ownerFromContext(ctx), method->name, result, args, true);
         namesForLocals.emplace_back();
         return method;
     }
@@ -107,7 +107,7 @@ public:
     }
 
     ast::Ident *postTransformIdent(ast::Context ctx, ast::Ident *ident) {
-        if (ident->symbol.isPlaceHolder()) {
+        if (ident->symbol == ctx.state.defn_lvar_todo()) {
             ast::SymbolRef &cur = namesForLocals.back()[ident->name];
             if (!cur.exists()) {
                 std::vector<ast::SymbolRef> args;
@@ -120,10 +120,10 @@ public:
 
 private:
     ast::SymbolRef ownerFromContext(ast::Context ctx) {
-        auto owner = ctx.owner;
-        if (owner == ast::ContextBase::defn_root()) {
+        ast::SymbolRef owner = ctx.owner;
+        if (owner == ast::GlobalState::defn_root()) {
             // Root methods end up going on object
-            owner = ast::ContextBase::defn_object();
+            owner = ast::GlobalState::defn_object();
         }
         return owner;
     }
@@ -135,7 +135,8 @@ private:
 
 unique_ptr<ast::Statement> Namer::run(ast::Context &ctx, unique_ptr<ast::Statement> tree) {
     NameInserter nameInserter;
-    return ast::TreeMap<NameInserter>::apply(ctx, nameInserter, std::move(tree));
+    tree = ast::TreeMap<NameInserter>::apply(ctx, nameInserter, std::move(tree));
+    return Namer::resolve(ctx, move(tree));
 }
 
 } // namespace namer
