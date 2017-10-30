@@ -165,6 +165,9 @@ static UTF8Desc falseClass_DESC{(char *)falseClass_str, (int)strlen(falseClass_s
 static const char *nilClass_str = "NilClass";
 static UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
 
+static const char *merge = "merge";
+static UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
+
 GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -199,6 +202,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef blockReturnTemp_id = enterNameUTF8(blockReturnTemp_DESC);
     NameRef include_id = enterNameUTF8(include_DESC);
     NameRef currentFile_id = enterNameUTF8(currentFile_DESC);
+    NameRef merge_id = enterNameUTF8(merge_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -222,6 +226,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(blockReturnTemp_id == Names::blockReturnTemp()));
     DEBUG_ONLY(Error::check(include_id == Names::include()));
     DEBUG_ONLY(Error::check(currentFile_id == Names::currentFile()));
+    DEBUG_ONLY(Error::check(merge_id == Names::merge()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject

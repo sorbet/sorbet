@@ -222,6 +222,11 @@ public:
     static inline NameRef currentFile() {
         return NameRef(22);
     }
+
+    // merge
+    static inline NameRef merge() {
+        return NameRef(23);
+    }
 };
 
 class Name {

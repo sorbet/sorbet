@@ -20,9 +20,10 @@ cc_library(
 
 cc_test(
     name = "namer_test",
-    srcs = [
-        "namer_test.cc",
-    ],
+    size = "small",
+    srcs = glob([
+        "test/*.cc",
+    ]),
     copts = ["-Iexternal/gtest/include"],
     linkstatic = 1,
     visibility = ["//tools:__pkg__"],
