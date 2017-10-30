@@ -14,7 +14,7 @@ enum class ErrorClass {
 };
 
 class Reporter {
-    friend ContextBase;
+    friend GlobalState;
 
 private:
     void _error(Loc loc, ErrorClass what, const std::string &formatted);
@@ -26,8 +26,8 @@ public:
     }
 
 private:
-    Reporter(ContextBase &ctx) : ctx_(ctx) {}
-    ContextBase &ctx_;
+    Reporter(GlobalState &ctx) : ctx_(ctx) {}
+    GlobalState &ctx_;
 };
 
 } // namespace ast

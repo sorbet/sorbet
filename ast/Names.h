@@ -7,7 +7,7 @@
 
 namespace ruby_typer {
 namespace ast {
-class ContextBase;
+class GlobalState;
 class Name;
 enum NameKind : u1 {
     UTF8 = 1,
@@ -28,7 +28,7 @@ inline int _NameKind2Id_UNIQUE(NameKind nm) {
 
 class NameRef {
 public:
-    friend ContextBase;
+    friend GlobalState;
     friend Name;
 
     NameRef() : _id(-1){};
@@ -53,7 +53,7 @@ public:
         return _id;
     }
 
-    Name &name(ContextBase &ctx) const;
+    Name &name(GlobalState &ctx) const;
 
     inline bool exists() const {
         return _id != 0;
@@ -63,7 +63,7 @@ public:
         return NameRef(2);
     }
 
-    std::string toString(ContextBase &ctx) const;
+    std::string toString(GlobalState &ctx) const;
 
 public:
     int _id;
@@ -250,13 +250,13 @@ public:
 
     bool operator!=(const Name &rhs) const;
 
-    std::string toString(ContextBase &ctx) const;
+    std::string toString(GlobalState &ctx) const;
 
 private:
-    unsigned int hash(ContextBase &ctx) const;
+    unsigned int hash(GlobalState &ctx) const;
 
 public:
-    static unsigned int hashNames(std::vector<NameRef> &lhs, ContextBase &ctx);
+    static unsigned int hashNames(std::vector<NameRef> &lhs, GlobalState &ctx);
 };
 
 CheckSize(Name, 24, 8);

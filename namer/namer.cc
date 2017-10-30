@@ -91,10 +91,10 @@ public:
         auto args = std::vector<ast::SymbolRef>();
         // Fill in the arity right with TODOs
         for (auto &UNUSED(_) : method->args) {
-            args.push_back(ast::ContextBase::defn_todo());
+            args.push_back(ast::GlobalState::defn_todo());
         }
 
-        auto result = ast::ContextBase::defn_todo();
+        auto result = ast::GlobalState::defn_todo();
 
         method->symbol = ctx.state.enterSymbol(ownerFromContext(ctx), method->name, result, args, true);
         namesForLocals.emplace_back();
@@ -121,9 +121,9 @@ public:
 private:
     ast::SymbolRef ownerFromContext(ast::Context ctx) {
         auto owner = ctx.owner;
-        if (owner == ast::ContextBase::defn_root()) {
+        if (owner == ast::GlobalState::defn_root()) {
             // Root methods end up going on object
-            owner = ast::ContextBase::defn_object();
+            owner = ast::GlobalState::defn_object();
         }
         return owner;
     }

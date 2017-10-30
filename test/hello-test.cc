@@ -155,13 +155,13 @@ TEST(PreOrderTreeMap, CountTrees) {
         }
     };
 
-    ruby_typer::ast::ContextBase cb(*console);
+    ruby_typer::ast::GlobalState cb(*console);
     ruby_typer::ast::Context ctx(cb, cb.defn_root());
     static const char *foo_str = "Foo";
     static UTF8Desc foo_DESC{(char *)foo_str, (int)strlen(foo_str)};
 
     auto name = ctx.state.enterNameUTF8(foo_DESC);
-    auto classSym = ctx.state.enterClassSymbol(ruby_typer::ast::ContextBase::defn_root(), name);
+    auto classSym = ctx.state.enterClassSymbol(ruby_typer::ast::GlobalState::defn_root(), name);
     auto argTypes = vector<SymbolRef>{ctx.state.defn_top()};
     auto methodSym = ctx.state.enterSymbol(classSym, name, ctx.state.defn_top(), argTypes, true);
     auto empty = vector<SymbolRef>();

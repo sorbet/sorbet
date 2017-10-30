@@ -5,7 +5,7 @@
 namespace ruby_typer {
 namespace parser {
 
-using ruby_typer::ast::ContextBase;
+using ruby_typer::ast::GlobalState;
 using ruby_typer::ast::FileRef;
 using std::string;
 using std::unique_ptr;
@@ -34,7 +34,7 @@ FileRef Result::file() {
 Result::Result(unique_ptr<Result::Impl> &&impl) : impl_(move(impl)) {}
 Result::~Result() {}
 
-Result parse_ruby(ContextBase &ctx, const std::string &path, const string &src) {
+Result parse_ruby(GlobalState &ctx, const std::string &path, const string &src) {
     FileRef file = ctx.enterFile(path, src);
     unique_ptr<Result::Impl> impl(new Result::Impl(file, src));
     Result result(move(impl));

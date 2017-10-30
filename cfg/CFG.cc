@@ -204,7 +204,7 @@ CFG::CFG() {
     freshBlock(); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
-    deadBlock()->bexit.cond = ast::ContextBase::defn_cfg_never();
+    deadBlock()->bexit.cond = ast::GlobalState::defn_cfg_never();
 }
 
 void conditionalJump(BasicBlock *from, ast::SymbolRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat) {
@@ -221,7 +221,7 @@ void conditionalJump(BasicBlock *from, ast::SymbolRef cond, BasicBlock *thenb, B
 void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat) {
     if (from != inWhat.deadBlock()) {
         Error::check(!from->bexit.cond.exists());
-        from->bexit.cond = ast::ContextBase::defn_cfg_always();
+        from->bexit.cond = ast::GlobalState::defn_cfg_always();
         from->bexit.elseb = to;
         from->bexit.thenb = to;
         to->backEdges.push_back(from);
@@ -232,7 +232,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
     auto *db = inWhat.deadBlock();
     if (from != db) {
         Error::check(!from->bexit.cond.exists());
-        from->bexit.cond = ast::ContextBase::defn_cfg_never();
+        from->bexit.cond = ast::GlobalState::defn_cfg_never();
         from->bexit.elseb = db;
         from->bexit.thenb = db;
         db->backEdges.push_back(from);

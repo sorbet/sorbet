@@ -12,7 +12,7 @@ using ruby_parser::node_list;
 using ruby_parser::self_ptr;
 using ruby_parser::token;
 
-using ruby_typer::ast::ContextBase;
+using ruby_typer::ast::GlobalState;
 using ruby_typer::ast::UTF8Desc;
 using std::make_unique;
 using std::string;
@@ -54,9 +54,9 @@ string Dedenter::dedent(const string &str) {
 
 class Builder::Impl {
 public:
-    Impl(ContextBase &ctx, Result &r) : ctx_(ctx), result_(r) {}
+    Impl(GlobalState &ctx, Result &r) : ctx_(ctx), result_(r) {}
 
-    ContextBase &ctx_;
+    GlobalState &ctx_;
     ruby_parser::base_driver *driver_;
     Result &result_;
 
@@ -1052,7 +1052,7 @@ public:
     }
 };
 
-Builder::Builder(ContextBase &ctx, Result &r) : impl_(new Builder::Impl(ctx, r)) {}
+Builder::Builder(GlobalState &ctx, Result &r) : impl_(new Builder::Impl(ctx, r)) {}
 Builder::~Builder() {}
 
 }; // namespace parser

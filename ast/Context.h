@@ -17,7 +17,7 @@ class SymbolInfo;
 class SymbolRef;
 struct UTF8Desc;
 
-class ContextBase {
+class GlobalState {
     friend Name;
     friend NameRef;
     friend SymbolInfo;
@@ -26,13 +26,13 @@ class ContextBase {
     friend FileRef;
 
 public:
-    ContextBase(spdlog::logger &logger);
+    GlobalState(spdlog::logger &logger);
 
-    ContextBase(const ContextBase &) = delete;
+    GlobalState(const GlobalState &) = delete;
 
-    ContextBase(ContextBase &&) = delete;
+    GlobalState(GlobalState &&) = delete;
 
-    ~ContextBase();
+    ~GlobalState();
 
     SymbolRef fillPreregistedSym(SymbolRef which, SymbolRef owner, NameRef name); // need to be implemented from scratch
 
@@ -153,18 +153,18 @@ private:
 
     u2 freshNameId = 0;
 };
-// CheckSize(ContextBase, 152, 8);
+// CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
 
 class Context {
 public:
-    ContextBase &state;
+    GlobalState &state;
     SymbolRef owner;
-    operator ContextBase &() {
+    operator GlobalState &() {
         return state;
     }
 
-    Context(ContextBase &state, SymbolRef owner) : state(state), owner(owner) {}
+    Context(GlobalState &state, SymbolRef owner) : state(state), owner(owner) {}
     Context(const Context &other) : state(other.state), owner(other.owner) {}
 
     Context withOwner(SymbolRef sym) {

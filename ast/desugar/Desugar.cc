@@ -244,7 +244,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  result.swap(res);
              },
              [&](parser::Cbase *a) {
-                 unique_ptr<Statement> res = mkIdent(ContextBase::defn_root());
+                 unique_ptr<Statement> res = mkIdent(GlobalState::defn_root());
                  result.swap(res);
              },
              [&](parser::Begin *a) {
@@ -331,33 +331,33 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  result.swap(res);
              },
              [&](parser::Arg *arg) {
-                 unique_ptr<Statement> res = make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(arg->name, GlobalState::defn_lvar_todo());
                  result.swap(res);
              },
              [&](parser::Restarg *arg) {
                  unique_ptr<Statement> res =
-                     make_unique<RestArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()));
+                     make_unique<RestArg>(make_unique<Ident>(arg->name, GlobalState::defn_lvar_todo()));
                  result.swap(res);
              },
              [&](parser::Kwrestarg *arg) {
                  unique_ptr<Statement> res = make_unique<RestArg>(
-                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo())));
+                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, GlobalState::defn_lvar_todo())));
                  result.swap(res);
              },
              [&](parser::Kwarg *arg) {
                  unique_ptr<Statement> res =
-                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()));
+                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, GlobalState::defn_lvar_todo()));
                  result.swap(res);
              },
              [&](parser::Kwoptarg *arg) {
                  unique_ptr<Statement> res = make_unique<OptionalArg>(
-                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo())),
+                     make_unique<KeywordArg>(make_unique<Ident>(arg->name, GlobalState::defn_lvar_todo())),
                      Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
                  result.swap(res);
              },
              [&](parser::Optarg *arg) {
                  unique_ptr<Statement> res =
-                     make_unique<OptionalArg>(make_unique<Ident>(arg->name, ContextBase::defn_lvar_todo()),
+                     make_unique<OptionalArg>(make_unique<Ident>(arg->name, GlobalState::defn_lvar_todo()),
                                               Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
                  result.swap(res);
              },
@@ -433,61 +433,61 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  result.swap(res);
              },
              [&](parser::IVar *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_ivar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_ivar_todo());
                  result.swap(res);
              },
              [&](parser::LVar *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_lvar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_lvar_todo());
                  result.swap(res);
              },
              [&](parser::GVar *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_gvar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_gvar_todo());
                  result.swap(res);
              },
              [&](parser::CVar *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_cvar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_cvar_todo());
                  result.swap(res);
              },
              [&](parser::IVar *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_ivar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_ivar_todo());
                  result.swap(res);
              },
              [&](parser::LVarLhs *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_lvar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_lvar_todo());
                  result.swap(res);
              },
              [&](parser::GVarLhs *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_gvar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_gvar_todo());
                  result.swap(res);
              },
              [&](parser::CVarLhs *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_cvar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_cvar_todo());
                  result.swap(res);
              },
              [&](parser::IVarLhs *var) {
-                 unique_ptr<Statement> res = make_unique<Ident>(var->name, ContextBase::defn_ivar_todo());
+                 unique_ptr<Statement> res = make_unique<Ident>(var->name, GlobalState::defn_ivar_todo());
                  result.swap(res);
              },
              [&](parser::IVarAsgn *asgn) {
-                 unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, ContextBase::defn_ivar_todo());
+                 unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, GlobalState::defn_ivar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
              },
              [&](parser::LVarAsgn *asgn) {
-                 unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, ContextBase::defn_lvar_todo());
+                 unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, GlobalState::defn_lvar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
              },
              [&](parser::GVarAsgn *asgn) {
-                 unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, ContextBase::defn_gvar_todo());
+                 unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, GlobalState::defn_gvar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);
              },
              [&](parser::CVarAsgn *asgn) {
-                 unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, ContextBase::defn_cvar_todo());
+                 unique_ptr<Statement> lhs = make_unique<Ident>(asgn->name, GlobalState::defn_cvar_todo());
                  auto rhs = node2TreeImpl(ctx, asgn->expr);
                  auto res = mkAssign(lhs, rhs);
                  result.swap(res);

@@ -5,7 +5,7 @@ using namespace std;
 namespace ruby_typer {
 namespace ast {
 
-File &FileRef::file(ContextBase &ctx) const {
+File &FileRef::file(GlobalState &ctx) const {
     return ctx.files[_id];
 }
 

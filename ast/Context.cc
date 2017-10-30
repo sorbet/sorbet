@@ -10,7 +10,7 @@ using namespace std;
 namespace ruby_typer {
 namespace ast {
 
-SymbolRef ContextBase::synthesizeClass(UTF8Desc name) {
+SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
     auto nameId = enterNameUTF8(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
@@ -138,7 +138,7 @@ static UTF8Desc include_DESC{(char *)include, (int)strlen(include)};
 static const char *currentFile = "__FILE__";
 static UTF8Desc currentFile_DESC{(char *)currentFile, (int)strlen(currentFile)};
 
-ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this) {
+GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
@@ -253,11 +253,11 @@ ContextBase::ContextBase(spdlog::logger &logger) : logger(logger), errors(*this)
     }
 }
 
-ContextBase::~ContextBase() {}
+GlobalState::~GlobalState() {}
 
-constexpr decltype(ContextBase::STRINGS_PAGE_SIZE) ContextBase::STRINGS_PAGE_SIZE;
+constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
+SymbolRef GlobalState::enterClassSymbol(SymbolRef owner, NameRef name) {
     // TODO Unify this with enterSymbol
     DEBUG_ONLY(Error::check(owner.exists()));
     auto &ownerScope = owner.info(*this, true);
@@ -285,7 +285,7 @@ SymbolRef ContextBase::enterClassSymbol(SymbolRef owner, NameRef name) {
     return ret;
 }
 
-SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
+SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
                                    bool isMethod) {
     DEBUG_ONLY(Error::check(owner.exists()));
     Error::check(name.exists());
@@ -325,7 +325,7 @@ SymbolRef ContextBase::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
     return ret;
 }
 
-NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
+NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
     const auto hs = _hash(nm);
     unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
@@ -363,9 +363,9 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
     bucket.second = idx;
     names.emplace_back();
 
-    Error::check(nm.to < ContextBase::STRINGS_PAGE_SIZE);
+    Error::check(nm.to < GlobalState::STRINGS_PAGE_SIZE);
     char *from = nullptr;
-    if (nm.to > ContextBase::STRINGS_PAGE_SIZE) {
+    if (nm.to > GlobalState::STRINGS_PAGE_SIZE) {
         strings.push_back(make_unique<vector<char>>(nm.to));
         from = strings.back()->data();
         if (strings.size() > 1) {
@@ -373,8 +373,8 @@ NameRef ContextBase::enterNameUTF8(UTF8Desc nm) {
         }
     } else {
 
-        if (strings_last_page_used + nm.to > ContextBase::STRINGS_PAGE_SIZE) {
-            strings.push_back(make_unique<vector<char>>(ContextBase::STRINGS_PAGE_SIZE));
+        if (strings_last_page_used + nm.to > GlobalState::STRINGS_PAGE_SIZE) {
+            strings.push_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
             // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
             strings_last_page_used = 0;
         }
@@ -410,7 +410,7 @@ void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsign
     }
 }
 
-void ContextBase::expandNames() {
+void GlobalState::expandNames() {
     Error::check(names.size() == names.capacity());
     Error::check(names.capacity() * 2 == names_by_hash.capacity());
     Error::check(names_by_hash.size() == names_by_hash.capacity());
@@ -421,7 +421,7 @@ void ContextBase::expandNames() {
     names_by_hash.swap(new_names_by_hash);
 }
 
-NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original) {
+NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original) {
     u2 num = freshNameId++;
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
     unsigned int hashTableSize = names_by_hash.size();
@@ -471,7 +471,7 @@ NameRef ContextBase::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return idx;
 }
 
-FileRef ContextBase::enterFile(UTF8Desc path, UTF8Desc source) {
+FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
     auto idx = files.size();
     files.emplace_back();
     auto &file = files.back();
@@ -480,21 +480,21 @@ FileRef ContextBase::enterFile(UTF8Desc path, UTF8Desc source) {
     return FileRef(idx);
 }
 
-SymbolRef ContextBase::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
+SymbolRef GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     auto tempName = this->freshNameUnique(kind, name);
     vector<SymbolRef> empty;
     return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
 }
 
-unsigned int ContextBase::symbolsUsed() {
+unsigned int GlobalState::symbolsUsed() {
     return symbols.size();
 }
 
-unsigned int ContextBase::namesUsed() {
+unsigned int GlobalState::namesUsed() {
     return names.size();
 }
 
-std::string ContextBase::toString() {
+std::string GlobalState::toString() {
     std::vector<std::string> children;
     for (auto element : defn_root().info(*this).members) {
         children.push_back(element.second.toString(*this));

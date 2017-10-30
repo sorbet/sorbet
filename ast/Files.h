@@ -6,7 +6,7 @@
 
 namespace ruby_typer {
 namespace ast {
-class ContextBase;
+class GlobalState;
 class File;
 
 class FileRef {
@@ -35,7 +35,7 @@ public:
         return _id != 0;
     }
 
-    File &file(ContextBase &ctx) const;
+    File &file(GlobalState &ctx) const;
 
 private:
     int _id;
@@ -43,7 +43,7 @@ private:
 
 class File {
 public:
-    friend class ContextBase;
+    friend class GlobalState;
 
     UTF8Desc path();
     UTF8Desc source();
