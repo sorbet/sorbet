@@ -1,4 +1,4 @@
-class Examples ()
+class Examples (Object)
   method i_like_exps ()
   method i_like_ifs ()
   method return_in_one_branch1 ()
