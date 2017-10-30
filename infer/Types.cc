@@ -94,7 +94,7 @@ std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared
 
     ast::SymbolRef sym1 = c1->symbol;
     ast::SymbolRef sym2 = c2->symbol;
-    if (sym1.info(ctx).derivesFrom(ctx, sym2)) {
+    if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
         result = t1;
     } else if (sym1.info(ctx).derivesFrom(ctx, sym2)) {
         result = t2;
@@ -162,7 +162,7 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
 
     if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) { // 1
         if (auto *c2 = dynamic_cast<ClassType *>(t2.get())) {
-            return c1->symbol.info(ctx).derivesFrom(ctx, c2->symbol);
+            return c1->symbol == c2->symbol || c1->symbol.info(ctx).derivesFrom(ctx, c2->symbol);
         }
     }
     Error::raise("should never ber reachable");
@@ -290,6 +290,10 @@ std::string HashType::typeName() {
 std::string AndType::typeName() {
     return "AndType";
 }
+
+AndType::AndType(std::shared_ptr<Type> left, std::shared_ptr<Type> right) : left(left), right(right) {}
+
+OrType::OrType(std::shared_ptr<Type> left, std::shared_ptr<Type> right) : left(left), right(right) {}
 
 std::string OrType::typeName() {
     return "OrType";

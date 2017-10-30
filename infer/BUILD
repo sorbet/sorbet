@@ -18,9 +18,9 @@ cc_library(
 
 cc_test(
     name = "infer_test",
-    srcs = [
-        "infer_test.cc",
-    ],
+    srcs = glob([
+        "test/*.cc",
+    ]),
     copts = ["-Iexternal/gtest/include"],
     linkstatic = 1,
     visibility = ["//tools:__pkg__"],
