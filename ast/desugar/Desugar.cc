@@ -227,7 +227,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  result.swap(res);
              },
              [&](parser::Symbol *a) {
-                 unique_ptr<Statement> res = make_unique<ast::Symbol>(a->val);
+                 unique_ptr<Statement> res = make_unique<ast::SymbolLit>(a->val);
                  result.swap(res);
              },
              [&](parser::String *a) {

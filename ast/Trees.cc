@@ -124,7 +124,7 @@ Block::Block(vector<unique_ptr<Expression>> &args, unique_ptr<Expression> body) 
 
 NotSupported::NotSupported(const string &why) : why(why) {}
 
-Symbol::Symbol(NameRef name) : name(name) {}
+SymbolLit::SymbolLit(NameRef name) : name(name) {}
 
 Array::Array(vector<unique_ptr<Expression>> &elems) : elems(move(elems)) {}
 
@@ -658,11 +658,11 @@ string Block::showRaw(GlobalState &ctx, int tabs) {
     return buf.str();
 }
 
-string Symbol::toString(GlobalState &ctx, int tabs) {
+string SymbolLit::toString(GlobalState &ctx, int tabs) {
     return ":" + this->name.name(ctx).toString(ctx);
 }
 
-std::string Symbol::showRaw(GlobalState &ctx, int tabs) {
+std::string SymbolLit::showRaw(GlobalState &ctx, int tabs) {
     return nodeName() + "{ name = " + this->name.name(ctx).toString(ctx) + " }";
 }
 
@@ -726,8 +726,8 @@ std::string Break::nodeName() {
     return "Break";
 }
 
-std::string Symbol::nodeName() {
-    return "Symbol";
+std::string SymbolLit::nodeName() {
+    return "SymbolLit";
 }
 
 std::string Assign::nodeName() {

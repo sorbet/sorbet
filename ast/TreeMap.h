@@ -619,7 +619,7 @@ private:
                     ctx, v, func);
             }
             return v;
-        } else if (Symbol *v = dynamic_cast<Symbol *>(what)) {
+        } else if (SymbolLit *v = dynamic_cast<SymbolLit *>(what)) {
             return what;
         } else if (Super *v = dynamic_cast<Super *>(what)) {
             // TODO Need to recursivly walk arguments

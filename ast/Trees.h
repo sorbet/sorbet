@@ -218,11 +218,11 @@ public:
     virtual std::string nodeName();
 };
 
-class Symbol : public Expression {
+class SymbolLit : public Expression {
 public:
     NameRef name;
 
-    Symbol(NameRef name);
+    SymbolLit(NameRef name);
 
     virtual std::string toString(GlobalState &ctx, int tabs);
     virtual std::string showRaw(GlobalState &ctx, int tabs = 0);
