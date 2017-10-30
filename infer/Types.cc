@@ -109,18 +109,64 @@ std::shared_ptr<ruby_typer::typer::Type> ruby_typer::typer::Types::glb(ast::Cont
 }
 
 bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+
+
+    auto *g1 = dynamic_cast<GroundType *>(t1.get());
+    auto *g2 = dynamic_cast<GroundType *>(t2.get());
+
+    ruby_typer::Error::check(g1 != nullptr && g2 != nullptr);
+    if (t1.get() == t2.get()) {
+        return true;
+    }
+
+    // Prereq: t1.kind <= t2.kind
     // pairs to cover: 1  (Class, Class)
     //                 2  (Class, And)
     //                 3  (Class, Or)
     //                 4  (Class, Method)
-    //                 5  (And, And)
-    //                 6  (And, Or)
-    //                 7  (And, Method)
-    //                 8  (Or, Or)
-    //                 9  (Or, Method)
-    //                 10 (Method, Method)
-    
+    //                 5  (And, Class)
+    //                 6  (And, And)
+    //                 7  (And, Or)
+    //                 8  (And, Method)
+    //                 9 (Or, Class)
+    //                 10 (Or, And)
+    //                 11 (Or, Or)
+    //                 12 (Or, Method)
+    //                 13 (Method, Class)
+    //                 14 (Method, And)
+    //                 15 (Method, Or)
+    //                 16 (Method, Method)
 
+    if (dynamic_cast<MethodType *>(t1.get()) || dynamic_cast<MethodType *>(t2.get())) { // 4, 8, 12, 13, 14, 15, 16
+        Error::notImplemented();
+    }
+
+    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 6, 10, 14
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
+    }
+
+    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 7, 11, 15
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
+    }
+
+    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 5, 7, 8
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
+    }
+
+    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 9, 11, 12
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
+    }
+
+    if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) { //1
+        if (auto *c2 = dynamic_cast<ClassType *>(t2.get())) {
+            return c1->symbol.info(ctx).derivesFrom(ctx, c2->symbol);
+        }
+    }
+    Error::raise("should never ber reachable");
 }
 
 bool ruby_typer::typer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
