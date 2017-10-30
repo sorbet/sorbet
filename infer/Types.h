@@ -6,7 +6,7 @@
 #include <string>
 
 namespace ruby_typer {
-namespace typer {
+namespace infer {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
 class Type;
 class Types {
@@ -142,6 +142,6 @@ public:
     virtual std::string typeName();
 };
 
-} // namespace typer
+} // namespace infer
 } // namespace ruby_typer
 #endif // SRUBY_TYPES_H

@@ -3,12 +3,12 @@
 #include <algorithm> // find_if
 
 using namespace ruby_typer;
-using namespace ruby_typer::typer;
+using namespace ruby_typer::infer;
 using namespace std;
 
-std::shared_ptr<ruby_typer::typer::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
+std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
                                                    std::shared_ptr<Type> &t2);
-std::shared_ptr<ruby_typer::typer::Type> ruby_typer::typer::Types::lub(ast::Context ctx, std::shared_ptr<Type> &t1,
+std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Context ctx, std::shared_ptr<Type> &t1,
                                                                        std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return t1;
@@ -32,9 +32,9 @@ std::shared_ptr<ruby_typer::typer::Type> ruby_typer::typer::Types::lub(ast::Cont
     }
 }
 
-std::shared_ptr<ruby_typer::typer::Type> distributeOr(ast::Context ctx, OrType *t1, std::shared_ptr<Type> t2) {
-    std::shared_ptr<ruby_typer::typer::Type> n1 = Types::lub(ctx, t2, t1->left);
-    std::shared_ptr<ruby_typer::typer::Type> n2 = Types::lub(ctx, t2, t1->right);
+std::shared_ptr<ruby_typer::infer::Type> distributeOr(ast::Context ctx, OrType *t1, std::shared_ptr<Type> t2) {
+    std::shared_ptr<ruby_typer::infer::Type> n1 = Types::lub(ctx, t2, t1->left);
+    std::shared_ptr<ruby_typer::infer::Type> n2 = Types::lub(ctx, t2, t1->right);
     if (Types::isSubType(ctx, n1, n2)) {
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
@@ -43,7 +43,7 @@ std::shared_ptr<ruby_typer::typer::Type> distributeOr(ast::Context ctx, OrType *
     return std::make_shared<OrType>(n1, n2);
 }
 
-std::shared_ptr<ruby_typer::typer::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
+std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
                                                    std::shared_ptr<Type> &t2) {
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
@@ -69,7 +69,7 @@ std::shared_ptr<ruby_typer::typer::Type> lubGround(ast::Context ctx, std::shared
     //                 9  (Or, Method)
     //                 10 (Method, Method)
 
-    std::shared_ptr<ruby_typer::typer::Type> result;
+    std::shared_ptr<ruby_typer::infer::Type> result;
 
     if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6, 8
         return distributeOr(ctx, o2, t1);
@@ -103,7 +103,7 @@ std::shared_ptr<ruby_typer::typer::Type> lubGround(ast::Context ctx, std::shared
     }
 }
 
-std::shared_ptr<ruby_typer::typer::Type> ruby_typer::typer::Types::glb(ast::Context ctx, std::shared_ptr<Type> &t1,
+std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::glb(ast::Context ctx, std::shared_ptr<Type> &t1,
                                                                        std::shared_ptr<Type> &t2) {
     Error::notImplemented();
 }
@@ -168,7 +168,7 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     Error::raise("should never ber reachable");
 }
 
-bool ruby_typer::typer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+bool ruby_typer::infer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -238,32 +238,32 @@ bool ruby_typer::typer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
     }
 }
 
-ruby_typer::typer::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
+ruby_typer::infer::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
 
-std::string ruby_typer::typer::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
+std::string ruby_typer::infer::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
     return this->symbol.toString(ctx);
 }
 
-std::string ruby_typer::typer::ClassType::typeName() {
+std::string ruby_typer::infer::ClassType::typeName() {
     return "ClassType";
 }
 
-ruby_typer::typer::ProxyType::ProxyType(std::shared_ptr<ruby_typer::typer::Type> underlying)
+ruby_typer::infer::ProxyType::ProxyType(std::shared_ptr<ruby_typer::infer::Type> underlying)
     : underlying(std::move(underlying)) {}
 
-ruby_typer::typer::MethodType::MethodType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
+ruby_typer::infer::MethodType::MethodType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
 
 // TODO: somehow reuse existing references instead of allocating new ones.
-ruby_typer::typer::Literal::Literal(int val)
+ruby_typer::infer::Literal::Literal(int val)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Integer())), value(val) {}
 
-ruby_typer::typer::Literal::Literal(float val)
+ruby_typer::infer::Literal::Literal(float val)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Float())), value(*reinterpret_cast<int *>(&val)) {}
 
-ruby_typer::typer::Literal::Literal(ast::NameRef val)
+ruby_typer::infer::Literal::Literal(ast::NameRef val)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_String())), value(val._id) {}
 
-ruby_typer::typer::Literal::Literal(bool val)
+ruby_typer::infer::Literal::Literal(bool val)
     : ProxyType(
           std::make_shared<ClassType>(val ? ast::GlobalState::defn_TrueClass() : ast::GlobalState::defn_FalseClass())),
       value(val ? 1 : 0) {}
@@ -276,7 +276,7 @@ std::string Literal::toString(ast::Context ctx, int tabs) {
     return "Literal[" + this->underlying->toString(ctx, tabs) + "]{" + to_string(value) + "}";
 }
 
-ruby_typer::typer::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> elements)
+ruby_typer::infer::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> elements)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Array())), elems(elements) {}
 
 std::string ArrayType::typeName() {
@@ -316,7 +316,7 @@ std::string ArrayType::toString(ast::Context ctx, int tabs) {
     return buf.str();
 }
 
-ruby_typer::typer::HashType::HashType(std::vector<std::shared_ptr<Literal>> keys,
+ruby_typer::infer::HashType::HashType(std::vector<std::shared_ptr<Literal>> keys,
                                       std::vector<std::shared_ptr<Type>> values)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(keys), values(values) {}
 
