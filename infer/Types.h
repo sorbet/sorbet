@@ -46,6 +46,17 @@ public:
     inline static bool isSubType(ast::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
         return isSubType(ctx, t1, t2);
     }
+
+    static bool equiv(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    inline static bool equiv(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &&t2) {
+        return equiv(ctx, t1, t2);
+    }
+    inline static bool equiv(ast::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &t2) {
+        return equiv(ctx, t1, t2);
+    }
+    inline static bool equiv(ast::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
+        return equiv(ctx, t1, t2);
+    }
 };
 
 class Type {

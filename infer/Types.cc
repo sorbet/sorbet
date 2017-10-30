@@ -171,6 +171,10 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     Error::raise("should never ber reachable");
 }
 
+bool ruby_typer::infer::Types::equiv(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+    return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
+}
+
 bool ruby_typer::infer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
