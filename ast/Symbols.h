@@ -42,6 +42,13 @@ public:
         return _id;
     }
 
+    inline SymbolRef orElse(SymbolRef other) const {
+        if (exists())
+            this;
+        else
+            other;
+    }
+
     bool isSynthetic() const;
 
     bool isPlaceHolder() const;
