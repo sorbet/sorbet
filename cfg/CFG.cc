@@ -345,8 +345,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  ret = current;
              },
              [&](ast::ConstantLit *a) {
-                 current->exprs.emplace_back(target, make_unique<ConstantLit>(a->cnst));
-                 ret = current;
+                 Error::raise("Should have been eliminated by namer/resolver");
              },
              [&](ast::Ident *a) {
                  current->exprs.emplace_back(target, make_unique<Ident>(a->symbol));
@@ -574,10 +573,6 @@ string BoolLit::toString(ast::Context ctx) {
     } else {
         return "false";
     }
-}
-
-string ConstantLit::toString(ast::Context ctx) {
-    return this->cnst.name(ctx).toString(ctx);
 }
 
 string Nil::toString(ast::Context ctx) {

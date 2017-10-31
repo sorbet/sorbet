@@ -111,14 +111,6 @@ public:
     virtual std::string toString(ast::Context ctx);
 };
 
-class ConstantLit : public Instruction {
-    ast::NameRef cnst;
-
-public:
-    ConstantLit(ast::NameRef cnst) : cnst(cnst) {}
-    virtual std::string toString(ast::Context ctx);
-};
-
 class ArraySplat : public Instruction {
 public:
     ast::NameRef arg;
