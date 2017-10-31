@@ -185,8 +185,7 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
     ast::SymbolRef retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
-    ast::SymbolRef selfSym =
-        ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::selfMethodTemp(), md.symbol);
+    ast::SymbolRef selfSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::selfMethodTemp(), md.symbol);
 
     BasicBlock *entry = res->entry();
 
