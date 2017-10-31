@@ -92,7 +92,7 @@ public:
     ClassType(ast::SymbolRef symbol);
     virtual int kind();
 
-    virtual std::string toString(ast::Context ctx, int tabs);
+    virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
 
@@ -102,7 +102,7 @@ public:
     virtual int kind();
     MethodType(ast::SymbolRef symbol);
 
-    virtual std::string toString(ast::Context ctx, int tabs);
+    virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
 
@@ -113,7 +113,7 @@ public:
     virtual int kind();
     OrType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
-    virtual std::string toString(ast::Context ctx, int tabs);
+    virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
 
@@ -124,7 +124,7 @@ public:
     virtual int kind();
     AndType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
-    virtual std::string toString(ast::Context ctx, int tabs);
+    virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
 
@@ -136,7 +136,7 @@ public:
     Literal(ast::NameRef val);
     Literal(bool val);
 
-    virtual std::string toString(ast::Context ctx, int tabs);
+    virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
 
@@ -146,7 +146,7 @@ public:
     std::vector<std::shared_ptr<Type>> values;
     HashType(std::vector<std::shared_ptr<Literal>> &keys, std::vector<std::shared_ptr<Type>> &values);
 
-    virtual std::string toString(ast::Context ctx, int tabs);
+    virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
 
@@ -155,7 +155,7 @@ public:
     std::vector<std::shared_ptr<Type>> elems;
     ArrayType(std::vector<std::shared_ptr<Type>> &elems);
 
-    virtual std::string toString(ast::Context ctx, int tabs);
+    virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
 } // namespace infer
