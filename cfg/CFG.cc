@@ -344,9 +344,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  current->exprs.emplace_back(target, make_unique<BoolLit>(a->value));
                  ret = current;
              },
-             [&](ast::ConstantLit *a) {
-                 Error::raise("Should have been eliminated by namer/resolver");
-             },
+             [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
              [&](ast::Ident *a) {
                  current->exprs.emplace_back(target, make_unique<Ident>(a->symbol));
                  ret = current;

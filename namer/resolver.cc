@@ -59,11 +59,10 @@ private:
             if (!resolved.exists())
                 return resolved;
             ast::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
-            if (!result.exists())  {
+            if (!result.exists()) {
                 ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::StubConstant,
                                        "Stubbing out unknown constant " + c->toString(ctx));
                 result = ast::GlobalState::defn_dynamic();
-
             }
             c->scope = make_unique<ast::Ident>(resolved);
 
