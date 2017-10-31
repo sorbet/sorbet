@@ -96,16 +96,6 @@ public:
     virtual std::string typeName();
 };
 
-class MethodType : public GroundType {
-public:
-    ast::SymbolRef symbol;
-    virtual int kind();
-    MethodType(ast::SymbolRef symbol);
-
-    virtual std::string toString(ast::Context ctx, int tabs = 0);
-    virtual std::string typeName();
-};
-
 class OrType : public GroundType {
 public:
     std::shared_ptr<Type> left;

@@ -160,22 +160,17 @@ std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared
     // pairs to cover: 1  (Class, Class)
     //                 2  (Class, And)
     //                 3  (Class, Or)
-    //                 4  (Class, Method)
-    //                 5  (And, And)
-    //                 6  (And, Or)
-    //                 7  (And, Method)
-    //                 8  (Or, Or)
-    //                 9  (Or, Method)
-    //                 10 (Method, Method)
+    //                 4  (And, And)
+    //                 5  (And, Or)
+    //                 6  (Or, Or)
 
     std::shared_ptr<ruby_typer::infer::Type> result;
 
-    if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6, 8
+    if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
         return distributeOr(ctx, o2, t1);
-    } else if (dynamic_cast<MethodType *>(t1.get()) != nullptr ||
-               dynamic_cast<OrType *>(t2.get()) != nullptr) { // 4, 7, 9, 10
+    } else if (dynamic_cast<OrType *>(t2.get()) != nullptr) {
         Error::raise("should not happen");
-    } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5
+    } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
         if (Types::isSubType(ctx, t1, a2->left)) {
             return std::make_shared<AndType>(t1, a2->right);
         } else if (Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right)) {
@@ -221,40 +216,29 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     // pairs to cover: 1  (Class, Class)
     //                 2  (Class, And)
     //                 3  (Class, Or)
-    //                 4  (Class, Method)
-    //                 5  (And, Class)
-    //                 6  (And, And)
-    //                 7  (And, Or)
-    //                 8  (And, Method)
-    //                 9 (Or, Class)
-    //                 10 (Or, And)
-    //                 11 (Or, Or)
-    //                 12 (Or, Method)
-    //                 13 (Method, Class)
-    //                 14 (Method, And)
-    //                 15 (Method, Or)
-    //                 16 (Method, Method)
+    //                 4  (And, Class)
+    //                 5  (And, And)
+    //                 6  (And, Or)
+    //                 7 (Or, Class)
+    //                 8 (Or, And)
+    //                 9 (Or, Or)
 
-    if (dynamic_cast<MethodType *>(t1.get()) || dynamic_cast<MethodType *>(t2.get())) { // 4, 8, 12, 13, 14, 15, 16
-        Error::notImplemented();
-    }
-
-    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 6, 10, 14
+    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5, 8
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
     }
 
-    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 7, 11, 15
+    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6, 9
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
     }
 
-    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 5, 7, 8
+    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
     }
 
-    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 9, 11, 12
+    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 7
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
     }
@@ -398,8 +382,6 @@ std::string ruby_typer::infer::ClassType::typeName() {
 ruby_typer::infer::ProxyType::ProxyType(std::shared_ptr<ruby_typer::infer::Type> underlying)
     : underlying(std::move(underlying)) {}
 
-ruby_typer::infer::MethodType::MethodType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
-
 // TODO: somehow reuse existing references instead of allocating new ones.
 ruby_typer::infer::Literal::Literal(int val)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Integer())), value(val) {}
@@ -526,18 +508,6 @@ std::string OrType::toString(ast::Context ctx, int tabs) {
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
-}
-
-int MethodType::kind() {
-    return 4;
-}
-
-std::string MethodType::typeName() {
-    return "MethodType";
-}
-
-std::string MethodType::toString(ast::Context ctx, int tabs) {
-    Error::notImplemented();
 }
 
 bool Type::isDynamic() {
