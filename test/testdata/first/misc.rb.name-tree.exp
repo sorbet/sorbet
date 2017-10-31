@@ -82,7 +82,7 @@ begin
   <Not Supported (NthRef)>
   def foo<foo>(x<todo lvar sym> = 1, *y<todo lvar sym>)
     <emptyTree>
-  {x<todo lvar sym> => y<todo lvar sym>, <Not Supported (DSymbol)> => 1}
+  {#x => #y, <Not Supported (DSymbol)> => 1}
   <Not Supported (Preexe)>
   <Not Supported (Postexe)>
   <Not Supported (Rational)>

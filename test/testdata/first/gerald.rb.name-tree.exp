@@ -126,7 +126,7 @@ begin
                     ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms.to_i()
                   end.to_s()).concat("ms budget=").concat(begin
                     ::<dynamic>
-                  end.to_s()).concat("ms").to_s(), {:rule_token => rule<todo lvar sym>.token()}))
+                  end.to_s()).concat("ms").to_s(), {:rule_token => ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule.token()}))
           else
             <emptyTree>
           end
