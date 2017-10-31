@@ -60,6 +60,7 @@ public:
 
     static std::shared_ptr<Type> top();
     static std::shared_ptr<Type> bottom();
+    static std::shared_ptr<Type> nil();
 };
 
 class Type {

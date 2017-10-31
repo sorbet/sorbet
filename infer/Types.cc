@@ -365,6 +365,10 @@ std::shared_ptr<Type> Types::bottom() {
     return make_shared<ClassType>(ast::GlobalState::defn_bottom());
 }
 
+std::shared_ptr<Type> Types::nil() {
+    return make_shared<ClassType>(ast::GlobalState::defn_NilClass());
+}
+
 ruby_typer::infer::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
 
 std::string ruby_typer::infer::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
