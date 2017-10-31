@@ -24,6 +24,9 @@ SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
     info.setClass();
 
     symRef.info(*this, true).setCompleted();
+    if (symRef._id > GlobalState::defn_root()._id) {
+        GlobalState::defn_root().info(*this, true).members.push_back(make_pair(nameId, symRef));
+    }
     return symRef;
 }
 
@@ -567,7 +570,9 @@ unsigned int GlobalState::namesUsed() {
 std::string GlobalState::toString() {
     std::vector<std::string> children;
     for (auto element : defn_root().info(*this).members) {
-        children.push_back(element.second.toString(*this));
+        if (!element.second.isSynthetic()) {
+            children.push_back(element.second.toString(*this));
+        }
     }
     std::sort(children.begin(), children.end());
     std::ostringstream os;
