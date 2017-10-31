@@ -156,7 +156,7 @@ digraph take_arguments {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$44 = self\ni = load_arg(<self>$44#take_arguments, 0)\nifTmp$45 = false\nifTmp$45"];
+    bb0 [label = "(i)\n<self>$44 = self\ni = load_arg(<self>$44#take_arguments, 0)\nifTmp$45 = false\nifTmp$45"];
     bb0 -> bb2;
     bb0 -> bb3;
 
@@ -164,7 +164,7 @@ digraph take_arguments {
     bb1 -> bb1;
     bb2 [label = "(<ret>$43)\n<ret>$43 = 2\n<always>"];
     bb2 -> bb4;
-    bb3 [label = "(<ret>$43)\n<ret>$43 = i\n<always>"];
+    bb3 [label = "(i, <ret>$43)\n<ret>$43 = i\n<always>"];
     bb3 -> bb4;
     bb4 [label = "(<ret>$43)\n<ret>$46 = return <ret>$43\n<never>"];
     bb4 -> bb1;

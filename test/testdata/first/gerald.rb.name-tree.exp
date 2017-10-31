@@ -5,7 +5,7 @@ begin
     class <emptyTree>::MatchTimeout<MatchTimeout> < (<emptyTree>::StandardError)
       <emptyTree>.attr_reader(:rule_token)
 
-      def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#message, rule_token<todo lvar sym>: = "")
+      def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#initialize#message, rule_token<todo lvar sym>: = "")
         begin
           super(message<todo lvar sym>)
           @rule_token<todo ivar sym> = ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token
@@ -34,7 +34,7 @@ begin
           end
         end
 
-      def match<match>(::Opus::CIBot::Gerald::Matcher#match_context)
+      def match<match>(::Opus::CIBot::Gerald::Matcher#match#match_context)
         begin
           if ::Opus::CIBot::Gerald::Matcher#match#match_context.diff().affected_files().count().>(<emptyTree>::MAX_AFFECTED_FILES)
             begin
@@ -73,7 +73,7 @@ begin
 
       <emptyTree>.attr_reader(:openapi_diff)
 
-      def initialize<initialize>(::Opus::CIBot::Gerald::MatchContext#repo, ::Opus::CIBot::Gerald::MatchContext#assignee, ::Opus::CIBot::Gerald::MatchContext#gh_user, ::Opus::CIBot::Gerald::MatchContext#merge_branch, ::Opus::CIBot::Gerald::MatchContext#body, ::Opus::CIBot::Gerald::MatchContext#title, ::Opus::CIBot::Gerald::MatchContext#diff, ::Opus::CIBot::Gerald::MatchContext#openapi_diff)
+      def initialize<initialize>(::Opus::CIBot::Gerald::MatchContext#initialize#repo, ::Opus::CIBot::Gerald::MatchContext#initialize#assignee, ::Opus::CIBot::Gerald::MatchContext#initialize#gh_user, ::Opus::CIBot::Gerald::MatchContext#initialize#merge_branch, ::Opus::CIBot::Gerald::MatchContext#initialize#body, ::Opus::CIBot::Gerald::MatchContext#initialize#title, ::Opus::CIBot::Gerald::MatchContext#initialize#diff, ::Opus::CIBot::Gerald::MatchContext#initialize#openapi_diff)
         begin
           @repo<todo ivar sym> = ::Opus::CIBot::Gerald::MatchContext#initialize#repo
           @assignee<todo ivar sym> = ::Opus::CIBot::Gerald::MatchContext#initialize#assignee
@@ -112,7 +112,7 @@ begin
           end
         end
 
-      def time_rule<time_rule>(::Opus::CIBot::Gerald::MatchTimeBudget#rule)
+      def time_rule<time_rule>(::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule)
         begin
           ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule_start = <emptyTree>::Time.now()
           ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#res = yield(<emptyTree>)
@@ -137,7 +137,7 @@ begin
     end
 
     class <emptyTree>::Diff<Diff> < (::Object)
-      def initialize<initialize>(::Opus::CIBot::Gerald::Diff#raw_diff)
+      def initialize<initialize>(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
         begin
           @raw<todo ivar sym> = ::Opus::CIBot::Gerald::Diff#initialize#raw_diff
           @parsed<todo ivar sym> = <emptyTree>.parse(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
@@ -183,7 +183,7 @@ begin
       def changed_openapi?<changed_openapi?>()
         <emptyTree>.changed_files().include?(::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
 
-      <emptyTree>.private(def parse<parse>(::Opus::CIBot::Gerald::Diff#diff)
+      <emptyTree>.private(def parse<parse>(::Opus::CIBot::Gerald::Diff#parse#diff)
           begin
             ::Opus::CIBot::Gerald::Diff#parse#parts = ::Opus::CIBot::Gerald::Diff#parse#diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if ::Opus::CIBot::Gerald::Diff#parse#parts
