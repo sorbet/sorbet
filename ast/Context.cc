@@ -99,6 +99,9 @@ static UTF8Desc top_DESC{(char *)top_str, (int)strlen(top_str)};
 static const char *bottom_str = "<bottom>";
 static UTF8Desc bottom_DESC{(char *)bottom_str, (int)strlen(bottom_str)};
 
+static const char *dynamic_str = "<dynamic>";
+static UTF8Desc dynamic_DESC{(char *)dynamic_str, (int)strlen(dynamic_str)};
+
 static const char *root_str = "<root>";
 static UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
 
@@ -257,6 +260,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef trueClass_id = synthesizeClass(trueClass_DESC);
     SymbolRef falseClass_id = synthesizeClass(falseClass_DESC);
     SymbolRef nilClass_id = synthesizeClass(nilClass_DESC);
+    SymbolRef dynamic_id = synthesizeClass(dynamic_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -282,6 +286,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(trueClass_id == defn_TrueClass());
     Error::check(falseClass_id == defn_FalseClass());
     Error::check(nilClass_id == defn_NilClass());
+    Error::check(dynamic_id == defn_dynamic());
 
     /* 0: <none>
      * 1: <top>
