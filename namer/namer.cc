@@ -90,8 +90,13 @@ public:
     ast::MethodDef *preTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
         auto args = std::vector<ast::SymbolRef>();
         // Fill in the arity right with TODOs
-        for (auto &UNUSED(_) : method->args) {
-            args.push_back(ast::GlobalState::defn_todo());
+        for (auto &arg : method->args) {
+            if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
+                postTransformIdent(ctx, iarg);
+                args.push_back(iarg->symbol);
+            } else {
+                args.push_back(ast::GlobalState::defn_todo());
+            }
         }
 
         ast::SymbolRef result = ast::GlobalState::defn_todo();
