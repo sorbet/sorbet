@@ -49,8 +49,6 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 }
             } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
                 reads[v->what].insert(bb.get());
-            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
-                reads[v->what].insert(bb.get());
             } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
                 reads[v->value].insert(bb.get());
             } else if (auto *v = dynamic_cast<LoadArg *>(bind.value.get())) {
