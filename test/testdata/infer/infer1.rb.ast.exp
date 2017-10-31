@@ -1,0 +1,14 @@
+begin
+  module <emptyTree>::Opus::Types<<todo sym>> < ()
+    def any<<todo sym>>()
+      <emptyTree>
+
+  end
+  class <emptyTree>::String<<todo sym>> < (::Object)
+    <emptyTree>.standard_method({:_ => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
+
+    def getbyte<<todo sym>>()
+      <emptyTree>
+
+  end
+end
