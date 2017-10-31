@@ -46,8 +46,6 @@ private:
         if (dynamic_cast<ast::EmptyTree *>(c->scope.get()) != nullptr) {
             ast::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (result.exists()) {
-                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::DynamicConstant,
-                                       "Successfully resolved" + c->toString(ctx));
                 return result;
             } else {
                 ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::StubConstant,
