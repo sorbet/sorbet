@@ -381,6 +381,10 @@ std::shared_ptr<Type> Types::nil() {
     return make_shared<ClassType>(ast::GlobalState::defn_NilClass());
 }
 
+std::shared_ptr<Type> Types::dynamic() {
+    return make_shared<ClassType>(ast::GlobalState::defn_dynamic());
+}
+
 ruby_typer::infer::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
 
 std::string ruby_typer::infer::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
@@ -534,4 +538,9 @@ std::string MethodType::typeName() {
 
 std::string MethodType::toString(ast::Context ctx, int tabs) {
     Error::notImplemented();
+}
+
+bool Type::isDynamic() {
+    auto *t = dynamic_cast<ClassType *>(this);
+    return t != nullptr && t->symbol == ast::GlobalState::defn_dynamic();
 }

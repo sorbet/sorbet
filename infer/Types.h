@@ -61,6 +61,7 @@ public:
     static std::shared_ptr<Type> top();
     static std::shared_ptr<Type> bottom();
     static std::shared_ptr<Type> nil();
+    static std::shared_ptr<Type> dynamic();
 };
 
 class Type {
@@ -70,6 +71,7 @@ public:
     virtual ~Type() = default;
     virtual std::string toString(ast::Context ctx, int tabs = 0) = 0;
     virtual std::string typeName() = 0;
+    bool isDynamic();
 };
 
 class GroundType : public Type {
