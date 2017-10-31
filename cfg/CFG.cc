@@ -62,8 +62,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
     }
 
-    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> reads_by_block;
-    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> writes_by_block;
+    vector<unordered_set<ast::SymbolRef>> reads_by_block(this->basicBlocks.size());
+    vector<unordered_set<ast::SymbolRef>> writes_by_block(this->basicBlocks.size());
 
     for (auto &rds : reads) {
         auto &wts = writes[rds.first];
@@ -81,54 +81,54 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
             wts.second.clear();
         }
         for (BasicBlock *bb : rds) {
-            reads_by_block[bb].insert(wts.first);
+            reads_by_block[bb->id].insert(wts.first);
         }
         for (BasicBlock *bb : wts.second) {
-            writes_by_block[bb].insert(wts.first);
+            writes_by_block[bb->id].insert(wts.first);
         }
     }
 
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
-    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> upper_bounds1;
+    vector<unordered_set<ast::SymbolRef>> upper_bounds1(this->basicBlocks.size());
     bool changed = true;
 
     while (changed) {
         changed = false;
         for (BasicBlock *bb : this->forwardsTopoSort) {
-            int sz = upper_bounds1[bb].size();
-            upper_bounds1[bb].insert(reads_by_block[bb].begin(), reads_by_block[bb].end());
+            int sz = upper_bounds1[bb->id].size();
+            upper_bounds1[bb->id].insert(reads_by_block[bb->id].begin(), reads_by_block[bb->id].end());
             if (bb->bexit.thenb != deadBlock()) {
-                upper_bounds1[bb].insert(upper_bounds1[bb->bexit.thenb].begin(), upper_bounds1[bb->bexit.thenb].end());
+                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.thenb->id].begin(), upper_bounds1[bb->bexit.thenb->id].end());
             }
             if (bb->bexit.elseb != deadBlock()) {
-                upper_bounds1[bb].insert(upper_bounds1[bb->bexit.elseb].begin(), upper_bounds1[bb->bexit.elseb].end());
+                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.elseb->id].begin(), upper_bounds1[bb->bexit.elseb->id].end());
             }
-            changed = changed || (upper_bounds1[bb].size() != sz);
+            changed = changed || (upper_bounds1[bb->id].size() != sz);
         }
     }
 
-    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> upper_bounds2;
+    vector<unordered_set<ast::SymbolRef>> upper_bounds2(this->basicBlocks.size());
 
     changed = true;
     while (changed) {
         changed = false;
         for (auto it = this->backwardsTopoSort.begin(); it != this->backwardsTopoSort.end(); ++it) {
             BasicBlock *bb = *it;
-            int sz = upper_bounds2[bb].size();
-            upper_bounds2[bb].insert(writes_by_block[bb].begin(), writes_by_block[bb].end());
+            int sz = upper_bounds2[bb->id].size();
+            upper_bounds2[bb->id].insert(writes_by_block[bb->id].begin(), writes_by_block[bb->id].end());
             for (BasicBlock *edge : bb->backEdges) {
                 if (edge != deadBlock()) {
-                    upper_bounds2[bb].insert(upper_bounds2[edge].begin(), upper_bounds2[edge].end());
+                    upper_bounds2[bb->id].insert(upper_bounds2[edge->id].begin(), upper_bounds2[edge->id].end());
                 }
             }
-            changed = changed || (upper_bounds2[bb].size() != sz);
+            changed = changed || (upper_bounds2[bb->id].size() != sz);
         }
     }
 
     for (auto &it : this->basicBlocks) {
-        auto set2 = upper_bounds2[it.get()];
+        auto set2 = upper_bounds2[it->id];
 
-        for (auto el : upper_bounds1[it.get()]) {
+        for (auto el : upper_bounds1[it->id]) {
             if (set2.find(el) != set2.end()) {
                 it->args.push_back(el);
             }
@@ -196,8 +196,10 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
 }
 
 BasicBlock *CFG::freshBlock(int outerLoops) {
+    int id = this->basicBlocks.size();
     this->basicBlocks.emplace_back(new BasicBlock());
     BasicBlock *r = this->basicBlocks.back().get();
+    r->id = id;
     r->outerLoops = outerLoops;
     return r;
 }

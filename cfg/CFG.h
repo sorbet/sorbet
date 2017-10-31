@@ -184,6 +184,7 @@ public:
 class BasicBlock {
 public:
     std::vector<ast::SymbolRef> args;
+    int id = 0;
     int flags = 0;
     int outerLoops = 0;
     std::vector<Binding> exprs;
