@@ -464,7 +464,7 @@ private:
             auto nrhs = mapIt(orhs, ctx);
             if (nlhs != olhs) {
                 Error::check(dynamic_cast<Expression *>(nlhs) != nullptr);
-                v->rhs.reset(dynamic_cast<Expression *>(nlhs));
+                v->lhs.reset(dynamic_cast<Expression *>(nlhs));
             }
             if (nrhs != orhs) {
                 Error::check(dynamic_cast<Expression *>(nrhs) != nullptr);
