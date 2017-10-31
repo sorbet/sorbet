@@ -65,9 +65,8 @@ TEST_F(InferFixture, ClassesLubs) {
     namer::Namer::run(ctx, std::move(tree));
     auto &rootScope = ast::GlobalState::defn_root().info(ctx);
 
-    ASSERT_EQ(2, rootScope.members.size());
-    auto barPair = rootScope.members[0];
-    auto fooPair = rootScope.members[1];
+    auto barPair = rootScope.members[rootScope.members.size() - 2];
+    auto fooPair = rootScope.members[rootScope.members.size() - 1];
     ASSERT_EQ("Foo", fooPair.first.name(ctx).toString(ctx));
     ASSERT_EQ("Bar", barPair.first.name(ctx).toString(ctx));
 
@@ -86,10 +85,9 @@ TEST_F(InferFixture, ClassesSubtyping) {
     namer::Namer::run(ctx, std::move(tree));
     auto &rootScope = ast::GlobalState::defn_root().info(ctx);
 
-    ASSERT_EQ(3, rootScope.members.size());
-    auto barPair = rootScope.members[0];
-    auto foo1Pair = rootScope.members[1];
-    auto foo2Pair = rootScope.members[2];
+    auto barPair = rootScope.members[rootScope.members.size() - 3];
+    auto foo1Pair = rootScope.members[rootScope.members.size() - 2];
+    auto foo2Pair = rootScope.members[rootScope.members.size() - 1];
     ASSERT_EQ("Foo2", foo2Pair.first.name(ctx).toString(ctx));
     ASSERT_EQ("Foo1", foo1Pair.first.name(ctx).toString(ctx));
     ASSERT_EQ("Bar", barPair.first.name(ctx).toString(ctx));
