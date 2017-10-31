@@ -387,6 +387,17 @@ std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef nam
     return underlying->dispatchCall(ctx, name, args);
 }
 
+std::shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name,
+                                           std::vector<std::shared_ptr<Type>> &args) {
+    return Types::lub(ctx, left->dispatchCall(ctx, name, args), right->dispatchCall(ctx, name, args));
+}
+
+std::shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name,
+                                            std::vector<std::shared_ptr<Type>> &args) {
+
+    Error::notImplemented();
+}
+
 std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun,
                                               std::vector<std::shared_ptr<Type>> &args) {
     if (isDynamic()) {
