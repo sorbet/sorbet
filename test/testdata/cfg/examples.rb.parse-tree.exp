@@ -260,6 +260,30 @@ Class {
           ]
         }
       }
+      DefMethod {
+        name = take_arguments
+        args = Args {
+          args = [
+            Arg {
+              name = i
+            }
+          ]
+        }
+        body = If {
+          condition = Begin {
+            stmts = [
+              False {
+              }
+            ]
+          }
+          then_ = Integer {
+            val = "2"
+          }
+          else_ = LVar {
+            name = i
+          }
+        }
+      }
     ]
   }
 }
