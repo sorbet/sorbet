@@ -46,24 +46,32 @@ private:
         if (dynamic_cast<ast::EmptyTree *>(c->scope.get()) != nullptr) {
             ast::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (result.exists()) {
+                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::DynamicConstant,
+                                       "Successfully resolved" + c->toString(ctx));
                 return result;
             } else {
-                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::DynamicConstant,
-                                       "Stubbing out unknown constant" + c->toString(ctx));
-                return ast::SymbolRef(ast::GlobalState::defn_dynamic());
+                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::StubConstant,
+                                       "Stubbing out unknown constant " + c->toString(ctx));
+                return ast::GlobalState::defn_dynamic();
             }
         } else if (ast::ConstantLit *scope = dynamic_cast<ast::ConstantLit *>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, scope);
             if (!resolved.exists())
                 return resolved;
             ast::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
+            if (!result.exists())  {
+                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::StubConstant,
+                                       "Stubbing out unknown constant " + c->toString(ctx));
+                result = ast::GlobalState::defn_dynamic();
+
+            }
             c->scope = make_unique<ast::Ident>(resolved);
 
             return result;
         } else {
             ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::DynamicConstant,
                                    "Dynamic constant references are unsupported " + c->toString(ctx));
-            return ast::SymbolRef(ast::GlobalState::defn_dynamic());
+            return ast::GlobalState::defn_dynamic();
         }
     }
 
