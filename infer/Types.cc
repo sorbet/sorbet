@@ -18,6 +18,9 @@ std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Cont
     }
 
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+        if (mayBeSpecial1->symbol == ast::GlobalState::defn_dynamic()) {
+            return t1;
+        }
         if (mayBeSpecial1->symbol == ast::GlobalState::defn_bottom()) {
             return t2;
         }
@@ -27,6 +30,9 @@ std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Cont
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+        if (mayBeSpecial2->symbol == ast::GlobalState::defn_dynamic()) {
+            return t2;
+        }
         if (mayBeSpecial2->symbol == ast::GlobalState::defn_bottom()) {
             return t1;
         }
@@ -270,6 +276,9 @@ bool ruby_typer::infer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
         return true;
     }
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+        if (mayBeSpecial1->symbol == ast::GlobalState::defn_dynamic()) {
+            return true;
+        }
         if (mayBeSpecial1->symbol == ast::GlobalState::defn_bottom()) {
             return true;
         }
@@ -283,6 +292,9 @@ bool ruby_typer::infer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+        if (mayBeSpecial2->symbol == ast::GlobalState::defn_dynamic()) {
+            return true;
+        }
         if (mayBeSpecial2->symbol == ast::GlobalState::defn_bottom()) {
             return false; // (bot, bot) is handled above.
         }
