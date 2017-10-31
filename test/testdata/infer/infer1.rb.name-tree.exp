@@ -5,7 +5,7 @@ begin
 
   end
   class <emptyTree>::String<String> < (::Object)
-    <emptyTree>.standard_method({:_ => ::Opus::Types.any(::Integer)}, {:returns => ::Opus::Types.any(::Integer, ::NilClass)})
+    <emptyTree>.standard_method({:_ => ::Opus::Types.any(::<dynamic>)}, {:returns => ::Opus::Types.any(::<dynamic>, ::<dynamic>)})
 
     def getbyte<getbyte>()
       <emptyTree>

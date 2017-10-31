@@ -1,4 +1,6 @@
 class Opus ()
   class Types ()
     method any ()
+class String (Object)
+  method getbyte ()
 
