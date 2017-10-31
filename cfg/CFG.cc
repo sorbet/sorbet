@@ -98,10 +98,12 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
             int sz = upper_bounds1[bb->id].size();
             upper_bounds1[bb->id].insert(reads_by_block[bb->id].begin(), reads_by_block[bb->id].end());
             if (bb->bexit.thenb != deadBlock()) {
-                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.thenb->id].begin(), upper_bounds1[bb->bexit.thenb->id].end());
+                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.thenb->id].begin(),
+                                             upper_bounds1[bb->bexit.thenb->id].end());
             }
             if (bb->bexit.elseb != deadBlock()) {
-                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.elseb->id].begin(), upper_bounds1[bb->bexit.elseb->id].end());
+                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.elseb->id].begin(),
+                                             upper_bounds1[bb->bexit.elseb->id].end());
             }
             changed = changed || (upper_bounds1[bb->id].size() != sz);
         }
@@ -183,7 +185,26 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
     ast::SymbolRef retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
-    auto cont = res->walk(ctx, md.rhs.get(), res->entry(), *res.get(), retSym, 0);
+    ast::SymbolRef selfSym =
+        ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::selfMethodTemp(), md.symbol);
+
+    BasicBlock *entry = res->entry();
+
+    entry->exprs.emplace_back(selfSym, make_unique<Self>(md.symbol.info(ctx).owner));
+    auto methodName = md.symbol.info(ctx).name;
+
+    int i = 0;
+    for (auto &arg : md.args) {
+        ast::SymbolRef argSym;
+        if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
+            argSym = iarg->symbol;
+        } else {
+            argSym = ast::GlobalState::defn_lvar_todo();
+        }
+        entry->exprs.emplace_back(argSym, make_unique<LoadArg>(selfSym, methodName, i));
+        i++;
+    }
+    auto cont = res->walk(ctx, md.rhs.get(), entry, *res.get(), retSym, 0);
     ast::SymbolRef retSym1 =
         ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
 

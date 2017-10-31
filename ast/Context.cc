@@ -84,6 +84,9 @@ static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)std::strlen(assignTemp)
 static const char *returnMethodTemp = "<ret>";
 static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)std::strlen(returnMethodTemp)};
 
+static const char *selfMethodTemp = "<self>";
+static UTF8Desc selfMethodTemp_DESC{(char *)selfMethodTemp, (int)std::strlen(selfMethodTemp)};
+
 static const char *blockReturnTemp = "<blockret>";
 static UTF8Desc blockReturnTemp_DESC{(char *)blockReturnTemp, (int)std::strlen(blockReturnTemp)};
 
@@ -203,6 +206,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef include_id = enterNameUTF8(include_DESC);
     NameRef currentFile_id = enterNameUTF8(currentFile_DESC);
     NameRef merge_id = enterNameUTF8(merge_DESC);
+    NameRef selfMethodTemp_id = enterNameUTF8(selfMethodTemp_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -227,6 +231,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(include_id == Names::include()));
     DEBUG_ONLY(Error::check(currentFile_id == Names::currentFile()));
     DEBUG_ONLY(Error::check(merge_id == Names::merge()));
+    DEBUG_ONLY(Error::check(selfMethodTemp_id == Names::selfMethodTemp()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
