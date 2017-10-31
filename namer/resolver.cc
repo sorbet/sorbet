@@ -1,3 +1,4 @@
+#include "../ast/ast.h"
 #include "ast/ast.h"
 #include "namer/namer.h"
 
@@ -43,7 +44,14 @@ private:
 
     ast::SymbolRef resolveConstant(ast::Context ctx, ast::ConstantLit *c) {
         if (dynamic_cast<ast::EmptyTree *>(c->scope.get()) != nullptr) {
-            return resolveLhs(ctx, c->cnst);
+            ast::SymbolRef result = resolveLhs(ctx, c->cnst);
+            if (result.exists()) {
+                return result;
+            } else {
+                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::DynamicConstant,
+                                       "Stubbing out unknown constant" + c->toString(ctx));
+                return ast::SymbolRef(ast::GlobalState::defn_dynamic());
+            }
         } else if (ast::ConstantLit *scope = dynamic_cast<ast::ConstantLit *>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, scope);
             if (!resolved.exists())
@@ -54,8 +62,8 @@ private:
             return result;
         } else {
             ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::DynamicConstant,
-                                   "Dynamic constant references are unsupported");
-            return ast::SymbolRef(0);
+                                   "Dynamic constant references are unsupported " + c->toString(ctx));
+            return ast::SymbolRef(ast::GlobalState::defn_dynamic());
         }
     }
 
@@ -96,8 +104,11 @@ public:
 
     ast::Statement *postTransformConstantLit(ast::Context ctx, ast::ConstantLit *c) {
         ast::SymbolRef resolved = resolveConstant(ctx, c);
-        if (!resolved.exists())
+        if (!resolved.exists()) {
+            string str = c->toString(ctx);
+            resolved = resolveConstant(ctx, c);
             return c;
+        }
         return new ast::Ident(resolved);
     }
 

@@ -11,6 +11,7 @@ enum class ErrorClass {
     IncludePassedBlock,
 
     DynamicConstant,
+    StubConstant,
 };
 
 class Reporter {
