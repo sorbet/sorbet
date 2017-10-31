@@ -15,7 +15,9 @@ enum class ErrorClass {
 
     PinnedVariableMismatch,
     MethodArgumentMismatch,
-    UnknownMethod
+    UnknownMethod,
+    MethodArgumentCountMismatch,
+    ReturnTypeMismatch,
 };
 
 class Reporter {
