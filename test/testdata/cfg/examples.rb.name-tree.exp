@@ -87,7 +87,7 @@ class <emptyTree>::Examples<Examples> < (::Object)
       ::Examples#variables_loop_if#b
     end
 
-  def take_arguments<take_arguments>(i<todo lvar sym>)
+  def take_arguments<take_arguments>(::Examples#i)
     if begin
         false
       end

@@ -156,7 +156,7 @@ digraph take_arguments {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$44 = self\n<todo lvar sym> = load_arg(<self>$44#take_arguments, 0)\nifTmp$45 = false\nifTmp$45"];
+    bb0 [label = "()\n<self>$44 = self\ni = load_arg(<self>$44#take_arguments, 0)\nifTmp$45 = false\nifTmp$45"];
     bb0 -> bb2;
     bb0 -> bb3;
 
