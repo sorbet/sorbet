@@ -183,7 +183,7 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
     ast::SymbolRef retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
-    auto cont = res->walk(ctx, md.rhs.get(), res->entry(), *res.get(), retSym);
+    auto cont = res->walk(ctx, md.rhs.get(), res->entry(), *res.get(), retSym, 0);
     ast::SymbolRef retSym1 =
         ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
 
@@ -195,14 +195,16 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     return res;
 }
 
-BasicBlock *CFG::freshBlock() {
+BasicBlock *CFG::freshBlock(int outerLoops) {
     this->basicBlocks.emplace_back(new BasicBlock());
-    return this->basicBlocks.back().get();
+    BasicBlock *r = this->basicBlocks.back().get();
+    r->outerLoops = outerLoops;
+    return r;
 }
 
 CFG::CFG() {
-    freshBlock(); // entry;
-    freshBlock(); // dead code;
+    freshBlock(0); // entry;
+    freshBlock(0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond = ast::GlobalState::defn_cfg_never();
@@ -243,7 +245,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target) {
+BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target, int loops) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
@@ -253,20 +255,20 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
     BasicBlock *ret = nullptr;
     typecase(what,
              [&](ast::While *a) {
-                 auto headerBlock = inWhat.freshBlock();
+                 auto headerBlock = inWhat.freshBlock(loops + 1);
                  unconditionalJump(current, headerBlock, inWhat);
 
                  ast::SymbolRef condSym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::whileTemp(), inWhat.symbol);
-                 auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym);
-                 auto bodyBlock = inWhat.freshBlock();
-                 auto continueBlock = inWhat.freshBlock();
+                 auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym, loops + 1);
+                 auto bodyBlock = inWhat.freshBlock(loops + 1);
+                 auto continueBlock = inWhat.freshBlock(loops);
                  conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, inWhat);
                  // finishHeader
                  ast::SymbolRef bodySym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
 
-                 auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym);
+                 auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym, loops + 1);
                  unconditionalJump(body, headerBlock, inWhat);
 
                  continueBlock->exprs.emplace_back(target, make_unique<Nil>());
@@ -275,7 +277,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
              [&](ast::Return *a) {
                  ast::SymbolRef retSym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
-                 auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym);
+                 auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym, loops);
                  cont->exprs.emplace_back(target, make_unique<Return>(retSym)); // dead assign.
                  jumpToDead(cont, inWhat);
                  ret = deadBlock();
@@ -284,20 +286,20 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  ast::SymbolRef ifSym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::ifTemp(), inWhat.symbol);
                  Error::check(ifSym.exists());
-                 auto thenBlock = inWhat.freshBlock();
-                 auto elseBlock = inWhat.freshBlock();
-                 auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym);
+                 auto thenBlock = inWhat.freshBlock(loops);
+                 auto elseBlock = inWhat.freshBlock(loops);
+                 auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym, loops);
                  conditionalJump(cont, ifSym, thenBlock, elseBlock, inWhat);
 
-                 auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target);
-                 auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target);
+                 auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target, loops);
+                 auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target, loops);
                  if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
                      if (thenEnd == deadBlock()) {
                          ret = elseEnd;
                      } else if (thenEnd == deadBlock()) {
                          ret = thenEnd;
                      } else {
-                         ret = freshBlock();
+                         ret = freshBlock(loops);
                          unconditionalJump(thenEnd, ret, inWhat);
                          unconditionalJump(elseEnd, ret, inWhat);
                      }
@@ -336,7 +338,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
              [&](ast::Assign *a) {
                  auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
                  Error::check(lhsIdent != nullptr);
-                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhsIdent->symbol);
+                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhsIdent->symbol, loops);
                  rhsCont->exprs.emplace_back(target, make_unique<Ident>(lhsIdent->symbol));
                  ret = rhsCont;
              },
@@ -344,9 +346,9 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  for (auto &exp : a->stats) {
                      ast::SymbolRef temp =
                          ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                     current = walk(ctx, exp.get(), current, inWhat, temp);
+                     current = walk(ctx, exp.get(), current, inWhat, temp, loops);
                  }
-                 ret = walk(ctx, a->expr.get(), current, inWhat, target);
+                 ret = walk(ctx, a->expr.get(), current, inWhat, target, loops);
              },
              [&](ast::Send *s) {
                  ast::SymbolRef recv;
@@ -354,7 +356,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                      recv = i->symbol;
                  } else {
                      recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                     current = walk(ctx, s->recv.get(), current, inWhat, recv);
+                     current = walk(ctx, s->recv.get(), current, inWhat, recv, loops);
                  }
 
                  vector<ast::SymbolRef> args;
@@ -364,15 +366,15 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                          temp = i->symbol;
                      } else {
                          temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                         current = walk(ctx, exp.get(), current, inWhat, temp);
+                         current = walk(ctx, exp.get(), current, inWhat, temp, loops);
                      }
                      args.push_back(temp);
                  }
 
                  if (s->block != nullptr) {
-                     auto headerBlock = inWhat.freshBlock();
-                     auto postBlock = inWhat.freshBlock();
-                     auto bodyBlock = inWhat.freshBlock();
+                     auto headerBlock = inWhat.freshBlock(loops + 1);
+                     auto postBlock = inWhat.freshBlock(loops);
+                     auto bodyBlock = inWhat.freshBlock(loops + 1);
 
                      for (int i = 0; i < s->block->args.size(); ++i) {
                          auto &arg = s->block->args[i];
@@ -392,7 +394,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                      // TODO: handle block arguments somehow??
                      ast::SymbolRef blockrv =
                          ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::blockReturnTemp(), inWhat.symbol);
-                     auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv);
+                     auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv, loops + 1);
 
                      unconditionalJump(blockLast, headerBlock, inWhat);
 
@@ -452,6 +454,9 @@ string BasicBlock::toString(ast::Context ctx) {
         buf << arg.info(ctx).name.name(ctx).toString(ctx);
     }
     buf << ")\\n";
+    if (this->outerLoops > 0) {
+        buf << "outerLoops: " << this->outerLoops << "\\n";
+    }
     for (auto &exp : this->exprs) {
         buf << exp.bind.info(ctx).name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
         buf << "\\n"; // intentional! graphviz will do interpolation.

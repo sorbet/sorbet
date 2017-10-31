@@ -185,6 +185,7 @@ class BasicBlock {
 public:
     std::vector<ast::SymbolRef> args;
     int flags = 0;
+    int outerLoops = 0;
     std::vector<Binding> exprs;
     BlockExit bexit;
     std::vector<BasicBlock *> backEdges;
@@ -225,8 +226,8 @@ public:
 
 private:
     CFG();
-    BasicBlock *walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target);
-    BasicBlock *freshBlock();
+    BasicBlock *walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target, int loops);
+    BasicBlock *freshBlock(int outerLoops);
     void fillInTopoSorts(ast::Context ctx);
     void fillInBlockArguments(ast::Context ctx);
     int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
