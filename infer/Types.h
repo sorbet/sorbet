@@ -57,6 +57,9 @@ public:
     inline static bool equiv(ast::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
         return equiv(ctx, t1, t2);
     }
+
+    static std::shared_ptr<Type> top();
+    static std::shared_ptr<Type> bottom();
 };
 
 class Type {
@@ -152,7 +155,6 @@ public:
     virtual std::string toString(ast::Context ctx, int tabs);
     virtual std::string typeName();
 };
-
 } // namespace infer
 } // namespace ruby_typer
 #endif // SRUBY_TYPES_H

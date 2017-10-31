@@ -16,6 +16,25 @@ std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Cont
     if (t1.get() == t2.get()) {
         return t1;
     }
+
+    if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+        if (mayBeSpecial1->symbol == ast::GlobalState::defn_bottom()) {
+            return t2;
+        }
+        if (mayBeSpecial1->symbol == ast::GlobalState::defn_top()) {
+            return t1;
+        }
+    }
+
+    if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+        if (mayBeSpecial2->symbol == ast::GlobalState::defn_bottom()) {
+            return t1;
+        }
+        if (mayBeSpecial2->symbol == ast::GlobalState::defn_top()) {
+            return t2;
+        }
+    }
+
     if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
             // both are proxy
@@ -250,6 +269,28 @@ bool ruby_typer::infer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
     if (t1.get() == t2.get()) {
         return true;
     }
+    if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+        if (mayBeSpecial1->symbol == ast::GlobalState::defn_bottom()) {
+            return true;
+        }
+        if (mayBeSpecial1->symbol == ast::GlobalState::defn_top()) {
+            if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+                return mayBeSpecial2->symbol == ast::GlobalState::defn_top();
+            } else {
+                return false;
+            }
+        }
+    }
+
+    if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+        if (mayBeSpecial2->symbol == ast::GlobalState::defn_bottom()) {
+            return false; // (bot, bot) is handled above.
+        }
+        if (mayBeSpecial2->symbol == ast::GlobalState::defn_top()) {
+            return true;
+        }
+    }
+
     if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
             bool result;
@@ -314,6 +355,14 @@ bool ruby_typer::infer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type>
         // none is proxy
         return isSubTypeGround(ctx, t1, t2);
     }
+}
+
+std::shared_ptr<Type> Types::top() {
+    return make_shared<ClassType>(ast::GlobalState::defn_top());
+}
+
+std::shared_ptr<Type> Types::bottom() {
+    return make_shared<ClassType>(ast::GlobalState::defn_bottom());
 }
 
 ruby_typer::infer::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
