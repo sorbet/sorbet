@@ -382,6 +382,52 @@ std::string ruby_typer::infer::ClassType::typeName() {
 ruby_typer::infer::ProxyType::ProxyType(std::shared_ptr<ruby_typer::infer::Type> underlying)
     : underlying(std::move(underlying)) {}
 
+std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name,
+                                              std::vector<std::shared_ptr<Type>> &args) {
+    return underlying->dispatchCall(ctx, name, args);
+}
+
+std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun,
+                                              std::vector<std::shared_ptr<Type>> &args) {
+    if (isDynamic()) {
+        return Types::dynamic();
+    }
+    ast::SymbolRef method = this->symbol.info(ctx).findMember(fun);
+
+    if (method.exists()) {
+        ast::Symbol &info = method.info(ctx);
+
+        if (info.arguments().size() == args.size()) { // todo: this should become actual argument matching
+            int i = 0;
+            for (std::shared_ptr<Type> &argTpe : args) {
+                if (!Types::isSubType(ctx, argTpe,
+                                      make_shared<ClassType>(info.arguments()[i].info(ctx).result().orElse(
+                                          ast::GlobalState::defn_dynamic())))) {
+                    ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
+                                           "Argument {}, does not match expected type.\n Expected {}, found: {}", i,
+                                           info.arguments()[i].info(ctx).result().toString(ctx), argTpe->toString(ctx));
+                }
+
+                i++;
+            }
+            return make_shared<ClassType>(method.info(ctx).result().orElse(ast::GlobalState::defn_dynamic()));
+        } else {
+            ctx.state.errors.error(
+                ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
+                "Wrong number of arguments for method {}.\n Expected: {}, found: {}", fun.toString(ctx),
+                info.arguments().size(),
+                args.size()); // TODO: should use position and print the source tree, not the cfg one.
+            return Types::dynamic();
+        }
+    } else {
+        ctx.state.errors.error(
+            ast::Loc::none(0), ast::ErrorClass::UnknownMethod, "Method not found, {} is not a member of {}",
+            fun.toString(ctx),
+            this->toString(ctx)); // TODO: should use position and print the source tree, not the cfg one.
+        return Types::dynamic();
+    }
+}
+
 // TODO: somehow reuse existing references instead of allocating new ones.
 ruby_typer::infer::Literal::Literal(int val)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Integer())), value(val) {}

@@ -34,49 +34,11 @@ public:
             bind.value.get(), [&](cfg::Ident *i) { tp = getType(i->what); },
             [&](cfg::Send *send) {
                 auto &recvType = getType(send->recv);
-                if (recvType->isDynamic()) {
-                    tp = Types::dynamic();
-                } else {
-                    ast::SymbolRef method = recvType->findMember(send->fun);
-                    if (method.exists()) {
-                        ast::Symbol &info = method.info(ctx);
-                        tp = make_shared<ClassType>(method.info(ctx).result().orElse(ast::GlobalState::defn_dynamic()));
-
-                        if (info.arguments().size() ==
-                            send->args.size()) { // todo: this should become actual argument matching
-                            int i = 0;
-                            for (ast::SymbolRef arg : send->args) {
-                                auto &argTpe = getType(arg);
-                                if (!Types::isSubType(
-                                        ctx, argTpe,
-                                        make_shared<ClassType>(info.arguments()[i].info(ctx).result().orElse(
-                                            ast::GlobalState::defn_dynamic())))) {
-                                    ctx.state.errors.error(
-                                        ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
-                                        "Argument {}, does not match expected type.\n Expected {}, found: {}", i,
-                                        info.arguments()[i].info(ctx).result().toString(ctx), argTpe->toString(ctx));
-                                }
-
-                                i++;
-                            }
-                        } else {
-                            ctx.state.errors.error(
-                                ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
-                                "Wrong number of arguments for method {}.\n Expected: {}, found: {}",
-                                send->fun.toString(ctx), info.arguments().size(),
-                                send->args
-                                    .size()); // TODO: should use position and print the source tree, not the cfg one.
-                            tp = Types::dynamic();
-                        }
-                    } else {
-                        ctx.state.errors.error(
-                            ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
-                            "Method not found, {} is not a member of {}", send->fun.toString(ctx),
-                            send->recv.toString(
-                                ctx)); // TODO: should use position and print the source tree, not the cfg one.
-                        tp = Types::dynamic();
-                    }
+                vector<shared_ptr<Type>> args(send->args.size());
+                for (ast::SymbolRef arg : send->args) {
+                    args.emplace_back(getType(arg));
                 }
+                tp = recvType->dispatchCall(ctx, send->fun, args);
             },
             [&](cfg::New *i) { Error::notImplemented(); }, [&](cfg::Super *i) { Error::notImplemented(); },
             [&](cfg::FloatLit *i) { tp = make_shared<Literal>(i->value); },

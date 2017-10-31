@@ -71,6 +71,8 @@ public:
     virtual ~Type() = default;
     virtual std::string toString(ast::Context ctx, int tabs = 0) = 0;
     virtual std::string typeName() = 0;
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
+                                               std::vector<std::shared_ptr<Type>> &args) = 0;
     bool isDynamic();
 };
 
@@ -84,6 +86,9 @@ public:
     // TODO: use shared pointers that use inline counter
     std::shared_ptr<Type> underlying;
     ProxyType(std::shared_ptr<Type> underlying);
+
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
+                                               std::vector<std::shared_ptr<Type>> &args);
 };
 
 class ClassType : public GroundType {
@@ -94,6 +99,8 @@ public:
 
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
+                                               std::vector<std::shared_ptr<Type>> &args);
 };
 
 class OrType : public GroundType {
@@ -105,6 +112,8 @@ public:
 
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
+                                               std::vector<std::shared_ptr<Type>> &args);
 };
 
 class AndType : public GroundType {
@@ -116,6 +125,8 @@ public:
 
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
+                                               std::vector<std::shared_ptr<Type>> &args);
 };
 
 class Literal : public ProxyType {
