@@ -12,6 +12,10 @@ enum class ErrorClass {
 
     DynamicConstant,
     StubConstant,
+
+    PinnedVariableMismatch,
+    MethodArgumentMismatch,
+    UnknownMethod
 };
 
 class Reporter {

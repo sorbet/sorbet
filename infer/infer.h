@@ -2,5 +2,6 @@
 #define SRUBY_TYPER_H
 
 #include "Types.h"
+#include "inference.h"
 
 #endif // SRUBY_TYPER_H
