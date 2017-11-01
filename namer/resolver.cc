@@ -2,9 +2,9 @@
 #include "ast/ast.h"
 #include "namer/namer.h"
 
+#include <algorithm> // find_if
 #include <list>
 #include <vector>
-#include <algorithm> // find_if
 
 using namespace std;
 
@@ -82,6 +82,58 @@ private:
         return nullptr;
     }
 
+    shared_ptr<ast::Type> getResultType(ast::Context ctx, std::unique_ptr<ast::Expression> &expr) {
+        shared_ptr<ast::Type> result;
+        typecase(expr.get(),
+                 [&](ast::Ident *i) {
+                     if (i->symbol.info(ctx).isClass()) {
+                         result = make_shared<ast::ClassType>(i->symbol);
+                     } else {
+                         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                                "Misformed standard_method. Not a class type {}" + i->toString(ctx));
+                         result = ast::Types::dynamic();
+                     }
+                 },
+                 [&](ast::Send *s) {
+                     if (auto *recvi = dynamic_cast<ast::Ident *>(s->recv.get())) {
+                         if (recvi->symbol != ast::GlobalState::defn_Opus_Types()) {
+                             ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                                    "Misformed standard_method. Unknown argument type type {}",
+                                                    expr->toString(ctx));
+                             result = ast::Types::dynamic();
+                         } else {
+                             if (s->fun == ast::Names::nilable()) {
+                                 result = make_shared<ast::OrType>(getResultType(ctx, s->args[0]), ast::Types::nil());
+                             } else if (s->fun == ast::Names::all()) {
+                                 result = getResultType(ctx, s->args[0]);
+                                 int i = 1;
+                                 while (i < s->args.size()) {
+                                     result = make_shared<ast::AndType>(result, getResultType(ctx, s->args[i]));
+                                     i++;
+                                 }
+                             } else if (s->fun == ast::Names::any()) {
+                                 result = getResultType(ctx, s->args[0]);
+                                 int i = 1;
+                                 while (i < s->args.size()) {
+                                     result = make_shared<ast::OrType>(result, getResultType(ctx, s->args[i]));
+                                     i++;
+                                 }
+                             } else {
+                                 ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                                        "Unsupported type combinator {}", s->fun.toString(ctx));
+                             }
+                         }
+                     } else {
+                         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                                "Misformed standard_method. Unknown argument type type {}",
+                                                expr->toString(ctx));
+                         result = ast::Types::dynamic();
+                     }
+                 });
+        Error::check(result.get() != nullptr);
+        return result;
+    }
+
 public:
     ResolveWalk(ast::Context ctx, Resolver *resolv)
         : resolv_(resolv), nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
@@ -100,7 +152,7 @@ public:
         if (original->ancestors.size() > 0) {
             if (ast::Ident *id = dynamic_cast<ast::Ident *>(original->ancestors.front().get())) {
                 ast::Symbol &info = original->symbol.info(ctx);
-                info.resultOrParentOrLoader = id->symbol;
+                info.parent_ = id->symbol;
                 info.argumentsOrMixins.emplace_back(id->symbol);
             }
         }
@@ -119,7 +171,6 @@ public:
                         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
                                                "Misformed standard_method " + lastStandardMethod->toString(ctx));
                     } else {
-                        printf("got %s", lastStandardMethod->showRaw(ctx).c_str());
                         std::vector<ast::SymbolRef> argTypes(mdef->args.size());
                         ast::SymbolRef returnType;
                         for (auto &arg : lastStandardMethod->args) {
@@ -130,23 +181,27 @@ public:
                                     if (auto *symbolLit = dynamic_cast<ast::SymbolLit *>(key.get())) {
                                         if (symbolLit->name == ast::Names::returns()) {
                                             // fill in return type
+                                            mdef->symbol.info(ctx).resultType = getResultType(ctx, value);
                                         } else {
-                                            auto fnd = find_if(mdef->symbol.info(ctx).arguments().begin(), mdef->symbol.info(ctx).arguments().end(),
-                                              [&](ast::SymbolRef sym) -> bool {
-                                                  return sym.info(ctx).name == symbolLit->name;
-                                              }
-                                            );
+                                            auto fnd = find_if(mdef->symbol.info(ctx).arguments().begin(),
+                                                               mdef->symbol.info(ctx).arguments().end(),
+                                                               [&](ast::SymbolRef sym) -> bool {
+                                                                   return sym.info(ctx).name == symbolLit->name;
+                                                               });
                                             if (fnd == mdef->symbol.info(ctx).arguments().end()) {
-                                                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
-                                                                       "Misformed standard_method. Unknown argument name type {}" + key->toString(ctx));
+                                                ctx.state.errors.error(
+                                                    ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                                    "Misformed standard_method. Unknown argument name type {}" +
+                                                        key->toString(ctx));
                                             } else {
                                                 ast::SymbolRef arg = *fnd;
-                                                arg.info(ctx).result();
+                                                arg.info(ctx).resultType = getResultType(ctx, value);
                                             }
                                         }
                                     } else {
-                                        ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
-                                                               "Misformed standard_method. Unknown key type {}" + key->toString(ctx));
+                                        ctx.state.errors.error(
+                                            ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                            "Misformed standard_method. Unknown key type {}" + key->toString(ctx));
                                     }
                                 }
                             }
