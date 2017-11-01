@@ -372,7 +372,7 @@ std::shared_ptr<Type> Types::dynamic() {
 ruby_typer::ast::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
 
 std::string ruby_typer::ast::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
-    return this->symbol.toString(ctx);
+    return this->symbol.info(ctx).fullName(ctx);
 }
 
 std::string ruby_typer::ast::ClassType::typeName() {
