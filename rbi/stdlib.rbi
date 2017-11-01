@@ -968,6 +968,14 @@ class Array
   def inspect(); end
 
   standard_method(
+    {
+      _: Opus::Types.any(String, NilClass),
+    },
+    returns: String
+  )
+  def join(_); end
+
+  standard_method(
     {},
     returns: Integer
   )
@@ -1573,9 +1581,7 @@ class BigMath
     returns: BigDecimal
   )
   def self.log(_, _1); end
-end
 
-class BigMath
   standard_method(
     {
       prec: Integer,
@@ -1939,12 +1945,6 @@ class Coverage
   def self.start(); end
 end
 
-class CSV
-end
-
-class Date
-end
-
 class Date
   standard_method(
     {
@@ -2042,9 +2042,7 @@ class Dir
     returns: Integer
   )
   def self.unlink(_); end
-end
 
-class Dir
   standard_method(
     {},
     returns: NilClass
@@ -2165,9 +2163,7 @@ class Encoding
     returns: Opus::Types.array_of(String)
   )
   def self.name_list(); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
@@ -2665,9 +2661,7 @@ class File
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.zero?(file); end
-end
 
-class File
   standard_method(
     {},
     returns: Time
@@ -3504,9 +3498,6 @@ class Gem
 end
 
 class Hash
-end
-
-class Hash
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
@@ -3542,6 +3533,399 @@ class Hash
     returns: Integer
   )
   def size(); end
+end
+
+class IO
+  standard_method(
+    {
+      _: Symbol,
+      offset: Opus::Types.any(Integer, NilClass),
+      len: Opus::Types.any(Integer, NilClass),
+    },
+    returns: NilClass
+  )
+  def advise(_, offset, len); end
+
+  standard_method(
+    {
+      _: Opus::Types.any(TrueClass, FalseClass),
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def autoclose=(_); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def autoclose?(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def binmode?(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def close(); end
+
+  standard_method(
+    {
+      _: Opus::Types.any(TrueClass, FalseClass),
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def close_on_exec=(_); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def close_on_exec?(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def close_read(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def close_write(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def closed?(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def eof(); end
+
+  standard_method(
+    {
+      integer_cmd: Integer,
+      arg: Opus::Types.any(String, Integer),
+    },
+    returns: Integer
+  )
+  def fcntl(integer_cmd, arg); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(Integer, NilClass)
+  )
+  def fdatasync(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def fileno(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(Integer, NilClass)
+  )
+  def fsync(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(Integer, NilClass)
+  )
+  def getbyte(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(String, NilClass)
+  )
+  def getc(); end
+
+  standard_method(
+    {
+      sep: Opus::Types.any(String, NilClass),
+      limit: Opus::Types.any(Integer, NilClass),
+    },
+    returns: Opus::Types.any(String, NilClass)
+  )
+  def gets(sep, limit); end
+
+  standard_method(
+    {},
+    returns: String
+  )
+  def inspect(); end
+
+  standard_method(
+    {},
+    returns: Encoding
+  )
+  def internal_encoding(); end
+
+  standard_method(
+    {
+      integer_cmd: Integer,
+      arg: Opus::Types.any(String, Integer),
+    },
+    returns: Integer
+  )
+  def ioctl(integer_cmd, arg); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def isatty(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def lineno(); end
+
+  standard_method(
+    {
+      _: Integer,
+    },
+    returns: Integer
+  )
+  def lineno=(_); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def pid(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def pos(); end
+
+  standard_method(
+    {
+      _: Integer,
+    },
+    returns: Integer
+  )
+  def pos=(_); end
+
+  standard_method(
+    {
+      _: Opus::Types.any(Numeric, String),
+    },
+    returns: BasicObject
+  )
+  def putc(_); end
+
+  standard_method(
+    {
+      length: Opus::Types.any(Integer, NilClass),
+      outbuf: Opus::Types.any(String, NilClass),
+    },
+    returns: Opus::Types.any(String, NilClass)
+  )
+  def read(length, outbuf); end
+
+  standard_method(
+    {
+      len: Integer,
+      buf: String,
+    },
+    returns: String
+  )
+  def read_nonblock(len, buf); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def readbyte(); end
+
+  standard_method(
+    {},
+    returns: String
+  )
+  def readchar(); end
+
+  standard_method(
+    {
+      sep: Opus::Types.any(String, NilClass),
+      limit: Opus::Types.any(Integer, NilClass),
+    },
+    returns: String
+  )
+  def readline(sep, limit); end
+
+  standard_method(
+    {
+      sep: Opus::Types.any(String, NilClass),
+      limit: Opus::Types.any(Integer, NilClass),
+    },
+    returns: Opus::Types.array_of(String)
+  )
+  def readlines(sep, limit); end
+
+  standard_method(
+    {
+      maxlen: Integer,
+      outbuf: String,
+    },
+    returns: String
+  )
+  def readpartial(maxlen, outbuf); end
+
+  standard_method(
+    {
+      other_IO: IO,
+      path: String,
+      mode_str: String,
+    },
+    returns: IO
+  )
+  def reopen(other_IO, path, mode_str); end
+
+  standard_method(
+    {
+      amount: Integer,
+      whence: Opus::Types.any(Integer, NilClass),
+    },
+    returns: Integer
+  )
+  def seek(amount, whence); end
+
+  standard_method(
+    {},
+    returns: File::Stat
+  )
+  def stat(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def sync(); end
+
+  standard_method(
+    {
+      _: Opus::Types.any(TrueClass, FalseClass),
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def sync=(_); end
+
+  standard_method(
+    {
+      maxlen: Integer,
+      outbuf: String,
+    },
+    returns: String
+  )
+  def sysread(maxlen, outbuf); end
+
+  standard_method(
+    {
+      amount: Integer,
+      whence: Opus::Types.any(Integer, NilClass),
+    },
+    returns: Integer
+  )
+  def sysseek(amount, whence); end
+
+  standard_method(
+    {
+      _: String,
+    },
+    returns: Integer
+  )
+  def syswrite(_); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def tell(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def tty?(); end
+
+  standard_method(
+    {
+      _: Opus::Types.any(String, Integer),
+    },
+    returns: NilClass
+  )
+  def ungetbyte(_); end
+
+  standard_method(
+    {
+      _: String,
+    },
+    returns: NilClass
+  )
+  def ungetc(_); end
+
+  standard_method(
+    {
+      _: String,
+    },
+    returns: Integer
+  )
+  def write(_); end
+
+  standard_method(
+    {
+      name: String,
+      length: Opus::Types.any(Integer, NilClass),
+      offset: Opus::Types.any(Integer, NilClass),
+    },
+    returns: String
+  )
+  def self.binread(name, length, offset); end
+
+  standard_method(
+    {
+      src: Opus::Types.any(String, IO),
+      dst: Opus::Types.any(String, IO),
+      copy_length: Opus::Types.any(Integer, NilClass),
+      src_offset: Opus::Types.any(Integer, NilClass),
+    },
+    returns: Integer
+  )
+  def self.copy_stream(src, dst, copy_length, src_offset); end
+
+  standard_method(
+    {
+      read_array: Opus::Types.array_of(IO),
+      write_array: Opus::Types.any(Opus::Types.array_of(IO), NilClass),
+      error_array: Opus::Types.any(Opus::Types.array_of(IO), NilClass),
+      timeout: Opus::Types.any(Integer, NilClass),
+    },
+    returns: Opus::Types.any(Opus::Types.array_of(IO), NilClass)
+  )
+  def self.select(read_array, write_array, error_array, timeout); end
+
+  standard_method(
+    {
+      path: String,
+      mode: Opus::Types.any(String, NilClass),
+      perm: Opus::Types.any(String, NilClass),
+    },
+    returns: Integer
+  )
+  def self.sysopen(path, mode, perm); end
 end
 
 class Integer
@@ -4046,401 +4430,6 @@ class Integer
   def zero?(); end
 end
 
-class IO
-  standard_method(
-    {
-      _: Symbol,
-      offset: Opus::Types.any(Integer, NilClass),
-      len: Opus::Types.any(Integer, NilClass),
-    },
-    returns: NilClass
-  )
-  def advise(_, offset, len); end
-
-  standard_method(
-    {
-      _: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def autoclose=(_); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def autoclose?(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def binmode?(); end
-
-  standard_method(
-    {},
-    returns: NilClass
-  )
-  def close(); end
-
-  standard_method(
-    {
-      _: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def close_on_exec=(_); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def close_on_exec?(); end
-
-  standard_method(
-    {},
-    returns: NilClass
-  )
-  def close_read(); end
-
-  standard_method(
-    {},
-    returns: NilClass
-  )
-  def close_write(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def closed?(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def eof(); end
-
-  standard_method(
-    {
-      integer_cmd: Integer,
-      arg: Opus::Types.any(String, Integer),
-    },
-    returns: Integer
-  )
-  def fcntl(integer_cmd, arg); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
-  def fdatasync(); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def fileno(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
-  def fsync(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
-  def getbyte(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
-  def getc(); end
-
-  standard_method(
-    {
-      sep: Opus::Types.any(String, NilClass),
-      limit: Opus::Types.any(Integer, NilClass),
-    },
-    returns: Opus::Types.any(String, NilClass)
-  )
-  def gets(sep, limit); end
-
-  standard_method(
-    {},
-    returns: String
-  )
-  def inspect(); end
-
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  def internal_encoding(); end
-
-  standard_method(
-    {
-      integer_cmd: Integer,
-      arg: Opus::Types.any(String, Integer),
-    },
-    returns: Integer
-  )
-  def ioctl(integer_cmd, arg); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def isatty(); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def lineno(); end
-
-  standard_method(
-    {
-      _: Integer,
-    },
-    returns: Integer
-  )
-  def lineno=(_); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def pid(); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def pos(); end
-
-  standard_method(
-    {
-      _: Integer,
-    },
-    returns: Integer
-  )
-  def pos=(_); end
-
-  standard_method(
-    {
-      _: Opus::Types.any(Numeric, String),
-    },
-    returns: BasicObject
-  )
-  def putc(_); end
-
-  standard_method(
-    {
-      length: Opus::Types.any(Integer, NilClass),
-      outbuf: Opus::Types.any(String, NilClass),
-    },
-    returns: Opus::Types.any(String, NilClass)
-  )
-  def read(length, outbuf); end
-
-  standard_method(
-    {
-      len: Integer,
-      buf: String,
-    },
-    returns: String
-  )
-  def read_nonblock(len, buf); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def readbyte(); end
-
-  standard_method(
-    {},
-    returns: String
-  )
-  def readchar(); end
-
-  standard_method(
-    {
-      sep: Opus::Types.any(String, NilClass),
-      limit: Opus::Types.any(Integer, NilClass),
-    },
-    returns: String
-  )
-  def readline(sep, limit); end
-
-  standard_method(
-    {
-      sep: Opus::Types.any(String, NilClass),
-      limit: Opus::Types.any(Integer, NilClass),
-    },
-    returns: Opus::Types.array_of(String)
-  )
-  def readlines(sep, limit); end
-
-  standard_method(
-    {
-      maxlen: Integer,
-      outbuf: String,
-    },
-    returns: String
-  )
-  def readpartial(maxlen, outbuf); end
-
-  standard_method(
-    {
-      other_IO: IO,
-      path: String,
-      mode_str: String,
-    },
-    returns: IO
-  )
-  def reopen(other_IO, path, mode_str); end
-
-  standard_method(
-    {
-      amount: Integer,
-      whence: Opus::Types.any(Integer, NilClass),
-    },
-    returns: Integer
-  )
-  def seek(amount, whence); end
-
-  standard_method(
-    {},
-    returns: File::Stat
-  )
-  def stat(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def sync(); end
-
-  standard_method(
-    {
-      _: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def sync=(_); end
-
-  standard_method(
-    {
-      maxlen: Integer,
-      outbuf: String,
-    },
-    returns: String
-  )
-  def sysread(maxlen, outbuf); end
-
-  standard_method(
-    {
-      amount: Integer,
-      whence: Opus::Types.any(Integer, NilClass),
-    },
-    returns: Integer
-  )
-  def sysseek(amount, whence); end
-
-  standard_method(
-    {
-      _: String,
-    },
-    returns: Integer
-  )
-  def syswrite(_); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def tell(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def tty?(); end
-
-  standard_method(
-    {
-      _: Opus::Types.any(String, Integer),
-    },
-    returns: NilClass
-  )
-  def ungetbyte(_); end
-
-  standard_method(
-    {
-      _: String,
-    },
-    returns: NilClass
-  )
-  def ungetc(_); end
-
-  standard_method(
-    {
-      _: String,
-    },
-    returns: Integer
-  )
-  def write(_); end
-end
-
-class IO
-  standard_method(
-    {
-      name: String,
-      length: Opus::Types.any(Integer, NilClass),
-      offset: Opus::Types.any(Integer, NilClass),
-    },
-    returns: String
-  )
-  def self.binread(name, length, offset); end
-
-  standard_method(
-    {
-      src: Opus::Types.any(String, IO),
-      dst: Opus::Types.any(String, IO),
-      copy_length: Opus::Types.any(Integer, NilClass),
-      src_offset: Opus::Types.any(Integer, NilClass),
-    },
-    returns: Integer
-  )
-  def self.copy_stream(src, dst, copy_length, src_offset); end
-
-  standard_method(
-    {
-      read_array: Opus::Types.array_of(IO),
-      write_array: Opus::Types.any(Opus::Types.array_of(IO), NilClass),
-      error_array: Opus::Types.any(Opus::Types.array_of(IO), NilClass),
-      timeout: Opus::Types.any(Integer, NilClass),
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(IO), NilClass)
-  )
-  def self.select(read_array, write_array, error_array, timeout); end
-
-  standard_method(
-    {
-      path: String,
-      mode: Opus::Types.any(String, NilClass),
-      perm: Opus::Types.any(String, NilClass),
-    },
-    returns: Integer
-  )
-  def self.sysopen(path, mode, perm); end
-end
-
 class Kernel
   standard_method(
     {
@@ -4732,9 +4721,7 @@ class Kernel
     returns: Opus::Types.any(TrueClass, FalseClass, Time)
   )
   def self.test(cmd, file1, file2); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Proc
@@ -5103,9 +5090,7 @@ class Module
     returns: Opus::Types.array_of(Module)
   )
   def self.nesting(); end
-end
 
-class Module
   standard_method(
     {
       other: Module,
@@ -6020,9 +6005,7 @@ class Pathname
     returns: Opus::Types.array_of(Pathname)
   )
   def self.glob(p1, p2); end
-end
 
-class Pathname
   standard_method(
     {
       other: Opus::Types.any(String, Pathname),
@@ -6966,62 +6949,6 @@ class Process::GID
   def self.sid_available?(); end
 end
 
-class Process::UID
-  standard_method(
-    {
-      user: Integer,
-    },
-    returns: Integer
-  )
-  def self.change_privilege(user); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def self.eid(); end
-
-  standard_method(
-    {
-      name: String,
-    },
-    returns: Integer
-  )
-  def self.from_name(name); end
-
-  standard_method(
-    {
-      user: Integer,
-    },
-    returns: Integer
-  )
-  def self.grant_privilege(user); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def self.re_exchange(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def self.re_exchangeable?(); end
-
-  standard_method(
-    {},
-    returns: Integer
-  )
-  def self.rid(); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def self.sid_available?(); end
-end
-
 class Process::Status
   standard_method(
     {
@@ -7232,6 +7159,62 @@ class Process::Sys
   def self.setuid(user); end
 end
 
+class Process::UID
+  standard_method(
+    {
+      user: Integer,
+    },
+    returns: Integer
+  )
+  def self.change_privilege(user); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def self.eid(); end
+
+  standard_method(
+    {
+      name: String,
+    },
+    returns: Integer
+  )
+  def self.from_name(name); end
+
+  standard_method(
+    {
+      user: Integer,
+    },
+    returns: Integer
+  )
+  def self.grant_privilege(user); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def self.re_exchange(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def self.re_exchangeable?(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def self.rid(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def self.sid_available?(); end
+end
+
 class Process::Waiter
   standard_method(
     {},
@@ -7262,9 +7245,7 @@ class Random
     returns: Integer
   )
   def seed(); end
-end
 
-class Random
   standard_method(
     {},
     returns: Integer
@@ -7708,9 +7689,7 @@ class Regexp
     returns: Opus::Types.any(Regexp, NilClass)
   )
   def self.try_convert(obj); end
-end
 
-class Regexp
   standard_method(
     {
       other: BasicObject,
@@ -7809,9 +7788,6 @@ class Regexp
     returns: Opus::Types.any(Integer, NilClass)
   )
   def ~(); end
-end
-
-class Set
 end
 
 class Set
@@ -8523,9 +8499,7 @@ class StringScanner
     returns: StringScanner
   )
   def self.new(_, _1); end
-end
 
-class StringScanner
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
@@ -8553,9 +8527,7 @@ class Symbol
     returns: Opus::Types.array_of(Symbol)
   )
   def self.all_symbols(); end
-end
 
-class Symbol
   standard_method(
     {
       other: Symbol,
@@ -8722,9 +8694,7 @@ class Time
     returns: Time
   )
   def self.utc(year, month, day, hour, min, sec, usec_with_frac); end
-end
 
-class Time
   standard_method(
     {
       _: Numeric,
@@ -9022,9 +8992,6 @@ class Time
   def zone(); end
 end
 
-class URI
-end
-
 class YAML
   standard_method(
     {
@@ -9034,4 +9001,3 @@ class YAML
   )
   def self.load_file(filename); end
 end
-
