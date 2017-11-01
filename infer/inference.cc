@@ -36,7 +36,8 @@ public:
             bind.value.get(), [&](cfg::Ident *i) { tp = getType(i->what); },
             [&](cfg::Send *send) {
                 auto &recvType = getType(send->recv);
-                vector<shared_ptr<ast::Type>> args(send->args.size());
+                vector<shared_ptr<ast::Type>> args;
+                args.reserve(send->args.size());
                 for (ast::SymbolRef arg : send->args) {
                     args.emplace_back(getType(arg));
                 }
