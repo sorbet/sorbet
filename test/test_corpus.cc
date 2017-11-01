@@ -225,22 +225,15 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             linenum += 1;
         }
 
-        if (errors.size() != expectedErrors.size()) {
-            for (auto &e : expectedErrors) {
-                ADD_FAILURE() << "Expected error on line: " << e.first << endl;
-            }
-            for (auto &e : errors) {
-                ADD_FAILURE() << "Got error: " << e.toString(ctx) << endl;
-            }
-            FAIL() << "Mismatched error count. Expected " << expectedErrors.size() << " errors but got "
-                   << errors.size();
-        }
-
+        set<int> seenErrorLines;
+        int unknownLineErrors = 0;
         for (int i = 0; i < errors.size(); i++) {
             auto &error = errors[i];
             if (error.loc.is_none()) {
                 // The counts matched so let this one slide. The convention is
-                // to put the `:error:` at the top of the file.
+                // to put the `:error:` at the top of the file so that they are
+                // eaten first when reporting mismatched errors
+                unknownLineErrors += 1;
                 continue;
             }
 
@@ -251,13 +244,20 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 if (expectedError != expectedErrors.end()) {
                     // TODO match the type of error
                     found = true;
+                    seenErrorLines.insert(i);
+                    continue;
                 }
             }
             if (!found) {
-                for (auto &e : expectedErrors) {
-                    ADD_FAILURE() << "Expected error on line: " << e.first << endl;
+                ADD_FAILURE() << "Unexpeted error: " << error.toString(ctx) << endl;
+            }
+        }
+
+        for (auto &error : expectedErrors) {
+            if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
+                if (unknownLineErrors-- < 0) {
+                    ADD_FAILURE() << "Expected error didn't happen on line " << error.first << endl;
                 }
-                FAIL() << "Unexpeted error: " << error.toString(ctx) << endl;
             }
         }
 
