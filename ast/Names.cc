@@ -37,6 +37,9 @@ string Name::toString(GlobalState &ctx) const {
     if (kind == UTF8) {
         return raw.utf8.toString();
     } else if (kind == UNIQUE) {
+        if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
+            return "<singleton class:" + this->unique.original.name(ctx).toString(ctx) + ">";
+        }
         return this->unique.original.name(ctx).toString(ctx) + "$" + to_string(this->unique.num);
     } else {
         Error::notImplemented();

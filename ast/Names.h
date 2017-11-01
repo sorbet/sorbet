@@ -109,7 +109,7 @@ struct RawName {
 };
 CheckSize(RawName, 16, 8);
 
-enum UniqueNameKind : u2 { Parser, Desugar, CFG };
+enum UniqueNameKind : u2 { Parser, Desugar, CFG, Singleton };
 
 struct UniqueName {
     NameRef original;
@@ -256,6 +256,23 @@ public:
     // used in resolver to find signatures
     static inline NameRef nilable() {
         return NameRef(29);
+    }
+
+    // The next two names are used as keys in SymbolInfo::members to store
+    // pointers up and down the singleton-class hierarchy. If A's singleton
+    // class is B, then A will have a `singletonClass` entry in its members
+    // table which references B, and B will have an `attachedClass` entry
+    // pointing at A.
+    //
+    // The "attached class" terminology is borrowed from MRI, which refers
+    // to the unique instance attached to a singleton class as the "attached
+    // object"
+    static inline NameRef singletonClass() {
+        return NameRef(30);
+    }
+
+    static inline NameRef attachedClass() {
+        return NameRef(31);
     }
 };
 

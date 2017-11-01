@@ -135,5 +135,23 @@ string Symbol::fullName(GlobalState &ctx) const {
         return owner_str + "#" + this->name.toString(ctx);
 }
 
+SymbolRef Symbol::singletonClass(GlobalState &ctx) {
+    Error::check(this->isClass());
+
+    SymbolRef singleton = findMember(Names::singletonClass());
+    if (singleton.exists())
+        return singleton;
+
+    NameRef singletonName = ctx.freshNameUnique(UniqueNameKind::Singleton, this->name);
+    singleton = ctx.enterClassSymbol(this->owner, singletonName);
+    Symbol &singletonInfo = singleton.info(ctx);
+
+    singletonInfo.members.push_back(make_pair(Names::attachedClass(), this->ref(ctx)));
+    singletonInfo.argumentsOrMixins.push_back(ctx.defn_Class());
+
+    this->members.push_back(make_pair(Names::singletonClass(), singleton));
+    return singleton;
+}
+
 } // namespace ast
 } // namespace ruby_typer

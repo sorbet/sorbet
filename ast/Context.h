@@ -171,9 +171,13 @@ public:
         return SymbolRef(26);
     }
 
+    static constexpr SymbolRef defn_Class() {
+        return SymbolRef(27);
+    }
+
     // Keep as last and update to match the last entry
     static constexpr SymbolRef defn_last_synthetic_sym() {
-        return defn_Opus_Types();
+        return defn_Class();
     }
 
 private:

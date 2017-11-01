@@ -121,13 +121,16 @@ public:
     }
 
     ast::Self *postTransformSelf(ast::Context ctx, ast::Self *self) {
-        if (ctx.owner.info(ctx).isMethod()) {
-            self->claz = ctx.owner.info(ctx).owner;
-            Error::check(self->claz.info(ctx).isClass());
+        ast::Symbol &info = ctx.owner.info(ctx);
+        if (info.isMethod()) {
+            self->claz = info.owner;
         } else {
-            // TODO(nelhage): refer to the singleton class of ctx.owner
-            // Error::notImplemented();
+            Error::check(info.isClass());
+            self->claz = info.singletonClass(ctx);
         }
+
+        Error::check(self->claz.info(ctx).isClass());
+
         return self;
     }
 

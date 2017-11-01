@@ -90,6 +90,12 @@ static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)std::strlen
 static const char *selfMethodTemp = "<self>";
 static UTF8Desc selfMethodTemp_DESC{(char *)selfMethodTemp, (int)std::strlen(selfMethodTemp)};
 
+static const char *singletonClass = "<singleton class>";
+static UTF8Desc singletonClass_DESC{(char *)singletonClass, (int)std::strlen(singletonClass)};
+
+static const char *attachedClass = "<attached class>";
+static UTF8Desc attachedClass_DESC{(char *)attachedClass, (int)std::strlen(attachedClass)};
+
 static const char *blockReturnTemp = "<blockret>";
 static UTF8Desc blockReturnTemp_DESC{(char *)blockReturnTemp, (int)std::strlen(blockReturnTemp)};
 
@@ -174,6 +180,9 @@ static UTF8Desc falseClass_DESC{(char *)falseClass_str, (int)strlen(falseClass_s
 static const char *nilClass_str = "NilClass";
 static UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
 
+static const char *class_str = "Class";
+static UTF8Desc class_DESC{(char *)class_str, (int)strlen(class_str)};
+
 static const char *merge = "merge";
 static UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
 
@@ -239,6 +248,8 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef all_id = enterNameUTF8(all_DESC);
     NameRef any_id = enterNameUTF8(any_DESC);
     NameRef nilable_id = enterNameUTF8(nilable_DESC);
+    NameRef singletonClass_id = enterNameUTF8(singletonClass_DESC);
+    NameRef attachedClass_id = enterNameUTF8(attachedClass_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -269,6 +280,8 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(all_id == Names::all()));
     DEBUG_ONLY(Error::check(any_id == Names::any()));
     DEBUG_ONLY(Error::check(nilable_id == Names::nilable()));
+    DEBUG_ONLY(Error::check(singletonClass_id == Names::singletonClass()));
+    DEBUG_ONLY(Error::check(attachedClass_id == Names::attachedClass()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -297,6 +310,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef dynamic_id = synthesizeClass(dynamic_DESC);
     SymbolRef opus_id = synthesizeClass(opus_DESC);
     SymbolRef opus_types_id = enterClassSymbol(opus_id, enterNameUTF8(types_DESC));
+    SymbolRef class_id = synthesizeClass(class_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -325,6 +339,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(dynamic_id == defn_dynamic());
     Error::check(opus_id == defn_Opus());
     Error::check(opus_types_id == defn_Opus_Types());
+    Error::check(class_id == defn_Class());
 
     /* 0: <none>
      * 1: <top>
