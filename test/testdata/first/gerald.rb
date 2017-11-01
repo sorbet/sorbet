@@ -1,15 +1,15 @@
-# :error:
-# :error:
-# :error:
-# :error:
-# :error:
-# :error:
+# error:
+# error:
+# error:
+# error:
+# error:
+# error:
 require_relative '../../../extn'
-Opus::AutogenLoader.init(__FILE__) # :error:
+Opus::AutogenLoader.init(__FILE__) # error:
 
 module Opus::CIBot::Gerald
 
-  class MatchTimeout < StandardError # :error:
+  class MatchTimeout < StandardError # error:
 
     attr_reader :rule_token
 
@@ -20,12 +20,12 @@ module Opus::CIBot::Gerald
   end
 
   class Matcher
-    include Chalk::Log # :error:
+    include Chalk::Log # error:
 
     MAX_AFFECTED_FILES = 100
 
     def initialize
-      @rules, invalid_rules = Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(&:valid?) # :error:
+      @rules, invalid_rules = Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(&:valid?) # error:
       if !invalid_rules.empty?
         invalid_rule_ids = invalid_rules.map(&:token).join(',')
         log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids)
@@ -37,7 +37,7 @@ module Opus::CIBot::Gerald
       # Sadly we process diff files not patch files so we don't know the actual
       # number of commits. I don't think it is worth switching right now, but
       # maybe in the future.
-      if match_context.diff.affected_files.count > MAX_AFFECTED_FILES # :error:
+      if match_context.diff.affected_files.count > MAX_AFFECTED_FILES # error:
         log.warn("Gerald skipping large PR with #{match_context.diff.affected_files.count} affected files")
         return []
       end
@@ -85,23 +85,23 @@ module Opus::CIBot::Gerald
     PER_RULE_MS = 2000
 
     def initialize
-      @start = Time.now # :error:
+      @start = Time.now # error:
     end
 
     def check!
-      dur_ms = (Time.now - @start) * 1000 # :error:
-      if dur_ms > TOTAL_TIME_MS # :error:
-        raise MatchTimeout.new("Gerald match time budged exceeded #{TOTAL_TIME_MS}ms") # :error:
+      dur_ms = (Time.now - @start) * 1000 # error:
+      if dur_ms > TOTAL_TIME_MS # error:
+        raise MatchTimeout.new("Gerald match time budged exceeded #{TOTAL_TIME_MS}ms") # error:
       end
     end
 
     def time_rule(rule)
-      rule_start = Time.now # :error:
+      rule_start = Time.now # error:
       res = yield
-      dur_ms = (Time.now - rule_start) * 1000 # :error:
-      if dur_ms > PER_RULE_MS # :error:
-        raise MatchTimeout.new( # :error:
-          "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms", # :error:
+      dur_ms = (Time.now - rule_start) * 1000 # error:
+      if dur_ms > PER_RULE_MS # error:
+        raise MatchTimeout.new( # error:
+          "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms", # error:
           rule_token: rule.token)
       end
       check! # Also check the total time
@@ -146,7 +146,7 @@ module Opus::CIBot::Gerald
     end
 
     def changed_openapi?
-      changed_files.include?(Opus::CIBot::Actions::OpenAPI::SPEC_PATH) # :error:
+      changed_files.include?(Opus::CIBot::Actions::OpenAPI::SPEC_PATH) # error:
     end
 
     private def parse(diff)
