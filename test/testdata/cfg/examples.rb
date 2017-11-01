@@ -80,4 +80,12 @@ class Examples
       b
     end
 
+    def take_arguments(i)
+      if(false)
+       2
+      else
+       i
+      end
+    end
+
 end

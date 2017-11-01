@@ -1,0 +1,14 @@
+begin
+  module <emptyTree>::Opus::Types<Types> < ()
+    def any<any>()
+      <emptyTree>
+
+  end
+  class <emptyTree>::String<String> < (::Object)
+    <emptyTree>.standard_method({:_ => ::Opus::Types.any(::<dynamic>)}, {:returns => ::Opus::Types.any(::<dynamic>, ::<dynamic>)})
+
+    def getbyte<getbyte>()
+      <emptyTree>
+
+  end
+end

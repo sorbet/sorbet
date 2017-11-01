@@ -464,7 +464,7 @@ private:
             auto nrhs = mapIt(orhs, ctx);
             if (nlhs != olhs) {
                 Error::check(dynamic_cast<Expression *>(nlhs) != nullptr);
-                v->rhs.reset(dynamic_cast<Expression *>(nlhs));
+                v->lhs.reset(dynamic_cast<Expression *>(nlhs));
             }
             if (nrhs != orhs) {
                 Error::check(dynamic_cast<Expression *>(nrhs) != nullptr);
@@ -546,10 +546,57 @@ private:
 
             return v;
         } else if (Hash *v = dynamic_cast<Hash *>(what)) {
-            // Error::notImplemented();
+            if (HAS_MEMBER_preTransformHash<FUNC>::value) {
+                v = PostPonePreTransform_Hash<FUNC, HAS_MEMBER_preTransformHash<FUNC>::value>::call(ctx, v, func);
+            }
+            int i = 0;
+            while (i < v->keys.size()) {
+                auto &el = v->keys[i];
+                auto oarg = el.get();
+                auto narg = mapIt(oarg, ctx);
+                if (oarg != narg) {
+                    Error::check(dynamic_cast<Expression *>(narg) != nullptr);
+                    el.reset(dynamic_cast<Expression *>(narg));
+                }
+                i++;
+            }
+
+            i = 0;
+            while (i < v->values.size()) {
+                auto &el = v->values[i];
+                auto oarg = el.get();
+                auto narg = mapIt(oarg, ctx);
+                if (oarg != narg) {
+                    Error::check(dynamic_cast<Expression *>(narg) != nullptr);
+                    el.reset(dynamic_cast<Expression *>(narg));
+                }
+                i++;
+            }
+
+            if (HAS_MEMBER_postTransformArray<FUNC>::value) {
+                return PostPonePostTransform_Hash<FUNC, HAS_MEMBER_postTransformHash<FUNC>::value>::call(ctx, v, func);
+            }
             return what;
         } else if (Array *v = dynamic_cast<Array *>(what)) {
-            // Error::notImplemented();
+            if (HAS_MEMBER_preTransformArray<FUNC>::value) {
+                v = PostPonePreTransform_Array<FUNC, HAS_MEMBER_preTransformArray<FUNC>::value>::call(ctx, v, func);
+            }
+            int i = 0;
+            while (i < v->elems.size()) {
+                auto &el = v->elems[i];
+                auto oarg = el.get();
+                auto narg = mapIt(oarg, ctx);
+                if (oarg != narg) {
+                    Error::check(dynamic_cast<Expression *>(narg) != nullptr);
+                    el.reset(dynamic_cast<Expression *>(narg));
+                }
+                i++;
+            }
+
+            if (HAS_MEMBER_postTransformArray<FUNC>::value) {
+                return PostPonePostTransform_Array<FUNC, HAS_MEMBER_postTransformArray<FUNC>::value>::call(ctx, v,
+                                                                                                           func);
+            }
             return what;
         } else if (FloatLit *v = dynamic_cast<FloatLit *>(what)) {
             if (HAS_MEMBER_postTransformFloatLit<FUNC>::value) {

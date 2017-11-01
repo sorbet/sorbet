@@ -6,6 +6,7 @@ cc_binary(
     deps = [
         "//ast/desugar",
         "//cfg",
+        "//infer",
         "//namer",
         "//parser",
         "@cxxopts//:cxxopts",

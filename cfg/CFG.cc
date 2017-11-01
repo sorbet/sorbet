@@ -49,8 +49,6 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 }
             } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
                 reads[v->what].insert(bb.get());
-            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
-                reads[v->what].insert(bb.get());
             } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
                 reads[v->value].insert(bb.get());
             } else if (auto *v = dynamic_cast<LoadArg *>(bind.value.get())) {
@@ -62,8 +60,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
     }
 
-    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> reads_by_block;
-    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> writes_by_block;
+    vector<unordered_set<ast::SymbolRef>> reads_by_block(this->basicBlocks.size());
+    vector<unordered_set<ast::SymbolRef>> writes_by_block(this->basicBlocks.size());
 
     for (auto &rds : reads) {
         auto &wts = writes[rds.first];
@@ -81,54 +79,56 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
             wts.second.clear();
         }
         for (BasicBlock *bb : rds) {
-            reads_by_block[bb].insert(wts.first);
+            reads_by_block[bb->id].insert(wts.first);
         }
         for (BasicBlock *bb : wts.second) {
-            writes_by_block[bb].insert(wts.first);
+            writes_by_block[bb->id].insert(wts.first);
         }
     }
 
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
-    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> upper_bounds1;
+    vector<unordered_set<ast::SymbolRef>> upper_bounds1(this->basicBlocks.size());
     bool changed = true;
 
     while (changed) {
         changed = false;
         for (BasicBlock *bb : this->forwardsTopoSort) {
-            int sz = upper_bounds1[bb].size();
-            upper_bounds1[bb].insert(reads_by_block[bb].begin(), reads_by_block[bb].end());
+            int sz = upper_bounds1[bb->id].size();
+            upper_bounds1[bb->id].insert(reads_by_block[bb->id].begin(), reads_by_block[bb->id].end());
             if (bb->bexit.thenb != deadBlock()) {
-                upper_bounds1[bb].insert(upper_bounds1[bb->bexit.thenb].begin(), upper_bounds1[bb->bexit.thenb].end());
+                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.thenb->id].begin(),
+                                             upper_bounds1[bb->bexit.thenb->id].end());
             }
             if (bb->bexit.elseb != deadBlock()) {
-                upper_bounds1[bb].insert(upper_bounds1[bb->bexit.elseb].begin(), upper_bounds1[bb->bexit.elseb].end());
+                upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.elseb->id].begin(),
+                                             upper_bounds1[bb->bexit.elseb->id].end());
             }
-            changed = changed || (upper_bounds1[bb].size() != sz);
+            changed = changed || (upper_bounds1[bb->id].size() != sz);
         }
     }
 
-    unordered_map<BasicBlock *, unordered_set<ast::SymbolRef>> upper_bounds2;
+    vector<unordered_set<ast::SymbolRef>> upper_bounds2(this->basicBlocks.size());
 
     changed = true;
     while (changed) {
         changed = false;
         for (auto it = this->backwardsTopoSort.begin(); it != this->backwardsTopoSort.end(); ++it) {
             BasicBlock *bb = *it;
-            int sz = upper_bounds2[bb].size();
-            upper_bounds2[bb].insert(writes_by_block[bb].begin(), writes_by_block[bb].end());
+            int sz = upper_bounds2[bb->id].size();
+            upper_bounds2[bb->id].insert(writes_by_block[bb->id].begin(), writes_by_block[bb->id].end());
             for (BasicBlock *edge : bb->backEdges) {
                 if (edge != deadBlock()) {
-                    upper_bounds2[bb].insert(upper_bounds2[edge].begin(), upper_bounds2[edge].end());
+                    upper_bounds2[bb->id].insert(upper_bounds2[edge->id].begin(), upper_bounds2[edge->id].end());
                 }
             }
-            changed = changed || (upper_bounds2[bb].size() != sz);
+            changed = changed || (upper_bounds2[bb->id].size() != sz);
         }
     }
 
     for (auto &it : this->basicBlocks) {
-        auto set2 = upper_bounds2[it.get()];
+        auto set2 = upper_bounds2[it->id];
 
-        for (auto el : upper_bounds1[it.get()]) {
+        for (auto el : upper_bounds1[it->id]) {
             if (set2.find(el) != set2.end()) {
                 it->args.push_back(el);
             }
@@ -183,7 +183,25 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
     ast::SymbolRef retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
-    auto cont = res->walk(ctx, md.rhs.get(), res->entry(), *res.get(), retSym);
+    ast::SymbolRef selfSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::selfMethodTemp(), md.symbol);
+
+    BasicBlock *entry = res->entry();
+
+    entry->exprs.emplace_back(selfSym, make_unique<Self>(md.symbol.info(ctx).owner));
+    auto methodName = md.symbol.info(ctx).name;
+
+    int i = 0;
+    for (auto &arg : md.args) {
+        ast::SymbolRef argSym;
+        if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
+            argSym = iarg->symbol;
+        } else {
+            argSym = ast::GlobalState::defn_lvar_todo();
+        }
+        entry->exprs.emplace_back(argSym, make_unique<LoadArg>(selfSym, methodName, i));
+        i++;
+    }
+    auto cont = res->walk(ctx, md.rhs.get(), entry, *res.get(), retSym, 0);
     ast::SymbolRef retSym1 =
         ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
 
@@ -195,14 +213,18 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     return res;
 }
 
-BasicBlock *CFG::freshBlock() {
+BasicBlock *CFG::freshBlock(int outerLoops) {
+    int id = this->basicBlocks.size();
     this->basicBlocks.emplace_back(new BasicBlock());
-    return this->basicBlocks.back().get();
+    BasicBlock *r = this->basicBlocks.back().get();
+    r->id = id;
+    r->outerLoops = outerLoops;
+    return r;
 }
 
 CFG::CFG() {
-    freshBlock(); // entry;
-    freshBlock(); // dead code;
+    freshBlock(0); // entry;
+    freshBlock(0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond = ast::GlobalState::defn_cfg_never();
@@ -243,7 +265,8 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target) {
+BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target,
+                      int loops) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
@@ -253,20 +276,20 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
     BasicBlock *ret = nullptr;
     typecase(what,
              [&](ast::While *a) {
-                 auto headerBlock = inWhat.freshBlock();
+                 auto headerBlock = inWhat.freshBlock(loops + 1);
                  unconditionalJump(current, headerBlock, inWhat);
 
                  ast::SymbolRef condSym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::whileTemp(), inWhat.symbol);
-                 auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym);
-                 auto bodyBlock = inWhat.freshBlock();
-                 auto continueBlock = inWhat.freshBlock();
+                 auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym, loops + 1);
+                 auto bodyBlock = inWhat.freshBlock(loops + 1);
+                 auto continueBlock = inWhat.freshBlock(loops);
                  conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, inWhat);
                  // finishHeader
                  ast::SymbolRef bodySym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
 
-                 auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym);
+                 auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym, loops + 1);
                  unconditionalJump(body, headerBlock, inWhat);
 
                  continueBlock->exprs.emplace_back(target, make_unique<Nil>());
@@ -275,7 +298,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
              [&](ast::Return *a) {
                  ast::SymbolRef retSym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
-                 auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym);
+                 auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym, loops);
                  cont->exprs.emplace_back(target, make_unique<Return>(retSym)); // dead assign.
                  jumpToDead(cont, inWhat);
                  ret = deadBlock();
@@ -284,20 +307,20 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  ast::SymbolRef ifSym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::ifTemp(), inWhat.symbol);
                  Error::check(ifSym.exists());
-                 auto thenBlock = inWhat.freshBlock();
-                 auto elseBlock = inWhat.freshBlock();
-                 auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym);
+                 auto thenBlock = inWhat.freshBlock(loops);
+                 auto elseBlock = inWhat.freshBlock(loops);
+                 auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym, loops);
                  conditionalJump(cont, ifSym, thenBlock, elseBlock, inWhat);
 
-                 auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target);
-                 auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target);
+                 auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target, loops);
+                 auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target, loops);
                  if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
                      if (thenEnd == deadBlock()) {
                          ret = elseEnd;
                      } else if (thenEnd == deadBlock()) {
                          ret = thenEnd;
                      } else {
-                         ret = freshBlock();
+                         ret = freshBlock(loops);
                          unconditionalJump(thenEnd, ret, inWhat);
                          unconditionalJump(elseEnd, ret, inWhat);
                      }
@@ -321,10 +344,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  current->exprs.emplace_back(target, make_unique<BoolLit>(a->value));
                  ret = current;
              },
-             [&](ast::ConstantLit *a) {
-                 current->exprs.emplace_back(target, make_unique<ConstantLit>(a->cnst));
-                 ret = current;
-             },
+             [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
              [&](ast::Ident *a) {
                  current->exprs.emplace_back(target, make_unique<Ident>(a->symbol));
                  ret = current;
@@ -336,7 +356,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
              [&](ast::Assign *a) {
                  auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
                  Error::check(lhsIdent != nullptr);
-                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhsIdent->symbol);
+                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhsIdent->symbol, loops);
                  rhsCont->exprs.emplace_back(target, make_unique<Ident>(lhsIdent->symbol));
                  ret = rhsCont;
              },
@@ -344,9 +364,9 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  for (auto &exp : a->stats) {
                      ast::SymbolRef temp =
                          ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                     current = walk(ctx, exp.get(), current, inWhat, temp);
+                     current = walk(ctx, exp.get(), current, inWhat, temp, loops);
                  }
-                 ret = walk(ctx, a->expr.get(), current, inWhat, target);
+                 ret = walk(ctx, a->expr.get(), current, inWhat, target, loops);
              },
              [&](ast::Send *s) {
                  ast::SymbolRef recv;
@@ -354,7 +374,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                      recv = i->symbol;
                  } else {
                      recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                     current = walk(ctx, s->recv.get(), current, inWhat, recv);
+                     current = walk(ctx, s->recv.get(), current, inWhat, recv, loops);
                  }
 
                  vector<ast::SymbolRef> args;
@@ -364,15 +384,15 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                          temp = i->symbol;
                      } else {
                          temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                         current = walk(ctx, exp.get(), current, inWhat, temp);
+                         current = walk(ctx, exp.get(), current, inWhat, temp, loops);
                      }
                      args.push_back(temp);
                  }
 
                  if (s->block != nullptr) {
-                     auto headerBlock = inWhat.freshBlock();
-                     auto postBlock = inWhat.freshBlock();
-                     auto bodyBlock = inWhat.freshBlock();
+                     auto headerBlock = inWhat.freshBlock(loops + 1);
+                     auto postBlock = inWhat.freshBlock(loops);
+                     auto bodyBlock = inWhat.freshBlock(loops + 1);
 
                      for (int i = 0; i < s->block->args.size(); ++i) {
                          auto &arg = s->block->args[i];
@@ -392,7 +412,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                      // TODO: handle block arguments somehow??
                      ast::SymbolRef blockrv =
                          ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::blockReturnTemp(), inWhat.symbol);
-                     auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv);
+                     auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv, loops + 1);
 
                      unconditionalJump(blockLast, headerBlock, inWhat);
 
@@ -452,6 +472,9 @@ string BasicBlock::toString(ast::Context ctx) {
         buf << arg.info(ctx).name.name(ctx).toString(ctx);
     }
     buf << ")\\n";
+    if (this->outerLoops > 0) {
+        buf << "outerLoops: " << this->outerLoops << "\\n";
+    }
     for (auto &exp : this->exprs) {
         buf << exp.bind.info(ctx).name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
         buf << "\\n"; // intentional! graphviz will do interpolation.
@@ -548,10 +571,6 @@ string BoolLit::toString(ast::Context ctx) {
     } else {
         return "false";
     }
-}
-
-string ConstantLit::toString(ast::Context ctx) {
-    return this->cnst.name(ctx).toString(ctx);
 }
 
 string Nil::toString(ast::Context ctx) {

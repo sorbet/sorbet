@@ -11,6 +11,13 @@ enum class ErrorClass {
     IncludePassedBlock,
 
     DynamicConstant,
+    StubConstant,
+
+    PinnedVariableMismatch,
+    MethodArgumentMismatch,
+    UnknownMethod,
+    MethodArgumentCountMismatch,
+    ReturnTypeMismatch,
 };
 
 class Reporter {

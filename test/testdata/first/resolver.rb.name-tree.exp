@@ -31,7 +31,7 @@ begin
     class <emptyTree>::Inner1::Inner2<Inner2> < (::Object)
       ::Outer2::C
 
-      <emptyTree>::A
+      ::<dynamic>
 
     end
 

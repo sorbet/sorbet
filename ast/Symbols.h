@@ -42,6 +42,13 @@ public:
         return _id;
     }
 
+    inline SymbolRef orElse(SymbolRef other) const {
+        if (exists())
+            this;
+        else
+            other;
+    }
+
     bool isSynthetic() const;
 
     bool isPlaceHolder() const;
@@ -90,6 +97,10 @@ public:
         Error::check(!isClass());
         return argumentsOrMixins;
     }
+
+    bool derivesFrom(GlobalState &ctx, SymbolRef sym);
+
+    SymbolRef ref(GlobalState &ctx);
 
     inline std::vector<SymbolRef> &mixins(GlobalState &ctx) {
         Error::check(isClass());

@@ -22,6 +22,21 @@ bool SymbolRef::isPrimitive() const {
 bool Symbol::isConstructor(GlobalState &ctx) const {
     return this->name._id == 1;
 }
+
+bool Symbol::derivesFrom(GlobalState &ctx, SymbolRef sym) {
+    // TODO: add baseClassSet
+    for (SymbolRef a : argumentsOrMixins) {
+        if (a == sym || a.info(ctx).derivesFrom(ctx, sym))
+            return true;
+    }
+    return false;
+}
+
+SymbolRef Symbol::ref(GlobalState &ctx) const {
+    auto id = this - ctx.symbols.data();
+    return SymbolRef(id / sizeof(Symbol));
+}
+
 Symbol &SymbolRef::info(GlobalState &ctx, bool allowNone) const {
     Error::check(_id < ctx.symbols.size());
     if (!allowNone)

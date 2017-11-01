@@ -84,6 +84,9 @@ static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)std::strlen(assignTemp)
 static const char *returnMethodTemp = "<ret>";
 static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)std::strlen(returnMethodTemp)};
 
+static const char *selfMethodTemp = "<self>";
+static UTF8Desc selfMethodTemp_DESC{(char *)selfMethodTemp, (int)std::strlen(selfMethodTemp)};
+
 static const char *blockReturnTemp = "<blockret>";
 static UTF8Desc blockReturnTemp_DESC{(char *)blockReturnTemp, (int)std::strlen(blockReturnTemp)};
 
@@ -95,6 +98,9 @@ static UTF8Desc top_DESC{(char *)top_str, (int)strlen(top_str)};
 
 static const char *bottom_str = "<bottom>";
 static UTF8Desc bottom_DESC{(char *)bottom_str, (int)strlen(bottom_str)};
+
+static const char *dynamic_str = "<dynamic>";
+static UTF8Desc dynamic_DESC{(char *)dynamic_str, (int)strlen(dynamic_str)};
 
 static const char *root_str = "<root>";
 static UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
@@ -138,6 +144,33 @@ static UTF8Desc include_DESC{(char *)include, (int)strlen(include)};
 static const char *currentFile = "__FILE__";
 static UTF8Desc currentFile_DESC{(char *)currentFile, (int)strlen(currentFile)};
 
+static const char *string_str = "String";
+static UTF8Desc string_DESC{(char *)string_str, (int)strlen(string_str)};
+
+static const char *integer_str = "Integer";
+static UTF8Desc integer_DESC{(char *)integer_str, (int)strlen(integer_str)};
+
+static const char *float_str = "Float";
+static UTF8Desc float_DESC{(char *)float_str, (int)strlen(float_str)};
+
+static const char *symbol_str = "Symbol";
+static UTF8Desc symbol_DESC{(char *)symbol_str, (int)strlen(symbol_str)};
+
+static const char *array_str = "Array";
+static UTF8Desc array_DESC{(char *)array_str, (int)strlen(array_str)};
+
+static const char *hash_str = "Hash";
+static UTF8Desc hash_DESC{(char *)hash_str, (int)strlen(hash_str)};
+
+static const char *trueClass_str = "TrueClass";
+static UTF8Desc trueClass_DESC{(char *)trueClass_str, (int)strlen(trueClass_str)};
+
+static const char *falseClass_str = "FalseClass";
+static UTF8Desc falseClass_DESC{(char *)falseClass_str, (int)strlen(falseClass_str)};
+
+static const char *nilClass_str = "NilClass";
+static UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
+
 static const char *merge = "merge";
 static UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
 
@@ -176,6 +209,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef include_id = enterNameUTF8(include_DESC);
     NameRef currentFile_id = enterNameUTF8(currentFile_DESC);
     NameRef merge_id = enterNameUTF8(merge_DESC);
+    NameRef selfMethodTemp_id = enterNameUTF8(selfMethodTemp_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -200,6 +234,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(include_id == Names::include()));
     DEBUG_ONLY(Error::check(currentFile_id == Names::currentFile()));
     DEBUG_ONLY(Error::check(merge_id == Names::merge()));
+    DEBUG_ONLY(Error::check(selfMethodTemp_id == Names::selfMethodTemp()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -216,6 +251,16 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef always_id = synthesizeClass(always_DESC);
     SymbolRef never_id = synthesizeClass(never_DESC);
     SymbolRef block_call_id = synthesizeClass(block_call_DESC);
+    SymbolRef integer_id = synthesizeClass(integer_DESC);
+    SymbolRef float_id = synthesizeClass(float_DESC);
+    SymbolRef string_id = synthesizeClass(string_DESC);
+    SymbolRef symbol_id = synthesizeClass(symbol_DESC);
+    SymbolRef array_id = synthesizeClass(array_DESC);
+    SymbolRef hash_id = synthesizeClass(hash_DESC);
+    SymbolRef trueClass_id = synthesizeClass(trueClass_DESC);
+    SymbolRef falseClass_id = synthesizeClass(falseClass_DESC);
+    SymbolRef nilClass_id = synthesizeClass(nilClass_DESC);
+    SymbolRef dynamic_id = synthesizeClass(dynamic_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -232,6 +277,17 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(always_id == defn_cfg_always());
     Error::check(never_id == defn_cfg_never());
     Error::check(block_call_id == defn_cfg_block_call());
+    Error::check(integer_id == defn_Integer());
+    Error::check(float_id == defn_Float());
+    Error::check(string_id == defn_String());
+    Error::check(symbol_id == defn_Symbol());
+    Error::check(array_id == defn_Array());
+    Error::check(hash_id == defn_Hash());
+    Error::check(trueClass_id == defn_TrueClass());
+    Error::check(falseClass_id == defn_FalseClass());
+    Error::check(nilClass_id == defn_NilClass());
+    Error::check(dynamic_id == defn_dynamic());
+
     /* 0: <none>
      * 1: <top>
      * 2: <bottom>
@@ -247,6 +303,15 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
      * 12: <always>
      * 13: <never>
      * 14: <block-call>
+     * 15: Integer
+     * 16: Float
+     * 17: String
+     * 18: Symbol
+     * 19: Array
+     * 20: Hash
+     * 21: TrueClass
+     * 22: FalseClass
+     * 23: NilClass
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 

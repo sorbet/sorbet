@@ -227,6 +227,11 @@ public:
     static inline NameRef merge() {
         return NameRef(23);
     }
+
+    // used in CFG for temporary
+    static inline NameRef selfMethodTemp() {
+        return NameRef(24);
+    }
 };
 
 class Name {

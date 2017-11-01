@@ -87,4 +87,13 @@ class <emptyTree>::Examples<Examples> < (::Object)
       ::Examples#variables_loop_if#b
     end
 
+  def take_arguments<take_arguments>(::Examples#take_arguments#i)
+    if begin
+        false
+      end
+      2
+    else
+      ::Examples#take_arguments#i
+    end
+
 end
