@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <memory>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <sys/types.h>
@@ -101,6 +102,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
     ruby_typer::ast::GlobalState ctx(*console);
     ruby_typer::ast::Context context(ctx, ctx.defn_root());
+    ctx.errors.keepErrorsInMemory = true;
 
     // Parser
     auto src = ruby_typer::File::read(inputPath.c_str());
@@ -205,6 +207,61 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == got.str() + "\n") {
             TEST_COUT << "cfg OK" << endl;
         }
+    }
+
+    // Check warnings and errors
+    auto errors = ctx.errors.getAndEmptyErrors();
+    if (errors.size() > 0) {
+        map<int, std::vector<std::string>> expectedErrors;
+        std::string line;
+        stringstream ss(src);
+        int linenum = 1;
+        while (std::getline(ss, line, '\n')) {
+            regex errorRegex("# :error:( ([A-Za-z]*))?");
+            smatch matches;
+            if (regex_search(line, matches, errorRegex)) {
+                expectedErrors[linenum].push_back(matches[2].str());
+            }
+            linenum += 1;
+        }
+
+        if (errors.size() != expectedErrors.size()) {
+            for (auto &e : expectedErrors) {
+                ADD_FAILURE() << "Expected error on line: " << e.first << endl;
+            }
+            for (auto &e : errors) {
+                ADD_FAILURE() << "Got error: " << e->toString(ctx) << endl;
+            }
+            FAIL() << "Mismatched error count. Expected " << expectedErrors.size() << " errors but got "
+                   << errors.size();
+        }
+
+        for (int i = 0; i < errors.size(); i++) {
+            auto &error = errors[i];
+            if (error->loc.is_none()) {
+                // The counts matched so let this one slide. The convention is
+                // to put the `:error:` at the top of the file.
+                continue;
+            }
+
+            auto pos = error->loc.position(ctx);
+            bool found = false;
+            for (int i = pos.first.line; i <= pos.second.line; i++) {
+                auto expectedError = expectedErrors.find(i);
+                if (expectedError != expectedErrors.end()) {
+                    // TODO match the type of error
+                    found = true;
+                }
+            }
+            if (!found) {
+                for (auto &e : expectedErrors) {
+                    ADD_FAILURE() << "Expected error on line: " << e.first << endl;
+                }
+                FAIL() << "Unexpeted error: " << error->toString(ctx) << endl;
+            }
+        }
+
+        TEST_COUT << "errors OK" << endl;
     }
 }
 

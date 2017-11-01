@@ -1,3 +1,4 @@
+# :error:
 class Outer1
 end
 

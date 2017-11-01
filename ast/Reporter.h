@@ -26,13 +26,25 @@ class Reporter {
     friend GlobalState;
 
 private:
-    void _error(Loc loc, ErrorClass what, const std::string &formatted);
+    struct Error {
+        Loc loc;
+        ErrorClass what;
+        std::string formatted;
+        Error(Loc loc, ErrorClass what, std::string formatted) : loc(loc), what(what), formatted(formatted) {}
+        std::string toString(GlobalState &ctx);
+    };
+
+    void _error(std::unique_ptr<Error> error);
+    std::vector<std::unique_ptr<Error>> errors;
 
 public:
     template <typename... Args> void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) {
         std::string formatted = fmt::format(msg, args...);
-        _error(loc, what, formatted);
+        _error(std::make_unique<Error>(loc, what, formatted));
     }
+
+    bool keepErrorsInMemory = false;
+    std::vector<std::unique_ptr<Error>> getAndEmptyErrors();
 
 private:
     Reporter(GlobalState &ctx) : ctx_(ctx) {}
