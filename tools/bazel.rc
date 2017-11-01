@@ -17,6 +17,11 @@ build --cxxopt=-fsanitize=undefined
 build --linkopt=-fsanitize=address
 build --linkopt=-fsanitize=undefined
 
+# The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
+# <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
+build --copt=-Wno-macro-redefined
+build --cxxopt=-Wno-macro-redefined
+
 build:dbg --copt=-O0
 build:dbg --cxxopt=-O0
 build:dbg --copt=-g3
