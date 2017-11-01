@@ -99,7 +99,7 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
         os << ")";
     }
     if (myInfo.resultType) {
-        os << " -> " << myInfo.resultType->toString(Context(ctx, ctx.defn_root()), tabs);
+        os << " -> " << myInfo.resultType->toString(Context(ctx, ctx.defn_root()), tabs + 2);
     }
     os << std::endl;
 
