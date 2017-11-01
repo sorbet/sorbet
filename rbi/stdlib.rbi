@@ -952,6 +952,7 @@ class Abbrev
     returns: Opus::Types.hash_of(keys: String, values: String)
   )
   def self.abbrev(words); end
+
 end
 
 class Array
@@ -960,22 +961,19 @@ class Array
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def empty?(); end
-end
 
-class Array
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Array
   standard_method(
     {},
     returns: Integer
   )
   def length(); end
+
 end
 
 class Base64
@@ -986,9 +984,7 @@ class Base64
     returns: String
   )
   def self.decode64(str); end
-end
 
-class Base64
   standard_method(
     {
       bin: String,
@@ -996,9 +992,7 @@ class Base64
     returns: String
   )
   def self.encode64(bin); end
-end
 
-class Base64
   standard_method(
     {
       str: String,
@@ -1006,9 +1000,7 @@ class Base64
     returns: String
   )
   def self.strict_decode64(str); end
-end
 
-class Base64
   standard_method(
     {
       bin: String,
@@ -1016,9 +1008,7 @@ class Base64
     returns: String
   )
   def self.strict_encode64(bin); end
-end
 
-class Base64
   standard_method(
     {
       str: String,
@@ -1026,9 +1016,7 @@ class Base64
     returns: String
   )
   def self.urlsafe_decode64(str); end
-end
 
-class Base64
   standard_method(
     {
       bin: String,
@@ -1036,6 +1024,7 @@ class Base64
     returns: String
   )
   def self.urlsafe_encode64(bin); end
+
 end
 
 class BasicObject
@@ -1046,9 +1035,7 @@ class BasicObject
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(other); end
-end
 
-class BasicObject
   standard_method(
     {
       other: BasicObject,
@@ -1056,17 +1043,13 @@ class BasicObject
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def equal?(other); end
-end
 
-class BasicObject
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def !(); end
-end
 
-class BasicObject
   standard_method(
     {
       other: BasicObject,
@@ -1074,9 +1057,7 @@ class BasicObject
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def !=(other); end
-end
 
-class BasicObject
   standard_method(
     {
       _: String,
@@ -1086,6 +1067,7 @@ class BasicObject
     returns: BasicObject
   )
   def instance_eval(_, filename, lineno); end
+
 end
 
 class Benchmark
@@ -1096,9 +1078,7 @@ class Benchmark
     returns: Opus::Types.array_of(Benchmark::Tms)
   )
   def self.bmbm(width); end
-end
 
-class Benchmark
   standard_method(
     {
       label: Opus::Types.any(String, NilClass),
@@ -1106,14 +1086,13 @@ class Benchmark
     returns: Benchmark::Tms
   )
   def self.measure(label); end
-end
 
-class Benchmark
   standard_method(
     {},
     returns: Integer
   )
   def self.realtime(); end
+
 end
 
 class BigDecimal
@@ -1124,9 +1103,7 @@ class BigDecimal
     returns: BigDecimal
   )
   def %(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1134,9 +1111,7 @@ class BigDecimal
     returns: Opus::Types.any(BigDecimal, Complex)
   )
   def +(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1144,25 +1119,19 @@ class BigDecimal
     returns: Opus::Types.any(BigDecimal, Complex)
   )
   def -(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def -@(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def +@(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1170,9 +1139,7 @@ class BigDecimal
     returns: Opus::Types.any(BigDecimal, Complex)
   )
   def *(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1180,9 +1147,7 @@ class BigDecimal
     returns: BigDecimal
   )
   def **(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1190,9 +1155,7 @@ class BigDecimal
     returns: Opus::Types.any(BigDecimal, Complex)
   )
   def /(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1200,9 +1163,7 @@ class BigDecimal
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def <(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1210,9 +1171,7 @@ class BigDecimal
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def <=(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1220,9 +1179,7 @@ class BigDecimal
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def >(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1230,9 +1187,7 @@ class BigDecimal
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def >=(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Object,
@@ -1240,9 +1195,7 @@ class BigDecimal
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Object,
@@ -1250,9 +1203,7 @@ class BigDecimal
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1260,73 +1211,55 @@ class BigDecimal
     returns: Object
   )
   def <=>(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def abs(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def abs2(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def angle(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def arg(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def ceil(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def conj(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def conjugate(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def denominator(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1334,9 +1267,7 @@ class BigDecimal
     returns: Integer
   )
   def div(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1344,9 +1275,7 @@ class BigDecimal
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def divmod(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Object,
@@ -1354,9 +1283,7 @@ class BigDecimal
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def equal?(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Object,
@@ -1364,9 +1291,7 @@ class BigDecimal
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1374,81 +1299,61 @@ class BigDecimal
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
   def fdiv(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def finite?(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def floor(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def imag(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def imaginary(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.any(NilClass, Integer)
   )
   def infinite?(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def magnitude(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1456,33 +1361,25 @@ class BigDecimal
     returns: BigDecimal
   )
   def modulo(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def nan?(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def numerator(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def phase(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1490,25 +1387,19 @@ class BigDecimal
     returns: Opus::Types.any(BigDecimal, Complex)
   )
   def quo(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def real(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: TrueClass
   )
   def real?(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Integer,
@@ -1516,49 +1407,37 @@ class BigDecimal
     returns: Opus::Types.any(Integer, BigDecimal)
   )
   def round(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Float
   )
   def to_f(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def to_i(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def to_int(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Rational
   )
   def to_r(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Complex
   )
   def to_c(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Integer,
@@ -1566,33 +1445,25 @@ class BigDecimal
     returns: Opus::Types.any(Integer, Rational)
   )
   def truncate(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.coerce([Integer, Integer])
   )
   def precs(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Opus::Types.coerce([Integer, String, Integer, Integer])
   )
   def split(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1600,25 +1471,19 @@ class BigDecimal
     returns: BigDecimal
   )
   def remainder(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def fix(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: BigDecimal
   )
   def frac(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1626,41 +1491,31 @@ class BigDecimal
     returns: BigDecimal
   )
   def power(_); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Object
   )
   def nonzero?(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def exponent(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: Integer
   )
   def sign(); end
-end
 
-class BigDecimal
   standard_method(
     {},
     returns: String
   )
   def _dump(); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Integer,
@@ -1668,9 +1523,7 @@ class BigDecimal
     returns: BigDecimal
   )
   def sqrt(_); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1679,9 +1532,7 @@ class BigDecimal
     returns: BigDecimal
   )
   def add(_, _1); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1690,9 +1541,7 @@ class BigDecimal
     returns: BigDecimal
   )
   def sub(_, _1); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1701,9 +1550,7 @@ class BigDecimal
     returns: BigDecimal
   )
   def mult(_, _1); end
-end
 
-class BigDecimal
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -1711,6 +1558,7 @@ class BigDecimal
     returns: Opus::Types.coerce([BigDecimal, BigDecimal])
   )
   def coerce(_); end
+
 end
 
 class BigMath
@@ -1722,9 +1570,7 @@ class BigMath
     returns: BigDecimal
   )
   def self.exp(_, _1); end
-end
 
-class BigMath
   standard_method(
     {
       _: Integer,
@@ -1733,6 +1579,7 @@ class BigMath
     returns: BigDecimal
   )
   def self.log(_, _1); end
+
 end
 
 class BigMath
@@ -1743,9 +1590,7 @@ class BigMath
     returns: BigDecimal
   )
   def E(prec); end
-end
 
-class BigMath
   standard_method(
     {
       prec: Integer,
@@ -1753,9 +1598,7 @@ class BigMath
     returns: BigDecimal
   )
   def PI(prec); end
-end
 
-class BigMath
   standard_method(
     {
       x: Integer,
@@ -1764,9 +1607,7 @@ class BigMath
     returns: BigDecimal
   )
   def atan(x, prec); end
-end
 
-class BigMath
   standard_method(
     {
       x: Integer,
@@ -1775,9 +1616,7 @@ class BigMath
     returns: BigDecimal
   )
   def cos(x, prec); end
-end
 
-class BigMath
   standard_method(
     {
       x: Integer,
@@ -1786,9 +1625,7 @@ class BigMath
     returns: BigDecimal
   )
   def sin(x, prec); end
-end
 
-class BigMath
   standard_method(
     {
       x: Integer,
@@ -1797,6 +1634,7 @@ class BigMath
     returns: BigDecimal
   )
   def sqrt(x, prec); end
+
 end
 
 class Class
@@ -1805,9 +1643,7 @@ class Class
     returns: BasicObject
   )
   def allocate(); end
-end
 
-class Class
   standard_method(
     {
       _: Class,
@@ -1815,17 +1651,13 @@ class Class
     returns: BasicObject
   )
   def inherited(_); end
-end
 
-class Class
   standard_method(
     {},
     returns: Opus::Types.any(Class, NilClass)
   )
   def superclass(); end
-end
 
-class Class
   standard_method(
     {
       _: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -1833,22 +1665,19 @@ class Class
     returns: Opus::Types.array_of(Symbol)
   )
   def instance_methods(_); end
-end
 
-class Class
   standard_method(
     {},
     returns: Class
   )
   def class(); end
-end
 
-class Class
   standard_method(
     {},
     returns: String
   )
   def name(); end
+
 end
 
 class Complex
@@ -1859,9 +1688,7 @@ class Complex
     returns: Complex
   )
   def *(_); end
-end
 
-class Complex
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1869,9 +1696,7 @@ class Complex
     returns: Complex
   )
   def **(_); end
-end
 
-class Complex
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1879,9 +1704,7 @@ class Complex
     returns: Complex
   )
   def +(_); end
-end
 
-class Complex
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1889,25 +1712,19 @@ class Complex
     returns: Complex
   )
   def -(_); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Complex
   )
   def -@(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Complex
   )
   def +@(); end
-end
 
-class Complex
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -1915,9 +1732,7 @@ class Complex
     returns: Complex
   )
   def /(_); end
-end
 
-class Complex
   standard_method(
     {
       _: Object,
@@ -1925,65 +1740,49 @@ class Complex
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def abs(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def abs2(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Float
   )
   def angle(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Float
   )
   def arg(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Complex
   )
   def conj(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Complex
   )
   def conjugate(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Integer
   )
   def denominator(); end
-end
 
-class Complex
   standard_method(
     {
       _: Object,
@@ -1991,9 +1790,7 @@ class Complex
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def equal?(_); end
-end
 
-class Complex
   standard_method(
     {
       _: Object,
@@ -2001,9 +1798,7 @@ class Complex
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(_); end
-end
 
-class Complex
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -2011,73 +1806,55 @@ class Complex
     returns: Complex
   )
   def fdiv(_); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def imag(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def imaginary(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def magnitude(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Complex
   )
   def numerator(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Float
   )
   def phase(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def polar(); end
-end
 
-class Complex
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -2085,9 +1862,7 @@ class Complex
     returns: Opus::Types.any(Complex, BigDecimal)
   )
   def quo(_); end
-end
 
-class Complex
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -2095,89 +1870,67 @@ class Complex
     returns: Rational
   )
   def rationalize(_); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def real(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: FalseClass
   )
   def real?(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def rect(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def rectangular(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Complex
   )
   def to_c(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Float
   )
   def to_f(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Integer
   )
   def to_i(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Rational
   )
   def to_r(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Complex
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
-end
 
-class Complex
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -2185,6 +1938,7 @@ class Complex
     returns: Opus::Types.coerce([Complex, Complex])
   )
   def coerce(_); end
+
 end
 
 class Coverage
@@ -2193,6 +1947,13 @@ class Coverage
     returns: NilClass
   )
   def self.start(); end
+
+end
+
+class CSV
+end
+
+class Date
 end
 
 class Date
@@ -2203,6 +1964,7 @@ class Date
     returns: String
   )
   def strftime(_); end
+
 end
 
 class Dir
@@ -2213,9 +1975,7 @@ class Dir
     returns: Integer
   )
   def self.chroot(_); end
-end
 
-class Dir
   standard_method(
     {
       _: String,
@@ -2223,9 +1983,7 @@ class Dir
     returns: Integer
   )
   def self.delete(_); end
-end
 
-class Dir
   standard_method(
     {
       _: String,
@@ -2234,9 +1992,7 @@ class Dir
     returns: Opus::Types.array_of(String)
   )
   def self.entries(_, _1); end
-end
 
-class Dir
   standard_method(
     {
       file: String,
@@ -2244,17 +2000,13 @@ class Dir
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.exist?(file); end
-end
 
-class Dir
   standard_method(
     {},
     returns: String
   )
   def self.getwd(); end
-end
 
-class Dir
   standard_method(
     {
       pattern: Opus::Types.any(String, Opus::Types.array_of(String)),
@@ -2263,9 +2015,7 @@ class Dir
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
   def self.glob(pattern, flags); end
-end
 
-class Dir
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -2273,9 +2023,7 @@ class Dir
     returns: String
   )
   def self.home(_); end
-end
 
-class Dir
   standard_method(
     {
       _: String,
@@ -2284,17 +2032,13 @@ class Dir
     returns: Integer
   )
   def self.mkdir(_, _1); end
-end
 
-class Dir
   standard_method(
     {},
     returns: String
   )
   def self.pwd(); end
-end
 
-class Dir
   standard_method(
     {
       _: String,
@@ -2302,9 +2046,7 @@ class Dir
     returns: Integer
   )
   def self.rmdir(_); end
-end
 
-class Dir
   standard_method(
     {
       _: String,
@@ -2312,6 +2054,7 @@ class Dir
     returns: Integer
   )
   def self.unlink(_); end
+
 end
 
 class Dir
@@ -2320,41 +2063,31 @@ class Dir
     returns: NilClass
   )
   def close(); end
-end
 
-class Dir
   standard_method(
     {},
     returns: Integer
   )
   def fileno(); end
-end
 
-class Dir
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Dir
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def path(); end
-end
 
-class Dir
   standard_method(
     {},
     returns: Integer
   )
   def pos(); end
-end
 
-class Dir
   standard_method(
     {
       _: Integer,
@@ -2362,30 +2095,25 @@ class Dir
     returns: Integer
   )
   def pos=(_); end
-end
 
-class Dir
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def read(); end
-end
 
-class Dir
   standard_method(
     {},
     returns: Integer
   )
   def tell(); end
-end
 
-class Dir
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def to_path(); end
+
 end
 
 class Encoding
@@ -2394,9 +2122,7 @@ class Encoding
     returns: Opus::Types.hash_of(keys: String, values: String)
   )
   def self.aliases(); end
-end
 
-class Encoding
   standard_method(
     {
       obj1: BasicObject,
@@ -2405,17 +2131,13 @@ class Encoding
     returns: Opus::Types.any(Encoding, NilClass)
   )
   def self.compatible?(obj1, obj2); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: Encoding
   )
   def self.default_external(); end
-end
 
-class Encoding
   standard_method(
     {
       _: Opus::Types.any(String, Encoding),
@@ -2423,17 +2145,13 @@ class Encoding
     returns: Opus::Types.any(String, Encoding)
   )
   def self.default_external=(_); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: Encoding
   )
   def self.default_internal(); end
-end
 
-class Encoding
   standard_method(
     {
       _: Opus::Types.any(String, Encoding),
@@ -2441,9 +2159,7 @@ class Encoding
     returns: Opus::Types.any(String, NilClass, Encoding)
   )
   def self.default_internal=(_); end
-end
 
-class Encoding
   standard_method(
     {
       _: Opus::Types.any(String, Encoding),
@@ -2451,22 +2167,19 @@ class Encoding
     returns: Encoding
   )
   def self.find(_); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: Opus::Types.array_of(Encoding)
   )
   def self.list(); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: Opus::Types.array_of(String)
   )
   def self.name_list(); end
+
 end
 
 class Encoding
@@ -2475,41 +2188,31 @@ class Encoding
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ascii_compatible?(); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def dummy?(); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: String
   )
   def name(); end
-end
 
-class Encoding
   standard_method(
     {},
     returns: Opus::Types.array_of(String)
   )
   def names(); end
-end
 
-class Encoding
   standard_method(
     {
       name: String,
@@ -2517,6 +2220,7 @@ class Encoding
     returns: Encoding
   )
   def replicate(name); end
+
 end
 
 class Enumerable
@@ -2525,17 +2229,13 @@ class Enumerable
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def all?(); end
-end
 
-class Enumerable
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def any?(); end
-end
 
-class Enumerable
   standard_method(
     {
       _: BasicObject,
@@ -2543,9 +2243,7 @@ class Enumerable
     returns: Integer
   )
   def count(_); end
-end
 
-class Enumerable
   standard_method(
     {
       _: BasicObject,
@@ -2553,22 +2251,19 @@ class Enumerable
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def include?(_); end
-end
 
-class Enumerable
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def none?(); end
-end
 
-class Enumerable
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def one?(); end
+
 end
 
 class Enumerator
@@ -2577,14 +2272,13 @@ class Enumerator
     returns: String
   )
   def inspect(); end
-end
 
-class Enumerator
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, NilClass)
   )
   def size(); end
+
 end
 
 class Exception
@@ -2595,33 +2289,25 @@ class Exception
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class Exception
   standard_method(
     {},
     returns: Opus::Types.array_of(String)
   )
   def backtrace(); end
-end
 
-class Exception
   standard_method(
     {},
     returns: Opus::Types.array_of(Thread::Backtrace::Location)
   )
   def backtrace_locations(); end
-end
 
-class Exception
   standard_method(
     {},
     returns: NilClass
   )
   def cause(); end
-end
 
-class Exception
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -2629,25 +2315,19 @@ class Exception
     returns: Exception
   )
   def exception(_); end
-end
 
-class Exception
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Exception
   standard_method(
     {},
     returns: String
   )
   def message(); end
-end
 
-class Exception
   standard_method(
     {
       _: Opus::Types.any(String, Opus::Types.array_of(String)),
@@ -2655,14 +2335,13 @@ class Exception
     returns: Opus::Types.array_of(String)
   )
   def set_backtrace(_); end
-end
 
-class Exception
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
+
 end
 
 class File
@@ -2674,9 +2353,7 @@ class File
     returns: String
   )
   def self.absolute_path(file, dir); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2685,9 +2362,7 @@ class File
     returns: String
   )
   def self.basename(file, suffix); end
-end
 
-class File
   standard_method(
     {
       _: String,
@@ -2697,9 +2372,7 @@ class File
     returns: String
   )
   def self.binread(_, _1, _2); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -2707,9 +2380,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.blockdev?(file); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -2717,9 +2388,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.chardev?(file); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -2727,9 +2396,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.directory?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2737,9 +2404,7 @@ class File
     returns: String
   )
   def self.dirname(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2747,9 +2412,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.executable?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2757,9 +2420,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.executable_real?(file); end
-end
 
-class File
   standard_method(
     {
       path: String,
@@ -2767,9 +2428,7 @@ class File
     returns: String
   )
   def self.extname(path); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -2777,9 +2436,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.file?(file); end
-end
 
-class File
   standard_method(
     {
       pattern: String,
@@ -2789,9 +2446,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.fnmatch(pattern, path, flags); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2799,9 +2454,7 @@ class File
     returns: String
   )
   def self.ftype(file); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -2809,9 +2462,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.grpowned?(file); end
-end
 
-class File
   standard_method(
     {
       file_1: Opus::Types.any(String, IO),
@@ -2820,9 +2471,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.identical?(file_1, file_2); end
-end
 
-class File
   standard_method(
     {
       old: String,
@@ -2831,9 +2480,7 @@ class File
     returns: Integer
   )
   def self.link(old, new); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2841,9 +2488,7 @@ class File
     returns: File::Stat
   )
   def self.lstat(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2851,9 +2496,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.owned?(file); end
-end
 
-class File
   standard_method(
     {
       path: String,
@@ -2861,9 +2504,7 @@ class File
     returns: String
   )
   def self.path(path); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2871,9 +2512,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.pipe?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2881,9 +2520,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.readable?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2891,9 +2528,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.readable_real?(file); end
-end
 
-class File
   standard_method(
     {
       link: String,
@@ -2901,9 +2536,7 @@ class File
     returns: String
   )
   def self.readlink(link); end
-end
 
-class File
   standard_method(
     {
       pathname: String,
@@ -2912,9 +2545,7 @@ class File
     returns: String
   )
   def self.realpath(pathname, dir); end
-end
 
-class File
   standard_method(
     {
       old: String,
@@ -2923,9 +2554,7 @@ class File
     returns: Integer
   )
   def self.rename(old, new); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2933,9 +2562,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.setgid?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2943,9 +2570,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.setuid?(file); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -2953,9 +2578,7 @@ class File
     returns: Integer
   )
   def self.size(file); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -2963,9 +2586,7 @@ class File
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.size?(file); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -2973,9 +2594,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.socket?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2983,9 +2602,7 @@ class File
     returns: Opus::Types.coerce([String, String])
   )
   def self.split(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -2993,9 +2610,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.sticky?(file); end
-end
 
-class File
   standard_method(
     {
       old: String,
@@ -3004,9 +2619,7 @@ class File
     returns: Integer
   )
   def self.symlink(old, new); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -3014,9 +2627,7 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.symlink?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -3025,9 +2636,7 @@ class File
     returns: Integer
   )
   def self.truncate(file, _); end
-end
 
-class File
   standard_method(
     {
       _: Opus::Types.any(Integer, NilClass),
@@ -3035,9 +2644,7 @@ class File
     returns: Integer
   )
   def self.umask(_); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -3045,9 +2652,7 @@ class File
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.world_readable?(file); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -3055,9 +2660,7 @@ class File
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.world_writable?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -3065,9 +2668,7 @@ class File
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.writable?(file); end
-end
 
-class File
   standard_method(
     {
       file: String,
@@ -3075,9 +2676,7 @@ class File
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.writable_real?(file); end
-end
 
-class File
   standard_method(
     {
       file: Opus::Types.any(String, IO),
@@ -3085,6 +2684,7 @@ class File
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.zero?(file); end
+
 end
 
 class File
@@ -3093,17 +2693,13 @@ class File
     returns: Time
   )
   def atime(); end
-end
 
-class File
   standard_method(
     {},
     returns: Time
   )
   def birthtime(); end
-end
 
-class File
   standard_method(
     {
       mode: Integer,
@@ -3111,9 +2707,7 @@ class File
     returns: Integer
   )
   def chmod(mode); end
-end
 
-class File
   standard_method(
     {
       owner: Integer,
@@ -3122,17 +2716,13 @@ class File
     returns: Integer
   )
   def chown(owner, group); end
-end
 
-class File
   standard_method(
     {},
     returns: Time
   )
   def ctime(); end
-end
 
-class File
   standard_method(
     {
       _: Integer,
@@ -3140,41 +2730,31 @@ class File
     returns: Opus::Types.any(Integer, TrueClass, FalseClass)
   )
   def flock(_); end
-end
 
-class File
   standard_method(
     {},
     returns: File::Stat
   )
   def lstat(); end
-end
 
-class File
   standard_method(
     {},
     returns: Time
   )
   def mtime(); end
-end
 
-class File
   standard_method(
     {},
     returns: String
   )
   def path(); end
-end
 
-class File
   standard_method(
     {},
     returns: Integer
   )
   def size(); end
-end
 
-class File
   standard_method(
     {
       _: Integer,
@@ -3182,6 +2762,7 @@ class File
     returns: Integer
   )
   def truncate(_); end
+
 end
 
 class File::Stat
@@ -3192,326 +2773,247 @@ class File::Stat
     returns: Opus::Types.any(Integer, NilClass)
   )
   def <=>(other); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Time
   )
   def atime(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Time
   )
   def birthtime(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def blksize(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def blockdev?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def blocks(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def chardev?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Time
   )
   def ctime(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def dev(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def dev_major(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def dev_minor(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def directory?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def executable?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def executable_real?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def file?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: String
   )
   def ftype(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def gid(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def grpowned?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def ino(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def mode(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Time
   )
   def mtime(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def nlink(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def owned?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def rdev(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def rdev_major(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def rdev_minor(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def readable?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def readable_real?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def setgid?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def setuid?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def size(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def socket?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def sticky?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def symlink?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Integer
   )
   def uid(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def world_readable?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def world_writable?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def writable?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def writable_real?(); end
-end
 
-class File::Stat
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
+
 end
 
 class FileUtils
@@ -3524,9 +3026,7 @@ class FileUtils
     returns: Opus::Types.array_of(String)
   )
   def self.cp_r(src, dest, preserve); end
-end
 
-class FileUtils
   standard_method(
     {
       list: Opus::Types.any(String, Pathname),
@@ -3535,6 +3035,7 @@ class FileUtils
     returns: Opus::Types.array_of(String)
   )
   def self.mkdir_p(list, mode); end
+
 end
 
 class Float
@@ -3545,9 +3046,7 @@ class Float
     returns: Opus::Types.any(Float, BigDecimal)
   )
   def %(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3555,9 +3054,7 @@ class Float
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
   def *(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3565,9 +3062,7 @@ class Float
     returns: Opus::Types.any(Float, Integer, Rational, BigDecimal, Complex)
   )
   def **(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3575,9 +3070,7 @@ class Float
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
   def +(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3585,25 +3078,19 @@ class Float
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
   def -(_); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def -@(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def +@(); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3611,9 +3098,7 @@ class Float
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
   def /(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -3621,9 +3106,7 @@ class Float
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def <(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -3631,9 +3114,7 @@ class Float
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def <=(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -3641,9 +3122,7 @@ class Float
     returns: Object
   )
   def <=>(_); end
-end
 
-class Float
   standard_method(
     {
       _: Object,
@@ -3651,9 +3130,7 @@ class Float
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class Float
   standard_method(
     {
       _: Object,
@@ -3661,9 +3138,7 @@ class Float
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -3671,9 +3146,7 @@ class Float
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def >(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -3681,25 +3154,19 @@ class Float
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def >=(_); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def abs(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def abs2(); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -3707,9 +3174,7 @@ class Float
     returns: Integer
   )
   def div(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -3717,33 +3182,25 @@ class Float
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def divmod(_); end
-end
 
-class Float
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def angle(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def arg(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def ceil(); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3751,17 +3208,13 @@ class Float
     returns: Opus::Types.coerce([Float, Float])
   )
   def coerce(_); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def denominator(); end
-end
 
-class Float
   standard_method(
     {
       _: Object,
@@ -3769,9 +3222,7 @@ class Float
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def equal?(_); end
-end
 
-class Float
   standard_method(
     {
       _: Object,
@@ -3779,9 +3230,7 @@ class Float
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3789,65 +3238,49 @@ class Float
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
   def fdiv(_); end
-end
 
-class Float
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def finite?(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def floor(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Object
   )
   def infinite?(); end
-end
 
-class Float
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Float
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def magnitude(); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -3855,49 +3288,37 @@ class Float
     returns: Opus::Types.any(Float, BigDecimal)
   )
   def modulo(_); end
-end
 
-class Float
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def nan?(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def next_float(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def numerator(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def phase(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def prev_float(); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3905,9 +3326,7 @@ class Float
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
   def quo(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3915,9 +3334,7 @@ class Float
     returns: Rational
   )
   def rationalize(_); end
-end
 
-class Float
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -3925,110 +3342,85 @@ class Float
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def round(_); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def to_f(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def to_i(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def to_int(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Rational
   )
   def to_r(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def truncate(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def conj(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def conjugate(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def imag(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Integer
   )
   def imaginary(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Float
   )
   def real(); end
-end
 
-class Float
   standard_method(
     {},
     returns: TrueClass
   )
   def real?(); end
-end
 
-class Float
   standard_method(
     {},
     returns: Complex
   )
   def to_c(); end
+
 end
 
 class Gem
@@ -4037,9 +3429,7 @@ class Gem
     returns: String
   )
   def self.binary_mode(); end
-end
 
-class Gem
   standard_method(
     {
       install_dir: Opus::Types.any(String, NilClass),
@@ -4047,41 +3437,31 @@ class Gem
     returns: String
   )
   def self.bindir(install_dir); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Hash
   )
   def self.clear_default_specs(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: NilClass
   )
   def self.clear_paths(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: String
   )
   def self.config_file(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Gem::ConfigFile
   )
   def self.configuration(); end
-end
 
-class Gem
   standard_method(
     {
       config: BasicObject,
@@ -4089,9 +3469,7 @@ class Gem
     returns: BasicObject
   )
   def self.configuration=(config); end
-end
 
-class Gem
   standard_method(
     {
       gem_name: String,
@@ -4099,70 +3477,58 @@ class Gem
     returns: Opus::Types.any(String, NilClass)
   )
   def self.datadir(gem_name); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def self.default_bindir(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def self.default_cert_path(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def self.default_dir(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def self.default_exec_format(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def self.default_key_path(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def self.default_path(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
   def self.default_rubygems_dirs(); end
-end
 
-class Gem
   standard_method(
     {},
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
   def self.default_sources(); end
+
+end
+
+class Hash
 end
 
 class Hash
@@ -4171,46 +3537,37 @@ class Hash
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def compare_by_identity?(); end
-end
 
-class Hash
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def empty?(); end
-end
 
-class Hash
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Hash
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Hash
   standard_method(
     {},
     returns: Integer
   )
   def length(); end
-end
 
-class Hash
   standard_method(
     {},
     returns: Integer
   )
   def size(); end
+
 end
 
 class Integer
@@ -4221,9 +3578,7 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def %(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Integer,
@@ -4231,9 +3586,7 @@ class Integer
     returns: Integer
   )
   def &(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4241,9 +3594,7 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def *(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4251,9 +3602,7 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def **(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4261,9 +3610,7 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def +(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4271,25 +3618,19 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def -(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def -@(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def +@(); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4297,9 +3638,7 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def /(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4307,9 +3646,7 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def <(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Integer,
@@ -4317,9 +3654,7 @@ class Integer
     returns: Integer
   )
   def <<(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4327,9 +3662,7 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def <=(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4337,9 +3670,7 @@ class Integer
     returns: Object
   )
   def <=>(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Object,
@@ -4347,9 +3678,7 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Object,
@@ -4357,9 +3686,7 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4367,9 +3694,7 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def >(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4377,9 +3702,7 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def >=(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Integer,
@@ -4387,9 +3710,7 @@ class Integer
     returns: Integer
   )
   def >>(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Rational, Float, BigDecimal),
@@ -4397,9 +3718,7 @@ class Integer
     returns: Integer
   )
   def [](_); end
-end
 
-class Integer
   standard_method(
     {
       _: Integer,
@@ -4407,9 +3726,7 @@ class Integer
     returns: Integer
   )
   def ^(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Integer,
@@ -4417,33 +3734,25 @@ class Integer
     returns: Integer
   )
   def |(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def ~(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def abs(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def bit_length(); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4451,9 +3760,7 @@ class Integer
     returns: Integer
   )
   def div(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4461,9 +3768,7 @@ class Integer
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def divmod(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4471,33 +3776,25 @@ class Integer
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
   def fdiv(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def magnitude(); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4505,9 +3802,7 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def modulo(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4515,33 +3810,25 @@ class Integer
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
   def quo(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def abs2(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def angle(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def arg(); end
-end
 
-class Integer
   standard_method(
     {
       _: Object,
@@ -4549,9 +3836,7 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def equal?(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Object,
@@ -4559,25 +3844,19 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def ceil(); end
-end
 
-class Integer
   standard_method(
     {
       _: Encoding,
@@ -4585,9 +3864,7 @@ class Integer
     returns: String
   )
   def chr(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4595,41 +3872,31 @@ class Integer
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def coerce(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def conj(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def conjugate(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def denominator(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def even?(); end
-end
 
-class Integer
   standard_method(
     {
       _: Integer,
@@ -4637,9 +3904,7 @@ class Integer
     returns: Integer
   )
   def gcd(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Integer,
@@ -4647,41 +3912,31 @@ class Integer
     returns: Opus::Types.coerce([Integer, Integer])
   )
   def gcdlcm(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def floor(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def imag(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def imaginary(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: TrueClass
   )
   def integer?(); end
-end
 
-class Integer
   standard_method(
     {
       _: Integer,
@@ -4689,57 +3944,43 @@ class Integer
     returns: Integer
   )
   def lcm(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def next(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def numerator(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def odd?(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def ord(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def phase(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def pred(); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4747,25 +3988,19 @@ class Integer
     returns: Rational
   )
   def rationalize(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def real(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: TrueClass
   )
   def real?(); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -4773,9 +4008,7 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def remainder(_); end
-end
 
-class Integer
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -4783,78 +4016,61 @@ class Integer
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def round(_); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def size(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def succ(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Complex
   )
   def to_c(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Float
   )
   def to_f(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def to_i(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def to_int(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Rational
   )
   def to_r(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Integer
   )
   def truncate(); end
-end
 
-class Integer
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
+
 end
 
 class IO
@@ -4867,9 +4083,7 @@ class IO
     returns: NilClass
   )
   def advise(_, offset, len); end
-end
 
-class IO
   standard_method(
     {
       _: Opus::Types.any(TrueClass, FalseClass),
@@ -4877,33 +4091,25 @@ class IO
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def autoclose=(_); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def autoclose?(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def binmode?(); end
-end
 
-class IO
   standard_method(
     {},
     returns: NilClass
   )
   def close(); end
-end
 
-class IO
   standard_method(
     {
       _: Opus::Types.any(TrueClass, FalseClass),
@@ -4911,49 +4117,37 @@ class IO
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def close_on_exec=(_); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def close_on_exec?(); end
-end
 
-class IO
   standard_method(
     {},
     returns: NilClass
   )
   def close_read(); end
-end
 
-class IO
   standard_method(
     {},
     returns: NilClass
   )
   def close_write(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def closed?(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eof(); end
-end
 
-class IO
   standard_method(
     {
       integer_cmd: Integer,
@@ -4962,49 +4156,37 @@ class IO
     returns: Integer
   )
   def fcntl(integer_cmd, arg); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def fdatasync(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Integer
   )
   def fileno(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def fsync(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def getbyte(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def getc(); end
-end
 
-class IO
   standard_method(
     {
       sep: Opus::Types.any(String, NilClass),
@@ -5013,25 +4195,19 @@ class IO
     returns: Opus::Types.any(String, NilClass)
   )
   def gets(sep, limit); end
-end
 
-class IO
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Encoding
   )
   def internal_encoding(); end
-end
 
-class IO
   standard_method(
     {
       integer_cmd: Integer,
@@ -5040,25 +4216,19 @@ class IO
     returns: Integer
   )
   def ioctl(integer_cmd, arg); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def isatty(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Integer
   )
   def lineno(); end
-end
 
-class IO
   standard_method(
     {
       _: Integer,
@@ -5066,25 +4236,19 @@ class IO
     returns: Integer
   )
   def lineno=(_); end
-end
 
-class IO
   standard_method(
     {},
     returns: Integer
   )
   def pid(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Integer
   )
   def pos(); end
-end
 
-class IO
   standard_method(
     {
       _: Integer,
@@ -5092,9 +4256,7 @@ class IO
     returns: Integer
   )
   def pos=(_); end
-end
 
-class IO
   standard_method(
     {
       _: Opus::Types.any(Numeric, String),
@@ -5102,9 +4264,7 @@ class IO
     returns: BasicObject
   )
   def putc(_); end
-end
 
-class IO
   standard_method(
     {
       length: Opus::Types.any(Integer, NilClass),
@@ -5113,9 +4273,7 @@ class IO
     returns: Opus::Types.any(String, NilClass)
   )
   def read(length, outbuf); end
-end
 
-class IO
   standard_method(
     {
       len: Integer,
@@ -5124,25 +4282,19 @@ class IO
     returns: String
   )
   def read_nonblock(len, buf); end
-end
 
-class IO
   standard_method(
     {},
     returns: Integer
   )
   def readbyte(); end
-end
 
-class IO
   standard_method(
     {},
     returns: String
   )
   def readchar(); end
-end
 
-class IO
   standard_method(
     {
       sep: Opus::Types.any(String, NilClass),
@@ -5151,9 +4303,7 @@ class IO
     returns: String
   )
   def readline(sep, limit); end
-end
 
-class IO
   standard_method(
     {
       sep: Opus::Types.any(String, NilClass),
@@ -5162,9 +4312,7 @@ class IO
     returns: Opus::Types.array_of(String)
   )
   def readlines(sep, limit); end
-end
 
-class IO
   standard_method(
     {
       maxlen: Integer,
@@ -5173,9 +4321,7 @@ class IO
     returns: String
   )
   def readpartial(maxlen, outbuf); end
-end
 
-class IO
   standard_method(
     {
       other_IO: IO,
@@ -5185,9 +4331,7 @@ class IO
     returns: IO
   )
   def reopen(other_IO, path, mode_str); end
-end
 
-class IO
   standard_method(
     {
       amount: Integer,
@@ -5196,25 +4340,19 @@ class IO
     returns: Integer
   )
   def seek(amount, whence); end
-end
 
-class IO
   standard_method(
     {},
     returns: File::Stat
   )
   def stat(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def sync(); end
-end
 
-class IO
   standard_method(
     {
       _: Opus::Types.any(TrueClass, FalseClass),
@@ -5222,9 +4360,7 @@ class IO
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def sync=(_); end
-end
 
-class IO
   standard_method(
     {
       maxlen: Integer,
@@ -5233,9 +4369,7 @@ class IO
     returns: String
   )
   def sysread(maxlen, outbuf); end
-end
 
-class IO
   standard_method(
     {
       amount: Integer,
@@ -5244,9 +4378,7 @@ class IO
     returns: Integer
   )
   def sysseek(amount, whence); end
-end
 
-class IO
   standard_method(
     {
       _: String,
@@ -5254,25 +4386,19 @@ class IO
     returns: Integer
   )
   def syswrite(_); end
-end
 
-class IO
   standard_method(
     {},
     returns: Integer
   )
   def tell(); end
-end
 
-class IO
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def tty?(); end
-end
 
-class IO
   standard_method(
     {
       _: Opus::Types.any(String, Integer),
@@ -5280,9 +4406,7 @@ class IO
     returns: NilClass
   )
   def ungetbyte(_); end
-end
 
-class IO
   standard_method(
     {
       _: String,
@@ -5290,9 +4414,7 @@ class IO
     returns: NilClass
   )
   def ungetc(_); end
-end
 
-class IO
   standard_method(
     {
       _: String,
@@ -5300,6 +4422,7 @@ class IO
     returns: Integer
   )
   def write(_); end
+
 end
 
 class IO
@@ -5312,9 +4435,7 @@ class IO
     returns: String
   )
   def self.binread(name, length, offset); end
-end
 
-class IO
   standard_method(
     {
       src: Opus::Types.any(String, IO),
@@ -5325,9 +4446,7 @@ class IO
     returns: Integer
   )
   def self.copy_stream(src, dst, copy_length, src_offset); end
-end
 
-class IO
   standard_method(
     {
       read_array: Opus::Types.array_of(IO),
@@ -5338,9 +4457,7 @@ class IO
     returns: Opus::Types.any(Opus::Types.array_of(IO), NilClass)
   )
   def self.select(read_array, write_array, error_array, timeout); end
-end
 
-class IO
   standard_method(
     {
       path: String,
@@ -5350,6 +4467,7 @@ class IO
     returns: Integer
   )
   def self.sysopen(path, mode, perm); end
+
 end
 
 class Kernel
@@ -5361,9 +4479,7 @@ class Kernel
     returns: Complex
   )
   def self.Complex(x, y); end
-end
 
-class Kernel
   standard_method(
     {
       x: Numeric,
@@ -5371,9 +4487,7 @@ class Kernel
     returns: Float
   )
   def self.Float(x); end
-end
 
-class Kernel
   standard_method(
     {
       arg: Opus::Types.any(Numeric, String),
@@ -5382,9 +4496,7 @@ class Kernel
     returns: Integer
   )
   def self.Integer(arg, base); end
-end
 
-class Kernel
   standard_method(
     {
       x: Opus::Types.any(Numeric, String),
@@ -5393,33 +4505,25 @@ class Kernel
     returns: Rational
   )
   def self.Rational(x, y); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Opus::Types.any(Symbol, NilClass)
   )
   def self.__callee__(); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def self.__dir__(); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Opus::Types.any(Symbol, NilClass)
   )
   def self.__method__(); end
-end
 
-class Kernel
   standard_method(
     {
       _: String,
@@ -5427,9 +4531,7 @@ class Kernel
     returns: String
   )
   def self.`(_); end
-end
 
-class Kernel
   standard_method(
     {
       msg: Opus::Types.any(String, NilClass),
@@ -5437,28 +4539,13 @@ class Kernel
     returns: NilClass
   )
   def self.abort(msg); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Proc
   )
   def self.at_exit(); end
-end
 
-class Kernel
-  standard_method(
-    {
-      module: Opus::Types.any(String, Symbol),
-      filename: String,
-    },
-    returns: NilClass
-  )
-  def self.autoload(module, filename); end
-end
-
-class Kernel
   standard_method(
     {
       name: Opus::Types.any(Symbol, String),
@@ -5466,25 +4553,19 @@ class Kernel
     returns: Opus::Types.any(String, NilClass)
   )
   def self.autoload?(name); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Binding
   )
   def self.binding(); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.block_given?(); end
-end
 
-class Kernel
   standard_method(
     {
       start: Opus::Types.any(Integer, NilClass),
@@ -5494,9 +4575,7 @@ class Kernel
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
   def self.caller(start, length, _); end
-end
 
-class Kernel
   standard_method(
     {
       start: Opus::Types.any(Integer, NilClass),
@@ -5506,9 +4585,7 @@ class Kernel
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
   def self.caller_locations(start, length, _); end
-end
 
-class Kernel
   standard_method(
     {
       _: String,
@@ -5519,9 +4596,7 @@ class Kernel
     returns: BasicObject
   )
   def self.eval(_, _1, filename, lineno); end
-end
 
-class Kernel
   standard_method(
     {
       status: Opus::Types.any(Integer, TrueClass, FalseClass),
@@ -5529,9 +4604,7 @@ class Kernel
     returns: NilClass
   )
   def self.exit(status); end
-end
 
-class Kernel
   standard_method(
     {
       status: Opus::Types.any(Integer, TrueClass, FalseClass),
@@ -5539,9 +4612,7 @@ class Kernel
     returns: NilClass
   )
   def self.exit!(status); end
-end
 
-class Kernel
   standard_method(
     {
       _: Opus::Types.any(String, Class),
@@ -5551,9 +4622,7 @@ class Kernel
     returns: NilClass
   )
   def self.fail(_, _1, _2); end
-end
 
-class Kernel
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -5562,25 +4631,19 @@ class Kernel
     returns: String
   )
   def self.gets(_, _1); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Opus::Types.array_of(Symbol)
   )
   def self.global_variables(); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.iterator?(); end
-end
 
-class Kernel
   standard_method(
     {
       filename: String,
@@ -5589,17 +4652,13 @@ class Kernel
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.load(filename, _); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: Opus::Types.array_of(Symbol)
   )
   def self.local_variables(); end
-end
 
-class Kernel
   standard_method(
     {
       name: String,
@@ -5609,9 +4668,7 @@ class Kernel
     returns: Opus::Types.any(IO, NilClass)
   )
   def self.open(name, rest, block); end
-end
 
-class Kernel
   standard_method(
     {
       _: Integer,
@@ -5619,17 +4676,13 @@ class Kernel
     returns: Integer
   )
   def self.putc(_); end
-end
 
-class Kernel
   standard_method(
     {},
     returns: NilClass
   )
   def self.raise(); end
-end
 
-class Kernel
   standard_method(
     {
       max: Opus::Types.any(Integer, Range),
@@ -5637,9 +4690,7 @@ class Kernel
     returns: Numeric
   )
   def self.rand(max); end
-end
 
-class Kernel
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -5648,9 +4699,7 @@ class Kernel
     returns: String
   )
   def self.readline(_, _1); end
-end
 
-class Kernel
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -5659,9 +4708,7 @@ class Kernel
     returns: Opus::Types.array_of(String)
   )
   def self.readlines(_, _1); end
-end
 
-class Kernel
   standard_method(
     {
       name: String,
@@ -5669,9 +4716,7 @@ class Kernel
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.require(name); end
-end
 
-class Kernel
   standard_method(
     {
       name: String,
@@ -5679,9 +4724,7 @@ class Kernel
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.require_relative(name); end
-end
 
-class Kernel
   standard_method(
     {
       read: Opus::Types.array_of(IO),
@@ -5692,9 +4735,7 @@ class Kernel
     returns: Opus::Types.array_of(String)
   )
   def self.select(read, write, error, timeout); end
-end
 
-class Kernel
   standard_method(
     {
       duration: Numeric,
@@ -5702,9 +4743,7 @@ class Kernel
     returns: Integer
   )
   def self.sleep(duration); end
-end
 
-class Kernel
   standard_method(
     {
       number: Numeric,
@@ -5712,9 +4751,7 @@ class Kernel
     returns: Numeric
   )
   def self.srand(number); end
-end
 
-class Kernel
   standard_method(
     {
       cmd: String,
@@ -5724,6 +4761,7 @@ class Kernel
     returns: Opus::Types.any(TrueClass, FalseClass, Time)
   )
   def self.test(cmd, file1, file2); end
+
 end
 
 class Kernel
@@ -5732,9 +4770,7 @@ class Kernel
     returns: Proc
   )
   def proc(); end
-end
 
-class Kernel
   standard_method(
     {
       _: Opus::Types.any(String, Class, Exception),
@@ -5744,6 +4780,7 @@ class Kernel
     returns: NilClass
   )
   def raise(_, _1, _2); end
+
 end
 
 class Marshal
@@ -5755,6 +4792,7 @@ class Marshal
     returns: Object
   )
   def self.load(_, _1); end
+
 end
 
 class MatchData
@@ -5765,9 +4803,7 @@ class MatchData
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class MatchData
   standard_method(
     {
       n: Integer,
@@ -5775,17 +4811,13 @@ class MatchData
     returns: Integer
   )
   def begin(n); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: Opus::Types.array_of(String)
   )
   def captures(); end
-end
 
-class MatchData
   standard_method(
     {
       n: Integer,
@@ -5793,9 +4825,7 @@ class MatchData
     returns: Integer
   )
   def end(n); end
-end
 
-class MatchData
   standard_method(
     {
       other: BasicObject,
@@ -5803,41 +4833,31 @@ class MatchData
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(other); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: Integer
   )
   def length(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: Opus::Types.array_of(String)
   )
   def names(); end
-end
 
-class MatchData
   standard_method(
     {
       n: Integer,
@@ -5845,62 +4865,49 @@ class MatchData
     returns: Opus::Types.array_of(Integer)
   )
   def offset(n); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: String
   )
   def post_match(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: String
   )
   def pre_match(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: Regexp
   )
   def regexp(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: Integer
   )
   def size(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: String
   )
   def string(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: Opus::Types.array_of(String)
   )
   def to_a(); end
-end
 
-class MatchData
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
+
 end
 
 class Math
@@ -5911,9 +4918,7 @@ class Math
     returns: Float
   )
   def self.acos(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -5921,9 +4926,7 @@ class Math
     returns: Float
   )
   def self.acosh(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -5931,9 +4934,7 @@ class Math
     returns: Float
   )
   def self.asin(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -5941,9 +4942,7 @@ class Math
     returns: Float
   )
   def self.asinh(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -5951,9 +4950,7 @@ class Math
     returns: Float
   )
   def self.atan(x); end
-end
 
-class Math
   standard_method(
     {
       y: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -5962,9 +4959,7 @@ class Math
     returns: Float
   )
   def self.atan2(y, x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -5972,9 +4967,7 @@ class Math
     returns: Float
   )
   def self.atanh(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -5982,9 +4975,7 @@ class Math
     returns: Float
   )
   def self.cbrt(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -5992,9 +4983,7 @@ class Math
     returns: Float
   )
   def self.cos(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6002,9 +4991,7 @@ class Math
     returns: Float
   )
   def self.cosh(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6012,9 +4999,7 @@ class Math
     returns: Float
   )
   def self.erf(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6022,9 +5007,7 @@ class Math
     returns: Float
   )
   def self.erfc(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6032,9 +5015,7 @@ class Math
     returns: Float
   )
   def self.exp(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6042,9 +5023,7 @@ class Math
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def self.frexp(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6052,9 +5031,7 @@ class Math
     returns: Float
   )
   def self.gamma(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6063,9 +5040,7 @@ class Math
     returns: Float
   )
   def self.hypot(x, y); end
-end
 
-class Math
   standard_method(
     {
       fraction: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6074,9 +5049,7 @@ class Math
     returns: Float
   )
   def self.ldexp(fraction, exponent); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6084,9 +5057,7 @@ class Math
     returns: Opus::Types.any(Integer, Float)
   )
   def self.lgamma(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6095,9 +5066,7 @@ class Math
     returns: Float
   )
   def self.log(x, base); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6105,9 +5074,7 @@ class Math
     returns: Float
   )
   def self.log10(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6115,9 +5082,7 @@ class Math
     returns: Float
   )
   def self.log2(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6125,9 +5090,7 @@ class Math
     returns: Float
   )
   def self.sin(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6135,9 +5098,7 @@ class Math
     returns: Float
   )
   def self.sinh(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6145,9 +5106,7 @@ class Math
     returns: Float
   )
   def self.sqrt(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6155,9 +5114,7 @@ class Math
     returns: Float
   )
   def self.tan(x); end
-end
 
-class Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6165,6 +5122,7 @@ class Math
     returns: Float
   )
   def self.tanh(x); end
+
 end
 
 class Module
@@ -6173,14 +5131,13 @@ class Module
     returns: Opus::Types.array_of(Integer)
   )
   def self.constants(); end
-end
 
-class Module
   standard_method(
     {},
     returns: Opus::Types.array_of(Module)
   )
   def self.nesting(); end
+
 end
 
 class Module
@@ -6191,9 +5148,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass, NilClass)
   )
   def <(other); end
-end
 
-class Module
   standard_method(
     {
       other: Module,
@@ -6201,9 +5156,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass, NilClass)
   )
   def <=(other); end
-end
 
-class Module
   standard_method(
     {
       other: Module,
@@ -6211,9 +5164,7 @@ class Module
     returns: Opus::Types.any(Integer, NilClass)
   )
   def <=>(other); end
-end
 
-class Module
   standard_method(
     {
       other: BasicObject,
@@ -6221,9 +5172,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(other); end
-end
 
-class Module
   standard_method(
     {
       other: BasicObject,
@@ -6231,9 +5180,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(other); end
-end
 
-class Module
   standard_method(
     {
       other: Module,
@@ -6241,9 +5188,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass, NilClass)
   )
   def >(other); end
-end
 
-class Module
   standard_method(
     {
       other: Module,
@@ -6251,28 +5196,13 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass, NilClass)
   )
   def >=(other); end
-end
 
-class Module
   standard_method(
     {},
     returns: Opus::Types.array_of(Module)
   )
   def ancestors(); end
-end
 
-class Module
-  standard_method(
-    {
-      module: Symbol,
-      filename: String,
-    },
-    returns: NilClass
-  )
-  def autoload(module, filename); end
-end
-
-class Module
   standard_method(
     {
       name: Symbol,
@@ -6280,9 +5210,7 @@ class Module
     returns: Opus::Types.any(String, NilClass)
   )
   def autoload?(name); end
-end
 
-class Module
   standard_method(
     {
       _: String,
@@ -6292,9 +5220,7 @@ class Module
     returns: BasicObject
   )
   def class_eval(_, filename, lineno); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6302,9 +5228,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def class_variable_defined?(_); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6312,9 +5236,7 @@ class Module
     returns: BasicObject
   )
   def class_variable_get(_); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6323,9 +5245,7 @@ class Module
     returns: BasicObject
   )
   def class_variable_set(_, _1); end
-end
 
-class Module
   standard_method(
     {
       inherit: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -6333,9 +5253,7 @@ class Module
     returns: Opus::Types.array_of(Symbol)
   )
   def class_variables(inherit); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6344,9 +5262,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def const_defined?(_, inherit); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6355,9 +5271,7 @@ class Module
     returns: BasicObject
   )
   def const_get(_, inherit); end
-end
 
-class Module
   standard_method(
     {
       _: Symbol,
@@ -6365,9 +5279,7 @@ class Module
     returns: BasicObject
   )
   def const_missing(_); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6376,9 +5288,7 @@ class Module
     returns: BasicObject
   )
   def const_set(_, _1); end
-end
 
-class Module
   standard_method(
     {
       inherit: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -6386,9 +5296,7 @@ class Module
     returns: Opus::Types.array_of(Symbol)
   )
   def constants(inherit); end
-end
 
-class Module
   standard_method(
     {
       _: Module,
@@ -6396,17 +5304,13 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def include?(_); end
-end
 
-class Module
   standard_method(
     {},
     returns: Opus::Types.array_of(Module)
   )
   def included_modules(); end
-end
 
-class Module
   standard_method(
     {
       _: Symbol,
@@ -6414,9 +5318,7 @@ class Module
     returns: UnboundMethod
   )
   def instance_method(_); end
-end
 
-class Module
   standard_method(
     {
       include_super: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -6424,9 +5326,7 @@ class Module
     returns: Opus::Types.array_of(Symbol)
   )
   def instance_methods(include_super); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6434,9 +5334,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def method_defined?(_); end
-end
 
-class Module
   standard_method(
     {
       _: String,
@@ -6446,17 +5344,13 @@ class Module
     returns: BasicObject
   )
   def module_eval(_, filename, lineno); end
-end
 
-class Module
   standard_method(
     {},
     returns: String
   )
   def name(); end
-end
 
-class Module
   standard_method(
     {
       include_super: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -6464,9 +5358,7 @@ class Module
     returns: Opus::Types.array_of(Symbol)
   )
   def private_instance_methods(include_super); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6474,9 +5366,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def private_method_defined?(_); end
-end
 
-class Module
   standard_method(
     {
       include_super: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -6484,9 +5374,7 @@ class Module
     returns: Opus::Types.array_of(Symbol)
   )
   def protected_instance_methods(include_super); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6494,9 +5382,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def protected_method_defined?(_); end
-end
 
-class Module
   standard_method(
     {
       _: Symbol,
@@ -6504,9 +5390,7 @@ class Module
     returns: UnboundMethod
   )
   def public_instance_method(_); end
-end
 
-class Module
   standard_method(
     {
       include_super: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -6514,9 +5398,7 @@ class Module
     returns: Opus::Types.array_of(Symbol)
   )
   def public_instance_methods(include_super); end
-end
 
-class Module
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -6524,9 +5406,7 @@ class Module
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def public_method_defined?(_); end
-end
 
-class Module
   standard_method(
     {
       _: Symbol,
@@ -6534,25 +5414,19 @@ class Module
     returns: BasicObject
   )
   def remove_class_variable(_); end
-end
 
-class Module
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def singleton_class?(); end
-end
 
-class Module
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Module
   standard_method(
     {
       _: Symbol,
@@ -6561,9 +5435,7 @@ class Module
     returns: Symbol
   )
   def define_method(_, _1); end
-end
 
-class Module
   standard_method(
     {
       _: BasicObject,
@@ -6571,9 +5443,7 @@ class Module
     returns: BasicObject
   )
   def extend_object(_); end
-end
 
-class Module
   standard_method(
     {
       othermod: Module,
@@ -6581,9 +5451,7 @@ class Module
     returns: BasicObject
   )
   def extended(othermod); end
-end
 
-class Module
   standard_method(
     {
       othermod: Module,
@@ -6591,9 +5459,7 @@ class Module
     returns: BasicObject
   )
   def included(othermod); end
-end
 
-class Module
   standard_method(
     {
       meth: Symbol,
@@ -6601,9 +5467,7 @@ class Module
     returns: BasicObject
   )
   def method_added(meth); end
-end
 
-class Module
   standard_method(
     {
       method_name: Symbol,
@@ -6611,9 +5475,7 @@ class Module
     returns: BasicObject
   )
   def method_removed(method_name); end
-end
 
-class Module
   standard_method(
     {
       othermod: Module,
@@ -6621,9 +5483,7 @@ class Module
     returns: BasicObject
   )
   def prepended(othermod); end
-end
 
-class Module
   standard_method(
     {
       _: Symbol,
@@ -6631,6 +5491,7 @@ class Module
     returns: BasicObject
   )
   def remove_const(_); end
+
 end
 
 class NilClass
@@ -6641,9 +5502,7 @@ class NilClass
     returns: FalseClass
   )
   def &(obj); end
-end
 
-class NilClass
   standard_method(
     {
       obj: BasicObject,
@@ -6651,9 +5510,7 @@ class NilClass
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ^(obj); end
-end
 
-class NilClass
   standard_method(
     {
       obj: BasicObject,
@@ -6661,46 +5518,37 @@ class NilClass
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def |(obj); end
-end
 
-class NilClass
   standard_method(
     {},
     returns: Rational
   )
   def rationalize(); end
-end
 
-class NilClass
   standard_method(
     {},
     returns: Opus::Types.coerce([])
   )
   def to_a(); end
-end
 
-class NilClass
   standard_method(
     {},
     returns: Complex
   )
   def to_c(); end
-end
 
-class NilClass
   standard_method(
     {},
     returns: Float
   )
   def to_f(); end
-end
 
-class NilClass
   standard_method(
     {},
     returns: Rational
   )
   def to_r(); end
+
 end
 
 class Numeric
@@ -6711,25 +5559,19 @@ class Numeric
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def %(_); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def -@(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def +@(); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6737,49 +5579,37 @@ class Numeric
     returns: Object
   )
   def <=>(_); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def abs(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def abs2(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def angle(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def arg(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Integer
   )
   def ceil(); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6787,33 +5617,25 @@ class Numeric
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)])
   )
   def coerce(_); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def conj(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def conjugate(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Integer
   )
   def denominator(); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6821,9 +5643,7 @@ class Numeric
     returns: Integer
   )
   def div(_); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6831,9 +5651,7 @@ class Numeric
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)])
   )
   def divmod(_); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6841,9 +5659,7 @@ class Numeric
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(_); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6851,57 +5667,43 @@ class Numeric
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def fdiv(_); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Integer
   )
   def floor(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Complex
   )
   def i(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def imag(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def imaginary(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def integer?(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def magnitude(); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6909,33 +5711,25 @@ class Numeric
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def modulo(_); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Integer
   )
   def numerator(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def phase(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)])
   )
   def polar(); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6943,41 +5737,31 @@ class Numeric
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def quo(_); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def real(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def real?(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)])
   )
   def rect(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)])
   )
   def rectangular(); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6985,9 +5769,7 @@ class Numeric
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
   def remainder(_); end
-end
 
-class Numeric
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -6995,9 +5777,7 @@ class Numeric
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def round(_); end
-end
 
-class Numeric
   standard_method(
     {
       _: Symbol,
@@ -7005,38 +5785,31 @@ class Numeric
     returns: TypeError
   )
   def singleton_method_added(_); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Complex
   )
   def to_c(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Integer
   )
   def to_int(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Integer
   )
   def truncate(); end
-end
 
-class Numeric
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
+
 end
 
 class Object
@@ -7047,9 +5820,7 @@ class Object
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def !~(other); end
-end
 
-class Object
   standard_method(
     {
       other: BasicObject,
@@ -7057,9 +5828,7 @@ class Object
     returns: Opus::Types.any(Integer, NilClass)
   )
   def <=>(other); end
-end
 
-class Object
   standard_method(
     {
       other: BasicObject,
@@ -7067,9 +5836,7 @@ class Object
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(other); end
-end
 
-class Object
   standard_method(
     {
       other: BasicObject,
@@ -7077,17 +5844,13 @@ class Object
     returns: NilClass
   )
   def =~(other); end
-end
 
-class Object
   standard_method(
     {},
     returns: Class
   )
   def class(); end
-end
 
-class Object
   standard_method(
     {
       port: IO,
@@ -7095,9 +5858,7 @@ class Object
     returns: NilClass
   )
   def display(port); end
-end
 
-class Object
   standard_method(
     {
       other: BasicObject,
@@ -7105,33 +5866,25 @@ class Object
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(other); end
-end
 
-class Object
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def frozen?(); end
-end
 
-class Object
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Object
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Object
   standard_method(
     {
       _: Class,
@@ -7139,9 +5892,7 @@ class Object
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def instance_of?(_); end
-end
 
-class Object
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -7149,9 +5900,7 @@ class Object
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def instance_variable_defined?(_); end
-end
 
-class Object
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -7159,9 +5908,7 @@ class Object
     returns: BasicObject
   )
   def instance_variable_get(_); end
-end
 
-class Object
   standard_method(
     {
       _: Opus::Types.any(Symbol, String),
@@ -7170,17 +5917,13 @@ class Object
     returns: BasicObject
   )
   def instance_variable_set(_, _1); end
-end
 
-class Object
   standard_method(
     {},
     returns: Opus::Types.array_of(Symbol)
   )
   def instance_variables(); end
-end
 
-class Object
   standard_method(
     {
       _: Opus::Types.any(Class, Module),
@@ -7188,9 +5931,7 @@ class Object
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def is_a?(_); end
-end
 
-class Object
   standard_method(
     {
       _: Class,
@@ -7198,9 +5939,7 @@ class Object
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def kind_of?(_); end
-end
 
-class Object
   standard_method(
     {
       _: Symbol,
@@ -7208,9 +5947,7 @@ class Object
     returns: Method
   )
   def method(_); end
-end
 
-class Object
   standard_method(
     {
       regular: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -7218,17 +5955,13 @@ class Object
     returns: Opus::Types.array_of(Symbol)
   )
   def methods(regular); end
-end
 
-class Object
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def nil?(); end
-end
 
-class Object
   standard_method(
     {
       all: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -7236,9 +5969,7 @@ class Object
     returns: Opus::Types.array_of(Symbol)
   )
   def private_methods(all); end
-end
 
-class Object
   standard_method(
     {
       all: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -7246,9 +5977,7 @@ class Object
     returns: Opus::Types.array_of(Symbol)
   )
   def protected_methods(all); end
-end
 
-class Object
   standard_method(
     {
       _: Symbol,
@@ -7256,9 +5985,7 @@ class Object
     returns: Method
   )
   def public_method(_); end
-end
 
-class Object
   standard_method(
     {
       all: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -7266,9 +5993,7 @@ class Object
     returns: Opus::Types.array_of(Symbol)
   )
   def public_methods(all); end
-end
 
-class Object
   standard_method(
     {
       _: Symbol,
@@ -7276,17 +6001,13 @@ class Object
     returns: BasicObject
   )
   def remove_instance_variable(_); end
-end
 
-class Object
   standard_method(
     {},
     returns: Class
   )
   def singleton_class(); end
-end
 
-class Object
   standard_method(
     {
       _: Symbol,
@@ -7294,9 +6015,7 @@ class Object
     returns: Method
   )
   def singleton_method(_); end
-end
 
-class Object
   standard_method(
     {
       all: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -7304,30 +6023,25 @@ class Object
     returns: Opus::Types.array_of(Symbol)
   )
   def singleton_methods(all); end
-end
 
-class Object
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def tainted?(); end
-end
 
-class Object
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Object
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def untrusted?(); end
+
 end
 
 class Pathname
@@ -7336,9 +6050,7 @@ class Pathname
     returns: Pathname
   )
   def self.getwd(); end
-end
 
-class Pathname
   standard_method(
     {
       p1: String,
@@ -7347,6 +6059,7 @@ class Pathname
     returns: Opus::Types.array_of(Pathname)
   )
   def self.glob(p1, p2); end
+
 end
 
 class Pathname
@@ -7357,9 +6070,7 @@ class Pathname
     returns: Pathname
   )
   def +(other); end
-end
 
-class Pathname
   standard_method(
     {
       p1: BasicObject,
@@ -7367,9 +6078,7 @@ class Pathname
     returns: Opus::Types.any(Integer, NilClass)
   )
   def <=>(p1); end
-end
 
-class Pathname
   standard_method(
     {
       p1: BasicObject,
@@ -7377,9 +6086,7 @@ class Pathname
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(p1); end
-end
 
-class Pathname
   standard_method(
     {
       p1: BasicObject,
@@ -7387,33 +6094,25 @@ class Pathname
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(p1); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def absolute?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: BasicObject
   )
   def ascend(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Time
   )
   def atime(); end
-end
 
-class Pathname
   standard_method(
     {
       p1: Opus::Types.any(String, NilClass),
@@ -7421,9 +6120,7 @@ class Pathname
     returns: Pathname
   )
   def basename(p1); end
-end
 
-class Pathname
   standard_method(
     {
       length: Opus::Types.any(Integer, NilClass),
@@ -7432,9 +6129,7 @@ class Pathname
     returns: String
   )
   def binread(length, offset); end
-end
 
-class Pathname
   standard_method(
     {
       _: String,
@@ -7443,33 +6138,25 @@ class Pathname
     returns: Integer
   )
   def binwrite(_, offset); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Time
   )
   def birthtime(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def blockdev?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def chardev?(); end
-end
 
-class Pathname
   standard_method(
     {
       with_directory: Opus::Types.any(TrueClass, FalseClass),
@@ -7477,9 +6164,7 @@ class Pathname
     returns: Opus::Types.array_of(Pathname)
   )
   def children(with_directory); end
-end
 
-class Pathname
   standard_method(
     {
       mode: Integer,
@@ -7487,9 +6172,7 @@ class Pathname
     returns: Integer
   )
   def chmod(mode); end
-end
 
-class Pathname
   standard_method(
     {
       owner: Integer,
@@ -7498,9 +6181,7 @@ class Pathname
     returns: Integer
   )
   def chown(owner, group); end
-end
 
-class Pathname
   standard_method(
     {
       consider_symlink: Opus::Types.any(TrueClass, FalseClass, NilClass),
@@ -7508,49 +6189,37 @@ class Pathname
     returns: BasicObject
   )
   def cleanpath(consider_symlink); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Time
   )
   def ctime(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: BasicObject
   )
   def delete(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: BasicObject
   )
   def descend(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def directory?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Pathname
   )
   def dirname(); end
-end
 
-class Pathname
   standard_method(
     {
       with_directory: Opus::Types.any(TrueClass, FalseClass),
@@ -7558,25 +6227,19 @@ class Pathname
     returns: BasicObject
   )
   def each_child(with_directory); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: BasicObject
   )
   def each_entry(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.array_of(Pathname)
   )
   def entries(); end
-end
 
-class Pathname
   standard_method(
     {
       _: BasicObject,
@@ -7584,33 +6247,25 @@ class Pathname
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(_); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def executable?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def executable_real?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def exist?(); end
-end
 
-class Pathname
   standard_method(
     {
       p1: Opus::Types.any(String, Pathname, NilClass),
@@ -7618,25 +6273,19 @@ class Pathname
     returns: Pathname
   )
   def expand_path(p1); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: String
   )
   def extname(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def file?(); end
-end
 
-class Pathname
   standard_method(
     {
       pattern: String,
@@ -7645,25 +6294,19 @@ class Pathname
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def fnmatch(pattern, flags); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: String
   )
   def ftype(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def grpowned?(); end
-end
 
-class Pathname
   standard_method(
     {
       mode: Integer,
@@ -7671,9 +6314,7 @@ class Pathname
     returns: Integer
   )
   def lchmod(mode); end
-end
 
-class Pathname
   standard_method(
     {
       owner: Integer,
@@ -7682,17 +6323,13 @@ class Pathname
     returns: Integer
   )
   def lchown(owner, group); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: File::Stat
   )
   def lstat(); end
-end
 
-class Pathname
   standard_method(
     {
       old: String,
@@ -7700,9 +6337,7 @@ class Pathname
     returns: Integer
   )
   def make_link(old); end
-end
 
-class Pathname
   standard_method(
     {
       p1: String,
@@ -7710,57 +6345,43 @@ class Pathname
     returns: Integer
   )
   def mkdir(p1); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: BasicObject
   )
   def mkpath(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def mountpoint?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Time
   )
   def mtime(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def owned?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Pathname
   )
   def parent(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def pipe?(); end
-end
 
-class Pathname
   standard_method(
     {
       length: Opus::Types.any(Integer, NilClass),
@@ -7770,17 +6391,13 @@ class Pathname
     returns: String
   )
   def read(length, offset, open_args); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def readable?(); end
-end
 
-class Pathname
   standard_method(
     {
       sep: Opus::Types.any(String, NilClass),
@@ -7790,17 +6407,13 @@ class Pathname
     returns: Opus::Types.array_of(String)
   )
   def readlines(sep, limit, open_args); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: String
   )
   def readlink(); end
-end
 
-class Pathname
   standard_method(
     {
       p1: Opus::Types.any(String, NilClass),
@@ -7808,9 +6421,7 @@ class Pathname
     returns: String
   )
   def realdirpath(p1); end
-end
 
-class Pathname
   standard_method(
     {
       p1: Opus::Types.any(String, NilClass),
@@ -7818,17 +6429,13 @@ class Pathname
     returns: String
   )
   def realpath(p1); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def relative?(); end
-end
 
-class Pathname
   standard_method(
     {
       base_directory: Opus::Types.any(String, Pathname),
@@ -7836,9 +6443,7 @@ class Pathname
     returns: Pathname
   )
   def relative_path_from(base_directory); end
-end
 
-class Pathname
   standard_method(
     {
       p1: String,
@@ -7846,97 +6451,73 @@ class Pathname
     returns: Integer
   )
   def rename(p1); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Integer
   )
   def rmdir(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Integer
   )
   def rmtree(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def root?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def setgid?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def setuid?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Integer
   )
   def size(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def size?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def socket?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.coerce([Pathname, Pathname])
   )
   def split(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: File::Stat
   )
   def stat(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def sticky?(); end
-end
 
-class Pathname
   standard_method(
     {
       p1: String,
@@ -7944,17 +6525,13 @@ class Pathname
     returns: Pathname
   )
   def sub_ext(p1); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def symlink?(); end
-end
 
-class Pathname
   standard_method(
     {
       mode: Opus::Types.any(Integer, NilClass),
@@ -7963,17 +6540,13 @@ class Pathname
     returns: Integer
   )
   def sysopen(mode, perm); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: String
   )
   def to_path(); end
-end
 
-class Pathname
   standard_method(
     {
       length: Integer,
@@ -7981,17 +6554,13 @@ class Pathname
     returns: Integer
   )
   def truncate(length); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Integer
   )
   def unlink(); end
-end
 
-class Pathname
   standard_method(
     {
       atime: Time,
@@ -8000,41 +6569,31 @@ class Pathname
     returns: Integer
   )
   def utime(atime, mtime); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def world_readable?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def world_writable?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def writable?(); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def writable_real?(); end
-end
 
-class Pathname
   standard_method(
     {
       _: String,
@@ -8044,14 +6603,13 @@ class Pathname
     returns: Integer
   )
   def write(_, offset, open_args); end
-end
 
-class Pathname
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
+
 end
 
 class Proc
@@ -8060,17 +6618,13 @@ class Proc
     returns: Integer
   )
   def arity(); end
-end
 
-class Proc
   standard_method(
     {},
     returns: Binding
   )
   def binding(); end
-end
 
-class Proc
   standard_method(
     {
       arity: Opus::Types.any(Integer, NilClass),
@@ -8078,38 +6632,31 @@ class Proc
     returns: Proc
   )
   def curry(arity); end
-end
 
-class Proc
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Proc
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def lambda(); end
-end
 
-class Proc
   standard_method(
     {},
     returns: Opus::Types.coerce([String, Integer])
   )
   def source_location(); end
-end
 
-class Proc
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
+
 end
 
 class Process
@@ -8120,17 +6667,13 @@ class Process
     returns: BasicObject
   )
   def self.abort(msg); end
-end
 
-class Process
   standard_method(
     {},
     returns: String
   )
   def self.argv0(); end
-end
 
-class Process
   standard_method(
     {
       clock_id: Opus::Types.any(Symbol, Integer),
@@ -8139,9 +6682,7 @@ class Process
     returns: Opus::Types.any(Float, Integer)
   )
   def self.clock_getres(clock_id, unit); end
-end
 
-class Process
   standard_method(
     {
       clock_id: Opus::Types.any(Symbol, Integer),
@@ -8150,9 +6691,7 @@ class Process
     returns: Opus::Types.any(Float, Integer)
   )
   def self.clock_gettime(clock_id, unit); end
-end
 
-class Process
   standard_method(
     {
       nochdir: Opus::Types.any(BasicObject, NilClass),
@@ -8161,9 +6700,7 @@ class Process
     returns: Integer
   )
   def self.daemon(nochdir, noclose); end
-end
 
-class Process
   standard_method(
     {
       pid: Integer,
@@ -8171,17 +6708,13 @@ class Process
     returns: Thread
   )
   def self.detach(pid); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.egid(); end
-end
 
-class Process
   standard_method(
     {
       _: Integer,
@@ -8189,17 +6722,13 @@ class Process
     returns: Integer
   )
   def self.egid=(_); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.euid(); end
-end
 
-class Process
   standard_method(
     {
       _: Integer,
@@ -8207,9 +6736,7 @@ class Process
     returns: Integer
   )
   def self.euid=(_); end
-end
 
-class Process
   standard_method(
     {
       status: Opus::Types.any(Integer, NilClass),
@@ -8217,9 +6744,7 @@ class Process
     returns: BasicObject
   )
   def self.exit(status); end
-end
 
-class Process
   standard_method(
     {
       status: Opus::Types.any(Integer, NilClass),
@@ -8227,17 +6752,13 @@ class Process
     returns: BasicObject
   )
   def self.exit!(status); end
-end
 
-class Process
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.fork(); end
-end
 
-class Process
   standard_method(
     {
       pid: Integer,
@@ -8245,17 +6766,13 @@ class Process
     returns: Integer
   )
   def self.getpgid(pid); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.getpgrp(); end
-end
 
-class Process
   standard_method(
     {
       kind: Integer,
@@ -8264,9 +6781,7 @@ class Process
     returns: Integer
   )
   def self.getpriority(kind, _); end
-end
 
-class Process
   standard_method(
     {
       resource: Opus::Types.any(Symbol, String, Integer),
@@ -8274,9 +6789,7 @@ class Process
     returns: Opus::Types.coerce([Integer, Integer])
   )
   def self.getrlimit(resource); end
-end
 
-class Process
   standard_method(
     {
       pid: Opus::Types.any(Integer, NilClass),
@@ -8284,17 +6797,13 @@ class Process
     returns: Integer
   )
   def self.getsid(pid); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.gid(); end
-end
 
-class Process
   standard_method(
     {
       _: Integer,
@@ -8302,17 +6811,13 @@ class Process
     returns: Integer
   )
   def self.gid=(_); end
-end
 
-class Process
   standard_method(
     {},
     returns: Opus::Types.array_of(Integer)
   )
   def self.groups(); end
-end
 
-class Process
   standard_method(
     {
       _: Opus::Types.array_of(Integer),
@@ -8320,9 +6825,7 @@ class Process
     returns: Opus::Types.array_of(Integer)
   )
   def self.groups=(_); end
-end
 
-class Process
   standard_method(
     {
       username: String,
@@ -8331,17 +6834,13 @@ class Process
     returns: Opus::Types.array_of(Integer)
   )
   def self.initgroups(username, gid); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.maxgroups(); end
-end
 
-class Process
   standard_method(
     {
       _: Integer,
@@ -8349,25 +6848,19 @@ class Process
     returns: Integer
   )
   def self.maxgroups=(_); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.pid(); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.ppid(); end
-end
 
-class Process
   standard_method(
     {
       kind: Integer,
@@ -8377,9 +6870,7 @@ class Process
     returns: Integer
   )
   def self.setpriority(kind, _, priority); end
-end
 
-class Process
   standard_method(
     {
       _: String,
@@ -8387,9 +6878,7 @@ class Process
     returns: String
   )
   def self.setproctitle(_); end
-end
 
-class Process
   standard_method(
     {
       resource: Opus::Types.any(Symbol, String, Integer),
@@ -8399,33 +6888,25 @@ class Process
     returns: NilClass
   )
   def self.setrlimit(resource, cur_limit, max_limit); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.setsid(); end
-end
 
-class Process
   standard_method(
     {},
     returns: Process::Tms
   )
   def self.times(); end
-end
 
-class Process
   standard_method(
     {},
     returns: Integer
   )
   def self.uid(); end
-end
 
-class Process
   standard_method(
     {
       user: Integer,
@@ -8433,9 +6914,7 @@ class Process
     returns: Integer
   )
   def self.uid=(user); end
-end
 
-class Process
   standard_method(
     {
       pid: Opus::Types.any(Integer, NilClass),
@@ -8444,9 +6923,7 @@ class Process
     returns: Integer
   )
   def self.wait(pid, flags); end
-end
 
-class Process
   standard_method(
     {
       pid: Opus::Types.any(Integer, NilClass),
@@ -8455,9 +6932,7 @@ class Process
     returns: Opus::Types.coerce([Integer, Integer])
   )
   def self.wait2(pid, flags); end
-end
 
-class Process
   standard_method(
     {
       pid: Opus::Types.any(Integer, NilClass),
@@ -8466,9 +6941,7 @@ class Process
     returns: Integer
   )
   def self.waitpid(pid, flags); end
-end
 
-class Process
   standard_method(
     {
       pid: Opus::Types.any(Integer, NilClass),
@@ -8477,6 +6950,7 @@ class Process
     returns: Opus::Types.coerce([Integer, Integer])
   )
   def self.waitpid2(pid, flags); end
+
 end
 
 class Process::GID
@@ -8487,17 +6961,13 @@ class Process::GID
     returns: Integer
   )
   def self.change_privilege(group); end
-end
 
-class Process::GID
   standard_method(
     {},
     returns: Integer
   )
   def self.eid(); end
-end
 
-class Process::GID
   standard_method(
     {
       name: String,
@@ -8505,9 +6975,7 @@ class Process::GID
     returns: Integer
   )
   def self.from_name(name); end
-end
 
-class Process::GID
   standard_method(
     {
       group: Integer,
@@ -8515,38 +6983,31 @@ class Process::GID
     returns: Integer
   )
   def self.grant_privilege(group); end
-end
 
-class Process::GID
   standard_method(
     {},
     returns: Integer
   )
   def self.re_exchange(); end
-end
 
-class Process::GID
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.re_exchangeable?(); end
-end
 
-class Process::GID
   standard_method(
     {},
     returns: Integer
   )
   def self.rid(); end
-end
 
-class Process::GID
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.sid_available?(); end
+
 end
 
 class Process::UID
@@ -8557,17 +7018,13 @@ class Process::UID
     returns: Integer
   )
   def self.change_privilege(user); end
-end
 
-class Process::UID
   standard_method(
     {},
     returns: Integer
   )
   def self.eid(); end
-end
 
-class Process::UID
   standard_method(
     {
       name: String,
@@ -8575,9 +7032,7 @@ class Process::UID
     returns: Integer
   )
   def self.from_name(name); end
-end
 
-class Process::UID
   standard_method(
     {
       user: Integer,
@@ -8585,38 +7040,31 @@ class Process::UID
     returns: Integer
   )
   def self.grant_privilege(user); end
-end
 
-class Process::UID
   standard_method(
     {},
     returns: Integer
   )
   def self.re_exchange(); end
-end
 
-class Process::UID
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.re_exchangeable?(); end
-end
 
-class Process::UID
   standard_method(
     {},
     returns: Integer
   )
   def self.rid(); end
-end
 
-class Process::UID
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.sid_available?(); end
+
 end
 
 class Process::Status
@@ -8627,9 +7075,7 @@ class Process::Status
     returns: Integer
   )
   def &(num); end
-end
 
-class Process::Status
   standard_method(
     {
       other: BasicObject,
@@ -8637,9 +7083,7 @@ class Process::Status
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(other); end
-end
 
-class Process::Status
   standard_method(
     {
       num: Integer,
@@ -8647,102 +7091,79 @@ class Process::Status
     returns: Integer
   )
   def >>(num); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def coredump?(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def exited?(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def exitstatus(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Integer
   )
   def pid(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def signaled?(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def stopped?(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def stopsig(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def success?(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def termsig(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: Integer
   )
   def to_i(); end
-end
 
-class Process::Status
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
+
 end
 
 class Process::Sys
@@ -8751,33 +7172,25 @@ class Process::Sys
     returns: Integer
   )
   def self.geteuid(); end
-end
 
-class Process::Sys
   standard_method(
     {},
     returns: Integer
   )
   def self.getgid(); end
-end
 
-class Process::Sys
   standard_method(
     {},
     returns: Integer
   )
   def self.getuid(); end
-end
 
-class Process::Sys
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.issetugid(); end
-end
 
-class Process::Sys
   standard_method(
     {
       group: Integer,
@@ -8785,9 +7198,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setegid(group); end
-end
 
-class Process::Sys
   standard_method(
     {
       user: Integer,
@@ -8795,9 +7206,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.seteuid(user); end
-end
 
-class Process::Sys
   standard_method(
     {
       group: Integer,
@@ -8805,9 +7214,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setgid(group); end
-end
 
-class Process::Sys
   standard_method(
     {
       rid: Integer,
@@ -8816,9 +7223,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setregid(rid, eid); end
-end
 
-class Process::Sys
   standard_method(
     {
       rid: Integer,
@@ -8828,9 +7233,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setresgid(rid, eid, sid); end
-end
 
-class Process::Sys
   standard_method(
     {
       rid: Integer,
@@ -8840,9 +7243,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setresuid(rid, eid, sid); end
-end
 
-class Process::Sys
   standard_method(
     {
       rid: Integer,
@@ -8851,9 +7252,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setreuid(rid, eid); end
-end
 
-class Process::Sys
   standard_method(
     {
       group: Integer,
@@ -8861,9 +7260,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setrgid(group); end
-end
 
-class Process::Sys
   standard_method(
     {
       user: Integer,
@@ -8871,9 +7268,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setruid(user); end
-end
 
-class Process::Sys
   standard_method(
     {
       user: Integer,
@@ -8881,6 +7276,7 @@ class Process::Sys
     returns: NilClass
   )
   def self.setuid(user); end
+
 end
 
 class Process::Waiter
@@ -8889,6 +7285,7 @@ class Process::Waiter
     returns: Integer
   )
   def pid(); end
+
 end
 
 class Random
@@ -8899,9 +7296,7 @@ class Random
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class Random
   standard_method(
     {
       size: Integer,
@@ -8909,14 +7304,13 @@ class Random
     returns: String
   )
   def bytes(size); end
-end
 
-class Random
   standard_method(
     {},
     returns: Integer
   )
   def seed(); end
+
 end
 
 class Random
@@ -8925,9 +7319,7 @@ class Random
     returns: Integer
   )
   def self.new_seed(); end
-end
 
-class Random
   standard_method(
     {
       max: Opus::Types.any(Integer, NilClass),
@@ -8935,9 +7327,7 @@ class Random
     returns: Numeric
   )
   def self.rand(max); end
-end
 
-class Random
   standard_method(
     {
       number: Opus::Types.any(Integer, NilClass),
@@ -8945,6 +7335,7 @@ class Random
     returns: Numeric
   )
   def self.srand(number); end
+
 end
 
 class Range
@@ -8955,9 +7346,7 @@ class Range
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(obj); end
-end
 
-class Range
   standard_method(
     {
       obj: BasicObject,
@@ -8965,9 +7354,7 @@ class Range
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(obj); end
-end
 
-class Range
   standard_method(
     {
       obj: BasicObject,
@@ -8975,25 +7362,19 @@ class Range
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def cover?(obj); end
-end
 
-class Range
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def exclude_end?(); end
-end
 
-class Range
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Range
   standard_method(
     {
       obj: BasicObject,
@@ -9001,30 +7382,25 @@ class Range
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def include?(obj); end
-end
 
-class Range
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Range
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def size(); end
-end
 
-class Range
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
+
 end
 
 class Rational
@@ -9035,9 +7411,7 @@ class Rational
     returns: Opus::Types.any(Rational, Float, BigDecimal)
   )
   def %(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -9045,9 +7419,7 @@ class Rational
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
   def *(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -9055,9 +7427,7 @@ class Rational
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
   def +(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -9065,25 +7435,19 @@ class Rational
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
   def -(_); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Rational
   )
   def -@(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Rational
   )
   def +@(); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -9091,9 +7455,7 @@ class Rational
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def **(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -9101,9 +7463,7 @@ class Rational
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
   def /(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -9111,9 +7471,7 @@ class Rational
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def <(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -9121,9 +7479,7 @@ class Rational
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def <=(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -9131,9 +7487,7 @@ class Rational
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def >(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -9141,9 +7495,7 @@ class Rational
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def >=(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -9151,9 +7503,7 @@ class Rational
     returns: Object
   )
   def <=>(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Object,
@@ -9161,41 +7511,31 @@ class Rational
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Rational
   )
   def abs(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Rational
   )
   def abs2(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def angle(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def arg(); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -9203,9 +7543,7 @@ class Rational
     returns: Integer
   )
   def div(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -9213,9 +7551,7 @@ class Rational
     returns: Opus::Types.any(Rational, Float, BigDecimal)
   )
   def modulo(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Integer,
@@ -9223,17 +7559,13 @@ class Rational
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def ceil(_); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Integer
   )
   def denominator(); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -9241,9 +7573,7 @@ class Rational
     returns: Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)])
   )
   def divmod(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Object,
@@ -9251,9 +7581,7 @@ class Rational
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def equal?(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -9261,9 +7589,7 @@ class Rational
     returns: Float
   )
   def fdiv(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Integer,
@@ -9271,41 +7597,31 @@ class Rational
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def floor(_); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Integer
   )
   def numerator(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def phase(); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -9313,9 +7629,7 @@ class Rational
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
   def quo(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -9323,9 +7637,7 @@ class Rational
     returns: Rational
   )
   def rationalize(_); end
-end
 
-class Rational
   standard_method(
     {
       _: Integer,
@@ -9333,41 +7645,31 @@ class Rational
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def round(_); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Float
   )
   def to_f(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Integer
   )
   def to_i(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Rational
   )
   def to_r(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Rational
   standard_method(
     {
       _: Integer,
@@ -9375,73 +7677,55 @@ class Rational
     returns: Opus::Types.any(Integer, Rational)
   )
   def truncate(_); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Rational
   )
   def conj(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Rational
   )
   def conjugate(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Integer
   )
   def imag(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Integer
   )
   def imaginary(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Rational
   )
   def real(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: TrueClass
   )
   def real?(); end
-end
 
-class Rational
   standard_method(
     {},
     returns: Complex
   )
   def to_c(); end
-end
 
-class Rational
   standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, Complex),
@@ -9449,6 +7733,7 @@ class Rational
     returns: Opus::Types.any(Opus::Types.coerce([Rational, Rational]), Opus::Types.coerce([Float, Float]), Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]))
   )
   def coerce(_); end
+
 end
 
 class Regexp
@@ -9459,9 +7744,7 @@ class Regexp
     returns: String
   )
   def self.escape(_); end
-end
 
-class Regexp
   standard_method(
     {
       _: Integer,
@@ -9469,9 +7752,7 @@ class Regexp
     returns: Opus::Types.any(MatchData, String)
   )
   def self.last_match(_); end
-end
 
-class Regexp
   standard_method(
     {
       obj: BasicObject,
@@ -9479,6 +7760,7 @@ class Regexp
     returns: Opus::Types.any(Regexp, NilClass)
   )
   def self.try_convert(obj); end
+
 end
 
 class Regexp
@@ -9489,9 +7771,7 @@ class Regexp
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(other); end
-end
 
-class Regexp
   standard_method(
     {
       other: BasicObject,
@@ -9499,9 +7779,7 @@ class Regexp
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(other); end
-end
 
-class Regexp
   standard_method(
     {
       str: String,
@@ -9509,49 +7787,37 @@ class Regexp
     returns: Opus::Types.any(Integer, NilClass)
   )
   def =~(str); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def casefold?(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: Encoding
   )
   def encoding(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def fixed_encoding?(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Regexp
   standard_method(
     {
       _: String,
@@ -9560,54 +7826,46 @@ class Regexp
     returns: Opus::Types.any(MatchData, NilClass)
   )
   def match(_, _1); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: Opus::Types.hash_of(keys: String, values: Opus::Types.array_of(Integer))
   )
   def named_captures(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: Opus::Types.array_of(String)
   )
   def names(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: Integer
   )
   def options(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: String
   )
   def source(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Regexp
   standard_method(
     {},
     returns: Opus::Types.any(Integer, NilClass)
   )
   def ~(); end
+
+end
+
+class Set
 end
 
 class Set
@@ -9616,22 +7874,19 @@ class Set
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def empty?(); end
-end
 
-class Set
   standard_method(
     {},
     returns: Set
   )
   def flatten(); end
-end
 
-class Set
   standard_method(
     {},
     returns: Integer
   )
   def size(); end
+
 end
 
 class String
@@ -9642,9 +7897,7 @@ class String
     returns: String
   )
   def %(_); end
-end
 
-class String
   standard_method(
     {
       _: Integer,
@@ -9652,9 +7905,7 @@ class String
     returns: String
   )
   def *(_); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -9662,9 +7913,7 @@ class String
     returns: String
   )
   def +(_); end
-end
 
-class String
   standard_method(
     {
       _: Object,
@@ -9672,9 +7921,7 @@ class String
     returns: String
   )
   def <<(_); end
-end
 
-class String
   standard_method(
     {
       other: String,
@@ -9682,9 +7929,7 @@ class String
     returns: Opus::Types.any(Integer, NilClass)
   )
   def <=>(other); end
-end
 
-class String
   standard_method(
     {
       _: BasicObject,
@@ -9692,9 +7937,7 @@ class String
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(_); end
-end
 
-class String
   standard_method(
     {
       _: BasicObject,
@@ -9702,9 +7945,7 @@ class String
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ===(_); end
-end
 
-class String
   standard_method(
     {
       _: Object,
@@ -9712,57 +7953,43 @@ class String
     returns: Opus::Types.any(Integer, NilClass)
   )
   def =~(_); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ascii_only?(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def b(); end
-end
 
-class String
   standard_method(
     {},
     returns: Array
   )
   def bytes(); end
-end
 
-class String
   standard_method(
     {},
     returns: Integer
   )
   def bytesize(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def capitalize(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def capitalize!(); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -9770,9 +7997,7 @@ class String
     returns: Opus::Types.any(NilClass, Integer)
   )
   def casecmp(_); end
-end
 
-class String
   standard_method(
     {
       _: Integer,
@@ -9781,17 +8006,13 @@ class String
     returns: String
   )
   def center(_, _1); end
-end
 
-class String
   standard_method(
     {},
     returns: Array
   )
   def chars(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -9799,9 +8020,7 @@ class String
     returns: String
   )
   def chomp(_); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -9809,49 +8028,37 @@ class String
     returns: Opus::Types.any(String, NilClass)
   )
   def chomp!(_); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def chop(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def chop!(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def chr(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def clear(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.array_of(Integer)
   )
   def codepoints(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Integer, Object),
@@ -9859,9 +8066,7 @@ class String
     returns: String
   )
   def concat(_); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -9869,57 +8074,43 @@ class String
     returns: String
   )
   def crypt(_); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def downcase(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def downcase!(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def dump(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, Enumerator)
   )
   def each_byte(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, Enumerator)
   )
   def each_char(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, Enumerator)
   )
   def each_codepoint(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -9927,25 +8118,19 @@ class String
     returns: Opus::Types.any(String, Enumerator)
   )
   def each_line(_); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def empty?(); end
-end
 
-class String
   standard_method(
     {},
     returns: Encoding
   )
   def encoding(); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -9953,9 +8138,7 @@ class String
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(_); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, Encoding),
@@ -9963,9 +8146,7 @@ class String
     returns: String
   )
   def force_encoding(_); end
-end
 
-class String
   standard_method(
     {
       _: Integer,
@@ -9973,9 +8154,7 @@ class String
     returns: Opus::Types.any(Integer, NilClass)
   )
   def getbyte(_); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String),
@@ -9984,9 +8163,7 @@ class String
     returns: Opus::Types.any(String, Enumerator)
   )
   def gsub(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String),
@@ -9995,25 +8172,19 @@ class String
     returns: Opus::Types.any(String, NilClass, Enumerator)
   )
   def gsub!(_, _1); end
-end
 
-class String
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class String
   standard_method(
     {},
     returns: Integer
   )
   def hex(); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -10021,9 +8192,7 @@ class String
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def include?(_); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String),
@@ -10032,9 +8201,7 @@ class String
     returns: Opus::Types.any(Integer, NilClass)
   )
   def index(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -10042,9 +8209,7 @@ class String
     returns: String
   )
   def replace(_); end
-end
 
-class String
   standard_method(
     {
       _: Integer,
@@ -10053,33 +8218,25 @@ class String
     returns: String
   )
   def insert(_, _1); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class String
   standard_method(
     {},
     returns: Symbol
   )
   def intern(); end
-end
 
-class String
   standard_method(
     {},
     returns: Integer
   )
   def length(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -10087,9 +8244,7 @@ class String
     returns: Opus::Types.array_of(String)
   )
   def lines(_); end
-end
 
-class String
   standard_method(
     {
       _: Integer,
@@ -10098,25 +8253,19 @@ class String
     returns: String
   )
   def ljust(_, _1); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def lstrip(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def lstrip!(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String),
@@ -10125,41 +8274,31 @@ class String
     returns: MatchData
   )
   def match(_, _1); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def next(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def next!(); end
-end
 
-class String
   standard_method(
     {},
     returns: Integer
   )
   def oct(); end
-end
 
-class String
   standard_method(
     {},
     returns: Integer
   )
   def ord(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String),
@@ -10167,9 +8306,7 @@ class String
     returns: Opus::Types.array_of(String)
   )
   def partition(_); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -10177,17 +8314,13 @@ class String
     returns: String
   )
   def prepend(_); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def reverse(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, Regexp),
@@ -10196,9 +8329,7 @@ class String
     returns: Opus::Types.any(Integer, NilClass)
   )
   def rindex(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: Integer,
@@ -10207,9 +8338,7 @@ class String
     returns: String
   )
   def rjust(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, Regexp),
@@ -10217,25 +8346,19 @@ class String
     returns: Opus::Types.array_of(String)
   )
   def rpartition(_); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def rstrip(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def rstrip!(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -10243,9 +8366,7 @@ class String
     returns: String
   )
   def scrub(_); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -10253,17 +8374,13 @@ class String
     returns: String
   )
   def scrub!(_); end
-end
 
-class String
   standard_method(
     {},
     returns: Integer
   )
   def size(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String, NilClass, Integer),
@@ -10272,9 +8389,7 @@ class String
     returns: Opus::Types.array_of(String)
   )
   def split(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -10282,9 +8397,7 @@ class String
     returns: String
   )
   def squeeze(_); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(String, NilClass),
@@ -10292,25 +8405,19 @@ class String
     returns: String
   )
   def squeeze!(_); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def strip(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def strip!(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String),
@@ -10319,9 +8426,7 @@ class String
     returns: String
   )
   def sub(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String),
@@ -10330,17 +8435,13 @@ class String
     returns: String
   )
   def sub!(_, _1); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def succ(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Integer, NilClass),
@@ -10348,41 +8449,31 @@ class String
     returns: Integer
   )
   def sum(_); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def swapcase(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def swapcase!(); end
-end
 
-class String
   standard_method(
     {},
     returns: Complex
   )
   def to_c(); end
-end
 
-class String
   standard_method(
     {},
     returns: Float
   )
   def to_f(); end
-end
 
-class String
   standard_method(
     {
       _: Opus::Types.any(Integer, NilClass),
@@ -10390,41 +8481,31 @@ class String
     returns: Integer
   )
   def to_i(_); end
-end
 
-class String
   standard_method(
     {},
     returns: Rational
   )
   def to_r(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def to_str(); end
-end
 
-class String
   standard_method(
     {},
     returns: Symbol
   )
   def to_sym(); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -10433,9 +8514,7 @@ class String
     returns: String
   )
   def tr(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -10444,9 +8523,7 @@ class String
     returns: Opus::Types.any(String, NilClass)
   )
   def tr!(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -10455,9 +8532,7 @@ class String
     returns: String
   )
   def tr_s(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -10466,9 +8541,7 @@ class String
     returns: Opus::Types.any(String, NilClass)
   )
   def tr_s!(_, _1); end
-end
 
-class String
   standard_method(
     {
       _: String,
@@ -10476,30 +8549,25 @@ class String
     returns: Opus::Types.array_of(String)
   )
   def unpack(_); end
-end
 
-class String
   standard_method(
     {},
     returns: String
   )
   def upcase(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(String, NilClass)
   )
   def upcase!(); end
-end
 
-class String
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def valid_encoding?(); end
+
 end
 
 class StringScanner
@@ -10511,6 +8579,7 @@ class StringScanner
     returns: StringScanner
   )
   def self.new(_, _1); end
+
 end
 
 class StringScanner
@@ -10519,9 +8588,7 @@ class StringScanner
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eos?(); end
-end
 
-class StringScanner
   standard_method(
     {
       _: Regexp,
@@ -10529,14 +8596,13 @@ class StringScanner
     returns: String
   )
   def scan(_); end
-end
 
-class StringScanner
   standard_method(
     {},
     returns: String
   )
   def getch(); end
+
 end
 
 class Symbol
@@ -10545,6 +8611,7 @@ class Symbol
     returns: Opus::Types.array_of(Symbol)
   )
   def self.all_symbols(); end
+
 end
 
 class Symbol
@@ -10555,9 +8622,7 @@ class Symbol
     returns: Opus::Types.any(Integer, NilClass)
   )
   def <=>(other); end
-end
 
-class Symbol
   standard_method(
     {
       obj: BasicObject,
@@ -10565,9 +8630,7 @@ class Symbol
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def ==(obj); end
-end
 
-class Symbol
   standard_method(
     {
       obj: BasicObject,
@@ -10575,17 +8638,13 @@ class Symbol
     returns: Opus::Types.any(Integer, NilClass)
   )
   def =~(obj); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Symbol
   )
   def capitalize(); end
-end
 
-class Symbol
   standard_method(
     {
       other: Symbol,
@@ -10593,57 +8652,43 @@ class Symbol
     returns: Opus::Types.any(Integer, NilClass)
   )
   def casecmp(other); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Symbol
   )
   def downcase(); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def empty?(); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Encoding
   )
   def encoding(); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: String
   )
   def id2name(); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Integer
   )
   def length(); end
-end
 
-class Symbol
   standard_method(
     {
       obj: BasicObject,
@@ -10651,38 +8696,31 @@ class Symbol
     returns: Opus::Types.any(Integer, NilClass)
   )
   def match(obj); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Symbol
   )
   def succ(); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Symbol
   )
   def swapcase(); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Proc
   )
   def to_proc(); end
-end
 
-class Symbol
   standard_method(
     {},
     returns: Symbol
   )
   def upcase(); end
+
 end
 
 class Time
@@ -10696,9 +8734,7 @@ class Time
     returns: Time
   )
   def self.at(_, seconds_with_frac, seconds, microseconds_with_frac); end
-end
 
-class Time
   standard_method(
     {
       year: Integer,
@@ -10712,9 +8748,7 @@ class Time
     returns: Time
   )
   def self.gm(year, month, day, hour, min, sec, usec_with_frac); end
-end
 
-class Time
   standard_method(
     {
       year: Integer,
@@ -10728,17 +8762,13 @@ class Time
     returns: Time
   )
   def self.local(year, month, day, hour, min, sec, usec_with_frac); end
-end
 
-class Time
   standard_method(
     {},
     returns: Time
   )
   def self.now(); end
-end
 
-class Time
   standard_method(
     {
       year: Integer,
@@ -10752,6 +8782,7 @@ class Time
     returns: Time
   )
   def self.utc(year, month, day, hour, min, sec, usec_with_frac); end
+
 end
 
 class Time
@@ -10762,9 +8793,7 @@ class Time
     returns: Time
   )
   def +(_); end
-end
 
-class Time
   standard_method(
     {
       _: Opus::Types.any(Time, Numeric),
@@ -10772,9 +8801,7 @@ class Time
     returns: Opus::Types.any(Float, Time)
   )
   def -(_); end
-end
 
-class Time
   standard_method(
     {
       other: Time,
@@ -10782,41 +8809,31 @@ class Time
     returns: Opus::Types.any(Integer, NilClass)
   )
   def <=>(other); end
-end
 
-class Time
   standard_method(
     {},
     returns: String
   )
   def asctime(); end
-end
 
-class Time
   standard_method(
     {},
     returns: String
   )
   def ctime(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def day(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def dst?(); end
-end
 
-class Time
   standard_method(
     {
       _: BasicObject,
@@ -10824,25 +8841,19 @@ class Time
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(_); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def friday?(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Time
   )
   def getgm(); end
-end
 
-class Time
   standard_method(
     {
       utc_offset: Opus::Types.any(Integer, NilClass),
@@ -10850,105 +8861,79 @@ class Time
     returns: Time
   )
   def getlocal(utc_offset); end
-end
 
-class Time
   standard_method(
     {},
     returns: Time
   )
   def getutc(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def gmt?(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def gmt_offset(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def hash(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def hour(); end
-end
 
-class Time
   standard_method(
     {},
     returns: String
   )
   def inspect(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def isdst(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def mday(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def min(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def mon(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def monday?(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def nsec(); end
-end
 
-class Time
   standard_method(
     {
       _: Integer,
@@ -10956,17 +8941,13 @@ class Time
     returns: Time
   )
   def round(_); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def sec(); end
-end
 
-class Time
   standard_method(
     {
       _: String,
@@ -10974,174 +8955,136 @@ class Time
     returns: String
   )
   def strftime(_); end
-end
 
-class Time
   standard_method(
     {},
     returns: Numeric
   )
   def subsec(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Time
   )
   def succ(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def sunday?(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def thursday?(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.coerce([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Opus::Types.any(TrueClass, FalseClass), String])
   )
   def to_a(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Float
   )
   def to_f(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Numeric
   )
   def to_i(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Rational
   )
   def to_r(); end
-end
 
-class Time
   standard_method(
     {},
     returns: String
   )
   def to_s(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def tuesday?(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Numeric
   )
   def tv_nsec(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Numeric
   )
   def tv_sec(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Numeric
   )
   def tv_usec(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Numeric
   )
   def usec(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def utc?(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def utc_offset(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def wday(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def wednesday?(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def yday(); end
-end
 
-class Time
   standard_method(
     {},
     returns: Integer
   )
   def year(); end
-end
 
-class Time
   standard_method(
     {},
     returns: String
   )
   def zone(); end
+
+end
+
+class URI
 end
 
 class YAML
@@ -11152,5 +9095,6 @@ class YAML
     returns: Opus::Types.array_of(String)
   )
   def self.load_file(filename); end
+
 end
 
