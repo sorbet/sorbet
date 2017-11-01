@@ -165,7 +165,7 @@ public:
                 }
             } else if (auto mdef = dynamic_cast<ast::MethodDef *>(stat.get())) {
                 if (lastStandardMethod) {
-                    ast::Symbol &info = mdef->symbol.info(ctx);
+                    ast::Symbol &methoInfo = mdef->symbol.info(ctx);
                     if (dynamic_cast<ast::EmptyTree *>(lastStandardMethod->recv.get()) == nullptr ||
                         lastStandardMethod->block != nullptr) {
                         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
@@ -181,14 +181,14 @@ public:
                                     if (auto *symbolLit = dynamic_cast<ast::SymbolLit *>(key.get())) {
                                         if (symbolLit->name == ast::Names::returns()) {
                                             // fill in return type
-                                            mdef->symbol.info(ctx).resultType = getResultType(ctx, value);
+                                            methoInfo.resultType = getResultType(ctx, value);
                                         } else {
-                                            auto fnd = find_if(mdef->symbol.info(ctx).arguments().begin(),
-                                                               mdef->symbol.info(ctx).arguments().end(),
+                                            auto fnd = find_if(methoInfo.arguments().begin(),
+                                                               methoInfo.arguments().end(),
                                                                [&](ast::SymbolRef sym) -> bool {
                                                                    return sym.info(ctx).name == symbolLit->name;
                                                                });
-                                            if (fnd == mdef->symbol.info(ctx).arguments().end()) {
+                                            if (fnd == methoInfo.arguments().end()) {
                                                 ctx.state.errors.error(
                                                     ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
                                                     "Misformed standard_method. Unknown argument name type {}" +
