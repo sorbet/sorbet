@@ -9,7 +9,8 @@
 namespace ruby_typer {
 namespace infer {
 class Inference {
-    static void run(ast::Context ctx, cfg::CFG &cfg);
+public:
+    static void run(ast::Context ctx, std::unique_ptr<cfg::CFG> &cfg);
 };
 } // namespace infer
 } // namespace ruby_typer
