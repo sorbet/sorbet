@@ -19,7 +19,7 @@ class Outer2
 
   class Inner1::Inner2
     C
-    A # error: unresolved
+    A # error: Stubbing out unknown constant <emptyTree>::A
   end
 
   class Other < Inner1::Inner2

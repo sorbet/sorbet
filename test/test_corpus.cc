@@ -212,15 +212,15 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     // Check warnings and errors
     auto errors = ctx.errors.getAndEmptyErrors();
     if (errors.size() > 0) {
-        map<int, std::vector<std::string>> expectedErrors;
+        map<int, std::string> expectedErrors;
         std::string line;
         stringstream ss(src);
         int linenum = 1;
         while (std::getline(ss, line, '\n')) {
-            regex errorRegex("# error:( ([A-Za-z]*))?");
+            regex errorRegex("# error: ?(.*)");
             smatch matches;
             if (regex_search(line, matches, errorRegex)) {
-                expectedErrors[linenum].push_back(matches[2].str());
+                expectedErrors[linenum] = matches[1].str();
             }
             linenum += 1;
         }
@@ -242,28 +242,35 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             for (int i = pos.first.line; i <= pos.second.line; i++) {
                 auto expectedError = expectedErrors.find(i);
                 if (expectedError != expectedErrors.end()) {
-                    // TODO match the type of error
+                    if (expectedError->second.empty()) {
+                        ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
+                                      << i << ". It should match a substring of '" << error.formatted << "'";
+                    }
+                    if (error.formatted.find(expectedError->second) == std::string::npos) {
+                        ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
+                                      << expectedError->second << "' inside of '" << error.formatted << "'";
+                    }
                     found = true;
                     seenErrorLines.insert(i);
                     continue;
                 }
             }
             if (!found) {
-                ADD_FAILURE() << "Unexpeted error: " << error.toString(ctx) << endl;
+                ADD_FAILURE() << "Unexpeted error: " << error.toString(ctx);
             }
         }
 
         for (auto &error : expectedErrors) {
             if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
                 if (--unknownLineErrors < 0) {
-                    ADD_FAILURE() << "Expected error didn't happen on line " << error.first << endl;
+                    ADD_FAILURE() << "Expected error didn't happen on line " << error.first;
                 }
             }
         }
 
         if (unknownLineErrors > 0) {
             ADD_FAILURE() << "Too many errors without locations. Add " << unknownLineErrors
-                          << " more `error:` lines at the top of your file" << endl;
+                          << " more `error:` lines at the top of your file";
         }
 
         TEST_COUT << "errors OK" << endl;
