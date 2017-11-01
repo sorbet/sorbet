@@ -15,7 +15,9 @@ public:
     shared_ptr<ast::Type> &getType(ast::SymbolRef symbol) {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
-            Error::raise("Should never happen");
+            vars.emplace_back(symbol);
+            types.emplace_back(ast::Types::bottom());
+            return types[types.size() - 1];
         }
         return types[fnd - vars.begin()];
     }
