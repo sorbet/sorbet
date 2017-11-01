@@ -65,7 +65,7 @@ public:
             },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
-                tp = ast::Types::top();
+                tp = getType(i->receiver)->getCallArgumentType(ctx, i->method, i->arg);
             });
 
         shared_ptr<ast::Type> &cur = getType(bind.bind);
