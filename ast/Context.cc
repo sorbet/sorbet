@@ -354,13 +354,6 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
      * 25: Opus::Types
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
-
-    // Add them back in since synthesizeClass couldn't
-    for (Symbol &info : symbols) {
-        if (info.owner != defn_root()) {
-            defn_root().info(*this).members.push_back(make_pair(info.name, info.owner));
-        }
-    }
 }
 
 GlobalState::~GlobalState() {}
