@@ -153,7 +153,7 @@ public:
         if (original->ancestors.size() > 0) {
             if (ast::Ident *id = dynamic_cast<ast::Ident *>(original->ancestors.front().get())) {
                 ast::Symbol &info = original->symbol.info(ctx);
-                info.parent_ = id->symbol;
+                info.superClass = id->symbol;
                 info.argumentsOrMixins.emplace_back(id->symbol);
             }
         }
