@@ -49,7 +49,7 @@ private:
             if (result.exists()) {
                 return result;
             } else {
-                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::StubConstant,
+                ctx.state.errors.error(c->loc, ast::ErrorClass::StubConstant,
                                        "Stubbing out unknown constant " + c->toString(ctx));
                 return ast::GlobalState::defn_dynamic();
             }
@@ -59,7 +59,7 @@ private:
                 return resolved;
             ast::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
             if (!result.exists()) {
-                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::StubConstant,
+                ctx.state.errors.error(c->loc, ast::ErrorClass::StubConstant,
                                        "Stubbing out unknown constant " + c->toString(ctx));
                 result = ast::GlobalState::defn_dynamic();
             }
@@ -67,7 +67,7 @@ private:
 
             return result;
         } else {
-            ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::DynamicConstant,
+            ctx.state.errors.error(c->loc, ast::ErrorClass::DynamicConstant,
                                    "Dynamic constant references are unsupported " + c->toString(ctx));
             return ast::GlobalState::defn_dynamic();
         }

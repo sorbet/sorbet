@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <memory>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <sys/types.h>
@@ -101,6 +102,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
     ruby_typer::ast::GlobalState ctx(*console);
     ruby_typer::ast::Context context(ctx, ctx.defn_root());
+    ctx.errors.keepErrorsInMemory = true;
 
     // Parser
     auto src = ruby_typer::File::read(inputPath.c_str());
@@ -205,6 +207,73 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == got.str() + "\n") {
             TEST_COUT << "cfg OK" << endl;
         }
+    }
+
+    // Check warnings and errors
+    auto errors = ctx.errors.getAndEmptyErrors();
+    if (errors.size() > 0) {
+        map<int, std::string> expectedErrors;
+        std::string line;
+        stringstream ss(src);
+        int linenum = 1;
+        while (std::getline(ss, line, '\n')) {
+            regex errorRegex("# error: ?(.*)");
+            smatch matches;
+            if (regex_search(line, matches, errorRegex)) {
+                expectedErrors[linenum] = matches[1].str();
+            }
+            linenum += 1;
+        }
+
+        set<int> seenErrorLines;
+        int unknownLineErrors = 0;
+        for (int i = 0; i < errors.size(); i++) {
+            auto &error = errors[i];
+            if (error.loc.is_none()) {
+                // The counts matched so let this one slide. The convention is
+                // to put the `error:` at the top of the file so that they are
+                // eaten first when reporting mismatched errors
+                unknownLineErrors += 1;
+                continue;
+            }
+
+            auto pos = error.loc.position(ctx);
+            bool found = false;
+            for (int i = pos.first.line; i <= pos.second.line; i++) {
+                auto expectedError = expectedErrors.find(i);
+                if (expectedError != expectedErrors.end()) {
+                    if (expectedError->second.empty()) {
+                        ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
+                                      << i << ". It should match a substring of '" << error.formatted << "'";
+                    }
+                    if (error.formatted.find(expectedError->second) == std::string::npos) {
+                        ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
+                                      << expectedError->second << "' inside of '" << error.formatted << "'";
+                    }
+                    found = true;
+                    seenErrorLines.insert(i);
+                    continue;
+                }
+            }
+            if (!found) {
+                ADD_FAILURE() << "Unexpeted error: " << error.toString(ctx);
+            }
+        }
+
+        for (auto &error : expectedErrors) {
+            if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
+                if (--unknownLineErrors < 0) {
+                    ADD_FAILURE() << "Expected error didn't happen on line " << error.first;
+                }
+            }
+        }
+
+        if (unknownLineErrors > 0) {
+            ADD_FAILURE() << "Too many errors without locations. Add " << unknownLineErrors
+                          << " more `error:` lines at the top of your file";
+        }
+
+        TEST_COUT << "errors OK" << endl;
     }
 }
 
