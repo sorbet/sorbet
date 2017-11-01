@@ -105,7 +105,9 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
 
     std::vector<std::string> children;
     for (auto pair : members) {
-        children.push_back(pair.second.toString(ctx, tabs + 1));
+        if (!pair.second.isHidden()) {
+            children.push_back(pair.second.toString(ctx, tabs + 1));
+        }
     }
     std::sort(children.begin(), children.end());
     for (auto row : children) {
