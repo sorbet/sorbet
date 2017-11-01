@@ -1,3 +1,4 @@
+#include "../infer/infer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
@@ -5,7 +6,6 @@
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
-#include "../infer/infer.h"
 #include <algorithm> // find
 #include <ctime>
 #include <cxxopts.hpp>

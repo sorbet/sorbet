@@ -407,7 +407,7 @@ std::shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name,
 }
 
 std::shared_ptr<Type> AndType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
-    return Types::lub(ctx,left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
+    return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
 std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun,
