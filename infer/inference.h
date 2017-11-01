@@ -1,7 +1,7 @@
 #ifndef SRUBY_INFERENCE_H
 #define SRUBY_INFERENCE_H
 
-#include "Types.h"
+#include "../types/types.h"
 #include "cfg/CFG.h"
 #include <memory>
 #include <string>
