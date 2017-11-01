@@ -29,7 +29,7 @@ begin
           if ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rules.empty?().!()
             begin
               ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rule_ids = ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rules.map(<Not Supported (BlockPass)>).join(",")
-              self(TODO).log().warn("Gerald skipping invalid rules: ".+(::Opus::CIBot::Gerald::Matcher#initialize#invalid_rule_ids))
+              self(Matcher).log().warn("Gerald skipping invalid rules: ".+(::Opus::CIBot::Gerald::Matcher#initialize#invalid_rule_ids))
             end
           else
             <emptyTree>
@@ -40,7 +40,7 @@ begin
         begin
           if ::Opus::CIBot::Gerald::Matcher#match#match_context.diff().affected_files().count().>(::<dynamic>)
             begin
-              self(TODO).log().warn("Gerald skipping large PR with ".concat(begin
+              self(Matcher).log().warn("Gerald skipping large PR with ".concat(begin
                     ::Opus::CIBot::Gerald::Matcher#match#match_context.diff().affected_files().count()
                   end.to_s()).concat(" affected files").to_s())
               return []
@@ -106,7 +106,7 @@ begin
             ::<dynamic>.now().-(@start<todo ivar sym>)
           end.*(1000)
           if ::Opus::CIBot::Gerald::MatchTimeBudget#check!#dur_ms.>(::<dynamic>)
-            self(TODO).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
+            self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
                     ::<dynamic>
                   end.to_s()).concat("ms").to_s()))
           else
@@ -122,7 +122,7 @@ begin
             ::<dynamic>.now().-(::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule_start)
           end.*(1000)
           if ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms.>(::<dynamic>)
-            self(TODO).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald rule '".concat(begin
+            self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald rule '".concat(begin
                     ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule.token()
                   end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
                     ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms.to_i()
@@ -132,7 +132,7 @@ begin
           else
             <emptyTree>
           end
-          self(TODO).check!()
+          self(MatchTimeBudget).check!()
           ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#res
         end
 
@@ -142,11 +142,11 @@ begin
       def initialize<initialize>(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
         begin
           @raw<todo ivar sym> = ::Opus::CIBot::Gerald::Diff#initialize#raw_diff
-          @parsed<todo ivar sym> = self(TODO).parse(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
+          @parsed<todo ivar sym> = self(Diff).parse(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
         end
 
       def affected_files<affected_files>()
-        self(TODO).added_files().+(self(TODO).deleted_files()).+(self(TODO).changed_files())
+        self(Diff).added_files().+(self(Diff).deleted_files()).+(self(Diff).changed_files())
 
       def added_files<added_files>()
         @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
@@ -180,10 +180,10 @@ begin
         end.flatten()
 
       def changed_lines<changed_lines>()
-        self(TODO).added_lines().+(self(TODO).removed_lines())
+        self(Diff).added_lines().+(self(Diff).removed_lines())
 
       def changed_openapi?<changed_openapi?>()
-        self(TODO).changed_files().include?(::<dynamic>)
+        self(Diff).changed_files().include?(::<dynamic>)
 
       self(TODO).private(def parse<parse>(::Opus::CIBot::Gerald::Diff#parse#diff)
           begin
