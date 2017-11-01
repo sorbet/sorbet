@@ -262,7 +262,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
 
         if (unknownLineErrors > 0) {
-            ADD_FAILURE() << "Too many errors without locations. Add " << unknownLineErrors << " more `error:` lines at the top of your file" << endl;
+            ADD_FAILURE() << "Too many errors without locations. Add " << unknownLineErrors
+                          << " more `error:` lines at the top of your file" << endl;
         }
 
         TEST_COUT << "errors OK" << endl;
