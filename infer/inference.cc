@@ -47,6 +47,7 @@ public:
             [&](cfg::FloatLit *i) { tp = make_shared<ast::Literal>(i->value); },
             [&](cfg::IntLit *i) { tp = make_shared<ast::Literal>(i->value); },
             [&](cfg::StringLit *i) { tp = make_shared<ast::Literal>(i->value); },
+            [&](cfg::BoolLit *i) { tp = make_shared<ast::Literal>(i->value); },
             [&](cfg::Nil *i) { tp = ast::Types::nil(); },
             [&](cfg::Self *i) { tp = make_shared<ast::ClassType>(i->klass); },
             [&](cfg::NotSupported *i) { tp = ast::Types::dynamic(); },
