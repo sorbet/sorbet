@@ -85,12 +85,7 @@ public:
      * IsFromJar, IsFromFile
      * */
     u4 flags;
-    // this contains the tree that only defines the type. TODO: make into tiny
-    // vector
-    // for classes it contains constructor signature
-    // for method - full method type. it is not used to refer to fields. No
-    // fields. Yet.
-    //    std::vector<Tree> definition;
+    // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
 
     inline std::vector<SymbolRef> &arguments() {
