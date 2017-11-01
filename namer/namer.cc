@@ -120,6 +120,17 @@ public:
         return ident;
     }
 
+    ast::Self *postTransformSelf(ast::Context ctx, ast::Self *self) {
+        if (ctx.owner.info(ctx).isMethod()) {
+            self->claz = ctx.owner.info(ctx).owner;
+            Error::check(self->claz.info(ctx).isClass());
+        } else {
+            // TODO(nelhage): refer to the singleton class of ctx.owner
+            // Error::notImplemented();
+        }
+        return self;
+    }
+
 private:
     ast::SymbolRef ownerFromContext(ast::Context ctx) {
         ast::SymbolRef owner = ctx.owner;
