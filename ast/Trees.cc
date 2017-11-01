@@ -464,7 +464,11 @@ string Next::toString(GlobalState &ctx, int tabs) {
 }
 
 string Self::toString(GlobalState &ctx, int tabs) {
-    return "self(" + this->claz.info(ctx).name.name(ctx).toString(ctx) + ")";
+    if (this->claz.exists()) {
+        return "self(" + this->claz.info(ctx).name.name(ctx).toString(ctx) + ")";
+    } else {
+        return "self(TODO)";
+    }
 }
 
 string Break::toString(GlobalState &ctx, int tabs) {

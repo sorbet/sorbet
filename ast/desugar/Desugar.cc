@@ -10,14 +10,17 @@ namespace ast {
 namespace desugar {
 using namespace parser;
 
-unique_ptr<Statement> mkSend(unique_ptr<Statement> &recv, NameRef fun, vector<unique_ptr<Statement>> &args) {
+unique_ptr<Statement> mkSend(unique_ptr<Statement> &recv, NameRef fun, vector<unique_ptr<Statement>> &args,
+                             u4 flags = 0) {
     Error::check(dynamic_cast<Expression *>(recv.get()));
     auto recvChecked = Expression::fromStatement(recv);
     auto nargs = vector<unique_ptr<Expression>>();
     for (auto &a : args) {
         nargs.emplace_back(Expression::fromStatement(a));
     }
-    return make_unique<Send>(move(recvChecked), fun, move(nargs));
+    auto send = make_unique<Send>(move(recvChecked), fun, move(nargs));
+    send->flags = flags;
+    return move(send);
 }
 
 unique_ptr<Statement> mkSend1(unique_ptr<Statement> &recv, NameRef fun, unique_ptr<Statement> &arg1) {
@@ -193,14 +196,23 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  }
              },
              [&](parser::Send *a) {
+                 u4 flags = 0;
                  auto rec = node2TreeImpl(ctx, a->receiver);
+                 if (dynamic_cast<EmptyTree *>(rec.get()) != nullptr) {
+                     rec = make_unique<Self>(SymbolRef(0));
+                     flags |= Send::PRIVATE_OK;
+                 }
                  vector<unique_ptr<Statement>> args;
                  for (auto &stat : a->args) {
                      args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
                  };
 
-                 auto send = mkSend(rec, a->method, args);
+                 auto send = mkSend(rec, a->method, args, flags);
                  result.swap(send);
+             },
+             [&](parser::Self *a) {
+                 unique_ptr<Statement> self = make_unique<Self>(SymbolRef(0));
+                 result.swap(self);
              },
              [&](parser::DString *a) {
                  auto it = a->nodes.begin();

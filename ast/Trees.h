@@ -247,6 +247,9 @@ public:
     std::unique_ptr<Expression> recv;
     NameRef fun;
     std::vector<std::unique_ptr<Expression>> args;
+    u4 flags = 0;
+
+    static const int PRIVATE_OK = 1 << 0;
 
     // null if no block passed
     std::unique_ptr<Block> block;
