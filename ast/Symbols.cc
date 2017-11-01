@@ -1,4 +1,5 @@
 #include "Symbols.h"
+#include "Types.h"
 #include "Context.h"
 #include <sstream>
 #include <string>
@@ -80,17 +81,22 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
         type = "method";
     }
     os << type << " " << name;
-    os << " (";
-    bool first = true;
-    for (SymbolRef thing : myInfo.argumentsOrMixins) {
-        if (first) {
-            first = false;
-        } else {
-            os << ", ";
+    if (!myInfo.isField()) {
+        os << " (";
+        bool first = true;
+        for (SymbolRef thing : myInfo.argumentsOrMixins) {
+            if (first) {
+                first = false;
+            } else {
+                os << ", ";
+            }
+            os << thing.info(ctx).name.toString(ctx);
         }
-        os << thing.info(ctx).name.toString(ctx);
+        os << ")";
     }
-    os << ")";
+    if (myInfo.resultType) {
+        os <<" -> " << myInfo.resultType->toString(Context(ctx, ctx.defn_root()), tabs);
+    }
     os << std::endl;
 
     std::vector<std::string> children;
