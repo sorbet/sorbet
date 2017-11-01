@@ -53,7 +53,6 @@ TEST_F(NamerFixture, HelloWorld) {
     auto &symbol = methodPair.second.info(ctx);
     ASSERT_EQ(ast::GlobalState::defn_object(), symbol.owner);
     ASSERT_EQ(0, symbol.arguments().size());
-    ASSERT_EQ(ast::GlobalState::defn_todo(), symbol.result());
 }
 
 TEST_F(NamerFixture, Idempotent) {
