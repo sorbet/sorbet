@@ -4,6 +4,7 @@
 
 #include <list>
 #include <vector>
+#include <algorithm> // find_if
 
 using namespace std;
 
@@ -113,6 +114,44 @@ public:
             } else if (auto mdef = dynamic_cast<ast::MethodDef *>(stat.get())) {
                 if (lastStandardMethod) {
                     ast::Symbol &info = mdef->symbol.info(ctx);
+                    if (dynamic_cast<ast::EmptyTree *>(lastStandardMethod->recv.get()) == nullptr ||
+                        lastStandardMethod->block != nullptr) {
+                        ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                               "Misformed standard_method " + lastStandardMethod->toString(ctx));
+                    } else {
+                        printf("got %s", lastStandardMethod->showRaw(ctx).c_str());
+                        std::vector<ast::SymbolRef> argTypes(mdef->args.size());
+                        ast::SymbolRef returnType;
+                        for (auto &arg : lastStandardMethod->args) {
+                            if (auto *hash = dynamic_cast<ast::Hash *>(arg.get())) {
+                                int i = 0;
+                                for (std::unique_ptr<ast::Expression> &key : hash->keys) {
+                                    std::unique_ptr<ast::Expression> &value = hash->values[i];
+                                    if (auto *symbolLit = dynamic_cast<ast::SymbolLit *>(key.get())) {
+                                        if (symbolLit->name == ast::Names::returns()) {
+                                            // fill in return type
+                                        } else {
+                                            auto fnd = find_if(mdef->symbol.info(ctx).arguments().begin(), mdef->symbol.info(ctx).arguments().end(),
+                                              [&](ast::SymbolRef sym) -> bool {
+                                                  return sym.info(ctx).name == symbolLit->name;
+                                              }
+                                            );
+                                            if (fnd == mdef->symbol.info(ctx).arguments().end()) {
+                                                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                                                       "Misformed standard_method. Unknown argument name type {}" + key->toString(ctx));
+                                            } else {
+                                                ast::SymbolRef arg = *fnd;
+                                                arg.info(ctx).result();
+                                            }
+                                        }
+                                    } else {
+                                        ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                                               "Misformed standard_method. Unknown key type {}" + key->toString(ctx));
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     lastStandardMethod.reset(nullptr);
                 }

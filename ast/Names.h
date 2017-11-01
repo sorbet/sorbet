@@ -237,6 +237,11 @@ public:
     static inline NameRef standardMethod() {
         return NameRef(25);
     }
+
+    // used in resolver to find signatures
+    static inline NameRef returns() {
+        return NameRef(26);
+    }
 };
 
 class Name {

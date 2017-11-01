@@ -177,8 +177,11 @@ static UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
 static const char *merge = "merge";
 static UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
 
-static const char *standardMethod = "standardMethod";
+static const char *standardMethod = "standard_method";
 static UTF8Desc standardMethod_DESC{(char *)standardMethod, (int)strlen(standardMethod)};
+
+static const char *returns = "returns";
+static UTF8Desc returns_DESC{(char *)returns, (int)strlen(returns)};
 
 GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
@@ -217,6 +220,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef merge_id = enterNameUTF8(merge_DESC);
     NameRef selfMethodTemp_id = enterNameUTF8(selfMethodTemp_DESC);
     NameRef standardMethod_id = enterNameUTF8(standardMethod_DESC);
+    NameRef returns_id = enterNameUTF8(returns_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -243,6 +247,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(merge_id == Names::merge()));
     DEBUG_ONLY(Error::check(selfMethodTemp_id == Names::selfMethodTemp()));
     DEBUG_ONLY(Error::check(standardMethod_id == Names::standardMethod()));
+    DEBUG_ONLY(Error::check(returns_id == Names::returns()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject

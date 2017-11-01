@@ -12,6 +12,7 @@ enum class ErrorClass {
 
     DynamicConstant,
     StubConstant,
+    InvalidMethodSignature,
 
     PinnedVariableMismatch,
     MethodArgumentMismatch,
