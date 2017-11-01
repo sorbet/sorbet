@@ -170,7 +170,7 @@ public:
                     if (dynamic_cast<ast::EmptyTree *>(lastStandardMethod->recv.get()) == nullptr ||
                         lastStandardMethod->block != nullptr) {
                         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
-                                               "Misformed standard_method " + lastStandardMethod->toString(ctx));
+                                               "Misformed standard_method: {}", lastStandardMethod->toString(ctx));
                     } else {
                         std::vector<ast::SymbolRef> argTypes(mdef->args.size());
                         ast::SymbolRef returnType;
