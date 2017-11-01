@@ -2521,6 +2521,15 @@ class File
     },
     returns: String
   )
+  def self.realdirpath(pathname, dir); end
+
+  standard_method(
+    {
+      pathname: String,
+      dir: Opus::Types.any(String, NilClass),
+    },
+    returns: String
+  )
   def self.realpath(pathname, dir); end
 
   standard_method(
@@ -2884,6 +2893,12 @@ class File::Stat
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def owned?(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def pipe?(); end
 
   standard_method(
     {},
@@ -3793,6 +3808,12 @@ class IO
     returns: IO
   )
   def reopen(other_IO, path, mode_str); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def rewind(); end
 
   standard_method(
     {
@@ -5129,6 +5150,22 @@ class Module
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  def equal?(other); end
+
+  standard_method(
+    {
+      other: BasicObject,
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def eql?(other); end
+
+  standard_method(
+    {
+      other: BasicObject,
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
   def ===(other); end
 
   standard_method(
@@ -6283,6 +6320,14 @@ class Pathname
 
   standard_method(
     {
+      old: String,
+    },
+    returns: Opus::Types.any(Integer, TrueClass, FalseClass)
+  )
+  def symlink?(old); end
+
+  standard_method(
+    {
       p1: String,
     },
     returns: Integer
@@ -6340,6 +6385,12 @@ class Pathname
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def readable?(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def readable_real?(); end
 
   standard_method(
     {
@@ -6468,12 +6519,6 @@ class Pathname
     returns: Pathname
   )
   def sub_ext(p1); end
-
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
-  def symlink?(); end
 
   standard_method(
     {
@@ -6829,6 +6874,15 @@ class Process
     returns: NilClass
   )
   def self.setrlimit(resource, cur_limit, max_limit); end
+
+  standard_method(
+    {
+      pid: Integer,
+      _: Integer,
+    },
+    returns: Integer
+  )
+  def self.setpgid(pid, _); end
 
   standard_method(
     {},
@@ -8297,6 +8351,15 @@ class String
   def scrub!(_); end
 
   standard_method(
+    {
+      _: Integer,
+      _1: Integer,
+    },
+    returns: Integer
+  )
+  def setbyte(_, _1); end
+
+  standard_method(
     {},
     returns: Integer
   )
@@ -8488,6 +8551,14 @@ class String
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def valid_encoding?(); end
+
+  standard_method(
+    {
+      obj: Object,
+    },
+    returns: Opus::Types.any(String, NilClass)
+  )
+  def self.try_convert(obj); end
 end
 
 class StringScanner
@@ -8853,6 +8924,12 @@ class Time
 
   standard_method(
     {},
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def saturday?(); end
+
+  standard_method(
+    {},
     returns: Integer
   )
   def sec(); end
@@ -8990,6 +9067,39 @@ class Time
     returns: String
   )
   def zone(); end
+end
+
+class URI
+  standard_method(
+    {
+      str: String,
+      schemes: Opus::Types.any(Array, NilClass),
+    },
+    returns: Opus::Types.array_of(String)
+  )
+  def self.extract(str, schemes); end
+
+  standard_method(
+    {
+      uri: String,
+    },
+    returns: URI::HTTP
+  )
+  def self.parse(uri); end
+
+  standard_method(
+    {
+      schemes: Opus::Types.any(Array, NilClass),
+    },
+    returns: Opus::Types.array_of(String)
+  )
+  def self.regexp(schemes); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.hash_of(keys: String, values: Class)
+  )
+  def self.scheme_list(); end
 end
 
 class YAML
