@@ -106,13 +106,13 @@ public:
         return argumentsOrMixins;
     }
 
-    SymbolRef parent_;
+    SymbolRef superClass;
     std::shared_ptr<Type> resultType;
 
     inline SymbolRef parent(GlobalState &ctx) {
         Error::check(isClass());
         ensureCompleted(ctx);
-        return parent_;
+        return superClass;
     }
 
     SymbolRef ref(GlobalState &ctx) const;
