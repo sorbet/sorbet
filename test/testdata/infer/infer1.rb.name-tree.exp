@@ -1,14 +1,18 @@
 begin
-  module <emptyTree>::Opus::Types<Types> < ()
-    def any<any>()
+  class <emptyTree>::String1<String1> < (::Object)
+    def getbyte<getbyte>(::String1#getbyte#i)
       <emptyTree>
 
   end
-  class <emptyTree>::String<String> < (::Object)
-    <emptyTree>.standard_method({:_ => ::Opus::Types.any(::Integer)}, {:returns => ::Opus::Types.any(::Integer, ::NilClass)})
-
-    def getbyte<getbyte>()
+  class <emptyTree>::Integer1<Integer1> < (::Object)
+    def +<+>(::Integer1#+#o)
       <emptyTree>
 
   end
+  def baz<baz>()
+    begin
+      ::Object#baz#a = "foo"
+      ::Object#baz#b = ::Object#baz#a.getbyte(1)
+      2.+(::Object#baz#b)
+    end
 end

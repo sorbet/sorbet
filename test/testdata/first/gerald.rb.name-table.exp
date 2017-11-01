@@ -10,43 +10,43 @@ class Opus ()
         method changed_openapi? ()
         method deleted_files ()
         method initialize (raw_diff)
-          field raw_diff ()
+          field raw_diff
         method parse (diff)
-          field diff ()
-          field parts ()
+          field diff
+          field parts
         method removed_lines ()
       class MatchContext (Object)
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
-          field assignee ()
-          field body ()
-          field diff ()
-          field gh_user ()
-          field merge_branch ()
-          field openapi_diff ()
-          field repo ()
-          field title ()
+          field assignee
+          field body
+          field diff
+          field gh_user
+          field merge_branch
+          field openapi_diff
+          field repo
+          field title
         method user_stripe_suffix? ()
       class MatchTimeBudget (Object)
         method check! ()
-          field dur_ms ()
+          field dur_ms
         method initialize ()
         method time_rule (rule)
-          field dur_ms ()
-          field res ()
-          field rule ()
-          field rule_start ()
+          field dur_ms
+          field res
+          field rule
+          field rule_start
       class MatchTimeout (<dynamic>)
         method initialize (message, <todo sym>)
-          field message ()
-          field rule_token ()
+          field message
+          field rule_token
       class Matcher (Object)
         method initialize ()
-          field invalid_rule_ids ()
-          field invalid_rules ()
+          field invalid_rule_ids
+          field invalid_rules
         method match (match_context)
-          field budget ()
-          field match_context ()
-field &&$1 ()
-field &&$2 ()
-field assignTmp$0 ()
+          field budget
+          field match_context
+field &&$1
+field &&$2
+field assignTmp$0
 
