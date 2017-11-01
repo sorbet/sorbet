@@ -216,8 +216,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         std::string line;
         stringstream ss(src);
         int linenum = 1;
+        regex errorRegex("# error: ?(.*)");
+
         while (std::getline(ss, line, '\n')) {
-            regex errorRegex("# error: ?(.*)");
             smatch matches;
             if (regex_search(line, matches, errorRegex)) {
                 expectedErrors[linenum] = matches[1].str();
@@ -230,9 +231,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         for (int i = 0; i < errors.size(); i++) {
             auto &error = errors[i];
             if (error.loc.is_none()) {
-                // The counts matched so let this one slide. The convention is
-                // to put the `error:` at the top of the file so that they are
-                // eaten first when reporting mismatched errors
+                // The convention is to put `error: Unknown Location Error` at
+                // the top of the file for each of these so that they are eaten
+                // first when reporting mismatched errors.
                 unknownLineErrors += 1;
                 continue;
             }
@@ -256,7 +257,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 }
             }
             if (!found) {
-                ADD_FAILURE() << "Unexpeted error: " << error.toString(ctx);
+                ADD_FAILURE() << "Unexpected error: " << error.toString(ctx);
             }
         }
 
