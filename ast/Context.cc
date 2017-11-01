@@ -600,7 +600,7 @@ unsigned int GlobalState::namesUsed() {
 std::string GlobalState::toString() {
     std::vector<std::string> children;
     for (auto element : defn_root().info(*this).members) {
-        if (true || !element.second.isSynthetic()) {
+        if (!element.second.isHidden()) {
             children.push_back(element.second.toString(*this));
         }
     }

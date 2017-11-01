@@ -1,6 +1,6 @@
 #include "Symbols.h"
-#include "Types.h"
 #include "Context.h"
+#include "Types.h"
 #include <sstream>
 #include <string>
 
@@ -50,6 +50,10 @@ bool SymbolRef::isSynthetic() const {
     return this->_id <= GlobalState::defn_last_synthetic_sym()._id;
 }
 
+bool SymbolRef::isHidden() const {
+    return isSynthetic() && _id != GlobalState::defn_Opus()._id;
+}
+
 bool SymbolRef::isPlaceHolder() const {
     return this->_id >= GlobalState::defn_todo()._id && this->_id <= GlobalState::defn_cvar_todo()._id;
 }
@@ -95,7 +99,7 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
         os << ")";
     }
     if (myInfo.resultType) {
-        os <<" -> " << myInfo.resultType->toString(Context(ctx, ctx.defn_root()), tabs);
+        os << " -> " << myInfo.resultType->toString(Context(ctx, ctx.defn_root()), tabs);
     }
     os << std::endl;
 
