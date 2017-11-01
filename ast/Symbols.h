@@ -3,12 +3,14 @@
 
 #include "Names.h"
 #include "common/common.h"
+#include <memory>
 #include <vector>
 
 namespace ruby_typer {
 namespace ast {
 class Symbol;
 class GlobalState;
+class Type;
 
 class SymbolRef {
     friend class GlobalState;
@@ -51,6 +53,9 @@ public:
 
     bool isSynthetic() const;
 
+    /** Not printed when showing name table */
+    bool isHidden() const;
+
     bool isPlaceHolder() const;
 
     bool isPrimitive() const;
@@ -85,12 +90,7 @@ public:
      * IsFromJar, IsFromFile
      * */
     u4 flags;
-    // this contains the tree that only defines the type. TODO: make into tiny
-    // vector
-    // for classes it contains constructor signature
-    // for method - full method type. it is not used to refer to fields. No
-    // fields. Yet.
-    //    std::vector<Tree> definition;
+    // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
 
     inline std::vector<SymbolRef> &arguments() {
@@ -108,17 +108,13 @@ public:
         return argumentsOrMixins;
     }
 
-    SymbolRef resultOrParentOrLoader;
-
-    inline SymbolRef result() const {
-        Error::check(!isClass());
-        return resultOrParentOrLoader;
-    }
+    SymbolRef parent_;
+    std::shared_ptr<Type> resultType;
 
     inline SymbolRef parent(GlobalState &ctx) {
         Error::check(isClass());
         ensureCompleted(ctx);
-        return resultOrParentOrLoader;
+        return parent_;
     }
 
     SymbolRef ref(GlobalState &ctx) const;
@@ -174,13 +170,6 @@ public:
     inline void setCompleted() {
         DEBUG_ONLY(Error::check(!isArray()));
         flags = flags | 0x0C00;
-    }
-
-    void setCompletingFromFile(unsigned int idx) {
-        DEBUG_ONLY(Error::check(!isCompleted()));
-        DEBUG_ONLY(Error::check(!isArray()));
-        flags = flags | 0x0400;
-        resultOrParentOrLoader = idx;
     }
 
     SymbolRef findMember(NameRef name);

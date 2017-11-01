@@ -17,7 +17,6 @@ cc_test(
         "//namer",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-        "@spdlog//:spdlog",
     ],
 )
 
@@ -34,7 +33,6 @@ cc_test(
         "@cxxopts//:cxxopts",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-        "@spdlog//:spdlog",
     ],
 )
 

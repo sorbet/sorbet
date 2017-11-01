@@ -88,10 +88,8 @@ public:
     }
 
     ast::MethodDef *preTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
-        auto args = std::vector<ast::SymbolRef>();
-        ast::SymbolRef result = ast::GlobalState::defn_todo();
         namesForLocals.emplace_back();
-        method->symbol = ctx.state.enterSymbol(ownerFromContext(ctx), method->name, result, args, true);
+        method->symbol = ctx.state.enterSymbol(ownerFromContext(ctx), method->name, true);
         ast::Symbol &symbol = method->symbol.info(ctx);
         // Fill in the arity right with TODOs
         for (auto &arg : method->args) {
@@ -115,8 +113,7 @@ public:
         if (ident->symbol == ctx.state.defn_lvar_todo()) {
             ast::SymbolRef &cur = namesForLocals.back()[ident->name];
             if (!cur.exists()) {
-                std::vector<ast::SymbolRef> args;
-                cur = ctx.state.enterSymbol(ctx.owner, ident->name, ctx.state.defn_todo(), args, false);
+                cur = ctx.state.enterSymbol(ctx.owner, ident->name, false);
             }
             ident->symbol = cur;
         }

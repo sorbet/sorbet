@@ -1,12 +1,13 @@
 #ifndef SRUBY_TYPES_H
 #define SRUBY_TYPES_H
 
-#include "../ast/ast.h"
+#include "Context.h"
+#include "Symbols.h"
 #include <memory>
 #include <string>
 
 namespace ruby_typer {
-namespace infer {
+namespace ast {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
 class Type;
 class Types {
@@ -159,6 +160,6 @@ public:
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
-} // namespace infer
+} // namespace ast
 } // namespace ruby_typer
 #endif // SRUBY_TYPES_H

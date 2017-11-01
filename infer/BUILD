@@ -11,6 +11,7 @@ cc_library(
     hdrs = glob(["*.h"]),
     visibility = ["//visibility:public"],
     deps = [
+        "//ast",
         "//cfg",
         "//common",
     ],
@@ -31,6 +32,5 @@ cc_test(
         "//namer",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-        "@spdlog//:spdlog",
     ],
 )

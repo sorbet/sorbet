@@ -1,3 +1,4 @@
+class Opus ()
 class Outer1 (Object)
 class Outer2 (Object)
   class C (Object)

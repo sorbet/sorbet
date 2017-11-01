@@ -1,5 +1,6 @@
 #include "Symbols.h"
 #include "Context.h"
+#include "Types.h"
 #include <sstream>
 #include <string>
 
@@ -49,6 +50,10 @@ bool SymbolRef::isSynthetic() const {
     return this->_id <= GlobalState::defn_last_synthetic_sym()._id;
 }
 
+bool SymbolRef::isHidden() const {
+    return isSynthetic() && _id != GlobalState::defn_Opus()._id;
+}
+
 bool SymbolRef::isPlaceHolder() const {
     return this->_id >= GlobalState::defn_todo()._id && this->_id <= GlobalState::defn_cvar_todo()._id;
 }
@@ -80,22 +85,29 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
         type = "method";
     }
     os << type << " " << name;
-    os << " (";
-    bool first = true;
-    for (SymbolRef thing : myInfo.argumentsOrMixins) {
-        if (first) {
-            first = false;
-        } else {
-            os << ", ";
+    if (!myInfo.isField()) {
+        os << " (";
+        bool first = true;
+        for (SymbolRef thing : myInfo.argumentsOrMixins) {
+            if (first) {
+                first = false;
+            } else {
+                os << ", ";
+            }
+            os << thing.info(ctx).name.toString(ctx);
         }
-        os << thing.info(ctx).name.toString(ctx);
+        os << ")";
     }
-    os << ")";
+    if (myInfo.resultType) {
+        os << " -> " << myInfo.resultType->toString(Context(ctx, ctx.defn_root()), tabs + 2);
+    }
     os << std::endl;
 
     std::vector<std::string> children;
     for (auto pair : members) {
-        children.push_back(pair.second.toString(ctx, tabs + 1));
+        if (!pair.second.isHidden()) {
+            children.push_back(pair.second.toString(ctx, tabs + 1));
+        }
     }
     std::sort(children.begin(), children.end());
     for (auto row : children) {

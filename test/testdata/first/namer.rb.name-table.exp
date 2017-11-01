@@ -7,6 +7,7 @@ class NormalClass (Object)
   class InnerClass (Object)
   class InnerModule ()
   method normal_method ()
+class Opus ()
 class OtherMixin ()
 class Parent (Object)
 

@@ -6,5 +6,6 @@
 #include "Names.h"
 #include "TreeMap.h"
 #include "Trees.h"
+#include "Types.h"
 
 #endif // SRUBY_AST_H

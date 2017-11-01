@@ -3,16 +3,16 @@
 #include <algorithm> // find_if
 
 using namespace ruby_typer;
-using namespace ruby_typer::infer;
+using namespace ruby_typer::ast;
 using namespace std;
 
 // improve debugging.
-template class std::shared_ptr<ruby_typer::infer::Type>;
+template class std::shared_ptr<ruby_typer::ast::Type>;
 
-std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
-                                                   std::shared_ptr<Type> &t2);
-std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Context ctx, std::shared_ptr<Type> &t1,
-                                                                       std::shared_ptr<Type> &t2) {
+std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
+                                                 std::shared_ptr<Type> &t2);
+std::shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, std::shared_ptr<Type> &t1,
+                                                                   std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return t1;
     }
@@ -44,13 +44,13 @@ std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Cont
     if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
             // both are proxy
-            std::shared_ptr<ruby_typer::infer::Type> result;
+            std::shared_ptr<ruby_typer::ast::Type> result;
             ruby_typer::typecase(
                 p1,
                 [&](ArrayType *a1) { // Warning: this implements COVARIANT arrays
                     if (ArrayType *a2 = dynamic_cast<ArrayType *>(p2)) {
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                            std::vector<std::shared_ptr<ruby_typer::infer::Type>> elemLubs;
+                            std::vector<std::shared_ptr<ruby_typer::ast::Type>> elemLubs;
                             int i = 0;
                             for (auto &el2 : a2->elems) {
                                 elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
@@ -69,8 +69,8 @@ std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Cont
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = 0;
-                            std::vector<std::shared_ptr<ruby_typer::infer::Literal>> keys;
-                            std::vector<std::shared_ptr<ruby_typer::infer::Type>> valueLubs;
+                            std::vector<std::shared_ptr<ruby_typer::ast::Literal>> keys;
+                            std::vector<std::shared_ptr<ruby_typer::ast::Type>> valueLubs;
                             for (auto &el2 : h2->keys) {
                                 ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
                                 Error::check(u2 != nullptr);
@@ -131,9 +131,9 @@ std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::lub(ast::Cont
     }
 }
 
-std::shared_ptr<ruby_typer::infer::Type> distributeOr(ast::Context ctx, OrType *t1, std::shared_ptr<Type> t2) {
-    std::shared_ptr<ruby_typer::infer::Type> n1 = Types::lub(ctx, t2, t1->left);
-    std::shared_ptr<ruby_typer::infer::Type> n2 = Types::lub(ctx, t2, t1->right);
+std::shared_ptr<ruby_typer::ast::Type> distributeOr(ast::Context ctx, OrType *t1, std::shared_ptr<Type> t2) {
+    std::shared_ptr<ruby_typer::ast::Type> n1 = Types::lub(ctx, t2, t1->left);
+    std::shared_ptr<ruby_typer::ast::Type> n2 = Types::lub(ctx, t2, t1->right);
     if (Types::isSubType(ctx, n1, n2)) {
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
@@ -142,8 +142,8 @@ std::shared_ptr<ruby_typer::infer::Type> distributeOr(ast::Context ctx, OrType *
     return std::make_shared<OrType>(n1, n2);
 }
 
-std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
-                                                   std::shared_ptr<Type> &t2) {
+std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
+                                                 std::shared_ptr<Type> &t2) {
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
     if (g1->kind() > g2->kind()) // force the relation to be symmentric and half the implementation
@@ -164,7 +164,7 @@ std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    std::shared_ptr<ruby_typer::infer::Type> result;
+    std::shared_ptr<ruby_typer::ast::Type> result;
 
     if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
         return distributeOr(ctx, o2, t1);
@@ -197,8 +197,8 @@ std::shared_ptr<ruby_typer::infer::Type> lubGround(ast::Context ctx, std::shared
     }
 }
 
-std::shared_ptr<ruby_typer::infer::Type> ruby_typer::infer::Types::glb(ast::Context ctx, std::shared_ptr<Type> &t1,
-                                                                       std::shared_ptr<Type> &t2) {
+std::shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::glb(ast::Context ctx, std::shared_ptr<Type> &t1,
+                                                                   std::shared_ptr<Type> &t2) {
     Error::notImplemented();
 }
 
@@ -251,11 +251,11 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     Error::raise("should never ber reachable");
 }
 
-bool ruby_typer::infer::Types::equiv(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+bool ruby_typer::ast::Types::equiv(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 
-bool ruby_typer::infer::Types::isSubType(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+bool ruby_typer::ast::Types::isSubType(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -369,17 +369,17 @@ std::shared_ptr<Type> Types::dynamic() {
     return make_shared<ClassType>(ast::GlobalState::defn_dynamic());
 }
 
-ruby_typer::infer::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
+ruby_typer::ast::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
 
-std::string ruby_typer::infer::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
-    return this->symbol.toString(ctx);
+std::string ruby_typer::ast::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
+    return this->symbol.info(ctx).fullName(ctx);
 }
 
-std::string ruby_typer::infer::ClassType::typeName() {
+std::string ruby_typer::ast::ClassType::typeName() {
     return "ClassType";
 }
 
-ruby_typer::infer::ProxyType::ProxyType(std::shared_ptr<ruby_typer::infer::Type> underlying)
+ruby_typer::ast::ProxyType::ProxyType(std::shared_ptr<ruby_typer::ast::Type> underlying)
     : underlying(std::move(underlying)) {}
 
 std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name,
@@ -411,17 +411,24 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
         if (info.arguments().size() == args.size()) { // todo: this should become actual argument matching
             int i = 0;
             for (std::shared_ptr<Type> &argTpe : args) {
-                if (!Types::isSubType(ctx, argTpe,
-                                      make_shared<ClassType>(info.arguments()[i].info(ctx).result().orElse(
-                                          ast::GlobalState::defn_dynamic())))) {
+                shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
+                if (!expectedType) {
+                    expectedType = Types::dynamic();
+                }
+
+                if (!Types::isSubType(ctx, argTpe, expectedType)) {
                     ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
                                            "Argument {}, does not match expected type.\n Expected {}, found: {}", i,
-                                           info.arguments()[i].info(ctx).result().toString(ctx), argTpe->toString(ctx));
+                                           expectedType->toString(ctx), argTpe->toString(ctx));
                 }
 
                 i++;
             }
-            return make_shared<ClassType>(method.info(ctx).result().orElse(ast::GlobalState::defn_dynamic()));
+            shared_ptr<Type> resultType = method.info(ctx).resultType;
+            if (!resultType) {
+                resultType = Types::dynamic();
+            }
+            return resultType;
         } else {
             ctx.state.errors.error(
                 ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
@@ -440,16 +447,16 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
 }
 
 // TODO: somehow reuse existing references instead of allocating new ones.
-ruby_typer::infer::Literal::Literal(int val)
+ruby_typer::ast::Literal::Literal(int val)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Integer())), value(val) {}
 
-ruby_typer::infer::Literal::Literal(float val)
+ruby_typer::ast::Literal::Literal(float val)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Float())), value(*reinterpret_cast<int *>(&val)) {}
 
-ruby_typer::infer::Literal::Literal(ast::NameRef val)
+ruby_typer::ast::Literal::Literal(ast::NameRef val)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_String())), value(val._id) {}
 
-ruby_typer::infer::Literal::Literal(bool val)
+ruby_typer::ast::Literal::Literal(bool val)
     : ProxyType(
           std::make_shared<ClassType>(val ? ast::GlobalState::defn_TrueClass() : ast::GlobalState::defn_FalseClass())),
       value(val ? 1 : 0) {}
@@ -462,7 +469,7 @@ std::string Literal::toString(ast::Context ctx, int tabs) {
     return "Literal[" + this->underlying->toString(ctx, tabs) + "]{" + to_string(value) + "}";
 }
 
-ruby_typer::infer::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> &elements)
+ruby_typer::ast::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> &elements)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Array())), elems(std::move(elements)) {}
 
 std::string ArrayType::typeName() {
@@ -506,8 +513,8 @@ std::string ArrayType::toString(ast::Context ctx, int tabs) {
     return buf.str();
 }
 
-ruby_typer::infer::HashType::HashType(std::vector<std::shared_ptr<Literal>> &keys,
-                                      std::vector<std::shared_ptr<Type>> &values)
+ruby_typer::ast::HashType::HashType(std::vector<std::shared_ptr<Literal>> &keys,
+                                    std::vector<std::shared_ptr<Type>> &values)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(std::move(keys)),
       values(std::move(values)) {}
 

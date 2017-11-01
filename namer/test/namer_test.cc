@@ -27,6 +27,9 @@ private:
     unique_ptr<ast::GlobalState> ctxPtr;
 };
 
+static const char *testClass = "Test";
+static ast::UTF8Desc testClass_DESC{(char *)testClass, (int)std::strlen(testClass)};
+
 std::unique_ptr<ast::Statement> getTree(ast::GlobalState &cb, std::string str) {
     auto result = parser::parse_ruby(cb, "<test>", str);
     ruby_typer::ast::Context ctx(cb, cb.defn_root());
@@ -50,7 +53,6 @@ TEST_F(NamerFixture, HelloWorld) {
     auto &symbol = methodPair.second.info(ctx);
     ASSERT_EQ(ast::GlobalState::defn_object(), symbol.owner);
     ASSERT_EQ(0, symbol.arguments().size());
-    ASSERT_EQ(ast::GlobalState::defn_todo(), symbol.result());
 }
 
 TEST_F(NamerFixture, Idempotent) {
@@ -71,9 +73,10 @@ TEST_F(NamerFixture, Idempotent) {
 
 TEST_F(NamerFixture, NameClass) {
     auto ctx = getCtx();
-    auto tree = getTree(ctx, "class Foo; end");
+    auto tree = getTree(ctx, "class Test; class Foo; end; end");
     namer::Namer::run(ctx, std::move(tree));
-    auto &rootScope = ast::GlobalState::defn_root().info(ctx);
+    auto &rootScope =
+        ast::GlobalState::defn_root().info(ctx).findMember(ctx.state.enterNameUTF8(testClass_DESC)).info(ctx);
 
     ASSERT_EQ(1, rootScope.members.size());
     auto fooPair = rootScope.members[0];
@@ -84,9 +87,10 @@ TEST_F(NamerFixture, NameClass) {
 
 TEST_F(NamerFixture, InsideClass) {
     auto ctx = getCtx();
-    auto tree = getTree(ctx, "class Foo; def bar; end; end");
+    auto tree = getTree(ctx, "class Test; class Foo; def bar; end; end; end");
     namer::Namer::run(ctx, std::move(tree));
-    auto &rootScope = ast::GlobalState::defn_root().info(ctx);
+    auto &rootScope =
+        ast::GlobalState::defn_root().info(ctx).findMember(ctx.state.enterNameUTF8(testClass_DESC)).info(ctx);
 
     ASSERT_EQ(1, rootScope.members.size());
     auto fooSym = rootScope.members[0].second;

@@ -2,4 +2,5 @@ class A ()
   class B ()
     class C (Object)
 class B ()
+class Opus ()
 

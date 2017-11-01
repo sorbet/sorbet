@@ -1,3 +1,4 @@
 class BlockTest (Object)
   method block_pass ()
+class Opus ()
 

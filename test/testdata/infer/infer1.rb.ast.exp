@@ -1,14 +1,22 @@
 begin
-  module <emptyTree>::Opus::Types<<todo sym>> < ()
-    def any<<todo sym>>()
+  class <emptyTree>::String1<<todo sym>> < (::Object)
+    <emptyTree>.standard_method({:i => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
+
+    def getbyte<<todo sym>>(i<todo lvar sym>)
       <emptyTree>
 
   end
-  class <emptyTree>::String<<todo sym>> < (::Object)
-    <emptyTree>.standard_method({:_ => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
+  class <emptyTree>::Integer1<<todo sym>> < (::Object)
+    <emptyTree>.standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
 
-    def getbyte<<todo sym>>()
+    def +<<todo sym>>(o<todo lvar sym>)
       <emptyTree>
 
   end
+  def baz<<todo sym>>()
+    begin
+      a<todo lvar sym> = "foo"
+      b<todo lvar sym> = a<todo lvar sym>.getbyte(1)
+      2.+(b<todo lvar sym>)
+    end
 end

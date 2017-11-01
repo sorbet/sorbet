@@ -18,7 +18,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//common",
-        "@spdlog//:spdlog",
     ],
 )
 

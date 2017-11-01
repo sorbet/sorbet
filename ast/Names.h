@@ -232,6 +232,31 @@ public:
     static inline NameRef selfMethodTemp() {
         return NameRef(24);
     }
+
+    // used in resolver to find signatures
+    static inline NameRef standardMethod() {
+        return NameRef(25);
+    }
+
+    // used in resolver to find signatures
+    static inline NameRef returns() {
+        return NameRef(26);
+    }
+
+    // used in resolver to find signatures
+    static inline NameRef all() {
+        return NameRef(27);
+    }
+
+    // used in resolver to find signatures
+    static inline NameRef any() {
+        return NameRef(28);
+    }
+
+    // used in resolver to find signatures
+    static inline NameRef nilable() {
+        return NameRef(29);
+    }
 };
 
 class Name {
