@@ -242,6 +242,21 @@ public:
     static inline NameRef returns() {
         return NameRef(26);
     }
+
+    // used in resolver to find signatures
+    static inline NameRef all() {
+        return NameRef(27);
+    }
+
+    // used in resolver to find signatures
+    static inline NameRef any() {
+        return NameRef(28);
+    }
+
+    // used in resolver to find signatures
+    static inline NameRef nilable() {
+        return NameRef(29);
+    }
 };
 
 class Name {
