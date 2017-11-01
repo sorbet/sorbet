@@ -255,10 +255,14 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         for (auto &error : expectedErrors) {
             if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
-                if (unknownLineErrors-- < 0) {
+                if (--unknownLineErrors < 0) {
                     ADD_FAILURE() << "Expected error didn't happen on line " << error.first << endl;
                 }
             }
+        }
+
+        if (unknownLineErrors > 0) {
+            ADD_FAILURE() << "Too many errors without locations. Add " << unknownLineErrors << " more `error:` lines at the top of your file" << endl;
         }
 
         TEST_COUT << "errors OK" << endl;

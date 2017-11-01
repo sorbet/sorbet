@@ -1,7 +1,6 @@
 # error:
 # error:
 # error:
-# error:
 require_relative '../../../extn'
 Opus::AutogenLoader.init(__FILE__) # error:
 
