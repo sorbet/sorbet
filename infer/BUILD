@@ -12,7 +12,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//cfg",
-        "//types",
         "//common",
     ],
 )

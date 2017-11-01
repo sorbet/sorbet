@@ -1,12 +1,13 @@
 #ifndef SRUBY_TYPES_H
 #define SRUBY_TYPES_H
 
-#include "../ast/ast.h"
+#include "Context.h"
+#include "Symbols.h"
 #include <memory>
 #include <string>
 
 namespace ruby_typer {
-namespace types {
+namespace ast {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
 class Type;
 class Types {
