@@ -15,7 +15,6 @@ namespace ruby_typer {
 namespace infer {
 namespace test {
 
-using namespace ast;
 auto console = spd::stderr_color_mt("infer");
 
 class InferFixture : public ::testing::Test {
@@ -39,25 +38,25 @@ std::unique_ptr<ast::Statement> getTree(ast::GlobalState &cb, std::string str) {
 
 TEST_F(InferFixture, LiteralsSubtyping) {
     auto ctx = getCtx();
-    auto intLit = make_shared<Literal>(1);
-    auto intClass = make_shared<ClassType>(ast::GlobalState::defn_Integer());
-    auto floatLit = make_shared<Literal>(1.0f);
-    auto floatClass = make_shared<ClassType>(ast::GlobalState::defn_Float());
-    auto trueLit = make_shared<Literal>(true);
-    auto trueClass = make_shared<ClassType>(ast::GlobalState::defn_TrueClass());
-    auto stringLit = make_shared<Literal>(ast::Names::assignTemp());
-    auto stringClass = make_shared<ClassType>(ast::GlobalState::defn_String());
-    EXPECT_TRUE(Types::isSubType(ctx, intLit, intClass));
-    EXPECT_TRUE(Types::isSubType(ctx, floatLit, floatClass));
-    EXPECT_TRUE(Types::isSubType(ctx, trueLit, trueClass));
-    EXPECT_TRUE(Types::isSubType(ctx, stringLit, stringClass));
+    auto intLit = make_shared<ast::Literal>(1);
+    auto intClass = make_shared<ast::ClassType>(ast::GlobalState::defn_Integer());
+    auto floatLit = make_shared<ast::Literal>(1.0f);
+    auto floatClass = make_shared<ast::ClassType>(ast::GlobalState::defn_Float());
+    auto trueLit = make_shared<ast::Literal>(true);
+    auto trueClass = make_shared<ast::ClassType>(ast::GlobalState::defn_TrueClass());
+    auto stringLit = make_shared<ast::Literal>(ast::Names::assignTemp());
+    auto stringClass = make_shared<ast::ClassType>(ast::GlobalState::defn_String());
+    EXPECT_TRUE(ast::Types::isSubType(ctx, intLit, intClass));
+    EXPECT_TRUE(ast::Types::isSubType(ctx, floatLit, floatClass));
+    EXPECT_TRUE(ast::Types::isSubType(ctx, trueLit, trueClass));
+    EXPECT_TRUE(ast::Types::isSubType(ctx, stringLit, stringClass));
 
-    EXPECT_TRUE(Types::isSubType(ctx, intLit, intLit));
-    EXPECT_TRUE(Types::isSubType(ctx, floatLit, floatLit));
-    EXPECT_TRUE(Types::isSubType(ctx, trueLit, trueLit));
-    EXPECT_TRUE(Types::isSubType(ctx, stringLit, stringLit));
+    EXPECT_TRUE(ast::Types::isSubType(ctx, intLit, intLit));
+    EXPECT_TRUE(ast::Types::isSubType(ctx, floatLit, floatLit));
+    EXPECT_TRUE(ast::Types::isSubType(ctx, trueLit, trueLit));
+    EXPECT_TRUE(ast::Types::isSubType(ctx, stringLit, stringLit));
 
-    EXPECT_FALSE(Types::isSubType(ctx, intClass, intLit));
+    EXPECT_FALSE(ast::Types::isSubType(ctx, intClass, intLit));
 }
 
 TEST_F(InferFixture, ClassesLubs) {
@@ -71,13 +70,13 @@ TEST_F(InferFixture, ClassesLubs) {
     ASSERT_EQ("Foo", fooPair.first.name(ctx).toString(ctx));
     ASSERT_EQ("Bar", barPair.first.name(ctx).toString(ctx));
 
-    auto fooType = make_shared<ClassType>(fooPair.second);
-    auto barType = make_shared<ClassType>(barPair.second);
+    auto fooType = make_shared<ast::ClassType>(fooPair.second);
+    auto barType = make_shared<ast::ClassType>(barPair.second);
 
-    ASSERT_TRUE(Types::isSubType(ctx, fooType, barType));
-    ASSERT_TRUE(Types::isSubType(ctx, fooType, fooType));
-    ASSERT_TRUE(Types::isSubType(ctx, barType, barType));
-    ASSERT_FALSE(Types::isSubType(ctx, barType, fooType));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, fooType, barType));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, fooType, fooType));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barType, barType));
+    ASSERT_FALSE(ast::Types::isSubType(ctx, barType, fooType));
 }
 
 TEST_F(InferFixture, ClassesSubtyping) {
@@ -93,33 +92,33 @@ TEST_F(InferFixture, ClassesSubtyping) {
     ASSERT_EQ("Foo1", foo1Pair.first.name(ctx).toString(ctx));
     ASSERT_EQ("Bar", barPair.first.name(ctx).toString(ctx));
 
-    auto foo1Type = make_shared<ClassType>(foo1Pair.second);
-    auto foo2Type = make_shared<ClassType>(foo2Pair.second);
-    auto barType = make_shared<ClassType>(barPair.second);
+    auto foo1Type = make_shared<ast::ClassType>(foo1Pair.second);
+    auto foo2Type = make_shared<ast::ClassType>(foo2Pair.second);
+    auto barType = make_shared<ast::ClassType>(barPair.second);
 
-    auto barNfoo1 = Types::lub(ctx, barType, foo1Type);
-    auto foo1Nbar = Types::lub(ctx, foo1Type, barType);
-    auto barNfoo2 = Types::lub(ctx, barType, foo2Type);
-    auto foo2Nbar = Types::lub(ctx, foo2Type, barType);
-    auto foo1Nfoo2 = Types::lub(ctx, foo1Type, foo2Type);
-    auto foo2Nfoo1 = Types::lub(ctx, foo2Type, foo1Type);
+    auto barNfoo1 = ast::Types::lub(ctx, barType, foo1Type);
+    auto foo1Nbar = ast::Types::lub(ctx, foo1Type, barType);
+    auto barNfoo2 = ast::Types::lub(ctx, barType, foo2Type);
+    auto foo2Nbar = ast::Types::lub(ctx, foo2Type, barType);
+    auto foo1Nfoo2 = ast::Types::lub(ctx, foo1Type, foo2Type);
+    auto foo2Nfoo1 = ast::Types::lub(ctx, foo2Type, foo1Type);
 
     ASSERT_EQ("ClassType", barNfoo1->typeName());
-    ASSERT_TRUE(Types::isSubType(ctx, barNfoo1, barType));
-    ASSERT_TRUE(Types::isSubType(ctx, barNfoo1, foo1Type));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barNfoo1, barType));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barNfoo1, foo1Type));
     ASSERT_EQ("ClassType", barNfoo2->typeName());
-    ASSERT_TRUE(Types::isSubType(ctx, barNfoo2, barType));
-    ASSERT_TRUE(Types::isSubType(ctx, barNfoo2, foo2Type));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barNfoo2, barType));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barNfoo2, foo2Type));
     ASSERT_EQ("ClassType", foo1Nbar->typeName());
-    ASSERT_TRUE(Types::isSubType(ctx, foo1Nbar, barType));
-    ASSERT_TRUE(Types::isSubType(ctx, foo1Nbar, foo1Type));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, foo1Nbar, barType));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, foo1Nbar, foo1Type));
     ASSERT_EQ("ClassType", foo2Nbar->typeName());
-    ASSERT_TRUE(Types::isSubType(ctx, foo2Nbar, barType));
-    ASSERT_TRUE(Types::isSubType(ctx, foo2Nbar, foo2Type));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, foo2Nbar, barType));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, foo2Nbar, foo2Type));
 
-    ASSERT_TRUE(Types::equiv(ctx, barNfoo2, foo2Nbar));
-    ASSERT_TRUE(Types::equiv(ctx, barNfoo1, foo1Nbar));
-    ASSERT_TRUE(Types::equiv(ctx, foo1Nfoo2, foo2Nfoo1));
+    ASSERT_TRUE(ast::Types::equiv(ctx, barNfoo2, foo2Nbar));
+    ASSERT_TRUE(ast::Types::equiv(ctx, barNfoo1, foo1Nbar));
+    ASSERT_TRUE(ast::Types::equiv(ctx, foo1Nfoo2, foo2Nfoo1));
 }
 
 } // namespace test
