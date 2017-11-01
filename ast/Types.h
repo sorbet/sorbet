@@ -74,6 +74,8 @@ public:
     virtual std::string typeName() = 0;
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
                                                std::vector<std::shared_ptr<Type>> &args) = 0;
+    virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name,
+                                                      int i) = 0;
     bool isDynamic();
 };
 
@@ -90,6 +92,8 @@ public:
 
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
                                                std::vector<std::shared_ptr<Type>> &args);
+    virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name,
+                                                      int i);
 };
 
 class ClassType : public GroundType {
@@ -102,6 +106,8 @@ public:
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
                                                std::vector<std::shared_ptr<Type>> &args);
+    virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name,
+                                                      int i);
 };
 
 class OrType : public GroundType {
@@ -115,6 +121,8 @@ public:
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
                                                std::vector<std::shared_ptr<Type>> &args);
+    virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name,
+                                                      int i);
 };
 
 class AndType : public GroundType {
@@ -128,6 +136,9 @@ public:
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
                                                std::vector<std::shared_ptr<Type>> &args);
+
+    virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name,
+                                               int i);
 };
 
 class Literal : public ProxyType {
