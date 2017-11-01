@@ -44,9 +44,9 @@ public:
 
     inline SymbolRef orElse(SymbolRef other) const {
         if (exists())
-            this;
+            return *this;
         else
-            other;
+            return other;
     }
 
     bool isSynthetic() const;

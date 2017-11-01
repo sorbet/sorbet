@@ -39,6 +39,7 @@ cc_library(
     hdrs = glob(["include/**/*.hh"]),
     copts = [
         "-std=c++14",
+        "-Wno-unused-const-variable",
         "-I$(GENDIR)/external/parser/cc",
         "-I$(GENDIR)/external/parser/cc/grammars",
     ],

@@ -214,8 +214,8 @@ public:
 
     std::string toString(ast::Context ctx);
 
-    static inline int FORWARD_TOPO_SORT_VISITED = 1 << 0;
-    static inline int BACKWARD_TOPO_SORT_VISITED = 1 << 1;
+    static int FORWARD_TOPO_SORT_VISITED;
+    static int BACKWARD_TOPO_SORT_VISITED;
 
 private:
     CFG();

@@ -33,7 +33,6 @@ cc_library(
     includes = [
         "googletest/include",
     ],
-    linkopts = ["-pthread"],
     visibility = ["//visibility:public"],
     deps = [
         ":gtest_prod",
