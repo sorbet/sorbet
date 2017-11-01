@@ -1,9 +1,9 @@
 begin
-  <emptyTree>.require_relative("../../../extn")
+  self(TODO).require_relative("../../../extn")
   <emptyTree>::Opus::AutogenLoader.init("__FILE__")
   module <emptyTree>::Opus::CIBot::Gerald<<todo sym>> < ()
     class <emptyTree>::MatchTimeout<<todo sym>> < (<emptyTree>::StandardError)
-      <emptyTree>.attr_reader(:rule_token)
+      self(TODO).attr_reader(:rule_token)
 
       def initialize<<todo sym>>(message<todo lvar sym>, rule_token<todo lvar sym>: = "")
         begin
@@ -14,7 +14,7 @@ begin
     end
 
     class <emptyTree>::Matcher<<todo sym>> < (::Object)
-      <emptyTree>.include(<emptyTree>::Chalk::Log)
+      self(TODO).include(<emptyTree>::Chalk::Log)
 
       <emptyTree>::MAX_AFFECTED_FILES = 100
 
@@ -29,7 +29,7 @@ begin
           if invalid_rules<todo lvar sym>.empty?().!()
             begin
               invalid_rule_ids<todo lvar sym> = invalid_rules<todo lvar sym>.map(<Not Supported (BlockPass)>).join(",")
-              <emptyTree>.log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids<todo lvar sym>))
+              self(TODO).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids<todo lvar sym>))
             end
           else
             <emptyTree>
@@ -40,7 +40,7 @@ begin
         begin
           if match_context<todo lvar sym>.diff().affected_files().count().>(<emptyTree>::MAX_AFFECTED_FILES)
             begin
-              <emptyTree>.log().warn("Gerald skipping large PR with ".concat(begin
+              self(TODO).log().warn("Gerald skipping large PR with ".concat(begin
                     match_context<todo lvar sym>.diff().affected_files().count()
                   end.to_s()).concat(" affected files").to_s())
               return []
@@ -59,21 +59,21 @@ begin
     end
 
     class <emptyTree>::MatchContext<<todo sym>> < (::Object)
-      <emptyTree>.attr_reader(:repo)
+      self(TODO).attr_reader(:repo)
 
-      <emptyTree>.attr_reader(:assignee)
+      self(TODO).attr_reader(:assignee)
 
-      <emptyTree>.attr_reader(:gh_user)
+      self(TODO).attr_reader(:gh_user)
 
-      <emptyTree>.attr_reader(:merge_branch)
+      self(TODO).attr_reader(:merge_branch)
 
-      <emptyTree>.attr_reader(:body)
+      self(TODO).attr_reader(:body)
 
-      <emptyTree>.attr_reader(:title)
+      self(TODO).attr_reader(:title)
 
-      <emptyTree>.attr_reader(:diff)
+      self(TODO).attr_reader(:diff)
 
-      <emptyTree>.attr_reader(:openapi_diff)
+      self(TODO).attr_reader(:openapi_diff)
 
       def initialize<<todo sym>>(repo<todo lvar sym>, assignee<todo lvar sym>, gh_user<todo lvar sym>, merge_branch<todo lvar sym>, body<todo lvar sym>, title<todo lvar sym>, diff<todo lvar sym>, openapi_diff<todo lvar sym>)
         begin
@@ -106,7 +106,7 @@ begin
             <emptyTree>::Time.now().-(@start<todo ivar sym>)
           end.*(1000)
           if dur_ms<todo lvar sym>.>(<emptyTree>::TOTAL_TIME_MS)
-            <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
+            self(TODO).raise(<emptyTree>::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
                     <emptyTree>::TOTAL_TIME_MS
                   end.to_s()).concat("ms").to_s()))
           else
@@ -122,7 +122,7 @@ begin
             <emptyTree>::Time.now().-(rule_start<todo lvar sym>)
           end.*(1000)
           if dur_ms<todo lvar sym>.>(<emptyTree>::PER_RULE_MS)
-            <emptyTree>.raise(<emptyTree>::MatchTimeout.new("Gerald rule '".concat(begin
+            self(TODO).raise(<emptyTree>::MatchTimeout.new("Gerald rule '".concat(begin
                     rule<todo lvar sym>.token()
                   end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
                     dur_ms<todo lvar sym>.to_i()
@@ -132,7 +132,7 @@ begin
           else
             <emptyTree>
           end
-          <emptyTree>.check!()
+          self(TODO).check!()
           res<todo lvar sym>
         end
 
@@ -142,11 +142,11 @@ begin
       def initialize<<todo sym>>(raw_diff<todo lvar sym>)
         begin
           @raw<todo ivar sym> = raw_diff<todo lvar sym>
-          @parsed<todo ivar sym> = <emptyTree>.parse(raw_diff<todo lvar sym>)
+          @parsed<todo ivar sym> = self(TODO).parse(raw_diff<todo lvar sym>)
         end
 
       def affected_files<<todo sym>>()
-        <emptyTree>.added_files().+(<emptyTree>.deleted_files()).+(<emptyTree>.changed_files())
+        self(TODO).added_files().+(self(TODO).deleted_files()).+(self(TODO).changed_files())
 
       def added_files<<todo sym>>()
         @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
@@ -180,12 +180,12 @@ begin
         end.flatten()
 
       def changed_lines<<todo sym>>()
-        <emptyTree>.added_lines().+(<emptyTree>.removed_lines())
+        self(TODO).added_lines().+(self(TODO).removed_lines())
 
       def changed_openapi?<<todo sym>>()
-        <emptyTree>.changed_files().include?(<emptyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
+        self(TODO).changed_files().include?(<emptyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
 
-      <emptyTree>.private(def parse<<todo sym>>(diff<todo lvar sym>)
+      self(TODO).private(def parse<<todo sym>>(diff<todo lvar sym>)
           begin
             parts<todo lvar sym> = diff<todo lvar sym>.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if parts<todo lvar sym>

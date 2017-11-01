@@ -39,16 +39,18 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Child<Child> < (::Parent, ::Mixin)
-    <emptyTree>.include(::Mixin, ::Mixin)
+  class <emptyTree>::Child<Child> < (::Parent)
+    self(TODO).include(::Mixin)
 
-    <emptyTree>.include(3)
+    self(TODO).include(::Mixin, ::Mixin)
 
-    <emptyTree>.include(::Mixin) do ||
+    self(TODO).include(3)
+
+    self(TODO).include(::Mixin) do ||
       <emptyTree>
     end
 
-    <emptyTree>.whatever().include(::OtherMixin)
+    self(TODO).whatever().include(::OtherMixin)
 
   end
 end

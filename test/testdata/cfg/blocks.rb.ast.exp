@@ -1,6 +1,6 @@
 class <emptyTree>::BlockTest<<todo sym>> < (::Object)
   def block_pass<<todo sym>>()
-    <emptyTree>.foo(1, 2, 3) do |x<todo lvar sym>, y<todo lvar sym>|
+    self(TODO).foo(1, 2, 3) do |x<todo lvar sym>, y<todo lvar sym>|
       x<todo lvar sym>
     end
 

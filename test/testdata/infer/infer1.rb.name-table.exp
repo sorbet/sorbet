@@ -1,11 +1,8 @@
 class Integer1 (Object)
-  method + (o) -> ::Integer
-    field o -> ::Integer
+  method + (o)
+    field o
 class Opus ()
 class String1 (Object)
-  method getbyte (i) -> OrType {
-        left = ::Integer
-        right = ::NilClass
-      }
-    field i -> ::Integer
+  method getbyte (i)
+    field i
 

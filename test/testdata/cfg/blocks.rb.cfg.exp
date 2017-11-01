@@ -2,7 +2,7 @@ digraph block_pass {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\n<self>$1 = self\nstatTmp$2 = NotSupported()\nstatTmp$3 = 1\nstatTmp$4 = 2\nstatTmp$5 = 3\n<always>"];
+    bb0 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\n<self>$1 = self\nstatTmp$2 = self\nstatTmp$3 = 1\nstatTmp$4 = 2\nstatTmp$5 = 3\n<always>"];
     bb0 -> bb2;
     bb1 [label = "()\n<never>"];
     bb1 -> bb1;
