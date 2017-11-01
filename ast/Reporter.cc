@@ -6,12 +6,12 @@ namespace ast {
 
 using namespace std;
 
-void Reporter::_error(unique_ptr<Error> error) {
+void Reporter::_error(Error error) {
     if (keepErrorsInMemory) {
-        errors.emplace_back(std::move(error));
+        errors.push_back(error);
         return;
     }
-    ctx_.logger.error("{}", error->toString(ctx_));
+    ctx_.logger.error("{}", error.toString(ctx_));
 }
 
 std::string Reporter::Error::toString(GlobalState &ctx) {
@@ -29,8 +29,8 @@ std::string Reporter::Error::toString(GlobalState &ctx) {
     return buf.str();
 }
 
-std::vector<std::unique_ptr<Reporter::Error>> Reporter::getAndEmptyErrors() {
-    return std::move(errors);
+std::vector<Reporter::Error> Reporter::getAndEmptyErrors() {
+    return errors;
 }
 
 } // namespace ast

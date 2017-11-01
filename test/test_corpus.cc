@@ -230,7 +230,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 ADD_FAILURE() << "Expected error on line: " << e.first << endl;
             }
             for (auto &e : errors) {
-                ADD_FAILURE() << "Got error: " << e->toString(ctx) << endl;
+                ADD_FAILURE() << "Got error: " << e.toString(ctx) << endl;
             }
             FAIL() << "Mismatched error count. Expected " << expectedErrors.size() << " errors but got "
                    << errors.size();
@@ -238,13 +238,13 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         for (int i = 0; i < errors.size(); i++) {
             auto &error = errors[i];
-            if (error->loc.is_none()) {
+            if (error.loc.is_none()) {
                 // The counts matched so let this one slide. The convention is
                 // to put the `:error:` at the top of the file.
                 continue;
             }
 
-            auto pos = error->loc.position(ctx);
+            auto pos = error.loc.position(ctx);
             bool found = false;
             for (int i = pos.first.line; i <= pos.second.line; i++) {
                 auto expectedError = expectedErrors.find(i);
@@ -257,7 +257,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 for (auto &e : expectedErrors) {
                     ADD_FAILURE() << "Expected error on line: " << e.first << endl;
                 }
-                FAIL() << "Unexpeted error: " << error->toString(ctx) << endl;
+                FAIL() << "Unexpeted error: " << error.toString(ctx) << endl;
             }
         }
 
