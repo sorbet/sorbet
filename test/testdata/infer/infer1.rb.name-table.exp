@@ -1,8 +1,12 @@
+class <singleton class:Integer1> (Class)
+class <singleton class:String1> (Class)
 class Integer1 (Object)
+  class <singleton class:Integer1> (Class)
   method + (o)
     field o
 class Opus ()
 class String1 (Object)
+  class <singleton class:String1> (Class)
   method getbyte (i)
     field i
 

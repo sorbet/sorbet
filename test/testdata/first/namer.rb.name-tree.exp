@@ -40,17 +40,17 @@ begin
 
   end
   class <emptyTree>::Child<Child> < (::Parent)
-    self(TODO).include(::Mixin)
+    self(<singleton class:Child>).include(::Mixin)
 
-    self(TODO).include(::Mixin, ::Mixin)
+    self(<singleton class:Child>).include(::Mixin, ::Mixin)
 
-    self(TODO).include(3)
+    self(<singleton class:Child>).include(3)
 
-    self(TODO).include(::Mixin) do ||
+    self(<singleton class:Child>).include(::Mixin) do ||
       <emptyTree>
     end
 
-    self(TODO).whatever().include(::OtherMixin)
+    self(<singleton class:Child>).whatever().include(::OtherMixin)
 
   end
 end

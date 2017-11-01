@@ -1,9 +1,9 @@
 begin
-  self(TODO).require_relative("../../../extn")
+  self(<singleton class:<root>>).require_relative("../../../extn")
   ::<dynamic>.init("__FILE__")
   module <emptyTree>::Opus::CIBot::Gerald<Gerald> < ()
     class <emptyTree>::MatchTimeout<MatchTimeout> < (::<dynamic>)
-      self(TODO).attr_reader(:rule_token)
+      self(<singleton class:MatchTimeout>).attr_reader(:rule_token)
 
       def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#initialize#message, rule_token<todo lvar sym>: = "")
         begin
@@ -14,7 +14,7 @@ begin
     end
 
     class <emptyTree>::Matcher<Matcher> < (::Object)
-      self(TODO).include(::<dynamic>)
+      self(<singleton class:Matcher>).include(::<dynamic>)
 
       ::<dynamic> = 100
 
@@ -59,21 +59,21 @@ begin
     end
 
     class <emptyTree>::MatchContext<MatchContext> < (::Object)
-      self(TODO).attr_reader(:repo)
+      self(<singleton class:MatchContext>).attr_reader(:repo)
 
-      self(TODO).attr_reader(:assignee)
+      self(<singleton class:MatchContext>).attr_reader(:assignee)
 
-      self(TODO).attr_reader(:gh_user)
+      self(<singleton class:MatchContext>).attr_reader(:gh_user)
 
-      self(TODO).attr_reader(:merge_branch)
+      self(<singleton class:MatchContext>).attr_reader(:merge_branch)
 
-      self(TODO).attr_reader(:body)
+      self(<singleton class:MatchContext>).attr_reader(:body)
 
-      self(TODO).attr_reader(:title)
+      self(<singleton class:MatchContext>).attr_reader(:title)
 
-      self(TODO).attr_reader(:diff)
+      self(<singleton class:MatchContext>).attr_reader(:diff)
 
-      self(TODO).attr_reader(:openapi_diff)
+      self(<singleton class:MatchContext>).attr_reader(:openapi_diff)
 
       def initialize<initialize>(::Opus::CIBot::Gerald::MatchContext#initialize#repo, ::Opus::CIBot::Gerald::MatchContext#initialize#assignee, ::Opus::CIBot::Gerald::MatchContext#initialize#gh_user, ::Opus::CIBot::Gerald::MatchContext#initialize#merge_branch, ::Opus::CIBot::Gerald::MatchContext#initialize#body, ::Opus::CIBot::Gerald::MatchContext#initialize#title, ::Opus::CIBot::Gerald::MatchContext#initialize#diff, ::Opus::CIBot::Gerald::MatchContext#initialize#openapi_diff)
         begin
@@ -185,7 +185,7 @@ begin
       def changed_openapi?<changed_openapi?>()
         self(Diff).changed_files().include?(::<dynamic>)
 
-      self(TODO).private(def parse<parse>(::Opus::CIBot::Gerald::Diff#parse#diff)
+      self(<singleton class:Diff>).private(def parse<parse>(::Opus::CIBot::Gerald::Diff#parse#diff)
           begin
             ::Opus::CIBot::Gerald::Diff#parse#parts = ::Opus::CIBot::Gerald::Diff#parse#diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if ::Opus::CIBot::Gerald::Diff#parse#parts
