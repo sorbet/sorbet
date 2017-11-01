@@ -10,9 +10,9 @@ using namespace std;
 template class std::shared_ptr<ruby_typer::ast::Type>;
 
 std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
-                                                   std::shared_ptr<Type> &t2);
+                                                 std::shared_ptr<Type> &t2);
 std::shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, std::shared_ptr<Type> &t1,
-                                                                       std::shared_ptr<Type> &t2) {
+                                                                   std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return t1;
     }
@@ -143,7 +143,7 @@ std::shared_ptr<ruby_typer::ast::Type> distributeOr(ast::Context ctx, OrType *t1
 }
 
 std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_ptr<Type> &t1,
-                                                   std::shared_ptr<Type> &t2) {
+                                                 std::shared_ptr<Type> &t2) {
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
     if (g1->kind() > g2->kind()) // force the relation to be symmentric and half the implementation
@@ -198,7 +198,7 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
 }
 
 std::shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::glb(ast::Context ctx, std::shared_ptr<Type> &t1,
-                                                                       std::shared_ptr<Type> &t2) {
+                                                                   std::shared_ptr<Type> &t2) {
     Error::notImplemented();
 }
 
@@ -411,17 +411,24 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
         if (info.arguments().size() == args.size()) { // todo: this should become actual argument matching
             int i = 0;
             for (std::shared_ptr<Type> &argTpe : args) {
-                if (!Types::isSubType(ctx, argTpe,
-                                      make_shared<ClassType>(info.arguments()[i].info(ctx).result().orElse(
-                                          ast::GlobalState::defn_dynamic())))) {
+                shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
+                if (!expectedType) {
+                    expectedType = Types::dynamic();
+                }
+
+                if (!Types::isSubType(ctx, argTpe, expectedType)) {
                     ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
                                            "Argument {}, does not match expected type.\n Expected {}, found: {}", i,
-                                           info.arguments()[i].info(ctx).result().toString(ctx), argTpe->toString(ctx));
+                                           expectedType->toString(ctx), argTpe->toString(ctx));
                 }
 
                 i++;
             }
-            return make_shared<ClassType>(method.info(ctx).result().orElse(ast::GlobalState::defn_dynamic()));
+            shared_ptr<Type> resultType = method.info(ctx).resultType;
+            if (!resultType) {
+                resultType = Types::dynamic();
+            }
+            return resultType;
         } else {
             ctx.state.errors.error(
                 ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
@@ -507,7 +514,7 @@ std::string ArrayType::toString(ast::Context ctx, int tabs) {
 }
 
 ruby_typer::ast::HashType::HashType(std::vector<std::shared_ptr<Literal>> &keys,
-                                      std::vector<std::shared_ptr<Type>> &values)
+                                    std::vector<std::shared_ptr<Type>> &values)
     : ProxyType(std::make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(std::move(keys)),
       values(std::move(values)) {}
 

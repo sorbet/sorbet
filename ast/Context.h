@@ -38,7 +38,7 @@ public:
 
     SymbolRef prePregisterSym();
 
-    SymbolRef enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, std::vector<SymbolRef> &args, bool isMethod);
+    SymbolRef enterSymbol(SymbolRef owner, NameRef name, bool isMethod);
 
     SymbolRef enterClassSymbol(SymbolRef owner, NameRef name);
 

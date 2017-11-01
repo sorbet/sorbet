@@ -3,12 +3,14 @@
 
 #include "Names.h"
 #include "common/common.h"
+#include <memory>
 #include <vector>
 
 namespace ruby_typer {
 namespace ast {
 class Symbol;
 class GlobalState;
+class Type;
 
 class SymbolRef {
     friend class GlobalState;
@@ -103,17 +105,13 @@ public:
         return argumentsOrMixins;
     }
 
-    SymbolRef resultOrParentOrLoader;
-
-    inline SymbolRef result() const {
-        Error::check(!isClass());
-        return resultOrParentOrLoader;
-    }
+    SymbolRef parent_;
+    std::shared_ptr<Type> resultType;
 
     inline SymbolRef parent(GlobalState &ctx) {
         Error::check(isClass());
         ensureCompleted(ctx);
-        return resultOrParentOrLoader;
+        return parent_;
     }
 
     SymbolRef ref(GlobalState &ctx) const;
@@ -169,13 +167,6 @@ public:
     inline void setCompleted() {
         DEBUG_ONLY(Error::check(!isArray()));
         flags = flags | 0x0C00;
-    }
-
-    void setCompletingFromFile(unsigned int idx) {
-        DEBUG_ONLY(Error::check(!isCompleted()));
-        DEBUG_ONLY(Error::check(!isArray()));
-        flags = flags | 0x0400;
-        resultOrParentOrLoader = idx;
     }
 
     SymbolRef findMember(NameRef name);

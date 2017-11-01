@@ -368,8 +368,7 @@ SymbolRef GlobalState::enterClassSymbol(SymbolRef owner, NameRef name) {
     return ret;
 }
 
-SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, SymbolRef result, vector<SymbolRef> &args,
-                                   bool isMethod) {
+SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, bool isMethod) {
     DEBUG_ONLY(Error::check(owner.exists()));
     Error::check(name.exists());
     Symbol &ownerScope = owner.info(*this, true);
@@ -378,9 +377,7 @@ SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
     while (from != to) {
         auto &el = *from;
         if (el.first == name) {
-            auto &otherInfo = el.second.info(*this, true);
-            if (otherInfo.result() == result && otherInfo.arguments() == args)
-                return from->second;
+            return from->second;
         }
         from++;
     }
@@ -392,15 +389,12 @@ SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, SymbolRef resu
     Symbol &info = ret.info(*this, true);
     info.name = name;
     info.flags = 0;
-
     info.owner = owner;
-    info.resultOrParentOrLoader = result;
     if (isMethod)
         info.setMethod();
     else
         info.setField();
 
-    info.argumentsOrMixins.swap(args);
     if (!reallocate)
         ownerScope.members.push_back(make_pair(name, ret));
     else
@@ -565,8 +559,7 @@ FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
 
 SymbolRef GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     NameRef tempName = this->freshNameUnique(kind, name);
-    vector<SymbolRef> empty;
-    return this->enterSymbol(owner, tempName, SymbolRef(), empty, false);
+    return this->enterSymbol(owner, tempName, false);
 }
 
 unsigned int GlobalState::symbolsUsed() {

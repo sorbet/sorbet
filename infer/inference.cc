@@ -48,8 +48,10 @@ public:
             [&](cfg::Self *i) { tp = make_shared<ast::ClassType>(i->klass); },
             [&](cfg::NotSupported *i) { tp = ast::Types::dynamic(); },
             [&](cfg::Return *i) {
-                auto expectedType = make_shared<ast::ClassType>(
-                    ctx.owner.info(ctx).result().orElse(ast::GlobalState::defn_dynamic()));
+                auto expectedType = ctx.owner.info(ctx).resultType;
+                if (!expectedType) {
+                    expectedType = ast::Types::dynamic();
+                }
                 if (!ast::Types::isSubType(ctx, getType(i->what), expectedType)) {
                     ctx.state.errors.error(
                         ast::Loc::none(0), ast::ErrorClass::ReturnTypeMismatch,

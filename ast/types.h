@@ -160,6 +160,6 @@ public:
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
-} // namespace types
+} // namespace ast
 } // namespace ruby_typer
 #endif // SRUBY_TYPES_H
