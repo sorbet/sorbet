@@ -30,6 +30,5 @@ cc_test(
         "//ast/desugar",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-        "@spdlog//:spdlog",
     ],
 )

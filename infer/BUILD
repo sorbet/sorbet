@@ -31,6 +31,5 @@ cc_test(
         "//namer",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-        "@spdlog//:spdlog",
     ],
 )

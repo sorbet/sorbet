@@ -10,6 +10,5 @@ cc_binary(
         "//namer",
         "//parser",
         "@cxxopts//:cxxopts",
-        "@spdlog//:spdlog",
     ],
 )

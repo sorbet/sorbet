@@ -33,6 +33,5 @@ cc_test(
         "//parser",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
-        "@spdlog//:spdlog",
     ],
 )

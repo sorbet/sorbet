@@ -14,5 +14,5 @@ cc_library(
         "typecase.h",
     ],
     visibility = ["//visibility:public"],
-    deps = [],
+    deps = ["@spdlog//:spdlog"],
 )
