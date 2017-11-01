@@ -121,6 +121,7 @@ private:
                              } else {
                                  ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
                                                         "Unsupported type combinator {}", s->fun.toString(ctx));
+                                 result = ast::Types::dynamic();
                              }
                          }
                      } else {
