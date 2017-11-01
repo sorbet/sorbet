@@ -1,4 +1,3 @@
-# error:
 class Outer1
 end
 
@@ -20,7 +19,7 @@ class Outer2
 
   class Inner1::Inner2
     C
-    A # unresolved
+    A # :error: unresolved
   end
 
   class Other < Inner1::Inner2

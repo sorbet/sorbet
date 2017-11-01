@@ -1,2 +1,1 @@
-# error:
-::TopLevelConst
+::TopLevelConst # :error:
