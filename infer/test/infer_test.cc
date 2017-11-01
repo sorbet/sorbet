@@ -15,6 +15,7 @@ namespace ruby_typer {
 namespace infer {
 namespace test {
 
+using namespace ast;
 auto console = spd::stderr_color_mt("infer");
 
 class InferFixture : public ::testing::Test {
@@ -46,17 +47,17 @@ TEST_F(InferFixture, LiteralsSubtyping) {
     auto trueClass = make_shared<ClassType>(ast::GlobalState::defn_TrueClass());
     auto stringLit = make_shared<Literal>(ast::Names::assignTemp());
     auto stringClass = make_shared<ClassType>(ast::GlobalState::defn_String());
-    EXPECT_TRUE(types::isSubType(ctx, intLit, intClass));
-    EXPECT_TRUE(types::isSubType(ctx, floatLit, floatClass));
-    EXPECT_TRUE(types::isSubType(ctx, trueLit, trueClass));
-    EXPECT_TRUE(types::isSubType(ctx, stringLit, stringClass));
+    EXPECT_TRUE(Types::isSubType(ctx, intLit, intClass));
+    EXPECT_TRUE(Types::isSubType(ctx, floatLit, floatClass));
+    EXPECT_TRUE(Types::isSubType(ctx, trueLit, trueClass));
+    EXPECT_TRUE(Types::isSubType(ctx, stringLit, stringClass));
 
-    EXPECT_TRUE(types::isSubType(ctx, intLit, intLit));
-    EXPECT_TRUE(types::isSubType(ctx, floatLit, floatLit));
-    EXPECT_TRUE(types::isSubType(ctx, trueLit, trueLit));
-    EXPECT_TRUE(types::isSubType(ctx, stringLit, stringLit));
+    EXPECT_TRUE(Types::isSubType(ctx, intLit, intLit));
+    EXPECT_TRUE(Types::isSubType(ctx, floatLit, floatLit));
+    EXPECT_TRUE(Types::isSubType(ctx, trueLit, trueLit));
+    EXPECT_TRUE(Types::isSubType(ctx, stringLit, stringLit));
 
-    EXPECT_FALSE(types::isSubType(ctx, intClass, intLit));
+    EXPECT_FALSE(Types::isSubType(ctx, intClass, intLit));
 }
 
 TEST_F(InferFixture, ClassesLubs) {
@@ -73,10 +74,10 @@ TEST_F(InferFixture, ClassesLubs) {
     auto fooType = make_shared<ClassType>(fooPair.second);
     auto barType = make_shared<ClassType>(barPair.second);
 
-    ASSERT_TRUE(types::isSubType(ctx, fooType, barType));
-    ASSERT_TRUE(types::isSubType(ctx, fooType, fooType));
-    ASSERT_TRUE(types::isSubType(ctx, barType, barType));
-    ASSERT_FALSE(types::isSubType(ctx, barType, fooType));
+    ASSERT_TRUE(Types::isSubType(ctx, fooType, barType));
+    ASSERT_TRUE(Types::isSubType(ctx, fooType, fooType));
+    ASSERT_TRUE(Types::isSubType(ctx, barType, barType));
+    ASSERT_FALSE(Types::isSubType(ctx, barType, fooType));
 }
 
 TEST_F(InferFixture, ClassesSubtyping) {

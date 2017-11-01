@@ -162,10 +162,9 @@ TEST(PreOrderTreeMap, CountTrees) {
 
     auto name = ctx.state.enterNameUTF8(foo_DESC);
     auto classSym = ctx.state.enterClassSymbol(ruby_typer::ast::GlobalState::defn_root(), name);
-    auto argTypes = vector<SymbolRef>{ctx.state.defn_top()};
-    auto methodSym = ctx.state.enterSymbol(classSym, name, ctx.state.defn_top(), argTypes, true);
+    auto methodSym = ctx.state.enterSymbol(classSym, name, true);
     auto empty = vector<SymbolRef>();
-    auto argumentSym = ctx.state.enterSymbol(methodSym, name, ctx.state.defn_top(), empty, false);
+    auto argumentSym = ctx.state.enterSymbol(methodSym, name, false);
     unique_ptr<Expression> rhs(new IntLit(5));
     auto arg = unique_ptr<Expression>(new Ident(argumentSym));
     auto args = vector<unique_ptr<Expression>>();
