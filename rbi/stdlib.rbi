@@ -952,7 +952,6 @@ class Abbrev
     returns: Opus::Types.hash_of(keys: String, values: String)
   )
   def self.abbrev(words); end
-
 end
 
 class Array
@@ -973,7 +972,6 @@ class Array
     returns: Integer
   )
   def length(); end
-
 end
 
 class Base64
@@ -1024,7 +1022,6 @@ class Base64
     returns: String
   )
   def self.urlsafe_encode64(bin); end
-
 end
 
 class BasicObject
@@ -1067,7 +1064,6 @@ class BasicObject
     returns: BasicObject
   )
   def instance_eval(_, filename, lineno); end
-
 end
 
 class Benchmark
@@ -1092,7 +1088,6 @@ class Benchmark
     returns: Integer
   )
   def self.realtime(); end
-
 end
 
 class BigDecimal
@@ -1558,7 +1553,6 @@ class BigDecimal
     returns: Opus::Types.coerce([BigDecimal, BigDecimal])
   )
   def coerce(_); end
-
 end
 
 class BigMath
@@ -1579,7 +1573,6 @@ class BigMath
     returns: BigDecimal
   )
   def self.log(_, _1); end
-
 end
 
 class BigMath
@@ -1634,7 +1627,6 @@ class BigMath
     returns: BigDecimal
   )
   def sqrt(x, prec); end
-
 end
 
 class Class
@@ -1677,7 +1669,6 @@ class Class
     returns: String
   )
   def name(); end
-
 end
 
 class Complex
@@ -1938,7 +1929,6 @@ class Complex
     returns: Opus::Types.coerce([Complex, Complex])
   )
   def coerce(_); end
-
 end
 
 class Coverage
@@ -1947,7 +1937,6 @@ class Coverage
     returns: NilClass
   )
   def self.start(); end
-
 end
 
 class CSV
@@ -1964,7 +1953,6 @@ class Date
     returns: String
   )
   def strftime(_); end
-
 end
 
 class Dir
@@ -2054,7 +2042,6 @@ class Dir
     returns: Integer
   )
   def self.unlink(_); end
-
 end
 
 class Dir
@@ -2113,7 +2100,6 @@ class Dir
     returns: Opus::Types.any(String, NilClass)
   )
   def to_path(); end
-
 end
 
 class Encoding
@@ -2179,7 +2165,6 @@ class Encoding
     returns: Opus::Types.array_of(String)
   )
   def self.name_list(); end
-
 end
 
 class Encoding
@@ -2220,7 +2205,6 @@ class Encoding
     returns: Encoding
   )
   def replicate(name); end
-
 end
 
 class Enumerable
@@ -2263,7 +2247,6 @@ class Enumerable
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def one?(); end
-
 end
 
 class Enumerator
@@ -2278,7 +2261,6 @@ class Enumerator
     returns: Opus::Types.any(Integer, Float, NilClass)
   )
   def size(); end
-
 end
 
 class Exception
@@ -2341,7 +2323,6 @@ class Exception
     returns: String
   )
   def to_s(); end
-
 end
 
 class File
@@ -2684,7 +2665,6 @@ class File
     returns: Opus::Types.any(Integer, NilClass)
   )
   def self.zero?(file); end
-
 end
 
 class File
@@ -2762,7 +2742,6 @@ class File
     returns: Integer
   )
   def truncate(_); end
-
 end
 
 class File::Stat
@@ -3013,7 +2992,6 @@ class File::Stat
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
-
 end
 
 class FileUtils
@@ -3035,7 +3013,6 @@ class FileUtils
     returns: Opus::Types.array_of(String)
   )
   def self.mkdir_p(list, mode); end
-
 end
 
 class Float
@@ -3420,7 +3397,6 @@ class Float
     returns: Complex
   )
   def to_c(); end
-
 end
 
 class Gem
@@ -3525,7 +3501,6 @@ class Gem
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
   def self.default_sources(); end
-
 end
 
 class Hash
@@ -3567,7 +3542,6 @@ class Hash
     returns: Integer
   )
   def size(); end
-
 end
 
 class Integer
@@ -4070,7 +4044,6 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
-
 end
 
 class IO
@@ -4422,7 +4395,6 @@ class IO
     returns: Integer
   )
   def write(_); end
-
 end
 
 class IO
@@ -4467,7 +4439,6 @@ class IO
     returns: Integer
   )
   def self.sysopen(path, mode, perm); end
-
 end
 
 class Kernel
@@ -4761,7 +4732,6 @@ class Kernel
     returns: Opus::Types.any(TrueClass, FalseClass, Time)
   )
   def self.test(cmd, file1, file2); end
-
 end
 
 class Kernel
@@ -4780,7 +4750,6 @@ class Kernel
     returns: NilClass
   )
   def raise(_, _1, _2); end
-
 end
 
 class Marshal
@@ -4792,7 +4761,6 @@ class Marshal
     returns: Object
   )
   def self.load(_, _1); end
-
 end
 
 class MatchData
@@ -4907,7 +4875,6 @@ class MatchData
     returns: String
   )
   def to_s(); end
-
 end
 
 class Math
@@ -5122,7 +5089,6 @@ class Math
     returns: Float
   )
   def self.tanh(x); end
-
 end
 
 class Module
@@ -5137,7 +5103,6 @@ class Module
     returns: Opus::Types.array_of(Module)
   )
   def self.nesting(); end
-
 end
 
 class Module
@@ -5491,7 +5456,6 @@ class Module
     returns: BasicObject
   )
   def remove_const(_); end
-
 end
 
 class NilClass
@@ -5548,7 +5512,6 @@ class NilClass
     returns: Rational
   )
   def to_r(); end
-
 end
 
 class Numeric
@@ -5809,7 +5772,6 @@ class Numeric
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
-
 end
 
 class Object
@@ -6041,7 +6003,6 @@ class Object
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def untrusted?(); end
-
 end
 
 class Pathname
@@ -6059,7 +6020,6 @@ class Pathname
     returns: Opus::Types.array_of(Pathname)
   )
   def self.glob(p1, p2); end
-
 end
 
 class Pathname
@@ -6609,7 +6569,6 @@ class Pathname
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
-
 end
 
 class Proc
@@ -6656,7 +6615,6 @@ class Proc
     returns: String
   )
   def to_s(); end
-
 end
 
 class Process
@@ -6950,7 +6908,6 @@ class Process
     returns: Opus::Types.coerce([Integer, Integer])
   )
   def self.waitpid2(pid, flags); end
-
 end
 
 class Process::GID
@@ -7007,7 +6964,6 @@ class Process::GID
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.sid_available?(); end
-
 end
 
 class Process::UID
@@ -7064,7 +7020,6 @@ class Process::UID
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.sid_available?(); end
-
 end
 
 class Process::Status
@@ -7163,7 +7118,6 @@ class Process::Status
     returns: String
   )
   def to_s(); end
-
 end
 
 class Process::Sys
@@ -7276,7 +7230,6 @@ class Process::Sys
     returns: NilClass
   )
   def self.setuid(user); end
-
 end
 
 class Process::Waiter
@@ -7285,7 +7238,6 @@ class Process::Waiter
     returns: Integer
   )
   def pid(); end
-
 end
 
 class Random
@@ -7310,7 +7262,6 @@ class Random
     returns: Integer
   )
   def seed(); end
-
 end
 
 class Random
@@ -7335,7 +7286,6 @@ class Random
     returns: Numeric
   )
   def self.srand(number); end
-
 end
 
 class Range
@@ -7400,7 +7350,6 @@ class Range
     returns: String
   )
   def to_s(); end
-
 end
 
 class Rational
@@ -7733,7 +7682,6 @@ class Rational
     returns: Opus::Types.any(Opus::Types.coerce([Rational, Rational]), Opus::Types.coerce([Float, Float]), Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]))
   )
   def coerce(_); end
-
 end
 
 class Regexp
@@ -7760,7 +7708,6 @@ class Regexp
     returns: Opus::Types.any(Regexp, NilClass)
   )
   def self.try_convert(obj); end
-
 end
 
 class Regexp
@@ -7862,7 +7809,6 @@ class Regexp
     returns: Opus::Types.any(Integer, NilClass)
   )
   def ~(); end
-
 end
 
 class Set
@@ -7886,7 +7832,6 @@ class Set
     returns: Integer
   )
   def size(); end
-
 end
 
 class String
@@ -8567,7 +8512,6 @@ class String
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def valid_encoding?(); end
-
 end
 
 class StringScanner
@@ -8579,7 +8523,6 @@ class StringScanner
     returns: StringScanner
   )
   def self.new(_, _1); end
-
 end
 
 class StringScanner
@@ -8602,7 +8545,6 @@ class StringScanner
     returns: String
   )
   def getch(); end
-
 end
 
 class Symbol
@@ -8611,7 +8553,6 @@ class Symbol
     returns: Opus::Types.array_of(Symbol)
   )
   def self.all_symbols(); end
-
 end
 
 class Symbol
@@ -8720,7 +8661,6 @@ class Symbol
     returns: Symbol
   )
   def upcase(); end
-
 end
 
 class Time
@@ -8782,7 +8722,6 @@ class Time
     returns: Time
   )
   def self.utc(year, month, day, hour, min, sec, usec_with_frac); end
-
 end
 
 class Time
@@ -9081,7 +9020,6 @@ class Time
     returns: String
   )
   def zone(); end
-
 end
 
 class URI
@@ -9095,6 +9033,5 @@ class YAML
     returns: Opus::Types.array_of(String)
   )
   def self.load_file(filename); end
-
 end
 
