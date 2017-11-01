@@ -167,7 +167,7 @@ public:
             } else if (auto mdef = dynamic_cast<ast::MethodDef *>(stat.get())) {
                 if (lastStandardMethod) {
                     ast::Symbol &methoInfo = mdef->symbol.info(ctx);
-                    if (dynamic_cast<ast::EmptyTree *>(lastStandardMethod->recv.get()) == nullptr ||
+                    if (dynamic_cast<ast::Self *>(lastStandardMethod->recv.get()) == nullptr ||
                         lastStandardMethod->block != nullptr) {
                         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
                                                "Misformed standard_method: {}", lastStandardMethod->toString(ctx));
