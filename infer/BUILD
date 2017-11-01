@@ -13,6 +13,7 @@ cc_library(
     deps = [
         "//cfg",
         "//common",
+        "//ast"
     ],
 )
 
