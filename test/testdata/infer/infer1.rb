@@ -1,4 +1,4 @@
-class String1
+class String
   standard_method(
     {
       i: Integer,
@@ -9,7 +9,7 @@ class String1
   end
 end
 
-class Integer1
+class Integer
   standard_method(
     {
       o: Integer,
