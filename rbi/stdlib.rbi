@@ -1339,6 +1339,16 @@ end
 class BigDecimal
   standard_method(
     {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def divmod(_); end
+end
+
+class BigDecimal
+  standard_method(
+    {
       _: Opus::Types.any(Object),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
@@ -1568,6 +1578,22 @@ end
 
 class BigDecimal
   standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Integer, Integer]))
+  )
+  def precs(); end
+end
+
+class BigDecimal
+  standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Integer, String, Integer, Integer]))
+  )
+  def split(); end
+end
+
+class BigDecimal
+  standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
@@ -1675,6 +1701,16 @@ class BigDecimal
     returns: Opus::Types.any(BigDecimal)
   )
   def mult(_, _1); end
+end
+
+class BigDecimal
+  standard_method(
+    {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([BigDecimal, BigDecimal]))
+  )
+  def coerce(_); end
 end
 
 class BigMath
@@ -2035,6 +2071,14 @@ end
 
 class Complex
   standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def polar(); end
+end
+
+class Complex
+  standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
@@ -2067,6 +2111,22 @@ class Complex
     returns: Opus::Types.any(FalseClass)
   )
   def real?(); end
+end
+
+class Complex
+  standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def rect(); end
+end
+
+class Complex
+  standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def rectangular(); end
 end
 
 class Complex
@@ -2115,6 +2175,16 @@ class Complex
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
+end
+
+class Complex
+  standard_method(
+    {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Complex, Complex]))
+  )
+  def coerce(_); end
 end
 
 class Coverage
@@ -2910,6 +2980,16 @@ class File
     {
       file: Opus::Types.any(String),
     },
+    returns: Opus::Types.any(Opus::Types.coerce([String, String]))
+  )
+  def self.split(file); end
+end
+
+class File
+  standard_method(
+    {
+      file: Opus::Types.any(String),
+    },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.sticky?(file); end
@@ -3631,6 +3711,16 @@ end
 
 class Float
   standard_method(
+    {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def divmod(_); end
+end
+
+class Float
+  standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
@@ -3651,6 +3741,16 @@ class Float
     returns: Opus::Types.any(Integer)
   )
   def ceil(); end
+end
+
+class Float
+  standard_method(
+    {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Float, Float]))
+  )
+  def coerce(_); end
 end
 
 class Float
@@ -4356,6 +4456,16 @@ end
 class Integer
   standard_method(
     {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def divmod(_); end
+end
+
+class Integer
+  standard_method(
+    {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
@@ -4479,6 +4589,16 @@ end
 
 class Integer
   standard_method(
+    {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def coerce(_); end
+end
+
+class Integer
+  standard_method(
     {},
     returns: Opus::Types.any(Integer)
   )
@@ -4517,6 +4637,16 @@ class Integer
     returns: Opus::Types.any(Integer)
   )
   def gcd(_); end
+end
+
+class Integer
+  standard_method(
+    {
+      _: Opus::Types.any(Integer),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Integer, Integer]))
+  )
+  def gcdlcm(_); end
 end
 
 class Integer
@@ -5909,6 +6039,16 @@ class Math
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def self.frexp(x); end
+end
+
+class Math
+  standard_method(
+    {
+      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+    },
     returns: Opus::Types.any(Float)
   )
   def self.gamma(x); end
@@ -6534,6 +6674,14 @@ end
 class NilClass
   standard_method(
     {},
+    returns: Opus::Types.any(Opus::Types.coerce([]))
+  )
+  def to_a(); end
+end
+
+class NilClass
+  standard_method(
+    {},
     returns: Opus::Types.any(Complex)
   )
   def to_c(); end
@@ -6633,6 +6781,16 @@ end
 
 class Numeric
   standard_method(
+    {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]))
+  )
+  def coerce(_); end
+end
+
+class Numeric
+  standard_method(
     {},
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
@@ -6663,6 +6821,16 @@ class Numeric
     returns: Opus::Types.any(Integer)
   )
   def div(_); end
+end
+
+class Numeric
+  standard_method(
+    {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]))
+  )
+  def divmod(_); end
 end
 
 class Numeric
@@ -6761,6 +6929,14 @@ end
 
 class Numeric
   standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]))
+  )
+  def polar(); end
+end
+
+class Numeric
+  standard_method(
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
@@ -6783,6 +6959,22 @@ class Numeric
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
   def real?(); end
+end
+
+class Numeric
+  standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]))
+  )
+  def rect(); end
+end
+
+class Numeric
+  standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]))
+  )
+  def rectangular(); end
 end
 
 class Numeric
@@ -7723,6 +7915,14 @@ end
 class Pathname
   standard_method(
     {},
+    returns: Opus::Types.any(Opus::Types.coerce([Pathname, Pathname]))
+  )
+  def split(); end
+end
+
+class Pathname
+  standard_method(
+    {},
     returns: Opus::Types.any(File::Stat)
   )
   def stat(); end
@@ -7899,6 +8099,14 @@ end
 class Proc
   standard_method(
     {},
+    returns: Opus::Types.any(Opus::Types.coerce([String, Integer]))
+  )
+  def source_location(); end
+end
+
+class Proc
+  standard_method(
+    {},
     returns: Opus::Types.any(String)
   )
   def to_s(); end
@@ -8056,6 +8264,16 @@ class Process
     returns: Opus::Types.any(Integer)
   )
   def self.getpriority(kind, _); end
+end
+
+class Process
+  standard_method(
+    {
+      resource: Opus::Types.any(Symbol, String, Integer),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Integer, Integer]))
+  )
+  def self.getrlimit(resource); end
 end
 
 class Process
@@ -8234,9 +8452,31 @@ class Process
       pid: Opus::Types.any(Integer, NilClass),
       flags: Opus::Types.any(Integer, NilClass),
     },
+    returns: Opus::Types.any(Opus::Types.coerce([Integer, Integer]))
+  )
+  def self.wait2(pid, flags); end
+end
+
+class Process
+  standard_method(
+    {
+      pid: Opus::Types.any(Integer, NilClass),
+      flags: Opus::Types.any(Integer, NilClass),
+    },
     returns: Opus::Types.any(Integer)
   )
   def self.waitpid(pid, flags); end
+end
+
+class Process
+  standard_method(
+    {
+      pid: Opus::Types.any(Integer, NilClass),
+      flags: Opus::Types.any(Integer, NilClass),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Integer, Integer]))
+  )
+  def self.waitpid2(pid, flags); end
 end
 
 class Process::GID
@@ -8996,6 +9236,16 @@ end
 class Rational
   standard_method(
     {
+      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]))
+  )
+  def divmod(_); end
+end
+
+class Rational
+  standard_method(
+    {
       _: Opus::Types.any(Object),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
@@ -9189,6 +9439,16 @@ class Rational
     returns: Opus::Types.any(Complex)
   )
   def to_c(); end
+end
+
+class Rational
+  standard_method(
+    {
+      _: Opus::Types.any(Integer, Float, Rational, Complex),
+    },
+    returns: Opus::Types.any(Opus::Types.coerce([Rational, Rational]), Opus::Types.coerce([Float, Float]), Opus::Types.coerce([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]))
+  )
+  def coerce(_); end
 end
 
 class Regexp
@@ -10746,6 +11006,14 @@ class Time
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def thursday?(); end
+end
+
+class Time
+  standard_method(
+    {},
+    returns: Opus::Types.any(Opus::Types.coerce([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Opus::Types.any(TrueClass, FalseClass), String]))
+  )
+  def to_a(); end
 end
 
 class Time
