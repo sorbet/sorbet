@@ -14,6 +14,9 @@ build --cxxopt=-fstack-protector
 build --copt=-fsanitize=undefined
 build --cxxopt=-fsanitize=undefined
 
+build --copt=-Werror
+build --cxxopt=-Werror
+
 build --linkopt=-fsanitize=address
 build --linkopt=-fsanitize=undefined
 

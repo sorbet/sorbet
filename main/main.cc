@@ -40,10 +40,6 @@ static bool removeOption(std::vector<std::string> &prints, std::string option) {
     }
 }
 
-static bool startsWith(const string &str, const string &prefix) {
-    return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.c_str(), prefix.size());
-}
-
 void parse_and_print(ruby_typer::ast::GlobalState &ctx, cxxopts::Options &opts, const string &path, const string &src,
                      std::vector<std::string> &prints) {
     auto r = ruby_typer::parser::parse_ruby(ctx, path, src);

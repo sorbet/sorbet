@@ -14,6 +14,9 @@ using namespace std;
 namespace ruby_typer {
 namespace cfg {
 
+int CFG::FORWARD_TOPO_SORT_VISITED = 1 << 0;
+int CFG::BACKWARD_TOPO_SORT_VISITED = 1 << 1;
+
 void CFG::fillInBlockArguments(ast::Context ctx) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
