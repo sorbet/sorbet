@@ -2,8 +2,6 @@
 # error:
 # error:
 # error:
-# error:
-# error:
 require_relative '../../../extn'
 Opus::AutogenLoader.init(__FILE__) # error:
 
@@ -100,7 +98,7 @@ module Opus::CIBot::Gerald
       res = yield
       dur_ms = (Time.now - rule_start) * 1000 # error:
       if dur_ms > PER_RULE_MS # error:
-        raise MatchTimeout.new( # error:
+        raise MatchTimeout.new(
           "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms", # error:
           rule_token: rule.token)
       end
