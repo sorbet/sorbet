@@ -103,6 +103,26 @@ public:
                 info.argumentsOrMixins.emplace_back(id->symbol);
             }
         }
+        unique_ptr<ast::Send> lastStandardMethod;
+        for (auto &stat : original->rhs) {
+            if (auto send = dynamic_cast<ast::Send *>(stat.get())) {
+                if (send->fun == ast::Names::standardMethod()) {
+                    lastStandardMethod.reset(send);
+                    stat.release();
+                }
+            } else if (auto mdef = dynamic_cast<ast::MethodDef *>(stat.get())) {
+                if (lastStandardMethod) {
+                    ast::Symbol &info = mdef->symbol.info(ctx);
+
+                    lastStandardMethod.reset(nullptr);
+                }
+            }
+        }
+
+        auto toRemove = std::remove_if(original->rhs.begin(), original->rhs.end(),
+                                       [](unique_ptr<ast::Statement> &stat) -> bool { return stat.get() == nullptr; });
+
+        original->rhs.erase(toRemove, original->rhs.end());
 
         return original;
     }

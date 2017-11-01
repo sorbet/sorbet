@@ -177,6 +177,9 @@ static UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
 static const char *merge = "merge";
 static UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
 
+static const char *standardMethod = "standardMethod";
+static UTF8Desc standardMethod_DESC{(char *)standardMethod, (int)strlen(standardMethod)};
+
 GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -213,6 +216,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef currentFile_id = enterNameUTF8(currentFile_DESC);
     NameRef merge_id = enterNameUTF8(merge_DESC);
     NameRef selfMethodTemp_id = enterNameUTF8(selfMethodTemp_DESC);
+    NameRef standardMethod_id = enterNameUTF8(standardMethod_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -238,6 +242,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(currentFile_id == Names::currentFile()));
     DEBUG_ONLY(Error::check(merge_id == Names::merge()));
     DEBUG_ONLY(Error::check(selfMethodTemp_id == Names::selfMethodTemp()));
+    DEBUG_ONLY(Error::check(standardMethod_id == Names::standardMethod()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -570,7 +575,7 @@ unsigned int GlobalState::namesUsed() {
 std::string GlobalState::toString() {
     std::vector<std::string> children;
     for (auto element : defn_root().info(*this).members) {
-        if (!element.second.isSynthetic()) {
+        if (true || !element.second.isSynthetic()) {
             children.push_back(element.second.toString(*this));
         }
     }
