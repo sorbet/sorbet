@@ -6,15 +6,16 @@ namespace ast {
 
 enum class ErrorClass {
     Internal, // Internal Compiler Error
-    IncludeMutipleParam,
+
+    IncludeMutipleParam, // Namer Errors
     IncludeNotConstant,
     IncludePassedBlock,
 
-    DynamicConstant,
+    DynamicConstant, // Resolver errors
     StubConstant,
     InvalidMethodSignature,
 
-    PinnedVariableMismatch,
+    PinnedVariableMismatch, // Inferencer Errors
     MethodArgumentMismatch,
     UnknownMethod,
     MethodArgumentCountMismatch,
