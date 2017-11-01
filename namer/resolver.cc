@@ -184,11 +184,11 @@ public:
                                             // fill in return type
                                             methoInfo.resultType = getResultType(ctx, value);
                                         } else {
-                                            auto fnd = find_if(methoInfo.arguments().begin(),
-                                                               methoInfo.arguments().end(),
-                                                               [&](ast::SymbolRef sym) -> bool {
-                                                                   return sym.info(ctx).name == symbolLit->name;
-                                                               });
+                                            auto fnd =
+                                                find_if(methoInfo.arguments().begin(), methoInfo.arguments().end(),
+                                                        [&](ast::SymbolRef sym) -> bool {
+                                                            return sym.info(ctx).name == symbolLit->name;
+                                                        });
                                             if (fnd == methoInfo.arguments().end()) {
                                                 ctx.state.errors.error(
                                                     ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
