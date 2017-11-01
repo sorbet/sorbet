@@ -217,7 +217,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         stringstream ss(src);
         int linenum = 1;
         while (std::getline(ss, line, '\n')) {
-            regex errorRegex("# :error:( ([A-Za-z]*))?");
+            regex errorRegex("# error:( ([A-Za-z]*))?");
             smatch matches;
             if (regex_search(line, matches, errorRegex)) {
                 expectedErrors[linenum].push_back(matches[2].str());
@@ -231,7 +231,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             auto &error = errors[i];
             if (error.loc.is_none()) {
                 // The counts matched so let this one slide. The convention is
-                // to put the `:error:` at the top of the file so that they are
+                // to put the `error:` at the top of the file so that they are
                 // eaten first when reporting mismatched errors
                 unknownLineErrors += 1;
                 continue;

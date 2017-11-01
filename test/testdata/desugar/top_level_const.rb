@@ -1,2 +1,2 @@
-# :error:
+# error:
 ::TopLevelConst

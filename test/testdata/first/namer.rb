@@ -24,9 +24,9 @@ module OtherMixin
 end
 class Child < Parent
   include Mixin
-  include Mixin, Mixin # :error:
-  include 3 # :error:
+  include Mixin, Mixin # error:
+  include 3 # error:
   include Mixin do
-  end # :error:
+  end # error:
   whatever.include OtherMixin
 end
