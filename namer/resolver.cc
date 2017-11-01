@@ -137,7 +137,7 @@ private:
 
     void fillInInfoFromStandardMethod(ast::Context ctx, ast::Symbol &methoInfo,
                                       unique_ptr<ast::Send> &lastStandardMethod, int argsSize) {
-        if (dynamic_cast<ast::EmptyTree *>(lastStandardMethod->recv.get()) == nullptr ||
+        if (dynamic_cast<ast::Self *>(lastStandardMethod->recv.get()) == nullptr ||
             lastStandardMethod->block != nullptr) {
             ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
                                    "Misformed standard_method " + lastStandardMethod->toString(ctx));

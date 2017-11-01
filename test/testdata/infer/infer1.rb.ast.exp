@@ -1,13 +1,13 @@
 begin
   class <emptyTree>::String1<<todo sym>> < (::Object)
-    <emptyTree>.standard_method({:i => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
+    self(TODO).standard_method({:i => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
 
     def getbyte<<todo sym>>(i<todo lvar sym>)
       <emptyTree>
 
   end
   class <emptyTree>::Integer1<<todo sym>> < (::Object)
-    <emptyTree>.standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
+    self(TODO).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
 
     def +<<todo sym>>(o<todo lvar sym>)
       <emptyTree>

@@ -5,28 +5,28 @@ begin
   $gv<todo gvar sym> = 1
   begin
     #assignTmp$2 = [nil, nil]
-    <emptyTree>.x().var=(#assignTmp$2.[](0))
+    self(<singleton class:<root>>).x().var=(#assignTmp$2.[](0))
     #y = #assignTmp$2.[](1)
     #assignTmp$2
   end
   begin
-    #assignTmp$3 = <emptyTree>.zaaaz()
+    #assignTmp$3 = self(<singleton class:<root>>).zaaaz()
     #baaaar = #assignTmp$3.[](0)
     #naaar = #assignTmp$3.[](1)
     #assignTmp$3
   end
-  #xaaaaz = [<emptyTree>.yayayaya(), <emptyTree>.tutututu()]
+  #xaaaaz = [self(<singleton class:<root>>).yayayaya(), self(<singleton class:<root>>).tutututu()]
   <emptyTree>
   begin
     nil
   end
   begin
-    <emptyTree>.a()
-    <emptyTree>.b()
+    self(<singleton class:<root>>).a()
+    self(<singleton class:<root>>).b()
   end
   def foo<foo>(<Not Supported (Blockarg)>)
     <emptyTree>
-  <emptyTree>.lambda() do ||
+  self(<singleton class:<root>>).lambda() do ||
     <emptyTree>
   end
   <Not Supported (Case)>
@@ -106,10 +106,10 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  <emptyTree>.proc() do |<Not Supported (Shadowarg)>|
+  self(<singleton class:<root>>).proc() do |<Not Supported (Shadowarg)>|
     <emptyTree>
   end
-  break(<emptyTree>.foo(1) do ||
+  break(self(TODO).foo(1) do ||
       <emptyTree>
     end)
   def foo<foo>(**$0<todo lvar sym>)

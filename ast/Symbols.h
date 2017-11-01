@@ -100,8 +100,6 @@ public:
 
     bool derivesFrom(GlobalState &ctx, SymbolRef sym);
 
-    SymbolRef ref(GlobalState &ctx);
-
     inline std::vector<SymbolRef> &mixins(GlobalState &ctx) {
         Error::check(isClass());
         ensureCompleted(ctx);
@@ -174,6 +172,10 @@ public:
 
     SymbolRef findMember(NameRef name);
     std::string fullName(GlobalState &ctx) const;
+
+    // Returns the singleton class for this class, lazily instantiating it if it
+    // doesn't exist.
+    SymbolRef singletonClass(GlobalState &ctx);
 
     //    std::vector<Tree> implementation; // TODO: make into small vector too
     NameRef name; // todo: move out? it should not matter but it's important for

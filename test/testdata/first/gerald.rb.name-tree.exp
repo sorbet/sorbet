@@ -1,9 +1,9 @@
 begin
-  <emptyTree>.require_relative("../../../extn")
+  self(<singleton class:<root>>).require_relative("../../../extn")
   ::<dynamic>.init("__FILE__")
   module <emptyTree>::Opus::CIBot::Gerald<Gerald> < ()
     class <emptyTree>::MatchTimeout<MatchTimeout> < (::<dynamic>)
-      <emptyTree>.attr_reader(:rule_token)
+      self(<singleton class:MatchTimeout>).attr_reader(:rule_token)
 
       def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#initialize#message, rule_token<todo lvar sym>: = "")
         begin
@@ -13,7 +13,9 @@ begin
 
     end
 
-    class <emptyTree>::Matcher<Matcher> < (::Object, ::<dynamic>)
+    class <emptyTree>::Matcher<Matcher> < (::Object)
+      self(<singleton class:Matcher>).include(::<dynamic>)
+
       ::<dynamic> = 100
 
       def initialize<initialize>()
@@ -27,7 +29,7 @@ begin
           if ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rules.empty?().!()
             begin
               ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rule_ids = ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rules.map(<Not Supported (BlockPass)>).join(",")
-              <emptyTree>.log().warn("Gerald skipping invalid rules: ".+(::Opus::CIBot::Gerald::Matcher#initialize#invalid_rule_ids))
+              self(Matcher).log().warn("Gerald skipping invalid rules: ".+(::Opus::CIBot::Gerald::Matcher#initialize#invalid_rule_ids))
             end
           else
             <emptyTree>
@@ -38,7 +40,7 @@ begin
         begin
           if ::Opus::CIBot::Gerald::Matcher#match#match_context.diff().affected_files().count().>(::<dynamic>)
             begin
-              <emptyTree>.log().warn("Gerald skipping large PR with ".concat(begin
+              self(Matcher).log().warn("Gerald skipping large PR with ".concat(begin
                     ::Opus::CIBot::Gerald::Matcher#match#match_context.diff().affected_files().count()
                   end.to_s()).concat(" affected files").to_s())
               return []
@@ -57,21 +59,21 @@ begin
     end
 
     class <emptyTree>::MatchContext<MatchContext> < (::Object)
-      <emptyTree>.attr_reader(:repo)
+      self(<singleton class:MatchContext>).attr_reader(:repo)
 
-      <emptyTree>.attr_reader(:assignee)
+      self(<singleton class:MatchContext>).attr_reader(:assignee)
 
-      <emptyTree>.attr_reader(:gh_user)
+      self(<singleton class:MatchContext>).attr_reader(:gh_user)
 
-      <emptyTree>.attr_reader(:merge_branch)
+      self(<singleton class:MatchContext>).attr_reader(:merge_branch)
 
-      <emptyTree>.attr_reader(:body)
+      self(<singleton class:MatchContext>).attr_reader(:body)
 
-      <emptyTree>.attr_reader(:title)
+      self(<singleton class:MatchContext>).attr_reader(:title)
 
-      <emptyTree>.attr_reader(:diff)
+      self(<singleton class:MatchContext>).attr_reader(:diff)
 
-      <emptyTree>.attr_reader(:openapi_diff)
+      self(<singleton class:MatchContext>).attr_reader(:openapi_diff)
 
       def initialize<initialize>(::Opus::CIBot::Gerald::MatchContext#initialize#repo, ::Opus::CIBot::Gerald::MatchContext#initialize#assignee, ::Opus::CIBot::Gerald::MatchContext#initialize#gh_user, ::Opus::CIBot::Gerald::MatchContext#initialize#merge_branch, ::Opus::CIBot::Gerald::MatchContext#initialize#body, ::Opus::CIBot::Gerald::MatchContext#initialize#title, ::Opus::CIBot::Gerald::MatchContext#initialize#diff, ::Opus::CIBot::Gerald::MatchContext#initialize#openapi_diff)
         begin
@@ -104,7 +106,7 @@ begin
             ::<dynamic>.now().-(@start<todo ivar sym>)
           end.*(1000)
           if ::Opus::CIBot::Gerald::MatchTimeBudget#check!#dur_ms.>(::<dynamic>)
-            <emptyTree>.raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
+            self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
                     ::<dynamic>
                   end.to_s()).concat("ms").to_s()))
           else
@@ -120,7 +122,7 @@ begin
             ::<dynamic>.now().-(::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule_start)
           end.*(1000)
           if ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms.>(::<dynamic>)
-            <emptyTree>.raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald rule '".concat(begin
+            self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald rule '".concat(begin
                     ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule.token()
                   end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
                     ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms.to_i()
@@ -130,7 +132,7 @@ begin
           else
             <emptyTree>
           end
-          <emptyTree>.check!()
+          self(MatchTimeBudget).check!()
           ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#res
         end
 
@@ -140,11 +142,11 @@ begin
       def initialize<initialize>(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
         begin
           @raw<todo ivar sym> = ::Opus::CIBot::Gerald::Diff#initialize#raw_diff
-          @parsed<todo ivar sym> = <emptyTree>.parse(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
+          @parsed<todo ivar sym> = self(Diff).parse(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
         end
 
       def affected_files<affected_files>()
-        <emptyTree>.added_files().+(<emptyTree>.deleted_files()).+(<emptyTree>.changed_files())
+        self(Diff).added_files().+(self(Diff).deleted_files()).+(self(Diff).changed_files())
 
       def added_files<added_files>()
         @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
@@ -178,12 +180,12 @@ begin
         end.flatten()
 
       def changed_lines<changed_lines>()
-        <emptyTree>.added_lines().+(<emptyTree>.removed_lines())
+        self(Diff).added_lines().+(self(Diff).removed_lines())
 
       def changed_openapi?<changed_openapi?>()
-        <emptyTree>.changed_files().include?(::<dynamic>)
+        self(Diff).changed_files().include?(::<dynamic>)
 
-      <emptyTree>.private(def parse<parse>(::Opus::CIBot::Gerald::Diff#parse#diff)
+      self(<singleton class:Diff>).private(def parse<parse>(::Opus::CIBot::Gerald::Diff#parse#diff)
           begin
             ::Opus::CIBot::Gerald::Diff#parse#parts = ::Opus::CIBot::Gerald::Diff#parse#diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if ::Opus::CIBot::Gerald::Diff#parse#parts

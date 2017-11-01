@@ -40,17 +40,17 @@ begin
 
   end
   class <emptyTree>::Child<<todo sym>> < (<emptyTree>::Parent)
-    <emptyTree>.include(<emptyTree>::Mixin)
+    self(TODO).include(<emptyTree>::Mixin)
 
-    <emptyTree>.include(<emptyTree>::Mixin, <emptyTree>::Mixin)
+    self(TODO).include(<emptyTree>::Mixin, <emptyTree>::Mixin)
 
-    <emptyTree>.include(3)
+    self(TODO).include(3)
 
-    <emptyTree>.include(<emptyTree>::Mixin) do ||
+    self(TODO).include(<emptyTree>::Mixin) do ||
       <emptyTree>
     end
 
-    <emptyTree>.whatever().include(<emptyTree>::OtherMixin)
+    self(TODO).whatever().include(<emptyTree>::OtherMixin)
 
   end
 end
