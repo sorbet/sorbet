@@ -169,6 +169,7 @@ private:
                                 } else {
                                     ast::SymbolRef arg = *fnd;
                                     arg.info(ctx).resultType = getResultType(ctx, value);
+                                    arg.info(ctx).definitionLoc = key->loc;
                                 }
                             }
                         } else {
