@@ -3,9 +3,9 @@
 
 #include "Names.h"
 #include "common/common.h"
+#include <climits> // INT_MAX
 #include <memory>
 #include <vector>
-#include <climits> // INT_MAX
 
 namespace ruby_typer {
 namespace ast {
