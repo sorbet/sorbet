@@ -7,6 +7,8 @@ namespace ast {
 enum class ErrorClass {
     Internal, // Internal Compiler Error
 
+    InvalidSingletonDef, // Desugarer Errors
+
     IncludeMutipleParam, // Namer Errors
     IncludeNotConstant,
     IncludePassedBlock,

@@ -10,6 +10,8 @@ namespace ast {
 namespace desugar {
 using namespace parser;
 
+unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what);
+
 unique_ptr<Statement> mkSend(unique_ptr<Statement> &recv, NameRef fun, vector<unique_ptr<Statement>> &args,
                              u4 flags = 0) {
     Error::check(dynamic_cast<Expression *>(recv.get()));
@@ -109,6 +111,22 @@ unique_ptr<Statement> mkTrue() {
 
 unique_ptr<Statement> mkFalse() {
     return make_unique<BoolLit>(false);
+}
+
+unique_ptr<MethodDef> buildMethod(Context ctx, NameRef name, unique_ptr<parser::Node> &argnode,
+                                  unique_ptr<parser::Node> &body) {
+    vector<unique_ptr<Expression>> args;
+    if (auto *oargs = dynamic_cast<parser::Args *>(argnode.get())) {
+        for (auto &arg : oargs->args) {
+            args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, arg)));
+        }
+    } else if (argnode.get() == nullptr) {
+        // do nothing
+    } else {
+        Error::notImplemented();
+    }
+    return make_unique<MethodDef>(ctx.state.defn_todo(), name, args,
+                                  Expression::fromStatement(node2TreeImpl(ctx, body)), false);
 }
 
 unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what) {
@@ -375,26 +393,21 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  result.swap(res);
              },
              [&](parser::DefMethod *method) {
-                 vector<unique_ptr<Expression>> args;
-                 if (auto *oargs = dynamic_cast<parser::Args *>(method->args.get())) {
-                     for (auto &arg : oargs->args) {
-                         args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, arg)));
-                     }
-                 } else if (dynamic_cast<parser::Arg *>(method->args.get()) ||
-                            dynamic_cast<parser::Restarg *>(method->args.get()) ||
-                            dynamic_cast<parser::Kwrestarg *>(method->args.get()) ||
-                            dynamic_cast<parser::Kwarg *>(method->args.get()) ||
-                            dynamic_cast<parser::Kwoptarg *>(method->args.get()) ||
-                            dynamic_cast<parser::Optarg *>(method->args.get())) {
-                     args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, method->args)));
-                 } else if (method->args.get() == nullptr) {
-                     // do nothing
-                 } else {
-                     Error::notImplemented();
+                 unique_ptr<Statement> res = buildMethod(ctx, method->name, method->args, method->body);
+                 result.swap(res);
+             },
+             [&](parser::DefS *method) {
+                 parser::Self *self = dynamic_cast<parser::Self *>(method->singleton.get());
+                 if (self == nullptr) {
+                     ctx.state.errors.error(method->loc, ErrorClass::InvalidSingletonDef,
+                                            "`def EXPRESSION.method' is only supported for `def self.method'");
+                     unique_ptr<Statement> res = make_unique<EmptyTree>();
+                     result.swap(res);
+                     return;
                  }
-                 unique_ptr<Statement> res =
-                     make_unique<MethodDef>(ctx.state.defn_todo(), method->name, args,
-                                            Expression::fromStatement(node2TreeImpl(ctx, method->body)), false);
+                 unique_ptr<MethodDef> meth = buildMethod(ctx, method->name, method->args, method->body);
+                 meth->isSelf = true;
+                 unique_ptr<Statement> res(meth.release());
                  result.swap(res);
              },
              [&](parser::Block *block) {
