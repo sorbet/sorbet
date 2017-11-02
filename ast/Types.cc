@@ -229,12 +229,18 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     //                 8 (Or, And)
     //                 9 (Or, Or)
 
-    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5, 8
+    // Note: order of cases here matters!
+    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 7, 8, 9
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
+    }
+
+    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
     }
 
-    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6, 9
+    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
     }
@@ -242,11 +248,6 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
-    }
-
-    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 7
-        // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
     }
 
     if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) { // 1
