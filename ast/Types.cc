@@ -191,9 +191,9 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
     ast::SymbolRef sym1 = c1->symbol;
     ast::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
-        return t1;
-    } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
         return t2;
+    } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
+        return t1;
     } else {
         return std::make_shared<AndType>(t1, t2);
     }

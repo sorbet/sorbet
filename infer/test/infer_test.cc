@@ -104,17 +104,17 @@ TEST_F(InferFixture, ClassesSubtyping) {
     auto foo2Nfoo1 = ast::Types::lub(ctx, foo2Type, foo1Type);
 
     ASSERT_EQ("ClassType", barNfoo1->typeName());
-    ASSERT_TRUE(ast::Types::isSubType(ctx, barNfoo1, barType));
-    ASSERT_TRUE(ast::Types::isSubType(ctx, barNfoo1, foo1Type));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barType, barNfoo1));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, foo1Type, barNfoo1));
     ASSERT_EQ("ClassType", barNfoo2->typeName());
-    ASSERT_TRUE(ast::Types::isSubType(ctx, barNfoo2, barType));
-    ASSERT_TRUE(ast::Types::isSubType(ctx, barNfoo2, foo2Type));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barType, barNfoo2));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, foo2Type, barNfoo2));
     ASSERT_EQ("ClassType", foo1Nbar->typeName());
-    ASSERT_TRUE(ast::Types::isSubType(ctx, foo1Nbar, barType));
-    ASSERT_TRUE(ast::Types::isSubType(ctx, foo1Nbar, foo1Type));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barType, foo1Nbar));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, foo1Type, foo1Nbar));
     ASSERT_EQ("ClassType", foo2Nbar->typeName());
-    ASSERT_TRUE(ast::Types::isSubType(ctx, foo2Nbar, barType));
-    ASSERT_TRUE(ast::Types::isSubType(ctx, foo2Nbar, foo2Type));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, barType, foo2Nbar));
+    ASSERT_TRUE(ast::Types::isSubType(ctx, foo2Type, foo2Nbar));
 
     ASSERT_TRUE(ast::Types::equiv(ctx, barNfoo2, foo2Nbar));
     ASSERT_TRUE(ast::Types::equiv(ctx, barNfoo1, foo1Nbar));
