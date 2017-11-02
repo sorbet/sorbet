@@ -71,6 +71,17 @@ std::string Reporter::ErrorLine::toString(GlobalState &ctx) {
         }
         string outline(i + 1, j - i - 1);
         buf << outline;
+        if (pos.second.line == pos.first.line) {
+            // add squigly
+            buf << endl;
+            int p;
+            for (p = 0; p < pos.first.column; p++) {
+                buf << " ";
+            }
+            for (; p < pos.second.column; p++) {
+                buf << "^";
+            }
+        }
     }
 
     return buf.str();
