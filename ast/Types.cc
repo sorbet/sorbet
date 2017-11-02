@@ -146,12 +146,14 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
                                                  std::shared_ptr<Type> &t2) {
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
+    ruby_typer::Error::check(g1 != nullptr);
+    ruby_typer::Error::check(g2 != nullptr);
+
     if (g1->kind() > g2->kind()) // force the relation to be symmentric and half the implementation
         return lubGround(ctx, t2, t1);
     /** this implementation makes a bet that types are small and very likely to be collapsable.
      * The more complex types we have, the more likely this bet is to be wrong.
      */
-    ruby_typer::Error::check(g1 != nullptr && g2 != nullptr);
     if (t1.get() == t2.get()) {
         return t1;
     }
@@ -207,7 +209,8 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
 
-    ruby_typer::Error::check(g1 != nullptr && g2 != nullptr);
+    ruby_typer::Error::check(g1 != nullptr);
+    ruby_typer::Error::check(g2 != nullptr);
     if (t1.get() == t2.get()) {
         return true;
     }
