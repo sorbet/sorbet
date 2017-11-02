@@ -45,5 +45,11 @@ TEST(ASTTest, ErrorReporter) {
     ctx.errors.error(Loc{f, 0, 3}, ErrorClass::Internal, "Use of metavariable: {}", "foo");
 }
 
+TEST(ASTTest, SymbolRef) {
+    GlobalState ctx(*console);
+    SymbolRef ref = ctx.defn_object();
+    EXPECT_EQ(ref, ref.info(ctx).ref(ctx));
+}
+
 } // namespace ast
 } // namespace ruby_typer

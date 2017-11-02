@@ -35,7 +35,7 @@ bool Symbol::derivesFrom(GlobalState &ctx, SymbolRef sym) {
 
 SymbolRef Symbol::ref(GlobalState &ctx) const {
     auto distance = this - ctx.symbols.data();
-    return SymbolRef(distance / sizeof(Symbol));
+    return SymbolRef(distance);
 }
 
 Symbol &SymbolRef::info(GlobalState &ctx, bool allowNone) const {
