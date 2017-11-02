@@ -173,11 +173,14 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
     } else if (dynamic_cast<OrType *>(t1.get()) != nullptr) {
         Error::raise("should not happen");
     } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
-        if (Types::isSubType(ctx, t1, a2->left)) {
+        bool collapseInLeft = Types::isSubType(ctx, t1, a2->left);
+        bool collapseInRight = Types::isSubType(ctx, t1, a2->right);
+        if (collapseInLeft) {
+            if (collapseInRight) {
+                return t2;
+            }
             return std::make_shared<AndType>(t1, a2->right);
-        } else if (Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right)) {
-            return t2;
-        } else if (Types::isSubType(ctx, t1, a2->right)) {
+        } else if (collapseInRight) {
             return std::make_shared<AndType>(t1, a2->left);
         } else {
             return std::make_shared<AndType>(t1, t2);
