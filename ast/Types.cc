@@ -507,7 +507,28 @@ std::string Literal::typeName() {
 }
 
 std::string Literal::toString(ast::Context ctx, int tabs) {
-    return "Literal[" + this->underlying->toString(ctx, tabs) + "]{" + to_string(value) + "}";
+    string value;
+    SymbolRef undSymbol = dynamic_cast<ClassType *>(this->underlying.get())->symbol;
+    switch (undSymbol._id) {
+        case GlobalState::defn_String()._id:
+            value = "\"" + NameRef(this->value).toString(ctx) + "\""`;
+            break;
+        case GlobalState::defn_Integer()._id:
+            value = std::to_string(this->value);
+            break;
+        case GlobalState::defn_Float()._id:
+            value = std::to_string(*reinterpret_cast<float *>(&(this->value)));
+            break;
+        case GlobalState::defn_TrueClass()._id:
+            value = "true";
+            break;
+        case GlobalState::defn_FalseClass()._id:
+            value = "false";
+            break;
+        default:
+            Error::raise("should not be reachable");
+    }
+    return this->underlying->toString(ctx, tabs) + "(" + value + ")";
 }
 
 ruby_typer::ast::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> &elements)
