@@ -96,7 +96,7 @@ private:
                      if (i->symbol.info(ctx).isClass()) {
                          result = make_shared<ast::ClassType>(i->symbol);
                      } else {
-                         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                         ctx.state.errors.error(i->loc, ast::ErrorClass::InvalidMethodSignature,
                                                 "Misformed standard_method. Not a class type {}" + i->toString(ctx));
                          result = ast::Types::dynamic();
                      }
@@ -104,7 +104,7 @@ private:
                  [&](ast::Send *s) {
                      if (auto *recvi = dynamic_cast<ast::Ident *>(s->recv.get())) {
                          if (recvi->symbol != ast::GlobalState::defn_Opus_Types()) {
-                             ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                             ctx.state.errors.error(recvi->loc, ast::ErrorClass::InvalidMethodSignature,
                                                     "Misformed standard_method. Unknown argument type type {}",
                                                     expr->toString(ctx));
                              result = ast::Types::dynamic();
@@ -126,13 +126,13 @@ private:
                                      i++;
                                  }
                              } else {
-                                 ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                 ctx.state.errors.error(s->loc, ast::ErrorClass::InvalidMethodSignature,
                                                         "Unsupported type combinator {}", s->fun.toString(ctx));
                                  result = ast::Types::dynamic();
                              }
                          }
                      } else {
-                         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                         ctx.state.errors.error(expr->loc, ast::ErrorClass::InvalidMethodSignature,
                                                 "Misformed standard_method. Unknown argument type type {}",
                                                 expr->toString(ctx));
                          result = ast::Types::dynamic();
@@ -146,7 +146,7 @@ private:
                                       unique_ptr<ast::Send> &lastStandardMethod, int argsSize) {
         if (dynamic_cast<ast::Self *>(lastStandardMethod->recv.get()) == nullptr ||
             lastStandardMethod->block != nullptr) {
-            ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+            ctx.state.errors.error(lastStandardMethod->loc, ast::ErrorClass::InvalidMethodSignature,
                                    "Misformed standard_method " + lastStandardMethod->toString(ctx));
         } else {
             for (auto &arg : lastStandardMethod->args) {
@@ -163,7 +163,7 @@ private:
                                     methoInfo.arguments().begin(), methoInfo.arguments().end(),
                                     [&](ast::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
                                 if (fnd == methoInfo.arguments().end()) {
-                                    ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                                    ctx.state.errors.error(key->loc, ast::ErrorClass::InvalidMethodSignature,
                                                            "Misformed standard_method. Unknown argument name type {}" +
                                                                key->toString(ctx));
                                 } else {
@@ -172,7 +172,7 @@ private:
                                 }
                             }
                         } else {
-                            ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::InvalidMethodSignature,
+                            ctx.state.errors.error(key->loc, ast::ErrorClass::InvalidMethodSignature,
                                                    "Misformed standard_method. Unknown key type {}" +
                                                        key->toString(ctx));
                         }
