@@ -19,13 +19,14 @@ class Instruction {
 public:
     virtual ~Instruction() = default;
     virtual std::string toString(ast::Context ctx) = 0;
+    Instruction() = default;
 };
 
 class Ident : public Instruction {
 public:
     ast::SymbolRef what;
 
-    Ident(const ast::SymbolRef &what);
+    Ident(ast::SymbolRef what);
     virtual std::string toString(ast::Context ctx);
 };
 
@@ -44,7 +45,7 @@ class Return : public Instruction {
 public:
     ast::SymbolRef what;
 
-    Return(const ast::SymbolRef &what);
+    Return(ast::SymbolRef what);
     virtual std::string toString(ast::Context ctx);
 };
 
@@ -53,7 +54,7 @@ public:
     ast::SymbolRef klass;
     std::vector<ast::SymbolRef> args;
 
-    New(const ast::SymbolRef &klass, std::vector<ast::SymbolRef> &args);
+    New(ast::SymbolRef klass, std::vector<ast::SymbolRef> &args);
     virtual std::string toString(ast::Context ctx);
 };
 
@@ -165,10 +166,11 @@ public:
      * we should consider using references to instructions similarly to how LuaJIT does it.
      */
     ast::SymbolRef bind;
+    ast::Loc loc;
 
     std::unique_ptr<Instruction> value;
 
-    Binding(const ast::SymbolRef &bind, std::unique_ptr<Instruction> value);
+    Binding(ast::SymbolRef bind, ast::Loc loc, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;
     Binding() = default;
 };
