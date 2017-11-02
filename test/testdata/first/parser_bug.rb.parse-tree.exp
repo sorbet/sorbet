@@ -1,0 +1,8 @@
+If {
+  condition = And {
+    left = NULL
+    right = NULL
+  }
+  then_ = NULL
+  else_ = NULL
+}
