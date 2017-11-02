@@ -198,7 +198,7 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
     } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
         return t1;
     } else {
-        return std::make_shared<AndType>(t1, t2);
+        return std::make_shared<OrType>(t1, t2);
     }
 }
 
