@@ -417,45 +417,42 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
     }
     ast::SymbolRef method = this->symbol.info(ctx).findMember(fun);
 
-    if (method.exists()) {
-        ast::Symbol &info = method.info(ctx);
-
-        if (info.arguments().size() == args.size()) { // todo: this should become actual argument matching
-            int i = 0;
-            for (std::shared_ptr<Type> &argTpe : args) {
-                shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
-                if (!expectedType) {
-                    expectedType = Types::dynamic();
-                }
-
-                if (!Types::isSubType(ctx, argTpe, expectedType)) {
-                    ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
-                                           "Argument {}, does not match expected type.\n Expected {}, found: {}", i + 1,
-                                           expectedType->toString(ctx), argTpe->toString(ctx));
-                }
-
-                i++;
-            }
-            shared_ptr<Type> resultType = method.info(ctx).resultType;
-            if (!resultType) {
-                resultType = Types::dynamic();
-            }
-            return resultType;
-        } else {
-            ctx.state.errors.error(
-                ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
-                "Wrong number of arguments for method {}.\n Expected: {}, found: {}", info.arguments().size(),
-                args.size(),
-                args.size()); // TODO: should use position and print the source tree, not the cfg one.
-            return Types::dynamic();
-        }
-    } else {
+    if (!method.exists()) {
         ctx.state.errors.error(
             ast::Loc::none(0), ast::ErrorClass::UnknownMethod, "Method not found, {} is not a member of {}",
             fun.toString(ctx),
             this->toString(ctx)); // TODO: should use position and print the source tree, not the cfg one.
         return Types::dynamic();
     }
+    ast::Symbol &info = method.info(ctx);
+
+    if (info.arguments().size() != !args.size()) { // todo: this should become actual argument matching
+        ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
+                               "Wrong number of arguments for method {}.\n Expected: {}, found: {}",
+                               info.arguments().size(), args.size(),
+                               args.size()); // TODO: should use position and print the source tree, not the cfg one.
+        return Types::dynamic();
+    }
+    int i = 0;
+    for (std::shared_ptr<Type> &argTpe : args) {
+        shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
+        if (!expectedType) {
+            expectedType = Types::dynamic();
+        }
+
+        if (!Types::isSubType(ctx, argTpe, expectedType)) {
+            ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
+                                   "Argument {}, does not match expected type.\n Expected {}, found: {}", i + 1,
+                                   expectedType->toString(ctx), argTpe->toString(ctx));
+        }
+
+        i++;
+    }
+    shared_ptr<Type> resultType = method.info(ctx).resultType;
+    if (!resultType) {
+        resultType = Types::dynamic();
+    }
+    return resultType;
 }
 
 std::shared_ptr<Type> ClassType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
