@@ -435,7 +435,7 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
     }
     ast::Symbol &info = method.info(ctx);
 
-    if (info.arguments().size() != !args.size()) { // todo: this should become actual argument matching
+    if (info.arguments().size() != args.size()) { // todo: this should become actual argument matching
         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
                                "Wrong number of arguments for method {}.\n Expected: {}, found: {}",
                                info.arguments().size(), args.size(),
