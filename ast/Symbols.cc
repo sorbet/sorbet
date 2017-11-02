@@ -50,7 +50,7 @@ bool SymbolRef::isSynthetic() const {
     return this->_id <= GlobalState::defn_last_synthetic_sym()._id;
 }
 
-bool SymbolRef::isHidden() const {
+bool SymbolRef::isHiddenFromPrinting() const {
     return isSynthetic() && _id != GlobalState::defn_Opus()._id;
 }
 
@@ -105,7 +105,7 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
 
     std::vector<std::string> children;
     for (auto pair : members) {
-        if (!pair.second.isHidden()) {
+        if (!pair.second.isHiddenFromPrinting()) {
             children.push_back(pair.second.toString(ctx, tabs + 1));
         }
     }

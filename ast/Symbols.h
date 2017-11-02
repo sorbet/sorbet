@@ -54,7 +54,7 @@ public:
     bool isSynthetic() const;
 
     /** Not printed when showing name table */
-    bool isHidden() const;
+    bool isHiddenFromPrinting() const;
 
     bool isPlaceHolder() const;
 
