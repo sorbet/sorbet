@@ -5,6 +5,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
+#include <climits> // INT_MAX
 
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
@@ -61,6 +62,35 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
         if (bb->bexit.cond != ctx.state.defn_cfg_never() && bb->bexit.cond != ctx.state.defn_cfg_always()) {
             reads[bb->bexit.cond].insert(bb.get());
+        }
+    }
+
+
+    for (auto &pair: reads) {
+        ast::SymbolRef what = pair.first;
+        unordered_set<BasicBlock *>& where = pair.second;
+        int min = INT_MAX;
+
+        for (BasicBlock *bb: where) {
+            if (min > bb->outerLoops) {
+                min = bb->outerLoops;
+            }
+        }
+        what.info(ctx).minLoops = min;
+    }
+
+    for (auto &pair: writes) {
+        ast::SymbolRef what = pair.first;
+        unordered_set<BasicBlock *>& where = pair.second;
+        int min = INT_MAX;
+
+        for (BasicBlock *bb: where) {
+            if (min > bb->outerLoops) {
+                min = bb->outerLoops;
+            }
+        }
+        if (what.info(ctx).minLoops > min) {
+            what.info(ctx).minLoops = min;
         }
     }
 

@@ -5,6 +5,7 @@
 #include "common/common.h"
 #include <memory>
 #include <vector>
+#include <climits> // INT_MAX
 
 namespace ruby_typer {
 namespace ast {
@@ -92,6 +93,9 @@ public:
     u4 flags;
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
+
+    // TODO: this should belong to future LocalVariable class
+    int minLoops = INT_MAX; // minimal loop depth that refers to this variable.
 
     inline std::vector<SymbolRef> &arguments() {
         Error::check(!isClass());

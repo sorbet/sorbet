@@ -120,12 +120,12 @@ public:
                 tp = getTypeAndOrigin(i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
                 loc.push_back(bind.loc);
             });
-        Error::check(tp.get() != nullptr);
-        Error::check(loc.size() > 0);
+        Error::check(tp.get() != nullptr, "Inferencer did not assign type");
+        Error::check(loc.size() > 0, "Inferencer did not assign location");
 
         TypeAndOrigins &cur = getTypeAndOrigin(bind.bind);
 
-        if (loopCount == 0) {
+        if (loopCount >= bind.bind.info(ctx).minLoops) {
             cur.type = tp;
             cur.origins = loc;
         } else {
@@ -134,6 +134,7 @@ public:
                                        "Changing type of pinned argument, {} is not a subtype of {}", tp->toString(ctx),
                                        cur.type->toString(ctx));
             }
+            cur.origins = loc;
         }
     }
 
