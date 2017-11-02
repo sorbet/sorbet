@@ -46,9 +46,11 @@ std::string Reporter::ErrorLine::toString(GlobalState &ctx) {
     } else {
         auto pos = loc.position(ctx);
         buf << loc.file.file(ctx).path() << ":";
-        buf << pos.first.line << ":" << pos.first.column;
-        buf << "-";
-        buf << pos.second.line << ":" << pos.second.column;
+        buf << pos.first.line;
+        if (pos.second.line != pos.first.line) {
+            buf << "-";
+            buf << pos.second.line;
+        }
         buf << " " << formattedMessage << endl;
         UTF8Desc source = loc.file.file(ctx).source();
         const char *i = source.from;
