@@ -15,7 +15,9 @@ public:
     shared_ptr<ast::Type> &getType(ast::SymbolRef symbol) {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
-            Error::raise("Should never happen");
+            vars.emplace_back(symbol);
+            types.emplace_back(ast::Types::bottom());
+            return types[types.size() - 1];
         }
         return types[fnd - vars.begin()];
     }
@@ -34,7 +36,8 @@ public:
             bind.value.get(), [&](cfg::Ident *i) { tp = getType(i->what); },
             [&](cfg::Send *send) {
                 auto &recvType = getType(send->recv);
-                vector<shared_ptr<ast::Type>> args(send->args.size());
+                vector<shared_ptr<ast::Type>> args;
+                args.reserve(send->args.size());
                 for (ast::SymbolRef arg : send->args) {
                     args.emplace_back(getType(arg));
                 }
@@ -44,6 +47,7 @@ public:
             [&](cfg::FloatLit *i) { tp = make_shared<ast::Literal>(i->value); },
             [&](cfg::IntLit *i) { tp = make_shared<ast::Literal>(i->value); },
             [&](cfg::StringLit *i) { tp = make_shared<ast::Literal>(i->value); },
+            [&](cfg::BoolLit *i) { tp = make_shared<ast::Literal>(i->value); },
             [&](cfg::Nil *i) { tp = ast::Types::nil(); },
             [&](cfg::Self *i) { tp = make_shared<ast::ClassType>(i->klass); },
             [&](cfg::NotSupported *i) { tp = ast::Types::dynamic(); },
@@ -62,7 +66,7 @@ public:
             },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
-                tp = ast::Types::top();
+                tp = getType(i->receiver)->getCallArgumentType(ctx, i->method, i->arg);
             });
 
         shared_ptr<ast::Type> &cur = getType(bind.bind);
@@ -81,11 +85,11 @@ public:
     void ensureGoodCondition(ast::Context ctx, ast::SymbolRef) {}
 };
 
-void ruby_typer::infer::Inference::run(ast::Context ctx, cfg::CFG &cfg) {
+void ruby_typer::infer::Inference::run(ast::Context ctx, std::unique_ptr<cfg::CFG> &cfg) {
     vector<Environment> outEnvironments;
-    outEnvironments.resize(cfg.basicBlocks.size());
-    for (cfg::BasicBlock *bb : cfg.backwardsTopoSort) {
-        if (bb == cfg.deadBlock())
+    outEnvironments.resize(cfg->basicBlocks.size());
+    for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
+        if (bb == cfg->deadBlock())
             continue;
         Environment &current = outEnvironments[bb->id];
         for (ast::SymbolRef arg : bb->args) {

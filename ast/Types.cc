@@ -387,15 +387,27 @@ std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef nam
     return underlying->dispatchCall(ctx, name, args);
 }
 
+std::shared_ptr<Type> ProxyType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
+    return underlying->getCallArgumentType(ctx, name, i);
+}
+
 std::shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name,
                                            std::vector<std::shared_ptr<Type>> &args) {
     return Types::lub(ctx, left->dispatchCall(ctx, name, args), right->dispatchCall(ctx, name, args));
+}
+
+std::shared_ptr<Type> OrType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
+    return left->getCallArgumentType(ctx, name, i); // TODO: should glb with right
 }
 
 std::shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name,
                                             std::vector<std::shared_ptr<Type>> &args) {
 
     Error::notImplemented();
+}
+
+std::shared_ptr<Type> AndType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
+    return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
 std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun,
@@ -418,7 +430,7 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
 
                 if (!Types::isSubType(ctx, argTpe, expectedType)) {
                     ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
-                                           "Argument {}, does not match expected type.\n Expected {}, found: {}", i,
+                                           "Argument {}, does not match expected type.\n Expected {}, found: {}", i + 1,
                                            expectedType->toString(ctx), argTpe->toString(ctx));
                 }
 
@@ -432,8 +444,8 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
         } else {
             ctx.state.errors.error(
                 ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
-                "Wrong number of arguments for method {}.\n Expected: {}, found: {}", fun.toString(ctx),
-                info.arguments().size(),
+                "Wrong number of arguments for method {}.\n Expected: {}, found: {}", info.arguments().size(),
+                args.size(),
                 args.size()); // TODO: should use position and print the source tree, not the cfg one.
             return Types::dynamic();
         }
@@ -442,6 +454,29 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
             ast::Loc::none(0), ast::ErrorClass::UnknownMethod, "Method not found, {} is not a member of {}",
             fun.toString(ctx),
             this->toString(ctx)); // TODO: should use position and print the source tree, not the cfg one.
+        return Types::dynamic();
+    }
+}
+
+std::shared_ptr<Type> ClassType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
+    if (isDynamic()) {
+        return Types::dynamic();
+    }
+    ast::SymbolRef method = this->symbol.info(ctx).findMember(name);
+
+    if (method.exists()) {
+        ast::Symbol &info = method.info(ctx);
+
+        if (info.arguments().size() > i) { // todo: this should become actual argument matching
+            shared_ptr<Type> resultType = info.arguments()[i].info(ctx).resultType;
+            if (!resultType) {
+                resultType = Types::dynamic();
+            }
+            return resultType;
+        } else {
+            return Types::dynamic();
+        }
+    } else {
         return Types::dynamic();
     }
 }

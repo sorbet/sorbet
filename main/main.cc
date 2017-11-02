@@ -1,6 +1,8 @@
+#include "../infer/infer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
+#include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
@@ -21,11 +23,13 @@ struct stats {
     unsigned long bytes = 0;
 };
 
-class CFG_Collector {
+class CFG_Collector_and_Typer {
 public:
     std::vector<std::string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
-        cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
+        auto cfg = ruby_typer::cfg::CFG::buildFor(ctx, *m);
+        ruby_typer::infer::Inference::run(ctx, cfg);
+        cfgs.push_back(cfg->toString(ctx));
         return m;
     }
 };
@@ -92,9 +96,9 @@ void parse_and_print(ruby_typer::ast::GlobalState &ctx, cxxopts::Options &opts, 
                 return;
         }
 
-        CFG_Collector collector;
+        CFG_Collector_and_Typer collector;
 
-        auto r = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, std::move(desugared));
+        auto r = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, std::move(desugared));
         std::stringstream buf;
         for (auto &cfg : collector.cfgs) {
             buf << cfg << std::endl << std::endl;
