@@ -132,8 +132,8 @@ std::shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context 
 }
 
 std::shared_ptr<ruby_typer::ast::Type> distributeOr(ast::Context ctx, OrType *t1, std::shared_ptr<Type> t2) {
-    std::shared_ptr<ruby_typer::ast::Type> n1 = Types::lub(ctx, t2, t1->left);
-    std::shared_ptr<ruby_typer::ast::Type> n2 = Types::lub(ctx, t2, t1->right);
+    std::shared_ptr<ruby_typer::ast::Type> n1 = Types::lub(ctx, t1->left, t2);
+    std::shared_ptr<ruby_typer::ast::Type> n2 = Types::lub(ctx, t1->right, t2);
     if (Types::isSubType(ctx, n1, n2)) {
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
