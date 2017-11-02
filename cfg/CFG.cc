@@ -8,6 +8,7 @@
 
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
+template class std::unique_ptr<ruby_typer::cfg::Instruction>;
 
 using namespace std;
 
