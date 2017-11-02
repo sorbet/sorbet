@@ -11,6 +11,13 @@ class TypeAndOrigins {
 public:
     shared_ptr<ast::Type> type;
     vector<ast::Loc> origins; // todo: use tiny vector
+    vector<ast::Reporter::ErrorLine> origins2Explanations(ast::Context ctx) {
+        vector<ast::Reporter::ErrorLine> result;
+        for (auto o : origins) {
+            result.emplace_back(o, "");
+        }
+        return result;
+    }
 };
 
 class Environment {
@@ -107,10 +114,18 @@ public:
                 }
                 auto &typeAndOrigin = getTypeAndOrigin(i->what);
                 if (!ast::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
-                    ctx.state.errors.error(
-                        typeAndOrigin.origins, ast::ErrorClass::ReturnTypeMismatch,
-                        "Returning value that does not conform to method {} result type. Expected: {},\n found: {}",
-                        ctx.owner.toString(ctx), expectedType->toString(ctx), typeAndOrigin.type->toString(ctx));
+                    ctx.state.errors.error(ast::Reporter::ComplexError(
+                        ast::ErrorClass::ReturnTypeMismatch,
+                        "Returning value that does not conform to method result type",
+                        {ast::Reporter::ErrorSection(
+                             "Expected " + expectedType->toString(ctx),
+                             {
+                                 ast::Reporter::ErrorLine::from(
+                                     ctx.owner.info(ctx).definitionLoc, "{} return type is defined as {}",
+                                     ctx.owner.info(ctx).name.toString(ctx), expectedType->toString(ctx)),
+                             }),
+                         ast::Reporter::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
+                                                     typeAndOrigin.origins2Explanations(ctx))}));
                 }
                 tp = ast::Types::bottom();
                 loc.push_back(bind.loc);
