@@ -56,7 +56,5 @@ class Opus ()
         method match (match_context)
           field budget
           field match_context
-field &&$1
-field &&$2
 field assignTmp$0
 

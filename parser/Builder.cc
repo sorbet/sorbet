@@ -105,11 +105,11 @@ public:
             if (b->stmts.size() == 1)
                 b->stmts[0] = transform_condition(move(b->stmts[0]));
         } else if (And *a = dynamic_cast<And *>(cond.get())) {
-            a->left = transform_condition(move(a->right));
-            a->left = transform_condition(move(a->right));
+            a->left = transform_condition(move(a->left));
+            a->right = transform_condition(move(a->right));
         } else if (Or *o = dynamic_cast<Or *>(cond.get())) {
-            o->left = transform_condition(move(o->right));
-            o->left = transform_condition(move(o->right));
+            o->left = transform_condition(move(o->left));
+            o->right = transform_condition(move(o->right));
         } else if (IRange *ir = dynamic_cast<IRange *>(cond.get())) {
             return make_unique<IFlipflop>(ir->loc, transform_condition(move(ir->from)),
                                           transform_condition(move(ir->to)));

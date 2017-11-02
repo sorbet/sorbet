@@ -120,7 +120,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  auto lhs = node2TreeImpl(ctx, a->left);
                  if (auto i = dynamic_cast<Ident *>(lhs.get())) {
                      auto cond = cpIdent(*i);
-                     mkIf(move(cond), node2TreeImpl(ctx, a->right), move(lhs));
+                     auto iff = mkIf(move(cond), node2TreeImpl(ctx, a->right), move(lhs));
+                     result.swap(iff);
                  } else {
                      SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
                      auto temp = mkAssign(tempSym, lhs);
