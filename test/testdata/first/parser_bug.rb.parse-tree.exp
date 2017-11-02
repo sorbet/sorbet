@@ -1,7 +1,17 @@
 If {
   condition = And {
-    left = NULL
-    right = NULL
+    left = Send {
+      receiver = NULL
+      method = a
+      args = [
+      ]
+    }
+    right = Send {
+      receiver = NULL
+      method = a
+      args = [
+      ]
+    }
   }
   then_ = NULL
   else_ = NULL

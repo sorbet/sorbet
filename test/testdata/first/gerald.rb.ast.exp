@@ -207,13 +207,10 @@ begin
                     if line<todo lvar sym>.start_with?("---")
                       begin
                         a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
-                        if begin
-                            #&&$1 = <emptyTree>
-                            if #&&$1
-                              <emptyTree>
-                            else
-                              #&&$1
-                            end
+                        if if a_name<todo lvar sym>
+                            a_name<todo lvar sym>.start_with?("a/")
+                          else
+                            a_name<todo lvar sym>
                           end
                           a_name<todo lvar sym> = a_name<todo lvar sym>.[](<Not Supported (IRange)>)
                         else
@@ -224,13 +221,10 @@ begin
                       if line<todo lvar sym>.start_with?("+++")
                         begin
                           b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
-                          if begin
-                              #&&$2 = <emptyTree>
-                              if #&&$2
-                                <emptyTree>
-                              else
-                                #&&$2
-                              end
+                          if if b_name<todo lvar sym>
+                              b_name<todo lvar sym>.start_with?("b/")
+                            else
+                              b_name<todo lvar sym>
                             end
                             b_name<todo lvar sym> = b_name<todo lvar sym>.[](<Not Supported (IRange)>)
                           else

@@ -1534,8 +1534,24 @@ Begin {
                                             }
                                             If {
                                               condition = And {
-                                                left = NULL
-                                                right = NULL
+                                                left = LVar {
+                                                  name = a_name
+                                                }
+                                                right = Send {
+                                                  receiver = LVar {
+                                                    name = a_name
+                                                  }
+                                                  method = start_with?
+                                                  args = [
+                                                    DString {
+                                                      nodes = [
+                                                        String {
+                                                          val = a/
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
                                               }
                                               then_ = LVarAsgn {
                                                 name = a_name
@@ -1599,8 +1615,24 @@ Begin {
                                               }
                                               If {
                                                 condition = And {
-                                                  left = NULL
-                                                  right = NULL
+                                                  left = LVar {
+                                                    name = b_name
+                                                  }
+                                                  right = Send {
+                                                    receiver = LVar {
+                                                      name = b_name
+                                                    }
+                                                    method = start_with?
+                                                    args = [
+                                                      DString {
+                                                        nodes = [
+                                                          String {
+                                                            val = b/
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
                                                 }
                                                 then_ = LVarAsgn {
                                                   name = b_name
