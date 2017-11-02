@@ -170,7 +170,7 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
 
     if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
         return distributeOr(ctx, o2, t1);
-    } else if (dynamic_cast<OrType *>(t2.get()) != nullptr) {
+    } else if (dynamic_cast<OrType *>(t1.get()) != nullptr) {
         Error::raise("should not happen");
     } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
         if (Types::isSubType(ctx, t1, a2->left)) {
