@@ -1,6 +1,7 @@
 #ifndef SRUBY_SYMBOLS_H
 #define SRUBY_SYMBOLS_H
 
+#include "Loc.h"
 #include "Names.h"
 #include "common/common.h"
 #include <climits> // INT_MAX
@@ -87,6 +88,7 @@ public:
     bool isConstructor(GlobalState &ctx) const;
 
     SymbolRef owner;
+    ast::Loc definitionLoc;
     /* isClass,   IsArray,  isField, isMethod
      * IsFromJar, IsFromFile
      * */
