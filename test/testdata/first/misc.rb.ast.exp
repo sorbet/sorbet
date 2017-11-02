@@ -34,7 +34,8 @@ begin
   1.+(<Not Supported (Complex)>)
   <Not Supported (Float)>
   <Not Supported (Complex)>
-  <Not Supported (DefS)>
+  def self.classmeth<<todo sym>>()
+    <emptyTree>
   <Not Supported (SClass)>
   begin
     #||$4 = true
