@@ -1,11 +1,11 @@
 begin
-  class <emptyTree>::String1<String1> < (::Object)
-    def getbyte<getbyte>(::String1#getbyte#i)
+  class <emptyTree>::String<String> < (::Object)
+    def getbyte<getbyte>(::String#getbyte#i)
       <emptyTree>
 
   end
-  class <emptyTree>::Integer1<Integer1> < (::Object)
-    def +<+>(::Integer1#+#o)
+  class <emptyTree>::Integer<Integer> < (::Object)
+    def +<+>(::Integer#+#o)
       <emptyTree>
 
   end
