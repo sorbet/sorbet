@@ -511,7 +511,7 @@ std::string Literal::toString(ast::Context ctx, int tabs) {
     SymbolRef undSymbol = dynamic_cast<ClassType *>(this->underlying.get())->symbol;
     switch (undSymbol._id) {
         case GlobalState::defn_String()._id:
-            value = "\"" + NameRef(this->value).toString(ctx) + "\""`;
+            value = "\"" + NameRef(this->value).toString(ctx) + "\"";
             break;
         case GlobalState::defn_Integer()._id:
             value = std::to_string(this->value);
