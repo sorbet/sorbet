@@ -7,30 +7,17 @@ using namespace std;
 using namespace ruby_typer;
 using namespace infer;
 
-class TypeAndOrigins {
-public:
-    shared_ptr<ast::Type> type;
-    vector<ast::Loc> origins; // todo: use tiny vector
-    vector<ast::Reporter::ErrorLine> origins2Explanations(ast::Context ctx) {
-        vector<ast::Reporter::ErrorLine> result;
-        for (auto o : origins) {
-            result.emplace_back(o, "");
-        }
-        return result;
-    }
-};
-
 class Environment {
 public:
     vector<ast::SymbolRef> vars;
-    vector<TypeAndOrigins> types;
+    vector<ast::TypeAndOrigins> types;
 
-    TypeAndOrigins &getTypeAndOrigin(ast::SymbolRef symbol) {
+    ast::TypeAndOrigins &getTypeAndOrigin(ast::SymbolRef symbol) {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             vars.emplace_back(symbol);
             types.emplace_back();
-            TypeAndOrigins &ret = types[types.size() - 1];
+            ast::TypeAndOrigins &ret = types[types.size() - 1];
             if (ret.type.get() == nullptr) {
                 ret.type = ast::Types::nil();
             }
@@ -65,17 +52,13 @@ public:
             },
             [&](cfg::Send *send) {
                 auto &recvType = getTypeAndOrigin(send->recv);
-                vector<shared_ptr<ast::Type>> args;
-                vector<vector<ast::Loc>> locs;
+                vector<ast::TypeAndOrigins> args;
 
                 args.reserve(send->args.size());
-                locs.reserve(send->args.size());
                 for (ast::SymbolRef arg : send->args) {
-                    auto &typeAndOrigin = getTypeAndOrigin(arg);
-                    args.emplace_back(typeAndOrigin.type);
-                    locs.emplace_back(typeAndOrigin.origins);
+                    args.emplace_back(getTypeAndOrigin(arg));
                 }
-                tp = recvType.type->dispatchCall(ctx, send->fun, args, locs);
+                tp = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
                 loc.push_back(bind.loc);
             },
             [&](cfg::New *i) { Error::notImplemented(); }, [&](cfg::Super *i) { Error::notImplemented(); },
@@ -138,7 +121,7 @@ public:
         Error::check(tp.get() != nullptr, "Inferencer did not assign type");
         Error::check(loc.size() > 0, "Inferencer did not assign location");
 
-        TypeAndOrigins &cur = getTypeAndOrigin(bind.bind);
+        ast::TypeAndOrigins &cur = getTypeAndOrigin(bind.bind);
 
         if (loopCount >= bind.bind.info(ctx).minLoops) {
             cur.type = tp;

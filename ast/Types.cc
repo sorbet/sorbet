@@ -389,27 +389,27 @@ std::string ruby_typer::ast::ClassType::typeName() {
 ruby_typer::ast::ProxyType::ProxyType(std::shared_ptr<ruby_typer::ast::Type> underlying)
     : underlying(std::move(underlying)) {}
 
-std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                              std::vector<std::shared_ptr<Type>> &args,
-                                              vector<vector<ast::Loc>> &locs) {
-    return underlying->dispatchCall(ctx, name, args, locs);
+std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
+    return underlying->dispatchCall(ctx, name, callLoc, args, fullType);
 }
 
 std::shared_ptr<Type> ProxyType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
     return underlying->getCallArgumentType(ctx, name, i);
 }
 
-std::shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                           std::vector<std::shared_ptr<Type>> &args, vector<vector<ast::Loc>> &locs) {
-    return Types::lub(ctx, left->dispatchCall(ctx, name, args, locs), right->dispatchCall(ctx, name, args, locs));
+std::shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                           std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
+    return Types::lub(ctx, left->dispatchCall(ctx, name, callLoc, args, fullType),
+                      right->dispatchCall(ctx, name, callLoc, args, fullType));
 }
 
 std::shared_ptr<Type> OrType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
     return left->getCallArgumentType(ctx, name, i); // TODO: should glb with right
 }
 
-std::shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                            std::vector<std::shared_ptr<Type>> &args, vector<vector<ast::Loc>> &locs) {
+std::shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                            std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
 
     Error::notImplemented();
 }
@@ -418,9 +418,8 @@ std::shared_ptr<Type> AndType::getCallArgumentType(ast::Context ctx, ast::NameRe
     return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
-std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun,
-                                              std::vector<std::shared_ptr<Type>> &args,
-                                              vector<vector<ast::Loc>> &locs) {
+std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun, ast::Loc callLoc,
+                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
     if (isDynamic()) {
         return Types::dynamic();
     }
@@ -443,16 +442,26 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
         return Types::dynamic();
     }
     int i = 0;
-    for (std::shared_ptr<Type> &argTpe : args) {
+    for (TypeAndOrigins &argTpe : args) {
         shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
         if (!expectedType) {
             expectedType = Types::dynamic();
         }
 
-        if (!Types::isSubType(ctx, argTpe, expectedType)) {
-            ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
-                                   "Argument {}, does not match expected type.\n Expected {}, found: {}", i + 1,
-                                   expectedType->toString(ctx), argTpe->toString(ctx));
+        if (!Types::isSubType(ctx, argTpe.type, expectedType)) {
+            ctx.state.errors.error(ast::Reporter::ComplexError(
+                ast::ErrorClass::MethodArgumentMismatch,
+                "Argument  №" + std::to_string(i + 1) + " does not match expected type.",
+                {ast::Reporter::ErrorSection(
+                     "Expected " + expectedType->toString(ctx),
+                     {
+                         ast::Reporter::ErrorLine::from(
+                             info.arguments()[i].info(ctx).definitionLoc,
+                             "Method {} has specified type of argument {} as {}", info.name.toString(ctx),
+                             info.arguments()[i].info(ctx).name.toString(ctx), expectedType->toString(ctx)),
+                     }),
+                 ast::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
+                                             argTpe.origins2Explanations(ctx))}));
         }
 
         i++;
