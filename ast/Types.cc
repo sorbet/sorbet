@@ -613,16 +613,7 @@ int AndType::kind() {
 
 std::string AndType::toString(ast::Context ctx, int tabs) {
     stringstream buf;
-    buf << "AndType {" << endl;
-    printTabs(buf, tabs + 1);
-    buf << "left"
-        << " = " << this->left->toString(ctx, tabs + 2) << endl;
-    printTabs(buf, tabs + 1);
-    buf << "right"
-        << " = " << this->right->toString(ctx, tabs + 2) << endl;
-
-    printTabs(buf, tabs);
-    buf << "}";
+    buf << this->left->toString(ctx, tabs + 2) << " && " << this->right->toString(ctx, tabs + 2);
     return buf.str();
 }
 
@@ -632,16 +623,7 @@ int OrType::kind() {
 
 std::string OrType::toString(ast::Context ctx, int tabs) {
     stringstream buf;
-    buf << "OrType {" << endl;
-    printTabs(buf, tabs + 1);
-    buf << "left"
-        << " = " << this->left->toString(ctx, tabs + 2) << endl;
-    printTabs(buf, tabs + 1);
-    buf << "right"
-        << " = " << this->right->toString(ctx, tabs + 2) << endl;
-
-    printTabs(buf, tabs);
-    buf << "}";
+    buf << this->left->toString(ctx, tabs + 2) << " | " << this->right->toString(ctx, tabs + 2);
     return buf.str();
 }
 
