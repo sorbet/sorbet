@@ -158,6 +158,7 @@ private:
                             if (symbolLit->name == ast::Names::returns()) {
                                 // fill in return type
                                 methoInfo.resultType = getResultType(ctx, value);
+                                methoInfo.definitionLoc = value->loc;
                             } else {
                                 auto fnd = find_if(
                                     methoInfo.arguments().begin(), methoInfo.arguments().end(),
