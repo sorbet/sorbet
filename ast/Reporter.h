@@ -43,6 +43,12 @@ public:
         _error(Error(loc, what, formatted));
     }
 
+    template <typename... Args>
+    void error(std::vector<Loc> locs, ErrorClass what, const std::string &msg, const Args &... args) {
+        std::string formatted = fmt::format(msg, args...);
+        _error(Error(locs[0], what, formatted));
+    }
+
     bool keepErrorsInMemory = false;
     std::vector<Error> getAndEmptyErrors();
 

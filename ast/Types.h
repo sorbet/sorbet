@@ -73,7 +73,8 @@ public:
     virtual std::string toString(ast::Context ctx, int tabs = 0) = 0;
     virtual std::string typeName() = 0;
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args) = 0;
+                                               std::vector<std::shared_ptr<Type>> &args,
+                                               std::vector<std::vector<ast::Loc>> &locs) = 0;
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) = 0;
     bool isDynamic();
 };
@@ -90,7 +91,8 @@ public:
     ProxyType(std::shared_ptr<Type> underlying);
 
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args);
+                                               std::vector<std::shared_ptr<Type>> &args,
+                                               std::vector<std::vector<ast::Loc>> &locs);
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i);
 };
 
@@ -103,7 +105,8 @@ public:
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args);
+                                               std::vector<std::shared_ptr<Type>> &args,
+                                               std::vector<std::vector<ast::Loc>> &locs);
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i);
 };
 
@@ -117,7 +120,8 @@ public:
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args);
+                                               std::vector<std::shared_ptr<Type>> &args,
+                                               std::vector<std::vector<ast::Loc>> &locs);
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i);
 };
 
@@ -131,7 +135,8 @@ public:
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args);
+                                               std::vector<std::shared_ptr<Type>> &args,
+                                               std::vector<std::vector<ast::Loc>> &locs);
 
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i);
 };

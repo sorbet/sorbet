@@ -7,16 +7,26 @@ using namespace std;
 using namespace ruby_typer;
 using namespace infer;
 
+class TypeAndOrigins {
+public:
+    shared_ptr<ast::Type> type;
+    vector<ast::Loc> origins; // todo: use tiny vector
+};
+
 class Environment {
 public:
     vector<ast::SymbolRef> vars;
-    vector<shared_ptr<ast::Type>> types;
+    vector<TypeAndOrigins> types;
 
-    shared_ptr<ast::Type> &getType(ast::SymbolRef symbol) {
+    TypeAndOrigins &getTypeAndOrigin(ast::SymbolRef symbol) {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             vars.emplace_back(symbol);
-            types.emplace_back(ast::Types::bottom());
+            types.emplace_back();
+            TypeAndOrigins &ret = types[types.size() - 1];
+            if (ret.type.get() == nullptr) {
+                ret.type = ast::Types::nil();
+            }
             return types[types.size() - 1];
         }
         return types[fnd - vars.begin()];
@@ -25,59 +35,104 @@ public:
     void mergeWith(ast::Context ctx, Environment &other) {
         int i = 0;
         for (ast::SymbolRef var : vars) {
-            types[i] = ast::Types::lub(ctx, types[i], other.getType(var));
+            auto &otherTO = other.getTypeAndOrigin(var);
+            if (types[i].type.get() != nullptr) {
+                types[i].type = ast::Types::lub(ctx, types[i].type, otherTO.type);
+            } else {
+                types[i].type = otherTO.type;
+            }
+            types[i].origins.insert(types[i].origins.end(), otherTO.origins.begin(), otherTO.origins.end());
             i++;
         }
     }
 
     void processBinding(ast::Context ctx, cfg::Binding &bind, int loopCount) {
         shared_ptr<ast::Type> tp;
+        vector<ast::Loc> loc; // todo: use tiny vector
         typecase(
-            bind.value.get(), [&](cfg::Ident *i) { tp = getType(i->what); },
+            bind.value.get(),
+            [&](cfg::Ident *i) {
+                auto &typeAndOrigin = getTypeAndOrigin(i->what);
+                tp = typeAndOrigin.type;
+                loc = typeAndOrigin.origins;
+            },
             [&](cfg::Send *send) {
-                auto &recvType = getType(send->recv);
+                auto &recvType = getTypeAndOrigin(send->recv);
                 vector<shared_ptr<ast::Type>> args;
+                vector<vector<ast::Loc>> locs;
+
                 args.reserve(send->args.size());
+                locs.reserve(send->args.size());
                 for (ast::SymbolRef arg : send->args) {
-                    args.emplace_back(getType(arg));
+                    auto &typeAndOrigin = getTypeAndOrigin(arg);
+                    args.emplace_back(typeAndOrigin.type);
+                    locs.emplace_back(typeAndOrigin.origins);
                 }
-                tp = recvType->dispatchCall(ctx, send->fun, args);
+                tp = recvType.type->dispatchCall(ctx, send->fun, args, locs);
+                loc.push_back(bind.loc);
             },
             [&](cfg::New *i) { Error::notImplemented(); }, [&](cfg::Super *i) { Error::notImplemented(); },
-            [&](cfg::FloatLit *i) { tp = make_shared<ast::Literal>(i->value); },
-            [&](cfg::IntLit *i) { tp = make_shared<ast::Literal>(i->value); },
-            [&](cfg::StringLit *i) { tp = make_shared<ast::Literal>(i->value); },
-            [&](cfg::BoolLit *i) { tp = make_shared<ast::Literal>(i->value); },
-            [&](cfg::Nil *i) { tp = ast::Types::nil(); },
-            [&](cfg::Self *i) { tp = make_shared<ast::ClassType>(i->klass); },
-            [&](cfg::NotSupported *i) { tp = ast::Types::dynamic(); },
+            [&](cfg::FloatLit *i) {
+                tp = make_shared<ast::Literal>(i->value);
+                loc.push_back(bind.loc);
+            },
+            [&](cfg::IntLit *i) {
+                tp = make_shared<ast::Literal>(i->value);
+                loc.push_back(bind.loc);
+            },
+            [&](cfg::StringLit *i) {
+                tp = make_shared<ast::Literal>(i->value);
+                loc.push_back(bind.loc);
+            },
+            [&](cfg::BoolLit *i) {
+                tp = make_shared<ast::Literal>(i->value);
+                loc.push_back(bind.loc);
+            },
+            [&](cfg::Nil *i) {
+                tp = ast::Types::nil();
+                loc.push_back(bind.loc);
+            },
+            [&](cfg::Self *i) {
+                tp = make_shared<ast::ClassType>(i->klass);
+                loc.push_back(bind.loc);
+            },
+            [&](cfg::NotSupported *i) {
+                tp = ast::Types::dynamic();
+                loc.push_back(bind.loc);
+            },
             [&](cfg::Return *i) {
                 auto expectedType = ctx.owner.info(ctx).resultType;
                 if (!expectedType) {
                     expectedType = ast::Types::dynamic();
                 }
-                if (!ast::Types::isSubType(ctx, getType(i->what), expectedType)) {
+                auto &typeAndOrigin = getTypeAndOrigin(i->what);
+                if (!ast::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
                     ctx.state.errors.error(
-                        ast::Loc::none(0), ast::ErrorClass::ReturnTypeMismatch,
+                        typeAndOrigin.origins, ast::ErrorClass::ReturnTypeMismatch,
                         "Returning value that does not conform to method {} result type. Expected: {},\n found: {}",
-                        ctx.owner.toString(ctx), expectedType->toString(ctx), getType(i->what)->toString(ctx));
+                        ctx.owner.toString(ctx), expectedType->toString(ctx), typeAndOrigin.type->toString(ctx));
                 }
                 tp = ast::Types::bottom();
+                loc.push_back(bind.loc);
             },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
-                tp = getType(i->receiver)->getCallArgumentType(ctx, i->method, i->arg);
+                tp = getTypeAndOrigin(i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
+                loc.push_back(bind.loc);
             });
+        Error::check(tp.get() != nullptr);
+        Error::check(loc.size() > 0);
 
-        shared_ptr<ast::Type> &cur = getType(bind.bind);
+        TypeAndOrigins &cur = getTypeAndOrigin(bind.bind);
 
         if (loopCount == 0) {
-            cur = tp;
+            cur.type = tp;
+            cur.origins = loc;
         } else {
-            if (!ast::Types::isSubType(ctx, tp, cur)) {
+            if (!ast::Types::isSubType(ctx, tp, cur.type)) {
                 ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::PinnedVariableMismatch,
-                                       "Changing type of pinner argument, {} is not a subtype of {}", tp->toString(ctx),
-                                       cur->toString(ctx));
+                                       "Changing type of pinned argument, {} is not a subtype of {}", tp->toString(ctx),
+                                       cur.type->toString(ctx));
             }
         }
     }
@@ -94,7 +149,7 @@ void ruby_typer::infer::Inference::run(ast::Context ctx, std::unique_ptr<cfg::CF
         Environment &current = outEnvironments[bb->id];
         for (ast::SymbolRef arg : bb->args) {
             current.vars.push_back(arg);
-            current.types.emplace_back(ast::Types::bottom());
+            current.types.emplace_back();
         }
         for (cfg::BasicBlock *parent : bb->backEdges) {
             current.mergeWith(ctx, outEnvironments[parent->id]);

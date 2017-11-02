@@ -390,8 +390,9 @@ ruby_typer::ast::ProxyType::ProxyType(std::shared_ptr<ruby_typer::ast::Type> und
     : underlying(std::move(underlying)) {}
 
 std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                              std::vector<std::shared_ptr<Type>> &args) {
-    return underlying->dispatchCall(ctx, name, args);
+                                              std::vector<std::shared_ptr<Type>> &args,
+                                              vector<vector<ast::Loc>> &locs) {
+    return underlying->dispatchCall(ctx, name, args, locs);
 }
 
 std::shared_ptr<Type> ProxyType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
@@ -399,8 +400,8 @@ std::shared_ptr<Type> ProxyType::getCallArgumentType(ast::Context ctx, ast::Name
 }
 
 std::shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                           std::vector<std::shared_ptr<Type>> &args) {
-    return Types::lub(ctx, left->dispatchCall(ctx, name, args), right->dispatchCall(ctx, name, args));
+                                           std::vector<std::shared_ptr<Type>> &args, vector<vector<ast::Loc>> &locs) {
+    return Types::lub(ctx, left->dispatchCall(ctx, name, args, locs), right->dispatchCall(ctx, name, args, locs));
 }
 
 std::shared_ptr<Type> OrType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
@@ -408,7 +409,7 @@ std::shared_ptr<Type> OrType::getCallArgumentType(ast::Context ctx, ast::NameRef
 }
 
 std::shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                            std::vector<std::shared_ptr<Type>> &args) {
+                                            std::vector<std::shared_ptr<Type>> &args, vector<vector<ast::Loc>> &locs) {
 
     Error::notImplemented();
 }
@@ -418,7 +419,8 @@ std::shared_ptr<Type> AndType::getCallArgumentType(ast::Context ctx, ast::NameRe
 }
 
 std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun,
-                                              std::vector<std::shared_ptr<Type>> &args) {
+                                              std::vector<std::shared_ptr<Type>> &args,
+                                              vector<vector<ast::Loc>> &locs) {
     if (isDynamic()) {
         return Types::dynamic();
     }
