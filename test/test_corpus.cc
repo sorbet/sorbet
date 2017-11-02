@@ -318,7 +318,6 @@ vector<Expectations> listDir(const char *name) {
 
     Expectations current;
     for (auto &s : names) {
-
         if (endsWith(s, ".rb")) {
             if (!current.sourceFile.empty()) {
                 result.push_back(current);

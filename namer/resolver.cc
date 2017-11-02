@@ -85,6 +85,13 @@ private:
     shared_ptr<ast::Type> getResultType(ast::Context ctx, std::unique_ptr<ast::Expression> &expr) {
         shared_ptr<ast::Type> result;
         typecase(expr.get(),
+                 [&](ast::Array *arr) {
+                     std::vector<std::shared_ptr<ast::Type>> elems;
+                     for (auto &el : arr->elems) {
+                         elems.emplace_back(getResultType(ctx, el));
+                     }
+                     result = make_shared<ast::ArrayType>(elems);
+                 },
                  [&](ast::Ident *i) {
                      if (i->symbol.info(ctx).isClass()) {
                          result = make_shared<ast::ClassType>(i->symbol);

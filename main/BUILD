@@ -1,6 +1,9 @@
 cc_binary(
     name = "ruby-typer",
-    srcs = ["main.cc"],
+    srcs = [
+        "main.cc",
+        "realmain.cc",
+    ],
     linkstatic = 1,
     visibility = ["//visibility:public"],
     deps = [
@@ -10,5 +13,26 @@ cc_binary(
         "//namer",
         "//parser",
         "@cxxopts//:cxxopts",
+    ],
+)
+
+cc_test(
+    name = "stdlib_test",
+    size = "small",
+    srcs = glob([
+        "test/*.cc",
+    ]) + ["realmain.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    data = ["//rbi:stdlib"],
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast/desugar",
+        "//cfg",
+        "//infer",
+        "//namer",
+        "//parser",
+        "@cxxopts//:cxxopts",
+        "@gtest//:gtest",
+        "@gtest//:gtest_main",
     ],
 )
