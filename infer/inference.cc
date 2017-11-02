@@ -121,7 +121,7 @@ public:
                              "Expected " + expectedType->toString(ctx),
                              {
                                  ast::Reporter::ErrorLine::from(
-                                     ctx.owner.info(ctx).definitionLoc, "{} return type is defined as {}",
+                                     ctx.owner.info(ctx).definitionLoc, "Method {} has return type is defined as {}",
                                      ctx.owner.info(ctx).name.toString(ctx), expectedType->toString(ctx)),
                              }),
                          ast::Reporter::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
