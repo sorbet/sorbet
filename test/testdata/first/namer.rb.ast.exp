@@ -3,7 +3,8 @@ begin
     def normal_method<<todo sym>>()
       <emptyTree>
 
-    <Not Supported (DefS)>
+    def self.normal_static_method<<todo sym>>()
+      <emptyTree>
 
     class <emptyTree>::InnerClass<<todo sym>> < (::Object)
       <emptyTree>

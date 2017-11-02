@@ -35,7 +35,7 @@ bool Symbol::derivesFrom(GlobalState &ctx, SymbolRef sym) {
 
 SymbolRef Symbol::ref(GlobalState &ctx) const {
     auto distance = this - ctx.symbols.data();
-    return SymbolRef(distance / sizeof(Symbol));
+    return SymbolRef(distance);
 }
 
 Symbol &SymbolRef::info(GlobalState &ctx, bool allowNone) const {
@@ -105,9 +105,12 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
 
     std::vector<std::string> children;
     for (auto pair : members) {
-        if (!pair.second.isHiddenFromPrinting()) {
-            children.push_back(pair.second.toString(ctx, tabs + 1));
-        }
+        if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass())
+            continue;
+        if (pair.second.isHiddenFromPrinting())
+            continue;
+
+        children.push_back(pair.second.toString(ctx, tabs + 1));
     }
     std::sort(children.begin(), children.end());
     for (auto row : children) {

@@ -8,7 +8,6 @@ class Opus ()
       class <singleton class:MatchTimeout> (Class)
       class <singleton class:Matcher> (Class)
       class Diff (Object)
-        class <singleton class:Diff> (Class)
         method added_files ()
         method added_lines ()
         method affected_files ()
@@ -23,7 +22,6 @@ class Opus ()
           field parts
         method removed_lines ()
       class MatchContext (Object)
-        class <singleton class:MatchContext> (Class)
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
           field assignee
           field body
@@ -44,12 +42,10 @@ class Opus ()
           field rule
           field rule_start
       class MatchTimeout (<dynamic>)
-        class <singleton class:MatchTimeout> (Class)
         method initialize (message, <todo sym>)
           field message
           field rule_token
       class Matcher (Object)
-        class <singleton class:Matcher> (Class)
         method initialize ()
           field invalid_rule_ids
           field invalid_rules
