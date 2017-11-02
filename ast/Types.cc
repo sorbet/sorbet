@@ -132,8 +132,8 @@ std::shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context 
 }
 
 std::shared_ptr<ruby_typer::ast::Type> distributeOr(ast::Context ctx, OrType *t1, std::shared_ptr<Type> t2) {
-    std::shared_ptr<ruby_typer::ast::Type> n1 = Types::lub(ctx, t2, t1->left);
-    std::shared_ptr<ruby_typer::ast::Type> n2 = Types::lub(ctx, t2, t1->right);
+    std::shared_ptr<ruby_typer::ast::Type> n1 = Types::lub(ctx, t1->left, t2);
+    std::shared_ptr<ruby_typer::ast::Type> n2 = Types::lub(ctx, t1->right, t2);
     if (Types::isSubType(ctx, n1, n2)) {
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
@@ -146,12 +146,14 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
                                                  std::shared_ptr<Type> &t2) {
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
+    ruby_typer::Error::check(g1 != nullptr);
+    ruby_typer::Error::check(g2 != nullptr);
+
     if (g1->kind() > g2->kind()) // force the relation to be symmentric and half the implementation
         return lubGround(ctx, t2, t1);
     /** this implementation makes a bet that types are small and very likely to be collapsable.
      * The more complex types we have, the more likely this bet is to be wrong.
      */
-    ruby_typer::Error::check(g1 != nullptr && g2 != nullptr);
     if (t1.get() == t2.get()) {
         return t1;
     }
@@ -168,14 +170,17 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
 
     if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
         return distributeOr(ctx, o2, t1);
-    } else if (dynamic_cast<OrType *>(t2.get()) != nullptr) {
+    } else if (dynamic_cast<OrType *>(t1.get()) != nullptr) {
         Error::raise("should not happen");
     } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
-        if (Types::isSubType(ctx, t1, a2->left)) {
+        bool collapseInLeft = Types::isSubType(ctx, t1, a2->left);
+        bool collapseInRight = Types::isSubType(ctx, t1, a2->right);
+        if (collapseInLeft) {
+            if (collapseInRight) {
+                return t2;
+            }
             return std::make_shared<AndType>(t1, a2->right);
-        } else if (Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right)) {
-            return t2;
-        } else if (Types::isSubType(ctx, t1, a2->right)) {
+        } else if (collapseInRight) {
             return std::make_shared<AndType>(t1, a2->left);
         } else {
             return std::make_shared<AndType>(t1, t2);
@@ -189,11 +194,11 @@ std::shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, std::shared_p
     ast::SymbolRef sym1 = c1->symbol;
     ast::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
-        return t1;
-    } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
         return t2;
+    } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
+        return t1;
     } else {
-        return std::make_shared<AndType>(t1, t2);
+        return std::make_shared<OrType>(t1, t2);
     }
 }
 
@@ -207,7 +212,8 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
 
-    ruby_typer::Error::check(g1 != nullptr && g2 != nullptr);
+    ruby_typer::Error::check(g1 != nullptr);
+    ruby_typer::Error::check(g2 != nullptr);
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -223,12 +229,18 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     //                 8 (Or, And)
     //                 9 (Or, Or)
 
-    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5, 8
+    // Note: order of cases here matters!
+    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 7, 8, 9
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
+    }
+
+    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
     }
 
-    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6, 9
+    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
     }
@@ -236,11 +248,6 @@ bool isSubTypeGround(ast::Context ctx, std::shared_ptr<Type> &t1, std::shared_pt
     if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
-    }
-
-    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 7
-        // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
     }
 
     if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) { // 1
@@ -417,45 +424,42 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
     }
     ast::SymbolRef method = this->symbol.info(ctx).findMember(fun);
 
-    if (method.exists()) {
-        ast::Symbol &info = method.info(ctx);
-
-        if (info.arguments().size() == args.size()) { // todo: this should become actual argument matching
-            int i = 0;
-            for (std::shared_ptr<Type> &argTpe : args) {
-                shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
-                if (!expectedType) {
-                    expectedType = Types::dynamic();
-                }
-
-                if (!Types::isSubType(ctx, argTpe, expectedType)) {
-                    ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
-                                           "Argument {}, does not match expected type.\n Expected {}, found: {}", i + 1,
-                                           expectedType->toString(ctx), argTpe->toString(ctx));
-                }
-
-                i++;
-            }
-            shared_ptr<Type> resultType = method.info(ctx).resultType;
-            if (!resultType) {
-                resultType = Types::dynamic();
-            }
-            return resultType;
-        } else {
-            ctx.state.errors.error(
-                ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
-                "Wrong number of arguments for method {}.\n Expected: {}, found: {}", info.arguments().size(),
-                args.size(),
-                args.size()); // TODO: should use position and print the source tree, not the cfg one.
-            return Types::dynamic();
-        }
-    } else {
+    if (!method.exists()) {
         ctx.state.errors.error(
             ast::Loc::none(0), ast::ErrorClass::UnknownMethod, "Method not found, {} is not a member of {}",
             fun.toString(ctx),
             this->toString(ctx)); // TODO: should use position and print the source tree, not the cfg one.
         return Types::dynamic();
     }
+    ast::Symbol &info = method.info(ctx);
+
+    if (info.arguments().size() != !args.size()) { // todo: this should become actual argument matching
+        ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
+                               "Wrong number of arguments for method {}.\n Expected: {}, found: {}",
+                               info.arguments().size(), args.size(),
+                               args.size()); // TODO: should use position and print the source tree, not the cfg one.
+        return Types::dynamic();
+    }
+    int i = 0;
+    for (std::shared_ptr<Type> &argTpe : args) {
+        shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
+        if (!expectedType) {
+            expectedType = Types::dynamic();
+        }
+
+        if (!Types::isSubType(ctx, argTpe, expectedType)) {
+            ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
+                                   "Argument {}, does not match expected type.\n Expected {}, found: {}", i + 1,
+                                   expectedType->toString(ctx), argTpe->toString(ctx));
+        }
+
+        i++;
+    }
+    shared_ptr<Type> resultType = method.info(ctx).resultType;
+    if (!resultType) {
+        resultType = Types::dynamic();
+    }
+    return resultType;
 }
 
 std::shared_ptr<Type> ClassType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {

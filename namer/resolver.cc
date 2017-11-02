@@ -48,11 +48,11 @@ private:
             ast::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (result.exists()) {
                 return result;
-            } else {
-                ctx.state.errors.error(c->loc, ast::ErrorClass::StubConstant,
-                                       "Stubbing out unknown constant " + c->toString(ctx));
-                return ast::GlobalState::defn_dynamic();
             }
+            ctx.state.errors.error(c->loc, ast::ErrorClass::StubConstant,
+                                   "Stubbing out unknown constant " + c->toString(ctx));
+            return ast::GlobalState::defn_dynamic();
+
         } else if (ast::ConstantLit *scope = dynamic_cast<ast::ConstantLit *>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, scope);
             if (!resolved.exists())
