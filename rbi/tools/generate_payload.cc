@@ -9,14 +9,17 @@
 
 using namespace std;
 
+string sourceName2funcName(string sourceName) {
+    std::replace(sourceName.begin(), sourceName.end(), '.', '_');
+    std::replace(sourceName.begin(), sourceName.end(), '/', '_');
+    return sourceName;
+}
+
 void emit_header(std::vector<std::string> sourceFiles, ostream &out) {
     out << "#include<string>" << endl << "#include<vector>" << endl;
     out << "namespace ruby_typer{" << endl << "namespace rbi{" << endl;
     for (auto &file : sourceFiles) {
-        std::string funName = file;
-        std::replace(funName.begin(), funName.end(), '.', '_');
-        std::replace(funName.begin(), funName.end(), '/', '_');
-        out << "  std::string " + funName << "();" << endl;
+        out << "  std::string " + sourceName2funcName(file) << "();" << endl;
     }
     out << "  std::vector<std::pair<std::string, std::string>> all();" << endl;
 
@@ -48,20 +51,14 @@ void emit_classfile(std::vector<std::string> sourceFiles, ostream &out) {
     out << "#include<string>" << endl << "#include<vector>" << endl;
     out << "namespace ruby_typer{" << endl << "namespace rbi{" << endl;
     for (auto &file : sourceFiles) {
-        std::string funName = file;
-        std::replace(funName.begin(), funName.end(), '.', '_');
-        std::replace(funName.begin(), funName.end(), '/', '_');
-        out << "  std::string " + funName << "() {" << endl;
+        out << "  std::string " + sourceName2funcName(file) << "() {" << endl;
         out << "  return \"" + escape(ruby_typer::File::read(file.c_str())) + "\";" << endl << "}" << endl;
     }
     out << "std::vector<std::pair<std::string, std::string>> all() {" << endl;
     out << "  std::vector<std::pair<std::string, std::string>> result;" << endl;
     for (auto &file : sourceFiles) {
-        std::string funName = file;
-        std::replace(funName.begin(), funName.end(), '.', '_');
-        std::replace(funName.begin(), funName.end(), '/', '_');
-        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + escape(file) + "\", " + funName +
-                   "()));"
+        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + escape(file) + "\", " +
+                   sourceName2funcName(file) + "()));"
             << endl;
     }
     out << "  return result;" << endl;
