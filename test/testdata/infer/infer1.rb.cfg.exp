@@ -1,0 +1,133 @@
+digraph getbyte {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$3 = self\ni = load_arg(<self>$3#getbyte, 0)\n<ret>$2 = NotSupported()\n<ret>$4 = return <ret>$2\n<never>"];
+    bb0 -> bb1;
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+}
+
+digraph + {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$6 = self\no = load_arg(<self>$6#+, 0)\n<ret>$5 = NotSupported()\n<ret>$7 = return <ret>$5\n<never>"];
+    bb0 -> bb1;
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+}
+
+digraph baz1 {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$9 = self\na = foo\nstatTmp$10 = a\nb = a.getbyte(a)\n<ret>$8 = b\n<ret>$11 = return <ret>$8\n<never>"];
+    bb0 -> bb1;
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+}
+
+digraph baz2 {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$13 = self\na = foo\nstatTmp$14 = a\nstatTmp$15 = foo\nb = a.getbyte(statTmp$15)\n<ret>$12 = b\n<ret>$16 = return <ret>$12\n<never>"];
+    bb0 -> bb1;
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+}
+
+digraph baz3 {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$18 = self\nstatTmp$19 = foo\nstatTmp$20 = foo\nb = statTmp$19.getbyte(statTmp$20)\n<ret>$17 = b\n<ret>$21 = return <ret>$17\n<never>"];
+    bb0 -> bb1;
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+}
+
+digraph baz4 {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$23 = self\nstatTmp$25 = self\nstatTmp$24 = statTmp$25.a()\nstatTmp$26 = foo\nb = statTmp$24.getbyte(statTmp$26)\n<ret>$22 = b\n<ret>$27 = return <ret>$22\n<never>"];
+    bb0 -> bb1;
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+}
+
+digraph baz5 {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$29 = self\nifTmp$31 = true\nifTmp$31"];
+    bb0 -> bb2;
+    bb0 -> bb3;
+
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+    bb2 [label = "(b)\nb = 1\nstatTmp$30 = b\n<always>"];
+    bb2 -> bb4;
+    bb3 [label = "(b)\nb = foo\nstatTmp$30 = b\n<always>"];
+    bb3 -> bb4;
+    bb4 [label = "(b)\nstatTmp$32 = 1\nb = b.getbyte(statTmp$32)\n<ret>$28 = b\n<ret>$33 = return <ret>$28\n<never>"];
+    bb4 -> bb1;
+}
+
+digraph baz6 {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$35 = self\nifTmp$37 = true\nifTmp$37"];
+    bb0 -> bb2;
+    bb0 -> bb3;
+
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+    bb2 [label = "(b)\nb = 1\nstatTmp$36 = b\n<always>"];
+    bb2 -> bb4;
+    bb3 [label = "(b)\nb = foo\nstatTmp$36 = b\n<always>"];
+    bb3 -> bb4;
+    bb4 [label = "(b)\nstatTmp$38 = foo\nb = statTmp$38.getbyte(b)\n<ret>$34 = b\n<ret>$39 = return <ret>$34\n<never>"];
+    bb4 -> bb1;
+}
+
+digraph baz7 {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$41 = self\nifTmp$43 = true\nifTmp$43"];
+    bb0 -> bb2;
+    bb0 -> bb3;
+
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+    bb2 [label = "(b)\nb = 1\nstatTmp$42 = b\n<always>"];
+    bb2 -> bb4;
+    bb3 [label = "()\nstatTmp$42 = NotSupported()\n<always>"];
+    bb3 -> bb4;
+    bb4 [label = "(b)\nstatTmp$44 = foo\nb = statTmp$44.getbyte(b)\n<ret>$40 = b\n<ret>$45 = return <ret>$40\n<never>"];
+    bb4 -> bb1;
+}
+
+digraph baz8 {
+    bb0 [shape = invhouse];
+    bb1 [shape = parallelogram];
+
+    bb0 [label = "()\n<self>$47 = self\n<always>"];
+    bb0 -> bb2;
+    bb1 [label = "()\n<never>"];
+    bb1 -> bb1;
+    bb2 [label = "()\nouterLoops: 1\nwhileTmp$48 = true\nwhileTmp$48"];
+    bb2 -> bb3;
+    bb2 -> bb4;
+
+    bb3 [label = "()\nouterLoops: 1\nb = 1\nstatTmp$49 = b\n<always>"];
+    bb3 -> bb2;
+    bb4 [label = "()\n<ret>$46 = nil\n<ret>$50 = return <ret>$46\n<never>"];
+    bb4 -> bb1;
+}
+
+

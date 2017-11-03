@@ -32,7 +32,7 @@ begin
       else
         ::Object#baz5#b = "foo"
       end
-      ::Object#baz5#b = ::Object#baz5#b.getbyte(::Object#baz5#b)
+      ::Object#baz5#b = ::Object#baz5#b.getbyte(1)
     end
   def baz6<baz6>()
     begin

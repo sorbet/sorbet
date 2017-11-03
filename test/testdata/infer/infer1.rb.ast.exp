@@ -36,7 +36,7 @@ begin
       else
         b<todo lvar sym> = "foo"
       end
-      b<todo lvar sym> = b<todo lvar sym>.getbyte(b<todo lvar sym>)
+      b<todo lvar sym> = b<todo lvar sym>.getbyte(1)
     end
   def baz6<<todo sym>>()
     begin
