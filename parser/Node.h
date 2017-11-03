@@ -1,9 +1,11 @@
 #include "ast/ast.h"
 #include "common/common.h"
 
+#include "absl/container/inlined_vector.h"
 #include <memory>
 #include <string>
 #include <vector>
+using absl::InlinedVector;
 
 namespace ruby_typer {
 namespace parser {
@@ -28,6 +30,8 @@ protected:
     void printTabs(std::stringstream &to, int count);
     void printNode(std::stringstream &to, unique_ptr<Node> &node, ast::GlobalState &gs, int tabs);
 };
+
+typedef InlinedVector<std::unique_ptr<Node>, 4> NodeVec;
 
 #include "parser/Node_gen.h"
 }; // namespace parser

@@ -298,7 +298,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
         [&](parser::Begin *a) {
             if (a->stmts.size() > 0) {
                 vector<unique_ptr<Statement>> stats;
-                auto end = --a->stmts.end();
+                auto end = a->stmts.end();
+                --end;
                 for (auto it = a->stmts.begin(); it != end; ++it) {
                     auto &stat = *it;
                     stats.emplace_back(node2TreeImpl(ctx, stat));
@@ -322,7 +323,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
         [&](parser::Kwbegin *a) {
             if (a->stmts.size() > 0) {
                 vector<unique_ptr<Statement>> stats;
-                auto end = --a->stmts.end();
+                auto end = a->stmts.end();
+                --end;
                 for (auto it = a->stmts.begin(); it != end; ++it) {
                     auto &stat = *it;
                     stats.emplace_back(node2TreeImpl(ctx, stat));
