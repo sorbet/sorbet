@@ -72,7 +72,7 @@ std::string Reporter::ComplexError::toString(GlobalState &ctx) {
     if (!this->loc.is_none()) {
         buf << this->loc.toString(ctx) << endl;
     }
-    buf << '[' << (int)this->what << ']' << this->header << endl;
+    buf << '[' << (int)this->what << "] " << this->header << endl;
     bool first = true;
     for (auto &line : this->sections) {
         if (!first)
