@@ -33,6 +33,7 @@ public:
     };
 
     std::pair<Detail, Detail> position(ast::GlobalState &ctx);
+    std::string toString(ast::GlobalState &ctx);
 };
 } // namespace ast
 } // namespace ruby_typer

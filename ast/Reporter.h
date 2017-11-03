@@ -8,19 +8,19 @@ namespace ast {
 enum class ErrorClass {
     Internal, // Internal Compiler Error
 
-    IncludeMutipleParam, // Namer Errors
-    IncludeNotConstant,
-    IncludePassedBlock,
+    IncludeMutipleParam = 2001, // Namer Errors
+    IncludeNotConstant = 2002,
+    IncludePassedBlock = 2003,
 
-    DynamicConstant, // Resolver errors
-    StubConstant,
-    InvalidMethodSignature,
+    DynamicConstant = 4001, // Resolver errors
+    StubConstant = 4002,
+    InvalidMethodSignature = 4003,
 
-    PinnedVariableMismatch, // Inferencer Errors
-    MethodArgumentMismatch,
-    UnknownMethod,
-    MethodArgumentCountMismatch,
-    ReturnTypeMismatch,
+    PinnedVariableMismatch = 7001, // Inferencer Errors
+    MethodArgumentMismatch = 7002,
+    UnknownMethod = 7003,
+    MethodArgumentCountMismatch = 7004,
+    ReturnTypeMismatch = 7005,
 };
 
 class Reporter {
@@ -58,14 +58,15 @@ public:
     };
 
     struct ComplexError {
+        Loc loc;
         ErrorClass what;
         std::string header;
         std::vector<ErrorSection> sections;
         std::string toString(GlobalState &ctx);
-        ComplexError(ErrorClass what, std::string header, std::initializer_list<ErrorSection> sections)
-            : what(what), header(header), sections(sections) {}
-        ComplexError(ErrorClass what, std::string header, std::vector<ErrorSection> sections)
-            : what(what), header(header), sections(sections) {}
+        ComplexError(Loc loc, ErrorClass what, std::string header, std::initializer_list<ErrorSection> sections)
+            : loc(loc), what(what), header(header), sections(sections) {}
+        ComplexError(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections)
+            : loc(loc), what(what), header(header), sections(sections) {}
     };
 
     void _error(Error error);

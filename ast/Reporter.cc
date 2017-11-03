@@ -52,36 +52,7 @@ std::string Reporter::ErrorLine::toString(GlobalState &ctx) {
             buf << pos.second.line;
         }
         buf << " " << formattedMessage << endl;
-        UTF8Desc source = loc.file.file(ctx).source();
-        const char *i = source.from;
-        int lineCount = 0;
-        while (lineCount < pos.first.line - 1) {
-            i = (const char *)memchr(i + 1, '\n', source.to - (i - source.from));
-            lineCount++;
-        }
-        const char *j = i;
-        while (lineCount < pos.second.line) {
-            const char *nj = (const char *)memchr(j + 1, '\n', source.to - (j - source.from));
-            if (nj != nullptr) {
-                j = nj;
-            } else {
-                break;
-            }
-            lineCount++;
-        }
-        string outline(i + 1, j - i - 1);
-        buf << outline;
-        if (pos.second.line == pos.first.line) {
-            // add squigly
-            buf << endl;
-            int p;
-            for (p = 0; p < pos.first.column; p++) {
-                buf << " ";
-            }
-            for (; p < pos.second.column; p++) {
-                buf << "^";
-            }
-        }
+        buf << loc.toString(ctx);
     }
 
     return buf.str();
@@ -98,7 +69,10 @@ std::string Reporter::ErrorSection::toString(GlobalState &ctx) {
 
 std::string Reporter::ComplexError::toString(GlobalState &ctx) {
     stringstream buf;
-    buf << this->header << endl;
+    if (!this->loc.is_none()) {
+        buf << this->loc.toString(ctx) << endl;
+    }
+    buf << '[' << (int)this->what << ']' << this->header << endl;
     bool first = true;
     for (auto &line : this->sections) {
         if (!first)
