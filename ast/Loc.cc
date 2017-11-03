@@ -38,23 +38,15 @@ std::string Loc::toString(ast::GlobalState &ctx) {
     stringstream buf;
     UTF8Desc source = this->file.file(ctx).source();
     auto pos = this->position(ctx);
-    const char *i = source.from;
-    int lineCount = 0;
-    while (lineCount < pos.first.line - 1) {
-        i = (const char *)memchr(i + 1, '\n', source.to - (i - source.from));
-        lineCount++;
-    }
-    const char *j = i;
-    while (lineCount < pos.second.line) {
-        const char *nj = (const char *)memchr(j + 1, '\n', source.to - (j - source.from));
-        if (nj != nullptr) {
-            j = nj;
-        } else {
-            break;
-        }
-        lineCount++;
-    }
-    string outline(i + 1, j - i - 1);
+    auto endstart = make_reverse_iterator(source.from + this->begin_pos);
+    auto beginstart = make_reverse_iterator(source.from);
+    auto start = find(endstart, beginstart, '\n');
+
+    auto end = find(source.from + this->end_pos, source.from + source.to, '\n');
+
+    auto offset1 = beginstart - start;
+    auto offset2 = end - source.from;
+    string outline(source.from + (offset1), source.from + (offset2));
     buf << outline;
     if (pos.second.line == pos.first.line) {
         // add squigly
