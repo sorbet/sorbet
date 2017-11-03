@@ -14,8 +14,8 @@ cc_test(
     deps = [
         "//ast/desugar",
         "//cfg",
-        "//namer",
         "//infer",
+        "//namer",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
     ],
