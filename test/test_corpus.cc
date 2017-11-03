@@ -2,11 +2,11 @@
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
 #include "common/common.h"
+#include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
-#include "infer/infer.h"
 #include <algorithm>
 #include <cstdio>
 #include <dirent.h>
@@ -76,18 +76,23 @@ public:
 #define TEST_COUT TestCout()
 
 class CFG_Collector_and_Typer {
+    bool shouldType;
+
 public:
+    CFG_Collector_and_Typer(bool shouldType) : shouldType(shouldType) {}
     std::vector<std::string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
-        ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+        if (shouldType) {
+            ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+        }
         cfgs.push_back(cfg->toString(ctx));
         return m;
     }
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg",
+    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "infer",
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) {
@@ -192,7 +197,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     // CFG
-    CFG_Collector_and_Typer collector;
+    CFG_Collector_and_Typer collector(test.expectations.find("infer") != test.expectations.end());
     auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(namedTree));
 
     expectation = test.expectations.find("cfg");
@@ -210,6 +215,10 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == got.str() + "\n") {
             TEST_COUT << "cfg OK" << endl;
         }
+    }
+
+    if (test.expectations.find("infer") != test.expectations.end()) {
+        TEST_COUT << "infer OK" << endl;
     }
 
     // Check warnings and errors
