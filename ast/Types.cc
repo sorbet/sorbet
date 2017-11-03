@@ -426,10 +426,14 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
     ast::SymbolRef method = this->symbol.info(ctx).findMember(fun);
 
     if (!method.exists()) {
-        ctx.state.errors.error(
-            ast::Loc::none(0), ast::ErrorClass::UnknownMethod, "Method not found, {} is not a member of {}",
-            fun.toString(ctx),
-            this->toString(ctx)); // TODO: should use position and print the source tree, not the cfg one.
+        std::string maybeComponent;
+        if (fullType.get() != this) {
+            maybeComponent = " component of " + fullType->toString(ctx);
+        }
+        ctx.state.errors.error(ast::Reporter::ComplexError(
+            callLoc, ast::ErrorClass::UnknownMethod,
+            "Method " + fun.name(ctx).toString(ctx) + " does not exist on " + this->toString(ctx) + maybeComponent,
+            {}));
         return Types::dynamic();
     }
     ast::Symbol &info = method.info(ctx);
@@ -450,8 +454,8 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
 
         if (!Types::isSubType(ctx, argTpe.type, expectedType)) {
             ctx.state.errors.error(ast::Reporter::ComplexError(
-                ast::ErrorClass::MethodArgumentMismatch,
-                "Argument  №" + std::to_string(i + 1) + " does not match expected type.",
+                callLoc, ast::ErrorClass::MethodArgumentMismatch,
+                "Argument №" + std::to_string(i + 1) + " does not match expected type.",
                 {ast::Reporter::ErrorSection(
                      "Expected " + expectedType->toString(ctx),
                      {

@@ -98,7 +98,7 @@ public:
                 auto &typeAndOrigin = getTypeAndOrigin(i->what);
                 if (!ast::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
                     ctx.state.errors.error(ast::Reporter::ComplexError(
-                        ast::ErrorClass::ReturnTypeMismatch,
+                        bind.loc, ast::ErrorClass::ReturnTypeMismatch,
                         "Returning value that does not conform to method result type",
                         {ast::Reporter::ErrorSection(
                              "Expected " + expectedType->toString(ctx),
