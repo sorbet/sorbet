@@ -132,6 +132,7 @@ unique_ptr<MethodDef> buildMethod(Context ctx, NameRef name, unique_ptr<parser::
 unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what) {
     if (what.get() == nullptr)
         return make_unique<EmptyTree>();
+    DEBUG_ONLY(Error::check(!what->loc.is_none(), "parse-tree node has no location: ", what->toString(ctx)));
     unique_ptr<Statement> result;
     typecase(what.get(),
              [&](parser::And *a) {
