@@ -455,7 +455,7 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
         if (!Types::isSubType(ctx, argTpe.type, expectedType)) {
             ctx.state.errors.error(ast::Reporter::ComplexError(
                 callLoc, ast::ErrorClass::MethodArgumentMismatch,
-                "Argument №" + std::to_string(i + 1) + " does not match expected type.",
+                "Argument number " + std::to_string(i + 1) + " does not match expected type.",
                 {ast::Reporter::ErrorSection(
                      "Expected " + expectedType->toString(ctx),
                      {
