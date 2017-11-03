@@ -27,6 +27,12 @@ def externals():
         build_file="//:cxxopts.BUILD",
     )
 
+    git_repository(
+            name="com_google_absl",
+            remote="https://github.com/abseil/abseil-cpp.git",
+            commit="da336a84e9c1f86409b21996164ae9602b37f9ca"
+        )
+
     new_git_repository(
         name = "compdb",
         commit = "02c33ed2c0e86053073080fd215f44356ef5b543",

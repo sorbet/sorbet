@@ -14,5 +14,6 @@ cc_library(
         "typecase.h",
     ],
     visibility = ["//visibility:public"],
-    deps = ["@spdlog//:spdlog"],
+    deps = ["@spdlog//:spdlog",
+            "@com_google_absl//absl/algorithm"],
 )
