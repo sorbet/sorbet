@@ -26,7 +26,7 @@ void emit_header(std::vector<std::string> sourceFiles, ostream &out) {
 string escape(string what) {
     char escaped[] = {'\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '\"'};
     char non_escaped[] = {'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '\"'};
-    static_assert(sizeof(escaped) == sizeof(non_escaped));
+    static_assert(sizeof(escaped) == sizeof(non_escaped), "???");
     stringstream buf;
     for (char c : what) {
         int j;

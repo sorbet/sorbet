@@ -12,6 +12,7 @@ cc_binary(
         "//infer",
         "//namer",
         "//parser",
+        "//rbi:payload",
         "@cxxopts//:cxxopts",
     ],
 )
@@ -31,6 +32,7 @@ cc_test(
         "//infer",
         "//namer",
         "//parser",
+        "//rbi:payload",
         "@cxxopts//:cxxopts",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
