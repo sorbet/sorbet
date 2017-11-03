@@ -6,6 +6,7 @@
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
+#include "infer/infer.h"
 #include <algorithm>
 #include <cstdio>
 #include <dirent.h>
@@ -74,11 +75,13 @@ public:
 
 #define TEST_COUT TestCout()
 
-class CFG_Collector {
+class CFG_Collector_and_Typer {
 public:
-    vector<string> cfgs;
+    std::vector<std::string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
-        cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
+        auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
+        ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+        cfgs.push_back(cfg->toString(ctx));
         return m;
     }
 };
@@ -189,8 +192,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     // CFG
-    CFG_Collector collector;
-    auto cfg = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(namedTree));
+    CFG_Collector_and_Typer collector;
+    auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(namedTree));
 
     expectation = test.expectations.find("cfg");
     if (expectation != test.expectations.end()) {
@@ -257,7 +260,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 }
             }
             if (!found) {
-                ADD_FAILURE() << "Unexpected error: " << error->toString(ctx);
+                ADD_FAILURE() << "Unexpected error:\n " << error->toString(ctx);
             }
         }
 
