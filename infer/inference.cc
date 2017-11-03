@@ -49,6 +49,12 @@ public:
                 auto &typeAndOrigin = getTypeAndOrigin(i->what);
                 tp = typeAndOrigin.type;
                 loc = typeAndOrigin.origins;
+                if (i->what.isPlaceHolder()) {
+                    loc.push_back(ast::Loc::none(0));
+                    tp = ast::Types::dynamic();
+                } else {
+                    Error::check(loc.size() > 0, "Inferencer did not assign location");
+                }
             },
             [&](cfg::Send *send) {
                 auto &recvType = getTypeAndOrigin(send->recv);
