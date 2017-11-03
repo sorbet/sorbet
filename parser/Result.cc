@@ -1,6 +1,10 @@
+#include "Result.h"
 #include "parser/Builder.h"
 #include "parser/parser.h"
 #include "ruby_parser/driver.hh"
+
+template class std::unique_ptr<ruby_typer::parser::Result::Impl>;
+template class std::unique_ptr<ruby_typer::parser::Node>;
 
 namespace ruby_typer {
 namespace parser {
@@ -31,7 +35,7 @@ FileRef Result::file() {
     return impl_->file;
 }
 
-Result::Result(unique_ptr<Result::Impl> &&impl) : impl_(move(impl)) {}
+Result::Result(unique_ptr<Impl> &&impl) : impl_(move(impl)) {}
 Result::~Result() {}
 
 Result parse_ruby(GlobalState &ctx, const std::string &path, const string &src) {
@@ -45,6 +49,8 @@ Result parse_ruby(GlobalState &ctx, const std::string &path, const string &src) 
     return result;
 }
 
-ruby_typer::parser::Result::Result(Result &&) {}
+Result::Result(Result &&other) : impl_(move(other.impl_)) {
+    other.impl_ = nullptr;
+}
 }; // namespace parser
 }; // namespace ruby_typer

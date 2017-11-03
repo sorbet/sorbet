@@ -186,7 +186,7 @@ private:
     void ensureCompleted(GlobalState &ctx);
 };
 
-CheckSize(Symbol, 64, 8);
+CheckSize(Symbol, 88, 8);
 } // namespace ast
 } // namespace ruby_typer
 

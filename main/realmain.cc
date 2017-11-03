@@ -1,10 +1,12 @@
 #include "../infer/infer.h"
+#include "../parser/Result.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
+#include "rbi/payload.h"
 #include "spdlog/spdlog.h"
 #include <algorithm> // find
 #include <ctime>
@@ -42,6 +44,43 @@ static bool removeOption(std::vector<std::string> &prints, std::string option) {
     } else {
         return false;
     }
+}
+
+void index(ruby_typer::ast::GlobalState &ctx, const vector<pair<string, string>> nameAndSource) {
+    vector<unique_ptr<ruby_typer::parser::Node>> empty;
+    vector<ruby_typer::parser::Result> results;
+    unique_ptr<ruby_typer::parser::Begin> join =
+        make_unique<ruby_typer::parser::Begin>(ruby_typer::ast::Loc::none(0), move(empty));
+    for (auto &pair : nameAndSource) {
+        results.emplace_back(ruby_typer::parser::parse_ruby(ctx, pair.first, pair.second));
+        auto &r = results.back();
+        auto ast = r.ast();
+        if (r.diagnostics().size() > 0) {
+            vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
+            for (auto &diag : r.diagnostics()) {
+                counts[static_cast<int>(diag.level())]++;
+            }
+            cerr << "parser reported " << r.diagnostics().size() << " errors:" << endl;
+            cerr << " NOTE: " << counts[static_cast<int>(ruby_parser::dlevel::NOTE)] << endl;
+            cerr << " WARNING: " << counts[static_cast<int>(ruby_parser::dlevel::WARNING)] << endl;
+            cerr << " ERROR: " << counts[static_cast<int>(ruby_parser::dlevel::ERROR)] << endl;
+            cerr << " FATAL: " << counts[static_cast<int>(ruby_parser::dlevel::FATAL)] << endl;
+        }
+        if (ast) {
+            join->stmts.emplace_back(ast);
+        } else {
+            ruby_typer::Error::raise("Failed to index " + pair.first);
+        }
+    }
+    ctx.errors.keepErrorsInMemory = true; // silence errors for stdlib.
+    ruby_typer::ast::Context context(ctx, ctx.defn_root());
+    auto desugared = ruby_typer::ast::desugar::node2Tree(context, join.get());
+    desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
+    for (auto &sh : join->stmts) {
+        sh.release(); // they are already owner by Result.
+    }
+    ctx.errors.getAndEmptyErrors();
+    ctx.errors.keepErrorsInMemory = false;
 }
 
 void parse_and_print(ruby_typer::ast::GlobalState &ctx, cxxopts::Options &opts, const string &path, const string &src,
@@ -129,6 +168,7 @@ int realmain(int argc, char **argv) {
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
+    options.add_options()("n,no-payload", "Do not load included rbi files for stdlib");
     options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
                           cxxopts::value<std::vector<std::string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
@@ -166,6 +206,15 @@ int realmain(int argc, char **argv) {
 
     ruby_typer::ast::GlobalState ctx(*console);
 
+    if (!options["n"].as<bool>()) {
+        clock_t begin = clock();
+
+        index(ctx, ruby_typer::rbi::all());
+
+        clock_t end = clock();
+        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
+        console_err->debug("Indexed payload in {} ms\n", elapsed_secs);
+    }
     stats st;
     clock_t begin = clock();
     if (options.count("e")) {
