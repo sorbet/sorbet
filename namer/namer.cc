@@ -90,7 +90,12 @@ public:
 
     ast::MethodDef *preTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
         namesForLocals.emplace_back();
-        method->symbol = ctx.state.enterSymbol(ownerFromContext(ctx), method->name, true);
+        ast::SymbolRef owner = ownerFromContext(ctx);
+        if (method->isSelf) {
+            owner = owner.info(ctx).singletonClass(ctx);
+        }
+
+        method->symbol = ctx.state.enterSymbol(owner, method->name, true);
         ast::Symbol &symbol = method->symbol.info(ctx);
         // Fill in the arity right with TODOs
         for (auto &arg : method->args) {

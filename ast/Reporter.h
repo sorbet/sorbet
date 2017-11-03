@@ -6,15 +6,17 @@ namespace ruby_typer {
 namespace ast {
 
 enum class ErrorClass {
-    Internal, // Internal Compiler Error
+    Internal = 1001, // Internal Compiler Error
 
-    IncludeMutipleParam = 2001, // Namer Errors
-    IncludeNotConstant = 2002,
-    IncludePassedBlock = 2003,
+    InvalidSingletonDef = 2001, // Desugarer Errors
 
-    DynamicConstant = 4001, // Resolver errors
-    StubConstant = 4002,
-    InvalidMethodSignature = 4003,
+    IncludeMutipleParam = 4001, // Namer Errors
+    IncludeNotConstant = 4002,
+    IncludePassedBlock = 4003,
+
+    DynamicConstant = 5001, // Resolver errors
+    StubConstant = 5002,
+    InvalidMethodSignature = 5003,
 
     PinnedVariableMismatch = 7001, // Inferencer Errors
     MethodArgumentMismatch = 7002,

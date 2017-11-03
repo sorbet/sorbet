@@ -3,7 +3,8 @@ begin
     def normal_method<normal_method>()
       <emptyTree>
 
-    <Not Supported (DefS)>
+    def self.normal_static_method<normal_static_method>()
+      <emptyTree>
 
     class <emptyTree>::InnerClass<InnerClass> < (::Object)
       <emptyTree>
