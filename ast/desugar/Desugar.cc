@@ -346,7 +346,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             }
         },
         [&](parser::Module *module) {
-            vector<unique_ptr<Statement>> body;
+            ClassDef::RHS_store body;
             if (auto *a = dynamic_cast<parser::Begin *>(module->body.get())) {
                 for (auto &stat : a->stmts) {
                     body.emplace_back(node2TreeImpl(ctx, stat));
@@ -361,7 +361,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             result.swap(res);
         },
         [&](parser::Class *claz) {
-            vector<unique_ptr<Statement>> body;
+            ClassDef::RHS_store body;
             if (auto *a = dynamic_cast<parser::Begin *>(claz->body.get())) {
                 for (auto &stat : a->stmts) {
                     body.emplace_back(node2TreeImpl(ctx, stat));

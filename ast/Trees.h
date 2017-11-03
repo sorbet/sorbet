@@ -7,6 +7,9 @@
 #include <memory>
 #include <vector>
 
+#include "absl/container/inlined_vector.h"
+using absl::InlinedVector;
+
 namespace ruby_typer {
 namespace ast {
 
@@ -56,7 +59,11 @@ public:
         return symbol.info(ctx).mixins(ctx);
     }
 
-    std::vector<std::unique_ptr<Statement>> rhs;
+    static constexpr int EXPECTED_RHS_COUNT = 4;
+
+    typedef InlinedVector<std::unique_ptr<Statement>, EXPECTED_RHS_COUNT> RHS_store;
+
+    RHS_store rhs;
     std::unique_ptr<Expression> name;
     // For unresolved names. Once they are resolved to Symbols they go into the
     // Symbol
@@ -64,8 +71,7 @@ public:
     ClassDefKind kind;
 
     ClassDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> name,
-             std::vector<std::unique_ptr<Expression>> &ancestors, std::vector<std::unique_ptr<Statement>> &rhs,
-             ClassDefKind kind);
+             std::vector<std::unique_ptr<Expression>> &ancestors, RHS_store &rhs, ClassDefKind kind);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);

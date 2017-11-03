@@ -170,7 +170,7 @@ TEST(PreOrderTreeMap, CountTrees) {
     auto emptyTree = unique_ptr<Expression>(new EmptyTree(loc));
     auto cnst = unique_ptr<Expression>(new ConstantLit(loc, move(emptyTree), name));
 
-    vector<unique_ptr<Statement>> classrhs;
+    ClassDef::RHS_store classrhs;
     classrhs.emplace_back(move(methodDef));
     vector<unique_ptr<Expression>> parents;
     unique_ptr<Statement> tree(new ClassDef(loc, classSym, move(cnst), parents, classrhs, ClassDefKind::Class));

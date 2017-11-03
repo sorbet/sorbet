@@ -63,7 +63,7 @@ Reference::Reference(Loc loc) : Expression(loc) {}
 ControlFlow::ControlFlow(Loc loc) : Expression(loc) {}
 
 ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &ancestors,
-                   vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
+                   RHS_store &rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
 MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args,
