@@ -430,10 +430,9 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
         if (fullType.get() != this) {
             maybeComponent = " component of " + fullType->toString(ctx);
         }
-        ctx.state.errors.error(ast::Reporter::ComplexError(
-            callLoc, ast::ErrorClass::UnknownMethod,
-            "Method " + fun.name(ctx).toString(ctx) + " does not exist on " + this->toString(ctx) + maybeComponent,
-            {}));
+        ctx.state.errors.error(callLoc, ast::ErrorClass::UnknownMethod,
+                               "Method {} does not exist on {}" + maybeComponent, fun.name(ctx).toString(ctx),
+                               this->toString(ctx));
         return Types::dynamic();
     }
     ast::Symbol &info = method.info(ctx);
