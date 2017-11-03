@@ -230,7 +230,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         int unknownLineErrors = 0;
         for (int i = 0; i < errors.size(); i++) {
             auto &error = errors[i];
-            if (error.loc.is_none()) {
+            if (error->loc.is_none()) {
                 // The convention is to put `error: Unknown Location Error` at
                 // the top of the file for each of these so that they are eaten
                 // first when reporting mismatched errors.
@@ -238,18 +238,18 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 continue;
             }
 
-            auto pos = error.loc.position(ctx);
+            auto pos = error->loc.position(ctx);
             bool found = false;
             for (int i = pos.first.line; i <= pos.second.line; i++) {
                 auto expectedError = expectedErrors.find(i);
                 if (expectedError != expectedErrors.end()) {
                     if (expectedError->second.empty()) {
                         ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
-                                      << i << ". It should match a substring of '" << error.formatted << "'";
+                                      << i << ". It should match a substring of '" << error->formatted << "'";
                     }
-                    if (error.formatted.find(expectedError->second) == std::string::npos) {
+                    if (error->formatted.find(expectedError->second) == std::string::npos) {
                         ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
-                                      << expectedError->second << "' inside of '" << error.formatted << "'";
+                                      << expectedError->second << "' inside of '" << error->formatted << "'";
                     }
                     found = true;
                     seenErrorLines.insert(i);
@@ -257,7 +257,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 }
             }
             if (!found) {
-                ADD_FAILURE() << "Unexpected error: " << error.toString(ctx);
+                ADD_FAILURE() << "Unexpected error: " << error->toString(ctx);
             }
         }
 

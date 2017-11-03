@@ -29,12 +29,13 @@ class Reporter {
     friend GlobalState;
 
 private:
-    struct Error {
+    struct BasicError {
         Loc loc;
         ErrorClass what;
         std::string formatted;
-        Error(Loc loc, ErrorClass what, std::string formatted) : loc(loc), what(what), formatted(formatted) {}
-        std::string toString(GlobalState &ctx);
+        BasicError(Loc loc, ErrorClass what, std::string formatted) : loc(loc), what(what), formatted(formatted) {}
+        virtual std::string toString(GlobalState &ctx);
+        virtual ~BasicError() = default;
     };
 
 public:
@@ -59,26 +60,23 @@ public:
         std::string toString(GlobalState &ctx);
     };
 
-    struct ComplexError {
-        Loc loc;
-        ErrorClass what;
-        std::string header;
+    struct ComplexError : public BasicError {
         std::vector<ErrorSection> sections;
-        std::string toString(GlobalState &ctx);
+        virtual std::string toString(GlobalState &ctx);
         ComplexError(Loc loc, ErrorClass what, std::string header, std::initializer_list<ErrorSection> sections)
-            : loc(loc), what(what), header(header), sections(sections) {}
+            : BasicError(loc, what, header), sections(sections) {}
         ComplexError(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections)
-            : loc(loc), what(what), header(header), sections(sections) {}
+            : BasicError(loc, what, header), sections(sections) {}
     };
 
-    void _error(Error error);
+    void _error(BasicError error);
     void _error(ComplexError error);
-    std::vector<Error> errors;
+    std::vector<std::unique_ptr<ruby_typer::ast::Reporter::BasicError>> errors;
 
 public:
     template <typename... Args> void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) {
         std::string formatted = fmt::format(msg, args...);
-        _error(Error(loc, what, formatted));
+        _error(BasicError(loc, what, formatted));
     }
 
     void error(ComplexError error) {
@@ -86,7 +84,7 @@ public:
     }
 
     bool keepErrorsInMemory = false;
-    std::vector<Error> getAndEmptyErrors();
+    std::vector<std::unique_ptr<ruby_typer::ast::Reporter::BasicError>> getAndEmptyErrors();
 
 private:
     Reporter(GlobalState &ctx) : ctx_(ctx) {}
