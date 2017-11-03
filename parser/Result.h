@@ -28,7 +28,7 @@ public:
     ~Result();
 
     Result(const Result &) = delete;
-    Result(Result &&);
+    Result(Result &&other);
 
     class Impl;
 
