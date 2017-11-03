@@ -1,3 +1,4 @@
+class <singleton class:Integer> (Class)
 class Examples (Object)
   method i_like_exps ()
   method i_like_ifs ()

@@ -1,99 +1,106 @@
-class <emptyTree>::Examples<Examples> < (::Object)
-  def i_like_ifs<i_like_ifs>()
-    if true
-      return 1
-    else
-      return 2
-    end
+begin
+  class <emptyTree>::Integer<Integer> < (::Object)
+    def +<+>(::Integer#+#o)
+      <emptyTree>
 
-  def i_like_exps<i_like_exps>()
-    if begin
-        true
+  end
+  class <emptyTree>::Examples<Examples> < (::Object)
+    def i_like_ifs<i_like_ifs>()
+      if true
+        return 1
+      else
+        return 2
       end
-      1
-    else
-      2
-    end
 
-  def return_in_one_branch1<return_in_one_branch1>()
-    if begin
-        true
-      end
-      return 1
-    else
-      2
-    end
-
-  def return_in_one_branch2<return_in_one_branch2>()
-    if begin
-        true
-      end
-      1
-    else
-      return 2
-    end
-
-  def variables<variables>()
-    begin
+    def i_like_exps<i_like_exps>()
       if begin
           true
         end
-        ::Examples#variables#a = 1
+        1
       else
-        ::Examples#variables#a = 2
+        2
       end
+
+    def return_in_one_branch1<return_in_one_branch1>()
+      if begin
+          true
+        end
+        return 1
+      else
+        2
+      end
+
+    def return_in_one_branch2<return_in_one_branch2>()
+      if begin
+          true
+        end
+        1
+      else
+        return 2
+      end
+
+    def variables<variables>()
+      begin
+        if begin
+            true
+          end
+          ::Examples#variables#a = 1
+        else
+          ::Examples#variables#a = 2
+        end
+        if begin
+            false
+          end
+          ::Examples#variables#b = 1
+        else
+          ::Examples#variables#b = 2
+        end
+        ::Examples#variables#a.+(::Examples#variables#b)
+      end
+
+    def variables_and_loop<variables_and_loop>()
+      begin
+        if begin
+            true
+          end
+          ::Examples#variables_and_loop#a = 1
+        else
+          ::Examples#variables_and_loop#a = 2
+        end
+        while true
+          if begin
+              false
+            end
+            ::Examples#variables_and_loop#b = 1
+          else
+            ::Examples#variables_and_loop#b = 2
+          end
+        end
+        ::Examples#variables_and_loop#b
+      end
+
+    def variables_loop_if<variables_loop_if>()
+      begin
+        while true
+          if begin
+              false
+            end
+            ::Examples#variables_loop_if#b = 1
+          else
+            ::Examples#variables_loop_if#b = 2
+          end
+        end
+        ::Examples#variables_loop_if#b
+      end
+
+    def take_arguments<take_arguments>(::Examples#take_arguments#i)
       if begin
           false
         end
-        ::Examples#variables#b = 1
+        2
       else
-        ::Examples#variables#b = 2
+        ::Examples#take_arguments#i
       end
-      ::Examples#variables#a.+(::Examples#variables#b)
-    end
 
-  def variables_and_loop<variables_and_loop>()
-    begin
-      if begin
-          true
-        end
-        ::Examples#variables_and_loop#a = 1
-      else
-        ::Examples#variables_and_loop#a = 2
-      end
-      while true
-        if begin
-            false
-          end
-          ::Examples#variables_and_loop#b = 1
-        else
-          ::Examples#variables_and_loop#b = 2
-        end
-      end
-      ::Examples#variables_and_loop#b
-    end
-
-  def variables_loop_if<variables_loop_if>()
-    begin
-      while true
-        if begin
-            false
-          end
-          ::Examples#variables_loop_if#b = 1
-        else
-          ::Examples#variables_loop_if#b = 2
-        end
-      end
-      ::Examples#variables_loop_if#b
-    end
-
-  def take_arguments<take_arguments>(::Examples#take_arguments#i)
-    if begin
-        false
-      end
-      2
-    else
-      ::Examples#take_arguments#i
-    end
-
+  end
 end
