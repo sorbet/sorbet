@@ -379,7 +379,7 @@ std::shared_ptr<Type> Types::dynamic() {
 ruby_typer::ast::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
 
 std::string ruby_typer::ast::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
-    return this->symbol.info(ctx).fullName(ctx);
+    return this->symbol.info(ctx).name.toString(ctx);
 }
 
 std::string ruby_typer::ast::ClassType::typeName() {
@@ -389,26 +389,27 @@ std::string ruby_typer::ast::ClassType::typeName() {
 ruby_typer::ast::ProxyType::ProxyType(std::shared_ptr<ruby_typer::ast::Type> underlying)
     : underlying(std::move(underlying)) {}
 
-std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                              std::vector<std::shared_ptr<Type>> &args) {
-    return underlying->dispatchCall(ctx, name, args);
+std::shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
+    return underlying->dispatchCall(ctx, name, callLoc, args, fullType);
 }
 
 std::shared_ptr<Type> ProxyType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
     return underlying->getCallArgumentType(ctx, name, i);
 }
 
-std::shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                           std::vector<std::shared_ptr<Type>> &args) {
-    return Types::lub(ctx, left->dispatchCall(ctx, name, args), right->dispatchCall(ctx, name, args));
+std::shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                           std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
+    return Types::lub(ctx, left->dispatchCall(ctx, name, callLoc, args, fullType),
+                      right->dispatchCall(ctx, name, callLoc, args, fullType));
 }
 
 std::shared_ptr<Type> OrType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
     return left->getCallArgumentType(ctx, name, i); // TODO: should glb with right
 }
 
-std::shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name,
-                                            std::vector<std::shared_ptr<Type>> &args) {
+std::shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                            std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
 
     Error::notImplemented();
 }
@@ -417,23 +418,26 @@ std::shared_ptr<Type> AndType::getCallArgumentType(ast::Context ctx, ast::NameRe
     return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
-std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun,
-                                              std::vector<std::shared_ptr<Type>> &args) {
+std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun, ast::Loc callLoc,
+                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
     if (isDynamic()) {
         return Types::dynamic();
     }
     ast::SymbolRef method = this->symbol.info(ctx).findMember(fun);
 
     if (!method.exists()) {
-        ctx.state.errors.error(
-            ast::Loc::none(0), ast::ErrorClass::UnknownMethod, "Method not found, {} is not a member of {}",
-            fun.toString(ctx),
-            this->toString(ctx)); // TODO: should use position and print the source tree, not the cfg one.
+        std::string maybeComponent;
+        if (fullType.get() != this) {
+            maybeComponent = " component of " + fullType->toString(ctx);
+        }
+        ctx.state.errors.error(callLoc, ast::ErrorClass::UnknownMethod,
+                               "Method {} does not exist on {}" + maybeComponent, fun.name(ctx).toString(ctx),
+                               this->toString(ctx));
         return Types::dynamic();
     }
     ast::Symbol &info = method.info(ctx);
 
-    if (info.arguments().size() != !args.size()) { // todo: this should become actual argument matching
+    if (info.arguments().size() != args.size()) { // todo: this should become actual argument matching
         ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
                                "Wrong number of arguments for method {}.\n Expected: {}, found: {}",
                                info.arguments().size(), args.size(),
@@ -441,16 +445,26 @@ std::shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun
         return Types::dynamic();
     }
     int i = 0;
-    for (std::shared_ptr<Type> &argTpe : args) {
+    for (TypeAndOrigins &argTpe : args) {
         shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
         if (!expectedType) {
             expectedType = Types::dynamic();
         }
 
-        if (!Types::isSubType(ctx, argTpe, expectedType)) {
-            ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::MethodArgumentCountMismatch,
-                                   "Argument {}, does not match expected type.\n Expected {}, found: {}", i + 1,
-                                   expectedType->toString(ctx), argTpe->toString(ctx));
+        if (!Types::isSubType(ctx, argTpe.type, expectedType)) {
+            ctx.state.errors.error(ast::Reporter::ComplexError(
+                callLoc, ast::ErrorClass::MethodArgumentMismatch,
+                "Argument number " + std::to_string(i + 1) + " does not match expected type.",
+                {ast::Reporter::ErrorSection(
+                     "Expected " + expectedType->toString(ctx),
+                     {
+                         ast::Reporter::ErrorLine::from(
+                             info.arguments()[i].info(ctx).definitionLoc,
+                             "Method {} has specified type of argument {} as {}", info.name.toString(ctx),
+                             info.arguments()[i].info(ctx).name.toString(ctx), expectedType->toString(ctx)),
+                     }),
+                 ast::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
+                                             argTpe.origins2Explanations(ctx))}));
         }
 
         i++;
@@ -505,7 +519,28 @@ std::string Literal::typeName() {
 }
 
 std::string Literal::toString(ast::Context ctx, int tabs) {
-    return "Literal[" + this->underlying->toString(ctx, tabs) + "]{" + to_string(value) + "}";
+    string value;
+    SymbolRef undSymbol = dynamic_cast<ClassType *>(this->underlying.get())->symbol;
+    switch (undSymbol._id) {
+        case GlobalState::defn_String()._id:
+            value = "\"" + NameRef(this->value).toString(ctx) + "\"";
+            break;
+        case GlobalState::defn_Integer()._id:
+            value = std::to_string(this->value);
+            break;
+        case GlobalState::defn_Float()._id:
+            value = std::to_string(*reinterpret_cast<float *>(&(this->value)));
+            break;
+        case GlobalState::defn_TrueClass()._id:
+            value = "true";
+            break;
+        case GlobalState::defn_FalseClass()._id:
+            value = "false";
+            break;
+        default:
+            Error::raise("should not be reachable");
+    }
+    return this->underlying->toString(ctx, tabs) + "(" + value + ")";
 }
 
 ruby_typer::ast::ArrayType::ArrayType(std::vector<std::shared_ptr<Type>> &elements)
@@ -581,16 +616,7 @@ int AndType::kind() {
 
 std::string AndType::toString(ast::Context ctx, int tabs) {
     stringstream buf;
-    buf << "AndType {" << endl;
-    printTabs(buf, tabs + 1);
-    buf << "left"
-        << " = " << this->left->toString(ctx, tabs + 2) << endl;
-    printTabs(buf, tabs + 1);
-    buf << "right"
-        << " = " << this->right->toString(ctx, tabs + 2) << endl;
-
-    printTabs(buf, tabs);
-    buf << "}";
+    buf << this->left->toString(ctx, tabs + 2) << " && " << this->right->toString(ctx, tabs + 2);
     return buf.str();
 }
 
@@ -600,16 +626,7 @@ int OrType::kind() {
 
 std::string OrType::toString(ast::Context ctx, int tabs) {
     stringstream buf;
-    buf << "OrType {" << endl;
-    printTabs(buf, tabs + 1);
-    buf << "left"
-        << " = " << this->left->toString(ctx, tabs + 2) << endl;
-    printTabs(buf, tabs + 1);
-    buf << "right"
-        << " = " << this->right->toString(ctx, tabs + 2) << endl;
-
-    printTabs(buf, tabs);
-    buf << "}";
+    buf << this->left->toString(ctx, tabs + 2) << " | " << this->right->toString(ctx, tabs + 2);
     return buf.str();
 }
 

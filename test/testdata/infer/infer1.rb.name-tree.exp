@@ -9,10 +9,57 @@ begin
       <emptyTree>
 
   end
-  def baz<baz>()
+  def baz1<baz1>()
     begin
-      ::Object#baz#a = "foo"
-      ::Object#baz#b = ::Object#baz#a.getbyte(1)
-      2.+(::Object#baz#b)
+      ::Object#baz1#a = "foo"
+      ::Object#baz1#b = ::Object#baz1#a.getbyte(::Object#baz1#a)
+    end
+  def baz2<baz2>()
+    begin
+      ::Object#baz2#a = "foo"
+      ::Object#baz2#b = ::Object#baz2#a.getbyte("foo")
+    end
+  def baz3<baz3>()
+    ::Object#baz3#b = "foo".getbyte("foo")
+  def baz4<baz4>()
+    ::Object#baz4#b = self(Object).a().getbyte("foo")
+  def baz5<baz5>()
+    begin
+      if begin
+          true
+        end
+        ::Object#baz5#b = 1
+      else
+        ::Object#baz5#b = "foo"
+      end
+      ::Object#baz5#b = ::Object#baz5#b.getbyte(1)
+    end
+  def baz6<baz6>()
+    begin
+      if begin
+          true
+        end
+        ::Object#baz6#b = 1
+      else
+        ::Object#baz6#b = "foo"
+      end
+      ::Object#baz6#b = "foo".getbyte(::Object#baz6#b)
+    end
+  def baz7<baz7>()
+    begin
+      if begin
+          true
+        end
+        ::Object#baz7#b = 1
+      else
+        <emptyTree>
+      end
+      ::Object#baz7#b = "foo".getbyte(::Object#baz7#b)
+    end
+  def baz8<baz8>()
+    while begin
+        true
+      end
+      ::Object#baz8#b = 1
     end
 end

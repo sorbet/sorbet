@@ -34,5 +34,33 @@ pair<Loc::Detail, Loc::Detail> Loc::position(ast::GlobalState &ctx) {
     return make_pair(offset2Pos(file.source(), begin_pos), offset2Pos(file.source(), end_pos));
 }
 
+std::string Loc::toString(ast::GlobalState &ctx) {
+    stringstream buf;
+    UTF8Desc source = this->file.file(ctx).source();
+    auto pos = this->position(ctx);
+    auto endstart = make_reverse_iterator(source.from + this->begin_pos);
+    auto beginstart = make_reverse_iterator(source.from);
+    auto start = find(endstart, beginstart, '\n');
+
+    auto end = find(source.from + this->end_pos, source.from + source.to, '\n');
+
+    auto offset1 = beginstart - start;
+    auto offset2 = end - source.from;
+    string outline(source.from + (offset1), source.from + (offset2));
+    buf << outline;
+    if (pos.second.line == pos.first.line) {
+        // add squigly
+        buf << endl;
+        int p;
+        for (p = 0; p < pos.first.column; p++) {
+            buf << " ";
+        }
+        for (; p < pos.second.column; p++) {
+            buf << "^";
+        }
+    }
+    return buf.str();
+}
+
 } // namespace ast
 } // namespace ruby_typer

@@ -65,6 +65,19 @@ public:
     static std::shared_ptr<Type> dynamic();
 };
 
+class TypeAndOrigins {
+public:
+    std::shared_ptr<ast::Type> type;
+    std::vector<ast::Loc> origins; // todo: use tiny vector
+    std::vector<ast::Reporter::ErrorLine> origins2Explanations(ast::Context ctx) {
+        std::vector<ast::Reporter::ErrorLine> result;
+        for (auto o : origins) {
+            result.emplace_back(o, "");
+        }
+        return result;
+    }
+};
+
 class Type {
 public:
     Type() = default;
@@ -72,8 +85,8 @@ public:
     virtual ~Type() = default;
     virtual std::string toString(ast::Context ctx, int tabs = 0) = 0;
     virtual std::string typeName() = 0;
-    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args) = 0;
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) = 0;
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) = 0;
     bool isDynamic();
 };
@@ -89,8 +102,8 @@ public:
     std::shared_ptr<Type> underlying;
     ProxyType(std::shared_ptr<Type> underlying);
 
-    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args);
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i);
 };
 
@@ -102,8 +115,8 @@ public:
 
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
-    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args);
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i);
 };
 
@@ -116,8 +129,8 @@ public:
 
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
-    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args);
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i);
 };
 
@@ -130,8 +143,8 @@ public:
 
     virtual std::string toString(ast::Context ctx, int tabs = 0);
     virtual std::string typeName();
-    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name,
-                                               std::vector<std::shared_ptr<Type>> &args);
+    virtual std::shared_ptr<Type> dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
 
     virtual std::shared_ptr<Type> getCallArgumentType(ast::Context ctx, ast::NameRef name, int i);
 };

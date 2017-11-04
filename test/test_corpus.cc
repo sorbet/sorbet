@@ -2,6 +2,7 @@
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
 #include "common/common.h"
+#include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
@@ -74,17 +75,24 @@ public:
 
 #define TEST_COUT TestCout()
 
-class CFG_Collector {
+class CFG_Collector_and_Typer {
+    bool shouldType;
+
 public:
-    vector<string> cfgs;
+    CFG_Collector_and_Typer(bool shouldType) : shouldType(shouldType) {}
+    std::vector<std::string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
-        cfgs.push_back(ruby_typer::cfg::CFG::buildFor(ctx, *m)->toString(ctx));
+        auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
+        if (shouldType) {
+            ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+        }
+        cfgs.push_back(cfg->toString(ctx));
         return m;
     }
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg",
+    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "infer",
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) {
@@ -189,8 +197,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     // CFG
-    CFG_Collector collector;
-    auto cfg = ruby_typer::ast::TreeMap<CFG_Collector>::apply(context, collector, move(namedTree));
+    CFG_Collector_and_Typer collector(test.expectations.find("infer") != test.expectations.end());
+    auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(namedTree));
 
     expectation = test.expectations.find("cfg");
     if (expectation != test.expectations.end()) {
@@ -207,6 +215,10 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == got.str() + "\n") {
             TEST_COUT << "cfg OK" << endl;
         }
+    }
+
+    if (test.expectations.find("infer") != test.expectations.end()) {
+        TEST_COUT << "infer OK" << endl;
     }
 
     // Check warnings and errors
@@ -230,7 +242,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         int unknownLineErrors = 0;
         for (int i = 0; i < errors.size(); i++) {
             auto &error = errors[i];
-            if (error.loc.is_none()) {
+            if (error->loc.is_none()) {
                 // The convention is to put `error: Unknown Location Error` at
                 // the top of the file for each of these so that they are eaten
                 // first when reporting mismatched errors.
@@ -238,18 +250,18 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 continue;
             }
 
-            auto pos = error.loc.position(ctx);
+            auto pos = error->loc.position(ctx);
             bool found = false;
             for (int i = pos.first.line; i <= pos.second.line; i++) {
                 auto expectedError = expectedErrors.find(i);
                 if (expectedError != expectedErrors.end()) {
                     if (expectedError->second.empty()) {
                         ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
-                                      << i << ". It should match a substring of '" << error.formatted << "'";
+                                      << i << ". It should match a substring of '" << error->formatted << "'";
                     }
-                    if (error.formatted.find(expectedError->second) == std::string::npos) {
+                    if (error->formatted.find(expectedError->second) == std::string::npos) {
                         ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
-                                      << expectedError->second << "' inside of '" << error.formatted << "'";
+                                      << expectedError->second << "' inside of '" << error->formatted << "'";
                     }
                     found = true;
                     seenErrorLines.insert(i);
@@ -257,7 +269,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 }
             }
             if (!found) {
-                ADD_FAILURE() << "Unexpected error: " << error.toString(ctx);
+                ADD_FAILURE() << "Unexpected error:\n " << error->toString(ctx);
             }
         }
 

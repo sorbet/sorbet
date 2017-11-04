@@ -1,289 +1,359 @@
-Class {
-  name = Const {
-    scope = NULL
-    name = Examples
-  }
-  superclass = NULL
-  body = Begin {
-    stmts = [
-      DefMethod {
-        name = i_like_ifs
-        args = Args {
-          args = [
-          ]
-        }
-        body = If {
-          condition = True {
-          }
-          then_ = Return {
-            exprs = [
-              Integer {
-                val = "1"
-              }
-            ]
-          }
-          else_ = Return {
-            exprs = [
-              Integer {
-                val = "2"
-              }
-            ]
-          }
-        }
+Begin {
+  stmts = [
+    Class {
+      name = Const {
+        scope = NULL
+        name = Integer
       }
-      DefMethod {
-        name = i_like_exps
-        args = Args {
-          args = [
-          ]
-        }
-        body = If {
-          condition = Begin {
-            stmts = [
-              True {
+      superclass = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = standard_method
+            args = [
+              Hash {
+                pairs = [
+                  Pair {
+                    key = Symbol {
+                      val = o
+                    }
+                    value = Const {
+                      scope = NULL
+                      name = Integer
+                    }
+                  }
+                ]
+              }
+              Hash {
+                pairs = [
+                  Pair {
+                    key = Symbol {
+                      val = returns
+                    }
+                    value = Send {
+                      receiver = Const {
+                        scope = Const {
+                          scope = NULL
+                          name = Opus
+                        }
+                        name = Types
+                      }
+                      method = any
+                      args = [
+                        Const {
+                          scope = NULL
+                          name = Integer
+                        }
+                      ]
+                    }
+                  }
+                ]
               }
             ]
           }
-          then_ = Integer {
-            val = "1"
+          DefMethod {
+            name = +
+            args = Args {
+              args = [
+                Arg {
+                  name = o
+                }
+              ]
+            }
+            body = NULL
           }
-          else_ = Integer {
-            val = "2"
-          }
-        }
+        ]
       }
-      DefMethod {
-        name = return_in_one_branch1
-        args = Args {
-          args = [
-          ]
-        }
-        body = If {
-          condition = Begin {
-            stmts = [
-              True {
-              }
-            ]
-          }
-          then_ = Return {
-            exprs = [
-              Integer {
-                val = "1"
-              }
-            ]
-          }
-          else_ = Integer {
-            val = "2"
-          }
-        }
+    }
+    Class {
+      name = Const {
+        scope = NULL
+        name = Examples
       }
-      DefMethod {
-        name = return_in_one_branch2
-        args = Args {
-          args = [
-          ]
-        }
-        body = If {
-          condition = Begin {
-            stmts = [
-              True {
+      superclass = NULL
+      body = Begin {
+        stmts = [
+          DefMethod {
+            name = i_like_ifs
+            args = Args {
+              args = [
+              ]
+            }
+            body = If {
+              condition = True {
               }
-            ]
-          }
-          then_ = Integer {
-            val = "1"
-          }
-          else_ = Return {
-            exprs = [
-              Integer {
-                val = "2"
+              then_ = Return {
+                exprs = [
+                  Integer {
+                    val = "1"
+                  }
+                ]
               }
-            ]
+              else_ = Return {
+                exprs = [
+                  Integer {
+                    val = "2"
+                  }
+                ]
+              }
+            }
           }
-        }
-      }
-      DefMethod {
-        name = variables
-        args = Args {
-          args = [
-          ]
-        }
-        body = Begin {
-          stmts = [
-            If {
+          DefMethod {
+            name = i_like_exps
+            args = Args {
+              args = [
+              ]
+            }
+            body = If {
               condition = Begin {
                 stmts = [
                   True {
                   }
                 ]
               }
-              then_ = LVarAsgn {
-                name = a
-                expr = Integer {
-                  val = "1"
-                }
+              then_ = Integer {
+                val = "1"
               }
-              else_ = LVarAsgn {
-                name = a
-                expr = Integer {
-                  val = "2"
-                }
+              else_ = Integer {
+                val = "2"
               }
             }
-            If {
+          }
+          DefMethod {
+            name = return_in_one_branch1
+            args = Args {
+              args = [
+              ]
+            }
+            body = If {
+              condition = Begin {
+                stmts = [
+                  True {
+                  }
+                ]
+              }
+              then_ = Return {
+                exprs = [
+                  Integer {
+                    val = "1"
+                  }
+                ]
+              }
+              else_ = Integer {
+                val = "2"
+              }
+            }
+          }
+          DefMethod {
+            name = return_in_one_branch2
+            args = Args {
+              args = [
+              ]
+            }
+            body = If {
+              condition = Begin {
+                stmts = [
+                  True {
+                  }
+                ]
+              }
+              then_ = Integer {
+                val = "1"
+              }
+              else_ = Return {
+                exprs = [
+                  Integer {
+                    val = "2"
+                  }
+                ]
+              }
+            }
+          }
+          DefMethod {
+            name = variables
+            args = Args {
+              args = [
+              ]
+            }
+            body = Begin {
+              stmts = [
+                If {
+                  condition = Begin {
+                    stmts = [
+                      True {
+                      }
+                    ]
+                  }
+                  then_ = LVarAsgn {
+                    name = a
+                    expr = Integer {
+                      val = "1"
+                    }
+                  }
+                  else_ = LVarAsgn {
+                    name = a
+                    expr = Integer {
+                      val = "2"
+                    }
+                  }
+                }
+                If {
+                  condition = Begin {
+                    stmts = [
+                      False {
+                      }
+                    ]
+                  }
+                  then_ = LVarAsgn {
+                    name = b
+                    expr = Integer {
+                      val = "1"
+                    }
+                  }
+                  else_ = LVarAsgn {
+                    name = b
+                    expr = Integer {
+                      val = "2"
+                    }
+                  }
+                }
+                Send {
+                  receiver = LVar {
+                    name = a
+                  }
+                  method = +
+                  args = [
+                    LVar {
+                      name = b
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          DefMethod {
+            name = variables_and_loop
+            args = Args {
+              args = [
+              ]
+            }
+            body = Begin {
+              stmts = [
+                If {
+                  condition = Begin {
+                    stmts = [
+                      True {
+                      }
+                    ]
+                  }
+                  then_ = LVarAsgn {
+                    name = a
+                    expr = Integer {
+                      val = "1"
+                    }
+                  }
+                  else_ = LVarAsgn {
+                    name = a
+                    expr = Integer {
+                      val = "2"
+                    }
+                  }
+                }
+                While {
+                  cond = True {
+                  }
+                  body = If {
+                    condition = Begin {
+                      stmts = [
+                        False {
+                        }
+                      ]
+                    }
+                    then_ = LVarAsgn {
+                      name = b
+                      expr = Integer {
+                        val = "1"
+                      }
+                    }
+                    else_ = LVarAsgn {
+                      name = b
+                      expr = Integer {
+                        val = "2"
+                      }
+                    }
+                  }
+                }
+                LVar {
+                  name = b
+                }
+              ]
+            }
+          }
+          DefMethod {
+            name = variables_loop_if
+            args = Args {
+              args = [
+              ]
+            }
+            body = Begin {
+              stmts = [
+                While {
+                  cond = True {
+                  }
+                  body = If {
+                    condition = Begin {
+                      stmts = [
+                        False {
+                        }
+                      ]
+                    }
+                    then_ = LVarAsgn {
+                      name = b
+                      expr = Integer {
+                        val = "1"
+                      }
+                    }
+                    else_ = LVarAsgn {
+                      name = b
+                      expr = Integer {
+                        val = "2"
+                      }
+                    }
+                  }
+                }
+                LVar {
+                  name = b
+                }
+              ]
+            }
+          }
+          DefMethod {
+            name = take_arguments
+            args = Args {
+              args = [
+                Arg {
+                  name = i
+                }
+              ]
+            }
+            body = If {
               condition = Begin {
                 stmts = [
                   False {
                   }
                 ]
               }
-              then_ = LVarAsgn {
-                name = b
-                expr = Integer {
-                  val = "1"
-                }
+              then_ = Integer {
+                val = "2"
               }
-              else_ = LVarAsgn {
-                name = b
-                expr = Integer {
-                  val = "2"
-                }
+              else_ = LVar {
+                name = i
               }
             }
-            Send {
-              receiver = LVar {
-                name = a
-              }
-              method = +
-              args = [
-                LVar {
-                  name = b
-                }
-              ]
-            }
-          ]
-        }
-      }
-      DefMethod {
-        name = variables_and_loop
-        args = Args {
-          args = [
-          ]
-        }
-        body = Begin {
-          stmts = [
-            If {
-              condition = Begin {
-                stmts = [
-                  True {
-                  }
-                ]
-              }
-              then_ = LVarAsgn {
-                name = a
-                expr = Integer {
-                  val = "1"
-                }
-              }
-              else_ = LVarAsgn {
-                name = a
-                expr = Integer {
-                  val = "2"
-                }
-              }
-            }
-            While {
-              cond = True {
-              }
-              body = If {
-                condition = Begin {
-                  stmts = [
-                    False {
-                    }
-                  ]
-                }
-                then_ = LVarAsgn {
-                  name = b
-                  expr = Integer {
-                    val = "1"
-                  }
-                }
-                else_ = LVarAsgn {
-                  name = b
-                  expr = Integer {
-                    val = "2"
-                  }
-                }
-              }
-            }
-            LVar {
-              name = b
-            }
-          ]
-        }
-      }
-      DefMethod {
-        name = variables_loop_if
-        args = Args {
-          args = [
-          ]
-        }
-        body = Begin {
-          stmts = [
-            While {
-              cond = True {
-              }
-              body = If {
-                condition = Begin {
-                  stmts = [
-                    False {
-                    }
-                  ]
-                }
-                then_ = LVarAsgn {
-                  name = b
-                  expr = Integer {
-                    val = "1"
-                  }
-                }
-                else_ = LVarAsgn {
-                  name = b
-                  expr = Integer {
-                    val = "2"
-                  }
-                }
-              }
-            }
-            LVar {
-              name = b
-            }
-          ]
-        }
-      }
-      DefMethod {
-        name = take_arguments
-        args = Args {
-          args = [
-            Arg {
-              name = i
-            }
-          ]
-        }
-        body = If {
-          condition = Begin {
-            stmts = [
-              False {
-              }
-            ]
           }
-          then_ = Integer {
-            val = "2"
-          }
-          else_ = LVar {
-            name = i
-          }
-        }
+        ]
       }
-    ]
-  }
+    }
+  ]
 }

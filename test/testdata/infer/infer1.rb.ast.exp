@@ -13,10 +13,57 @@ begin
       <emptyTree>
 
   end
-  def baz<<todo sym>>()
+  def baz1<<todo sym>>()
     begin
       a<todo lvar sym> = "foo"
-      b<todo lvar sym> = a<todo lvar sym>.getbyte(1)
-      2.+(b<todo lvar sym>)
+      b<todo lvar sym> = a<todo lvar sym>.getbyte(a<todo lvar sym>)
+    end
+  def baz2<<todo sym>>()
+    begin
+      a<todo lvar sym> = "foo"
+      b<todo lvar sym> = a<todo lvar sym>.getbyte("foo")
+    end
+  def baz3<<todo sym>>()
+    b<todo lvar sym> = "foo".getbyte("foo")
+  def baz4<<todo sym>>()
+    b<todo lvar sym> = self(TODO).a().getbyte("foo")
+  def baz5<<todo sym>>()
+    begin
+      if begin
+          true
+        end
+        b<todo lvar sym> = 1
+      else
+        b<todo lvar sym> = "foo"
+      end
+      b<todo lvar sym> = b<todo lvar sym>.getbyte(1)
+    end
+  def baz6<<todo sym>>()
+    begin
+      if begin
+          true
+        end
+        b<todo lvar sym> = 1
+      else
+        b<todo lvar sym> = "foo"
+      end
+      b<todo lvar sym> = "foo".getbyte(b<todo lvar sym>)
+    end
+  def baz7<<todo sym>>()
+    begin
+      if begin
+          true
+        end
+        b<todo lvar sym> = 1
+      else
+        <emptyTree>
+      end
+      b<todo lvar sym> = "foo".getbyte(b<todo lvar sym>)
+    end
+  def baz8<<todo sym>>()
+    while begin
+        true
+      end
+      b<todo lvar sym> = 1
     end
 end

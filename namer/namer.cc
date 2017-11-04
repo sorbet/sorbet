@@ -83,6 +83,7 @@ public:
                 }
                 return false;
             });
+        klass->symbol.info(ctx).definitionLoc = klass->loc;
         klass->rhs.erase(toRemove, klass->rhs.end());
         return klass;
     }
@@ -105,6 +106,7 @@ public:
                 symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
             }
         }
+        symbol.definitionLoc = method->loc;
 
         return method;
     }

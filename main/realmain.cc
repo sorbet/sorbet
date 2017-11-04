@@ -29,8 +29,8 @@ class CFG_Collector_and_Typer {
 public:
     std::vector<std::string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
-        auto cfg = ruby_typer::cfg::CFG::buildFor(ctx, *m);
-        ruby_typer::infer::Inference::run(ctx, cfg);
+        auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
+        ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
         cfgs.push_back(cfg->toString(ctx));
         return m;
     }

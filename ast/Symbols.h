@@ -1,8 +1,10 @@
 #ifndef SRUBY_SYMBOLS_H
 #define SRUBY_SYMBOLS_H
 
+#include "Loc.h"
 #include "Names.h"
 #include "common/common.h"
+#include <climits> // INT_MAX
 #include <memory>
 #include <vector>
 
@@ -86,12 +88,16 @@ public:
     bool isConstructor(GlobalState &ctx) const;
 
     SymbolRef owner;
+    ast::Loc definitionLoc;
     /* isClass,   IsArray,  isField, isMethod
      * IsFromJar, IsFromFile
      * */
     u4 flags;
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
+
+    // TODO: this should belong to future LocalVariable class
+    int minLoops = INT_MAX; // minimal loop depth that refers to this variable.
 
     inline std::vector<SymbolRef> &arguments() {
         Error::check(!isClass());

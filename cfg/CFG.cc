@@ -2,12 +2,14 @@
 #include "CFG.h"
 #include <algorithm>
 #include <algorithm> // sort
+#include <climits>   // INT_MAX
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
+template class std::unique_ptr<ruby_typer::cfg::Instruction>;
 
 using namespace std;
 
@@ -60,6 +62,34 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
         if (bb->bexit.cond != ctx.state.defn_cfg_never() && bb->bexit.cond != ctx.state.defn_cfg_always()) {
             reads[bb->bexit.cond].insert(bb.get());
+        }
+    }
+
+    for (auto &pair : reads) {
+        ast::SymbolRef what = pair.first;
+        unordered_set<BasicBlock *> &where = pair.second;
+        int min = INT_MAX;
+
+        for (BasicBlock *bb : where) {
+            if (min > bb->outerLoops) {
+                min = bb->outerLoops;
+            }
+        }
+        what.info(ctx).minLoops = min;
+    }
+
+    for (auto &pair : writes) {
+        ast::SymbolRef what = pair.first;
+        unordered_set<BasicBlock *> &where = pair.second;
+        int min = INT_MAX;
+
+        for (BasicBlock *bb : where) {
+            if (min > bb->outerLoops) {
+                min = bb->outerLoops;
+            }
+        }
+        if (what.info(ctx).minLoops > min) {
+            what.info(ctx).minLoops = min;
         }
     }
 
@@ -190,7 +220,7 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
 
     BasicBlock *entry = res->entry();
 
-    entry->exprs.emplace_back(selfSym, make_unique<Self>(md.symbol.info(ctx).owner));
+    entry->exprs.emplace_back(selfSym, md.loc, make_unique<Self>(md.symbol.info(ctx).owner));
     auto methodName = md.symbol.info(ctx).name;
 
     int i = 0;
@@ -201,14 +231,14 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
         } else {
             argSym = ast::GlobalState::defn_lvar_todo();
         }
-        entry->exprs.emplace_back(argSym, make_unique<LoadArg>(selfSym, methodName, i));
+        entry->exprs.emplace_back(argSym, arg->loc, make_unique<LoadArg>(selfSym, methodName, i));
         i++;
     }
     auto cont = res->walk(ctx, md.rhs.get(), entry, *res.get(), retSym, 0);
     ast::SymbolRef retSym1 =
         ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
 
-    cont->exprs.emplace_back(retSym1, make_unique<Return>(retSym)); // dead assign.
+    cont->exprs.emplace_back(retSym1, md.loc, make_unique<Return>(retSym)); // dead assign.
     jumpToDead(cont, *res.get());
 
     res->fillInTopoSorts(ctx);
@@ -295,14 +325,14 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym, loops + 1);
                  unconditionalJump(body, headerBlock, inWhat);
 
-                 continueBlock->exprs.emplace_back(target, make_unique<Nil>());
+                 continueBlock->exprs.emplace_back(target, a->loc, make_unique<Nil>());
                  ret = continueBlock;
              },
              [&](ast::Return *a) {
                  ast::SymbolRef retSym =
                      ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
                  auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym, loops);
-                 cont->exprs.emplace_back(target, make_unique<Return>(retSym)); // dead assign.
+                 cont->exprs.emplace_back(target, a->loc, make_unique<Return>(retSym)); // dead assign.
                  jumpToDead(cont, inWhat);
                  ret = deadBlock();
              },
@@ -332,35 +362,35 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  }
              },
              [&](ast::IntLit *a) {
-                 current->exprs.emplace_back(target, make_unique<IntLit>(a->value));
+                 current->exprs.emplace_back(target, a->loc, make_unique<IntLit>(a->value));
                  ret = current;
              },
              [&](ast::FloatLit *a) {
-                 current->exprs.emplace_back(target, make_unique<FloatLit>(a->value));
+                 current->exprs.emplace_back(target, a->loc, make_unique<FloatLit>(a->value));
                  ret = current;
              },
              [&](ast::StringLit *a) {
-                 current->exprs.emplace_back(target, make_unique<StringLit>(a->value));
+                 current->exprs.emplace_back(target, a->loc, make_unique<StringLit>(a->value));
                  ret = current;
              },
              [&](ast::BoolLit *a) {
-                 current->exprs.emplace_back(target, make_unique<BoolLit>(a->value));
+                 current->exprs.emplace_back(target, a->loc, make_unique<BoolLit>(a->value));
                  ret = current;
              },
              [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
              [&](ast::Ident *a) {
-                 current->exprs.emplace_back(target, make_unique<Ident>(a->symbol));
+                 current->exprs.emplace_back(target, a->loc, make_unique<Ident>(a->symbol));
                  ret = current;
              },
              [&](ast::Self *a) {
-                 current->exprs.emplace_back(target, make_unique<Self>(a->claz));
+                 current->exprs.emplace_back(target, a->loc, make_unique<Self>(a->claz));
                  ret = current;
              },
              [&](ast::Assign *a) {
                  auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
                  Error::check(lhsIdent != nullptr);
                  auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhsIdent->symbol, loops);
-                 rhsCont->exprs.emplace_back(target, make_unique<Ident>(lhsIdent->symbol));
+                 rhsCont->exprs.emplace_back(target, a->loc, make_unique<Ident>(lhsIdent->symbol));
                  ret = rhsCont;
              },
              [&](ast::InsSeq *a) {
@@ -401,7 +431,8 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                          auto &arg = s->block->args[i];
 
                          if (auto id = dynamic_cast<ast::Ident *>(arg.get())) {
-                             headerBlock->exprs.emplace_back(id->symbol, make_unique<LoadArg>(recv, s->fun, i));
+                             headerBlock->exprs.emplace_back(id->symbol, arg->loc,
+                                                             make_unique<LoadArg>(recv, s->fun, i));
                          } else {
                              // TODO(nelhage): this will be an error once the namer
                              // is more complete and turns all args into Ident
@@ -422,12 +453,12 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                      current = postBlock;
                  }
 
-                 current->exprs.emplace_back(target, make_unique<Send>(recv, s->fun, args));
+                 current->exprs.emplace_back(target, s->loc, make_unique<Send>(recv, s->fun, args));
                  ret = current;
              },
 
              [&](ast::Statement *n) {
-                 current->exprs.emplace_back(target, make_unique<NotSupported>(""));
+                 current->exprs.emplace_back(target, n->loc, make_unique<NotSupported>(""));
                  ret = current;
              },
 
@@ -486,15 +517,16 @@ string BasicBlock::toString(ast::Context ctx) {
     return buf.str();
 }
 
-Binding::Binding(const ast::SymbolRef &bind, unique_ptr<Instruction> value) : bind(bind), value(move(value)) {}
+Binding::Binding(ast::SymbolRef bind, ast::Loc loc, unique_ptr<Instruction> value)
+    : bind(bind), loc(loc), value(move(value)) {}
 
-Return::Return(const ast::SymbolRef &what) : what(what) {}
+Return::Return(ast::SymbolRef what) : what(what) {}
 
 string Return::toString(ast::Context ctx) {
     return "return " + this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-New::New(const ast::SymbolRef &klaz, vector<ast::SymbolRef> &args) : klass(klaz), args(move(args)) {}
+New::New(ast::SymbolRef klaz, vector<ast::SymbolRef> &args) : klass(klaz), args(move(args)) {}
 
 Send::Send(ast::SymbolRef recv, ast::NameRef fun, std::vector<ast::SymbolRef> &args)
     : recv(recv), fun(fun), args(std::move(args)) {}
@@ -543,7 +575,7 @@ string IntLit::toString(ast::Context ctx) {
     return to_string(this->value);
 }
 
-Ident::Ident(const ast::SymbolRef &what) : what(what) {}
+Ident::Ident(ast::SymbolRef what) : what(what) {}
 
 string Ident::toString(ast::Context ctx) {
     return this->what.info(ctx).name.name(ctx).toString(ctx);
