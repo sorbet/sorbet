@@ -53,88 +53,103 @@ unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&stateme
     return fromStatement(statement);
 }
 
-ClassDef::ClassDef(SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &ancestors,
+
+Statement::Statement(Loc loc) : loc(loc) {
+    DEBUG_ONLY(Error::check(!loc.is_none(), "Location of ast node is none"));
+}
+
+Expression::Expression(Loc loc) : Statement(loc) {}
+
+Reference::Reference(Loc loc) : Expression(loc) {}
+
+ControlFlow::ControlFlow(Loc loc) : Expression(loc) {}
+
+ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &ancestors,
                    vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
-    : Declaration(symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
+    : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
-MethodDef::MethodDef(SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs,
+MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs,
                      bool isSelf)
-    : Declaration(symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {}
+    : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {}
 
-Declaration::Declaration(SymbolRef symbol) : symbol(symbol) {}
+Declaration::Declaration(Loc loc, SymbolRef symbol) : Expression(loc), symbol(symbol) {}
 
-ConstDef::ConstDef(SymbolRef symbol, unique_ptr<Expression> rhs) : Declaration(symbol), rhs(move(rhs)) {}
+ConstDef::ConstDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> rhs) : Declaration(loc, symbol), rhs(move(rhs)) {}
 
-If::If(unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
-    : cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
+If::If(Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
+    : ControlFlow(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
-While::While(unique_ptr<Expression> cond, unique_ptr<Statement> body) : cond(move(cond)), body(move(body)) {}
+While::While(Loc loc, unique_ptr<Expression> cond, unique_ptr<Statement> body) : ControlFlow(loc), cond(move(cond)), body(move(body)) {}
 
-Break::Break(unique_ptr<Expression> expr) : expr(move(expr)) {}
+Break::Break(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-Next::Next(unique_ptr<Expression> expr) : expr(move(expr)) {}
+Next::Next(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-BoolLit::BoolLit(bool value) : value(value) {}
+BoolLit::BoolLit(Loc loc, bool value) : Expression(loc), value(value) {}
 
-Return::Return(unique_ptr<Expression> expr) : expr(move(expr)) {}
+Return::Return(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-Yield::Yield(unique_ptr<Expression> expr) : expr(move(expr)) {}
+Yield::Yield(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-Ident::Ident(SymbolRef symbol) : symbol(symbol), name(0) {
+Ident::Ident(Loc loc, SymbolRef symbol) : Reference(loc), symbol(symbol), name(0) {
     Error::check(!symbol.isPlaceHolder()); // symbol is a valid symbol
 }
 
-Ident::Ident(NameRef name, SymbolRef symbol) : symbol(symbol), name(name) {
+Ident::Ident(Loc loc, NameRef name, SymbolRef symbol) : Reference(loc), symbol(symbol), name(name) {
     Error::check(symbol.isPlaceHolder()); // symbol is a sentinel
 }
 
-Assign::Assign(unique_ptr<Expression> lhs, unique_ptr<Expression> rhs) : lhs(move(lhs)), rhs(move(rhs)) {}
+Assign::Assign(Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs) : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
 
-Send::Send(unique_ptr<Expression> recv, NameRef fun, vector<unique_ptr<Expression>> &&args)
-    : recv(move(recv)), fun(move(fun)), args(move(args)) {}
+Send::Send(Loc loc, unique_ptr<Expression> recv, NameRef fun, vector<unique_ptr<Expression>> &&args)
+    : Expression(loc), recv(move(recv)), fun(move(fun)), args(move(args)) {}
 
-Super::Super(vector<unique_ptr<Expression>> &&args) : args(move(args)) {}
+Super::Super(Loc loc, vector<unique_ptr<Expression>> &&args) : Expression(loc), args(move(args)) {}
 
-New::New(SymbolRef claz, vector<unique_ptr<Expression>> &&args) : claz(claz), args(move(args)) {}
+New::New(Loc loc, SymbolRef claz, vector<unique_ptr<Expression>> &&args) : Expression(loc), claz(claz), args(move(args)) {}
 
-NamedArg::NamedArg(NameRef name, unique_ptr<Expression> arg) : name(name), arg(move(arg)) {}
+NamedArg::NamedArg(Loc loc, NameRef name, unique_ptr<Expression> arg) : Expression(loc), name(name), arg(move(arg)) {}
 
-RestArg::RestArg(unique_ptr<Reference> arg) : expr(move(arg)) {}
+RestArg::RestArg(Loc loc, unique_ptr<Reference> arg) : Reference(loc), expr(move(arg)) {}
 
-KeywordArg::KeywordArg(unique_ptr<Reference> expr) : expr(move(expr)) {}
+KeywordArg::KeywordArg(Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
 
-OptionalArg::OptionalArg(unique_ptr<Reference> expr, unique_ptr<Expression> default_)
-    : expr(move(expr)), default_(move(default_)) {}
+OptionalArg::OptionalArg(Loc loc, unique_ptr<Reference> expr, unique_ptr<Expression> default_)
+    : Reference(loc), expr(move(expr)), default_(move(default_)) {}
 
-ShadowArg::ShadowArg(unique_ptr<Reference> expr) : expr(move(expr)) {}
+ShadowArg::ShadowArg(Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
 
-FloatLit::FloatLit(float value) : value(value) {}
+Nil::Nil(Loc loc) : Expression(loc) {}
 
-IntLit::IntLit(int value) : value(value) {}
+FloatLit::FloatLit(Loc loc, float value) : Expression(loc), value(value) {}
 
-StringLit::StringLit(NameRef value) : value(value) {}
+IntLit::IntLit(Loc loc, int value) : Expression(loc), value(value) {}
 
-ConstantLit::ConstantLit(unique_ptr<Expression> scope, NameRef cnst) : cnst(cnst), scope(move(scope)) {}
+StringLit::StringLit(Loc loc, NameRef value) : Expression(loc), value(value) {}
 
-ArraySplat::ArraySplat(unique_ptr<Expression> arg) : arg(move(arg)) {}
+ConstantLit::ConstantLit(Loc loc, unique_ptr<Expression> scope, NameRef cnst) : Expression(loc), cnst(cnst), scope(move(scope)) {}
 
-HashSplat::HashSplat(unique_ptr<Expression> arg) : arg(move(arg)) {}
+ArraySplat::ArraySplat(Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {}
 
-Self::Self(SymbolRef claz) : claz(claz) {}
+HashSplat::HashSplat(Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {}
 
-Block::Block(vector<unique_ptr<Expression>> &args, unique_ptr<Expression> body) : args(move(args)), body(move(body)){};
+Self::Self(Loc loc, SymbolRef claz) : Expression(loc), claz(claz) {}
 
-NotSupported::NotSupported(const string &why) : why(why) {}
+Block::Block(Loc loc, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> body) : Expression(loc), args(move(args)), body(move(body)){};
 
-SymbolLit::SymbolLit(NameRef name) : name(name) {}
+NotSupported::NotSupported(Loc loc, const string &why) : Expression(loc), why(why) {}
 
-Hash::Hash(vector<unique_ptr<Expression>> &keys, vector<unique_ptr<Expression>> &values)
-    : keys(move(keys)), values(move(values)) {}
+SymbolLit::SymbolLit(Loc loc, NameRef name) : Expression(loc), name(name) {}
 
-Array::Array(vector<unique_ptr<Expression>> &elems) : elems(move(elems)) {}
+Hash::Hash(Loc loc, vector<unique_ptr<Expression>> &keys, vector<unique_ptr<Expression>> &values)
+    : Expression(loc), keys(move(keys)), values(move(values)) {}
 
-InsSeq::InsSeq(vector<unique_ptr<Statement>> &&stats, unique_ptr<Expression> expr)
-    : stats(move(stats)), expr(move(expr)) {}
+Array::Array(Loc loc, vector<unique_ptr<Expression>> &elems) : Expression(loc), elems(move(elems)) {}
+
+InsSeq::InsSeq(Loc loc, vector<unique_ptr<Statement>> &&stats, unique_ptr<Expression> expr)
+    : Expression(loc), stats(move(stats)), expr(move(expr)) {}
+
+EmptyTree::EmptyTree(Loc loc) : Expression(loc) {}
 
 void printElems(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
     bool first = true;

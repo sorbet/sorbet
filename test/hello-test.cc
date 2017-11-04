@@ -159,25 +159,26 @@ TEST(PreOrderTreeMap, CountTrees) {
     ruby_typer::ast::Context ctx(cb, cb.defn_root());
     static const char *foo_str = "Foo";
     static UTF8Desc foo_DESC{(char *)foo_str, (int)strlen(foo_str)};
+    ruby_typer::ast::Loc loc(0, 42, 91);
 
     auto name = ctx.state.enterNameUTF8(foo_DESC);
     auto classSym = ctx.state.enterClassSymbol(ruby_typer::ast::GlobalState::defn_root(), name);
     auto methodSym = ctx.state.enterSymbol(classSym, name, true);
     auto empty = vector<SymbolRef>();
     auto argumentSym = ctx.state.enterSymbol(methodSym, name, false);
-    unique_ptr<Expression> rhs(new IntLit(5));
-    auto arg = unique_ptr<Expression>(new Ident(argumentSym));
+    unique_ptr<Expression> rhs(new IntLit(loc, 5));
+    auto arg = unique_ptr<Expression>(new Ident(loc, argumentSym));
     auto args = vector<unique_ptr<Expression>>();
     args.emplace_back(move(arg));
 
-    unique_ptr<Statement> methodDef(new MethodDef(methodSym, name, args, move(rhs), false));
-    auto emptyTree = unique_ptr<Expression>(new EmptyTree());
-    auto cnst = unique_ptr<Expression>(new ConstantLit(move(emptyTree), name));
+    unique_ptr<Statement> methodDef(new MethodDef(loc, methodSym, name, args, move(rhs), false));
+    auto emptyTree = unique_ptr<Expression>(new EmptyTree(loc));
+    auto cnst = unique_ptr<Expression>(new ConstantLit(loc, move(emptyTree), name));
 
     vector<unique_ptr<Statement>> classrhs;
     classrhs.emplace_back(move(methodDef));
     vector<unique_ptr<Expression>> parents;
-    unique_ptr<Statement> tree(new ClassDef(classSym, move(cnst), parents, classrhs, ClassDefKind::Class));
+    unique_ptr<Statement> tree(new ClassDef(loc, classSym, move(cnst), parents, classrhs, ClassDefKind::Class));
     Counter c;
 
     auto r = TreeMap<Counter>::apply(ctx, c, move(tree));

@@ -63,7 +63,7 @@ private:
                                        "Stubbing out unknown constant " + c->toString(ctx));
                 result = ast::GlobalState::defn_dynamic();
             }
-            c->scope = make_unique<ast::Ident>(resolved);
+            c->scope = make_unique<ast::Ident>(c->loc, resolved);
 
             return result;
         } else {
@@ -77,7 +77,7 @@ private:
         if (ast::ConstantLit *cnst = dynamic_cast<ast::ConstantLit *>(expr)) {
             ast::SymbolRef resolved = resolveConstant(ctx, cnst);
             if (resolved.exists())
-                return make_unique<ast::Ident>(resolved);
+                return make_unique<ast::Ident>(expr->loc, resolved);
         }
         return nullptr;
     }
@@ -237,7 +237,7 @@ public:
             resolved = resolveConstant(ctx, c);
             return c;
         }
-        return new ast::Ident(resolved);
+        return new ast::Ident(c->loc, resolved);
     }
 
     Resolver *resolv_;
