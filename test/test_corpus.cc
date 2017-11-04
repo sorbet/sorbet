@@ -239,14 +239,25 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         }
 
         set<int> seenErrorLines;
-        int unknownLineErrors = 0;
+        int unknownLocErrorLine = 1;
         for (int i = 0; i < errors.size(); i++) {
             auto &error = errors[i];
             if (error->loc.is_none()) {
                 // The convention is to put `error: Unknown Location Error` at
                 // the top of the file for each of these so that they are eaten
                 // first when reporting mismatched errors.
-                unknownLineErrors += 1;
+                int line = unknownLocErrorLine++;
+                auto expectedError = expectedErrors.find(line);
+                if (expectedError == expectedErrors.end()) {
+                    ADD_FAILURE()
+                        << "Unknown location error thrown but not annotated. You should put a `error:` on line "
+                        << line;
+                } else if (error->formatted.find(expectedError->second) == std::string::npos) {
+                    ADD_FAILURE() << "Error string mismatch on line " << line << ". Expected to find '"
+                                  << expectedError->second << "' inside of '" << error->formatted << "'";
+                } else {
+                    seenErrorLines.insert(line);
+                }
                 continue;
             }
 
@@ -258,14 +269,14 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                     if (expectedError->second.empty()) {
                         ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
                                       << i << ". It should match a substring of '" << error->formatted << "'";
-                    }
-                    if (error->formatted.find(expectedError->second) == std::string::npos) {
+                    } else if (error->formatted.find(expectedError->second) == std::string::npos) {
                         ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
                                       << expectedError->second << "' inside of '" << error->formatted << "'";
+                    } else {
+                        found = true;
+                        seenErrorLines.insert(i);
+                        continue;
                     }
-                    found = true;
-                    seenErrorLines.insert(i);
-                    continue;
                 }
             }
             if (!found) {
@@ -275,15 +286,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         for (auto &error : expectedErrors) {
             if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
-                if (--unknownLineErrors < 0) {
-                    ADD_FAILURE() << "Expected error didn't happen on line " << error.first;
-                }
+                ADD_FAILURE() << "Expected error didn't happen on line " << error.first;
             }
-        }
-
-        if (unknownLineErrors > 0) {
-            ADD_FAILURE() << "Too many errors without locations. Add " << unknownLineErrors
-                          << " more `error:` lines at the top of your file";
         }
 
         TEST_COUT << "errors OK" << endl;

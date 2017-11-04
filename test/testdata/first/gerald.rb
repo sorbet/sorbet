@@ -1,6 +1,6 @@
-# error: Unknown Location Error
-# error: Unknown Location Error
-# error: Unknown Location Error
+# error: Stubbing out unknown constant <emptyTree>::MAX_AFFECTED_FILES
+# error: Stubbing out unknown constant <emptyTree>::TOTAL_TIME_MS
+# error: Stubbing out unknown constant <emptyTree>::PER_RULE_MS
 require_relative '../../../extn'
 Opus::AutogenLoader.init(__FILE__) # error: Stubbing out unknown constant <emptyTree>::Opus::AutogenLoader
 
