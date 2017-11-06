@@ -1,6 +1,7 @@
 #ifndef SRUBY_DESUGAR_H
 #define SRUBY_DESUGAR_H
 
+#include "../Verifier.h"
 #include "ast/ast.h"
 #include "parser/parser.h"
 #include <memory>
