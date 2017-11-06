@@ -592,9 +592,9 @@ string New::toString(ast::Context ctx) {
     bool isFirst = true;
     for (auto arg : this->args) {
         if (!isFirst) {
-            buf << " ,";
+            buf << ", ";
         }
-        isFirst = true;
+        isFirst = false;
         buf << arg.info(ctx).name.name(ctx).toString(ctx);
     }
     buf << ")";
@@ -609,9 +609,9 @@ string Super::toString(ast::Context ctx) {
     bool isFirst = true;
     for (auto arg : this->args) {
         if (!isFirst) {
-            buf << " ,";
+            buf << ", ";
         }
-        isFirst = true;
+        isFirst = false;
         buf << arg.info(ctx).name.name(ctx).toString(ctx);
     }
     buf << ")";
@@ -642,9 +642,9 @@ string Send::toString(ast::Context ctx) {
     bool isFirst = true;
     for (auto arg : this->args) {
         if (!isFirst) {
-            buf << " ,";
+            buf << ", ";
         }
-        isFirst = true;
+        isFirst = false;
         buf << arg.info(ctx).name.name(ctx).toString(ctx);
     }
     buf << ")";
