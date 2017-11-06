@@ -58,7 +58,7 @@ bool SymbolRef::isPlaceHolder() const {
     return this->_id >= GlobalState::defn_todo()._id && this->_id <= GlobalState::defn_cvar_todo()._id;
 }
 
-void printTabs(std::ostringstream &to, int count) {
+void printTabs(ostringstream &to, int count) {
     int i = 0;
     while (i < count) {
         to << "  ";
@@ -66,15 +66,15 @@ void printTabs(std::ostringstream &to, int count) {
     }
 }
 
-std::string SymbolRef::toString(GlobalState &gs, int tabs) const {
-    std::ostringstream os;
+string SymbolRef::toString(GlobalState &gs, int tabs) const {
+    ostringstream os;
     Symbol &myInfo = info(gs, true);
-    std::string name = myInfo.name.toString(gs);
+    string name = myInfo.name.toString(gs);
     auto members = myInfo.members;
 
     printTabs(os, tabs);
 
-    std::string type = "unknown";
+    string type = "unknown";
     if (myInfo.isClass()) {
         type = "class";
     } else if (myInfo.isArray()) {
@@ -101,9 +101,9 @@ std::string SymbolRef::toString(GlobalState &gs, int tabs) const {
     if (myInfo.resultType) {
         os << " -> " << myInfo.resultType->toString(Context(gs, gs.defn_root()), tabs + 2);
     }
-    os << std::endl;
+    os << endl;
 
-    std::vector<std::string> children;
+    vector<string> children;
     for (auto pair : members) {
         if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass())
             continue;
@@ -112,7 +112,7 @@ std::string SymbolRef::toString(GlobalState &gs, int tabs) const {
 
         children.push_back(pair.second.toString(gs, tabs + 1));
     }
-    std::sort(children.begin(), children.end());
+    sort(children.begin(), children.end());
     for (auto row : children) {
         os << row;
     }

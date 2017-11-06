@@ -145,7 +145,7 @@ public:
     void ensureGoodCondition(ast::Context ctx, ast::SymbolRef) {}
 };
 
-void ruby_typer::infer::Inference::run(ast::Context ctx, std::unique_ptr<cfg::CFG> &cfg) {
+void ruby_typer::infer::Inference::run(ast::Context ctx, unique_ptr<cfg::CFG> &cfg) {
     vector<Environment> outEnvironments;
     outEnvironments.resize(cfg->basicBlocks.size());
     for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {

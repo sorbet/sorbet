@@ -7,9 +7,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-std::string exec(std::string cmd);
+string exec(string cmd);
 
-std::string addr2line(const std::string program_name, void const *const *addr, int count) {
+string addr2line(const string program_name, void const *const *addr, int count) {
 
     auto addr2line_cmd = strprintf("atos -o %.256s", program_name.c_str());
     for (int i = 3; i < count; ++i) {
@@ -18,11 +18,11 @@ std::string addr2line(const std::string program_name, void const *const *addr, i
 
     return exec(addr2line_cmd);
 }
-std::string getProgramName() {
+string getProgramName() {
     char dest[512] = {}; // explicitly zero out
 
     readlink("/proc/self/exe", dest, PATH_MAX);
-    std::string res(dest);
+    string res(dest);
     return res;
 }
 

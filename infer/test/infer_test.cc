@@ -30,7 +30,7 @@ private:
     unique_ptr<ast::GlobalState> ctxPtr;
 };
 
-std::unique_ptr<ast::Statement> getTree(ast::GlobalState &cb, std::string str) {
+unique_ptr<ast::Statement> getTree(ast::GlobalState &cb, string str) {
     auto result = parser::parse_ruby(cb, "<test>", str);
     ruby_typer::ast::Context ctx(cb, cb.defn_root());
     return ast::desugar::node2Tree(ctx, result.ast());
@@ -62,7 +62,7 @@ TEST_F(InferFixture, LiteralsSubtyping) {
 TEST_F(InferFixture, ClassesLubs) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo < Bar; end");
-    namer::Namer::run(ctx, std::move(tree));
+    namer::Namer::run(ctx, move(tree));
     auto &rootScope = ast::GlobalState::defn_root().info(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 2];
@@ -82,7 +82,7 @@ TEST_F(InferFixture, ClassesLubs) {
 TEST_F(InferFixture, ClassesSubtyping) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    namer::Namer::run(ctx, std::move(tree));
+    namer::Namer::run(ctx, move(tree));
     auto &rootScope = ast::GlobalState::defn_root().info(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 3];

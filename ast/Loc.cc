@@ -34,7 +34,7 @@ pair<Loc::Detail, Loc::Detail> Loc::position(ast::GlobalState &gs) {
     return make_pair(offset2Pos(file.source(), begin_pos), offset2Pos(file.source(), end_pos));
 }
 
-std::string Loc::toString(ast::GlobalState &gs) {
+string Loc::toString(ast::GlobalState &gs) {
     stringstream buf;
     UTF8Desc source = this->file.file(gs).source();
     auto pos = this->position(gs);

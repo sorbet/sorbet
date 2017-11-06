@@ -101,9 +101,9 @@ NamedArg::NamedArg(NameRef name, unique_ptr<Expression> arg) : name(name), arg(m
 
 RestArg::RestArg(unique_ptr<Reference> arg) : expr(move(arg)) {}
 
-KeywordArg::KeywordArg(std::unique_ptr<Reference> expr) : expr(move(expr)) {}
+KeywordArg::KeywordArg(unique_ptr<Reference> expr) : expr(move(expr)) {}
 
-OptionalArg::OptionalArg(std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_)
+OptionalArg::OptionalArg(unique_ptr<Reference> expr, unique_ptr<Expression> default_)
     : expr(move(expr)), default_(move(default_)) {}
 
 FloatLit::FloatLit(float value) : value(value) {}
@@ -717,183 +717,183 @@ string SymbolLit::toString(GlobalState &gs, int tabs) {
     return ":" + this->name.name(gs).toString(gs);
 }
 
-std::string SymbolLit::showRaw(GlobalState &gs, int tabs) {
+string SymbolLit::showRaw(GlobalState &gs, int tabs) {
     return nodeName() + "{ name = " + this->name.name(gs).toString(gs) + " }";
 }
 
-std::string NotSupported::toString(GlobalState &gs, int tabs) {
+string NotSupported::toString(GlobalState &gs, int tabs) {
     return nodeName();
 }
 
-std::string RestArg::toString(GlobalState &gs, int tabs) {
+string RestArg::toString(GlobalState &gs, int tabs) {
     return "*" + this->expr->toString(gs, tabs);
 }
 
-std::string KeywordArg::toString(GlobalState &gs, int tabs) {
+string KeywordArg::toString(GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs) + ":";
 }
 
-std::string OptionalArg::toString(GlobalState &gs, int tabs) {
+string OptionalArg::toString(GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs) + " = " + this->default_->toString(gs, tabs);
 }
 
-std::string NotSupported::nodeName() {
+string NotSupported::nodeName() {
     return "<Not Supported (" + why + ")>";
 }
 
-std::string NotSupported::showRaw(GlobalState &gs, int tabs) {
+string NotSupported::showRaw(GlobalState &gs, int tabs) {
     return "Not Supported{ why = " + why + " }";
 }
 
-std::string Rescue::nodeName() {
+string Rescue::nodeName() {
     return "Rescue";
 }
-std::string Yield::nodeName() {
+string Yield::nodeName() {
     return "Next";
 }
-std::string Next::nodeName() {
+string Next::nodeName() {
     return "Next";
 }
-std::string ClassDef::nodeName() {
+string ClassDef::nodeName() {
     return "ClassDef";
 }
 
-std::string ConstDef::nodeName() {
+string ConstDef::nodeName() {
     return "ConstDef";
 }
-std::string MethodDef::nodeName() {
+string MethodDef::nodeName() {
     return "MethodDef";
 }
-std::string If::nodeName() {
+string If::nodeName() {
     return "If";
 }
-std::string While::nodeName() {
+string While::nodeName() {
     return "While";
 }
-std::string Ident::nodeName() {
+string Ident::nodeName() {
     return "Ident";
 }
 
-std::string Return::nodeName() {
+string Return::nodeName() {
     return "Return";
 }
-std::string Break::nodeName() {
+string Break::nodeName() {
     return "Break";
 }
 
-std::string SymbolLit::nodeName() {
+string SymbolLit::nodeName() {
     return "SymbolLit";
 }
 
-std::string Assign::nodeName() {
+string Assign::nodeName() {
     return "Assign";
 }
 
-std::string Send::nodeName() {
+string Send::nodeName() {
     return "Send";
 }
 
-std::string New::nodeName() {
+string New::nodeName() {
     return "New";
 }
 
-std::string Super::nodeName() {
+string Super::nodeName() {
     return "Super";
 }
-std::string NamedArg::nodeName() {
+string NamedArg::nodeName() {
     return "NamedArg";
 }
 
-std::string Hash::nodeName() {
+string Hash::nodeName() {
     return "Hash";
 }
 
-std::string Array::nodeName() {
+string Array::nodeName() {
     return "Array";
 }
 
-std::string FloatLit::nodeName() {
+string FloatLit::nodeName() {
     return "FloatLit";
 }
 
-std::string IntLit::nodeName() {
+string IntLit::nodeName() {
     return "IntLit";
 }
 
-std::string StringLit::nodeName() {
+string StringLit::nodeName() {
     return "StringLit";
 }
 
-std::string BoolLit::nodeName() {
+string BoolLit::nodeName() {
     return "BoolLit";
 }
 
-std::string ConstantLit::nodeName() {
+string ConstantLit::nodeName() {
     return "ConstantLit";
 }
 
-std::string ArraySplat::nodeName() {
+string ArraySplat::nodeName() {
     return "ArraySplat";
 }
 
-std::string HashSplat::nodeName() {
+string HashSplat::nodeName() {
     return "HashSplat";
 }
 
-std::string Self::nodeName() {
+string Self::nodeName() {
     return "Self";
 }
 
-std::string Block::nodeName() {
+string Block::nodeName() {
     return "Block";
 }
 
-std::string InsSeq::nodeName() {
+string InsSeq::nodeName() {
     return "InsSeq";
 }
 
-std::string EmptyTree::nodeName() {
+string EmptyTree::nodeName() {
     return "EmptyTree";
 }
 
-std::string Nil::toString(GlobalState &gs, int tabs) {
+string Nil::toString(GlobalState &gs, int tabs) {
     return "nil";
 }
 
-std::string Nil::showRaw(GlobalState &gs, int tabs) {
+string Nil::showRaw(GlobalState &gs, int tabs) {
     return nodeName();
 }
-std::string EmptyTree::showRaw(GlobalState &gs, int tabs) {
+string EmptyTree::showRaw(GlobalState &gs, int tabs) {
     return nodeName();
 }
 
-std::string Nil::nodeName() {
+string Nil::nodeName() {
     return "Nil";
 }
-std::string RestArg::showRaw(GlobalState &gs, int tabs) {
+string RestArg::showRaw(GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
-std::string RestArg::nodeName() {
+string RestArg::nodeName() {
     return "RestArg";
 }
 
-std::string Self::showRaw(GlobalState &gs, int tabs) {
+string Self::showRaw(GlobalState &gs, int tabs) {
     return nodeName() + "{ claz = " + claz.toString(gs) + " }";
 }
-std::string KeywordArg::showRaw(GlobalState &gs, int tabs) {
+string KeywordArg::showRaw(GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
-std::string KeywordArg::nodeName() {
+string KeywordArg::nodeName() {
     return "KeywordArg";
 }
 
-std::string OptionalArg::showRaw(GlobalState &gs, int tabs) {
+string OptionalArg::showRaw(GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
-std::string OptionalArg::nodeName() {
+string OptionalArg::nodeName() {
     return "OptionalArg";
 }
 } // namespace ast

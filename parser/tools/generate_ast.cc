@@ -206,7 +206,7 @@ NodeDef nodes[] = {
     {"ZSuper", vector<FieldDef>()},
 };
 
-std::string arg_type(FieldType arg) {
+string arg_type(FieldType arg) {
     switch (arg) {
         case Name:
             return "NameRef ";
@@ -221,7 +221,7 @@ std::string arg_type(FieldType arg) {
     }
 }
 
-std::string field_type(FieldType arg) {
+string field_type(FieldType arg) {
     switch (arg) {
         case Name:
             return "NameRef";

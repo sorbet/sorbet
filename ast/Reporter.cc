@@ -22,7 +22,7 @@ void Reporter::_error(ComplexError error) {
     gs_.logger.error("{}", error.toString(gs_));
 }
 
-std::string Reporter::BasicError::toString(GlobalState &gs) {
+string Reporter::BasicError::toString(GlobalState &gs) {
     stringstream buf;
     if (loc.is_none()) {
         buf << "???:";
@@ -37,13 +37,13 @@ std::string Reporter::BasicError::toString(GlobalState &gs) {
     return buf.str();
 }
 
-std::vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> Reporter::getAndEmptyErrors() {
-    std::vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> result;
+vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> Reporter::getAndEmptyErrors() {
+    vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> result;
     result.swap(errors);
     return result;
 }
 
-std::string Reporter::ErrorLine::toString(GlobalState &gs) {
+string Reporter::ErrorLine::toString(GlobalState &gs) {
     stringstream buf;
     if (loc.is_none()) {
         buf << "???:"
@@ -63,7 +63,7 @@ std::string Reporter::ErrorLine::toString(GlobalState &gs) {
     return buf.str();
 }
 
-std::string Reporter::ErrorSection::toString(GlobalState &gs) {
+string Reporter::ErrorSection::toString(GlobalState &gs) {
     stringstream buf;
     buf << this->header << endl;
     for (auto &line : this->messages) {
@@ -72,7 +72,7 @@ std::string Reporter::ErrorSection::toString(GlobalState &gs) {
     return buf.str();
 }
 
-std::string Reporter::ComplexError::toString(GlobalState &gs) {
+string Reporter::ComplexError::toString(GlobalState &gs) {
     stringstream buf;
     if (!this->loc.is_none()) {
         buf << this->loc.toString(gs) << endl;

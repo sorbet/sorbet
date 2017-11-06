@@ -27,7 +27,7 @@ struct stats {
 
 class CFG_Collector_and_Typer {
 public:
-    std::vector<std::string> cfgs;
+    vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
         ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
@@ -36,7 +36,7 @@ public:
     }
 };
 
-static bool removeOption(std::vector<std::string> &prints, std::string option) {
+static bool removeOption(vector<string> &prints, string option) {
     auto it = find(prints.begin(), prints.end(), option);
     if (it != prints.end()) {
         prints.erase(it);
@@ -75,7 +75,7 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
     gs.errors.keepErrorsInMemory = true; // silence errors for stdlib.
     ruby_typer::ast::Context context(gs, gs.defn_root());
     auto desugared = ruby_typer::ast::desugar::node2Tree(context, join.get());
-    desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
+    desugared = ruby_typer::namer::Namer::run(context, move(desugared));
     for (auto &sh : join->stmts) {
         sh.release(); // they are already owner by Result.
     }
@@ -84,7 +84,7 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
 }
 
 void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
-                     std::vector<std::string> &prints) {
+                     vector<string> &prints) {
     auto r = ruby_typer::parser::parse_ruby(gs, path, src);
     auto ast = r.ast();
     if (r.diagnostics().size() > 0) {
@@ -118,7 +118,7 @@ void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, c
                 return;
         }
 
-        desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
+        desugared = ruby_typer::namer::Namer::run(context, move(desugared));
         if (removeOption(prints, "name-table")) {
             cout << gs.toString() << endl;
             if (prints.empty())
@@ -137,10 +137,10 @@ void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, c
 
         CFG_Collector_and_Typer collector;
 
-        auto r = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, std::move(desugared));
-        std::stringstream buf;
+        auto r = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(desugared));
+        stringstream buf;
         for (auto &cfg : collector.cfgs) {
-            buf << cfg << std::endl << std::endl;
+            buf << cfg << endl << endl;
         }
         auto got = buf.str();
         if (removeOption(prints, "cfg")) {
@@ -154,15 +154,15 @@ void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, c
 }
 
 int realmain(int argc, char **argv) {
-    std::vector<std::string> files;
-    std::vector<std::string> prints;
+    vector<string> files;
+    vector<string> prints;
     //    spd::set_async_mode(1024);
-    auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stderr_sink_st>();
+    auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
-    std::shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
+    shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
     console->set_pattern("%v");
-    std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
+    shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
     console_err->set_pattern("%v");
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
@@ -170,9 +170,9 @@ int realmain(int argc, char **argv) {
     options.add_options()("h,help", "Show help");
     options.add_options()("n,no-payload", "Do not load included rbi files for stdlib");
     options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
-                          cxxopts::value<std::vector<std::string>>(prints));
-    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
-    options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
+                          cxxopts::value<vector<string>>(prints));
+    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
+    options.add_options()("files", "Input files", cxxopts::value<vector<string>>(files));
     options.parse_positional("files");
 
     try {

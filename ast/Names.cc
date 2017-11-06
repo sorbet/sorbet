@@ -51,7 +51,7 @@ Name &NameRef::name(GlobalState &gs) const {
     DEBUG_ONLY(Error::check(exists()));
     return gs.names[_id];
 }
-std::string NameRef::toString(GlobalState &gs) const {
+string NameRef::toString(GlobalState &gs) const {
     return name(gs).toString(gs);
 }
 
