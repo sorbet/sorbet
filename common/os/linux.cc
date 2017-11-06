@@ -7,6 +7,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+using namespace std;
+
 string exec(string cmd);
 
 string addr2line(const string program_name, void const *const *addr, int count) {
