@@ -392,6 +392,11 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                                               Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
                  result.swap(res);
              },
+             [&](parser::Shadowarg *arg) {
+                 unique_ptr<Statement> res =
+                     make_unique<ShadowArg>(make_unique<Ident>(arg->name, GlobalState::defn_lvar_todo()));
+                 result.swap(res);
+             },
              [&](parser::DefMethod *method) {
                  unique_ptr<Statement> res = buildMethod(ctx, method->name, method->args, method->body);
                  result.swap(res);
