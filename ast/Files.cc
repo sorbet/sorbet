@@ -5,8 +5,8 @@ using namespace std;
 namespace ruby_typer {
 namespace ast {
 
-File &FileRef::file(GlobalState &ctx) const {
-    return ctx.files[_id];
+File &FileRef::file(GlobalState &gs) const {
+    return gs.files[_id];
 }
 
 UTF8Desc File::path() {

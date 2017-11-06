@@ -4,9 +4,11 @@
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
 #include <string>
 
-std::string exec(std::string cmd);
+using namespace std;
 
-std::string addr2line(const std::string program_name, void const *const *addr, int count) {
+string exec(string cmd);
+
+string addr2line(const string program_name, void const *const *addr, int count) {
 
     auto addr2line_cmd = strprintf("atos -o %.256s", program_name.c_str());
     for (int i = 3; i < count; ++i) {
@@ -17,11 +19,11 @@ std::string addr2line(const std::string program_name, void const *const *addr, i
 
     return exec(addr2line_cmd);
 }
-std::string getProgramName() {
+string getProgramName() {
     char buf[512];
     uint32_t sz = 512;
     _NSGetExecutablePath(buf, &sz);
-    std::string res(buf);
+    string res(buf);
     return res;
 }
 

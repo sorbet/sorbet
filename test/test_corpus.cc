@@ -80,7 +80,7 @@ class CFG_Collector_and_Typer {
 
 public:
     CFG_Collector_and_Typer(bool shouldType) : shouldType(shouldType) {}
-    std::vector<std::string> cfgs;
+    vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
         if (shouldType) {
@@ -108,13 +108,13 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
-    ruby_typer::ast::GlobalState ctx(*console);
-    ruby_typer::ast::Context context(ctx, ctx.defn_root());
-    ctx.errors.keepErrorsInMemory = true;
+    ruby_typer::ast::GlobalState gs(*console);
+    ruby_typer::ast::Context context(gs, gs.defn_root());
+    gs.errors.keepErrorsInMemory = true;
 
     // Parser
     auto src = ruby_typer::File::read(inputPath.c_str());
-    auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
+    auto parsed = ruby_typer::parser::parse_ruby(gs, inputPath, src);
 
     auto expectation = test.expectations.find("parse-tree");
     if (expectation != test.expectations.end()) {
@@ -124,8 +124,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
 
         EXPECT_EQ(0, parsed.diagnostics().size());
-        EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
-        if (exp == parsed.ast()->toString(ctx) + "\n") {
+        EXPECT_EQ(exp, parsed.ast()->toString(gs) + "\n");
+        if (exp == parsed.ast()->toString(gs) + "\n") {
             TEST_COUT << "parse-tree OK" << endl;
         }
     }
@@ -139,8 +139,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
-        if (exp == desugared->toString(ctx) + "\n") {
+        EXPECT_EQ(exp, desugared->toString(gs) + "\n");
+        if (exp == desugared->toString(gs) + "\n") {
             TEST_COUT << "ast OK" << endl;
         }
     }
@@ -151,14 +151,14 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, desugared->showRaw(ctx) + "\n");
-        if (exp == desugared->showRaw(ctx) + "\n") {
+        EXPECT_EQ(exp, desugared->showRaw(gs) + "\n");
+        if (exp == desugared->showRaw(gs) + "\n") {
             TEST_COUT << "ast-raw OK" << endl;
         }
     }
 
     // Namer
-    auto namedTree = ruby_typer::namer::Namer::run(context, std::move(desugared));
+    auto namedTree = ruby_typer::namer::Namer::run(context, move(desugared));
 
     expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
@@ -166,9 +166,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, ctx.toString() + "\n");
-        if (exp == ctx.toString() + "\n") {
-            TEST_COUT << "name-table OK" << std::endl;
+        EXPECT_EQ(exp, gs.toString() + "\n");
+        if (exp == gs.toString() + "\n") {
+            TEST_COUT << "name-table OK" << endl;
         }
     }
 
@@ -178,9 +178,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, namedTree->toString(ctx) + "\n");
-        if (exp == namedTree->toString(ctx) + "\n") {
-            TEST_COUT << "name-tree OK" << std::endl;
+        EXPECT_EQ(exp, namedTree->toString(gs) + "\n");
+        if (exp == namedTree->toString(gs) + "\n") {
+            TEST_COUT << "name-tree OK" << endl;
         }
     }
 
@@ -190,9 +190,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, namedTree->showRaw(ctx) + "\n");
-        if (exp == namedTree->showRaw(ctx) + "\n") {
-            TEST_COUT << "name-tree-raw OK" << std::endl;
+        EXPECT_EQ(exp, namedTree->showRaw(gs) + "\n");
+        if (exp == namedTree->showRaw(gs) + "\n") {
+            TEST_COUT << "name-tree-raw OK" << endl;
         }
     }
 
@@ -222,15 +222,15 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     // Check warnings and errors
-    auto errors = ctx.errors.getAndEmptyErrors();
+    auto errors = gs.errors.getAndEmptyErrors();
     if (errors.size() > 0) {
-        map<int, std::string> expectedErrors;
-        std::string line;
+        map<int, string> expectedErrors;
+        string line;
         stringstream ss(src);
         int linenum = 1;
         regex errorRegex("# error: ?(.*)");
 
-        while (std::getline(ss, line, '\n')) {
+        while (getline(ss, line, '\n')) {
             smatch matches;
             if (regex_search(line, matches, errorRegex)) {
                 expectedErrors[linenum] = matches[1].str();
@@ -252,7 +252,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                     ADD_FAILURE()
                         << "Unknown location error thrown but not annotated. You should put a `error:` on line "
                         << line;
-                } else if (error->formatted.find(expectedError->second) == std::string::npos) {
+                } else if (error->formatted.find(expectedError->second) == string::npos) {
                     ADD_FAILURE() << "Error string mismatch on line " << line << ". Expected to find '"
                                   << expectedError->second << "' inside of '" << error->formatted << "'";
                 } else {
@@ -261,7 +261,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 continue;
             }
 
-            auto pos = error->loc.position(ctx);
+            auto pos = error->loc.position(gs);
             bool found = false;
             for (int i = pos.first.line; i <= pos.second.line; i++) {
                 auto expectedError = expectedErrors.find(i);
@@ -269,7 +269,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                     if (expectedError->second.empty()) {
                         ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
                                       << i << ". It should match a substring of '" << error->formatted << "'";
-                    } else if (error->formatted.find(expectedError->second) == std::string::npos) {
+                    } else if (error->formatted.find(expectedError->second) == string::npos) {
                         ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
                                       << expectedError->second << "' inside of '" << error->formatted << "'";
                     } else {
@@ -280,7 +280,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 }
             }
             if (!found) {
-                ADD_FAILURE() << "Unexpected error:\n " << error->toString(ctx);
+                ADD_FAILURE() << "Unexpected error:\n " << error->toString(gs);
             }
         }
 

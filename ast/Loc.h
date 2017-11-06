@@ -32,8 +32,8 @@ public:
         u4 line, column;
     };
 
-    std::pair<Detail, Detail> position(ast::GlobalState &ctx);
-    std::string toString(ast::GlobalState &ctx);
+    std::pair<Detail, Detail> position(ast::GlobalState &gs);
+    std::string toString(ast::GlobalState &gs);
 };
 } // namespace ast
 } // namespace ruby_typer

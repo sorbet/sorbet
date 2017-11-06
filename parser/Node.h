@@ -18,13 +18,13 @@ class Node {
 public:
     Node(Loc loc) : loc(loc) {}
     virtual ~Node() = default;
-    virtual std::string toString(ast::GlobalState &ctx, int tabs = 0) = 0;
+    virtual std::string toString(ast::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     Loc loc;
 
 protected:
     void printTabs(std::stringstream &to, int count);
-    void printNode(std::stringstream &to, unique_ptr<Node> &node, ast::GlobalState &ctx, int tabs);
+    void printNode(std::stringstream &to, unique_ptr<Node> &node, ast::GlobalState &gs, int tabs);
 };
 
 #include "parser/Node_gen.h"

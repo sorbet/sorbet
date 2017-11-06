@@ -53,7 +53,7 @@ public:
         return _id;
     }
 
-    Name &name(GlobalState &ctx) const;
+    Name &name(GlobalState &gs) const;
 
     inline bool exists() const {
         return _id != 0;
@@ -63,7 +63,7 @@ public:
         return NameRef(2);
     }
 
-    std::string toString(GlobalState &ctx) const;
+    std::string toString(GlobalState &gs) const;
 
 public:
     int _id;
@@ -302,13 +302,13 @@ public:
 
     bool operator!=(const Name &rhs) const;
 
-    std::string toString(GlobalState &ctx) const;
+    std::string toString(GlobalState &gs) const;
 
 private:
-    unsigned int hash(GlobalState &ctx) const;
+    unsigned int hash(GlobalState &gs) const;
 
 public:
-    static unsigned int hashNames(std::vector<NameRef> &lhs, GlobalState &ctx);
+    static unsigned int hashNames(std::vector<NameRef> &lhs, GlobalState &gs);
 };
 
 CheckSize(Name, 24, 8);

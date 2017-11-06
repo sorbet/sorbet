@@ -166,8 +166,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 it->args.push_back(el);
             }
         }
-        std::sort(it->args.begin(), it->args.end(),
-                  [](ast::SymbolRef a, ast::SymbolRef b) -> bool { return a._id < b._id; });
+        sort(it->args.begin(), it->args.end(),
+             [](ast::SymbolRef a, ast::SymbolRef b) -> bool { return a._id < b._id; });
     }
 
     return;
@@ -528,8 +528,8 @@ string Return::toString(ast::Context ctx) {
 
 New::New(ast::SymbolRef klaz, vector<ast::SymbolRef> &args) : klass(klaz), args(move(args)) {}
 
-Send::Send(ast::SymbolRef recv, ast::NameRef fun, std::vector<ast::SymbolRef> &args)
-    : recv(recv), fun(fun), args(std::move(args)) {}
+Send::Send(ast::SymbolRef recv, ast::NameRef fun, vector<ast::SymbolRef> &args)
+    : recv(recv), fun(fun), args(move(args)) {}
 
 string New::toString(ast::Context ctx) {
     stringstream buf;

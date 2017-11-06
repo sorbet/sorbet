@@ -10,12 +10,12 @@
 using namespace std;
 
 string sourceName2funcName(string sourceName) {
-    std::replace(sourceName.begin(), sourceName.end(), '.', '_');
-    std::replace(sourceName.begin(), sourceName.end(), '/', '_');
+    replace(sourceName.begin(), sourceName.end(), '.', '_');
+    replace(sourceName.begin(), sourceName.end(), '/', '_');
     return sourceName;
 }
 
-void emit_header(std::vector<std::string> sourceFiles, ostream &out) {
+void emit_header(vector<string> sourceFiles, ostream &out) {
     out << "#include<string>" << endl << "#include<vector>" << endl;
     out << "namespace ruby_typer{" << endl << "namespace rbi{" << endl;
     for (auto &file : sourceFiles) {
@@ -47,7 +47,7 @@ string escape(string what) {
     return buf.str();
 }
 
-void emit_classfile(std::vector<std::string> sourceFiles, ostream &out) {
+void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "#include<string>" << endl << "#include<vector>" << endl;
     out << "namespace ruby_typer{" << endl << "namespace rbi{" << endl;
     for (auto &file : sourceFiles) {
@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        std::vector<std::string> sources;
+        vector<string> sources;
         for (int i = 3; i < argc; i++) {
             sources.emplace_back(argv[i]);
         }
