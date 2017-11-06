@@ -63,8 +63,9 @@ public:
     std::vector<std::unique_ptr<Expression>> ancestors;
     ClassDefKind kind;
 
-    ClassDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Expression>> &ancestors,
-             std::vector<std::unique_ptr<Statement>> &rhs, ClassDefKind kind);
+    ClassDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> name,
+             std::vector<std::unique_ptr<Expression>> &ancestors, std::vector<std::unique_ptr<Statement>> &rhs,
+             ClassDefKind kind);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -442,7 +443,6 @@ public:
 
 class EmptyTree : public Expression {
 public:
-
     EmptyTree(Loc loc);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);

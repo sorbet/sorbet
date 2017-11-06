@@ -53,7 +53,6 @@ unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&stateme
     return fromStatement(statement);
 }
 
-
 Statement::Statement(Loc loc) : loc(loc) {
     DEBUG_ONLY(Error::check(!loc.is_none(), "Location of ast node is none"));
 }
@@ -68,8 +67,8 @@ ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, vecto
                    vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
-MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> rhs,
-                     bool isSelf)
+MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args,
+                     unique_ptr<Expression> rhs, bool isSelf)
     : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {}
 
 Declaration::Declaration(Loc loc, SymbolRef symbol) : Expression(loc), symbol(symbol) {}
@@ -79,7 +78,8 @@ ConstDef::ConstDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> rhs) : Decl
 If::If(Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : ControlFlow(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
-While::While(Loc loc, unique_ptr<Expression> cond, unique_ptr<Statement> body) : ControlFlow(loc), cond(move(cond)), body(move(body)) {}
+While::While(Loc loc, unique_ptr<Expression> cond, unique_ptr<Statement> body)
+    : ControlFlow(loc), cond(move(cond)), body(move(body)) {}
 
 Break::Break(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
@@ -99,14 +99,16 @@ Ident::Ident(Loc loc, NameRef name, SymbolRef symbol) : Reference(loc), symbol(s
     Error::check(symbol.isPlaceHolder()); // symbol is a sentinel
 }
 
-Assign::Assign(Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs) : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
+Assign::Assign(Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
+    : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
 
 Send::Send(Loc loc, unique_ptr<Expression> recv, NameRef fun, vector<unique_ptr<Expression>> &&args)
     : Expression(loc), recv(move(recv)), fun(move(fun)), args(move(args)) {}
 
 Super::Super(Loc loc, vector<unique_ptr<Expression>> &&args) : Expression(loc), args(move(args)) {}
 
-New::New(Loc loc, SymbolRef claz, vector<unique_ptr<Expression>> &&args) : Expression(loc), claz(claz), args(move(args)) {}
+New::New(Loc loc, SymbolRef claz, vector<unique_ptr<Expression>> &&args)
+    : Expression(loc), claz(claz), args(move(args)) {}
 
 NamedArg::NamedArg(Loc loc, NameRef name, unique_ptr<Expression> arg) : Expression(loc), name(name), arg(move(arg)) {}
 
@@ -127,7 +129,8 @@ IntLit::IntLit(Loc loc, int value) : Expression(loc), value(value) {}
 
 StringLit::StringLit(Loc loc, NameRef value) : Expression(loc), value(value) {}
 
-ConstantLit::ConstantLit(Loc loc, unique_ptr<Expression> scope, NameRef cnst) : Expression(loc), cnst(cnst), scope(move(scope)) {}
+ConstantLit::ConstantLit(Loc loc, unique_ptr<Expression> scope, NameRef cnst)
+    : Expression(loc), cnst(cnst), scope(move(scope)) {}
 
 ArraySplat::ArraySplat(Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {}
 
@@ -135,7 +138,8 @@ HashSplat::HashSplat(Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg
 
 Self::Self(Loc loc, SymbolRef claz) : Expression(loc), claz(claz) {}
 
-Block::Block(Loc loc, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> body) : Expression(loc), args(move(args)), body(move(body)){};
+Block::Block(Loc loc, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> body)
+    : Expression(loc), args(move(args)), body(move(body)){};
 
 NotSupported::NotSupported(Loc loc, const string &why) : Expression(loc), why(why) {}
 
