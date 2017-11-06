@@ -8,7 +8,7 @@ You can read more in our [design doc](https://hackpad.corp.stripe.com/Design-Doc
 # Developing on `ruby-typer`
 
 We build using [bazel](https://bazel.build/); Run `./bazel test
-...` to build and run the tests.
+//...` to build and run the tests.
 
 # Code convenctions
 
