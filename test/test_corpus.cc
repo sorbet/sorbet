@@ -318,7 +318,6 @@ vector<Expectations> listDir(const char *name) {
     }
 
     while ((entry = readdir(dir)) != NULL) {
-
         if (entry->d_type == DT_DIR) {
             if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
                 continue;

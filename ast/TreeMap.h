@@ -297,7 +297,6 @@ private:
         if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr || dynamic_cast<Nil *>(what) != nullptr)
             return what;
         if (ClassDef *v = dynamic_cast<ClassDef *>(what)) {
-
             if (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
                 v = PostPonePreTransform_ClassDef<FUNC, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(ctx, v,
                                                                                                             func);

@@ -45,7 +45,6 @@ template <typename Base> void typecase(Base *b) {
 
 template <typename Base, typename FirstSubclass, typename... RestOfSubclasses>
 void typecase(Base *base, FirstSubclass &&first, RestOfSubclasses &&... rest) {
-
     using Signature = get_signature<FirstSubclass>;
     using Function = std::function<Signature>;
 
