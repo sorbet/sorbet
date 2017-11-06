@@ -9,10 +9,9 @@ using namespace std;
 // improve debugging.
 template class std::shared_ptr<ruby_typer::ast::Type>;
 
-shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &t1,
-                                                 shared_ptr<Type> &t2);
+shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2);
 shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, shared_ptr<Type> &t1,
-                                                                   shared_ptr<Type> &t2) {
+                                                              shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return t1;
     }
@@ -142,8 +141,7 @@ shared_ptr<ruby_typer::ast::Type> distributeOr(ast::Context ctx, OrType *t1, sha
     return make_shared<OrType>(n1, n2);
 }
 
-shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &t1,
-                                                 shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
     ruby_typer::Error::check(g1 != nullptr);
@@ -203,7 +201,7 @@ shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &
 }
 
 shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::glb(ast::Context ctx, shared_ptr<Type> &t1,
-                                                                   shared_ptr<Type> &t2) {
+                                                              shared_ptr<Type> &t2) {
     Error::notImplemented();
 }
 
@@ -298,52 +296,52 @@ bool ruby_typer::ast::Types::isSubType(ast::Context ctx, shared_ptr<Type> &t1, s
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
             bool result;
             // TODO: simply compare as memory regions
-            ruby_typer::typecase(
-                p1,
-                [&](ArrayType *a1) { // Warning: this implements COVARIANT arrays
-                    ArrayType *a2 = dynamic_cast<ArrayType *>(p2);
-                    result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
-                    if (result) {
-                        int i = 0;
-                        for (auto &el2 : a2->elems) {
-                            result = isSubType(ctx, a1->elems[i], el2);
-                            if (!result) {
-                                break;
-                            }
-                            ++i;
-                        }
-                    }
-                },
-                [&](HashType *h1) { // Warning: this implements COVARIANT hashes
-                    HashType *h2 = dynamic_cast<HashType *>(p2);
-                    result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
-                    if (!result) {
-                        return;
-                    }
-                    // have enough keys.
-                    int i = 0;
-                    for (auto &el2 : h2->keys) {
-                        ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
-                        Error::check(u2 != nullptr);
-                        auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
-                            ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
-                            return candidate->value == el2->value && u1 == u2; // from lambda
-                        });
-                        result =
-                            fnd != h1->keys.end() && isSubType(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
-                        if (!result) {
-                            return;
-                        }
-                        ++i;
-                    }
-                },
-                [&](Literal *l1) {
-                    Literal *l2 = dynamic_cast<Literal *>(p2);
-                    ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
-                    ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
-                    Error::check(u1 != nullptr && u2 != nullptr);
-                    result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
-                });
+            ruby_typer::typecase(p1,
+                                 [&](ArrayType *a1) { // Warning: this implements COVARIANT arrays
+                                     ArrayType *a2 = dynamic_cast<ArrayType *>(p2);
+                                     result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
+                                     if (result) {
+                                         int i = 0;
+                                         for (auto &el2 : a2->elems) {
+                                             result = isSubType(ctx, a1->elems[i], el2);
+                                             if (!result) {
+                                                 break;
+                                             }
+                                             ++i;
+                                         }
+                                     }
+                                 },
+                                 [&](HashType *h1) { // Warning: this implements COVARIANT hashes
+                                     HashType *h2 = dynamic_cast<HashType *>(p2);
+                                     result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
+                                     if (!result) {
+                                         return;
+                                     }
+                                     // have enough keys.
+                                     int i = 0;
+                                     for (auto &el2 : h2->keys) {
+                                         ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
+                                         Error::check(u2 != nullptr);
+                                         auto fnd =
+                                             find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                                                 ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
+                                                 return candidate->value == el2->value && u1 == u2; // from lambda
+                                             });
+                                         result = fnd != h1->keys.end() &&
+                                                  isSubType(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
+                                         if (!result) {
+                                             return;
+                                         }
+                                         ++i;
+                                     }
+                                 },
+                                 [&](Literal *l1) {
+                                     Literal *l2 = dynamic_cast<Literal *>(p2);
+                                     ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
+                                     ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
+                                     Error::check(u1 != nullptr && u2 != nullptr);
+                                     result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
+                                 });
             return result;
             // both are proxy
         } else {
@@ -386,11 +384,10 @@ string ruby_typer::ast::ClassType::typeName() {
     return "ClassType";
 }
 
-ruby_typer::ast::ProxyType::ProxyType(shared_ptr<ruby_typer::ast::Type> underlying)
-    : underlying(move(underlying)) {}
+ruby_typer::ast::ProxyType::ProxyType(shared_ptr<ruby_typer::ast::Type> underlying) : underlying(move(underlying)) {}
 
 shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
-                                              vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     return underlying->dispatchCall(ctx, name, callLoc, args, fullType);
 }
 
@@ -399,7 +396,7 @@ shared_ptr<Type> ProxyType::getCallArgumentType(ast::Context ctx, ast::NameRef n
 }
 
 shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
-                                           vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                      vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     return Types::lub(ctx, left->dispatchCall(ctx, name, callLoc, args, fullType),
                       right->dispatchCall(ctx, name, callLoc, args, fullType));
 }
@@ -409,7 +406,7 @@ shared_ptr<Type> OrType::getCallArgumentType(ast::Context ctx, ast::NameRef name
 }
 
 shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
-                                            vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                       vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
 
     Error::notImplemented();
 }
@@ -419,7 +416,7 @@ shared_ptr<Type> AndType::getCallArgumentType(ast::Context ctx, ast::NameRef nam
 }
 
 shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun, ast::Loc callLoc,
-                                              vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     if (isDynamic()) {
         return Types::dynamic();
     }
@@ -510,8 +507,7 @@ ruby_typer::ast::Literal::Literal(ast::NameRef val)
     : ProxyType(make_shared<ClassType>(ast::GlobalState::defn_String())), value(val._id) {}
 
 ruby_typer::ast::Literal::Literal(bool val)
-    : ProxyType(
-          make_shared<ClassType>(val ? ast::GlobalState::defn_TrueClass() : ast::GlobalState::defn_FalseClass())),
+    : ProxyType(make_shared<ClassType>(val ? ast::GlobalState::defn_TrueClass() : ast::GlobalState::defn_FalseClass())),
       value(val ? 1 : 0) {}
 
 string Literal::typeName() {
@@ -587,10 +583,8 @@ string ArrayType::toString(ast::Context ctx, int tabs) {
     return buf.str();
 }
 
-ruby_typer::ast::HashType::HashType(vector<shared_ptr<Literal>> &keys,
-                                    vector<shared_ptr<Type>> &values)
-    : ProxyType(make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(move(keys)),
-      values(move(values)) {}
+ruby_typer::ast::HashType::HashType(vector<shared_ptr<Literal>> &keys, vector<shared_ptr<Type>> &values)
+    : ProxyType(make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(move(keys)), values(move(values)) {}
 
 string HashType::toString(ast::Context ctx, int tabs) {
     stringstream buf;

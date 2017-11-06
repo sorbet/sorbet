@@ -223,7 +223,7 @@ public:
         }
 
         auto toRemove = remove_if(original->rhs.begin(), original->rhs.end(),
-                                       [](unique_ptr<ast::Statement> &stat) -> bool { return stat.get() == nullptr; });
+                                  [](unique_ptr<ast::Statement> &stat) -> bool { return stat.get() == nullptr; });
 
         original->rhs.erase(toRemove, original->rhs.end());
 

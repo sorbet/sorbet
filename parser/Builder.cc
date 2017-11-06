@@ -745,13 +745,11 @@ public:
             return make_unique<AndAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
         if (op->string() == "||")
             return make_unique<OrAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
-        return make_unique<OpAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), gs_.enterNameUTF8(op->string()),
-                                   move(rhs));
+        return make_unique<OpAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), gs_.enterNameUTF8(op->string()), move(rhs));
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
-        return make_unique<Optarg>(loc_join(tok_loc(name), value->loc), gs_.enterNameUTF8(name->string()),
-                                   move(value));
+        return make_unique<Optarg>(loc_join(tok_loc(name), value->loc), gs_.enterNameUTF8(name->string()), move(value));
     }
 
     unique_ptr<Node> pair(unique_ptr<Node> key, const token *assoc, unique_ptr<Node> value) {

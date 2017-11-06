@@ -167,7 +167,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
             }
         }
         sort(it->args.begin(), it->args.end(),
-                  [](ast::SymbolRef a, ast::SymbolRef b) -> bool { return a._id < b._id; });
+             [](ast::SymbolRef a, ast::SymbolRef b) -> bool { return a._id < b._id; });
     }
 
     return;

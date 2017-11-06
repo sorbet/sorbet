@@ -284,8 +284,8 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << endl;
         switch (arg.type) {
             case Name:
-                out << "    buf << \"" << arg.name << " = \" << " << arg.name
-                    << ".name(gs).toString(gs) << std::endl;" << endl;
+                out << "    buf << \"" << arg.name << " = \" << " << arg.name << ".name(gs).toString(gs) << std::endl;"
+                    << endl;
                 break;
             case Node:
                 out << "    buf << \"" << arg.name << " = \";" << endl;

@@ -192,8 +192,8 @@ string ClassDef::showRaw(GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "ClassDef{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "name = " << name->showRaw(gs, tabs) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs)
-        << ">" << endl;
+    buf << "name = " << name->showRaw(gs, tabs) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs) << ">"
+        << endl;
     printTabs(buf, tabs + 1);
     buf << "ancestors = [";
     bool first = true;
