@@ -484,7 +484,6 @@ NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
             swap(*(strings.end() - 1), *(strings.end() - 2));
         }
     } else {
-
         if (strings_last_page_used + nm.to > GlobalState::STRINGS_PAGE_SIZE) {
             strings.push_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
             // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);

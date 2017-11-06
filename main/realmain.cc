@@ -224,7 +224,6 @@ int realmain(int argc, char **argv) {
         st.bytes += src.size();
         parse_and_print(gs, options, "-e", src, prints);
     } else {
-
         for (auto &fileName : files) {
             console->debug("Parsing {}...", fileName);
             string src;

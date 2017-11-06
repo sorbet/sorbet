@@ -206,7 +206,6 @@ shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::glb(ast::Context ctx, 
 }
 
 bool isSubTypeGround(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
-
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
 
@@ -407,7 +406,6 @@ shared_ptr<Type> OrType::getCallArgumentType(ast::Context ctx, ast::NameRef name
 
 shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
                                        vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-
     Error::notImplemented();
 }
 

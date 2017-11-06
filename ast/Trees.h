@@ -420,7 +420,6 @@ public:
 };
 
 class EmptyTree : public Expression {
-
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

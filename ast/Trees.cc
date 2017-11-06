@@ -152,7 +152,6 @@ void printArgs(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression>
 }
 
 string ConstDef::toString(GlobalState &gs, int tabs) {
-
     return "constdef " + this->symbol.info(gs, true).name.name(gs).toString(gs) + " = " +
            this->rhs->toString(gs, tabs + 1);
 }
