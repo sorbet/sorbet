@@ -29,15 +29,15 @@ Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off) {
     return pos;
 }
 
-pair<Loc::Detail, Loc::Detail> Loc::position(ast::GlobalState &ctx) {
-    ast::File &file = this->file.file(ctx);
+pair<Loc::Detail, Loc::Detail> Loc::position(ast::GlobalState &gs) {
+    ast::File &file = this->file.file(gs);
     return make_pair(offset2Pos(file.source(), begin_pos), offset2Pos(file.source(), end_pos));
 }
 
-std::string Loc::toString(ast::GlobalState &ctx) {
+string Loc::toString(ast::GlobalState &gs) {
     stringstream buf;
-    UTF8Desc source = this->file.file(ctx).source();
-    auto pos = this->position(ctx);
+    UTF8Desc source = this->file.file(gs).source();
+    auto pos = this->position(gs);
     auto endstart = make_reverse_iterator(source.from + this->begin_pos);
     auto beginstart = make_reverse_iterator(source.from);
     auto start = find(endstart, beginstart, '\n');

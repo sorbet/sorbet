@@ -62,7 +62,7 @@ public:
 
     bool isPrimitive() const;
 
-    Symbol &info(GlobalState &ctx, bool allowNone = false) const;
+    Symbol &info(GlobalState &gs, bool allowNone = false) const;
 
     bool operator==(const SymbolRef &rhs) const;
 
@@ -72,7 +72,7 @@ public:
         return !_id;
     }
 
-    std::string toString(GlobalState &ctx, int tabs = 0) const;
+    std::string toString(GlobalState &gs, int tabs = 0) const;
 
     u4 _id;
 };
@@ -85,7 +85,7 @@ public:
     Symbol() = default;
     Symbol(Symbol &&) noexcept = default;
 
-    bool isConstructor(GlobalState &ctx) const;
+    bool isConstructor(GlobalState &gs) const;
 
     SymbolRef owner;
     ast::Loc definitionLoc;
@@ -104,24 +104,24 @@ public:
         return argumentsOrMixins;
     }
 
-    bool derivesFrom(GlobalState &ctx, SymbolRef sym);
+    bool derivesFrom(GlobalState &gs, SymbolRef sym);
 
-    inline std::vector<SymbolRef> &mixins(GlobalState &ctx) {
+    inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
         Error::check(isClass());
-        ensureCompleted(ctx);
+        ensureCompleted(gs);
         return argumentsOrMixins;
     }
 
     SymbolRef superClass;
     std::shared_ptr<Type> resultType;
 
-    inline SymbolRef parent(GlobalState &ctx) {
+    inline SymbolRef parent(GlobalState &gs) {
         Error::check(isClass());
-        ensureCompleted(ctx);
+        ensureCompleted(gs);
         return superClass;
     }
 
-    SymbolRef ref(GlobalState &ctx) const;
+    SymbolRef ref(GlobalState &gs) const;
 
     inline bool isClass() const {
         return (flags & 0x8000) != 0;
@@ -177,13 +177,13 @@ public:
     }
 
     SymbolRef findMember(NameRef name);
-    std::string fullName(GlobalState &ctx) const;
+    std::string fullName(GlobalState &gs) const;
 
     bool isSynthetic(GlobalState &ctx) const;
 
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
-    SymbolRef singletonClass(GlobalState &ctx);
+    SymbolRef singletonClass(GlobalState &gs);
 
     //    std::vector<Tree> implementation; // TODO: make into small vector too
     NameRef name; // todo: move out? it should not matter but it's important for
@@ -191,7 +191,7 @@ public:
     std::vector<std::pair<NameRef, SymbolRef>> members; // TODO: replace with https://github.com/greg7mdp/sparsepp &
     // optimize for absence
 private:
-    void ensureCompleted(GlobalState &ctx);
+    void ensureCompleted(GlobalState &gs);
 };
 
 CheckSize(Symbol, 88, 8);

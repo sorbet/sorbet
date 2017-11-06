@@ -242,7 +242,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  if (dynamic_cast<StringLit *>(first.get()) == nullptr) {
                      res = mkSend0(first, Names::to_s());
                  } else {
-                     res = std::move(first);
+                     res = move(first);
                  }
                  ++it;
                  for (; it != end; ++it) {
@@ -433,19 +433,19 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
              [&](parser::While *wl) {
                  auto cond = node2TreeImpl(ctx, wl->cond);
                  auto body = node2TreeImpl(ctx, wl->body);
-                 unique_ptr<Statement> res = make_unique<While>(Expression::fromStatement(move(cond)), std::move(body));
+                 unique_ptr<Statement> res = make_unique<While>(Expression::fromStatement(move(cond)), move(body));
                  result.swap(res);
              },
              [&](parser::WhilePost *wl) {
                  auto cond = node2TreeImpl(ctx, wl->cond);
                  auto body = node2TreeImpl(ctx, wl->body);
-                 unique_ptr<Statement> res = make_unique<While>(Expression::fromStatement(move(cond)), std::move(body));
+                 unique_ptr<Statement> res = make_unique<While>(Expression::fromStatement(move(cond)), move(body));
                  result.swap(res);
              },
              [&](parser::Until *wl) {
                  auto cond = mkSend0(node2TreeImpl(ctx, wl->cond), Names::bang());
                  auto body = node2TreeImpl(ctx, wl->body);
-                 unique_ptr<Statement> res = make_unique<While>(Expression::fromStatement(move(cond)), std::move(body));
+                 unique_ptr<Statement> res = make_unique<While>(Expression::fromStatement(move(cond)), move(body));
                  result.swap(res);
              },
              [&](parser::UntilPost *wl) {
@@ -558,8 +558,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                      if (pair != nullptr) {
                          auto key = Expression::fromStatement(node2TreeImpl(ctx, pair->key));
                          auto value = Expression::fromStatement(node2TreeImpl(ctx, pair->value));
-                         keys.emplace_back(std::move(key));
-                         values.emplace_back(std::move(value));
+                         keys.emplace_back(move(key));
+                         values.emplace_back(move(value));
                      } else {
                          parser::Kwsplat *splat = dynamic_cast<parser::Kwsplat *>(pairAsExpression.get());
                          Error::check(splat);
@@ -579,7 +579,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                              if (lastMerge != nullptr) {
                                  lastMerge = mkSend1(lastMerge, Names::merge(), current);
                              } else {
-                                 lastMerge = std::move(current);
+                                 lastMerge = move(current);
                              }
                              lastMerge = mkSend1(lastMerge, Names::merge(), node2TreeImpl(ctx, splat->expr));
                          }
@@ -589,7 +589,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                  unique_ptr<Statement> res;
                  if (keys.size() == 0) {
                      if (lastMerge != nullptr) {
-                         res = std::move(lastMerge);
+                         res = move(lastMerge);
                      } else {
                          // Empty array
                          res = make_unique<Hash>(keys, values);
@@ -713,14 +713,14 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                          Error::check(snd->args.size() == 0);
                          unique_ptr<Expression> getElement = Expression::fromStatement(
                              mkSend1(mkIdent(tempSym), Names::squareBrackets(), make_unique<IntLit>(i)));
-                         snd->args.emplace_back(std::move(getElement));
-                         stats.emplace_back(std::move(lh));
+                         snd->args.emplace_back(move(getElement));
+                         stats.emplace_back(move(lh));
                      } else if (ast::Ident *snd = dynamic_cast<ast::Ident *>(lh.get())) {
                          auto access = mkSend1(mkIdent(tempSym), Names::squareBrackets(), make_unique<IntLit>(i));
                          unique_ptr<Statement> assign = mkAssign(lh, access);
-                         stats.emplace_back(std::move(assign));
+                         stats.emplace_back(move(assign));
                      } else if (ast::NotSupported *snd = dynamic_cast<ast::NotSupported *>(lh.get())) {
-                         stats.emplace_back(std::move(lh));
+                         stats.emplace_back(move(lh));
                      } else {
                          Error::notImplemented();
                      }

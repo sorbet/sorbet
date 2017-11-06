@@ -27,7 +27,7 @@ struct stats {
 
 class CFG_Collector_and_Typer {
 public:
-    std::vector<std::string> cfgs;
+    vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
         ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
@@ -36,7 +36,7 @@ public:
     }
 };
 
-static bool removeOption(std::vector<std::string> &prints, std::string option) {
+static bool removeOption(vector<string> &prints, string option) {
     auto it = find(prints.begin(), prints.end(), option);
     if (it != prints.end()) {
         prints.erase(it);
@@ -46,13 +46,13 @@ static bool removeOption(std::vector<std::string> &prints, std::string option) {
     }
 }
 
-void index(ruby_typer::ast::GlobalState &ctx, const vector<pair<string, string>> nameAndSource) {
+void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> nameAndSource) {
     vector<unique_ptr<ruby_typer::parser::Node>> empty;
     vector<ruby_typer::parser::Result> results;
     unique_ptr<ruby_typer::parser::Begin> join =
         make_unique<ruby_typer::parser::Begin>(ruby_typer::ast::Loc::none(0), move(empty));
     for (auto &pair : nameAndSource) {
-        results.emplace_back(ruby_typer::parser::parse_ruby(ctx, pair.first, pair.second));
+        results.emplace_back(ruby_typer::parser::parse_ruby(gs, pair.first, pair.second));
         auto &r = results.back();
         auto ast = r.ast();
         if (r.diagnostics().size() > 0) {
@@ -72,20 +72,20 @@ void index(ruby_typer::ast::GlobalState &ctx, const vector<pair<string, string>>
             ruby_typer::Error::raise("Failed to index " + pair.first);
         }
     }
-    ctx.errors.keepErrorsInMemory = true; // silence errors for stdlib.
-    ruby_typer::ast::Context context(ctx, ctx.defn_root());
+    gs.errors.keepErrorsInMemory = true; // silence errors for stdlib.
+    ruby_typer::ast::Context context(gs, gs.defn_root());
     auto desugared = ruby_typer::ast::desugar::node2Tree(context, join.get());
-    desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
+    desugared = ruby_typer::namer::Namer::run(context, move(desugared));
     for (auto &sh : join->stmts) {
         sh.release(); // they are already owner by Result.
     }
-    ctx.errors.getAndEmptyErrors();
-    ctx.errors.keepErrorsInMemory = false;
+    gs.errors.getAndEmptyErrors();
+    gs.errors.keepErrorsInMemory = false;
 }
 
-void parse_and_print(ruby_typer::ast::GlobalState &ctx, cxxopts::Options &opts, const string &path, const string &src,
-                     std::vector<std::string> &prints) {
-    auto r = ruby_typer::parser::parse_ruby(ctx, path, src);
+void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
+                     vector<string> &prints) {
+    auto r = ruby_typer::parser::parse_ruby(gs, path, src);
     auto ast = r.ast();
     if (r.diagnostics().size() > 0) {
         vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
@@ -100,47 +100,47 @@ void parse_and_print(ruby_typer::ast::GlobalState &ctx, cxxopts::Options &opts, 
     }
     if (ast) {
         if (removeOption(prints, "parse-tree")) {
-            cout << ast->toString(ctx, 0) << endl;
+            cout << ast->toString(gs, 0) << endl;
             if (prints.empty())
                 return;
         }
 
-        ruby_typer::ast::Context context(ctx, ctx.defn_root());
+        ruby_typer::ast::Context context(gs, gs.defn_root());
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
         if (removeOption(prints, "ast")) {
-            cout << desugared->toString(ctx, 0) << endl;
+            cout << desugared->toString(gs, 0) << endl;
             if (prints.empty())
                 return;
         }
         if (removeOption(prints, "ast-raw")) {
-            cout << desugared->showRaw(ctx) << endl;
+            cout << desugared->showRaw(gs) << endl;
             if (prints.empty())
                 return;
         }
 
-        desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
+        desugared = ruby_typer::namer::Namer::run(context, move(desugared));
         if (removeOption(prints, "name-table")) {
-            cout << ctx.toString() << endl;
+            cout << gs.toString() << endl;
             if (prints.empty())
                 return;
         }
         if (removeOption(prints, "name-tree")) {
-            cout << desugared->toString(ctx, 0) << endl;
+            cout << desugared->toString(gs, 0) << endl;
             if (prints.empty())
                 return;
         }
         if (removeOption(prints, "name-tree-raw")) {
-            cout << desugared->showRaw(ctx) << endl;
+            cout << desugared->showRaw(gs) << endl;
             if (prints.empty())
                 return;
         }
 
         CFG_Collector_and_Typer collector;
 
-        auto r = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, std::move(desugared));
-        std::stringstream buf;
+        auto r = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(desugared));
+        stringstream buf;
         for (auto &cfg : collector.cfgs) {
-            buf << cfg << std::endl << std::endl;
+            buf << cfg << endl << endl;
         }
         auto got = buf.str();
         if (removeOption(prints, "cfg")) {
@@ -154,15 +154,15 @@ void parse_and_print(ruby_typer::ast::GlobalState &ctx, cxxopts::Options &opts, 
 }
 
 int realmain(int argc, char **argv) {
-    std::vector<std::string> files;
-    std::vector<std::string> prints;
+    vector<string> files;
+    vector<string> prints;
     //    spd::set_async_mode(1024);
-    auto color_sink = std::make_shared<spdlog::sinks::ansicolor_stderr_sink_st>();
+    auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
-    std::shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
+    shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
     console->set_pattern("%v");
-    std::shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
+    shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
     console_err->set_pattern("%v");
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
@@ -170,9 +170,9 @@ int realmain(int argc, char **argv) {
     options.add_options()("h,help", "Show help");
     options.add_options()("n,no-payload", "Do not load included rbi files for stdlib");
     options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
-                          cxxopts::value<std::vector<std::string>>(prints));
-    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<std::string>());
-    options.add_options()("files", "Input files", cxxopts::value<std::vector<std::string>>(files));
+                          cxxopts::value<vector<string>>(prints));
+    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
+    options.add_options()("files", "Input files", cxxopts::value<vector<string>>(files));
     options.parse_positional("files");
 
     try {
@@ -204,12 +204,12 @@ int realmain(int argc, char **argv) {
             break;
     }
 
-    ruby_typer::ast::GlobalState ctx(*console);
+    ruby_typer::ast::GlobalState gs(*console);
 
     if (!options["n"].as<bool>()) {
         clock_t begin = clock();
 
-        index(ctx, ruby_typer::rbi::all());
+        index(gs, ruby_typer::rbi::all());
 
         clock_t end = clock();
         double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
@@ -222,7 +222,7 @@ int realmain(int argc, char **argv) {
         st.files++;
         st.lines++;
         st.bytes += src.size();
-        parse_and_print(ctx, options, "-e", src, prints);
+        parse_and_print(gs, options, "-e", src, prints);
     } else {
 
         for (auto &fileName : files) {
@@ -234,7 +234,7 @@ int realmain(int argc, char **argv) {
                 console->error("File Not Found: {}", fileName);
                 return 1;
             }
-            parse_and_print(ctx, options, fileName, src, prints);
+            parse_and_print(gs, options, fileName, src, prints);
         }
     }
     clock_t end = clock();

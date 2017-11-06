@@ -32,16 +32,16 @@ string ruby_typer::File::read(const char *filename) {
     return src;
 }
 
-std::string strprintf(const char *format, va_list vlist) {
+string strprintf(const char *format, va_list vlist) {
     char *buf = nullptr;
     int ret = vasprintf(&buf, format, vlist);
     ruby_typer::Error::check(ret >= 0);
-    std::string str = buf;
+    string str = buf;
     free(buf);
     return str;
 }
 
-std::string strprintf(const char *format, ...) {
+string strprintf(const char *format, ...) {
     va_list vlist;
     va_start(vlist, format);
     auto str = strprintf(format, vlist);
@@ -66,7 +66,7 @@ public:
     }
 } SetTerminateHandler;
 
-string exec(std::string cmd) {
+string exec(string cmd) {
     array<char, 128> buffer;
     string result;
     shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
@@ -123,8 +123,8 @@ void ruby_typer::Error::print_backtrace() {
     }
 }
 
-std::string demangle(const char *mangled) {
+string demangle(const char *mangled) {
     int status;
-    unique_ptr<char[], void (*)(void *)> result(abi::__cxa_demangle(mangled, 0, 0, &status), std::free);
-    return result.get() ? std::string(result.get()) : "error occurred";
+    unique_ptr<char[], void (*)(void *)> result(abi::__cxa_demangle(mangled, 0, 0, &status), free);
+    return result.get() ? string(result.get()) : "error occurred";
 }

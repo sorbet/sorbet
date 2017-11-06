@@ -11,7 +11,7 @@ void Reporter::_error(BasicError error) {
         errors.emplace_back(make_unique<BasicError>(error));
         return;
     }
-    ctx_.logger.error("{}", error.toString(ctx_));
+    gs_.logger.error("{}", error.toString(gs_));
 }
 
 void Reporter::_error(ComplexError error) {
@@ -19,16 +19,16 @@ void Reporter::_error(ComplexError error) {
         errors.emplace_back(make_unique<ComplexError>(error));
         return;
     }
-    ctx_.logger.error("{}", error.toString(ctx_));
+    gs_.logger.error("{}", error.toString(gs_));
 }
 
-std::string Reporter::BasicError::toString(GlobalState &ctx) {
+string Reporter::BasicError::toString(GlobalState &gs) {
     stringstream buf;
     if (loc.is_none()) {
         buf << "???:";
     } else {
-        auto pos = loc.position(ctx);
-        buf << loc.file.file(ctx).path() << ":";
+        auto pos = loc.position(gs);
+        buf << loc.file.file(gs).path() << ":";
         buf << pos.first.line << ":" << pos.first.column;
         buf << "-";
         buf << pos.second.line << ":" << pos.second.column;
@@ -37,45 +37,45 @@ std::string Reporter::BasicError::toString(GlobalState &ctx) {
     return buf.str();
 }
 
-std::vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> Reporter::getAndEmptyErrors() {
-    std::vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> result;
+vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> Reporter::getAndEmptyErrors() {
+    vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> result;
     result.swap(errors);
     return result;
 }
 
-std::string Reporter::ErrorLine::toString(GlobalState &ctx) {
+string Reporter::ErrorLine::toString(GlobalState &gs) {
     stringstream buf;
     if (loc.is_none()) {
         buf << "???:"
             << " " << formattedMessage;
     } else {
-        auto pos = loc.position(ctx);
-        buf << loc.file.file(ctx).path() << ":";
+        auto pos = loc.position(gs);
+        buf << loc.file.file(gs).path() << ":";
         buf << pos.first.line;
         if (pos.second.line != pos.first.line) {
             buf << "-";
             buf << pos.second.line;
         }
         buf << " " << formattedMessage << endl;
-        buf << loc.toString(ctx);
+        buf << loc.toString(gs);
     }
 
     return buf.str();
 }
 
-std::string Reporter::ErrorSection::toString(GlobalState &ctx) {
+string Reporter::ErrorSection::toString(GlobalState &gs) {
     stringstream buf;
     buf << this->header << endl;
     for (auto &line : this->messages) {
-        buf << line.toString(ctx) << endl;
+        buf << line.toString(gs) << endl;
     }
     return buf.str();
 }
 
-std::string Reporter::ComplexError::toString(GlobalState &ctx) {
+string Reporter::ComplexError::toString(GlobalState &gs) {
     stringstream buf;
     if (!this->loc.is_none()) {
-        buf << this->loc.toString(ctx) << endl;
+        buf << this->loc.toString(gs) << endl;
     }
     buf << '[' << (int)this->what << "] " << this->formatted << endl;
     bool first = true;
@@ -83,7 +83,7 @@ std::string Reporter::ComplexError::toString(GlobalState &ctx) {
         if (!first)
             buf << endl;
         first = false;
-        buf << line.toString(ctx);
+        buf << line.toString(gs);
     }
     return buf.str();
 }

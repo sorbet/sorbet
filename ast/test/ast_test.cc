@@ -40,15 +40,15 @@ TEST(ASTTest, TestOffset2Pos) {
 }
 
 TEST(ASTTest, ErrorReporter) {
-    GlobalState ctx(*console);
-    FileRef f = ctx.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
-    ctx.errors.error(Loc{f, 0, 3}, ErrorClass::Internal, "Use of metavariable: {}", "foo");
+    GlobalState gs(*console);
+    FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
+    gs.errors.error(Loc{f, 0, 3}, ErrorClass::Internal, "Use of metavariable: {}", "foo");
 }
 
 TEST(ASTTest, SymbolRef) {
-    GlobalState ctx(*console);
-    SymbolRef ref = ctx.defn_object();
-    EXPECT_EQ(ref, ref.info(ctx).ref(ctx));
+    GlobalState gs(*console);
+    SymbolRef ref = gs.defn_object();
+    EXPECT_EQ(ref, ref.info(gs).ref(gs));
 }
 
 } // namespace ast

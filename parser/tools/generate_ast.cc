@@ -206,7 +206,7 @@ NodeDef nodes[] = {
     {"ZSuper", vector<FieldDef>()},
 };
 
-std::string arg_type(FieldType arg) {
+string arg_type(FieldType arg) {
     switch (arg) {
         case Name:
             return "NameRef ";
@@ -221,7 +221,7 @@ std::string arg_type(FieldType arg) {
     }
 }
 
-std::string field_type(FieldType arg) {
+string field_type(FieldType arg) {
     switch (arg) {
         case Name:
             return "NameRef";
@@ -264,7 +264,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
         out << "    " << field_type(arg.type) << " " << arg.name << ";" << endl;
     }
     out << endl;
-    out << "  virtual std::string toString(ast::GlobalState &ctx, int tabs = 0);" << endl;
+    out << "  virtual std::string toString(ast::GlobalState &gs, int tabs = 0);" << endl;
     out << "  virtual std::string nodeName();" << endl;
 
     out << "};" << endl;
@@ -276,7 +276,7 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
     out << "    return \"" << node.name << "\";" << endl;
     out << "  };" << endl << endl;
 
-    out << "  std::string " << node.name << "::toString(ast::GlobalState &ctx, int tabs) {" << endl
+    out << "  std::string " << node.name << "::toString(ast::GlobalState &gs, int tabs) {" << endl
         << "    std::stringstream buf;" << endl;
     out << "    buf << \"" << node.name << " {\" << std::endl;" << endl;
     // Generate fields
@@ -284,18 +284,18 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << endl;
         switch (arg.type) {
             case Name:
-                out << "    buf << \"" << arg.name << " = \" << " << arg.name
-                    << ".name(ctx).toString(ctx) << std::endl;" << endl;
+                out << "    buf << \"" << arg.name << " = \" << " << arg.name << ".name(gs).toString(gs) << std::endl;"
+                    << endl;
                 break;
             case Node:
                 out << "    buf << \"" << arg.name << " = \";" << endl;
-                out << "    printNode(buf, " << arg.name << ", ctx, tabs + 1);" << endl;
+                out << "    printNode(buf, " << arg.name << ", gs, tabs + 1);" << endl;
                 break;
             case NodeVec:
                 out << "    buf << \"" << arg.name << " = [\" << std::endl;" << endl;
                 out << "    for (auto &&a: " << arg.name << ") {" << endl;
                 out << "      printTabs(buf, tabs + 2);" << endl;
-                out << "      printNode(buf, a, ctx, tabs + 2); " << endl;
+                out << "      printNode(buf, a, gs, tabs + 2); " << endl;
                 out << "    }" << endl;
                 out << "    printTabs(buf, tabs + 1);";
                 out << "    buf << \"]\" << std::endl;" << endl;

@@ -8,6 +8,8 @@
 
 namespace spd = spdlog;
 
+using namespace std;
+
 namespace ruby_typer {
 namespace namer {
 namespace test {
@@ -28,22 +30,22 @@ private:
 };
 
 static const char *testClass = "Test";
-static ast::UTF8Desc testClass_DESC{(char *)testClass, (int)std::strlen(testClass)};
+static ast::UTF8Desc testClass_DESC{(char *)testClass, (int)strlen(testClass)};
 
-std::unique_ptr<ast::Statement> getTree(ast::GlobalState &cb, std::string str) {
-    auto result = parser::parse_ruby(cb, "<test>", str);
-    ruby_typer::ast::Context ctx(cb, cb.defn_root());
+unique_ptr<ast::Statement> getTree(ast::GlobalState &gs, string str) {
+    auto result = parser::parse_ruby(gs, "<test>", str);
+    ruby_typer::ast::Context ctx(gs, gs.defn_root());
     return ast::desugar::node2Tree(ctx, result.ast());
 }
 
-std::unique_ptr<ast::Statement> hello_world(ast::GlobalState &ctx) {
-    return getTree(ctx, "def hello_world; end");
+unique_ptr<ast::Statement> hello_world(ast::GlobalState &gs) {
+    return getTree(gs, "def hello_world; end");
 }
 
 TEST_F(NamerFixture, HelloWorld) {
     auto ctx = getCtx();
     auto tree = hello_world(ctx);
-    namer::Namer::run(ctx, std::move(tree));
+    namer::Namer::run(ctx, move(tree));
     auto &objectScope = ast::GlobalState::defn_object().info(ctx);
     ASSERT_EQ(ast::GlobalState::defn_root(), objectScope.owner);
 
@@ -61,12 +63,12 @@ TEST_F(NamerFixture, Idempotent) {
     auto baseNames = ctx.state.namesUsed();
 
     auto tree = hello_world(ctx);
-    auto newtree = namer::Namer::run(ctx, std::move(tree));
+    auto newtree = namer::Namer::run(ctx, move(tree));
     ASSERT_EQ(baseSymbols + 1, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
 
     // Run it again and get the same numbers
-    namer::Namer::run(ctx, std::move(newtree));
+    namer::Namer::run(ctx, move(newtree));
     ASSERT_EQ(baseSymbols + 1, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
 }
@@ -74,7 +76,7 @@ TEST_F(NamerFixture, Idempotent) {
 TEST_F(NamerFixture, NameClass) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Test; class Foo; end; end");
-    namer::Namer::run(ctx, std::move(tree));
+    namer::Namer::run(ctx, move(tree));
     auto &rootScope =
         ast::GlobalState::defn_root().info(ctx).findMember(ctx.state.enterNameUTF8(testClass_DESC)).info(ctx);
 
@@ -88,7 +90,7 @@ TEST_F(NamerFixture, NameClass) {
 TEST_F(NamerFixture, InsideClass) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Test; class Foo; def bar; end; end; end");
-    namer::Namer::run(ctx, std::move(tree));
+    namer::Namer::run(ctx, move(tree));
     auto &rootScope =
         ast::GlobalState::defn_root().info(ctx).findMember(ctx.state.enterNameUTF8(testClass_DESC)).info(ctx);
 

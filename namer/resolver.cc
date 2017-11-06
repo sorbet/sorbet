@@ -82,11 +82,11 @@ private:
         return nullptr;
     }
 
-    shared_ptr<ast::Type> getResultType(ast::Context ctx, std::unique_ptr<ast::Expression> &expr) {
+    shared_ptr<ast::Type> getResultType(ast::Context ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<ast::Type> result;
         typecase(expr.get(),
                  [&](ast::Array *arr) {
-                     std::vector<std::shared_ptr<ast::Type>> elems;
+                     vector<shared_ptr<ast::Type>> elems;
                      for (auto &el : arr->elems) {
                          elems.emplace_back(getResultType(ctx, el));
                      }
@@ -152,8 +152,8 @@ private:
             for (auto &arg : lastStandardMethod->args) {
                 if (auto *hash = dynamic_cast<ast::Hash *>(arg.get())) {
                     int i = 0;
-                    for (std::unique_ptr<ast::Expression> &key : hash->keys) {
-                        std::unique_ptr<ast::Expression> &value = hash->values[i];
+                    for (unique_ptr<ast::Expression> &key : hash->keys) {
+                        unique_ptr<ast::Expression> &value = hash->values[i];
                         if (auto *symbolLit = dynamic_cast<ast::SymbolLit *>(key.get())) {
                             if (symbolLit->name == ast::Names::returns()) {
                                 // fill in return type
@@ -222,8 +222,8 @@ public:
             }
         }
 
-        auto toRemove = std::remove_if(original->rhs.begin(), original->rhs.end(),
-                                       [](unique_ptr<ast::Statement> &stat) -> bool { return stat.get() == nullptr; });
+        auto toRemove = remove_if(original->rhs.begin(), original->rhs.end(),
+                                  [](unique_ptr<ast::Statement> &stat) -> bool { return stat.get() == nullptr; });
 
         original->rhs.erase(toRemove, original->rhs.end());
 

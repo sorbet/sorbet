@@ -70,34 +70,34 @@ static const char *starStar = "**";
 static UTF8Desc starStar_DESC{(char *)starStar, (int)strlen(starStar)};
 
 static const char *whileTemp = "whileTmp";
-static UTF8Desc whileTemp_DESC{(char *)whileTemp, (int)std::strlen(whileTemp)};
+static UTF8Desc whileTemp_DESC{(char *)whileTemp, (int)strlen(whileTemp)};
 
 static const char *ifTemp = "ifTmp";
-static UTF8Desc ifTemp_DESC{(char *)ifTemp, (int)std::strlen(ifTemp)};
+static UTF8Desc ifTemp_DESC{(char *)ifTemp, (int)strlen(ifTemp)};
 
 static const char *returnTemp = "returnTmp";
-static UTF8Desc retunTemp_DESC{(char *)returnTemp, (int)std::strlen(returnTemp)};
+static UTF8Desc retunTemp_DESC{(char *)returnTemp, (int)strlen(returnTemp)};
 
 static const char *statTemp = "statTmp";
-static UTF8Desc statTemp_DESC{(char *)statTemp, (int)std::strlen(statTemp)};
+static UTF8Desc statTemp_DESC{(char *)statTemp, (int)strlen(statTemp)};
 
 static const char *assignTemp = "assignTmp";
-static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)std::strlen(assignTemp)};
+static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)strlen(assignTemp)};
 
 static const char *returnMethodTemp = "<ret>";
-static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)std::strlen(returnMethodTemp)};
+static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)strlen(returnMethodTemp)};
 
 static const char *selfMethodTemp = "<self>";
-static UTF8Desc selfMethodTemp_DESC{(char *)selfMethodTemp, (int)std::strlen(selfMethodTemp)};
+static UTF8Desc selfMethodTemp_DESC{(char *)selfMethodTemp, (int)strlen(selfMethodTemp)};
 
 static const char *singletonClass = "<singleton class>";
-static UTF8Desc singletonClass_DESC{(char *)singletonClass, (int)std::strlen(singletonClass)};
+static UTF8Desc singletonClass_DESC{(char *)singletonClass, (int)strlen(singletonClass)};
 
 static const char *attachedClass = "<attached class>";
-static UTF8Desc attachedClass_DESC{(char *)attachedClass, (int)std::strlen(attachedClass)};
+static UTF8Desc attachedClass_DESC{(char *)attachedClass, (int)strlen(attachedClass)};
 
 static const char *blockReturnTemp = "<blockret>";
-static UTF8Desc blockReturnTemp_DESC{(char *)blockReturnTemp, (int)std::strlen(blockReturnTemp)};
+static UTF8Desc blockReturnTemp_DESC{(char *)blockReturnTemp, (int)strlen(blockReturnTemp)};
 
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
@@ -133,19 +133,19 @@ static const char *todo_lvar_str = "<todo lvar sym>";
 static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)strlen(todo_lvar_str)};
 
 static const char *object_str = "Object";
-static UTF8Desc object_DESC{(char *)object_str, (int)std::strlen(object_str)};
+static UTF8Desc object_DESC{(char *)object_str, (int)strlen(object_str)};
 
 static const char *junk_str = "<<JUNK>>";
-static UTF8Desc junk_DESC{(char *)junk_str, (int)std::strlen(junk_str)};
+static UTF8Desc junk_DESC{(char *)junk_str, (int)strlen(junk_str)};
 
 static const char *always_str = "<always>";
-static UTF8Desc always_DESC{(char *)always_str, (int)std::strlen(always_str)};
+static UTF8Desc always_DESC{(char *)always_str, (int)strlen(always_str)};
 
 static const char *never_str = "<never>";
-static UTF8Desc never_DESC{(char *)never_str, (int)std::strlen(never_str)};
+static UTF8Desc never_DESC{(char *)never_str, (int)strlen(never_str)};
 
 static const char *block_call_str = "<block-call>";
-static UTF8Desc block_call_DESC{(char *)block_call_str, (int)std::strlen(block_call_str)};
+static UTF8Desc block_call_DESC{(char *)block_call_str, (int)strlen(block_call_str)};
 
 static const char *include = "include";
 static UTF8Desc include_DESC{(char *)include, (int)strlen(include)};
@@ -605,15 +605,15 @@ unsigned int GlobalState::namesUsed() {
     return names.size();
 }
 
-std::string GlobalState::toString() {
-    std::vector<std::string> children;
+string GlobalState::toString() {
+    vector<string> children;
     for (auto element : defn_root().info(*this).members) {
         if (!element.second.isHiddenFromPrinting()) {
             children.push_back(element.second.toString(*this));
         }
     }
-    std::sort(children.begin(), children.end());
-    std::ostringstream os;
+    sort(children.begin(), children.end());
+    ostringstream os;
     for (auto child : children) {
         os << child;
     }

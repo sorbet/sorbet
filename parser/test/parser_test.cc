@@ -14,10 +14,10 @@ using namespace std;
 
 TEST(ParserTest, SimpleParse) {
     auto console = spd::stderr_color_mt("parse");
-    ruby_typer::ast::GlobalState ctx(*console);
-    ruby_typer::parser::parse_ruby(ctx, "<test>", "def hello_world; p :hello; end");
-    ruby_typer::parser::parse_ruby(ctx, "<test>", "class A; class B; end; end");
-    ruby_typer::parser::parse_ruby(ctx, "<test>", "class A::B; module B; end; end");
+    ruby_typer::ast::GlobalState gs(*console);
+    ruby_typer::parser::parse_ruby(gs, "<test>", "def hello_world; p :hello; end");
+    ruby_typer::parser::parse_ruby(gs, "<test>", "class A; class B; end; end");
+    ruby_typer::parser::parse_ruby(gs, "<test>", "class A::B; module B; end; end");
 }
 
 struct DedentTest {

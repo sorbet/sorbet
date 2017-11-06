@@ -4,6 +4,8 @@
 
 #include <unordered_map>
 
+using namespace std;
+
 namespace ruby_typer {
 namespace namer {
 
@@ -24,7 +26,7 @@ class NameInserter {
         return ctx.state.enterClassSymbol(newOwner, constLit->cnst);
     }
 
-    std::vector<std::unordered_map<ast::NameRef, ast::SymbolRef>> namesForLocals;
+    vector<unordered_map<ast::NameRef, ast::SymbolRef>> namesForLocals;
 
     unique_ptr<ast::Expression> addAncestor(ast::Context ctx, ast::ClassDef *klass, unique_ptr<ast::Statement> &node) {
         auto send = dynamic_cast<ast::Send *>(node.get());
@@ -61,7 +63,7 @@ class NameInserter {
             return nullptr;
         }
         // TODO check that send->block is empty
-        return std::move(send->args[0]);
+        return move(send->args[0]);
     }
 
 public:
@@ -75,10 +77,10 @@ public:
         namesForLocals.pop_back();
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         auto toRemove =
-            std::remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Statement> &line) {
+            remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Statement> &line) {
                 auto newAncestor = addAncestor(ctx, klass, line);
                 if (newAncestor) {
-                    klass->ancestors.emplace_back(std::move(newAncestor));
+                    klass->ancestors.emplace_back(move(newAncestor));
                     return true;
                 }
                 return false;
@@ -158,7 +160,7 @@ private:
 
 unique_ptr<ast::Statement> Namer::run(ast::Context &ctx, unique_ptr<ast::Statement> tree) {
     NameInserter nameInserter;
-    tree = ast::TreeMap<NameInserter>::apply(ctx, nameInserter, std::move(tree));
+    tree = ast::TreeMap<NameInserter>::apply(ctx, nameInserter, move(tree));
     return Namer::resolve(ctx, move(tree));
 }
 
