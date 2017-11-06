@@ -49,7 +49,7 @@ begin
   while 0.!=(1)
     <emptyTree>
   end
-  #x.[]=(0)
+  #x$9.[]=(0)
   break(<emptyTree>)
   break(1)
   break([1, 2])
@@ -60,7 +60,7 @@ begin
   <Not Supported (ZSuper)>
   def foo<foo>(x<todo lvar sym>:, y<todo lvar sym>: = 1, *z<todo lvar sym>:)
     <emptyTree>
-  #x
+  #x$9
   <Not Supported (LineLiteral)>
   while true
     nil
@@ -76,14 +76,14 @@ begin
   end
   begin
     #assignTmp$5 = 1
-    #a = #assignTmp$5.[](0)
+    #a$10 = #assignTmp$5.[](0)
     <Not Supported (Mlhs)>
     #assignTmp$5
   end
   <Not Supported (NthRef)>
   def foo<foo>(x<todo lvar sym> = 1, *y<todo lvar sym>)
     <emptyTree>
-  {#x => #y, <Not Supported (DSymbol)> => 1}
+  {#x$9 => #y, <Not Supported (DSymbol)> => 1}
   <Not Supported (Preexe)>
   <Not Supported (Postexe)>
   <Not Supported (Rational)>
@@ -98,7 +98,7 @@ begin
   end
   <Not Supported (DSymbol)>
   [:sym]
-  if #x
+  if #x$9
     1
   else
     7
@@ -107,7 +107,7 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(<singleton class:<root>>).proc() do |<Not Supported (Shadowarg)>|
+  self(<singleton class:<root>>).proc() do |x<todo lvar sym>|
     <emptyTree>
   end
   break(self(TODO).foo(1) do ||

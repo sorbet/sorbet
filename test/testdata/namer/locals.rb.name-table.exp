@@ -1,0 +1,8 @@
+class Opus ()
+class TestLocals (Object)
+  method method ()
+    field a
+    field a$1
+    field b$0
+    field b$2
+

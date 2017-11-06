@@ -1,0 +1,17 @@
+class <emptyTree>::TestLocals<TestLocals> < (::Object)
+  def method<method>()
+    begin
+      ::TestLocals#method#a = 1
+      self(TestLocals).proc() do ||
+        begin
+          ::TestLocals#method#b$0 = 2
+          ::TestLocals#method#a.+(::TestLocals#method#b$0)
+        end
+      end
+      ::TestLocals#method#b$0 = 3
+      self(TestLocals).proc() do |a<todo lvar sym>; b<todo lvar sym>|
+        ::TestLocals#method#a$1.+(::TestLocals#method#b$2)
+      end
+    end
+
+end

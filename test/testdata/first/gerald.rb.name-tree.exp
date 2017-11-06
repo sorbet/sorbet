@@ -50,8 +50,8 @@ begin
           end
           ::Opus::CIBot::Gerald::Matcher#match#budget = ::Opus::CIBot::Gerald::MatchTimeBudget.new()
           @rules<todo ivar sym>.select() do |r<todo lvar sym>|
-            budget<todo lvar sym>.time_rule(r<todo lvar sym>) do ||
-              r<todo lvar sym>.matches?(match_context<todo lvar sym>)
+            ::Opus::CIBot::Gerald::Matcher#match#budget.time_rule(::Opus::CIBot::Gerald::Matcher#match#r$4) do ||
+              ::Opus::CIBot::Gerald::Matcher#match#r$4.matches?(::Opus::CIBot::Gerald::Matcher#match#match_context)
             end
           end
         end
@@ -150,33 +150,33 @@ begin
 
       def added_files<added_files>()
         @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:a_name).==("/dev/null")
+          ::Opus::CIBot::Gerald::Diff#added_files#part$6.[](:a_name).==("/dev/null")
         end.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:b_name)
+          ::Opus::CIBot::Gerald::Diff#added_files#part$7.[](:b_name)
         end
 
       def deleted_files<deleted_files>()
         @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:b_name).==("/dev/null")
+          ::Opus::CIBot::Gerald::Diff#deleted_files#part$8.[](:b_name).==("/dev/null")
         end.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:a_name)
+          ::Opus::CIBot::Gerald::Diff#deleted_files#part$9.[](:a_name)
         end
 
       def changed_files<changed_files>()
         @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:a_name).==(part<todo lvar sym>.[](:b_name))
+          ::Opus::CIBot::Gerald::Diff#changed_files#part$10.[](:a_name).==(::Opus::CIBot::Gerald::Diff#changed_files#part$10.[](:b_name))
         end.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:b_name)
+          ::Opus::CIBot::Gerald::Diff#changed_files#part$11.[](:b_name)
         end
 
       def added_lines<added_lines>()
         @parsed<todo ivar sym>.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:added_lines)
+          ::Opus::CIBot::Gerald::Diff#added_lines#part$12.[](:added_lines)
         end.flatten()
 
       def removed_lines<removed_lines>()
         @parsed<todo ivar sym>.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:removed_lines)
+          ::Opus::CIBot::Gerald::Diff#removed_lines#part$13.[](:removed_lines)
         end.flatten()
 
       def changed_lines<changed_lines>()
@@ -195,48 +195,48 @@ begin
             end
             ::Opus::CIBot::Gerald::Diff#parse#parts.map() do |part<todo lvar sym>|
               begin
-                lines<todo lvar sym> = part<todo lvar sym>.split("
+                ::Opus::CIBot::Gerald::Diff#parse#lines$15 = ::Opus::CIBot::Gerald::Diff#parse#part$16.split("
 ")
-                a_name<todo lvar sym> = b_name<todo lvar sym> = nil
-                added_lines<todo lvar sym> = []
-                removed_lines<todo lvar sym> = []
-                lines<todo lvar sym>.each() do |line<todo lvar sym>|
-                  if line<todo lvar sym>.start_with?("index ", "@@", "new file mode")
+                ::Opus::CIBot::Gerald::Diff#parse#a_name$17 = ::Opus::CIBot::Gerald::Diff#parse#b_name$18 = nil
+                ::Opus::CIBot::Gerald::Diff#parse#added_lines$19 = []
+                ::Opus::CIBot::Gerald::Diff#parse#removed_lines$20 = []
+                ::Opus::CIBot::Gerald::Diff#parse#lines$15.each() do |line<todo lvar sym>|
+                  if ::Opus::CIBot::Gerald::Diff#parse#line$21.start_with?("index ", "@@", "new file mode")
                     next(<emptyTree>)
                   else
-                    if line<todo lvar sym>.start_with?("---")
+                    if ::Opus::CIBot::Gerald::Diff#parse#line$21.start_with?("---")
                       begin
-                        a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
-                        if if a_name<todo lvar sym>
-                            a_name<todo lvar sym>.start_with?("a/")
+                        ::Opus::CIBot::Gerald::Diff#parse#a_name$17 = ::Opus::CIBot::Gerald::Diff#parse#line$21.[](<Not Supported (IRange)>)
+                        if if ::Opus::CIBot::Gerald::Diff#parse#a_name$17
+                            ::Opus::CIBot::Gerald::Diff#parse#a_name$17.start_with?("a/")
                           else
-                            a_name<todo lvar sym>
+                            ::Opus::CIBot::Gerald::Diff#parse#a_name$17
                           end
-                          a_name<todo lvar sym> = a_name<todo lvar sym>.[](<Not Supported (IRange)>)
+                          ::Opus::CIBot::Gerald::Diff#parse#a_name$17 = ::Opus::CIBot::Gerald::Diff#parse#a_name$17.[](<Not Supported (IRange)>)
                         else
                           <emptyTree>
                         end
                       end
                     else
-                      if line<todo lvar sym>.start_with?("+++")
+                      if ::Opus::CIBot::Gerald::Diff#parse#line$21.start_with?("+++")
                         begin
-                          b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
-                          if if b_name<todo lvar sym>
-                              b_name<todo lvar sym>.start_with?("b/")
+                          ::Opus::CIBot::Gerald::Diff#parse#b_name$18 = ::Opus::CIBot::Gerald::Diff#parse#line$21.[](<Not Supported (IRange)>)
+                          if if ::Opus::CIBot::Gerald::Diff#parse#b_name$18
+                              ::Opus::CIBot::Gerald::Diff#parse#b_name$18.start_with?("b/")
                             else
-                              b_name<todo lvar sym>
+                              ::Opus::CIBot::Gerald::Diff#parse#b_name$18
                             end
-                            b_name<todo lvar sym> = b_name<todo lvar sym>.[](<Not Supported (IRange)>)
+                            ::Opus::CIBot::Gerald::Diff#parse#b_name$18 = ::Opus::CIBot::Gerald::Diff#parse#b_name$18.[](<Not Supported (IRange)>)
                           else
                             <emptyTree>
                           end
                         end
                       else
-                        if line<todo lvar sym>.start_with?("+")
-                          added_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
+                        if ::Opus::CIBot::Gerald::Diff#parse#line$21.start_with?("+")
+                          ::Opus::CIBot::Gerald::Diff#parse#added_lines$19.<<(::Opus::CIBot::Gerald::Diff#parse#line$21.[](<Not Supported (IRange)>))
                         else
-                          if line<todo lvar sym>.start_with?("-")
-                            removed_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
+                          if ::Opus::CIBot::Gerald::Diff#parse#line$21.start_with?("-")
+                            ::Opus::CIBot::Gerald::Diff#parse#removed_lines$20.<<(::Opus::CIBot::Gerald::Diff#parse#line$21.[](<Not Supported (IRange)>))
                           else
                             <emptyTree>
                           end
@@ -245,12 +245,12 @@ begin
                     end
                   end
                 end
-                if a_name<todo lvar sym>.nil?()
+                if ::Opus::CIBot::Gerald::Diff#parse#a_name$17.nil?()
                   next(<emptyTree>)
                 else
                   <emptyTree>
                 end
-                {:a_name => a_name<todo lvar sym>, :b_name => b_name<todo lvar sym>, :added_lines => added_lines<todo lvar sym>, :removed_lines => removed_lines<todo lvar sym>}
+                {:a_name => ::Opus::CIBot::Gerald::Diff#parse#a_name$17, :b_name => ::Opus::CIBot::Gerald::Diff#parse#b_name$18, :added_lines => ::Opus::CIBot::Gerald::Diff#parse#added_lines$19, :removed_lines => ::Opus::CIBot::Gerald::Diff#parse#removed_lines$20}
               end
             end.compact()
           end)

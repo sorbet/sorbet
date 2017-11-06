@@ -9,18 +9,33 @@ class Opus ()
       class <singleton class:Matcher> (Class)
       class Diff (Object)
         method added_files ()
+          field part$6
+          field part$7
         method added_lines ()
+          field part$12
         method affected_files ()
         method changed_files ()
+          field part$10
+          field part$11
         method changed_lines ()
         method changed_openapi? ()
         method deleted_files ()
+          field part$8
+          field part$9
         method initialize (raw_diff)
           field raw_diff
         method parse (diff)
+          field a_name$17
+          field added_lines$19
+          field b_name$18
           field diff
+          field line$21
+          field lines$15
+          field part$16
           field parts
+          field removed_lines$20
         method removed_lines ()
+          field part$13
       class MatchContext (Object)
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
           field assignee
@@ -52,5 +67,6 @@ class Opus ()
         method match (match_context)
           field budget
           field match_context
+          field r$4
 field assignTmp$0
 
