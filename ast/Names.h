@@ -109,7 +109,13 @@ struct RawName {
 };
 CheckSize(RawName, 16, 8);
 
-enum UniqueNameKind : u2 { Parser, Desugar, CFG, Singleton };
+enum UniqueNameKind : u2 {
+    Parser,
+    Desugar,
+    Namer,
+    CFG,
+    Singleton,
+};
 
 struct UniqueName {
     NameRef original;

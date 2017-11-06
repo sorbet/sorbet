@@ -26,7 +26,26 @@ class NameInserter {
         return ctx.state.enterClassSymbol(newOwner, constLit->cnst);
     }
 
-    vector<unordered_map<ast::NameRef, ast::SymbolRef>> namesForLocals;
+    ast::Ident *arg2Ident(ast::Reference *arg) {
+        while (true) {
+            if (ast::Ident *id = dynamic_cast<ast::Ident *>(arg)) {
+                return id;
+            }
+            typecase(arg,
+
+                     [&](ast::RestArg *rest) { arg = rest->expr.get(); },
+                     [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
+                     [&](ast::OptionalArg *opt) { arg = opt->expr.get(); },
+                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); });
+        }
+    }
+
+    struct LocalFrame {
+        bool is_block;
+        unordered_map<ast::NameRef, ast::SymbolRef> locals;
+    };
+
+    vector<LocalFrame> scopeStack;
 
     unique_ptr<ast::Expression> addAncestor(ast::Context ctx, ast::ClassDef *klass, unique_ptr<ast::Statement> &node) {
         auto send = dynamic_cast<ast::Send *>(node.get());
@@ -69,12 +88,12 @@ class NameInserter {
 public:
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
-        namesForLocals.emplace_back();
+        scopeStack.emplace_back();
         return klass;
     }
 
     ast::ClassDef *postTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
-        namesForLocals.pop_back();
+        scopeStack.pop_back();
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         auto toRemove =
             remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Statement> &line) {
@@ -91,7 +110,7 @@ public:
     }
 
     ast::MethodDef *preTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
-        namesForLocals.emplace_back();
+        scopeStack.emplace_back();
         ast::SymbolRef owner = ownerFromContext(ctx);
         if (method->isSelf) {
             owner = owner.info(ctx).singletonClass(ctx);
@@ -114,15 +133,49 @@ public:
     }
 
     ast::MethodDef *postTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
-        namesForLocals.pop_back();
+        scopeStack.pop_back();
         return method;
+    }
+
+    ast::Block *preTransformBlock(ast::Context ctx, ast::Block *blk) {
+        scopeStack.emplace_back();
+        auto &parent = *(scopeStack.end() - 2);
+        auto &frame = scopeStack.back();
+        frame.is_block = true;
+
+        // We inherit our parent's locals
+        for (auto &binding : parent.locals) {
+            frame.locals.insert(binding);
+        }
+        // Except that any arguments we have exist in our own frame
+        for (auto &arg : blk->args) {
+            ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
+            if (ref == nullptr)
+                continue;
+            ast::Ident *id = arg2Ident(ref);
+            if (id->symbol != ctx.state.defn_lvar_todo())
+                continue;
+
+            frame.locals.erase(id->name);
+        }
+        return blk;
+    }
+
+    ast::Block *postTransformBlock(ast::Context ctx, ast::Block *blk) {
+        scopeStack.pop_back();
+        return blk;
     }
 
     ast::Ident *postTransformIdent(ast::Context ctx, ast::Ident *ident) {
         if (ident->symbol == ctx.state.defn_lvar_todo()) {
-            ast::SymbolRef &cur = namesForLocals.back()[ident->name];
+            auto &frame = scopeStack.back();
+            ast::SymbolRef &cur = frame.locals[ident->name];
             if (!cur.exists()) {
-                cur = ctx.state.enterSymbol(ctx.owner, ident->name, false);
+                ast::NameRef name = ident->name;
+                if (frame.is_block)
+                    name = ctx.state.freshNameUnique(ast::UniqueNameKind::Namer, name);
+                cur = ctx.state.enterSymbol(ctx.owner, name, false);
+                frame.locals[ident->name] = cur;
             }
             ident->symbol = cur;
         }
@@ -154,7 +207,7 @@ private:
     }
 
     NameInserter() {
-        namesForLocals.emplace_back();
+        scopeStack.emplace_back();
     }
 };
 
