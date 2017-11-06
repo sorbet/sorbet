@@ -458,22 +458,16 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
              },
              [&](ast::Send *s) {
                  ast::SymbolRef recv;
-                 if (auto *i = dynamic_cast<ast::Ident *>(s->recv.get())) {
-                     recv = i->symbol;
-                 } else {
-                     recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                     current = walk(ctx, s->recv.get(), current, inWhat, recv, loops);
-                 }
+
+                 recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                 current = walk(ctx, s->recv.get(), current, inWhat, recv, loops);
 
                  vector<ast::SymbolRef> args;
                  for (auto &exp : s->args) {
                      ast::SymbolRef temp;
-                     if (auto *i = dynamic_cast<ast::Ident *>(exp.get())) {
-                         temp = i->symbol;
-                     } else {
-                         temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                         current = walk(ctx, exp.get(), current, inWhat, temp, loops);
-                     }
+                     temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                     current = walk(ctx, exp.get(), current, inWhat, temp, loops);
+
                      args.push_back(temp);
                  }
 
