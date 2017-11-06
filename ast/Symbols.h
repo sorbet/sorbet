@@ -179,6 +179,8 @@ public:
     SymbolRef findMember(NameRef name);
     std::string fullName(GlobalState &ctx) const;
 
+    bool isSynthetic(GlobalState &ctx) const;
+
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
     SymbolRef singletonClass(GlobalState &ctx);
