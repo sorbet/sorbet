@@ -56,8 +56,7 @@ public:
     }
 
     [[noreturn]] static inline void notImplemented() {
-        if (debug_mode)
-            raise("Not Implemented");
+        raise("Not Implemented");
     }
 
     static void print_backtrace();
