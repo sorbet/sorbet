@@ -77,15 +77,15 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
     string type = "unknown";
     if (myInfo.isClass()) {
         type = "class";
-    } else if (myInfo.isArray()) {
-        type = "array";
+    } else if (myInfo.isStaticField()) {
+        type = "static-field";
     } else if (myInfo.isField()) {
         type = "field";
     } else if (myInfo.isMethod()) {
         type = "method";
     }
     os << type << " " << name;
-    if (!myInfo.isField()) {
+    if (!myInfo.isField() && !myInfo.isStaticField()) {
         os << " (";
         bool first = true;
         for (SymbolRef thing : myInfo.argumentsOrMixins) {

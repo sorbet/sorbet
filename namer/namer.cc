@@ -195,6 +195,18 @@ public:
         return self;
     }
 
+    ast::Assign *postTransformAssign(ast::Context ctx, ast::Assign *asgn) {
+        ast::ConstantLit *lhs = dynamic_cast<ast::ConstantLit *>(asgn->lhs.get());
+        if (lhs == nullptr)
+            return asgn;
+
+        // TODO(nelhage): forbid dynamic constant definition
+        ast::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);
+        ctx.state.enterStaticFieldSymbol(scope, lhs->cnst);
+
+        return asgn;
+    }
+
 private:
     ast::SymbolRef ownerFromContext(ast::Context ctx) {
         ast::SymbolRef owner = ctx.owner;
