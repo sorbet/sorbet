@@ -18,9 +18,9 @@ void Node::printTabs(stringstream &to, int count) {
     }
 }
 
-void Node::printNode(stringstream &to, unique_ptr<Node> &node, ast::GlobalState &ctx, int tabs) {
+void Node::printNode(stringstream &to, unique_ptr<Node> &node, ast::GlobalState &gs, int tabs) {
     if (node) {
-        to << node->toString(ctx, tabs) << endl;
+        to << node->toString(gs, tabs) << endl;
     } else {
         to << "NULL" << endl;
     }

@@ -20,30 +20,30 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
 bool SymbolRef::isPrimitive() const {
     Error::notImplemented();
 }
-bool Symbol::isConstructor(GlobalState &ctx) const {
+bool Symbol::isConstructor(GlobalState &gs) const {
     return this->name._id == 1;
 }
 
-bool Symbol::derivesFrom(GlobalState &ctx, SymbolRef sym) {
+bool Symbol::derivesFrom(GlobalState &gs, SymbolRef sym) {
     // TODO: add baseClassSet
     for (SymbolRef a : argumentsOrMixins) {
-        if (a == sym || a.info(ctx).derivesFrom(ctx, sym))
+        if (a == sym || a.info(gs).derivesFrom(gs, sym))
             return true;
     }
     return false;
 }
 
-SymbolRef Symbol::ref(GlobalState &ctx) const {
-    auto distance = this - ctx.symbols.data();
+SymbolRef Symbol::ref(GlobalState &gs) const {
+    auto distance = this - gs.symbols.data();
     return SymbolRef(distance);
 }
 
-Symbol &SymbolRef::info(GlobalState &ctx, bool allowNone) const {
-    Error::check(_id < ctx.symbols.size());
+Symbol &SymbolRef::info(GlobalState &gs, bool allowNone) const {
+    Error::check(_id < gs.symbols.size());
     if (!allowNone)
         Error::check(this->exists());
 
-    return ctx.symbols[this->_id];
+    return gs.symbols[this->_id];
 }
 
 bool SymbolRef::isSynthetic() const {
@@ -66,10 +66,10 @@ void printTabs(std::ostringstream &to, int count) {
     }
 }
 
-std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
+std::string SymbolRef::toString(GlobalState &gs, int tabs) const {
     std::ostringstream os;
-    Symbol &myInfo = info(ctx, true);
-    std::string name = myInfo.name.toString(ctx);
+    Symbol &myInfo = info(gs, true);
+    std::string name = myInfo.name.toString(gs);
     auto members = myInfo.members;
 
     printTabs(os, tabs);
@@ -94,12 +94,12 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
             } else {
                 os << ", ";
             }
-            os << thing.info(ctx).name.toString(ctx);
+            os << thing.info(gs).name.toString(gs);
         }
         os << ")";
     }
     if (myInfo.resultType) {
-        os << " -> " << myInfo.resultType->toString(Context(ctx, ctx.defn_root()), tabs + 2);
+        os << " -> " << myInfo.resultType->toString(Context(gs, gs.defn_root()), tabs + 2);
     }
     os << std::endl;
 
@@ -110,7 +110,7 @@ std::string SymbolRef::toString(GlobalState &ctx, int tabs) const {
         if (pair.second.isHiddenFromPrinting())
             continue;
 
-        children.push_back(pair.second.toString(ctx, tabs + 1));
+        children.push_back(pair.second.toString(gs, tabs + 1));
     }
     std::sort(children.begin(), children.end());
     for (auto row : children) {
@@ -127,30 +127,30 @@ SymbolRef Symbol::findMember(NameRef name) {
     return SymbolRef(0);
 }
 
-string Symbol::fullName(GlobalState &ctx) const {
+string Symbol::fullName(GlobalState &gs) const {
     string owner_str;
-    if (this->owner.exists() && this->owner != ctx.defn_root())
-        owner_str = this->owner.info(ctx).fullName(ctx);
+    if (this->owner.exists() && this->owner != gs.defn_root())
+        owner_str = this->owner.info(gs).fullName(gs);
 
     if (this->isClass())
-        return owner_str + "::" + this->name.toString(ctx);
+        return owner_str + "::" + this->name.toString(gs);
     else
-        return owner_str + "#" + this->name.toString(ctx);
+        return owner_str + "#" + this->name.toString(gs);
 }
 
-SymbolRef Symbol::singletonClass(GlobalState &ctx) {
+SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Error::check(this->isClass());
 
     SymbolRef singleton = findMember(Names::singletonClass());
     if (singleton.exists())
         return singleton;
 
-    NameRef singletonName = ctx.freshNameUnique(UniqueNameKind::Singleton, this->name);
-    singleton = ctx.enterClassSymbol(this->owner, singletonName);
-    Symbol &singletonInfo = singleton.info(ctx);
+    NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name);
+    singleton = gs.enterClassSymbol(this->owner, singletonName);
+    Symbol &singletonInfo = singleton.info(gs);
 
-    singletonInfo.members.push_back(make_pair(Names::attachedClass(), this->ref(ctx)));
-    singletonInfo.argumentsOrMixins.push_back(ctx.defn_Class());
+    singletonInfo.members.push_back(make_pair(Names::attachedClass(), this->ref(gs)));
+    singletonInfo.argumentsOrMixins.push_back(gs.defn_Class());
 
     this->members.push_back(make_pair(Names::singletonClass(), singleton));
     return singleton;

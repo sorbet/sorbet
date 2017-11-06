@@ -34,7 +34,7 @@ private:
         ErrorClass what;
         std::string formatted;
         BasicError(Loc loc, ErrorClass what, std::string formatted) : loc(loc), what(what), formatted(formatted) {}
-        virtual std::string toString(GlobalState &ctx);
+        virtual std::string toString(GlobalState &gs);
         virtual ~BasicError() = default;
     };
 
@@ -48,7 +48,7 @@ public:
             std::string formatted = fmt::format(msg, args...);
             return ErrorLine(loc, formatted);
         }
-        std::string toString(GlobalState &ctx);
+        std::string toString(GlobalState &gs);
     };
 
     struct ErrorSection {
@@ -57,12 +57,12 @@ public:
         ErrorSection(std::string header, std::initializer_list<ErrorLine> messages)
             : header(header), messages(messages) {}
         ErrorSection(std::string header, std::vector<ErrorLine> messages) : header(header), messages(messages) {}
-        std::string toString(GlobalState &ctx);
+        std::string toString(GlobalState &gs);
     };
 
     struct ComplexError : public BasicError {
         std::vector<ErrorSection> sections;
-        virtual std::string toString(GlobalState &ctx);
+        virtual std::string toString(GlobalState &gs);
         ComplexError(Loc loc, ErrorClass what, std::string header, std::initializer_list<ErrorSection> sections)
             : BasicError(loc, what, header), sections(sections) {}
         ComplexError(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections)
@@ -87,8 +87,8 @@ public:
     std::vector<std::unique_ptr<ruby_typer::ast::Reporter::BasicError>> getAndEmptyErrors();
 
 private:
-    Reporter(GlobalState &ctx) : ctx_(ctx) {}
-    GlobalState &ctx_;
+    Reporter(GlobalState &gs) : gs_(gs) {}
+    GlobalState &gs_;
 };
 
 } // namespace ast

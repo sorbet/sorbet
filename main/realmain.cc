@@ -46,13 +46,13 @@ static bool removeOption(std::vector<std::string> &prints, std::string option) {
     }
 }
 
-void index(ruby_typer::ast::GlobalState &ctx, const vector<pair<string, string>> nameAndSource) {
+void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> nameAndSource) {
     vector<unique_ptr<ruby_typer::parser::Node>> empty;
     vector<ruby_typer::parser::Result> results;
     unique_ptr<ruby_typer::parser::Begin> join =
         make_unique<ruby_typer::parser::Begin>(ruby_typer::ast::Loc::none(0), move(empty));
     for (auto &pair : nameAndSource) {
-        results.emplace_back(ruby_typer::parser::parse_ruby(ctx, pair.first, pair.second));
+        results.emplace_back(ruby_typer::parser::parse_ruby(gs, pair.first, pair.second));
         auto &r = results.back();
         auto ast = r.ast();
         if (r.diagnostics().size() > 0) {
@@ -72,20 +72,20 @@ void index(ruby_typer::ast::GlobalState &ctx, const vector<pair<string, string>>
             ruby_typer::Error::raise("Failed to index " + pair.first);
         }
     }
-    ctx.errors.keepErrorsInMemory = true; // silence errors for stdlib.
-    ruby_typer::ast::Context context(ctx, ctx.defn_root());
+    gs.errors.keepErrorsInMemory = true; // silence errors for stdlib.
+    ruby_typer::ast::Context context(gs, gs.defn_root());
     auto desugared = ruby_typer::ast::desugar::node2Tree(context, join.get());
     desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
     for (auto &sh : join->stmts) {
         sh.release(); // they are already owner by Result.
     }
-    ctx.errors.getAndEmptyErrors();
-    ctx.errors.keepErrorsInMemory = false;
+    gs.errors.getAndEmptyErrors();
+    gs.errors.keepErrorsInMemory = false;
 }
 
-void parse_and_print(ruby_typer::ast::GlobalState &ctx, cxxopts::Options &opts, const string &path, const string &src,
+void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
                      std::vector<std::string> &prints) {
-    auto r = ruby_typer::parser::parse_ruby(ctx, path, src);
+    auto r = ruby_typer::parser::parse_ruby(gs, path, src);
     auto ast = r.ast();
     if (r.diagnostics().size() > 0) {
         vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
@@ -100,37 +100,37 @@ void parse_and_print(ruby_typer::ast::GlobalState &ctx, cxxopts::Options &opts, 
     }
     if (ast) {
         if (removeOption(prints, "parse-tree")) {
-            cout << ast->toString(ctx, 0) << endl;
+            cout << ast->toString(gs, 0) << endl;
             if (prints.empty())
                 return;
         }
 
-        ruby_typer::ast::Context context(ctx, ctx.defn_root());
+        ruby_typer::ast::Context context(gs, gs.defn_root());
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
         if (removeOption(prints, "ast")) {
-            cout << desugared->toString(ctx, 0) << endl;
+            cout << desugared->toString(gs, 0) << endl;
             if (prints.empty())
                 return;
         }
         if (removeOption(prints, "ast-raw")) {
-            cout << desugared->showRaw(ctx) << endl;
+            cout << desugared->showRaw(gs) << endl;
             if (prints.empty())
                 return;
         }
 
         desugared = ruby_typer::namer::Namer::run(context, std::move(desugared));
         if (removeOption(prints, "name-table")) {
-            cout << ctx.toString() << endl;
+            cout << gs.toString() << endl;
             if (prints.empty())
                 return;
         }
         if (removeOption(prints, "name-tree")) {
-            cout << desugared->toString(ctx, 0) << endl;
+            cout << desugared->toString(gs, 0) << endl;
             if (prints.empty())
                 return;
         }
         if (removeOption(prints, "name-tree-raw")) {
-            cout << desugared->showRaw(ctx) << endl;
+            cout << desugared->showRaw(gs) << endl;
             if (prints.empty())
                 return;
         }
@@ -204,12 +204,12 @@ int realmain(int argc, char **argv) {
             break;
     }
 
-    ruby_typer::ast::GlobalState ctx(*console);
+    ruby_typer::ast::GlobalState gs(*console);
 
     if (!options["n"].as<bool>()) {
         clock_t begin = clock();
 
-        index(ctx, ruby_typer::rbi::all());
+        index(gs, ruby_typer::rbi::all());
 
         clock_t end = clock();
         double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
@@ -222,7 +222,7 @@ int realmain(int argc, char **argv) {
         st.files++;
         st.lines++;
         st.bytes += src.size();
-        parse_and_print(ctx, options, "-e", src, prints);
+        parse_and_print(gs, options, "-e", src, prints);
     } else {
 
         for (auto &fileName : files) {
@@ -234,7 +234,7 @@ int realmain(int argc, char **argv) {
                 console->error("File Not Found: {}", fileName);
                 return 1;
             }
-            parse_and_print(ctx, options, fileName, src, prints);
+            parse_and_print(gs, options, fileName, src, prints);
         }
     }
     clock_t end = clock();

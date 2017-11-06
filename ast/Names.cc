@@ -13,14 +13,14 @@ ruby_typer::ast::Name::~Name() noexcept {
         unique.~UniqueName();
 }
 
-unsigned int Name::hashNames(vector<NameRef> &lhs, GlobalState &ctx) {
+unsigned int Name::hashNames(vector<NameRef> &lhs, GlobalState &gs) {
     return accumulate(lhs.begin(), lhs.end(), 0,
-                      [&ctx](int acc, NameRef &necc) -> int { return mix(acc, necc.id()); }) *
+                      [&gs](int acc, NameRef &necc) -> int { return mix(acc, necc.id()); }) *
                8 +
            lhs.size();
 }
 
-unsigned int Name::hash(GlobalState &ctx) const {
+unsigned int Name::hash(GlobalState &gs) const {
     // TODO: use https://github.com/Cyan4973/xxHash
     // !!! keep this in sync with GlobalState.enter*
     switch (kind) {
@@ -33,26 +33,26 @@ unsigned int Name::hash(GlobalState &ctx) const {
     }
 }
 
-string Name::toString(GlobalState &ctx) const {
+string Name::toString(GlobalState &gs) const {
     if (kind == UTF8) {
         return raw.utf8.toString();
     } else if (kind == UNIQUE) {
         if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-            return "<singleton class:" + this->unique.original.name(ctx).toString(ctx) + ">";
+            return "<singleton class:" + this->unique.original.name(gs).toString(gs) + ">";
         }
-        return this->unique.original.name(ctx).toString(ctx) + "$" + to_string(this->unique.num);
+        return this->unique.original.name(gs).toString(gs) + "$" + to_string(this->unique.num);
     } else {
         Error::notImplemented();
     }
 }
 
-Name &NameRef::name(GlobalState &ctx) const {
-    DEBUG_ONLY(Error::check(_id < ctx.names.size()));
+Name &NameRef::name(GlobalState &gs) const {
+    DEBUG_ONLY(Error::check(_id < gs.names.size()));
     DEBUG_ONLY(Error::check(exists()));
-    return ctx.names[_id];
+    return gs.names[_id];
 }
-std::string NameRef::toString(GlobalState &ctx) const {
-    return name(ctx).toString(ctx);
+std::string NameRef::toString(GlobalState &gs) const {
+    return name(gs).toString(gs);
 }
 
 } // namespace ast

@@ -54,9 +54,9 @@ string Dedenter::dedent(const string &str) {
 
 class Builder::Impl {
 public:
-    Impl(GlobalState &ctx, Result &r) : ctx_(ctx), result_(r) {}
+    Impl(GlobalState &gs, Result &r) : gs_(gs), result_(r) {}
 
-    GlobalState &ctx_;
+    GlobalState &gs_;
     ruby_parser::base_driver *driver_;
     Result &result_;
 
@@ -130,9 +130,9 @@ public:
 
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (Ident *id = dynamic_cast<Ident *>(node.get())) {
-            ast::Name &name = id->name.name(ctx_);
+            ast::Name &name = id->name.name(gs_);
             DEBUG_ONLY(Error::check(name.kind == ast::UTF8));
-            if (driver_->lex.is_declared(name.toString(ctx_))) {
+            if (driver_->lex.is_declared(name.toString(gs_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {
                 return make_unique<Send>(node->loc, nullptr, id->name, vector<unique_ptr<Node>>());
@@ -146,7 +146,7 @@ public:
     }
 
     unique_ptr<Node> arg(const token *name) {
-        return make_unique<Arg>(tok_loc(name), ctx_.enterNameUTF8(name->string()));
+        return make_unique<Arg>(tok_loc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> args(const token *begin, vector<unique_ptr<Node>> args, const token *end, bool check_args) {
@@ -184,8 +184,8 @@ public:
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (Ident *id = dynamic_cast<Ident *>(node.get())) {
-            ast::Name &name = id->name.name(ctx_);
-            driver_->lex.declare(name.toString(ctx_));
+            ast::Name &name = id->name.name(gs_);
+            driver_->lex.declare(name.toString(gs_));
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (IVar *iv = dynamic_cast<IVar *>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
@@ -209,7 +209,7 @@ public:
     }
 
     unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
-        NameRef method = ctx_.enterNameUTF8(selector->string() + "=");
+        NameRef method = gs_.enterNameUTF8(selector->string() + "=");
         Loc loc = loc_join(receiver->loc, tok_loc(selector));
         if (dot && dot->string() == "&.") {
             return make_unique<CSend>(loc, move(receiver), method, vector<unique_ptr<Node>>());
@@ -218,7 +218,7 @@ public:
     }
 
     unique_ptr<Node> back_ref(const token *tok) {
-        return make_unique<Backref>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
+        return make_unique<Backref>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> begin(const token *begin, unique_ptr<Node> body, const token *end) {
@@ -293,7 +293,7 @@ public:
         vector<unique_ptr<Node>> args;
         args.push_back(move(arg));
 
-        return make_unique<Send>(loc, move(receiver), ctx_.enterNameUTF8(oper->string()), move(args));
+        return make_unique<Send>(loc, move(receiver), gs_.enterNameUTF8(oper->string()), move(args));
     }
 
     unique_ptr<Node> block(unique_ptr<Node> method_call, const token *begin, unique_ptr<Node> args,
@@ -347,7 +347,7 @@ public:
     }
 
     unique_ptr<Node> blockarg(const token *amper, const token *name) {
-        return make_unique<Blockarg>(loc_join(tok_loc(amper), tok_loc(name)), ctx_.enterNameUTF8(name->string()));
+        return make_unique<Blockarg>(loc_join(tok_loc(amper), tok_loc(name)), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> call_lambda(const token *lambda) {
@@ -378,7 +378,7 @@ public:
         if (selector == nullptr)
             method = ast::Names::bang();
         else
-            method = ctx_.enterNameUTF8(selector->string());
+            method = gs_.enterNameUTF8(selector->string());
 
         if (dot && dot->string() == "&.")
             return make_unique<CSend>(loc, move(receiver), method, move(args));
@@ -393,7 +393,7 @@ public:
     }
 
     unique_ptr<Node> character(const token *char_) {
-        return make_unique<String>(tok_loc(char_), ctx_.enterNameUTF8(char_->string()));
+        return make_unique<String>(tok_loc(char_), gs_.enterNameUTF8(char_->string()));
     }
 
     unique_ptr<Node> complex(const token *tok) {
@@ -438,16 +438,16 @@ public:
     }
 
     unique_ptr<Node> const_(const token *name) {
-        return make_unique<Const>(tok_loc(name), nullptr, ctx_.enterNameUTF8(name->string()));
+        return make_unique<Const>(tok_loc(name), nullptr, gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> const_fetch(unique_ptr<Node> scope, const token *colon, const token *name) {
-        return make_unique<Const>(loc_join(scope->loc, tok_loc(name)), move(scope), ctx_.enterNameUTF8(name->string()));
+        return make_unique<Const>(loc_join(scope->loc, tok_loc(name)), move(scope), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> const_global(const token *colon, const token *name) {
         return make_unique<Const>(loc_join(tok_loc(colon), tok_loc(name)), make_unique<Cbase>(tok_loc(colon)),
-                                  ctx_.enterNameUTF8(name->string()));
+                                  gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> const_op_assignable(unique_ptr<Node> node) {
@@ -455,7 +455,7 @@ public:
     }
 
     unique_ptr<Node> cvar(const token *tok) {
-        return make_unique<CVar>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
+        return make_unique<CVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedent_level) {
@@ -468,15 +468,15 @@ public:
         typecase(node.get(),
 
                  [&](String *s) {
-                     std::string dedented = dedenter.dedent(s->val.name(ctx_).toString(ctx_));
-                     result = make_unique<String>(s->loc, ctx_.enterNameUTF8(dedented));
+                     std::string dedented = dedenter.dedent(s->val.name(gs_).toString(gs_));
+                     result = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                  },
 
                  [&](DString *d) {
                      for (auto &p : d->nodes) {
                          if (String *s = dynamic_cast<String *>(p.get())) {
-                             std::string dedented = dedenter.dedent(s->val.name(ctx_).toString(ctx_));
-                             unique_ptr<Node> newstr = make_unique<String>(s->loc, ctx_.enterNameUTF8(dedented));
+                             std::string dedented = dedenter.dedent(s->val.name(gs_).toString(gs_));
+                             unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                              p.swap(newstr);
                          }
                      }
@@ -495,7 +495,7 @@ public:
 
     unique_ptr<Node> def_method(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
                                 const token *end) {
-        return make_unique<DefMethod>(tok_loc(def, end), ctx_.enterNameUTF8(name->string()), move(args), move(body));
+        return make_unique<DefMethod>(tok_loc(def, end), gs_.enterNameUTF8(name->string()), move(args), move(body));
     }
 
     unique_ptr<Node> def_module(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
@@ -512,7 +512,7 @@ public:
         Loc loc = loc_join(tok_loc(def), tok_loc(end));
         // TODO: Ruby interprets (e.g.) def 1.method as a parser error; Do we
         // need to reject it here, or can we defer that until later analysis?
-        return make_unique<DefS>(loc, move(definee), ctx_.enterNameUTF8(name->string()), move(args), move(body));
+        return make_unique<DefS>(loc, move(definee), gs_.enterNameUTF8(name->string()), move(args), move(body));
     }
 
     unique_ptr<Node> encoding_literal(const token *tok) {
@@ -541,11 +541,11 @@ public:
     }
 
     unique_ptr<Node> gvar(const token *tok) {
-        return make_unique<GVar>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
+        return make_unique<GVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> ident(const token *tok) {
-        return make_unique<Ident>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
+        return make_unique<Ident>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
@@ -566,7 +566,7 @@ public:
     }
 
     unique_ptr<Node> ivar(const token *tok) {
-        return make_unique<IVar>(tok_loc(tok), ctx_.enterNameUTF8(tok->string()));
+        return make_unique<IVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
     unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
@@ -621,11 +621,11 @@ public:
     }
 
     unique_ptr<Node> kwarg(const token *name) {
-        return make_unique<Kwarg>(tok_loc(name), ctx_.enterNameUTF8(name->string()));
+        return make_unique<Kwarg>(tok_loc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> kwoptarg(const token *name, unique_ptr<Node> value) {
-        return make_unique<Kwoptarg>(loc_join(tok_loc(name), value->loc), ctx_.enterNameUTF8(name->string()),
+        return make_unique<Kwoptarg>(loc_join(tok_loc(name), value->loc), gs_.enterNameUTF8(name->string()),
                                      move(value));
     }
 
@@ -635,9 +635,9 @@ public:
 
         if (name != nullptr) {
             loc = loc_join(loc, tok_loc(name));
-            nm = ctx_.enterNameUTF8(name->string());
+            nm = gs_.enterNameUTF8(name->string());
         } else {
-            nm = ctx_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::starStar());
+            nm = gs_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::starStar());
         }
         return make_unique<Kwrestarg>(loc, nm);
     }
@@ -684,7 +684,7 @@ public:
         Loc loc = loc_join(receiver->loc, arg->loc);
         vector<unique_ptr<Node>> args;
         args.emplace_back(move(arg));
-        return make_unique<Send>(loc, move(receiver), ctx_.enterNameUTF8(oper->string()), move(args));
+        return make_unique<Send>(loc, move(receiver), gs_.enterNameUTF8(oper->string()), move(args));
     }
 
     unique_ptr<Node> multi_assign(unique_ptr<Node> mlhs, unique_ptr<Node> rhs) {
@@ -745,12 +745,12 @@ public:
             return make_unique<AndAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
         if (op->string() == "||")
             return make_unique<OrAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
-        return make_unique<OpAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), ctx_.enterNameUTF8(op->string()),
+        return make_unique<OpAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), gs_.enterNameUTF8(op->string()),
                                    move(rhs));
     }
 
     unique_ptr<Node> optarg_(const token *name, const token *eql, unique_ptr<Node> value) {
-        return make_unique<Optarg>(loc_join(tok_loc(name), value->loc), ctx_.enterNameUTF8(name->string()),
+        return make_unique<Optarg>(loc_join(tok_loc(name), value->loc), gs_.enterNameUTF8(name->string()),
                                    move(value));
     }
 
@@ -760,7 +760,7 @@ public:
 
     unique_ptr<Node> pair_keyword(const token *key, unique_ptr<Node> value) {
         return make_unique<Pair>(loc_join(tok_loc(key), value->loc),
-                                 make_unique<Symbol>(tok_loc(key), ctx_.enterNameUTF8(key->string())), move(value));
+                                 make_unique<Symbol>(tok_loc(key), gs_.enterNameUTF8(key->string())), move(value));
     }
 
     unique_ptr<Node> pair_quoted(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
@@ -827,9 +827,9 @@ public:
 
         if (name != nullptr) {
             loc = loc_join(loc, tok_loc(name));
-            nm = ctx_.enterNameUTF8(name->string());
+            nm = gs_.enterNameUTF8(name->string());
         } else {
-            nm = ctx_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::star());
+            nm = gs_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::star());
         }
         return make_unique<Restarg>(loc, nm);
     }
@@ -839,7 +839,7 @@ public:
     }
 
     unique_ptr<Node> shadowarg(const token *name) {
-        return make_unique<Shadowarg>(tok_loc(name), ctx_.enterNameUTF8(name->string()));
+        return make_unique<Shadowarg>(tok_loc(name), gs_.enterNameUTF8(name->string()));
     }
 
     unique_ptr<Node> splat(const token *star, unique_ptr<Node> arg) {
@@ -852,7 +852,7 @@ public:
     }
 
     unique_ptr<Node> string(const token *string_) {
-        return make_unique<String>(tok_loc(string_), ctx_.enterNameUTF8(string_->string()));
+        return make_unique<String>(tok_loc(string_), gs_.enterNameUTF8(string_->string()));
     }
 
     unique_ptr<Node> string_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
@@ -861,11 +861,11 @@ public:
     }
 
     unique_ptr<Node> string_internal(const token *string_) {
-        return make_unique<String>(tok_loc(string_), ctx_.enterNameUTF8(string_->string()));
+        return make_unique<String>(tok_loc(string_), gs_.enterNameUTF8(string_->string()));
     }
 
     unique_ptr<Node> symbol(const token *symbol) {
-        return make_unique<Symbol>(tok_loc(symbol), ctx_.enterNameUTF8(symbol->string()));
+        return make_unique<Symbol>(tok_loc(symbol), gs_.enterNameUTF8(symbol->string()));
     }
 
     unique_ptr<Node> symbol_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
@@ -873,7 +873,7 @@ public:
     }
 
     unique_ptr<Node> symbol_internal(const token *symbol) {
-        return make_unique<Symbol>(tok_loc(symbol), ctx_.enterNameUTF8(symbol->string()));
+        return make_unique<Symbol>(tok_loc(symbol), gs_.enterNameUTF8(symbol->string()));
     }
 
     unique_ptr<Node> symbols_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
@@ -1014,7 +1014,7 @@ public:
         else if (oper->string() == "-")
             op = ast::Names::unaryMinus();
         else
-            op = ctx_.enterNameUTF8(oper->string());
+            op = gs_.enterNameUTF8(oper->string());
 
         return make_unique<Send>(loc, move(receiver), op, vector<unique_ptr<Node>>());
     }

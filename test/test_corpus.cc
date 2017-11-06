@@ -108,13 +108,13 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
-    ruby_typer::ast::GlobalState ctx(*console);
-    ruby_typer::ast::Context context(ctx, ctx.defn_root());
-    ctx.errors.keepErrorsInMemory = true;
+    ruby_typer::ast::GlobalState gs(*console);
+    ruby_typer::ast::Context context(gs, gs.defn_root());
+    gs.errors.keepErrorsInMemory = true;
 
     // Parser
     auto src = ruby_typer::File::read(inputPath.c_str());
-    auto parsed = ruby_typer::parser::parse_ruby(ctx, inputPath, src);
+    auto parsed = ruby_typer::parser::parse_ruby(gs, inputPath, src);
 
     auto expectation = test.expectations.find("parse-tree");
     if (expectation != test.expectations.end()) {
@@ -124,8 +124,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
 
         EXPECT_EQ(0, parsed.diagnostics().size());
-        EXPECT_EQ(exp, parsed.ast()->toString(ctx) + "\n");
-        if (exp == parsed.ast()->toString(ctx) + "\n") {
+        EXPECT_EQ(exp, parsed.ast()->toString(gs) + "\n");
+        if (exp == parsed.ast()->toString(gs) + "\n") {
             TEST_COUT << "parse-tree OK" << endl;
         }
     }
@@ -139,8 +139,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, desugared->toString(ctx) + "\n");
-        if (exp == desugared->toString(ctx) + "\n") {
+        EXPECT_EQ(exp, desugared->toString(gs) + "\n");
+        if (exp == desugared->toString(gs) + "\n") {
             TEST_COUT << "ast OK" << endl;
         }
     }
@@ -151,8 +151,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, desugared->showRaw(ctx) + "\n");
-        if (exp == desugared->showRaw(ctx) + "\n") {
+        EXPECT_EQ(exp, desugared->showRaw(gs) + "\n");
+        if (exp == desugared->showRaw(gs) + "\n") {
             TEST_COUT << "ast-raw OK" << endl;
         }
     }
@@ -166,8 +166,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, ctx.toString() + "\n");
-        if (exp == ctx.toString() + "\n") {
+        EXPECT_EQ(exp, gs.toString() + "\n");
+        if (exp == gs.toString() + "\n") {
             TEST_COUT << "name-table OK" << std::endl;
         }
     }
@@ -178,8 +178,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, namedTree->toString(ctx) + "\n");
-        if (exp == namedTree->toString(ctx) + "\n") {
+        EXPECT_EQ(exp, namedTree->toString(gs) + "\n");
+        if (exp == namedTree->toString(gs) + "\n") {
             TEST_COUT << "name-tree OK" << std::endl;
         }
     }
@@ -190,8 +190,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, namedTree->showRaw(ctx) + "\n");
-        if (exp == namedTree->showRaw(ctx) + "\n") {
+        EXPECT_EQ(exp, namedTree->showRaw(gs) + "\n");
+        if (exp == namedTree->showRaw(gs) + "\n") {
             TEST_COUT << "name-tree-raw OK" << std::endl;
         }
     }
@@ -222,7 +222,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     // Check warnings and errors
-    auto errors = ctx.errors.getAndEmptyErrors();
+    auto errors = gs.errors.getAndEmptyErrors();
     if (errors.size() > 0) {
         map<int, std::string> expectedErrors;
         std::string line;
@@ -261,7 +261,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 continue;
             }
 
-            auto pos = error->loc.position(ctx);
+            auto pos = error->loc.position(gs);
             bool found = false;
             for (int i = pos.first.line; i <= pos.second.line; i++) {
                 auto expectedError = expectedErrors.find(i);
@@ -280,7 +280,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 }
             }
             if (!found) {
-                ADD_FAILURE() << "Unexpected error:\n " << error->toString(ctx);
+                ADD_FAILURE() << "Unexpected error:\n " << error->toString(gs);
             }
         }
 

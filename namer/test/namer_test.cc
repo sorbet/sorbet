@@ -30,14 +30,14 @@ private:
 static const char *testClass = "Test";
 static ast::UTF8Desc testClass_DESC{(char *)testClass, (int)std::strlen(testClass)};
 
-std::unique_ptr<ast::Statement> getTree(ast::GlobalState &cb, std::string str) {
-    auto result = parser::parse_ruby(cb, "<test>", str);
-    ruby_typer::ast::Context ctx(cb, cb.defn_root());
+std::unique_ptr<ast::Statement> getTree(ast::GlobalState &gs, std::string str) {
+    auto result = parser::parse_ruby(gs, "<test>", str);
+    ruby_typer::ast::Context ctx(gs, gs.defn_root());
     return ast::desugar::node2Tree(ctx, result.ast());
 }
 
-std::unique_ptr<ast::Statement> hello_world(ast::GlobalState &ctx) {
-    return getTree(ctx, "def hello_world; end");
+std::unique_ptr<ast::Statement> hello_world(ast::GlobalState &gs) {
+    return getTree(gs, "def hello_world; end");
 }
 
 TEST_F(NamerFixture, HelloWorld) {

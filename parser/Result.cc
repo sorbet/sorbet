@@ -38,12 +38,12 @@ FileRef Result::file() {
 Result::Result(unique_ptr<Impl> &&impl) : impl_(move(impl)) {}
 Result::~Result() {}
 
-Result parse_ruby(GlobalState &ctx, const std::string &path, const string &src) {
-    FileRef file = ctx.enterFile(path, src);
+Result parse_ruby(GlobalState &gs, const std::string &path, const string &src) {
+    FileRef file = gs.enterFile(path, src);
     unique_ptr<Result::Impl> impl(new Result::Impl(file, src));
     Result result(move(impl));
 
-    Builder builder(ctx, result);
+    Builder builder(gs, result);
     result.impl_->node = unique_ptr<Node>(builder.build(&result.impl_->driver));
 
     return result;

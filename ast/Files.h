@@ -35,7 +35,7 @@ public:
         return _id != 0;
     }
 
-    File &file(GlobalState &ctx) const;
+    File &file(GlobalState &gs) const;
 
 private:
     int _id;
