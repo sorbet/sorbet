@@ -225,6 +225,7 @@ private:
                      int loops);
     BasicBlock *freshBlock(int outerLoops);
     void fillInTopoSorts(ast::Context ctx);
+    void dealias(ast::Context ctx);
     void fillInBlockArguments(ast::Context ctx);
     int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
     int topoSortBwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);

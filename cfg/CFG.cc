@@ -19,6 +19,60 @@ namespace cfg {
 int CFG::FORWARD_TOPO_SORT_VISITED = 1 << 0;
 int CFG::BACKWARD_TOPO_SORT_VISITED = 1 << 1;
 
+/**
+ * Remove aliases from CFG. Why does this need a separate pass?
+ * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
+ */
+void CFG::dealias(ast::Context ctx) {
+    vector<unordered_map<ast::SymbolRef, ast::SymbolRef>> outAliases;
+
+    outAliases.resize(this->basicBlocks.size());
+    for (BasicBlock *bb : this->backwardsTopoSort) {
+        if (bb == this->deadBlock())
+            continue;
+        unordered_map<ast::SymbolRef, ast::SymbolRef> &current = outAliases[bb->id];
+        if (bb->backEdges.size() > 0) {
+            current = outAliases[bb->backEdges[0]->id];
+        }
+        for (BasicBlock *parent : bb->backEdges) {
+            unordered_map<ast::SymbolRef, ast::SymbolRef> other = outAliases[parent->id];
+            for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                auto &el = *it;
+                auto fnd = other.find(el.first);
+                if (fnd != other.end()) {
+                    if (fnd->second != el.second) {
+                        it = current.erase(it);
+                    } else {
+                        ++it;
+                    }
+                } else {
+                    ++it;
+                }
+            }
+        }
+        for (Binding &bind : bb->exprs) {
+            if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
+                if (i->what.info(ctx).isSynthetic(ctx)) {
+                    auto fnd = current.find(i->what);
+                    if (fnd != current.end()) {
+                        i->what = fnd->second;
+                    }
+                }
+            }
+            for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                if (it->second == bind.bind) {
+                    it = current.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+            if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
+                current[bind.bind] = i->what;
+            }
+        }
+    }
+}
+
 void CFG::fillInBlockArguments(ast::Context ctx) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
@@ -242,6 +296,7 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     jumpToDead(cont, *res.get());
 
     res->fillInTopoSorts(ctx);
+    res->dealias(ctx);
     res->fillInBlockArguments(ctx);
     return res;
 }
