@@ -124,7 +124,7 @@ unique_ptr<Statement> mkFalse(Loc loc) {
     return make_unique<BoolLit>(loc, false);
 }
 
-unique_ptr<MethodDef> buildMethod(Loc loc, Context ctx, NameRef name, unique_ptr<parser::Node> &argnode,
+unique_ptr<MethodDef> buildMethod(Context ctx, Loc loc, NameRef name, unique_ptr<parser::Node> &argnode,
                                   unique_ptr<parser::Node> &body) {
     vector<unique_ptr<Expression>> args;
     if (auto *oargs = dynamic_cast<parser::Args *>(argnode.get())) {
@@ -412,7 +412,7 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
                  result.swap(res);
              },
              [&](parser::DefMethod *method) {
-                 unique_ptr<Statement> res = buildMethod(what->loc, ctx, method->name, method->args, method->body);
+                 unique_ptr<Statement> res = buildMethod(ctx, what->loc, method->name, method->args, method->body);
                  result.swap(res);
              },
              [&](parser::DefS *method) {
@@ -424,7 +424,7 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
                      result.swap(res);
                      return;
                  }
-                 unique_ptr<MethodDef> meth = buildMethod(what->loc, ctx, method->name, method->args, method->body);
+                 unique_ptr<MethodDef> meth = buildMethod(ctx, what->loc, method->name, method->args, method->body);
                  meth->isSelf = true;
                  unique_ptr<Statement> res(meth.release());
                  result.swap(res);
