@@ -47,7 +47,7 @@ public:
     Statement *postTransformRescue(Context ctx, Rescue *original);
 
     Statement *postTransformIdent(Context ctx, Ident *original);
-    Statement *postTransformNameReference(Context ctx, NameReference *original);
+    Statement *postTransformUnresolvedIdent(Context ctx, UnresolvedIdent *original);
 
     Assign *preTransformAssign(Context ctx, Assign *original);
     Statement *postTransformAssign(Context ctx, Assign *original);
@@ -140,7 +140,7 @@ GENERATE_HAS_MEMBER(preTransformInsSeq);
 GENERATE_HAS_MEMBER(preTransformBreak);
 GENERATE_HAS_MEMBER(preTransformNext);
 GENERATE_HAS_MEMBER(preTransformIdent);
-GENERATE_HAS_MEMBER(preTransformNameReference);
+GENERATE_HAS_MEMBER(preTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(preTransformBoolLit);
 GENERATE_HAS_MEMBER(preTransformStringLit);
 GENERATE_HAS_MEMBER(preTransformFloatLit);
@@ -160,7 +160,7 @@ GENERATE_HAS_MEMBER(postTransformReturn);
 GENERATE_HAS_MEMBER(postTransformYield);
 GENERATE_HAS_MEMBER(postTransformRescue);
 GENERATE_HAS_MEMBER(postTransformIdent);
-GENERATE_HAS_MEMBER(postTransformNameReference);
+GENERATE_HAS_MEMBER(postTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(postTransformAssign);
 GENERATE_HAS_MEMBER(postTransformSend);
 GENERATE_HAS_MEMBER(postTransformNew);
@@ -256,7 +256,7 @@ GENERATE_POSTPONE_POSTCLASS(Next);
 GENERATE_POSTPONE_POSTCLASS(Return);
 GENERATE_POSTPONE_POSTCLASS(Yield);
 GENERATE_POSTPONE_POSTCLASS(Ident);
-GENERATE_POSTPONE_POSTCLASS(NameReference);
+GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent);
 GENERATE_POSTPONE_POSTCLASS(Assign);
 GENERATE_POSTPONE_POSTCLASS(Send);
 GENERATE_POSTPONE_POSTCLASS(New);
@@ -287,7 +287,7 @@ private:
     static_assert(!HAS_MEMBER_preTransformBreak<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformNext<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformIdent<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformNameReference<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformBoolLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformStringLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformFloatLit<FUNC>::value, "use post*Transform instead");
@@ -458,10 +458,10 @@ private:
                                                                                                            func);
             }
             return v;
-        } else if (NameReference *v = dynamic_cast<NameReference *>(what)) {
-            if (HAS_MEMBER_postTransformNameReference<FUNC>::value) {
-                return PostPonePostTransform_NameReference<
-                    FUNC, HAS_MEMBER_postTransformNameReference<FUNC>::value>::call(ctx, v, func);
+        } else if (UnresolvedIdent *v = dynamic_cast<UnresolvedIdent *>(what)) {
+            if (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value) {
+                return PostPonePostTransform_UnresolvedIdent<
+                    FUNC, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value>::call(ctx, v, func);
             }
             return v;
         } else if (Assign *v = dynamic_cast<Assign *>(what)) {

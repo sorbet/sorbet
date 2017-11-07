@@ -64,8 +64,8 @@ unique_ptr<Statement> cpIdent(Loc loc, Ident &id) {
 }
 
 unique_ptr<Statement> cpRef(Loc loc, Reference &name) {
-    if (NameReference *nm = dynamic_cast<NameReference *>(&name))
-        return make_unique<NameReference>(loc, nm->kind, nm->name);
+    if (UnresolvedIdent *nm = dynamic_cast<UnresolvedIdent *>(&name))
+        return make_unique<UnresolvedIdent>(loc, nm->kind, nm->name);
     if (Ident *id = dynamic_cast<Ident *>(&name))
         return make_unique<Ident>(loc, id->symbol);
     Error::notImplemented();
@@ -373,42 +373,42 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             result.swap(res);
         },
         [&](parser::Arg *arg) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Local, arg->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name);
             result.swap(res);
         },
         [&](parser::Restarg *arg) {
-            unique_ptr<Statement> res =
-                make_unique<RestArg>(what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name));
+            unique_ptr<Statement> res = make_unique<RestArg>(
+                what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name));
             result.swap(res);
         },
         [&](parser::Kwrestarg *arg) {
             unique_ptr<Statement> res = make_unique<RestArg>(
                 what->loc, make_unique<KeywordArg>(
-                               what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name)));
+                               what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name)));
             result.swap(res);
         },
         [&](parser::Kwarg *arg) {
             unique_ptr<Statement> res = make_unique<KeywordArg>(
-                what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name));
+                what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name));
             result.swap(res);
         },
         [&](parser::Kwoptarg *arg) {
             unique_ptr<Statement> res = make_unique<OptionalArg>(
                 what->loc,
                 make_unique<KeywordArg>(what->loc,
-                                        make_unique<NameReference>(what->loc, NameReference::Local, arg->name)),
+                                        make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name)),
                 Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
             result.swap(res);
         },
         [&](parser::Optarg *arg) {
             unique_ptr<Statement> res = make_unique<OptionalArg>(
-                what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name),
+                what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name),
                 Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
             result.swap(res);
         },
         [&](parser::Shadowarg *arg) {
             unique_ptr<Statement> res = make_unique<ShadowArg>(
-                what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name));
+                what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name));
             result.swap(res);
         },
         [&](parser::DefMethod *method) {
@@ -483,61 +483,61 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             result.swap(res);
         },
         [&](parser::IVar *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Instance, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Instance, var->name);
             result.swap(res);
         },
         [&](parser::LVar *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Local, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, var->name);
             result.swap(res);
         },
         [&](parser::GVar *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Global, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Global, var->name);
             result.swap(res);
         },
         [&](parser::CVar *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Class, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Class, var->name);
             result.swap(res);
         },
         [&](parser::IVar *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Instance, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Instance, var->name);
             result.swap(res);
         },
         [&](parser::LVarLhs *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Local, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, var->name);
             result.swap(res);
         },
         [&](parser::GVarLhs *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Global, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Global, var->name);
             result.swap(res);
         },
         [&](parser::CVarLhs *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Class, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Class, var->name);
             result.swap(res);
         },
         [&](parser::IVarLhs *var) {
-            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Instance, var->name);
+            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Instance, var->name);
             result.swap(res);
         },
         [&](parser::IVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<NameReference>(what->loc, NameReference::Instance, asgn->name);
+            unique_ptr<Statement> lhs = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Instance, asgn->name);
             auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::LVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<NameReference>(what->loc, NameReference::Local, asgn->name);
+            unique_ptr<Statement> lhs = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, asgn->name);
             auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::GVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<NameReference>(what->loc, NameReference::Global, asgn->name);
+            unique_ptr<Statement> lhs = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Global, asgn->name);
             auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::CVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<NameReference>(what->loc, NameReference::Class, asgn->name);
+            unique_ptr<Statement> lhs = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Class, asgn->name);
             auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
