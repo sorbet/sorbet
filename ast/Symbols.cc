@@ -138,6 +138,10 @@ string Symbol::fullName(GlobalState &gs) const {
         return owner_str + "#" + this->name.toString(gs);
 }
 
+bool Symbol::isSyntheticTemporary(GlobalState &gs) const {
+    return name.name(gs).kind == NameKind::UNIQUE;
+}
+
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Error::check(this->isClass());
 

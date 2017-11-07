@@ -19,6 +19,94 @@ namespace cfg {
 int CFG::FORWARD_TOPO_SORT_VISITED = 1 << 0;
 int CFG::BACKWARD_TOPO_SORT_VISITED = 1 << 1;
 
+ast::SymbolRef maybeDealias(ast::Context ctx, ast::SymbolRef what,
+                            unordered_map<ast::SymbolRef, ast::SymbolRef> &aliases) {
+    if (what.info(ctx).isSyntheticTemporary(ctx)) {
+        auto fnd = aliases.find(what);
+        if (fnd != aliases.end()) {
+            return fnd->second;
+        } else
+            return what;
+    } else {
+        return what;
+    }
+}
+
+/**
+ * Remove aliases from CFG. Why does this need a separate pass?
+ * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
+ */
+void CFG::dealias(ast::Context ctx) {
+    vector<unordered_map<ast::SymbolRef, ast::SymbolRef>> outAliases;
+
+    outAliases.resize(this->basicBlocks.size());
+    for (BasicBlock *bb : this->backwardsTopoSort) {
+        if (bb == this->deadBlock())
+            continue;
+        unordered_map<ast::SymbolRef, ast::SymbolRef> &current = outAliases[bb->id];
+        if (bb->backEdges.size() > 0) {
+            current = outAliases[bb->backEdges[0]->id];
+        }
+
+        for (BasicBlock *parent : bb->backEdges) {
+            unordered_map<ast::SymbolRef, ast::SymbolRef> other = outAliases[parent->id];
+            for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                auto &el = *it;
+                auto fnd = other.find(el.first);
+                if (fnd != other.end()) {
+                    if (fnd->second != el.second) {
+                        it = current.erase(it);
+                    } else {
+                        ++it;
+                    }
+                } else {
+                    ++it;
+                }
+            }
+        }
+
+        for (Binding &bind : bb->exprs) {
+            if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
+                i->what = maybeDealias(ctx, i->what, current);
+            }
+            /* invalidate a stale record */
+            for (auto it = current.begin(); it != current.end(); /* nothing */) {
+                if (it->second == bind.bind) {
+                    it = current.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+            /* dealias */
+            if (auto *v = dynamic_cast<Ident *>(bind.value.get())) {
+                v->what = maybeDealias(ctx, v->what, current);
+            } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
+                v->recv = maybeDealias(ctx, v->recv, current);
+                for (auto &arg : v->args) {
+                    arg = maybeDealias(ctx, arg, current);
+                }
+            } else if (auto *v = dynamic_cast<New *>(bind.value.get())) {
+                for (auto &arg : v->args) {
+                    arg = maybeDealias(ctx, arg, current);
+                }
+            } else if (auto *v = dynamic_cast<Super *>(bind.value.get())) {
+                for (auto &arg : v->args) {
+                    arg = maybeDealias(ctx, arg, current);
+                }
+            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
+                v->what = maybeDealias(ctx, v->what, current);
+            } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
+                v->value = maybeDealias(ctx, v->value, current);
+            }
+
+            // record new aliases
+            if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
+                current[bind.bind] = i->what;
+            }
+        }
+    }
+}
+
 void CFG::fillInBlockArguments(ast::Context ctx) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
@@ -93,6 +181,34 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
     }
 
+    for (auto &it : this->basicBlocks) {
+        /* remove dead variables */
+        for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
+            Binding &bind = *expIt;
+            auto fnd = reads.find(bind.bind);
+            if (fnd == reads.end()) {
+                // This should be !New && !Send && !Return, but I prefer to list explicitly in case we start adding
+                // nodes.
+                if (dynamic_cast<Ident *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<ArraySplat *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<HashSplat *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<BoolLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<StringLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<IntLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<FloatLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<Self *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<LoadArg *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<NamedArg *>(bind.value.get()) != nullptr) {
+                    expIt = it->exprs.erase(expIt);
+                } else {
+                    ++expIt;
+                }
+            } else {
+                ++expIt;
+            }
+        }
+    }
+
     vector<unordered_set<ast::SymbolRef>> reads_by_block(this->basicBlocks.size());
     vector<unordered_set<ast::SymbolRef>> writes_by_block(this->basicBlocks.size());
 
@@ -158,6 +274,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
     }
 
+    /** Combine two upper bounds */
     for (auto &it : this->basicBlocks) {
         auto set2 = upper_bounds2[it->id];
 
@@ -242,6 +359,7 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     jumpToDead(cont, *res.get());
 
     res->fillInTopoSorts(ctx);
+    res->dealias(ctx);
     res->fillInBlockArguments(ctx);
     return res;
 }
@@ -403,22 +521,16 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
              },
              [&](ast::Send *s) {
                  ast::SymbolRef recv;
-                 if (auto *i = dynamic_cast<ast::Ident *>(s->recv.get())) {
-                     recv = i->symbol;
-                 } else {
-                     recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                     current = walk(ctx, s->recv.get(), current, inWhat, recv, loops);
-                 }
+
+                 recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                 current = walk(ctx, s->recv.get(), current, inWhat, recv, loops);
 
                  vector<ast::SymbolRef> args;
                  for (auto &exp : s->args) {
                      ast::SymbolRef temp;
-                     if (auto *i = dynamic_cast<ast::Ident *>(exp.get())) {
-                         temp = i->symbol;
-                     } else {
-                         temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
-                         current = walk(ctx, exp.get(), current, inWhat, temp, loops);
-                     }
+                     temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                     current = walk(ctx, exp.get(), current, inWhat, temp, loops);
+
                      args.push_back(temp);
                  }
 
@@ -537,9 +649,9 @@ string New::toString(ast::Context ctx) {
     bool isFirst = true;
     for (auto arg : this->args) {
         if (!isFirst) {
-            buf << " ,";
+            buf << ", ";
         }
-        isFirst = true;
+        isFirst = false;
         buf << arg.info(ctx).name.name(ctx).toString(ctx);
     }
     buf << ")";
@@ -554,9 +666,9 @@ string Super::toString(ast::Context ctx) {
     bool isFirst = true;
     for (auto arg : this->args) {
         if (!isFirst) {
-            buf << " ,";
+            buf << ", ";
         }
-        isFirst = true;
+        isFirst = false;
         buf << arg.info(ctx).name.name(ctx).toString(ctx);
     }
     buf << ")";
@@ -587,9 +699,9 @@ string Send::toString(ast::Context ctx) {
     bool isFirst = true;
     for (auto arg : this->args) {
         if (!isFirst) {
-            buf << " ,";
+            buf << ", ";
         }
-        isFirst = true;
+        isFirst = false;
         buf << arg.info(ctx).name.name(ctx).toString(ctx);
     }
     buf << ")";

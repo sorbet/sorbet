@@ -2,7 +2,7 @@ digraph + {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$2 = self\no = load_arg(<self>$2#+, 0)\n<ret>$1 = NotSupported()\n<ret>$3 = return <ret>$1\n<never>"];
+    bb0 [label = "()\n<self>$2 = self\n<ret>$1 = NotSupported()\n<ret>$3 = return <ret>$1\n<never>"];
     bb0 -> bb1;
     bb1 [label = "()\n<never>"];
     bb1 -> bb1;
@@ -12,7 +12,7 @@ digraph i_like_ifs {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$5 = self\nifTmp$6 = true\nifTmp$6"];
+    bb0 [label = "()\nifTmp$6 = true\nifTmp$6"];
     bb0 -> bb2;
     bb0 -> bb3;
 
@@ -28,7 +28,7 @@ digraph i_like_exps {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$11 = self\nifTmp$12 = true\nifTmp$12"];
+    bb0 [label = "()\nifTmp$12 = true\nifTmp$12"];
     bb0 -> bb2;
     bb0 -> bb3;
 
@@ -46,7 +46,7 @@ digraph return_in_one_branch1 {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$15 = self\nifTmp$16 = true\nifTmp$16"];
+    bb0 [label = "()\nifTmp$16 = true\nifTmp$16"];
     bb0 -> bb2;
     bb0 -> bb3;
 
@@ -62,7 +62,7 @@ digraph return_in_one_branch2 {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$20 = self\nifTmp$21 = true\nifTmp$21"];
+    bb0 [label = "()\nifTmp$21 = true\nifTmp$21"];
     bb0 -> bb2;
     bb0 -> bb3;
 
@@ -80,25 +80,25 @@ digraph variables {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$25 = self\nifTmp$27 = true\nifTmp$27"];
+    bb0 [label = "()\nifTmp$27 = true\nifTmp$27"];
     bb0 -> bb2;
     bb0 -> bb3;
 
     bb1 [label = "()\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "(a)\na = 1\nstatTmp$26 = a\n<always>"];
+    bb2 [label = "(a)\na = 1\n<always>"];
     bb2 -> bb4;
-    bb3 [label = "(a)\na = 2\nstatTmp$26 = a\n<always>"];
+    bb3 [label = "(a)\na = 2\n<always>"];
     bb3 -> bb4;
     bb4 [label = "(a)\nifTmp$29 = false\nifTmp$29"];
     bb4 -> bb5;
     bb4 -> bb6;
 
-    bb5 [label = "(a, b)\nb = 1\nstatTmp$28 = b\n<always>"];
+    bb5 [label = "(a, b)\nb = 1\n<always>"];
     bb5 -> bb7;
-    bb6 [label = "(a, b)\nb = 2\nstatTmp$28 = b\n<always>"];
+    bb6 [label = "(a, b)\nb = 2\n<always>"];
     bb6 -> bb7;
-    bb7 [label = "(a, b)\n<ret>$24 = a.+(b)\n<ret>$30 = return <ret>$24\n<never>"];
+    bb7 [label = "(a, b)\n<ret>$24 = a.+(b)\n<ret>$32 = return <ret>$24\n<never>"];
     bb7 -> bb1;
 }
 
@@ -106,31 +106,31 @@ digraph variables_and_loop {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$32 = self\nifTmp$34 = true\nifTmp$34"];
+    bb0 [label = "()\nifTmp$36 = true\nifTmp$36"];
     bb0 -> bb2;
     bb0 -> bb3;
 
     bb1 [label = "()\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "(a)\na = 1\nstatTmp$33 = a\n<always>"];
+    bb2 [label = "(a)\na = 1\n<always>"];
     bb2 -> bb4;
-    bb3 [label = "(a)\na = 2\nstatTmp$33 = a\n<always>"];
+    bb3 [label = "(a)\na = 2\n<always>"];
     bb3 -> bb4;
     bb4 [label = "()\n<always>"];
     bb4 -> bb5;
-    bb5 [label = "(b)\nouterLoops: 1\nwhileTmp$36 = true\nwhileTmp$36"];
+    bb5 [label = "(b)\nouterLoops: 1\nwhileTmp$38 = true\nwhileTmp$38"];
     bb5 -> bb6;
     bb5 -> bb7;
 
-    bb6 [label = "(b)\nouterLoops: 1\nifTmp$38 = false\nifTmp$38"];
+    bb6 [label = "(b)\nouterLoops: 1\nifTmp$40 = false\nifTmp$40"];
     bb6 -> bb8;
     bb6 -> bb9;
 
-    bb7 [label = "(b)\nstatTmp$35 = nil\n<ret>$31 = b\n<ret>$39 = return <ret>$31\n<never>"];
+    bb7 [label = "(b)\nstatTmp$37 = nil\n<ret>$41 = return b\n<never>"];
     bb7 -> bb1;
-    bb8 [label = "(b)\nouterLoops: 1\nb = 1\nstatTmp$37 = b\n<always>"];
+    bb8 [label = "(b)\nouterLoops: 1\nb = 1\n<always>"];
     bb8 -> bb10;
-    bb9 [label = "(b)\nouterLoops: 1\nb = 2\nstatTmp$37 = b\n<always>"];
+    bb9 [label = "(b)\nouterLoops: 1\nb = 2\n<always>"];
     bb9 -> bb10;
     bb10 [label = "(b)\nouterLoops: 1\n<always>"];
     bb10 -> bb5;
@@ -140,23 +140,23 @@ digraph variables_loop_if {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$41 = self\n<always>"];
+    bb0 [label = "()\n<always>"];
     bb0 -> bb2;
     bb1 [label = "()\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "(b)\nouterLoops: 1\nwhileTmp$43 = true\nwhileTmp$43"];
+    bb2 [label = "(b)\nouterLoops: 1\nwhileTmp$45 = true\nwhileTmp$45"];
     bb2 -> bb3;
     bb2 -> bb4;
 
-    bb3 [label = "(b)\nouterLoops: 1\nifTmp$45 = false\nifTmp$45"];
+    bb3 [label = "(b)\nouterLoops: 1\nifTmp$47 = false\nifTmp$47"];
     bb3 -> bb5;
     bb3 -> bb6;
 
-    bb4 [label = "(b)\nstatTmp$42 = nil\n<ret>$40 = b\n<ret>$46 = return <ret>$40\n<never>"];
+    bb4 [label = "(b)\nstatTmp$44 = nil\n<ret>$48 = return b\n<never>"];
     bb4 -> bb1;
-    bb5 [label = "(b)\nouterLoops: 1\nb = 1\nstatTmp$44 = b\n<always>"];
+    bb5 [label = "(b)\nouterLoops: 1\nb = 1\n<always>"];
     bb5 -> bb7;
-    bb6 [label = "(b)\nouterLoops: 1\nb = 2\nstatTmp$44 = b\n<always>"];
+    bb6 [label = "(b)\nouterLoops: 1\nb = 2\n<always>"];
     bb6 -> bb7;
     bb7 [label = "(b)\nouterLoops: 1\n<always>"];
     bb7 -> bb2;
@@ -166,17 +166,17 @@ digraph take_arguments {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
-    bb0 [label = "(i)\n<self>$48 = self\ni = load_arg(<self>$48#take_arguments, 0)\nifTmp$49 = false\nifTmp$49"];
+    bb0 [label = "(i)\n<self>$50 = self\ni = load_arg(<self>$50#take_arguments, 0)\nifTmp$51 = false\nifTmp$51"];
     bb0 -> bb2;
     bb0 -> bb3;
 
     bb1 [label = "()\n<never>"];
     bb1 -> bb1;
-    bb2 [label = "(<ret>$47)\n<ret>$47 = 2\n<always>"];
+    bb2 [label = "(<ret>$49)\n<ret>$49 = 2\n<always>"];
     bb2 -> bb4;
-    bb3 [label = "(i, <ret>$47)\n<ret>$47 = i\n<always>"];
+    bb3 [label = "(i, <ret>$49)\n<ret>$49 = i\n<always>"];
     bb3 -> bb4;
-    bb4 [label = "(<ret>$47)\n<ret>$50 = return <ret>$47\n<never>"];
+    bb4 [label = "(<ret>$49)\n<ret>$52 = return <ret>$49\n<never>"];
     bb4 -> bb1;
 }
 
