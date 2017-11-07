@@ -49,8 +49,8 @@
 <polygon fill="none" stroke="blue" points="3072,-8 3072,-597.738 3476,-597.738 3476,-8 3072,-8"/>
 <text text-anchor="middle" x="3274" y="-582.538" font-family="Times,serif" font-size="14.00">::Object#baz8</text>
 </g>
-<!-- bb29_0 -->
-<g id="node1" class="node"><title>bb29_0</title>
+<!-- bb25_0 -->
+<g id="node1" class="node"><title>bb25_0</title>
 <polygon fill="none" stroke="black" points="16.0613,-511.094 157,-460.936 297.939,-511.094 297.807,-592.251 16.1929,-592.251 16.0613,-511.094"/>
 <text text-anchor="middle" x="157" y="-559.825" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="157" y="-544.825" font-family="Times,serif" font-size="14.00">&lt;self&gt;$3 = self</text>
@@ -58,24 +58,24 @@
 <text text-anchor="middle" x="157" y="-514.825" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$4 = return &lt;ret&gt;$2</text>
 <text text-anchor="middle" x="157" y="-499.825" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb29_1 -->
-<g id="node2" class="node"><title>bb29_1</title>
+<!-- bb25_1 -->
+<g id="node2" class="node"><title>bb25_1</title>
 <polygon fill="none" stroke="black" points="222.131,-388.676 118.522,-388.676 91.8686,-312.676 195.478,-312.676 222.131,-388.676"/>
 <text text-anchor="middle" x="157" y="-354.476" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="157" y="-339.476" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb29_0&#45;&gt;bb29_1 -->
-<g id="edge1" class="edge"><title>bb29_0&#45;&gt;bb29_1</title>
+<!-- bb25_0&#45;&gt;bb25_1 -->
+<g id="edge1" class="edge"><title>bb25_0&#45;&gt;bb25_1</title>
 <path fill="none" stroke="black" d="M157,-460.789C157,-439.987 157,-417.805 157,-398.911"/>
 <polygon fill="black" stroke="black" points="160.5,-398.783 157,-388.783 153.5,-398.783 160.5,-398.783"/>
 </g>
-<!-- bb29_1&#45;&gt;bb29_1 -->
-<g id="edge2" class="edge"><title>bb29_1&#45;&gt;bb29_1</title>
+<!-- bb25_1&#45;&gt;bb25_1 -->
+<g id="edge2" class="edge"><title>bb25_1&#45;&gt;bb25_1</title>
 <path fill="none" stroke="black" d="M218.768,-378.089C231.324,-375.103 240.315,-365.965 240.315,-350.676 240.315,-331.939 226.812,-322.441 209.792,-322.182"/>
 <polygon fill="black" stroke="black" points="209.093,-318.73 199.44,-323.096 209.709,-325.703 209.093,-318.73"/>
 </g>
-<!-- bb32_0 -->
-<g id="node3" class="node"><title>bb32_0</title>
+<!-- bb28_0 -->
+<g id="node3" class="node"><title>bb28_0</title>
 <polygon fill="none" stroke="black" points="322.061,-511.094 463,-460.936 603.939,-511.094 603.807,-592.251 322.193,-592.251 322.061,-511.094"/>
 <text text-anchor="middle" x="463" y="-559.825" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="463" y="-544.825" font-family="Times,serif" font-size="14.00">&lt;self&gt;$6 = self</text>
@@ -83,24 +83,24 @@
 <text text-anchor="middle" x="463" y="-514.825" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$7 = return &lt;ret&gt;$5</text>
 <text text-anchor="middle" x="463" y="-499.825" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb32_1 -->
-<g id="node4" class="node"><title>bb32_1</title>
+<!-- bb28_1 -->
+<g id="node4" class="node"><title>bb28_1</title>
 <polygon fill="none" stroke="black" points="528.131,-388.676 424.522,-388.676 397.869,-312.676 501.478,-312.676 528.131,-388.676"/>
 <text text-anchor="middle" x="463" y="-354.476" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="463" y="-339.476" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb32_0&#45;&gt;bb32_1 -->
-<g id="edge3" class="edge"><title>bb32_0&#45;&gt;bb32_1</title>
+<!-- bb28_0&#45;&gt;bb28_1 -->
+<g id="edge3" class="edge"><title>bb28_0&#45;&gt;bb28_1</title>
 <path fill="none" stroke="black" d="M463,-460.789C463,-439.987 463,-417.805 463,-398.911"/>
 <polygon fill="black" stroke="black" points="466.5,-398.783 463,-388.783 459.5,-398.783 466.5,-398.783"/>
 </g>
-<!-- bb32_1&#45;&gt;bb32_1 -->
-<g id="edge4" class="edge"><title>bb32_1&#45;&gt;bb32_1</title>
+<!-- bb28_1&#45;&gt;bb28_1 -->
+<g id="edge4" class="edge"><title>bb28_1&#45;&gt;bb28_1</title>
 <path fill="none" stroke="black" d="M524.768,-378.089C537.324,-375.103 546.315,-365.965 546.315,-350.676 546.315,-331.939 532.812,-322.441 515.792,-322.182"/>
 <polygon fill="black" stroke="black" points="515.093,-318.73 505.44,-323.096 515.709,-325.703 515.093,-318.73"/>
 </g>
-<!-- bb34_0 -->
-<g id="node5" class="node"><title>bb34_0</title>
+<!-- bb30_0 -->
+<g id="node5" class="node"><title>bb30_0</title>
 <polygon fill="none" stroke="black" points="627.744,-511.094 738,-460.936 848.256,-511.094 848.153,-592.251 627.847,-592.251 627.744,-511.094"/>
 <text text-anchor="middle" x="738" y="-559.825" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="738" y="-544.825" font-family="Times,serif" font-size="14.00">a = foo</text>
@@ -108,24 +108,24 @@
 <text text-anchor="middle" x="738" y="-514.825" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$13 = return b</text>
 <text text-anchor="middle" x="738" y="-499.825" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb34_1 -->
-<g id="node6" class="node"><title>bb34_1</title>
+<!-- bb30_1 -->
+<g id="node6" class="node"><title>bb30_1</title>
 <polygon fill="none" stroke="black" points="803.131,-388.676 699.522,-388.676 672.869,-312.676 776.478,-312.676 803.131,-388.676"/>
 <text text-anchor="middle" x="738" y="-354.476" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="738" y="-339.476" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb34_0&#45;&gt;bb34_1 -->
-<g id="edge5" class="edge"><title>bb34_0&#45;&gt;bb34_1</title>
+<!-- bb30_0&#45;&gt;bb30_1 -->
+<g id="edge5" class="edge"><title>bb30_0&#45;&gt;bb30_1</title>
 <path fill="none" stroke="black" d="M738,-460.789C738,-439.987 738,-417.805 738,-398.911"/>
 <polygon fill="black" stroke="black" points="741.5,-398.783 738,-388.783 734.5,-398.783 741.5,-398.783"/>
 </g>
-<!-- bb34_1&#45;&gt;bb34_1 -->
-<g id="edge6" class="edge"><title>bb34_1&#45;&gt;bb34_1</title>
+<!-- bb30_1&#45;&gt;bb30_1 -->
+<g id="edge6" class="edge"><title>bb30_1&#45;&gt;bb30_1</title>
 <path fill="none" stroke="black" d="M799.768,-378.089C812.324,-375.103 821.315,-365.965 821.315,-350.676 821.315,-331.939 807.812,-322.441 790.792,-322.182"/>
 <polygon fill="black" stroke="black" points="790.093,-318.73 780.44,-323.096 790.709,-325.703 790.093,-318.73"/>
 </g>
-<!-- bb37_0 -->
-<g id="node7" class="node"><title>bb37_0</title>
+<!-- bb33_0 -->
+<g id="node7" class="node"><title>bb33_0</title>
 <polygon fill="none" stroke="black" points="871.566,-507.008 1014,-447.715 1156.43,-507.008 1156.3,-602.947 871.698,-602.947 871.566,-507.008"/>
 <text text-anchor="middle" x="1014" y="-567.325" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="1014" y="-552.325" font-family="Times,serif" font-size="14.00">a = foo</text>
@@ -134,24 +134,24 @@
 <text text-anchor="middle" x="1014" y="-507.325" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$19 = return b</text>
 <text text-anchor="middle" x="1014" y="-492.325" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb37_1 -->
-<g id="node8" class="node"><title>bb37_1</title>
+<!-- bb33_1 -->
+<g id="node8" class="node"><title>bb33_1</title>
 <polygon fill="none" stroke="black" points="1079.13,-388.676 975.522,-388.676 948.869,-312.676 1052.48,-312.676 1079.13,-388.676"/>
 <text text-anchor="middle" x="1014" y="-354.476" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="1014" y="-339.476" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb37_0&#45;&gt;bb37_1 -->
-<g id="edge7" class="edge"><title>bb37_0&#45;&gt;bb37_1</title>
+<!-- bb33_0&#45;&gt;bb33_1 -->
+<g id="edge7" class="edge"><title>bb33_0&#45;&gt;bb33_1</title>
 <path fill="none" stroke="black" d="M1014,-447.661C1014,-431.119 1014,-414.328 1014,-399.513"/>
 <polygon fill="black" stroke="black" points="1017.5,-399.107 1014,-389.107 1010.5,-399.107 1017.5,-399.107"/>
 </g>
-<!-- bb37_1&#45;&gt;bb37_1 -->
-<g id="edge8" class="edge"><title>bb37_1&#45;&gt;bb37_1</title>
+<!-- bb33_1&#45;&gt;bb33_1 -->
+<g id="edge8" class="edge"><title>bb33_1&#45;&gt;bb33_1</title>
 <path fill="none" stroke="black" d="M1075.77,-378.089C1088.32,-375.103 1097.32,-365.965 1097.32,-350.676 1097.32,-331.939 1083.81,-322.441 1066.79,-322.182"/>
 <polygon fill="black" stroke="black" points="1066.09,-318.73 1056.44,-323.096 1066.71,-325.703 1066.09,-318.73"/>
 </g>
-<!-- bb40_0 -->
-<g id="node9" class="node"><title>bb40_0</title>
+<!-- bb36_0 -->
+<g id="node9" class="node"><title>bb36_0</title>
 <polygon fill="none" stroke="black" points="1179.93,-507.008 1374,-447.715 1568.07,-507.008 1567.89,-602.947 1180.11,-602.947 1179.93,-507.008"/>
 <text text-anchor="middle" x="1374" y="-567.325" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="1374" y="-552.325" font-family="Times,serif" font-size="14.00">statTmp$22 = foo</text>
@@ -160,24 +160,24 @@
 <text text-anchor="middle" x="1374" y="-507.325" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$24 = return b</text>
 <text text-anchor="middle" x="1374" y="-492.325" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb40_1 -->
-<g id="node10" class="node"><title>bb40_1</title>
+<!-- bb36_1 -->
+<g id="node10" class="node"><title>bb36_1</title>
 <polygon fill="none" stroke="black" points="1439.13,-388.676 1335.52,-388.676 1308.87,-312.676 1412.48,-312.676 1439.13,-388.676"/>
 <text text-anchor="middle" x="1374" y="-354.476" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="1374" y="-339.476" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb40_0&#45;&gt;bb40_1 -->
-<g id="edge9" class="edge"><title>bb40_0&#45;&gt;bb40_1</title>
+<!-- bb36_0&#45;&gt;bb36_1 -->
+<g id="edge9" class="edge"><title>bb36_0&#45;&gt;bb36_1</title>
 <path fill="none" stroke="black" d="M1374,-447.661C1374,-431.119 1374,-414.328 1374,-399.513"/>
 <polygon fill="black" stroke="black" points="1377.5,-399.107 1374,-389.107 1370.5,-399.107 1377.5,-399.107"/>
 </g>
-<!-- bb40_1&#45;&gt;bb40_1 -->
-<g id="edge10" class="edge"><title>bb40_1&#45;&gt;bb40_1</title>
+<!-- bb36_1&#45;&gt;bb36_1 -->
+<g id="edge10" class="edge"><title>bb36_1&#45;&gt;bb36_1</title>
 <path fill="none" stroke="black" d="M1435.77,-378.089C1448.32,-375.103 1457.32,-365.965 1457.32,-350.676 1457.32,-331.939 1443.81,-322.441 1426.79,-322.182"/>
 <polygon fill="black" stroke="black" points="1426.09,-318.73 1416.44,-323.096 1426.71,-325.703 1426.09,-318.73"/>
 </g>
-<!-- bb42_0 -->
-<g id="node11" class="node"><title>bb42_0</title>
+<!-- bb38_0 -->
+<g id="node11" class="node"><title>bb38_0</title>
 <polygon fill="none" stroke="black" points="1591.93,-503.077 1786,-434.993 1980.07,-503.077 1979.89,-613.239 1592.11,-613.239 1591.93,-503.077"/>
 <text text-anchor="middle" x="1786" y="-574.825" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="1786" y="-559.825" font-family="Times,serif" font-size="14.00">statTmp$28 = self</text>
@@ -187,66 +187,66 @@
 <text text-anchor="middle" x="1786" y="-499.825" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$30 = return b</text>
 <text text-anchor="middle" x="1786" y="-484.825" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb42_1 -->
-<g id="node12" class="node"><title>bb42_1</title>
+<!-- bb38_1 -->
+<g id="node12" class="node"><title>bb38_1</title>
 <polygon fill="none" stroke="black" points="1851.13,-388.676 1747.52,-388.676 1720.87,-312.676 1824.48,-312.676 1851.13,-388.676"/>
 <text text-anchor="middle" x="1786" y="-354.476" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="1786" y="-339.476" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb42_0&#45;&gt;bb42_1 -->
-<g id="edge11" class="edge"><title>bb42_0&#45;&gt;bb42_1</title>
+<!-- bb38_0&#45;&gt;bb38_1 -->
+<g id="edge11" class="edge"><title>bb38_0&#45;&gt;bb38_1</title>
 <path fill="none" stroke="black" d="M1786,-434.955C1786,-422.565 1786,-410.355 1786,-399.263"/>
 <polygon fill="black" stroke="black" points="1789.5,-399.002 1786,-389.003 1782.5,-399.003 1789.5,-399.002"/>
 </g>
-<!-- bb42_1&#45;&gt;bb42_1 -->
-<g id="edge12" class="edge"><title>bb42_1&#45;&gt;bb42_1</title>
+<!-- bb38_1&#45;&gt;bb38_1 -->
+<g id="edge12" class="edge"><title>bb38_1&#45;&gt;bb38_1</title>
 <path fill="none" stroke="black" d="M1847.77,-378.089C1860.32,-375.103 1869.32,-365.965 1869.32,-350.676 1869.32,-331.939 1855.81,-322.441 1838.79,-322.182"/>
 <polygon fill="black" stroke="black" points="1838.09,-318.73 1828.44,-323.096 1838.71,-325.703 1838.09,-318.73"/>
 </g>
-<!-- bb44_0 -->
-<g id="node13" class="node"><title>bb44_0</title>
+<!-- bb40_0 -->
+<g id="node13" class="node"><title>bb40_0</title>
 <polygon fill="none" stroke="black" points="2040.71,-519.265 2135,-487.377 2229.29,-519.265 2229.2,-570.86 2040.8,-570.86 2040.71,-519.265"/>
 <text text-anchor="middle" x="2135" y="-544.825" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="2135" y="-529.825" font-family="Times,serif" font-size="14.00">ifTmp$34 = true</text>
 <text text-anchor="middle" x="2135" y="-514.825" font-family="Times,serif" font-size="14.00">ifTmp$34</text>
 </g>
-<!-- bb44_2 -->
-<g id="node15" class="node"><title>bb44_2</title>
+<!-- bb40_2 -->
+<g id="node15" class="node"><title>bb40_2</title>
 <ellipse fill="none" stroke="black" cx="2094" cy="-350.676" rx="50.41" ry="37.4533"/>
 <text text-anchor="middle" x="2094" y="-361.976" font-family="Times,serif" font-size="14.00">(b)</text>
 <text text-anchor="middle" x="2094" y="-346.976" font-family="Times,serif" font-size="14.00">b = 1</text>
 <text text-anchor="middle" x="2094" y="-331.976" font-family="Times,serif" font-size="14.00">&lt;always&gt;</text>
 </g>
-<!-- bb44_0&#45;&gt;bb44_2 -->
-<g id="edge13" class="edge"><title>bb44_0&#45;&gt;bb44_2</title>
+<!-- bb40_0&#45;&gt;bb40_2 -->
+<g id="edge13" class="edge"><title>bb40_0&#45;&gt;bb40_2</title>
 <path fill="none" stroke="black" d="M2125.49,-490.58C2119.18,-462.765 2110.91,-426.261 2104.42,-397.655"/>
 <polygon fill="black" stroke="black" points="2107.84,-396.872 2102.21,-387.893 2101.01,-398.42 2107.84,-396.872"/>
 </g>
-<!-- bb44_3 -->
-<g id="node16" class="node"><title>bb44_3</title>
+<!-- bb40_3 -->
+<g id="node16" class="node"><title>bb40_3</title>
 <ellipse fill="none" stroke="black" cx="2212" cy="-350.676" rx="50.41" ry="37.4533"/>
 <text text-anchor="middle" x="2212" y="-361.976" font-family="Times,serif" font-size="14.00">(b)</text>
 <text text-anchor="middle" x="2212" y="-346.976" font-family="Times,serif" font-size="14.00">b = foo</text>
 <text text-anchor="middle" x="2212" y="-331.976" font-family="Times,serif" font-size="14.00">&lt;always&gt;</text>
 </g>
-<!-- bb44_0&#45;&gt;bb44_3 -->
-<g id="edge14" class="edge"><title>bb44_0&#45;&gt;bb44_3</title>
+<!-- bb40_0&#45;&gt;bb40_3 -->
+<g id="edge14" class="edge"><title>bb40_0&#45;&gt;bb40_3</title>
 <path fill="none" stroke="black" d="M2151.9,-492.837C2164.08,-464.221 2180.53,-425.582 2193.14,-395.964"/>
 <polygon fill="black" stroke="black" points="2196.4,-397.261 2197.09,-386.689 2189.95,-394.519 2196.4,-397.261"/>
 </g>
-<!-- bb44_1 -->
-<g id="node14" class="node"><title>bb44_1</title>
+<!-- bb40_1 -->
+<g id="node14" class="node"><title>bb40_1</title>
 <polygon fill="none" stroke="black" points="2226.13,-92 2122.52,-92 2095.87,-16 2199.48,-16 2226.13,-92"/>
 <text text-anchor="middle" x="2161" y="-57.8" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="2161" y="-42.8" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb44_1&#45;&gt;bb44_1 -->
-<g id="edge15" class="edge"><title>bb44_1&#45;&gt;bb44_1</title>
+<!-- bb40_1&#45;&gt;bb40_1 -->
+<g id="edge15" class="edge"><title>bb40_1&#45;&gt;bb40_1</title>
 <path fill="none" stroke="black" d="M2222.03,-79.7653C2234.97,-77.149 2244.32,-68.5605 2244.32,-54 2244.32,-36.6118 2230.99,-27.7405 2214.13,-27.3861"/>
 <polygon fill="black" stroke="black" points="2213.58,-23.9179 2203.87,-28.1615 2214.1,-30.898 2213.58,-23.9179"/>
 </g>
-<!-- bb44_4 -->
-<g id="node17" class="node"><title>bb44_4</title>
+<!-- bb40_4 -->
+<g id="node17" class="node"><title>bb40_4</title>
 <ellipse fill="none" stroke="black" cx="2161" cy="-197.296" rx="156.955" ry="69.0935"/>
 <text text-anchor="middle" x="2161" y="-231.096" font-family="Times,serif" font-size="14.00">(b)</text>
 <text text-anchor="middle" x="2161" y="-216.096" font-family="Times,serif" font-size="14.00">statTmp$35 = b</text>
@@ -255,65 +255,65 @@
 <text text-anchor="middle" x="2161" y="-171.096" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$37 = return b</text>
 <text text-anchor="middle" x="2161" y="-156.096" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb44_2&#45;&gt;bb44_4 -->
-<g id="edge16" class="edge"><title>bb44_2&#45;&gt;bb44_4</title>
+<!-- bb40_2&#45;&gt;bb40_4 -->
+<g id="edge16" class="edge"><title>bb40_2&#45;&gt;bb40_4</title>
 <path fill="none" stroke="black" d="M2109.37,-314.947C2114.73,-302.845 2120.97,-288.745 2127.22,-274.616"/>
 <polygon fill="black" stroke="black" points="2130.48,-275.908 2131.32,-265.347 2124.08,-273.075 2130.48,-275.908"/>
 </g>
-<!-- bb44_3&#45;&gt;bb44_4 -->
-<g id="edge17" class="edge"><title>bb44_3&#45;&gt;bb44_4</title>
+<!-- bb40_3&#45;&gt;bb40_4 -->
+<g id="edge17" class="edge"><title>bb40_3&#45;&gt;bb40_4</title>
 <path fill="none" stroke="black" d="M2200.04,-314.184C2196.13,-302.581 2191.63,-289.203 2187.09,-275.75"/>
 <polygon fill="black" stroke="black" points="2190.31,-274.325 2183.8,-265.966 2183.67,-276.56 2190.31,-274.325"/>
 </g>
-<!-- bb44_4&#45;&gt;bb44_1 -->
-<g id="edge18" class="edge"><title>bb44_4&#45;&gt;bb44_1</title>
+<!-- bb40_4&#45;&gt;bb40_1 -->
+<g id="edge18" class="edge"><title>bb40_4&#45;&gt;bb40_1</title>
 <path fill="none" stroke="black" d="M2161,-127.718C2161,-119.115 2161,-110.472 2161,-102.299"/>
 <polygon fill="black" stroke="black" points="2164.5,-102.235 2161,-92.2351 2157.5,-102.235 2164.5,-102.235"/>
 </g>
-<!-- bb46_0 -->
-<g id="node18" class="node"><title>bb46_0</title>
+<!-- bb42_0 -->
+<g id="node18" class="node"><title>bb42_0</title>
 <polygon fill="none" stroke="black" points="2378.71,-519.265 2473,-487.377 2567.29,-519.265 2567.2,-570.86 2378.8,-570.86 2378.71,-519.265"/>
 <text text-anchor="middle" x="2473" y="-544.825" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="2473" y="-529.825" font-family="Times,serif" font-size="14.00">ifTmp$41 = true</text>
 <text text-anchor="middle" x="2473" y="-514.825" font-family="Times,serif" font-size="14.00">ifTmp$41</text>
 </g>
-<!-- bb46_2 -->
-<g id="node20" class="node"><title>bb46_2</title>
+<!-- bb42_2 -->
+<g id="node20" class="node"><title>bb42_2</title>
 <ellipse fill="none" stroke="black" cx="2432" cy="-350.676" rx="50.41" ry="37.4533"/>
 <text text-anchor="middle" x="2432" y="-361.976" font-family="Times,serif" font-size="14.00">(b)</text>
 <text text-anchor="middle" x="2432" y="-346.976" font-family="Times,serif" font-size="14.00">b = 1</text>
 <text text-anchor="middle" x="2432" y="-331.976" font-family="Times,serif" font-size="14.00">&lt;always&gt;</text>
 </g>
-<!-- bb46_0&#45;&gt;bb46_2 -->
-<g id="edge19" class="edge"><title>bb46_0&#45;&gt;bb46_2</title>
+<!-- bb42_0&#45;&gt;bb42_2 -->
+<g id="edge19" class="edge"><title>bb42_0&#45;&gt;bb42_2</title>
 <path fill="none" stroke="black" d="M2463.49,-490.58C2457.18,-462.765 2448.91,-426.261 2442.42,-397.655"/>
 <polygon fill="black" stroke="black" points="2445.84,-396.872 2440.21,-387.893 2439.01,-398.42 2445.84,-396.872"/>
 </g>
-<!-- bb46_3 -->
-<g id="node21" class="node"><title>bb46_3</title>
+<!-- bb42_3 -->
+<g id="node21" class="node"><title>bb42_3</title>
 <ellipse fill="none" stroke="black" cx="2550" cy="-350.676" rx="50.41" ry="37.4533"/>
 <text text-anchor="middle" x="2550" y="-361.976" font-family="Times,serif" font-size="14.00">(b)</text>
 <text text-anchor="middle" x="2550" y="-346.976" font-family="Times,serif" font-size="14.00">b = foo</text>
 <text text-anchor="middle" x="2550" y="-331.976" font-family="Times,serif" font-size="14.00">&lt;always&gt;</text>
 </g>
-<!-- bb46_0&#45;&gt;bb46_3 -->
-<g id="edge20" class="edge"><title>bb46_0&#45;&gt;bb46_3</title>
+<!-- bb42_0&#45;&gt;bb42_3 -->
+<g id="edge20" class="edge"><title>bb42_0&#45;&gt;bb42_3</title>
 <path fill="none" stroke="black" d="M2489.9,-492.837C2502.08,-464.221 2518.53,-425.582 2531.14,-395.964"/>
 <polygon fill="black" stroke="black" points="2534.4,-397.261 2535.09,-386.689 2527.95,-394.519 2534.4,-397.261"/>
 </g>
-<!-- bb46_1 -->
-<g id="node19" class="node"><title>bb46_1</title>
+<!-- bb42_1 -->
+<g id="node19" class="node"><title>bb42_1</title>
 <polygon fill="none" stroke="black" points="2564.13,-92 2460.52,-92 2433.87,-16 2537.48,-16 2564.13,-92"/>
 <text text-anchor="middle" x="2499" y="-57.8" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="2499" y="-42.8" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb46_1&#45;&gt;bb46_1 -->
-<g id="edge21" class="edge"><title>bb46_1&#45;&gt;bb46_1</title>
+<!-- bb42_1&#45;&gt;bb42_1 -->
+<g id="edge21" class="edge"><title>bb42_1&#45;&gt;bb42_1</title>
 <path fill="none" stroke="black" d="M2560.03,-79.7653C2572.97,-77.149 2582.32,-68.5605 2582.32,-54 2582.32,-36.6118 2568.99,-27.7405 2552.13,-27.3861"/>
 <polygon fill="black" stroke="black" points="2551.58,-23.9179 2541.87,-28.1615 2552.1,-30.898 2551.58,-23.9179"/>
 </g>
-<!-- bb46_4 -->
-<g id="node22" class="node"><title>bb46_4</title>
+<!-- bb42_4 -->
+<g id="node22" class="node"><title>bb42_4</title>
 <ellipse fill="none" stroke="black" cx="2499" cy="-197.296" rx="156.955" ry="69.0935"/>
 <text text-anchor="middle" x="2499" y="-231.096" font-family="Times,serif" font-size="14.00">(b)</text>
 <text text-anchor="middle" x="2499" y="-216.096" font-family="Times,serif" font-size="14.00">statTmp$42 = foo</text>
@@ -322,65 +322,65 @@
 <text text-anchor="middle" x="2499" y="-171.096" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$44 = return b</text>
 <text text-anchor="middle" x="2499" y="-156.096" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb46_2&#45;&gt;bb46_4 -->
-<g id="edge22" class="edge"><title>bb46_2&#45;&gt;bb46_4</title>
+<!-- bb42_2&#45;&gt;bb42_4 -->
+<g id="edge22" class="edge"><title>bb42_2&#45;&gt;bb42_4</title>
 <path fill="none" stroke="black" d="M2447.37,-314.947C2452.73,-302.845 2458.97,-288.745 2465.22,-274.616"/>
 <polygon fill="black" stroke="black" points="2468.48,-275.908 2469.32,-265.347 2462.08,-273.075 2468.48,-275.908"/>
 </g>
-<!-- bb46_3&#45;&gt;bb46_4 -->
-<g id="edge23" class="edge"><title>bb46_3&#45;&gt;bb46_4</title>
+<!-- bb42_3&#45;&gt;bb42_4 -->
+<g id="edge23" class="edge"><title>bb42_3&#45;&gt;bb42_4</title>
 <path fill="none" stroke="black" d="M2538.04,-314.184C2534.13,-302.581 2529.63,-289.203 2525.09,-275.75"/>
 <polygon fill="black" stroke="black" points="2528.31,-274.325 2521.8,-265.966 2521.67,-276.56 2528.31,-274.325"/>
 </g>
-<!-- bb46_4&#45;&gt;bb46_1 -->
-<g id="edge24" class="edge"><title>bb46_4&#45;&gt;bb46_1</title>
+<!-- bb42_4&#45;&gt;bb42_1 -->
+<g id="edge24" class="edge"><title>bb42_4&#45;&gt;bb42_1</title>
 <path fill="none" stroke="black" d="M2499,-127.718C2499,-119.115 2499,-110.472 2499,-102.299"/>
 <polygon fill="black" stroke="black" points="2502.5,-102.235 2499,-92.2351 2495.5,-102.235 2502.5,-102.235"/>
 </g>
-<!-- bb48_0 -->
-<g id="node23" class="node"><title>bb48_0</title>
+<!-- bb44_0 -->
+<g id="node23" class="node"><title>bb44_0</title>
 <polygon fill="none" stroke="black" points="2755.71,-519.265 2850,-487.377 2944.29,-519.265 2944.2,-570.86 2755.8,-570.86 2755.71,-519.265"/>
 <text text-anchor="middle" x="2850" y="-544.825" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="2850" y="-529.825" font-family="Times,serif" font-size="14.00">ifTmp$48 = true</text>
 <text text-anchor="middle" x="2850" y="-514.825" font-family="Times,serif" font-size="14.00">ifTmp$48</text>
 </g>
-<!-- bb48_2 -->
-<g id="node25" class="node"><title>bb48_2</title>
+<!-- bb44_2 -->
+<g id="node25" class="node"><title>bb44_2</title>
 <ellipse fill="none" stroke="black" cx="2730" cy="-350.676" rx="50.41" ry="37.4533"/>
 <text text-anchor="middle" x="2730" y="-361.976" font-family="Times,serif" font-size="14.00">(b)</text>
 <text text-anchor="middle" x="2730" y="-346.976" font-family="Times,serif" font-size="14.00">b = 1</text>
 <text text-anchor="middle" x="2730" y="-331.976" font-family="Times,serif" font-size="14.00">&lt;always&gt;</text>
 </g>
-<!-- bb48_0&#45;&gt;bb48_2 -->
-<g id="edge25" class="edge"><title>bb48_0&#45;&gt;bb48_2</title>
+<!-- bb44_0&#45;&gt;bb44_2 -->
+<g id="edge25" class="edge"><title>bb44_0&#45;&gt;bb44_2</title>
 <path fill="none" stroke="black" d="M2825.43,-495.491C2805.68,-465.737 2777.97,-423.966 2757.49,-393.104"/>
 <polygon fill="black" stroke="black" points="2760.36,-391.105 2751.92,-384.708 2754.53,-394.975 2760.36,-391.105"/>
 </g>
-<!-- bb48_3 -->
-<g id="node26" class="node"><title>bb48_3</title>
+<!-- bb44_3 -->
+<g id="node26" class="node"><title>bb44_3</title>
 <ellipse fill="none" stroke="black" cx="2927" cy="-350.676" rx="128.887" ry="37.4533"/>
 <text text-anchor="middle" x="2927" y="-361.976" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="2927" y="-346.976" font-family="Times,serif" font-size="14.00">statTmp$47 = NotSupported()</text>
 <text text-anchor="middle" x="2927" y="-331.976" font-family="Times,serif" font-size="14.00">&lt;always&gt;</text>
 </g>
-<!-- bb48_0&#45;&gt;bb48_3 -->
-<g id="edge26" class="edge"><title>bb48_0&#45;&gt;bb48_3</title>
+<!-- bb44_0&#45;&gt;bb44_3 -->
+<g id="edge26" class="edge"><title>bb44_0&#45;&gt;bb44_3</title>
 <path fill="none" stroke="black" d="M2866.9,-492.837C2878.92,-464.597 2895.1,-426.594 2907.65,-397.134"/>
 <polygon fill="black" stroke="black" points="2910.88,-398.464 2911.58,-387.892 2904.44,-395.722 2910.88,-398.464"/>
 </g>
-<!-- bb48_1 -->
-<g id="node24" class="node"><title>bb48_1</title>
+<!-- bb44_1 -->
+<g id="node24" class="node"><title>bb44_1</title>
 <polygon fill="none" stroke="black" points="2933.13,-92 2829.52,-92 2802.87,-16 2906.48,-16 2933.13,-92"/>
 <text text-anchor="middle" x="2868" y="-57.8" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="2868" y="-42.8" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb48_1&#45;&gt;bb48_1 -->
-<g id="edge27" class="edge"><title>bb48_1&#45;&gt;bb48_1</title>
+<!-- bb44_1&#45;&gt;bb44_1 -->
+<g id="edge27" class="edge"><title>bb44_1&#45;&gt;bb44_1</title>
 <path fill="none" stroke="black" d="M2929.03,-79.7653C2941.97,-77.149 2951.32,-68.5605 2951.32,-54 2951.32,-36.6118 2937.99,-27.7405 2921.13,-27.3861"/>
 <polygon fill="black" stroke="black" points="2920.58,-23.9179 2910.87,-28.1615 2921.1,-30.898 2920.58,-23.9179"/>
 </g>
-<!-- bb48_4 -->
-<g id="node27" class="node"><title>bb48_4</title>
+<!-- bb44_4 -->
+<g id="node27" class="node"><title>bb44_4</title>
 <ellipse fill="none" stroke="black" cx="2868" cy="-197.296" rx="156.955" ry="69.0935"/>
 <text text-anchor="middle" x="2868" y="-231.096" font-family="Times,serif" font-size="14.00">(b)</text>
 <text text-anchor="middle" x="2868" y="-216.096" font-family="Times,serif" font-size="14.00">statTmp$49 = foo</text>
@@ -389,84 +389,84 @@
 <text text-anchor="middle" x="2868" y="-171.096" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$51 = return b</text>
 <text text-anchor="middle" x="2868" y="-156.096" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb48_2&#45;&gt;bb48_4 -->
-<g id="edge28" class="edge"><title>bb48_2&#45;&gt;bb48_4</title>
+<!-- bb44_2&#45;&gt;bb44_4 -->
+<g id="edge28" class="edge"><title>bb44_2&#45;&gt;bb44_4</title>
 <path fill="none" stroke="black" d="M2757.93,-319.042C2771.02,-304.679 2787.22,-286.913 2803.12,-269.468"/>
 <polygon fill="black" stroke="black" points="2805.76,-271.77 2809.91,-262.022 2800.58,-267.054 2805.76,-271.77"/>
 </g>
-<!-- bb48_3&#45;&gt;bb48_4 -->
-<g id="edge29" class="edge"><title>bb48_3&#45;&gt;bb48_4</title>
+<!-- bb44_3&#45;&gt;bb44_4 -->
+<g id="edge29" class="edge"><title>bb44_3&#45;&gt;bb44_4</title>
 <path fill="none" stroke="black" d="M2912.87,-313.417C2908.37,-301.874 2903.21,-288.633 2898.03,-275.337"/>
 <polygon fill="black" stroke="black" points="2901.15,-273.715 2894.26,-265.668 2894.63,-276.257 2901.15,-273.715"/>
 </g>
-<!-- bb48_4&#45;&gt;bb48_1 -->
-<g id="edge30" class="edge"><title>bb48_4&#45;&gt;bb48_1</title>
+<!-- bb44_4&#45;&gt;bb44_1 -->
+<g id="edge30" class="edge"><title>bb44_4&#45;&gt;bb44_1</title>
 <path fill="none" stroke="black" d="M2868,-127.718C2868,-119.115 2868,-110.472 2868,-102.299"/>
 <polygon fill="black" stroke="black" points="2871.5,-102.235 2868,-92.2351 2864.5,-102.235 2871.5,-102.235"/>
 </g>
-<!-- bb50_0 -->
-<g id="node28" class="node"><title>bb50_0</title>
+<!-- bb46_0 -->
+<g id="node28" class="node"><title>bb46_0</title>
 <polygon fill="none" stroke="black" points="3109.89,-523.195 3172,-500.097 3234.11,-523.195 3234.05,-560.569 3109.95,-560.569 3109.89,-523.195"/>
 <text text-anchor="middle" x="3172" y="-537.325" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="3172" y="-522.325" font-family="Times,serif" font-size="14.00">&lt;always&gt;</text>
 </g>
-<!-- bb50_2 -->
-<g id="node30" class="node"><title>bb50_2</title>
+<!-- bb46_2 -->
+<g id="node30" class="node"><title>bb46_2</title>
 <ellipse fill="none" stroke="black" cx="3172" cy="-350.676" rx="91.8478" ry="48.1667"/>
 <text text-anchor="middle" x="3172" y="-369.476" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="3172" y="-354.476" font-family="Times,serif" font-size="14.00">outerLoops: 1</text>
 <text text-anchor="middle" x="3172" y="-339.476" font-family="Times,serif" font-size="14.00">whileTmp$54 = true</text>
 <text text-anchor="middle" x="3172" y="-324.476" font-family="Times,serif" font-size="14.00">whileTmp$54</text>
 </g>
-<!-- bb50_0&#45;&gt;bb50_2 -->
-<g id="edge31" class="edge"><title>bb50_0&#45;&gt;bb50_2</title>
+<!-- bb46_0&#45;&gt;bb46_2 -->
+<g id="edge31" class="edge"><title>bb46_0&#45;&gt;bb46_2</title>
 <path fill="none" stroke="black" d="M3172,-500.193C3172,-475.018 3172,-439.426 3172,-409.395"/>
 <polygon fill="black" stroke="black" points="3175.5,-409.031 3172,-399.032 3168.5,-409.032 3175.5,-409.031"/>
 </g>
-<!-- bb50_1 -->
-<g id="node29" class="node"><title>bb50_1</title>
+<!-- bb46_1 -->
+<g id="node29" class="node"><title>bb46_1</title>
 <polygon fill="none" stroke="black" points="3413.13,-92 3309.52,-92 3282.87,-16 3386.48,-16 3413.13,-92"/>
 <text text-anchor="middle" x="3348" y="-57.8" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="3348" y="-42.8" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb50_1&#45;&gt;bb50_1 -->
-<g id="edge32" class="edge"><title>bb50_1&#45;&gt;bb50_1</title>
+<!-- bb46_1&#45;&gt;bb46_1 -->
+<g id="edge32" class="edge"><title>bb46_1&#45;&gt;bb46_1</title>
 <path fill="none" stroke="black" d="M3409.03,-79.7653C3421.97,-77.149 3431.32,-68.5605 3431.32,-54 3431.32,-36.6118 3417.99,-27.7405 3401.13,-27.3861"/>
 <polygon fill="black" stroke="black" points="3400.58,-23.9179 3390.87,-28.1615 3401.1,-30.898 3400.58,-23.9179"/>
 </g>
-<!-- bb50_3 -->
-<g id="node31" class="node"><title>bb50_3</title>
+<!-- bb46_3 -->
+<g id="node31" class="node"><title>bb46_3</title>
 <ellipse fill="none" stroke="black" cx="3145" cy="-197.296" rx="65.1077" ry="48.1667"/>
 <text text-anchor="middle" x="3145" y="-216.096" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="3145" y="-201.096" font-family="Times,serif" font-size="14.00">outerLoops: 1</text>
 <text text-anchor="middle" x="3145" y="-186.096" font-family="Times,serif" font-size="14.00">b = 1</text>
 <text text-anchor="middle" x="3145" y="-171.096" font-family="Times,serif" font-size="14.00">&lt;always&gt;</text>
 </g>
-<!-- bb50_2&#45;&gt;bb50_3 -->
-<g id="edge33" class="edge"><title>bb50_2&#45;&gt;bb50_3</title>
+<!-- bb46_2&#45;&gt;bb46_3 -->
+<g id="edge33" class="edge"><title>bb46_2&#45;&gt;bb46_3</title>
 <path fill="none" stroke="black" d="M3157.39,-303.022C3154.22,-288.057 3151.14,-271.307 3148.66,-255.667"/>
 <polygon fill="black" stroke="black" points="3152.09,-254.938 3147.12,-245.579 3145.17,-255.992 3152.09,-254.938"/>
 </g>
-<!-- bb50_4 -->
-<g id="node32" class="node"><title>bb50_4</title>
+<!-- bb46_4 -->
+<g id="node32" class="node"><title>bb46_4</title>
 <ellipse fill="none" stroke="black" cx="3348" cy="-197.296" rx="120.417" ry="48.1667"/>
 <text text-anchor="middle" x="3348" y="-216.096" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="3348" y="-201.096" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$52 = nil</text>
 <text text-anchor="middle" x="3348" y="-186.096" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$56 = return &lt;ret&gt;$52</text>
 <text text-anchor="middle" x="3348" y="-171.096" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb50_2&#45;&gt;bb50_4 -->
-<g id="edge34" class="edge"><title>bb50_2&#45;&gt;bb50_4</title>
+<!-- bb46_2&#45;&gt;bb46_4 -->
+<g id="edge34" class="edge"><title>bb46_2&#45;&gt;bb46_4</title>
 <path fill="none" stroke="black" d="M3219.16,-309.109C3241.12,-290.225 3267.43,-267.593 3290.54,-247.719"/>
 <polygon fill="black" stroke="black" points="3292.94,-250.268 3298.24,-241.094 3288.38,-244.961 3292.94,-250.268"/>
 </g>
-<!-- bb50_3&#45;&gt;bb50_2 -->
-<g id="edge35" class="edge"><title>bb50_3&#45;&gt;bb50_2</title>
+<!-- bb46_3&#45;&gt;bb46_2 -->
+<g id="edge35" class="edge"><title>bb46_3&#45;&gt;bb46_2</title>
 <path fill="none" stroke="black" d="M3159.47,-244.315C3162.67,-259.348 3165.79,-276.237 3168.29,-292.016"/>
 <polygon fill="black" stroke="black" points="3164.88,-292.837 3169.85,-302.194 3171.8,-291.78 3164.88,-292.837"/>
 </g>
-<!-- bb50_4&#45;&gt;bb50_1 -->
-<g id="edge36" class="edge"><title>bb50_4&#45;&gt;bb50_1</title>
+<!-- bb46_4&#45;&gt;bb46_1 -->
+<g id="edge36" class="edge"><title>bb46_4&#45;&gt;bb46_1</title>
 <path fill="none" stroke="black" d="M3348,-148.854C3348,-133.872 3348,-117.323 3348,-102.348"/>
 <polygon fill="black" stroke="black" points="3351.5,-102.27 3348,-92.2698 3344.5,-102.27 3351.5,-102.27"/>
 </g>

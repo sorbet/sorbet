@@ -2,21 +2,21 @@ digraph "side_effects.rb"{
 subgraph "cluster_::Side#foo" {
     label = "::Side#foo";
     color = blue;
-    bb29_0 [shape = invhouse];
-    bb29_1 [shape = parallelogram];
+    bb25_0 [shape = invhouse];
+    bb25_1 [shape = parallelogram];
 
-    bb29_0 [label = "(a, statTmp$3, statTmp$4)\na = 1\nstatTmp$3 = a\nstatTmp$4 = a\nifTmp$6 = true\nifTmp$6"];
-    bb29_0 -> bb29_2;
-    bb29_0 -> bb29_3;
+    bb25_0 [label = "(a, statTmp$3, statTmp$4)\na = 1\nstatTmp$3 = a\nstatTmp$4 = a\nifTmp$6 = true\nifTmp$6"];
+    bb25_0 -> bb25_2;
+    bb25_0 -> bb25_3;
 
-    bb29_1 [label = "()\n<never>"];
-    bb29_1 -> bb29_1;
-    bb29_2 [label = "(a, statTmp$3, statTmp$4)\na = true\n<always>"];
-    bb29_2 -> bb29_4;
-    bb29_3 [label = "(a, statTmp$3, statTmp$4)\na = 2\n<always>"];
-    bb29_3 -> bb29_4;
-    bb29_4 [label = "(a, statTmp$3, statTmp$4)\n<ret>$0 = statTmp$3.foo(statTmp$4, a)\n<ret>$7 = return <ret>$0\n<never>"];
-    bb29_4 -> bb29_1;
+    bb25_1 [label = "()\n<never>"];
+    bb25_1 -> bb25_1;
+    bb25_2 [label = "(a, statTmp$3, statTmp$4)\na = true\n<always>"];
+    bb25_2 -> bb25_4;
+    bb25_3 [label = "(a, statTmp$3, statTmp$4)\na = 2\n<always>"];
+    bb25_3 -> bb25_4;
+    bb25_4 [label = "(a, statTmp$3, statTmp$4)\n<ret>$0 = statTmp$3.foo(statTmp$4, a)\n<ret>$7 = return <ret>$0\n<never>"];
+    bb25_4 -> bb25_1;
 }
 
 }

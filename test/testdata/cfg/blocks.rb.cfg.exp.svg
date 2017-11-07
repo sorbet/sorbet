@@ -13,27 +13,27 @@
 <polygon fill="none" stroke="blue" points="8,-8 8,-277.868 306,-277.868 306,-8 8,-8"/>
 <text text-anchor="middle" x="157" y="-262.668" font-family="Times,serif" font-size="14.00">::BlockTest#block_pass</text>
 </g>
-<!-- bb29_0 -->
-<g id="node1" class="node"><title>bb29_0</title>
+<!-- bb25_0 -->
+<g id="node1" class="node"><title>bb25_0</title>
 <polygon fill="none" stroke="black" points="16.0613,-169.088 157,-128.066 297.939,-169.088 297.807,-235.464 16.1929,-235.464 16.0613,-169.088"/>
 <text text-anchor="middle" x="157" y="-206.234" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="157" y="-191.234" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$0 = NotSupported()</text>
 <text text-anchor="middle" x="157" y="-176.234" font-family="Times,serif" font-size="14.00">&lt;ret&gt;$2 = return &lt;ret&gt;$0</text>
 <text text-anchor="middle" x="157" y="-161.234" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb29_1 -->
-<g id="node2" class="node"><title>bb29_1</title>
+<!-- bb25_1 -->
+<g id="node2" class="node"><title>bb25_1</title>
 <polygon fill="none" stroke="black" points="222.131,-92 118.522,-92 91.8686,-16 195.478,-16 222.131,-92"/>
 <text text-anchor="middle" x="157" y="-57.8" font-family="Times,serif" font-size="14.00">()</text>
 <text text-anchor="middle" x="157" y="-42.8" font-family="Times,serif" font-size="14.00">&lt;never&gt;</text>
 </g>
-<!-- bb29_0&#45;&gt;bb29_1 -->
-<g id="edge1" class="edge"><title>bb29_0&#45;&gt;bb29_1</title>
+<!-- bb25_0&#45;&gt;bb25_1 -->
+<g id="edge1" class="edge"><title>bb25_0&#45;&gt;bb25_1</title>
 <path fill="none" stroke="black" d="M157,-128.02C157,-119.439 157,-110.69 157,-102.368"/>
 <polygon fill="black" stroke="black" points="160.5,-102.1 157,-92.0998 153.5,-102.1 160.5,-102.1"/>
 </g>
-<!-- bb29_1&#45;&gt;bb29_1 -->
-<g id="edge2" class="edge"><title>bb29_1&#45;&gt;bb29_1</title>
+<!-- bb25_1&#45;&gt;bb25_1 -->
+<g id="edge2" class="edge"><title>bb25_1&#45;&gt;bb25_1</title>
 <path fill="none" stroke="black" d="M217.289,-78.0838C230.612,-75.8209 240.315,-67.793 240.315,-54 240.315,-38.0519 227.343,-29.8111 210.802,-29.2777"/>
 <polygon fill="black" stroke="black" points="210.505,-25.7888 200.721,-29.8542 210.905,-32.7774 210.505,-25.7888"/>
 </g>
