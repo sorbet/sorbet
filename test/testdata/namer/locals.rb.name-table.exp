@@ -1,0 +1,13 @@
+class Opus ()
+class TestLocals (Object)
+  method method ()
+    field a
+    field b
+    field c
+    method <block>$0 ()
+      field b
+      method <block>$1 ()
+    method <block>$2 (a, <todo sym>)
+      field a
+      field b
+

@@ -210,6 +210,16 @@ public:
     virtual std::string nodeName();
 };
 
+class ShadowArg : public Reference {
+public:
+    std::unique_ptr<Reference> expr;
+
+    ShadowArg(std::unique_ptr<Reference> expr);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+};
+
 class Nil : public Expression {
 public:
     Nil(){};
@@ -401,6 +411,7 @@ class Block : public Expression {
 public:
     std::vector<std::unique_ptr<Expression>> args;
     std::unique_ptr<Expression> body;
+    SymbolRef symbol;
 
     Block(std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> body);
     virtual std::string toString(GlobalState &gs, int tabs = 0);

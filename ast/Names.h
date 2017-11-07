@@ -109,7 +109,13 @@ struct RawName {
 };
 CheckSize(RawName, 16, 8);
 
-enum UniqueNameKind : u2 { Parser, Desugar, CFG, Singleton };
+enum UniqueNameKind : u2 {
+    Parser,
+    Desugar,
+    Namer,
+    CFG,
+    Singleton,
+};
 
 struct UniqueName {
     NameRef original;
@@ -273,6 +279,12 @@ public:
 
     static inline NameRef attachedClass() {
         return NameRef(31);
+    }
+
+    // Used to generate temporary names for entering blocks into the symbol
+    // table.
+    static inline NameRef blockTemp() {
+        return NameRef(32);
     }
 };
 

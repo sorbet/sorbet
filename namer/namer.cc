@@ -26,7 +26,26 @@ class NameInserter {
         return ctx.state.enterClassSymbol(newOwner, constLit->cnst);
     }
 
-    vector<unordered_map<ast::NameRef, ast::SymbolRef>> namesForLocals;
+    ast::Ident *arg2Ident(ast::Reference *arg) {
+        while (true) {
+            if (ast::Ident *id = dynamic_cast<ast::Ident *>(arg)) {
+                return id;
+            }
+            typecase(arg,
+
+                     [&](ast::RestArg *rest) { arg = rest->expr.get(); },
+                     [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
+                     [&](ast::OptionalArg *opt) { arg = opt->expr.get(); },
+                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); });
+        }
+    }
+
+    struct LocalFrame {
+        bool is_block;
+        unordered_map<ast::NameRef, ast::SymbolRef> locals;
+    };
+
+    vector<LocalFrame> scopeStack;
 
     unique_ptr<ast::Expression> addAncestor(ast::Context ctx, ast::ClassDef *klass, unique_ptr<ast::Statement> &node) {
         auto send = dynamic_cast<ast::Send *>(node.get());
@@ -69,12 +88,12 @@ class NameInserter {
 public:
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
-        namesForLocals.emplace_back();
+        scopeStack.emplace_back();
         return klass;
     }
 
     ast::ClassDef *postTransformClassDef(ast::Context ctx, ast::ClassDef *klass) {
-        namesForLocals.pop_back();
+        scopeStack.pop_back();
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         auto toRemove =
             remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Statement> &line) {
@@ -90,8 +109,20 @@ public:
         return klass;
     }
 
+    void fillInArgs(ast::Context ctx, vector<unique_ptr<ast::Expression>> &args, ast::Symbol &symbol) {
+        // Fill in the arity right with TODOs
+        for (auto &arg : args) {
+            if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
+                postTransformIdent(ctx.withOwner(symbol.ref(ctx)), iarg);
+                symbol.argumentsOrMixins.push_back(iarg->symbol);
+            } else {
+                symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
+            }
+        }
+    }
+
     ast::MethodDef *preTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
-        namesForLocals.emplace_back();
+        scopeStack.emplace_back();
         ast::SymbolRef owner = ownerFromContext(ctx);
         if (method->isSelf) {
             owner = owner.info(ctx).singletonClass(ctx);
@@ -99,30 +130,60 @@ public:
 
         method->symbol = ctx.state.enterSymbol(owner, method->name, true);
         ast::Symbol &symbol = method->symbol.info(ctx);
-        // Fill in the arity right with TODOs
-        for (auto &arg : method->args) {
-            if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
-                postTransformIdent(ctx.withOwner(method->symbol), iarg);
-                symbol.argumentsOrMixins.push_back(iarg->symbol);
-            } else {
-                symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
-            }
-        }
+        fillInArgs(ctx, method->args, symbol);
         symbol.definitionLoc = method->loc;
 
         return method;
     }
 
     ast::MethodDef *postTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
-        namesForLocals.pop_back();
+        scopeStack.pop_back();
         return method;
+    }
+
+    ast::Block *preTransformBlock(ast::Context ctx, ast::Block *blk) {
+        ast::SymbolRef owner = ownerFromContext(ctx);
+        blk->symbol = ctx.state.enterSymbol(
+            owner, ctx.state.freshNameUnique(ast::UniqueNameKind::Namer, ast::Names::blockTemp()), true);
+        ast::Symbol &symbol = blk->symbol.info(ctx);
+
+        scopeStack.emplace_back();
+        auto &parent = *(scopeStack.end() - 2);
+        auto &frame = scopeStack.back();
+        frame.is_block = true;
+
+        // We inherit our parent's locals
+        for (auto &binding : parent.locals) {
+            frame.locals.insert(binding);
+        }
+        // Except that any arguments we have exist in our own frame
+        for (auto &arg : blk->args) {
+            ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
+            if (ref == nullptr)
+                continue;
+            ast::Ident *id = arg2Ident(ref);
+            if (id->symbol != ctx.state.defn_lvar_todo())
+                continue;
+
+            frame.locals.erase(id->name);
+        }
+
+        fillInArgs(ctx, blk->args, symbol);
+        return blk;
+    }
+
+    ast::Block *postTransformBlock(ast::Context ctx, ast::Block *blk) {
+        scopeStack.pop_back();
+        return blk;
     }
 
     ast::Ident *postTransformIdent(ast::Context ctx, ast::Ident *ident) {
         if (ident->symbol == ctx.state.defn_lvar_todo()) {
-            ast::SymbolRef &cur = namesForLocals.back()[ident->name];
+            auto &frame = scopeStack.back();
+            ast::SymbolRef &cur = frame.locals[ident->name];
             if (!cur.exists()) {
                 cur = ctx.state.enterSymbol(ctx.owner, ident->name, false);
+                frame.locals[ident->name] = cur;
             }
             ident->symbol = cur;
         }
@@ -130,16 +191,7 @@ public:
     }
 
     ast::Self *postTransformSelf(ast::Context ctx, ast::Self *self) {
-        ast::Symbol &info = ctx.owner.info(ctx);
-        if (info.isMethod()) {
-            self->claz = info.owner;
-        } else {
-            Error::check(info.isClass());
-            self->claz = info.singletonClass(ctx);
-        }
-
-        Error::check(self->claz.info(ctx).isClass());
-
+        self->claz = ctx.selfClass();
         return self;
     }
 
@@ -154,7 +206,7 @@ private:
     }
 
     NameInserter() {
-        namesForLocals.emplace_back();
+        scopeStack.emplace_back();
     }
 };
 

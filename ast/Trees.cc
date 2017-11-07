@@ -106,6 +106,8 @@ KeywordArg::KeywordArg(unique_ptr<Reference> expr) : expr(move(expr)) {}
 OptionalArg::OptionalArg(unique_ptr<Reference> expr, unique_ptr<Expression> default_)
     : expr(move(expr)), default_(move(default_)) {}
 
+ShadowArg::ShadowArg(unique_ptr<Reference> expr) : expr(move(expr)) {}
+
 FloatLit::FloatLit(float value) : value(value) {}
 
 IntLit::IntLit(int value) : value(value) {}
@@ -136,9 +138,15 @@ InsSeq::InsSeq(vector<unique_ptr<Statement>> &&stats, unique_ptr<Expression> exp
 
 void printElems(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
     bool first = true;
+    bool didshadow = false;
     for (auto &a : args) {
         if (!first) {
-            buf << ", ";
+            if (dynamic_cast<ShadowArg *>(a.get()) && !didshadow) {
+                buf << "; ";
+                didshadow = true;
+            } else {
+                buf << ", ";
+            }
         }
         first = false;
         buf << a->toString(gs, tabs + 1);
@@ -736,6 +744,10 @@ string OptionalArg::toString(GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs) + " = " + this->default_->toString(gs, tabs);
 }
 
+string ShadowArg::toString(GlobalState &gs, int tabs) {
+    return this->expr->toString(gs, tabs);
+}
+
 string NotSupported::nodeName() {
     return "<Not Supported (" + why + ")>";
 }
@@ -894,6 +906,14 @@ string OptionalArg::showRaw(GlobalState &gs, int tabs) {
 
 string OptionalArg::nodeName() {
     return "OptionalArg";
+}
+
+string ShadowArg::showRaw(GlobalState &gs, int tabs) {
+    return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
+}
+
+string ShadowArg::nodeName() {
+    return "ShadowArg";
 }
 } // namespace ast
 } // namespace ruby_typer

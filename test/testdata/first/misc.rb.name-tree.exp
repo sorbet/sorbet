@@ -107,7 +107,7 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(<singleton class:<root>>).proc() do |<Not Supported (Shadowarg)>|
+  self(<singleton class:<root>>).proc() do |x<todo lvar sym>|
     <emptyTree>
   end
   break(self(TODO).foo(1) do ||

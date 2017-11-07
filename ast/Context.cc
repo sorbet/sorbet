@@ -99,6 +99,9 @@ static UTF8Desc attachedClass_DESC{(char *)attachedClass, (int)strlen(attachedCl
 static const char *blockReturnTemp = "<blockret>";
 static UTF8Desc blockReturnTemp_DESC{(char *)blockReturnTemp, (int)strlen(blockReturnTemp)};
 
+static const char *blockTemp = "<block>";
+static UTF8Desc blockTemp_DESC{(char *)blockTemp, (int)strlen(blockTemp)};
+
 static const char *no_symbol_str = "<none>";
 static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
 
@@ -250,6 +253,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef nilable_id = enterNameUTF8(nilable_DESC);
     NameRef singletonClass_id = enterNameUTF8(singletonClass_DESC);
     NameRef attachedClass_id = enterNameUTF8(attachedClass_DESC);
+    NameRef blockTemp_id = enterNameUTF8(blockTemp_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -282,6 +286,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(nilable_id == Names::nilable()));
     DEBUG_ONLY(Error::check(singletonClass_id == Names::singletonClass()));
     DEBUG_ONLY(Error::check(attachedClass_id == Names::attachedClass()));
+    DEBUG_ONLY(Error::check(blockTemp_id == Names::blockTemp()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -617,6 +622,19 @@ string GlobalState::toString() {
         os << child;
     }
     return os.str();
+}
+
+SymbolRef Context::selfClass() {
+    Symbol &info = this->owner.info(this->state);
+    if (info.isClass())
+        return info.singletonClass(this->state);
+
+    SymbolRef owner = this->owner;
+    while (!owner.info(this->state).isClass()) {
+        Error::check(owner.exists());
+        owner = owner.info(this->state).owner;
+    }
+    return owner;
 }
 
 } // namespace ast

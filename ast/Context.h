@@ -219,6 +219,12 @@ public:
     Context(GlobalState &state, SymbolRef owner) : state(state), owner(owner) {}
     Context(const Context &other) : state(other.state), owner(other.owner) {}
 
+    // Returns a SymbolRef corresponding to the class `self.class` for code
+    // executed in this Context, or, if `self` is a class,
+    // `self.singleton_class` (We model classes as being normal instances of
+    // their singleton classes for most purposes)
+    SymbolRef selfClass();
+
     Context withOwner(SymbolRef sym) {
         Context r = Context(*this);
         r.owner = sym;

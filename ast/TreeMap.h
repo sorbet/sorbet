@@ -499,6 +499,15 @@ private:
                 i++;
             }
 
+            if (v->block != nullptr) {
+                auto oblock = v->block.get();
+                auto nblock = mapIt(oblock, ctx);
+                if (oblock != nblock) {
+                    Error::check(dynamic_cast<Block *>(nblock) != nullptr);
+                    v->block.reset(dynamic_cast<Block *>(nblock));
+                }
+            }
+
             if (HAS_MEMBER_postTransformSend<FUNC>::value) {
                 return PostPonePostTransform_Send<FUNC, HAS_MEMBER_postTransformSend<FUNC>::value>::call(ctx, v, func);
             }
@@ -676,8 +685,22 @@ private:
             }
             return v;
         } else if (Block *v = dynamic_cast<Block *>(what)) {
-            // Error::notImplemented();
-            return what;
+            if (HAS_MEMBER_preTransformBlock<FUNC>::value) {
+                v = PostPonePreTransform_Block<FUNC, HAS_MEMBER_preTransformBlock<FUNC>::value>::call(ctx, v, func);
+            }
+
+            auto originalBody = v->body.get();
+            auto newBody = mapIt(originalBody, ctx.withOwner(v->symbol));
+            if (newBody != originalBody) {
+                Error::check(dynamic_cast<Expression *>(newBody) != nullptr);
+                v->body.reset(dynamic_cast<Expression *>(newBody));
+            }
+
+            if (HAS_MEMBER_postTransformBlock<FUNC>::value) {
+                return PostPonePostTransform_Block<FUNC, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(ctx, v,
+                                                                                                           func);
+            }
+            return v;
         } else if (InsSeq *v = dynamic_cast<InsSeq *>(what)) {
             if (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
                 v = PostPonePreTransform_InsSeq<FUNC, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(ctx, v, func);
