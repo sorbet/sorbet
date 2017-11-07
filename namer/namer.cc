@@ -26,14 +26,12 @@ class NameInserter {
         return ctx.state.enterClassSymbol(newOwner, constLit->cnst);
     }
 
-    ast::Ident *arg2Ident(ast::Reference *arg) {
+    ast::NameReference *arg2NameRef(ast::Reference *arg) {
         while (true) {
-            if (ast::Ident *id = dynamic_cast<ast::Ident *>(arg)) {
-                return id;
+            if (ast::NameReference *nm = dynamic_cast<ast::NameReference *>(arg)) {
+                return nm;
             }
-            typecase(arg,
-
-                     [&](ast::RestArg *rest) { arg = rest->expr.get(); },
+            typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
                      [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
                      [&](ast::OptionalArg *opt) { arg = opt->expr.get(); },
                      [&](ast::ShadowArg *opt) { arg = opt->expr.get(); });
@@ -112,9 +110,16 @@ public:
     void fillInArgs(ast::Context ctx, vector<unique_ptr<ast::Expression>> &args, ast::Symbol &symbol) {
         // Fill in the arity right with TODOs
         for (auto &arg : args) {
-            if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
-                postTransformIdent(ctx.withOwner(symbol.ref(ctx)), iarg);
-                symbol.argumentsOrMixins.push_back(iarg->symbol);
+            if (auto *nmarg = dynamic_cast<ast::NameReference *>(arg.get())) {
+                auto tx = postTransformNameReference(ctx.withOwner(symbol.ref(ctx)), nmarg);
+                if (tx != nmarg) {
+                    ast::Ident *id = dynamic_cast<ast::Ident *>(tx);
+                    Error::check(id != nullptr);
+                    symbol.argumentsOrMixins.push_back(id->symbol);
+                    arg.reset(tx);
+                } else {
+                    symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
+                }
             } else {
                 symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
             }
@@ -161,11 +166,11 @@ public:
             ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
             if (ref == nullptr)
                 continue;
-            ast::Ident *id = arg2Ident(ref);
-            if (id->symbol != ctx.state.defn_lvar_todo())
+            ast::NameReference *nm = arg2NameRef(ref);
+            if (nm->kind != ast::NameReference::Local)
                 continue;
 
-            frame.locals.erase(id->name);
+            frame.locals.erase(nm->name);
         }
 
         fillInArgs(ctx, blk->args, symbol);
@@ -177,17 +182,17 @@ public:
         return blk;
     }
 
-    ast::Ident *postTransformIdent(ast::Context ctx, ast::Ident *ident) {
-        if (ident->symbol == ctx.state.defn_lvar_todo()) {
+    ast::Expression *postTransformNameReference(ast::Context ctx, ast::NameReference *nm) {
+        if (nm->kind == ast::NameReference::Local) {
             auto &frame = scopeStack.back();
-            ast::SymbolRef &cur = frame.locals[ident->name];
+            ast::SymbolRef &cur = frame.locals[nm->name];
             if (!cur.exists()) {
-                cur = ctx.state.enterFieldSymbol(ctx.owner, ident->name);
-                frame.locals[ident->name] = cur;
+                cur = ctx.state.enterFieldSymbol(ctx.owner, nm->name);
+                frame.locals[nm->name] = cur;
             }
-            ident->symbol = cur;
+            return new ast::Ident(nm->loc, cur);
         }
-        return ident;
+        return nm;
     }
 
     ast::Self *postTransformSelf(ast::Context ctx, ast::Self *self) {

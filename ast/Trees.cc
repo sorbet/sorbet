@@ -89,13 +89,11 @@ Return::Return(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(mo
 
 Yield::Yield(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-Ident::Ident(Loc loc, SymbolRef symbol) : Reference(loc), symbol(symbol), name(0) {
-    Error::check(!symbol.isPlaceHolder()); // symbol is a valid symbol
+Ident::Ident(Loc loc, SymbolRef symbol) : Reference(loc), symbol(symbol) {
+    Error::check(symbol.exists());
 }
 
-Ident::Ident(Loc loc, NameRef name, SymbolRef symbol) : Reference(loc), symbol(symbol), name(name) {
-    Error::check(symbol.isPlaceHolder()); // symbol is a sentinel
-}
+NameReference::NameReference(Loc loc, VarKind kind, NameRef name) : Reference(loc), kind(kind), name(name) {}
 
 Assign::Assign(Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
@@ -424,11 +422,7 @@ string ConstantLit::showRaw(GlobalState &gs, int tabs) {
 }
 
 string Ident::toString(GlobalState &gs, int tabs) {
-    if (!symbol.isPlaceHolder()) {
-        return this->symbol.info(gs, true).fullName(gs);
-    } else {
-        return this->name.name(gs).toString(gs) + this->symbol.info(gs, true).name.name(gs).toString(gs);
-    }
+    return this->symbol.info(gs, true).fullName(gs);
 }
 
 string Ident::showRaw(GlobalState &gs, int tabs) {
@@ -436,10 +430,40 @@ string Ident::showRaw(GlobalState &gs, int tabs) {
     buf << "Ident{" << endl;
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.info(gs, true).name.name(gs).toString(gs) << endl;
-    printTabs(buf, tabs + 1);
-    buf << "name = " << (name.exists() ? this->name.name(gs).toString(gs) : "<none>") << endl;
     printTabs(buf, tabs);
     buf << "}";
+    return buf.str();
+}
+
+string NameReference::toString(GlobalState &gs, int tabs) {
+    return this->name.toString(gs);
+}
+
+string NameReference::showRaw(GlobalState &gs, int tabs) {
+    stringstream buf;
+    buf << "NameReference{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "kind = ";
+    switch (this->kind) {
+        case Local:
+            buf << "Local";
+            break;
+        case Instance:
+            buf << "Instance";
+            break;
+        case Class:
+            buf << "Class";
+            break;
+        case Global:
+            buf << "Global";
+            break;
+    }
+    buf << endl;
+    printTabs(buf, tabs + 1);
+    buf << "name = " << this->name.toString(gs) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+
     return buf.str();
 }
 
@@ -801,7 +825,9 @@ string While::nodeName() {
 string Ident::nodeName() {
     return "Ident";
 }
-
+string NameReference::nodeName() {
+    return "NameReference";
+}
 string Return::nodeName() {
     return "Return";
 }

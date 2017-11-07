@@ -181,10 +181,25 @@ public:
 class Ident : public Reference {
 public:
     SymbolRef symbol;
-    NameRef name;
 
     Ident(Loc loc, SymbolRef symbol);
-    Ident(Loc loc, NameRef name, SymbolRef symbol);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+};
+
+class NameReference : public Reference {
+public:
+    enum VarKind {
+        Local,
+        Instance,
+        Class,
+        Global,
+    };
+    VarKind kind;
+    NameRef name;
+
+    NameReference(Loc loc, VarKind kind, NameRef name);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
