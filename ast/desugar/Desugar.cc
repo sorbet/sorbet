@@ -60,11 +60,15 @@ unique_ptr<Statement> mkIdent(Loc loc, SymbolRef symbol) {
 }
 
 unique_ptr<Statement> cpIdent(Loc loc, Ident &id) {
-    if (id.symbol.isSynthetic()) {
-        return make_unique<Ident>(loc, id.name, id.symbol);
-    } else {
-        return make_unique<Ident>(loc, id.symbol);
-    }
+    return make_unique<Ident>(loc, id.symbol);
+}
+
+unique_ptr<Statement> cpRef(Loc loc, Reference &name) {
+    if (NameReference *nm = dynamic_cast<NameReference *>(&name))
+        return make_unique<NameReference>(loc, nm->kind, nm->name);
+    if (Ident *id = dynamic_cast<Ident *>(&name))
+        return make_unique<Ident>(loc, id->symbol);
+    Error::notImplemented();
 }
 
 unique_ptr<Statement> mkAssign(Loc loc, unique_ptr<Statement> &lhs, unique_ptr<Statement> &rhs) {
@@ -141,8 +145,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
         what.get(),
         [&](parser::And *a) {
             auto lhs = node2TreeImpl(ctx, a->left);
-            if (auto i = dynamic_cast<Ident *>(lhs.get())) {
-                auto cond = cpIdent(what->loc, *i);
+            if (auto i = dynamic_cast<Reference *>(lhs.get())) {
+                auto cond = cpRef(what->loc, *i);
                 auto iff = mkIf(what->loc, move(cond), node2TreeImpl(ctx, a->right), move(lhs));
                 result.swap(iff);
             } else {
@@ -158,8 +162,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
         },
         [&](parser::Or *a) {
             auto lhs = node2TreeImpl(ctx, a->left);
-            if (auto i = dynamic_cast<Ident *>(lhs.get())) {
-                auto cond = cpIdent(what->loc, *i);
+            if (auto i = dynamic_cast<Reference *>(lhs.get())) {
+                auto cond = cpRef(what->loc, *i);
                 mkIf(what->loc, move(cond), move(lhs), node2TreeImpl(ctx, a->right));
             } else {
                 SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::orOr(), ctx.owner);
@@ -186,10 +190,10 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                 auto iff = mkIf(what->loc, cond, body, elsep);
                 auto wrapped = mkInsSeq1(what->loc, move(temp), Expression::fromStatement(iff));
                 result.swap(wrapped);
-            } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
-                auto cond = cpIdent(what->loc, *i);
+            } else if (auto i = dynamic_cast<Reference *>(recv.get())) {
+                auto cond = cpRef(what->loc, *i);
                 auto body = mkAssign(what->loc, recv, arg);
-                auto elsep = cpIdent(what->loc, *i);
+                auto elsep = cpRef(what->loc, *i);
                 auto iff = mkIf(what->loc, cond, body, elsep);
                 result.swap(iff);
             } else {
@@ -210,10 +214,10 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                 auto iff = mkIf(what->loc, cond, elsep, body);
                 auto wrapped = mkInsSeq1(what->loc, move(temp), Expression::fromStatement(iff));
                 result.swap(wrapped);
-            } else if (auto i = dynamic_cast<Ident *>(recv.get())) {
-                auto cond = cpIdent(what->loc, *i);
+            } else if (auto i = dynamic_cast<Reference *>(recv.get())) {
+                auto cond = cpRef(what->loc, *i);
                 auto body = mkAssign(what->loc, recv, arg);
-                auto elsep = cpIdent(what->loc, *i);
+                auto elsep = cpRef(what->loc, *i);
                 auto iff = mkIf(what->loc, cond, elsep, body);
                 result.swap(iff);
 
@@ -369,42 +373,42 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             result.swap(res);
         },
         [&](parser::Arg *arg) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Local, arg->name);
             result.swap(res);
         },
         [&](parser::Restarg *arg) {
-            unique_ptr<Statement> res = make_unique<RestArg>(
-                what->loc, make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo()));
+            unique_ptr<Statement> res =
+                make_unique<RestArg>(what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name));
             result.swap(res);
         },
         [&](parser::Kwrestarg *arg) {
             unique_ptr<Statement> res = make_unique<RestArg>(
                 what->loc, make_unique<KeywordArg>(
-                               what->loc, make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo())));
+                               what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name)));
             result.swap(res);
         },
         [&](parser::Kwarg *arg) {
             unique_ptr<Statement> res = make_unique<KeywordArg>(
-                what->loc, make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo()));
+                what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name));
             result.swap(res);
         },
         [&](parser::Kwoptarg *arg) {
             unique_ptr<Statement> res = make_unique<OptionalArg>(
                 what->loc,
                 make_unique<KeywordArg>(what->loc,
-                                        make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo())),
+                                        make_unique<NameReference>(what->loc, NameReference::Local, arg->name)),
                 Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
             result.swap(res);
         },
         [&](parser::Optarg *arg) {
             unique_ptr<Statement> res = make_unique<OptionalArg>(
-                what->loc, make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo()),
+                what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name),
                 Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
             result.swap(res);
         },
         [&](parser::Shadowarg *arg) {
             unique_ptr<Statement> res = make_unique<ShadowArg>(
-                what->loc, make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo()));
+                what->loc, make_unique<NameReference>(what->loc, NameReference::Local, arg->name));
             result.swap(res);
         },
         [&](parser::DefMethod *method) {
@@ -479,61 +483,61 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             result.swap(res);
         },
         [&](parser::IVar *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_ivar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Instance, var->name);
             result.swap(res);
         },
         [&](parser::LVar *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_lvar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Local, var->name);
             result.swap(res);
         },
         [&](parser::GVar *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_gvar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Global, var->name);
             result.swap(res);
         },
         [&](parser::CVar *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_cvar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Class, var->name);
             result.swap(res);
         },
         [&](parser::IVar *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_ivar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Instance, var->name);
             result.swap(res);
         },
         [&](parser::LVarLhs *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_lvar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Local, var->name);
             result.swap(res);
         },
         [&](parser::GVarLhs *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_gvar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Global, var->name);
             result.swap(res);
         },
         [&](parser::CVarLhs *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_cvar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Class, var->name);
             result.swap(res);
         },
         [&](parser::IVarLhs *var) {
-            unique_ptr<Statement> res = make_unique<Ident>(what->loc, var->name, GlobalState::defn_ivar_todo());
+            unique_ptr<Statement> res = make_unique<NameReference>(what->loc, NameReference::Instance, var->name);
             result.swap(res);
         },
         [&](parser::IVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<Ident>(what->loc, asgn->name, GlobalState::defn_ivar_todo());
+            unique_ptr<Statement> lhs = make_unique<NameReference>(what->loc, NameReference::Instance, asgn->name);
             auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::LVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<Ident>(what->loc, asgn->name, GlobalState::defn_lvar_todo());
+            unique_ptr<Statement> lhs = make_unique<NameReference>(what->loc, NameReference::Local, asgn->name);
             auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::GVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<Ident>(what->loc, asgn->name, GlobalState::defn_gvar_todo());
+            unique_ptr<Statement> lhs = make_unique<NameReference>(what->loc, NameReference::Global, asgn->name);
             auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::CVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<Ident>(what->loc, asgn->name, GlobalState::defn_cvar_todo());
+            unique_ptr<Statement> lhs = make_unique<NameReference>(what->loc, NameReference::Class, asgn->name);
             auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
@@ -741,7 +745,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                                                           Names::squareBrackets(), make_unique<IntLit>(what->loc, i)));
                     snd->args.emplace_back(move(getElement));
                     stats.emplace_back(move(lh));
-                } else if (ast::Ident *snd = dynamic_cast<ast::Ident *>(lh.get())) {
+                } else if (ast::Reference *ref = dynamic_cast<ast::Reference *>(lh.get())) {
                     auto access = mkSend1(what->loc, mkIdent(what->loc, tempSym), Names::squareBrackets(),
                                           make_unique<IntLit>(what->loc, i));
                     unique_ptr<Statement> assign = mkAssign(what->loc, lh, access);
