@@ -192,6 +192,9 @@ static UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
 static const char *standardMethod = "standard_method";
 static UTF8Desc standardMethod_DESC{(char *)standardMethod, (int)strlen(standardMethod)};
 
+static const char *declareVariables = "declare_variables";
+static UTF8Desc declareVariables_DESC{(char *)declareVariables, (int)strlen(declareVariables)};
+
 static const char *returns = "returns";
 static UTF8Desc returns_DESC{(char *)returns, (int)strlen(returns)};
 
@@ -254,6 +257,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef singletonClass_id = enterNameUTF8(singletonClass_DESC);
     NameRef attachedClass_id = enterNameUTF8(attachedClass_DESC);
     NameRef blockTemp_id = enterNameUTF8(blockTemp_DESC);
+    NameRef declareVariables_id = enterNameUTF8(declareVariables_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -287,6 +291,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(singletonClass_id == Names::singletonClass()));
     DEBUG_ONLY(Error::check(attachedClass_id == Names::attachedClass()));
     DEBUG_ONLY(Error::check(blockTemp_id == Names::blockTemp()));
+    DEBUG_ONLY(Error::check(declareVariables_id == Names::declareVariables()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -604,7 +609,10 @@ SymbolRef Context::selfClass() {
     Symbol &info = this->owner.info(this->state);
     if (info.isClass())
         return info.singletonClass(this->state);
+    return this->contextClass();
+}
 
+SymbolRef Context::contextClass() {
     SymbolRef owner = this->owner;
     while (!owner.info(this->state).isClass()) {
         Error::check(owner.exists());
