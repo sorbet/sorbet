@@ -18,3 +18,5 @@ for src in "${rb_src[@]}"; do
         fi
     done
 done
+
+./tools/scripts/dot2svg.sh
