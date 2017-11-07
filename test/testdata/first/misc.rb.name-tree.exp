@@ -58,7 +58,7 @@ begin
   next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
-  def foo<foo>(x:, y: = 1, *z:)
+  def foo<foo>(x:, ::Object#foo#y, *z:)
     <emptyTree>
   #x
   <Not Supported (LineLiteral)>
@@ -81,7 +81,7 @@ begin
     #assignTmp$5
   end
   <Not Supported (NthRef)>
-  def foo<foo>(x = 1, *y)
+  def foo<foo>(::Object#foo#x, *y)
     <emptyTree>
   {#x => #y, <Not Supported (DSymbol)> => 1}
   <Not Supported (Preexe)>

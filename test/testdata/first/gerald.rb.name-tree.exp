@@ -5,7 +5,7 @@ begin
     class <emptyTree>::MatchTimeout<MatchTimeout> < (::<dynamic>)
       self(<singleton class:MatchTimeout>).attr_reader(:rule_token)
 
-      def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#initialize#message, rule_token: = "")
+      def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#initialize#message, ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token)
         begin
           super(message)
           ::Opus::CIBot::Gerald::MatchTimeout#@rule_token = ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token
