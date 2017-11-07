@@ -506,9 +506,16 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
              },
              [&](ast::Assign *a) {
                  auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
-                 Error::check(lhsIdent != nullptr);
-                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhsIdent->symbol, loops);
-                 rhsCont->exprs.emplace_back(target, a->loc, make_unique<Ident>(lhsIdent->symbol));
+                 ast::SymbolRef lhs;
+                 if (lhsIdent != nullptr) {
+                     lhs = lhsIdent->symbol;
+                 } else {
+                     // TODO(nelhage): Once namer is complete this should be a
+                     // fatal error
+                     lhs = ctx.state.defn_todo();
+                 }
+                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhs, loops);
+                 rhsCont->exprs.emplace_back(target, a->loc, make_unique<Ident>(lhs));
                  ret = rhsCont;
              },
              [&](ast::InsSeq *a) {
