@@ -1,0 +1,6 @@
+class A ()
+  class B ()
+    static-field C
+    static-field D
+class Opus ()
+
