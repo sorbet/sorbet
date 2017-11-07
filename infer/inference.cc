@@ -14,6 +14,14 @@ public:
 
     /** Note: any calls to this method INVALIDATE references returned by previous calls to this method */
     ast::TypeAndOrigins &getTypeAndOrigin(ast::SymbolRef symbol) {
+        static ast::TypeAndOrigins dynamicTypeAndOrigin;
+        if (symbol == ast::GlobalState::defn_dynamic()) {
+            if (!dynamicTypeAndOrigin.type) {
+                dynamicTypeAndOrigin.type = ast::Types::dynamic();
+                dynamicTypeAndOrigin.origins.push_back(ast::Loc::none(0));
+            }
+            return dynamicTypeAndOrigin;
+        }
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             vars.emplace_back(symbol);
