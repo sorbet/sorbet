@@ -12,6 +12,7 @@ public:
     vector<ast::SymbolRef> vars;
     vector<ast::TypeAndOrigins> types;
 
+    /** Note: any calls to this method INVALIDATE references returned by previous calls to this method */
     ast::TypeAndOrigins &getTypeAndOrigin(ast::SymbolRef symbol) {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
@@ -57,13 +58,15 @@ public:
                 }
             },
             [&](cfg::Send *send) {
-                auto &recvType = getTypeAndOrigin(send->recv);
-                vector<ast::TypeAndOrigins> args;
+                vector<ast::TypeAndOrigins>
+                    args; // Warning: do not make this be a reference vector. See comment on getTypeAndOrigin
 
                 args.reserve(send->args.size());
                 for (ast::SymbolRef arg : send->args) {
                     args.emplace_back(getTypeAndOrigin(arg));
                 }
+
+                auto &recvType = getTypeAndOrigin(send->recv);
                 tp = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
                 loc.push_back(bind.loc);
             },
