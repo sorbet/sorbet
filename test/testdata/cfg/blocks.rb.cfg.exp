@@ -1,12 +1,12 @@
 digraph "./test/testdata//cfg/blocks.rb"{
 subgraph "::BlockTest#block_pass" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb29_0 [shape = invhouse];
+    bb29_1 [shape = parallelogram];
 
-    bb0 [label = "()\n<ret>$0 = NotSupported()\n<ret>$2 = return <ret>$0\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb29_0 [label = "()\n<ret>$0 = NotSupported()\n<ret>$2 = return <ret>$0\n<never>"];
+    bb29_0 -> bb29_1;
+    bb29_1 [label = "()\n<never>"];
+    bb29_1 -> bb29_1;
 }
 
 }

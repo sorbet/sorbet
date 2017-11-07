@@ -1,134 +1,134 @@
 digraph "./test/testdata//infer/infer1.rb"{
 subgraph "::String#getbyte" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb29_0 [shape = invhouse];
+    bb29_1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$3 = self\n<ret>$2 = NotSupported()\n<ret>$4 = return <ret>$2\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb29_0 [label = "()\n<self>$3 = self\n<ret>$2 = NotSupported()\n<ret>$4 = return <ret>$2\n<never>"];
+    bb29_0 -> bb29_1;
+    bb29_1 [label = "()\n<never>"];
+    bb29_1 -> bb29_1;
 }
 
 subgraph "::Integer#+" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb32_0 [shape = invhouse];
+    bb32_1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$6 = self\n<ret>$5 = NotSupported()\n<ret>$7 = return <ret>$5\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb32_0 [label = "()\n<self>$6 = self\n<ret>$5 = NotSupported()\n<ret>$7 = return <ret>$5\n<never>"];
+    bb32_0 -> bb32_1;
+    bb32_1 [label = "()\n<never>"];
+    bb32_1 -> bb32_1;
 }
 
 subgraph "::Object#baz1" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb34_0 [shape = invhouse];
+    bb34_1 [shape = parallelogram];
 
-    bb0 [label = "()\na = foo\nb = a.getbyte(a)\n<ret>$13 = return b\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb34_0 [label = "()\na = foo\nb = a.getbyte(a)\n<ret>$13 = return b\n<never>"];
+    bb34_0 -> bb34_1;
+    bb34_1 [label = "()\n<never>"];
+    bb34_1 -> bb34_1;
 }
 
 subgraph "::Object#baz2" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb37_0 [shape = invhouse];
+    bb37_1 [shape = parallelogram];
 
-    bb0 [label = "()\na = foo\nstatTmp$18 = foo\nb = a.getbyte(statTmp$18)\n<ret>$19 = return b\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb37_0 [label = "()\na = foo\nstatTmp$18 = foo\nb = a.getbyte(statTmp$18)\n<ret>$19 = return b\n<never>"];
+    bb37_0 -> bb37_1;
+    bb37_1 [label = "()\n<never>"];
+    bb37_1 -> bb37_1;
 }
 
 subgraph "::Object#baz3" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb40_0 [shape = invhouse];
+    bb40_1 [shape = parallelogram];
 
-    bb0 [label = "()\nstatTmp$22 = foo\nstatTmp$23 = foo\nb = statTmp$22.getbyte(statTmp$23)\n<ret>$24 = return b\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb40_0 [label = "()\nstatTmp$22 = foo\nstatTmp$23 = foo\nb = statTmp$22.getbyte(statTmp$23)\n<ret>$24 = return b\n<never>"];
+    bb40_0 -> bb40_1;
+    bb40_1 [label = "()\n<never>"];
+    bb40_1 -> bb40_1;
 }
 
 subgraph "::Object#baz4" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb42_0 [shape = invhouse];
+    bb42_1 [shape = parallelogram];
 
-    bb0 [label = "()\nstatTmp$28 = self\nstatTmp$27 = statTmp$28.a()\nstatTmp$29 = foo\nb = statTmp$27.getbyte(statTmp$29)\n<ret>$30 = return b\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb42_0 [label = "()\nstatTmp$28 = self\nstatTmp$27 = statTmp$28.a()\nstatTmp$29 = foo\nb = statTmp$27.getbyte(statTmp$29)\n<ret>$30 = return b\n<never>"];
+    bb42_0 -> bb42_1;
+    bb42_1 [label = "()\n<never>"];
+    bb42_1 -> bb42_1;
 }
 
 subgraph "::Object#baz5" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb44_0 [shape = invhouse];
+    bb44_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$34 = true\nifTmp$34"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb44_0 [label = "()\nifTmp$34 = true\nifTmp$34"];
+    bb44_0 -> bb44_2;
+    bb44_0 -> bb44_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(b)\nb = 1\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "(b)\nb = foo\n<always>"];
-    bb3 -> bb4;
-    bb4 [label = "(b)\nstatTmp$35 = b\nstatTmp$36 = 1\nb = statTmp$35.getbyte(statTmp$36)\n<ret>$37 = return b\n<never>"];
-    bb4 -> bb1;
+    bb44_1 [label = "()\n<never>"];
+    bb44_1 -> bb44_1;
+    bb44_2 [label = "(b)\nb = 1\n<always>"];
+    bb44_2 -> bb44_4;
+    bb44_3 [label = "(b)\nb = foo\n<always>"];
+    bb44_3 -> bb44_4;
+    bb44_4 [label = "(b)\nstatTmp$35 = b\nstatTmp$36 = 1\nb = statTmp$35.getbyte(statTmp$36)\n<ret>$37 = return b\n<never>"];
+    bb44_4 -> bb44_1;
 }
 
 subgraph "::Object#baz6" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb46_0 [shape = invhouse];
+    bb46_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$41 = true\nifTmp$41"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb46_0 [label = "()\nifTmp$41 = true\nifTmp$41"];
+    bb46_0 -> bb46_2;
+    bb46_0 -> bb46_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(b)\nb = 1\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "(b)\nb = foo\n<always>"];
-    bb3 -> bb4;
-    bb4 [label = "(b)\nstatTmp$42 = foo\nstatTmp$43 = b\nb = statTmp$42.getbyte(statTmp$43)\n<ret>$44 = return b\n<never>"];
-    bb4 -> bb1;
+    bb46_1 [label = "()\n<never>"];
+    bb46_1 -> bb46_1;
+    bb46_2 [label = "(b)\nb = 1\n<always>"];
+    bb46_2 -> bb46_4;
+    bb46_3 [label = "(b)\nb = foo\n<always>"];
+    bb46_3 -> bb46_4;
+    bb46_4 [label = "(b)\nstatTmp$42 = foo\nstatTmp$43 = b\nb = statTmp$42.getbyte(statTmp$43)\n<ret>$44 = return b\n<never>"];
+    bb46_4 -> bb46_1;
 }
 
 subgraph "::Object#baz7" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb48_0 [shape = invhouse];
+    bb48_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$48 = true\nifTmp$48"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb48_0 [label = "()\nifTmp$48 = true\nifTmp$48"];
+    bb48_0 -> bb48_2;
+    bb48_0 -> bb48_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(b)\nb = 1\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "()\nstatTmp$47 = NotSupported()\n<always>"];
-    bb3 -> bb4;
-    bb4 [label = "(b)\nstatTmp$49 = foo\nstatTmp$50 = b\nb = statTmp$49.getbyte(statTmp$50)\n<ret>$51 = return b\n<never>"];
-    bb4 -> bb1;
+    bb48_1 [label = "()\n<never>"];
+    bb48_1 -> bb48_1;
+    bb48_2 [label = "(b)\nb = 1\n<always>"];
+    bb48_2 -> bb48_4;
+    bb48_3 [label = "()\nstatTmp$47 = NotSupported()\n<always>"];
+    bb48_3 -> bb48_4;
+    bb48_4 [label = "(b)\nstatTmp$49 = foo\nstatTmp$50 = b\nb = statTmp$49.getbyte(statTmp$50)\n<ret>$51 = return b\n<never>"];
+    bb48_4 -> bb48_1;
 }
 
 subgraph "::Object#baz8" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb50_0 [shape = invhouse];
+    bb50_1 [shape = parallelogram];
 
-    bb0 [label = "()\n<always>"];
-    bb0 -> bb2;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "()\nouterLoops: 1\nwhileTmp$54 = true\nwhileTmp$54"];
-    bb2 -> bb3;
-    bb2 -> bb4;
+    bb50_0 [label = "()\n<always>"];
+    bb50_0 -> bb50_2;
+    bb50_1 [label = "()\n<never>"];
+    bb50_1 -> bb50_1;
+    bb50_2 [label = "()\nouterLoops: 1\nwhileTmp$54 = true\nwhileTmp$54"];
+    bb50_2 -> bb50_3;
+    bb50_2 -> bb50_4;
 
-    bb3 [label = "()\nouterLoops: 1\nb = 1\n<always>"];
-    bb3 -> bb2;
-    bb4 [label = "()\n<ret>$52 = nil\n<ret>$56 = return <ret>$52\n<never>"];
-    bb4 -> bb1;
+    bb50_3 [label = "()\nouterLoops: 1\nb = 1\n<always>"];
+    bb50_3 -> bb50_2;
+    bb50_4 [label = "()\n<ret>$52 = nil\n<ret>$56 = return <ret>$52\n<never>"];
+    bb50_4 -> bb50_1;
 }
 
 }

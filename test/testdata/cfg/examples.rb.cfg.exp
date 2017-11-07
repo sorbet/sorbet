@@ -1,184 +1,184 @@
 digraph "./test/testdata//cfg/examples.rb"{
 subgraph "::Integer#+" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb29_0 [shape = invhouse];
+    bb29_1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$2 = self\n<ret>$1 = NotSupported()\n<ret>$3 = return <ret>$1\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb29_0 [label = "()\n<self>$2 = self\n<ret>$1 = NotSupported()\n<ret>$3 = return <ret>$1\n<never>"];
+    bb29_0 -> bb29_1;
+    bb29_1 [label = "()\n<never>"];
+    bb29_1 -> bb29_1;
 }
 
 subgraph "::Examples#i_like_ifs" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb32_0 [shape = invhouse];
+    bb32_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$6 = true\nifTmp$6"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb32_0 [label = "()\nifTmp$6 = true\nifTmp$6"];
+    bb32_0 -> bb32_2;
+    bb32_0 -> bb32_3;
 
-    bb1 [label = "(<ret>$4)\n<ret>$9 = return <ret>$4\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "()\nreturnTmp$7 = 1\n<ret>$4 = return returnTmp$7\n<never>"];
-    bb2 -> bb1;
-    bb3 [label = "()\nreturnTmp$8 = 2\n<ret>$4 = return returnTmp$8\n<never>"];
-    bb3 -> bb1;
+    bb32_1 [label = "(<ret>$4)\n<ret>$9 = return <ret>$4\n<never>"];
+    bb32_1 -> bb32_1;
+    bb32_2 [label = "()\nreturnTmp$7 = 1\n<ret>$4 = return returnTmp$7\n<never>"];
+    bb32_2 -> bb32_1;
+    bb32_3 [label = "()\nreturnTmp$8 = 2\n<ret>$4 = return returnTmp$8\n<never>"];
+    bb32_3 -> bb32_1;
 }
 
 subgraph "::Examples#i_like_exps" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb33_0 [shape = invhouse];
+    bb33_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$12 = true\nifTmp$12"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb33_0 [label = "()\nifTmp$12 = true\nifTmp$12"];
+    bb33_0 -> bb33_2;
+    bb33_0 -> bb33_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(<ret>$10)\n<ret>$10 = 1\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "(<ret>$10)\n<ret>$10 = 2\n<always>"];
-    bb3 -> bb4;
-    bb4 [label = "(<ret>$10)\n<ret>$13 = return <ret>$10\n<never>"];
-    bb4 -> bb1;
+    bb33_1 [label = "()\n<never>"];
+    bb33_1 -> bb33_1;
+    bb33_2 [label = "(<ret>$10)\n<ret>$10 = 1\n<always>"];
+    bb33_2 -> bb33_4;
+    bb33_3 [label = "(<ret>$10)\n<ret>$10 = 2\n<always>"];
+    bb33_3 -> bb33_4;
+    bb33_4 [label = "(<ret>$10)\n<ret>$13 = return <ret>$10\n<never>"];
+    bb33_4 -> bb33_1;
 }
 
 subgraph "::Examples#return_in_one_branch1" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb34_0 [shape = invhouse];
+    bb34_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$16 = true\nifTmp$16"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb34_0 [label = "()\nifTmp$16 = true\nifTmp$16"];
+    bb34_0 -> bb34_2;
+    bb34_0 -> bb34_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "()\nreturnTmp$17 = 1\n<ret>$14 = return returnTmp$17\n<never>"];
-    bb2 -> bb1;
-    bb3 [label = "(<ret>$14)\n<ret>$14 = 2\n<ret>$18 = return <ret>$14\n<never>"];
-    bb3 -> bb1;
+    bb34_1 [label = "()\n<never>"];
+    bb34_1 -> bb34_1;
+    bb34_2 [label = "()\nreturnTmp$17 = 1\n<ret>$14 = return returnTmp$17\n<never>"];
+    bb34_2 -> bb34_1;
+    bb34_3 [label = "(<ret>$14)\n<ret>$14 = 2\n<ret>$18 = return <ret>$14\n<never>"];
+    bb34_3 -> bb34_1;
 }
 
 subgraph "::Examples#return_in_one_branch2" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb35_0 [shape = invhouse];
+    bb35_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$21 = true\nifTmp$21"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb35_0 [label = "()\nifTmp$21 = true\nifTmp$21"];
+    bb35_0 -> bb35_2;
+    bb35_0 -> bb35_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(<ret>$19)\n<ret>$19 = 1\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "()\nreturnTmp$22 = 2\n<ret>$19 = return returnTmp$22\n<never>"];
-    bb3 -> bb1;
-    bb4 [label = "(<ret>$19)\n<ret>$23 = return <ret>$19\n<never>"];
-    bb4 -> bb1;
+    bb35_1 [label = "()\n<never>"];
+    bb35_1 -> bb35_1;
+    bb35_2 [label = "(<ret>$19)\n<ret>$19 = 1\n<always>"];
+    bb35_2 -> bb35_4;
+    bb35_3 [label = "()\nreturnTmp$22 = 2\n<ret>$19 = return returnTmp$22\n<never>"];
+    bb35_3 -> bb35_1;
+    bb35_4 [label = "(<ret>$19)\n<ret>$23 = return <ret>$19\n<never>"];
+    bb35_4 -> bb35_1;
 }
 
 subgraph "::Examples#variables" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb36_0 [shape = invhouse];
+    bb36_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$27 = true\nifTmp$27"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb36_0 [label = "()\nifTmp$27 = true\nifTmp$27"];
+    bb36_0 -> bb36_2;
+    bb36_0 -> bb36_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(a)\na = 1\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "(a)\na = 2\n<always>"];
-    bb3 -> bb4;
-    bb4 [label = "(a)\nifTmp$29 = false\nifTmp$29"];
-    bb4 -> bb5;
-    bb4 -> bb6;
+    bb36_1 [label = "()\n<never>"];
+    bb36_1 -> bb36_1;
+    bb36_2 [label = "(a)\na = 1\n<always>"];
+    bb36_2 -> bb36_4;
+    bb36_3 [label = "(a)\na = 2\n<always>"];
+    bb36_3 -> bb36_4;
+    bb36_4 [label = "(a)\nifTmp$29 = false\nifTmp$29"];
+    bb36_4 -> bb36_5;
+    bb36_4 -> bb36_6;
 
-    bb5 [label = "(a, b)\nb = 1\n<always>"];
-    bb5 -> bb7;
-    bb6 [label = "(a, b)\nb = 2\n<always>"];
-    bb6 -> bb7;
-    bb7 [label = "(a, b)\n<ret>$24 = a.+(b)\n<ret>$32 = return <ret>$24\n<never>"];
-    bb7 -> bb1;
+    bb36_5 [label = "(a, b)\nb = 1\n<always>"];
+    bb36_5 -> bb36_7;
+    bb36_6 [label = "(a, b)\nb = 2\n<always>"];
+    bb36_6 -> bb36_7;
+    bb36_7 [label = "(a, b)\n<ret>$24 = a.+(b)\n<ret>$32 = return <ret>$24\n<never>"];
+    bb36_7 -> bb36_1;
 }
 
 subgraph "::Examples#variables_and_loop" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb39_0 [shape = invhouse];
+    bb39_1 [shape = parallelogram];
 
-    bb0 [label = "()\nifTmp$36 = true\nifTmp$36"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb39_0 [label = "()\nifTmp$36 = true\nifTmp$36"];
+    bb39_0 -> bb39_2;
+    bb39_0 -> bb39_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(a)\na = 1\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "(a)\na = 2\n<always>"];
-    bb3 -> bb4;
-    bb4 [label = "()\n<always>"];
-    bb4 -> bb5;
-    bb5 [label = "(b)\nouterLoops: 1\nwhileTmp$38 = true\nwhileTmp$38"];
-    bb5 -> bb6;
-    bb5 -> bb7;
+    bb39_1 [label = "()\n<never>"];
+    bb39_1 -> bb39_1;
+    bb39_2 [label = "(a)\na = 1\n<always>"];
+    bb39_2 -> bb39_4;
+    bb39_3 [label = "(a)\na = 2\n<always>"];
+    bb39_3 -> bb39_4;
+    bb39_4 [label = "()\n<always>"];
+    bb39_4 -> bb39_5;
+    bb39_5 [label = "(b)\nouterLoops: 1\nwhileTmp$38 = true\nwhileTmp$38"];
+    bb39_5 -> bb39_6;
+    bb39_5 -> bb39_7;
 
-    bb6 [label = "(b)\nouterLoops: 1\nifTmp$40 = false\nifTmp$40"];
-    bb6 -> bb8;
-    bb6 -> bb9;
+    bb39_6 [label = "(b)\nouterLoops: 1\nifTmp$40 = false\nifTmp$40"];
+    bb39_6 -> bb39_8;
+    bb39_6 -> bb39_9;
 
-    bb7 [label = "(b)\nstatTmp$37 = nil\n<ret>$41 = return b\n<never>"];
-    bb7 -> bb1;
-    bb8 [label = "(b)\nouterLoops: 1\nb = 1\n<always>"];
-    bb8 -> bb10;
-    bb9 [label = "(b)\nouterLoops: 1\nb = 2\n<always>"];
-    bb9 -> bb10;
-    bb10 [label = "(b)\nouterLoops: 1\n<always>"];
-    bb10 -> bb5;
+    bb39_7 [label = "(b)\nstatTmp$37 = nil\n<ret>$41 = return b\n<never>"];
+    bb39_7 -> bb39_1;
+    bb39_8 [label = "(b)\nouterLoops: 1\nb = 1\n<always>"];
+    bb39_8 -> bb39_10;
+    bb39_9 [label = "(b)\nouterLoops: 1\nb = 2\n<always>"];
+    bb39_9 -> bb39_10;
+    bb39_10 [label = "(b)\nouterLoops: 1\n<always>"];
+    bb39_10 -> bb39_5;
 }
 
 subgraph "::Examples#variables_loop_if" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb42_0 [shape = invhouse];
+    bb42_1 [shape = parallelogram];
 
-    bb0 [label = "()\n<always>"];
-    bb0 -> bb2;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(b)\nouterLoops: 1\nwhileTmp$45 = true\nwhileTmp$45"];
-    bb2 -> bb3;
-    bb2 -> bb4;
+    bb42_0 [label = "()\n<always>"];
+    bb42_0 -> bb42_2;
+    bb42_1 [label = "()\n<never>"];
+    bb42_1 -> bb42_1;
+    bb42_2 [label = "(b)\nouterLoops: 1\nwhileTmp$45 = true\nwhileTmp$45"];
+    bb42_2 -> bb42_3;
+    bb42_2 -> bb42_4;
 
-    bb3 [label = "(b)\nouterLoops: 1\nifTmp$47 = false\nifTmp$47"];
-    bb3 -> bb5;
-    bb3 -> bb6;
+    bb42_3 [label = "(b)\nouterLoops: 1\nifTmp$47 = false\nifTmp$47"];
+    bb42_3 -> bb42_5;
+    bb42_3 -> bb42_6;
 
-    bb4 [label = "(b)\nstatTmp$44 = nil\n<ret>$48 = return b\n<never>"];
-    bb4 -> bb1;
-    bb5 [label = "(b)\nouterLoops: 1\nb = 1\n<always>"];
-    bb5 -> bb7;
-    bb6 [label = "(b)\nouterLoops: 1\nb = 2\n<always>"];
-    bb6 -> bb7;
-    bb7 [label = "(b)\nouterLoops: 1\n<always>"];
-    bb7 -> bb2;
+    bb42_4 [label = "(b)\nstatTmp$44 = nil\n<ret>$48 = return b\n<never>"];
+    bb42_4 -> bb42_1;
+    bb42_5 [label = "(b)\nouterLoops: 1\nb = 1\n<always>"];
+    bb42_5 -> bb42_7;
+    bb42_6 [label = "(b)\nouterLoops: 1\nb = 2\n<always>"];
+    bb42_6 -> bb42_7;
+    bb42_7 [label = "(b)\nouterLoops: 1\n<always>"];
+    bb42_7 -> bb42_2;
 }
 
 subgraph "::Examples#take_arguments" {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+    bb44_0 [shape = invhouse];
+    bb44_1 [shape = parallelogram];
 
-    bb0 [label = "(i)\n<self>$50 = self\ni = load_arg(<self>$50#take_arguments, 0)\nifTmp$51 = false\nifTmp$51"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb44_0 [label = "(i)\n<self>$50 = self\ni = load_arg(<self>$50#take_arguments, 0)\nifTmp$51 = false\nifTmp$51"];
+    bb44_0 -> bb44_2;
+    bb44_0 -> bb44_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(<ret>$49)\n<ret>$49 = 2\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "(i, <ret>$49)\n<ret>$49 = i\n<always>"];
-    bb3 -> bb4;
-    bb4 [label = "(<ret>$49)\n<ret>$52 = return <ret>$49\n<never>"];
-    bb4 -> bb1;
+    bb44_1 [label = "()\n<never>"];
+    bb44_1 -> bb44_1;
+    bb44_2 [label = "(<ret>$49)\n<ret>$49 = 2\n<always>"];
+    bb44_2 -> bb44_4;
+    bb44_3 [label = "(i, <ret>$49)\n<ret>$49 = i\n<always>"];
+    bb44_3 -> bb44_4;
+    bb44_4 [label = "(<ret>$49)\n<ret>$52 = return <ret>$49\n<never>"];
+    bb44_4 -> bb44_1;
 }
 
 }
