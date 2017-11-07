@@ -250,16 +250,29 @@ public:
             if (auto resolved = maybeResolve(ctx, ancst.get()))
                 ancst.swap(resolved);
         }
+        ast::Symbol &info = original->symbol.info(ctx);
         if (original->ancestors.size() > 0) {
             ast::Symbol &info = original->symbol.info(ctx);
             for (auto &ancst : original->ancestors) {
                 if (ast::Ident *id = dynamic_cast<ast::Ident *>(ancst.get())) {
                     info.argumentsOrMixins.emplace_back(id->symbol);
-                    if (&ancst == &original->ancestors.front())
-                        info.superClass = id->symbol;
+                    if (&ancst == &original->ancestors.front()) {
+                        if (!info.superClass.exists() || info.superClass == ast::GlobalState::defn_object() ||
+                            info.superClass == id->symbol) {
+                            info.superClass = id->symbol;
+                        } else {
+                            ctx.state.errors.error(id->loc, ast::ErrorClass::RedefinitionOfParents,
+                                                   "Class parents redefined for class {}",
+                                                   original->symbol.info(ctx).name.toString(ctx));
+                        }
+                    }
                 }
             }
+        } else if (!info.superClass.exists() && original->symbol != ast::GlobalState::defn_Basic_Object()) {
+            info.superClass = ast::GlobalState::defn_object();
+            info.argumentsOrMixins.emplace_back(ast::GlobalState::defn_object());
         }
+
         unique_ptr<ast::Send> lastStandardMethod;
         for (auto &stat : original->rhs) {
             if (auto send = dynamic_cast<ast::Send *>(stat.get())) {
