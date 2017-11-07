@@ -21,7 +21,7 @@ int CFG::BACKWARD_TOPO_SORT_VISITED = 1 << 1;
 
 ast::SymbolRef maybeDealias(ast::Context ctx, ast::SymbolRef what,
                             unordered_map<ast::SymbolRef, ast::SymbolRef> &aliases) {
-    if (what.info(ctx).isSynthetic(ctx)) {
+    if (what.info(ctx).isSyntheticTemporary(ctx)) {
         auto fnd = aliases.find(what);
         if (fnd != aliases.end()) {
             return fnd->second;

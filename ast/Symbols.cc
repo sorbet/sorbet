@@ -138,8 +138,8 @@ string Symbol::fullName(GlobalState &gs) const {
         return owner_str + "#" + this->name.toString(gs);
 }
 
-bool Symbol::isSynthetic(GlobalState &gs) const {
-    return name.name(gs).kind != NameKind::UTF8;
+bool Symbol::isSyntheticTemporary(GlobalState &gs) const {
+    return name.name(gs).kind == NameKind::UNIQUE;
 }
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
