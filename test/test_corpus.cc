@@ -208,13 +208,18 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
 
         stringstream got;
+        got << "digraph \"" + ruby_typer::File::getFileName(inputPath) + "\"{" << endl;
         for (auto &cfg : collector.cfgs) {
             got << cfg << endl << endl;
         }
+        got << "}" << endl;
         EXPECT_EQ(exp, got.str() + "\n");
         if (exp == got.str() + "\n") {
             TEST_COUT << "cfg OK" << endl;
         }
+
+        ifstream svgFile(checker + ".svg");
+        EXPECT_TRUE(svgFile.good());
     }
 
     if (test.expectations.find("infer") != test.expectations.end()) {

@@ -586,20 +586,25 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
 
 string CFG::toString(ast::Context ctx) {
     stringstream buf;
-    buf << "digraph " << this->symbol.info(ctx).name.name(ctx).toString(ctx) << " {" << endl;
-    buf << "    bb0 [shape = invhouse];" << endl;
-    buf << "    bb1 [shape = parallelogram];" << endl << endl;
+    buf << "subgraph \"cluster_" << this->symbol.info(ctx).fullName(ctx) << "\" {" << endl;
+    buf << "    label = \"" << this->symbol.info(ctx).fullName(ctx) << "\";" << endl;
+    buf << "    color = blue;" << endl;
+    buf << "    bb" << this->symbol._id << "_0 [shape = invhouse];" << endl;
+    buf << "    bb" << this->symbol._id << "_1 [shape = parallelogram];" << endl << endl;
     for (int i = 0; i < this->basicBlocks.size(); i++) {
         auto text = this->basicBlocks[i]->toString(ctx);
-        buf << "    bb" << i << " [label = \"" << text << "\"];" << endl;
+        buf << "    bb" << this->symbol._id << "_" << i << " [label = \"" << text << "\"];" << endl;
         auto thenI = find_if(this->basicBlocks.begin(), this->basicBlocks.end(),
                              [&](auto &a) { return a.get() == this->basicBlocks[i]->bexit.thenb; });
         auto elseI = find_if(this->basicBlocks.begin(), this->basicBlocks.end(),
                              [&](auto &a) { return a.get() == this->basicBlocks[i]->bexit.elseb; });
-        buf << "    bb" << i << " -> bb" << thenI - this->basicBlocks.begin() << ";" << endl;
+        buf << "    bb" << this->symbol._id << "_" << i << " -> bb" << this->symbol._id << "_"
+            << thenI - this->basicBlocks.begin() << ";" << endl;
         if (this->basicBlocks[i]->bexit.cond != ctx.state.defn_cfg_always() &&
             this->basicBlocks[i]->bexit.cond != ctx.state.defn_cfg_never()) {
-            buf << "    bb" << i << " -> bb" << elseI - this->basicBlocks.begin() << ";" << endl << endl;
+            buf << "    bb" << this->symbol._id << "_" << i << " -> bb" << this->symbol._id << "_"
+                << elseI - this->basicBlocks.begin() << ";" << endl
+                << endl;
         }
     }
     buf << "}";

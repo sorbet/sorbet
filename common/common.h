@@ -74,6 +74,7 @@ CheckSize(u8, 8, 8);
 class File {
 public:
     static std::string read(const char *filename);
+    static std::string getFileName(const std::string path);
 };
 }
 std::string strprintf(const char *__restrict, va_list) __attribute__((format(printf, 1, 0)));

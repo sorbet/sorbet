@@ -1,29 +1,35 @@
-digraph foo {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+digraph "side_effects2.rb"{
+subgraph "cluster_::Side#foo" {
+    label = "::Side#foo";
+    color = blue;
+    bb29_0 [shape = invhouse];
+    bb29_1 [shape = parallelogram];
 
-    bb0 [label = "(a, statTmp$3, statTmp$4)\na = self\nstatTmp$3 = a\nstatTmp$4 = a\nifTmp$6 = true\nifTmp$6"];
-    bb0 -> bb2;
-    bb0 -> bb3;
+    bb29_0 [label = "(a, statTmp$3, statTmp$4)\na = self\nstatTmp$3 = a\nstatTmp$4 = a\nifTmp$6 = true\nifTmp$6"];
+    bb29_0 -> bb29_2;
+    bb29_0 -> bb29_3;
 
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
-    bb2 [label = "(a, statTmp$3, statTmp$4)\na = true\n<always>"];
-    bb2 -> bb4;
-    bb3 [label = "(a, statTmp$3, statTmp$4)\na = 2\n<always>"];
-    bb3 -> bb4;
-    bb4 [label = "(a, statTmp$3, statTmp$4)\n<ret>$0 = statTmp$3.bar(statTmp$4, a, a)\n<ret>$8 = return <ret>$0\n<never>"];
-    bb4 -> bb1;
+    bb29_1 [label = "()\n<never>"];
+    bb29_1 -> bb29_1;
+    bb29_2 [label = "(a, statTmp$3, statTmp$4)\na = true\n<always>"];
+    bb29_2 -> bb29_4;
+    bb29_3 [label = "(a, statTmp$3, statTmp$4)\na = 2\n<always>"];
+    bb29_3 -> bb29_4;
+    bb29_4 [label = "(a, statTmp$3, statTmp$4)\n<ret>$0 = statTmp$3.bar(statTmp$4, a, a)\n<ret>$8 = return <ret>$0\n<never>"];
+    bb29_4 -> bb29_1;
 }
 
-digraph bar {
-    bb0 [shape = invhouse];
-    bb1 [shape = parallelogram];
+subgraph "cluster_::Side#bar" {
+    label = "::Side#bar";
+    color = blue;
+    bb31_0 [shape = invhouse];
+    bb31_1 [shape = parallelogram];
 
-    bb0 [label = "()\n<self>$10 = self\na = load_arg(<self>$10#bar, 0)\nb = load_arg(<self>$10#bar, 1)\nc = load_arg(<self>$10#bar, 2)\nstatTmp$11 = self\n<ret>$9 = statTmp$11.puts(a, b, c)\n<ret>$15 = return <ret>$9\n<never>"];
-    bb0 -> bb1;
-    bb1 [label = "()\n<never>"];
-    bb1 -> bb1;
+    bb31_0 [label = "()\n<self>$10 = self\na = load_arg(<self>$10#bar, 0)\nb = load_arg(<self>$10#bar, 1)\nc = load_arg(<self>$10#bar, 2)\nstatTmp$11 = self\n<ret>$9 = statTmp$11.puts(a, b, c)\n<ret>$15 = return <ret>$9\n<never>"];
+    bb31_0 -> bb31_1;
+    bb31_1 [label = "()\n<never>"];
+    bb31_1 -> bb31_1;
 }
 
+}
 

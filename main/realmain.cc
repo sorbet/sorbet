@@ -139,9 +139,12 @@ void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, c
 
         auto r = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(desugared));
         stringstream buf;
+
+        buf << "digraph \"" + ruby_typer::File::getFileName(path) + "\"{" << endl;
         for (auto &cfg : collector.cfgs) {
             buf << cfg << endl << endl;
         }
+        buf << "}" << endl;
         auto got = buf.str();
         if (removeOption(prints, "cfg")) {
             cout << got << endl;

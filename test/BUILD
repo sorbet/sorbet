@@ -8,6 +8,7 @@ cc_test(
     data = glob([
         "testdata/**/*.rb",
         "testdata/**/*.rb.*.exp",
+        "testdata/**/*.rb.*.exp.svg",
     ]),
     linkstatic = 1,
     visibility = ["//tools:__pkg__"],
