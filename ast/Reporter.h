@@ -13,6 +13,7 @@ enum class ErrorClass {
     IncludeMutipleParam = 4001, // Namer Errors
     IncludeNotConstant = 4002,
     IncludePassedBlock = 4003,
+    DynamicConstantDefinition = 4004,
 
     DynamicConstant = 5001, // Resolver errors
     StubConstant = 5002,

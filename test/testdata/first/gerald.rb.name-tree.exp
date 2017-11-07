@@ -16,7 +16,7 @@ begin
     class <emptyTree>::Matcher<Matcher> < (::Object)
       self(<singleton class:Matcher>).include(::<dynamic>)
 
-      ::<dynamic> = 100
+      ::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES = 100
 
       def initialize<initialize>()
         begin
@@ -38,7 +38,7 @@ begin
 
       def match<match>(::Opus::CIBot::Gerald::Matcher#match#match_context)
         begin
-          if ::Opus::CIBot::Gerald::Matcher#match#match_context.diff().affected_files().count().>(::<dynamic>)
+          if ::Opus::CIBot::Gerald::Matcher#match#match_context.diff().affected_files().count().>(::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES)
             begin
               self(Matcher).log().warn("Gerald skipping large PR with ".concat(begin
                     ::Opus::CIBot::Gerald::Matcher#match#match_context.diff().affected_files().count()
@@ -93,9 +93,9 @@ begin
     end
 
     class <emptyTree>::MatchTimeBudget<MatchTimeBudget> < (::Object)
-      ::<dynamic> = 10000
+      ::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS = 10000
 
-      ::<dynamic> = 2000
+      ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS = 2000
 
       def initialize<initialize>()
         @start<todo ivar sym> = ::<dynamic>.now()
@@ -105,9 +105,9 @@ begin
           ::Opus::CIBot::Gerald::MatchTimeBudget#check!#dur_ms = begin
             ::<dynamic>.now().-(@start<todo ivar sym>)
           end.*(1000)
-          if ::Opus::CIBot::Gerald::MatchTimeBudget#check!#dur_ms.>(::<dynamic>)
+          if ::Opus::CIBot::Gerald::MatchTimeBudget#check!#dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS)
             self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
-                    ::<dynamic>
+                    ::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS
                   end.to_s()).concat("ms").to_s()))
           else
             <emptyTree>
@@ -121,13 +121,13 @@ begin
           ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms = begin
             ::<dynamic>.now().-(::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule_start)
           end.*(1000)
-          if ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms.>(::<dynamic>)
+          if ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS)
             self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald rule '".concat(begin
                     ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule.token()
                   end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
                     ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#dur_ms.to_i()
                   end.to_s()).concat("ms budget=").concat(begin
-                    ::<dynamic>
+                    ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS
                   end.to_s()).concat("ms").to_s(), {:rule_token => ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule.token()}))
           else
             <emptyTree>

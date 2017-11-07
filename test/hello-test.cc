@@ -163,9 +163,9 @@ TEST(PreOrderTreeMap, CountTrees) {
 
     auto name = ctx.state.enterNameUTF8(foo_DESC);
     auto classSym = ctx.state.enterClassSymbol(ruby_typer::ast::GlobalState::defn_root(), name);
-    auto methodSym = ctx.state.enterSymbol(classSym, name, true);
+    auto methodSym = ctx.state.enterMethodSymbol(classSym, name);
     auto empty = vector<SymbolRef>();
-    auto argumentSym = ctx.state.enterSymbol(methodSym, name, false);
+    auto argumentSym = ctx.state.enterFieldSymbol(methodSym, name);
     unique_ptr<Expression> rhs(new IntLit(loc, 5));
     auto arg = unique_ptr<Expression>(new Ident(loc, argumentSym));
     auto args = vector<unique_ptr<Expression>>();

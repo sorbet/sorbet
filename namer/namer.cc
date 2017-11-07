@@ -128,7 +128,7 @@ public:
             owner = owner.info(ctx).singletonClass(ctx);
         }
 
-        method->symbol = ctx.state.enterSymbol(owner, method->name, true);
+        method->symbol = ctx.state.enterMethodSymbol(owner, method->name);
         ast::Symbol &symbol = method->symbol.info(ctx);
         fillInArgs(ctx, method->args, symbol);
         symbol.definitionLoc = method->loc;
@@ -143,8 +143,8 @@ public:
 
     ast::Block *preTransformBlock(ast::Context ctx, ast::Block *blk) {
         ast::SymbolRef owner = ownerFromContext(ctx);
-        blk->symbol = ctx.state.enterSymbol(
-            owner, ctx.state.freshNameUnique(ast::UniqueNameKind::Namer, ast::Names::blockTemp()), true);
+        blk->symbol = ctx.state.enterMethodSymbol(
+            owner, ctx.state.freshNameUnique(ast::UniqueNameKind::Namer, ast::Names::blockTemp()));
         ast::Symbol &symbol = blk->symbol.info(ctx);
 
         scopeStack.emplace_back();
@@ -182,7 +182,7 @@ public:
             auto &frame = scopeStack.back();
             ast::SymbolRef &cur = frame.locals[ident->name];
             if (!cur.exists()) {
-                cur = ctx.state.enterSymbol(ctx.owner, ident->name, false);
+                cur = ctx.state.enterFieldSymbol(ctx.owner, ident->name);
                 frame.locals[ident->name] = cur;
             }
             ident->symbol = cur;
@@ -193,6 +193,18 @@ public:
     ast::Self *postTransformSelf(ast::Context ctx, ast::Self *self) {
         self->claz = ctx.selfClass();
         return self;
+    }
+
+    ast::Assign *postTransformAssign(ast::Context ctx, ast::Assign *asgn) {
+        ast::ConstantLit *lhs = dynamic_cast<ast::ConstantLit *>(asgn->lhs.get());
+        if (lhs == nullptr)
+            return asgn;
+
+        // TODO(nelhage): forbid dynamic constant definition
+        ast::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);
+        ctx.state.enterStaticFieldSymbol(scope, lhs->cnst);
+
+        return asgn;
     }
 
 private:

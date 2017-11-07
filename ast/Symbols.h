@@ -127,7 +127,7 @@ public:
         return (flags & 0x8000) != 0;
     }
 
-    inline bool isArray() const {
+    inline bool isStaticField() const {
         return (flags & 0x4000) != 0;
     }
 
@@ -152,27 +152,26 @@ public:
     }
 
     inline void setClass() {
-        DEBUG_ONLY(Error::check(!isArray() && !isField() && !isMethod()));
+        DEBUG_ONLY(Error::check(!isStaticField() && !isField() && !isMethod()));
         flags = flags | 0x8000;
     }
 
-    inline void setArray() {
+    inline void setStaticField() {
         DEBUG_ONLY(Error::check(!isClass() && !isField() && !isMethod()));
         flags = flags | 0x4000;
     }
 
     inline void setField() {
-        DEBUG_ONLY(Error::check(!isClass() && !isArray() && !isMethod()));
+        DEBUG_ONLY(Error::check(!isClass() && !isStaticField() && !isMethod()));
         flags = flags | 0x2000;
     }
 
     inline void setMethod() {
-        DEBUG_ONLY(Error::check(!isClass() && !isArray() && !isField()));
+        DEBUG_ONLY(Error::check(!isClass() && !isStaticField() && !isField()));
         flags = flags | 0x1000;
     }
 
     inline void setCompleted() {
-        DEBUG_ONLY(Error::check(!isArray()));
         flags = flags | 0x0C00;
     }
 

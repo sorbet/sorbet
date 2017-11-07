@@ -1,0 +1,15 @@
+begin
+  module <emptyTree>::A<A> < ()
+    ::A::B#C = 1
+
+    module <emptyTree>::B<B> < ()
+      ::A::B#C
+
+      ::A::B#D = 1
+
+    end
+
+  end
+  ::A::B#C
+  ::A::B#D
+end

@@ -380,35 +380,7 @@ GlobalState::~GlobalState() {}
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef GlobalState::enterClassSymbol(SymbolRef owner, NameRef name) {
-    // TODO Unify this with enterSymbol
-    DEBUG_ONLY(Error::check(owner.exists()));
-    Symbol &ownerScope = owner.info(*this, true);
-    for (auto &member : ownerScope.members) {
-        if (member.first == name) {
-            return member.second;
-        }
-    }
-
-    bool reallocate = symbols.size() == symbols.capacity();
-
-    SymbolRef ret = SymbolRef(symbols.size());
-    symbols.emplace_back();
-    Symbol &info = ret.info(*this, true);
-    info.name = name;
-    info.flags = 0;
-    info.owner = owner;
-    info.setClass();
-
-    if (!reallocate) {
-        ownerScope.members.push_back(make_pair(name, ret));
-    } else {
-        owner.info(*this, true).members.push_back(make_pair(name, ret));
-    }
-    return ret;
-}
-
-SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, bool isMethod) {
+SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, u4 flags) {
     DEBUG_ONLY(Error::check(owner.exists()));
     Error::check(name.exists());
     Symbol &ownerScope = owner.info(*this, true);
@@ -428,18 +400,30 @@ SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, bool isMethod)
     symbols.emplace_back();
     Symbol &info = ret.info(*this, true);
     info.name = name;
-    info.flags = 0;
+    info.flags = flags;
     info.owner = owner;
-    if (isMethod)
-        info.setMethod();
-    else
-        info.setField();
 
     if (!reallocate)
         ownerScope.members.push_back(make_pair(name, ret));
     else
         owner.info(*this, true).members.push_back(make_pair(name, ret));
     return ret;
+}
+
+SymbolRef GlobalState::enterClassSymbol(SymbolRef owner, NameRef name) {
+    return enterSymbol(owner, name, 0x8000);
+}
+
+SymbolRef GlobalState::enterMethodSymbol(SymbolRef owner, NameRef name) {
+    return enterSymbol(owner, name, 0x1000);
+}
+
+SymbolRef GlobalState::enterFieldSymbol(SymbolRef owner, NameRef name) {
+    return enterSymbol(owner, name, 0x2000);
+}
+
+SymbolRef GlobalState::enterStaticFieldSymbol(SymbolRef owner, NameRef name) {
+    return enterSymbol(owner, name, 0x4000);
 }
 
 NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
@@ -598,7 +582,7 @@ FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
 
 SymbolRef GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     NameRef tempName = this->freshNameUnique(kind, name);
-    return this->enterSymbol(owner, tempName, false);
+    return this->enterFieldSymbol(owner, tempName);
 }
 
 unsigned int GlobalState::symbolsUsed() {
