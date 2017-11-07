@@ -1,5 +1,7 @@
 digraph "./test/testdata//cfg/blocks.rb"{
-subgraph "::BlockTest#block_pass" {
+subgraph "cluster_::BlockTest#block_pass" {
+    label = "::BlockTest#block_pass";
+    color = blue;
     bb29_0 [shape = invhouse];
     bb29_1 [shape = parallelogram];
 
