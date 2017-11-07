@@ -19,6 +19,19 @@ namespace cfg {
 int CFG::FORWARD_TOPO_SORT_VISITED = 1 << 0;
 int CFG::BACKWARD_TOPO_SORT_VISITED = 1 << 1;
 
+ast::SymbolRef maybeDealias(ast::Context ctx, ast::SymbolRef what,
+                            unordered_map<ast::SymbolRef, ast::SymbolRef> &aliases) {
+    if (what.info(ctx).isSynthetic(ctx)) {
+        auto fnd = aliases.find(what);
+        if (fnd != aliases.end()) {
+            return fnd->second;
+        } else
+            return what;
+    } else {
+        return what;
+    }
+}
+
 /**
  * Remove aliases from CFG. Why does this need a separate pass?
  * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
@@ -34,6 +47,7 @@ void CFG::dealias(ast::Context ctx) {
         if (bb->backEdges.size() > 0) {
             current = outAliases[bb->backEdges[0]->id];
         }
+
         for (BasicBlock *parent : bb->backEdges) {
             unordered_map<ast::SymbolRef, ast::SymbolRef> other = outAliases[parent->id];
             for (auto it = current.begin(); it != current.end(); /* nothing */) {
@@ -50,15 +64,12 @@ void CFG::dealias(ast::Context ctx) {
                 }
             }
         }
+
         for (Binding &bind : bb->exprs) {
             if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
-                if (i->what.info(ctx).isSynthetic(ctx)) {
-                    auto fnd = current.find(i->what);
-                    if (fnd != current.end()) {
-                        i->what = fnd->second;
-                    }
-                }
+                i->what = maybeDealias(ctx, i->what, current);
             }
+            /* invalidate a stale record */
             for (auto it = current.begin(); it != current.end(); /* nothing */) {
                 if (it->second == bind.bind) {
                     it = current.erase(it);
@@ -66,6 +77,29 @@ void CFG::dealias(ast::Context ctx) {
                     ++it;
                 }
             }
+            /* dealias */
+            if (auto *v = dynamic_cast<Ident *>(bind.value.get())) {
+                v->what = maybeDealias(ctx, v->what, current);
+            } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
+                v->recv = maybeDealias(ctx, v->recv, current);
+                for (auto &arg : v->args) {
+                    arg = maybeDealias(ctx, arg, current);
+                }
+            } else if (auto *v = dynamic_cast<New *>(bind.value.get())) {
+                for (auto &arg : v->args) {
+                    arg = maybeDealias(ctx, arg, current);
+                }
+            } else if (auto *v = dynamic_cast<Super *>(bind.value.get())) {
+                for (auto &arg : v->args) {
+                    arg = maybeDealias(ctx, arg, current);
+                }
+            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
+                v->what = maybeDealias(ctx, v->what, current);
+            } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
+                v->value = maybeDealias(ctx, v->value, current);
+            }
+
+            // record new aliases
             if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
                 current[bind.bind] = i->what;
             }
@@ -147,6 +181,34 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
     }
 
+    for (auto &it : this->basicBlocks) {
+        /* remove dead variables */
+        for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
+            Binding &bind = *expIt;
+            auto fnd = reads.find(bind.bind);
+            if (fnd == reads.end()) {
+                // This should be !New && !Send && !Return, but I prefer to list explicitly in case we start adding
+                // nodes.
+                if (dynamic_cast<Ident *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<ArraySplat *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<HashSplat *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<BoolLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<StringLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<IntLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<FloatLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<Self *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<LoadArg *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<NamedArg *>(bind.value.get()) != nullptr) {
+                    expIt = it->exprs.erase(expIt);
+                } else {
+                    ++expIt;
+                }
+            } else {
+                ++expIt;
+            }
+        }
+    }
+
     vector<unordered_set<ast::SymbolRef>> reads_by_block(this->basicBlocks.size());
     vector<unordered_set<ast::SymbolRef>> writes_by_block(this->basicBlocks.size());
 
@@ -212,6 +274,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
     }
 
+    /** Combine two upper bounds */
     for (auto &it : this->basicBlocks) {
         auto set2 = upper_bounds2[it->id];
 
