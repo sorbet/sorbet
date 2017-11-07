@@ -12,7 +12,7 @@ namespace ast {
 
 class Statement {
 public:
-    Statement() = default;
+    Statement(Loc loc);
     virtual ~Statement() = default;
     virtual std::string toString(GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
@@ -22,19 +22,26 @@ public:
 
 class Expression : public Statement {
 public:
+    Expression(Loc loc);
     static std::unique_ptr<Expression> fromStatement(std::unique_ptr<Statement> &expr);
     static std::unique_ptr<Expression> fromStatement(std::unique_ptr<Statement> &&expr);
 };
 
-class Reference : public Expression {};
+class Reference : public Expression {
+public:
+    Reference(Loc loc);
+};
 
-class ControlFlow : public Expression {};
+class ControlFlow : public Expression {
+public:
+    ControlFlow(Loc loc);
+};
 
 class Declaration : public Expression {
 public:
     SymbolRef symbol;
 
-    Declaration(SymbolRef symbol);
+    Declaration(Loc loc, SymbolRef symbol);
 };
 
 enum ClassDefKind : u1 { Module, Class };
@@ -56,8 +63,9 @@ public:
     std::vector<std::unique_ptr<Expression>> ancestors;
     ClassDefKind kind;
 
-    ClassDef(SymbolRef symbol, std::unique_ptr<Expression> name, std::vector<std::unique_ptr<Expression>> &ancestors,
-             std::vector<std::unique_ptr<Statement>> &rhs, ClassDefKind kind);
+    ClassDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> name,
+             std::vector<std::unique_ptr<Expression>> &ancestors, std::vector<std::unique_ptr<Statement>> &rhs,
+             ClassDefKind kind);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -72,7 +80,7 @@ public:
     NameRef name;
     bool isSelf;
 
-    MethodDef(SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
+    MethodDef(Loc loc, SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
               std::unique_ptr<Expression> rhs, bool isSelf);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -83,7 +91,7 @@ class ConstDef : public Declaration {
 public:
     std::unique_ptr<Expression> rhs;
 
-    ConstDef(SymbolRef symbol, std::unique_ptr<Expression> rhs);
+    ConstDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> rhs);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -94,7 +102,7 @@ public:
     std::unique_ptr<Expression> cond;
     std::unique_ptr<Expression> thenp;
     std::unique_ptr<Expression> elsep;
-    If(std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp, std::unique_ptr<Expression> elsep);
+    If(Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp, std::unique_ptr<Expression> elsep);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -105,13 +113,15 @@ public:
     std::unique_ptr<Expression> cond;
     std::unique_ptr<Statement> body;
 
-    While(std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body);
+    While(Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
 class For : public ControlFlow {
+public:
+    For(Loc loc);
     // TODO
 };
 
@@ -119,7 +129,7 @@ class Break : public ControlFlow {
 public:
     std::unique_ptr<Expression> expr;
 
-    Break(std::unique_ptr<Expression> expr);
+    Break(Loc loc, std::unique_ptr<Expression> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -129,7 +139,7 @@ class Next : public ControlFlow {
 public:
     std::unique_ptr<Expression> expr;
 
-    Next(std::unique_ptr<Expression> expr);
+    Next(Loc loc, std::unique_ptr<Expression> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -139,7 +149,7 @@ class Return : public ControlFlow {
 public:
     std::unique_ptr<Expression> expr;
 
-    Return(std::unique_ptr<Expression> expr);
+    Return(Loc loc, std::unique_ptr<Expression> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -149,7 +159,7 @@ class Yield : public ControlFlow {
 public:
     std::unique_ptr<Expression> expr;
 
-    Yield(std::unique_ptr<Expression> expr);
+    Yield(Loc loc, std::unique_ptr<Expression> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -162,6 +172,7 @@ public:
     SymbolRef binder_type;
     std::unique_ptr<Expression> handler;
 
+    Rescue(Loc loc);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -172,8 +183,8 @@ public:
     SymbolRef symbol;
     NameRef name;
 
-    Ident(SymbolRef symbol);
-    Ident(NameRef name, SymbolRef symbol);
+    Ident(Loc loc, SymbolRef symbol);
+    Ident(Loc loc, NameRef name, SymbolRef symbol);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -183,7 +194,7 @@ class RestArg : public Reference {
 public:
     std::unique_ptr<Reference> expr;
 
-    RestArg(std::unique_ptr<Reference> expr);
+    RestArg(Loc loc, std::unique_ptr<Reference> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -193,7 +204,7 @@ class KeywordArg : public Reference {
 public:
     std::unique_ptr<Reference> expr;
 
-    KeywordArg(std::unique_ptr<Reference> expr);
+    KeywordArg(Loc loc, std::unique_ptr<Reference> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -204,7 +215,7 @@ public:
     std::unique_ptr<Reference> expr;
     std::unique_ptr<Expression> default_;
 
-    OptionalArg(std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_);
+    OptionalArg(Loc loc, std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -214,7 +225,7 @@ class ShadowArg : public Reference {
 public:
     std::unique_ptr<Reference> expr;
 
-    ShadowArg(std::unique_ptr<Reference> expr);
+    ShadowArg(Loc loc, std::unique_ptr<Reference> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -222,7 +233,7 @@ public:
 
 class Nil : public Expression {
 public:
-    Nil(){};
+    Nil(Loc loc);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -232,7 +243,7 @@ class SymbolLit : public Expression {
 public:
     NameRef name;
 
-    SymbolLit(NameRef name);
+    SymbolLit(Loc loc, NameRef name);
 
     virtual std::string toString(GlobalState &gs, int tabs);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -244,7 +255,7 @@ public:
     std::unique_ptr<Expression> lhs;
     std::unique_ptr<Expression> rhs;
 
-    Assign(std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
+    Assign(Loc loc, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -264,7 +275,7 @@ public:
     // null if no block passed
     std::unique_ptr<Block> block;
 
-    Send(std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args);
+    Send(Loc loc, std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -275,7 +286,7 @@ public:
     SymbolRef claz;
     std::vector<std::unique_ptr<Expression>> args;
 
-    New(SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args);
+    New(Loc loc, SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -285,7 +296,7 @@ class Super : public Expression {
 public:
     std::vector<std::unique_ptr<Expression>> args;
 
-    Super(std::vector<std::unique_ptr<Expression>> &&args);
+    Super(Loc loc, std::vector<std::unique_ptr<Expression>> &&args);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -297,7 +308,7 @@ public:
     NameRef name;
     std::unique_ptr<Expression> arg;
 
-    NamedArg(NameRef name, std::unique_ptr<Expression> arg);
+    NamedArg(Loc loc, NameRef name, std::unique_ptr<Expression> arg);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -308,7 +319,7 @@ public:
     std::vector<std::unique_ptr<Expression>> keys;
     std::vector<std::unique_ptr<Expression>> values;
 
-    Hash(std::vector<std::unique_ptr<Expression>> &keys, std::vector<std::unique_ptr<Expression>> &values);
+    Hash(Loc loc, std::vector<std::unique_ptr<Expression>> &keys, std::vector<std::unique_ptr<Expression>> &values);
 
     virtual std::string toString(GlobalState &gs, int tabs);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -319,7 +330,7 @@ class Array : public Expression {
 public:
     std::vector<std::unique_ptr<Expression>> elems;
 
-    Array(std::vector<std::unique_ptr<Expression>> &elems);
+    Array(Loc loc, std::vector<std::unique_ptr<Expression>> &elems);
 
     virtual std::string toString(GlobalState &gs, int tabs);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -330,7 +341,7 @@ class FloatLit : public Expression {
 public:
     float value;
 
-    FloatLit(float value);
+    FloatLit(Loc loc, float value);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -340,7 +351,7 @@ class IntLit : public Expression {
 public:
     int value;
 
-    IntLit(int value);
+    IntLit(Loc loc, int value);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -350,7 +361,7 @@ class StringLit : public Expression {
 public:
     NameRef value;
 
-    StringLit(NameRef value);
+    StringLit(Loc loc, NameRef value);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -360,7 +371,7 @@ class BoolLit : public Expression {
 public:
     bool value;
 
-    BoolLit(bool value);
+    BoolLit(Loc loc, bool value);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -371,7 +382,7 @@ public:
     NameRef cnst;
     std::unique_ptr<Expression> scope;
 
-    ConstantLit(std::unique_ptr<Expression> scope, NameRef cnst);
+    ConstantLit(Loc loc, std::unique_ptr<Expression> scope, NameRef cnst);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -381,7 +392,7 @@ class ArraySplat : public Expression {
 public:
     std::unique_ptr<Expression> arg;
 
-    ArraySplat(std::unique_ptr<Expression> arg);
+    ArraySplat(Loc loc, std::unique_ptr<Expression> arg);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -391,7 +402,7 @@ class HashSplat : public Expression {
 public:
     std::unique_ptr<Expression> arg;
 
-    HashSplat(std::unique_ptr<Expression> arg);
+    HashSplat(Loc loc, std::unique_ptr<Expression> arg);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -401,7 +412,7 @@ class Self : public Expression {
 public:
     SymbolRef claz;
 
-    Self(SymbolRef claz);
+    Self(Loc loc, SymbolRef claz);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -413,7 +424,7 @@ public:
     std::unique_ptr<Expression> body;
     SymbolRef symbol;
 
-    Block(std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> body);
+    Block(Loc loc, std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> body);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -424,13 +435,15 @@ public:
     std::vector<std::unique_ptr<Statement>> stats;
     std::unique_ptr<Expression> expr;
 
-    InsSeq(std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expression> expr);
+    InsSeq(Loc loc, std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expression> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
 class EmptyTree : public Expression {
+public:
+    EmptyTree(Loc loc);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -440,7 +453,7 @@ class NotSupported : public Expression {
     std::string why;
 
 public:
-    NotSupported(const std::string &why);
+    NotSupported(Loc loc, const std::string &why);
 
     virtual std::string toString(GlobalState &gs, int tabs);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);

@@ -1,6 +1,3 @@
-# error: Stubbing out unknown constant <emptyTree>::MAX_AFFECTED_FILES
-# error: Stubbing out unknown constant <emptyTree>::TOTAL_TIME_MS
-# error: Stubbing out unknown constant <emptyTree>::PER_RULE_MS
 require_relative '../../../extn'
 Opus::AutogenLoader.init(__FILE__) # error: Stubbing out unknown constant <emptyTree>::Opus::AutogenLoader
 
@@ -19,7 +16,7 @@ module Opus::CIBot::Gerald
   class Matcher
     include Chalk::Log # error: Stubbing out unknown constant
 
-    MAX_AFFECTED_FILES = 100
+    MAX_AFFECTED_FILES = 100 # error: Stubbing out unknown constant <emptyTree>::MAX_AFFECTED_FILES
 
     def initialize
       @rules, invalid_rules = Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(&:valid?) # error: Stubbing out unknown constant
@@ -78,8 +75,8 @@ module Opus::CIBot::Gerald
 
   class MatchTimeBudget
 
-    TOTAL_TIME_MS = 10000
-    PER_RULE_MS = 2000
+    TOTAL_TIME_MS = 10000 # error: Stubbing out unknown constant <emptyTree>::TOTAL_TIME_MS
+    PER_RULE_MS = 2000 # error: Stubbing out unknown constant <emptyTree>::PER_RULE_MS
 
     def initialize
       @start = Time.now # error: Stubbing out unknown constant <emptyTree>::Time

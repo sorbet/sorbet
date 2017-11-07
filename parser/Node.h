@@ -16,7 +16,9 @@ using std::vector;
 
 class Node {
 public:
-    Node(Loc loc) : loc(loc) {}
+    Node(Loc loc) : loc(loc) {
+        DEBUG_ONLY(Error::check(!loc.is_none(), "Location of parser node is none"));
+    }
     virtual ~Node() = default;
     virtual std::string toString(ast::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
