@@ -10,18 +10,7 @@ namespace ast {
 namespace desugar {
 using namespace parser;
 
-unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &what);
-
-unique_ptr<Statement> node2TreeImpl(Loc fallbackLoc, Context ctx, unique_ptr<parser::Node> &what) {
-    unique_ptr<Statement> result;
-    if (what.get() == nullptr) {
-        result = make_unique<EmptyTree>(fallbackLoc);
-    } else {
-        result = node2TreeRecursion(ctx, what);
-    }
-    DEBUG_ONLY(Error::check(!result->loc.is_none(), "desugared node has no location: ", result->toString(ctx)));
-    return result;
-}
+unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what);
 
 unique_ptr<Statement> mkSend(Loc loc, unique_ptr<Statement> &recv, NameRef fun, vector<unique_ptr<Statement>> &args,
                              u4 flags = 0) {
@@ -131,7 +120,7 @@ unique_ptr<MethodDef> buildMethod(Context ctx, Loc loc, NameRef name, unique_ptr
     vector<unique_ptr<Expression>> args;
     if (auto *oargs = dynamic_cast<parser::Args *>(argnode.get())) {
         for (auto &arg : oargs->args) {
-            args.emplace_back(Expression::fromStatement(node2TreeImpl(loc, ctx, arg)));
+            args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, arg)));
         }
     } else if (argnode.get() == nullptr) {
         // do nothing
@@ -139,29 +128,28 @@ unique_ptr<MethodDef> buildMethod(Context ctx, Loc loc, NameRef name, unique_ptr
         Error::notImplemented();
     }
     return make_unique<MethodDef>(loc, ctx.state.defn_todo(), name, args,
-                                  Expression::fromStatement(node2TreeImpl(loc, ctx, body)), false);
+                                  Expression::fromStatement(node2TreeImpl(ctx, body)), false);
 }
 
-/**
- * Don't call this, call node2TreeImpl as it does some assertions for you
- */
-unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &what) {
-    DEBUG_ONLY(Error::check(what.get() != nullptr));
+unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what) {
+    if (what.get() == nullptr) {
+        return make_unique<EmptyTree>(Loc::none(0));
+    }
     DEBUG_ONLY(Error::check(!what->loc.is_none(), "parse-tree node has no location: ", what->toString(ctx)));
     unique_ptr<Statement> result;
     typecase(
         what.get(),
         [&](parser::And *a) {
-            auto lhs = node2TreeImpl(what->loc, ctx, a->left);
+            auto lhs = node2TreeImpl(ctx, a->left);
             if (auto i = dynamic_cast<Ident *>(lhs.get())) {
                 auto cond = cpIdent(what->loc, *i);
-                auto iff = mkIf(what->loc, move(cond), node2TreeImpl(what->loc, ctx, a->right), move(lhs));
+                auto iff = mkIf(what->loc, move(cond), node2TreeImpl(ctx, a->right), move(lhs));
                 result.swap(iff);
             } else {
                 SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::andAnd(), ctx.owner);
                 auto temp = mkAssign(what->loc, tempSym, lhs);
 
-                auto iff = mkIf(what->loc, mkIdent(what->loc, tempSym), node2TreeImpl(what->loc, ctx, a->right),
+                auto iff = mkIf(what->loc, mkIdent(what->loc, tempSym), node2TreeImpl(ctx, a->right),
                                 mkIdent(what->loc, tempSym));
                 auto wrapped = mkInsSeq1(what->loc, move(temp), Expression::fromStatement(iff));
 
@@ -169,24 +157,24 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             }
         },
         [&](parser::Or *a) {
-            auto lhs = node2TreeImpl(what->loc, ctx, a->left);
+            auto lhs = node2TreeImpl(ctx, a->left);
             if (auto i = dynamic_cast<Ident *>(lhs.get())) {
                 auto cond = cpIdent(what->loc, *i);
-                mkIf(what->loc, move(cond), move(lhs), node2TreeImpl(what->loc, ctx, a->right));
+                mkIf(what->loc, move(cond), move(lhs), node2TreeImpl(ctx, a->right));
             } else {
                 SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::orOr(), ctx.owner);
                 auto temp = mkAssign(what->loc, tempSym, lhs);
 
                 auto iff = mkIf(what->loc, mkIdent(what->loc, tempSym), mkIdent(what->loc, tempSym),
-                                node2TreeImpl(what->loc, ctx, a->right));
+                                node2TreeImpl(ctx, a->right));
                 auto wrapped = mkInsSeq1(what->loc, move(temp), Expression::fromStatement(iff));
 
                 result.swap(wrapped);
             }
         },
         [&](parser::AndAsgn *a) {
-            auto recv = node2TreeImpl(what->loc, ctx, a->left);
-            auto arg = node2TreeImpl(what->loc, ctx, a->right);
+            auto recv = node2TreeImpl(ctx, a->left);
+            auto arg = node2TreeImpl(ctx, a->right);
             if (auto s = dynamic_cast<Send *>(recv.get())) {
                 Error::check(s->args.empty());
                 SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
@@ -209,8 +197,8 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             }
         },
         [&](parser::OrAsgn *a) {
-            auto recv = node2TreeImpl(what->loc, ctx, a->left);
-            auto arg = node2TreeImpl(what->loc, ctx, a->right);
+            auto recv = node2TreeImpl(ctx, a->left);
+            auto arg = node2TreeImpl(ctx, a->right);
             if (auto s = dynamic_cast<Send *>(recv.get())) {
                 Error::check(s->args.empty());
                 SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, s->fun, ctx.owner);
@@ -235,14 +223,14 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
         },
         [&](parser::Send *a) {
             u4 flags = 0;
-            auto rec = node2TreeImpl(what->loc, ctx, a->receiver);
+            auto rec = node2TreeImpl(ctx, a->receiver);
             if (dynamic_cast<EmptyTree *>(rec.get()) != nullptr) {
                 rec = make_unique<Self>(what->loc, SymbolRef(0));
                 flags |= Send::PRIVATE_OK;
             }
             vector<unique_ptr<Statement>> args;
             for (auto &stat : a->args) {
-                args.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, stat)));
+                args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
             };
 
             auto send = mkSend(what->loc, rec, a->method, args, flags);
@@ -257,7 +245,7 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             auto end = a->nodes.end();
             Error::check(it != end);
             unique_ptr<Statement> res;
-            unique_ptr<Statement> first = node2TreeImpl(what->loc, ctx, *it);
+            unique_ptr<Statement> first = node2TreeImpl(ctx, *it);
             if (dynamic_cast<StringLit *>(first.get()) == nullptr) {
                 res = mkSend0(what->loc, first, Names::to_s());
             } else {
@@ -266,7 +254,7 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             ++it;
             for (; it != end; ++it) {
                 auto &stat = *it;
-                unique_ptr<Statement> narg = node2TreeImpl(what->loc, ctx, stat);
+                unique_ptr<Statement> narg = node2TreeImpl(ctx, stat);
                 if (dynamic_cast<StringLit *>(narg.get()) == nullptr) {
                     narg = mkSend0(what->loc, narg, Names::to_s());
                 }
@@ -289,7 +277,7 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             result.swap(res);
         },
         [&](parser::Const *a) {
-            auto scope = node2TreeImpl(what->loc, ctx, a->scope);
+            auto scope = node2TreeImpl(ctx, a->scope);
             unique_ptr<Statement> res = make_unique<ConstantLit>(what->loc, Expression::fromStatement(scope), a->name);
             result.swap(res);
         },
@@ -303,10 +291,10 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
                 auto end = --a->stmts.end();
                 for (auto it = a->stmts.begin(); it != end; ++it) {
                     auto &stat = *it;
-                    stats.emplace_back(node2TreeImpl(what->loc, ctx, stat));
+                    stats.emplace_back(node2TreeImpl(ctx, stat));
                 };
                 auto &last = a->stmts.back();
-                auto expr = node2TreeImpl(what->loc, ctx, last);
+                auto expr = node2TreeImpl(ctx, last);
                 if (auto *epx = dynamic_cast<Expression *>(expr.get())) {
                     auto exp = Expression::fromStatement(expr);
                     auto block = mkInsSeq(what->loc, move(stats), move(exp));
@@ -327,10 +315,10 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
                 auto end = --a->stmts.end();
                 for (auto it = a->stmts.begin(); it != end; ++it) {
                     auto &stat = *it;
-                    stats.emplace_back(node2TreeImpl(what->loc, ctx, stat));
+                    stats.emplace_back(node2TreeImpl(ctx, stat));
                 };
                 auto &last = a->stmts.back();
-                auto expr = node2TreeImpl(what->loc, ctx, last);
+                auto expr = node2TreeImpl(ctx, last);
                 if (auto *epx = dynamic_cast<Expression *>(expr.get())) {
                     auto exp = Expression::fromStatement(expr);
                     auto block = mkInsSeq(what->loc, move(stats), move(exp));
@@ -349,15 +337,15 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             vector<unique_ptr<Statement>> body;
             if (auto *a = dynamic_cast<parser::Begin *>(module->body.get())) {
                 for (auto &stat : a->stmts) {
-                    body.emplace_back(node2TreeImpl(what->loc, ctx, stat));
+                    body.emplace_back(node2TreeImpl(ctx, stat));
                 };
             } else {
-                body.emplace_back(node2TreeImpl(what->loc, ctx, module->body));
+                body.emplace_back(node2TreeImpl(ctx, module->body));
             }
             vector<unique_ptr<Expression>> ancestors;
             unique_ptr<Statement> res =
                 make_unique<ClassDef>(what->loc, ctx.state.defn_todo(),
-                                      Expression::fromStatement(node2TreeImpl(what->loc, ctx, module->name)), ancestors,
+                                      Expression::fromStatement(node2TreeImpl(ctx, module->name)), ancestors,
                                       body, ClassDefKind::Module);
             result.swap(res);
         },
@@ -365,19 +353,19 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             vector<unique_ptr<Statement>> body;
             if (auto *a = dynamic_cast<parser::Begin *>(claz->body.get())) {
                 for (auto &stat : a->stmts) {
-                    body.emplace_back(node2TreeImpl(what->loc, ctx, stat));
+                    body.emplace_back(node2TreeImpl(ctx, stat));
                 };
             } else {
-                body.emplace_back(node2TreeImpl(what->loc, ctx, claz->body));
+                body.emplace_back(node2TreeImpl(ctx, claz->body));
             }
             vector<unique_ptr<Expression>> ancestors;
             if (claz->superclass == nullptr) {
                 ancestors.emplace_back(make_unique<Ident>(what->loc, ctx.state.defn_object()));
             } else {
-                ancestors.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, claz->superclass)));
+                ancestors.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, claz->superclass)));
             }
             unique_ptr<Statement> res = make_unique<ClassDef>(
-                what->loc, ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(what->loc, ctx, claz->name)),
+                what->loc, ctx.state.defn_todo(), Expression::fromStatement(node2TreeImpl(ctx, claz->name)),
                 ancestors, body, ClassDefKind::Class);
             result.swap(res);
         },
@@ -406,13 +394,13 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
                 what->loc,
                 make_unique<KeywordArg>(what->loc,
                                         make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo())),
-                Expression::fromStatement(node2TreeImpl(what->loc, ctx, arg->default_)));
+                Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
             result.swap(res);
         },
         [&](parser::Optarg *arg) {
             unique_ptr<Statement> res = make_unique<OptionalArg>(
                 what->loc, make_unique<Ident>(what->loc, arg->name, GlobalState::defn_lvar_todo()),
-                Expression::fromStatement(node2TreeImpl(what->loc, ctx, arg->default_)));
+                Expression::fromStatement(node2TreeImpl(ctx, arg->default_)));
             result.swap(res);
         },
         [&](parser::Shadowarg *arg) {
@@ -440,12 +428,12 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
         },
         [&](parser::Block *block) {
             vector<unique_ptr<Expression>> args;
-            auto recv = node2TreeImpl(what->loc, ctx, block->send);
+            auto recv = node2TreeImpl(ctx, block->send);
             Error::check(dynamic_cast<Send *>(recv.get()));
             unique_ptr<Send> send(dynamic_cast<Send *>(recv.release()));
             if (auto *oargs = dynamic_cast<parser::Args *>(block->args.get())) {
                 for (auto &arg : oargs->args) {
-                    args.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, arg)));
+                    args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, arg)));
                 }
             } else if (block->args.get() == nullptr) {
                 // do nothing
@@ -454,35 +442,35 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             }
 
             send->block = make_unique<Block>(what->loc, args,
-                                             Expression::fromStatement(node2TreeImpl(what->loc, ctx, block->body)));
+                                             Expression::fromStatement(node2TreeImpl(ctx, block->body)));
             unique_ptr<Statement> res(send.release());
 
             result.swap(res);
         },
         [&](parser::While *wl) {
-            auto cond = node2TreeImpl(what->loc, ctx, wl->cond);
-            auto body = node2TreeImpl(what->loc, ctx, wl->body);
+            auto cond = node2TreeImpl(ctx, wl->cond);
+            auto body = node2TreeImpl(ctx, wl->body);
             unique_ptr<Statement> res =
                 make_unique<While>(what->loc, Expression::fromStatement(move(cond)), move(body));
             result.swap(res);
         },
         [&](parser::WhilePost *wl) {
-            auto cond = node2TreeImpl(what->loc, ctx, wl->cond);
-            auto body = node2TreeImpl(what->loc, ctx, wl->body);
+            auto cond = node2TreeImpl(ctx, wl->cond);
+            auto body = node2TreeImpl(ctx, wl->body);
             unique_ptr<Statement> res =
                 make_unique<While>(what->loc, Expression::fromStatement(move(cond)), move(body));
             result.swap(res);
         },
         [&](parser::Until *wl) {
-            auto cond = mkSend0(what->loc, node2TreeImpl(what->loc, ctx, wl->cond), Names::bang());
-            auto body = node2TreeImpl(what->loc, ctx, wl->body);
+            auto cond = mkSend0(what->loc, node2TreeImpl(ctx, wl->cond), Names::bang());
+            auto body = node2TreeImpl(ctx, wl->body);
             unique_ptr<Statement> res =
                 make_unique<While>(what->loc, Expression::fromStatement(move(cond)), move(body));
             result.swap(res);
         },
         [&](parser::UntilPost *wl) {
-            auto cond = mkSend0(what->loc, node2TreeImpl(what->loc, ctx, wl->cond), Names::bang());
-            auto body = node2TreeImpl(what->loc, ctx, wl->body);
+            auto cond = mkSend0(what->loc, node2TreeImpl(ctx, wl->cond), Names::bang());
+            auto body = node2TreeImpl(ctx, wl->body);
             unique_ptr<Statement> res =
                 make_unique<While>(what->loc, Expression::fromStatement(move(cond)), move(body));
             result.swap(res);
@@ -529,40 +517,40 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
         },
         [&](parser::IVarAsgn *asgn) {
             unique_ptr<Statement> lhs = make_unique<Ident>(what->loc, asgn->name, GlobalState::defn_ivar_todo());
-            auto rhs = node2TreeImpl(what->loc, ctx, asgn->expr);
+            auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::LVarAsgn *asgn) {
             unique_ptr<Statement> lhs = make_unique<Ident>(what->loc, asgn->name, GlobalState::defn_lvar_todo());
-            auto rhs = node2TreeImpl(what->loc, ctx, asgn->expr);
+            auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::GVarAsgn *asgn) {
             unique_ptr<Statement> lhs = make_unique<Ident>(what->loc, asgn->name, GlobalState::defn_gvar_todo());
-            auto rhs = node2TreeImpl(what->loc, ctx, asgn->expr);
+            auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::CVarAsgn *asgn) {
             unique_ptr<Statement> lhs = make_unique<Ident>(what->loc, asgn->name, GlobalState::defn_cvar_todo());
-            auto rhs = node2TreeImpl(what->loc, ctx, asgn->expr);
+            auto rhs = node2TreeImpl(ctx, asgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::ConstAsgn *constAsgn) {
-            auto scope = node2TreeImpl(what->loc, ctx, constAsgn->scope);
+            auto scope = node2TreeImpl(ctx, constAsgn->scope);
             unique_ptr<Statement> lhs =
                 make_unique<ConstantLit>(what->loc, Expression::fromStatement(scope), constAsgn->name);
-            auto rhs = node2TreeImpl(what->loc, ctx, constAsgn->expr);
+            auto rhs = node2TreeImpl(ctx, constAsgn->expr);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },
         [&](parser::Super *super) {
             vector<unique_ptr<Expression>> args;
             for (auto &stat : super->args) {
-                args.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, stat)));
+                args.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
             };
 
             unique_ptr<Statement> res = make_unique<Super>(what->loc, move(args));
@@ -575,7 +563,7 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
         [&](parser::Array *array) {
             vector<unique_ptr<Expression>> elems;
             for (auto &stat : array->elts) {
-                elems.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, stat)));
+                elems.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
             };
 
             unique_ptr<Statement> res = make_unique<Array>(what->loc, elems);
@@ -589,8 +577,8 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             for (auto &pairAsExpression : hash->pairs) {
                 parser::Pair *pair = dynamic_cast<parser::Pair *>(pairAsExpression.get());
                 if (pair != nullptr) {
-                    auto key = Expression::fromStatement(node2TreeImpl(what->loc, ctx, pair->key));
-                    auto value = Expression::fromStatement(node2TreeImpl(what->loc, ctx, pair->value));
+                    auto key = Expression::fromStatement(node2TreeImpl(ctx, pair->key));
+                    auto value = Expression::fromStatement(node2TreeImpl(ctx, pair->value));
                     keys.emplace_back(move(key));
                     values.emplace_back(move(value));
                 } else {
@@ -604,9 +592,9 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
                     if (keys.size() == 0) {
                         if (lastMerge != nullptr) {
                             lastMerge = mkSend1(what->loc, lastMerge, Names::merge(),
-                                                node2TreeImpl(what->loc, ctx, splat->expr));
+                                                node2TreeImpl(ctx, splat->expr));
                         } else {
-                            lastMerge = node2TreeImpl(what->loc, ctx, splat->expr);
+                            lastMerge = node2TreeImpl(ctx, splat->expr);
                         }
                     } else {
                         unique_ptr<Statement> current = make_unique<Hash>(what->loc, keys, values);
@@ -616,7 +604,7 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
                             lastMerge = move(current);
                         }
                         lastMerge =
-                            mkSend1(what->loc, lastMerge, Names::merge(), node2TreeImpl(what->loc, ctx, splat->expr));
+                            mkSend1(what->loc, lastMerge, Names::merge(), node2TreeImpl(ctx, splat->expr));
                     }
                 }
             };
@@ -642,14 +630,14 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             if (ret->exprs.size() > 1) {
                 vector<unique_ptr<Expression>> elems;
                 for (auto &stat : ret->exprs) {
-                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, stat)));
+                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
                 };
                 unique_ptr<Expression> arr = make_unique<Array>(what->loc, elems);
                 unique_ptr<Statement> res = make_unique<Return>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
                 unique_ptr<Statement> res = make_unique<Return>(
-                    what->loc, Expression::fromStatement(node2TreeImpl(what->loc, ctx, ret->exprs[0])));
+                    what->loc, Expression::fromStatement(node2TreeImpl(ctx, ret->exprs[0])));
                 result.swap(res);
             } else {
                 unique_ptr<Statement> res =
@@ -661,14 +649,14 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             if (ret->exprs.size() > 1) {
                 vector<unique_ptr<Expression>> elems;
                 for (auto &stat : ret->exprs) {
-                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, stat)));
+                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
                 };
                 unique_ptr<Expression> arr = make_unique<Array>(what->loc, elems);
                 unique_ptr<Statement> res = make_unique<Return>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
                 unique_ptr<Statement> res = make_unique<Return>(
-                    what->loc, Expression::fromStatement(node2TreeImpl(what->loc, ctx, ret->exprs[0])));
+                    what->loc, Expression::fromStatement(node2TreeImpl(ctx, ret->exprs[0])));
                 result.swap(res);
             } else {
                 unique_ptr<Statement> res =
@@ -680,14 +668,14 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             if (ret->exprs.size() > 1) {
                 vector<unique_ptr<Expression>> elems;
                 for (auto &stat : ret->exprs) {
-                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, stat)));
+                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
                 };
                 unique_ptr<Expression> arr = make_unique<Array>(what->loc, elems);
                 unique_ptr<Statement> res = make_unique<Break>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
                 unique_ptr<Statement> res = make_unique<Break>(
-                    what->loc, Expression::fromStatement(node2TreeImpl(what->loc, ctx, ret->exprs[0])));
+                    what->loc, Expression::fromStatement(node2TreeImpl(ctx, ret->exprs[0])));
                 result.swap(res);
             } else {
                 unique_ptr<Statement> res =
@@ -699,14 +687,14 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             if (ret->exprs.size() > 1) {
                 vector<unique_ptr<Expression>> elems;
                 for (auto &stat : ret->exprs) {
-                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, stat)));
+                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
                 };
                 unique_ptr<Expression> arr = make_unique<Array>(what->loc, elems);
                 unique_ptr<Statement> res = make_unique<Next>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
                 unique_ptr<Statement> res = make_unique<Next>(
-                    what->loc, Expression::fromStatement(node2TreeImpl(what->loc, ctx, ret->exprs[0])));
+                    what->loc, Expression::fromStatement(node2TreeImpl(ctx, ret->exprs[0])));
                 result.swap(res);
             } else {
                 unique_ptr<Statement> res =
@@ -718,14 +706,14 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             if (ret->exprs.size() > 1) {
                 vector<unique_ptr<Expression>> elems;
                 for (auto &stat : ret->exprs) {
-                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(what->loc, ctx, stat)));
+                    elems.emplace_back(Expression::fromStatement(node2TreeImpl(ctx, stat)));
                 };
                 unique_ptr<Expression> arr = make_unique<Array>(what->loc, elems);
                 unique_ptr<Statement> res = make_unique<Yield>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
                 unique_ptr<Statement> res = make_unique<Yield>(
-                    what->loc, Expression::fromStatement(node2TreeImpl(what->loc, ctx, ret->exprs[0])));
+                    what->loc, Expression::fromStatement(node2TreeImpl(ctx, ret->exprs[0])));
                 result.swap(res);
             } else {
                 unique_ptr<Statement> res =
@@ -734,9 +722,9 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             }
         },
         [&](parser::If *a) {
-            auto cond = node2TreeImpl(what->loc, ctx, a->condition);
-            auto thenp = node2TreeImpl(what->loc, ctx, a->then_);
-            auto elsep = node2TreeImpl(what->loc, ctx, a->else_);
+            auto cond = node2TreeImpl(ctx, a->condition);
+            auto thenp = node2TreeImpl(ctx, a->then_);
+            auto elsep = node2TreeImpl(ctx, a->else_);
             auto iff = mkIf(what->loc, cond, thenp, elsep);
             result.swap(iff);
         },
@@ -745,10 +733,10 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
             Error::check(lhs != nullptr);
             SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::assignTemp(), ctx.owner);
             vector<unique_ptr<Statement>> stats;
-            stats.emplace_back(mkAssign(what->loc, tempSym, node2TreeImpl(what->loc, ctx, masgn->rhs)));
+            stats.emplace_back(mkAssign(what->loc, tempSym, node2TreeImpl(ctx, masgn->rhs)));
             int i = 0;
             for (auto &c : lhs->exprs) {
-                unique_ptr<Statement> lh = node2TreeImpl(what->loc, ctx, c);
+                unique_ptr<Statement> lh = node2TreeImpl(ctx, c);
                 if (ast::Send *snd = dynamic_cast<ast::Send *>(lh.get())) {
                     Error::check(snd->args.size() == 0);
                     unique_ptr<Expression> getElement =
@@ -788,7 +776,7 @@ unique_ptr<Statement> node2TreeRecursion(Context ctx, unique_ptr<parser::Node> &
 
 unique_ptr<Statement> node2Tree(Context ctx, parser::Node *what) {
     auto adapter = unique_ptr<Node>(what);
-    auto result = node2TreeImpl(adapter->loc, ctx, adapter);
+    auto result = node2TreeImpl(ctx, adapter);
     adapter.release();
     return result;
 }
