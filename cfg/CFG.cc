@@ -586,7 +586,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
 
 string CFG::toString(ast::Context ctx) {
     stringstream buf;
-    buf << "digraph " << this->symbol.info(ctx).name.name(ctx).toString(ctx) << " {" << endl;
+    buf << "digraph \"" << this->symbol.info(ctx).name.name(ctx).toString(ctx) << "\" {" << endl;
     buf << "    bb0 [shape = invhouse];" << endl;
     buf << "    bb1 [shape = parallelogram];" << endl << endl;
     for (int i = 0; i < this->basicBlocks.size(); i++) {
