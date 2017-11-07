@@ -4,5 +4,7 @@ int main(int argc, char **argv) {
     try {
         realmain(argc, argv);
     } catch (ruby_typer::SRubyException e) {
+        return 1;
     }
+    return 0;
 };
