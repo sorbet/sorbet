@@ -1,4 +1,4 @@
-digraph + {
+digraph "+" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -8,7 +8,7 @@ digraph + {
     bb1 -> bb1;
 }
 
-digraph i_like_ifs {
+digraph "i_like_ifs" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -24,7 +24,7 @@ digraph i_like_ifs {
     bb3 -> bb1;
 }
 
-digraph i_like_exps {
+digraph "i_like_exps" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -42,7 +42,7 @@ digraph i_like_exps {
     bb4 -> bb1;
 }
 
-digraph return_in_one_branch1 {
+digraph "return_in_one_branch1" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -58,7 +58,7 @@ digraph return_in_one_branch1 {
     bb3 -> bb1;
 }
 
-digraph return_in_one_branch2 {
+digraph "return_in_one_branch2" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -76,7 +76,7 @@ digraph return_in_one_branch2 {
     bb4 -> bb1;
 }
 
-digraph variables {
+digraph "variables" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -102,7 +102,7 @@ digraph variables {
     bb7 -> bb1;
 }
 
-digraph variables_and_loop {
+digraph "variables_and_loop" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -136,7 +136,7 @@ digraph variables_and_loop {
     bb10 -> bb5;
 }
 
-digraph variables_loop_if {
+digraph "variables_loop_if" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -162,7 +162,7 @@ digraph variables_loop_if {
     bb7 -> bb2;
 }
 
-digraph take_arguments {
+digraph "take_arguments" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 

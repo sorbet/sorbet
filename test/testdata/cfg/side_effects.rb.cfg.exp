@@ -1,4 +1,4 @@
-digraph foo {
+digraph "foo" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
