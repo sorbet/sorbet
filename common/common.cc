@@ -32,6 +32,11 @@ string ruby_typer::File::read(const char *filename) {
     return src;
 }
 
+std::string ruby_typer::File::getFileName(const std::string path) {
+    std::size_t found = path.find_last_of("/\\");
+    return path.substr(found + 1);
+}
+
 string strprintf(const char *format, va_list vlist) {
     char *buf = nullptr;
     int ret = vasprintf(&buf, format, vlist);
