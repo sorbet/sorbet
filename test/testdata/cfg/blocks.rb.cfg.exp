@@ -1,4 +1,5 @@
-digraph "block_pass" {
+digraph "./test/testdata//cfg/blocks.rb"{
+subgraph "::BlockTest#block_pass" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -8,4 +9,5 @@ digraph "block_pass" {
     bb1 -> bb1;
 }
 
+}
 

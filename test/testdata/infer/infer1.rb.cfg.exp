@@ -1,4 +1,5 @@
-digraph "getbyte" {
+digraph "./test/testdata//infer/infer1.rb"{
+subgraph "::String#getbyte" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -8,7 +9,7 @@ digraph "getbyte" {
     bb1 -> bb1;
 }
 
-digraph "+" {
+subgraph "::Integer#+" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -18,7 +19,7 @@ digraph "+" {
     bb1 -> bb1;
 }
 
-digraph "baz1" {
+subgraph "::Object#baz1" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -28,7 +29,7 @@ digraph "baz1" {
     bb1 -> bb1;
 }
 
-digraph "baz2" {
+subgraph "::Object#baz2" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -38,7 +39,7 @@ digraph "baz2" {
     bb1 -> bb1;
 }
 
-digraph "baz3" {
+subgraph "::Object#baz3" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -48,7 +49,7 @@ digraph "baz3" {
     bb1 -> bb1;
 }
 
-digraph "baz4" {
+subgraph "::Object#baz4" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -58,7 +59,7 @@ digraph "baz4" {
     bb1 -> bb1;
 }
 
-digraph "baz5" {
+subgraph "::Object#baz5" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -76,7 +77,7 @@ digraph "baz5" {
     bb4 -> bb1;
 }
 
-digraph "baz6" {
+subgraph "::Object#baz6" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -94,7 +95,7 @@ digraph "baz6" {
     bb4 -> bb1;
 }
 
-digraph "baz7" {
+subgraph "::Object#baz7" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -112,7 +113,7 @@ digraph "baz7" {
     bb4 -> bb1;
 }
 
-digraph "baz8" {
+subgraph "::Object#baz8" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -130,4 +131,5 @@ digraph "baz8" {
     bb4 -> bb1;
 }
 
+}
 

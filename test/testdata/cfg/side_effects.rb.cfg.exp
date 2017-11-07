@@ -1,4 +1,5 @@
-digraph "foo" {
+digraph "./test/testdata//cfg/side_effects.rb"{
+subgraph "::Side#foo" {
     bb0 [shape = invhouse];
     bb1 [shape = parallelogram];
 
@@ -16,4 +17,5 @@ digraph "foo" {
     bb4 -> bb1;
 }
 
+}
 
