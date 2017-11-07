@@ -54,10 +54,6 @@ bool SymbolRef::isHiddenFromPrinting() const {
     return isSynthetic() && _id != GlobalState::defn_Opus()._id;
 }
 
-bool SymbolRef::isPlaceHolder() const {
-    return this->_id >= GlobalState::defn_todo()._id && this->_id <= GlobalState::defn_cvar_todo()._id;
-}
-
 void printTabs(ostringstream &to, int count) {
     int i = 0;
     while (i < count) {

@@ -88,92 +88,76 @@ public:
         return SymbolRef(5);
     }
 
-    static constexpr SymbolRef defn_lvar_todo() {
+    static constexpr SymbolRef defn_object() {
         return SymbolRef(6);
     }
 
-    static constexpr SymbolRef defn_ivar_todo() {
+    static constexpr SymbolRef defn_junk() {
         return SymbolRef(7);
     }
 
-    static constexpr SymbolRef defn_gvar_todo() {
+    static constexpr SymbolRef defn_cfg_always() {
         return SymbolRef(8);
     }
 
-    static constexpr SymbolRef defn_cvar_todo() {
+    static constexpr SymbolRef defn_cfg_never() {
         return SymbolRef(9);
     }
 
-    static constexpr SymbolRef defn_object() {
+    static constexpr SymbolRef defn_cfg_block_call() {
         return SymbolRef(10);
     }
 
-    static constexpr SymbolRef defn_junk() {
+    static constexpr SymbolRef defn_Integer() {
         return SymbolRef(11);
     }
 
-    static constexpr SymbolRef defn_cfg_always() {
+    static constexpr SymbolRef defn_Float() {
         return SymbolRef(12);
     }
 
-    static constexpr SymbolRef defn_cfg_never() {
+    static constexpr SymbolRef defn_String() {
         return SymbolRef(13);
     }
 
-    static constexpr SymbolRef defn_cfg_block_call() {
+    static constexpr SymbolRef defn_Symbol() {
         return SymbolRef(14);
     }
 
-    static constexpr SymbolRef defn_Integer() {
+    static constexpr SymbolRef defn_Array() {
         return SymbolRef(15);
     }
 
-    static constexpr SymbolRef defn_Float() {
+    static constexpr SymbolRef defn_Hash() {
         return SymbolRef(16);
     }
 
-    static constexpr SymbolRef defn_String() {
+    static constexpr SymbolRef defn_TrueClass() {
         return SymbolRef(17);
     }
 
-    static constexpr SymbolRef defn_Symbol() {
+    static constexpr SymbolRef defn_FalseClass() {
         return SymbolRef(18);
     }
 
-    static constexpr SymbolRef defn_Array() {
+    static constexpr SymbolRef defn_NilClass() {
         return SymbolRef(19);
     }
 
-    static constexpr SymbolRef defn_Hash() {
+    static constexpr SymbolRef defn_dynamic() {
         return SymbolRef(20);
     }
 
-    static constexpr SymbolRef defn_TrueClass() {
+    static constexpr SymbolRef defn_Opus() {
         return SymbolRef(21);
     }
 
-    static constexpr SymbolRef defn_FalseClass() {
+    static constexpr SymbolRef defn_Opus_Types() {
         return SymbolRef(22);
     }
 
-    static constexpr SymbolRef defn_NilClass() {
-        return SymbolRef(23);
-    }
-
-    static constexpr SymbolRef defn_dynamic() {
-        return SymbolRef(24);
-    }
-
-    static constexpr SymbolRef defn_Opus() {
-        return SymbolRef(25);
-    }
-
-    static constexpr SymbolRef defn_Opus_Types() {
-        return SymbolRef(26);
-    }
-
     static constexpr SymbolRef defn_Class() {
-        return SymbolRef(27);
+        return SymbolRef(23);
     }
 
     // Keep as last and update to match the last entry

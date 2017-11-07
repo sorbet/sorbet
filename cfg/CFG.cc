@@ -346,7 +346,7 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
         if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
             argSym = iarg->symbol;
         } else {
-            argSym = ast::GlobalState::defn_lvar_todo();
+            argSym = ast::GlobalState::defn_todo();
         }
         entry->exprs.emplace_back(argSym, arg->loc, make_unique<LoadArg>(selfSym, methodName, i));
         i++;

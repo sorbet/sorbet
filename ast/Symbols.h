@@ -58,8 +58,6 @@ public:
     /** Not printed when showing name table */
     bool isHiddenFromPrinting() const;
 
-    bool isPlaceHolder() const;
-
     bool isPrimitive() const;
 
     Symbol &info(GlobalState &gs, bool allowNone = false) const;

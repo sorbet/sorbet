@@ -294,10 +294,6 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef root_id = synthesizeClass(root_DESC);
     SymbolRef nil_id = synthesizeClass(nil_DESC);
     SymbolRef todo_id = synthesizeClass(todo_DESC);
-    SymbolRef lvar_id = synthesizeClass(todo_lvar_DESC);
-    SymbolRef ivar_id = synthesizeClass(todo_ivar_DESC);
-    SymbolRef gvar_id = synthesizeClass(todo_gvar_DESC);
-    SymbolRef cvar_id = synthesizeClass(todo_cvar_DESC);
     SymbolRef object_id = synthesizeClass(object_DESC);
     SymbolRef junk_id = synthesizeClass(junk_DESC);
     SymbolRef always_id = synthesizeClass(always_DESC);
@@ -323,10 +319,6 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(root_id == defn_root());
     Error::check(nil_id == defn_nil());
     Error::check(todo_id == defn_todo());
-    Error::check(lvar_id == defn_lvar_todo());
-    Error::check(ivar_id == defn_ivar_todo());
-    Error::check(gvar_id == defn_gvar_todo());
-    Error::check(cvar_id == defn_cvar_todo());
     Error::check(object_id == defn_object());
     Error::check(junk_id == defn_junk());
     Error::check(always_id == defn_cfg_always());
