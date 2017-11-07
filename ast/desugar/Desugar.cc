@@ -377,8 +377,8 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             result.swap(res);
         },
         [&](parser::Restarg *arg) {
-            unique_ptr<Statement> res =
-                make_unique<RestArg>(what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name));
+            unique_ptr<Statement> res = make_unique<RestArg>(
+                what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name));
             result.swap(res);
         },
         [&](parser::Kwrestarg *arg) {
