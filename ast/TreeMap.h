@@ -691,14 +691,15 @@ private:
             }
 
             auto originalBody = v->body.get();
-            auto newBody = mapIt(originalBody, ctx);
+            auto newBody = mapIt(originalBody, ctx.withOwner(v->symbol));
             if (newBody != originalBody) {
                 Error::check(dynamic_cast<Expression *>(newBody) != nullptr);
                 v->body.reset(dynamic_cast<Expression *>(newBody));
             }
 
             if (HAS_MEMBER_postTransformBlock<FUNC>::value) {
-                v = PostPonePreTransform_Block<FUNC, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(ctx, v, func);
+                return PostPonePostTransform_Block<FUNC, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(ctx, v,
+                                                                                                           func);
             }
             return v;
         } else if (InsSeq *v = dynamic_cast<InsSeq *>(what)) {

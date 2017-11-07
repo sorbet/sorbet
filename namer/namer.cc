@@ -109,6 +109,18 @@ public:
         return klass;
     }
 
+    void fillInArgs(ast::Context ctx, vector<unique_ptr<ast::Expression>> &args, ast::Symbol &symbol) {
+        // Fill in the arity right with TODOs
+        for (auto &arg : args) {
+            if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
+                postTransformIdent(ctx.withOwner(symbol.ref(ctx)), iarg);
+                symbol.argumentsOrMixins.push_back(iarg->symbol);
+            } else {
+                symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
+            }
+        }
+    }
+
     ast::MethodDef *preTransformMethodDef(ast::Context ctx, ast::MethodDef *method) {
         scopeStack.emplace_back();
         ast::SymbolRef owner = ownerFromContext(ctx);
@@ -118,15 +130,7 @@ public:
 
         method->symbol = ctx.state.enterSymbol(owner, method->name, true);
         ast::Symbol &symbol = method->symbol.info(ctx);
-        // Fill in the arity right with TODOs
-        for (auto &arg : method->args) {
-            if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
-                postTransformIdent(ctx.withOwner(method->symbol), iarg);
-                symbol.argumentsOrMixins.push_back(iarg->symbol);
-            } else {
-                symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
-            }
-        }
+        fillInArgs(ctx, method->args, symbol);
         symbol.definitionLoc = method->loc;
 
         return method;
@@ -138,6 +142,11 @@ public:
     }
 
     ast::Block *preTransformBlock(ast::Context ctx, ast::Block *blk) {
+        ast::SymbolRef owner = ownerFromContext(ctx);
+        blk->symbol = ctx.state.enterSymbol(
+            owner, ctx.state.freshNameUnique(ast::UniqueNameKind::Namer, ast::Names::blockTemp()), true);
+        ast::Symbol &symbol = blk->symbol.info(ctx);
+
         scopeStack.emplace_back();
         auto &parent = *(scopeStack.end() - 2);
         auto &frame = scopeStack.back();
@@ -158,6 +167,8 @@ public:
 
             frame.locals.erase(id->name);
         }
+
+        fillInArgs(ctx, blk->args, symbol);
         return blk;
     }
 
@@ -171,10 +182,7 @@ public:
             auto &frame = scopeStack.back();
             ast::SymbolRef &cur = frame.locals[ident->name];
             if (!cur.exists()) {
-                ast::NameRef name = ident->name;
-                if (frame.is_block)
-                    name = ctx.state.freshNameUnique(ast::UniqueNameKind::Namer, name);
-                cur = ctx.state.enterSymbol(ctx.owner, name, false);
+                cur = ctx.state.enterSymbol(ctx.owner, ident->name, false);
                 frame.locals[ident->name] = cur;
             }
             ident->symbol = cur;
@@ -183,16 +191,7 @@ public:
     }
 
     ast::Self *postTransformSelf(ast::Context ctx, ast::Self *self) {
-        ast::Symbol &info = ctx.owner.info(ctx);
-        if (info.isMethod()) {
-            self->claz = info.owner;
-        } else {
-            Error::check(info.isClass());
-            self->claz = info.singletonClass(ctx);
-        }
-
-        Error::check(self->claz.info(ctx).isClass());
-
+        self->claz = ctx.selfClass();
         return self;
     }
 

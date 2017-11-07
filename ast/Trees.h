@@ -411,6 +411,7 @@ class Block : public Expression {
 public:
     std::vector<std::unique_ptr<Expression>> args;
     std::unique_ptr<Expression> body;
+    SymbolRef symbol;
 
     Block(std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> body);
     virtual std::string toString(GlobalState &gs, int tabs = 0);

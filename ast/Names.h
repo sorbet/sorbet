@@ -280,6 +280,12 @@ public:
     static inline NameRef attachedClass() {
         return NameRef(31);
     }
+
+    // Used to generate temporary names for entering blocks into the symbol
+    // table.
+    static inline NameRef blockTemp() {
+        return NameRef(32);
+    }
 };
 
 class Name {
