@@ -4,6 +4,7 @@
 // makes lldb work. Don't remove please
 template class std::unique_ptr<ruby_typer::ast::Expression>;
 template class std::unique_ptr<ruby_typer::ast::Statement>;
+template class std::unique_ptr<ruby_typer::ast::Reference>;
 
 using namespace std;
 

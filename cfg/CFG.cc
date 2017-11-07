@@ -341,14 +341,8 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     auto methodName = md.symbol.info(ctx).name;
 
     int i = 0;
-    for (auto &arg : md.args) {
-        ast::SymbolRef argSym;
-        if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
-            argSym = iarg->symbol;
-        } else {
-            argSym = ast::GlobalState::defn_todo();
-        }
-        entry->exprs.emplace_back(argSym, arg->loc, make_unique<LoadArg>(selfSym, methodName, i));
+    for (ast::SymbolRef argSym : md.symbol.info(ctx).arguments()) {
+        entry->exprs.emplace_back(argSym, argSym.info(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
         i++;
     }
     auto cont = res->walk(ctx, md.rhs.get(), entry, *res.get(), retSym, 0);
