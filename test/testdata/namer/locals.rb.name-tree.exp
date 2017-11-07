@@ -4,13 +4,13 @@ class <emptyTree>::TestLocals<TestLocals> < (::Object)
       ::TestLocals#method#a = 1
       self(TestLocals).proc() do ||
         begin
-          ::TestLocals#method#b$0 = 2
-          ::TestLocals#method#a.+(::TestLocals#method#b$0)
+          ::TestLocals#method#<block>$0#b = 2
+          ::TestLocals#method#a.+(::TestLocals#method#<block>$0#b)
         end
       end
-      ::TestLocals#method#b$0 = 3
-      self(TestLocals).proc() do |a<todo lvar sym>; b<todo lvar sym>|
-        ::TestLocals#method#a$1.+(::TestLocals#method#b$2)
+      ::TestLocals#method#b = 3
+      self(TestLocals).proc() do |::TestLocals#method#<block>$1#a; b<todo lvar sym>|
+        ::TestLocals#method#<block>$1#a.+(::TestLocals#method#<block>$1#b)
       end
     end
 

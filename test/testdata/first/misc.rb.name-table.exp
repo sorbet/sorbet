@@ -3,14 +3,14 @@ class <singleton class:<root>> (Class)
 class <singleton class:Object> (Class)
   method classmeth ()
 class Opus ()
-field a$10
+field a
 field assignTmp$2
 field assignTmp$3
 field assignTmp$5
 field assignTmp$6
 field baaaar
 field naaar
-field x$9
+field x
 field xaaaaz
 field y
 field ||$4

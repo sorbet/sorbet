@@ -9,33 +9,43 @@ class Opus ()
       class <singleton class:Matcher> (Class)
       class Diff (Object)
         method added_files ()
-          field part$6
-          field part$7
+          method <block>$7 (part)
+            field part
+          method <block>$8 (part)
+            field part
         method added_lines ()
-          field part$12
+          method <block>$13 (part)
+            field part
         method affected_files ()
         method changed_files ()
-          field part$10
-          field part$11
+          method <block>$11 (part)
+            field part
+          method <block>$12 (part)
+            field part
         method changed_lines ()
         method changed_openapi? ()
         method deleted_files ()
-          field part$8
-          field part$9
+          method <block>$10 (part)
+            field part
+          method <block>$9 (part)
+            field part
         method initialize (raw_diff)
           field raw_diff
         method parse (diff)
-          field a_name$17
-          field added_lines$19
-          field b_name$18
           field diff
-          field line$21
-          field lines$15
-          field part$16
           field parts
-          field removed_lines$20
+          method <block>$16 (part)
+            field a_name
+            field added_lines
+            field b_name
+            field lines
+            field part
+            field removed_lines
+            method <block>$17 (line)
+              field line
         method removed_lines ()
-          field part$13
+          method <block>$14 (part)
+            field part
       class MatchContext (Object)
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
           field assignee
@@ -67,6 +77,8 @@ class Opus ()
         method match (match_context)
           field budget
           field match_context
-          field r$4
+          method <block>$4 (r)
+            field r
+            method <block>$5 ()
 field assignTmp$0
 
