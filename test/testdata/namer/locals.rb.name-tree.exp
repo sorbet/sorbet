@@ -2,15 +2,19 @@ class <emptyTree>::TestLocals<TestLocals> < (::Object)
   def method<method>()
     begin
       ::TestLocals#method#a = 1
+      ::TestLocals#method#c = 4
       self(TestLocals).proc() do ||
         begin
           ::TestLocals#method#<block>$0#b = 2
           ::TestLocals#method#a.+(::TestLocals#method#<block>$0#b)
+          self(TestLocals).proc() do ||
+            ::TestLocals#method#<block>$0#b.+(::TestLocals#method#c)
+          end
         end
       end
       ::TestLocals#method#b = 3
-      self(TestLocals).proc() do |::TestLocals#method#<block>$1#a; b<todo lvar sym>|
-        ::TestLocals#method#<block>$1#a.+(::TestLocals#method#<block>$1#b)
+      self(TestLocals).proc() do |::TestLocals#method#<block>$2#a; b<todo lvar sym>|
+        ::TestLocals#method#<block>$2#a.+(::TestLocals#method#<block>$2#b)
       end
     end
 
