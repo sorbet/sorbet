@@ -217,6 +217,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == got.str() + "\n") {
             TEST_COUT << "cfg OK" << endl;
         }
+
+        ifstream svgFile(checker + ".svg");
+        EXPECT_TRUE(svgFile.good());
     }
 
     if (test.expectations.find("infer") != test.expectations.end()) {
