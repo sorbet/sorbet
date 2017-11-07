@@ -5,7 +5,7 @@ subgraph "cluster_::String#getbyte" {
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];
 
-    bb25_0 [label = "()\n<self>$3 = self\n<ret>$2 = NotSupported()\n<ret>$4 = return <ret>$2\n<never>"];
+    bb25_0 [label = "()\n<self>$3 = self : String\n<ret>$2 = NotSupported() : <dynamic>\n<ret>$4 = return <ret>$2 : <bottom>\n<never>"];
     bb25_0 -> bb25_1;
     bb25_1 [label = "()\n<never>"];
     bb25_1 -> bb25_1;
@@ -17,7 +17,7 @@ subgraph "cluster_::Integer#+" {
     bb28_0 [shape = invhouse];
     bb28_1 [shape = parallelogram];
 
-    bb28_0 [label = "()\n<self>$6 = self\n<ret>$5 = NotSupported()\n<ret>$7 = return <ret>$5\n<never>"];
+    bb28_0 [label = "()\n<self>$6 = self : Integer\n<ret>$5 = NotSupported() : <dynamic>\n<ret>$7 = return <ret>$5 : <bottom>\n<never>"];
     bb28_0 -> bb28_1;
     bb28_1 [label = "()\n<never>"];
     bb28_1 -> bb28_1;
@@ -29,7 +29,7 @@ subgraph "cluster_::Object#baz1" {
     bb30_0 [shape = invhouse];
     bb30_1 [shape = parallelogram];
 
-    bb30_0 [label = "()\na = foo\nb = a.getbyte(a)\n<ret>$13 = return b\n<never>"];
+    bb30_0 [label = "()\na = foo : String(\"foo\")\nb = a.getbyte(a) : Integer | NilClass\n<ret>$13 = return b : <bottom>\n<never>"];
     bb30_0 -> bb30_1;
     bb30_1 [label = "()\n<never>"];
     bb30_1 -> bb30_1;
@@ -41,7 +41,7 @@ subgraph "cluster_::Object#baz2" {
     bb33_0 [shape = invhouse];
     bb33_1 [shape = parallelogram];
 
-    bb33_0 [label = "()\na = foo\nstatTmp$18 = foo\nb = a.getbyte(statTmp$18)\n<ret>$19 = return b\n<never>"];
+    bb33_0 [label = "()\na = foo : String(\"foo\")\nstatTmp$18 = foo : String(\"foo\")\nb = a.getbyte(statTmp$18) : Integer | NilClass\n<ret>$19 = return b : <bottom>\n<never>"];
     bb33_0 -> bb33_1;
     bb33_1 [label = "()\n<never>"];
     bb33_1 -> bb33_1;
@@ -53,7 +53,7 @@ subgraph "cluster_::Object#baz3" {
     bb36_0 [shape = invhouse];
     bb36_1 [shape = parallelogram];
 
-    bb36_0 [label = "()\nstatTmp$22 = foo\nstatTmp$23 = foo\nb = statTmp$22.getbyte(statTmp$23)\n<ret>$24 = return b\n<never>"];
+    bb36_0 [label = "()\nstatTmp$22 = foo : String(\"foo\")\nstatTmp$23 = foo : String(\"foo\")\nb = statTmp$22.getbyte(statTmp$23) : Integer | NilClass\n<ret>$24 = return b : <bottom>\n<never>"];
     bb36_0 -> bb36_1;
     bb36_1 [label = "()\n<never>"];
     bb36_1 -> bb36_1;
@@ -65,7 +65,7 @@ subgraph "cluster_::Object#baz4" {
     bb38_0 [shape = invhouse];
     bb38_1 [shape = parallelogram];
 
-    bb38_0 [label = "()\nstatTmp$28 = self\nstatTmp$27 = statTmp$28.a()\nstatTmp$29 = foo\nb = statTmp$27.getbyte(statTmp$29)\n<ret>$30 = return b\n<never>"];
+    bb38_0 [label = "()\nstatTmp$28 = self : Object\nstatTmp$27 = statTmp$28.a() : <dynamic>\nstatTmp$29 = foo : String(\"foo\")\nb = statTmp$27.getbyte(statTmp$29) : <dynamic>\n<ret>$30 = return b : <bottom>\n<never>"];
     bb38_0 -> bb38_1;
     bb38_1 [label = "()\n<never>"];
     bb38_1 -> bb38_1;
@@ -77,17 +77,17 @@ subgraph "cluster_::Object#baz5" {
     bb40_0 [shape = invhouse];
     bb40_1 [shape = parallelogram];
 
-    bb40_0 [label = "()\nifTmp$34 = true\nifTmp$34"];
+    bb40_0 [label = "()\nifTmp$34 = true : TrueClass(true)\nifTmp$34"];
     bb40_0 -> bb40_2;
     bb40_0 -> bb40_3;
 
     bb40_1 [label = "()\n<never>"];
     bb40_1 -> bb40_1;
-    bb40_2 [label = "(b)\nb = 1\n<always>"];
+    bb40_2 [label = "(b)\nb = 1 : Integer(1)\n<always>"];
     bb40_2 -> bb40_4;
-    bb40_3 [label = "(b)\nb = foo\n<always>"];
+    bb40_3 [label = "(b)\nb = foo : String(\"foo\")\n<always>"];
     bb40_3 -> bb40_4;
-    bb40_4 [label = "(b)\nstatTmp$35 = b\nstatTmp$36 = 1\nb = statTmp$35.getbyte(statTmp$36)\n<ret>$37 = return b\n<never>"];
+    bb40_4 [label = "(b)\nstatTmp$35 = b : Integer | String\nstatTmp$36 = 1 : Integer(1)\nb = statTmp$35.getbyte(statTmp$36) : <dynamic>\n<ret>$37 = return b : <bottom>\n<never>"];
     bb40_4 -> bb40_1;
 }
 
@@ -97,17 +97,17 @@ subgraph "cluster_::Object#baz6" {
     bb42_0 [shape = invhouse];
     bb42_1 [shape = parallelogram];
 
-    bb42_0 [label = "()\nifTmp$41 = true\nifTmp$41"];
+    bb42_0 [label = "()\nifTmp$41 = true : TrueClass(true)\nifTmp$41"];
     bb42_0 -> bb42_2;
     bb42_0 -> bb42_3;
 
     bb42_1 [label = "()\n<never>"];
     bb42_1 -> bb42_1;
-    bb42_2 [label = "(b)\nb = 1\n<always>"];
+    bb42_2 [label = "(b)\nb = 1 : Integer(1)\n<always>"];
     bb42_2 -> bb42_4;
-    bb42_3 [label = "(b)\nb = foo\n<always>"];
+    bb42_3 [label = "(b)\nb = foo : String(\"foo\")\n<always>"];
     bb42_3 -> bb42_4;
-    bb42_4 [label = "(b)\nstatTmp$42 = foo\nstatTmp$43 = b\nb = statTmp$42.getbyte(statTmp$43)\n<ret>$44 = return b\n<never>"];
+    bb42_4 [label = "(b)\nstatTmp$42 = foo : String(\"foo\")\nstatTmp$43 = b : Integer | String\nb = statTmp$42.getbyte(statTmp$43) : Integer | NilClass\n<ret>$44 = return b : <bottom>\n<never>"];
     bb42_4 -> bb42_1;
 }
 
@@ -117,17 +117,17 @@ subgraph "cluster_::Object#baz7" {
     bb44_0 [shape = invhouse];
     bb44_1 [shape = parallelogram];
 
-    bb44_0 [label = "()\nifTmp$48 = true\nifTmp$48"];
+    bb44_0 [label = "()\nifTmp$48 = true : TrueClass(true)\nifTmp$48"];
     bb44_0 -> bb44_2;
     bb44_0 -> bb44_3;
 
     bb44_1 [label = "()\n<never>"];
     bb44_1 -> bb44_1;
-    bb44_2 [label = "(b)\nb = 1\n<always>"];
+    bb44_2 [label = "(b)\nb = 1 : Integer(1)\n<always>"];
     bb44_2 -> bb44_4;
-    bb44_3 [label = "()\nstatTmp$47 = NotSupported()\n<always>"];
+    bb44_3 [label = "()\nstatTmp$47 = NotSupported() : <dynamic>\n<always>"];
     bb44_3 -> bb44_4;
-    bb44_4 [label = "(b)\nstatTmp$49 = foo\nstatTmp$50 = b\nb = statTmp$49.getbyte(statTmp$50)\n<ret>$51 = return b\n<never>"];
+    bb44_4 [label = "(b)\nstatTmp$49 = foo : String(\"foo\")\nstatTmp$50 = b : Integer | NilClass\nb = statTmp$49.getbyte(statTmp$50) : Integer | NilClass\n<ret>$51 = return b : <bottom>\n<never>"];
     bb44_4 -> bb44_1;
 }
 
@@ -141,13 +141,13 @@ subgraph "cluster_::Object#baz8" {
     bb46_0 -> bb46_2;
     bb46_1 [label = "()\n<never>"];
     bb46_1 -> bb46_1;
-    bb46_2 [label = "()\nouterLoops: 1\nwhileTmp$54 = true\nwhileTmp$54"];
+    bb46_2 [label = "()\nouterLoops: 1\nwhileTmp$54 = true : TrueClass(true)\nwhileTmp$54"];
     bb46_2 -> bb46_3;
     bb46_2 -> bb46_4;
 
-    bb46_3 [label = "()\nouterLoops: 1\nb = 1\n<always>"];
+    bb46_3 [label = "()\nouterLoops: 1\nb = 1 : Integer(1)\n<always>"];
     bb46_3 -> bb46_2;
-    bb46_4 [label = "()\n<ret>$52 = nil\n<ret>$56 = return <ret>$52\n<never>"];
+    bb46_4 [label = "()\n<ret>$52 = nil : NilClass\n<ret>$56 = return <ret>$52 : <bottom>\n<never>"];
     bb46_4 -> bb46_1;
 }
 

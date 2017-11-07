@@ -5,17 +5,17 @@ subgraph "cluster_::Side#foo" {
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];
 
-    bb25_0 [label = "(a, statTmp$3, statTmp$4)\na = 1\nstatTmp$3 = a\nstatTmp$4 = a\nifTmp$6 = true\nifTmp$6"];
+    bb25_0 [label = "(a, statTmp$3, statTmp$4)\na = 1 : Integer(1)\nstatTmp$3 = a : Integer(1)\nstatTmp$4 = a : Integer(1)\nifTmp$6 = true : TrueClass(true)\nifTmp$6"];
     bb25_0 -> bb25_2;
     bb25_0 -> bb25_3;
 
     bb25_1 [label = "()\n<never>"];
     bb25_1 -> bb25_1;
-    bb25_2 [label = "(a, statTmp$3, statTmp$4)\na = true\n<always>"];
+    bb25_2 [label = "(a, statTmp$3, statTmp$4)\na = true : TrueClass(true)\n<always>"];
     bb25_2 -> bb25_4;
-    bb25_3 [label = "(a, statTmp$3, statTmp$4)\na = 2\n<always>"];
+    bb25_3 [label = "(a, statTmp$3, statTmp$4)\na = 2 : Integer(2)\n<always>"];
     bb25_3 -> bb25_4;
-    bb25_4 [label = "(a, statTmp$3, statTmp$4)\n<ret>$0 = statTmp$3.foo(statTmp$4, a)\n<ret>$7 = return <ret>$0\n<never>"];
+    bb25_4 [label = "(a, statTmp$3, statTmp$4)\n<ret>$0 = statTmp$3.foo(statTmp$4, a) : <dynamic>\n<ret>$7 = return <ret>$0 : <bottom>\n<never>"];
     bb25_4 -> bb25_1;
 }
 
