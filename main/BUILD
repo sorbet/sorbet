@@ -4,7 +4,10 @@ cc_binary(
         "main.cc",
         "realmain.cc",
     ],
-    linkstatic = 1,
+    linkstatic = select({
+        "//tools/config:opt": 1,
+        "//conditions:default": 0,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//ast/desugar",

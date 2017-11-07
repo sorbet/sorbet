@@ -191,7 +191,8 @@ private:
     void ensureCompleted(GlobalState &gs);
 };
 
-CheckSize(Symbol, 88, 8);
+// CheckSize(Symbol, 88, 8); // This is under too much churn to be worth checking
+
 } // namespace ast
 } // namespace ruby_typer
 

@@ -25,7 +25,6 @@ cc_test(
         "test/*.cc",
     ]),
     copts = ["-Iexternal/gtest/include"],
-    linkstatic = 1,
     visibility = ["//tools:__pkg__"],
     deps = [
         "namer",

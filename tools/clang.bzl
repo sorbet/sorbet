@@ -23,20 +23,10 @@ _clang_tool = rule(
 )
 
 def clang_tool(name):
-    native.config_setting(
-        name = "darwin",
-        values = {"host_cpu": "darwin"},
-    )
-
-    native.config_setting(
-        name = "linux",
-        values = {"host_cpu": "k8"},
-    )
-
     _clang_tool(
         name = name,
         tool = select({
-            ":darwin": "@clang_5_0_0_darwin//:bin/" + name,
-            ":linux": "@clang_5_0_0_linux//:bin/" + name,
+            "//tools/config:darwin": "@clang_5_0_0_darwin//:bin/" + name,
+            "//tools/config:linux": "@clang_5_0_0_linux//:bin/" + name,
         }),
     )
