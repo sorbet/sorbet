@@ -1,0 +1,7 @@
+class A (Object)
+  method meth ()
+class Opus ()
+field $a
+field $b
+field $c
+
