@@ -53,9 +53,7 @@ unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&stateme
     return fromStatement(statement);
 }
 
-Statement::Statement(Loc loc) : loc(loc) {
-    DEBUG_ONLY(Error::check(!loc.is_none(), "Location of ast node is none"));
-}
+Statement::Statement(Loc loc) : loc(loc) {}
 
 Expression::Expression(Loc loc) : Statement(loc) {}
 
