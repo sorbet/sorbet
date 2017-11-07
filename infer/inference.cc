@@ -41,7 +41,7 @@ public:
         }
     }
 
-    void processBinding(ast::Context ctx, cfg::Binding &bind, int loopCount) {
+    shared_ptr<ast::Type> processBinding(ast::Context ctx, cfg::Binding &bind, int loopCount) {
         shared_ptr<ast::Type> tp;
         vector<ast::Loc> loc; // todo: use tiny vector
         typecase(
@@ -143,6 +143,7 @@ public:
             }
             cur.origins = loc;
         }
+        return tp;
     }
 
     void ensureGoodCondition(ast::Context ctx, ast::SymbolRef) {}
@@ -163,7 +164,7 @@ void ruby_typer::infer::Inference::run(ast::Context ctx, unique_ptr<cfg::CFG> &c
             current.mergeWith(ctx, outEnvironments[parent->id]);
         }
         for (cfg::Binding &bind : bb->exprs) {
-            current.processBinding(ctx, bind, bb->outerLoops);
+            bind.tpe = current.processBinding(ctx, bind, bb->outerLoops);
         }
         current.ensureGoodCondition(ctx, bb->bexit.cond);
     }

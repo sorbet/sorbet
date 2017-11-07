@@ -169,6 +169,7 @@ public:
     ast::Loc loc;
 
     std::unique_ptr<Instruction> value;
+    std::shared_ptr<ast::Type> tpe;
 
     Binding(ast::SymbolRef bind, ast::Loc loc, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;

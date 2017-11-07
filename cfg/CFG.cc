@@ -633,8 +633,11 @@ string BasicBlock::toString(ast::Context ctx) {
     if (this->outerLoops > 0) {
         buf << "outerLoops: " << this->outerLoops << "\\n";
     }
-    for (auto &exp : this->exprs) {
+    for (Binding &exp : this->exprs) {
         buf << exp.bind.info(ctx).name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
+        if (exp.tpe) {
+            buf << " : " << escape(exp.tpe->toString(ctx));
+        }
         buf << "\\n"; // intentional! graphviz will do interpolation.
     }
     buf << this->bexit.cond.info(ctx).name.name(ctx).toString(ctx);
