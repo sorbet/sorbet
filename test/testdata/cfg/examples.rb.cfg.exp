@@ -1,4 +1,4 @@
-digraph "./test/testdata//cfg/examples.rb"{
+digraph "examples.rb"{
 subgraph "cluster_::Integer#+" {
     label = "::Integer#+";
     color = blue;

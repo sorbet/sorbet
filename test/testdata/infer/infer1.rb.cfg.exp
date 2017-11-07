@@ -1,4 +1,4 @@
-digraph "./test/testdata//infer/infer1.rb"{
+digraph "infer1.rb"{
 subgraph "cluster_::String#getbyte" {
     label = "::String#getbyte";
     color = blue;

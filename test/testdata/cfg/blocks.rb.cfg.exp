@@ -1,4 +1,4 @@
-digraph "./test/testdata//cfg/blocks.rb"{
+digraph "blocks.rb"{
 subgraph "cluster_::BlockTest#block_pass" {
     label = "::BlockTest#block_pass";
     color = blue;

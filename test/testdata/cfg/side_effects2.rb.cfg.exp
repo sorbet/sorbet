@@ -1,4 +1,4 @@
-digraph "./test/testdata//cfg/side_effects2.rb"{
+digraph "side_effects2.rb"{
 subgraph "cluster_::Side#foo" {
     label = "::Side#foo";
     color = blue;
