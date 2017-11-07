@@ -1,21 +1,21 @@
 begin
   <Not Supported (Alias)>
-  @iv<todo ivar sym> = 1
-  @@cv<todo cvar sym> = 1
-  $gv<todo gvar sym> = 1
+  @iv = 1
+  @@cv = 1
+  $gv = 1
   begin
     #assignTmp$2 = [nil, nil]
     self(TODO).x().var=(#assignTmp$2.[](0))
-    y<todo lvar sym> = #assignTmp$2.[](1)
+    y = #assignTmp$2.[](1)
     #assignTmp$2
   end
   begin
     #assignTmp$3 = self(TODO).zaaaz()
-    baaaar<todo lvar sym> = #assignTmp$3.[](0)
-    naaar<todo lvar sym> = #assignTmp$3.[](1)
+    baaaar = #assignTmp$3.[](0)
+    naaar = #assignTmp$3.[](1)
     #assignTmp$3
   end
-  xaaaaz<todo lvar sym> = [self(TODO).yayayaya(), self(TODO).tutututu()]
+  xaaaaz = [self(TODO).yayayaya(), self(TODO).tutututu()]
   <emptyTree>
   begin
     nil
@@ -49,7 +49,7 @@ begin
   while 0.!=(1)
     <emptyTree>
   end
-  x<todo lvar sym>.[]=(0)
+  x.[]=(0)
   break(<emptyTree>)
   break(1)
   break([1, 2])
@@ -58,9 +58,9 @@ begin
   next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
-  def foo<<todo sym>>(x<todo lvar sym>:, y<todo lvar sym>: = 1, *z<todo lvar sym>:)
+  def foo<<todo sym>>(x:, y: = 1, *z:)
     <emptyTree>
-  x<todo lvar sym>
+  x
   <Not Supported (LineLiteral)>
   while true
     nil
@@ -76,14 +76,14 @@ begin
   end
   begin
     #assignTmp$5 = 1
-    a<todo lvar sym> = #assignTmp$5.[](0)
+    a = #assignTmp$5.[](0)
     <Not Supported (Mlhs)>
     #assignTmp$5
   end
   <Not Supported (NthRef)>
-  def foo<<todo sym>>(x<todo lvar sym> = 1, *y<todo lvar sym>)
+  def foo<<todo sym>>(x = 1, *y)
     <emptyTree>
-  {x<todo lvar sym> => y<todo lvar sym>, <Not Supported (DSymbol)> => 1}
+  {x => y, <Not Supported (DSymbol)> => 1}
   <Not Supported (Preexe)>
   <Not Supported (Postexe)>
   <Not Supported (Rational)>
@@ -98,7 +98,7 @@ begin
   end
   <Not Supported (DSymbol)>
   [:sym]
-  if x<todo lvar sym>
+  if x
     1
   else
     7
@@ -107,14 +107,14 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(TODO).proc() do |x<todo lvar sym>|
+  self(TODO).proc() do |x|
     <emptyTree>
   end
   break(self(TODO).foo(1) do ||
       <emptyTree>
     end)
-  def foo<<todo sym>>(**$0<todo lvar sym>)
+  def foo<<todo sym>>(**$0)
     <emptyTree>
-  def foo<<todo sym>>(***$1<todo lvar sym>:)
+  def foo<<todo sym>>(***$1:)
     <emptyTree>
 end

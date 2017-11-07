@@ -5,10 +5,10 @@ begin
     class <emptyTree>::MatchTimeout<<todo sym>> < (<emptyTree>::StandardError)
       self(TODO).attr_reader(:rule_token)
 
-      def initialize<<todo sym>>(message<todo lvar sym>, rule_token<todo lvar sym>: = "")
+      def initialize<<todo sym>>(message, rule_token: = "")
         begin
-          super(message<todo lvar sym>)
-          @rule_token<todo ivar sym> = rule_token<todo lvar sym>
+          super(message)
+          @rule_token = rule_token
         end
 
     end
@@ -22,36 +22,36 @@ begin
         begin
           begin
             #assignTmp$0 = <emptyTree>::Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
-            @rules<todo ivar sym> = #assignTmp$0.[](0)
-            invalid_rules<todo lvar sym> = #assignTmp$0.[](1)
+            @rules = #assignTmp$0.[](0)
+            invalid_rules = #assignTmp$0.[](1)
             #assignTmp$0
           end
-          if invalid_rules<todo lvar sym>.empty?().!()
+          if invalid_rules.empty?().!()
             begin
-              invalid_rule_ids<todo lvar sym> = invalid_rules<todo lvar sym>.map(<Not Supported (BlockPass)>).join(",")
-              self(TODO).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids<todo lvar sym>))
+              invalid_rule_ids = invalid_rules.map(<Not Supported (BlockPass)>).join(",")
+              self(TODO).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
             end
           else
             <emptyTree>
           end
         end
 
-      def match<<todo sym>>(match_context<todo lvar sym>)
+      def match<<todo sym>>(match_context)
         begin
-          if match_context<todo lvar sym>.diff().affected_files().count().>(<emptyTree>::MAX_AFFECTED_FILES)
+          if match_context.diff().affected_files().count().>(<emptyTree>::MAX_AFFECTED_FILES)
             begin
               self(TODO).log().warn("Gerald skipping large PR with ".concat(begin
-                    match_context<todo lvar sym>.diff().affected_files().count()
+                    match_context.diff().affected_files().count()
                   end.to_s()).concat(" affected files").to_s())
               return []
             end
           else
             <emptyTree>
           end
-          budget<todo lvar sym> = <emptyTree>::MatchTimeBudget.new()
-          @rules<todo ivar sym>.select() do |r<todo lvar sym>|
-            budget<todo lvar sym>.time_rule(r<todo lvar sym>) do ||
-              r<todo lvar sym>.matches?(match_context<todo lvar sym>)
+          budget = <emptyTree>::MatchTimeBudget.new()
+          @rules.select() do |r|
+            budget.time_rule(r) do ||
+              r.matches?(match_context)
             end
           end
         end
@@ -75,20 +75,20 @@ begin
 
       self(TODO).attr_reader(:openapi_diff)
 
-      def initialize<<todo sym>>(repo<todo lvar sym>, assignee<todo lvar sym>, gh_user<todo lvar sym>, merge_branch<todo lvar sym>, body<todo lvar sym>, title<todo lvar sym>, diff<todo lvar sym>, openapi_diff<todo lvar sym>)
+      def initialize<<todo sym>>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
         begin
-          @repo<todo ivar sym> = repo<todo lvar sym>
-          @assignee<todo ivar sym> = assignee<todo lvar sym>
-          @gh_user<todo ivar sym> = gh_user<todo lvar sym>
-          @merge_branch<todo ivar sym> = merge_branch<todo lvar sym>
-          @body<todo ivar sym> = body<todo lvar sym>
-          @title<todo ivar sym> = title<todo lvar sym>
-          @diff<todo ivar sym> = diff<todo lvar sym>
-          @openapi_diff<todo ivar sym> = openapi_diff<todo lvar sym>
+          @repo = repo
+          @assignee = assignee
+          @gh_user = gh_user
+          @merge_branch = merge_branch
+          @body = body
+          @title = title
+          @diff = diff
+          @openapi_diff = openapi_diff
         end
 
       def user_stripe_suffix?<<todo sym>>()
-        @repo<todo ivar sym>.start_with?("stripe-internal/").!()
+        @repo.start_with?("stripe-internal/").!()
 
     end
 
@@ -98,14 +98,14 @@ begin
       <emptyTree>::PER_RULE_MS = 2000
 
       def initialize<<todo sym>>()
-        @start<todo ivar sym> = <emptyTree>::Time.now()
+        @start = <emptyTree>::Time.now()
 
       def check!<<todo sym>>()
         begin
-          dur_ms<todo lvar sym> = begin
-            <emptyTree>::Time.now().-(@start<todo ivar sym>)
+          dur_ms = begin
+            <emptyTree>::Time.now().-(@start)
           end.*(1000)
-          if dur_ms<todo lvar sym>.>(<emptyTree>::TOTAL_TIME_MS)
+          if dur_ms.>(<emptyTree>::TOTAL_TIME_MS)
             self(TODO).raise(<emptyTree>::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
                     <emptyTree>::TOTAL_TIME_MS
                   end.to_s()).concat("ms").to_s()))
@@ -114,69 +114,69 @@ begin
           end
         end
 
-      def time_rule<<todo sym>>(rule<todo lvar sym>)
+      def time_rule<<todo sym>>(rule)
         begin
-          rule_start<todo lvar sym> = <emptyTree>::Time.now()
-          res<todo lvar sym> = yield(<emptyTree>)
-          dur_ms<todo lvar sym> = begin
-            <emptyTree>::Time.now().-(rule_start<todo lvar sym>)
+          rule_start = <emptyTree>::Time.now()
+          res = yield(<emptyTree>)
+          dur_ms = begin
+            <emptyTree>::Time.now().-(rule_start)
           end.*(1000)
-          if dur_ms<todo lvar sym>.>(<emptyTree>::PER_RULE_MS)
+          if dur_ms.>(<emptyTree>::PER_RULE_MS)
             self(TODO).raise(<emptyTree>::MatchTimeout.new("Gerald rule '".concat(begin
-                    rule<todo lvar sym>.token()
+                    rule.token()
                   end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
-                    dur_ms<todo lvar sym>.to_i()
+                    dur_ms.to_i()
                   end.to_s()).concat("ms budget=").concat(begin
                     <emptyTree>::PER_RULE_MS
-                  end.to_s()).concat("ms").to_s(), {:rule_token => rule<todo lvar sym>.token()}))
+                  end.to_s()).concat("ms").to_s(), {:rule_token => rule.token()}))
           else
             <emptyTree>
           end
           self(TODO).check!()
-          res<todo lvar sym>
+          res
         end
 
     end
 
     class <emptyTree>::Diff<<todo sym>> < (::Object)
-      def initialize<<todo sym>>(raw_diff<todo lvar sym>)
+      def initialize<<todo sym>>(raw_diff)
         begin
-          @raw<todo ivar sym> = raw_diff<todo lvar sym>
-          @parsed<todo ivar sym> = self(TODO).parse(raw_diff<todo lvar sym>)
+          @raw = raw_diff
+          @parsed = self(TODO).parse(raw_diff)
         end
 
       def affected_files<<todo sym>>()
         self(TODO).added_files().+(self(TODO).deleted_files()).+(self(TODO).changed_files())
 
       def added_files<<todo sym>>()
-        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:a_name).==("/dev/null")
-        end.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:b_name)
+        @parsed.select() do |part|
+          part.[](:a_name).==("/dev/null")
+        end.map() do |part|
+          part.[](:b_name)
         end
 
       def deleted_files<<todo sym>>()
-        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:b_name).==("/dev/null")
-        end.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:a_name)
+        @parsed.select() do |part|
+          part.[](:b_name).==("/dev/null")
+        end.map() do |part|
+          part.[](:a_name)
         end
 
       def changed_files<<todo sym>>()
-        @parsed<todo ivar sym>.select() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:a_name).==(part<todo lvar sym>.[](:b_name))
-        end.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:b_name)
+        @parsed.select() do |part|
+          part.[](:a_name).==(part.[](:b_name))
+        end.map() do |part|
+          part.[](:b_name)
         end
 
       def added_lines<<todo sym>>()
-        @parsed<todo ivar sym>.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:added_lines)
+        @parsed.map() do |part|
+          part.[](:added_lines)
         end.flatten()
 
       def removed_lines<<todo sym>>()
-        @parsed<todo ivar sym>.map() do |part<todo lvar sym>|
-          part<todo lvar sym>.[](:removed_lines)
+        @parsed.map() do |part|
+          part.[](:removed_lines)
         end.flatten()
 
       def changed_lines<<todo sym>>()
@@ -185,58 +185,58 @@ begin
       def changed_openapi?<<todo sym>>()
         self(TODO).changed_files().include?(<emptyTree>::Opus::CIBot::Actions::OpenAPI::SPEC_PATH)
 
-      self(TODO).private(def parse<<todo sym>>(diff<todo lvar sym>)
+      self(TODO).private(def parse<<todo sym>>(diff)
           begin
-            parts<todo lvar sym> = diff<todo lvar sym>.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
-            if parts<todo lvar sym>
-              parts<todo lvar sym>
+            parts = diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
+            if parts
+              parts
             else
-              parts<todo lvar sym> = []
+              parts = []
             end
-            parts<todo lvar sym>.map() do |part<todo lvar sym>|
+            parts.map() do |part|
               begin
-                lines<todo lvar sym> = part<todo lvar sym>.split("
+                lines = part.split("
 ")
-                a_name<todo lvar sym> = b_name<todo lvar sym> = nil
-                added_lines<todo lvar sym> = []
-                removed_lines<todo lvar sym> = []
-                lines<todo lvar sym>.each() do |line<todo lvar sym>|
-                  if line<todo lvar sym>.start_with?("index ", "@@", "new file mode")
+                a_name = b_name = nil
+                added_lines = []
+                removed_lines = []
+                lines.each() do |line|
+                  if line.start_with?("index ", "@@", "new file mode")
                     next(<emptyTree>)
                   else
-                    if line<todo lvar sym>.start_with?("---")
+                    if line.start_with?("---")
                       begin
-                        a_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
-                        if if a_name<todo lvar sym>
-                            a_name<todo lvar sym>.start_with?("a/")
+                        a_name = line.[](<Not Supported (IRange)>)
+                        if if a_name
+                            a_name.start_with?("a/")
                           else
-                            a_name<todo lvar sym>
+                            a_name
                           end
-                          a_name<todo lvar sym> = a_name<todo lvar sym>.[](<Not Supported (IRange)>)
+                          a_name = a_name.[](<Not Supported (IRange)>)
                         else
                           <emptyTree>
                         end
                       end
                     else
-                      if line<todo lvar sym>.start_with?("+++")
+                      if line.start_with?("+++")
                         begin
-                          b_name<todo lvar sym> = line<todo lvar sym>.[](<Not Supported (IRange)>)
-                          if if b_name<todo lvar sym>
-                              b_name<todo lvar sym>.start_with?("b/")
+                          b_name = line.[](<Not Supported (IRange)>)
+                          if if b_name
+                              b_name.start_with?("b/")
                             else
-                              b_name<todo lvar sym>
+                              b_name
                             end
-                            b_name<todo lvar sym> = b_name<todo lvar sym>.[](<Not Supported (IRange)>)
+                            b_name = b_name.[](<Not Supported (IRange)>)
                           else
                             <emptyTree>
                           end
                         end
                       else
-                        if line<todo lvar sym>.start_with?("+")
-                          added_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
+                        if line.start_with?("+")
+                          added_lines.<<(line.[](<Not Supported (IRange)>))
                         else
-                          if line<todo lvar sym>.start_with?("-")
-                            removed_lines<todo lvar sym>.<<(line<todo lvar sym>.[](<Not Supported (IRange)>))
+                          if line.start_with?("-")
+                            removed_lines.<<(line.[](<Not Supported (IRange)>))
                           else
                             <emptyTree>
                           end
@@ -245,12 +245,12 @@ begin
                     end
                   end
                 end
-                if a_name<todo lvar sym>.nil?()
+                if a_name.nil?()
                   next(<emptyTree>)
                 else
                   <emptyTree>
                 end
-                {:a_name => a_name<todo lvar sym>, :b_name => b_name<todo lvar sym>, :added_lines => added_lines<todo lvar sym>, :removed_lines => removed_lines<todo lvar sym>}
+                {:a_name => a_name, :b_name => b_name, :added_lines => added_lines, :removed_lines => removed_lines}
               end
             end.compact()
           end)

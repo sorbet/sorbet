@@ -1,7 +1,6 @@
 ConstantLit{
   scope = Ident{
       symbol = <root>
-      name = <none>
     }
   cnst = TopLevelConst
 }

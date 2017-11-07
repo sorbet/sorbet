@@ -1,8 +1,8 @@
 begin
   <Not Supported (Alias)>
-  @iv<todo ivar sym> = 1
-  @@cv<todo cvar sym> = 1
-  $gv<todo gvar sym> = 1
+  @iv = 1
+  @@cv = 1
+  $gv = 1
   begin
     #assignTmp$2 = [nil, nil]
     self(<singleton class:<root>>).x().var=(#assignTmp$2.[](0))
@@ -58,7 +58,7 @@ begin
   next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
-  def foo<foo>(x<todo lvar sym>:, y<todo lvar sym>: = 1, *z<todo lvar sym>:)
+  def foo<foo>(x:, y: = 1, *z:)
     <emptyTree>
   #x
   <Not Supported (LineLiteral)>
@@ -81,7 +81,7 @@ begin
     #assignTmp$5
   end
   <Not Supported (NthRef)>
-  def foo<foo>(x<todo lvar sym> = 1, *y<todo lvar sym>)
+  def foo<foo>(x = 1, *y)
     <emptyTree>
   {#x => #y, <Not Supported (DSymbol)> => 1}
   <Not Supported (Preexe)>
@@ -107,14 +107,14 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(<singleton class:<root>>).proc() do |x<todo lvar sym>|
+  self(<singleton class:<root>>).proc() do |x|
     <emptyTree>
   end
   break(self(TODO).foo(1) do ||
       <emptyTree>
     end)
-  def foo<foo>(**$0<todo lvar sym>)
+  def foo<foo>(**$0)
     <emptyTree>
-  def foo<foo>(***$1<todo lvar sym>:)
+  def foo<foo>(***$1:)
     <emptyTree>
 end

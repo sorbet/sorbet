@@ -13,7 +13,7 @@ class <emptyTree>::TestLocals<TestLocals> < (::Object)
         end
       end
       ::TestLocals#method#b = 3
-      self(TestLocals).proc() do |::TestLocals#method#<block>$2#a; b<todo lvar sym>|
+      self(TestLocals).proc() do |::TestLocals#method#<block>$2#a; b|
         ::TestLocals#method#<block>$2#a.+(::TestLocals#method#<block>$2#b)
       end
     end

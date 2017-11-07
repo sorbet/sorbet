@@ -2,68 +2,68 @@ begin
   class <emptyTree>::String<<todo sym>> < (::Object)
     self(TODO).standard_method({:i => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
 
-    def getbyte<<todo sym>>(i<todo lvar sym>)
+    def getbyte<<todo sym>>(i)
       <emptyTree>
 
   end
   class <emptyTree>::Integer<<todo sym>> < (::Object)
     self(TODO).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
 
-    def +<<todo sym>>(o<todo lvar sym>)
+    def +<<todo sym>>(o)
       <emptyTree>
 
   end
   def baz1<<todo sym>>()
     begin
-      a<todo lvar sym> = "foo"
-      b<todo lvar sym> = a<todo lvar sym>.getbyte(a<todo lvar sym>)
+      a = "foo"
+      b = a.getbyte(a)
     end
   def baz2<<todo sym>>()
     begin
-      a<todo lvar sym> = "foo"
-      b<todo lvar sym> = a<todo lvar sym>.getbyte("foo")
+      a = "foo"
+      b = a.getbyte("foo")
     end
   def baz3<<todo sym>>()
-    b<todo lvar sym> = "foo".getbyte("foo")
+    b = "foo".getbyte("foo")
   def baz4<<todo sym>>()
-    b<todo lvar sym> = self(TODO).a().getbyte("foo")
+    b = self(TODO).a().getbyte("foo")
   def baz5<<todo sym>>()
     begin
       if begin
           true
         end
-        b<todo lvar sym> = 1
+        b = 1
       else
-        b<todo lvar sym> = "foo"
+        b = "foo"
       end
-      b<todo lvar sym> = b<todo lvar sym>.getbyte(1)
+      b = b.getbyte(1)
     end
   def baz6<<todo sym>>()
     begin
       if begin
           true
         end
-        b<todo lvar sym> = 1
+        b = 1
       else
-        b<todo lvar sym> = "foo"
+        b = "foo"
       end
-      b<todo lvar sym> = "foo".getbyte(b<todo lvar sym>)
+      b = "foo".getbyte(b)
     end
   def baz7<<todo sym>>()
     begin
       if begin
           true
         end
-        b<todo lvar sym> = 1
+        b = 1
       else
         <emptyTree>
       end
-      b<todo lvar sym> = "foo".getbyte(b<todo lvar sym>)
+      b = "foo".getbyte(b)
     end
   def baz8<<todo sym>>()
     while begin
         true
       end
-      b<todo lvar sym> = 1
+      b = 1
     end
 end
