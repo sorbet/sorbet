@@ -26,9 +26,9 @@ class NameInserter {
         return ctx.state.enterClassSymbol(newOwner, constLit->cnst);
     }
 
-    ast::NameReference *arg2NameRef(ast::Reference *arg) {
+    ast::UnresolvedIdent *arg2NameRef(ast::Reference *arg) {
         while (true) {
-            if (ast::NameReference *nm = dynamic_cast<ast::NameReference *>(arg)) {
+            if (ast::UnresolvedIdent *nm = dynamic_cast<ast::UnresolvedIdent *>(arg)) {
                 return nm;
             }
             typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
@@ -110,8 +110,8 @@ public:
     void fillInArgs(ast::Context ctx, vector<unique_ptr<ast::Expression>> &args, ast::Symbol &symbol) {
         // Fill in the arity right with TODOs
         for (auto &arg : args) {
-            if (auto *nmarg = dynamic_cast<ast::NameReference *>(arg.get())) {
-                auto tx = postTransformNameReference(ctx.withOwner(symbol.ref(ctx)), nmarg);
+            if (auto *nmarg = dynamic_cast<ast::UnresolvedIdent *>(arg.get())) {
+                auto tx = postTransformUnresolvedIdent(ctx.withOwner(symbol.ref(ctx)), nmarg);
                 if (tx != nmarg) {
                     ast::Ident *id = dynamic_cast<ast::Ident *>(tx);
                     Error::check(id != nullptr);
@@ -166,8 +166,8 @@ public:
             ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
             if (ref == nullptr)
                 continue;
-            ast::NameReference *nm = arg2NameRef(ref);
-            if (nm->kind != ast::NameReference::Local)
+            ast::UnresolvedIdent *nm = arg2NameRef(ref);
+            if (nm->kind != ast::UnresolvedIdent::Local)
                 continue;
 
             frame.locals.erase(nm->name);
@@ -182,8 +182,8 @@ public:
         return blk;
     }
 
-    ast::Expression *postTransformNameReference(ast::Context ctx, ast::NameReference *nm) {
-        if (nm->kind == ast::NameReference::Local) {
+    ast::Expression *postTransformUnresolvedIdent(ast::Context ctx, ast::UnresolvedIdent *nm) {
+        if (nm->kind == ast::UnresolvedIdent::Local) {
             auto &frame = scopeStack.back();
             ast::SymbolRef &cur = frame.locals[nm->name];
             if (!cur.exists()) {

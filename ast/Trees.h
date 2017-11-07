@@ -188,7 +188,7 @@ public:
     virtual std::string nodeName();
 };
 
-class NameReference : public Reference {
+class UnresolvedIdent : public Reference {
 public:
     enum VarKind {
         Local,
@@ -199,7 +199,7 @@ public:
     VarKind kind;
     NameRef name;
 
-    NameReference(Loc loc, VarKind kind, NameRef name);
+    UnresolvedIdent(Loc loc, VarKind kind, NameRef name);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

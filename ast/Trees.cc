@@ -93,7 +93,7 @@ Ident::Ident(Loc loc, SymbolRef symbol) : Reference(loc), symbol(symbol) {
     Error::check(symbol.exists());
 }
 
-NameReference::NameReference(Loc loc, VarKind kind, NameRef name) : Reference(loc), kind(kind), name(name) {}
+UnresolvedIdent::UnresolvedIdent(Loc loc, VarKind kind, NameRef name) : Reference(loc), kind(kind), name(name) {}
 
 Assign::Assign(Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
@@ -435,13 +435,13 @@ string Ident::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string NameReference::toString(GlobalState &gs, int tabs) {
+string UnresolvedIdent::toString(GlobalState &gs, int tabs) {
     return this->name.toString(gs);
 }
 
-string NameReference::showRaw(GlobalState &gs, int tabs) {
+string UnresolvedIdent::showRaw(GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "NameReference{" << endl;
+    buf << "UnresolvedIdent{" << endl;
     printTabs(buf, tabs + 1);
     buf << "kind = ";
     switch (this->kind) {
@@ -825,8 +825,8 @@ string While::nodeName() {
 string Ident::nodeName() {
     return "Ident";
 }
-string NameReference::nodeName() {
-    return "NameReference";
+string UnresolvedIdent::nodeName() {
+    return "UnresolvedIdent";
 }
 string Return::nodeName() {
     return "Return";
