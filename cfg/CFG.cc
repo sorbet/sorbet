@@ -586,7 +586,9 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
 
 string CFG::toString(ast::Context ctx) {
     stringstream buf;
-    buf << "subgraph \"" << this->symbol.info(ctx).fullName(ctx) << "\" {" << endl;
+    buf << "subgraph \"cluster_" << this->symbol.info(ctx).fullName(ctx) << "\" {" << endl;
+    buf << "    label = \"" << this->symbol.info(ctx).fullName(ctx) << "\";" << endl;
+    buf << "    color = blue;" << endl;
     buf << "    bb" << this->symbol._id << "_0 [shape = invhouse];" << endl;
     buf << "    bb" << this->symbol._id << "_1 [shape = parallelogram];" << endl << endl;
     for (int i = 0; i < this->basicBlocks.size(); i++) {
