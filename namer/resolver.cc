@@ -339,6 +339,7 @@ public:
             } else {
                 sym = ctx.state.enterFieldSymbol(klass, id->name);
             }
+            sym.info(ctx).resultType = ast::Types::dynamic();
         }
 
         return new ast::Ident(id->loc, sym);
