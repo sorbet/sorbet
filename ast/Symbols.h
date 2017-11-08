@@ -86,7 +86,7 @@ public:
     bool isConstructor(GlobalState &gs) const;
 
     SymbolRef owner;
-    ast::Loc definitionLoc;
+    Loc definitionLoc;
     /* isClass,   IsArray,  isField, isMethod
      * IsFromJar, IsFromFile
      * */

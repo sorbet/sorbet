@@ -215,7 +215,7 @@ private:
                     ctx.state.errors.error(key->loc, ast::ErrorClass::DuplicateVariableDeclaration,
                                            "Redeclaring variable `{}'", str);
                 } else {
-                    var = ctx.state.enterStaticFieldSymbol(ctx.owner, sym->name);
+                    var = ctx.state.enterStaticFieldSymbol(sym->loc, ctx.owner, sym->name);
                 }
             } else if (str.substr(0, 1) == "@") {
                 ast::Symbol &info = ctx.owner.info(ctx);
@@ -224,7 +224,7 @@ private:
                     ctx.state.errors.error(key->loc, ast::ErrorClass::DuplicateVariableDeclaration,
                                            "Redeclaring variable `{}'", str);
                 } else {
-                    var = ctx.state.enterFieldSymbol(ctx.owner, sym->name);
+                    var = ctx.state.enterFieldSymbol(sym->loc, ctx.owner, sym->name);
                 }
             } else {
                 ctx.state.errors.error(key->loc, ast::ErrorClass::InvalidDeclareVariables,
@@ -335,9 +335,9 @@ public:
             ctx.state.errors.error(id->loc, ast::ErrorClass::UndeclaredVariable, "Use of undeclared variable `{}'",
                                    id->name.toString(ctx));
             if (id->kind == ast::UnresolvedIdent::Class) {
-                sym = ctx.state.enterStaticFieldSymbol(klass, id->name);
+                sym = ctx.state.enterStaticFieldSymbol(id->loc, klass, id->name);
             } else {
-                sym = ctx.state.enterFieldSymbol(klass, id->name);
+                sym = ctx.state.enterFieldSymbol(id->loc, klass, id->name);
             }
         }
 

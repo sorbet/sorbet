@@ -326,7 +326,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef nilClass_id = synthesizeClass(nilClass_DESC);
     SymbolRef dynamic_id = synthesizeClass(dynamic_DESC);
     SymbolRef opus_id = synthesizeClass(opus_DESC);
-    SymbolRef opus_types_id = enterClassSymbol(opus_id, enterNameUTF8(types_DESC));
+    SymbolRef opus_types_id = enterClassSymbol(Loc::none(0), opus_id, enterNameUTF8(types_DESC));
     SymbolRef class_id = synthesizeClass(class_DESC);
     SymbolRef basicObject_id = synthesizeClass(basicObject_DESC);
     SymbolRef kernel_id = synthesizeClass(kernel_DESC);
@@ -393,7 +393,7 @@ GlobalState::~GlobalState() {}
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, u4 flags) {
+SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
     DEBUG_ONLY(Error::check(owner.exists()));
     Error::check(name.exists());
     Symbol &ownerScope = owner.info(*this, true);
@@ -415,6 +415,7 @@ SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, u4 flags) {
     info.name = name;
     info.flags = flags;
     info.owner = owner;
+    info.definitionLoc = loc;
 
     if (!reallocate)
         ownerScope.members.push_back(make_pair(name, ret));
@@ -423,20 +424,24 @@ SymbolRef GlobalState::enterSymbol(SymbolRef owner, NameRef name, u4 flags) {
     return ret;
 }
 
-SymbolRef GlobalState::enterClassSymbol(SymbolRef owner, NameRef name) {
-    return enterSymbol(owner, name, 0x8000);
+SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    return enterSymbol(loc, owner, name, 0x8000);
 }
 
-SymbolRef GlobalState::enterMethodSymbol(SymbolRef owner, NameRef name) {
-    return enterSymbol(owner, name, 0x1000);
+SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    return enterSymbol(loc, owner, name, 0x1000);
 }
 
-SymbolRef GlobalState::enterFieldSymbol(SymbolRef owner, NameRef name) {
-    return enterSymbol(owner, name, 0x2000);
+SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    return enterSymbol(loc, owner, name, 0x2000);
 }
 
-SymbolRef GlobalState::enterStaticFieldSymbol(SymbolRef owner, NameRef name) {
-    return enterSymbol(owner, name, 0x4000);
+SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    return enterSymbol(loc, owner, name, 0x4000);
+}
+
+SymbolRef GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
+    return enterSymbol(Loc::none(0), owner, name, 0x2000);
 }
 
 NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
@@ -595,7 +600,7 @@ FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
 
 SymbolRef GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     NameRef tempName = this->freshNameUnique(kind, name);
-    return this->enterFieldSymbol(owner, tempName);
+    return this->enterLocalSymbol(owner, tempName);
 }
 
 unsigned int GlobalState::symbolsUsed() {
