@@ -10,7 +10,6 @@ cc_test(
         "testdata/**/*.rb.*.exp",
         "testdata/**/*.rb.*.exp.svg",
     ]),
-    linkstatic = 1,
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
@@ -27,7 +26,6 @@ cc_test(
     size = "small",
     srcs = ["hello-test.cc"],
     copts = ["-Iexternal/gtest/include"],
-    linkstatic = 1,
     visibility = ["//tools:__pkg__"],
     deps = [
         "//common",
