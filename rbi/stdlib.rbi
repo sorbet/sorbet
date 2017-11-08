@@ -38,6 +38,8 @@ class Bundler::BundlerError < StandardError
 end
 class Bundler::APIResponseMismatchError < Bundler::BundlerError
 end
+module Bundler::BuildMetadata
+end
 class Bundler::CurrentRuby < Object
 end
 class Bundler::CyclicDependencyError < Bundler::BundlerError
@@ -77,6 +79,23 @@ end
 class Bundler::EndpointSpecification < Gem::Specification
 end
 class Bundler::EnvironmentPreserver < Object
+end
+class Bundler::FeatureFlag < Object
+end
+module Bundler::FileUtils::StreamUtils_
+end
+module Bundler::FileUtils
+end
+module Bundler::FileUtils::LowMethods
+end
+module Bundler::FileUtils::DryRun
+end
+class Bundler::FileUtils::Entry_ < Object
+  include Bundler::FileUtils::StreamUtils_
+end
+module Bundler::FileUtils::NoWrite
+end
+module Bundler::FileUtils::Verbose
 end
 class Struct < Object
   include Enumerable
@@ -127,6 +146,74 @@ class Bundler::LockfileParser < Object
 end
 class Bundler::MarshalError < StandardError
 end
+module Bundler::Molinillo
+end
+class Bundler::Molinillo::ResolverError < StandardError
+end
+class Bundler::Molinillo::CircularDependencyError < Bundler::Molinillo::ResolverError
+end
+module Bundler::Molinillo::Compatibility
+end
+module Bundler::Molinillo::Delegates
+end
+module Bundler::Molinillo::Delegates::ResolutionState
+end
+module Bundler::Molinillo::Delegates::SpecificationProvider
+end
+module TSort
+end
+class Bundler::Molinillo::DependencyGraph < Object
+  include TSort
+  include Enumerable
+end
+class Bundler::Molinillo::DependencyGraph::Action < Object
+end
+class Bundler::Molinillo::DependencyGraph::AddEdgeNoCircular < Bundler::Molinillo::DependencyGraph::Action
+end
+class Bundler::Molinillo::DependencyGraph::AddVertex < Bundler::Molinillo::DependencyGraph::Action
+end
+class Bundler::Molinillo::DependencyGraph::DeleteEdge < Bundler::Molinillo::DependencyGraph::Action
+end
+class Bundler::Molinillo::DependencyGraph::DetachVertexNamed < Bundler::Molinillo::DependencyGraph::Action
+end
+class Bundler::Molinillo::DependencyGraph::Edge < Struct
+end
+class Bundler::Molinillo::DependencyGraph::Log < Object
+end
+class Bundler::Molinillo::DependencyGraph::SetPayload < Bundler::Molinillo::DependencyGraph::Action
+end
+class Bundler::Molinillo::DependencyGraph::Tag < Bundler::Molinillo::DependencyGraph::Action
+end
+class Bundler::Molinillo::DependencyGraph::Vertex < Object
+end
+class Bundler::Molinillo::ResolutionState < Struct
+end
+class Bundler::Molinillo::DependencyState < Bundler::Molinillo::ResolutionState
+end
+class Bundler::Molinillo::NoSuchDependencyError < Bundler::Molinillo::ResolverError
+end
+class Bundler::Molinillo::PossibilityState < Bundler::Molinillo::ResolutionState
+end
+class Bundler::Molinillo::Resolver < Object
+end
+class Bundler::Molinillo::Resolver::Resolution < Object
+  include Bundler::Molinillo::Delegates::SpecificationProvider
+  include Bundler::Molinillo::Delegates::ResolutionState
+end
+class Bundler::Molinillo::Resolver::Resolution::Conflict < Struct
+end
+class Bundler::Molinillo::Resolver::Resolution::PossibilitySet < Struct
+end
+class Bundler::Molinillo::Resolver::Resolution::UnwindDetails < Struct
+  include Comparable
+end
+module Bundler::Molinillo::SpecificationProvider
+end
+module Bundler::Molinillo::UI
+end
+class Bundler::Molinillo::VersionConflict < Bundler::Molinillo::ResolverError
+  include Bundler::Molinillo::Delegates::SpecificationProvider
+end
 class Bundler::PermissionError < Bundler::BundlerError
 end
 class Bundler::NoSpaceOnDeviceError < Bundler::PermissionError
@@ -152,6 +239,13 @@ end
 class Bundler::RemoteSpecification < Object
   include Comparable
   include Bundler::MatchPlatform
+  include Bundler::GemHelpers
+end
+class Bundler::Resolver < Object
+  include Bundler::Molinillo::SpecificationProvider
+  include Bundler::Molinillo::UI
+end
+class Bundler::Resolver::SpecGroup < Object
   include Bundler::GemHelpers
 end
 class Bundler::RubyVersion < Object
@@ -185,6 +279,8 @@ class Bundler::SecurityError < Bundler::BundlerError
 end
 class Bundler::Settings < Object
 end
+class Bundler::Settings::Path < Struct
+end
 class Bundler::Source < Object
 end
 class Bundler::Source::Path < Bundler::Source
@@ -203,11 +299,11 @@ class Bundler::Source::Git::GitProxy < Object
 end
 class Bundler::Source::Git::MissingGitRevisionError < Bundler::GitError
 end
+class Bundler::Source::Metadata < Bundler::Source
+end
 class Bundler::Source::Rubygems < Bundler::Source
 end
 class Bundler::SourceList < Object
-end
-module TSort
 end
 class Bundler::SpecSet < Object
   include TSort
@@ -570,6 +666,8 @@ module GC
 end
 module GC::Profiler
 end
+module Gem::BundlerVersionFinder
+end
 class RuntimeError < StandardError
 end
 class Gem::Exception < RuntimeError
@@ -656,6 +754,8 @@ end
 class Gem::Requirement::BadRequirementError < ArgumentError
 end
 class Gem::RubyVersionMismatch < Gem::Exception
+end
+class Gem::RuntimeRequirementNotMetError < Gem::InstallError
 end
 class Gem::Source < Object
   include Comparable
@@ -944,7 +1044,7 @@ module Warning
 end
 class ZeroDivisionError < StandardError
 end
-class Abbrev
+module Abbrev
   standard_method(
     {
       words: Opus::Types.array_of(String),
@@ -982,7 +1082,7 @@ class Array
   def length(); end
 end
 
-class Base64
+module Base64
   standard_method(
     {
       str: String,
@@ -1074,7 +1174,7 @@ class BasicObject
   def instance_eval(_, filename, lineno); end
 end
 
-class Benchmark
+module Benchmark
   standard_method(
     {
       width: Opus::Types.any(Integer, NilClass),
@@ -1563,7 +1663,7 @@ class BigDecimal
   def coerce(_); end
 end
 
-class BigMath
+module BigMath
   standard_method(
     {
       _: Integer,
@@ -1937,7 +2037,7 @@ class Complex
   def coerce(_); end
 end
 
-class Coverage
+module Coverage
   standard_method(
     {},
     returns: NilClass
@@ -2203,7 +2303,7 @@ class Encoding
   def replicate(name); end
 end
 
-class Enumerable
+module Enumerable
   standard_method(
     {},
     returns: Opus::Types.any(TrueClass, FalseClass)
@@ -3003,7 +3103,7 @@ class File::Stat
   def zero?(); end
 end
 
-class FileUtils
+module FileUtils
   standard_method(
     {
       src: Opus::Types.any(String, Pathname),
@@ -3408,7 +3508,7 @@ class Float
   def to_c(); end
 end
 
-class Gem
+module Gem
   standard_method(
     {},
     returns: String
@@ -3457,11 +3557,11 @@ class Gem
 
   standard_method(
     {
-      gem_name: String,
+      args: String,
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def self.datadir(gem_name); end
+  def self.datadir(args); end
 
   standard_method(
     {},
@@ -4451,7 +4551,7 @@ class Integer
   def zero?(); end
 end
 
-class Kernel
+module Kernel
   standard_method(
     {
       x: Opus::Types.any(Numeric, String),
@@ -4760,7 +4860,7 @@ class Kernel
   def raise(_, _1, _2); end
 end
 
-class Marshal
+module Marshal
   standard_method(
     {
       _: String,
@@ -4885,7 +4985,7 @@ class MatchData
   def to_s(); end
 end
 
-class Math
+module Math
   standard_method(
     {
       x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
@@ -6645,7 +6745,7 @@ class Proc
   def to_s(); end
 end
 
-class Process
+module Process
   standard_method(
     {
       msg: Opus::Types.any(String, NilClass),
@@ -6947,7 +7047,7 @@ class Process
   def self.waitpid2(pid, flags); end
 end
 
-class Process::GID
+module Process::GID
   standard_method(
     {
       group: Integer,
@@ -7101,7 +7201,7 @@ class Process::Status
   def to_s(); end
 end
 
-class Process::Sys
+module Process::Sys
   standard_method(
     {},
     returns: Integer
@@ -7213,7 +7313,7 @@ class Process::Sys
   def self.setuid(user); end
 end
 
-class Process::UID
+module Process::UID
   standard_method(
     {
       user: Integer,
@@ -9069,7 +9169,7 @@ class Time
   def zone(); end
 end
 
-class URI
+module URI
   standard_method(
     {
       str: String,
@@ -9102,7 +9202,7 @@ class URI
   def self.scheme_list(); end
 end
 
-class YAML
+module YAML
   standard_method(
     {
       filename: String,
