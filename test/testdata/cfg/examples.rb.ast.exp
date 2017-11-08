@@ -1,12 +1,12 @@
 begin
-  class <emptyTree>::Integer<<todo sym>> < (::Object)
+  class <emptyTree>::Integer<<todo sym>> < ()
     self(TODO).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
 
     def +<<todo sym>>(o)
       <emptyTree>
 
   end
-  class <emptyTree>::Examples<<todo sym>> < (::Object)
+  class <emptyTree>::Examples<<todo sym>> < ()
     def i_like_ifs<<todo sym>>()
       if true
         return 1

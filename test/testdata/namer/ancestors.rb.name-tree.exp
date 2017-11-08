@@ -7,7 +7,7 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Parent<Parent> < (::Object, ::Mixin1)
+  class <emptyTree>::Parent<Parent> < (::Mixin1)
   end
   class <emptyTree>::Child<Child> < (::Parent, ::Mixin2)
   end

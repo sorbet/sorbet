@@ -4,6 +4,6 @@ class Outer2 (Object)
   class C (Object)
   class Inner1 (Object)
     class A (Object)
-    class Inner2 (Object, Object)
+    class Inner2 (Object)
   class Other (Inner2)
 

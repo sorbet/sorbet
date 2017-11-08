@@ -1,4 +1,4 @@
-class <emptyTree>::TestLocals<TestLocals> < (::Object)
+class <emptyTree>::TestLocals<TestLocals> < ()
   def method<method>()
     begin
       ::TestLocals#method#a = 1

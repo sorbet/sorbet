@@ -4,7 +4,7 @@ begin
 
   end
   module <emptyTree>::A<A> < ()
-    class <emptyTree>::B::C<C> < (::Object)
+    class <emptyTree>::B::C<C> < ()
       <emptyTree>
 
     end

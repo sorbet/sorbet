@@ -2,7 +2,7 @@ class <singleton class:<root>> (Class)
 class <singleton class:<root>> (Class)
 class Opus ()
   class CIBot ()
-    class Gerald ()
+    class Gerald (Object)
       class <singleton class:Diff> (Class)
       class <singleton class:MatchContext> (Class)
       class <singleton class:MatchTimeout> (Class)
@@ -84,7 +84,7 @@ class Opus ()
         method initialize (message, rule_token)
           field message
           field rule_token
-      class Matcher (Object, <dynamic>)
+      class Matcher (<dynamic>)
         field @rules
         method initialize ()
           field invalid_rule_ids

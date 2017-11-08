@@ -4,7 +4,7 @@ begin
 
   end
   module <emptyTree>::A<<todo sym>> < ()
-    class <emptyTree>::B::C<<todo sym>> < (::Object)
+    class <emptyTree>::B::C<<todo sym>> < ()
       <emptyTree>
 
     end

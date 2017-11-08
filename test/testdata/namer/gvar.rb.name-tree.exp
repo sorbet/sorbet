@@ -1,6 +1,6 @@
 begin
   #$a = 1
-  class <emptyTree>::A<A> < (::Object)
+  class <emptyTree>::A<A> < ()
     #$b = 2
 
     #$a

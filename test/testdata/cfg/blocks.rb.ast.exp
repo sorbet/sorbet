@@ -1,4 +1,4 @@
-class <emptyTree>::BlockTest<<todo sym>> < (::Object)
+class <emptyTree>::BlockTest<<todo sym>> < ()
   def block_pass<<todo sym>>()
     <emptyTree>
 

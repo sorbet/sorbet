@@ -5,7 +5,7 @@ class Child (Parent, Mixin)
   field @undefinedivar
   method child_method ()
   static-field @@undefined_cvar
-class Mixin ()
+class Mixin (Object)
   static-field @@mixin_cvar -> Integer
 class Opus ()
 class Parent (Object)
