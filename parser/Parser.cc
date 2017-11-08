@@ -31,6 +31,8 @@ public:
                 case ruby_parser::dlevel::FATAL:
                     level = "Fatal";
                     break;
+                default:
+                    Error::notImplemented();
             }
             std::string msg("Parse {}: ");
             msg.append(ruby_parser::dclass_strings[(int)diag.error_class()]);
