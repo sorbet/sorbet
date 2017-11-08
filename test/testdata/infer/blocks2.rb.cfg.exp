@@ -1,0 +1,27 @@
+digraph "blocks2.rb"{
+subgraph "cluster_::<singleton class:Foo>#bar" {
+    label = "::<singleton class:Foo>#bar";
+    color = blue;
+    bb27_0 [shape = invhouse];
+    bb27_1 [shape = parallelogram];
+
+    bb27_0 [label = "()\n<ret>$1 = 1 : Integer(1)\n<ret>$3 = return <ret>$1 : <bottom>\n<never>"];
+    bb27_0 -> bb27_1;
+    bb27_1 [label = "()\n<never>"];
+    bb27_1 -> bb27_1;
+}
+
+subgraph "cluster_::Bar#baz" {
+    label = "::Bar#baz";
+    color = blue;
+    bb29_0 [shape = invhouse];
+    bb29_1 [shape = parallelogram];
+
+    bb29_0 [label = "()\n<ret>$4 = Foo.bar() : <dynamic>\n<ret>$7 = return <ret>$4 : <bottom>\n<never>"];
+    bb29_0 -> bb29_1;
+    bb29_1 [label = "()\n<never>"];
+    bb29_1 -> bb29_1;
+}
+
+}
+
