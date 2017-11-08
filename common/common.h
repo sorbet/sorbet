@@ -79,7 +79,7 @@ public:
 
 class Strings {
 public:
-    static std::string escape(std::string what);
+    static std::string escapeCString(std::string what);
 };
 }
 std::string strprintf(const char *__restrict, va_list) __attribute__((format(printf, 1, 0)));
