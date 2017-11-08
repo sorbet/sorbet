@@ -27,7 +27,10 @@ cc_test(
         "test/*.cc",
     ]) + ["realmain.cc"],
     copts = ["-Iexternal/gtest/include"],
-    data = ["//rbi:stdlib"],
+    data = [
+        "//rbi:stdlib",
+        "//test:gerald",
+    ],
     linkstatic = select({
         "//tools/config:fastbuild": 0,
         "//conditions:default": 1,

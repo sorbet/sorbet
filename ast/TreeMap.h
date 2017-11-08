@@ -55,9 +55,6 @@ public:
     Send *preTransformSend(Context ctx, Send *original);
     Statement *postTransformSend(Context ctx, Send *original);
 
-    New *preTransformNew(Context ctx, New *original);
-    Statement *postTransformNew(Context ctx, New *original);
-
     NamedArg *preTransformNamedArg(Context ctx, NamedArg *original);
     Statement *postTransformNamedArg(Context ctx, NamedArg *original);
 
@@ -127,7 +124,6 @@ GENERATE_HAS_MEMBER(preTransformYield);
 GENERATE_HAS_MEMBER(preTransformRescue);
 GENERATE_HAS_MEMBER(preTransformAssign);
 GENERATE_HAS_MEMBER(preTransformSend);
-GENERATE_HAS_MEMBER(preTransformNew);
 GENERATE_HAS_MEMBER(preTransformNamedArg);
 GENERATE_HAS_MEMBER(preTransformHash);
 GENERATE_HAS_MEMBER(preTransformArray);
@@ -163,7 +159,6 @@ GENERATE_HAS_MEMBER(postTransformIdent);
 GENERATE_HAS_MEMBER(postTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(postTransformAssign);
 GENERATE_HAS_MEMBER(postTransformSend);
-GENERATE_HAS_MEMBER(postTransformNew);
 GENERATE_HAS_MEMBER(postTransformNamedArg);
 GENERATE_HAS_MEMBER(postTransformHash);
 GENERATE_HAS_MEMBER(postTransformArray);
@@ -236,7 +231,6 @@ GENERATE_POSTPONE_PRECLASS(Return);
 GENERATE_POSTPONE_PRECLASS(Yield);
 GENERATE_POSTPONE_PRECLASS(Assign);
 GENERATE_POSTPONE_PRECLASS(Send);
-GENERATE_POSTPONE_PRECLASS(New);
 GENERATE_POSTPONE_PRECLASS(NamedArg);
 GENERATE_POSTPONE_PRECLASS(Hash);
 GENERATE_POSTPONE_PRECLASS(Array);
@@ -259,7 +253,6 @@ GENERATE_POSTPONE_POSTCLASS(Ident);
 GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent);
 GENERATE_POSTPONE_POSTCLASS(Assign);
 GENERATE_POSTPONE_POSTCLASS(Send);
-GENERATE_POSTPONE_POSTCLASS(New);
 GENERATE_POSTPONE_POSTCLASS(NamedArg);
 GENERATE_POSTPONE_POSTCLASS(Hash);
 GENERATE_POSTPONE_POSTCLASS(Array);
@@ -521,28 +514,6 @@ private:
 
             if (HAS_MEMBER_postTransformSend<FUNC>::value) {
                 return PostPonePostTransform_Send<FUNC, HAS_MEMBER_postTransformSend<FUNC>::value>::call(ctx, v, func);
-            }
-
-            return v;
-        } else if (New *v = dynamic_cast<New *>(what)) {
-            if (HAS_MEMBER_preTransformNew<FUNC>::value) {
-                v = PostPonePreTransform_New<FUNC, HAS_MEMBER_preTransformNew<FUNC>::value>::call(ctx, v, func);
-            }
-            auto &args = v->args;
-            auto i = 0;
-            while (i < args.size()) {
-                auto &el = args[i];
-                auto oarg = el.get();
-                auto narg = mapIt(oarg, ctx);
-                if (oarg != narg) {
-                    Error::check(dynamic_cast<Expression *>(narg) != nullptr);
-                    el.reset(dynamic_cast<Expression *>(narg));
-                }
-                i++;
-            }
-
-            if (HAS_MEMBER_postTransformNew<FUNC>::value) {
-                return PostPonePostTransform_New<FUNC, HAS_MEMBER_postTransformNew<FUNC>::value>::call(ctx, v, func);
             }
 
             return v;

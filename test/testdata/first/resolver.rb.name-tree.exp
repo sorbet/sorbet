@@ -1,21 +1,21 @@
 begin
-  class <emptyTree>::Outer1<Outer1> < (::Object)
+  class <emptyTree>::Outer1<Outer1> < ()
     <emptyTree>
 
   end
-  class <emptyTree>::Outer2<Outer2> < (::Object)
-    class <emptyTree>::C<C> < (::Object)
+  class <emptyTree>::Outer2<Outer2> < ()
+    class <emptyTree>::C<C> < ()
       <emptyTree>
 
     end
 
-    class <emptyTree>::Inner1<Inner1> < (::Object)
-      class <emptyTree>::A<A> < (::Object)
+    class <emptyTree>::Inner1<Inner1> < ()
+      class <emptyTree>::A<A> < ()
         <emptyTree>
 
       end
 
-      class <emptyTree>::Inner2<Inner2> < (::Object)
+      class <emptyTree>::Inner2<Inner2> < ()
         ::Outer2::Inner1::A
 
         ::Outer2::Inner1
@@ -28,7 +28,7 @@ begin
 
     end
 
-    class <emptyTree>::Inner1::Inner2<Inner2> < (::Object)
+    class <emptyTree>::Inner1::Inner2<Inner2> < ()
       ::Outer2::C
 
       ::<dynamic>

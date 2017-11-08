@@ -1,12 +1,12 @@
 begin
-  class <emptyTree>::NormalClass<NormalClass> < (::Object)
+  class <emptyTree>::NormalClass<NormalClass> < ()
     def normal_method<normal_method>()
       <emptyTree>
 
     def self.normal_static_method<normal_static_method>()
       <emptyTree>
 
-    class <emptyTree>::InnerClass<InnerClass> < (::Object)
+    class <emptyTree>::InnerClass<InnerClass> < ()
       <emptyTree>
 
     end
@@ -18,17 +18,17 @@ begin
 
   end
   module <emptyTree>::ANamespace<ANamespace> < ()
-    class <emptyTree>::ObviousChild<ObviousChild> < (::Object)
+    class <emptyTree>::ObviousChild<ObviousChild> < ()
       <emptyTree>
 
     end
 
   end
-  class <emptyTree>::ANamespace::ClassInNamespace<ClassInNamespace> < (::Object)
+  class <emptyTree>::ANamespace::ClassInNamespace<ClassInNamespace> < ()
     <emptyTree>
 
   end
-  class <emptyTree>::Parent<Parent> < (::Object)
+  class <emptyTree>::Parent<Parent> < ()
     <emptyTree>
 
   end

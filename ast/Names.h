@@ -130,9 +130,11 @@ public:
     static inline NameRef initialize() {
         return NameRef(1);
     }
+
     static inline NameRef andAnd() {
         return NameRef(2);
     }
+
     static inline NameRef orOr() {
         return NameRef(3);
     }
@@ -291,6 +293,10 @@ public:
     static inline NameRef declareVariables() {
         return NameRef(33);
     }
+
+    static inline NameRef new_() {
+        return NameRef(34);
+    };
 };
 
 class Name {

@@ -23,7 +23,7 @@ module Opus::CIBot::Gerald
               Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(&:valid?) # error: Stubbing out unknown constant
       if !invalid_rules.empty?
         invalid_rule_ids = invalid_rules.map(&:token).join(',')
-        log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids)
+        log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids) # error: MULTI: both log and invalid_rule_ids
       end
     end
 
@@ -33,12 +33,12 @@ module Opus::CIBot::Gerald
       # number of commits. I don't think it is worth switching right now, but
       # maybe in the future.
       if match_context.diff.affected_files.count > MAX_AFFECTED_FILES
-        log.warn("Gerald skipping large PR with #{match_context.diff.affected_files.count} affected files")
+        log.warn("Gerald skipping large PR with #{match_context.diff.affected_files.count} affected files") # error: MULTI: both log and diff
         return []
       end
 
       budget = MatchTimeBudget.new
-      @rules.select do |r|
+      @rules.select do |r| # error: select does not exist
         budget.time_rule(r) do
           r.matches?(match_context)
         end
@@ -70,7 +70,7 @@ module Opus::CIBot::Gerald
     # Should the name be suffixed with `-stripe`?
     def user_stripe_suffix?
       # non internal (GHE) repos need usernames to be suffixed with `-stripe`
-      !@repo.start_with?('stripe-internal/')
+      !@repo.start_with?('stripe-internal/') # error: start_with? does not exist
     end
   end
 
@@ -87,7 +87,7 @@ module Opus::CIBot::Gerald
     def check!
       dur_ms = (Time.now - @start) * 1000 # error: Stubbing out unknown constant <emptyTree>::Time
       if dur_ms > TOTAL_TIME_MS
-        raise MatchTimeout.new("Gerald match time budged exceeded #{TOTAL_TIME_MS}ms")
+        raise MatchTimeout.new("Gerald match time budged exceeded #{TOTAL_TIME_MS}ms") # error: MULTI: no concat and no to_s.
       end
     end
 
@@ -96,8 +96,8 @@ module Opus::CIBot::Gerald
       res = yield
       dur_ms = (Time.now - rule_start) * 1000 # error: Stubbing out unknown constant <emptyTree>::Time
       if dur_ms > PER_RULE_MS
-        raise MatchTimeout.new(
-          "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms",
+        raise MatchTimeout.new( # error: Method raise does not exist
+          "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms", # error: MULTI: no concat and no to_s.
           rule_token: rule.token)
       end
       check! # Also check the total time
@@ -118,23 +118,23 @@ module Opus::CIBot::Gerald
     end
 
     def added_files
-      @parsed.select {|part| part[:a_name] == '/dev/null'}.map {|part| part[:b_name]}
+      @parsed.select {|part| part[:a_name] == '/dev/null'}.map {|part| part[:b_name]} # error: select does not exist
     end
 
     def deleted_files
-      @parsed.select {|part| part[:b_name] == '/dev/null'}.map {|part| part[:a_name]}
+      @parsed.select {|part| part[:b_name] == '/dev/null'}.map {|part| part[:a_name]} # error: select does not exist
     end
 
     def changed_files
-      @parsed.select {|part| part[:a_name] == part[:b_name]}.map {|part| part[:b_name]}
+      @parsed.select {|part| part[:a_name] == part[:b_name]}.map {|part| part[:b_name]} # error: select does not exist
     end
 
     def added_lines
-      @parsed.map {|part| part[:added_lines]}.flatten
+      @parsed.map {|part| part[:added_lines]}.flatten # error: map does not exist
     end
 
     def removed_lines
-      @parsed.map {|part| part[:removed_lines]}.flatten
+      @parsed.map {|part| part[:removed_lines]}.flatten # error: map does not exist
     end
 
     def changed_lines

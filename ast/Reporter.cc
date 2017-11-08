@@ -25,15 +25,19 @@ void Reporter::_error(ComplexError error) {
 string Reporter::BasicError::toString(GlobalState &gs) {
     stringstream buf;
     if (loc.is_none()) {
-        buf << "???:";
+        buf << "???:"
+            << " " << formatted;
     } else {
         auto pos = loc.position(gs);
         buf << loc.file.file(gs).path() << ":";
-        buf << pos.first.line << ":" << pos.first.column;
-        buf << "-";
-        buf << pos.second.line << ":" << pos.second.column;
+        buf << pos.first.line;
+        if (pos.second.line != pos.first.line) {
+            buf << "-";
+            buf << pos.second.line;
+        }
+        buf << " " << formatted << endl;
+        buf << loc.toString(gs);
     }
-    buf << " " << formatted;
     return buf.str();
 }
 

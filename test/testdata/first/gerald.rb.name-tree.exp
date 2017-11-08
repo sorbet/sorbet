@@ -5,7 +5,7 @@ begin
     class <emptyTree>::MatchTimeout<MatchTimeout> < (::<dynamic>)
       self(<singleton class:MatchTimeout>).attr_reader(:rule_token)
 
-      def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#initialize#message, rule_token: = "")
+      def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#initialize#message, ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token)
         begin
           super(message)
           ::Opus::CIBot::Gerald::MatchTimeout#@rule_token = ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token
@@ -13,7 +13,7 @@ begin
 
     end
 
-    class <emptyTree>::Matcher<Matcher> < (::Object, ::<dynamic>)
+    class <emptyTree>::Matcher<Matcher> < (::<dynamic>)
       ::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES = 100
 
       def initialize<initialize>()
@@ -56,7 +56,7 @@ begin
 
     end
 
-    class <emptyTree>::MatchContext<MatchContext> < (::Object)
+    class <emptyTree>::MatchContext<MatchContext> < ()
       self(<singleton class:MatchContext>).attr_reader(:repo)
 
       self(<singleton class:MatchContext>).attr_reader(:assignee)
@@ -90,7 +90,7 @@ begin
 
     end
 
-    class <emptyTree>::MatchTimeBudget<MatchTimeBudget> < (::Object)
+    class <emptyTree>::MatchTimeBudget<MatchTimeBudget> < ()
       ::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS = 10000
 
       ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS = 2000
@@ -136,7 +136,7 @@ begin
 
     end
 
-    class <emptyTree>::Diff<Diff> < (::Object)
+    class <emptyTree>::Diff<Diff> < ()
       def initialize<initialize>(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
         begin
           ::Opus::CIBot::Gerald::Diff#@raw = ::Opus::CIBot::Gerald::Diff#initialize#raw_diff

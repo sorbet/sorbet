@@ -76,6 +76,11 @@ public:
     static std::string read(const char *filename);
     static std::string getFileName(const std::string path);
 };
+
+class Strings {
+public:
+    static std::string escape(std::string what);
+};
 }
 std::string strprintf(const char *__restrict, va_list) __attribute__((format(printf, 1, 0)));
 ;

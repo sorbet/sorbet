@@ -85,10 +85,6 @@ void CFG::dealias(ast::Context ctx) {
                 for (auto &arg : v->args) {
                     arg = maybeDealias(ctx, arg, current);
                 }
-            } else if (auto *v = dynamic_cast<New *>(bind.value.get())) {
-                for (auto &arg : v->args) {
-                    arg = maybeDealias(ctx, arg, current);
-                }
             } else if (auto *v = dynamic_cast<Super *>(bind.value.get())) {
                 for (auto &arg : v->args) {
                     arg = maybeDealias(ctx, arg, current);
@@ -129,10 +125,6 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 reads[v->what].insert(bb.get());
             } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
                 reads[v->recv].insert(bb.get());
-                for (auto arg : v->args) {
-                    reads[arg].insert(bb.get());
-                }
-            } else if (auto *v = dynamic_cast<New *>(bind.value.get())) {
                 for (auto arg : v->args) {
                     reads[arg].insert(bb.get());
                 }
@@ -304,19 +296,50 @@ int CFG::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *cur
 }
 
 int CFG::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
+    // We're not looking for an arbitrary topo-sort.
+    // First of all topo sort does not exist, as the graph has loops.
+    // We are looking for a sort that has all outer loops dominating loop headers that dominate loop bodies.
+    //
+    // This method is a big cache invalidator and should be removed if we become slow
+    // Instead we will build this sort the fly during construction of the CFG, but it will make it hard to add new nodes
+    // much harder.
+
     if ((currentBB->flags & BACKWARD_TOPO_SORT_VISITED)) {
         return nextFree;
     } else {
         currentBB->flags |= BACKWARD_TOPO_SORT_VISITED;
-        for (BasicBlock *edge : currentBB->backEdges) {
-            nextFree = topoSortBwd(target, nextFree, edge);
+        int i = 0;
+        // iterate over outer loops
+        while (i < currentBB->backEdges.size() && currentBB->outerLoops > currentBB->backEdges[i]->outerLoops) {
+            nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
+            i++;
         }
-        target[nextFree] = currentBB;
-        return nextFree + 1;
+        if (i > 0) { // This is a loop header!
+            target[nextFree] = currentBB;
+            nextFree = nextFree + 1;
+            while (i < currentBB->backEdges.size()) {
+                nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
+                i++;
+            }
+        } else {
+            while (i < currentBB->backEdges.size()) {
+                nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
+                i++;
+            }
+            target[nextFree] = currentBB;
+            nextFree = nextFree + 1;
+        }
+        return nextFree;
     }
 }
 
 void CFG::fillInTopoSorts(ast::Context ctx) {
+    // needed to find loop headers.
+    for (auto &bb : this->basicBlocks) {
+        std::sort(bb->backEdges.begin(), bb->backEdges.end(),
+                  [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->outerLoops < b->outerLoops; });
+    }
+
     auto &target1 = this->forwardsTopoSort;
     target1.resize(this->basicBlocks.size());
     this->topoSortFwd(target1, 0, this->entry());
@@ -341,14 +364,8 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     auto methodName = md.symbol.info(ctx).name;
 
     int i = 0;
-    for (auto &arg : md.args) {
-        ast::SymbolRef argSym;
-        if (auto *iarg = dynamic_cast<ast::Ident *>(arg.get())) {
-            argSym = iarg->symbol;
-        } else {
-            argSym = ast::GlobalState::defn_todo();
-        }
-        entry->exprs.emplace_back(argSym, arg->loc, make_unique<LoadArg>(selfSym, methodName, i));
+    for (ast::SymbolRef argSym : md.symbol.info(ctx).arguments()) {
+        entry->exprs.emplace_back(argSym, argSym.info(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
         i++;
     }
     auto cont = res->walk(ctx, md.rhs.get(), entry, *res.get(), retSym, 0);
@@ -550,17 +567,16 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                          auto &arg = s->block->args[i];
 
                          if (auto id = dynamic_cast<ast::Ident *>(arg.get())) {
-                             headerBlock->exprs.emplace_back(id->symbol, arg->loc,
-                                                             make_unique<LoadArg>(recv, s->fun, i));
+                             bodyBlock->exprs.emplace_back(id->symbol, arg->loc, make_unique<LoadArg>(recv, s->fun, i));
                          } else {
                              // TODO(nelhage): this will be an error once the namer
                              // is more complete and turns all args into Ident
                          }
                      }
 
-                     unconditionalJump(current, headerBlock, inWhat);
-
                      conditionalJump(headerBlock, ctx.state.defn_cfg_block_call(), bodyBlock, postBlock, inWhat);
+
+                     unconditionalJump(current, headerBlock, inWhat);
 
                      // TODO: handle block arguments somehow??
                      ast::SymbolRef blockrv =
@@ -633,8 +649,11 @@ string BasicBlock::toString(ast::Context ctx) {
     if (this->outerLoops > 0) {
         buf << "outerLoops: " << this->outerLoops << "\\n";
     }
-    for (auto &exp : this->exprs) {
+    for (Binding &exp : this->exprs) {
         buf << exp.bind.info(ctx).name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
+        if (exp.tpe) {
+            buf << " : " << Strings::escape(exp.tpe->toString(ctx));
+        }
         buf << "\\n"; // intentional! graphviz will do interpolation.
     }
     buf << this->bexit.cond.info(ctx).name.name(ctx).toString(ctx);
@@ -650,25 +669,8 @@ string Return::toString(ast::Context ctx) {
     return "return " + this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-New::New(ast::SymbolRef klaz, vector<ast::SymbolRef> &args) : klass(klaz), args(move(args)) {}
-
 Send::Send(ast::SymbolRef recv, ast::NameRef fun, vector<ast::SymbolRef> &args)
     : recv(recv), fun(fun), args(move(args)) {}
-
-string New::toString(ast::Context ctx) {
-    stringstream buf;
-    buf << "new " << this->klass.info(ctx).name.name(ctx).toString(ctx) << "(";
-    bool isFirst = true;
-    for (auto arg : this->args) {
-        if (!isFirst) {
-            buf << ", ";
-        }
-        isFirst = false;
-        buf << arg.info(ctx).name.name(ctx).toString(ctx);
-    }
-    buf << ")";
-    return buf.str();
-}
 
 Super::Super(vector<ast::SymbolRef> &args) : args(move(args)) {}
 

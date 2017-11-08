@@ -1,0 +1,15 @@
+digraph "non_existent_method.rb"{
+subgraph "cluster_::Foo#baz" {
+    label = "::Foo#baz";
+    color = blue;
+    bb27_0 [shape = invhouse];
+    bb27_1 [shape = parallelogram];
+
+    bb27_0 [label = "()\nstatTmp$3 = self : Foo\na = statTmp$3.does_not_exist() : <dynamic>\n<ret>$0 = a.bla() : <dynamic>\n<ret>$5 = return <ret>$0 : <bottom>\n<never>"];
+    bb27_0 -> bb27_1;
+    bb27_1 [label = "()\n<never>"];
+    bb27_1 -> bb27_1;
+}
+
+}
+

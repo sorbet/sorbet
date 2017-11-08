@@ -1,5 +1,5 @@
 begin
-  class <emptyTree>::Parent<Parent> < (::Object)
+  class <emptyTree>::Parent<Parent> < ()
     self(<singleton class:Parent>).declare_variables({:@ivar => ::Integer, :@ivar2 => ::Integer, :@@class_var => ::String})
 
     ::Parent#@@class_var = "hi"

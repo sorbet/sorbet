@@ -120,6 +120,9 @@ static UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
 static const char *nil_str = "nil";
 static UTF8Desc nil_DESC{(char *)nil_str, (int)strlen(nil_str)};
 
+static const char *new_str = "new";
+static UTF8Desc new_DESC{(char *)new_str, (int)strlen(new_str)};
+
 static const char *todo_str = "<todo sym>";
 static UTF8Desc todo_DESC{(char *)todo_str, (int)strlen(todo_str)};
 
@@ -213,6 +216,12 @@ static UTF8Desc opus_DESC{(char *)opus, (int)strlen(opus)};
 static const char *types = "Types";
 static UTF8Desc types_DESC{(char *)types, (int)strlen(types)};
 
+static const char *basicObject = "BasicObject";
+static UTF8Desc basicObject_DESC{(char *)basicObject, (int)strlen(basicObject)};
+
+static const char *kernel = "Kernel";
+static UTF8Desc kernel_DESC{(char *)kernel, (int)strlen(kernel)};
+
 GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -258,6 +267,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef attachedClass_id = enterNameUTF8(attachedClass_DESC);
     NameRef blockTemp_id = enterNameUTF8(blockTemp_DESC);
     NameRef declareVariables_id = enterNameUTF8(declareVariables_DESC);
+    NameRef new_id = enterNameUTF8(new_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -292,6 +302,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(attachedClass_id == Names::attachedClass()));
     DEBUG_ONLY(Error::check(blockTemp_id == Names::blockTemp()));
     DEBUG_ONLY(Error::check(declareVariables_id == Names::declareVariables()));
+    DEBUG_ONLY(Error::check(new_id == Names::new_()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -317,6 +328,8 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef opus_id = synthesizeClass(opus_DESC);
     SymbolRef opus_types_id = enterClassSymbol(opus_id, enterNameUTF8(types_DESC));
     SymbolRef class_id = synthesizeClass(class_DESC);
+    SymbolRef basicObject_id = synthesizeClass(basicObject_DESC);
+    SymbolRef kernel_id = synthesizeClass(kernel_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -342,6 +355,8 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(opus_id == defn_Opus());
     Error::check(opus_types_id == defn_Opus_Types());
     Error::check(class_id == defn_Class());
+    Error::check(basicObject_id == defn_Basic_Object());
+    Error::check(kernel_id == defn_Kernel());
 
     /* 0: <none>
      * 1: <top>
@@ -369,6 +384,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
      * 23: NilClass
      * 24: Opus
      * 25: Opus::Types
+     * 26: BasicObject
      */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }

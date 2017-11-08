@@ -81,10 +81,10 @@ class Opus ()
         static-field TOTAL_TIME_MS
       class MatchTimeout (<dynamic>)
         field @rule_token
-        method initialize (message, <todo sym>)
+        method initialize (message, rule_token)
           field message
           field rule_token
-      class Matcher (Object, <dynamic>)
+      class Matcher (<dynamic>)
         field @rules
         method initialize ()
           field invalid_rule_ids

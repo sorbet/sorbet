@@ -26,39 +26,19 @@ void emit_header(vector<string> sourceFiles, ostream &out) {
     out << "}};" << endl;
 }
 
-string escape(string what) {
-    char escaped[] = {'\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '\"'};
-    char non_escaped[] = {'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '\"'};
-    static_assert(sizeof(escaped) == sizeof(non_escaped), "???");
-    stringstream buf;
-    for (char c : what) {
-        int j;
-        for (j = 0; j < sizeof(escaped); j++) {
-            if (c == escaped[j]) {
-                buf << '\\';
-                buf << non_escaped[j];
-                break;
-            }
-        }
-        if (j == sizeof(escaped))
-            buf << c;
-    }
-
-    return buf.str();
-}
-
 void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "#include<string>" << endl << "#include<vector>" << endl;
     out << "namespace ruby_typer{" << endl << "namespace rbi{" << endl;
     for (auto &file : sourceFiles) {
         out << "  std::string " + sourceName2funcName(file) << "() {" << endl;
-        out << "  return \"" + escape(ruby_typer::File::read(file.c_str())) + "\";" << endl << "}" << endl;
+        out << "  return \"" + ruby_typer::Strings::escape(ruby_typer::File::read(file.c_str())) + "\";" << endl
+            << "}" << endl;
     }
     out << "std::vector<std::pair<std::string, std::string>> all() {" << endl;
     out << "  std::vector<std::pair<std::string, std::string>> result;" << endl;
     for (auto &file : sourceFiles) {
-        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + escape(file) + "\", " +
-                   sourceName2funcName(file) + "()));"
+        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + ruby_typer::Strings::escape(file) +
+                   "\", " + sourceName2funcName(file) + "()));"
             << endl;
     }
     out << "  return result;" << endl;

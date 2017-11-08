@@ -130,6 +130,7 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name) {
     if (result.exists())
         return result;
     for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+        Error::check(it->exists());
         result = it->info(gs).findMemberTransitive(gs, name);
         if (result.exists())
             return result;
@@ -167,6 +168,13 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singletonInfo.argumentsOrMixins.push_back(gs.defn_Class());
 
     this->members.push_back(make_pair(Names::singletonClass(), singleton));
+    return singleton;
+}
+
+SymbolRef Symbol::attachedClass(GlobalState &gs) {
+    Error::check(this->isClass());
+
+    SymbolRef singleton = findMember(Names::attachedClass());
     return singleton;
 }
 

@@ -160,9 +160,17 @@ public:
         return SymbolRef(23);
     }
 
+    static constexpr SymbolRef defn_Basic_Object() {
+        return SymbolRef(24);
+    }
+
+    static constexpr SymbolRef defn_Kernel() {
+        return SymbolRef(25);
+    }
+
     // Keep as last and update to match the last entry
     static constexpr SymbolRef defn_last_synthetic_sym() {
-        return defn_Class();
+        return defn_Kernel();
     }
 
 private:

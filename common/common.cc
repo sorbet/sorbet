@@ -32,6 +32,27 @@ string ruby_typer::File::read(const char *filename) {
     return src;
 }
 
+string ruby_typer::Strings::escape(string what) {
+    char escaped[] = {'\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '\"'};
+    char non_escaped[] = {'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '\"'};
+    static_assert(sizeof(escaped) == sizeof(non_escaped), "???");
+    stringstream buf;
+    for (char c : what) {
+        int j;
+        for (j = 0; j < sizeof(escaped); j++) {
+            if (c == escaped[j]) {
+                buf << '\\';
+                buf << non_escaped[j];
+                break;
+            }
+        }
+        if (j == sizeof(escaped))
+            buf << c;
+    }
+
+    return buf.str();
+}
+
 std::string ruby_typer::File::getFileName(const std::string path) {
     std::size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);

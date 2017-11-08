@@ -1,4 +1,5 @@
 #include "namer/namer.h"
+#include "../ast/ast.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 
@@ -106,16 +107,32 @@ public:
         return klass;
     }
 
+    unique_ptr<ast::Expression> fillInArg(ast::Context ctx, ast::UnresolvedIdent *nmarg, ast::Symbol &method) {
+        auto tx = postTransformUnresolvedIdent(ctx.withOwner(method.ref(ctx)), nmarg);
+        if (tx != nmarg) {
+            unique_ptr<ast::Expression> res(tx);
+            ast::Ident *id = dynamic_cast<ast::Ident *>(tx);
+            Error::check(id != nullptr);
+            method.argumentsOrMixins.push_back(id->symbol);
+            return res;
+        }
+        Error::notImplemented();
+    }
+
     void fillInArgs(ast::Context ctx, vector<unique_ptr<ast::Expression>> &args, ast::Symbol &symbol) {
         // Fill in the arity right with TODOs
         for (auto &arg : args) {
             if (auto *nmarg = dynamic_cast<ast::UnresolvedIdent *>(arg.get())) {
-                auto tx = postTransformUnresolvedIdent(ctx.withOwner(symbol.ref(ctx)), nmarg);
-                if (tx != nmarg) {
-                    ast::Ident *id = dynamic_cast<ast::Ident *>(tx);
-                    Error::check(id != nullptr);
-                    symbol.argumentsOrMixins.push_back(id->symbol);
-                    arg.reset(tx);
+                arg = fillInArg(ctx, nmarg, symbol);
+            } else if (auto *oarg = dynamic_cast<ast::OptionalArg *>(arg.get())) {
+                if (auto *nmarg = dynamic_cast<ast::UnresolvedIdent *>(oarg->expr.get())) {
+                    arg = fillInArg(ctx, nmarg, symbol);
+                } else if (auto *krg = dynamic_cast<ast::KeywordArg *>(oarg->expr.get())) {
+                    if (auto *nmarg = dynamic_cast<ast::UnresolvedIdent *>(krg->expr.get())) {
+                        arg = fillInArg(ctx, nmarg, symbol);
+                    } else {
+                        symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
+                    }
                 } else {
                     symbol.argumentsOrMixins.push_back(ast::GlobalState::defn_todo());
                 }

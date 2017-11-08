@@ -296,17 +296,6 @@ public:
     virtual std::string nodeName();
 };
 
-class New : public Expression {
-public:
-    SymbolRef claz;
-    std::vector<std::unique_ptr<Expression>> args;
-
-    New(Loc loc, SymbolRef claz, std::vector<std::unique_ptr<Expression>> &&args);
-    virtual std::string toString(GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-};
-
 class Super : public Expression {
 public:
     std::vector<std::unique_ptr<Expression>> args;

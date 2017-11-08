@@ -89,11 +89,6 @@ TEST(PreOrderTreeMap, CountTrees) {
             return original;
         }
 
-        New *preTransformNew(Context ctx, New *original) {
-            count++;
-            return original;
-        }
-
         NamedArg *preTransformNamedArg(Context ctx, NamedArg *original) {
             count++;
             return original;
