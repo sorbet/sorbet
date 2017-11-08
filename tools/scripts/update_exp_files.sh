@@ -13,8 +13,8 @@ for src in "${rb_src[@]}"; do
     for pass in "${passes[@]}" ; do
         candidate="$src.$pass.exp"
         if [ -e "$candidate" ]; then
-            echo "bazel-bin/main/ruby-typer --no-payload --print $pass $src > $candidate"
-            bazel-bin/main/ruby-typer --no-payload --print "$pass" "$src" > "$candidate"
+            echo "bazel-bin/main/ruby-typer --no-stdlib --print $pass $src > $candidate"
+            bazel-bin/main/ruby-typer --no-stdlib --print "$pass" "$src" > "$candidate"
         fi
     done
 done
