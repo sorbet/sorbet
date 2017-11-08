@@ -23,8 +23,33 @@ public:
     unique_ptr<Node> node;
 };
 
-const ruby_parser::diagnostics_t &Result::diagnostics() {
-    return impl_->driver.diagnostics;
+void Result::emit_diagnostics_as_errors(GlobalState &gs, FileRef file) {
+    auto &diagnostics = impl_->driver.diagnostics;
+    if (diagnostics.size() == 0) {
+        return;
+    }
+
+    for (auto &diag : diagnostics) {
+        std::string level = "unknown";
+        switch (diag.level()) {
+            case ruby_parser::dlevel::NOTE:
+                level = "Note";
+                break;
+            case ruby_parser::dlevel::WARNING:
+                level = "Warning";
+                break;
+            case ruby_parser::dlevel::ERROR:
+                level = "Error";
+                break;
+            case ruby_parser::dlevel::FATAL:
+                level = "Fatal";
+                break;
+        }
+        std::string msg("Parse {}: ");
+        msg.append(ruby_parser::dclass_strings[(int)diag.error_class()]);
+        Loc loc(file, diag.location().begin_pos - 1, diag.location().end_pos - 1);
+        gs.errors.error(loc, ast::ErrorClass::ParserError, msg, level, diag.data());
+    }
 }
 
 unique_ptr<Node> &Result::ast() {
@@ -49,6 +74,8 @@ Result parse_ruby(GlobalState &gs, const string &path, const string &src) {
 
     Builder builder(gs, result);
     result.impl_->node = unique_ptr<Node>(builder.build(&result.impl_->driver));
+
+    result.emit_diagnostics_as_errors(gs, file);
 
     return result;
 }

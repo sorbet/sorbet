@@ -8,7 +8,9 @@ namespace ast {
 enum class ErrorClass {
     Internal = 1001, // Internal Compiler Error
 
-    InvalidSingletonDef = 2001, // Desugarer Errors
+    ParserError = 2001, // Parser Errors
+
+    InvalidSingletonDef = 3001, // Desugarer Errors
 
     IncludeMutipleParam = 4001, // Namer Errors
     IncludeNotConstant = 4002,

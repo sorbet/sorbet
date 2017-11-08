@@ -31,7 +31,10 @@ Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off) {
 
 pair<Loc::Detail, Loc::Detail> Loc::position(ast::GlobalState &gs) {
     ast::File &file = this->file.file(gs);
-    return make_pair(offset2Pos(file.source(), begin_pos), offset2Pos(file.source(), end_pos));
+    ast::UTF8Desc source(file.source());
+    Loc::Detail begin(offset2Pos(source, begin_pos));
+    Loc::Detail end(offset2Pos(source, end_pos));
+    return make_pair(begin, end);
 }
 
 string Loc::toString(ast::GlobalState &gs) {

@@ -123,7 +123,6 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         auto exp = ruby_typer::File::read(checker.c_str());
 
-        EXPECT_EQ(0, parsed.diagnostics().size());
         EXPECT_EQ(exp, parsed.ast()->toString(gs) + "\n");
         if (exp == parsed.ast()->toString(gs) + "\n") {
             TEST_COUT << "parse-tree OK" << endl;
