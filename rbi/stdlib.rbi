@@ -35,10 +35,6 @@ class BigDecimal < Numeric
 end
 module BigMath
 end
-class Integer < Numeric
-end
-class Bignum < Integer
-end
 class Binding < Object
 end
 class CSV < Object
@@ -63,9 +59,13 @@ class Module < Object
 end
 class Class < Module
 end
-class Complex < Numeric
+class IndexError < StandardError
 end
-class ConditionVariable < Object
+class StopIteration < IndexError
+end
+class ClosedQueueError < StopIteration
+end
+class Complex < Numeric
 end
 module Coverage
 end
@@ -77,6 +77,30 @@ end
 class Date::Infinity < Numeric
 end
 class DateTime < Date
+end
+module DidYouMean
+end
+class DidYouMean::ClassNameChecker < Object
+end
+module DidYouMean::Correctable
+end
+class DidYouMean::Formatter < Object
+end
+module DidYouMean::Jaro
+end
+module DidYouMean::JaroWinkler
+end
+module DidYouMean::Levenshtein
+end
+class DidYouMean::MethodNameChecker < Object
+end
+module DidYouMean::NameErrorCheckers
+end
+class DidYouMean::NullChecker < Object
+end
+class DidYouMean::SpellChecker < Object
+end
+class DidYouMean::VariableNameChecker < Object
 end
 class Dir < Object
   include Enumerable
@@ -129,13 +153,7 @@ class Errno::EALREADY < SystemCallError
 end
 class Errno::EAUTH < SystemCallError
 end
-class Errno::EBADARCH < SystemCallError
-end
-class Errno::EBADEXEC < SystemCallError
-end
 class Errno::EBADF < SystemCallError
-end
-class Errno::EBADMACHO < SystemCallError
 end
 class Errno::EBADMSG < SystemCallError
 end
@@ -156,8 +174,6 @@ end
 class Errno::EDEADLK < SystemCallError
 end
 class Errno::EDESTADDRREQ < SystemCallError
-end
-class Errno::EDEVERR < SystemCallError
 end
 class Errno::EDOM < SystemCallError
 end
@@ -233,8 +249,6 @@ class Errno::ENOMEM < SystemCallError
 end
 class Errno::ENOMSG < SystemCallError
 end
-class Errno::ENOPOLICY < SystemCallError
-end
 class Errno::ENOPROTOOPT < SystemCallError
 end
 class Errno::ENOSPC < SystemCallError
@@ -289,10 +303,6 @@ class Errno::EPROTONOSUPPORT < SystemCallError
 end
 class Errno::EPROTOTYPE < SystemCallError
 end
-class Errno::EPWROFF < SystemCallError
-end
-class Errno::EQFULL < SystemCallError
-end
 class Errno::ERANGE < SystemCallError
 end
 class Errno::EREMOTE < SystemCallError
@@ -300,8 +310,6 @@ end
 class Errno::EROFS < SystemCallError
 end
 class Errno::ERPCMISMATCH < SystemCallError
-end
-class Errno::ESHLIBVERS < SystemCallError
 end
 class Errno::ESHUTDOWN < SystemCallError
 end
@@ -345,8 +353,6 @@ class File::Stat < Object
   include Comparable
 end
 module FileTest
-end
-class Fixnum < Integer
 end
 class Float < Numeric
 end
@@ -409,6 +415,10 @@ end
 class Gem::List < Object
   include Enumerable
 end
+class Gem::MissingSpecError < Gem::LoadError
+end
+class Gem::MissingSpecVersionError < Gem::MissingSpecError
+end
 class Gem::OperationNotSupportedError < Gem::Exception
 end
 class Gem::PathSupport < Object
@@ -430,6 +440,8 @@ end
 class Gem::Requirement::BadRequirementError < ArgumentError
 end
 class Gem::RubyVersionMismatch < Gem::Exception
+end
+class Gem::RuntimeRequirementNotMetError < Gem::InstallError
 end
 class Gem::SourceFetchProblem < Gem::ErrorReason
 end
@@ -457,9 +469,21 @@ class Hash < Object
 end
 module IO::WaitReadable
 end
+class IO::EAGAINWaitReadable < Errno::EAGAIN
+  include IO::WaitReadable
+end
 module IO::WaitWritable
 end
-class IndexError < StandardError
+class IO::EAGAINWaitWritable < Errno::EAGAIN
+  include IO::WaitWritable
+end
+class IO::EINPROGRESSWaitReadable < Errno::EINPROGRESS
+  include IO::WaitReadable
+end
+class IO::EINPROGRESSWaitWritable < Errno::EINPROGRESS
+  include IO::WaitWritable
+end
+class Integer < Numeric
 end
 class SignalException < Exception
 end
@@ -488,8 +512,6 @@ class MonitorMixin::ConditionVariable < Object
 end
 class MonitorMixin::ConditionVariable::Timeout < Exception
 end
-class Mutex < Object
-end
 class NameError < StandardError
 end
 class NilClass < Object
@@ -503,6 +525,7 @@ end
 module ObjectSpace
 end
 class ObjectSpace::WeakMap < Object
+  include Enumerable
 end
 class Proc < Object
 end
@@ -514,11 +537,18 @@ class Process::Status < Object
 end
 module Process::Sys
 end
+class Process::Tms < Struct
+end
 module Process::UID
 end
-class Queue < Object
+class Thread < Object
+end
+class Process::Waiter < Thread
+end
+module Random::Formatter
 end
 class Random < Object
+  include Random::Formatter
 end
 class Range < Object
   include Enumerable
@@ -533,8 +563,6 @@ class RegexpError < StandardError
 end
 class RubyVM < Object
 end
-class RubyVM::Env < Object
-end
 class RubyVM::InstructionSequence < Object
 end
 class SecurityError < Exception
@@ -543,19 +571,13 @@ module Signal
 end
 module SingleForwardable
 end
-class SizedQueue < Queue
-end
-class StopIteration < IndexError
-end
 class String < Object
   include Comparable
 end
 class StringIO < Data
-  include IO::writable
-  include IO::readable
+  include IO::generic_writable
+  include IO::generic_readable
   include Enumerable
-end
-class Struct::Tms < Struct
 end
 class Symbol < Object
   include Comparable
@@ -564,11 +586,17 @@ class SyntaxError < ScriptError
 end
 class SystemStackError < Exception
 end
-class Thread < Object
-end
 class Thread::Backtrace < Object
 end
 class Thread::Backtrace::Location < Object
+end
+class Thread::ConditionVariable < Object
+end
+class Thread::Mutex < Object
+end
+class Thread::Queue < Object
+end
+class Thread::SizedQueue < Thread::Queue
 end
 class ThreadError < StandardError
 end
@@ -583,7 +611,7 @@ class TrueClass < Object
 end
 class TypeError < StandardError
 end
-module URI::REGEXP
+module URI::RFC2396_REGEXP
 end
 module URI
 end
@@ -595,7 +623,7 @@ module URI::Escape
 end
 class URI::Generic < Object
   include URI
-  include URI::REGEXP
+  include URI::RFC2396_REGEXP
 end
 class URI::FTP < URI::Generic
 end
@@ -613,14 +641,20 @@ class URI::LDAPS < URI::LDAP
 end
 class URI::MailTo < URI::Generic
 end
-class URI::Parser < Object
-  include URI::REGEXP
+class URI::RFC2396_Parser < Object
+  include URI::RFC2396_REGEXP
 end
-module URI::REGEXP::PATTERN
+module URI::RFC2396_REGEXP::PATTERN
+end
+class URI::RFC3986_Parser < Object
 end
 module URI::Util
 end
 class UnboundMethod < Object
+end
+class UncaughtThrowError < ArgumentError
+end
+module Warning
 end
 class ZeroDivisionError < StandardError
 end
