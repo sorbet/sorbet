@@ -123,6 +123,20 @@ SymbolRef Symbol::findMember(NameRef name) {
     return SymbolRef(0);
 }
 
+SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name) {
+    Error::check(this->isClass());
+
+    SymbolRef result = findMember(name);
+    if (result.exists())
+        return result;
+    for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+        result = it->info(gs).findMemberTransitive(gs, name);
+        if (result.exists())
+            return result;
+    }
+    return SymbolRef(0);
+}
+
 string Symbol::fullName(GlobalState &gs) const {
     string owner_str;
     if (this->owner.exists() && this->owner != gs.defn_root())

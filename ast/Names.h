@@ -286,6 +286,11 @@ public:
     static inline NameRef blockTemp() {
         return NameRef(32);
     }
+
+    // used in resolver to find signatures
+    static inline NameRef declareVariables() {
+        return NameRef(33);
+    }
 };
 
 class Name {

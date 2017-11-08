@@ -88,9 +88,11 @@ Begin {
                           }
                         ]
                       }
-                      IVarAsgn {
-                        name = @rule_token
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @rule_token
+                        }
+                        rhs = LVar {
                           name = rule_token
                         }
                       }
@@ -121,10 +123,12 @@ Begin {
                     }
                   ]
                 }
-                ConstAsgn {
-                  scope = NULL
-                  name = MAX_AFFECTED_FILES
-                  expr = Integer {
+                Assign {
+                  lhs = ConstLhs {
+                    scope = NULL
+                    name = MAX_AFFECTED_FILES
+                  }
+                  rhs = Integer {
                     val = "100"
                   }
                 }
@@ -201,9 +205,11 @@ Begin {
                         }
                         then_ = Begin {
                           stmts = [
-                            LVarAsgn {
-                              name = invalid_rule_ids
-                              expr = Send {
+                            Assign {
+                              lhs = LVarLhs {
+                                name = invalid_rule_ids
+                              }
+                              rhs = Send {
                                 receiver = Send {
                                   receiver = LVar {
                                     name = invalid_rules
@@ -362,9 +368,11 @@ Begin {
                         }
                         else_ = NULL
                       }
-                      LVarAsgn {
-                        name = budget
-                        expr = Send {
+                      Assign {
+                        lhs = LVarLhs {
+                          name = budget
+                        }
+                        rhs = Send {
                           receiver = Const {
                             scope = NULL
                             name = MatchTimeBudget
@@ -534,51 +542,67 @@ Begin {
                   }
                   body = Begin {
                     stmts = [
-                      IVarAsgn {
-                        name = @repo
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @repo
+                        }
+                        rhs = LVar {
                           name = repo
                         }
                       }
-                      IVarAsgn {
-                        name = @assignee
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @assignee
+                        }
+                        rhs = LVar {
                           name = assignee
                         }
                       }
-                      IVarAsgn {
-                        name = @gh_user
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @gh_user
+                        }
+                        rhs = LVar {
                           name = gh_user
                         }
                       }
-                      IVarAsgn {
-                        name = @merge_branch
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @merge_branch
+                        }
+                        rhs = LVar {
                           name = merge_branch
                         }
                       }
-                      IVarAsgn {
-                        name = @body
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @body
+                        }
+                        rhs = LVar {
                           name = body
                         }
                       }
-                      IVarAsgn {
-                        name = @title
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @title
+                        }
+                        rhs = LVar {
                           name = title
                         }
                       }
-                      IVarAsgn {
-                        name = @diff
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @diff
+                        }
+                        rhs = LVar {
                           name = diff
                         }
                       }
-                      IVarAsgn {
-                        name = @openapi_diff
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @openapi_diff
+                        }
+                        rhs = LVar {
                           name = openapi_diff
                         }
                       }
@@ -620,26 +644,32 @@ Begin {
             superclass = NULL
             body = Begin {
               stmts = [
-                ConstAsgn {
-                  scope = NULL
-                  name = TOTAL_TIME_MS
-                  expr = Integer {
+                Assign {
+                  lhs = ConstLhs {
+                    scope = NULL
+                    name = TOTAL_TIME_MS
+                  }
+                  rhs = Integer {
                     val = "10000"
                   }
                 }
-                ConstAsgn {
-                  scope = NULL
-                  name = PER_RULE_MS
-                  expr = Integer {
+                Assign {
+                  lhs = ConstLhs {
+                    scope = NULL
+                    name = PER_RULE_MS
+                  }
+                  rhs = Integer {
                     val = "2000"
                   }
                 }
                 DefMethod {
                   name = initialize
                   args = NULL
-                  body = IVarAsgn {
-                    name = @start
-                    expr = Send {
+                  body = Assign {
+                    lhs = IVarLhs {
+                      name = @start
+                    }
+                    rhs = Send {
                       receiver = Const {
                         scope = NULL
                         name = Time
@@ -655,9 +685,11 @@ Begin {
                   args = NULL
                   body = Begin {
                     stmts = [
-                      LVarAsgn {
-                        name = dur_ms
-                        expr = Send {
+                      Assign {
+                        lhs = LVarLhs {
+                          name = dur_ms
+                        }
+                        rhs = Send {
                           receiver = Begin {
                             stmts = [
                               Send {
@@ -753,9 +785,11 @@ Begin {
                   }
                   body = Begin {
                     stmts = [
-                      LVarAsgn {
-                        name = rule_start
-                        expr = Send {
+                      Assign {
+                        lhs = LVarLhs {
+                          name = rule_start
+                        }
+                        rhs = Send {
                           receiver = Const {
                             scope = NULL
                             name = Time
@@ -765,16 +799,20 @@ Begin {
                           ]
                         }
                       }
-                      LVarAsgn {
-                        name = res
-                        expr = Yield {
+                      Assign {
+                        lhs = LVarLhs {
+                          name = res
+                        }
+                        rhs = Yield {
                           exprs = [
                           ]
                         }
                       }
-                      LVarAsgn {
-                        name = dur_ms
-                        expr = Send {
+                      Assign {
+                        lhs = LVarLhs {
+                          name = dur_ms
+                        }
+                        rhs = Send {
                           receiver = Begin {
                             stmts = [
                               Send {
@@ -937,15 +975,19 @@ Begin {
                   }
                   body = Begin {
                     stmts = [
-                      IVarAsgn {
-                        name = @raw
-                        expr = LVar {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @raw
+                        }
+                        rhs = LVar {
                           name = raw_diff
                         }
                       }
-                      IVarAsgn {
-                        name = @parsed
-                        expr = Send {
+                      Assign {
+                        lhs = IVarLhs {
+                          name = @parsed
+                        }
+                        rhs = Send {
                           receiver = NULL
                           method = parse
                           args = [
@@ -1342,9 +1384,11 @@ Begin {
                       }
                       body = Begin {
                         stmts = [
-                          LVarAsgn {
-                            name = parts
-                            expr = Send {
+                          Assign {
+                            lhs = LVarLhs {
+                              name = parts
+                            }
+                            rhs = Send {
                               receiver = Send {
                                 receiver = LVar {
                                   name = diff
@@ -1404,9 +1448,11 @@ Begin {
                               }
                               body = Begin {
                                 stmts = [
-                                  LVarAsgn {
-                                    name = lines
-                                    expr = Send {
+                                  Assign {
+                                    lhs = LVarLhs {
+                                      name = lines
+                                    }
+                                    rhs = Send {
                                       receiver = LVar {
                                         name = part
                                       }
@@ -1423,24 +1469,32 @@ Begin {
                                       ]
                                     }
                                   }
-                                  LVarAsgn {
-                                    name = a_name
-                                    expr = LVarAsgn {
-                                      name = b_name
-                                      expr = Nil {
+                                  Assign {
+                                    lhs = LVarLhs {
+                                      name = a_name
+                                    }
+                                    rhs = Assign {
+                                      lhs = LVarLhs {
+                                        name = b_name
+                                      }
+                                      rhs = Nil {
                                       }
                                     }
                                   }
-                                  LVarAsgn {
-                                    name = added_lines
-                                    expr = Array {
+                                  Assign {
+                                    lhs = LVarLhs {
+                                      name = added_lines
+                                    }
+                                    rhs = Array {
                                       elts = [
                                       ]
                                     }
                                   }
-                                  LVarAsgn {
-                                    name = removed_lines
-                                    expr = Array {
+                                  Assign {
+                                    lhs = LVarLhs {
+                                      name = removed_lines
+                                    }
+                                    rhs = Array {
                                       elts = [
                                       ]
                                     }
@@ -1513,9 +1567,11 @@ Begin {
                                         }
                                         then_ = Begin {
                                           stmts = [
-                                            LVarAsgn {
-                                              name = a_name
-                                              expr = Send {
+                                            Assign {
+                                              lhs = LVarLhs {
+                                                name = a_name
+                                              }
+                                              rhs = Send {
                                                 receiver = LVar {
                                                   name = line
                                                 }
@@ -1553,9 +1609,11 @@ Begin {
                                                   ]
                                                 }
                                               }
-                                              then_ = LVarAsgn {
-                                                name = a_name
-                                                expr = Send {
+                                              then_ = Assign {
+                                                lhs = LVarLhs {
+                                                  name = a_name
+                                                }
+                                                rhs = Send {
                                                   receiver = LVar {
                                                     name = a_name
                                                   }
@@ -1594,9 +1652,11 @@ Begin {
                                           }
                                           then_ = Begin {
                                             stmts = [
-                                              LVarAsgn {
-                                                name = b_name
-                                                expr = Send {
+                                              Assign {
+                                                lhs = LVarLhs {
+                                                  name = b_name
+                                                }
+                                                rhs = Send {
                                                   receiver = LVar {
                                                     name = line
                                                   }
@@ -1634,9 +1694,11 @@ Begin {
                                                     ]
                                                   }
                                                 }
-                                                then_ = LVarAsgn {
-                                                  name = b_name
-                                                  expr = Send {
+                                                then_ = Assign {
+                                                  lhs = LVarLhs {
+                                                    name = b_name
+                                                  }
+                                                  rhs = Send {
                                                     receiver = LVar {
                                                       name = b_name
                                                     }

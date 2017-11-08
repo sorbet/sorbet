@@ -4,8 +4,8 @@
 alias foo bar
 
 # various LHSs
-@iv = 1
-@@cv = 1
+@iv = 1         # error: undeclared variable
+@@cv = 1        # error: undeclared variable
 $gv = 1
 
 x.var, y = nil, nil

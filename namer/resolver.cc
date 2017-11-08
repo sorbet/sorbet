@@ -11,14 +11,6 @@ using namespace std;
 namespace ruby_typer {
 namespace namer {
 
-class Resolver {
-public:
-    Resolver(unique_ptr<ast::Statement> tree) : tree_(move(tree)) {}
-    void walk(ast::Context);
-
-    unique_ptr<ast::Statement> tree_;
-};
-
 struct Nesting {
     unique_ptr<Nesting> parent;
     ast::SymbolRef scope;
@@ -96,16 +88,16 @@ private:
                      if (i->symbol.info(ctx).isClass()) {
                          result = make_shared<ast::ClassType>(i->symbol);
                      } else {
-                         ctx.state.errors.error(i->loc, ast::ErrorClass::InvalidMethodSignature,
-                                                "Misformed standard_method. Not a class type {}" + i->toString(ctx));
+                         ctx.state.errors.error(i->loc, ast::ErrorClass::InvalidTypeDeclaration,
+                                                "Malformed type declaration. Not a class type {}" + i->toString(ctx));
                          result = ast::Types::dynamic();
                      }
                  },
                  [&](ast::Send *s) {
                      if (auto *recvi = dynamic_cast<ast::Ident *>(s->recv.get())) {
                          if (recvi->symbol != ast::GlobalState::defn_Opus_Types()) {
-                             ctx.state.errors.error(recvi->loc, ast::ErrorClass::InvalidMethodSignature,
-                                                    "Misformed standard_method. Unknown argument type type {}",
+                             ctx.state.errors.error(recvi->loc, ast::ErrorClass::InvalidTypeDeclaration,
+                                                    "Misformed type declaration. Unknown argument type type {}",
                                                     expr->toString(ctx));
                              result = ast::Types::dynamic();
                          } else {
@@ -126,14 +118,14 @@ private:
                                      i++;
                                  }
                              } else {
-                                 ctx.state.errors.error(s->loc, ast::ErrorClass::InvalidMethodSignature,
+                                 ctx.state.errors.error(s->loc, ast::ErrorClass::InvalidTypeDeclaration,
                                                         "Unsupported type combinator {}", s->fun.toString(ctx));
                                  result = ast::Types::dynamic();
                              }
                          }
                      } else {
-                         ctx.state.errors.error(expr->loc, ast::ErrorClass::InvalidMethodSignature,
-                                                "Misformed standard_method. Unknown argument type type {}",
+                         ctx.state.errors.error(expr->loc, ast::ErrorClass::InvalidTypeDeclaration,
+                                                "Misformed type declaration. Unknown type syntax {}",
                                                 expr->toString(ctx));
                          result = ast::Types::dynamic();
                      }
@@ -184,9 +176,68 @@ private:
         }
     }
 
+    void processDeclareVariables(ast::Context ctx, ast::Send *send) {
+        if (dynamic_cast<ast::Self *>(send->recv.get()) == nullptr || send->block != nullptr) {
+            ctx.state.errors.error(send->loc, ast::ErrorClass::InvalidDeclareVariables,
+                                   "Malformed `declare_variables'");
+            return;
+        }
+
+        if (send->args.size() != 1) {
+            ctx.state.errors.error(send->loc, ast::ErrorClass::InvalidDeclareVariables,
+                                   "Wrong number of arguments to `declare_variables'");
+            return;
+        }
+        auto hash = dynamic_cast<ast::Hash *>(send->args.front().get());
+        if (hash == nullptr) {
+            ctx.state.errors.error(send->loc, ast::ErrorClass::InvalidDeclareVariables,
+                                   "Malformed `declare_variables': Argument must be a hash");
+            return;
+        }
+        for (int i = 0; i < hash->keys.size(); ++i) {
+            auto &key = hash->keys[i];
+            auto &value = hash->values[i];
+            auto sym = dynamic_cast<ast::SymbolLit *>(key.get());
+            if (sym == nullptr) {
+                ctx.state.errors.error(key->loc, ast::ErrorClass::InvalidDeclareVariables,
+                                       "`declare_variables': variable names must be symbols");
+                continue;
+            }
+
+            auto typ = getResultType(ctx, value);
+            ast::SymbolRef var;
+
+            auto str = sym->name.toString(ctx);
+            if (str.substr(0, 2) == "@@") {
+                ast::Symbol &info = ctx.owner.info(ctx);
+                var = info.findMember(sym->name);
+                if (var.exists()) {
+                    ctx.state.errors.error(key->loc, ast::ErrorClass::DuplicateVariableDeclaration,
+                                           "Redeclaring variable `{}'", str);
+                } else {
+                    var = ctx.state.enterStaticFieldSymbol(ctx.owner, sym->name);
+                }
+            } else if (str.substr(0, 1) == "@") {
+                ast::Symbol &info = ctx.owner.info(ctx);
+                var = info.findMember(sym->name);
+                if (var.exists()) {
+                    ctx.state.errors.error(key->loc, ast::ErrorClass::DuplicateVariableDeclaration,
+                                           "Redeclaring variable `{}'", str);
+                } else {
+                    var = ctx.state.enterFieldSymbol(ctx.owner, sym->name);
+                }
+            } else {
+                ctx.state.errors.error(key->loc, ast::ErrorClass::InvalidDeclareVariables,
+                                       "`declare_variables`: variables must start with @ or @@");
+            }
+
+            if (var.exists())
+                var.info(ctx).resultType = typ;
+        }
+    }
+
 public:
-    ResolveWalk(ast::Context ctx, Resolver *resolv)
-        : resolv_(resolv), nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
+    ResolveWalk(ast::Context ctx) : nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
 
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *original) {
         nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
@@ -215,6 +266,8 @@ public:
                 if (send->fun == ast::Names::standardMethod()) {
                     lastStandardMethod.reset(send);
                     stat.release();
+                } else if (send->fun == ast::Names::declareVariables()) {
+                    processDeclareVariables(ctx.withOwner(original->symbol), send);
                 }
             } else if (auto mdef = dynamic_cast<ast::MethodDef *>(stat.get())) {
                 if (lastStandardMethod) {
@@ -243,19 +296,47 @@ public:
         return new ast::Ident(c->loc, resolved);
     }
 
-    Resolver *resolv_;
     unique_ptr<Nesting> nesting_;
 };
 
-void Resolver::walk(ast::Context ctx) {
-    ResolveWalk walk(ctx, this);
-    tree_ = ast::TreeMap<ResolveWalk>::apply(ctx, walk, move(tree_));
-}
+class ResolveVariablesWalk {
+public:
+    ast::Statement *postTransformUnresolvedIdent(ast::Context ctx, ast::UnresolvedIdent *id) {
+        ast::SymbolRef klass;
+
+        switch (id->kind) {
+            case ast::UnresolvedIdent::Class:
+                klass = ctx.contextClass();
+                break;
+            case ast::UnresolvedIdent::Instance:
+                klass = ctx.selfClass();
+                break;
+            default:
+                // These should have been removed in the namer
+                Error::notImplemented();
+        }
+
+        ast::SymbolRef sym = klass.info(ctx).findMemberTransitive(ctx, id->name);
+        if (!sym.exists()) {
+            ctx.state.errors.error(id->loc, ast::ErrorClass::UndeclaredVariable, "Use of undeclared variable `{}'",
+                                   id->name.toString(ctx));
+            if (id->kind == ast::UnresolvedIdent::Class) {
+                sym = ctx.state.enterStaticFieldSymbol(klass, id->name);
+            } else {
+                sym = ctx.state.enterFieldSymbol(klass, id->name);
+            }
+        }
+
+        return new ast::Ident(id->loc, sym);
+    };
+};
 
 unique_ptr<ast::Statement> Namer::resolve(ast::Context &ctx, unique_ptr<ast::Statement> tree) {
-    Resolver resolv(move(tree));
-    resolv.walk(ctx);
-    return move(resolv.tree_);
+    ResolveWalk walk(ctx);
+    tree = ast::TreeMap<ResolveWalk>::apply(ctx, walk, move(tree));
+    ResolveVariablesWalk vars;
+    tree = ast::TreeMap<ResolveVariablesWalk>::apply(ctx, vars, move(tree));
+    return tree;
 }
 } // namespace namer
 } // namespace ruby_typer

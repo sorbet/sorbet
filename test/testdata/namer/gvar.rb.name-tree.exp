@@ -1,0 +1,12 @@
+begin
+  #$a = 1
+  class <emptyTree>::A<A> < (::Object)
+    #$b = 2
+
+    #$a
+
+    def meth<meth>()
+      [#$a, #$b, #$c]
+
+  end
+end

@@ -1,0 +1,36 @@
+begin
+  class <emptyTree>::Parent<Parent> < (::Object)
+    self(<singleton class:Parent>).declare_variables({:@ivar => ::Integer, :@ivar2 => ::Integer, :@@class_var => ::String})
+
+    ::Parent#@@class_var = "hi"
+
+    def hi<hi>()
+      begin
+        ::Parent#@ivar = 1
+        ::Parent#@ivar2
+      end
+
+  end
+  module <emptyTree>::Mixin<Mixin> < ()
+    self(<singleton class:Mixin>).declare_variables({:@@mixin_cvar => ::Integer})
+
+    ::Mixin#@@mixin_cvar
+
+  end
+  class <emptyTree>::Child<Child> < (::Parent, ::Mixin)
+    ::Parent#@@class_var
+
+    ::Mixin#@@mixin_cvar
+
+    ::Child#@@undefined_cvar
+
+    def child_method<child_method>()
+      begin
+        ::Parent#@@class_var
+        ::Mixin#@@mixin_cvar
+        ::Parent#@ivar2
+        ::Child#@undefinedivar
+      end
+
+  end
+end

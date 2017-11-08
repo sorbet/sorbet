@@ -182,16 +182,27 @@ public:
     }
 
     ast::Expression *postTransformUnresolvedIdent(ast::Context ctx, ast::UnresolvedIdent *nm) {
-        if (nm->kind == ast::UnresolvedIdent::Local) {
-            auto &frame = scopeStack.back();
-            ast::SymbolRef &cur = frame.locals[nm->name];
-            if (!cur.exists()) {
-                cur = ctx.state.enterFieldSymbol(ctx.owner, nm->name);
-                frame.locals[nm->name] = cur;
+        switch (nm->kind) {
+            case ast::UnresolvedIdent::Local: {
+                auto &frame = scopeStack.back();
+                ast::SymbolRef &cur = frame.locals[nm->name];
+                if (!cur.exists()) {
+                    cur = ctx.state.enterFieldSymbol(ctx.owner, nm->name);
+                    frame.locals[nm->name] = cur;
+                }
+                return new ast::Ident(nm->loc, cur);
             }
-            return new ast::Ident(nm->loc, cur);
+            case ast::UnresolvedIdent::Global: {
+                ast::Symbol &root = ctx.state.defn_root().info(ctx);
+                ast::SymbolRef sym = root.findMember(nm->name);
+                if (!sym.exists()) {
+                    sym = ctx.state.enterFieldSymbol(ctx.state.defn_root(), nm->name);
+                }
+                return new ast::Ident(nm->loc, sym);
+            }
+            default:
+                return nm;
         }
-        return nm;
     }
 
     ast::Self *postTransformSelf(ast::Context ctx, ast::Self *self) {

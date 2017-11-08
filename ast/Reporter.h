@@ -20,6 +20,10 @@ enum class ErrorClass {
     DynamicConstant = 5001, // Resolver errors
     StubConstant = 5002,
     InvalidMethodSignature = 5003,
+    InvalidTypeDeclaration = 5004,
+    InvalidDeclareVariables = 5005,
+    DuplicateVariableDeclaration = 5006,
+    UndeclaredVariable = 5007,
 
     PinnedVariableMismatch = 7001, // Inferencer Errors
     MethodArgumentMismatch = 7002,
