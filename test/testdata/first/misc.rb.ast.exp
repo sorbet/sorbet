@@ -24,7 +24,7 @@ begin
     self(TODO).a()
     self(TODO).b()
   end
-  def foo<<todo sym>>(<Not Supported (Blockarg)>)
+  def foo<<todo sym>>(&x)
     <emptyTree>
   self(TODO).lambda() do ||
     <emptyTree>
