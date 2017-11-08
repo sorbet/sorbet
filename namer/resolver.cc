@@ -47,7 +47,7 @@ private:
 
         } else if (ast::ConstantLit *scope = dynamic_cast<ast::ConstantLit *>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, scope);
-            if (!resolved.exists())
+            if (!resolved.exists() || resolved == ast::GlobalState::defn_dynamic())
                 return resolved;
             ast::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
             if (!result.exists()) {
