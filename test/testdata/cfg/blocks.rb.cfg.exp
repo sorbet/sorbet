@@ -2,13 +2,13 @@ digraph "blocks.rb"{
 subgraph "cluster_::BlockTest#block_pass" {
     label = "::BlockTest#block_pass";
     color = blue;
-    bb26_0 [shape = invhouse];
-    bb26_1 [shape = parallelogram];
+    bb27_0 [shape = invhouse];
+    bb27_1 [shape = parallelogram];
 
-    bb26_0 [label = "()\n<ret>$0 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$0 : <bottom>\n<never>"];
-    bb26_0 -> bb26_1;
-    bb26_1 [label = "()\n<never>"];
-    bb26_1 -> bb26_1;
+    bb27_0 [label = "()\n<ret>$0 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$0 : <bottom>\n<never>"];
+    bb27_0 -> bb27_1;
+    bb27_1 [label = "()\n<never>"];
+    bb27_1 -> bb27_1;
 }
 
 }

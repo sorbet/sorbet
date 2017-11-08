@@ -1,6 +1,6 @@
-class A (Object)
+class A ()
   class B ()
     class C (Object)
-class B (Object)
+class B ()
 class Opus ()
 

@@ -2,37 +2,37 @@ digraph "constructors.rb"{
 subgraph "cluster_::<singleton class:Foo2>#new" {
     label = "::<singleton class:Foo2>#new";
     color = blue;
-    bb28_0 [shape = invhouse];
-    bb28_1 [shape = parallelogram];
+    bb29_0 [shape = invhouse];
+    bb29_1 [shape = parallelogram];
 
-    bb28_0 [label = "()\n<self>$2 = self : <singleton class:Foo2>\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$3 = return <ret>$1 : <bottom>\n<never>"];
-    bb28_0 -> bb28_1;
-    bb28_1 [label = "()\n<never>"];
-    bb28_1 -> bb28_1;
+    bb29_0 [label = "()\n<self>$2 = self : <singleton class:Foo2>\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$3 = return <ret>$1 : <bottom>\n<never>"];
+    bb29_0 -> bb29_1;
+    bb29_1 [label = "()\n<never>"];
+    bb29_1 -> bb29_1;
 }
 
 subgraph "cluster_::Foo3#initialize" {
     label = "::Foo3#initialize";
     color = blue;
-    bb31_0 [shape = invhouse];
-    bb31_1 [shape = parallelogram];
+    bb32_0 [shape = invhouse];
+    bb32_1 [shape = parallelogram];
 
-    bb31_0 [label = "()\n<self>$5 = self : Foo3\n<ret>$4 = NotSupported() : <dynamic>\n<ret>$6 = return <ret>$4 : <bottom>\n<never>"];
-    bb31_0 -> bb31_1;
-    bb31_1 [label = "()\n<never>"];
-    bb31_1 -> bb31_1;
+    bb32_0 [label = "()\n<self>$5 = self : Foo3\n<ret>$4 = NotSupported() : <dynamic>\n<ret>$6 = return <ret>$4 : <bottom>\n<never>"];
+    bb32_0 -> bb32_1;
+    bb32_1 [label = "()\n<never>"];
+    bb32_1 -> bb32_1;
 }
 
 subgraph "cluster_::Bar#foo" {
     label = "::Bar#foo";
     color = blue;
-    bb35_0 [shape = invhouse];
-    bb35_1 [shape = parallelogram];
+    bb36_0 [shape = invhouse];
+    bb36_1 [shape = parallelogram];
 
-    bb35_0 [label = "()\nstatTmp$9 = Foo1.new() : Foo1\nstatTmp$13 = 1 : Integer(1)\nstatTmp$11 = Foo2.new(statTmp$13) : <dynamic>\nstatTmp$15 = 1 : Integer(1)\nstatTmp$16 = 2 : Integer(2)\n<ret>$7 = Foo3.new(statTmp$15, statTmp$16) : Foo3\n<ret>$17 = return <ret>$7 : <bottom>\n<never>"];
-    bb35_0 -> bb35_1;
-    bb35_1 [label = "()\n<never>"];
-    bb35_1 -> bb35_1;
+    bb36_0 [label = "()\nstatTmp$9 = Foo1.new() : Foo1\nstatTmp$13 = 1 : Integer(1)\nstatTmp$11 = Foo2.new(statTmp$13) : <dynamic>\nstatTmp$15 = 1 : Integer(1)\nstatTmp$16 = 2 : Integer(2)\n<ret>$7 = Foo3.new(statTmp$15, statTmp$16) : Foo3\n<ret>$17 = return <ret>$7 : <bottom>\n<never>"];
+    bb36_0 -> bb36_1;
+    bb36_1 [label = "()\n<never>"];
+    bb36_1 -> bb36_1;
 }
 
 }

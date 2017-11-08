@@ -14,9 +14,9 @@
 <polygon fill="none" stroke="#0000ff" points="8,-8 8,-314.8219 494,-314.8219 494,-8 8,-8"/>
 <text text-anchor="middle" x="251" y="-299.6219" font-family="Times,serif" font-size="14.00" fill="#000000">::Foo#baz</text>
 </g>
-<!-- bb26_0 -->
+<!-- bb27_0 -->
 <g id="node1" class="node">
-<title>bb26_0</title>
+<title>bb27_0</title>
 <polygon fill="none" stroke="#000000" points="16.2999,-179.5901 251,-124.089 485.7001,-179.5901 485.4811,-269.3928 16.5189,-269.3928 16.2999,-179.5901"/>
 <text text-anchor="middle" x="251" y="-235.2109" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="251" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$3 = self : Foo</text>
@@ -25,22 +25,22 @@
 <text text-anchor="middle" x="251" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$5 = return &lt;ret&gt;$0 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="251" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
 </g>
-<!-- bb26_1 -->
+<!-- bb27_1 -->
 <g id="node2" class="node">
-<title>bb26_1</title>
+<title>bb27_1</title>
 <polygon fill="none" stroke="#000000" points="316.3844,-88 212.3724,-88 185.6156,-16 289.6276,-16 316.3844,-88"/>
 <text text-anchor="middle" x="251" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="251" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
 </g>
-<!-- bb26_0&#45;&gt;bb26_1 -->
+<!-- bb27_0&#45;&gt;bb27_1 -->
 <g id="edge1" class="edge">
-<title>bb26_0&#45;&gt;bb26_1</title>
+<title>bb27_0&#45;&gt;bb27_1</title>
 <path fill="none" stroke="#000000" d="M251,-123.7426C251,-115.1039 251,-106.542 251,-98.5028"/>
 <polygon fill="#000000" stroke="#000000" points="254.5001,-98.2733 251,-88.2733 247.5001,-98.2733 254.5001,-98.2733"/>
 </g>
-<!-- bb26_1&#45;&gt;bb26_1 -->
+<!-- bb27_1&#45;&gt;bb27_1 -->
 <g id="edge2" class="edge">
-<title>bb26_1&#45;&gt;bb26_1</title>
+<title>bb27_1&#45;&gt;bb27_1</title>
 <path fill="none" stroke="#000000" d="M313.4023,-79.2319C325.5591,-76.0695 334.1919,-66.9922 334.1919,-52 334.1919,-33.1392 320.529,-23.6397 303.3752,-23.5015"/>
 <polygon fill="#000000" stroke="#000000" points="302.5688,-20.0627 292.9489,-24.502 303.2375,-27.0307 302.5688,-20.0627"/>
 </g>

@@ -1,5 +1,5 @@
-class A (Object)
-  class B (Object)
+class A ()
+  class B ()
     static-field C
     static-field D
 class Opus ()
