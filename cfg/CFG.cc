@@ -544,17 +544,16 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                          auto &arg = s->block->args[i];
 
                          if (auto id = dynamic_cast<ast::Ident *>(arg.get())) {
-                             headerBlock->exprs.emplace_back(id->symbol, arg->loc,
-                                                             make_unique<LoadArg>(recv, s->fun, i));
+                             bodyBlock->exprs.emplace_back(id->symbol, arg->loc, make_unique<LoadArg>(recv, s->fun, i));
                          } else {
                              // TODO(nelhage): this will be an error once the namer
                              // is more complete and turns all args into Ident
                          }
                      }
 
-                     unconditionalJump(current, headerBlock, inWhat);
-
                      conditionalJump(headerBlock, ctx.state.defn_cfg_block_call(), bodyBlock, postBlock, inWhat);
+
+                     unconditionalJump(current, headerBlock, inWhat);
 
                      // TODO: handle block arguments somehow??
                      ast::SymbolRef blockrv =
