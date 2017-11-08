@@ -7,7 +7,7 @@ class TestLocals (Object)
     method <block>$0 ()
       field b
       method <block>$1 ()
-    method <block>$2 (a, <todo sym>)
+    method <block>$2 (a, b)
       field a
       field b
 

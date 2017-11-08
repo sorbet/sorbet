@@ -1,26 +1,34 @@
 digraph "blocks2.rb"{
-subgraph "cluster_::<singleton class:Foo>#bar" {
-    label = "::<singleton class:Foo>#bar";
+subgraph "cluster_::Foo#bar" {
+    label = "::Foo#bar";
+    color = blue;
+    bb27_0 [shape = invhouse];
+    bb27_1 [shape = parallelogram];
+
+    bb27_0 [label = "()\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$3 = return <ret>$1 : <bottom>\n<never>"];
+    bb27_0 -> bb27_1;
+    bb27_1 [label = "()\n<never>"];
+    bb27_1 -> bb27_1;
+}
+
+subgraph "cluster_::Foo#baz" {
+    label = "::Foo#baz";
     color = blue;
     bb28_0 [shape = invhouse];
     bb28_1 [shape = parallelogram];
 
-    bb28_0 [label = "()\n<ret>$1 = 1 : Integer(1)\n<ret>$3 = return <ret>$1 : <bottom>\n<never>"];
-    bb28_0 -> bb28_1;
+    bb28_0 [label = "(statTmp$6)\nstatTmp$6 = self : Foo\n<always>"];
+    bb28_0 -> bb28_2;
     bb28_1 [label = "()\n<never>"];
     bb28_1 -> bb28_1;
-}
+    bb28_2 [label = "(statTmp$6)\nouterLoops: 1\n<block-call>"];
+    bb28_2 -> bb28_4;
+    bb28_2 -> bb28_3;
 
-subgraph "cluster_::Bar#baz" {
-    label = "::Bar#baz";
-    color = blue;
-    bb30_0 [shape = invhouse];
-    bb30_1 [shape = parallelogram];
-
-    bb30_0 [label = "()\n<ret>$4 = Foo.bar() : <dynamic>\n<ret>$7 = return <ret>$4 : <bottom>\n<never>"];
-    bb30_0 -> bb30_1;
-    bb30_1 [label = "()\n<never>"];
-    bb30_1 -> bb30_1;
+    bb28_3 [label = "(statTmp$6)\n<ret>$4 = statTmp$6.bar() : <dynamic>\n<ret>$10 = return <ret>$4 : <bottom>\n<never>"];
+    bb28_3 -> bb28_1;
+    bb28_4 [label = "(statTmp$6)\nouterLoops: 1\nr = load_arg(statTmp$6#bar, 0) : <dynamic>\nstatTmp$8 = self : Foo\n<blockret>$7 = statTmp$8.puts(r) : <dynamic>\n<always>"];
+    bb28_4 -> bb28_2;
 }
 
 }
