@@ -8,7 +8,7 @@ begin
       def initialize<initialize>(::Opus::CIBot::Gerald::MatchTimeout#initialize#message, rule_token: = "")
         begin
           super(message)
-          @rule_token = ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token
+          ::Opus::CIBot::Gerald::MatchTimeout#@rule_token = ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token
         end
 
     end
@@ -20,7 +20,7 @@ begin
         begin
           begin
             #assignTmp$0 = ::<dynamic>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
-            @rules = #assignTmp$0.[](0)
+            ::Opus::CIBot::Gerald::Matcher#@rules = #assignTmp$0.[](0)
             ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rules = #assignTmp$0.[](1)
             #assignTmp$0
           end
@@ -47,7 +47,7 @@ begin
             <emptyTree>
           end
           ::Opus::CIBot::Gerald::Matcher#match#budget = ::Opus::CIBot::Gerald::MatchTimeBudget.new()
-          @rules.select() do |::Opus::CIBot::Gerald::Matcher#match#<block>$4#r|
+          ::Opus::CIBot::Gerald::Matcher#@rules.select() do |::Opus::CIBot::Gerald::Matcher#match#<block>$4#r|
             ::Opus::CIBot::Gerald::Matcher#match#budget.time_rule(::Opus::CIBot::Gerald::Matcher#match#<block>$4#r) do ||
               ::Opus::CIBot::Gerald::Matcher#match#<block>$4#r.matches?(::Opus::CIBot::Gerald::Matcher#match#match_context)
             end
@@ -75,18 +75,18 @@ begin
 
       def initialize<initialize>(::Opus::CIBot::Gerald::MatchContext#initialize#repo, ::Opus::CIBot::Gerald::MatchContext#initialize#assignee, ::Opus::CIBot::Gerald::MatchContext#initialize#gh_user, ::Opus::CIBot::Gerald::MatchContext#initialize#merge_branch, ::Opus::CIBot::Gerald::MatchContext#initialize#body, ::Opus::CIBot::Gerald::MatchContext#initialize#title, ::Opus::CIBot::Gerald::MatchContext#initialize#diff, ::Opus::CIBot::Gerald::MatchContext#initialize#openapi_diff)
         begin
-          @repo = ::Opus::CIBot::Gerald::MatchContext#initialize#repo
-          @assignee = ::Opus::CIBot::Gerald::MatchContext#initialize#assignee
-          @gh_user = ::Opus::CIBot::Gerald::MatchContext#initialize#gh_user
-          @merge_branch = ::Opus::CIBot::Gerald::MatchContext#initialize#merge_branch
-          @body = ::Opus::CIBot::Gerald::MatchContext#initialize#body
-          @title = ::Opus::CIBot::Gerald::MatchContext#initialize#title
-          @diff = ::Opus::CIBot::Gerald::MatchContext#initialize#diff
-          @openapi_diff = ::Opus::CIBot::Gerald::MatchContext#initialize#openapi_diff
+          ::Opus::CIBot::Gerald::MatchContext#@repo = ::Opus::CIBot::Gerald::MatchContext#initialize#repo
+          ::Opus::CIBot::Gerald::MatchContext#@assignee = ::Opus::CIBot::Gerald::MatchContext#initialize#assignee
+          ::Opus::CIBot::Gerald::MatchContext#@gh_user = ::Opus::CIBot::Gerald::MatchContext#initialize#gh_user
+          ::Opus::CIBot::Gerald::MatchContext#@merge_branch = ::Opus::CIBot::Gerald::MatchContext#initialize#merge_branch
+          ::Opus::CIBot::Gerald::MatchContext#@body = ::Opus::CIBot::Gerald::MatchContext#initialize#body
+          ::Opus::CIBot::Gerald::MatchContext#@title = ::Opus::CIBot::Gerald::MatchContext#initialize#title
+          ::Opus::CIBot::Gerald::MatchContext#@diff = ::Opus::CIBot::Gerald::MatchContext#initialize#diff
+          ::Opus::CIBot::Gerald::MatchContext#@openapi_diff = ::Opus::CIBot::Gerald::MatchContext#initialize#openapi_diff
         end
 
       def user_stripe_suffix?<user_stripe_suffix?>()
-        @repo.start_with?("stripe-internal/").!()
+        ::Opus::CIBot::Gerald::MatchContext#@repo.start_with?("stripe-internal/").!()
 
     end
 
@@ -96,12 +96,12 @@ begin
       ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS = 2000
 
       def initialize<initialize>()
-        @start = ::<dynamic>.now()
+        ::Opus::CIBot::Gerald::MatchTimeBudget#@start = ::<dynamic>.now()
 
       def check!<check!>()
         begin
           ::Opus::CIBot::Gerald::MatchTimeBudget#check!#dur_ms = begin
-            ::<dynamic>.now().-(@start)
+            ::<dynamic>.now().-(::Opus::CIBot::Gerald::MatchTimeBudget#@start)
           end.*(1000)
           if ::Opus::CIBot::Gerald::MatchTimeBudget#check!#dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS)
             self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
@@ -139,41 +139,41 @@ begin
     class <emptyTree>::Diff<Diff> < (::Object)
       def initialize<initialize>(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
         begin
-          @raw = ::Opus::CIBot::Gerald::Diff#initialize#raw_diff
-          @parsed = self(Diff).parse(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
+          ::Opus::CIBot::Gerald::Diff#@raw = ::Opus::CIBot::Gerald::Diff#initialize#raw_diff
+          ::Opus::CIBot::Gerald::Diff#@parsed = self(Diff).parse(::Opus::CIBot::Gerald::Diff#initialize#raw_diff)
         end
 
       def affected_files<affected_files>()
         self(Diff).added_files().+(self(Diff).deleted_files()).+(self(Diff).changed_files())
 
       def added_files<added_files>()
-        @parsed.select() do |::Opus::CIBot::Gerald::Diff#added_files#<block>$7#part|
+        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |::Opus::CIBot::Gerald::Diff#added_files#<block>$7#part|
           ::Opus::CIBot::Gerald::Diff#added_files#<block>$7#part.[](:a_name).==("/dev/null")
         end.map() do |::Opus::CIBot::Gerald::Diff#added_files#<block>$8#part|
           ::Opus::CIBot::Gerald::Diff#added_files#<block>$8#part.[](:b_name)
         end
 
       def deleted_files<deleted_files>()
-        @parsed.select() do |::Opus::CIBot::Gerald::Diff#deleted_files#<block>$9#part|
+        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |::Opus::CIBot::Gerald::Diff#deleted_files#<block>$9#part|
           ::Opus::CIBot::Gerald::Diff#deleted_files#<block>$9#part.[](:b_name).==("/dev/null")
         end.map() do |::Opus::CIBot::Gerald::Diff#deleted_files#<block>$10#part|
           ::Opus::CIBot::Gerald::Diff#deleted_files#<block>$10#part.[](:a_name)
         end
 
       def changed_files<changed_files>()
-        @parsed.select() do |::Opus::CIBot::Gerald::Diff#changed_files#<block>$11#part|
+        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |::Opus::CIBot::Gerald::Diff#changed_files#<block>$11#part|
           ::Opus::CIBot::Gerald::Diff#changed_files#<block>$11#part.[](:a_name).==(::Opus::CIBot::Gerald::Diff#changed_files#<block>$11#part.[](:b_name))
         end.map() do |::Opus::CIBot::Gerald::Diff#changed_files#<block>$12#part|
           ::Opus::CIBot::Gerald::Diff#changed_files#<block>$12#part.[](:b_name)
         end
 
       def added_lines<added_lines>()
-        @parsed.map() do |::Opus::CIBot::Gerald::Diff#added_lines#<block>$13#part|
+        ::Opus::CIBot::Gerald::Diff#@parsed.map() do |::Opus::CIBot::Gerald::Diff#added_lines#<block>$13#part|
           ::Opus::CIBot::Gerald::Diff#added_lines#<block>$13#part.[](:added_lines)
         end.flatten()
 
       def removed_lines<removed_lines>()
-        @parsed.map() do |::Opus::CIBot::Gerald::Diff#removed_lines#<block>$14#part|
+        ::Opus::CIBot::Gerald::Diff#@parsed.map() do |::Opus::CIBot::Gerald::Diff#removed_lines#<block>$14#part|
           ::Opus::CIBot::Gerald::Diff#removed_lines#<block>$14#part.[](:removed_lines)
         end.flatten()
 

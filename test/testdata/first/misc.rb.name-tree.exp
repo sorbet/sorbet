@@ -1,7 +1,7 @@
 begin
   <Not Supported (Alias)>
-  @iv = 1
-  @@cv = 1
+  ::<singleton class:<root>>#@iv = 1
+  #@@cv = 1
   #$gv = 1
   begin
     #assignTmp$2 = [nil, nil]

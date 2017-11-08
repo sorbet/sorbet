@@ -8,6 +8,8 @@ class Opus ()
       class <singleton class:MatchTimeout> (Class)
       class <singleton class:Matcher> (Class)
       class Diff (Object)
+        field @parsed
+        field @raw
         method added_files ()
           method <block>$7 (part)
             field part
@@ -47,6 +49,14 @@ class Opus ()
           method <block>$14 (part)
             field part
       class MatchContext (Object)
+        field @assignee
+        field @body
+        field @diff
+        field @gh_user
+        field @merge_branch
+        field @openapi_diff
+        field @repo
+        field @title
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
           field assignee
           field body
@@ -58,6 +68,7 @@ class Opus ()
           field title
         method user_stripe_suffix? ()
       class MatchTimeBudget (Object)
+        field @start
         method check! ()
           field dur_ms
         method initialize ()
@@ -69,10 +80,12 @@ class Opus ()
         static-field PER_RULE_MS
         static-field TOTAL_TIME_MS
       class MatchTimeout (<dynamic>)
+        field @rule_token
         method initialize (message, <todo sym>)
           field message
           field rule_token
       class Matcher (Object, <dynamic>)
+        field @rules
         method initialize ()
           field invalid_rule_ids
           field invalid_rules

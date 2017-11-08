@@ -1,8 +1,16 @@
-class <singleton class:A> (Class)
-class A (Object)
+class <singleton class:Child> (Class)
+class <singleton class:Mixin> (Class)
+class <singleton class:Parent> (Class)
+class Child (Parent, Mixin)
+  field @undefinedivar
+  method child_method ()
+  static-field @@undefined_cvar
+class Mixin ()
+  static-field @@mixin_cvar -> Integer
+class Opus ()
+class Parent (Object)
   field @ivar -> Integer
   field @ivar2 -> Integer
   method hi ()
   static-field @@class_var -> String
-class Opus ()
 
