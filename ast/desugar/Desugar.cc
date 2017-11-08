@@ -139,7 +139,9 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
     if (what.get() == nullptr) {
         return make_unique<EmptyTree>(Loc::none(0));
     }
-    DEBUG_ONLY(Error::check(!what->loc.is_none(), "parse-tree node has no location: ", what->toString(ctx)));
+    if (what->loc.is_none()) {
+        DEBUG_ONLY(Error::check(false, "parse-tree node has no location: ", what->toString(ctx)));
+    }
     unique_ptr<Statement> result;
     typecase(
         what.get(),
