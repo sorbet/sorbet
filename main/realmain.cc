@@ -54,7 +54,7 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
     for (auto &pair : nameAndSource) {
         results.emplace_back(ruby_typer::parser::parse_ruby(gs, pair.first, pair.second));
         auto &r = results.back();
-        auto ast = r.ast();
+        auto ast = r.release();
         if (r.diagnostics().size() > 0) {
             vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
             for (auto &diag : r.diagnostics()) {
@@ -67,18 +67,16 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
             cerr << " FATAL: " << counts[static_cast<int>(ruby_parser::dlevel::FATAL)] << endl;
         }
         if (ast) {
-            join->stmts.emplace_back(ast);
+            join->stmts.emplace_back(move(ast));
         } else {
             ruby_typer::Error::raise("Failed to index " + pair.first);
         }
     }
     gs.errors.keepErrorsInMemory = true; // silence errors for stdlib.
     ruby_typer::ast::Context context(gs, gs.defn_root());
-    auto desugared = ruby_typer::ast::desugar::node2Tree(context, join.get());
-    desugared = ruby_typer::namer::Namer::run(context, move(desugared));
-    for (auto &sh : join->stmts) {
-        sh.release(); // they are already owner by Result.
-    }
+    unique_ptr<ruby_typer::parser::Node> node(move(join));
+    auto desugared = ruby_typer::ast::desugar::node2Tree(context, node);
+    ruby_typer::namer::Namer::run(context, move(desugared));
     gs.errors.getAndEmptyErrors();
     gs.errors.keepErrorsInMemory = false;
 }
@@ -86,7 +84,7 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
 void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
                      vector<string> &prints) {
     auto r = ruby_typer::parser::parse_ruby(gs, path, src);
-    auto ast = r.ast();
+    auto &ast = r.ast();
     if (r.diagnostics().size() > 0) {
         vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
         for (auto &diag : r.diagnostics()) {

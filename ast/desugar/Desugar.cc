@@ -775,11 +775,9 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
     return result;
 }
 
-unique_ptr<Statement> node2Tree(Context ctx, parser::Node *what) {
-    auto adapter = unique_ptr<Node>(what);
-    auto result = node2TreeImpl(ctx, adapter);
+unique_ptr<Statement> node2Tree(Context ctx, unique_ptr<parser::Node> &what) {
+    auto result = node2TreeImpl(ctx, what);
     auto verifiedResult = Verifier::run(ctx, move(result));
-    adapter.release();
     return verifiedResult;
 }
 } // namespace desugar
