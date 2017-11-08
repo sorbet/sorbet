@@ -8,21 +8,27 @@ Begin {
         val = bar
       }
     }
-    IVarAsgn {
-      name = @iv
-      expr = Integer {
+    Assign {
+      lhs = IVarLhs {
+        name = @iv
+      }
+      rhs = Integer {
         val = "1"
       }
     }
-    CVarAsgn {
-      name = @@cv
-      expr = Integer {
+    Assign {
+      lhs = CVarLhs {
+        name = @@cv
+      }
+      rhs = Integer {
         val = "1"
       }
     }
-    GVarAsgn {
-      name = $gv
-      expr = Integer {
+    Assign {
+      lhs = GVarLhs {
+        name = $gv
+      }
+      rhs = Integer {
         val = "1"
       }
     }
@@ -72,9 +78,11 @@ Begin {
         ]
       }
     }
-    LVarAsgn {
-      name = xaaaaz
-      expr = Array {
+    Assign {
+      lhs = LVarLhs {
+        name = xaaaaz
+      }
+      rhs = Array {
         elts = [
           Send {
             receiver = NULL

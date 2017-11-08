@@ -185,15 +185,19 @@ Begin {
                       }
                     ]
                   }
-                  then_ = LVarAsgn {
-                    name = a
-                    expr = Integer {
+                  then_ = Assign {
+                    lhs = LVarLhs {
+                      name = a
+                    }
+                    rhs = Integer {
                       val = "1"
                     }
                   }
-                  else_ = LVarAsgn {
-                    name = a
-                    expr = Integer {
+                  else_ = Assign {
+                    lhs = LVarLhs {
+                      name = a
+                    }
+                    rhs = Integer {
                       val = "2"
                     }
                   }
@@ -205,15 +209,19 @@ Begin {
                       }
                     ]
                   }
-                  then_ = LVarAsgn {
-                    name = b
-                    expr = Integer {
+                  then_ = Assign {
+                    lhs = LVarLhs {
+                      name = b
+                    }
+                    rhs = Integer {
                       val = "1"
                     }
                   }
-                  else_ = LVarAsgn {
-                    name = b
-                    expr = Integer {
+                  else_ = Assign {
+                    lhs = LVarLhs {
+                      name = b
+                    }
+                    rhs = Integer {
                       val = "2"
                     }
                   }
@@ -247,15 +255,19 @@ Begin {
                       }
                     ]
                   }
-                  then_ = LVarAsgn {
-                    name = a
-                    expr = Integer {
+                  then_ = Assign {
+                    lhs = LVarLhs {
+                      name = a
+                    }
+                    rhs = Integer {
                       val = "1"
                     }
                   }
-                  else_ = LVarAsgn {
-                    name = a
-                    expr = Integer {
+                  else_ = Assign {
+                    lhs = LVarLhs {
+                      name = a
+                    }
+                    rhs = Integer {
                       val = "2"
                     }
                   }
@@ -270,15 +282,19 @@ Begin {
                         }
                       ]
                     }
-                    then_ = LVarAsgn {
-                      name = b
-                      expr = Integer {
+                    then_ = Assign {
+                      lhs = LVarLhs {
+                        name = b
+                      }
+                      rhs = Integer {
                         val = "1"
                       }
                     }
-                    else_ = LVarAsgn {
-                      name = b
-                      expr = Integer {
+                    else_ = Assign {
+                      lhs = LVarLhs {
+                        name = b
+                      }
+                      rhs = Integer {
                         val = "2"
                       }
                     }
@@ -308,15 +324,19 @@ Begin {
                         }
                       ]
                     }
-                    then_ = LVarAsgn {
-                      name = b
-                      expr = Integer {
+                    then_ = Assign {
+                      lhs = LVarLhs {
+                        name = b
+                      }
+                      rhs = Integer {
                         val = "1"
                       }
                     }
-                    else_ = LVarAsgn {
-                      name = b
-                      expr = Integer {
+                    else_ = Assign {
+                      lhs = LVarLhs {
+                        name = b
+                      }
+                      rhs = Integer {
                         val = "2"
                       }
                     }
