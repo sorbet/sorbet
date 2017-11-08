@@ -40,9 +40,7 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Child<Child> < (::Parent)
-    self(<singleton class:Child>).include(::Mixin)
-
+  class <emptyTree>::Child<Child> < (::Parent, ::Mixin)
     self(<singleton class:Child>).include(::Mixin, ::Mixin)
 
     self(<singleton class:Child>).include(3)

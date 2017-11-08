@@ -13,9 +13,7 @@ begin
 
     end
 
-    class <emptyTree>::Matcher<Matcher> < (::Object)
-      self(<singleton class:Matcher>).include(::<dynamic>)
-
+    class <emptyTree>::Matcher<Matcher> < (::Object, ::<dynamic>)
       ::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES = 100
 
       def initialize<initialize>()
