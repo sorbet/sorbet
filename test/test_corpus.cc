@@ -76,16 +76,14 @@ public:
 #define TEST_COUT TestCout()
 
 class CFG_Collector_and_Typer {
-    bool shouldType;
 
 public:
-    CFG_Collector_and_Typer(bool shouldType) : shouldType(shouldType) {}
+    CFG_Collector_and_Typer() {}
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
-        if (shouldType) {
-            ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
-        }
+        ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+
         cfgs.push_back(cfg->toString(ctx));
         return m;
     }
@@ -196,7 +194,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     // CFG
-    CFG_Collector_and_Typer collector(test.expectations.find("infer") != test.expectations.end());
+    CFG_Collector_and_Typer collector;
     auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(namedTree));
 
     expectation = test.expectations.find("cfg");
@@ -214,15 +212,11 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         got << "}" << endl;
         EXPECT_EQ(exp, got.str() + "\n");
         if (exp == got.str() + "\n") {
-            TEST_COUT << "cfg OK" << endl;
+            TEST_COUT << "cfg+infer OK" << endl;
         }
 
         ifstream svgFile(checker + ".svg");
         EXPECT_TRUE(svgFile.good());
-    }
-
-    if (test.expectations.find("infer") != test.expectations.end()) {
-        TEST_COUT << "infer OK" << endl;
     }
 
     // Check warnings and errors
