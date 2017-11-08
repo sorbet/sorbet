@@ -120,6 +120,9 @@ static UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
 static const char *nil_str = "nil";
 static UTF8Desc nil_DESC{(char *)nil_str, (int)strlen(nil_str)};
 
+static const char *new_str = "new";
+static UTF8Desc new_DESC{(char *)new_str, (int)strlen(new_str)};
+
 static const char *todo_str = "<todo sym>";
 static UTF8Desc todo_DESC{(char *)todo_str, (int)strlen(todo_str)};
 
@@ -261,6 +264,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef attachedClass_id = enterNameUTF8(attachedClass_DESC);
     NameRef blockTemp_id = enterNameUTF8(blockTemp_DESC);
     NameRef declareVariables_id = enterNameUTF8(declareVariables_DESC);
+    NameRef new_id = enterNameUTF8(new_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -295,6 +299,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(attachedClass_id == Names::attachedClass()));
     DEBUG_ONLY(Error::check(blockTemp_id == Names::blockTemp()));
     DEBUG_ONLY(Error::check(declareVariables_id == Names::declareVariables()));
+    DEBUG_ONLY(Error::check(new_id == Names::new_()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject

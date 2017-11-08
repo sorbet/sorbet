@@ -84,8 +84,7 @@ public:
                 }
             },
             [&](cfg::Send *send) {
-                vector<ast::TypeAndOrigins>
-                    args; // Warning: do not make this be a reference vector. See comment on getTypeAndOrigin
+                vector<ast::TypeAndOrigins> args;
 
                 args.reserve(send->args.size());
                 for (ast::SymbolRef arg : send->args) {
@@ -93,8 +92,40 @@ public:
                 }
 
                 auto recvType = getTypeAndOrigin(ctx, send->recv);
-                tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
-                tp.origins.push_back(bind.loc);
+                if (send->fun == ast::Names::new_()) {
+                    if (ast::ClassType *classType = dynamic_cast<ast::ClassType *>(recvType.type.get())) {
+                        ast::SymbolRef newSymbol = classType->symbol.info(ctx).findMember(ast::Names::new_());
+                        if (!newSymbol.exists() || newSymbol.info(ctx).owner == ast::GlobalState::defn_Basic_Object()) {
+                            ast::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
+                            Error::check(attachedClass.exists());
+                            tp.type = make_shared<ast::ClassType>(attachedClass);
+                            tp.origins.push_back(bind.loc);
+
+                            // call constructor
+                            newSymbol = attachedClass.info(ctx).findMember(ast::Names::initialize());
+                            if (newSymbol.exists()) {
+                                auto initilizeResult =
+                                    tp.type->dispatchCall(ctx, ast::Names::initialize(), bind.loc, args, recvType.type);
+                            } else {
+                                if (args.size() > 0) {
+                                    ctx.state.errors.error(
+                                        bind.loc, ast::ErrorClass::MethodArgumentCountMismatch,
+                                        "Wrong number of arguments for constructor.\n Expected: 0, found: {}",
+                                        args.size());
+                                }
+                            }
+                        } else { // custom new was defined
+                            tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+                            tp.origins.push_back(bind.loc);
+                        }
+                    } else {
+                        tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+                        tp.origins.push_back(bind.loc);
+                    }
+                } else {
+                    tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+                    tp.origins.push_back(bind.loc);
+                }
             },
             [&](cfg::Super *i) { Error::notImplemented(); },
             [&](cfg::FloatLit *i) {
