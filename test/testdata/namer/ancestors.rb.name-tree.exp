@@ -1,0 +1,18 @@
+begin
+  module <emptyTree>::Mixin1<Mixin1> < ()
+    <emptyTree>
+
+  end
+  module <emptyTree>::Mixin2<Mixin2> < ()
+    <emptyTree>
+
+  end
+  class <emptyTree>::Parent<Parent> < (::Object)
+    self(<singleton class:Parent>).include(::Mixin1)
+
+  end
+  class <emptyTree>::Child<Child> < (::Parent)
+    self(<singleton class:Child>).include(::Mixin2)
+
+  end
+end
