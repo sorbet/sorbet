@@ -5,8 +5,8 @@ cc_binary(
         "realmain.cc",
     ],
     linkstatic = select({
-        "//tools/config:opt": 1,
-        "//conditions:default": 0,
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
     deps = [
@@ -28,6 +28,10 @@ cc_test(
     ]) + ["realmain.cc"],
     copts = ["-Iexternal/gtest/include"],
     data = ["//rbi:stdlib"],
+    linkstatic = select({
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",

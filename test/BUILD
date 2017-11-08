@@ -10,6 +10,10 @@ cc_test(
         "testdata/**/*.rb.*.exp",
         "testdata/**/*.rb.*.exp.svg",
     ]),
+    linkstatic = select({
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",

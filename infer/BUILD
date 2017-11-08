@@ -23,6 +23,10 @@ cc_test(
         "test/*.cc",
     ]),
     copts = ["-Iexternal/gtest/include"],
+    linkstatic = select({
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = [
         "infer",
