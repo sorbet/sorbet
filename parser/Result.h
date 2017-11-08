@@ -23,7 +23,8 @@ class Result {
 public:
     ast::FileRef file();
     const ruby_parser::diagnostics_t &diagnostics();
-    Node *ast();
+    std::unique_ptr<Node> &ast();
+    std::unique_ptr<Node> release();
 
     ~Result();
 

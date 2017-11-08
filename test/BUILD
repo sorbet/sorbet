@@ -36,6 +36,23 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "error-check-test",
+    size = "small",
+    srcs = ["error-check-test.cc"],
+    copts = ["-Iexternal/gtest/include"],
+    linkstatic = 1,
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//ast",
+        "//ast/desugar",
+        "//common",
+        "//parser",
+        "@gtest//:gtest",
+        "@gtest//:gtest_main",
+    ],
+)
+
 # Passes with --config=dbg but I'm not smart enough to figure out how to make it
 # only run when in that config
 # sh_test(

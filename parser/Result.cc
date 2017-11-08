@@ -27,8 +27,12 @@ const ruby_parser::diagnostics_t &Result::diagnostics() {
     return impl_->driver.diagnostics;
 }
 
-Node *Result::ast() {
-    return impl_->node.get();
+unique_ptr<Node> &Result::ast() {
+    return impl_->node;
+}
+
+unique_ptr<Node> Result::release() {
+    return move(ast());
 }
 
 FileRef Result::file() {
