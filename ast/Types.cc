@@ -433,9 +433,9 @@ shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun, ast
     ast::Symbol &info = method.info(ctx);
 
     if (info.arguments().size() != args.size()) { // todo: this should become actual argument matching
-        ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::UnknownMethod,
-                               "Wrong number of arguments for method {}.\n Expected: {}, found: {}",
-                               info.arguments().size(), args.size(),
+        ctx.state.errors.error(callLoc, ast::ErrorClass::MethodArgumentCountMismatch,
+                               "Wrong number of arguments for method {}.\n Expected: {}, found: {}", fun.toString(ctx),
+                               info.arguments().size(),
                                args.size()); // TODO: should use position and print the source tree, not the cfg one.
         return Types::dynamic();
     }
