@@ -115,6 +115,8 @@ OptionalArg::OptionalArg(Loc loc, unique_ptr<Reference> expr, unique_ptr<Express
 
 ShadowArg::ShadowArg(Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
 
+BlockArg::BlockArg(Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
+
 Nil::Nil(Loc loc) : Expression(loc) {}
 
 FloatLit::FloatLit(Loc loc, float value) : Expression(loc), value(value) {}
@@ -773,6 +775,10 @@ string ShadowArg::toString(GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs);
 }
 
+string BlockArg::toString(GlobalState &gs, int tabs) {
+    return "&" + this->expr->toString(gs, tabs);
+}
+
 string NotSupported::nodeName() {
     return "<Not Supported (" + why + ")>";
 }
@@ -935,8 +941,16 @@ string ShadowArg::showRaw(GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
+string BlockArg::showRaw(GlobalState &gs, int tabs) {
+    return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
+}
+
 string ShadowArg::nodeName() {
     return "ShadowArg";
+}
+
+string BlockArg::nodeName() {
+    return "BlockArg";
 }
 } // namespace ast
 } // namespace ruby_typer

@@ -35,7 +35,8 @@ class NameInserter {
             typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
                      [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
                      [&](ast::OptionalArg *opt) { arg = opt->expr.get(); },
-                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); });
+                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); },
+                     [&](ast::BlockArg *opt) { arg = opt->expr.get(); });
         }
     }
 
@@ -122,7 +123,9 @@ public:
     void fillInArgs(ast::Context ctx, vector<unique_ptr<ast::Expression>> &args, ast::Symbol &symbol) {
         // Fill in the arity right with TODOs
         for (auto &arg : args) {
-            arg = fillInArg(ctx, arg2NameRef(arg), symbol);
+            ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
+            Error::check(ref != nullptr);
+            arg = fillInArg(ctx, arg2NameRef(ref), symbol);
         }
     }
 

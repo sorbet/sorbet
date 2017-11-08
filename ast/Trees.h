@@ -236,6 +236,16 @@ public:
     virtual std::string nodeName();
 };
 
+class BlockArg : public Reference {
+public:
+    std::unique_ptr<Reference> expr;
+
+    BlockArg(Loc loc, std::unique_ptr<Reference> expr);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+};
+
 class ShadowArg : public Reference {
 public:
     std::unique_ptr<Reference> expr;
