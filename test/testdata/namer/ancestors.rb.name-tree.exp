@@ -7,12 +7,8 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::Parent<Parent> < (::Object)
-    self(<singleton class:Parent>).include(::Mixin1)
-
+  class <emptyTree>::Parent<Parent> < (::Object, ::Mixin1)
   end
-  class <emptyTree>::Child<Child> < (::Parent)
-    self(<singleton class:Child>).include(::Mixin2)
-
+  class <emptyTree>::Child<Child> < (::Parent, ::Mixin2)
   end
 end
