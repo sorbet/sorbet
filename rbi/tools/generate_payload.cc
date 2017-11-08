@@ -37,8 +37,8 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "std::vector<std::pair<std::string, std::string>> all() {" << endl;
     out << "  std::vector<std::pair<std::string, std::string>> result;" << endl;
     for (auto &file : sourceFiles) {
-        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + ruby_typer::Strings::escapeCString(file) +
-                   "\", " + sourceName2funcName(file) + "()));"
+        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" +
+                   ruby_typer::Strings::escapeCString(file) + "\", " + sourceName2funcName(file) + "()));"
             << endl;
     }
     out << "  return result;" << endl;
