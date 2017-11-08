@@ -287,6 +287,11 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             unique_ptr<Statement> res = make_unique<ConstantLit>(what->loc, Expression::fromStatement(scope), a->name);
             result.swap(res);
         },
+        [&](parser::ConstLhs *a) {
+            auto scope = node2TreeImpl(ctx, a->scope);
+            unique_ptr<Statement> res = make_unique<ConstantLit>(what->loc, Expression::fromStatement(scope), a->name);
+            result.swap(res);
+        },
         [&](parser::Cbase *a) {
             unique_ptr<Statement> res = mkIdent(what->loc, GlobalState::defn_root());
             result.swap(res);
@@ -500,10 +505,6 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Class, var->name);
             result.swap(res);
         },
-        [&](parser::IVar *var) {
-            unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Instance, var->name);
-            result.swap(res);
-        },
         [&](parser::LVarLhs *var) {
             unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, var->name);
             result.swap(res);
@@ -520,35 +521,9 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
             unique_ptr<Statement> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Instance, var->name);
             result.swap(res);
         },
-        [&](parser::IVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Instance, asgn->name);
-            auto rhs = node2TreeImpl(ctx, asgn->expr);
-            auto res = mkAssign(what->loc, lhs, rhs);
-            result.swap(res);
-        },
-        [&](parser::LVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, asgn->name);
-            auto rhs = node2TreeImpl(ctx, asgn->expr);
-            auto res = mkAssign(what->loc, lhs, rhs);
-            result.swap(res);
-        },
-        [&](parser::GVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Global, asgn->name);
-            auto rhs = node2TreeImpl(ctx, asgn->expr);
-            auto res = mkAssign(what->loc, lhs, rhs);
-            result.swap(res);
-        },
-        [&](parser::CVarAsgn *asgn) {
-            unique_ptr<Statement> lhs = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Class, asgn->name);
-            auto rhs = node2TreeImpl(ctx, asgn->expr);
-            auto res = mkAssign(what->loc, lhs, rhs);
-            result.swap(res);
-        },
-        [&](parser::ConstAsgn *constAsgn) {
-            auto scope = node2TreeImpl(ctx, constAsgn->scope);
-            unique_ptr<Statement> lhs =
-                make_unique<ConstantLit>(what->loc, Expression::fromStatement(scope), constAsgn->name);
-            auto rhs = node2TreeImpl(ctx, constAsgn->expr);
+        [&](parser::Assign *asgn) {
+            auto lhs = node2TreeImpl(ctx, asgn->lhs);
+            auto rhs = node2TreeImpl(ctx, asgn->rhs);
             auto res = mkAssign(what->loc, lhs, rhs);
             result.swap(res);
         },

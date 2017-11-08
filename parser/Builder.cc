@@ -168,18 +168,9 @@ public:
         } else if (CSend *s = dynamic_cast<CSend *>(lhs.get())) {
             s->args.push_back(move(rhs));
             return make_unique<CSend>(loc, move(s->receiver), s->method, move(s->args));
-        } else if (LVarLhs *l = dynamic_cast<LVarLhs *>(lhs.get())) {
-            return make_unique<LVarAsgn>(loc, l->name, move(rhs));
-        } else if (ConstLhs *c = dynamic_cast<ConstLhs *>(lhs.get())) {
-            return make_unique<ConstAsgn>(loc, move(c->scope), c->name, move(rhs));
-        } else if (CVarLhs *c = dynamic_cast<CVarLhs *>(lhs.get())) {
-            return make_unique<CVarAsgn>(loc, c->name, move(rhs));
-        } else if (IVarLhs *c = dynamic_cast<IVarLhs *>(lhs.get())) {
-            return make_unique<IVarAsgn>(loc, c->name, move(rhs));
-        } else if (GVarLhs *c = dynamic_cast<GVarLhs *>(lhs.get())) {
-            return make_unique<GVarAsgn>(loc, c->name, move(rhs));
+        } else {
+            return make_unique<Assign>(loc, move(lhs), move(rhs));
         }
-        Error::raise("unimplemented lhs: ", lhs->nodeName());
     }
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {

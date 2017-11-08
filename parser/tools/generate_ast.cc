@@ -38,6 +38,7 @@ NodeDef nodes[] = {
     {"Array", vector<FieldDef>({{"elts", NodeVec}})},
     // Used for $`, $& etc magic regex globals
     {"Backref", vector<FieldDef>({{"name", Name}})},
+    {"Assign", vector<FieldDef>({{"lhs", Node}, {"rhs", Node}})},
     // wraps any set of statements implicitly grouped by syntax (e.g. def, class bodies)
     {"Begin", vector<FieldDef>({{"stmts", NodeVec}})},
     // Node is always a send, which is previous call, args is arguments of body
@@ -59,14 +60,10 @@ NodeDef nodes[] = {
     {"Const", vector<FieldDef>({{"scope", Node}, {"name", Name}})},
     // Used inside a `Mlhs` if a constant is part of multiple assignment
     {"ConstLhs", vector<FieldDef>({{"scope", Node}, {"name", Name}})},
-    // Constant assignment
-    {"ConstAsgn", vector<FieldDef>({{"scope", Node}, {"name", Name}, {"expr", Node}})},
     // &. "conditional-send"/safe-navigation operator
     {"CSend", vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}})},
     // @@foo class variable
     {"CVar", vector<FieldDef>({{"name", Name}})},
-    // @@foo class variable assignment
-    {"CVarAsgn", vector<FieldDef>({{"name", Name}, {"expr", Node}})},
     // @@foo class variable in the lhs of an Mlhs
     {"CVarLhs", vector<FieldDef>({{"name", Name}})},
     // args may be NULL, body does not have to be a block.
@@ -93,8 +90,6 @@ NodeDef nodes[] = {
     {"Float", vector<FieldDef>({{"val", String}})},
     // Global variable ($foo)
     {"GVar", vector<FieldDef>({{"name", Name}})},
-    // Global variable assignment
-    {"GVarAsgn", vector<FieldDef>({{"name", Name}, {"expr", Node}})},
     // Global variable in the lhs of an mlhs
     {"GVarLhs", vector<FieldDef>({{"name", Name}})},
     // entries are `Pair`s,
@@ -109,8 +104,6 @@ NodeDef nodes[] = {
     {"Integer", vector<FieldDef>({{"val", String}})},
     // instance variable reference
     {"IVar", vector<FieldDef>({{"name", Name}})},
-    // ivar assign
-    {"IVarAsgn", vector<FieldDef>({{"name", Name}, {"expr", Node}})},
     // @rules in `@rules, invalid_rules = ...`
     {"IVarLhs", vector<FieldDef>({{"name", Name}})},
     // Required keyword argument inside an (args)
