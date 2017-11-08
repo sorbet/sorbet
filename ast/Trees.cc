@@ -214,8 +214,8 @@ string ClassDef::showRaw(GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "ClassDef{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "name = " << name->showRaw(gs, tabs) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs) << ">"
-        << endl;
+    buf << "name = " << name->showRaw(gs, tabs + 1) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs)
+        << ">" << endl;
     printTabs(buf, tabs + 1);
     buf << "ancestors = [";
     bool first = true;
@@ -232,9 +232,13 @@ string ClassDef::showRaw(GlobalState &gs, int tabs) {
     buf << "rhs = [" << endl;
 
     for (auto &a : this->rhs) {
-        printTabs(buf, tabs + 1);
-        buf << a->showRaw(gs, tabs + 2) << endl << endl;
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(gs, tabs + 2) << endl;
+        if (&a != &this->rhs.back())
+            buf << endl;
     }
+    printTabs(buf, tabs + 1);
+    buf << "]" << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -608,6 +612,8 @@ string Send::showRaw(GlobalState &gs, int tabs) {
         printTabs(buf, tabs + 2);
         buf << a->showRaw(gs, tabs + 2) << endl;
     }
+    printTabs(buf, tabs + 1);
+    buf << "]" << endl;
     printTabs(buf, tabs);
     buf << "}";
 
@@ -640,6 +646,8 @@ string Super::showRaw(GlobalState &gs, int tabs) {
         printTabs(buf, tabs + 2);
         buf << a->showRaw(gs, tabs + 2) << endl;
     }
+    printTabs(buf, tabs + 1);
+    buf << "]" << endl;
     printTabs(buf, tabs);
     buf << "}";
 
@@ -683,6 +691,8 @@ string Array::showRaw(GlobalState &gs, int tabs) {
         printTabs(buf, tabs + 2);
         buf << a->showRaw(gs, tabs + 2) << endl;
     }
+    printTabs(buf, tabs + 1);
+    buf << "]" << endl;
     printTabs(buf, tabs);
     buf << "}";
 
@@ -933,7 +943,7 @@ string RestArg::nodeName() {
 }
 
 string Self::showRaw(GlobalState &gs, int tabs) {
-    return nodeName() + "{ claz = " + claz.toString(gs) + " }";
+    return nodeName() + "{ claz = " + this->claz.info(gs).fullName(gs) + " }";
 }
 string KeywordArg::showRaw(GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
