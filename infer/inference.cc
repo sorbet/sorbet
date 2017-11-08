@@ -67,6 +67,40 @@ public:
         }
     }
 
+    ast::TypeAndOrigins dispatchNew(ast::Context ctx, ast::TypeAndOrigins recvType, cfg::Send *send,
+                                    vector<ast::TypeAndOrigins> &args, cfg::Binding &bind) {
+        ast::TypeAndOrigins result;
+        if (ast::ClassType *classType = dynamic_cast<ast::ClassType *>(recvType.type.get())) {
+            ast::SymbolRef newSymbol = classType->symbol.info(ctx).findMember(ast::Names::new_());
+            if (!newSymbol.exists() || newSymbol.info(ctx).owner == ast::GlobalState::defn_Basic_Object()) {
+                ast::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
+                Error::check(attachedClass.exists());
+                result.type = make_shared<ast::ClassType>(attachedClass);
+                result.origins.push_back(bind.loc);
+
+                // call constructor
+                newSymbol = attachedClass.info(ctx).findMember(ast::Names::initialize());
+                if (newSymbol.exists()) {
+                    auto initilizeResult =
+                        result.type->dispatchCall(ctx, ast::Names::initialize(), bind.loc, args, recvType.type);
+                } else {
+                    if (args.size() > 0) {
+                        ctx.state.errors.error(bind.loc, ast::ErrorClass::MethodArgumentCountMismatch,
+                                               "Wrong number of arguments for constructor.\n Expected: 0, found: {}",
+                                               args.size());
+                    }
+                }
+            } else { // custom new was defined
+                result.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+                result.origins.push_back(bind.loc);
+            }
+        } else {
+            result.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+            result.origins.push_back(bind.loc);
+        }
+        return result;
+    }
+
     shared_ptr<ast::Type> processBinding(ast::Context ctx, cfg::Binding &bind, int loopCount) {
         ast::TypeAndOrigins tp;
         typecase(
@@ -92,35 +126,7 @@ public:
 
                 auto recvType = getTypeAndOrigin(ctx, send->recv);
                 if (send->fun == ast::Names::new_()) {
-                    if (ast::ClassType *classType = dynamic_cast<ast::ClassType *>(recvType.type.get())) {
-                        ast::SymbolRef newSymbol = classType->symbol.info(ctx).findMember(ast::Names::new_());
-                        if (!newSymbol.exists() || newSymbol.info(ctx).owner == ast::GlobalState::defn_Basic_Object()) {
-                            ast::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
-                            Error::check(attachedClass.exists());
-                            tp.type = make_shared<ast::ClassType>(attachedClass);
-                            tp.origins.push_back(bind.loc);
-
-                            // call constructor
-                            newSymbol = attachedClass.info(ctx).findMember(ast::Names::initialize());
-                            if (newSymbol.exists()) {
-                                auto initilizeResult =
-                                    tp.type->dispatchCall(ctx, ast::Names::initialize(), bind.loc, args, recvType.type);
-                            } else {
-                                if (args.size() > 0) {
-                                    ctx.state.errors.error(
-                                        bind.loc, ast::ErrorClass::MethodArgumentCountMismatch,
-                                        "Wrong number of arguments for constructor.\n Expected: 0, found: {}",
-                                        args.size());
-                                }
-                            }
-                        } else { // custom new was defined
-                            tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
-                            tp.origins.push_back(bind.loc);
-                        }
-                    } else {
-                        tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
-                        tp.origins.push_back(bind.loc);
-                    }
+                    tp = dispatchNew(ctx, recvType, send, args, bind);
                 } else {
                     tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
                     tp.origins.push_back(bind.loc);
