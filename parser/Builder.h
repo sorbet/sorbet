@@ -11,12 +11,11 @@
 namespace ruby_typer {
 namespace parser {
 
-class Result;
 class Node;
 
 class Builder {
 public:
-    Builder(ruby_typer::ast::GlobalState &, Result &);
+    Builder(ruby_typer::ast::GlobalState &gs, ruby_typer::ast::FileRef file);
     ~Builder();
 
     static ruby_parser::builder interface;

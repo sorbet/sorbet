@@ -1,7 +1,18 @@
 #ifndef SRUBY_PARSER_PARSER_H
 #define SRUBY_PARSER_PARSER_H
 
-#include "parser/Node.h"
-#include "parser/Result.h"
+#include "Node.h"
+
+namespace ruby_typer {
+namespace parser {
+
+class Parser {
+public:
+    static std::unique_ptr<Node> run(ruby_typer::ast::GlobalState &gs, ruby_typer::ast::FileRef file);
+    static std::unique_ptr<Node> run(ruby_typer::ast::GlobalState &gs, const std::string &path, const std::string &src);
+};
+
+} // namespace parser
+} // namespace ruby_typer
 
 #endif // SRUBY_PARSER_PARSER_H

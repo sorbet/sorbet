@@ -114,7 +114,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
     // Parser
     auto src = ruby_typer::File::read(inputPath.c_str());
-    auto parsed = ruby_typer::parser::parse_ruby(gs, inputPath, src);
+    auto ast = ruby_typer::parser::Parser::run(gs, inputPath, src);
 
     auto expectation = test.expectations.find("parse-tree");
     if (expectation != test.expectations.end()) {
@@ -123,14 +123,14 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         auto exp = ruby_typer::File::read(checker.c_str());
 
-        EXPECT_EQ(exp, parsed.ast()->toString(gs) + "\n");
-        if (exp == parsed.ast()->toString(gs) + "\n") {
+        EXPECT_EQ(exp, ast->toString(gs) + "\n");
+        if (exp == ast->toString(gs) + "\n") {
             TEST_COUT << "parse-tree OK" << endl;
         }
     }
 
     // Desugarer
-    auto desugared = ruby_typer::ast::desugar::node2Tree(context, parsed.ast());
+    auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
 
     expectation = test.expectations.find("ast");
     if (expectation != test.expectations.end()) {

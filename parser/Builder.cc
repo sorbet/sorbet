@@ -54,25 +54,25 @@ string Dedenter::dedent(const string &str) {
 
 class Builder::Impl {
 public:
-    Impl(GlobalState &gs, Result &r) : gs_(gs), result_(r) {}
+    Impl(GlobalState &gs, ast::FileRef file) : gs_(gs), file_(file) {}
 
     GlobalState &gs_;
+    ast::FileRef file_;
     ruby_parser::base_driver *driver_;
-    Result &result_;
 
     Loc tok_loc(const token *tok) {
-        return Loc{result_.file(), (u4)tok->start(), (u4)tok->end()};
+        return Loc{file_, (u4)tok->start(), (u4)tok->end()};
     }
 
     Loc maybe_loc(unique_ptr<Node> &node) {
         if (node == nullptr) {
-            return Loc::none(result_.file());
+            return Loc::none(file_);
         }
         return node->loc;
     }
 
     Loc tok_loc(const token *begin, const token *end) {
-        return Loc{result_.file(), (u4)begin->start(), (u4)end->end()};
+        return Loc{file_, (u4)begin->start(), (u4)end->end()};
     }
 
     Loc loc_join(Loc begin, Loc end) {
@@ -82,7 +82,7 @@ public:
             return begin;
         Error::check(begin.file == end.file);
 
-        return Loc{result_.file(), begin.begin_pos, end.end_pos};
+        return Loc{file_, begin.begin_pos, end.end_pos};
     }
 
     Loc collection_loc(const token *begin, vector<unique_ptr<Node>> &elts, const token *end) {
@@ -92,7 +92,7 @@ public:
         }
         DEBUG_ONLY(Error::check(end == nullptr));
         if (elts.size() == 0)
-            return Loc::none(result_.file());
+            return Loc::none(file_);
         return loc_join(elts.front()->loc, elts.back()->loc);
     }
 
@@ -1050,7 +1050,7 @@ public:
     }
 };
 
-Builder::Builder(GlobalState &ctx, Result &r) : impl_(new Builder::Impl(ctx, r)) {}
+Builder::Builder(GlobalState &ctx, ast::FileRef file) : impl_(new Builder::Impl(ctx, file)) {}
 Builder::~Builder() {}
 
 }; // namespace parser

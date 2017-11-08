@@ -1,5 +1,3 @@
-#include "../infer/infer.h"
-#include "../parser/Result.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
@@ -48,13 +46,10 @@ static bool removeOption(vector<string> &prints, string option) {
 
 void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> nameAndSource) {
     vector<unique_ptr<ruby_typer::parser::Node>> empty;
-    vector<ruby_typer::parser::Result> results;
     ruby_typer::ast::Loc emptyLoc(0, 0, 0);
     unique_ptr<ruby_typer::parser::Begin> join = make_unique<ruby_typer::parser::Begin>(emptyLoc, move(empty));
     for (auto &pair : nameAndSource) {
-        results.emplace_back(ruby_typer::parser::parse_ruby(gs, pair.first, pair.second));
-        auto &r = results.back();
-        auto ast = r.release();
+        auto ast = ruby_typer::parser::Parser::run(gs, pair.first, pair.second);
         if (ast) {
             join->stmts.emplace_back(move(ast));
         } else {
@@ -72,8 +67,7 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
 
 void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
                      vector<string> &prints) {
-    auto result = ruby_typer::parser::parse_ruby(gs, path, src);
-    auto ast = result.release();
+    auto ast = ruby_typer::parser::Parser::run(gs, path, src);
     if (!ast) {
         ruby_typer::Error::raise("Parse Error");
     }
