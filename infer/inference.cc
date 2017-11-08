@@ -41,7 +41,6 @@ public:
 
     void setTypeAndOrigin(ast::SymbolRef symbol, ast::TypeAndOrigins typeAndOrigins) {
         Error::check(typeAndOrigins.type.get() != nullptr);
-        static ast::TypeAndOrigins dynamicTypeAndOrigin;
 
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
@@ -211,7 +210,6 @@ void ruby_typer::infer::Inference::run(ast::Context ctx, unique_ptr<cfg::CFG> &c
     vector<Environment> outEnvironments;
     outEnvironments.resize(cfg->basicBlocks.size());
     vector<bool> visited;
-    visited.assign(cfg->basicBlocks.size(), false);
     visited.resize(cfg->basicBlocks.size());
     for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
         if (bb == cfg->deadBlock())
