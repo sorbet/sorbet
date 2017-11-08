@@ -2,9 +2,9 @@ class <singleton class:Child> (Class)
 class <singleton class:Mixin> (Class)
 class <singleton class:Parent> (Class)
 class Child (Parent, Mixin)
-  field @undefinedivar
+  field @undefinedivar -> <dynamic>
   method child_method ()
-  static-field @@undefined_cvar
+  static-field @@undefined_cvar -> <dynamic>
 class Mixin ()
   static-field @@mixin_cvar -> Integer
 class Opus ()
