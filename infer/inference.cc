@@ -96,7 +96,7 @@ public:
                 tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
                 tp.origins.push_back(bind.loc);
             },
-            [&](cfg::New *i) { Error::notImplemented(); }, [&](cfg::Super *i) { Error::notImplemented(); },
+            [&](cfg::Super *i) { Error::notImplemented(); },
             [&](cfg::FloatLit *i) {
                 tp.type = make_shared<ast::Literal>(i->value);
                 tp.origins.push_back(bind.loc);

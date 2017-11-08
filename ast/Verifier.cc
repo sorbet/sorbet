@@ -64,10 +64,6 @@ public:
         check(original);
         return original;
     }
-    Statement *postTransformNew(Context ctx, New *original) {
-        check(original);
-        return original;
-    }
     Statement *postTransformNamedArg(Context ctx, NamedArg *original) {
         check(original);
         return original;

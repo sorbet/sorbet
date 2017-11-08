@@ -104,9 +104,6 @@ Send::Send(Loc loc, unique_ptr<Expression> recv, NameRef fun, vector<unique_ptr<
 
 Super::Super(Loc loc, vector<unique_ptr<Expression>> &&args) : Expression(loc), args(move(args)) {}
 
-New::New(Loc loc, SymbolRef claz, vector<unique_ptr<Expression>> &&args)
-    : Expression(loc), claz(claz), args(move(args)) {}
-
 NamedArg::NamedArg(Loc loc, NameRef name, unique_ptr<Expression> arg) : Expression(loc), name(name), arg(move(arg)) {}
 
 RestArg::RestArg(Loc loc, unique_ptr<Reference> arg) : Reference(loc), expr(move(arg)) {}
@@ -621,23 +618,6 @@ string Send::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string New::showRaw(GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << nodeName() << "{" << endl;
-    printTabs(buf, tabs + 1);
-    buf << "claz = " << this->claz.info(gs).name.name(gs).toString(gs) << endl;
-    printTabs(buf, tabs + 1);
-    buf << "args = [" << endl;
-    for (auto &a : args) {
-        printTabs(buf, tabs + 2);
-        buf << a->showRaw(gs, tabs + 2) << endl;
-    }
-    printTabs(buf, tabs);
-    buf << "}";
-
-    return buf.str();
-}
-
 string Super::showRaw(GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
@@ -697,13 +677,6 @@ string Array::showRaw(GlobalState &gs, int tabs) {
     printTabs(buf, tabs);
     buf << "}";
 
-    return buf.str();
-}
-
-string New::toString(GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "new " << this->claz.info(gs).name.name(gs).toString(gs);
-    printArgs(gs, buf, this->args, tabs);
     return buf.str();
 }
 
@@ -856,10 +829,6 @@ string Assign::nodeName() {
 
 string Send::nodeName() {
     return "Send";
-}
-
-string New::nodeName() {
-    return "New";
 }
 
 string Super::nodeName() {

@@ -85,10 +85,6 @@ void CFG::dealias(ast::Context ctx) {
                 for (auto &arg : v->args) {
                     arg = maybeDealias(ctx, arg, current);
                 }
-            } else if (auto *v = dynamic_cast<New *>(bind.value.get())) {
-                for (auto &arg : v->args) {
-                    arg = maybeDealias(ctx, arg, current);
-                }
             } else if (auto *v = dynamic_cast<Super *>(bind.value.get())) {
                 for (auto &arg : v->args) {
                     arg = maybeDealias(ctx, arg, current);
@@ -129,10 +125,6 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
                 reads[v->what].insert(bb.get());
             } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
                 reads[v->recv].insert(bb.get());
-                for (auto arg : v->args) {
-                    reads[arg].insert(bb.get());
-                }
-            } else if (auto *v = dynamic_cast<New *>(bind.value.get())) {
                 for (auto arg : v->args) {
                     reads[arg].insert(bb.get());
                 }
@@ -677,25 +669,8 @@ string Return::toString(ast::Context ctx) {
     return "return " + this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-New::New(ast::SymbolRef klaz, vector<ast::SymbolRef> &args) : klass(klaz), args(move(args)) {}
-
 Send::Send(ast::SymbolRef recv, ast::NameRef fun, vector<ast::SymbolRef> &args)
     : recv(recv), fun(fun), args(move(args)) {}
-
-string New::toString(ast::Context ctx) {
-    stringstream buf;
-    buf << "new " << this->klass.info(ctx).name.name(ctx).toString(ctx) << "(";
-    bool isFirst = true;
-    for (auto arg : this->args) {
-        if (!isFirst) {
-            buf << ", ";
-        }
-        isFirst = false;
-        buf << arg.info(ctx).name.name(ctx).toString(ctx);
-    }
-    buf << ")";
-    return buf.str();
-}
 
 Super::Super(vector<ast::SymbolRef> &args) : args(move(args)) {}
 
