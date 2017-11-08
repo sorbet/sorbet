@@ -38,10 +38,11 @@ public:
 
     SymbolRef prePregisterSym();
 
-    SymbolRef enterClassSymbol(SymbolRef owner, NameRef name);
-    SymbolRef enterMethodSymbol(SymbolRef owner, NameRef name);
-    SymbolRef enterFieldSymbol(SymbolRef owner, NameRef name);
-    SymbolRef enterStaticFieldSymbol(SymbolRef owner, NameRef name);
+    SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterLocalSymbol(SymbolRef owner, NameRef name);
 
     SymbolRef newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
 
@@ -186,7 +187,7 @@ private:
 
     SymbolRef synthesizeClass(UTF8Desc name);
 
-    SymbolRef enterSymbol(SymbolRef owner, NameRef name, u4 flags);
+    SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef getTopLevelClassSymbol(NameRef name);
 

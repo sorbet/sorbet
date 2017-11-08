@@ -160,7 +160,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
         return singleton;
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name);
-    singleton = gs.enterClassSymbol(this->owner, singletonName);
+    singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
     Symbol &singletonInfo = singleton.info(gs);
 
     singletonInfo.members.push_back(make_pair(Names::attachedClass(), this->ref(gs)));

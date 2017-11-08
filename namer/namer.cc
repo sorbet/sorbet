@@ -23,7 +23,7 @@ class NameInserter {
         }
 
         auto newOwner = squashNames(ctx, owner, constLit->scope);
-        return ctx.state.enterClassSymbol(newOwner, constLit->cnst);
+        return ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
     }
 
     ast::UnresolvedIdent *arg2NameRef(ast::Reference *arg) {
@@ -132,7 +132,7 @@ public:
             owner = owner.info(ctx).singletonClass(ctx);
         }
 
-        method->symbol = ctx.state.enterMethodSymbol(owner, method->name);
+        method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
         ast::Symbol &symbol = method->symbol.info(ctx);
         fillInArgs(ctx, method->args, symbol);
         symbol.definitionLoc = method->loc;
@@ -148,7 +148,7 @@ public:
     ast::Block *preTransformBlock(ast::Context ctx, ast::Block *blk) {
         ast::SymbolRef owner = ownerFromContext(ctx);
         blk->symbol = ctx.state.enterMethodSymbol(
-            owner, ctx.state.freshNameUnique(ast::UniqueNameKind::Namer, ast::Names::blockTemp()));
+            blk->loc, owner, ctx.state.freshNameUnique(ast::UniqueNameKind::Namer, ast::Names::blockTemp()));
         ast::Symbol &symbol = blk->symbol.info(ctx);
 
         scopeStack.emplace_back();
@@ -187,7 +187,7 @@ public:
                 auto &frame = scopeStack.back();
                 ast::SymbolRef &cur = frame.locals[nm->name];
                 if (!cur.exists()) {
-                    cur = ctx.state.enterFieldSymbol(ctx.owner, nm->name);
+                    cur = ctx.state.enterLocalSymbol(ctx.owner, nm->name);
                     frame.locals[nm->name] = cur;
                 }
                 return new ast::Ident(nm->loc, cur);
@@ -196,7 +196,7 @@ public:
                 ast::Symbol &root = ctx.state.defn_root().info(ctx);
                 ast::SymbolRef sym = root.findMember(nm->name);
                 if (!sym.exists()) {
-                    sym = ctx.state.enterFieldSymbol(ctx.state.defn_root(), nm->name);
+                    sym = ctx.state.enterFieldSymbol(nm->loc, ctx.state.defn_root(), nm->name);
                 }
                 return new ast::Ident(nm->loc, sym);
             }
@@ -217,7 +217,7 @@ public:
 
         // TODO(nelhage): forbid dynamic constant definition
         ast::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);
-        ctx.state.enterStaticFieldSymbol(scope, lhs->cnst);
+        ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
 
         return asgn;
     }
