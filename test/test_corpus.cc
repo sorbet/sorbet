@@ -264,10 +264,11 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             for (int i = pos.first.line; i <= pos.second.line; i++) {
                 auto expectedError = expectedErrors.find(i);
                 if (expectedError != expectedErrors.end()) {
+                    bool isMultipleErrors = expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
                     if (expectedError->second.empty()) {
                         ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
                                       << i << ". It should match a substring of '" << error->formatted << "'";
-                    } else if (error->formatted.find(expectedError->second) == string::npos) {
+                    } else if (error->formatted.find(expectedError->second) == string::npos && !isMultipleErrors) {
                         ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
                                       << expectedError->second << "' inside of '" << error->formatted << "'";
                     } else {
