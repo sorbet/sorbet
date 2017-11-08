@@ -30,19 +30,17 @@ public:
 
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
-            vars.emplace_back(symbol);
-            types.emplace_back();
-            ast::TypeAndOrigins &ret = types[types.size() - 1];
-            if (ret.type.get() == nullptr) {
-                ret.type = ast::Types::nil();
-                ret.origins.push_back(symbol.info(ctx).owner.info(ctx).definitionLoc);
-            }
+            ast::TypeAndOrigins ret;
+            ret.type = ast::Types::nil();
+            ret.origins.push_back(symbol.info(ctx).owner.info(ctx).definitionLoc);
             return ret;
         }
+        Error::check(types[fnd - vars.begin()].type.get() != nullptr);
         return types[fnd - vars.begin()];
     }
 
     void setTypeAndOrigin(ast::SymbolRef symbol, ast::TypeAndOrigins typeAndOrigins) {
+        Error::check(typeAndOrigins.type.get() != nullptr);
         static ast::TypeAndOrigins dynamicTypeAndOrigin;
 
         auto fnd = find(vars.begin(), vars.end(), symbol);
@@ -181,6 +179,9 @@ public:
 void ruby_typer::infer::Inference::run(ast::Context ctx, unique_ptr<cfg::CFG> &cfg) {
     vector<Environment> outEnvironments;
     outEnvironments.resize(cfg->basicBlocks.size());
+    vector<bool> visited;
+    visited.assign(cfg->basicBlocks.size(), false);
+    visited.resize(cfg->basicBlocks.size());
     for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
         if (bb == cfg->deadBlock())
             continue;
@@ -190,12 +191,23 @@ void ruby_typer::infer::Inference::run(ast::Context ctx, unique_ptr<cfg::CFG> &c
             current.types.emplace_back();
         }
         for (cfg::BasicBlock *parent : bb->backEdges) {
+            if (!visited[parent->id])
+                continue;
             current.mergeWith(ctx, outEnvironments[parent->id]);
+        }
+        int i = 0;
+        for (auto &uninitialized : current.types) {
+            if (uninitialized.type.get() == nullptr) {
+                uninitialized.type = ast::Types::nil();
+                uninitialized.origins.push_back(current.vars[i].info(ctx).owner.info(ctx).definitionLoc);
+            }
+            i++;
         }
         for (cfg::Binding &bind : bb->exprs) {
             current.ensureGoodAssignTarget(ctx, bind.bind);
             bind.tpe = current.processBinding(ctx, bind, bb->outerLoops);
         }
         current.ensureGoodCondition(ctx, bb->bexit.cond);
+        visited[bb->id] = true;
     }
 }
