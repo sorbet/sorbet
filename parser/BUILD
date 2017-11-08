@@ -50,6 +50,10 @@ cc_test(
         "fixtures/*.rb",
         "fixtures/*.rb.exp",
     ]),
+    linkstatic = select({
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = [
         ":parser",
