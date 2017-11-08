@@ -304,19 +304,50 @@ int CFG::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *cur
 }
 
 int CFG::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
+    // We're not looking for an arbitrary topo-sort.
+    // First of all topo sort does not exist, as the graph has loops.
+    // We are looking for a sort that has all outer loops dominating loop headers that dominate loop bodies.
+    //
+    // This method is a big cache invalidator and should be removed if we become slow
+    // Instead we will build this sort the fly during construction of the CFG, but it will make it hard to add new nodes
+    // much harder.
+
     if ((currentBB->flags & BACKWARD_TOPO_SORT_VISITED)) {
         return nextFree;
     } else {
         currentBB->flags |= BACKWARD_TOPO_SORT_VISITED;
-        for (BasicBlock *edge : currentBB->backEdges) {
-            nextFree = topoSortBwd(target, nextFree, edge);
+        int i = 0;
+        // iterate over outer loops
+        while (i < currentBB->backEdges.size() && currentBB->outerLoops > currentBB->backEdges[i]->outerLoops) {
+            nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
+            i++;
         }
-        target[nextFree] = currentBB;
-        return nextFree + 1;
+        if (i > 0) { // This is a loop header!
+            target[nextFree] = currentBB;
+            nextFree = nextFree + 1;
+            while (i < currentBB->backEdges.size()) {
+                nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
+                i++;
+            }
+        } else {
+            while (i < currentBB->backEdges.size()) {
+                nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
+                i++;
+            }
+            target[nextFree] = currentBB;
+            nextFree = nextFree + 1;
+        }
+        return nextFree;
     }
 }
 
 void CFG::fillInTopoSorts(ast::Context ctx) {
+    // needed to find loop headers.
+    for (auto &bb : this->basicBlocks) {
+        std::sort(bb->backEdges.begin(), bb->backEdges.end(),
+                  [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->outerLoops < b->outerLoops; });
+    }
+
     auto &target1 = this->forwardsTopoSort;
     target1.resize(this->basicBlocks.size());
     this->topoSortFwd(target1, 0, this->entry());
