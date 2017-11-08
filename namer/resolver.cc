@@ -11,14 +11,6 @@ using namespace std;
 namespace ruby_typer {
 namespace namer {
 
-class Resolver {
-public:
-    Resolver(unique_ptr<ast::Statement> tree) : tree_(move(tree)) {}
-    void walk(ast::Context);
-
-    unique_ptr<ast::Statement> tree_;
-};
-
 struct Nesting {
     unique_ptr<Nesting> parent;
     ast::SymbolRef scope;
@@ -245,8 +237,7 @@ private:
     }
 
 public:
-    ResolveWalk(ast::Context ctx, Resolver *resolv)
-        : resolv_(resolv), nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
+    ResolveWalk(ast::Context ctx) : nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
 
     ast::ClassDef *preTransformClassDef(ast::Context ctx, ast::ClassDef *original) {
         nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
@@ -305,19 +296,47 @@ public:
         return new ast::Ident(c->loc, resolved);
     }
 
-    Resolver *resolv_;
     unique_ptr<Nesting> nesting_;
 };
 
-void Resolver::walk(ast::Context ctx) {
-    ResolveWalk walk(ctx, this);
-    tree_ = ast::TreeMap<ResolveWalk>::apply(ctx, walk, move(tree_));
-}
+class ResolveVariablesWalk {
+public:
+    ast::Statement *postTransformUnresolvedIdent(ast::Context ctx, ast::UnresolvedIdent *id) {
+        ast::SymbolRef klass;
+
+        switch (id->kind) {
+            case ast::UnresolvedIdent::Class:
+                klass = ctx.contextClass();
+                break;
+            case ast::UnresolvedIdent::Instance:
+                klass = ctx.selfClass();
+                break;
+            default:
+                // These should have been removed in the namer
+                Error::notImplemented();
+        }
+
+        ast::SymbolRef sym = klass.info(ctx).findMemberTransitive(ctx, id->name);
+        if (!sym.exists()) {
+            ctx.state.errors.error(id->loc, ast::ErrorClass::UndeclaredVariable, "Use of undeclared variable `{}'",
+                                   id->name.toString(ctx));
+            if (id->kind == ast::UnresolvedIdent::Class) {
+                sym = ctx.state.enterStaticFieldSymbol(klass, id->name);
+            } else {
+                sym = ctx.state.enterFieldSymbol(klass, id->name);
+            }
+        }
+
+        return new ast::Ident(id->loc, sym);
+    };
+};
 
 unique_ptr<ast::Statement> Namer::resolve(ast::Context &ctx, unique_ptr<ast::Statement> tree) {
-    Resolver resolv(move(tree));
-    resolv.walk(ctx);
-    return move(resolv.tree_);
+    ResolveWalk walk(ctx);
+    tree = ast::TreeMap<ResolveWalk>::apply(ctx, walk, move(tree));
+    ResolveVariablesWalk vars;
+    tree = ast::TreeMap<ResolveVariablesWalk>::apply(ctx, vars, move(tree));
+    return tree;
 }
 } // namespace namer
 } // namespace ruby_typer

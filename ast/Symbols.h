@@ -174,6 +174,8 @@ public:
     }
 
     SymbolRef findMember(NameRef name);
+    SymbolRef findMemberTransitive(GlobalState &gs, NameRef name);
+
     std::string fullName(GlobalState &gs) const;
 
     bool isSyntheticTemporary(GlobalState &ctx) const;

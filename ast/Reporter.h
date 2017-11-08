@@ -21,6 +21,7 @@ enum class ErrorClass {
     InvalidTypeDeclaration = 5004,
     InvalidDeclareVariables = 5005,
     DuplicateVariableDeclaration = 5006,
+    UndeclaredVariable = 5007,
 
     PinnedVariableMismatch = 7001, // Inferencer Errors
     MethodArgumentMismatch = 7002,
