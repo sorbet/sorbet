@@ -1,8 +1,8 @@
 class <singleton class:Child> (Class)
 class <singleton class:Parent> (Class)
-class Child (Parent)
+class Child (Parent, Mixin2)
 class Mixin1 ()
 class Mixin2 ()
 class Opus ()
-class Parent (Object)
+class Parent (Object, Mixin1)
 

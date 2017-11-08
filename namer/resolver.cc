@@ -200,10 +200,13 @@ public:
                 ancst.swap(resolved);
         }
         if (original->ancestors.size() > 0) {
-            if (ast::Ident *id = dynamic_cast<ast::Ident *>(original->ancestors.front().get())) {
-                ast::Symbol &info = original->symbol.info(ctx);
-                info.superClass = id->symbol;
-                info.argumentsOrMixins.emplace_back(id->symbol);
+            ast::Symbol &info = original->symbol.info(ctx);
+            for (auto &ancst : original->ancestors) {
+                if (ast::Ident *id = dynamic_cast<ast::Ident *>(ancst.get())) {
+                    info.argumentsOrMixins.emplace_back(id->symbol);
+                    if (&ancst == &original->ancestors.front())
+                        info.superClass = id->symbol;
+                }
             }
         }
         unique_ptr<ast::Send> lastStandardMethod;

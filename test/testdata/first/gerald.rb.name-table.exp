@@ -72,7 +72,7 @@ class Opus ()
         method initialize (message, <todo sym>)
           field message
           field rule_token
-      class Matcher (Object)
+      class Matcher (Object, <dynamic>)
         method initialize ()
           field invalid_rule_ids
           field invalid_rules
