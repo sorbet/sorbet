@@ -55,8 +55,7 @@ class NameInserter {
         if (send->fun != ast::Names::include()) {
             return nullptr;
         }
-        auto recv = dynamic_cast<ast::EmptyTree *>(send->recv.get());
-        if (recv == nullptr) {
+        if (dynamic_cast<ast::Self *>(send->recv.get()) == nullptr) {
             // ignore `something.include`
             return nullptr;
         }
