@@ -1,0 +1,8 @@
+class <singleton class:A> (Class)
+class A (Object)
+  field @ivar -> Integer
+  field @ivar2 -> Integer
+  method hi ()
+  static-field @@class_var -> String
+class Opus ()
+
