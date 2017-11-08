@@ -31,9 +31,9 @@ private:
 };
 
 unique_ptr<ast::Statement> getTree(ast::GlobalState &cb, string str) {
-    auto result = parser::parse_ruby(cb, "<test>", str);
+    auto ast = parser::Parser::run(cb, "<test>", str);
     ruby_typer::ast::Context ctx(cb, cb.defn_root());
-    return ast::desugar::node2Tree(ctx, result.ast());
+    return ast::desugar::node2Tree(ctx, ast);
 }
 
 TEST_F(InferFixture, LiteralsSubtyping) {

@@ -8,8 +8,8 @@ cc_library(
         "Node.h",
         "Node_gen.cc",
         "Node_gen.h",
-        "Result.cc",
-        "Result.h",
+        "Parser.cc",
+        "parser.h",
     ],
     hdrs = [
         "parser.h",
