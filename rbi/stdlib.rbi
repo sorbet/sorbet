@@ -1,13 +1,11 @@
+module Abbrev
+end
 class BasicObject
 end
 module Kernel
 end
 class Object < BasicObject
   include Kernel
-end
-class Data < Object
-end
-class Addrinfo < Data
 end
 class Exception < Object
 end
@@ -20,377 +18,68 @@ end
 class Array < Object
   include Enumerable
 end
-class File < IO
+module Benchmark
 end
-module File::Constants
+class Benchmark::Job < Object
 end
-class IO < Object
-  include File::Constants
-  include Enumerable
+class Benchmark::Report < Object
 end
-class BasicSocket < IO
+class Benchmark::Tms < Object
+end
+module Comparable
+end
+class Numeric < Object
+  include Comparable
+end
+class BigDecimal < Numeric
+end
+module BigMath
+end
+class Integer < Numeric
+end
+class Bignum < Integer
 end
 class Binding < Object
 end
-module Bundler
-end
-class Bundler::BundlerError < StandardError
-end
-class Bundler::APIResponseMismatchError < Bundler::BundlerError
-end
-module Bundler::BuildMetadata
-end
-class Bundler::CurrentRuby < Object
-end
-class Bundler::CyclicDependencyError < Bundler::BundlerError
-end
-module Bundler::GemHelpers
-end
-class Bundler::Definition < Object
-  include Bundler::GemHelpers
-end
-class Bundler::DepProxy < Object
-end
-module Gem
-end
-class Gem::Dependency < Object
-end
-class Bundler::Dependency < Gem::Dependency
-end
-class Bundler::DeprecatedError < Bundler::BundlerError
-end
-module Bundler::RubyDsl
-end
-class Bundler::Dsl < Object
-  include Bundler::RubyDsl
-end
-class Bundler::GemfileError < Bundler::BundlerError
-end
-class Bundler::Dsl::DSLError < Bundler::GemfileError
-end
-module Bundler::MatchPlatform
-end
-class Gem::BasicSpecification < Object
-end
-class Gem::Specification < Gem::BasicSpecification
-  include Bundler::MatchPlatform
-  include Bundler::GemHelpers
-end
-class Bundler::EndpointSpecification < Gem::Specification
-end
-class Bundler::EnvironmentPreserver < Object
-end
-class Bundler::FeatureFlag < Object
-end
-module Bundler::FileUtils::StreamUtils_
-end
-module Bundler::FileUtils
-end
-module Bundler::FileUtils::LowMethods
-end
-module Bundler::FileUtils::DryRun
-end
-class Bundler::FileUtils::Entry_ < Object
-  include Bundler::FileUtils::StreamUtils_
-end
-module Bundler::FileUtils::NoWrite
-end
-module Bundler::FileUtils::Verbose
+class CSV < Object
+  include Enumerable
 end
 class Struct < Object
   include Enumerable
 end
-class Bundler::GemHelpers::PlatformMatch < Struct
+class CSV::FieldInfo < Struct
 end
-class Bundler::GemNotFound < Bundler::BundlerError
+class RuntimeError < StandardError
 end
-class Bundler::GemRequireError < Bundler::BundlerError
+class CSV::MalformedCSVError < RuntimeError
 end
-class Bundler::GemVersionPromoter < Object
-end
-class Bundler::GemfileEvalError < Bundler::GemfileError
-end
-class Bundler::GemfileLockNotFound < Bundler::BundlerError
-end
-class Bundler::GemfileNotFound < Bundler::BundlerError
-end
-class Bundler::GemspecError < Bundler::BundlerError
-end
-class Bundler::GenericSystemCallError < Bundler::BundlerError
-end
-class Bundler::GitError < Bundler::BundlerError
-end
-class Bundler::HTTPError < Bundler::BundlerError
-end
-class Bundler::Index < Object
+class CSV::Row < Object
   include Enumerable
 end
-class Bundler::InstallError < Bundler::BundlerError
-end
-class Bundler::InstallHookError < Bundler::BundlerError
-end
-class Bundler::InvalidOption < Bundler::BundlerError
-end
-class Bundler::LazySpecification < Object
-  include Bundler::MatchPlatform
-  include Bundler::GemHelpers
-end
-module Comparable
-end
-class Bundler::LazySpecification::Identifier < Struct
-  include Comparable
-end
-class Bundler::LockfileError < Bundler::BundlerError
-end
-class Bundler::LockfileParser < Object
-end
-class Bundler::MarshalError < StandardError
-end
-module Bundler::Molinillo
-end
-class Bundler::Molinillo::ResolverError < StandardError
-end
-class Bundler::Molinillo::CircularDependencyError < Bundler::Molinillo::ResolverError
-end
-module Bundler::Molinillo::Compatibility
-end
-module Bundler::Molinillo::Delegates
-end
-module Bundler::Molinillo::Delegates::ResolutionState
-end
-module Bundler::Molinillo::Delegates::SpecificationProvider
-end
-module TSort
-end
-class Bundler::Molinillo::DependencyGraph < Object
-  include TSort
+class CSV::Table < Object
   include Enumerable
-end
-class Bundler::Molinillo::DependencyGraph::Action < Object
-end
-class Bundler::Molinillo::DependencyGraph::AddEdgeNoCircular < Bundler::Molinillo::DependencyGraph::Action
-end
-class Bundler::Molinillo::DependencyGraph::AddVertex < Bundler::Molinillo::DependencyGraph::Action
-end
-class Bundler::Molinillo::DependencyGraph::DeleteEdge < Bundler::Molinillo::DependencyGraph::Action
-end
-class Bundler::Molinillo::DependencyGraph::DetachVertexNamed < Bundler::Molinillo::DependencyGraph::Action
-end
-class Bundler::Molinillo::DependencyGraph::Edge < Struct
-end
-class Bundler::Molinillo::DependencyGraph::Log < Object
-end
-class Bundler::Molinillo::DependencyGraph::SetPayload < Bundler::Molinillo::DependencyGraph::Action
-end
-class Bundler::Molinillo::DependencyGraph::Tag < Bundler::Molinillo::DependencyGraph::Action
-end
-class Bundler::Molinillo::DependencyGraph::Vertex < Object
-end
-class Bundler::Molinillo::ResolutionState < Struct
-end
-class Bundler::Molinillo::DependencyState < Bundler::Molinillo::ResolutionState
-end
-class Bundler::Molinillo::NoSuchDependencyError < Bundler::Molinillo::ResolverError
-end
-class Bundler::Molinillo::PossibilityState < Bundler::Molinillo::ResolutionState
-end
-class Bundler::Molinillo::Resolver < Object
-end
-class Bundler::Molinillo::Resolver::Resolution < Object
-  include Bundler::Molinillo::Delegates::SpecificationProvider
-  include Bundler::Molinillo::Delegates::ResolutionState
-end
-class Bundler::Molinillo::Resolver::Resolution::Conflict < Struct
-end
-class Bundler::Molinillo::Resolver::Resolution::PossibilitySet < Struct
-end
-class Bundler::Molinillo::Resolver::Resolution::UnwindDetails < Struct
-  include Comparable
-end
-module Bundler::Molinillo::SpecificationProvider
-end
-module Bundler::Molinillo::UI
-end
-class Bundler::Molinillo::VersionConflict < Bundler::Molinillo::ResolverError
-  include Bundler::Molinillo::Delegates::SpecificationProvider
-end
-class Bundler::PermissionError < Bundler::BundlerError
-end
-class Bundler::NoSpaceOnDeviceError < Bundler::PermissionError
-end
-class Bundler::OperationNotSupportedError < Bundler::PermissionError
-end
-class Bundler::PathError < Bundler::BundlerError
-end
-module Bundler::Plugin
-end
-class Bundler::Plugin::API < Object
-end
-class Bundler::PluginError < Bundler::BundlerError
-end
-class Bundler::Plugin::MalformattedPlugin < Bundler::PluginError
-end
-class Bundler::Plugin::UndefinedCommandError < Bundler::PluginError
-end
-class Bundler::Plugin::UnknownSourceError < Bundler::PluginError
-end
-class Bundler::ProductionError < Bundler::BundlerError
-end
-class Bundler::RemoteSpecification < Object
-  include Comparable
-  include Bundler::MatchPlatform
-  include Bundler::GemHelpers
-end
-class Bundler::Resolver < Object
-  include Bundler::Molinillo::SpecificationProvider
-  include Bundler::Molinillo::UI
-end
-class Bundler::Resolver::SpecGroup < Object
-  include Bundler::GemHelpers
-end
-class Bundler::RubyVersion < Object
-end
-class Bundler::RubyVersionMismatch < Bundler::BundlerError
-end
-class Bundler::RubygemsIntegration < Object
-end
-class Bundler::RubygemsIntegration::Modern < Bundler::RubygemsIntegration
-end
-class Bundler::RubygemsIntegration::AlmostModern < Bundler::RubygemsIntegration::Modern
-end
-class Bundler::RubygemsIntegration::Legacy < Bundler::RubygemsIntegration
-end
-class Bundler::RubygemsIntegration::Ancient < Bundler::RubygemsIntegration::Legacy
-end
-class Bundler::RubygemsIntegration::Future < Bundler::RubygemsIntegration
-end
-class Bundler::RubygemsIntegration::MoreFuture < Bundler::RubygemsIntegration::Future
-end
-class Bundler::RubygemsIntegration::MoreModern < Bundler::RubygemsIntegration::Modern
-end
-class Bundler::RubygemsIntegration::Transitional < Bundler::RubygemsIntegration::Legacy
-end
-module Bundler::SharedHelpers
-end
-class Bundler::Runtime < Object
-  include Bundler::SharedHelpers
-end
-class Bundler::SecurityError < Bundler::BundlerError
-end
-class Bundler::Settings < Object
-end
-class Bundler::Settings::Path < Struct
-end
-class Bundler::Source < Object
-end
-class Bundler::Source::Path < Bundler::Source
-end
-class Bundler::Source::Gemspec < Bundler::Source::Path
-end
-class Bundler::Source::Git < Bundler::Source::Path
-end
-class Bundler::Source::Git::GitCommandError < Bundler::GitError
-end
-class Bundler::Source::Git::GitNotAllowedError < Bundler::GitError
-end
-class Bundler::Source::Git::GitNotInstalledError < Bundler::GitError
-end
-class Bundler::Source::Git::GitProxy < Object
-end
-class Bundler::Source::Git::MissingGitRevisionError < Bundler::GitError
-end
-class Bundler::Source::Metadata < Bundler::Source
-end
-class Bundler::Source::Rubygems < Bundler::Source
-end
-class Bundler::SourceList < Object
-end
-class Bundler::SpecSet < Object
-  include TSort
-  include Enumerable
-end
-class Bundler::StubSpecification < Bundler::RemoteSpecification
-end
-class Bundler::SudoNotPermittedError < Bundler::BundlerError
-end
-class Bundler::TemporaryResourceError < Bundler::PermissionError
-end
-class Bundler::ThreadCreationError < Bundler::BundlerError
-end
-module Bundler::UI
-end
-class Gem::StreamUI < Object
-end
-class Gem::SilentUI < Gem::StreamUI
-end
-class Bundler::UI::RGProxy < Gem::SilentUI
-end
-class Bundler::UI::Silent < Object
-end
-module Bundler::URICredentialsFilter
-end
-class Bundler::VersionConflict < Bundler::BundlerError
-end
-class Bundler::VirtualProtocolError < Bundler::BundlerError
-end
-module Bundler::YAMLSerializer
-end
-class Bundler::YamlSyntaxError < Bundler::BundlerError
 end
 class Module < Object
 end
 class Class < Module
 end
-class IndexError < StandardError
-end
-class StopIteration < IndexError
-end
-class ClosedQueueError < StopIteration
-end
-class Numeric < Object
-  include Comparable
-end
 class Complex < Numeric
 end
-module DidYouMean
+class ConditionVariable < Object
 end
-class DidYouMean::ClassNameChecker < Object
+module Coverage
 end
-module DidYouMean::Correctable
+class Data < Object
 end
-class DidYouMean::Formatter < Object
+class Date < Object
+  include Comparable
 end
-module DidYouMean::Jaro
+class Date::Infinity < Numeric
 end
-module DidYouMean::JaroWinkler
-end
-module DidYouMean::Levenshtein
-end
-class DidYouMean::MethodNameChecker < Object
-end
-module DidYouMean::NameErrorCheckers
-end
-class DidYouMean::NullChecker < Object
-end
-class DidYouMean::SpellChecker < Object
-end
-class DidYouMean::VariableNameChecker < Object
-end
-module Digest
-end
-module Digest::Instance
-end
-class Digest::Class < Object
-  include Digest::Instance
-end
-class Digest::Base < Digest::Class
-end
-class Digest::SHA1 < Digest::Base
+class DateTime < Date
 end
 class Dir < Object
   include Enumerable
-end
-module Dir::Tmpname
 end
 class IOError < StandardError
 end
@@ -440,7 +129,13 @@ class Errno::EALREADY < SystemCallError
 end
 class Errno::EAUTH < SystemCallError
 end
+class Errno::EBADARCH < SystemCallError
+end
+class Errno::EBADEXEC < SystemCallError
+end
 class Errno::EBADF < SystemCallError
+end
+class Errno::EBADMACHO < SystemCallError
 end
 class Errno::EBADMSG < SystemCallError
 end
@@ -461,6 +156,8 @@ end
 class Errno::EDEADLK < SystemCallError
 end
 class Errno::EDESTADDRREQ < SystemCallError
+end
+class Errno::EDEVERR < SystemCallError
 end
 class Errno::EDOM < SystemCallError
 end
@@ -536,6 +233,8 @@ class Errno::ENOMEM < SystemCallError
 end
 class Errno::ENOMSG < SystemCallError
 end
+class Errno::ENOPOLICY < SystemCallError
+end
 class Errno::ENOPROTOOPT < SystemCallError
 end
 class Errno::ENOSPC < SystemCallError
@@ -590,6 +289,10 @@ class Errno::EPROTONOSUPPORT < SystemCallError
 end
 class Errno::EPROTOTYPE < SystemCallError
 end
+class Errno::EPWROFF < SystemCallError
+end
+class Errno::EQFULL < SystemCallError
+end
 class Errno::ERANGE < SystemCallError
 end
 class Errno::EREMOTE < SystemCallError
@@ -597,6 +300,8 @@ end
 class Errno::EROFS < SystemCallError
 end
 class Errno::ERPCMISMATCH < SystemCallError
+end
+class Errno::ESHLIBVERS < SystemCallError
 end
 class Errno::ESHUTDOWN < SystemCallError
 end
@@ -622,37 +327,26 @@ class Errno::EXDEV < SystemCallError
 end
 class Errno::NOERROR < SystemCallError
 end
-module Etc
-end
-class Etc::Group < Struct
-end
-class Etc::Passwd < Struct
-end
 class FalseClass < Object
 end
 class Fiber < Object
 end
 class FiberError < StandardError
 end
+module File::Constants
+end
+class IO < Object
+  include File::Constants
+  include Enumerable
+end
+class File < IO
+end
 class File::Stat < Object
   include Comparable
 end
 module FileTest
 end
-module FileUtils::StreamUtils_
-end
-module FileUtils
-end
-module FileUtils::LowMethods
-end
-module FileUtils::DryRun
-end
-class FileUtils::Entry_ < Object
-  include FileUtils::StreamUtils_
-end
-module FileUtils::NoWrite
-end
-module FileUtils::Verbose
+class Fixnum < Integer
 end
 class Float < Numeric
 end
@@ -666,21 +360,13 @@ module GC
 end
 module GC::Profiler
 end
-module Gem::BundlerVersionFinder
+module Gem
 end
-class RuntimeError < StandardError
+class Gem::BasicSpecification < Object
 end
 class Gem::Exception < RuntimeError
 end
 class Gem::CommandLineError < Gem::Exception
-end
-module Gem::DefaultUserInteraction
-end
-module Gem::UserInteraction
-end
-class Gem::ConfigFile < Object
-  include Gem::UserInteraction
-  include Gem::DefaultUserInteraction
 end
 class ScriptError < Exception
 end
@@ -690,7 +376,7 @@ class Gem::LoadError < LoadError
 end
 class Gem::ConflictError < Gem::LoadError
 end
-class Gem::ConsoleUI < Gem::StreamUI
+class Gem::Dependency < Object
 end
 class Gem::DependencyError < Gem::Exception
 end
@@ -705,12 +391,6 @@ end
 class Gem::EndOfYAMLException < Gem::Exception
 end
 class Gem::ErrorReason < Object
-end
-module Gem::Ext
-end
-class Gem::Ext::Builder < Object
-  include Gem::UserInteraction
-  include Gem::DefaultUserInteraction
 end
 class Gem::FilePermissionError < Gem::Exception
 end
@@ -728,10 +408,6 @@ class Gem::InvalidSpecificationException < Gem::Exception
 end
 class Gem::List < Object
   include Enumerable
-end
-class Gem::MissingSpecError < Gem::LoadError
-end
-class Gem::MissingSpecVersionError < Gem::MissingSpecError
 end
 class Gem::OperationNotSupportedError < Gem::Exception
 end
@@ -755,38 +431,11 @@ class Gem::Requirement::BadRequirementError < ArgumentError
 end
 class Gem::RubyVersionMismatch < Gem::Exception
 end
-class Gem::RuntimeRequirementNotMetError < Gem::InstallError
-end
-class Gem::Source < Object
-  include Comparable
-end
-class Gem::Source::Git < Gem::Source
-end
-class Gem::Source::Installed < Gem::Source
-end
-class Gem::Source::Local < Gem::Source
-end
-class Gem::Source::Lock < Gem::Source
-end
-class Gem::Source::SpecificFile < Gem::Source
-end
-class Gem::Source::Vendor < Gem::Source::Installed
-end
 class Gem::SourceFetchProblem < Gem::ErrorReason
 end
 class Gem::SpecificGemNotFoundException < Gem::GemNotFoundException
 end
-class Gem::StreamUI::SilentDownloadReporter < Object
-end
-class Gem::StreamUI::SilentProgressReporter < Object
-end
-class Gem::StreamUI::SimpleProgressReporter < Object
-  include Gem::DefaultUserInteraction
-end
-class Gem::StreamUI::VerboseDownloadReporter < Object
-end
-class Gem::StreamUI::VerboseProgressReporter < Object
-  include Gem::DefaultUserInteraction
+class Gem::Specification < Gem::BasicSpecification
 end
 class Gem::StubSpecification < Gem::BasicSpecification
 end
@@ -798,8 +447,6 @@ class Gem::SystemExitException < SystemExit
 end
 class Gem::UnsatisfiableDependencyError < Gem::DependencyError
 end
-module Gem::Util
-end
 class Gem::VerificationError < Gem::Exception
 end
 class Gem::Version < Object
@@ -810,23 +457,9 @@ class Hash < Object
 end
 module IO::WaitReadable
 end
-class IO::EAGAINWaitReadable < Errno::EAGAIN
-  include IO::WaitReadable
-end
 module IO::WaitWritable
 end
-class IO::EAGAINWaitWritable < Errno::EAGAIN
-  include IO::WaitWritable
-end
-class IO::EINPROGRESSWaitReadable < Errno::EINPROGRESS
-  include IO::WaitReadable
-end
-class IO::EINPROGRESSWaitWritable < Errno::EINPROGRESS
-  include IO::WaitWritable
-end
-class IPSocket < BasicSocket
-end
-class Integer < Numeric
+class IndexError < StandardError
 end
 class SignalException < Exception
 end
@@ -855,6 +488,8 @@ class MonitorMixin::ConditionVariable < Object
 end
 class MonitorMixin::ConditionVariable::Timeout < Exception
 end
+class Mutex < Object
+end
 class NameError < StandardError
 end
 class NilClass < Object
@@ -868,15 +503,6 @@ end
 module ObjectSpace
 end
 class ObjectSpace::WeakMap < Object
-  include Enumerable
-end
-module Open3
-end
-module Opus::Dev
-end
-module Opus::Dev::BundleManager
-end
-class Pathname < Object
 end
 class Proc < Object
 end
@@ -888,18 +514,11 @@ class Process::Status < Object
 end
 module Process::Sys
 end
-class Process::Tms < Struct
-end
 module Process::UID
 end
-class Thread < Object
-end
-class Process::Waiter < Thread
-end
-module Random::Formatter
+class Queue < Object
 end
 class Random < Object
-  include Random::Formatter
 end
 class Range < Object
   include Enumerable
@@ -914,42 +533,29 @@ class RegexpError < StandardError
 end
 class RubyVM < Object
 end
+class RubyVM::Env < Object
+end
 class RubyVM::InstructionSequence < Object
 end
 class SecurityError < Exception
-end
-class Set < Object
-  include Enumerable
-end
-module Shellwords
 end
 module Signal
 end
 module SingleForwardable
 end
-class Socket < BasicSocket
+class SizedQueue < Queue
 end
-class Socket::AncillaryData < Object
-end
-module Socket::Constants
-end
-class Socket::Ifaddr < Data
-end
-class Socket::Option < Object
-end
-class Socket::UDPSource < Object
-end
-class SocketError < StandardError
-end
-class SortedSet < Set
+class StopIteration < IndexError
 end
 class String < Object
   include Comparable
 end
 class StringIO < Data
-  include IO::generic_writable
-  include IO::generic_readable
+  include IO::writable
+  include IO::readable
   include Enumerable
+end
+class Struct::Tms < Struct
 end
 class Symbol < Object
   include Comparable
@@ -958,25 +564,11 @@ class SyntaxError < ScriptError
 end
 class SystemStackError < Exception
 end
-class TCPSocket < IPSocket
-end
-class TCPServer < TCPSocket
-end
-class TSort::Cyclic < StandardError
-end
-class Tempfile::Remover < Object
+class Thread < Object
 end
 class Thread::Backtrace < Object
 end
 class Thread::Backtrace::Location < Object
-end
-class Thread::ConditionVariable < Object
-end
-class Thread::Mutex < Object
-end
-class Thread::Queue < Object
-end
-class Thread::SizedQueue < Thread::Queue
 end
 class ThreadError < StandardError
 end
@@ -991,13 +583,7 @@ class TrueClass < Object
 end
 class TypeError < StandardError
 end
-class UDPSocket < IPSocket
-end
-class UNIXSocket < BasicSocket
-end
-class UNIXServer < UNIXSocket
-end
-module URI::RFC2396_REGEXP
+module URI::REGEXP
 end
 module URI
 end
@@ -1009,7 +595,7 @@ module URI::Escape
 end
 class URI::Generic < Object
   include URI
-  include URI::RFC2396_REGEXP
+  include URI::REGEXP
 end
 class URI::FTP < URI::Generic
 end
@@ -1027,20 +613,14 @@ class URI::LDAPS < URI::LDAP
 end
 class URI::MailTo < URI::Generic
 end
-class URI::RFC2396_Parser < Object
-  include URI::RFC2396_REGEXP
+class URI::Parser < Object
+  include URI::REGEXP
 end
-module URI::RFC2396_REGEXP::PATTERN
-end
-class URI::RFC3986_Parser < Object
+module URI::REGEXP::PATTERN
 end
 module URI::Util
 end
 class UnboundMethod < Object
-end
-class UncaughtThrowError < ArgumentError
-end
-module Warning
 end
 class ZeroDivisionError < StandardError
 end
