@@ -19,6 +19,15 @@ public:
             dynamicTypeAndOrigin.origins.push_back(ast::Loc::none(0));
             return dynamicTypeAndOrigin;
         }
+
+        if (symbol.info(ctx).isClass()) {
+            ast::TypeAndOrigins instanceTypeAndOrigin;
+            ast::SymbolRef sym = symbol.info(ctx).singletonClass(ctx);
+            instanceTypeAndOrigin.type = make_shared<ast::ClassType>(sym);
+            instanceTypeAndOrigin.origins.push_back(sym.info(ctx).definitionLoc);
+            return instanceTypeAndOrigin;
+        }
+
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             vars.emplace_back(symbol);

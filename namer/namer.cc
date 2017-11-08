@@ -122,7 +122,6 @@ public:
     void fillInArgs(ast::Context ctx, vector<unique_ptr<ast::Expression>> &args, ast::Symbol &symbol) {
         // Fill in the arity right with TODOs
         for (auto &arg : args) {
-
             if (auto *nmarg = dynamic_cast<ast::UnresolvedIdent *>(arg.get())) {
                 arg = fillInArg(ctx, nmarg, symbol);
             } else if (auto *oarg = dynamic_cast<ast::OptionalArg *>(arg.get())) {
