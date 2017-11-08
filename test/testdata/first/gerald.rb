@@ -9,7 +9,7 @@ module Opus::CIBot::Gerald
 
     def initialize(message, rule_token: '')
       super(message)
-      @rule_token = rule_token
+      @rule_token = rule_token  # error: undeclared variable
     end
   end
 
@@ -19,7 +19,8 @@ module Opus::CIBot::Gerald
     MAX_AFFECTED_FILES = 100
 
     def initialize
-      @rules, invalid_rules = Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(&:valid?) # error: Stubbing out unknown constant
+      @rules, invalid_rules =  # error: undeclared variable
+              Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(&:valid?) # error: Stubbing out unknown constant
       if !invalid_rules.empty?
         invalid_rule_ids = invalid_rules.map(&:token).join(',')
         log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids)
@@ -56,14 +57,14 @@ module Opus::CIBot::Gerald
     attr_reader :openapi_diff
 
     def initialize(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
-      @repo = repo
-      @assignee = assignee
-      @gh_user = gh_user
-      @merge_branch = merge_branch
-      @body = body
-      @title = title
-      @diff = diff
-      @openapi_diff = openapi_diff
+      @repo = repo # error: undeclared variable
+      @assignee = assignee # error: undeclared variable
+      @gh_user = gh_user # error: undeclared variable
+      @merge_branch = merge_branch # error: undeclared variable
+      @body = body # error: undeclared variable
+      @title = title # error: undeclared variable
+      @diff = diff # error: undeclared variable
+      @openapi_diff = openapi_diff # error: undeclared variable
     end
 
     # Should the name be suffixed with `-stripe`?
@@ -79,7 +80,8 @@ module Opus::CIBot::Gerald
     PER_RULE_MS = 2000
 
     def initialize
-      @start = Time.now # error: Stubbing out unknown constant <emptyTree>::Time
+      @start =   # error: undeclared variable
+        Time.now # error: Stubbing out unknown constant <emptyTree>::Time
     end
 
     def check!
@@ -107,8 +109,8 @@ module Opus::CIBot::Gerald
   class Diff
     # Using `.diff` format from github
     def initialize(raw_diff)
-      @raw = raw_diff
-      @parsed = parse(raw_diff)
+      @raw = raw_diff # error: undeclared variable
+      @parsed = parse(raw_diff) # error: undeclared variable
     end
 
     def affected_files
