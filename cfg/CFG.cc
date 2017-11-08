@@ -660,7 +660,7 @@ string BasicBlock::toString(ast::Context ctx) {
     for (Binding &exp : this->exprs) {
         buf << exp.bind.info(ctx).name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
         if (exp.tpe) {
-            buf << " : " << escape(exp.tpe->toString(ctx));
+            buf << " : " << Strings::escape(exp.tpe->toString(ctx));
         }
         buf << "\\n"; // intentional! graphviz will do interpolation.
     }

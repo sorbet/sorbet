@@ -32,7 +32,7 @@ string ruby_typer::File::read(const char *filename) {
     return src;
 }
 
-string ruby_typer::escape(string what) {
+string ruby_typer::Strings::escape(string what) {
     char escaped[] = {'\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '\"'};
     char non_escaped[] = {'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '\"'};
     static_assert(sizeof(escaped) == sizeof(non_escaped), "???");
