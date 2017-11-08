@@ -76,7 +76,6 @@ public:
 #define TEST_COUT TestCout()
 
 class CFG_Collector_and_Typer {
-
 public:
     CFG_Collector_and_Typer() {}
     vector<string> cfgs;
@@ -264,7 +263,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             for (int i = pos.first.line; i <= pos.second.line; i++) {
                 auto expectedError = expectedErrors.find(i);
                 if (expectedError != expectedErrors.end()) {
-                    bool isMultipleErrors = expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
+                    bool isMultipleErrors =
+                        expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
                     if (expectedError->second.empty()) {
                         ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
                                       << i << ". It should match a substring of '" << error->formatted << "'";
