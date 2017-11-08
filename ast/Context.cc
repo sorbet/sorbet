@@ -219,6 +219,9 @@ static UTF8Desc types_DESC{(char *)types, (int)strlen(types)};
 static const char *basicObject = "BasicObject";
 static UTF8Desc basicObject_DESC{(char *)basicObject, (int)strlen(basicObject)};
 
+static const char *kernel = "Kernel";
+static UTF8Desc kernel_DESC{(char *)kernel, (int)strlen(kernel)};
+
 GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -326,6 +329,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef opus_types_id = enterClassSymbol(opus_id, enterNameUTF8(types_DESC));
     SymbolRef class_id = synthesizeClass(class_DESC);
     SymbolRef basicObject_id = synthesizeClass(basicObject_DESC);
+    SymbolRef kernel_id = synthesizeClass(kernel_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -352,6 +356,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(opus_types_id == defn_Opus_Types());
     Error::check(class_id == defn_Class());
     Error::check(basicObject_id == defn_Basic_Object());
+    Error::check(kernel_id == defn_Kernel());
 
     /* 0: <none>
      * 1: <top>

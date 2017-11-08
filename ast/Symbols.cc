@@ -130,6 +130,7 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name) {
     if (result.exists())
         return result;
     for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+        Error::check(it->exists());
         result = it->info(gs).findMemberTransitive(gs, name);
         if (result.exists())
             return result;

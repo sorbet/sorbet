@@ -268,7 +268,8 @@ public:
                     }
                 }
             }
-        } else if (!info.superClass.exists() && original->symbol != ast::GlobalState::defn_Basic_Object()) {
+        } else if (!info.superClass.exists() && original->symbol != ast::GlobalState::defn_Basic_Object() &&
+                   original->symbol != ast::GlobalState::defn_Kernel()) {
             info.superClass = ast::GlobalState::defn_object();
             info.argumentsOrMixins.emplace_back(ast::GlobalState::defn_object());
         }
