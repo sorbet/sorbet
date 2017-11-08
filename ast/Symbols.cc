@@ -170,5 +170,12 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     return singleton;
 }
 
+SymbolRef Symbol::attachedClass(GlobalState &gs) {
+    Error::check(this->isClass());
+
+    SymbolRef singleton = findMember(Names::attachedClass());
+    return singleton;
+}
+
 } // namespace ast
 } // namespace ruby_typer

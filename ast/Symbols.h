@@ -184,6 +184,9 @@ public:
     // doesn't exist.
     SymbolRef singletonClass(GlobalState &gs);
 
+    // Returns attached class or noSymbol if it does not exist
+    SymbolRef attachedClass(GlobalState &gs);
+
     //    std::vector<Tree> implementation; // TODO: make into small vector too
     NameRef name; // todo: move out? it should not matter but it's important for
     // name resolution
