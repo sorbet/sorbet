@@ -6,8 +6,6 @@
 
 #include "ast/Context.h"
 
-#include "ruby_parser/diagnostic.hh"
-
 namespace ruby_typer {
 namespace parser {
 
@@ -16,13 +14,11 @@ class Node;
 /*
  * parser::Result contains the result of parsing a piece of Ruby source. It is
  * the owner of all memory allocated during the parse or referenced by the
- * returned objects, and must outlive any references to the AST or diagnostics
- * information.
+ * returned objects, and must outlive any references to the AST.
  */
 class Result {
 public:
     ast::FileRef file();
-    const ruby_parser::diagnostics_t &diagnostics();
     std::unique_ptr<Node> &ast();
     std::unique_ptr<Node> release();
 
@@ -35,6 +31,8 @@ public:
 
 private:
     Result(std::unique_ptr<Impl> &&impl);
+
+    void emit_diagnostics_as_errors(ruby_typer::ast::GlobalState &gs, ast::FileRef file);
 
     friend Result parse_ruby(ruby_typer::ast::GlobalState &gs, const std::string &path, const std::string &src);
 

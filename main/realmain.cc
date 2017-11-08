@@ -55,17 +55,6 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
         results.emplace_back(ruby_typer::parser::parse_ruby(gs, pair.first, pair.second));
         auto &r = results.back();
         auto ast = r.release();
-        if (r.diagnostics().size() > 0) {
-            vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
-            for (auto &diag : r.diagnostics()) {
-                counts[static_cast<int>(diag.level())]++;
-            }
-            cerr << "parser reported " << r.diagnostics().size() << " errors:" << endl;
-            cerr << " NOTE: " << counts[static_cast<int>(ruby_parser::dlevel::NOTE)] << endl;
-            cerr << " WARNING: " << counts[static_cast<int>(ruby_parser::dlevel::WARNING)] << endl;
-            cerr << " ERROR: " << counts[static_cast<int>(ruby_parser::dlevel::ERROR)] << endl;
-            cerr << " FATAL: " << counts[static_cast<int>(ruby_parser::dlevel::FATAL)] << endl;
-        }
         if (ast) {
             join->stmts.emplace_back(move(ast));
         } else {
@@ -83,59 +72,53 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
 
 void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
                      vector<string> &prints) {
-    auto r = ruby_typer::parser::parse_ruby(gs, path, src);
-    auto &ast = r.ast();
-    if (r.diagnostics().size() > 0) {
-        vector<int> counts(static_cast<int>(ruby_parser::dlevel::FATAL) + 1);
-        for (auto &diag : r.diagnostics()) {
-            counts[static_cast<int>(diag.level())]++;
-        }
-        cerr << "parser reported " << r.diagnostics().size() << " errors:" << endl;
-        cerr << " NOTE: " << counts[static_cast<int>(ruby_parser::dlevel::NOTE)] << endl;
-        cerr << " WARNING: " << counts[static_cast<int>(ruby_parser::dlevel::WARNING)] << endl;
-        cerr << " ERROR: " << counts[static_cast<int>(ruby_parser::dlevel::ERROR)] << endl;
-        cerr << " FATAL: " << counts[static_cast<int>(ruby_parser::dlevel::FATAL)] << endl;
+    auto result = ruby_typer::parser::parse_ruby(gs, path, src);
+    auto ast = result.release();
+    if (!ast) {
+        ruby_typer::Error::raise("Parse Error");
     }
-    if (ast) {
-        if (removeOption(prints, "parse-tree")) {
-            cout << ast->toString(gs, 0) << endl;
-            if (prints.empty())
-                return;
-        }
 
-        ruby_typer::ast::Context context(gs, gs.defn_root());
-        auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
-        if (removeOption(prints, "ast")) {
-            cout << desugared->toString(gs, 0) << endl;
-            if (prints.empty())
-                return;
-        }
-        if (removeOption(prints, "ast-raw")) {
-            cout << desugared->showRaw(gs) << endl;
-            if (prints.empty())
-                return;
-        }
+    if (removeOption(prints, "parse-tree")) {
+        cout << ast->toString(gs, 0) << endl;
+        if (prints.empty())
+            return;
+    }
 
-        desugared = ruby_typer::namer::Namer::run(context, move(desugared));
-        if (removeOption(prints, "name-table")) {
-            cout << gs.toString() << endl;
-            if (prints.empty())
-                return;
-        }
-        if (removeOption(prints, "name-tree")) {
-            cout << desugared->toString(gs, 0) << endl;
-            if (prints.empty())
-                return;
-        }
-        if (removeOption(prints, "name-tree-raw")) {
-            cout << desugared->showRaw(gs) << endl;
-            if (prints.empty())
-                return;
-        }
+    ruby_typer::ast::Context context(gs, gs.defn_root());
+    auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
+    if (removeOption(prints, "ast")) {
+        cout << desugared->toString(gs, 0) << endl;
+        if (prints.empty())
+            return;
+    }
+    if (removeOption(prints, "ast-raw")) {
+        cout << desugared->showRaw(gs) << endl;
+        if (prints.empty())
+            return;
+    }
 
-        CFG_Collector_and_Typer collector;
+    desugared = ruby_typer::namer::Namer::run(context, move(desugared));
+    if (removeOption(prints, "name-table")) {
+        cout << gs.toString() << endl;
+        if (prints.empty())
+            return;
+    }
+    if (removeOption(prints, "name-tree")) {
+        cout << desugared->toString(gs, 0) << endl;
+        if (prints.empty())
+            return;
+    }
+    if (removeOption(prints, "name-tree-raw")) {
+        cout << desugared->showRaw(gs) << endl;
+        if (prints.empty())
+            return;
+    }
 
-        auto r = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(desugared));
+    CFG_Collector_and_Typer collector;
+
+    auto cfg_and_throw_out_result =
+        ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(desugared));
+    if (removeOption(prints, "cfg")) {
         stringstream buf;
 
         buf << "digraph \"" + ruby_typer::File::getFileName(path) + "\"{" << endl;
@@ -144,14 +127,12 @@ void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, c
         }
         buf << "}" << endl;
         auto got = buf.str();
-        if (removeOption(prints, "cfg")) {
-            cout << got << endl;
-            if (prints.empty())
-                return;
-        }
-    } else {
-        cout << " got null" << endl;
+        cout << got << endl;
+        if (prints.empty())
+            return;
     }
+
+    // All good!
 }
 
 int realmain(int argc, char **argv) {
