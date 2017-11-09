@@ -201,7 +201,7 @@ public:
 
         ast::TypeAndOrigins cur = getTypeAndOrigin(ctx, bind.bind);
 
-        if (loopCount >= bind.bind.info(ctx).minLoops) {
+        if (loopCount == bind.bind.info(ctx).minLoops) {
             setTypeAndOrigin(bind.bind, tp);
         } else {
             if (!ast::Types::isSubType(ctx, tp.type, cur.type)) {
