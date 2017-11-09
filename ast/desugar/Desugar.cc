@@ -15,18 +15,18 @@ namespace {
 
 unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what);
 
-unique_ptr<Expression> mkSend(Loc loc, unique_ptr<Expression> &recv, NameRef fun, vector<unique_ptr<Expression>> &args,
+unique_ptr<Expression> mkSend(Loc loc, unique_ptr<Expression> &recv, NameRef fun, Send::ARGS_store &args,
                               u4 flags = 0) {
     Error::check(dynamic_cast<Expression *>(recv.get()));
-    auto send = make_unique<Send>(loc, move(recv), fun, move(args));
+    auto send = make_unique<Send>(loc, move(recv), fun, args);
     send->flags = flags;
     return move(send);
 }
 
 unique_ptr<Expression> mkSend1(Loc loc, unique_ptr<Expression> &recv, NameRef fun, unique_ptr<Expression> &arg1) {
-    auto nargs = vector<unique_ptr<Expression>>();
+    Send::ARGS_store nargs;
     nargs.emplace_back(move(arg1));
-    return make_unique<Send>(loc, move(recv), fun, move(nargs));
+    return make_unique<Send>(loc, move(recv), fun, nargs);
 }
 
 unique_ptr<Expression> mkSend1(Loc loc, unique_ptr<Expression> &&recv, NameRef fun, unique_ptr<Expression> &&arg1) {
@@ -42,8 +42,8 @@ unique_ptr<Expression> mkSend1(Loc loc, unique_ptr<Expression> &recv, NameRef fu
 }
 
 unique_ptr<Expression> mkSend0(Loc loc, unique_ptr<Expression> &recv, NameRef fun) {
-    auto nargs = vector<unique_ptr<Expression>>();
-    return make_unique<Send>(loc, move(recv), fun, move(nargs));
+    Send::ARGS_store nargs;
+    return make_unique<Send>(loc, move(recv), fun, nargs);
 }
 
 unique_ptr<Expression> mkSend0(Loc loc, unique_ptr<Expression> &&recv, NameRef fun) {
@@ -221,7 +221,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 rec = make_unique<Self>(what->loc, SymbolRef(0));
                 flags |= Send::PRIVATE_OK;
             }
-            vector<unique_ptr<Expression>> args;
+            Send::ARGS_store args;
             for (auto &stat : a->args) {
                 args.emplace_back(node2TreeImpl(ctx, stat));
             };
@@ -501,12 +501,12 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             result.swap(res);
         },
         [&](parser::Super *super) {
-            vector<unique_ptr<Expression>> args;
+            Send::ARGS_store args;
             for (auto &stat : super->args) {
                 args.emplace_back(node2TreeImpl(ctx, stat));
             };
 
-            unique_ptr<Expression> res = make_unique<Super>(what->loc, move(args));
+            unique_ptr<Expression> res = make_unique<Super>(what->loc, args);
             result.swap(res);
         },
         [&](parser::Integer *integer) {

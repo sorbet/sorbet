@@ -86,10 +86,10 @@ UnresolvedIdent::UnresolvedIdent(Loc loc, VarKind kind, NameRef name) : Referenc
 Assign::Assign(Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
 
-Send::Send(Loc loc, unique_ptr<Expression> recv, NameRef fun, vector<unique_ptr<Expression>> &&args)
+Send::Send(Loc loc, unique_ptr<Expression> recv, NameRef fun, Send::ARGS_store &args)
     : Expression(loc), recv(move(recv)), fun(move(fun)), args(move(args)) {}
 
-Super::Super(Loc loc, vector<unique_ptr<Expression>> &&args) : Expression(loc), args(move(args)) {}
+Super::Super(Loc loc, Send::ARGS_store &args) : Expression(loc), args(move(args)) {}
 
 NamedArg::NamedArg(Loc loc, NameRef name, unique_ptr<Expression> arg) : Expression(loc), name(name), arg(move(arg)) {}
 

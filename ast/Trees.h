@@ -298,7 +298,10 @@ class Send : public Expression {
 public:
     std::unique_ptr<Expression> recv;
     NameRef fun;
-    std::vector<std::unique_ptr<Expression>> args;
+
+    static constexpr int EXPECTED_ARGS_COUNT = 2;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
+    ARGS_store args;
     u4 flags = 0;
 
     static const int PRIVATE_OK = 1 << 0;
@@ -306,7 +309,7 @@ public:
     // null if no block passed
     std::unique_ptr<Block> block;
 
-    Send(Loc loc, std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args);
+    Send(Loc loc, std::unique_ptr<Expression> recv, NameRef fun, ARGS_store &args);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -314,9 +317,9 @@ public:
 
 class Super : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> args;
+    Send::ARGS_store args;
 
-    Super(Loc loc, std::vector<std::unique_ptr<Expression>> &&args);
+    Super(Loc loc, Send::ARGS_store &args);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
