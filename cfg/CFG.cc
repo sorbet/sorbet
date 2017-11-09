@@ -147,6 +147,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
 
     for (auto &pair : reads) {
         ast::SymbolRef what = pair.first;
+        if (!what.info(ctx).isLocalVariable())
+            continue;
         unordered_set<BasicBlock *> &where = pair.second;
         int min = INT_MAX;
 
@@ -160,6 +162,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
 
     for (auto &pair : writes) {
         ast::SymbolRef what = pair.first;
+        if (!what.info(ctx).isLocalVariable())
+            continue;
         unordered_set<BasicBlock *> &where = pair.second;
         int min = INT_MAX;
 
