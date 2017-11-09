@@ -201,7 +201,7 @@ GENERATE_HAS_MEMBER(postTransformInsSeq);
                                                                                \
     template <class FUNC, bool has> class PostPonePostTransform_##X {          \
     public:                                                                    \
-        static Expression *call(Context ctx, X *cd, FUNC &what) {               \
+        static Expression *call(Context ctx, X *cd, FUNC &what) {              \
             Error::raise("should never be called. Incorrect use of TreeMap?"); \
             return nullptr;                                                    \
         }                                                                      \
@@ -209,14 +209,14 @@ GENERATE_HAS_MEMBER(postTransformInsSeq);
                                                                                \
     template <class FUNC> class PostPonePostTransform_##X<FUNC, true> {        \
     public:                                                                    \
-        static Expression *call(Context ctx, X *cd, FUNC &func) {               \
+        static Expression *call(Context ctx, X *cd, FUNC &func) {              \
             return func.postTransform##X(ctx, cd);                             \
         }                                                                      \
     };                                                                         \
                                                                                \
     template <class FUNC> class PostPonePostTransform_##X<FUNC, false> {       \
     public:                                                                    \
-        static Expression *call(Context ctx, X *cd, FUNC &func) {               \
+        static Expression *call(Context ctx, X *cd, FUNC &func) {              \
             return cd;                                                         \
         }                                                                      \
     };

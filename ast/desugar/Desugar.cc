@@ -16,7 +16,7 @@ namespace {
 unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what);
 
 unique_ptr<Expression> mkSend(Loc loc, unique_ptr<Expression> &recv, NameRef fun, vector<unique_ptr<Expression>> &args,
-                             u4 flags = 0) {
+                              u4 flags = 0) {
     Error::check(dynamic_cast<Expression *>(recv.get()));
     auto send = make_unique<Send>(loc, move(recv), fun, move(args));
     send->flags = flags;
@@ -76,13 +76,12 @@ unique_ptr<Expression> mkAssign(Loc loc, SymbolRef symbol, unique_ptr<Expression
 }
 
 unique_ptr<Expression> mkIf(Loc loc, unique_ptr<Expression> &cond, unique_ptr<Expression> &thenp,
-                           unique_ptr<Expression> &elsep) {
-    return make_unique<If>(loc, move(cond), move(thenp),
-                           move(elsep));
+                            unique_ptr<Expression> &elsep) {
+    return make_unique<If>(loc, move(cond), move(thenp), move(elsep));
 }
 
 unique_ptr<Expression> mkIf(Loc loc, unique_ptr<Expression> &&cond, unique_ptr<Expression> &&thenp,
-                           unique_ptr<Expression> &&elsep) {
+                            unique_ptr<Expression> &&elsep) {
     return mkIf(loc, cond, thenp, elsep);
 }
 
@@ -120,8 +119,7 @@ unique_ptr<MethodDef> buildMethod(Context ctx, Loc loc, NameRef name, unique_ptr
     } else {
         Error::notImplemented();
     }
-    return make_unique<MethodDef>(loc, ctx.state.defn_todo(), name, args,
-                                  node2TreeImpl(ctx, body), false);
+    return make_unique<MethodDef>(loc, ctx.state.defn_todo(), name, args, node2TreeImpl(ctx, body), false);
 }
 
 unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what) {
@@ -343,9 +341,9 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 body.emplace_back(node2TreeImpl(ctx, module->body));
             }
             ClassDef::ANCESTORS_store ancestors;
-            unique_ptr<Expression> res = make_unique<ClassDef>(
-                what->loc, ctx.state.defn_todo(), node2TreeImpl(ctx, module->name),
-                ancestors, body, ClassDefKind::Module);
+            unique_ptr<Expression> res =
+                make_unique<ClassDef>(what->loc, ctx.state.defn_todo(), node2TreeImpl(ctx, module->name), ancestors,
+                                      body, ClassDefKind::Module);
             result.swap(res);
         },
         [&](parser::Class *claz) {
@@ -357,14 +355,13 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             } else {
                 body.emplace_back(node2TreeImpl(ctx, claz->body));
             }
-            ClassDef::ANCESTORS_store  ancestors;
+            ClassDef::ANCESTORS_store ancestors;
             if (claz->superclass != nullptr) {
                 ancestors.emplace_back(node2TreeImpl(ctx, claz->superclass));
             }
 
-            unique_ptr<Expression> res = make_unique<ClassDef>(what->loc, ctx.state.defn_todo(),
-                                                              node2TreeImpl(ctx, claz->name),
-                                                              ancestors, body, ClassDefKind::Class);
+            unique_ptr<Expression> res = make_unique<ClassDef>(
+                what->loc, ctx.state.defn_todo(), node2TreeImpl(ctx, claz->name), ancestors, body, ClassDefKind::Class);
             result.swap(res);
         },
         [&](parser::Arg *arg) {
@@ -444,8 +441,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 Error::notImplemented();
             }
 
-            send->block =
-                make_unique<Block>(what->loc, args, node2TreeImpl(ctx, block->body));
+            send->block = make_unique<Block>(what->loc, args, node2TreeImpl(ctx, block->body));
             unique_ptr<Expression> res(send.release());
 
             result.swap(res);
@@ -453,29 +449,25 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::While *wl) {
             auto cond = node2TreeImpl(ctx, wl->cond);
             auto body = node2TreeImpl(ctx, wl->body);
-            unique_ptr<Expression> res =
-                make_unique<While>(what->loc, move(cond), move(body));
+            unique_ptr<Expression> res = make_unique<While>(what->loc, move(cond), move(body));
             result.swap(res);
         },
         [&](parser::WhilePost *wl) {
             auto cond = node2TreeImpl(ctx, wl->cond);
             auto body = node2TreeImpl(ctx, wl->body);
-            unique_ptr<Expression> res =
-                make_unique<While>(what->loc, move(cond), move(body));
+            unique_ptr<Expression> res = make_unique<While>(what->loc, move(cond), move(body));
             result.swap(res);
         },
         [&](parser::Until *wl) {
             auto cond = mkSend0(what->loc, node2TreeImpl(ctx, wl->cond), Names::bang());
             auto body = node2TreeImpl(ctx, wl->body);
-            unique_ptr<Expression> res =
-                make_unique<While>(what->loc, move(cond), move(body));
+            unique_ptr<Expression> res = make_unique<While>(what->loc, move(cond), move(body));
             result.swap(res);
         },
         [&](parser::UntilPost *wl) {
             auto cond = mkSend0(what->loc, node2TreeImpl(ctx, wl->cond), Names::bang());
             auto body = node2TreeImpl(ctx, wl->body);
-            unique_ptr<Expression> res =
-                make_unique<While>(what->loc, move(cond), move(body));
+            unique_ptr<Expression> res = make_unique<While>(what->loc, move(cond), move(body));
             result.swap(res);
         },
         [&](parser::Nil *wl) {
@@ -607,12 +599,10 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 unique_ptr<Expression> res = make_unique<Return>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
-                unique_ptr<Expression> res =
-                    make_unique<Return>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
+                unique_ptr<Expression> res = make_unique<Return>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
                 result.swap(res);
             } else {
-                unique_ptr<Expression> res =
-                    make_unique<Return>(what->loc, mkEmptyTree(what->loc));
+                unique_ptr<Expression> res = make_unique<Return>(what->loc, mkEmptyTree(what->loc));
                 result.swap(res);
             }
         },
@@ -626,12 +616,10 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 unique_ptr<Expression> res = make_unique<Return>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
-                unique_ptr<Expression> res =
-                    make_unique<Return>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
+                unique_ptr<Expression> res = make_unique<Return>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
                 result.swap(res);
             } else {
-                unique_ptr<Expression> res =
-                    make_unique<Return>(what->loc, mkEmptyTree(what->loc));
+                unique_ptr<Expression> res = make_unique<Return>(what->loc, mkEmptyTree(what->loc));
                 result.swap(res);
             }
         },
@@ -645,12 +633,10 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 unique_ptr<Expression> res = make_unique<Break>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
-                unique_ptr<Expression> res =
-                    make_unique<Break>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
+                unique_ptr<Expression> res = make_unique<Break>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
                 result.swap(res);
             } else {
-                unique_ptr<Expression> res =
-                    make_unique<Break>(what->loc, mkEmptyTree(what->loc));
+                unique_ptr<Expression> res = make_unique<Break>(what->loc, mkEmptyTree(what->loc));
                 result.swap(res);
             }
         },
@@ -664,12 +650,10 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 unique_ptr<Expression> res = make_unique<Next>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
-                unique_ptr<Expression> res =
-                    make_unique<Next>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
+                unique_ptr<Expression> res = make_unique<Next>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
                 result.swap(res);
             } else {
-                unique_ptr<Expression> res =
-                    make_unique<Next>(what->loc, mkEmptyTree(what->loc));
+                unique_ptr<Expression> res = make_unique<Next>(what->loc, mkEmptyTree(what->loc));
                 result.swap(res);
             }
         },
@@ -683,12 +667,10 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 unique_ptr<Expression> res = make_unique<Yield>(what->loc, move(arr));
                 result.swap(res);
             } else if (ret->exprs.size() == 1) {
-                unique_ptr<Expression> res =
-                    make_unique<Yield>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
+                unique_ptr<Expression> res = make_unique<Yield>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
                 result.swap(res);
             } else {
-                unique_ptr<Expression> res =
-                    make_unique<Yield>(what->loc, mkEmptyTree(what->loc));
+                unique_ptr<Expression> res = make_unique<Yield>(what->loc, mkEmptyTree(what->loc));
                 result.swap(res);
             }
         },
@@ -711,8 +693,8 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 if (ast::Send *snd = dynamic_cast<ast::Send *>(lh.get())) {
                     Error::check(snd->args.size() == 0);
                     unique_ptr<Expression> getElement =
-                        mkSend1(what->loc, mkIdent(what->loc, tempSym),
-                                                          Names::squareBrackets(), make_unique<IntLit>(what->loc, i));
+                        mkSend1(what->loc, mkIdent(what->loc, tempSym), Names::squareBrackets(),
+                                make_unique<IntLit>(what->loc, i));
                     snd->args.emplace_back(move(getElement));
                     stats.emplace_back(move(lh));
                 } else if (ast::Reference *ref = dynamic_cast<ast::Reference *>(lh.get())) {
@@ -727,8 +709,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 }
                 i++;
             }
-            unique_ptr<Expression> res =
-                mkInsSeq(what->loc, move(stats), mkIdent(what->loc, tempSym));
+            unique_ptr<Expression> res = mkInsSeq(what->loc, move(stats), mkIdent(what->loc, tempSym));
             result.swap(res);
         },
         [&](parser::True *t) {

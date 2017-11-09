@@ -50,8 +50,8 @@ Reference::Reference(Loc loc) : Expression(loc) {}
 
 ControlFlow::ControlFlow(Loc loc) : Expression(loc) {}
 
-ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors,
-                   RHS_store &rhs, ClassDefKind kind)
+ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors, RHS_store &rhs,
+                   ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
 MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args,
@@ -139,7 +139,7 @@ InsSeq::InsSeq(Loc loc, vector<unique_ptr<Expression>> &&stats, unique_ptr<Expre
 
 EmptyTree::EmptyTree(Loc loc) : Expression(loc) {}
 
-    template<class T> void printElems(GlobalState &gs, stringstream &buf, T &args, int tabs) {
+template <class T> void printElems(GlobalState &gs, stringstream &buf, T &args, int tabs) {
     bool first = true;
     bool didshadow = false;
     for (auto &a : args) {
@@ -156,7 +156,7 @@ EmptyTree::EmptyTree(Loc loc) : Expression(loc) {}
     }
 };
 
-template<class T> void printArgs(GlobalState &gs, stringstream &buf, T &args, int tabs) {
+template <class T> void printArgs(GlobalState &gs, stringstream &buf, T &args, int tabs) {
     buf << "(";
     printElems(gs, buf, args, tabs);
     buf << ")";

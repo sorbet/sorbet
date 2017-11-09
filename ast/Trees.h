@@ -67,8 +67,8 @@ public:
     ANCESTORS_store ancestors;
     ClassDefKind kind;
 
-    ClassDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> name,
-             ANCESTORS_store &ancestors, RHS_store &rhs, ClassDefKind kind);
+    ClassDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> name, ANCESTORS_store &ancestors, RHS_store &rhs,
+             ClassDefKind kind);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
