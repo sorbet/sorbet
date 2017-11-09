@@ -398,6 +398,11 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
                 what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name));
             result.swap(res);
         },
+        [&](parser::Blockarg *arg) {
+            unique_ptr<Statement> res = make_unique<BlockArg>(
+                what->loc, make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Local, arg->name));
+            result.swap(res);
+        },
         [&](parser::Kwoptarg *arg) {
             unique_ptr<Statement> res = make_unique<OptionalArg>(
                 what->loc,

@@ -1,11 +1,11 @@
 class Foo
-  def self.bar()
-    1
-  end;
-end
+  def bar()
+    yield(1);
+  end
 
-class Bar
   def baz()
-    Foo.bar()
+    bar() do |r|
+      puts r # error: does not exist
+    end
   end
 end

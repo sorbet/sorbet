@@ -31,14 +31,14 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "namespace ruby_typer{" << endl << "namespace rbi{" << endl;
     for (auto &file : sourceFiles) {
         out << "  std::string " + sourceName2funcName(file) << "() {" << endl;
-        out << "  return \"" + ruby_typer::Strings::escape(ruby_typer::File::read(file.c_str())) + "\";" << endl
+        out << "  return \"" + ruby_typer::Strings::escapeCString(ruby_typer::File::read(file.c_str())) + "\";" << endl
             << "}" << endl;
     }
     out << "std::vector<std::pair<std::string, std::string>> all() {" << endl;
     out << "  std::vector<std::pair<std::string, std::string>> result;" << endl;
     for (auto &file : sourceFiles) {
-        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + ruby_typer::Strings::escape(file) +
-                   "\", " + sourceName2funcName(file) + "()));"
+        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" +
+                   ruby_typer::Strings::escapeCString(file) + "\", " + sourceName2funcName(file) + "()));"
             << endl;
     }
     out << "  return result;" << endl;

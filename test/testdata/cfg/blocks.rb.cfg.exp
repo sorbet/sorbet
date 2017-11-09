@@ -5,10 +5,18 @@ subgraph "cluster_::BlockTest#block_pass" {
     bb27_0 [shape = invhouse];
     bb27_1 [shape = parallelogram];
 
-    bb27_0 [label = "()\n<ret>$0 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$0 : <bottom>\n<never>"];
-    bb27_0 -> bb27_1;
+    bb27_0 [label = "(statTmp$3, statTmp$4, statTmp$5, statTmp$6)\nstatTmp$3 = self : BlockTest\nstatTmp$4 = 1 : Integer(1)\nstatTmp$5 = 2 : Integer(2)\nstatTmp$6 = 3 : Integer(3)\n<always>"];
+    bb27_0 -> bb27_2;
     bb27_1 [label = "()\n<never>"];
     bb27_1 -> bb27_1;
+    bb27_2 [label = "(statTmp$3, statTmp$4, statTmp$5, statTmp$6)\nouterLoops: 1\n<block-call>"];
+    bb27_2 -> bb27_4;
+    bb27_2 -> bb27_3;
+
+    bb27_3 [label = "(statTmp$3, statTmp$4, statTmp$5, statTmp$6)\n<ret>$1 = statTmp$3.foo(statTmp$4, statTmp$5, statTmp$6) : <dynamic>\n<ret>$8 = return <ret>$1 : <bottom>\n<never>"];
+    bb27_3 -> bb27_1;
+    bb27_4 [label = "(statTmp$3, statTmp$4, statTmp$5, statTmp$6)\nouterLoops: 1\nx = load_arg(statTmp$3#foo, 0) : <dynamic>\n<always>"];
+    bb27_4 -> bb27_2;
 }
 
 }

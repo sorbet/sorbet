@@ -24,7 +24,7 @@ begin
     self(<singleton class:<root>>).a()
     self(<singleton class:<root>>).b()
   end
-  def foo<foo>(<Not Supported (Blockarg)>)
+  def foo<foo>(::Object#foo#x)
     <emptyTree>
   self(<singleton class:<root>>).lambda() do ||
     <emptyTree>
@@ -58,7 +58,7 @@ begin
   next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
-  def foo<foo>(x:, ::Object#foo#y, *z:)
+  def foo<foo>(::Object#foo#x, ::Object#foo#y, ::Object#foo#z)
     <emptyTree>
   #x
   <Not Supported (LineLiteral)>
@@ -81,7 +81,7 @@ begin
     #assignTmp$5
   end
   <Not Supported (NthRef)>
-  def foo<foo>(::Object#foo#x, *y)
+  def foo<foo>(::Object#foo#x, ::Object#foo#y)
     <emptyTree>
   {#x => #y, <Not Supported (DSymbol)> => 1}
   <Not Supported (Preexe)>
@@ -107,14 +107,14 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(<singleton class:<root>>).proc() do |x|
+  self(<singleton class:<root>>).proc() do |::Object#<block>$10#x|
     <emptyTree>
   end
   break(self(TODO).foo(1) do ||
       <emptyTree>
     end)
-  def foo<foo>(**$0)
+  def foo<foo>(::Object#foo#*$0)
     <emptyTree>
-  def foo<foo>(***$1:)
+  def foo<foo>(::Object#foo#**$1)
     <emptyTree>
 end
