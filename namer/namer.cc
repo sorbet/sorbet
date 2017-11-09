@@ -221,7 +221,8 @@ public:
 
         // TODO(nelhage): forbid dynamic constant definition
         ast::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);
-        ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
+        ast::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
+        cnst.info(ctx).resultType = ast::Types::dynamic();
 
         return asgn;
     }
