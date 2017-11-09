@@ -107,20 +107,49 @@ unique_ptr<Expression> mkFalse(Loc loc) {
     return make_unique<BoolLit>(loc, false);
 }
 
-unique_ptr<MethodDef> buildMethod(Context ctx, Loc loc, NameRef name, unique_ptr<parser::Node> &argnode,
-                                  unique_ptr<parser::Node> &body) {
-    MethodDef::ARGS_store args;
+
+pair<MethodDef::ARGS_store , unique_ptr<Expression>>
+desugarArgsAndBody(Context ctx, Loc loc, unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &bodynode) {
+    MethodDef::ARGS_store  args;
+    InsSeq::STATS_store destructures;
+
+
     if (auto *oargs = dynamic_cast<parser::Args *>(argnode.get())) {
         args.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
-            args.emplace_back(node2TreeImpl(ctx, arg));
+
+            if (parser::Mlhs *lhs = dynamic_cast<parser::Mlhs *>(arg.get())) {
+                ast::NameRef temporary = ctx.state.freshNameUnique(UniqueNameKind::Desugar, Names::destructureArg());
+                args.emplace_back(make_unique<UnresolvedIdent>(arg->loc, UnresolvedIdent::Local, temporary));
+                unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
+                unique_ptr<parser::Node> destructure = make_unique<parser::Masgn>(arg->loc, move(arg), move(lvarNode));
+                destructures.emplace_back(node2TreeImpl(ctx, destructure));
+            } else {
+                args.emplace_back(node2TreeImpl(ctx, arg));
+            }
         }
     } else if (argnode.get() == nullptr) {
         // do nothing
     } else {
         Error::notImplemented();
     }
-    return make_unique<MethodDef>(loc, ctx.state.defn_todo(), name, args, node2TreeImpl(ctx, body), false);
+
+    auto body = node2TreeImpl(ctx, bodynode);
+    if (destructures.size() > 0) {
+        Loc bodyLoc = body->loc;
+        if (bodyLoc.is_none())
+            bodyLoc = loc;
+        body = make_unique<InsSeq>(loc, destructures, move(body));
+    }
+
+    return make_pair(move(args), move(body));
+}
+
+unique_ptr<MethodDef> buildMethod(Context ctx, Loc loc, NameRef name, unique_ptr<parser::Node> &argnode,
+                                  unique_ptr<parser::Node> &body) {
+    auto argsAndBody = desugarArgsAndBody(ctx, loc, argnode, body);
+    return make_unique<MethodDef>(loc, ctx.state.defn_todo(), name, argsAndBody.first,
+                                  move(argsAndBody.second), false);
 }
 
 unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what) {
@@ -421,44 +450,15 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             result.swap(res);
         },
         [&](parser::Block *block) {
-            MethodDef::ARGS_store args;
             auto recv = node2TreeImpl(ctx, block->send);
             Error::check(dynamic_cast<Send *>(recv.get()));
             unique_ptr<Send> send(dynamic_cast<Send *>(recv.release()));
-            InsSeq::STATS_store destructures;
 
-            if (auto *oargs = dynamic_cast<parser::Args *>(block->args.get())) {
-                args.reserve(oargs->args.size());
-                for (auto &arg : oargs->args) {
-                    if (parser::Mlhs *lhs = dynamic_cast<parser::Mlhs *>(arg.get())) {
-                        ast::NameRef temporary =
-                            ctx.state.freshNameUnique(UniqueNameKind::Desugar, Names::destructureArg());
-                        args.emplace_back(make_unique<UnresolvedIdent>(arg->loc, UnresolvedIdent::Local, temporary));
-                        unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
-                        unique_ptr<parser::Node> destructure =
-                            make_unique<parser::Masgn>(arg->loc, move(arg), move(lvarNode));
-                        destructures.emplace_back(node2TreeImpl(ctx, destructure));
-                    } else {
-                        args.emplace_back(node2TreeImpl(ctx, arg));
-                    }
-                }
-            } else if (block->args.get() == nullptr) {
-                // do nothing
-            } else {
-                Error::notImplemented();
-            }
+            auto argsAndBody = desugarArgsAndBody(ctx, block->loc, block->args, block->body);
 
-            auto body = node2TreeImpl(ctx, block->body);
-            if (destructures.size() > 0) {
-                Loc loc = body->loc;
-                if (loc.is_none())
-                    loc = block->loc;
-                body = make_unique<InsSeq>(loc, destructures, move(body));
-            }
-
-            send->block = make_unique<Block>(what->loc, args, move(body));
+            send->block =
+                make_unique<Block>(what->loc, argsAndBody.first, move(argsAndBody.second));
             unique_ptr<Expression> res(send.release());
-
             result.swap(res);
         },
         [&](parser::While *wl) {
