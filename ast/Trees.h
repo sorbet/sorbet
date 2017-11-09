@@ -79,12 +79,15 @@ public:
 class MethodDef : public Declaration {
 public:
     std::unique_ptr<Expression> rhs;
-    std::vector<std::unique_ptr<Expression>> args;
+
+    static constexpr int EXPECTED_ARGS_COUNT = 2;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
+    ARGS_store args;
+
     NameRef name;
     bool isSelf;
 
-    MethodDef(Loc loc, SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
-              std::unique_ptr<Expression> rhs, bool isSelf);
+    MethodDef(Loc loc, SymbolRef symbol, NameRef name, ARGS_store &args, std::unique_ptr<Expression> rhs, bool isSelf);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -437,11 +440,11 @@ public:
 
 class Block : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> args;
+    MethodDef::ARGS_store args;
     std::unique_ptr<Expression> body;
     SymbolRef symbol;
 
-    Block(Loc loc, std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> body);
+    Block(Loc loc, MethodDef::ARGS_store &args, std::unique_ptr<Expression> body);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

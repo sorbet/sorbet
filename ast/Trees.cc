@@ -54,8 +54,7 @@ ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, ANCES
                    ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
-MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args,
-                     unique_ptr<Expression> rhs, bool isSelf)
+MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, ARGS_store &args, unique_ptr<Expression> rhs, bool isSelf)
     : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {}
 
 Declaration::Declaration(Loc loc, SymbolRef symbol) : Expression(loc), symbol(symbol) {}
@@ -122,7 +121,7 @@ HashSplat::HashSplat(Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg
 
 Self::Self(Loc loc, SymbolRef claz) : Expression(loc), claz(claz) {}
 
-Block::Block(Loc loc, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> body)
+Block::Block(Loc loc, MethodDef::ARGS_store &args, unique_ptr<Expression> body)
     : Expression(loc), args(move(args)), body(move(body)){};
 
 NotSupported::NotSupported(Loc loc, const string &why) : Expression(loc), why(why) {}

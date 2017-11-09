@@ -120,7 +120,7 @@ public:
         Error::notImplemented();
     }
 
-    void fillInArgs(ast::Context ctx, vector<unique_ptr<ast::Expression>> &args, ast::Symbol &symbol) {
+    void fillInArgs(ast::Context ctx, ast::MethodDef::ARGS_store &args, ast::Symbol &symbol) {
         // Fill in the arity right with TODOs
         for (auto &arg : args) {
             ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());

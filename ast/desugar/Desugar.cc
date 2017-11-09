@@ -109,7 +109,7 @@ unique_ptr<Expression> mkFalse(Loc loc) {
 
 unique_ptr<MethodDef> buildMethod(Context ctx, Loc loc, NameRef name, unique_ptr<parser::Node> &argnode,
                                   unique_ptr<parser::Node> &body) {
-    vector<unique_ptr<Expression>> args;
+    MethodDef::ARGS_store args;
     if (auto *oargs = dynamic_cast<parser::Args *>(argnode.get())) {
         for (auto &arg : oargs->args) {
             args.emplace_back(node2TreeImpl(ctx, arg));
@@ -427,7 +427,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             result.swap(res);
         },
         [&](parser::Block *block) {
-            vector<unique_ptr<Expression>> args;
+            MethodDef::ARGS_store args;
             auto recv = node2TreeImpl(ctx, block->send);
             Error::check(dynamic_cast<Send *>(recv.get()));
             unique_ptr<Send> send(dynamic_cast<Send *>(recv.release()));
