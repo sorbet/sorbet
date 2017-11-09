@@ -8,7 +8,10 @@
 namespace ruby_typer {
 namespace ast {
 namespace desugar {
-using namespace parser;
+
+using namespace std;
+
+namespace {
 
 unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what);
 
@@ -57,10 +60,6 @@ unique_ptr<Statement> mkSend0(Loc loc, unique_ptr<Statement> &&recv, NameRef fun
 
 unique_ptr<Statement> mkIdent(Loc loc, SymbolRef symbol) {
     return make_unique<Ident>(loc, symbol);
-}
-
-unique_ptr<Statement> cpIdent(Loc loc, Ident &id) {
-    return make_unique<Ident>(loc, id.symbol);
 }
 
 unique_ptr<Statement> cpRef(Loc loc, Reference &name) {
@@ -755,6 +754,7 @@ unique_ptr<Statement> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what)
     Error::check(result.get());
     return result;
 }
+} // namespace
 
 unique_ptr<Statement> node2Tree(Context ctx, unique_ptr<parser::Node> &what) {
     auto result = node2TreeImpl(ctx, what);
