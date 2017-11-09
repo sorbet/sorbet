@@ -297,6 +297,12 @@ public:
     static inline NameRef new_() {
         return NameRef(34);
     };
+
+    // Used to generate temporary names for destructuring arguments ala proc do
+    //  |(x,y)|; end
+    static inline NameRef destructureArg() {
+        return NameRef(35);
+    }
 };
 
 class Name {

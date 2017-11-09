@@ -425,9 +425,22 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             auto recv = node2TreeImpl(ctx, block->send);
             Error::check(dynamic_cast<Send *>(recv.get()));
             unique_ptr<Send> send(dynamic_cast<Send *>(recv.release()));
+            InsSeq::STATS_store destructures;
+
             if (auto *oargs = dynamic_cast<parser::Args *>(block->args.get())) {
+                args.reserve(oargs->args.size());
                 for (auto &arg : oargs->args) {
-                    args.emplace_back(node2TreeImpl(ctx, arg));
+                    if (parser::Mlhs *lhs = dynamic_cast<parser::Mlhs *>(arg.get())) {
+                        ast::NameRef temporary =
+                            ctx.state.freshNameUnique(UniqueNameKind::Desugar, Names::destructureArg());
+                        args.emplace_back(make_unique<UnresolvedIdent>(arg->loc, UnresolvedIdent::Local, temporary));
+                        unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
+                        unique_ptr<parser::Node> destructure =
+                            make_unique<parser::Masgn>(arg->loc, move(arg), move(lvarNode));
+                        destructures.emplace_back(node2TreeImpl(ctx, destructure));
+                    } else {
+                        args.emplace_back(node2TreeImpl(ctx, arg));
+                    }
                 }
             } else if (block->args.get() == nullptr) {
                 // do nothing
@@ -435,7 +448,15 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 Error::notImplemented();
             }
 
-            send->block = make_unique<Block>(what->loc, args, node2TreeImpl(ctx, block->body));
+            auto body = node2TreeImpl(ctx, block->body);
+            if (destructures.size() > 0) {
+                Loc loc = body->loc;
+                if (loc.is_none())
+                    loc = block->loc;
+                body = make_unique<InsSeq>(loc, destructures, move(body));
+            }
+
+            send->block = make_unique<Block>(what->loc, args, move(body));
             unique_ptr<Expression> res(send.release());
 
             result.swap(res);
