@@ -195,7 +195,7 @@ private:
 
     SymbolRef synthesizeClass(UTF8Desc name);
 
-    SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
+    SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags, bool alwaysPinned);
 
     SymbolRef getTopLevelClassSymbol(NameRef name);
 
