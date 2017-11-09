@@ -107,7 +107,7 @@ public:
         }
         return result;
     }
-    
+
     shared_ptr<ast::Type> dropLiteral(shared_ptr<ast::Type> tp) {
         if (auto *a = dynamic_cast<ast::Literal *>(tp.get())) {
             return a->underlying;
