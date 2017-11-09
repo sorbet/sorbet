@@ -28,6 +28,13 @@ public:
             return instanceTypeAndOrigin;
         }
 
+        if (symbol.info(ctx).resultType != nullptr) {
+            ast::TypeAndOrigins typeAndOrigin;
+            typeAndOrigin.type = symbol.info(ctx).resultType;
+            typeAndOrigin.origins.push_back(symbol.info(ctx).definitionLoc);
+            return typeAndOrigin;
+        }
+
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             ast::TypeAndOrigins ret;

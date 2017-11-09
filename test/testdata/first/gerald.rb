@@ -38,7 +38,7 @@ module Opus::CIBot::Gerald
       end
 
       budget = MatchTimeBudget.new
-      @rules.select do |r| # error: select does not exist
+      @rules.select do |r|
         budget.time_rule(r) do
           r.matches?(match_context)
         end
@@ -70,7 +70,7 @@ module Opus::CIBot::Gerald
     # Should the name be suffixed with `-stripe`?
     def user_stripe_suffix?
       # non internal (GHE) repos need usernames to be suffixed with `-stripe`
-      !@repo.start_with?('stripe-internal/') # error: start_with? does not exist
+      !@repo.start_with?('stripe-internal/')
     end
   end
 
@@ -118,23 +118,23 @@ module Opus::CIBot::Gerald
     end
 
     def added_files
-      @parsed.select {|part| part[:a_name] == '/dev/null'}.map {|part| part[:b_name]} # error: select does not exist
+      @parsed.select {|part| part[:a_name] == '/dev/null'}.map {|part| part[:b_name]}
     end
 
     def deleted_files
-      @parsed.select {|part| part[:b_name] == '/dev/null'}.map {|part| part[:a_name]} # error: select does not exist
+      @parsed.select {|part| part[:b_name] == '/dev/null'}.map {|part| part[:a_name]}
     end
 
     def changed_files
-      @parsed.select {|part| part[:a_name] == part[:b_name]}.map {|part| part[:b_name]} # error: select does not exist
+      @parsed.select {|part| part[:a_name] == part[:b_name]}.map {|part| part[:b_name]}
     end
 
     def added_lines
-      @parsed.map {|part| part[:added_lines]}.flatten # error: map does not exist
+      @parsed.map {|part| part[:added_lines]}.flatten
     end
 
     def removed_lines
-      @parsed.map {|part| part[:removed_lines]}.flatten # error: map does not exist
+      @parsed.map {|part| part[:removed_lines]}.flatten
     end
 
     def changed_lines

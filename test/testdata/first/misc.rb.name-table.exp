@@ -1,7 +1,7 @@
 class <singleton class:<root>> (Class)
-  field @iv
+  field @iv -> <dynamic>
 class <singleton class:<root>> (Class)
-  field @iv
+  field @iv -> <dynamic>
 class <singleton class:Object> (Class)
   method classmeth ()
 class Opus ()
@@ -17,5 +17,5 @@ field x
 field xaaaaz
 field y
 field ||$4
-static-field @@cv
+static-field @@cv -> <dynamic>
 
