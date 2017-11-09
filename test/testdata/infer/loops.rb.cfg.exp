@@ -1,0 +1,63 @@
+digraph "loops.rb"{
+subgraph "cluster_::HasLoops#variable_only_inside_loop" {
+    label = "::HasLoops#variable_only_inside_loop";
+    color = blue;
+    bb27_0 [shape = invhouse];
+    bb27_1 [shape = parallelogram];
+
+    bb27_0 [label = "()\n<always>"];
+    bb27_0 -> bb27_2;
+    bb27_1 [label = "()\n<never>"];
+    bb27_1 -> bb27_1;
+    bb27_2 [label = "()\nouterLoops: 1\nwhileTmp$2 = true : TrueClass(true)\nwhileTmp$2"];
+    bb27_2 -> bb27_3;
+    bb27_2 -> bb27_4;
+
+    bb27_3 [label = "()\nouterLoops: 1\na = 1 : Integer(1)\n<always>"];
+    bb27_3 -> bb27_2;
+    bb27_4 [label = "()\n<ret>$0 = nil : NilClass\n<ret>$4 = return <ret>$0 : <bottom>\n<never>"];
+    bb27_4 -> bb27_1;
+}
+
+subgraph "cluster_::HasLoops#incorrect_assignment" {
+    label = "::HasLoops#incorrect_assignment";
+    color = blue;
+    bb29_0 [shape = invhouse];
+    bb29_1 [shape = parallelogram];
+
+    bb29_0 [label = "(a)\na = s : String(\"s\")\n<always>"];
+    bb29_0 -> bb29_2;
+    bb29_1 [label = "()\n<never>"];
+    bb29_1 -> bb29_1;
+    bb29_2 [label = "(a)\nouterLoops: 1\nwhileTmp$8 = false : FalseClass(false)\nwhileTmp$8"];
+    bb29_2 -> bb29_3;
+    bb29_2 -> bb29_4;
+
+    bb29_3 [label = "(a)\nouterLoops: 1\na = 1 : <dynamic>\n<always>"];
+    bb29_3 -> bb29_2;
+    bb29_4 [label = "()\n<ret>$5 = nil : NilClass\n<ret>$10 = return <ret>$5 : <bottom>\n<never>"];
+    bb29_4 -> bb29_1;
+}
+
+subgraph "cluster_::HasLoops#correct_assignment" {
+    label = "::HasLoops#correct_assignment";
+    color = blue;
+    bb31_0 [shape = invhouse];
+    bb31_1 [shape = parallelogram];
+
+    bb31_0 [label = "(a)\na = s : String(\"s\")\n<always>"];
+    bb31_0 -> bb31_2;
+    bb31_1 [label = "()\n<never>"];
+    bb31_1 -> bb31_1;
+    bb31_2 [label = "(a)\nouterLoops: 1\nwhileTmp$14 = false : FalseClass(false)\nwhileTmp$14"];
+    bb31_2 -> bb31_3;
+    bb31_2 -> bb31_4;
+
+    bb31_3 [label = "(a)\nouterLoops: 1\na = a : <dynamic>\n<always>"];
+    bb31_3 -> bb31_2;
+    bb31_4 [label = "()\n<ret>$11 = nil : NilClass\n<ret>$16 = return <ret>$11 : <bottom>\n<never>"];
+    bb31_4 -> bb31_1;
+}
+
+}
+
