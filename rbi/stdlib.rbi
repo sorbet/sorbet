@@ -35,10 +35,6 @@ class BigDecimal < Numeric
 end
 module BigMath
 end
-class Integer < Numeric
-end
-class Bignum < Integer
-end
 class Binding < Object
 end
 class CSV < Object
@@ -63,9 +59,13 @@ class Module < Object
 end
 class Class < Module
 end
-class Complex < Numeric
+class IndexError < StandardError
 end
-class ConditionVariable < Object
+class StopIteration < IndexError
+end
+class ClosedQueueError < StopIteration
+end
+class Complex < Numeric
 end
 module Coverage
 end
@@ -77,6 +77,30 @@ end
 class Date::Infinity < Numeric
 end
 class DateTime < Date
+end
+module DidYouMean
+end
+class DidYouMean::ClassNameChecker < Object
+end
+module DidYouMean::Correctable
+end
+class DidYouMean::Formatter < Object
+end
+module DidYouMean::Jaro
+end
+module DidYouMean::JaroWinkler
+end
+module DidYouMean::Levenshtein
+end
+class DidYouMean::MethodNameChecker < Object
+end
+module DidYouMean::NameErrorCheckers
+end
+class DidYouMean::NullChecker < Object
+end
+class DidYouMean::SpellChecker < Object
+end
+class DidYouMean::VariableNameChecker < Object
 end
 class Dir < Object
   include Enumerable
@@ -121,31 +145,39 @@ class Errno::EADDRINUSE < SystemCallError
 end
 class Errno::EADDRNOTAVAIL < SystemCallError
 end
+class Errno::EADV < SystemCallError
+end
 class Errno::EAFNOSUPPORT < SystemCallError
 end
 class Errno::EAGAIN < SystemCallError
 end
 class Errno::EALREADY < SystemCallError
 end
-class Errno::EAUTH < SystemCallError
-end
-class Errno::EBADARCH < SystemCallError
-end
-class Errno::EBADEXEC < SystemCallError
+class Errno::EBADE < SystemCallError
 end
 class Errno::EBADF < SystemCallError
 end
-class Errno::EBADMACHO < SystemCallError
+class Errno::EBADFD < SystemCallError
 end
 class Errno::EBADMSG < SystemCallError
 end
-class Errno::EBADRPC < SystemCallError
+class Errno::EBADR < SystemCallError
+end
+class Errno::EBADRQC < SystemCallError
+end
+class Errno::EBADSLT < SystemCallError
+end
+class Errno::EBFONT < SystemCallError
 end
 class Errno::EBUSY < SystemCallError
 end
 class Errno::ECANCELED < SystemCallError
 end
 class Errno::ECHILD < SystemCallError
+end
+class Errno::ECHRNG < SystemCallError
+end
+class Errno::ECOMM < SystemCallError
 end
 class Errno::ECONNABORTED < SystemCallError
 end
@@ -157,9 +189,9 @@ class Errno::EDEADLK < SystemCallError
 end
 class Errno::EDESTADDRREQ < SystemCallError
 end
-class Errno::EDEVERR < SystemCallError
-end
 class Errno::EDOM < SystemCallError
+end
+class Errno::EDOTDOT < SystemCallError
 end
 class Errno::EDQUOT < SystemCallError
 end
@@ -169,11 +201,11 @@ class Errno::EFAULT < SystemCallError
 end
 class Errno::EFBIG < SystemCallError
 end
-class Errno::EFTYPE < SystemCallError
-end
 class Errno::EHOSTDOWN < SystemCallError
 end
 class Errno::EHOSTUNREACH < SystemCallError
+end
+class Errno::EHWPOISON < SystemCallError
 end
 class Errno::EIDRM < SystemCallError
 end
@@ -191,7 +223,37 @@ class Errno::EISCONN < SystemCallError
 end
 class Errno::EISDIR < SystemCallError
 end
+class Errno::EISNAM < SystemCallError
+end
+class Errno::EKEYEXPIRED < SystemCallError
+end
+class Errno::EKEYREJECTED < SystemCallError
+end
+class Errno::EKEYREVOKED < SystemCallError
+end
+class Errno::EL2HLT < SystemCallError
+end
+class Errno::EL2NSYNC < SystemCallError
+end
+class Errno::EL3HLT < SystemCallError
+end
+class Errno::EL3RST < SystemCallError
+end
+class Errno::ELIBACC < SystemCallError
+end
+class Errno::ELIBBAD < SystemCallError
+end
+class Errno::ELIBEXEC < SystemCallError
+end
+class Errno::ELIBMAX < SystemCallError
+end
+class Errno::ELIBSCN < SystemCallError
+end
+class Errno::ELNRNG < SystemCallError
+end
 class Errno::ELOOP < SystemCallError
+end
+class Errno::EMEDIUMTYPE < SystemCallError
 end
 class Errno::EMFILE < SystemCallError
 end
@@ -203,7 +265,7 @@ class Errno::EMULTIHOP < SystemCallError
 end
 class Errno::ENAMETOOLONG < SystemCallError
 end
-class Errno::ENEEDAUTH < SystemCallError
+class Errno::ENAVAIL < SystemCallError
 end
 class Errno::ENETDOWN < SystemCallError
 end
@@ -213,9 +275,11 @@ class Errno::ENETUNREACH < SystemCallError
 end
 class Errno::ENFILE < SystemCallError
 end
-class Errno::ENOATTR < SystemCallError
+class Errno::ENOANO < SystemCallError
 end
 class Errno::ENOBUFS < SystemCallError
+end
+class Errno::ENOCSI < SystemCallError
 end
 class Errno::ENODATA < SystemCallError
 end
@@ -225,15 +289,21 @@ class Errno::ENOENT < SystemCallError
 end
 class Errno::ENOEXEC < SystemCallError
 end
+class Errno::ENOKEY < SystemCallError
+end
 class Errno::ENOLCK < SystemCallError
 end
 class Errno::ENOLINK < SystemCallError
+end
+class Errno::ENOMEDIUM < SystemCallError
 end
 class Errno::ENOMEM < SystemCallError
 end
 class Errno::ENOMSG < SystemCallError
 end
-class Errno::ENOPOLICY < SystemCallError
+class Errno::ENONET < SystemCallError
+end
+class Errno::ENOPKG < SystemCallError
 end
 class Errno::ENOPROTOOPT < SystemCallError
 end
@@ -253,13 +323,15 @@ class Errno::ENOTDIR < SystemCallError
 end
 class Errno::ENOTEMPTY < SystemCallError
 end
+class Errno::ENOTNAM < SystemCallError
+end
 class Errno::ENOTRECOVERABLE < SystemCallError
 end
 class Errno::ENOTSOCK < SystemCallError
 end
-class Errno::ENOTSUP < SystemCallError
-end
 class Errno::ENOTTY < SystemCallError
+end
+class Errno::ENOTUNIQ < SystemCallError
 end
 class Errno::ENXIO < SystemCallError
 end
@@ -275,33 +347,25 @@ class Errno::EPFNOSUPPORT < SystemCallError
 end
 class Errno::EPIPE < SystemCallError
 end
-class Errno::EPROCLIM < SystemCallError
-end
-class Errno::EPROCUNAVAIL < SystemCallError
-end
-class Errno::EPROGMISMATCH < SystemCallError
-end
-class Errno::EPROGUNAVAIL < SystemCallError
-end
 class Errno::EPROTO < SystemCallError
 end
 class Errno::EPROTONOSUPPORT < SystemCallError
 end
 class Errno::EPROTOTYPE < SystemCallError
 end
-class Errno::EPWROFF < SystemCallError
-end
-class Errno::EQFULL < SystemCallError
-end
 class Errno::ERANGE < SystemCallError
+end
+class Errno::EREMCHG < SystemCallError
 end
 class Errno::EREMOTE < SystemCallError
 end
+class Errno::EREMOTEIO < SystemCallError
+end
+class Errno::ERESTART < SystemCallError
+end
+class Errno::ERFKILL < SystemCallError
+end
 class Errno::EROFS < SystemCallError
-end
-class Errno::ERPCMISMATCH < SystemCallError
-end
-class Errno::ESHLIBVERS < SystemCallError
 end
 class Errno::ESHUTDOWN < SystemCallError
 end
@@ -311,7 +375,11 @@ class Errno::ESPIPE < SystemCallError
 end
 class Errno::ESRCH < SystemCallError
 end
+class Errno::ESRMNT < SystemCallError
+end
 class Errno::ESTALE < SystemCallError
+end
+class Errno::ESTRPIPE < SystemCallError
 end
 class Errno::ETIME < SystemCallError
 end
@@ -321,9 +389,15 @@ class Errno::ETOOMANYREFS < SystemCallError
 end
 class Errno::ETXTBSY < SystemCallError
 end
+class Errno::EUCLEAN < SystemCallError
+end
+class Errno::EUNATCH < SystemCallError
+end
 class Errno::EUSERS < SystemCallError
 end
 class Errno::EXDEV < SystemCallError
+end
+class Errno::EXFULL < SystemCallError
 end
 class Errno::NOERROR < SystemCallError
 end
@@ -345,8 +419,6 @@ class File::Stat < Object
   include Comparable
 end
 module FileTest
-end
-class Fixnum < Integer
 end
 class Float < Numeric
 end
@@ -409,6 +481,10 @@ end
 class Gem::List < Object
   include Enumerable
 end
+class Gem::MissingSpecError < Gem::LoadError
+end
+class Gem::MissingSpecVersionError < Gem::MissingSpecError
+end
 class Gem::OperationNotSupportedError < Gem::Exception
 end
 class Gem::PathSupport < Object
@@ -457,9 +533,21 @@ class Hash < Object
 end
 module IO::WaitReadable
 end
+class IO::EAGAINWaitReadable < Errno::EAGAIN
+  include IO::WaitReadable
+end
 module IO::WaitWritable
 end
-class IndexError < StandardError
+class IO::EAGAINWaitWritable < Errno::EAGAIN
+  include IO::WaitWritable
+end
+class IO::EINPROGRESSWaitReadable < Errno::EINPROGRESS
+  include IO::WaitReadable
+end
+class IO::EINPROGRESSWaitWritable < Errno::EINPROGRESS
+  include IO::WaitWritable
+end
+class Integer < Numeric
 end
 class SignalException < Exception
 end
@@ -488,8 +576,6 @@ class MonitorMixin::ConditionVariable < Object
 end
 class MonitorMixin::ConditionVariable::Timeout < Exception
 end
-class Mutex < Object
-end
 class NameError < StandardError
 end
 class NilClass < Object
@@ -503,6 +589,7 @@ end
 module ObjectSpace
 end
 class ObjectSpace::WeakMap < Object
+  include Enumerable
 end
 class Proc < Object
 end
@@ -514,11 +601,18 @@ class Process::Status < Object
 end
 module Process::Sys
 end
+class Process::Tms < Struct
+end
 module Process::UID
 end
-class Queue < Object
+class Thread < Object
+end
+class Process::Waiter < Thread
+end
+module Random::Formatter
 end
 class Random < Object
+  include Random::Formatter
 end
 class Range < Object
   include Enumerable
@@ -533,8 +627,6 @@ class RegexpError < StandardError
 end
 class RubyVM < Object
 end
-class RubyVM::Env < Object
-end
 class RubyVM::InstructionSequence < Object
 end
 class SecurityError < Exception
@@ -543,19 +635,13 @@ module Signal
 end
 module SingleForwardable
 end
-class SizedQueue < Queue
-end
-class StopIteration < IndexError
-end
 class String < Object
   include Comparable
 end
 class StringIO < Data
-  include IO::writable
-  include IO::readable
+  include IO::generic_writable
+  include IO::generic_readable
   include Enumerable
-end
-class Struct::Tms < Struct
 end
 class Symbol < Object
   include Comparable
@@ -564,11 +650,17 @@ class SyntaxError < ScriptError
 end
 class SystemStackError < Exception
 end
-class Thread < Object
-end
 class Thread::Backtrace < Object
 end
 class Thread::Backtrace::Location < Object
+end
+class Thread::ConditionVariable < Object
+end
+class Thread::Mutex < Object
+end
+class Thread::Queue < Object
+end
+class Thread::SizedQueue < Thread::Queue
 end
 class ThreadError < StandardError
 end
@@ -583,7 +675,7 @@ class TrueClass < Object
 end
 class TypeError < StandardError
 end
-module URI::REGEXP
+module URI::RFC2396_REGEXP
 end
 module URI
 end
@@ -595,7 +687,7 @@ module URI::Escape
 end
 class URI::Generic < Object
   include URI
-  include URI::REGEXP
+  include URI::RFC2396_REGEXP
 end
 class URI::FTP < URI::Generic
 end
@@ -613,14 +705,20 @@ class URI::LDAPS < URI::LDAP
 end
 class URI::MailTo < URI::Generic
 end
-class URI::Parser < Object
-  include URI::REGEXP
+class URI::RFC2396_Parser < Object
+  include URI::RFC2396_REGEXP
 end
-module URI::REGEXP::PATTERN
+module URI::RFC2396_REGEXP::PATTERN
+end
+class URI::RFC3986_Parser < Object
 end
 module URI::Util
 end
 class UnboundMethod < Object
+end
+class UncaughtThrowError < ArgumentError
+end
+module Warning
 end
 class ZeroDivisionError < StandardError
 end
@@ -3137,11 +3235,11 @@ module Gem
 
   standard_method(
     {
-      args: String,
+      gem_name: String,
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def self.datadir(args); end
+  def self.datadir(gem_name); end
 
   standard_method(
     {},
