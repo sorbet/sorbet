@@ -28,7 +28,7 @@ public:
             return instanceTypeAndOrigin;
         }
 
-        if (symbol.info(ctx).resultType != nullptr) {
+        if (symbol.info(ctx).resultType.get() != nullptr) {
             ast::TypeAndOrigins typeAndOrigin;
             typeAndOrigin.type = symbol.info(ctx).resultType;
             typeAndOrigin.origins.push_back(symbol.info(ctx).definitionLoc);
