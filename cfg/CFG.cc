@@ -437,7 +437,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target,
+BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target,
                       int loops) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
@@ -596,7 +596,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  ret = current;
              },
 
-             [&](ast::Statement *n) {
+             [&](ast::Expression *n) {
                  current->exprs.emplace_back(target, n->loc, make_unique<NotSupported>(""));
                  ret = current;
              },

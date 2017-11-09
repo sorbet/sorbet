@@ -47,7 +47,7 @@ class NameInserter {
 
     vector<LocalFrame> scopeStack;
 
-    unique_ptr<ast::Expression> addAncestor(ast::Context ctx, ast::ClassDef *klass, unique_ptr<ast::Statement> &node) {
+    unique_ptr<ast::Expression> addAncestor(ast::Context ctx, ast::ClassDef *klass, unique_ptr<ast::Expression> &node) {
         auto send = dynamic_cast<ast::Send *>(node.get());
         if (send == nullptr) {
             Error::check(node.get() != nullptr);
@@ -95,7 +95,7 @@ public:
         scopeStack.pop_back();
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         auto toRemove =
-            remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Statement> &line) {
+            remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Expression> &line) {
                 auto newAncestor = addAncestor(ctx, klass, line);
                 if (newAncestor) {
                     klass->ancestors.emplace_back(move(newAncestor));
@@ -242,7 +242,7 @@ private:
     }
 };
 
-unique_ptr<ast::Statement> Namer::run(ast::Context &ctx, unique_ptr<ast::Statement> tree) {
+unique_ptr<ast::Expression> Namer::run(ast::Context &ctx, unique_ptr<ast::Expression> tree) {
     NameInserter nameInserter;
     tree = ast::TreeMap<NameInserter>::apply(ctx, nameInserter, move(tree));
     return Namer::resolve(ctx, move(tree));

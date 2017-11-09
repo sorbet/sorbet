@@ -3,7 +3,6 @@
 
 // makes lldb work. Don't remove please
 template class std::unique_ptr<ruby_typer::ast::Expression>;
-template class std::unique_ptr<ruby_typer::ast::Statement>;
 template class std::unique_ptr<ruby_typer::ast::Reference>;
 
 using namespace std;
@@ -45,24 +44,13 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
-unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &statement) {
-    Error::check(dynamic_cast<Expression *>(statement.get()));
-    return unique_ptr<Expression>(dynamic_cast<Expression *>(statement.release()));
-}
-
-unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&statement) {
-    return fromStatement(statement);
-}
-
-Statement::Statement(Loc loc) : loc(loc) {}
-
-Expression::Expression(Loc loc) : Statement(loc) {}
+Expression::Expression(Loc loc) : loc(loc) {}
 
 Reference::Reference(Loc loc) : Expression(loc) {}
 
 ControlFlow::ControlFlow(Loc loc) : Expression(loc) {}
 
-ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &ancestors,
+ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors,
                    RHS_store &rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
@@ -77,7 +65,7 @@ ConstDef::ConstDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> rhs) : Decl
 If::If(Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : ControlFlow(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
-While::While(Loc loc, unique_ptr<Expression> cond, unique_ptr<Statement> body)
+While::While(Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> body)
     : ControlFlow(loc), cond(move(cond)), body(move(body)) {}
 
 Break::Break(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
@@ -146,12 +134,12 @@ Hash::Hash(Loc loc, vector<unique_ptr<Expression>> &keys, vector<unique_ptr<Expr
 
 Array::Array(Loc loc, vector<unique_ptr<Expression>> &elems) : Expression(loc), elems(move(elems)) {}
 
-InsSeq::InsSeq(Loc loc, vector<unique_ptr<Statement>> &&stats, unique_ptr<Expression> expr)
+InsSeq::InsSeq(Loc loc, vector<unique_ptr<Expression>> &&stats, unique_ptr<Expression> expr)
     : Expression(loc), stats(move(stats)), expr(move(expr)) {}
 
 EmptyTree::EmptyTree(Loc loc) : Expression(loc) {}
 
-void printElems(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
+    template<class T> void printElems(GlobalState &gs, stringstream &buf, T &args, int tabs) {
     bool first = true;
     bool didshadow = false;
     for (auto &a : args) {
@@ -168,7 +156,7 @@ void printElems(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression
     }
 };
 
-void printArgs(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
+template<class T> void printArgs(GlobalState &gs, stringstream &buf, T &args, int tabs) {
     buf << "(";
     printElems(gs, buf, args, tabs);
     buf << ")";

@@ -6,10 +6,10 @@ namespace namer {
 
 class Namer {
 public:
-    static unique_ptr<ast::Statement> run(ast::Context &ctx, unique_ptr<ast::Statement> tree);
+    static unique_ptr<ast::Expression> run(ast::Context &ctx, unique_ptr<ast::Expression> tree);
 
 private:
-    static unique_ptr<ast::Statement> resolve(ast::Context &ctx, unique_ptr<ast::Statement> tree);
+    static unique_ptr<ast::Expression> resolve(ast::Context &ctx, unique_ptr<ast::Expression> tree);
 
     Namer() = default;
 };

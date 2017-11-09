@@ -5,7 +5,7 @@ namespace ast {
 
 class Verifier {
 public:
-    static std::unique_ptr<Statement> run(Context ctx, std::unique_ptr<Statement> node);
+    static std::unique_ptr<Expression> run(Context ctx, std::unique_ptr<Expression> node);
 };
 
 } // namespace ast

@@ -30,7 +30,7 @@ private:
     unique_ptr<ast::GlobalState> ctxPtr;
 };
 
-unique_ptr<ast::Statement> getTree(ast::GlobalState &cb, string str) {
+unique_ptr<ast::Expression> getTree(ast::GlobalState &cb, string str) {
     auto ast = parser::Parser::run(cb, "<test>", str);
     ruby_typer::ast::Context ctx(cb, cb.defn_root());
     return ast::desugar::node2Tree(ctx, ast);

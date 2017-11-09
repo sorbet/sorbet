@@ -10,7 +10,7 @@ namespace ruby_typer {
 namespace ast {
 namespace desugar {
 
-std::unique_ptr<Statement> node2Tree(Context ctx, unique_ptr<parser::Node> &what);
+std::unique_ptr<Expression> node2Tree(Context ctx, unique_ptr<parser::Node> &what);
 } // namespace desugar
 } // namespace ast
 } // namespace ruby_typer
