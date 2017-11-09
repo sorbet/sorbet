@@ -19,10 +19,10 @@ begin
       def initialize<initialize>()
         begin
           begin
-            #assignTmp$0 = ::<dynamic>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
-            ::Opus::CIBot::Gerald::Matcher#@rules = #assignTmp$0.[](0)
-            ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rules = #assignTmp$0.[](1)
-            #assignTmp$0
+            ::Opus::CIBot::Gerald::Matcher#initialize#assignTmp$0 = ::<dynamic>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
+            ::Opus::CIBot::Gerald::Matcher#@rules = ::Opus::CIBot::Gerald::Matcher#initialize#assignTmp$0.[](0)
+            ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rules = ::Opus::CIBot::Gerald::Matcher#initialize#assignTmp$0.[](1)
+            ::Opus::CIBot::Gerald::Matcher#initialize#assignTmp$0
           end
           if ::Opus::CIBot::Gerald::Matcher#initialize#invalid_rules.empty?().!()
             begin

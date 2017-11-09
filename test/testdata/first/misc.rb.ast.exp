@@ -4,29 +4,29 @@ begin
   @@cv = 1
   $gv = 1
   begin
-    #assignTmp$2 = [nil, nil]
-    self(TODO).x().var=(#assignTmp$2.[](0))
-    y = #assignTmp$2.[](1)
-    #assignTmp$2
+    assignTmp$2 = [nil, nil]
+    self(<todo sym>).x().var=(assignTmp$2.[](0))
+    y = assignTmp$2.[](1)
+    assignTmp$2
   end
   begin
-    #assignTmp$3 = self(TODO).zaaaz()
-    baaaar = #assignTmp$3.[](0)
-    naaar = #assignTmp$3.[](1)
-    #assignTmp$3
+    assignTmp$3 = self(<todo sym>).zaaaz()
+    baaaar = assignTmp$3.[](0)
+    naaar = assignTmp$3.[](1)
+    assignTmp$3
   end
-  xaaaaz = [self(TODO).yayayaya(), self(TODO).tutututu()]
+  xaaaaz = [self(<todo sym>).yayayaya(), self(<todo sym>).tutututu()]
   <emptyTree>
   begin
     nil
   end
   begin
-    self(TODO).a()
-    self(TODO).b()
+    self(<todo sym>).a()
+    self(<todo sym>).b()
   end
   def foo<<todo sym>>(&x)
     <emptyTree>
-  self(TODO).lambda() do ||
+  self(<todo sym>).lambda() do ||
     <emptyTree>
   end
   <Not Supported (Case)>
@@ -38,9 +38,9 @@ begin
     <emptyTree>
   <Not Supported (SClass)>
   begin
-    #||$4 = true
-    if #||$4
-      #||$4
+    ||$4 = true
+    if ||$4
+      ||$4
     else
       false
     end
@@ -75,10 +75,10 @@ begin
     nil
   end
   begin
-    #assignTmp$5 = 1
-    a = #assignTmp$5.[](0)
+    assignTmp$5 = 1
+    a = assignTmp$5.[](0)
     <Not Supported (Mlhs)>
-    #assignTmp$5
+    assignTmp$5
   end
   <Not Supported (NthRef)>
   def foo<<todo sym>>(x = 1, *y)
@@ -92,9 +92,9 @@ begin
     <Not Supported (Rescue)>
   end
   begin
-    #assignTmp$6 = [<Not Supported (Splat)>]
+    assignTmp$6 = [<Not Supported (Splat)>]
     <Not Supported (SplatLhs)>
-    #assignTmp$6
+    assignTmp$6
   end
   <Not Supported (DSymbol)>
   [:sym]
@@ -107,10 +107,10 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(TODO).proc() do |x|
+  self(<todo sym>).proc() do |x|
     <emptyTree>
   end
-  break(self(TODO).foo(1) do ||
+  break(self(<todo sym>).foo(1) do ||
       <emptyTree>
     end)
   def foo<<todo sym>>(**$0)

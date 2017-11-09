@@ -1,6 +1,6 @@
 begin
   class <emptyTree>::Integer<<todo sym>> < ()
-    self(TODO).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
+    self(<todo sym>).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
 
     def +<<todo sym>>(o)
       <emptyTree>

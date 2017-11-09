@@ -1,13 +1,13 @@
 begin
   class <emptyTree>::String<<todo sym>> < ()
-    self(TODO).standard_method({:i => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
+    self(<todo sym>).standard_method({:i => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
 
     def getbyte<<todo sym>>(i)
       <emptyTree>
 
   end
   class <emptyTree>::Integer<<todo sym>> < ()
-    self(TODO).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
+    self(<todo sym>).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
 
     def +<<todo sym>>(o)
       <emptyTree>
@@ -26,7 +26,7 @@ begin
   def baz3<<todo sym>>()
     b = "foo".getbyte("foo")
   def baz4<<todo sym>>()
-    b = self(TODO).a().getbyte("foo")
+    b = self(<todo sym>).a().getbyte("foo")
   def baz5<<todo sym>>()
     begin
       if begin
