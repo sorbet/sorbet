@@ -12,42 +12,42 @@ class Opus ()
         field @raw -> <dynamic>
         method added_files ()
           method <block>$7 (part)
-            field part
+            local part
           method <block>$8 (part)
-            field part
+            local part
         method added_lines ()
           method <block>$13 (part)
-            field part
+            local part
         method affected_files ()
         method changed_files ()
           method <block>$11 (part)
-            field part
+            local part
           method <block>$12 (part)
-            field part
+            local part
         method changed_lines ()
         method changed_openapi? ()
         method deleted_files ()
           method <block>$10 (part)
-            field part
+            local part
           method <block>$9 (part)
-            field part
+            local part
         method initialize (raw_diff)
-          field raw_diff
+          local raw_diff
         method parse (diff)
-          field diff
-          field parts
+          local diff
+          local parts
           method <block>$16 (part)
-            field a_name
-            field added_lines
-            field b_name
-            field lines
-            field part
-            field removed_lines
+            local a_name
+            local added_lines
+            local b_name
+            local lines
+            local part
+            local removed_lines
             method <block>$17 (line)
-              field line
+              local line
         method removed_lines ()
           method <block>$14 (part)
-            field part
+            local part
       class MatchContext (Object)
         field @assignee -> <dynamic>
         field @body -> <dynamic>
@@ -58,43 +58,43 @@ class Opus ()
         field @repo -> <dynamic>
         field @title -> <dynamic>
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
-          field assignee
-          field body
-          field diff
-          field gh_user
-          field merge_branch
-          field openapi_diff
-          field repo
-          field title
+          local assignee
+          local body
+          local diff
+          local gh_user
+          local merge_branch
+          local openapi_diff
+          local repo
+          local title
         method user_stripe_suffix? ()
       class MatchTimeBudget (Object)
         field @start -> <dynamic>
         method check! ()
-          field dur_ms
+          local dur_ms
         method initialize ()
         method time_rule (rule)
-          field dur_ms
-          field res
-          field rule
-          field rule_start
+          local dur_ms
+          local res
+          local rule
+          local rule_start
         static-field PER_RULE_MS -> <dynamic>
         static-field TOTAL_TIME_MS -> <dynamic>
       class MatchTimeout (<dynamic>)
         field @rule_token -> <dynamic>
         method initialize (message, rule_token)
-          field message
-          field rule_token
+          local message
+          local rule_token
       class Matcher (<dynamic>)
         field @rules -> <dynamic>
         method initialize ()
-          field invalid_rule_ids
-          field invalid_rules
+          local invalid_rule_ids
+          local invalid_rules
         method match (match_context)
-          field budget
-          field match_context
+          local budget
+          local match_context
           method <block>$4 (r)
-            field r
+            local r
             method <block>$5 ()
         static-field MAX_AFFECTED_FILES -> <dynamic>
-field assignTmp$0
+local assignTmp$0
 
