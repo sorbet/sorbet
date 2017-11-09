@@ -248,7 +248,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             u4 flags = 0;
             auto rec = node2TreeImpl(ctx, a->receiver);
             if (dynamic_cast<EmptyTree *>(rec.get()) != nullptr) {
-                rec = make_unique<Self>(what->loc, SymbolRef(0));
+                rec = make_unique<Self>(what->loc, ctx.state.defn_todo());
                 flags |= Send::PRIVATE_OK;
             }
             Send::ARGS_store args;
@@ -261,7 +261,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             result.swap(send);
         },
         [&](parser::Self *a) {
-            unique_ptr<Expression> self = make_unique<Self>(what->loc, SymbolRef(0));
+            unique_ptr<Statement> self = make_unique<Self>(what->loc, ctx.state.defn_todo());
             result.swap(self);
         },
         [&](parser::DString *a) {
