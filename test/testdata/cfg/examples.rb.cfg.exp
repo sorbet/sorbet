@@ -143,9 +143,9 @@ subgraph "cluster_::Examples#variables_and_loop" {
 
     bb37_7 [label = "(b)\nstatTmp$37 = nil : NilClass\n<ret>$41 = return b : <bottom>\n<never>"];
     bb37_7 -> bb37_1;
-    bb37_8 [label = "(b)\nouterLoops: 1\nb = 1 : Integer(1)\n<always>"];
+    bb37_8 [label = "(b)\nouterLoops: 1\nb = 1 : <dynamic>\n<always>"];
     bb37_8 -> bb37_10;
-    bb37_9 [label = "(b)\nouterLoops: 1\nb = 2 : Integer(2)\n<always>"];
+    bb37_9 [label = "(b)\nouterLoops: 1\nb = 2 : <dynamic>\n<always>"];
     bb37_9 -> bb37_10;
     bb37_10 [label = "(b)\nouterLoops: 1\n<always>"];
     bb37_10 -> bb37_5;
@@ -171,9 +171,9 @@ subgraph "cluster_::Examples#variables_loop_if" {
 
     bb40_4 [label = "(b)\nstatTmp$44 = nil : NilClass\n<ret>$48 = return b : <bottom>\n<never>"];
     bb40_4 -> bb40_1;
-    bb40_5 [label = "(b)\nouterLoops: 1\nb = 1 : Integer(1)\n<always>"];
+    bb40_5 [label = "(b)\nouterLoops: 1\nb = 1 : <dynamic>\n<always>"];
     bb40_5 -> bb40_7;
-    bb40_6 [label = "(b)\nouterLoops: 1\nb = 2 : Integer(2)\n<always>"];
+    bb40_6 [label = "(b)\nouterLoops: 1\nb = 2 : <dynamic>\n<always>"];
     bb40_6 -> bb40_7;
     bb40_7 [label = "(b)\nouterLoops: 1\n<always>"];
     bb40_7 -> bb40_2;
