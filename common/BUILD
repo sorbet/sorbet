@@ -14,6 +14,8 @@ cc_library(
         "typecase.h",
     ],
     visibility = ["//visibility:public"],
-    deps = ["@spdlog//:spdlog",
-            "@com_google_absl//absl/container:inlined_vector"],
+    deps = [
+        "@com_google_absl//absl/container:inlined_vector",
+        "@spdlog//:spdlog",
+    ],
 )
