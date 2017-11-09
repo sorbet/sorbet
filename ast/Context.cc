@@ -439,7 +439,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) 
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, Symbol::Flags::STATIC_FIELD, 0x4000, true);
+    return enterSymbol(loc, owner, name, Symbol::Flags::STATIC_FIELD, true);
 }
 
 SymbolRef GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
