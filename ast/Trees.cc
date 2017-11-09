@@ -128,10 +128,9 @@ NotSupported::NotSupported(Loc loc, const string &why) : Expression(loc), why(wh
 
 SymbolLit::SymbolLit(Loc loc, NameRef name) : Expression(loc), name(name) {}
 
-Hash::Hash(Loc loc, vector<unique_ptr<Expression>> &keys, vector<unique_ptr<Expression>> &values)
-    : Expression(loc), keys(move(keys)), values(move(values)) {}
+Hash::Hash(Loc loc, ENTRY_store &keys, ENTRY_store &values) : Expression(loc), keys(move(keys)), values(move(values)) {}
 
-Array::Array(Loc loc, vector<unique_ptr<Expression>> &elems) : Expression(loc), elems(move(elems)) {}
+Array::Array(Loc loc, ENTRY_store &elems) : Expression(loc), elems(move(elems)) {}
 
 InsSeq::InsSeq(Loc loc, STATS_store &stats, unique_ptr<Expression> expr)
     : Expression(loc), stats(move(stats)), expr(move(expr)) {}

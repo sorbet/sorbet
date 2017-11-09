@@ -514,7 +514,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             result.swap(res);
         },
         [&](parser::Array *array) {
-            vector<unique_ptr<Expression>> elems;
+            Array::ENTRY_store elems;
             for (auto &stat : array->elts) {
                 elems.emplace_back(node2TreeImpl(ctx, stat));
             };
@@ -523,8 +523,8 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             result.swap(res);
         },
         [&](parser::Hash *hash) {
-            vector<unique_ptr<Expression>> keys;
-            vector<unique_ptr<Expression>> values;
+            Hash::ENTRY_store keys;
+            Hash::ENTRY_store values;
             unique_ptr<Expression> lastMerge;
 
             for (auto &pairAsExpression : hash->pairs) {
@@ -550,6 +550,8 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                         }
                     } else {
                         unique_ptr<Expression> current = make_unique<Hash>(what->loc, keys, values);
+                        keys.clear();
+                        values.clear();
                         if (lastMerge != nullptr) {
                             lastMerge = mkSend1(what->loc, lastMerge, Names::merge(), current);
                         } else {
@@ -579,7 +581,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Return *ret) {
             if (ret->exprs.size() > 1) {
-                vector<unique_ptr<Expression>> elems;
+                Array::ENTRY_store elems;
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -596,7 +598,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Return *ret) {
             if (ret->exprs.size() > 1) {
-                vector<unique_ptr<Expression>> elems;
+                Array::ENTRY_store elems;
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -613,7 +615,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Break *ret) {
             if (ret->exprs.size() > 1) {
-                vector<unique_ptr<Expression>> elems;
+                Array::ENTRY_store elems;
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -630,7 +632,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Next *ret) {
             if (ret->exprs.size() > 1) {
-                vector<unique_ptr<Expression>> elems;
+                Array::ENTRY_store elems;
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -647,7 +649,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Yield *ret) {
             if (ret->exprs.size() > 1) {
-                vector<unique_ptr<Expression>> elems;
+                Array::ENTRY_store elems;
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };

@@ -336,10 +336,13 @@ public:
 
 class Hash : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> keys;
-    std::vector<std::unique_ptr<Expression>> values;
+    static constexpr int EXPECTED_ENTRY_COUNT = 2;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
 
-    Hash(Loc loc, std::vector<std::unique_ptr<Expression>> &keys, std::vector<std::unique_ptr<Expression>> &values);
+    ENTRY_store keys;
+    ENTRY_store values;
+
+    Hash(Loc loc, ENTRY_store &keys, ENTRY_store &values);
 
     virtual std::string toString(GlobalState &gs, int tabs);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -348,9 +351,12 @@ public:
 
 class Array : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> elems;
+    static constexpr int EXPECTED_ENTRY_COUNT = 4;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
 
-    Array(Loc loc, std::vector<std::unique_ptr<Expression>> &elems);
+    ENTRY_store elems;
+
+    Array(Loc loc, ENTRY_store &elems);
 
     virtual std::string toString(GlobalState &gs, int tabs);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
