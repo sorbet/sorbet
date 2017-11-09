@@ -452,10 +452,13 @@ public:
 
 class InsSeq : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> stats;
+    static constexpr int EXPECTED_STATS_COUNT = 4;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT> STATS_store;
+    STATS_store stats;
+
     std::unique_ptr<Expression> expr;
 
-    InsSeq(Loc loc, std::vector<std::unique_ptr<Expression>> &&stats, std::unique_ptr<Expression> expr);
+    InsSeq(Loc loc, STATS_store &stats, std::unique_ptr<Expression> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

@@ -133,7 +133,7 @@ Hash::Hash(Loc loc, vector<unique_ptr<Expression>> &keys, vector<unique_ptr<Expr
 
 Array::Array(Loc loc, vector<unique_ptr<Expression>> &elems) : Expression(loc), elems(move(elems)) {}
 
-InsSeq::InsSeq(Loc loc, vector<unique_ptr<Expression>> &&stats, unique_ptr<Expression> expr)
+InsSeq::InsSeq(Loc loc, STATS_store &stats, unique_ptr<Expression> expr)
     : Expression(loc), stats(move(stats)), expr(move(expr)) {}
 
 EmptyTree::EmptyTree(Loc loc) : Expression(loc) {}

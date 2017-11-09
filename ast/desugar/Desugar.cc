@@ -89,14 +89,14 @@ unique_ptr<Expression> mkEmptyTree(Loc loc) {
     return make_unique<EmptyTree>(loc);
 }
 
-unique_ptr<Expression> mkInsSeq(Loc loc, vector<unique_ptr<Expression>> &&stats, unique_ptr<Expression> &&expr) {
-    return make_unique<InsSeq>(loc, move(stats), move(expr));
+unique_ptr<Expression> mkInsSeq(Loc loc, InsSeq::STATS_store &stats, unique_ptr<Expression> &&expr) {
+    return make_unique<InsSeq>(loc, stats, move(expr));
 }
 
 unique_ptr<Expression> mkInsSeq1(Loc loc, unique_ptr<Expression> stat, unique_ptr<Expression> &&expr) {
-    vector<unique_ptr<Expression>> stats;
+    InsSeq::STATS_store stats;
     stats.emplace_back(move(stat));
-    return make_unique<InsSeq>(loc, move(stats), move(expr));
+    return make_unique<InsSeq>(loc, stats, move(expr));
 }
 
 unique_ptr<Expression> mkTrue(Loc loc) {
@@ -285,7 +285,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Begin *a) {
             if (a->stmts.size() > 0) {
-                vector<unique_ptr<Expression>> stats;
+                InsSeq::STATS_store stats;
                 auto end = a->stmts.end();
                 --end;
                 for (auto it = a->stmts.begin(); it != end; ++it) {
@@ -294,14 +294,8 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 };
                 auto &last = a->stmts.back();
                 auto expr = node2TreeImpl(ctx, last);
-                if (auto *epx = dynamic_cast<Expression *>(expr.get())) {
-                    auto block = mkInsSeq(what->loc, move(stats), move(expr));
-                    result.swap(block);
-                } else {
-                    stats.emplace_back(move(expr));
-                    auto block = mkInsSeq(what->loc, move(stats), mkEmptyTree(what->loc));
-                    result.swap(block);
-                }
+                auto block = mkInsSeq(what->loc, stats, move(expr));
+                result.swap(block);
             } else {
                 unique_ptr<Expression> res = mkEmptyTree(what->loc);
                 result.swap(res);
@@ -309,7 +303,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Kwbegin *a) {
             if (a->stmts.size() > 0) {
-                vector<unique_ptr<Expression>> stats;
+                InsSeq::STATS_store stats;
                 auto end = a->stmts.end();
                 --end;
                 for (auto it = a->stmts.begin(); it != end; ++it) {
@@ -318,14 +312,8 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 };
                 auto &last = a->stmts.back();
                 auto expr = node2TreeImpl(ctx, last);
-                if (auto *epx = dynamic_cast<Expression *>(expr.get())) {
-                    auto block = mkInsSeq(what->loc, move(stats), move(expr));
-                    result.swap(block);
-                } else {
-                    stats.emplace_back(move(expr));
-                    auto block = mkInsSeq(what->loc, move(stats), mkEmptyTree(what->loc));
-                    result.swap(block);
-                }
+                auto block = mkInsSeq(what->loc, stats, move(expr));
+                result.swap(block);
             } else {
                 unique_ptr<Expression> res = mkEmptyTree(what->loc);
                 result.swap(res);
@@ -685,7 +673,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             parser::Mlhs *lhs = dynamic_cast<parser::Mlhs *>(masgn->lhs.get());
             Error::check(lhs != nullptr);
             SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::assignTemp(), ctx.owner);
-            vector<unique_ptr<Expression>> stats;
+            InsSeq::STATS_store stats;
             stats.emplace_back(mkAssign(what->loc, tempSym, node2TreeImpl(ctx, masgn->rhs)));
             int i = 0;
             for (auto &c : lhs->exprs) {
@@ -709,7 +697,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 }
                 i++;
             }
-            unique_ptr<Expression> res = mkInsSeq(what->loc, move(stats), mkIdent(what->loc, tempSym));
+            unique_ptr<Expression> res = mkInsSeq(what->loc, stats, mkIdent(what->loc, tempSym));
             result.swap(res);
         },
         [&](parser::True *t) {
