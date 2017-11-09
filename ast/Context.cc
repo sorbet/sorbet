@@ -23,7 +23,6 @@ SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
     info.flags = 0;
     info.setClass();
 
-    symRef.info(*this, true).setCompleted();
     if (symRef._id > GlobalState::defn_root()._id) {
         GlobalState::defn_root().info(*this, true).members.push_back(make_pair(nameId, symRef));
     }
@@ -419,7 +418,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     if (alwaysPinned) {
         info.minLoops = -1;
     }
-    
+
     if (!reallocate)
         ownerScope.members.push_back(make_pair(name, ret));
     else
@@ -428,23 +427,23 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 }
 
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, name, 0x8000, true);
+    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS, true);
 }
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, name, 0x1000, true);
+    return enterSymbol(loc, owner, name, Symbol::Flags::METHOD, true);
 }
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, name, 0x2000, true);
+    return enterSymbol(loc, owner, name, Symbol::Flags::FIELD, true);
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, name, 0x4000, true);
+    return enterSymbol(loc, owner, Symbol::Flags::STATIC_FIELD, 0x4000, true);
 }
 
 SymbolRef GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
-    return enterSymbol(Loc::none(0), owner, name, 0x2000, false);
+    return enterSymbol(Loc::none(0), owner, name, Symbol::Flags::LOCAL_VARIABLE, false);
 }
 
 NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
