@@ -6,16 +6,16 @@ class <singleton class:Object> (Class)
   method classmeth ()
 class Opus ()
 field $gv
-field a
-field assignTmp$2
-field assignTmp$3
-field assignTmp$5
-field assignTmp$6
-field baaaar
-field naaar
-field x
-field xaaaaz
-field y
-field ||$4
+local a
+local assignTmp$2
+local assignTmp$3
+local assignTmp$5
+local assignTmp$6
+local baaaar
+local naaar
+local x
+local xaaaaz
+local y
+local ||$4
 static-field @@cv -> <dynamic>
 

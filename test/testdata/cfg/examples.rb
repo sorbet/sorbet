@@ -69,9 +69,9 @@ class Examples
 
       while true
         if (false)
-          b = 1
+          b = 1 # error: pinned
         else
-          b = 2
+          b = 2 # error: pinned
         end
       end
 
@@ -82,9 +82,9 @@ class Examples
     def variables_loop_if()
       while true
         if (false)
-          b = 1
+          b = 1 # error: pinned
         else
-          b = 2
+          b = 2 # error: pinned
         end
       end
 

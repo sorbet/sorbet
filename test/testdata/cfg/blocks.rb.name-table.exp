@@ -1,7 +1,7 @@
 class BlockTest (Object)
   method block_pass ()
     method <block>$0 (x, y)
-      field x
-      field y
+      local x
+      local y
 class Opus ()
 

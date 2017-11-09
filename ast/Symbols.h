@@ -85,6 +85,15 @@ public:
 
     bool isConstructor(GlobalState &gs) const;
 
+    class Flags {
+    public:
+        static constexpr int CLASS = 0x8000;
+        static constexpr int METHOD = 0x4000;
+        static constexpr int FIELD = 0x2000;
+        static constexpr int STATIC_FIELD = 0x1000;
+        static constexpr int LOCAL_VARIABLE = 0x0800;
+    };
+
     SymbolRef owner;
     Loc definitionLoc;
     /* isClass,   IsArray,  isField, isMethod
@@ -122,55 +131,43 @@ public:
     SymbolRef ref(GlobalState &gs) const;
 
     inline bool isClass() const {
-        return (flags & 0x8000) != 0;
+        return (flags & Symbol::Flags::CLASS) != 0;
     }
 
     inline bool isStaticField() const {
-        return (flags & 0x4000) != 0;
+        return (flags & Symbol::Flags::STATIC_FIELD) != 0;
     }
 
     inline bool isField() const {
-        return (flags & 0x2000) != 0;
+        return (flags & Symbol::Flags::FIELD) != 0;
     }
 
     inline bool isMethod() const {
-        return (flags & 0x1000) != 0;
+        return (flags & Symbol::Flags::METHOD) != 0;
     }
 
-    inline bool isCompleted() const {
-        return (flags & 0x0C00) == 0x0C00;
-    }
-
-    inline bool isCompletingFromJar() const {
-        return (flags & 0x0C00) == 0x0800;
-    }
-
-    inline bool isCompletingFromFile() const {
-        return (flags & 0x0C00) == 0x0400;
+    inline bool isLocalVariable() const {
+        return (flags & Symbol::Flags::LOCAL_VARIABLE) != 0;
     }
 
     inline void setClass() {
         DEBUG_ONLY(Error::check(!isStaticField() && !isField() && !isMethod()));
-        flags = flags | 0x8000;
+        flags = flags | Symbol::Flags::CLASS;
     }
 
     inline void setStaticField() {
         DEBUG_ONLY(Error::check(!isClass() && !isField() && !isMethod()));
-        flags = flags | 0x4000;
+        flags = flags | Symbol::Flags::STATIC_FIELD;
     }
 
     inline void setField() {
         DEBUG_ONLY(Error::check(!isClass() && !isStaticField() && !isMethod()));
-        flags = flags | 0x2000;
+        flags = flags | Symbol::Flags::FIELD;
     }
 
     inline void setMethod() {
         DEBUG_ONLY(Error::check(!isClass() && !isStaticField() && !isField()));
-        flags = flags | 0x1000;
-    }
-
-    inline void setCompleted() {
-        flags = flags | 0x0C00;
+        flags = flags | Symbol::Flags::METHOD;
     }
 
     SymbolRef findMember(NameRef name);

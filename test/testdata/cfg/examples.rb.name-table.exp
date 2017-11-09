@@ -5,14 +5,14 @@ class Examples (Object)
   method return_in_one_branch1 ()
   method return_in_one_branch2 ()
   method take_arguments (i)
-    field i
+    local i
   method variables ()
-    field a
-    field b
+    local a
+    local b
   method variables_and_loop ()
-    field a
-    field b
+    local a
+    local b
   method variables_loop_if ()
-    field b
+    local b
 class Opus ()
 

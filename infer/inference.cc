@@ -28,7 +28,7 @@ public:
             return instanceTypeAndOrigin;
         }
 
-        if (symbol.info(ctx).resultType != nullptr) {
+        if (symbol.info(ctx).resultType.get() != nullptr) {
             ast::TypeAndOrigins typeAndOrigin;
             typeAndOrigin.type = symbol.info(ctx).resultType;
             typeAndOrigin.origins.push_back(symbol.info(ctx).definitionLoc);
@@ -106,6 +106,13 @@ public:
             result.origins.push_back(bind.loc);
         }
         return result;
+    }
+
+    shared_ptr<ast::Type> dropLiteral(shared_ptr<ast::Type> tp) {
+        if (auto *a = dynamic_cast<ast::Literal *>(tp.get())) {
+            return a->underlying;
+        }
+        return tp;
     }
 
     shared_ptr<ast::Type> processBinding(ast::Context ctx, cfg::Binding &bind, int loopCount) {
@@ -201,11 +208,11 @@ public:
 
         ast::TypeAndOrigins cur = getTypeAndOrigin(ctx, bind.bind);
 
-        if (loopCount >= bind.bind.info(ctx).minLoops) {
+        if (loopCount == bind.bind.info(ctx).minLoops) {
             setTypeAndOrigin(bind.bind, tp);
         } else {
-            if (!ast::Types::isSubType(ctx, tp.type, cur.type)) {
-                ctx.state.errors.error(ast::Loc::none(0), ast::ErrorClass::PinnedVariableMismatch,
+            if (!ast::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {
+                ctx.state.errors.error(bind.loc, ast::ErrorClass::PinnedVariableMismatch,
                                        "Changing type of pinned argument, {} is not a subtype of {}",
                                        tp.type->toString(ctx), cur.type->toString(ctx));
             }

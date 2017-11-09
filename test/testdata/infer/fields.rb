@@ -1,0 +1,10 @@
+class Foo
+  declare_variables(
+    :@ivar => Integer
+  )
+
+  def foo
+    @ivar = 2
+    @ivar = "ss" # error: pinned
+  end
+end
