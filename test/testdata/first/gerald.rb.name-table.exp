@@ -77,8 +77,8 @@ class Opus ()
           field res
           field rule
           field rule_start
-        static-field PER_RULE_MS
-        static-field TOTAL_TIME_MS
+        static-field PER_RULE_MS -> <dynamic>
+        static-field TOTAL_TIME_MS -> <dynamic>
       class MatchTimeout (<dynamic>)
         field @rule_token -> <dynamic>
         method initialize (message, rule_token)
@@ -95,6 +95,6 @@ class Opus ()
           method <block>$4 (r)
             field r
             method <block>$5 ()
-        static-field MAX_AFFECTED_FILES
+        static-field MAX_AFFECTED_FILES -> <dynamic>
 field assignTmp$0
 
