@@ -7,9 +7,6 @@
 #include <memory>
 #include <vector>
 
-#include "absl/container/inlined_vector.h"
-using absl::InlinedVector;
-
 namespace ruby_typer {
 namespace ast {
 

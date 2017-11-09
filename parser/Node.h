@@ -5,7 +5,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-using absl::InlinedVector;
 
 namespace ruby_typer {
 namespace parser {
