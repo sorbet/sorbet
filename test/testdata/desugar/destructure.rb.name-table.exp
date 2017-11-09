@@ -1,0 +1,14 @@
+class Destructure (Object)
+  method f (<destructure>$0, z)
+    local <destructure>$0
+    local assignTmp$1
+    local x
+    local y
+    local z
+    method <block>$4 (<destructure>$2)
+      local <destructure>$2
+      local a
+      local assignTmp$3
+      local b
+class Opus ()
+

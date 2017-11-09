@@ -1,0 +1,26 @@
+class <emptyTree>::Destructure<Destructure> < ()
+  def f<f>(::Destructure#f#<destructure>$0, ::Destructure#f#z)
+    begin
+      begin
+        ::Destructure#f#assignTmp$1 = ::Destructure#f#<destructure>$0
+        ::Destructure#f#x = ::Destructure#f#assignTmp$1.[](0)
+        ::Destructure#f#y = ::Destructure#f#assignTmp$1.[](1)
+        ::Destructure#f#assignTmp$1
+      end
+      begin
+        ::Destructure#f#x.+(::Destructure#f#y)
+        self(Destructure).lambda() do |::Destructure#f#<block>$4#<destructure>$2|
+          begin
+            begin
+              ::Destructure#f#<block>$4#assignTmp$3 = ::Destructure#f#<block>$4#<destructure>$2
+              ::Destructure#f#<block>$4#a = ::Destructure#f#<block>$4#assignTmp$3.[](0)
+              ::Destructure#f#<block>$4#b = ::Destructure#f#<block>$4#assignTmp$3.[](1)
+              ::Destructure#f#<block>$4#assignTmp$3
+            end
+            <emptyTree>
+          end
+        end
+      end
+    end
+
+end
