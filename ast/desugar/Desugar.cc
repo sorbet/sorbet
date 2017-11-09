@@ -111,6 +111,7 @@ unique_ptr<MethodDef> buildMethod(Context ctx, Loc loc, NameRef name, unique_ptr
                                   unique_ptr<parser::Node> &body) {
     MethodDef::ARGS_store args;
     if (auto *oargs = dynamic_cast<parser::Args *>(argnode.get())) {
+        args.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
             args.emplace_back(node2TreeImpl(ctx, arg));
         }
@@ -222,6 +223,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
                 flags |= Send::PRIVATE_OK;
             }
             Send::ARGS_store args;
+            args.reserve(a->args.size());
             for (auto &stat : a->args) {
                 args.emplace_back(node2TreeImpl(ctx, stat));
             };
@@ -286,6 +288,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Begin *a) {
             if (a->stmts.size() > 0) {
                 InsSeq::STATS_store stats;
+                stats.reserve(a->stmts.size() - 1);
                 auto end = a->stmts.end();
                 --end;
                 for (auto it = a->stmts.begin(); it != end; ++it) {
@@ -304,6 +307,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Kwbegin *a) {
             if (a->stmts.size() > 0) {
                 InsSeq::STATS_store stats;
+                stats.reserve(a->stmts.size() - 1);
                 auto end = a->stmts.end();
                 --end;
                 for (auto it = a->stmts.begin(); it != end; ++it) {
@@ -322,6 +326,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Module *module) {
             ClassDef::RHS_store body;
             if (auto *a = dynamic_cast<parser::Begin *>(module->body.get())) {
+                body.reserve(a->stmts.size());
                 for (auto &stat : a->stmts) {
                     body.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -337,6 +342,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Class *claz) {
             ClassDef::RHS_store body;
             if (auto *a = dynamic_cast<parser::Begin *>(claz->body.get())) {
+                body.reserve(a->stmts.size());
                 for (auto &stat : a->stmts) {
                     body.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -502,6 +508,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Super *super) {
             Send::ARGS_store args;
+            args.reserve(super->args.size());
             for (auto &stat : super->args) {
                 args.emplace_back(node2TreeImpl(ctx, stat));
             };
@@ -515,6 +522,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         },
         [&](parser::Array *array) {
             Array::ENTRY_store elems;
+            elems.reserve(array->elts.size());
             for (auto &stat : array->elts) {
                 elems.emplace_back(node2TreeImpl(ctx, stat));
             };
@@ -525,6 +533,8 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Hash *hash) {
             Hash::ENTRY_store keys;
             Hash::ENTRY_store values;
+            keys.reserve(hash->pairs.size());   // overapproximation in case there are KwSpats
+            values.reserve(hash->pairs.size()); // overapproximation in case there are KwSpats
             unique_ptr<Expression> lastMerge;
 
             for (auto &pairAsExpression : hash->pairs) {
@@ -582,6 +592,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Return *ret) {
             if (ret->exprs.size() > 1) {
                 Array::ENTRY_store elems;
+                elems.reserve(ret->exprs.size());
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -599,6 +610,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Return *ret) {
             if (ret->exprs.size() > 1) {
                 Array::ENTRY_store elems;
+                elems.reserve(ret->exprs.size());
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -616,6 +628,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Break *ret) {
             if (ret->exprs.size() > 1) {
                 Array::ENTRY_store elems;
+                elems.reserve(ret->exprs.size());
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -633,6 +646,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Next *ret) {
             if (ret->exprs.size() > 1) {
                 Array::ENTRY_store elems;
+                elems.reserve(ret->exprs.size());
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -650,6 +664,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
         [&](parser::Yield *ret) {
             if (ret->exprs.size() > 1) {
                 Array::ENTRY_store elems;
+                elems.reserve(ret->exprs.size());
                 for (auto &stat : ret->exprs) {
                     elems.emplace_back(node2TreeImpl(ctx, stat));
                 };
@@ -676,6 +691,7 @@ unique_ptr<Expression> node2TreeImpl(Context ctx, unique_ptr<parser::Node> &what
             Error::check(lhs != nullptr);
             SymbolRef tempSym = ctx.state.newTemporary(UniqueNameKind::Desugar, Names::assignTemp(), ctx.owner);
             InsSeq::STATS_store stats;
+            stats.reserve(lhs->exprs.size() + 1);
             stats.emplace_back(mkAssign(what->loc, tempSym, node2TreeImpl(ctx, masgn->rhs)));
             int i = 0;
             for (auto &c : lhs->exprs) {

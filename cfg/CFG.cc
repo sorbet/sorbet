@@ -274,6 +274,9 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
     for (auto &it : this->basicBlocks) {
         auto set2 = upper_bounds2[it->id];
 
+        int set1Sz = set2.size();
+        int set2Sz = upper_bounds1[it->id].size();
+        it->args.reserve(set1Sz > set2Sz ? set2Sz : set1Sz);
         for (auto el : upper_bounds1[it->id]) {
             if (set2.find(el) != set2.end()) {
                 it->args.push_back(el);

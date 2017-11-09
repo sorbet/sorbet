@@ -868,6 +868,7 @@ public:
     unique_ptr<Node> symbols_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
         Loc loc = collection_loc(begin, parts, end);
         ruby_typer::parser::NodeVec out_parts;
+        out_parts.reserve(parts.size());
         for (auto &p : parts) {
             if (String *s = dynamic_cast<String *>(p.get())) {
                 out_parts.emplace_back(make_unique<Symbol>(s->loc, s->val));
@@ -1066,6 +1067,7 @@ ruby_typer::parser::NodeVec convert_node_list(const node_list *cargs) {
         return out;
 
     node_list *args = const_cast<node_list *>(cargs);
+    out.reserve(args->size());
     for (int i = 0; i < args->size(); i++) {
         out.push_back(cast_node(args->at(i)));
     }

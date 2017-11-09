@@ -122,6 +122,7 @@ public:
 
     void fillInArgs(ast::Context ctx, ast::MethodDef::ARGS_store &args, ast::Symbol &symbol) {
         // Fill in the arity right with TODOs
+        symbol.argumentsOrMixins.reserve(args.size());
         for (auto &arg : args) {
             ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
             Error::check(ref != nullptr);
