@@ -42,3 +42,8 @@ build:dbg --genrule_strategy=standalone
 build:dbg --compilation_mode=dbg
 
 build --strip=never
+
+# Enable nice UIs. Taken from bazel.rc of Bazel itself.
+build --experimental_skyframe_target_pattern_evaluator
+common --experimental_ui --experimental_ui_actions_shown 8
+common --show_progress_rate_limit=0.25
