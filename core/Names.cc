@@ -14,7 +14,7 @@ ruby_typer::core::Name::~Name() noexcept {
 }
 
 unsigned int Name::hashNames(vector<NameRef> &lhs, GlobalState &gs) {
-    return accumulate(lhs.begin(), lhs.end(), 0, [&gs](int acc, NameRef &necc) -> int { return mix(acc, necc.id()); }) *
+    return accumulate(lhs.begin(), lhs.end(), 0, [](int acc, NameRef &necc) -> int { return mix(acc, necc.id()); }) *
                8 +
            lhs.size();
 }
