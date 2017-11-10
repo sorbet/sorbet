@@ -22,6 +22,10 @@ unique_ptr<Expression> mkSend(core::Loc loc, unique_ptr<Expression> &recv, core:
     send->flags = flags;
     return move(send);
 }
+unique_ptr<Expression> mkSend(core::Loc loc, unique_ptr<Expression> &&recv, core::NameRef fun, Send::ARGS_store &args,
+                              u4 flags = 0) {
+    return mkSend(loc, recv, fun, args, flags);
+}
 
 unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun,
                                unique_ptr<Expression> &arg1) {
@@ -32,11 +36,6 @@ unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> &recv, core
 
 unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> &&recv, core::NameRef fun,
                                unique_ptr<Expression> &&arg1) {
-    return mkSend1(loc, recv, fun, arg1);
-}
-
-unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> &&recv, core::NameRef fun,
-                               unique_ptr<Expression> &arg1) {
     return mkSend1(loc, recv, fun, arg1);
 }
 
@@ -206,15 +205,27 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             auto recv = node2TreeImpl(ctx, a->left);
             auto arg = node2TreeImpl(ctx, a->right);
             if (auto s = dynamic_cast<Send *>(recv.get())) {
-                Error::check(s->args.empty());
-                core::NameRef tempName = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
-                auto temp = mkAssign(what->loc, tempName, move(s->recv));
-                recv.reset();
-                auto cond = mkSend0(what->loc, mkLocal(what->loc, tempName), s->fun);
-                auto body = mkSend1(what->loc, mkLocal(what->loc, tempName), s->fun.addEq(), arg);
-                auto elsep = mkLocal(what->loc, tempName);
-                auto iff = mkIf(what->loc, cond, body, elsep);
-                auto wrapped = mkInsSeq1(what->loc, move(temp), move(iff));
+                InsSeq::STATS_store stats;
+                core::NameRef tempRecv = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
+                stats.emplace_back(mkAssign(what->loc, tempRecv, move(s->recv)));
+                Send::ARGS_store readArgs;
+                Send::ARGS_store assgnArgs;
+                for (auto &arg : s->args) {
+                    core::Loc loc = arg->loc;
+                    core::NameRef name = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
+                    stats.emplace_back(mkAssign(loc, name, move(arg)));
+                    readArgs.emplace_back(mkLocal(loc, name));
+                    assgnArgs.emplace_back(mkLocal(loc, name));
+                }
+                assgnArgs.emplace_back(move(arg));
+                auto cond = mkSend(what->loc, mkLocal(what->loc, tempRecv), s->fun, readArgs, s->flags);
+                core::NameRef tempResult = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
+                stats.emplace_back(mkAssign(what->loc, tempResult, move(cond)));
+
+                auto body = mkSend(what->loc, mkLocal(what->loc, tempRecv), s->fun.addEq(ctx), assgnArgs, s->flags);
+                auto elsep = mkLocal(what->loc, tempResult);
+                auto iff = mkIf(what->loc, mkLocal(what->loc, tempResult), move(body), move(elsep));
+                auto wrapped = mkInsSeq(what->loc, stats, move(iff));
                 result.swap(wrapped);
             } else if (auto i = dynamic_cast<Reference *>(recv.get())) {
                 auto cond = cpRef(what->loc, *i);
@@ -230,15 +241,27 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             auto recv = node2TreeImpl(ctx, a->left);
             auto arg = node2TreeImpl(ctx, a->right);
             if (auto s = dynamic_cast<Send *>(recv.get())) {
-                Error::check(s->args.empty());
-                core::NameRef tempName = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
-                auto temp = mkAssign(what->loc, tempName, move(s->recv));
-                recv.reset();
-                auto cond = mkSend0(what->loc, mkLocal(what->loc, tempName), s->fun);
-                auto body = mkSend1(what->loc, mkLocal(what->loc, tempName), s->fun.addEq(), arg);
-                auto elsep = mkLocal(what->loc, tempName);
-                auto iff = mkIf(what->loc, cond, elsep, body);
-                auto wrapped = mkInsSeq1(what->loc, move(temp), move(iff));
+                InsSeq::STATS_store stats;
+                core::NameRef tempRecv = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
+                stats.emplace_back(mkAssign(what->loc, tempRecv, move(s->recv)));
+                Send::ARGS_store readArgs;
+                Send::ARGS_store assgnArgs;
+                for (auto &arg : s->args) {
+                    core::Loc loc = arg->loc;
+                    core::NameRef name = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
+                    stats.emplace_back(mkAssign(loc, name, move(arg)));
+                    readArgs.emplace_back(mkLocal(loc, name));
+                    assgnArgs.emplace_back(mkLocal(loc, name));
+                }
+                assgnArgs.emplace_back(move(arg));
+                auto cond = mkSend(what->loc, mkLocal(what->loc, tempRecv), s->fun, readArgs, s->flags);
+                core::NameRef tempResult = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
+                stats.emplace_back(mkAssign(what->loc, tempResult, move(cond)));
+
+                auto elsep = mkSend(what->loc, mkLocal(what->loc, tempRecv), s->fun.addEq(ctx), assgnArgs, s->flags);
+                auto body = mkLocal(what->loc, tempResult);
+                auto iff = mkIf(what->loc, mkLocal(what->loc, tempResult), move(body), move(elsep));
+                auto wrapped = mkInsSeq(what->loc, stats, move(iff));
                 result.swap(wrapped);
             } else if (auto i = dynamic_cast<Reference *>(recv.get())) {
                 auto cond = cpRef(what->loc, *i);
