@@ -12,7 +12,7 @@ using namespace std;
 Loc::Detail offset2Pos(core::UTF8Desc source, u4 off) {
     Loc::Detail pos;
 
-    Error::check(off < source.to);
+    Error::check(off <= source.to);
 
     pos.line = 1 + count(source.from, source.from + off, '\n');
 

@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "Builder.h"
 #include "ruby_parser/driver.hh"
+#include <algorithm>
 
 template class std::unique_ptr<ruby_typer::parser::Node>;
 
@@ -17,6 +18,7 @@ public:
         if (diagnostics.size() == 0) {
             return;
         }
+        u4 max_off = file.file(gs).source().to;
 
         for (auto &diag : diagnostics) {
             std::string level = "unknown";
@@ -38,7 +40,8 @@ public:
             }
             std::string msg("Parse {}: ");
             msg.append(dclass_strings[(int)diag.error_class()]);
-            Loc loc(file, diag.location().begin_pos - 1, diag.location().end_pos - 1);
+            Loc loc(file, min((u4)(diag.location().begin_pos - 1), max_off),
+                    min((u4)(diag.location().end_pos - 1), max_off));
             gs.errors.error(loc, core::ErrorClass::ParserError, msg, level, diag.data());
         }
     }

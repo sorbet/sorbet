@@ -5,6 +5,7 @@
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/diagnostic.hh"
 
+#include <algorithm>
 #include <typeinfo>
 
 using ruby_parser::foreign_ptr;
@@ -54,14 +55,21 @@ string Dedenter::dedent(const string &str) {
 
 class Builder::Impl {
 public:
-    Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {}
+    Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
+        this->max_off_ = file.file(gs).source().to;
+    }
 
     GlobalState &gs_;
     core::FileRef file_;
+    u4 max_off_;
     ruby_parser::base_driver *driver_;
 
+    u4 clamp(u4 off) {
+        return std::min(off, max_off_);
+    }
+
     Loc tok_loc(const token *tok) {
-        return Loc{file_, (u4)tok->start(), (u4)tok->end()};
+        return Loc{file_, clamp((u4)tok->start()), clamp((u4)tok->end())};
     }
 
     Loc maybe_loc(unique_ptr<Node> &node) {
@@ -72,7 +80,7 @@ public:
     }
 
     Loc tok_loc(const token *begin, const token *end) {
-        return Loc{file_, (u4)begin->start(), (u4)end->end()};
+        return Loc{file_, clamp((u4)begin->start()), clamp((u4)end->end())};
     }
 
     Loc loc_join(Loc begin, Loc end) {
