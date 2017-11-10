@@ -253,7 +253,8 @@ public:
             // TODO: We're losing the source-level information that there was an
             // `else` here.
             ruby_typer::parser::NodeVec stmts;
-            stmts.push_back(move(body));
+            if (body != nullptr)
+                stmts.push_back(move(body));
             stmts.push_back(move(else_));
             body = make_unique<Begin>(collection_loc(stmts), move(stmts));
         }
