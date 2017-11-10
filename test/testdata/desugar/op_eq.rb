@@ -1,12 +1,17 @@
 class OpEq
+  def b; end
+  def b=(_); end
+  def y; end
+  def z; end
+
   def example(a)
     a &&= :a
     self.b &&= :b
-    x[y, z] &&= 1
+    a[y, z] &&= 1
 
 
     a ||= :a
     self.b ||= :b
-    x[y, z] ||= 1
+    a[y, z] ||= 1
   end
 end

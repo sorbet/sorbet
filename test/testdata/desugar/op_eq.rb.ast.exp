@@ -1,4 +1,16 @@
 class <emptyTree>::OpEq<<todo sym>> < ()
+  def b<<todo sym>>()
+    <emptyTree>
+
+  def b=<<todo sym>>(_)
+    <emptyTree>
+
+  def y<<todo sym>>()
+    <emptyTree>
+
+  def z<<todo sym>>()
+    <emptyTree>
+
   def example<<todo sym>>(a)
     begin
       if a
@@ -16,7 +28,7 @@ class <emptyTree>::OpEq<<todo sym>> < ()
         end
       end
       begin
-        []$2 = self(<todo sym>).x()
+        []$2 = a
         []$3 = self(<todo sym>).y()
         []$4 = self(<todo sym>).z()
         []$5 = []$2.[]([]$3, []$4)
@@ -41,7 +53,7 @@ class <emptyTree>::OpEq<<todo sym>> < ()
         end
       end
       begin
-        []$8 = self(<todo sym>).x()
+        []$8 = a
         []$9 = self(<todo sym>).y()
         []$10 = self(<todo sym>).z()
         []$11 = []$8.[]([]$9, []$10)
