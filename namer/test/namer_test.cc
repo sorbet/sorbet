@@ -32,13 +32,13 @@ private:
 static const char *testClass = "Test";
 static ast::UTF8Desc testClass_DESC{(char *)testClass, (int)strlen(testClass)};
 
-unique_ptr<ast::Statement> getTree(ast::GlobalState &gs, string str) {
+unique_ptr<ast::Expression> getTree(ast::GlobalState &gs, string str) {
     auto ast = parser::Parser::run(gs, "<test>", str);
     ruby_typer::ast::Context ctx(gs, gs.defn_root());
     return ast::desugar::node2Tree(ctx, ast);
 }
 
-unique_ptr<ast::Statement> hello_world(ast::GlobalState &gs) {
+unique_ptr<ast::Expression> hello_world(ast::GlobalState &gs) {
     return getTree(gs, "def hello_world; end");
 }
 

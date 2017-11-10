@@ -224,7 +224,7 @@ public:
 
 private:
     CFG();
-    BasicBlock *walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target,
+    BasicBlock *walk(ast::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target,
                      int loops);
     BasicBlock *freshBlock(int outerLoops);
     void fillInTopoSorts(ast::Context ctx);

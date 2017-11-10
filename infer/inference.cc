@@ -235,6 +235,8 @@ void ruby_typer::infer::Inference::run(ast::Context ctx, unique_ptr<cfg::CFG> &c
         if (bb == cfg->deadBlock())
             continue;
         Environment &current = outEnvironments[bb->id];
+        current.vars.reserve(bb->args.size());
+        current.types.reserve(bb->args.size());
         for (ast::SymbolRef arg : bb->args) {
             current.vars.push_back(arg);
             current.types.emplace_back();

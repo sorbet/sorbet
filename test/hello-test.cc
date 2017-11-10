@@ -163,17 +163,17 @@ TEST(PreOrderTreeMap, CountTrees) {
     auto argumentSym = ctx.state.enterLocalSymbol(methodSym, name);
     unique_ptr<Expression> rhs(new IntLit(loc, 5));
     auto arg = unique_ptr<Expression>(new Ident(loc, argumentSym));
-    auto args = vector<unique_ptr<Expression>>();
+    MethodDef::ARGS_store args;
     args.emplace_back(move(arg));
 
-    unique_ptr<Statement> methodDef(new MethodDef(loc, methodSym, name, args, move(rhs), false));
+    unique_ptr<Expression> methodDef(new MethodDef(loc, methodSym, name, args, move(rhs), false));
     auto emptyTree = unique_ptr<Expression>(new EmptyTree(loc));
     auto cnst = unique_ptr<Expression>(new ConstantLit(loc, move(emptyTree), name));
 
-    vector<unique_ptr<Statement>> classrhs;
+    ClassDef::RHS_store classrhs;
     classrhs.emplace_back(move(methodDef));
-    vector<unique_ptr<Expression>> parents;
-    unique_ptr<Statement> tree(new ClassDef(loc, classSym, move(cnst), parents, classrhs, ClassDefKind::Class));
+    ClassDef::ANCESTORS_store parents;
+    unique_ptr<Expression> tree(new ClassDef(loc, classSym, move(cnst), parents, classrhs, ClassDefKind::Class));
     Counter c;
 
     auto r = TreeMap<Counter>::apply(ctx, c, move(tree));

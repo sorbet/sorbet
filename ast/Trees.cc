@@ -3,7 +3,6 @@
 
 // makes lldb work. Don't remove please
 template class std::unique_ptr<ruby_typer::ast::Expression>;
-template class std::unique_ptr<ruby_typer::ast::Statement>;
 template class std::unique_ptr<ruby_typer::ast::Reference>;
 
 using namespace std;
@@ -45,29 +44,17 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
-unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &statement) {
-    Error::check(dynamic_cast<Expression *>(statement.get()));
-    return unique_ptr<Expression>(dynamic_cast<Expression *>(statement.release()));
-}
-
-unique_ptr<Expression> Expression::fromStatement(unique_ptr<Statement> &&statement) {
-    return fromStatement(statement);
-}
-
-Statement::Statement(Loc loc) : loc(loc) {}
-
-Expression::Expression(Loc loc) : Statement(loc) {}
+Expression::Expression(Loc loc) : loc(loc) {}
 
 Reference::Reference(Loc loc) : Expression(loc) {}
 
 ControlFlow::ControlFlow(Loc loc) : Expression(loc) {}
 
-ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, vector<unique_ptr<Expression>> &ancestors,
-                   vector<unique_ptr<Statement>> &rhs, ClassDefKind kind)
+ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors, RHS_store &rhs,
+                   ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
-MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, vector<unique_ptr<Expression>> &args,
-                     unique_ptr<Expression> rhs, bool isSelf)
+MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, ARGS_store &args, unique_ptr<Expression> rhs, bool isSelf)
     : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {}
 
 Declaration::Declaration(Loc loc, SymbolRef symbol) : Expression(loc), symbol(symbol) {}
@@ -77,7 +64,7 @@ ConstDef::ConstDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> rhs) : Decl
 If::If(Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : ControlFlow(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
-While::While(Loc loc, unique_ptr<Expression> cond, unique_ptr<Statement> body)
+While::While(Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> body)
     : ControlFlow(loc), cond(move(cond)), body(move(body)) {}
 
 Break::Break(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
@@ -99,10 +86,10 @@ UnresolvedIdent::UnresolvedIdent(Loc loc, VarKind kind, NameRef name) : Referenc
 Assign::Assign(Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
 
-Send::Send(Loc loc, unique_ptr<Expression> recv, NameRef fun, vector<unique_ptr<Expression>> &&args)
+Send::Send(Loc loc, unique_ptr<Expression> recv, NameRef fun, Send::ARGS_store &args)
     : Expression(loc), recv(move(recv)), fun(move(fun)), args(move(args)) {}
 
-Super::Super(Loc loc, vector<unique_ptr<Expression>> &&args) : Expression(loc), args(move(args)) {}
+Super::Super(Loc loc, Send::ARGS_store &args) : Expression(loc), args(move(args)) {}
 
 NamedArg::NamedArg(Loc loc, NameRef name, unique_ptr<Expression> arg) : Expression(loc), name(name), arg(move(arg)) {}
 
@@ -134,24 +121,23 @@ HashSplat::HashSplat(Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg
 
 Self::Self(Loc loc, SymbolRef claz) : Expression(loc), claz(claz) {}
 
-Block::Block(Loc loc, vector<unique_ptr<Expression>> &args, unique_ptr<Expression> body)
+Block::Block(Loc loc, MethodDef::ARGS_store &args, unique_ptr<Expression> body)
     : Expression(loc), args(move(args)), body(move(body)){};
 
 NotSupported::NotSupported(Loc loc, const string &why) : Expression(loc), why(why) {}
 
 SymbolLit::SymbolLit(Loc loc, NameRef name) : Expression(loc), name(name) {}
 
-Hash::Hash(Loc loc, vector<unique_ptr<Expression>> &keys, vector<unique_ptr<Expression>> &values)
-    : Expression(loc), keys(move(keys)), values(move(values)) {}
+Hash::Hash(Loc loc, ENTRY_store &keys, ENTRY_store &values) : Expression(loc), keys(move(keys)), values(move(values)) {}
 
-Array::Array(Loc loc, vector<unique_ptr<Expression>> &elems) : Expression(loc), elems(move(elems)) {}
+Array::Array(Loc loc, ENTRY_store &elems) : Expression(loc), elems(move(elems)) {}
 
-InsSeq::InsSeq(Loc loc, vector<unique_ptr<Statement>> &&stats, unique_ptr<Expression> expr)
+InsSeq::InsSeq(Loc loc, STATS_store &stats, unique_ptr<Expression> expr)
     : Expression(loc), stats(move(stats)), expr(move(expr)) {}
 
 EmptyTree::EmptyTree(Loc loc) : Expression(loc) {}
 
-void printElems(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
+template <class T> void printElems(GlobalState &gs, stringstream &buf, T &args, int tabs) {
     bool first = true;
     bool didshadow = false;
     for (auto &a : args) {
@@ -168,7 +154,7 @@ void printElems(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression
     }
 };
 
-void printArgs(GlobalState &gs, stringstream &buf, vector<unique_ptr<Expression>> &args, int tabs) {
+template <class T> void printArgs(GlobalState &gs, stringstream &buf, T &args, int tabs) {
     buf << "(";
     printElems(gs, buf, args, tabs);
     buf << ")";

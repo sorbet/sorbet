@@ -19,74 +19,74 @@ public:
     // you may return the same pointer that you are given
     // caller is repsonsible to handle it
     ClassDef *preTransformClassDef(Context ctx, ClassDef *original);
-    Statement *postTransformClassDef(Context ctx, ClassDef *original);
+    Expression *postTransformClassDef(Context ctx, ClassDef *original);
 
     MethodDef *preTransformMethodDef(Context ctx, MethodDef *original);
-    Statement *postTransformMethodDef(Context ctx, MethodDef *original);
+    Expression *postTransformMethodDef(Context ctx, MethodDef *original);
 
     If *preTransformIf(Context ctx, If *original);
-    Statement *postTransformIf(Context ctx, If *original);
+    Expression *postTransformIf(Context ctx, If *original);
 
     While *preTransformWhile(Context ctx, While *original);
-    Statement *postTransformWhile(Context ctx, While *original);
+    Expression *postTransformWhile(Context ctx, While *original);
 
     For *preTransformFor(Context ctx, For *original);
-    Statement *postTransformFor(Context ctx, For *original);
+    Expression *postTransformFor(Context ctx, For *original);
 
-    Statement *postTransformBreak(Context ctx, Break *original);
+    Expression *postTransformBreak(Context ctx, Break *original);
 
-    Statement *postTransformNext(Context ctx, Next *original);
+    Expression *postTransformNext(Context ctx, Next *original);
 
     Return *preTransformReturn(Context ctx, Return *original);
-    Statement *postTransformReturn(Context ctx, Return *original);
+    Expression *postTransformReturn(Context ctx, Return *original);
 
     Yield *preTransformYield(Context ctx, Yield *original);
-    Statement *postTransformYield(Context ctx, Yield *original);
+    Expression *postTransformYield(Context ctx, Yield *original);
 
     Rescue *preTransformRescue(Context ctx, Rescue *original);
-    Statement *postTransformRescue(Context ctx, Rescue *original);
+    Expression *postTransformRescue(Context ctx, Rescue *original);
 
-    Statement *postTransformIdent(Context ctx, Ident *original);
-    Statement *postTransformUnresolvedIdent(Context ctx, UnresolvedIdent *original);
+    Expression *postTransformIdent(Context ctx, Ident *original);
+    Expression *postTransformUnresolvedIdent(Context ctx, UnresolvedIdent *original);
 
     Assign *preTransformAssign(Context ctx, Assign *original);
-    Statement *postTransformAssign(Context ctx, Assign *original);
+    Expression *postTransformAssign(Context ctx, Assign *original);
 
     Send *preTransformSend(Context ctx, Send *original);
-    Statement *postTransformSend(Context ctx, Send *original);
+    Expression *postTransformSend(Context ctx, Send *original);
 
     NamedArg *preTransformNamedArg(Context ctx, NamedArg *original);
-    Statement *postTransformNamedArg(Context ctx, NamedArg *original);
+    Expression *postTransformNamedArg(Context ctx, NamedArg *original);
 
     Hash *preTransformHash(Context ctx, Hash *original);
-    Statement *postTransformHash(Context ctx, Hash *original);
+    Expression *postTransformHash(Context ctx, Hash *original);
 
     Array *preTransformArray(Context ctx, Array *original);
-    Statement *postransformArray(Context ctx, Array *original);
+    Expression *postransformArray(Context ctx, Array *original);
 
-    Statement *postTransformBoolLit(Context ctx, BoolLit *original);
+    Expression *postTransformBoolLit(Context ctx, BoolLit *original);
 
-    Statement *postTransformFloatLit(Context ctx, FloatLit *original);
+    Expression *postTransformFloatLit(Context ctx, FloatLit *original);
 
-    Statement *postTransformIntLit(Context ctx, IntLit *original);
+    Expression *postTransformIntLit(Context ctx, IntLit *original);
 
-    Statement *postTransformStringLit(Context ctx, StringLit *original);
+    Expression *postTransformStringLit(Context ctx, StringLit *original);
 
-    Statement *postTransformConstantLit(Context ctx, ConstantLit *original);
+    Expression *postTransformConstantLit(Context ctx, ConstantLit *original);
 
     ArraySplat *preTransformArraySplat(Context ctx, ArraySplat *original);
-    Statement *postTransformArraySplat(Context ctx, ArraySplat *original);
+    Expression *postTransformArraySplat(Context ctx, ArraySplat *original);
 
     HashSplat *preTransformHashSplat(Context ctx, HashSplat *original);
-    Statement *postTransformHashSplat(Context ctx, HashSplat *original);
+    Expression *postTransformHashSplat(Context ctx, HashSplat *original);
 
-    Statement *postTransformSelf(Context ctx, Self *original);
+    Expression *postTransformSelf(Context ctx, Self *original);
 
     Block *preTransformBlock(Context ctx, Block *original);
-    Statement *postTransformBlock(Context ctx, Block *original);
+    Expression *postTransformBlock(Context ctx, Block *original);
 
     InsSeq *preTransformInsSeq(Context ctx, InsSeq *original);
-    Statement *postTransformInsSeq(Context ctx, InsSeq *original);
+    Expression *postTransformInsSeq(Context ctx, InsSeq *original);
 };
 
 /**
@@ -201,7 +201,7 @@ GENERATE_HAS_MEMBER(postTransformInsSeq);
                                                                                \
     template <class FUNC, bool has> class PostPonePostTransform_##X {          \
     public:                                                                    \
-        static Statement *call(Context ctx, X *cd, FUNC &what) {               \
+        static Expression *call(Context ctx, X *cd, FUNC &what) {              \
             Error::raise("should never be called. Incorrect use of TreeMap?"); \
             return nullptr;                                                    \
         }                                                                      \
@@ -209,14 +209,14 @@ GENERATE_HAS_MEMBER(postTransformInsSeq);
                                                                                \
     template <class FUNC> class PostPonePostTransform_##X<FUNC, true> {        \
     public:                                                                    \
-        static Statement *call(Context ctx, X *cd, FUNC &func) {               \
+        static Expression *call(Context ctx, X *cd, FUNC &func) {              \
             return func.postTransform##X(ctx, cd);                             \
         }                                                                      \
     };                                                                         \
                                                                                \
     template <class FUNC> class PostPonePostTransform_##X<FUNC, false> {       \
     public:                                                                    \
-        static Statement *call(Context ctx, X *cd, FUNC &func) {               \
+        static Expression *call(Context ctx, X *cd, FUNC &func) {              \
             return cd;                                                         \
         }                                                                      \
     };
@@ -290,7 +290,7 @@ private:
 
     TreeMap(FUNC &func) : func(func) {}
 
-    Statement *mapIt(Statement *what, Context ctx) {
+    Expression *mapIt(Expression *what, Context ctx) {
         // TODO: reorder by frequency
         if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr || dynamic_cast<Nil *>(what) != nullptr)
             return what;
@@ -719,15 +719,15 @@ private:
     }
 
 public:
-    static unique_ptr<Statement> apply(Context ctx, FUNC &func, unique_ptr<Statement> to) {
-        Statement *underlying = to.get();
+    static unique_ptr<Expression> apply(Context ctx, FUNC &func, unique_ptr<Expression> to) {
+        Expression *underlying = to.get();
         TreeMap walker(func);
-        Statement *res = walker.mapIt(underlying, ctx);
+        Expression *res = walker.mapIt(underlying, ctx);
 
         if (res == underlying) {
             return to;
         } else {
-            return std::unique_ptr<Statement>(res);
+            return std::unique_ptr<Expression>(res);
         }
     }
 };

@@ -274,6 +274,9 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
     for (auto &it : this->basicBlocks) {
         auto set2 = upper_bounds2[it->id];
 
+        int set1Sz = set2.size();
+        int set2Sz = upper_bounds1[it->id].size();
+        it->args.reserve(set1Sz > set2Sz ? set2Sz : set1Sz);
         for (auto el : upper_bounds1[it->id]) {
             if (set2.find(el) != set2.end()) {
                 it->args.push_back(el);
@@ -437,7 +440,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target,
+BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target,
                       int loops) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
@@ -596,7 +599,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Statement *what, BasicBlock *curren
                  ret = current;
              },
 
-             [&](ast::Statement *n) {
+             [&](ast::Expression *n) {
                  current->exprs.emplace_back(target, n->loc, make_unique<NotSupported>(""));
                  ret = current;
              },

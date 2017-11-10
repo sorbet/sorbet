@@ -45,7 +45,7 @@ static bool removeOption(vector<string> &prints, string option) {
 }
 
 void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> nameAndSource) {
-    vector<unique_ptr<ruby_typer::parser::Node>> empty;
+    ruby_typer::parser::NodeVec empty;
     ruby_typer::ast::Loc emptyLoc(0, 0, 0);
     unique_ptr<ruby_typer::parser::Begin> join = make_unique<ruby_typer::parser::Begin>(emptyLoc, move(empty));
     for (auto &pair : nameAndSource) {

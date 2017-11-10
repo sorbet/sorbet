@@ -10,21 +10,14 @@
 namespace ruby_typer {
 namespace ast {
 
-class Statement {
+class Expression {
 public:
-    Statement(Loc loc);
-    virtual ~Statement() = default;
+    Expression(Loc loc);
+    virtual ~Expression() = default;
     virtual std::string toString(GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     virtual std::string showRaw(GlobalState &gs, int tabs = 0) = 0;
     Loc loc;
-};
-
-class Expression : public Statement {
-public:
-    Expression(Loc loc);
-    static std::unique_ptr<Expression> fromStatement(std::unique_ptr<Statement> &expr);
-    static std::unique_ptr<Expression> fromStatement(std::unique_ptr<Statement> &&expr);
 };
 
 class Reference : public Expression {
@@ -56,15 +49,22 @@ public:
         return symbol.info(ctx).mixins(ctx);
     }
 
-    std::vector<std::unique_ptr<Statement>> rhs;
+    static constexpr int EXPECTED_RHS_COUNT = 4;
+
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT> RHS_store;
+
+    RHS_store rhs;
     std::unique_ptr<Expression> name;
     // For unresolved names. Once they are resolved to Symbols they go into the
     // Symbol
-    std::vector<std::unique_ptr<Expression>> ancestors;
+
+    static constexpr int EXPECTED_ANCESTORS_COUNT = 2;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ANCESTORS_COUNT> ANCESTORS_store;
+
+    ANCESTORS_store ancestors;
     ClassDefKind kind;
 
-    ClassDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> name,
-             std::vector<std::unique_ptr<Expression>> &ancestors, std::vector<std::unique_ptr<Statement>> &rhs,
+    ClassDef(Loc loc, SymbolRef symbol, std::unique_ptr<Expression> name, ANCESTORS_store &ancestors, RHS_store &rhs,
              ClassDefKind kind);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
@@ -76,12 +76,15 @@ public:
 class MethodDef : public Declaration {
 public:
     std::unique_ptr<Expression> rhs;
-    std::vector<std::unique_ptr<Expression>> args;
+
+    static constexpr int EXPECTED_ARGS_COUNT = 2;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
+    ARGS_store args;
+
     NameRef name;
     bool isSelf;
 
-    MethodDef(Loc loc, SymbolRef symbol, NameRef name, std::vector<std::unique_ptr<Expression>> &args,
-              std::unique_ptr<Expression> rhs, bool isSelf);
+    MethodDef(Loc loc, SymbolRef symbol, NameRef name, ARGS_store &args, std::unique_ptr<Expression> rhs, bool isSelf);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -111,9 +114,9 @@ public:
 class While : public ControlFlow {
 public:
     std::unique_ptr<Expression> cond;
-    std::unique_ptr<Statement> body;
+    std::unique_ptr<Expression> body;
 
-    While(Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Statement> body);
+    While(Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> body);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -292,7 +295,10 @@ class Send : public Expression {
 public:
     std::unique_ptr<Expression> recv;
     NameRef fun;
-    std::vector<std::unique_ptr<Expression>> args;
+
+    static constexpr int EXPECTED_ARGS_COUNT = 2;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
+    ARGS_store args;
     u4 flags = 0;
 
     static const int PRIVATE_OK = 1 << 0;
@@ -300,7 +306,7 @@ public:
     // null if no block passed
     std::unique_ptr<Block> block;
 
-    Send(Loc loc, std::unique_ptr<Expression> recv, NameRef fun, std::vector<std::unique_ptr<Expression>> &&args);
+    Send(Loc loc, std::unique_ptr<Expression> recv, NameRef fun, ARGS_store &args);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -308,9 +314,9 @@ public:
 
 class Super : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> args;
+    Send::ARGS_store args;
 
-    Super(Loc loc, std::vector<std::unique_ptr<Expression>> &&args);
+    Super(Loc loc, Send::ARGS_store &args);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -330,10 +336,13 @@ public:
 
 class Hash : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> keys;
-    std::vector<std::unique_ptr<Expression>> values;
+    static constexpr int EXPECTED_ENTRY_COUNT = 2;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
 
-    Hash(Loc loc, std::vector<std::unique_ptr<Expression>> &keys, std::vector<std::unique_ptr<Expression>> &values);
+    ENTRY_store keys;
+    ENTRY_store values;
+
+    Hash(Loc loc, ENTRY_store &keys, ENTRY_store &values);
 
     virtual std::string toString(GlobalState &gs, int tabs);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -342,9 +351,12 @@ public:
 
 class Array : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> elems;
+    static constexpr int EXPECTED_ENTRY_COUNT = 4;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
 
-    Array(Loc loc, std::vector<std::unique_ptr<Expression>> &elems);
+    ENTRY_store elems;
+
+    Array(Loc loc, ENTRY_store &elems);
 
     virtual std::string toString(GlobalState &gs, int tabs);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
@@ -434,11 +446,11 @@ public:
 
 class Block : public Expression {
 public:
-    std::vector<std::unique_ptr<Expression>> args;
+    MethodDef::ARGS_store args;
     std::unique_ptr<Expression> body;
     SymbolRef symbol;
 
-    Block(Loc loc, std::vector<std::unique_ptr<Expression>> &args, std::unique_ptr<Expression> body);
+    Block(Loc loc, MethodDef::ARGS_store &args, std::unique_ptr<Expression> body);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -446,10 +458,13 @@ public:
 
 class InsSeq : public Expression {
 public:
-    std::vector<std::unique_ptr<Statement>> stats;
+    static constexpr int EXPECTED_STATS_COUNT = 4;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT> STATS_store;
+    STATS_store stats;
+
     std::unique_ptr<Expression> expr;
 
-    InsSeq(Loc loc, std::vector<std::unique_ptr<Statement>> &&stats, std::unique_ptr<Expression> expr);
+    InsSeq(Loc loc, STATS_store &stats, std::unique_ptr<Expression> expr);
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

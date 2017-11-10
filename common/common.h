@@ -1,6 +1,7 @@
 #ifndef SRUBY_COMMON_HPP
 #define SRUBY_COMMON_HPP
 
+#include "absl/container/inlined_vector.h"
 #include <cstring>
 #include <functional>
 #include <ostream>
@@ -8,6 +9,10 @@
 #include <string>
 
 namespace ruby_typer {
+
+template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
+// Uncomment to make vectors debuggable
+// template <class T, size_t N> using InlinedVector = std::vector<T>;
 
 #ifdef NDEBUG
 constexpr bool debug_mode = false;
@@ -81,7 +86,7 @@ class Strings {
 public:
     static std::string escapeCString(std::string what);
 };
-}
+} // namespace ruby_typer
 std::string strprintf(const char *__restrict, va_list) __attribute__((format(printf, 1, 0)));
 ;
 

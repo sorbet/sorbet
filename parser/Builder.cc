@@ -85,7 +85,7 @@ public:
         return Loc{file_, begin.begin_pos, end.end_pos};
     }
 
-    Loc collection_loc(const token *begin, vector<unique_ptr<Node>> &elts, const token *end) {
+    Loc collection_loc(const token *begin, ruby_typer::parser::NodeVec &elts, const token *end) {
         if (begin != nullptr) {
             DEBUG_ONLY(Error::check(end != nullptr));
             return tok_loc(begin, end);
@@ -96,7 +96,7 @@ public:
         return loc_join(elts.front()->loc, elts.back()->loc);
     }
 
-    Loc collection_loc(vector<unique_ptr<Node>> &elts) {
+    Loc collection_loc(ruby_typer::parser::NodeVec &elts) {
         return collection_loc(nullptr, elts, nullptr);
     }
 
@@ -135,7 +135,7 @@ public:
             if (driver_->lex.is_declared(name.toString(gs_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {
-                return make_unique<Send>(node->loc, nullptr, id->name, vector<unique_ptr<Node>>());
+                return make_unique<Send>(node->loc, nullptr, id->name, ruby_typer::parser::NodeVec());
             }
         }
         return node;
@@ -149,13 +149,13 @@ public:
         return make_unique<Arg>(tok_loc(name), gs_.enterNameUTF8(name->string()));
     }
 
-    unique_ptr<Node> args(const token *begin, vector<unique_ptr<Node>> args, const token *end, bool check_args) {
+    unique_ptr<Node> args(const token *begin, ruby_typer::parser::NodeVec args, const token *end, bool check_args) {
         if (begin == nullptr && args.size() == 0 && end == nullptr)
             return nullptr;
         return make_unique<Args>(collection_loc(begin, args, end), move(args));
     }
 
-    unique_ptr<Node> array(const token *begin, vector<unique_ptr<Node>> elements, const token *end) {
+    unique_ptr<Node> array(const token *begin, ruby_typer::parser::NodeVec elements, const token *end) {
         return make_unique<Array>(collection_loc(begin, elements, end), move(elements));
     }
 
@@ -195,7 +195,7 @@ public:
         }
     }
 
-    unique_ptr<Node> associate(const token *begin, vector<unique_ptr<Node>> pairs, const token *end) {
+    unique_ptr<Node> associate(const token *begin, ruby_typer::parser::NodeVec pairs, const token *end) {
         return make_unique<Hash>(collection_loc(begin, pairs, end), move(pairs));
     }
 
@@ -203,9 +203,9 @@ public:
         NameRef method = gs_.enterNameUTF8(selector->string() + "=");
         Loc loc = loc_join(receiver->loc, tok_loc(selector));
         if (dot && dot->string() == "&.") {
-            return make_unique<CSend>(loc, move(receiver), method, vector<unique_ptr<Node>>());
+            return make_unique<CSend>(loc, move(receiver), method, ruby_typer::parser::NodeVec());
         }
-        return make_unique<Send>(loc, move(receiver), method, vector<unique_ptr<Node>>());
+        return make_unique<Send>(loc, move(receiver), method, ruby_typer::parser::NodeVec());
     }
 
     unique_ptr<Node> back_ref(const token *tok) {
@@ -220,18 +220,18 @@ public:
             loc = body->loc;
 
         if (body == nullptr) {
-            return make_unique<Begin>(loc, vector<unique_ptr<Node>>());
+            return make_unique<Begin>(loc, ruby_typer::parser::NodeVec());
         }
         if (Begin *b = dynamic_cast<Begin *>(body.get()))
             return body;
         if (Mlhs *m = dynamic_cast<Mlhs *>(body.get()))
             return body;
-        vector<unique_ptr<Node>> stmts;
+        ruby_typer::parser::NodeVec stmts;
         stmts.push_back(move(body));
         return make_unique<Begin>(loc, move(stmts));
     }
 
-    unique_ptr<Node> begin_body(unique_ptr<Node> body, vector<unique_ptr<Node>> rescue_bodies, const token *else_tok,
+    unique_ptr<Node> begin_body(unique_ptr<Node> body, ruby_typer::parser::NodeVec rescue_bodies, const token *else_tok,
                                 unique_ptr<Node> else_, const token *ensure_tok, unique_ptr<Node> ensure) {
         if (rescue_bodies.size() > 0) {
             if (else_ == nullptr) {
@@ -244,7 +244,7 @@ public:
         } else if (else_ != nullptr) {
             // TODO: We're losing the source-level information that there was an
             // `else` here.
-            vector<unique_ptr<Node>> stmts;
+            ruby_typer::parser::NodeVec stmts;
             stmts.push_back(move(body));
             stmts.push_back(move(else_));
             body = make_unique<Begin>(collection_loc(stmts), move(stmts));
@@ -270,18 +270,18 @@ public:
             if (Begin *b = dynamic_cast<Begin *>(body.get())) {
                 return make_unique<Kwbegin>(loc, move(b->stmts));
             } else {
-                vector<unique_ptr<Node>> nodes;
+                ruby_typer::parser::NodeVec nodes;
                 nodes.push_back(move(body));
                 return make_unique<Kwbegin>(loc, move(nodes));
             }
         }
-        return make_unique<Kwbegin>(loc, vector<unique_ptr<Node>>());
+        return make_unique<Kwbegin>(loc, ruby_typer::parser::NodeVec());
     }
 
     unique_ptr<Node> binary_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
         Loc loc = loc_join(receiver->loc, arg->loc);
 
-        vector<unique_ptr<Node>> args;
+        ruby_typer::parser::NodeVec args;
         args.push_back(move(arg));
 
         return make_unique<Send>(loc, move(receiver), gs_.enterNameUTF8(oper->string()), move(args));
@@ -291,10 +291,10 @@ public:
                            unique_ptr<Node> body, const token *end) {
         if (Yield *y = dynamic_cast<Yield *>(method_call.get())) {
             error(ruby_parser::dclass::BlockGivenToYield, y->loc);
-            return make_unique<Yield>(y->loc, vector<unique_ptr<Node>>());
+            return make_unique<Yield>(y->loc, ruby_typer::parser::NodeVec());
         }
 
-        vector<unique_ptr<Node>> *callargs = nullptr;
+        ruby_typer::parser::NodeVec *callargs = nullptr;
         if (Send *s = dynamic_cast<Send *>(method_call.get())) {
             callargs = &s->args;
         }
@@ -317,7 +317,7 @@ public:
                                       move(body));
         }
 
-        vector<unique_ptr<Node>> *exprs;
+        ruby_typer::parser::NodeVec *exprs;
         typecase(method_call.get(), [&](Break *b) { exprs = &b->exprs; },
 
                  [&](Return *r) { exprs = &r->exprs; },
@@ -346,7 +346,7 @@ public:
     }
 
     unique_ptr<Node> call_method(unique_ptr<Node> receiver, const token *dot, const token *selector,
-                                 const token *lparen, vector<unique_ptr<Node>> args, const token *rparen) {
+                                 const token *lparen, ruby_typer::parser::NodeVec args, const token *rparen) {
         Loc selector_loc, start_loc;
         if (selector != nullptr)
             selector_loc = tok_loc(selector);
@@ -377,7 +377,7 @@ public:
             return make_unique<Send>(loc, move(receiver), method, move(args));
     }
 
-    unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, vector<unique_ptr<Node>> when_bodies,
+    unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, ruby_typer::parser::NodeVec when_bodies,
                            const token *else_tok, unique_ptr<Node> else_body, const token *end) {
         return make_unique<Case>(loc_join(tok_loc(case_), tok_loc(end)), move(expr), move(when_bodies),
                                  move(else_body));
@@ -391,7 +391,7 @@ public:
         return make_unique<Complex>(tok_loc(tok), tok->string());
     }
 
-    unique_ptr<Node> compstmt(vector<unique_ptr<Node>> nodes) {
+    unique_ptr<Node> compstmt(ruby_typer::parser::NodeVec nodes) {
         switch (nodes.size()) {
             case 0:
                 return nullptr;
@@ -539,15 +539,15 @@ public:
         return make_unique<Ident>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
-    unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
+    unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, ruby_typer::parser::NodeVec indexes,
                            const token *rbrack) {
         return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver), ast::Names::squareBrackets(),
                                  move(indexes));
     }
 
-    unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, vector<unique_ptr<Node>> indexes,
+    unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, ruby_typer::parser::NodeVec indexes,
                                 const token *rbrack) {
-        vector<unique_ptr<Node>> args;
+        ruby_typer::parser::NodeVec args;
         return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver),
                                  ast::Names::squareBracketsEq(), move(args));
     }
@@ -560,7 +560,7 @@ public:
         return make_unique<IVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
-    unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
+    unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
         return make_unique<Break>(loc, move(args));
@@ -570,7 +570,7 @@ public:
         return make_unique<Defined>(loc_join(tok_loc(keyword), arg->loc), move(arg));
     }
 
-    unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
+    unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                   const token *rparen) {
         return make_unique<Next>(loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen)), move(args));
     }
@@ -583,13 +583,13 @@ public:
         return make_unique<Retry>(tok_loc(keyword));
     }
 
-    unique_ptr<Node> keyword_return(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
+    unique_ptr<Node> keyword_return(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                     const token *rparen) {
         Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
         return make_unique<Return>(loc, move(args));
     }
 
-    unique_ptr<Node> keyword_super(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
+    unique_ptr<Node> keyword_super(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = tok_loc(keyword);
         Loc argloc = collection_loc(lparen, args, rparen);
@@ -598,7 +598,7 @@ public:
         return make_unique<Super>(loc, move(args));
     }
 
-    unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, vector<unique_ptr<Node>> args,
+    unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
         if (args.size() > 0 && dynamic_cast<BlockPass *>(args.back().get()) != nullptr) {
@@ -673,7 +673,7 @@ public:
         // to support that, we'd need to analyze that here and call
         // `driver_->lex.declare`.
         Loc loc = loc_join(receiver->loc, arg->loc);
-        vector<unique_ptr<Node>> args;
+        ruby_typer::parser::NodeVec args;
         args.emplace_back(move(arg));
         return make_unique<Send>(loc, move(receiver), gs_.enterNameUTF8(oper->string()), move(args));
     }
@@ -682,7 +682,7 @@ public:
         return make_unique<Masgn>(loc_join(mlhs->loc, rhs->loc), move(mlhs), move(rhs));
     }
 
-    unique_ptr<Node> multi_lhs(const token *begin, vector<unique_ptr<Node>> items, const token *end) {
+    unique_ptr<Node> multi_lhs(const token *begin, ruby_typer::parser::NodeVec items, const token *end) {
         return make_unique<Mlhs>(collection_loc(begin, items, end), move(items));
     }
 
@@ -690,7 +690,7 @@ public:
         if (Mlhs *mlhs = dynamic_cast<Mlhs *>(item.get())) {
             return item;
         }
-        vector<unique_ptr<Node>> args;
+        ruby_typer::parser::NodeVec args;
         args.emplace_back(move(item));
         return make_unique<Mlhs>(collection_loc(begin, args, end), move(args));
     }
@@ -715,13 +715,13 @@ public:
                 loc = loc_join(tok_loc(not_), tok_loc(end));
             else
                 loc = loc_join(tok_loc(not_), receiver->loc);
-            return make_unique<Send>(loc, move(receiver), ast::Names::bang(), vector<unique_ptr<Node>>());
+            return make_unique<Send>(loc, move(receiver), ast::Names::bang(), ruby_typer::parser::NodeVec());
         }
 
         DEBUG_ONLY(Error::check(begin != nullptr && end != nullptr));
-        auto body = make_unique<Begin>(loc_join(tok_loc(begin), tok_loc(end)), vector<unique_ptr<Node>>());
+        auto body = make_unique<Begin>(loc_join(tok_loc(begin), tok_loc(end)), ruby_typer::parser::NodeVec());
         return make_unique<Send>(loc_join(tok_loc(not_), body->loc), move(body), ast::Names::bang(),
-                                 vector<unique_ptr<Node>>());
+                                 ruby_typer::parser::NodeVec());
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
@@ -752,7 +752,7 @@ public:
                                  make_unique<Symbol>(tok_loc(key), gs_.enterNameUTF8(key->string())), move(value));
     }
 
-    unique_ptr<Node> pair_quoted(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
+    unique_ptr<Node> pair_quoted(const token *begin, ruby_typer::parser::NodeVec parts, const token *end,
                                  unique_ptr<Node> value) {
         auto sym = make_unique<DSymbol>(loc_join(tok_loc(begin), tok_loc(end)), move(parts));
         return make_unique<Pair>(loc_join(tok_loc(begin), value->loc), move(sym), move(value));
@@ -788,7 +788,7 @@ public:
         return make_unique<Complex>(tok_loc(tok), tok->string());
     }
 
-    unique_ptr<Node> regexp_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end,
+    unique_ptr<Node> regexp_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end,
                                     unique_ptr<Node> options) {
         Loc loc = loc_join(loc_join(tok_loc(begin), tok_loc(end)), maybe_loc(options));
         return make_unique<Regexp>(loc, move(parts), move(options));
@@ -844,7 +844,7 @@ public:
         return make_unique<String>(tok_loc(string_), gs_.enterNameUTF8(string_->string()));
     }
 
-    unique_ptr<Node> string_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
+    unique_ptr<Node> string_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
         Loc loc = collection_loc(begin, parts, end);
         return make_unique<DString>(loc, move(parts));
     }
@@ -857,7 +857,7 @@ public:
         return make_unique<Symbol>(tok_loc(symbol), gs_.enterNameUTF8(symbol->string()));
     }
 
-    unique_ptr<Node> symbol_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
+    unique_ptr<Node> symbol_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
         return make_unique<DSymbol>(collection_loc(begin, parts, end), move(parts));
     }
 
@@ -865,9 +865,10 @@ public:
         return make_unique<Symbol>(tok_loc(symbol), gs_.enterNameUTF8(symbol->string()));
     }
 
-    unique_ptr<Node> symbols_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
+    unique_ptr<Node> symbols_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
         Loc loc = collection_loc(begin, parts, end);
-        vector<unique_ptr<Node>> out_parts;
+        ruby_typer::parser::NodeVec out_parts;
+        out_parts.reserve(parts.size());
         for (auto &p : parts) {
             if (String *s = dynamic_cast<String *>(p.get())) {
                 out_parts.emplace_back(make_unique<Symbol>(s->loc, s->val));
@@ -890,7 +891,7 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_arg_instance(unique_ptr<Node> base, vector<unique_ptr<Node>> types, const token *end) {
+    unique_ptr<Node> tr_arg_instance(unique_ptr<Node> base, ruby_typer::parser::NodeVec types, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
@@ -919,13 +920,13 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_genargs(const token *begin, vector<unique_ptr<Node>> genargs,
-                                vector<unique_ptr<Node>> constraints, const token *end) {
+    unique_ptr<Node> tr_genargs(const token *begin, ruby_typer::parser::NodeVec genargs,
+                                ruby_typer::parser::NodeVec constraints, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_gendecl(unique_ptr<Node> cpath, const token *begin, vector<unique_ptr<Node>> genargs,
-                                vector<unique_ptr<Node>> constraints, const token *end) {
+    unique_ptr<Node> tr_gendecl(unique_ptr<Node> cpath, const token *begin, ruby_typer::parser::NodeVec genargs,
+                                ruby_typer::parser::NodeVec constraints, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
@@ -933,7 +934,7 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_geninst(unique_ptr<Node> cpath, const token *begin, vector<unique_ptr<Node>> genargs,
+    unique_ptr<Node> tr_geninst(unique_ptr<Node> cpath, const token *begin, ruby_typer::parser::NodeVec genargs,
                                 const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
@@ -983,7 +984,7 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_tuple(const token *begin, vector<unique_ptr<Node>> types, const token *end) {
+    unique_ptr<Node> tr_tuple(const token *begin, ruby_typer::parser::NodeVec types, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
@@ -1005,17 +1006,17 @@ public:
         else
             op = gs_.enterNameUTF8(oper->string());
 
-        return make_unique<Send>(loc, move(receiver), op, vector<unique_ptr<Node>>());
+        return make_unique<Send>(loc, move(receiver), op, ruby_typer::parser::NodeVec());
     }
 
-    unique_ptr<Node> undef_method(const token *undef, vector<unique_ptr<Node>> name_list) {
+    unique_ptr<Node> undef_method(const token *undef, ruby_typer::parser::NodeVec name_list) {
         Loc loc = tok_loc(undef);
         if (name_list.size() > 0)
             loc = loc_join(loc, name_list.back()->loc);
         return make_unique<Undef>(loc, move(name_list));
     }
 
-    unique_ptr<Node> when(const token *when, vector<unique_ptr<Node>> patterns, const token *then,
+    unique_ptr<Node> when(const token *when, ruby_typer::parser::NodeVec patterns, const token *then,
                           unique_ptr<Node> body) {
         Loc loc = tok_loc(when);
         if (body != nullptr)
@@ -1027,16 +1028,16 @@ public:
         return make_unique<When>(loc, move(patterns), move(body));
     }
 
-    unique_ptr<Node> word(vector<unique_ptr<Node>> parts) {
+    unique_ptr<Node> word(ruby_typer::parser::NodeVec parts) {
         Loc loc = collection_loc(parts);
         return make_unique<DString>(loc, move(parts));
     }
 
-    unique_ptr<Node> words_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
+    unique_ptr<Node> words_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
         return make_unique<Array>(collection_loc(begin, parts, end), move(parts));
     }
 
-    unique_ptr<Node> xstring_compose(const token *begin, vector<unique_ptr<Node>> parts, const token *end) {
+    unique_ptr<Node> xstring_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
         return make_unique<XString>(collection_loc(begin, parts, end), move(parts));
     }
 };
@@ -1060,12 +1061,13 @@ unique_ptr<Node> cast_node(foreign_ptr node) {
     return unique_ptr<Node>(const_cast<Node *>(reinterpret_cast<const Node *>(node)));
 }
 
-vector<unique_ptr<Node>> convert_node_list(const node_list *cargs) {
-    vector<unique_ptr<Node>> out;
+ruby_typer::parser::NodeVec convert_node_list(const node_list *cargs) {
+    ruby_typer::parser::NodeVec out;
     if (cargs == nullptr)
         return out;
 
     node_list *args = const_cast<node_list *>(cargs);
+    out.reserve(args->size());
     for (int i = 0; i < args->size(); i++) {
         out.push_back(cast_node(args->at(i)));
     }

@@ -103,6 +103,7 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
     os << endl;
 
     vector<string> children;
+    children.reserve(members.size());
     for (auto pair : members) {
         if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass())
             continue;

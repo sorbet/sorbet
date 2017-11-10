@@ -206,7 +206,7 @@ string arg_type(FieldType arg) {
         case Node:
             return "unique_ptr<Node> ";
         case NodeVec:
-            return "vector<unique_ptr<Node>> ";
+            return "NodeVec ";
         case String:
             return "const std::string &";
         case Uint:
@@ -221,7 +221,7 @@ string field_type(FieldType arg) {
         case Node:
             return "unique_ptr<Node>";
         case NodeVec:
-            return "vector<unique_ptr<Node>>";
+            return "NodeVec";
         case String:
             return "const std::string";
         case Uint:

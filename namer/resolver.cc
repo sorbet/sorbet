@@ -243,7 +243,7 @@ public:
         nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
         return original;
     }
-    ast::Statement *postTransformClassDef(ast::Context ctx, ast::ClassDef *original) {
+    ast::Expression *postTransformClassDef(ast::Context ctx, ast::ClassDef *original) {
         nesting_ = move(nesting_->parent);
 
         for (auto &ancst : original->ancestors) {
@@ -293,14 +293,14 @@ public:
         }
 
         auto toRemove = remove_if(original->rhs.begin(), original->rhs.end(),
-                                  [](unique_ptr<ast::Statement> &stat) -> bool { return stat.get() == nullptr; });
+                                  [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
 
         original->rhs.erase(toRemove, original->rhs.end());
 
         return original;
     }
 
-    ast::Statement *postTransformConstantLit(ast::Context ctx, ast::ConstantLit *c) {
+    ast::Expression *postTransformConstantLit(ast::Context ctx, ast::ConstantLit *c) {
         ast::SymbolRef resolved = resolveConstant(ctx, c);
         if (!resolved.exists()) {
             string str = c->toString(ctx);
@@ -315,7 +315,7 @@ public:
 
 class ResolveVariablesWalk {
 public:
-    ast::Statement *postTransformUnresolvedIdent(ast::Context ctx, ast::UnresolvedIdent *id) {
+    ast::Expression *postTransformUnresolvedIdent(ast::Context ctx, ast::UnresolvedIdent *id) {
         ast::SymbolRef klass;
 
         switch (id->kind) {
@@ -346,7 +346,7 @@ public:
     };
 };
 
-unique_ptr<ast::Statement> Namer::resolve(ast::Context &ctx, unique_ptr<ast::Statement> tree) {
+unique_ptr<ast::Expression> Namer::resolve(ast::Context &ctx, unique_ptr<ast::Expression> tree) {
     ResolveWalk walk(ctx);
     tree = ast::TreeMap<ResolveWalk>::apply(ctx, walk, move(tree));
     ResolveVariablesWalk vars;
