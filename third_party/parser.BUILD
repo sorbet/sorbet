@@ -49,3 +49,5 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
 )
+
+exports_files(["codegen/diagnostics.rb"])

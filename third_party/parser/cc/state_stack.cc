@@ -31,3 +31,4 @@ bool state_stack::active() const {
     return stack.back();
   }
 }
+

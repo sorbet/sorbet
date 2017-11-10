@@ -531,6 +531,14 @@ public:
         return make_unique<For>(loc_join(tok_loc(for_), tok_loc(end)), move(iterator), move(iteratee), move(body));
     }
 
+    unique_ptr<Node> free_node(unique_ptr<Node> UNUSED(_node)) {
+        return nullptr;
+    }
+
+    unique_ptr<Node> free_node_list(NodeVec UNUSED(_node)) {
+        return nullptr;
+    }
+
     unique_ptr<Node> gvar(const token *tok) {
         return make_unique<GVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
@@ -1267,6 +1275,14 @@ foreign_ptr for_(self_ptr builder, const token *for_, foreign_ptr iterator, cons
         .release();
 }
 
+foreign_ptr free_node(self_ptr builder, foreign_ptr node) {
+    return cast_builder(builder)->free_node(cast_node(node)).release();
+}
+
+foreign_ptr free_node_list(self_ptr builder, const node_list *nodes) {
+    return cast_builder(builder)->free_node_list(convert_node_list(nodes)).release();
+}
+
 foreign_ptr gvar(self_ptr builder, const token *tok) {
     return cast_builder(builder)->gvar(tok).release();
 }
@@ -1721,6 +1737,8 @@ struct ruby_parser::builder Builder::interface = {
     float_,
     float_complex,
     for_,
+    free_node,
+    free_node_list,
     gvar,
     ident,
     index,
