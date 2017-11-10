@@ -110,7 +110,7 @@ begin
   self(<singleton class:<root>>).proc() do |::Object#<block>$10#x|
     <emptyTree>
   end
-  break(self(TODO).foo(1) do ||
+  break(self(<todo sym>).foo(1) do ||
       <emptyTree>
     end)
   def foo<foo>(::Object#foo#*$0)

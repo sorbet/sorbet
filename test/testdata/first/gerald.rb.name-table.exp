@@ -87,6 +87,7 @@ class Opus ()
       class Matcher (<dynamic>)
         field @rules -> <dynamic>
         method initialize ()
+          local assignTmp$0
           local invalid_rule_ids
           local invalid_rules
         method match (match_context)
@@ -96,5 +97,4 @@ class Opus ()
             local r
             method <block>$5 ()
         static-field MAX_AFFECTED_FILES -> <dynamic>
-local assignTmp$0
 
