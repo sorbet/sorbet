@@ -2,33 +2,33 @@ digraph "gerald.rb"{
 subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize" {
     label = "::Opus::CIBot::Gerald::MatchTimeout#initialize";
     color = blue;
-    bb32_0 [shape = invhouse];
-    bb32_1 [shape = parallelogram];
+    bb31_0 [shape = invhouse];
+    bb31_1 [shape = parallelogram];
 
-    bb32_0 [label = "()\n<self>$19 = self : MatchTimeout\nrule_token = load_arg(<self>$19#initialize, 1) : <dynamic>\nstatTmp$20 = NotSupported() : <dynamic>\n@rule_token = rule_token : <dynamic>\n<ret>$21 = return @rule_token : <bottom>\n<never>"];
-    bb32_0 -> bb32_1;
-    bb32_1 [label = "()\n<never>"];
-    bb32_1 -> bb32_1;
+    bb31_0 [label = "()\n<self>$19 = self : MatchTimeout\nrule_token = load_arg(<self>$19#initialize, 1) : <dynamic>\nstatTmp$20 = NotSupported() : <dynamic>\n@rule_token = rule_token : <dynamic>\n<ret>$21 = return @rule_token : <bottom>\n<never>"];
+    bb31_0 -> bb31_1;
+    bb31_1 [label = "()\n<never>"];
+    bb31_1 -> bb31_1;
 }
 
 subgraph "cluster_::Opus::CIBot::Gerald::Matcher#initialize" {
     label = "::Opus::CIBot::Gerald::Matcher#initialize";
     color = blue;
-    bb38_0 [shape = invhouse];
-    bb38_1 [shape = parallelogram];
+    bb37_0 [shape = invhouse];
+    bb37_1 [shape = parallelogram];
 
-    bb38_0 [label = "(invalid_rules)\nstatTmp$29 = NotSupported() : <dynamic>\nstatTmp$27 = <dynamic>.query_by(statTmp$29) : <dynamic>\nstatTmp$30 = NotSupported() : <dynamic>\nstatTmp$26 = statTmp$27.load_all(statTmp$30) : <dynamic>\nstatTmp$31 = NotSupported() : <dynamic>\nassignTmp$0 = statTmp$26.partition(statTmp$31) : <dynamic>\nstatTmp$34 = 0 : Integer(0)\n@rules = assignTmp$0.[](statTmp$34) : <dynamic>\nstatTmp$37 = 1 : Integer(1)\ninvalid_rules = assignTmp$0.[](statTmp$37) : <dynamic>\nstatTmp$39 = invalid_rules.empty?() : <dynamic>\nifTmp$38 = statTmp$39.!() : <dynamic>\nifTmp$38"];
-    bb38_0 -> bb38_2;
-    bb38_0 -> bb38_3;
+    bb37_0 [label = "(invalid_rules)\nstatTmp$29 = NotSupported() : <dynamic>\nstatTmp$27 = <dynamic>.query_by(statTmp$29) : <dynamic>\nstatTmp$30 = NotSupported() : <dynamic>\nstatTmp$26 = statTmp$27.load_all(statTmp$30) : <dynamic>\nstatTmp$31 = NotSupported() : <dynamic>\nassignTmp$0 = statTmp$26.partition(statTmp$31) : <dynamic>\nstatTmp$34 = 0 : Integer(0)\n@rules = assignTmp$0.[](statTmp$34) : <dynamic>\nstatTmp$37 = 1 : Integer(1)\ninvalid_rules = assignTmp$0.[](statTmp$37) : <dynamic>\nstatTmp$39 = invalid_rules.empty?() : <dynamic>\nifTmp$38 = statTmp$39.!() : <dynamic>\nifTmp$38"];
+    bb37_0 -> bb37_2;
+    bb37_0 -> bb37_3;
 
-    bb38_1 [label = "()\n<never>"];
-    bb38_1 -> bb38_1;
-    bb38_2 [label = "(invalid_rules, <ret>$22)\nstatTmp$44 = NotSupported() : <dynamic>\nstatTmp$42 = invalid_rules.map(statTmp$44) : <dynamic>\nstatTmp$45 = , : String(\",\")\ninvalid_rule_ids = statTmp$42.join(statTmp$45) : <dynamic>\nstatTmp$47 = self : Matcher\nstatTmp$46 = statTmp$47.log() : <dynamic>\nstatTmp$49 = Gerald skipping invalid rules:  : String(\"Gerald skipping invalid rules: \")\nstatTmp$48 = statTmp$49.+(invalid_rule_ids) : <dynamic>\n<ret>$22 = statTmp$46.warn(statTmp$48) : <dynamic>\n<always>"];
-    bb38_2 -> bb38_4;
-    bb38_3 [label = "(<ret>$22)\n<ret>$22 = NotSupported() : <dynamic>\n<always>"];
-    bb38_3 -> bb38_4;
-    bb38_4 [label = "(<ret>$22)\n<ret>$51 = return <ret>$22 : <bottom>\n<never>"];
-    bb38_4 -> bb38_1;
+    bb37_1 [label = "()\n<never>"];
+    bb37_1 -> bb37_1;
+    bb37_2 [label = "(invalid_rules, <ret>$22)\nstatTmp$44 = NotSupported() : <dynamic>\nstatTmp$42 = invalid_rules.map(statTmp$44) : <dynamic>\nstatTmp$45 = , : String(\",\")\ninvalid_rule_ids = statTmp$42.join(statTmp$45) : <dynamic>\nstatTmp$47 = self : Matcher\nstatTmp$46 = statTmp$47.log() : <dynamic>\nstatTmp$49 = Gerald skipping invalid rules:  : String(\"Gerald skipping invalid rules: \")\nstatTmp$48 = statTmp$49.+(invalid_rule_ids) : <dynamic>\n<ret>$22 = statTmp$46.warn(statTmp$48) : <dynamic>\n<always>"];
+    bb37_2 -> bb37_4;
+    bb37_3 [label = "(<ret>$22)\n<ret>$22 = NotSupported() : <dynamic>\n<always>"];
+    bb37_3 -> bb37_4;
+    bb37_4 [label = "(<ret>$22)\n<ret>$51 = return <ret>$22 : <bottom>\n<never>"];
+    bb37_4 -> bb37_1;
 }
 
 subgraph "cluster_::Opus::CIBot::Gerald::Matcher#match" {

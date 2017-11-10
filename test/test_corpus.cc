@@ -93,7 +93,7 @@ unordered_set<string> knownPasses = {
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) {
-    vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> errors;
+    vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
     SCOPED_TRACE(inputPath);
