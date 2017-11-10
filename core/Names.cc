@@ -54,5 +54,12 @@ string NameRef::toString(GlobalState &gs) const {
     return name(gs).toString(gs);
 }
 
+NameRef NameRef::addEq(GlobalState &gs) const {
+    Name &name = this->name(gs);
+    Error::check(name.kind == UTF8);
+    string nameEq = name.raw.utf8.toString() + "=";
+    return gs.enterNameUTF8(nameEq);
+}
+
 } // namespace core
 } // namespace ruby_typer

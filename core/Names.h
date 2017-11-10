@@ -59,9 +59,7 @@ public:
         return _id != 0;
     }
 
-    inline NameRef addEq() const {
-        return NameRef(2);
-    }
+    NameRef addEq(GlobalState &gs) const;
 
     std::string toString(GlobalState &gs) const;
 
