@@ -1,39 +1,37 @@
 cc_library(
-    name = "infer",
+    name = "core",
     srcs = glob(
-        ["*.cc"],
-        # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
+        [
+            "*.cc",
+            "*.h",
+        ],
         exclude = [
             "*_test.cc",
+
+            # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
             "flycheck_*",
         ],
     ),
-    hdrs = glob(["*.h"]),
+    hdrs = [
+        "core.h",
+    ],
     visibility = ["//visibility:public"],
     deps = [
-        "//ast",
-        "//cfg",
         "//common",
-        "//core",
     ],
 )
 
 cc_test(
-    name = "infer_test",
-    srcs = glob([
-        "test/*.cc",
-    ]),
-    copts = ["-Iexternal/gtest/include"],
+    name = "core_test",
+    size = "small",
+    srcs = glob(["test/*.cc"]),
     linkstatic = select({
         "//tools/config:fastbuild": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],
     deps = [
-        "infer",
-        "//ast/desugar",
-        "//cfg",
-        "//namer",
+        ":core",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
     ],

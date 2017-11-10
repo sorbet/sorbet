@@ -257,7 +257,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
         out << "    " << field_type(arg.type) << " " << arg.name << ";" << endl;
     }
     out << endl;
-    out << "  virtual std::string toString(ast::GlobalState &gs, int tabs = 0);" << endl;
+    out << "  virtual std::string toString(core::GlobalState &gs, int tabs = 0);" << endl;
     out << "  virtual std::string nodeName();" << endl;
 
     out << "};" << endl;
@@ -269,7 +269,7 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
     out << "    return \"" << node.name << "\";" << endl;
     out << "  };" << endl << endl;
 
-    out << "  std::string " << node.name << "::toString(ast::GlobalState &gs, int tabs) {" << endl
+    out << "  std::string " << node.name << "::toString(core::GlobalState &gs, int tabs) {" << endl
         << "    std::stringstream buf;" << endl;
     out << "    buf << \"" << node.name << " {\" << std::endl;" << endl;
     // Generate fields

@@ -18,6 +18,7 @@ cc_test(
     deps = [
         "//ast/desugar",
         "//cfg",
+        "//core",
         "//infer",
         "//namer",
         "@gtest//:gtest",
@@ -41,6 +42,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//common",
+        "//core",
         "//parser",
         "@cxxopts//:cxxopts",
         "@gtest//:gtest",
@@ -59,6 +61,7 @@ cc_test(
         "//ast",
         "//ast/desugar",
         "//common",
+        "//core",
         "//parser",
         "@gtest//:gtest",
         "@gtest//:gtest_main",

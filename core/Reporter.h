@@ -3,7 +3,7 @@
 #include <initializer_list>
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 
 enum class ErrorClass {
     Internal = 1001, // Internal Compiler Error
@@ -79,7 +79,7 @@ public:
 
     void _error(BasicError error);
     void _error(ComplexError error);
-    std::vector<std::unique_ptr<ruby_typer::ast::Reporter::BasicError>> errors;
+    std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
 
 public:
     template <typename... Args> void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) {
@@ -92,12 +92,12 @@ public:
     }
 
     bool keepErrorsInMemory = false;
-    std::vector<std::unique_ptr<ruby_typer::ast::Reporter::BasicError>> getAndEmptyErrors();
+    std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> getAndEmptyErrors();
 
 private:
     Reporter(GlobalState &gs) : gs_(gs) {}
     GlobalState &gs_;
 };
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer

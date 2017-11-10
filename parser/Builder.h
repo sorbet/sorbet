@@ -4,7 +4,7 @@
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/driver.hh"
 
-#include "ast/Context.h"
+#include "core/core.h"
 
 #include <memory>
 
@@ -15,7 +15,7 @@ class Node;
 
 class Builder {
 public:
-    Builder(ruby_typer::ast::GlobalState &gs, ruby_typer::ast::FileRef file);
+    Builder(ruby_typer::core::GlobalState &gs, ruby_typer::core::FileRef file);
     ~Builder();
 
     static ruby_parser::builder interface;

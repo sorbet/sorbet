@@ -5,11 +5,11 @@
 #include <iterator>
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 
 using namespace std;
 
-Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off) {
+Loc::Detail offset2Pos(core::UTF8Desc source, u4 off) {
     Loc::Detail pos;
 
     Error::check(off < source.to);
@@ -29,15 +29,15 @@ Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off) {
     return pos;
 }
 
-pair<Loc::Detail, Loc::Detail> Loc::position(ast::GlobalState &gs) {
-    ast::File &file = this->file.file(gs);
-    ast::UTF8Desc source(file.source());
+pair<Loc::Detail, Loc::Detail> Loc::position(core::GlobalState &gs) {
+    core::File &file = this->file.file(gs);
+    core::UTF8Desc source(file.source());
     Loc::Detail begin(offset2Pos(source, begin_pos));
     Loc::Detail end(offset2Pos(source, end_pos));
     return make_pair(begin, end);
 }
 
-string Loc::toString(ast::GlobalState &gs) {
+string Loc::toString(core::GlobalState &gs) {
     stringstream buf;
     UTF8Desc source = this->file.file(gs).source();
     auto pos = this->position(gs);
@@ -65,5 +65,5 @@ string Loc::toString(ast::GlobalState &gs) {
     return buf.str();
 }
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer

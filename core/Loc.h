@@ -4,7 +4,7 @@
 #include "Files.h"
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 class GlobalState;
 
 class Loc {
@@ -32,10 +32,10 @@ public:
         u4 line, column;
     };
 
-    std::pair<Detail, Detail> position(ast::GlobalState &gs);
-    std::string toString(ast::GlobalState &gs);
+    std::pair<Detail, Detail> position(core::GlobalState &gs);
+    std::string toString(core::GlobalState &gs);
 };
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer
 
 #endif // SRUBY_AST_LOC_H

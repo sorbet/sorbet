@@ -18,10 +18,10 @@ TEST(ErrorTest, RawCheck) {
 
 TEST(ErrorTest, ParserCheck) {
     auto console = spdlog::stderr_color_mt("Error Test");
-    ruby_typer::ast::GlobalState gs(*console);
-    ruby_typer::ast::Context context(gs, gs.defn_root());
+    ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::Context context(gs, gs.defn_root());
     auto ast = ruby_typer::parser::Parser::run(gs, "<test input>", "a");
-    ast->loc = ast::Loc::none(0);
+    ast->loc = core::Loc::none(0);
 
     try {
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);

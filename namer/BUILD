@@ -14,6 +14,7 @@ cc_library(
     deps = [
         "//ast",
         "//ast/desugar",
+        "//core",
         "//parser",
     ],
 )

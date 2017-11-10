@@ -79,7 +79,7 @@ class CFG_Collector_and_Typer {
 public:
     CFG_Collector_and_Typer() {}
     vector<string> cfgs;
-    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
+    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
         ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
 
@@ -105,8 +105,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
-    ruby_typer::ast::GlobalState gs(*console);
-    ruby_typer::ast::Context context(gs, gs.defn_root());
+    ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::Context context(gs, gs.defn_root());
     gs.errors.keepErrorsInMemory = true;
 
     // Parser

@@ -1,4 +1,4 @@
-#include "ast/ast.h"
+#include "core/core.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 
@@ -6,11 +6,10 @@ namespace spd = spdlog;
 using namespace std;
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
+core::Loc::Detail offset2Pos(core::UTF8Desc source, u4 off);
 
 auto console = spd::stderr_color_mt("parse");
-
-Loc::Detail offset2Pos(ast::UTF8Desc source, u4 off);
 
 struct Offset2PosTest {
     string src;
@@ -40,16 +39,16 @@ TEST(ASTTest, TestOffset2Pos) {
 }
 
 TEST(ASTTest, ErrorReporter) {
-    GlobalState gs(*console);
-    FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
-    gs.errors.error(Loc{f, 0, 3}, ErrorClass::Internal, "Use of metavariable: {}", "foo");
+    core::GlobalState gs(*console);
+    core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
+    gs.errors.error(core::Loc{f, 0, 3}, core::ErrorClass::Internal, "Use of metavariable: {}", "foo");
 }
 
 TEST(ASTTest, SymbolRef) {
-    GlobalState gs(*console);
-    SymbolRef ref = gs.defn_object();
+    core::GlobalState gs(*console);
+    core::SymbolRef ref = gs.defn_object();
     EXPECT_EQ(ref, ref.info(gs).ref(gs));
 }
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer

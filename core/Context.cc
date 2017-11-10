@@ -8,7 +8,7 @@
 using namespace std;
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 
 SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
     NameRef nameId = enterNameUTF8(name);
@@ -649,5 +649,5 @@ SymbolRef Context::contextClass() {
     return owner;
 }
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer

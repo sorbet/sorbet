@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 class Name;
 class NameRef;
 class Symbol;
@@ -233,7 +233,7 @@ public:
     }
 };
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer
 
 #endif // SRUBY_CONTEXT_H

@@ -30,136 +30,136 @@ TEST(PreOrderTreeMap, CountTrees) {
     class Counter {
     public:
         int count = 0;
-        ClassDef *preTransformClassDef(Context ctx, ClassDef *original) {
+        ClassDef *preTransformClassDef(core::Context ctx, ClassDef *original) {
             count++;
             return original;
         }
-        MethodDef *preTransformMethodDef(Context ctx, MethodDef *original) {
-            count++;
-            return original;
-        }
-
-        If *preTransformIf(Context ctx, If *original) {
+        MethodDef *preTransformMethodDef(core::Context ctx, MethodDef *original) {
             count++;
             return original;
         }
 
-        While *preTransformWhile(Context ctx, While *original) {
+        If *preTransformIf(core::Context ctx, If *original) {
             count++;
             return original;
         }
 
-        For *preTransformFor(Context ctx, For *original) {
+        While *preTransformWhile(core::Context ctx, While *original) {
             count++;
             return original;
         }
 
-        Break *postTransformBreak(Context ctx, Break *original) {
+        For *preTransformFor(core::Context ctx, For *original) {
             count++;
             return original;
         }
 
-        Next *postTransformNext(Context ctx, Next *original) {
+        Break *postTransformBreak(core::Context ctx, Break *original) {
             count++;
             return original;
         }
 
-        Return *preTransformReturn(Context ctx, Return *original) {
+        Next *postTransformNext(core::Context ctx, Next *original) {
             count++;
             return original;
         }
 
-        Rescue *preTransformRescue(Context ctx, Rescue *original) {
+        Return *preTransformReturn(core::Context ctx, Return *original) {
             count++;
             return original;
         }
 
-        Ident *postTransformIdent(Context ctx, Ident *original) {
+        Rescue *preTransformRescue(core::Context ctx, Rescue *original) {
             count++;
             return original;
         }
 
-        Assign *preTransformAssign(Context ctx, Assign *original) {
+        Ident *postTransformIdent(core::Context ctx, Ident *original) {
             count++;
             return original;
         }
 
-        Send *preTransformSend(Context ctx, Send *original) {
+        Assign *preTransformAssign(core::Context ctx, Assign *original) {
             count++;
             return original;
         }
 
-        NamedArg *preTransformNamedArg(Context ctx, NamedArg *original) {
+        Send *preTransformSend(core::Context ctx, Send *original) {
             count++;
             return original;
         }
 
-        Hash *preTransformHash(Context ctx, Hash *original) {
+        NamedArg *preTransformNamedArg(core::Context ctx, NamedArg *original) {
             count++;
             return original;
         }
 
-        Array *preTransformArray(Context ctx, Array *original) {
+        Hash *preTransformHash(core::Context ctx, Hash *original) {
             count++;
             return original;
         }
 
-        FloatLit *postTransformFloatLit(Context ctx, FloatLit *original) {
+        Array *preTransformArray(core::Context ctx, Array *original) {
             count++;
             return original;
         }
 
-        IntLit *postTransformIntLit(Context ctx, IntLit *original) {
+        FloatLit *postTransformFloatLit(core::Context ctx, FloatLit *original) {
             count++;
             return original;
         }
 
-        StringLit *postTransformStringLit(Context ctx, StringLit *original) {
+        IntLit *postTransformIntLit(core::Context ctx, IntLit *original) {
             count++;
             return original;
         }
 
-        ConstantLit *postTransformConstantLit(Context ctx, ConstantLit *original) {
+        StringLit *postTransformStringLit(core::Context ctx, StringLit *original) {
             count++;
             return original;
         }
 
-        ArraySplat *preTransformArraySplat(Context ctx, ArraySplat *original) {
+        ConstantLit *postTransformConstantLit(core::Context ctx, ConstantLit *original) {
             count++;
             return original;
         }
 
-        HashSplat *preTransformHashSplat(Context ctx, HashSplat *original) {
+        ArraySplat *preTransformArraySplat(core::Context ctx, ArraySplat *original) {
             count++;
             return original;
         }
 
-        Self *postTransformSelf(Context ctx, Self *original) {
+        HashSplat *preTransformHashSplat(core::Context ctx, HashSplat *original) {
             count++;
             return original;
         }
 
-        Block *preTransformBlock(Context ctx, Block *original) {
+        Self *postTransformSelf(core::Context ctx, Self *original) {
             count++;
             return original;
         }
 
-        InsSeq *preTransformInsSeq(Context ctx, InsSeq *original) {
+        Block *preTransformBlock(core::Context ctx, Block *original) {
+            count++;
+            return original;
+        }
+
+        InsSeq *preTransformInsSeq(core::Context ctx, InsSeq *original) {
             count++;
             return original;
         }
     };
 
-    ruby_typer::ast::GlobalState cb(*console);
-    ruby_typer::ast::Context ctx(cb, cb.defn_root());
+    ruby_typer::core::GlobalState cb(*console);
+    ruby_typer::core::Context ctx(cb, cb.defn_root());
     static const char *foo_str = "Foo";
-    static UTF8Desc foo_DESC{(char *)foo_str, (int)strlen(foo_str)};
-    ruby_typer::ast::Loc loc(0, 42, 91);
+    static core::UTF8Desc foo_DESC{(char *)foo_str, (int)strlen(foo_str)};
+    ruby_typer::core::Loc loc(0, 42, 91);
 
     auto name = ctx.state.enterNameUTF8(foo_DESC);
-    auto classSym = ctx.state.enterClassSymbol(loc, ruby_typer::ast::GlobalState::defn_root(), name);
+    auto classSym = ctx.state.enterClassSymbol(loc, ruby_typer::core::GlobalState::defn_root(), name);
     auto methodSym = ctx.state.enterMethodSymbol(loc, classSym, name);
-    auto empty = vector<SymbolRef>();
+    auto empty = vector<core::SymbolRef>();
     auto argumentSym = ctx.state.enterLocalSymbol(methodSym, name);
     unique_ptr<Expression> rhs(new IntLit(loc, 5));
     auto arg = unique_ptr<Expression>(new Ident(loc, argumentSym));

@@ -5,7 +5,7 @@
 #include <string>
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 class GlobalState;
 class File;
 
@@ -58,7 +58,7 @@ private:
     std::string path_;
     std::string source_;
 };
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer
 
 #endif // SRUBY_AST_FILES_H

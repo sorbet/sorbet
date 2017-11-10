@@ -44,100 +44,105 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
-Expression::Expression(Loc loc) : loc(loc) {}
+Expression::Expression(core::Loc loc) : loc(loc) {}
 
-Reference::Reference(Loc loc) : Expression(loc) {}
+Reference::Reference(core::Loc loc) : Expression(loc) {}
 
-ControlFlow::ControlFlow(Loc loc) : Expression(loc) {}
+ControlFlow::ControlFlow(core::Loc loc) : Expression(loc) {}
 
-ClassDef::ClassDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors, RHS_store &rhs,
-                   ClassDefKind kind)
+ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors,
+                   RHS_store &rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
-MethodDef::MethodDef(Loc loc, SymbolRef symbol, NameRef name, ARGS_store &args, unique_ptr<Expression> rhs, bool isSelf)
+MethodDef::MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store &args,
+                     unique_ptr<Expression> rhs, bool isSelf)
     : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {}
 
-Declaration::Declaration(Loc loc, SymbolRef symbol) : Expression(loc), symbol(symbol) {}
+Declaration::Declaration(core::Loc loc, core::SymbolRef symbol) : Expression(loc), symbol(symbol) {}
 
-ConstDef::ConstDef(Loc loc, SymbolRef symbol, unique_ptr<Expression> rhs) : Declaration(loc, symbol), rhs(move(rhs)) {}
+ConstDef::ConstDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> rhs)
+    : Declaration(loc, symbol), rhs(move(rhs)) {}
 
-If::If(Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
+If::If(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : ControlFlow(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
-While::While(Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> body)
+While::While(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> body)
     : ControlFlow(loc), cond(move(cond)), body(move(body)) {}
 
-Break::Break(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
+Break::Break(core::Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-Next::Next(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
+Next::Next(core::Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-BoolLit::BoolLit(Loc loc, bool value) : Expression(loc), value(value) {}
+BoolLit::BoolLit(core::Loc loc, bool value) : Expression(loc), value(value) {}
 
-Return::Return(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
+Return::Return(core::Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-Yield::Yield(Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
+Yield::Yield(core::Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
 
-Ident::Ident(Loc loc, SymbolRef symbol) : Reference(loc), symbol(symbol) {
+Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
     Error::check(symbol.exists());
 }
 
-UnresolvedIdent::UnresolvedIdent(Loc loc, VarKind kind, NameRef name) : Reference(loc), kind(kind), name(name) {}
+UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name)
+    : Reference(loc), kind(kind), name(name) {}
 
-Assign::Assign(Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
+Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
 
-Send::Send(Loc loc, unique_ptr<Expression> recv, NameRef fun, Send::ARGS_store &args)
+Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store &args)
     : Expression(loc), recv(move(recv)), fun(move(fun)), args(move(args)) {}
 
-Super::Super(Loc loc, Send::ARGS_store &args) : Expression(loc), args(move(args)) {}
+Super::Super(core::Loc loc, Send::ARGS_store &args) : Expression(loc), args(move(args)) {}
 
-NamedArg::NamedArg(Loc loc, NameRef name, unique_ptr<Expression> arg) : Expression(loc), name(name), arg(move(arg)) {}
+NamedArg::NamedArg(core::Loc loc, core::NameRef name, unique_ptr<Expression> arg)
+    : Expression(loc), name(name), arg(move(arg)) {}
 
-RestArg::RestArg(Loc loc, unique_ptr<Reference> arg) : Reference(loc), expr(move(arg)) {}
+RestArg::RestArg(core::Loc loc, unique_ptr<Reference> arg) : Reference(loc), expr(move(arg)) {}
 
-KeywordArg::KeywordArg(Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
+KeywordArg::KeywordArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
 
-OptionalArg::OptionalArg(Loc loc, unique_ptr<Reference> expr, unique_ptr<Expression> default_)
+OptionalArg::OptionalArg(core::Loc loc, unique_ptr<Reference> expr, unique_ptr<Expression> default_)
     : Reference(loc), expr(move(expr)), default_(move(default_)) {}
 
-ShadowArg::ShadowArg(Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
+ShadowArg::ShadowArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
 
-BlockArg::BlockArg(Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
+BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
 
-Nil::Nil(Loc loc) : Expression(loc) {}
+Nil::Nil(core::Loc loc) : Expression(loc) {}
 
-FloatLit::FloatLit(Loc loc, float value) : Expression(loc), value(value) {}
+FloatLit::FloatLit(core::Loc loc, float value) : Expression(loc), value(value) {}
 
-IntLit::IntLit(Loc loc, int value) : Expression(loc), value(value) {}
+IntLit::IntLit(core::Loc loc, int value) : Expression(loc), value(value) {}
 
-StringLit::StringLit(Loc loc, NameRef value) : Expression(loc), value(value) {}
+StringLit::StringLit(core::Loc loc, core::NameRef value) : Expression(loc), value(value) {}
 
-ConstantLit::ConstantLit(Loc loc, unique_ptr<Expression> scope, NameRef cnst)
+ConstantLit::ConstantLit(core::Loc loc, unique_ptr<Expression> scope, core::NameRef cnst)
     : Expression(loc), cnst(cnst), scope(move(scope)) {}
 
-ArraySplat::ArraySplat(Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {}
+ArraySplat::ArraySplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {}
 
-HashSplat::HashSplat(Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {}
+HashSplat::HashSplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {}
 
-Self::Self(Loc loc, SymbolRef claz) : Expression(loc), claz(claz) {}
+Self::Self(core::Loc loc, core::SymbolRef claz) : Expression(loc), claz(claz) {}
 
-Block::Block(Loc loc, MethodDef::ARGS_store &args, unique_ptr<Expression> body)
+Block::Block(core::Loc loc, MethodDef::ARGS_store &args, unique_ptr<Expression> body)
     : Expression(loc), args(move(args)), body(move(body)){};
 
-NotSupported::NotSupported(Loc loc, const string &why) : Expression(loc), why(why) {}
+NotSupported::NotSupported(core::Loc loc, const string &why) : Expression(loc), why(why) {}
 
-SymbolLit::SymbolLit(Loc loc, NameRef name) : Expression(loc), name(name) {}
+SymbolLit::SymbolLit(core::Loc loc, core::NameRef name) : Expression(loc), name(name) {}
 
-Hash::Hash(Loc loc, ENTRY_store &keys, ENTRY_store &values) : Expression(loc), keys(move(keys)), values(move(values)) {}
+Hash::Hash(core::Loc loc, ENTRY_store &keys, ENTRY_store &values)
+    : Expression(loc), keys(move(keys)), values(move(values)) {}
 
-Array::Array(Loc loc, ENTRY_store &elems) : Expression(loc), elems(move(elems)) {}
+Array::Array(core::Loc loc, ENTRY_store &elems) : Expression(loc), elems(move(elems)) {}
 
-InsSeq::InsSeq(Loc loc, STATS_store &stats, unique_ptr<Expression> expr)
+InsSeq::InsSeq(core::Loc loc, STATS_store &stats, unique_ptr<Expression> expr)
     : Expression(loc), stats(move(stats)), expr(move(expr)) {}
 
-EmptyTree::EmptyTree(Loc loc) : Expression(loc) {}
+EmptyTree::EmptyTree(core::Loc loc) : Expression(loc) {}
 
-template <class T> void printElems(GlobalState &gs, stringstream &buf, T &args, int tabs) {
+template <class T> void printElems(core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
     bool first = true;
     bool didshadow = false;
     for (auto &a : args) {
@@ -154,18 +159,18 @@ template <class T> void printElems(GlobalState &gs, stringstream &buf, T &args, 
     }
 };
 
-template <class T> void printArgs(GlobalState &gs, stringstream &buf, T &args, int tabs) {
+template <class T> void printArgs(core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
     buf << "(";
     printElems(gs, buf, args, tabs);
     buf << ")";
 }
 
-string ConstDef::toString(GlobalState &gs, int tabs) {
+string ConstDef::toString(core::GlobalState &gs, int tabs) {
     return "constdef " + this->symbol.info(gs, true).name.name(gs).toString(gs) + " = " +
            this->rhs->toString(gs, tabs + 1);
 }
 
-string ConstDef::showRaw(GlobalState &gs, int tabs) {
+string ConstDef::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -175,7 +180,7 @@ string ConstDef::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string ClassDef::toString(GlobalState &gs, int tabs) {
+string ClassDef::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     if (kind == ClassDefKind::Module) {
         buf << "module ";
@@ -196,7 +201,7 @@ string ClassDef::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string ClassDef::showRaw(GlobalState &gs, int tabs) {
+string ClassDef::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "ClassDef{" << endl;
     printTabs(buf, tabs + 1);
@@ -230,7 +235,7 @@ string ClassDef::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string InsSeq::toString(GlobalState &gs, int tabs) {
+string InsSeq::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "begin" << endl;
     for (auto &a : this->stats) {
@@ -245,7 +250,7 @@ string InsSeq::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string InsSeq::showRaw(GlobalState &gs, int tabs) {
+string InsSeq::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -264,7 +269,7 @@ string InsSeq::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string MethodDef::toString(GlobalState &gs, int tabs) {
+string MethodDef::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     if (isSelf) {
@@ -288,7 +293,7 @@ string MethodDef::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string MethodDef::showRaw(GlobalState &gs, int tabs) {
+string MethodDef::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "MethodDef{" << endl;
     printTabs(buf, tabs + 1);
@@ -315,7 +320,7 @@ string MethodDef::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string If::toString(GlobalState &gs, int tabs) {
+string If::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "if " << this->cond->toString(gs, tabs + 1) << endl;
@@ -330,7 +335,7 @@ string If::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string If::showRaw(GlobalState &gs, int tabs) {
+string If::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "If{" << endl;
@@ -345,7 +350,7 @@ string If::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Assign::showRaw(GlobalState &gs, int tabs) {
+string Assign::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "Assign{" << endl;
@@ -358,7 +363,7 @@ string Assign::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string While::toString(GlobalState &gs, int tabs) {
+string While::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "while " << this->cond->toString(gs, tabs + 1) << endl;
@@ -369,7 +374,7 @@ string While::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string While::showRaw(GlobalState &gs, int tabs) {
+string While::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "While{" << endl;
@@ -382,23 +387,23 @@ string While::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string EmptyTree::toString(GlobalState &gs, int tabs) {
+string EmptyTree::toString(core::GlobalState &gs, int tabs) {
     return "<emptyTree>";
 }
 
-string StringLit::toString(GlobalState &gs, int tabs) {
+string StringLit::toString(core::GlobalState &gs, int tabs) {
     return "\"" + this->value.name(gs).toString(gs) + "\"";
 }
 
-string StringLit::showRaw(GlobalState &gs, int tabs) {
+string StringLit::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->value.name(gs).toString(gs) + " }";
 }
 
-string ConstantLit::toString(GlobalState &gs, int tabs) {
+string ConstantLit::toString(core::GlobalState &gs, int tabs) {
     return this->scope->toString(gs, tabs) + "::" + this->cnst.name(gs).toString(gs);
 }
 
-string ConstantLit::showRaw(GlobalState &gs, int tabs) {
+string ConstantLit::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "ConstantLit{" << endl;
@@ -411,11 +416,11 @@ string ConstantLit::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Ident::toString(GlobalState &gs, int tabs) {
+string Ident::toString(core::GlobalState &gs, int tabs) {
     return this->symbol.info(gs, true).fullName(gs);
 }
 
-string Ident::showRaw(GlobalState &gs, int tabs) {
+string Ident::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "Ident{" << endl;
     printTabs(buf, tabs + 1);
@@ -425,11 +430,11 @@ string Ident::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string UnresolvedIdent::toString(GlobalState &gs, int tabs) {
+string UnresolvedIdent::toString(core::GlobalState &gs, int tabs) {
     return this->name.toString(gs);
 }
 
-string UnresolvedIdent::showRaw(GlobalState &gs, int tabs) {
+string UnresolvedIdent::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "UnresolvedIdent{" << endl;
     printTabs(buf, tabs + 1);
@@ -457,51 +462,51 @@ string UnresolvedIdent::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string HashSplat::toString(GlobalState &gs, int tabs) {
+string HashSplat::toString(core::GlobalState &gs, int tabs) {
     return "**" + this->arg->toString(gs, tabs + 1);
 }
 
-string ArraySplat::toString(GlobalState &gs, int tabs) {
+string ArraySplat::toString(core::GlobalState &gs, int tabs) {
     return "*" + this->arg->toString(gs, tabs + 1);
 }
 
-string ArraySplat::showRaw(GlobalState &gs, int tabs) {
+string ArraySplat::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ arg = " + this->arg->showRaw(gs, tabs + 1) + " }";
 }
 
-string HashSplat::showRaw(GlobalState &gs, int tabs) {
+string HashSplat::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ arg = " + this->arg->showRaw(gs, tabs + 1) + " }";
 }
 
-string Return::showRaw(GlobalState &gs, int tabs) {
+string Return::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Yield::showRaw(GlobalState &gs, int tabs) {
+string Yield::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Next::showRaw(GlobalState &gs, int tabs) {
+string Next::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Break::showRaw(GlobalState &gs, int tabs) {
+string Break::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Return::toString(GlobalState &gs, int tabs) {
+string Return::toString(core::GlobalState &gs, int tabs) {
     return "return " + this->expr->toString(gs, tabs + 1);
 }
 
-string Yield::toString(GlobalState &gs, int tabs) {
+string Yield::toString(core::GlobalState &gs, int tabs) {
     return "yield(" + this->expr->toString(gs, tabs + 1) + ")";
 }
 
-string Next::toString(GlobalState &gs, int tabs) {
+string Next::toString(core::GlobalState &gs, int tabs) {
     return "next(" + this->expr->toString(gs, tabs + 1) + ")";
 }
 
-string Self::toString(GlobalState &gs, int tabs) {
+string Self::toString(core::GlobalState &gs, int tabs) {
     if (this->claz.exists()) {
         return "self(" + this->claz.info(gs).name.name(gs).toString(gs) + ")";
     } else {
@@ -509,31 +514,31 @@ string Self::toString(GlobalState &gs, int tabs) {
     }
 }
 
-string Break::toString(GlobalState &gs, int tabs) {
+string Break::toString(core::GlobalState &gs, int tabs) {
     return "break(" + this->expr->toString(gs, tabs + 1) + ")";
 }
 
-string IntLit::toString(GlobalState &gs, int tabs) {
+string IntLit::toString(core::GlobalState &gs, int tabs) {
     return to_string(this->value);
 }
 
-string IntLit::showRaw(GlobalState &gs, int tabs) {
+string IntLit::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
 }
 
-string FloatLit::showRaw(GlobalState &gs, int tabs) {
+string FloatLit::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
 }
 
-string BoolLit::showRaw(GlobalState &gs, int tabs) {
+string BoolLit::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
 }
 
-string NamedArg::toString(GlobalState &gs, int tabs) {
+string NamedArg::toString(core::GlobalState &gs, int tabs) {
     return this->name.name(gs).toString(gs) + " : " + this->arg->toString(gs, tabs + 1);
 }
 
-string NamedArg::showRaw(GlobalState &gs, int tabs) {
+string NamedArg::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "NamedArg{" << endl;
     printTabs(buf, tabs + 1);
@@ -545,30 +550,30 @@ string NamedArg::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string FloatLit::toString(GlobalState &gs, int tabs) {
+string FloatLit::toString(core::GlobalState &gs, int tabs) {
     return to_string(this->value);
 }
 
-string BoolLit::toString(GlobalState &gs, int tabs) {
+string BoolLit::toString(core::GlobalState &gs, int tabs) {
     if (this->value)
         return "true";
     else
         return "false";
 }
 
-string Assign::toString(GlobalState &gs, int tabs) {
+string Assign::toString(core::GlobalState &gs, int tabs) {
     return this->lhs->toString(gs, tabs) + " = " + this->rhs->toString(gs, tabs);
 }
 
-string Rescue::toString(GlobalState &gs, int tabs) {
+string Rescue::toString(core::GlobalState &gs, int tabs) {
     return "Rescue";
 }
 
-string Rescue::showRaw(GlobalState &gs, int tabs) {
+string Rescue::showRaw(core::GlobalState &gs, int tabs) {
     return "Rescue";
 }
 
-string Send::toString(GlobalState &gs, int tabs) {
+string Send::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << this->recv->toString(gs, tabs) << "." << this->fun.name(gs).toString(gs);
     printArgs(gs, buf, this->args, tabs);
@@ -578,7 +583,7 @@ string Send::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Send::showRaw(GlobalState &gs, int tabs) {
+string Send::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -606,7 +611,7 @@ string Send::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Super::showRaw(GlobalState &gs, int tabs) {
+string Super::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -623,7 +628,7 @@ string Super::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Hash::showRaw(GlobalState &gs, int tabs) {
+string Hash::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -651,7 +656,7 @@ string Hash::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Array::showRaw(GlobalState &gs, int tabs) {
+string Array::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -668,14 +673,14 @@ string Array::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Super::toString(GlobalState &gs, int tabs) {
+string Super::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "super";
     printArgs(gs, buf, this->args, tabs);
     return buf.str();
 }
 
-string Hash::toString(GlobalState &gs, int tabs) {
+string Hash::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "{";
     bool first = true;
@@ -695,7 +700,7 @@ string Hash::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Array::toString(GlobalState &gs, int tabs) {
+string Array::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "[";
     printElems(gs, buf, this->elems, tabs);
@@ -703,7 +708,7 @@ string Array::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Block::toString(GlobalState &gs, int tabs) {
+string Block::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << " do |";
     printElems(gs, buf, this->args, tabs + 1);
@@ -715,7 +720,7 @@ string Block::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Block::showRaw(GlobalState &gs, int tabs) {
+string Block::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "Block {" << endl;
     printTabs(buf, tabs + 1);
@@ -733,35 +738,35 @@ string Block::showRaw(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string SymbolLit::toString(GlobalState &gs, int tabs) {
+string SymbolLit::toString(core::GlobalState &gs, int tabs) {
     return ":" + this->name.name(gs).toString(gs);
 }
 
-string SymbolLit::showRaw(GlobalState &gs, int tabs) {
+string SymbolLit::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ name = " + this->name.name(gs).toString(gs) + " }";
 }
 
-string NotSupported::toString(GlobalState &gs, int tabs) {
+string NotSupported::toString(core::GlobalState &gs, int tabs) {
     return nodeName();
 }
 
-string RestArg::toString(GlobalState &gs, int tabs) {
+string RestArg::toString(core::GlobalState &gs, int tabs) {
     return "*" + this->expr->toString(gs, tabs);
 }
 
-string KeywordArg::toString(GlobalState &gs, int tabs) {
+string KeywordArg::toString(core::GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs) + ":";
 }
 
-string OptionalArg::toString(GlobalState &gs, int tabs) {
+string OptionalArg::toString(core::GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs) + " = " + this->default_->toString(gs, tabs);
 }
 
-string ShadowArg::toString(GlobalState &gs, int tabs) {
+string ShadowArg::toString(core::GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs);
 }
 
-string BlockArg::toString(GlobalState &gs, int tabs) {
+string BlockArg::toString(core::GlobalState &gs, int tabs) {
     return "&" + this->expr->toString(gs, tabs);
 }
 
@@ -769,7 +774,7 @@ string NotSupported::nodeName() {
     return "<Not Supported (" + why + ")>";
 }
 
-string NotSupported::showRaw(GlobalState &gs, int tabs) {
+string NotSupported::showRaw(core::GlobalState &gs, int tabs) {
     return "Not Supported{ why = " + why + " }";
 }
 
@@ -882,21 +887,21 @@ string EmptyTree::nodeName() {
     return "EmptyTree";
 }
 
-string Nil::toString(GlobalState &gs, int tabs) {
+string Nil::toString(core::GlobalState &gs, int tabs) {
     return "nil";
 }
 
-string Nil::showRaw(GlobalState &gs, int tabs) {
+string Nil::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName();
 }
-string EmptyTree::showRaw(GlobalState &gs, int tabs) {
+string EmptyTree::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName();
 }
 
 string Nil::nodeName() {
     return "Nil";
 }
-string RestArg::showRaw(GlobalState &gs, int tabs) {
+string RestArg::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
@@ -904,10 +909,10 @@ string RestArg::nodeName() {
     return "RestArg";
 }
 
-string Self::showRaw(GlobalState &gs, int tabs) {
+string Self::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ claz = " + this->claz.info(gs).fullName(gs) + " }";
 }
-string KeywordArg::showRaw(GlobalState &gs, int tabs) {
+string KeywordArg::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
@@ -915,7 +920,7 @@ string KeywordArg::nodeName() {
     return "KeywordArg";
 }
 
-string OptionalArg::showRaw(GlobalState &gs, int tabs) {
+string OptionalArg::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
@@ -923,11 +928,11 @@ string OptionalArg::nodeName() {
     return "OptionalArg";
 }
 
-string ShadowArg::showRaw(GlobalState &gs, int tabs) {
+string ShadowArg::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
-string BlockArg::showRaw(GlobalState &gs, int tabs) {
+string BlockArg::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 

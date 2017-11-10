@@ -2,7 +2,7 @@
 #include "spdlog/fmt/ostr.h"
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 
 using namespace std;
 
@@ -41,8 +41,8 @@ string Reporter::BasicError::toString(GlobalState &gs) {
     return buf.str();
 }
 
-vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> Reporter::getAndEmptyErrors() {
-    vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> result;
+vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> Reporter::getAndEmptyErrors() {
+    vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> result;
     result.swap(errors);
     return result;
 }
@@ -91,5 +91,5 @@ string Reporter::ComplexError::toString(GlobalState &gs) {
     }
     return buf.str();
 }
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer

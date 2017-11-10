@@ -3,7 +3,7 @@
 using namespace std;
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 
 File &FileRef::file(GlobalState &gs) const {
     return gs.files[_id];
@@ -17,5 +17,5 @@ UTF8Desc File::source() {
     return this->source_;
 }
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer
