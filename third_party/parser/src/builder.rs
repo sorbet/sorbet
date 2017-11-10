@@ -870,6 +870,14 @@ impl<'a> Builder<'a> {
         Node::For(self.loc(&for_).join(&self.loc(&end)), iterator, iteratee, body)
     }
 
+    pub fn free_node(&self, _node: Option<Rc<Node>>) -> Option<Node> {
+        return None;
+    }
+
+    pub fn free_node_list(&self, _nodes: Vec<Rc<Node>>) -> Option<Node> {
+        return None;
+    }
+
     pub fn gvar(&self, tok: Option<Token>) -> Node {
         let (loc, id) = self.tok_split(&tok);
         Node::Gvar(loc, String::from(id.string().unwrap()))

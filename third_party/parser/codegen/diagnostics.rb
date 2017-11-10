@@ -103,9 +103,6 @@ def generate_cpp(out)
   out.puts "enum class dclass {"
   out.puts MESSAGES.map { |err, _| "\t#{camelize(err)}" }.join(",\n")
   out.puts "};"
-  out.puts "static const char * dclass_strings[] = {"
-  out.puts MESSAGES.map { |_, msg| "\t#{msg.inspect}" }.join(",\n")
-  out.puts "};"
 end
 
 OptionParser.new do |opts|

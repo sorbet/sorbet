@@ -54,6 +54,8 @@ struct builder {
 	foreign_ptr(*float_)(self_ptr builder, const token* tok);
 	foreign_ptr(*float_complex)(self_ptr builder, const token* tok);
 	foreign_ptr(*for_)(self_ptr builder, const token* for_, foreign_ptr iterator, const token* in_, foreign_ptr iteratee, const token* do_, foreign_ptr body, const token* end);
+	foreign_ptr(*free_node)(self_ptr builder, foreign_ptr node);
+	foreign_ptr(*free_node_list)(self_ptr builder, const node_list* node);
 	foreign_ptr(*gvar)(self_ptr builder, const token* tok);
 	foreign_ptr(*ident)(self_ptr builder, const token* tok);
 	foreign_ptr(*index)(self_ptr builder, foreign_ptr receiver, const token* lbrack, const node_list* indexes, const token* rbrack);
