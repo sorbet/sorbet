@@ -34,6 +34,30 @@ build:dbg --linkopt=-fno-pie
 build:dbg --copt=-fno-pie
 build:dbg --cxxopt=-fno-pie
 
+# LTO build. Much longer compilation time. Smaller size and better perf.
+build:lto --copt=-flto=thin
+build:lto --cxxopt=-flto=thin
+build:lto --linkopt=-flto=thin
+build:lto --linkopt=-fno-pie
+build:lto --copt=-fno-pie
+build:lto --cxxopt=-fno-pie
+
+# Unsafe build: disable sanitizers. Smaller size and better perf, undefined behaviour in case of bugs.
+build:unsafe --copt=-fno-stack-protector
+build:unsafe --cxxopt=-fno-stack-protector
+build:unsafe --linkopt=-flto=thin
+build:unsafe --copt=-fno-sanitize=address
+build:unsafe --cxxopt=-fno-sanitize=address
+build:unsafe --linkopt=-fno-sanitize=address
+build:unsafe --copt=-fno-sanitize=undefined
+build:unsafe --cxxopt=-fno-sanitize=undefined
+build:unsafe --linkopt=-fno-sanitize=undefined
+
+# Build optimized for executable size. Can be faster if size of executable code is a bottleneck.
+build:size --linkopt=-Os
+build:size --copt=-Os
+build:size --cxxopt=-Os
+
 ### Debug symbols on OS X. ###
 # From https://github.com/RobotLocomotion/drake/blob/master/tools/cc_toolchain/bazel.rc
 # See https://github.com/bazelbuild/bazel/issues/2537
