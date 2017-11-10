@@ -7,6 +7,8 @@ template class std::unique_ptr<ruby_typer::parser::Node>;
 namespace ruby_typer {
 namespace parser {
 
+extern const char *dclass_strings[];
+
 using namespace std;
 
 class DiagnosticToError {
@@ -35,7 +37,7 @@ public:
                     Error::notImplemented();
             }
             std::string msg("Parse {}: ");
-            msg.append(ruby_parser::dclass_strings[(int)diag.error_class()]);
+            msg.append(dclass_strings[(int)diag.error_class()]);
             Loc loc(file, diag.location().begin_pos - 1, diag.location().end_pos - 1);
             gs.errors.error(loc, core::ErrorClass::ParserError, msg, level, diag.data());
         }

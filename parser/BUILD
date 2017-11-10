@@ -9,6 +9,7 @@ cc_library(
         "Node_gen.cc",
         "Node_gen.h",
         "Parser.cc",
+        "diagnostics.cc",
         "parser.h",
     ],
     hdrs = [
@@ -38,6 +39,18 @@ genrule(
     ],
     cmd = "$(location :generate_ast) $(location Node_gen.h) $(location Node_gen.cc)",
     tools = [":generate_ast"],
+)
+
+genrule(
+    name = "generate_diagnostics_cc",
+    srcs = [
+        "tools/generate_diagnostics.rb",
+        "@parser//:codegen/diagnostics.rb",
+    ],
+    outs = [
+        "diagnostics.cc",
+    ],
+    cmd = "ruby $(location tools/generate_diagnostics.rb) $(location @parser//:codegen/diagnostics.rb) $(location diagnostics.cc)",
 )
 
 cc_test(
