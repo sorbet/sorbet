@@ -93,6 +93,7 @@ unordered_set<string> knownPasses = {
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) {
+    vector<unique_ptr<ruby_typer::ast::Reporter::BasicError>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
     SCOPED_TRACE(inputPath);
@@ -124,6 +125,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == ast->toString(gs) + "\n") {
             TEST_COUT << "parse-tree OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     // Desugarer
@@ -139,6 +143,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == desugared->toString(gs) + "\n") {
             TEST_COUT << "ast OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     expectation = test.expectations.find("ast-raw");
@@ -151,6 +158,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == desugared->showRaw(gs) + "\n") {
             TEST_COUT << "ast-raw OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     // Namer
@@ -166,6 +176,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == gs.toString() + "\n") {
             TEST_COUT << "name-table OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     expectation = test.expectations.find("name-tree");
@@ -178,6 +191,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == namedTree->toString(gs) + "\n") {
             TEST_COUT << "name-tree OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     expectation = test.expectations.find("name-tree-raw");
@@ -190,6 +206,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == namedTree->showRaw(gs) + "\n") {
             TEST_COUT << "name-tree-raw OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     // CFG
@@ -216,10 +235,12 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         ifstream svgFile(checker + ".svg");
         EXPECT_TRUE(svgFile.good());
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     // Check warnings and errors
-    auto errors = gs.errors.getAndEmptyErrors();
     if (errors.size() > 0) {
         map<int, string> expectedErrors;
         string line;
