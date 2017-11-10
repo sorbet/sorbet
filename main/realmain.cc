@@ -26,7 +26,7 @@ struct stats {
 class CFG_Collector_and_Typer {
 public:
     vector<string> cfgs;
-    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::ast::Context ctx, ruby_typer::ast::MethodDef *m) {
+    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
         ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
         cfgs.push_back(cfg->toString(ctx));
@@ -44,9 +44,9 @@ static bool removeOption(vector<string> &prints, string option) {
     }
 }
 
-void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> nameAndSource) {
+void index(ruby_typer::core::GlobalState &gs, const vector<pair<string, string>> nameAndSource) {
     ruby_typer::parser::NodeVec empty;
-    ruby_typer::ast::Loc emptyLoc(0, 0, 0);
+    ruby_typer::core::Loc emptyLoc(0, 0, 0);
     unique_ptr<ruby_typer::parser::Begin> join = make_unique<ruby_typer::parser::Begin>(emptyLoc, move(empty));
     for (auto &pair : nameAndSource) {
         auto ast = ruby_typer::parser::Parser::run(gs, pair.first, pair.second);
@@ -57,7 +57,7 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
         }
     }
     gs.errors.keepErrorsInMemory = true; // silence errors for stdlib.
-    ruby_typer::ast::Context context(gs, gs.defn_root());
+    ruby_typer::core::Context context(gs, gs.defn_root());
     unique_ptr<ruby_typer::parser::Node> node(move(join));
     auto desugared = ruby_typer::ast::desugar::node2Tree(context, node);
     ruby_typer::namer::Namer::run(context, move(desugared));
@@ -65,7 +65,7 @@ void index(ruby_typer::ast::GlobalState &gs, const vector<pair<string, string>> 
     gs.errors.keepErrorsInMemory = false;
 }
 
-void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
+void parse_and_print(ruby_typer::core::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
                      vector<string> &prints) {
     auto ast = ruby_typer::parser::Parser::run(gs, path, src);
     if (!ast) {
@@ -78,7 +78,7 @@ void parse_and_print(ruby_typer::ast::GlobalState &gs, cxxopts::Options &opts, c
             return;
     }
 
-    ruby_typer::ast::Context context(gs, gs.defn_root());
+    ruby_typer::core::Context context(gs, gs.defn_root());
     auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
     if (removeOption(prints, "ast")) {
         cout << desugared->toString(gs, 0) << endl;
@@ -180,7 +180,7 @@ int realmain(int argc, char **argv) {
             break;
     }
 
-    ruby_typer::ast::GlobalState gs(*console);
+    ruby_typer::core::GlobalState gs(*console);
 
     if (!options["n"].as<bool>()) {
         clock_t begin = clock();

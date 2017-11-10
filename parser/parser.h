@@ -8,8 +8,9 @@ namespace parser {
 
 class Parser {
 public:
-    static std::unique_ptr<Node> run(ruby_typer::ast::GlobalState &gs, ruby_typer::ast::FileRef file);
-    static std::unique_ptr<Node> run(ruby_typer::ast::GlobalState &gs, const std::string &path, const std::string &src);
+    static std::unique_ptr<Node> run(ruby_typer::core::GlobalState &gs, ruby_typer::core::FileRef file);
+    static std::unique_ptr<Node> run(ruby_typer::core::GlobalState &gs, const std::string &path,
+                                     const std::string &src);
 };
 
 } // namespace parser

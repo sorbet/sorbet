@@ -10,6 +10,7 @@ cc_library(
     deps = [
         "//ast",
         "//common",
+        "//core",
         "//parser",
     ],
 )

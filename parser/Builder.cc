@@ -12,8 +12,8 @@ using ruby_parser::node_list;
 using ruby_parser::self_ptr;
 using ruby_parser::token;
 
-using ruby_typer::ast::GlobalState;
-using ruby_typer::ast::UTF8Desc;
+using ruby_typer::core::GlobalState;
+using ruby_typer::core::UTF8Desc;
 using std::make_unique;
 using std::string;
 using std::type_info;
@@ -54,10 +54,10 @@ string Dedenter::dedent(const string &str) {
 
 class Builder::Impl {
 public:
-    Impl(GlobalState &gs, ast::FileRef file) : gs_(gs), file_(file) {}
+    Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {}
 
     GlobalState &gs_;
-    ast::FileRef file_;
+    core::FileRef file_;
     ruby_parser::base_driver *driver_;
 
     Loc tok_loc(const token *tok) {
@@ -130,8 +130,8 @@ public:
 
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (Ident *id = dynamic_cast<Ident *>(node.get())) {
-            ast::Name &name = id->name.name(gs_);
-            DEBUG_ONLY(Error::check(name.kind == ast::UTF8));
+            core::Name &name = id->name.name(gs_);
+            DEBUG_ONLY(Error::check(name.kind == core::UTF8));
             if (driver_->lex.is_declared(name.toString(gs_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {
@@ -175,7 +175,7 @@ public:
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (Ident *id = dynamic_cast<Ident *>(node.get())) {
-            ast::Name &name = id->name.name(gs_);
+            core::Name &name = id->name.name(gs_);
             driver_->lex.declare(name.toString(gs_));
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (IVar *iv = dynamic_cast<IVar *>(node.get())) {
@@ -367,7 +367,7 @@ public:
 
         NameRef method;
         if (selector == nullptr)
-            method = ast::Names::bang();
+            method = core::Names::bang();
         else
             method = gs_.enterNameUTF8(selector->string());
 
@@ -541,15 +541,15 @@ public:
 
     unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, ruby_typer::parser::NodeVec indexes,
                            const token *rbrack) {
-        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver), ast::Names::squareBrackets(),
-                                 move(indexes));
+        return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver),
+                                 core::Names::squareBrackets(), move(indexes));
     }
 
     unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, ruby_typer::parser::NodeVec indexes,
                                 const token *rbrack) {
         ruby_typer::parser::NodeVec args;
         return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver),
-                                 ast::Names::squareBracketsEq(), move(args));
+                                 core::Names::squareBracketsEq(), move(args));
     }
 
     unique_ptr<Node> integer(const token *tok) {
@@ -628,7 +628,7 @@ public:
             loc = loc_join(loc, tok_loc(name));
             nm = gs_.enterNameUTF8(name->string());
         } else {
-            nm = gs_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::starStar());
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar());
         }
         return make_unique<Kwrestarg>(loc, nm);
     }
@@ -715,12 +715,12 @@ public:
                 loc = loc_join(tok_loc(not_), tok_loc(end));
             else
                 loc = loc_join(tok_loc(not_), receiver->loc);
-            return make_unique<Send>(loc, move(receiver), ast::Names::bang(), ruby_typer::parser::NodeVec());
+            return make_unique<Send>(loc, move(receiver), core::Names::bang(), ruby_typer::parser::NodeVec());
         }
 
         DEBUG_ONLY(Error::check(begin != nullptr && end != nullptr));
         auto body = make_unique<Begin>(loc_join(tok_loc(begin), tok_loc(end)), ruby_typer::parser::NodeVec());
-        return make_unique<Send>(loc_join(tok_loc(not_), body->loc), move(body), ast::Names::bang(),
+        return make_unique<Send>(loc_join(tok_loc(not_), body->loc), move(body), core::Names::bang(),
                                  ruby_typer::parser::NodeVec());
     }
 
@@ -818,7 +818,7 @@ public:
             loc = loc_join(loc, tok_loc(name));
             nm = gs_.enterNameUTF8(name->string());
         } else {
-            nm = gs_.freshNameUnique(ast::UniqueNameKind::Parser, ast::Names::star());
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star());
         }
         return make_unique<Restarg>(loc, nm);
     }
@@ -1000,9 +1000,9 @@ public:
         Loc loc = loc_join(tok_loc(oper), receiver->loc);
         NameRef op;
         if (oper->string() == "+")
-            op = ast::Names::unaryPlus();
+            op = core::Names::unaryPlus();
         else if (oper->string() == "-")
-            op = ast::Names::unaryMinus();
+            op = core::Names::unaryMinus();
         else
             op = gs_.enterNameUTF8(oper->string());
 
@@ -1042,7 +1042,7 @@ public:
     }
 };
 
-Builder::Builder(GlobalState &ctx, ast::FileRef file) : impl_(new Builder::Impl(ctx, file)) {}
+Builder::Builder(GlobalState &ctx, core::FileRef file) : impl_(new Builder::Impl(ctx, file)) {}
 Builder::~Builder() {}
 
 }; // namespace parser

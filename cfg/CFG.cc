@@ -19,8 +19,8 @@ namespace cfg {
 int CFG::FORWARD_TOPO_SORT_VISITED = 1 << 0;
 int CFG::BACKWARD_TOPO_SORT_VISITED = 1 << 1;
 
-ast::SymbolRef maybeDealias(ast::Context ctx, ast::SymbolRef what,
-                            unordered_map<ast::SymbolRef, ast::SymbolRef> &aliases) {
+core::SymbolRef maybeDealias(core::Context ctx, core::SymbolRef what,
+                             unordered_map<core::SymbolRef, core::SymbolRef> &aliases) {
     if (what.info(ctx).isSyntheticTemporary(ctx)) {
         auto fnd = aliases.find(what);
         if (fnd != aliases.end()) {
@@ -36,20 +36,20 @@ ast::SymbolRef maybeDealias(ast::Context ctx, ast::SymbolRef what,
  * Remove aliases from CFG. Why does this need a separate pass?
  * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
  */
-void CFG::dealias(ast::Context ctx) {
-    vector<unordered_map<ast::SymbolRef, ast::SymbolRef>> outAliases;
+void CFG::dealias(core::Context ctx) {
+    vector<unordered_map<core::SymbolRef, core::SymbolRef>> outAliases;
 
     outAliases.resize(this->basicBlocks.size());
     for (BasicBlock *bb : this->backwardsTopoSort) {
         if (bb == this->deadBlock())
             continue;
-        unordered_map<ast::SymbolRef, ast::SymbolRef> &current = outAliases[bb->id];
+        unordered_map<core::SymbolRef, core::SymbolRef> &current = outAliases[bb->id];
         if (bb->backEdges.size() > 0) {
             current = outAliases[bb->backEdges[0]->id];
         }
 
         for (BasicBlock *parent : bb->backEdges) {
-            unordered_map<ast::SymbolRef, ast::SymbolRef> other = outAliases[parent->id];
+            unordered_map<core::SymbolRef, core::SymbolRef> other = outAliases[parent->id];
             for (auto it = current.begin(); it != current.end(); /* nothing */) {
                 auto &el = *it;
                 auto fnd = other.find(el.first);
@@ -103,7 +103,7 @@ void CFG::dealias(ast::Context ctx) {
     }
 }
 
-void CFG::fillInBlockArguments(ast::Context ctx) {
+void CFG::fillInBlockArguments(core::Context ctx) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
     //
@@ -115,8 +115,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
     //
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
-    unordered_map<ast::SymbolRef, unordered_set<BasicBlock *>> reads;
-    unordered_map<ast::SymbolRef, unordered_set<BasicBlock *>> writes;
+    unordered_map<core::SymbolRef, unordered_set<BasicBlock *>> reads;
+    unordered_map<core::SymbolRef, unordered_set<BasicBlock *>> writes;
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         for (Binding &bind : bb->exprs) {
@@ -146,7 +146,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
     }
 
     for (auto &pair : reads) {
-        ast::SymbolRef what = pair.first;
+        core::SymbolRef what = pair.first;
         if (!what.info(ctx).isLocalVariable())
             continue;
         unordered_set<BasicBlock *> &where = pair.second;
@@ -161,7 +161,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
     }
 
     for (auto &pair : writes) {
-        ast::SymbolRef what = pair.first;
+        core::SymbolRef what = pair.first;
         if (!what.info(ctx).isLocalVariable())
             continue;
         unordered_set<BasicBlock *> &where = pair.second;
@@ -205,8 +205,8 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
     }
 
-    vector<unordered_set<ast::SymbolRef>> reads_by_block(this->basicBlocks.size());
-    vector<unordered_set<ast::SymbolRef>> writes_by_block(this->basicBlocks.size());
+    vector<unordered_set<core::SymbolRef>> reads_by_block(this->basicBlocks.size());
+    vector<unordered_set<core::SymbolRef>> writes_by_block(this->basicBlocks.size());
 
     for (auto &rds : reads) {
         auto &wts = writes[rds.first];
@@ -232,7 +232,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
     }
 
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
-    vector<unordered_set<ast::SymbolRef>> upper_bounds1(this->basicBlocks.size());
+    vector<unordered_set<core::SymbolRef>> upper_bounds1(this->basicBlocks.size());
     bool changed = true;
 
     while (changed) {
@@ -252,7 +252,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
         }
     }
 
-    vector<unordered_set<ast::SymbolRef>> upper_bounds2(this->basicBlocks.size());
+    vector<unordered_set<core::SymbolRef>> upper_bounds2(this->basicBlocks.size());
 
     changed = true;
     while (changed) {
@@ -283,7 +283,7 @@ void CFG::fillInBlockArguments(ast::Context ctx) {
             }
         }
         sort(it->args.begin(), it->args.end(),
-             [](ast::SymbolRef a, ast::SymbolRef b) -> bool { return a._id < b._id; });
+             [](core::SymbolRef a, core::SymbolRef b) -> bool { return a._id < b._id; });
     }
 
     return;
@@ -340,7 +340,7 @@ int CFG::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *cur
     }
 }
 
-void CFG::fillInTopoSorts(ast::Context ctx) {
+void CFG::fillInTopoSorts(core::Context ctx) {
     // needed to find loop headers.
     for (auto &bb : this->basicBlocks) {
         std::sort(bb->backEdges.begin(), bb->backEdges.end(),
@@ -359,11 +359,13 @@ void CFG::fillInTopoSorts(ast::Context ctx) {
 
 void jumpToDead(BasicBlock *from, CFG &inWhat);
 
-unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
+unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
-    ast::SymbolRef retSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
-    ast::SymbolRef selfSym = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::selfMethodTemp(), md.symbol);
+    core::SymbolRef retSym =
+        ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
+    core::SymbolRef selfSym =
+        ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::selfMethodTemp(), md.symbol);
 
     BasicBlock *entry = res->entry();
 
@@ -371,13 +373,13 @@ unique_ptr<CFG> CFG::buildFor(ast::Context ctx, ast::MethodDef &md) {
     auto methodName = md.symbol.info(ctx).name;
 
     int i = 0;
-    for (ast::SymbolRef argSym : md.symbol.info(ctx).arguments()) {
+    for (core::SymbolRef argSym : md.symbol.info(ctx).arguments()) {
         entry->exprs.emplace_back(argSym, argSym.info(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
         i++;
     }
     auto cont = res->walk(ctx, md.rhs.get(), entry, *res.get(), retSym, 0);
-    ast::SymbolRef retSym1 =
-        ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnMethodTemp(), md.symbol);
+    core::SymbolRef retSym1 =
+        ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
 
     cont->exprs.emplace_back(retSym1, md.loc, make_unique<Return>(retSym)); // dead assign.
     jumpToDead(cont, *res.get());
@@ -402,10 +404,10 @@ CFG::CFG() {
     freshBlock(0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
-    deadBlock()->bexit.cond = ast::GlobalState::defn_cfg_never();
+    deadBlock()->bexit.cond = core::GlobalState::defn_cfg_never();
 }
 
-void conditionalJump(BasicBlock *from, ast::SymbolRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat) {
+void conditionalJump(BasicBlock *from, core::SymbolRef cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat) {
     if (from != inWhat.deadBlock()) {
         Error::check(!from->bexit.cond.exists());
         from->bexit.cond = cond;
@@ -419,7 +421,7 @@ void conditionalJump(BasicBlock *from, ast::SymbolRef cond, BasicBlock *thenb, B
 void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat) {
     if (from != inWhat.deadBlock()) {
         Error::check(!from->bexit.cond.exists());
-        from->bexit.cond = ast::GlobalState::defn_cfg_always();
+        from->bexit.cond = core::GlobalState::defn_cfg_always();
         from->bexit.elseb = to;
         from->bexit.thenb = to;
         to->backEdges.push_back(from);
@@ -430,7 +432,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
     auto *db = inWhat.deadBlock();
     if (from != db) {
         Error::check(!from->bexit.cond.exists());
-        from->bexit.cond = ast::GlobalState::defn_cfg_never();
+        from->bexit.cond = core::GlobalState::defn_cfg_never();
         from->bexit.elseb = db;
         from->bexit.thenb = db;
         db->backEdges.push_back(from);
@@ -440,8 +442,8 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, ast::SymbolRef target,
-                      int loops) {
+BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat,
+                      core::SymbolRef target, int loops) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
@@ -454,15 +456,15 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *curre
                  auto headerBlock = inWhat.freshBlock(loops + 1);
                  unconditionalJump(current, headerBlock, inWhat);
 
-                 ast::SymbolRef condSym =
-                     ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::whileTemp(), inWhat.symbol);
+                 core::SymbolRef condSym =
+                     ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::whileTemp(), inWhat.symbol);
                  auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym, loops + 1);
                  auto bodyBlock = inWhat.freshBlock(loops + 1);
                  auto continueBlock = inWhat.freshBlock(loops);
                  conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, inWhat);
                  // finishHeader
-                 ast::SymbolRef bodySym =
-                     ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                 core::SymbolRef bodySym =
+                     ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), inWhat.symbol);
 
                  auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym, loops + 1);
                  unconditionalJump(body, headerBlock, inWhat);
@@ -471,16 +473,16 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *curre
                  ret = continueBlock;
              },
              [&](ast::Return *a) {
-                 ast::SymbolRef retSym =
-                     ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::returnTemp(), inWhat.symbol);
+                 core::SymbolRef retSym =
+                     ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnTemp(), inWhat.symbol);
                  auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym, loops);
                  cont->exprs.emplace_back(target, a->loc, make_unique<Return>(retSym)); // dead assign.
                  jumpToDead(cont, inWhat);
                  ret = deadBlock();
              },
              [&](ast::If *a) {
-                 ast::SymbolRef ifSym =
-                     ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::ifTemp(), inWhat.symbol);
+                 core::SymbolRef ifSym =
+                     ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::ifTemp(), inWhat.symbol);
                  Error::check(ifSym.exists());
                  auto thenBlock = inWhat.freshBlock(loops);
                  auto elseBlock = inWhat.freshBlock(loops);
@@ -530,7 +532,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *curre
              },
              [&](ast::Assign *a) {
                  auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
-                 ast::SymbolRef lhs;
+                 core::SymbolRef lhs;
                  if (lhsIdent != nullptr) {
                      lhs = lhsIdent->symbol;
                  } else {
@@ -544,22 +546,22 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *curre
              },
              [&](ast::InsSeq *a) {
                  for (auto &exp : a->stats) {
-                     ast::SymbolRef temp =
-                         ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                     core::SymbolRef temp =
+                         ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), inWhat.symbol);
                      current = walk(ctx, exp.get(), current, inWhat, temp, loops);
                  }
                  ret = walk(ctx, a->expr.get(), current, inWhat, target, loops);
              },
              [&](ast::Send *s) {
-                 ast::SymbolRef recv;
+                 core::SymbolRef recv;
 
-                 recv = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                 recv = ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), inWhat.symbol);
                  current = walk(ctx, s->recv.get(), current, inWhat, recv, loops);
 
-                 vector<ast::SymbolRef> args;
+                 vector<core::SymbolRef> args;
                  for (auto &exp : s->args) {
-                     ast::SymbolRef temp;
-                     temp = ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::statTemp(), inWhat.symbol);
+                     core::SymbolRef temp;
+                     temp = ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), inWhat.symbol);
                      current = walk(ctx, exp.get(), current, inWhat, temp, loops);
 
                      args.push_back(temp);
@@ -586,8 +588,8 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *curre
                      unconditionalJump(current, headerBlock, inWhat);
 
                      // TODO: handle block arguments somehow??
-                     ast::SymbolRef blockrv =
-                         ctx.state.newTemporary(ast::UniqueNameKind::CFG, ast::Names::blockReturnTemp(), inWhat.symbol);
+                     core::SymbolRef blockrv = ctx.state.newTemporary(core::UniqueNameKind::CFG,
+                                                                      core::Names::blockReturnTemp(), inWhat.symbol);
                      auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv, loops + 1);
 
                      unconditionalJump(blockLast, headerBlock, inWhat);
@@ -614,7 +616,7 @@ BasicBlock *CFG::walk(ast::Context ctx, ast::Expression *what, BasicBlock *curre
     return ret;
 }
 
-string CFG::toString(ast::Context ctx) {
+string CFG::toString(core::Context ctx) {
     stringstream buf;
     buf << "subgraph \"cluster_" << this->symbol.info(ctx).fullName(ctx) << "\" {" << endl;
     buf << "    label = \"" << this->symbol.info(ctx).fullName(ctx) << "\";" << endl;
@@ -641,11 +643,11 @@ string CFG::toString(ast::Context ctx) {
     return buf.str();
 }
 
-string BasicBlock::toString(ast::Context ctx) {
+string BasicBlock::toString(core::Context ctx) {
     stringstream buf;
     buf << "(";
     bool first = true;
-    for (ast::SymbolRef arg : this->args) {
+    for (core::SymbolRef arg : this->args) {
         if (!first) {
             buf << ", ";
         }
@@ -667,21 +669,21 @@ string BasicBlock::toString(ast::Context ctx) {
     return buf.str();
 }
 
-Binding::Binding(ast::SymbolRef bind, ast::Loc loc, unique_ptr<Instruction> value)
+Binding::Binding(core::SymbolRef bind, core::Loc loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(move(value)) {}
 
-Return::Return(ast::SymbolRef what) : what(what) {}
+Return::Return(core::SymbolRef what) : what(what) {}
 
-string Return::toString(ast::Context ctx) {
+string Return::toString(core::Context ctx) {
     return "return " + this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-Send::Send(ast::SymbolRef recv, ast::NameRef fun, vector<ast::SymbolRef> &args)
+Send::Send(core::SymbolRef recv, core::NameRef fun, vector<core::SymbolRef> &args)
     : recv(recv), fun(fun), args(move(args)) {}
 
-Super::Super(vector<ast::SymbolRef> &args) : args(move(args)) {}
+Super::Super(vector<core::SymbolRef> &args) : args(move(args)) {}
 
-string Super::toString(ast::Context ctx) {
+string Super::toString(core::Context ctx) {
     stringstream buf;
     buf << "super(";
     bool isFirst = true;
@@ -698,23 +700,23 @@ string Super::toString(ast::Context ctx) {
 
 FloatLit::FloatLit(float value) : value(value) {}
 
-string FloatLit::toString(ast::Context ctx) {
+string FloatLit::toString(core::Context ctx) {
     return to_string(this->value);
 }
 
 IntLit::IntLit(int value) : value(value) {}
 
-string IntLit::toString(ast::Context ctx) {
+string IntLit::toString(core::Context ctx) {
     return to_string(this->value);
 }
 
-Ident::Ident(ast::SymbolRef what) : what(what) {}
+Ident::Ident(core::SymbolRef what) : what(what) {}
 
-string Ident::toString(ast::Context ctx) {
+string Ident::toString(core::Context ctx) {
     return this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
-string Send::toString(ast::Context ctx) {
+string Send::toString(core::Context ctx) {
     stringstream buf;
     buf << this->recv.info(ctx).name.name(ctx).toString(ctx) << "." << this->fun.name(ctx).toString(ctx) << "(";
     bool isFirst = true;
@@ -729,11 +731,11 @@ string Send::toString(ast::Context ctx) {
     return buf.str();
 }
 
-string StringLit::toString(ast::Context ctx) {
+string StringLit::toString(core::Context ctx) {
     return this->value.name(ctx).toString(ctx);
 }
 
-string BoolLit::toString(ast::Context ctx) {
+string BoolLit::toString(core::Context ctx) {
     if (value) {
         return "true";
     } else {
@@ -741,15 +743,15 @@ string BoolLit::toString(ast::Context ctx) {
     }
 }
 
-string Nil::toString(ast::Context ctx) {
+string Nil::toString(core::Context ctx) {
     return "nil";
 }
 
-string Self::toString(ast::Context ctx) {
+string Self::toString(core::Context ctx) {
     return "self";
 }
 
-string LoadArg::toString(ast::Context ctx) {
+string LoadArg::toString(core::Context ctx) {
     stringstream buf;
     buf << "load_arg(";
     buf << this->receiver.info(ctx).name.name(ctx).toString(ctx);
@@ -759,7 +761,7 @@ string LoadArg::toString(ast::Context ctx) {
     return buf.str();
 }
 
-string NotSupported::toString(ast::Context ctx) {
+string NotSupported::toString(core::Context ctx) {
     return "NotSupported(" + why + ")";
 }
 } // namespace cfg

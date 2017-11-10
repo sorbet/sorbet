@@ -12,113 +12,113 @@ class VerifierWalker {
     }
 
 public:
-    Expression *postTransformClassDef(Context ctx, ClassDef *original) {
+    Expression *postTransformClassDef(core::Context ctx, ClassDef *original) {
         check(original);
         return original;
     }
-    Expression *postTransformMethodDef(Context ctx, MethodDef *original) {
+    Expression *postTransformMethodDef(core::Context ctx, MethodDef *original) {
         check(original);
         return original;
     }
-    Expression *postTransformIf(Context ctx, If *original) {
+    Expression *postTransformIf(core::Context ctx, If *original) {
         check(original);
         return original;
     }
-    Expression *postTransformWhile(Context ctx, While *original) {
+    Expression *postTransformWhile(core::Context ctx, While *original) {
         check(original);
         return original;
     }
-    Expression *postTransformFor(Context ctx, For *original) {
+    Expression *postTransformFor(core::Context ctx, For *original) {
         check(original);
         return original;
     }
-    Expression *postTransformBreak(Context ctx, Break *original) {
+    Expression *postTransformBreak(core::Context ctx, Break *original) {
         check(original);
         return original;
     }
-    Expression *postTransformNext(Context ctx, Next *original) {
+    Expression *postTransformNext(core::Context ctx, Next *original) {
         check(original);
         return original;
     }
-    Expression *postTransformReturn(Context ctx, Return *original) {
+    Expression *postTransformReturn(core::Context ctx, Return *original) {
         check(original);
         return original;
     }
-    Expression *postTransformYield(Context ctx, Yield *original) {
+    Expression *postTransformYield(core::Context ctx, Yield *original) {
         check(original);
         return original;
     }
-    Expression *postTransformRescue(Context ctx, Rescue *original) {
+    Expression *postTransformRescue(core::Context ctx, Rescue *original) {
         check(original);
         return original;
     }
-    Expression *postTransformIdent(Context ctx, Ident *original) {
+    Expression *postTransformIdent(core::Context ctx, Ident *original) {
         check(original);
         return original;
     }
-    Expression *postTransformAssign(Context ctx, Assign *original) {
+    Expression *postTransformAssign(core::Context ctx, Assign *original) {
         check(original);
         return original;
     }
-    Expression *postTransformSend(Context ctx, Send *original) {
+    Expression *postTransformSend(core::Context ctx, Send *original) {
         check(original);
         return original;
     }
-    Expression *postTransformNamedArg(Context ctx, NamedArg *original) {
+    Expression *postTransformNamedArg(core::Context ctx, NamedArg *original) {
         check(original);
         return original;
     }
-    Expression *postTransformHash(Context ctx, Hash *original) {
+    Expression *postTransformHash(core::Context ctx, Hash *original) {
         check(original);
         return original;
     }
-    Expression *postransformArray(Context ctx, Array *original) {
+    Expression *postransformArray(core::Context ctx, Array *original) {
         check(original);
         return original;
     }
-    Expression *postTransformBoolLit(Context ctx, BoolLit *original) {
+    Expression *postTransformBoolLit(core::Context ctx, BoolLit *original) {
         check(original);
         return original;
     }
-    Expression *postTransformFloatLit(Context ctx, FloatLit *original) {
+    Expression *postTransformFloatLit(core::Context ctx, FloatLit *original) {
         check(original);
         return original;
     }
-    Expression *postTransformIntLit(Context ctx, IntLit *original) {
+    Expression *postTransformIntLit(core::Context ctx, IntLit *original) {
         check(original);
         return original;
     }
-    Expression *postTransformStringLit(Context ctx, StringLit *original) {
+    Expression *postTransformStringLit(core::Context ctx, StringLit *original) {
         check(original);
         return original;
     }
-    Expression *postTransformConstantLit(Context ctx, ConstantLit *original) {
+    Expression *postTransformConstantLit(core::Context ctx, ConstantLit *original) {
         check(original);
         return original;
     }
-    Expression *postTransformArraySplat(Context ctx, ArraySplat *original) {
+    Expression *postTransformArraySplat(core::Context ctx, ArraySplat *original) {
         check(original);
         return original;
     }
-    Expression *postTransformHashSplat(Context ctx, HashSplat *original) {
+    Expression *postTransformHashSplat(core::Context ctx, HashSplat *original) {
         check(original);
         return original;
     }
-    Expression *postTransformSelf(Context ctx, Self *original) {
+    Expression *postTransformSelf(core::Context ctx, Self *original) {
         check(original);
         return original;
     }
-    Expression *postTransformBlock(Context ctx, Block *original) {
+    Expression *postTransformBlock(core::Context ctx, Block *original) {
         check(original);
         return original;
     }
-    Expression *postTransformInsSeq(Context ctx, InsSeq *original) {
+    Expression *postTransformInsSeq(core::Context ctx, InsSeq *original) {
         check(original);
         return original;
     }
 };
 
-std::unique_ptr<Expression> Verifier::run(Context ctx, std::unique_ptr<Expression> node) {
+std::unique_ptr<Expression> Verifier::run(core::Context ctx, std::unique_ptr<Expression> node) {
     VerifierWalker vw;
     return TreeMap<VerifierWalker>::apply(ctx, vw, move(node));
 }

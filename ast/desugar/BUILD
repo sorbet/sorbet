@@ -10,6 +10,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
+        "//core",
         "//parser",
     ],
 )

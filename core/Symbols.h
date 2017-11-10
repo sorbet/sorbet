@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 class Symbol;
 class GlobalState;
 class Type;
@@ -195,12 +195,12 @@ private:
 
 // CheckSize(Symbol, 88, 8); // This is under too much churn to be worth checking
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer
 
 namespace std {
-template <> struct hash<ruby_typer::ast::SymbolRef> {
-    std::size_t operator()(const ruby_typer::ast::SymbolRef k) const {
+template <> struct hash<ruby_typer::core::SymbolRef> {
+    std::size_t operator()(const ruby_typer::core::SymbolRef k) const {
         return k._id;
     }
 };

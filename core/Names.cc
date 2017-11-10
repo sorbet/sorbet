@@ -6,9 +6,9 @@
 using namespace std;
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 
-ruby_typer::ast::Name::~Name() noexcept {
+ruby_typer::core::Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE)
         unique.~UniqueName();
 }
@@ -54,5 +54,5 @@ string NameRef::toString(GlobalState &gs) const {
     return name(gs).toString(gs);
 }
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer

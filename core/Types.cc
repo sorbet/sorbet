@@ -3,39 +3,39 @@
 #include <algorithm> // find_if
 
 using namespace ruby_typer;
-using namespace ruby_typer::ast;
+using namespace ruby_typer::core;
 using namespace std;
 
 // improve debugging.
-template class std::shared_ptr<ruby_typer::ast::Type>;
+template class std::shared_ptr<ruby_typer::core::Type>;
 
-shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2);
-shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, shared_ptr<Type> &t1,
-                                                              shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2);
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> &t1,
+                                                                shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return t1;
     }
 
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
-        if (mayBeSpecial1->symbol == ast::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_dynamic()) {
             return t1;
         }
-        if (mayBeSpecial1->symbol == ast::GlobalState::defn_bottom()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
             return t2;
         }
-        if (mayBeSpecial1->symbol == ast::GlobalState::defn_top()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
             return t1;
         }
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
-        if (mayBeSpecial2->symbol == ast::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_dynamic()) {
             return t2;
         }
-        if (mayBeSpecial2->symbol == ast::GlobalState::defn_bottom()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
             return t1;
         }
-        if (mayBeSpecial2->symbol == ast::GlobalState::defn_top()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
             return t2;
         }
     }
@@ -43,13 +43,13 @@ shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, 
     if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
             // both are proxy
-            shared_ptr<ruby_typer::ast::Type> result;
+            shared_ptr<ruby_typer::core::Type> result;
             ruby_typer::typecase(
                 p1,
                 [&](ArrayType *a1) { // Warning: this implements COVARIANT arrays
                     if (ArrayType *a2 = dynamic_cast<ArrayType *>(p2)) {
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                            vector<shared_ptr<ruby_typer::ast::Type>> elemLubs;
+                            vector<shared_ptr<ruby_typer::core::Type>> elemLubs;
                             int i = 0;
                             for (auto &el2 : a2->elems) {
                                 elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
@@ -57,7 +57,7 @@ shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, 
                             }
                             result = make_shared<ArrayType>(elemLubs);
                         } else {
-                            result = make_shared<ClassType>(ast::GlobalState::defn_Array());
+                            result = make_shared<ClassType>(core::GlobalState::defn_Array());
                         }
                     } else {
                         result = lubGround(ctx, p1->underlying, p2->underlying);
@@ -68,8 +68,8 @@ shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, 
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = 0;
-                            vector<shared_ptr<ruby_typer::ast::Literal>> keys;
-                            vector<shared_ptr<ruby_typer::ast::Type>> valueLubs;
+                            vector<shared_ptr<ruby_typer::core::Literal>> keys;
+                            vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
                             for (auto &el2 : h2->keys) {
                                 ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
                                 Error::check(u2 != nullptr);
@@ -81,14 +81,14 @@ shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, 
                                     keys.emplace_back(el2);
                                     valueLubs.emplace_back(lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
                                 } else {
-                                    result = make_shared<ClassType>(ast::GlobalState::defn_Hash());
+                                    result = make_shared<ClassType>(core::GlobalState::defn_Hash());
                                     return;
                                 }
                                 result = make_shared<HashType>(keys, valueLubs);
                                 ++i;
                             }
                         } else {
-                            result = make_shared<ClassType>(ast::GlobalState::defn_Hash());
+                            result = make_shared<ClassType>(core::GlobalState::defn_Hash());
                         }
                     } else {
                         result = lubGround(ctx, p1->underlying, p2->underlying);
@@ -130,9 +130,9 @@ shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::lub(ast::Context ctx, 
     }
 }
 
-shared_ptr<ruby_typer::ast::Type> distributeOr(ast::Context ctx, OrType *t1, shared_ptr<Type> t2) {
-    shared_ptr<ruby_typer::ast::Type> n1 = Types::lub(ctx, t1->left, t2);
-    shared_ptr<ruby_typer::ast::Type> n2 = Types::lub(ctx, t1->right, t2);
+shared_ptr<ruby_typer::core::Type> distributeOr(core::Context ctx, OrType *t1, shared_ptr<Type> t2) {
+    shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, t1->left, t2);
+    shared_ptr<ruby_typer::core::Type> n2 = Types::lub(ctx, t1->right, t2);
     if (Types::isSubType(ctx, n1, n2)) {
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
@@ -141,7 +141,7 @@ shared_ptr<ruby_typer::ast::Type> distributeOr(ast::Context ctx, OrType *t1, sha
     return make_shared<OrType>(n1, n2);
 }
 
-shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
     ruby_typer::Error::check(g1 != nullptr);
@@ -164,7 +164,7 @@ shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    shared_ptr<ruby_typer::ast::Type> result;
+    shared_ptr<ruby_typer::core::Type> result;
 
     if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
         return distributeOr(ctx, o2, t1);
@@ -189,8 +189,8 @@ shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &
     ClassType *c2 = dynamic_cast<ClassType *>(t2.get());
     Error::check(c1 != nullptr && c2 != nullptr);
 
-    ast::SymbolRef sym1 = c1->symbol;
-    ast::SymbolRef sym2 = c2->symbol;
+    core::SymbolRef sym1 = c1->symbol;
+    core::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
         return t2;
     } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
@@ -200,12 +200,12 @@ shared_ptr<ruby_typer::ast::Type> lubGround(ast::Context ctx, shared_ptr<Type> &
     }
 }
 
-shared_ptr<ruby_typer::ast::Type> ruby_typer::ast::Types::glb(ast::Context ctx, shared_ptr<Type> &t1,
-                                                              shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> &t1,
+                                                                shared_ptr<Type> &t2) {
     Error::notImplemented();
 }
 
-bool isSubTypeGround(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+bool isSubTypeGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
     auto *g1 = dynamic_cast<GroundType *>(t1.get());
     auto *g2 = dynamic_cast<GroundType *>(t2.get());
 
@@ -255,24 +255,24 @@ bool isSubTypeGround(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t
     Error::raise("should never ber reachable");
 }
 
-bool ruby_typer::ast::Types::equiv(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+bool ruby_typer::core::Types::equiv(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 
-bool ruby_typer::ast::Types::isSubType(ast::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
-        if (mayBeSpecial1->symbol == ast::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_dynamic()) {
             return true;
         }
-        if (mayBeSpecial1->symbol == ast::GlobalState::defn_bottom()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
             return true;
         }
-        if (mayBeSpecial1->symbol == ast::GlobalState::defn_top()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
             if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
-                return mayBeSpecial2->symbol == ast::GlobalState::defn_top();
+                return mayBeSpecial2->symbol == core::GlobalState::defn_top();
             } else {
                 return false;
             }
@@ -280,13 +280,13 @@ bool ruby_typer::ast::Types::isSubType(ast::Context ctx, shared_ptr<Type> &t1, s
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
-        if (mayBeSpecial2->symbol == ast::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_dynamic()) {
             return true;
         }
-        if (mayBeSpecial2->symbol == ast::GlobalState::defn_bottom()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
             return false; // (bot, bot) is handled above.
         }
-        if (mayBeSpecial2->symbol == ast::GlobalState::defn_top()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
             return true;
         }
     }
@@ -358,82 +358,82 @@ bool ruby_typer::ast::Types::isSubType(ast::Context ctx, shared_ptr<Type> &t1, s
 }
 
 shared_ptr<Type> Types::top() {
-    return make_shared<ClassType>(ast::GlobalState::defn_top());
+    return make_shared<ClassType>(core::GlobalState::defn_top());
 }
 
 shared_ptr<Type> Types::bottom() {
-    return make_shared<ClassType>(ast::GlobalState::defn_bottom());
+    return make_shared<ClassType>(core::GlobalState::defn_bottom());
 }
 
 shared_ptr<Type> Types::nil() {
-    return make_shared<ClassType>(ast::GlobalState::defn_NilClass());
+    return make_shared<ClassType>(core::GlobalState::defn_NilClass());
 }
 
 shared_ptr<Type> Types::dynamic() {
-    return make_shared<ClassType>(ast::GlobalState::defn_dynamic());
+    return make_shared<ClassType>(core::GlobalState::defn_dynamic());
 }
 
-ruby_typer::ast::ClassType::ClassType(ruby_typer::ast::SymbolRef symbol) : symbol(symbol) {}
+ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {}
 
-string ruby_typer::ast::ClassType::toString(ruby_typer::ast::Context ctx, int tabs) {
+string ruby_typer::core::ClassType::toString(ruby_typer::core::Context ctx, int tabs) {
     return this->symbol.info(ctx).name.toString(ctx);
 }
 
-string ruby_typer::ast::ClassType::typeName() {
+string ruby_typer::core::ClassType::typeName() {
     return "ClassType";
 }
 
-ruby_typer::ast::ProxyType::ProxyType(shared_ptr<ruby_typer::ast::Type> underlying) : underlying(move(underlying)) {}
+ruby_typer::core::ProxyType::ProxyType(shared_ptr<ruby_typer::core::Type> underlying) : underlying(move(underlying)) {}
 
-shared_ptr<Type> ProxyType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+shared_ptr<Type> ProxyType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     return underlying->dispatchCall(ctx, name, callLoc, args, fullType);
 }
 
-shared_ptr<Type> ProxyType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
+shared_ptr<Type> ProxyType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     return underlying->getCallArgumentType(ctx, name, i);
 }
 
-shared_ptr<Type> OrType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+shared_ptr<Type> OrType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                       vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     return Types::lub(ctx, left->dispatchCall(ctx, name, callLoc, args, fullType),
                       right->dispatchCall(ctx, name, callLoc, args, fullType));
 }
 
-shared_ptr<Type> OrType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
+shared_ptr<Type> OrType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     return left->getCallArgumentType(ctx, name, i); // TODO: should glb with right
 }
 
-shared_ptr<Type> AndType::dispatchCall(ast::Context ctx, ast::NameRef name, ast::Loc callLoc,
+shared_ptr<Type> AndType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                        vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     Error::notImplemented();
 }
 
-shared_ptr<Type> AndType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
+shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
-shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun, ast::Loc callLoc,
+shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     if (isDynamic()) {
         return Types::dynamic();
     }
-    ast::SymbolRef method = this->symbol.info(ctx).findMember(fun);
+    core::SymbolRef method = this->symbol.info(ctx).findMember(fun);
 
     if (!method.exists()) {
         string maybeComponent;
         if (fullType.get() != this) {
             maybeComponent = " component of " + fullType->toString(ctx);
         }
-        ctx.state.errors.error(callLoc, ast::ErrorClass::UnknownMethod,
+        ctx.state.errors.error(callLoc, core::ErrorClass::UnknownMethod,
                                "Method {} does not exist on {}" + maybeComponent, fun.name(ctx).toString(ctx),
                                this->toString(ctx));
         return Types::dynamic();
     }
-    ast::Symbol &info = method.info(ctx);
+    core::Symbol &info = method.info(ctx);
 
     if (info.arguments().size() != args.size()) { // todo: this should become actual argument matching
-        ctx.state.errors.error(callLoc, ast::ErrorClass::MethodArgumentCountMismatch,
+        ctx.state.errors.error(callLoc, core::ErrorClass::MethodArgumentCountMismatch,
                                "Wrong number of arguments for method {}.\n Expected: {}, found: {}", fun.toString(ctx),
                                info.arguments().size(),
                                args.size()); // TODO: should use position and print the source tree, not the cfg one.
@@ -447,19 +447,19 @@ shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun, ast
         }
 
         if (!Types::isSubType(ctx, argTpe.type, expectedType)) {
-            ctx.state.errors.error(ast::Reporter::ComplexError(
-                callLoc, ast::ErrorClass::MethodArgumentMismatch,
+            ctx.state.errors.error(core::Reporter::ComplexError(
+                callLoc, core::ErrorClass::MethodArgumentMismatch,
                 "Argument number " + to_string(i + 1) + " does not match expected type.",
-                {ast::Reporter::ErrorSection(
+                {core::Reporter::ErrorSection(
                      "Expected " + expectedType->toString(ctx),
                      {
-                         ast::Reporter::ErrorLine::from(
+                         core::Reporter::ErrorLine::from(
                              info.arguments()[i].info(ctx).definitionLoc,
                              "Method {} has specified type of argument {} as {}", info.name.toString(ctx),
                              info.arguments()[i].info(ctx).name.toString(ctx), expectedType->toString(ctx)),
                      }),
-                 ast::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
-                                             argTpe.origins2Explanations(ctx))}));
+                 core::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
+                                              argTpe.origins2Explanations(ctx))}));
         }
 
         i++;
@@ -471,14 +471,14 @@ shared_ptr<Type> ClassType::dispatchCall(ast::Context ctx, ast::NameRef fun, ast
     return resultType;
 }
 
-shared_ptr<Type> ClassType::getCallArgumentType(ast::Context ctx, ast::NameRef name, int i) {
+shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     if (isDynamic()) {
         return Types::dynamic();
     }
-    ast::SymbolRef method = this->symbol.info(ctx).findMember(name);
+    core::SymbolRef method = this->symbol.info(ctx).findMember(name);
 
     if (method.exists()) {
-        ast::Symbol &info = method.info(ctx);
+        core::Symbol &info = method.info(ctx);
 
         if (info.arguments().size() > i) { // todo: this should become actual argument matching
             shared_ptr<Type> resultType = info.arguments()[i].info(ctx).resultType;
@@ -495,24 +495,25 @@ shared_ptr<Type> ClassType::getCallArgumentType(ast::Context ctx, ast::NameRef n
 }
 
 // TODO: somehow reuse existing references instead of allocating new ones.
-ruby_typer::ast::Literal::Literal(int val)
-    : ProxyType(make_shared<ClassType>(ast::GlobalState::defn_Integer())), value(val) {}
+ruby_typer::core::Literal::Literal(int val)
+    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Integer())), value(val) {}
 
-ruby_typer::ast::Literal::Literal(float val)
-    : ProxyType(make_shared<ClassType>(ast::GlobalState::defn_Float())), value(*reinterpret_cast<int *>(&val)) {}
+ruby_typer::core::Literal::Literal(float val)
+    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<int *>(&val)) {}
 
-ruby_typer::ast::Literal::Literal(ast::NameRef val)
-    : ProxyType(make_shared<ClassType>(ast::GlobalState::defn_String())), value(val._id) {}
+ruby_typer::core::Literal::Literal(core::NameRef val)
+    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_String())), value(val._id) {}
 
-ruby_typer::ast::Literal::Literal(bool val)
-    : ProxyType(make_shared<ClassType>(val ? ast::GlobalState::defn_TrueClass() : ast::GlobalState::defn_FalseClass())),
+ruby_typer::core::Literal::Literal(bool val)
+    : ProxyType(
+          make_shared<ClassType>(val ? core::GlobalState::defn_TrueClass() : core::GlobalState::defn_FalseClass())),
       value(val ? 1 : 0) {}
 
 string Literal::typeName() {
     return "Literal";
 }
 
-string Literal::toString(ast::Context ctx, int tabs) {
+string Literal::toString(core::Context ctx, int tabs) {
     string value;
     SymbolRef undSymbol = dynamic_cast<ClassType *>(this->underlying.get())->symbol;
     switch (undSymbol._id) {
@@ -537,8 +538,8 @@ string Literal::toString(ast::Context ctx, int tabs) {
     return this->underlying->toString(ctx, tabs) + "(" + value + ")";
 }
 
-ruby_typer::ast::ArrayType::ArrayType(vector<shared_ptr<Type>> &elements)
-    : ProxyType(make_shared<ClassType>(ast::GlobalState::defn_Array())), elems(move(elements)) {}
+ruby_typer::core::ArrayType::ArrayType(vector<shared_ptr<Type>> &elements)
+    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Array())), elems(move(elements)) {}
 
 string ArrayType::typeName() {
     return "ArrayType";
@@ -568,7 +569,7 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
-string ArrayType::toString(ast::Context ctx, int tabs) {
+string ArrayType::toString(core::Context ctx, int tabs) {
     stringstream buf;
     buf << "ArrayType {" << endl;
     int i = 0;
@@ -581,10 +582,10 @@ string ArrayType::toString(ast::Context ctx, int tabs) {
     return buf.str();
 }
 
-ruby_typer::ast::HashType::HashType(vector<shared_ptr<Literal>> &keys, vector<shared_ptr<Type>> &values)
-    : ProxyType(make_shared<ClassType>(ast::GlobalState::defn_Hash())), keys(move(keys)), values(move(values)) {}
+ruby_typer::core::HashType::HashType(vector<shared_ptr<Literal>> &keys, vector<shared_ptr<Type>> &values)
+    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())), keys(move(keys)), values(move(values)) {}
 
-string HashType::toString(ast::Context ctx, int tabs) {
+string HashType::toString(core::Context ctx, int tabs) {
     stringstream buf;
     buf << "HashType {" << endl;
     auto valueIterator = this->values.begin();
@@ -606,7 +607,7 @@ int AndType::kind() {
     return 2;
 }
 
-string AndType::toString(ast::Context ctx, int tabs) {
+string AndType::toString(core::Context ctx, int tabs) {
     stringstream buf;
     buf << this->left->toString(ctx, tabs + 2) << " && " << this->right->toString(ctx, tabs + 2);
     return buf.str();
@@ -616,7 +617,7 @@ int OrType::kind() {
     return 3;
 }
 
-string OrType::toString(ast::Context ctx, int tabs) {
+string OrType::toString(core::Context ctx, int tabs) {
     stringstream buf;
     buf << this->left->toString(ctx, tabs + 2) << " | " << this->right->toString(ctx, tabs + 2);
     return buf.str();
@@ -624,5 +625,5 @@ string OrType::toString(ast::Context ctx, int tabs) {
 
 bool Type::isDynamic() {
     auto *t = dynamic_cast<ClassType *>(this);
-    return t != nullptr && t->symbol == ast::GlobalState::defn_dynamic();
+    return t != nullptr && t->symbol == core::GlobalState::defn_dynamic();
 }

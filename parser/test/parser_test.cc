@@ -14,7 +14,7 @@ using namespace std;
 
 TEST(ParserTest, SimpleParse) {
     auto console = spd::stderr_color_mt("parse");
-    ruby_typer::ast::GlobalState gs(*console);
+    ruby_typer::core::GlobalState gs(*console);
     ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
     ruby_typer::parser::Parser::run(gs, "<test>", "class A; class B; end; end");
     ruby_typer::parser::Parser::run(gs, "<test>", "class A::B; module B; end; end");

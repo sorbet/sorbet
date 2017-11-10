@@ -14,8 +14,8 @@ namespace spd = spdlog;
 
 TEST(DesugarTest, SimpleDesugar) {
     auto console = spd::stderr_color_mt("console");
-    ruby_typer::ast::GlobalState gs(*console);
+    ruby_typer::core::GlobalState gs(*console);
     auto ast = ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
-    ruby_typer::ast::Context context(gs, gs.defn_root());
+    ruby_typer::core::Context context(gs, gs.defn_root());
     auto o1 = ruby_typer::ast::desugar::node2Tree(context, ast);
 }

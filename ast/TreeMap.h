@@ -18,75 +18,75 @@ public:
     // Not including the member will skip the branch
     // you may return the same pointer that you are given
     // caller is repsonsible to handle it
-    ClassDef *preTransformClassDef(Context ctx, ClassDef *original);
-    Expression *postTransformClassDef(Context ctx, ClassDef *original);
+    ClassDef *preTransformClassDef(core::Context ctx, ClassDef *original);
+    Expression *postTransformClassDef(core::Context ctx, ClassDef *original);
 
-    MethodDef *preTransformMethodDef(Context ctx, MethodDef *original);
-    Expression *postTransformMethodDef(Context ctx, MethodDef *original);
+    MethodDef *preTransformMethodDef(core::Context ctx, MethodDef *original);
+    Expression *postTransformMethodDef(core::Context ctx, MethodDef *original);
 
-    If *preTransformIf(Context ctx, If *original);
-    Expression *postTransformIf(Context ctx, If *original);
+    If *preTransformIf(core::Context ctx, If *original);
+    Expression *postTransformIf(core::Context ctx, If *original);
 
-    While *preTransformWhile(Context ctx, While *original);
-    Expression *postTransformWhile(Context ctx, While *original);
+    While *preTransformWhile(core::Context ctx, While *original);
+    Expression *postTransformWhile(core::Context ctx, While *original);
 
-    For *preTransformFor(Context ctx, For *original);
-    Expression *postTransformFor(Context ctx, For *original);
+    For *preTransformFor(core::Context ctx, For *original);
+    Expression *postTransformFor(core::Context ctx, For *original);
 
-    Expression *postTransformBreak(Context ctx, Break *original);
+    Expression *postTransformBreak(core::Context ctx, Break *original);
 
-    Expression *postTransformNext(Context ctx, Next *original);
+    Expression *postTransformNext(core::Context ctx, Next *original);
 
-    Return *preTransformReturn(Context ctx, Return *original);
-    Expression *postTransformReturn(Context ctx, Return *original);
+    Return *preTransformReturn(core::Context ctx, Return *original);
+    Expression *postTransformReturn(core::Context ctx, Return *original);
 
-    Yield *preTransformYield(Context ctx, Yield *original);
-    Expression *postTransformYield(Context ctx, Yield *original);
+    Yield *preTransformYield(core::Context ctx, Yield *original);
+    Expression *postTransformYield(core::Context ctx, Yield *original);
 
-    Rescue *preTransformRescue(Context ctx, Rescue *original);
-    Expression *postTransformRescue(Context ctx, Rescue *original);
+    Rescue *preTransformRescue(core::Context ctx, Rescue *original);
+    Expression *postTransformRescue(core::Context ctx, Rescue *original);
 
-    Expression *postTransformIdent(Context ctx, Ident *original);
-    Expression *postTransformUnresolvedIdent(Context ctx, UnresolvedIdent *original);
+    Expression *postTransformIdent(core::Context ctx, Ident *original);
+    Expression *postTransformUnresolvedIdent(core::Context ctx, UnresolvedIdent *original);
 
-    Assign *preTransformAssign(Context ctx, Assign *original);
-    Expression *postTransformAssign(Context ctx, Assign *original);
+    Assign *preTransformAssign(core::Context ctx, Assign *original);
+    Expression *postTransformAssign(core::Context ctx, Assign *original);
 
-    Send *preTransformSend(Context ctx, Send *original);
-    Expression *postTransformSend(Context ctx, Send *original);
+    Send *preTransformSend(core::Context ctx, Send *original);
+    Expression *postTransformSend(core::Context ctx, Send *original);
 
-    NamedArg *preTransformNamedArg(Context ctx, NamedArg *original);
-    Expression *postTransformNamedArg(Context ctx, NamedArg *original);
+    NamedArg *preTransformNamedArg(core::Context ctx, NamedArg *original);
+    Expression *postTransformNamedArg(core::Context ctx, NamedArg *original);
 
-    Hash *preTransformHash(Context ctx, Hash *original);
-    Expression *postTransformHash(Context ctx, Hash *original);
+    Hash *preTransformHash(core::Context ctx, Hash *original);
+    Expression *postTransformHash(core::Context ctx, Hash *original);
 
-    Array *preTransformArray(Context ctx, Array *original);
-    Expression *postransformArray(Context ctx, Array *original);
+    Array *preTransformArray(core::Context ctx, Array *original);
+    Expression *postransformArray(core::Context ctx, Array *original);
 
-    Expression *postTransformBoolLit(Context ctx, BoolLit *original);
+    Expression *postTransformBoolLit(core::Context ctx, BoolLit *original);
 
-    Expression *postTransformFloatLit(Context ctx, FloatLit *original);
+    Expression *postTransformFloatLit(core::Context ctx, FloatLit *original);
 
-    Expression *postTransformIntLit(Context ctx, IntLit *original);
+    Expression *postTransformIntLit(core::Context ctx, IntLit *original);
 
-    Expression *postTransformStringLit(Context ctx, StringLit *original);
+    Expression *postTransformStringLit(core::Context ctx, StringLit *original);
 
-    Expression *postTransformConstantLit(Context ctx, ConstantLit *original);
+    Expression *postTransformConstantLit(core::Context ctx, ConstantLit *original);
 
-    ArraySplat *preTransformArraySplat(Context ctx, ArraySplat *original);
-    Expression *postTransformArraySplat(Context ctx, ArraySplat *original);
+    ArraySplat *preTransformArraySplat(core::Context ctx, ArraySplat *original);
+    Expression *postTransformArraySplat(core::Context ctx, ArraySplat *original);
 
-    HashSplat *preTransformHashSplat(Context ctx, HashSplat *original);
-    Expression *postTransformHashSplat(Context ctx, HashSplat *original);
+    HashSplat *preTransformHashSplat(core::Context ctx, HashSplat *original);
+    Expression *postTransformHashSplat(core::Context ctx, HashSplat *original);
 
-    Expression *postTransformSelf(Context ctx, Self *original);
+    Expression *postTransformSelf(core::Context ctx, Self *original);
 
-    Block *preTransformBlock(Context ctx, Block *original);
-    Expression *postTransformBlock(Context ctx, Block *original);
+    Block *preTransformBlock(core::Context ctx, Block *original);
+    Expression *postTransformBlock(core::Context ctx, Block *original);
 
-    InsSeq *preTransformInsSeq(Context ctx, InsSeq *original);
-    Expression *postTransformInsSeq(Context ctx, InsSeq *original);
+    InsSeq *preTransformInsSeq(core::Context ctx, InsSeq *original);
+    Expression *postTransformInsSeq(core::Context ctx, InsSeq *original);
 };
 
 /**
@@ -177,7 +177,7 @@ GENERATE_HAS_MEMBER(postTransformInsSeq);
                                                                                \
     template <class FUNC, bool has> class PostPonePreTransform_##X {           \
     public:                                                                    \
-        static X *call(Context ctx, X *cd, FUNC &what) {                       \
+        static X *call(core::Context ctx, X *cd, FUNC &what) {                 \
             Error::raise("should never be called. Incorrect use of TreeMap?"); \
             return nullptr;                                                    \
         }                                                                      \
@@ -185,14 +185,14 @@ GENERATE_HAS_MEMBER(postTransformInsSeq);
                                                                                \
     template <class FUNC> class PostPonePreTransform_##X<FUNC, true> {         \
     public:                                                                    \
-        static X *call(Context ctx, X *cd, FUNC &func) {                       \
+        static X *call(core::Context ctx, X *cd, FUNC &func) {                 \
             return func.preTransform##X(ctx, cd);                              \
         }                                                                      \
     };                                                                         \
                                                                                \
     template <class FUNC> class PostPonePreTransform_##X<FUNC, false> {        \
     public:                                                                    \
-        static X *call(Context ctx, X *cd, FUNC &func) {                       \
+        static X *call(core::Context ctx, X *cd, FUNC &func) {                 \
             return cd;                                                         \
         }                                                                      \
     };
@@ -201,7 +201,7 @@ GENERATE_HAS_MEMBER(postTransformInsSeq);
                                                                                \
     template <class FUNC, bool has> class PostPonePostTransform_##X {          \
     public:                                                                    \
-        static Expression *call(Context ctx, X *cd, FUNC &what) {              \
+        static Expression *call(core::Context ctx, X *cd, FUNC &what) {        \
             Error::raise("should never be called. Incorrect use of TreeMap?"); \
             return nullptr;                                                    \
         }                                                                      \
@@ -209,14 +209,14 @@ GENERATE_HAS_MEMBER(postTransformInsSeq);
                                                                                \
     template <class FUNC> class PostPonePostTransform_##X<FUNC, true> {        \
     public:                                                                    \
-        static Expression *call(Context ctx, X *cd, FUNC &func) {              \
+        static Expression *call(core::Context ctx, X *cd, FUNC &func) {        \
             return func.postTransform##X(ctx, cd);                             \
         }                                                                      \
     };                                                                         \
                                                                                \
     template <class FUNC> class PostPonePostTransform_##X<FUNC, false> {       \
     public:                                                                    \
-        static Expression *call(Context ctx, X *cd, FUNC &func) {              \
+        static Expression *call(core::Context ctx, X *cd, FUNC &func) {        \
             return cd;                                                         \
         }                                                                      \
     };
@@ -290,7 +290,7 @@ private:
 
     TreeMap(FUNC &func) : func(func) {}
 
-    Expression *mapIt(Expression *what, Context ctx) {
+    Expression *mapIt(Expression *what, core::Context ctx) {
         // TODO: reorder by frequency
         if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr || dynamic_cast<Nil *>(what) != nullptr)
             return what;
@@ -719,7 +719,7 @@ private:
     }
 
 public:
-    static unique_ptr<Expression> apply(Context ctx, FUNC &func, unique_ptr<Expression> to) {
+    static unique_ptr<Expression> apply(core::Context ctx, FUNC &func, unique_ptr<Expression> to) {
         Expression *underlying = to.get();
         TreeMap walker(func);
         Expression *res = walker.mapIt(underlying, ctx);

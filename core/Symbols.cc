@@ -5,7 +5,7 @@
 #include <string>
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 
 using namespace std;
 
@@ -182,5 +182,5 @@ SymbolRef Symbol::attachedClass(GlobalState &gs) {
     return singleton;
 }
 
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer

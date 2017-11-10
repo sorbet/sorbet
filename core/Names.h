@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace ruby_typer {
-namespace ast {
+namespace core {
 class GlobalState;
 class Name;
 enum NameKind : u1 {
@@ -341,17 +341,17 @@ public:
 };
 
 CheckSize(Name, 24, 8);
-} // namespace ast
+} // namespace core
 } // namespace ruby_typer
 
-template <> struct std::hash<ruby_typer::ast::NameRef> {
-    size_t operator()(const ruby_typer::ast::NameRef &x) const {
+template <> struct std::hash<ruby_typer::core::NameRef> {
+    size_t operator()(const ruby_typer::core::NameRef &x) const {
         return x._id;
     }
 };
 
-template <> struct std::equal_to<ruby_typer::ast::NameRef> {
-    constexpr bool operator()(const ruby_typer::ast::NameRef &lhs, const ruby_typer::ast::NameRef &rhs) const {
+template <> struct std::equal_to<ruby_typer::core::NameRef> {
+    constexpr bool operator()(const ruby_typer::core::NameRef &lhs, const ruby_typer::core::NameRef &rhs) const {
         return lhs._id == rhs._id;
     }
 };
