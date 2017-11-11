@@ -3,17 +3,17 @@ class TestLocals
     a = 1
     c = 4
 
-    proc do # error: Method proc does not exist on TestLocals
+    proc do
       b = 2
-      a + b # error: Method + does not exist on Integer
-      proc do # error: Method proc does not exist on TestLocals
-        b + c # error: Method + does not exist on Integer
+      a + b
+      proc do
+        b + c
       end
     end
 
     b = 3
 
-    proc do |a; b| # error: Method proc does not exist on TestLocals
+    proc do |a; b|
       a + b
     end
   end

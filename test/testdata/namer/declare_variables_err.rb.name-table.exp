@@ -1,0 +1,7 @@
+class <singleton class:A> (Class)
+class A (Object)
+  field @foo -> Integer
+  field @llamas -> <dynamic>
+  method <block>$1 ()
+class Opus ()
+

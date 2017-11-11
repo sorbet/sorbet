@@ -2,7 +2,7 @@ class Destructure
   def f((x,y), z)
     x + y
 
-    lambda do |(a,b)| # error: lambda does not exist
+    lambda do |(a,b)|
     end
   end
 end
