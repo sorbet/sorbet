@@ -727,7 +727,9 @@ public:
             return make_unique<Integer>(loc, "-" + i->val);
         if (Float *i = dynamic_cast<Float *>(numeric.get()))
             return make_unique<Float>(loc, "-" + i->val);
-        Error::raise("unexpected numeric type");
+        if (Rational *r = dynamic_cast<Rational *>(numeric.get()))
+            return make_unique<Float>(loc, "-" + r->val);
+        Error::raise("unexpected numeric type: ", numeric->nodeName());
     }
 
     unique_ptr<Node> nil(const token *tok) {
