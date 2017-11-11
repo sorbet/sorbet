@@ -17,7 +17,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#initialize" {
     bb37_0 [shape = invhouse];
     bb37_1 [shape = parallelogram];
 
-    bb37_0 [label = "(invalid_rules)\n@rules$35 = alias @rules : <dynamic>\n<dynamic>$30 = alias <dynamic> : <dynamic>\nstatTmp$31 = NotSupported() : <dynamic>\nstatTmp$28 = <dynamic>$30.query_by(statTmp$31) : <dynamic>\nstatTmp$32 = NotSupported() : <dynamic>\nstatTmp$27 = statTmp$28.load_all(statTmp$32) : <dynamic>\nstatTmp$33 = NotSupported() : <dynamic>\nassignTmp$0 = statTmp$27.partition(statTmp$33) : <dynamic>\nstatTmp$37 = 0 : Integer(0)\n@rules$35 = assignTmp$0.[](statTmp$37) : <dynamic>\nstatTmp$40 = 1 : Integer(1)\ninvalid_rules = assignTmp$0.[](statTmp$40) : <dynamic>\nstatTmp$42 = invalid_rules.empty?() : <dynamic>\nifTmp$41 = statTmp$42.!() : <dynamic>\nifTmp$41"];
+    bb37_0 [label = "(invalid_rules)\n<dynamic>$30 = alias <dynamic> : <dynamic>\n@rules$35 = alias @rules : <dynamic>\nstatTmp$31 = NotSupported() : <dynamic>\nstatTmp$28 = <dynamic>$30.query_by(statTmp$31) : <dynamic>\nstatTmp$32 = NotSupported() : <dynamic>\nstatTmp$27 = statTmp$28.load_all(statTmp$32) : <dynamic>\nstatTmp$33 = NotSupported() : <dynamic>\nassignTmp$0 = statTmp$27.partition(statTmp$33) : <dynamic>\nstatTmp$37 = 0 : Integer(0)\n@rules$35 = assignTmp$0.[](statTmp$37) : <dynamic>\nstatTmp$40 = 1 : Integer(1)\ninvalid_rules = assignTmp$0.[](statTmp$40) : <dynamic>\nstatTmp$42 = invalid_rules.empty?() : <dynamic>\nifTmp$41 = statTmp$42.!() : <dynamic>\nifTmp$41"];
     bb37_0 -> bb37_2;
     bb37_0 -> bb37_3;
 
@@ -37,7 +37,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#match" {
     bb41_0 [shape = invhouse];
     bb41_1 [shape = parallelogram];
 
-    bb41_0 [label = "(match_context, MatchTimeBudget$81, @rules$83)\nMatchTimeBudget$81 = alias MatchTimeBudget : <singleton class:MatchTimeBudget>\n@rules$83 = alias @rules : <dynamic>\nMAX_AFFECTED_FILES$64 = alias MAX_AFFECTED_FILES : <dynamic>\n<self>$56 = self : Matcher\nmatch_context = load_arg(<self>$56#match, 0) : <dynamic>\nstatTmp$61 = match_context.diff() : <dynamic>\nstatTmp$60 = statTmp$61.affected_files() : <dynamic>\nstatTmp$59 = statTmp$60.count() : <dynamic>\nifTmp$58 = statTmp$59.>(MAX_AFFECTED_FILES$64) : <dynamic>\nifTmp$58"];
+    bb41_0 [label = "(match_context, MatchTimeBudget$81, @rules$83)\nMAX_AFFECTED_FILES$64 = alias MAX_AFFECTED_FILES : <dynamic>\nMatchTimeBudget$81 = alias MatchTimeBudget : <singleton class:MatchTimeBudget>\n@rules$83 = alias @rules : <dynamic>\n<self>$56 = self : Matcher\nmatch_context = load_arg(<self>$56#match, 0) : <dynamic>\nstatTmp$61 = match_context.diff() : <dynamic>\nstatTmp$60 = statTmp$61.affected_files() : <dynamic>\nstatTmp$59 = statTmp$60.count() : <dynamic>\nifTmp$58 = statTmp$59.>(MAX_AFFECTED_FILES$64) : <dynamic>\nifTmp$58"];
     bb41_0 -> bb41_2;
     bb41_0 -> bb41_3;
 
@@ -71,7 +71,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#initialize" {
     bb49_0 [shape = invhouse];
     bb49_1 [shape = parallelogram];
 
-    bb49_0 [label = "()\n@openapi_diff$108 = alias @openapi_diff : <dynamic>\n@diff$107 = alias @diff : <dynamic>\n@title$105 = alias @title : <dynamic>\n@body$103 = alias @body : <dynamic>\n@merge_branch$101 = alias @merge_branch : <dynamic>\n@gh_user$99 = alias @gh_user : <dynamic>\n@assignee$97 = alias @assignee : <dynamic>\n@repo$95 = alias @repo : <dynamic>\n<self>$93 = self : MatchContext\nrepo = load_arg(<self>$93#initialize, 0) : <dynamic>\nassignee = load_arg(<self>$93#initialize, 1) : <dynamic>\ngh_user = load_arg(<self>$93#initialize, 2) : <dynamic>\nmerge_branch = load_arg(<self>$93#initialize, 3) : <dynamic>\nbody = load_arg(<self>$93#initialize, 4) : <dynamic>\ntitle = load_arg(<self>$93#initialize, 5) : <dynamic>\ndiff = load_arg(<self>$93#initialize, 6) : <dynamic>\nopenapi_diff = load_arg(<self>$93#initialize, 7) : <dynamic>\n<ret>$109 = return openapi_diff : <bottom>\n<never>"];
+    bb49_0 [label = "()\n@repo$95 = alias @repo : <dynamic>\n@assignee$97 = alias @assignee : <dynamic>\n@gh_user$99 = alias @gh_user : <dynamic>\n@merge_branch$101 = alias @merge_branch : <dynamic>\n@body$103 = alias @body : <dynamic>\n@title$105 = alias @title : <dynamic>\n@diff$107 = alias @diff : <dynamic>\n@openapi_diff$108 = alias @openapi_diff : <dynamic>\n<self>$93 = self : MatchContext\nrepo = load_arg(<self>$93#initialize, 0) : <dynamic>\nassignee = load_arg(<self>$93#initialize, 1) : <dynamic>\ngh_user = load_arg(<self>$93#initialize, 2) : <dynamic>\nmerge_branch = load_arg(<self>$93#initialize, 3) : <dynamic>\nbody = load_arg(<self>$93#initialize, 4) : <dynamic>\ntitle = load_arg(<self>$93#initialize, 5) : <dynamic>\ndiff = load_arg(<self>$93#initialize, 6) : <dynamic>\nopenapi_diff = load_arg(<self>$93#initialize, 7) : <dynamic>\n<ret>$109 = return openapi_diff : <bottom>\n<never>"];
     bb49_0 -> bb49_1;
     bb49_1 [label = "()\n<never>"];
     bb49_1 -> bb49_1;
@@ -95,7 +95,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#initialize" {
     bb62_0 [shape = invhouse];
     bb62_1 [shape = parallelogram];
 
-    bb62_0 [label = "()\n<dynamic>$121 = alias <dynamic> : <dynamic>\n@start$119 = alias @start : <dynamic>\n@start$119 = <dynamic>$121.now() : <dynamic>\n<ret>$122 = return @start$119 : <bottom>\n<never>"];
+    bb62_0 [label = "()\n@start$119 = alias @start : <dynamic>\n<dynamic>$121 = alias <dynamic> : <dynamic>\n@start$119 = <dynamic>$121.now() : <dynamic>\n<ret>$122 = return @start$119 : <bottom>\n<never>"];
     bb62_0 -> bb62_1;
     bb62_1 [label = "()\n<never>"];
     bb62_1 -> bb62_1;
@@ -107,7 +107,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#check!" {
     bb63_0 [shape = invhouse];
     bb63_1 [shape = parallelogram];
 
-    bb63_0 [label = "(TOTAL_TIME_MS$136, MatchTimeout$140)\nMatchTimeout$140 = alias MatchTimeout : <singleton class:MatchTimeout>\nTOTAL_TIME_MS$136 = alias TOTAL_TIME_MS : <dynamic>\n@start$131 = alias @start : <dynamic>\n<dynamic>$129 = alias <dynamic> : <dynamic>\nstatTmp$127 = <dynamic>$129.now() : <dynamic>\nstatTmp$126 = statTmp$127.-(@start$131) : <dynamic>\nstatTmp$132 = 1000 : Integer(1000)\ndur_ms = statTmp$126.*(statTmp$132) : <dynamic>\nifTmp$133 = dur_ms.>(TOTAL_TIME_MS$136) : <dynamic>\nifTmp$133"];
+    bb63_0 [label = "(TOTAL_TIME_MS$136, MatchTimeout$140)\n<dynamic>$129 = alias <dynamic> : <dynamic>\n@start$131 = alias @start : <dynamic>\nTOTAL_TIME_MS$136 = alias TOTAL_TIME_MS : <dynamic>\nMatchTimeout$140 = alias MatchTimeout : <singleton class:MatchTimeout>\nstatTmp$127 = <dynamic>$129.now() : <dynamic>\nstatTmp$126 = statTmp$127.-(@start$131) : <dynamic>\nstatTmp$132 = 1000 : Integer(1000)\ndur_ms = statTmp$126.*(statTmp$132) : <dynamic>\nifTmp$133 = dur_ms.>(TOTAL_TIME_MS$136) : <dynamic>\nifTmp$133"];
     bb63_0 -> bb63_2;
     bb63_0 -> bb63_3;
 
@@ -127,7 +127,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#time_rule" {
     bb65_0 [shape = invhouse];
     bb65_1 [shape = parallelogram];
 
-    bb65_0 [label = "(rule, res, dur_ms, PER_RULE_MS$165, MatchTimeout$169)\nMatchTimeout$169 = alias MatchTimeout : <singleton class:MatchTimeout>\nPER_RULE_MS$165 = alias PER_RULE_MS : <dynamic>\n<dynamic>$153 = alias <dynamic> : <dynamic>\n<self>$150 = self : MatchTimeBudget\nrule = load_arg(<self>$150#time_rule, 0) : <dynamic>\nrule_start = <dynamic>$153.now() : <dynamic>\nres = NotSupported() : <dynamic>\nstatTmp$157 = <dynamic>$153.now() : <dynamic>\nstatTmp$156 = statTmp$157.-(rule_start) : <dynamic>\nstatTmp$160 = 1000 : Integer(1000)\ndur_ms = statTmp$156.*(statTmp$160) : <dynamic>\nifTmp$162 = dur_ms.>(PER_RULE_MS$165) : <dynamic>\nifTmp$162"];
+    bb65_0 [label = "(rule, res, dur_ms, PER_RULE_MS$165, MatchTimeout$169)\n<dynamic>$153 = alias <dynamic> : <dynamic>\nPER_RULE_MS$165 = alias PER_RULE_MS : <dynamic>\nMatchTimeout$169 = alias MatchTimeout : <singleton class:MatchTimeout>\n<self>$150 = self : MatchTimeBudget\nrule = load_arg(<self>$150#time_rule, 0) : <dynamic>\nrule_start = <dynamic>$153.now() : <dynamic>\nres = NotSupported() : <dynamic>\nstatTmp$157 = <dynamic>$153.now() : <dynamic>\nstatTmp$156 = statTmp$157.-(rule_start) : <dynamic>\nstatTmp$160 = 1000 : Integer(1000)\ndur_ms = statTmp$156.*(statTmp$160) : <dynamic>\nifTmp$162 = dur_ms.>(PER_RULE_MS$165) : <dynamic>\nifTmp$162"];
     bb65_0 -> bb65_2;
     bb65_0 -> bb65_3;
 
@@ -147,7 +147,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#initialize" {
     bb71_0 [shape = invhouse];
     bb71_1 [shape = parallelogram];
 
-    bb71_0 [label = "()\n@parsed$197 = alias @parsed : <dynamic>\n@raw$196 = alias @raw : <dynamic>\n<self>$194 = self : Diff\nraw_diff = load_arg(<self>$194#initialize, 0) : <dynamic>\nstatTmp$198 = self : Diff\n@parsed$197 = statTmp$198.parse(raw_diff) : <dynamic>\n<ret>$200 = return @parsed$197 : <bottom>\n<never>"];
+    bb71_0 [label = "()\n@raw$196 = alias @raw : <dynamic>\n@parsed$197 = alias @parsed : <dynamic>\n<self>$194 = self : Diff\nraw_diff = load_arg(<self>$194#initialize, 0) : <dynamic>\nstatTmp$198 = self : Diff\n@parsed$197 = statTmp$198.parse(raw_diff) : <dynamic>\n<ret>$200 = return @parsed$197 : <bottom>\n<never>"];
     bb71_0 -> bb71_1;
     bb71_1 [label = "()\n<never>"];
     bb71_1 -> bb71_1;

@@ -9,35 +9,10 @@
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 3575.5466)">
 <title>gerald.rb</title>
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-3575.5466 19747,-3575.5466 19747,4 -4,4"/>
-<g id="clust16" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#changed_lines</title>
-<polygon fill="none" stroke="#0000ff" points="13434,-2726.6584 13434,-3416.7093 14060,-3416.7093 14060,-2726.6584 13434,-2726.6584"/>
-<text text-anchor="middle" x="13747" y="-3401.5093" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_lines</text>
-</g>
-<g id="clust17" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#changed_openapi?</title>
-<polygon fill="none" stroke="#0000ff" points="14068,-2726.6584 14068,-3404.4728 14766,-3404.4728 14766,-2726.6584 14068,-2726.6584"/>
-<text text-anchor="middle" x="14417" y="-3389.2728" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_openapi?</text>
-</g>
-<g id="clust18" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#parse</title>
-<polygon fill="none" stroke="#0000ff" points="14774,-8 14774,-3428.9457 19735,-3428.9457 19735,-8 14774,-8"/>
-<text text-anchor="middle" x="17254.5" y="-3413.7457" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#parse</text>
-</g>
-<g id="clust13" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#changed_files</title>
-<polygon fill="none" stroke="#0000ff" points="10640,-1626.6501 10640,-3367.7635 11626,-3367.7635 11626,-1626.6501 10640,-1626.6501"/>
-<text text-anchor="middle" x="11133" y="-3352.5635" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_files</text>
-</g>
-<g id="clust14" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#added_lines</title>
-<polygon fill="none" stroke="#0000ff" points="11634,-2057.8603 11634,-3367.7635 12526,-3367.7635 12526,-2057.8603 11634,-2057.8603"/>
-<text text-anchor="middle" x="12080" y="-3352.5635" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#added_lines</text>
-</g>
-<g id="clust15" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#removed_lines</title>
-<polygon fill="none" stroke="#0000ff" points="12534,-2057.8603 12534,-3367.7635 13426,-3367.7635 13426,-2057.8603 12534,-2057.8603"/>
-<text text-anchor="middle" x="12980" y="-3352.5635" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#removed_lines</text>
+<g id="clust3" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Matcher#match</title>
+<polygon fill="none" stroke="#0000ff" points="1748,-1617.3952 1748,-3453.4186 2937,-3453.4186 2937,-1617.3952 1748,-1617.3952"/>
+<text text-anchor="middle" x="2342.5" y="-3438.2186" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Matcher#match</text>
 </g>
 <g id="clust1" class="cluster">
 <title>cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize</title>
@@ -48,11 +23,6 @@
 <title>cluster_::Opus::CIBot::Gerald::Matcher#initialize</title>
 <polygon fill="none" stroke="#0000ff" points="646,-2057.8603 646,-3514.6008 1740,-3514.6008 1740,-2057.8603 646,-2057.8603"/>
 <text text-anchor="middle" x="1193" y="-3499.4008" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Matcher#initialize</text>
-</g>
-<g id="clust3" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Matcher#match</title>
-<polygon fill="none" stroke="#0000ff" points="1748,-1617.3952 1748,-3453.4186 2937,-3453.4186 2937,-1617.3952 1748,-1617.3952"/>
-<text text-anchor="middle" x="2342.5" y="-3438.2186" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Matcher#match</text>
 </g>
 <g id="clust4" class="cluster">
 <title>cluster_::Opus::CIBot::Gerald::MatchContext#initialize</title>
@@ -99,6 +69,36 @@
 <polygon fill="none" stroke="#0000ff" points="9646,-1626.6501 9646,-3367.7635 10632,-3367.7635 10632,-1626.6501 9646,-1626.6501"/>
 <text text-anchor="middle" x="10139" y="-3352.5635" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#deleted_files</text>
 </g>
+<g id="clust13" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#changed_files</title>
+<polygon fill="none" stroke="#0000ff" points="10640,-1626.6501 10640,-3367.7635 11626,-3367.7635 11626,-1626.6501 10640,-1626.6501"/>
+<text text-anchor="middle" x="11133" y="-3352.5635" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_files</text>
+</g>
+<g id="clust15" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#removed_lines</title>
+<polygon fill="none" stroke="#0000ff" points="12534,-2057.8603 12534,-3367.7635 13426,-3367.7635 13426,-2057.8603 12534,-2057.8603"/>
+<text text-anchor="middle" x="12980" y="-3352.5635" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#removed_lines</text>
+</g>
+<g id="clust16" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#changed_lines</title>
+<polygon fill="none" stroke="#0000ff" points="13434,-2726.6584 13434,-3416.7093 14060,-3416.7093 14060,-2726.6584 13434,-2726.6584"/>
+<text text-anchor="middle" x="13747" y="-3401.5093" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_lines</text>
+</g>
+<g id="clust17" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#changed_openapi?</title>
+<polygon fill="none" stroke="#0000ff" points="14068,-2726.6584 14068,-3404.4728 14766,-3404.4728 14766,-2726.6584 14068,-2726.6584"/>
+<text text-anchor="middle" x="14417" y="-3389.2728" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_openapi?</text>
+</g>
+<g id="clust18" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#parse</title>
+<polygon fill="none" stroke="#0000ff" points="14774,-8 14774,-3428.9457 19735,-3428.9457 19735,-8 14774,-8"/>
+<text text-anchor="middle" x="17254.5" y="-3413.7457" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#parse</text>
+</g>
+<g id="clust14" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#added_lines</title>
+<polygon fill="none" stroke="#0000ff" points="11634,-2057.8603 11634,-3367.7635 12526,-3367.7635 12526,-2057.8603 11634,-2057.8603"/>
+<text text-anchor="middle" x="12080" y="-3352.5635" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#added_lines</text>
+</g>
 <!-- bb31_0 -->
 <g id="node1" class="node">
 <title>bb31_0</title>
@@ -135,8 +135,8 @@
 <title>bb37_0</title>
 <polygon fill="none" stroke="#000000" points="859.8231,-3219.2337 1201,-3079.2743 1542.1769,-3219.2337 1541.8585,-3445.6927 860.1415,-3445.6927 859.8231,-3219.2337"/>
 <text text-anchor="middle" x="1201" y="-3382.6254" font-family="Times,serif" font-size="14.00" fill="#000000">(invalid_rules)</text>
-<text text-anchor="middle" x="1201" y="-3368.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@rules$35 = alias @rules : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="1201" y="-3354.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;dynamic&gt;$30 = alias &lt;dynamic&gt; : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="1201" y="-3368.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;dynamic&gt;$30 = alias &lt;dynamic&gt; : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="1201" y="-3354.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@rules$35 = alias @rules : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="1201" y="-3340.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$31 = NotSupported() : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="1201" y="-3326.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$28 = &lt;dynamic&gt;$30.query_by(statTmp$31) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="1201" y="-3312.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$32 = NotSupported() : &lt;dynamic&gt;</text>
@@ -231,9 +231,9 @@
 <title>bb41_0</title>
 <polygon fill="none" stroke="#000000" points="1874.921,-3238.0419 2320,-3140.139 2765.079,-3238.0419 2764.6636,-3396.4522 1875.3364,-3396.4522 1874.921,-3238.0419"/>
 <text text-anchor="middle" x="2320" y="-3347.6254" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, MatchTimeBudget$81, @rules$83)</text>
-<text text-anchor="middle" x="2320" y="-3333.6254" font-family="Times,serif" font-size="14.00" fill="#000000">MatchTimeBudget$81 = alias MatchTimeBudget : &lt;singleton class:MatchTimeBudget&gt;</text>
-<text text-anchor="middle" x="2320" y="-3319.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@rules$83 = alias @rules : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="2320" y="-3305.6254" font-family="Times,serif" font-size="14.00" fill="#000000">MAX_AFFECTED_FILES$64 = alias MAX_AFFECTED_FILES : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="2320" y="-3333.6254" font-family="Times,serif" font-size="14.00" fill="#000000">MAX_AFFECTED_FILES$64 = alias MAX_AFFECTED_FILES : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="2320" y="-3319.6254" font-family="Times,serif" font-size="14.00" fill="#000000">MatchTimeBudget$81 = alias MatchTimeBudget : &lt;singleton class:MatchTimeBudget&gt;</text>
+<text text-anchor="middle" x="2320" y="-3305.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@rules$83 = alias @rules : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="2320" y="-3291.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$56 = self : Matcher</text>
 <text text-anchor="middle" x="2320" y="-3277.6254" font-family="Times,serif" font-size="14.00" fill="#000000">match_context = load_arg(&lt;self&gt;$56#match, 0) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="2320" y="-3263.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$61 = match_context.diff() : &lt;dynamic&gt;</text>
@@ -415,14 +415,14 @@
 <title>bb49_0</title>
 <polygon fill="none" stroke="#000000" points="2953.0828,-3203.9708 3277,-3029.8828 3600.9172,-3203.9708 3600.6149,-3485.6513 2953.3851,-3485.6513 2953.0828,-3203.9708"/>
 <text text-anchor="middle" x="3277" y="-3410.6254" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="3277" y="-3396.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@openapi_diff$108 = alias @openapi_diff : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="3277" y="-3382.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@diff$107 = alias @diff : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="3277" y="-3368.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@title$105 = alias @title : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="3277" y="-3354.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@body$103 = alias @body : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="3277" y="-3340.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@merge_branch$101 = alias @merge_branch : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="3277" y="-3326.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@gh_user$99 = alias @gh_user : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="3277" y="-3312.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@assignee$97 = alias @assignee : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="3277" y="-3298.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@repo$95 = alias @repo : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="3277" y="-3396.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@repo$95 = alias @repo : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="3277" y="-3382.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@assignee$97 = alias @assignee : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="3277" y="-3368.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@gh_user$99 = alias @gh_user : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="3277" y="-3354.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@merge_branch$101 = alias @merge_branch : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="3277" y="-3340.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@body$103 = alias @body : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="3277" y="-3326.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@title$105 = alias @title : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="3277" y="-3312.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@diff$107 = alias @diff : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="3277" y="-3298.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@openapi_diff$108 = alias @openapi_diff : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="3277" y="-3284.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$93 = self : MatchContext</text>
 <text text-anchor="middle" x="3277" y="-3270.6254" font-family="Times,serif" font-size="14.00" fill="#000000">repo = load_arg(&lt;self&gt;$93#initialize, 0) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="3277" y="-3256.6254" font-family="Times,serif" font-size="14.00" fill="#000000">assignee = load_arg(&lt;self&gt;$93#initialize, 1) : &lt;dynamic&gt;</text>
@@ -490,8 +490,8 @@
 <title>bb62_0</title>
 <polygon fill="none" stroke="#000000" points="4335.4806,-3257.0045 4597,-3201.5034 4858.5194,-3257.0045 4858.2753,-3346.8073 4335.7247,-3346.8073 4335.4806,-3257.0045"/>
 <text text-anchor="middle" x="4597" y="-3312.6254" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="4597" y="-3298.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;dynamic&gt;$121 = alias &lt;dynamic&gt; : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="4597" y="-3284.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@start$119 = alias @start : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="4597" y="-3298.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@start$119 = alias @start : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="4597" y="-3284.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;dynamic&gt;$121 = alias &lt;dynamic&gt; : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="4597" y="-3270.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@start$119 = &lt;dynamic&gt;$121.now() : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="4597" y="-3256.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$122 = return @start$119 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="4597" y="-3242.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
@@ -520,10 +520,10 @@
 <title>bb63_0</title>
 <polygon fill="none" stroke="#000000" points="5103.9503,-3238.0419 5496,-3140.139 5888.0497,-3238.0419 5887.6838,-3396.4522 5104.3162,-3396.4522 5103.9503,-3238.0419"/>
 <text text-anchor="middle" x="5496" y="-3347.6254" font-family="Times,serif" font-size="14.00" fill="#000000">(TOTAL_TIME_MS$136, MatchTimeout$140)</text>
-<text text-anchor="middle" x="5496" y="-3333.6254" font-family="Times,serif" font-size="14.00" fill="#000000">MatchTimeout$140 = alias MatchTimeout : &lt;singleton class:MatchTimeout&gt;</text>
-<text text-anchor="middle" x="5496" y="-3319.6254" font-family="Times,serif" font-size="14.00" fill="#000000">TOTAL_TIME_MS$136 = alias TOTAL_TIME_MS : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="5496" y="-3305.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@start$131 = alias @start : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="5496" y="-3291.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;dynamic&gt;$129 = alias &lt;dynamic&gt; : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="5496" y="-3333.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;dynamic&gt;$129 = alias &lt;dynamic&gt; : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="5496" y="-3319.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@start$131 = alias @start : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="5496" y="-3305.6254" font-family="Times,serif" font-size="14.00" fill="#000000">TOTAL_TIME_MS$136 = alias TOTAL_TIME_MS : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="5496" y="-3291.6254" font-family="Times,serif" font-size="14.00" fill="#000000">MatchTimeout$140 = alias MatchTimeout : &lt;singleton class:MatchTimeout&gt;</text>
 <text text-anchor="middle" x="5496" y="-3277.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$127 = &lt;dynamic&gt;$129.now() : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="5496" y="-3263.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$126 = statTmp$127.&#45;(@start$131) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="5496" y="-3249.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$132 = 1000 : Integer(1000)</text>
@@ -611,9 +611,9 @@
 <title>bb65_0</title>
 <polygon fill="none" stroke="#000000" points="6368.9503,-3226.7878 6761,-3103.7201 7153.0497,-3226.7878 7152.6838,-3425.9156 6369.3162,-3425.9156 6368.9503,-3226.7878"/>
 <text text-anchor="middle" x="6761" y="-3368.6254" font-family="Times,serif" font-size="14.00" fill="#000000">(rule, res, dur_ms, PER_RULE_MS$165, MatchTimeout$169)</text>
-<text text-anchor="middle" x="6761" y="-3354.6254" font-family="Times,serif" font-size="14.00" fill="#000000">MatchTimeout$169 = alias MatchTimeout : &lt;singleton class:MatchTimeout&gt;</text>
+<text text-anchor="middle" x="6761" y="-3354.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;dynamic&gt;$153 = alias &lt;dynamic&gt; : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="6761" y="-3340.6254" font-family="Times,serif" font-size="14.00" fill="#000000">PER_RULE_MS$165 = alias PER_RULE_MS : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="6761" y="-3326.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;dynamic&gt;$153 = alias &lt;dynamic&gt; : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="6761" y="-3326.6254" font-family="Times,serif" font-size="14.00" fill="#000000">MatchTimeout$169 = alias MatchTimeout : &lt;singleton class:MatchTimeout&gt;</text>
 <text text-anchor="middle" x="6761" y="-3312.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$150 = self : MatchTimeBudget</text>
 <text text-anchor="middle" x="6761" y="-3298.6254" font-family="Times,serif" font-size="14.00" fill="#000000">rule = load_arg(&lt;self&gt;$150#time_rule, 0) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="6761" y="-3284.6254" font-family="Times,serif" font-size="14.00" fill="#000000">rule_start = &lt;dynamic&gt;$153.now() : &lt;dynamic&gt;</text>
@@ -718,8 +718,8 @@
 <title>bb71_0</title>
 <polygon fill="none" stroke="#000000" points="7396.1996,-3245.596 7700,-3164.5847 8003.8004,-3245.596 8003.5169,-3376.6751 7396.4831,-3376.6751 7396.1996,-3245.596"/>
 <text text-anchor="middle" x="7700" y="-3333.6254" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="7700" y="-3319.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@parsed$197 = alias @parsed : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="7700" y="-3305.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@raw$196 = alias @raw : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="7700" y="-3319.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@raw$196 = alias @raw : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="7700" y="-3305.6254" font-family="Times,serif" font-size="14.00" fill="#000000">@parsed$197 = alias @parsed : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="7700" y="-3291.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$194 = self : Diff</text>
 <text text-anchor="middle" x="7700" y="-3277.6254" font-family="Times,serif" font-size="14.00" fill="#000000">raw_diff = load_arg(&lt;self&gt;$194#initialize, 0) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="7700" y="-3263.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$198 = self : Diff</text>
@@ -1409,130 +1409,130 @@
 <!-- bb98_0 -->
 <g id="node76" class="node">
 <title>bb98_0</title>
-<polygon fill="none" stroke="#000000" points="15318.7994,-3245.596 15590,-3164.5847 15861.2006,-3245.596 15860.9474,-3376.6751 15319.0526,-3376.6751 15318.7994,-3245.596"/>
-<text text-anchor="middle" x="15590" y="-3333.6254" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="15590" y="-3319.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$288 = self : Diff</text>
-<text text-anchor="middle" x="15590" y="-3305.6254" font-family="Times,serif" font-size="14.00" fill="#000000">diff = load_arg(&lt;self&gt;$288#parse, 0) : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-3291.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$292 = NotSupported() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-3277.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$290 = diff.split(statTmp$292) : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-3263.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$293 = NotSupported() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-3249.6254" font-family="Times,serif" font-size="14.00" fill="#000000">parts = statTmp$290.[](statTmp$293) : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-3235.6254" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$295 = parts : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-3221.6254" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$295</text>
+<polygon fill="none" stroke="#000000" points="15189.7994,-3245.596 15461,-3164.5847 15732.2006,-3245.596 15731.9474,-3376.6751 15190.0526,-3376.6751 15189.7994,-3245.596"/>
+<text text-anchor="middle" x="15461" y="-3333.6254" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="15461" y="-3319.6254" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$288 = self : Diff</text>
+<text text-anchor="middle" x="15461" y="-3305.6254" font-family="Times,serif" font-size="14.00" fill="#000000">diff = load_arg(&lt;self&gt;$288#parse, 0) : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-3291.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$292 = NotSupported() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-3277.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$290 = diff.split(statTmp$292) : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-3263.6254" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$293 = NotSupported() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-3249.6254" font-family="Times,serif" font-size="14.00" fill="#000000">parts = statTmp$290.[](statTmp$293) : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-3235.6254" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$295 = parts : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-3221.6254" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$295</text>
 </g>
 <!-- bb98_2 -->
 <g id="node78" class="node">
 <title>bb98_2</title>
-<ellipse fill="none" stroke="#000000" cx="15478" cy="-2770.6584" rx="49.9382" ry="25.4118"/>
-<text text-anchor="middle" x="15478" y="-2773.4584" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="15478" y="-2759.4584" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;always&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15349" cy="-2770.6584" rx="49.9382" ry="25.4118"/>
+<text text-anchor="middle" x="15349" y="-2773.4584" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="15349" y="-2759.4584" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;always&gt;</text>
 </g>
 <!-- bb98_0&#45;&gt;bb98_2 -->
 <g id="edge90" class="edge">
 <title>bb98_0&#45;&gt;bb98_2</title>
-<path fill="none" stroke="#000000" d="M15565.8356,-3171.5391C15540.47,-3055.7711 15502.0555,-2880.4474 15485.753,-2806.0431"/>
-<polygon fill="#000000" stroke="#000000" points="15489.1623,-2805.2499 15483.6031,-2796.2308 15482.3245,-2806.7482 15489.1623,-2805.2499"/>
+<path fill="none" stroke="#000000" d="M15436.8356,-3171.5391C15411.47,-3055.7711 15373.0555,-2880.4474 15356.753,-2806.0431"/>
+<polygon fill="#000000" stroke="#000000" points="15360.1623,-2805.2499 15354.6031,-2796.2308 15353.3245,-2806.7482 15360.1623,-2805.2499"/>
 </g>
 <!-- bb98_3 -->
 <g id="node79" class="node">
 <title>bb98_3</title>
-<ellipse fill="none" stroke="#000000" cx="15702" cy="-2770.6584" rx="156.3619" ry="35.2113"/>
-<text text-anchor="middle" x="15702" y="-2780.4584" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="15702" y="-2766.4584" font-family="Times,serif" font-size="14.00" fill="#000000">parts = NotSupported() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15702" y="-2752.4584" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;always&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15573" cy="-2770.6584" rx="156.3619" ry="35.2113"/>
+<text text-anchor="middle" x="15573" y="-2780.4584" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="15573" y="-2766.4584" font-family="Times,serif" font-size="14.00" fill="#000000">parts = NotSupported() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15573" y="-2752.4584" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;always&gt;</text>
 </g>
 <!-- bb98_0&#45;&gt;bb98_3 -->
 <g id="edge91" class="edge">
 <title>bb98_0&#45;&gt;bb98_3</title>
-<path fill="none" stroke="#000000" d="M15614.1644,-3171.5391C15638.4433,-3060.7307 15674.677,-2895.3601 15692.0328,-2816.1487"/>
-<polygon fill="#000000" stroke="#000000" points="15695.5321,-2816.5306 15694.2535,-2806.0132 15688.6943,-2815.0324 15695.5321,-2816.5306"/>
+<path fill="none" stroke="#000000" d="M15485.1644,-3171.5391C15509.4433,-3060.7307 15545.677,-2895.3601 15563.0328,-2816.1487"/>
+<polygon fill="#000000" stroke="#000000" points="15566.5321,-2816.5306 15565.2535,-2806.0132 15559.6943,-2815.0324 15566.5321,-2816.5306"/>
 </g>
 <!-- bb98_1 -->
 <g id="node77" class="node">
 <title>bb98_1</title>
-<polygon fill="none" stroke="#000000" points="15655.3844,-1706.6501 15551.3724,-1706.6501 15524.6156,-1634.6501 15628.6276,-1634.6501 15655.3844,-1706.6501"/>
-<text text-anchor="middle" x="15590" y="-1673.4501" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="15590" y="-1659.4501" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
+<polygon fill="none" stroke="#000000" points="15526.3844,-1706.6501 15422.3724,-1706.6501 15395.6156,-1634.6501 15499.6276,-1634.6501 15526.3844,-1706.6501"/>
+<text text-anchor="middle" x="15461" y="-1673.4501" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="15461" y="-1659.4501" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
 </g>
 <!-- bb98_1&#45;&gt;bb98_1 -->
 <g id="edge92" class="edge">
 <title>bb98_1&#45;&gt;bb98_1</title>
-<path fill="none" stroke="#000000" d="M15653.1203,-1700.1774C15664.8976,-1696.5413 15673.1919,-1686.6989 15673.1919,-1670.6501 15673.1919,-1649.586 15658.9037,-1639.2134 15641.2056,-1639.5322"/>
-<polygon fill="#000000" stroke="#000000" points="15640.5743,-1636.084 15631.0916,-1640.8093 15641.4513,-1643.0289 15640.5743,-1636.084"/>
+<path fill="none" stroke="#000000" d="M15524.1203,-1700.1774C15535.8976,-1696.5413 15544.1919,-1686.6989 15544.1919,-1670.6501 15544.1919,-1649.586 15529.9037,-1639.2134 15512.2056,-1639.5322"/>
+<polygon fill="#000000" stroke="#000000" points="15511.5743,-1636.084 15502.0916,-1640.8093 15512.4513,-1643.0289 15511.5743,-1636.084"/>
 </g>
 <!-- bb98_4 -->
 <g id="node80" class="node">
 <title>bb98_4</title>
-<ellipse fill="none" stroke="#000000" cx="15590" cy="-2347.1639" rx="146.0726" ry="35.2113"/>
-<text text-anchor="middle" x="15590" y="-2356.9639" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, statTmp$297)</text>
-<text text-anchor="middle" x="15590" y="-2342.9639" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$297 = parts : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-2328.9639" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;always&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15461" cy="-2347.1639" rx="146.0726" ry="35.2113"/>
+<text text-anchor="middle" x="15461" y="-2356.9639" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, statTmp$297)</text>
+<text text-anchor="middle" x="15461" y="-2342.9639" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$297 = parts : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-2328.9639" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;always&gt;</text>
 </g>
 <!-- bb98_2&#45;&gt;bb98_4 -->
 <g id="edge93" class="edge">
 <title>bb98_2&#45;&gt;bb98_4</title>
-<path fill="none" stroke="#000000" d="M15484.7178,-2745.1889C15495.6606,-2703.7068 15518.0205,-2618.9712 15537,-2547.2127 15551.0589,-2494.058 15567.2486,-2432.9676 15577.9977,-2392.4232"/>
-<polygon fill="#000000" stroke="#000000" points="15581.429,-2393.1384 15580.6087,-2382.5754 15574.6628,-2391.3444 15581.429,-2393.1384"/>
+<path fill="none" stroke="#000000" d="M15355.7178,-2745.1889C15366.6606,-2703.7068 15389.0205,-2618.9712 15408,-2547.2127 15422.0589,-2494.058 15438.2486,-2432.9676 15448.9977,-2392.4232"/>
+<polygon fill="#000000" stroke="#000000" points="15452.429,-2393.1384 15451.6087,-2382.5754 15445.6628,-2391.3444 15452.429,-2393.1384"/>
 </g>
 <!-- bb98_3&#45;&gt;bb98_4 -->
 <g id="edge94" class="edge">
 <title>bb98_3&#45;&gt;bb98_4</title>
-<path fill="none" stroke="#000000" d="M15692.6436,-2735.2799C15672.3848,-2658.6774 15624.4805,-2477.5415 15602.0182,-2392.607"/>
-<polygon fill="#000000" stroke="#000000" points="15605.3491,-2391.5123 15599.4086,-2382.7396 15598.5817,-2393.3021 15605.3491,-2391.5123"/>
+<path fill="none" stroke="#000000" d="M15563.6436,-2735.2799C15543.3848,-2658.6774 15495.4805,-2477.5415 15473.0182,-2392.607"/>
+<polygon fill="#000000" stroke="#000000" points="15476.3491,-2391.5123 15470.4086,-2382.7396 15469.5817,-2393.3021 15476.3491,-2391.5123"/>
 </g>
 <!-- bb98_5 -->
 <g id="node81" class="node">
 <title>bb98_5</title>
-<ellipse fill="none" stroke="#000000" cx="15590" cy="-2101.8603" rx="481.3861" ry="35.2113"/>
-<text text-anchor="middle" x="15590" y="-2111.6603" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, lines, a_name, b_name, added_lines, removed_lines, line, statTmp$297, statTmp$306, ifTmp$319, ifTmp$331)</text>
-<text text-anchor="middle" x="15590" y="-2097.6603" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="15590" y="-2083.6603" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15461" cy="-2101.8603" rx="481.3861" ry="35.2113"/>
+<text text-anchor="middle" x="15461" y="-2111.6603" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, lines, a_name, b_name, added_lines, removed_lines, line, statTmp$297, statTmp$306, ifTmp$319, ifTmp$331)</text>
+<text text-anchor="middle" x="15461" y="-2097.6603" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="15461" y="-2083.6603" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
 <!-- bb98_4&#45;&gt;bb98_5 -->
 <g id="edge95" class="edge">
 <title>bb98_4&#45;&gt;bb98_5</title>
-<path fill="none" stroke="#000000" d="M15590,-2311.7567C15590,-2268.3695 15590,-2194.7835 15590,-2147.272"/>
-<polygon fill="#000000" stroke="#000000" points="15593.5001,-2147.2568 15590,-2137.2569 15586.5001,-2147.2569 15593.5001,-2147.2568"/>
+<path fill="none" stroke="#000000" d="M15461,-2311.7567C15461,-2268.3695 15461,-2194.7835 15461,-2147.272"/>
+<polygon fill="#000000" stroke="#000000" points="15464.5001,-2147.2568 15461,-2137.2569 15457.5001,-2147.2569 15464.5001,-2147.2568"/>
 </g>
 <!-- bb98_7 -->
 <g id="node82" class="node">
 <title>bb98_7</title>
-<ellipse fill="none" stroke="#000000" cx="16376" cy="-1886.2552" rx="481.3861" ry="134.2007"/>
-<text text-anchor="middle" x="16376" y="-1966.0552" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, lines, a_name, b_name, added_lines, removed_lines, line, statTmp$297, statTmp$306, ifTmp$319, ifTmp$331)</text>
-<text text-anchor="middle" x="16376" y="-1952.0552" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="16376" y="-1938.0552" font-family="Times,serif" font-size="14.00" fill="#000000">part = load_arg(statTmp$297#map, 0) : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="16376" y="-1924.0552" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$301 = </text>
-<text text-anchor="middle" x="16376" y="-1910.0552" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;</text>
-<text text-anchor="middle" x="16376" y="-1896.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
-<text text-anchor="middle" x="16376" y="-1882.0552" font-family="Times,serif" font-size="14.00" fill="#000000">lines = part.split(statTmp$301) : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="16376" y="-1868.0552" font-family="Times,serif" font-size="14.00" fill="#000000">b_name = NotSupported() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="16376" y="-1854.0552" font-family="Times,serif" font-size="14.00" fill="#000000">a_name = b_name : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="16376" y="-1840.0552" font-family="Times,serif" font-size="14.00" fill="#000000">added_lines = NotSupported() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="16376" y="-1826.0552" font-family="Times,serif" font-size="14.00" fill="#000000">removed_lines = NotSupported() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="16376" y="-1812.0552" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$306 = lines : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="16376" y="-1798.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;always&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="16316" cy="-1886.2552" rx="481.3861" ry="134.2007"/>
+<text text-anchor="middle" x="16316" y="-1966.0552" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, lines, a_name, b_name, added_lines, removed_lines, line, statTmp$297, statTmp$306, ifTmp$319, ifTmp$331)</text>
+<text text-anchor="middle" x="16316" y="-1952.0552" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="16316" y="-1938.0552" font-family="Times,serif" font-size="14.00" fill="#000000">part = load_arg(statTmp$297#map, 0) : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="16316" y="-1924.0552" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$301 = </text>
+<text text-anchor="middle" x="16316" y="-1910.0552" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;</text>
+<text text-anchor="middle" x="16316" y="-1896.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
+<text text-anchor="middle" x="16316" y="-1882.0552" font-family="Times,serif" font-size="14.00" fill="#000000">lines = part.split(statTmp$301) : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="16316" y="-1868.0552" font-family="Times,serif" font-size="14.00" fill="#000000">b_name = NotSupported() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="16316" y="-1854.0552" font-family="Times,serif" font-size="14.00" fill="#000000">a_name = b_name : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="16316" y="-1840.0552" font-family="Times,serif" font-size="14.00" fill="#000000">added_lines = NotSupported() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="16316" y="-1826.0552" font-family="Times,serif" font-size="14.00" fill="#000000">removed_lines = NotSupported() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="16316" y="-1812.0552" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$306 = lines : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="16316" y="-1798.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;always&gt;</text>
 </g>
 <!-- bb98_5&#45;&gt;bb98_7 -->
 <g id="edge96" class="edge">
 <title>bb98_5&#45;&gt;bb98_7</title>
-<path fill="none" stroke="#000000" d="M15714.544,-2067.697C15797.9519,-2044.8177 15912.2625,-2013.4615 16022.4032,-1983.2492"/>
-<polygon fill="#000000" stroke="#000000" points="16023.6455,-1986.5378 16032.3634,-1980.5171 16021.7937,-1979.7872 16023.6455,-1986.5378"/>
+<path fill="none" stroke="#000000" d="M15596.0055,-2067.816C15691.1703,-2043.8183 15823.4858,-2010.4524 15948.7572,-1978.8627"/>
+<polygon fill="#000000" stroke="#000000" points="15949.6922,-1982.2366 15958.5329,-1976.3976 15947.9806,-1975.4491 15949.6922,-1982.2366"/>
 </g>
 <!-- bb98_6 -->
 <g id="node83" class="node">
 <title>bb98_6</title>
-<ellipse fill="none" stroke="#000000" cx="15590" cy="-1886.2552" rx="211.0972" ry="55.3091"/>
-<text text-anchor="middle" x="15590" y="-1910.0552" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="15590" y="-1896.0552" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$296 = parts.map() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-1882.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$287 = statTmp$296.compact() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="15590" y="-1868.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$354 = return &lt;ret&gt;$287 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="15590" y="-1854.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15461" cy="-1886.2552" rx="211.0972" ry="55.3091"/>
+<text text-anchor="middle" x="15461" y="-1910.0552" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="15461" y="-1896.0552" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$296 = parts.map() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-1882.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$287 = statTmp$296.compact() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="15461" y="-1868.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$354 = return &lt;ret&gt;$287 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="15461" y="-1854.0552" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
 </g>
 <!-- bb98_5&#45;&gt;bb98_6 -->
 <g id="edge97" class="edge">
 <title>bb98_5&#45;&gt;bb98_6</title>
-<path fill="none" stroke="#000000" d="M15590,-2066.2575C15590,-2035.3181 15590,-1989.6943 15590,-1952.1219"/>
-<polygon fill="#000000" stroke="#000000" points="15593.5001,-1951.7569 15590,-1941.757 15586.5001,-1951.757 15593.5001,-1951.7569"/>
+<path fill="none" stroke="#000000" d="M15461,-2066.2575C15461,-2035.3181 15461,-1989.6943 15461,-1952.1219"/>
+<polygon fill="#000000" stroke="#000000" points="15464.5001,-1951.7569 15461,-1941.757 15457.5001,-1951.757 15464.5001,-1951.7569"/>
 </g>
 <!-- bb98_8 -->
 <g id="node84" class="node">
@@ -1545,14 +1545,14 @@
 <!-- bb98_7&#45;&gt;bb98_8 -->
 <g id="edge99" class="edge">
 <title>bb98_7&#45;&gt;bb98_8</title>
-<path fill="none" stroke="#000000" d="M16460.843,-1753.7002C16469.7089,-1739.8485 16478.2059,-1726.5732 16485.7046,-1714.8576"/>
-<polygon fill="#000000" stroke="#000000" points="16488.7908,-1716.5282 16491.2339,-1706.2189 16482.895,-1712.7546 16488.7908,-1716.5282"/>
+<path fill="none" stroke="#000000" d="M16435.7452,-1755.8629C16449.6385,-1740.7343 16462.9611,-1726.2271 16474.551,-1713.6067"/>
+<polygon fill="#000000" stroke="#000000" points="16477.3469,-1715.7367 16481.533,-1706.0039 16472.1911,-1711.0019 16477.3469,-1715.7367"/>
 </g>
 <!-- bb98_6&#45;&gt;bb98_1 -->
 <g id="edge98" class="edge">
 <title>bb98_6&#45;&gt;bb98_1</title>
-<path fill="none" stroke="#000000" d="M15590,-1831.0115C15590,-1795.7731 15590,-1750.6147 15590,-1717.2035"/>
-<polygon fill="#000000" stroke="#000000" points="15593.5001,-1716.7959 15590,-1706.7959 15586.5001,-1716.7959 15593.5001,-1716.7959"/>
+<path fill="none" stroke="#000000" d="M15461,-1831.0115C15461,-1795.7731 15461,-1750.6147 15461,-1717.2035"/>
+<polygon fill="#000000" stroke="#000000" points="15464.5001,-1716.7959 15461,-1706.7959 15457.5001,-1716.7959 15464.5001,-1716.7959"/>
 </g>
 <!-- bb98_10 -->
 <g id="node85" class="node">
@@ -2117,9 +2117,9 @@
 <!-- bb98_40&#45;&gt;bb98_5 -->
 <g id="edge143" class="edge">
 <title>bb98_40&#45;&gt;bb98_5</title>
-<path fill="none" stroke="#000000" d="M14967.3075,-1206.5253C14888.3235,-1221.7043 14818.6912,-1243.2068 14793,-1273.381 14726.3344,-1351.6793 14783,-1401.7079 14783,-1504.5424 14783,-1670.6501 14783,-1670.6501 14783,-1670.6501 14783,-1920.0381 15086.5046,-2025.7197 15321.2582,-2070.1619"/>
-<polygon fill="#000000" stroke="#000000" points="15320.8582,-2073.6475 15331.3303,-2072.0392 15322.1409,-2066.766 15320.8582,-2073.6475"/>
+<path fill="none" stroke="#000000" d="M14967.3075,-1206.5253C14888.3235,-1221.7043 14818.6912,-1243.2068 14793,-1273.381 14726.3344,-1351.6793 14783,-1401.7079 14783,-1504.5424 14783,-1670.6501 14783,-1670.6501 14783,-1670.6501 14783,-1904.1471 15072.852,-2016.6503 15273.5207,-2066.5591"/>
+<polygon fill="#000000" stroke="#000000" points="15272.7604,-2069.9763 15283.3064,-2068.9611 15274.4291,-2063.1781 15272.7604,-2069.9763"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 095596985198ea5ca8a3b806707478196a60c75f0bea2d904b86abf4beef4e35 -->
+<!-- ruby-types:sha256: ec678beb4ac63cca4fac9bab10c13731190981c0ce38f017ec47b3c3c682eaf8 -->

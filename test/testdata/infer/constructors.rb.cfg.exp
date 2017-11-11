@@ -29,7 +29,7 @@ subgraph "cluster_::Bar#foo" {
     bb36_0 [shape = invhouse];
     bb36_1 [shape = parallelogram];
 
-    bb36_0 [label = "()\nFoo2$14 = alias Foo2 : <singleton class:Foo2>\nFoo3$17 = alias Foo3 : <singleton class:Foo3>\nFoo1$11 = alias Foo1 : <singleton class:Foo1>\nstatTmp$9 = Foo1$11.new() : Foo1\nstatTmp$15 = 1 : Integer(1)\nstatTmp$12 = Foo2$14.new(statTmp$15) : <dynamic>\nstatTmp$18 = 1 : Integer(1)\nstatTmp$19 = 2 : Integer(2)\n<ret>$7 = Foo3$17.new(statTmp$18, statTmp$19) : Foo3\n<ret>$20 = return <ret>$7 : <bottom>\n<never>"];
+    bb36_0 [label = "()\nFoo1$11 = alias Foo1 : <singleton class:Foo1>\nFoo2$14 = alias Foo2 : <singleton class:Foo2>\nFoo3$17 = alias Foo3 : <singleton class:Foo3>\nstatTmp$9 = Foo1$11.new() : Foo1\nstatTmp$15 = 1 : Integer(1)\nstatTmp$12 = Foo2$14.new(statTmp$15) : <dynamic>\nstatTmp$18 = 1 : Integer(1)\nstatTmp$19 = 2 : Integer(2)\n<ret>$7 = Foo3$17.new(statTmp$18, statTmp$19) : Foo3\n<ret>$20 = return <ret>$7 : <bottom>\n<never>"];
     bb36_0 -> bb36_1;
     bb36_1 [label = "()\n<never>"];
     bb36_1 -> bb36_1;
