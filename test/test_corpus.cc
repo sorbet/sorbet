@@ -93,6 +93,7 @@ unordered_set<string> knownPasses = {
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) {
+    vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
     SCOPED_TRACE(inputPath);
@@ -112,6 +113,11 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     // Parser
     auto src = ruby_typer::File::read(inputPath.c_str());
     auto ast = ruby_typer::parser::Parser::run(gs, inputPath, src);
+    {
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
+    }
 
     auto expectation = test.expectations.find("parse-tree");
     if (expectation != test.expectations.end()) {
@@ -124,6 +130,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == ast->toString(gs) + "\n") {
             TEST_COUT << "parse-tree OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     // Desugarer
@@ -139,6 +148,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == desugared->toString(gs) + "\n") {
             TEST_COUT << "ast OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     expectation = test.expectations.find("ast-raw");
@@ -151,6 +163,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == desugared->showRaw(gs) + "\n") {
             TEST_COUT << "ast-raw OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     // Namer
@@ -166,6 +181,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == gs.toString() + "\n") {
             TEST_COUT << "name-table OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     expectation = test.expectations.find("name-tree");
@@ -178,6 +196,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == namedTree->toString(gs) + "\n") {
             TEST_COUT << "name-tree OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     expectation = test.expectations.find("name-tree-raw");
@@ -190,6 +211,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         if (exp == namedTree->showRaw(gs) + "\n") {
             TEST_COUT << "name-tree-raw OK" << endl;
         }
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     // CFG
@@ -216,81 +240,81 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
         ifstream svgFile(checker + ".svg");
         EXPECT_TRUE(svgFile.good());
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
     }
 
     // Check warnings and errors
-    auto errors = gs.errors.getAndEmptyErrors();
-    if (errors.size() > 0) {
-        map<int, string> expectedErrors;
-        string line;
-        stringstream ss(src);
-        int linenum = 1;
-        regex errorRegex("# error: ?(.*)");
 
-        while (getline(ss, line, '\n')) {
-            smatch matches;
-            if (regex_search(line, matches, errorRegex)) {
-                expectedErrors[linenum] = matches[1].str();
+    map<int, string> expectedErrors;
+    string line;
+    stringstream ss(src);
+    int linenum = 1;
+    regex errorRegex("# error: ?(.*)");
+
+    while (getline(ss, line, '\n')) {
+        smatch matches;
+        if (regex_search(line, matches, errorRegex)) {
+            expectedErrors[linenum] = matches[1].str();
+        }
+        linenum += 1;
+    }
+
+    set<int> seenErrorLines;
+    int unknownLocErrorLine = 1;
+    for (int i = 0; i < errors.size(); i++) {
+        auto &error = errors[i];
+        if (error->loc.is_none()) {
+            // The convention is to put `error: Unknown Location Error` at
+            // the top of the file for each of these so that they are eaten
+            // first when reporting mismatched errors.
+            int line = unknownLocErrorLine++;
+            auto expectedError = expectedErrors.find(line);
+            if (expectedError == expectedErrors.end()) {
+                ADD_FAILURE() << "Unknown location error thrown but not annotated. You should put a `error:` on line "
+                              << line;
+            } else if (error->formatted.find(expectedError->second) == string::npos) {
+                ADD_FAILURE() << "Error string mismatch on line " << line << ". Expected to find '"
+                              << expectedError->second << "' inside of '" << error->formatted << "'";
+            } else {
+                seenErrorLines.insert(line);
             }
-            linenum += 1;
+            continue;
         }
 
-        set<int> seenErrorLines;
-        int unknownLocErrorLine = 1;
-        for (int i = 0; i < errors.size(); i++) {
-            auto &error = errors[i];
-            if (error->loc.is_none()) {
-                // The convention is to put `error: Unknown Location Error` at
-                // the top of the file for each of these so that they are eaten
-                // first when reporting mismatched errors.
-                int line = unknownLocErrorLine++;
-                auto expectedError = expectedErrors.find(line);
-                if (expectedError == expectedErrors.end()) {
-                    ADD_FAILURE()
-                        << "Unknown location error thrown but not annotated. You should put a `error:` on line "
-                        << line;
-                } else if (error->formatted.find(expectedError->second) == string::npos) {
-                    ADD_FAILURE() << "Error string mismatch on line " << line << ". Expected to find '"
+        auto pos = error->loc.position(gs);
+        bool found = false;
+        for (int i = pos.first.line; i <= pos.second.line; i++) {
+            auto expectedError = expectedErrors.find(i);
+            if (expectedError != expectedErrors.end()) {
+                bool isMultipleErrors =
+                    expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
+                if (expectedError->second.empty()) {
+                    ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line " << i
+                                  << ". It should match a substring of '" << error->formatted << "'";
+                } else if (error->formatted.find(expectedError->second) == string::npos && !isMultipleErrors) {
+                    ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
                                   << expectedError->second << "' inside of '" << error->formatted << "'";
                 } else {
-                    seenErrorLines.insert(line);
-                }
-                continue;
-            }
-
-            auto pos = error->loc.position(gs);
-            bool found = false;
-            for (int i = pos.first.line; i <= pos.second.line; i++) {
-                auto expectedError = expectedErrors.find(i);
-                if (expectedError != expectedErrors.end()) {
-                    bool isMultipleErrors =
-                        expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
-                    if (expectedError->second.empty()) {
-                        ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line "
-                                      << i << ". It should match a substring of '" << error->formatted << "'";
-                    } else if (error->formatted.find(expectedError->second) == string::npos && !isMultipleErrors) {
-                        ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
-                                      << expectedError->second << "' inside of '" << error->formatted << "'";
-                    } else {
-                        found = true;
-                        seenErrorLines.insert(i);
-                        continue;
-                    }
+                    found = true;
+                    seenErrorLines.insert(i);
+                    continue;
                 }
             }
-            if (!found) {
-                ADD_FAILURE() << "Unexpected error:\n " << error->toString(gs);
-            }
         }
-
-        for (auto &error : expectedErrors) {
-            if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
-                ADD_FAILURE() << "Expected error didn't happen on line " << error.first;
-            }
+        if (!found) {
+            ADD_FAILURE() << "Unexpected error:\n " << error->toString(gs);
         }
-
-        TEST_COUT << "errors OK" << endl;
     }
+
+    for (auto &error : expectedErrors) {
+        if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
+            ADD_FAILURE() << "Expected error didn't happen on line " << error.first;
+        }
+    }
+
+    TEST_COUT << "errors OK" << endl;
 }
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs()), prettyPrintTest);

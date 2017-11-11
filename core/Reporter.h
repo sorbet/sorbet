@@ -36,7 +36,7 @@ enum class ErrorClass {
 class Reporter {
     friend GlobalState;
 
-private:
+public:
     struct BasicError {
         Loc loc;
         ErrorClass what;

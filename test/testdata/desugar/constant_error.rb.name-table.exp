@@ -1,0 +1,4 @@
+class Foo (Object)
+  static-field BAR -> <dynamic>
+class Opus ()
+
