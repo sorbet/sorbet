@@ -53,7 +53,7 @@ subgraph "cluster_::HasLoops#correct_assignment" {
     bb31_2 -> bb31_3;
     bb31_2 -> bb31_4;
 
-    bb31_3 [label = "(a)\nouterLoops: 1\na = a : <dynamic>\n<always>"];
+    bb31_3 [label = "(a)\nouterLoops: 1\na = a : String(\"a\")\n<always>"];
     bb31_3 -> bb31_2;
     bb31_4 [label = "()\n<ret>$11 = nil : NilClass\n<ret>$16 = return <ret>$11 : <bottom>\n<never>"];
     bb31_4 -> bb31_1;

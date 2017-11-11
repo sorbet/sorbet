@@ -226,8 +226,8 @@ public:
                 ctx.state.errors.error(bind.loc, core::ErrorClass::PinnedVariableMismatch,
                                        "Changing type of pinned argument, {} is not a subtype of {}",
                                        tp.type->toString(ctx), cur.type->toString(ctx));
+                tp.type = core::Types::dynamic();
             }
-            tp.type = core::Types::dynamic();
             setTypeAndOrigin(bind.bind, tp);
         }
         return tp.type;
