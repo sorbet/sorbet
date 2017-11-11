@@ -347,7 +347,16 @@ public:
     }
 
     unique_ptr<Node> blockarg(const token *amper, const token *name) {
-        return make_unique<Blockarg>(loc_join(tok_loc(amper), tok_loc(name)), gs_.enterNameUTF8(name->string()));
+        Loc loc = tok_loc(amper);
+        NameRef nm;
+
+        if (name != nullptr) {
+            loc = loc_join(loc, tok_loc(name));
+            nm = gs_.enterNameUTF8(name->string());
+        } else {
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand());
+        }
+        return make_unique<Blockarg>(loc, nm);
     }
 
     unique_ptr<Node> call_lambda(const token *lambda) {

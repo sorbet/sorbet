@@ -125,6 +125,9 @@ static UTF8Desc new_DESC{(char *)new_str, (int)strlen(new_str)};
 static const char *destructureArg_str = "<destructure>";
 static UTF8Desc destructureArg_DESC{(char *)destructureArg_str, (int)strlen(destructureArg_str)};
 
+static const char *ampersand_str = "&";
+static UTF8Desc ampersand_DESC{(char *)ampersand_str, (int)strlen(ampersand_str)};
+
 static const char *todo_str = "<todo sym>";
 static UTF8Desc todo_DESC{(char *)todo_str, (int)strlen(todo_str)};
 
@@ -271,6 +274,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef declareVariables_id = enterNameUTF8(declareVariables_DESC);
     NameRef new_id = enterNameUTF8(new_DESC);
     NameRef destructureArg_id = enterNameUTF8(destructureArg_DESC);
+    NameRef ampersand_id = enterNameUTF8(ampersand_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -307,6 +311,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(declareVariables_id == Names::declareVariables()));
     DEBUG_ONLY(Error::check(new_id == Names::new_()));
     DEBUG_ONLY(Error::check(destructureArg_id == Names::destructureArg()));
+    DEBUG_ONLY(Error::check(ampersand_id == Names::ampersand()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
