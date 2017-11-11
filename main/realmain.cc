@@ -151,7 +151,7 @@ int realmain(int argc, char **argv) {
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
     options.add_options()("n,no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options()("t,no-typer", "Do not load type the CFG");
+    options.add_options()("t,no-typer", "Do not type the CFG");
     options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
                           cxxopts::value<vector<string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
