@@ -1,5 +1,6 @@
 #include "inference.h"
 #include "../cfg/CFG.h"
+#include "../core/Symbols.h"
 #include <algorithm> // find
 #include <unordered_map>
 
@@ -20,20 +21,7 @@ public:
             return dynamicTypeAndOrigin;
         }
 
-        if (symbol.info(ctx).isClass()) {
-            core::TypeAndOrigins instanceTypeAndOrigin;
-            core::SymbolRef sym = symbol.info(ctx).singletonClass(ctx);
-            instanceTypeAndOrigin.type = make_shared<core::ClassType>(sym);
-            instanceTypeAndOrigin.origins.push_back(sym.info(ctx).definitionLoc);
-            return instanceTypeAndOrigin;
-        }
-
-        if (symbol.info(ctx).resultType.get() != nullptr) {
-            core::TypeAndOrigins typeAndOrigin;
-            typeAndOrigin.type = symbol.info(ctx).resultType;
-            typeAndOrigin.origins.push_back(symbol.info(ctx).definitionLoc);
-            return typeAndOrigin;
-        }
+        Error::check(symbol.info(ctx).isLocalVariable());
 
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
@@ -78,6 +66,9 @@ public:
                                      vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
         core::TypeAndOrigins result;
         if (core::ClassType *classType = dynamic_cast<core::ClassType *>(recvType.type.get())) {
+            if (classType->symbol == core::GlobalState::defn_dynamic()) {
+                return recvType;
+            }
             core::SymbolRef newSymbol = classType->symbol.info(ctx).findMember(core::Names::new_());
             if (!newSymbol.exists() || newSymbol.info(ctx).owner == core::GlobalState::defn_Basic_Object()) {
                 core::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
@@ -117,8 +108,28 @@ public:
 
     shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount) {
         core::TypeAndOrigins tp;
+        bool noLoopChecking = dynamic_cast<cfg::Alias *>(bind.value.get()) != nullptr;
         typecase(
             bind.value.get(),
+            [&](cfg::Alias *a) {
+                core::SymbolRef symbol = a->what;
+                core::Symbol &info = symbol.info(ctx);
+                if (info.isClass()) {
+                    core::SymbolRef sym = info.singletonClass(ctx);
+                    tp.type = make_shared<core::ClassType>(sym);
+                    tp.origins.push_back(info.definitionLoc);
+                } else if (info.isField() || info.isStaticField()) {
+                    if (info.resultType.get() != nullptr) {
+                        tp.type = info.resultType;
+                        tp.origins.push_back(info.definitionLoc);
+                    } else {
+                        tp.origins.push_back(core::Loc::none(0));
+                        tp.type = core::Types::dynamic();
+                    }
+                } else {
+                    Error::notImplemented();
+                }
+            },
             [&](cfg::Ident *i) {
                 auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                 tp.type = typeAndOrigin.type;
@@ -208,7 +219,7 @@ public:
 
         core::TypeAndOrigins cur = getTypeAndOrigin(ctx, bind.bind);
 
-        if (loopCount == bind.bind.info(ctx).minLoops) {
+        if (noLoopChecking || loopCount == bind.bind.info(ctx).minLoops) {
             setTypeAndOrigin(bind.bind, tp);
         } else {
             if (!core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {

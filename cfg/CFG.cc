@@ -150,14 +150,13 @@ void CFG::fillInBlockArguments(core::Context ctx) {
         if (!what.info(ctx).isLocalVariable())
             continue;
         unordered_set<BasicBlock *> &where = pair.second;
-        int min = INT_MAX;
+        int &min = what.info(ctx).minLoops;
 
         for (BasicBlock *bb : where) {
             if (min > bb->outerLoops) {
                 min = bb->outerLoops;
             }
         }
-        what.info(ctx).minLoops = min;
     }
 
     for (auto &pair : writes) {
@@ -165,15 +164,12 @@ void CFG::fillInBlockArguments(core::Context ctx) {
         if (!what.info(ctx).isLocalVariable())
             continue;
         unordered_set<BasicBlock *> &where = pair.second;
-        int min = INT_MAX;
+        int &min = what.info(ctx).minLoops;
 
         for (BasicBlock *bb : where) {
             if (min > bb->outerLoops) {
                 min = bb->outerLoops;
             }
-        }
-        if (what.info(ctx).minLoops > min) {
-            what.info(ctx).minLoops = min;
         }
     }
 
@@ -377,12 +373,24 @@ unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md) {
         entry->exprs.emplace_back(argSym, argSym.info(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
         i++;
     }
-    auto cont = res->walk(ctx, md.rhs.get(), entry, *res.get(), retSym, 0);
+    std::unordered_map<core::SymbolRef, core::SymbolRef> aliases;
+    auto cont = res->walk(ctx, md.rhs.get(), entry, *res.get(), retSym, 0, aliases);
     core::SymbolRef retSym1 =
         ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
 
     cont->exprs.emplace_back(retSym1, md.loc, make_unique<Return>(retSym)); // dead assign.
     jumpToDead(cont, *res.get());
+
+    std::vector<Binding> aliasesPrefix;
+    for (auto kv : aliases) {
+        core::SymbolRef global = kv.first;
+        core::SymbolRef local = kv.second;
+        local.info(ctx).minLoops = -1;
+        aliasesPrefix.emplace_back(local, md.symbol.info(ctx).definitionLoc, make_unique<Alias>(global));
+    }
+
+    entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
+                        make_move_iterator(aliasesPrefix.end()));
 
     res->fillInTopoSorts(ctx);
     res->dealias(ctx);
@@ -439,11 +447,26 @@ void jumpToDead(BasicBlock *from, CFG &inWhat) {
     }
 }
 
+core::SymbolRef global2Local(core::Context ctx, core::SymbolRef what, CFG &inWhat,
+                             std::unordered_map<core::SymbolRef, core::SymbolRef> &aliases) {
+    core::Symbol &info = what.info(ctx);
+    if (!info.isLocalVariable()) {
+        core::SymbolRef &alias = aliases[what];
+        if (!alias.exists()) {
+            alias = ctx.state.newTemporary(core::UniqueNameKind::CFG, info.name, inWhat.symbol);
+        }
+        return alias;
+    } else {
+        return what;
+    }
+}
+
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
 BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat,
-                      core::SymbolRef target, int loops) {
+                      core::SymbolRef target, int loops,
+                      std::unordered_map<core::SymbolRef, core::SymbolRef> &aliases) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
@@ -458,7 +481,7 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
 
                  core::SymbolRef condSym =
                      ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::whileTemp(), inWhat.symbol);
-                 auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym, loops + 1);
+                 auto headerEnd = walk(ctx, a->cond.get(), headerBlock, inWhat, condSym, loops + 1, aliases);
                  auto bodyBlock = inWhat.freshBlock(loops + 1);
                  auto continueBlock = inWhat.freshBlock(loops);
                  conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, inWhat);
@@ -466,7 +489,7 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
                  core::SymbolRef bodySym =
                      ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), inWhat.symbol);
 
-                 auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym, loops + 1);
+                 auto body = walk(ctx, a->body.get(), bodyBlock, inWhat, bodySym, loops + 1, aliases);
                  unconditionalJump(body, headerBlock, inWhat);
 
                  continueBlock->exprs.emplace_back(target, a->loc, make_unique<Nil>());
@@ -475,7 +498,7 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
              [&](ast::Return *a) {
                  core::SymbolRef retSym =
                      ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnTemp(), inWhat.symbol);
-                 auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym, loops);
+                 auto cont = walk(ctx, a->expr.get(), current, inWhat, retSym, loops, aliases);
                  cont->exprs.emplace_back(target, a->loc, make_unique<Return>(retSym)); // dead assign.
                  jumpToDead(cont, inWhat);
                  ret = deadBlock();
@@ -486,11 +509,11 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
                  Error::check(ifSym.exists());
                  auto thenBlock = inWhat.freshBlock(loops);
                  auto elseBlock = inWhat.freshBlock(loops);
-                 auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym, loops);
+                 auto cont = walk(ctx, a->cond.get(), current, inWhat, ifSym, loops, aliases);
                  conditionalJump(cont, ifSym, thenBlock, elseBlock, inWhat);
 
-                 auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target, loops);
-                 auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target, loops);
+                 auto thenEnd = walk(ctx, a->thenp.get(), thenBlock, inWhat, target, loops, aliases);
+                 auto elseEnd = walk(ctx, a->elsep.get(), elseBlock, inWhat, target, loops, aliases);
                  if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
                      if (thenEnd == deadBlock()) {
                          ret = elseEnd;
@@ -523,7 +546,8 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
              },
              [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
              [&](ast::Ident *a) {
-                 current->exprs.emplace_back(target, a->loc, make_unique<Ident>(a->symbol));
+                 current->exprs.emplace_back(target, a->loc,
+                                             make_unique<Ident>(global2Local(ctx, a->symbol, inWhat, aliases)));
                  ret = current;
              },
              [&](ast::Self *a) {
@@ -534,13 +558,13 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
                  auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
                  core::SymbolRef lhs;
                  if (lhsIdent != nullptr) {
-                     lhs = lhsIdent->symbol;
+                     lhs = global2Local(ctx, lhsIdent->symbol, inWhat, aliases);
                  } else {
                      // TODO(nelhage): Once namer is complete this should be a
                      // fatal error
                      lhs = ctx.state.defn_todo();
                  }
-                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhs, loops);
+                 auto rhsCont = walk(ctx, a->rhs.get(), current, inWhat, lhs, loops, aliases);
                  rhsCont->exprs.emplace_back(target, a->loc, make_unique<Ident>(lhs));
                  ret = rhsCont;
              },
@@ -548,21 +572,21 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
                  for (auto &exp : a->stats) {
                      core::SymbolRef temp =
                          ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), inWhat.symbol);
-                     current = walk(ctx, exp.get(), current, inWhat, temp, loops);
+                     current = walk(ctx, exp.get(), current, inWhat, temp, loops, aliases);
                  }
-                 ret = walk(ctx, a->expr.get(), current, inWhat, target, loops);
+                 ret = walk(ctx, a->expr.get(), current, inWhat, target, loops, aliases);
              },
              [&](ast::Send *s) {
                  core::SymbolRef recv;
 
                  recv = ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), inWhat.symbol);
-                 current = walk(ctx, s->recv.get(), current, inWhat, recv, loops);
+                 current = walk(ctx, s->recv.get(), current, inWhat, recv, loops, aliases);
 
                  vector<core::SymbolRef> args;
                  for (auto &exp : s->args) {
                      core::SymbolRef temp;
                      temp = ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), inWhat.symbol);
-                     current = walk(ctx, exp.get(), current, inWhat, temp, loops);
+                     current = walk(ctx, exp.get(), current, inWhat, temp, loops, aliases);
 
                      args.push_back(temp);
                  }
@@ -590,7 +614,7 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
                      // TODO: handle block arguments somehow??
                      core::SymbolRef blockrv = ctx.state.newTemporary(core::UniqueNameKind::CFG,
                                                                       core::Names::blockReturnTemp(), inWhat.symbol);
-                     auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv, loops + 1);
+                     auto blockLast = walk(ctx, s->block->body.get(), bodyBlock, inWhat, blockrv, loops + 1, aliases);
 
                      unconditionalJump(blockLast, headerBlock, inWhat);
 
@@ -712,8 +736,14 @@ string IntLit::toString(core::Context ctx) {
 
 Ident::Ident(core::SymbolRef what) : what(what) {}
 
+Alias::Alias(core::SymbolRef what) : what(what) {}
+
 string Ident::toString(core::Context ctx) {
     return this->what.info(ctx).name.name(ctx).toString(ctx);
+}
+
+string Alias::toString(core::Context ctx) {
+    return "alias " + this->what.info(ctx).name.name(ctx).toString(ctx);
 }
 
 string Send::toString(core::Context ctx) {
