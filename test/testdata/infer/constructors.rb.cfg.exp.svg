@@ -87,9 +87,9 @@
 <title>bb36_0</title>
 <polygon fill="none" stroke="#000000" points="904.4623,-230.3463 1203,-124.1702 1501.5377,-230.3463 1501.259,-402.1428 904.741,-402.1428 904.4623,-230.3463"/>
 <text text-anchor="middle" x="1203" y="-350.6296" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1203" y="-336.6296" font-family="Times,serif" font-size="14.00" fill="#000000">Foo2$14 = alias Foo2 : &lt;singleton class:Foo2&gt;</text>
-<text text-anchor="middle" x="1203" y="-322.6296" font-family="Times,serif" font-size="14.00" fill="#000000">Foo3$17 = alias Foo3 : &lt;singleton class:Foo3&gt;</text>
-<text text-anchor="middle" x="1203" y="-308.6296" font-family="Times,serif" font-size="14.00" fill="#000000">Foo1$11 = alias Foo1 : &lt;singleton class:Foo1&gt;</text>
+<text text-anchor="middle" x="1203" y="-336.6296" font-family="Times,serif" font-size="14.00" fill="#000000">Foo1$11 = alias Foo1 : &lt;singleton class:Foo1&gt;</text>
+<text text-anchor="middle" x="1203" y="-322.6296" font-family="Times,serif" font-size="14.00" fill="#000000">Foo2$14 = alias Foo2 : &lt;singleton class:Foo2&gt;</text>
+<text text-anchor="middle" x="1203" y="-308.6296" font-family="Times,serif" font-size="14.00" fill="#000000">Foo3$17 = alias Foo3 : &lt;singleton class:Foo3&gt;</text>
 <text text-anchor="middle" x="1203" y="-294.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$9 = Foo1$11.new() : Foo1</text>
 <text text-anchor="middle" x="1203" y="-280.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$15 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="1203" y="-266.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$12 = Foo2$14.new(statTmp$15) : &lt;dynamic&gt;</text>
@@ -120,4 +120,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: f7184ca5053349109a805817d2512639d0d05798aa238e3fc70d1bbb199e0423 -->
+<!-- ruby-types:sha256: aa49bb02825a1a0e5ba30c8fe9f6dd1937dc3ad476d4644aefc998db57475d4d -->

@@ -388,6 +388,8 @@ unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md) {
         local.info(ctx).minLoops = -1;
         aliasesPrefix.emplace_back(local, md.symbol.info(ctx).definitionLoc, make_unique<Alias>(global));
     }
+    std::sort(aliasesPrefix.begin(), aliasesPrefix.end(),
+              [](const Binding &l, const Binding &r) -> bool { return l.bind._id < r.bind._id; });
 
     entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
                         make_move_iterator(aliasesPrefix.end()));
