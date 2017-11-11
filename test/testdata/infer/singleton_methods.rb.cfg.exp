@@ -17,7 +17,7 @@ subgraph "cluster_::Bar#baz" {
     bb30_0 [shape = invhouse];
     bb30_1 [shape = parallelogram];
 
-    bb30_0 [label = "()\n<ret>$4 = Foo.bar() : <dynamic>\n<ret>$7 = return <ret>$4 : <bottom>\n<never>"];
+    bb30_0 [label = "()\nFoo$7 = alias Foo : <singleton class:Foo>\n<ret>$4 = Foo$7.bar() : <dynamic>\n<ret>$8 = return <ret>$4 : <bottom>\n<never>"];
     bb30_0 -> bb30_1;
     bb30_1 [label = "()\n<never>"];
     bb30_1 -> bb30_1;

@@ -30,6 +30,15 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
+class Alias : public Instruction {
+public:
+    core::SymbolRef what;
+
+    Alias(core::SymbolRef what);
+
+    virtual std::string toString(core::Context ctx);
+};
+
 class Send : public Instruction {
 public:
     core::SymbolRef recv;
@@ -225,7 +234,7 @@ public:
 private:
     CFG();
     BasicBlock *walk(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, core::SymbolRef target,
-                     int loops);
+                     int loops, std::unordered_map<core::SymbolRef, core::SymbolRef> &aliases);
     BasicBlock *freshBlock(int outerLoops);
     void fillInTopoSorts(core::Context ctx);
     void dealias(core::Context ctx);
