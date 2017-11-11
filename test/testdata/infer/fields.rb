@@ -5,6 +5,6 @@ class Foo
 
   def foo
     @ivar = 2
-    @ivar = "ss" # error: pinned
+    @ivar = "ss"
   end
 end
