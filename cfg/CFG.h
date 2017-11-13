@@ -190,6 +190,8 @@ public:
     std::string toString(core::Context ctx);
 };
 
+class CFGContext;
+
 class CFG final {
     /**
      * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
@@ -223,9 +225,7 @@ public:
 
 private:
     CFG();
-    BasicBlock *walk(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat,
-                     core::LocalVariable target, int loops,
-                     std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases);
+    BasicBlock *walk(CFGContext ctx);
     BasicBlock *freshBlock(int outerLoops);
     void fillInTopoSorts(core::Context ctx);
     void dealias(core::Context ctx);
@@ -233,6 +233,20 @@ private:
     int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
     int topoSortBwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
 };
+
+class CFGContext {
+public:
+    core::Context ctx;
+    core::Expression *what;
+    BasicBlock *current;
+    CFG &inWhat;
+    core::LocalVariable target;
+    int loops;
+    std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
+
+    CFGContext(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, core::LocalVariable target, int loops, std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases) : ctx(ctx), what(what), current(current), inWhat(inWhat), target(target), loops(loops), aliases(aliases) {};
+};
+
 
 } // namespace cfg
 } // namespace ruby_typer
