@@ -317,6 +317,11 @@ public:
     static inline NameRef lambda() {
         return NameRef(38);
     }
+
+    // nil?
+    static inline NameRef nil_p() {
+        return NameRef(39);
+    }
 };
 
 class Name {

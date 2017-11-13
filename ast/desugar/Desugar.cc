@@ -291,6 +291,29 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             auto send = mkSend(what->loc, rec, a->method, args, flags);
             result.swap(send);
         },
+        [&](parser::CSend *a) {
+            core::NameRef tempRecv =
+                ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp());
+            core::Loc recvLoc = a->receiver->loc;
+
+            // NOTE(nelhage): We actually desugar into a call to `nil?`. If an
+            // object has overridden `nil?`, this technically will not match
+            // Ruby's behavior.
+
+            auto assgn = mkAssign(recvLoc, tempRecv, node2TreeImpl(ctx, a->receiver));
+            auto cond = mkSend0(a->loc, mkLocal(recvLoc, tempRecv), core::Names::nil_p());
+
+            unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
+                a->loc, make_unique<parser::LVar>(recvLoc, tempRecv), a->method, move(a->args));
+            auto send = node2TreeImpl(ctx, sendNode);
+
+            unique_ptr<Expression> nil = make_unique<Nil>(a->loc);
+            auto iff = mkIf(a->loc, cond, nil, send);
+            InsSeq::STATS_store stats;
+            stats.emplace_back(move(assgn));
+            auto res = mkInsSeq(a->loc, stats, move(iff));
+            result.swap(res);
+        },
         [&](parser::Self *a) {
             unique_ptr<Expression> self = make_unique<Self>(what->loc, ctx.state.defn_todo());
             result.swap(self);
