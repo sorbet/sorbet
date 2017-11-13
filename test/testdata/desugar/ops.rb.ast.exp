@@ -1,0 +1,19 @@
+def test_ops<<todo sym>>()
+  begin
+    begin
+      ||$0 = self(<todo sym>).a()
+      if ||$0
+        ||$0
+      else
+        self(<todo sym>).b()
+      end
+    end
+    begin
+      &&$1 = self(<todo sym>).c()
+      if &&$1
+        self(<todo sym>).d()
+      else
+        &&$1
+      end
+    end
+  end
