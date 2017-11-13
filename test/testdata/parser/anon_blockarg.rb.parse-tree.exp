@@ -1,0 +1,11 @@
+DefMethod {
+  name = foo
+  args = Args {
+    args = [
+      Blockarg {
+        name = &$0
+      }
+    ]
+  }
+  body = NULL
+}

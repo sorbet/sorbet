@@ -301,6 +301,11 @@ public:
     static inline NameRef destructureArg() {
         return NameRef(35);
     }
+
+    // &
+    static inline NameRef ampersand() {
+        return NameRef(36);
+    }
 };
 
 class Name {

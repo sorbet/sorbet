@@ -5,6 +5,7 @@
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/diagnostic.hh"
 
+#include <algorithm>
 #include <typeinfo>
 
 using ruby_parser::foreign_ptr;
@@ -54,14 +55,21 @@ string Dedenter::dedent(const string &str) {
 
 class Builder::Impl {
 public:
-    Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {}
+    Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
+        this->max_off_ = file.file(gs).source().to;
+    }
 
     GlobalState &gs_;
     core::FileRef file_;
+    u4 max_off_;
     ruby_parser::base_driver *driver_;
 
+    u4 clamp(u4 off) {
+        return std::min(off, max_off_);
+    }
+
     Loc tok_loc(const token *tok) {
-        return Loc{file_, (u4)tok->start(), (u4)tok->end()};
+        return Loc{file_, clamp((u4)tok->start()), clamp((u4)tok->end())};
     }
 
     Loc maybe_loc(unique_ptr<Node> &node) {
@@ -72,7 +80,7 @@ public:
     }
 
     Loc tok_loc(const token *begin, const token *end) {
-        return Loc{file_, (u4)begin->start(), (u4)end->end()};
+        return Loc{file_, clamp((u4)begin->start()), clamp((u4)end->end())};
     }
 
     Loc loc_join(Loc begin, Loc end) {
@@ -245,7 +253,8 @@ public:
             // TODO: We're losing the source-level information that there was an
             // `else` here.
             ruby_typer::parser::NodeVec stmts;
-            stmts.push_back(move(body));
+            if (body != nullptr)
+                stmts.push_back(move(body));
             stmts.push_back(move(else_));
             body = make_unique<Begin>(collection_loc(stmts), move(stmts));
         }
@@ -338,7 +347,16 @@ public:
     }
 
     unique_ptr<Node> blockarg(const token *amper, const token *name) {
-        return make_unique<Blockarg>(loc_join(tok_loc(amper), tok_loc(name)), gs_.enterNameUTF8(name->string()));
+        Loc loc = tok_loc(amper);
+        NameRef nm;
+
+        if (name != nullptr) {
+            loc = loc_join(loc, tok_loc(name));
+            nm = gs_.enterNameUTF8(name->string());
+        } else {
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand());
+        }
+        return make_unique<Blockarg>(loc, nm);
     }
 
     unique_ptr<Node> call_lambda(const token *lambda) {
@@ -709,7 +727,9 @@ public:
             return make_unique<Integer>(loc, "-" + i->val);
         if (Float *i = dynamic_cast<Float *>(numeric.get()))
             return make_unique<Float>(loc, "-" + i->val);
-        Error::raise("unexpected numeric type");
+        if (Rational *r = dynamic_cast<Rational *>(numeric.get()))
+            return make_unique<Float>(loc, "-" + r->val);
+        Error::raise("unexpected numeric type: ", numeric->nodeName());
     }
 
     unique_ptr<Node> nil(const token *tok) {
