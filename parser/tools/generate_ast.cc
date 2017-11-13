@@ -116,7 +116,6 @@ NodeDef nodes[] = {
     {"Kwrestarg", vector<FieldDef>({{"name", Name}})},
     // **foo splat
     {"Kwsplat", vector<FieldDef>({{"expr", Node}})},
-    {"Lambda", vector<FieldDef>()},
     {"LineLiteral", vector<FieldDef>()},
     // local variable referense
     {"LVar", vector<FieldDef>({{"name", Name}})},

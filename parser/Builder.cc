@@ -320,8 +320,7 @@ public:
 
         Node &n = *method_call;
         const type_info &ty = typeid(n);
-        if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper) ||
-            ty == typeid(Lambda)) {
+        if (ty == typeid(Send) || ty == typeid(CSend) || ty == typeid(Super) || ty == typeid(ZSuper)) {
             return make_unique<Block>(loc_join(method_call->loc, tok_loc(end)), move(method_call), move(args),
                                       move(body));
         }
@@ -360,7 +359,7 @@ public:
     }
 
     unique_ptr<Node> call_lambda(const token *lambda) {
-        return make_unique<Lambda>(tok_loc(lambda));
+        return make_unique<Send>(tok_loc(lambda), nullptr, core::Names::lambda(), NodeVec());
     }
 
     unique_ptr<Node> call_method(unique_ptr<Node> receiver, const token *dot, const token *selector,

@@ -313,6 +313,10 @@ public:
     static inline NameRef blockCall() {
         return NameRef(37);
     }
+
+    static inline NameRef lambda() {
+        return NameRef(38);
+    }
 };
 
 class Name {
