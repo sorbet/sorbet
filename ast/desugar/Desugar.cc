@@ -189,7 +189,8 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             auto lhs = node2TreeImpl(ctx, a->left);
             if (auto i = dynamic_cast<Reference *>(lhs.get())) {
                 auto cond = cpRef(what->loc, *i);
-                mkIf(what->loc, move(cond), move(lhs), node2TreeImpl(ctx, a->right));
+                auto iff = mkIf(what->loc, move(cond), move(lhs), node2TreeImpl(ctx, a->right));
+                result.swap(iff);
             } else {
                 core::NameRef tempName = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::orOr());
                 auto temp = mkAssign(what->loc, tempName, lhs);
