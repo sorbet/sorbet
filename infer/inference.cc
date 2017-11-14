@@ -1,5 +1,6 @@
 #include "inference.h"
 #include "../cfg/CFG.h"
+#include "../core/Context.h"
 #include "../core/Symbols.h"
 #include <algorithm> // find
 #include <unordered_map>
@@ -43,12 +44,18 @@ public:
         int i = 0;
         for (core::LocalVariable var : vars) {
             auto otherTO = other.getTypeAndOrigin(ctx, var);
-            if (types[i].type.get() != nullptr) {
-                types[i].type = core::Types::lub(ctx, types[i].type, otherTO.type);
+            auto &thisTO = types[i];
+            if (thisTO.type.get() != nullptr) {
+                thisTO.type = core::Types::lub(ctx, thisTO.type, otherTO.type);
             } else {
                 types[i].type = otherTO.type;
             }
-            types[i].origins.insert(types[i].origins.end(), otherTO.origins.begin(), otherTO.origins.end());
+            for (auto origin : otherTO.origins) {
+                if (find(thisTO.origins.begin(), thisTO.origins.end(), origin) == thisTO.origins.end()) {
+                    thisTO.origins.push_back(origin);
+                }
+            }
+
             i++;
         }
     }
