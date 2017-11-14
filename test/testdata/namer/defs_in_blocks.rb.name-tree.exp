@@ -1,0 +1,8 @@
+self(<singleton class:<root>>).foobar() do ||
+  begin
+    def a_method<a_method>()
+      <emptyTree>
+    def self.a_static_method<a_static_method>()
+      <emptyTree>
+  end
+end
