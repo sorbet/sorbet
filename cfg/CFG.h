@@ -23,7 +23,7 @@ public:
     Instruction() = default;
 };
 
-class Ident : public Instruction {
+class Ident final : public Instruction {
 public:
     core::LocalVariable what;
 
@@ -31,7 +31,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class Alias : public Instruction {
+class Alias final : public Instruction {
 public:
     core::SymbolRef what;
 
@@ -40,7 +40,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class Send : public Instruction {
+class Send final : public Instruction {
 public:
     core::LocalVariable recv;
     core::NameRef fun;
@@ -51,7 +51,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class Return : public Instruction {
+class Return final : public Instruction {
 public:
     core::LocalVariable what;
 
@@ -59,16 +59,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class New : public Instruction {
-public:
-    core::LocalVariable klass;
-    std::vector<core::LocalVariable> args;
-
-    New(core::LocalVariable klass, std::vector<core::LocalVariable> &args);
-    virtual std::string toString(core::Context ctx);
-};
-
-class Super : public Instruction {
+class Super final : public Instruction {
 public:
     std::vector<core::LocalVariable> args;
 
@@ -82,7 +73,7 @@ public:
     core::LocalVariable value;
 };
 
-class FloatLit : public Instruction {
+class FloatLit final : public Instruction {
 public:
     float value;
 
@@ -106,7 +97,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class NotSupported : public Instruction {
+class NotSupported final : public Instruction {
 public:
     std::string why;
 
@@ -114,7 +105,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class BoolLit : public Instruction {
+class BoolLit final : public Instruction {
 public:
     bool value;
 
@@ -136,13 +127,13 @@ public:
     HashSplat(core::NameRef arg) : arg(arg){};
 };
 
-class Nil : public Instruction {
+class Nil final : public Instruction {
 public:
     Nil(){};
     virtual std::string toString(core::Context ctx);
 };
 
-class Self : public Instruction {
+class Self final : public Instruction {
 public:
     core::SymbolRef klass;
 
@@ -150,7 +141,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class LoadArg : public Instruction {
+class LoadArg final : public Instruction {
 public:
     core::LocalVariable receiver;
     core::NameRef method;
@@ -163,14 +154,14 @@ public:
 
 class BasicBlock;
 
-class BlockExit {
+class BlockExit final {
 public:
     core::LocalVariable cond;
     BasicBlock *thenb;
     BasicBlock *elseb;
 };
 
-class Binding {
+class Binding final {
 public:
     core::LocalVariable bind;
     core::Loc loc;
@@ -185,7 +176,7 @@ public:
     Binding &operator=(Binding &&) = default;
 };
 
-class BasicBlock {
+class BasicBlock final {
 public:
     std::vector<core::LocalVariable> args;
     int id = 0;
@@ -199,7 +190,7 @@ public:
     std::string toString(core::Context ctx);
 };
 
-class CFG {
+class CFG final {
     /**
      * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
      * because they all have lifetime identical with each other and the CFG.

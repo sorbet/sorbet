@@ -9,7 +9,7 @@ namespace core {
 class GlobalState;
 class File;
 
-class FileRef {
+class FileRef final {
 public:
     FileRef() : _id(-1){};
     FileRef(unsigned int id) : _id(id) {}
@@ -41,7 +41,7 @@ private:
     int _id;
 };
 
-class File {
+class File final {
 public:
     friend class GlobalState;
 

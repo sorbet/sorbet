@@ -13,7 +13,7 @@ namespace parser {
 
 class Node;
 
-class Builder {
+class Builder final {
 public:
     Builder(ruby_typer::core::GlobalState &gs, ruby_typer::core::FileRef file);
     ~Builder();

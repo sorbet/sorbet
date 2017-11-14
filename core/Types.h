@@ -10,7 +10,7 @@ namespace ruby_typer {
 namespace core {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
 class Type;
-class Types {
+class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
     static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
@@ -65,7 +65,7 @@ public:
     static std::shared_ptr<Type> dynamic();
 };
 
-class TypeAndOrigins {
+class TypeAndOrigins final {
 public:
     std::shared_ptr<core::Type> type;
     std::vector<core::Loc> origins; // todo: use tiny vector
@@ -107,7 +107,7 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
 };
 
-class ClassType : public GroundType {
+class ClassType final : public GroundType {
 public:
     core::SymbolRef symbol;
     ClassType(core::SymbolRef symbol);
@@ -120,7 +120,7 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
 };
 
-class OrType : public GroundType {
+class OrType final : public GroundType {
 public:
     std::shared_ptr<Type> left;
     std::shared_ptr<Type> right;
@@ -134,7 +134,7 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
 };
 
-class AndType : public GroundType {
+class AndType final : public GroundType {
 public:
     std::shared_ptr<Type> left;
     std::shared_ptr<Type> right;
@@ -149,7 +149,7 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
 };
 
-class Literal : public ProxyType {
+class Literal final : public ProxyType {
 public:
     int64_t value;
     Literal(int64_t val);
@@ -161,7 +161,7 @@ public:
     virtual std::string typeName();
 };
 
-class HashType : public ProxyType {
+class HashType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<Literal>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
@@ -171,7 +171,7 @@ public:
     virtual std::string typeName();
 };
 
-class ArrayType : public ProxyType {
+class ArrayType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<Type>> elems;
     ArrayType(std::vector<std::shared_ptr<Type>> &elems);

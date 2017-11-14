@@ -229,7 +229,7 @@ string field_type(FieldType arg) {
 }
 
 void emit_node_header(ostream &out, NodeDef &node) {
-    out << "class " << node.name << " : public Node {" << endl;
+    out << "class " << node.name << " final : public Node {" << endl;
     out << "public:" << endl;
 
     // generate constructor

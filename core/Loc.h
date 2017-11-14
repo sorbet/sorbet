@@ -7,7 +7,7 @@ namespace ruby_typer {
 namespace core {
 class GlobalState;
 
-class Loc {
+class Loc final {
 public:
     FileRef file;
     u4 begin_pos, end_pos;

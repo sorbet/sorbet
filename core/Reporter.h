@@ -34,7 +34,7 @@ enum class ErrorClass {
     ReturnTypeMismatch = 7005,
 };
 
-class Reporter {
+class Reporter final {
     friend GlobalState;
 
 public:

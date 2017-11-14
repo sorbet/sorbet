@@ -17,7 +17,7 @@ class Symbol;
 class SymbolRef;
 struct UTF8Desc;
 
-class GlobalState {
+class GlobalState final {
     friend Name;
     friend NameRef;
     friend Symbol;
@@ -193,7 +193,7 @@ private:
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
 
-class Context {
+class Context final {
 public:
     GlobalState &state;
     SymbolRef owner;

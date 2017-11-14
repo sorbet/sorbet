@@ -13,7 +13,7 @@ class Symbol;
 class GlobalState;
 class Type;
 
-class SymbolRef {
+class SymbolRef final {
     friend class GlobalState;
 
 public:
@@ -76,7 +76,7 @@ public:
 
 CheckSize(SymbolRef, 4, 4);
 
-class LocalVariable {
+class LocalVariable final {
 public:
     NameRef name;
     LocalVariable(NameRef name);
@@ -93,7 +93,7 @@ public:
     bool operator!=(const LocalVariable &rhs) const;
 };
 
-class Symbol {
+class Symbol final {
 public:
     Symbol(const Symbol &) = delete;
     Symbol() = default;

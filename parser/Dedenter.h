@@ -4,7 +4,7 @@ namespace ruby_typer {
 namespace parser {
 
 // This is defined in a Dedent.h only for testing, and is not a public API
-class Dedenter {
+class Dedenter final {
 public:
     Dedenter(int level) : dedent_level(level), spaces_to_remove(level) {}
 

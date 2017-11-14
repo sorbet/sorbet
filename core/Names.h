@@ -26,7 +26,7 @@ inline int _NameKind2Id_UNIQUE(NameKind nm) {
     return 2;
 }
 
-class NameRef {
+class NameRef final {
 public:
     friend GlobalState;
     friend Name;
@@ -71,7 +71,7 @@ public:
 
 CheckSize(NameRef, 4, 4);
 
-struct UTF8Desc {
+struct UTF8Desc final {
     const char *from;
     int to;
 
@@ -104,7 +104,7 @@ struct UTF8Desc {
     }
 };
 
-struct RawName {
+struct RawName final {
     UTF8Desc utf8;
 };
 CheckSize(RawName, 16, 8);
@@ -118,7 +118,7 @@ enum UniqueNameKind : u2 {
     Singleton,
 };
 
-struct UniqueName {
+struct UniqueName final {
     NameRef original;
     UniqueNameKind uniqueNameKind;
     u2 num;
@@ -126,7 +126,7 @@ struct UniqueName {
 
 CheckSize(UniqueName, 8, 4)
 
-    class Names {
+    class Names final {
 public:
     static inline NameRef initialize() {
         return NameRef(1);
@@ -324,7 +324,7 @@ public:
     }
 };
 
-class Name {
+class Name final {
 public:
     NameKind kind;
 
