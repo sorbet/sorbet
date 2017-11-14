@@ -341,11 +341,13 @@ void CFG::fillInTopoSorts(core::Context ctx) {
 
     auto &target1 = this->forwardsTopoSort;
     target1.resize(this->basicBlocks.size());
-    this->topoSortFwd(target1, 0, this->entry());
+    int count = this->topoSortFwd(target1, 0, this->entry());
+    Error::check(count == this->basicBlocks.size());
 
     auto &target2 = this->backwardsTopoSort;
     target2.resize(this->basicBlocks.size());
-    this->topoSortBwd(target2, 0, this->deadBlock());
+    count = this->topoSortBwd(target2, 0, this->deadBlock());
+    Error::check(count == this->basicBlocks.size());
     return;
 }
 
@@ -400,7 +402,10 @@ unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md) {
     return res;
 }
 
-BasicBlock *CFG::freshBlock(int outerLoops) {
+BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *from) {
+    if (from != nullptr && from == deadBlock()) {
+        return from;
+    }
     int id = this->basicBlocks.size();
     this->basicBlocks.emplace_back(new BasicBlock());
     BasicBlock *r = this->basicBlocks.back().get();
@@ -410,8 +415,8 @@ BasicBlock *CFG::freshBlock(int outerLoops) {
 }
 
 CFG::CFG() {
-    freshBlock(0); // entry;
-    freshBlock(0); // dead code;
+    freshBlock(0, nullptr); // entry;
+    freshBlock(0, nullptr); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond = core::NameRef(0);
@@ -473,14 +478,14 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
     typecase(
         what,
         [&](ast::While *a) {
-            auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
+            auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current);
             unconditionalJump(current, headerBlock, cctx.inWhat);
 
             core::LocalVariable condSym =
                 cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::whileTemp(), cctx.inWhat.symbol);
             auto headerEnd = walk(cctx.withTarget(condSym).withDeeperLoops(), a->cond.get(), headerBlock);
-            auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
-            auto continueBlock = cctx.inWhat.freshBlock(cctx.loops);
+            auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, headerEnd);
+            auto continueBlock = cctx.inWhat.freshBlock(cctx.loops, headerEnd);
             conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, cctx.inWhat);
             // finishHeader
             core::LocalVariable bodySym =
@@ -504,9 +509,9 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
             core::LocalVariable ifSym =
                 cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::ifTemp(), cctx.inWhat.symbol);
             Error::check(ifSym.exists());
-            auto thenBlock = cctx.inWhat.freshBlock(cctx.loops);
-            auto elseBlock = cctx.inWhat.freshBlock(cctx.loops);
             auto cont = walk(cctx.withTarget(ifSym), a->cond.get(), current);
+            auto thenBlock = cctx.inWhat.freshBlock(cctx.loops, cont);
+            auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, cont);
             conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat);
 
             auto thenEnd = walk(cctx, a->thenp.get(), thenBlock);
@@ -517,7 +522,7 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 } else if (thenEnd == deadBlock()) {
                     ret = thenEnd;
                 } else {
-                    ret = freshBlock(cctx.loops);
+                    ret = freshBlock(cctx.loops, thenEnd); // could be elseEnd
                     unconditionalJump(thenEnd, ret, cctx.inWhat);
                     unconditionalJump(elseEnd, ret, cctx.inWhat);
                 }
@@ -597,9 +602,9 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
             }
 
             if (s->block != nullptr) {
-                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
-                auto postBlock = cctx.inWhat.freshBlock(cctx.loops);
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
+                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current);
+                auto postBlock = cctx.inWhat.freshBlock(cctx.loops, headerBlock);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, headerBlock);
                 core::SymbolRef sym = s->block->symbol;
                 core::Symbol &info = sym.info(cctx.ctx);
 

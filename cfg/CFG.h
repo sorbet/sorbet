@@ -226,7 +226,7 @@ public:
 private:
     CFG();
     BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);
-    BasicBlock *freshBlock(int outerLoops);
+    BasicBlock *freshBlock(int outerLoops, BasicBlock *from);
     void fillInTopoSorts(core::Context ctx);
     void dealias(core::Context ctx);
     void fillInBlockArguments(core::Context ctx);

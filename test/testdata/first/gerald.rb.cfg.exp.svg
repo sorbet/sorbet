@@ -9,6 +9,41 @@
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 3555.7477)">
 <title>gerald.rb</title>
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-3555.7477 22026,-3555.7477 22026,4 -4,4"/>
+<g id="clust12" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#deleted_files</title>
+<polygon fill="none" stroke="#0000ff" points="9175,-1626.6501 9175,-3347.9645 10128,-3347.9645 10128,-1626.6501 9175,-1626.6501"/>
+<text text-anchor="middle" x="9651.5" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#deleted_files</text>
+</g>
+<g id="clust13" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#changed_files</title>
+<polygon fill="none" stroke="#0000ff" points="10136,-1626.6501 10136,-3347.9645 11089,-3347.9645 11089,-1626.6501 10136,-1626.6501"/>
+<text text-anchor="middle" x="10612.5" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_files</text>
+</g>
+<g id="clust14" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#added_lines</title>
+<polygon fill="none" stroke="#0000ff" points="11097,-2038.0613 11097,-3347.9645 12029,-3347.9645 12029,-2038.0613 11097,-2038.0613"/>
+<text text-anchor="middle" x="11563" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#added_lines</text>
+</g>
+<g id="clust15" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#removed_lines</title>
+<polygon fill="none" stroke="#0000ff" points="12037,-2038.0613 12037,-3347.9645 12969,-3347.9645 12969,-2038.0613 12037,-2038.0613"/>
+<text text-anchor="middle" x="12503" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#removed_lines</text>
+</g>
+<g id="clust16" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#changed_lines</title>
+<polygon fill="none" stroke="#0000ff" points="12977,-2706.8594 12977,-3396.9103 13521,-3396.9103 13521,-2706.8594 12977,-2706.8594"/>
+<text text-anchor="middle" x="13249" y="-3381.7103" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_lines</text>
+</g>
+<g id="clust17" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#changed_openapi?</title>
+<polygon fill="none" stroke="#0000ff" points="13529,-2706.8594 13529,-3384.6738 14101,-3384.6738 14101,-2706.8594 13529,-2706.8594"/>
+<text text-anchor="middle" x="13815" y="-3369.4738" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_openapi?</text>
+</g>
+<g id="clust18" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#parse</title>
+<polygon fill="none" stroke="#0000ff" points="14109,-8 14109,-3409.1467 22014,-3409.1467 22014,-8 14109,-8"/>
+<text text-anchor="middle" x="18061.5" y="-3393.9467" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#parse</text>
+</g>
 <g id="clust1" class="cluster">
 <title>cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize</title>
 <polygon fill="none" stroke="#0000ff" points="8,-2706.8594 8,-3384.6738 592,-3384.6738 592,-2706.8594 8,-2706.8594"/>
@@ -63,41 +98,6 @@
 <title>cluster_::Opus::CIBot::Gerald::Diff#added_files</title>
 <polygon fill="none" stroke="#0000ff" points="8224,-1626.6501 8224,-3347.9645 9167,-3347.9645 9167,-1626.6501 8224,-1626.6501"/>
 <text text-anchor="middle" x="8695.5" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#added_files</text>
-</g>
-<g id="clust12" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#deleted_files</title>
-<polygon fill="none" stroke="#0000ff" points="9175,-1626.6501 9175,-3347.9645 10128,-3347.9645 10128,-1626.6501 9175,-1626.6501"/>
-<text text-anchor="middle" x="9651.5" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#deleted_files</text>
-</g>
-<g id="clust13" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#changed_files</title>
-<polygon fill="none" stroke="#0000ff" points="10136,-1626.6501 10136,-3347.9645 11089,-3347.9645 11089,-1626.6501 10136,-1626.6501"/>
-<text text-anchor="middle" x="10612.5" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_files</text>
-</g>
-<g id="clust14" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#added_lines</title>
-<polygon fill="none" stroke="#0000ff" points="11097,-2038.0613 11097,-3347.9645 12029,-3347.9645 12029,-2038.0613 11097,-2038.0613"/>
-<text text-anchor="middle" x="11563" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#added_lines</text>
-</g>
-<g id="clust15" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#removed_lines</title>
-<polygon fill="none" stroke="#0000ff" points="12037,-2038.0613 12037,-3347.9645 12969,-3347.9645 12969,-2038.0613 12037,-2038.0613"/>
-<text text-anchor="middle" x="12503" y="-3332.7645" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#removed_lines</text>
-</g>
-<g id="clust16" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#changed_lines</title>
-<polygon fill="none" stroke="#0000ff" points="12977,-2706.8594 12977,-3396.9103 13521,-3396.9103 13521,-2706.8594 12977,-2706.8594"/>
-<text text-anchor="middle" x="13249" y="-3381.7103" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_lines</text>
-</g>
-<g id="clust17" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#changed_openapi?</title>
-<polygon fill="none" stroke="#0000ff" points="13529,-2706.8594 13529,-3384.6738 14101,-3384.6738 14101,-2706.8594 13529,-2706.8594"/>
-<text text-anchor="middle" x="13815" y="-3369.4738" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_openapi?</text>
-</g>
-<g id="clust18" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#parse</title>
-<polygon fill="none" stroke="#0000ff" points="14109,-8 14109,-3409.1467 22014,-3409.1467 22014,-8 14109,-8"/>
-<text text-anchor="middle" x="18061.5" y="-3393.9467" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#parse</text>
 </g>
 <!-- bb28_0 -->
 <g id="node1" class="node">
@@ -1409,129 +1409,129 @@
 <!-- bb87_0 -->
 <g id="node76" class="node">
 <title>bb87_0</title>
-<polygon fill="none" stroke="#000000" points="14966.9641,-3225.797 15199,-3144.7857 15431.0359,-3225.797 15430.8193,-3356.8762 14967.1807,-3356.8762 14966.9641,-3225.797"/>
-<text text-anchor="middle" x="15199" y="-3313.8264" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="15199" y="-3299.8264" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$1 = self : Diff</text>
-<text text-anchor="middle" x="15199" y="-3285.8264" font-family="Times,serif" font-size="14.00" fill="#000000">diff = load_arg(&lt;self&gt;$1#parse, 0) : untyped</text>
-<text text-anchor="middle" x="15199" y="-3271.8264" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$5 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="15199" y="-3257.8264" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$3 = diff.split(statTmp$5) : untyped</text>
-<text text-anchor="middle" x="15199" y="-3243.8264" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$6 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="15199" y="-3229.8264" font-family="Times,serif" font-size="14.00" fill="#000000">parts = statTmp$3.[](statTmp$6) : untyped</text>
-<text text-anchor="middle" x="15199" y="-3215.8264" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$8 = parts : untyped</text>
-<text text-anchor="middle" x="15199" y="-3201.8264" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$8</text>
+<polygon fill="none" stroke="#000000" points="15012.9641,-3225.797 15245,-3144.7857 15477.0359,-3225.797 15476.8193,-3356.8762 15013.1807,-3356.8762 15012.9641,-3225.797"/>
+<text text-anchor="middle" x="15245" y="-3313.8264" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="15245" y="-3299.8264" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$1 = self : Diff</text>
+<text text-anchor="middle" x="15245" y="-3285.8264" font-family="Times,serif" font-size="14.00" fill="#000000">diff = load_arg(&lt;self&gt;$1#parse, 0) : untyped</text>
+<text text-anchor="middle" x="15245" y="-3271.8264" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$5 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="15245" y="-3257.8264" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$3 = diff.split(statTmp$5) : untyped</text>
+<text text-anchor="middle" x="15245" y="-3243.8264" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$6 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="15245" y="-3229.8264" font-family="Times,serif" font-size="14.00" fill="#000000">parts = statTmp$3.[](statTmp$6) : untyped</text>
+<text text-anchor="middle" x="15245" y="-3215.8264" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$8 = parts : untyped</text>
+<text text-anchor="middle" x="15245" y="-3201.8264" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$8</text>
 </g>
 <!-- bb87_2 -->
 <g id="node78" class="node">
 <title>bb87_2</title>
-<ellipse fill="none" stroke="#000000" cx="15080" cy="-2750.8594" rx="76.8345" ry="25.4118"/>
-<text text-anchor="middle" x="15080" y="-2753.6594" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="15080" y="-2739.6594" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15126" cy="-2750.8594" rx="76.8345" ry="25.4118"/>
+<text text-anchor="middle" x="15126" y="-2753.6594" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="15126" y="-2739.6594" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb87_0&#45;&gt;bb87_2 -->
 <g id="edge90" class="edge">
 <title>bb87_0&#45;&gt;bb87_2</title>
-<path fill="none" stroke="#000000" d="M15173.6904,-3153.3083C15146.7722,-3037.6809 15105.7224,-2861.3504 15088.2916,-2786.4764"/>
-<polygon fill="#000000" stroke="#000000" points="15091.6691,-2785.5475 15085.9928,-2776.6015 15084.8514,-2787.1347 15091.6691,-2785.5475"/>
+<path fill="none" stroke="#000000" d="M15219.6904,-3153.3083C15192.7722,-3037.6809 15151.7224,-2861.3504 15134.2916,-2786.4764"/>
+<polygon fill="#000000" stroke="#000000" points="15137.6691,-2785.5475 15131.9928,-2776.6015 15130.8514,-2787.1347 15137.6691,-2785.5475"/>
 </g>
 <!-- bb87_3 -->
 <g id="node79" class="node">
 <title>bb87_3</title>
-<ellipse fill="none" stroke="#000000" cx="15318" cy="-2750.8594" rx="142.641" ry="35.2113"/>
-<text text-anchor="middle" x="15318" y="-2760.6594" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="15318" y="-2746.6594" font-family="Times,serif" font-size="14.00" fill="#000000">parts = NotSupported() : untyped</text>
-<text text-anchor="middle" x="15318" y="-2732.6594" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15364" cy="-2750.8594" rx="142.641" ry="35.2113"/>
+<text text-anchor="middle" x="15364" y="-2760.6594" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="15364" y="-2746.6594" font-family="Times,serif" font-size="14.00" fill="#000000">parts = NotSupported() : untyped</text>
+<text text-anchor="middle" x="15364" y="-2732.6594" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb87_0&#45;&gt;bb87_3 -->
 <g id="edge91" class="edge">
 <title>bb87_0&#45;&gt;bb87_3</title>
-<path fill="none" stroke="#000000" d="M15224.3096,-3153.3083C15250.1072,-3042.4942 15288.8845,-2875.9257 15307.4115,-2796.3426"/>
-<polygon fill="#000000" stroke="#000000" points="15310.9229,-2796.6954 15309.7815,-2786.1622 15304.1052,-2795.1081 15310.9229,-2796.6954"/>
+<path fill="none" stroke="#000000" d="M15270.3096,-3153.3083C15296.1072,-3042.4942 15334.8845,-2875.9257 15353.4115,-2796.3426"/>
+<polygon fill="#000000" stroke="#000000" points="15356.9229,-2796.6954 15355.7815,-2786.1622 15350.1052,-2795.1081 15356.9229,-2796.6954"/>
 </g>
 <!-- bb87_1 -->
 <g id="node77" class="node">
 <title>bb87_1</title>
-<polygon fill="none" stroke="#000000" points="15311.551,-1706.6501 15132.5076,-1706.6501 15086.449,-1634.6501 15265.4924,-1634.6501 15311.551,-1706.6501"/>
-<text text-anchor="middle" x="15199" y="-1673.4501" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="15199" y="-1659.4501" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="15357.551,-1706.6501 15178.5076,-1706.6501 15132.449,-1634.6501 15311.4924,-1634.6501 15357.551,-1706.6501"/>
+<text text-anchor="middle" x="15245" y="-1673.4501" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="15245" y="-1659.4501" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb87_1&#45;&gt;bb87_1 -->
 <g id="edge92" class="edge">
 <title>bb87_1&#45;&gt;bb87_1</title>
-<path fill="none" stroke="#000000" d="M15306.2352,-1698.0972C15320.3886,-1693.4163 15329.7753,-1684.2673 15329.7753,-1670.6501 15329.7753,-1649.5508 15307.2395,-1639.1788 15279.3544,-1639.5339"/>
-<polygon fill="#000000" stroke="#000000" points="15279.0808,-1636.0437 15269.2961,-1640.1069 15279.479,-1643.0324 15279.0808,-1636.0437"/>
+<path fill="none" stroke="#000000" d="M15352.2352,-1698.0972C15366.3886,-1693.4163 15375.7753,-1684.2673 15375.7753,-1670.6501 15375.7753,-1649.5508 15353.2395,-1639.1788 15325.3544,-1639.5339"/>
+<polygon fill="#000000" stroke="#000000" points="15325.0808,-1636.0437 15315.2961,-1640.1069 15325.479,-1643.0324 15325.0808,-1636.0437"/>
 </g>
 <!-- bb87_4 -->
 <g id="node80" class="node">
 <title>bb87_4</title>
-<ellipse fill="none" stroke="#000000" cx="15199" cy="-2327.3649" rx="127.9519" ry="35.2113"/>
-<text text-anchor="middle" x="15199" y="-2337.1649" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, statTmp$10)</text>
-<text text-anchor="middle" x="15199" y="-2323.1649" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$10 = parts : untyped</text>
-<text text-anchor="middle" x="15199" y="-2309.1649" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15245" cy="-2327.3649" rx="127.9519" ry="35.2113"/>
+<text text-anchor="middle" x="15245" y="-2337.1649" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, statTmp$10)</text>
+<text text-anchor="middle" x="15245" y="-2323.1649" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$10 = parts : untyped</text>
+<text text-anchor="middle" x="15245" y="-2309.1649" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb87_2&#45;&gt;bb87_4 -->
 <g id="edge93" class="edge">
 <title>bb87_2&#45;&gt;bb87_4</title>
-<path fill="none" stroke="#000000" d="M15087.176,-2725.3217C15106.772,-2655.584 15161.3892,-2461.2134 15186.3108,-2372.5228"/>
-<polygon fill="#000000" stroke="#000000" points="15189.7205,-2373.3266 15189.0562,-2362.7526 15182.9815,-2371.4329 15189.7205,-2373.3266"/>
+<path fill="none" stroke="#000000" d="M15133.176,-2725.3217C15152.772,-2655.584 15207.3892,-2461.2134 15232.3108,-2372.5228"/>
+<polygon fill="#000000" stroke="#000000" points="15235.7205,-2373.3266 15235.0562,-2362.7526 15228.9815,-2371.4329 15235.7205,-2373.3266"/>
 </g>
 <!-- bb87_3&#45;&gt;bb87_4 -->
 <g id="edge94" class="edge">
 <title>bb87_3&#45;&gt;bb87_4</title>
-<path fill="none" stroke="#000000" d="M15308.0588,-2715.481C15286.507,-2638.7829 15235.5085,-2457.2906 15211.6802,-2372.4908"/>
-<polygon fill="#000000" stroke="#000000" points="15214.9875,-2371.3225 15208.9127,-2362.6422 15208.2485,-2373.2162 15214.9875,-2371.3225"/>
+<path fill="none" stroke="#000000" d="M15354.0588,-2715.481C15332.507,-2638.7829 15281.5085,-2457.2906 15257.6802,-2372.4908"/>
+<polygon fill="#000000" stroke="#000000" points="15260.9875,-2371.3225 15254.9127,-2362.6422 15254.2485,-2373.2162 15260.9875,-2371.3225"/>
 </g>
 <!-- bb87_5 -->
 <g id="node81" class="node">
 <title>bb87_5</title>
-<ellipse fill="none" stroke="#000000" cx="15199" cy="-2082.0613" rx="775.739" ry="35.2113"/>
-<text text-anchor="middle" x="15199" y="-2091.8613" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
-<text text-anchor="middle" x="15199" y="-2077.8613" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="15199" y="-2063.8613" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15245" cy="-2082.0613" rx="775.739" ry="35.2113"/>
+<text text-anchor="middle" x="15245" y="-2091.8613" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
+<text text-anchor="middle" x="15245" y="-2077.8613" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="15245" y="-2063.8613" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
 <!-- bb87_4&#45;&gt;bb87_5 -->
 <g id="edge95" class="edge">
 <title>bb87_4&#45;&gt;bb87_5</title>
-<path fill="none" stroke="#000000" d="M15199,-2291.9577C15199,-2248.5706 15199,-2174.9845 15199,-2127.473"/>
-<polygon fill="#000000" stroke="#000000" points="15202.5001,-2127.4578 15199,-2117.4579 15195.5001,-2127.4579 15202.5001,-2127.4578"/>
+<path fill="none" stroke="#000000" d="M15245,-2291.9577C15245,-2248.5706 15245,-2174.9845 15245,-2127.473"/>
+<polygon fill="#000000" stroke="#000000" points="15248.5001,-2127.4578 15245,-2117.4579 15241.5001,-2127.4579 15248.5001,-2127.4578"/>
 </g>
 <!-- bb87_7 -->
 <g id="node82" class="node">
 <title>bb87_7</title>
-<ellipse fill="none" stroke="#000000" cx="16328" cy="-1876.3557" rx="775.739" ry="124.4016"/>
-<text text-anchor="middle" x="16328" y="-1949.1557" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
-<text text-anchor="middle" x="16328" y="-1935.1557" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="16328" y="-1921.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: part$26&gt; = load_arg(statTmp$10#map, 0) : untyped</text>
-<text text-anchor="middle" x="16328" y="-1907.1557" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$14 = </text>
-<text text-anchor="middle" x="16328" y="-1893.1557" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;</text>
-<text text-anchor="middle" x="16328" y="-1879.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
-<text text-anchor="middle" x="16328" y="-1865.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: lines&gt; = &lt;block&#45;nested: part$26&gt;.split(statTmp$14) : untyped</text>
-<text text-anchor="middle" x="16328" y="-1851.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="16328" y="-1837.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: added_lines&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="16328" y="-1823.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: removed_lines&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="16328" y="-1809.1557" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$19 = &lt;block&#45;nested: lines&gt; : untyped</text>
-<text text-anchor="middle" x="16328" y="-1795.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="16527" cy="-1876.3557" rx="775.739" ry="124.4016"/>
+<text text-anchor="middle" x="16527" y="-1949.1557" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
+<text text-anchor="middle" x="16527" y="-1935.1557" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="16527" y="-1921.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: part$26&gt; = load_arg(statTmp$10#map, 0) : untyped</text>
+<text text-anchor="middle" x="16527" y="-1907.1557" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$14 = </text>
+<text text-anchor="middle" x="16527" y="-1893.1557" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;</text>
+<text text-anchor="middle" x="16527" y="-1879.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
+<text text-anchor="middle" x="16527" y="-1865.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: lines&gt; = &lt;block&#45;nested: part$26&gt;.split(statTmp$14) : untyped</text>
+<text text-anchor="middle" x="16527" y="-1851.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="16527" y="-1837.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: added_lines&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="16527" y="-1823.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: removed_lines&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="16527" y="-1809.1557" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$19 = &lt;block&#45;nested: lines&gt; : untyped</text>
+<text text-anchor="middle" x="16527" y="-1795.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb87_5&#45;&gt;bb87_7 -->
 <g id="edge96" class="edge">
 <title>bb87_5&#45;&gt;bb87_7</title>
-<path fill="none" stroke="#000000" d="M15387.3336,-2047.7466C15502.4398,-2026.7741 15655.8418,-1998.824 15805.3127,-1971.5902"/>
-<polygon fill="#000000" stroke="#000000" points="15805.9413,-1975.0333 15815.1519,-1969.7974 15804.6865,-1968.1467 15805.9413,-1975.0333"/>
+<path fill="none" stroke="#000000" d="M15457.0557,-2048.0355C15596.9368,-2025.5907 15787.1846,-1995.0641 15968.4813,-1965.9738"/>
+<polygon fill="#000000" stroke="#000000" points="15969.1596,-1969.4099 15978.4787,-1964.3697 15968.0505,-1962.4983 15969.1596,-1969.4099"/>
 </g>
 <!-- bb87_6 -->
 <g id="node83" class="node">
 <title>bb87_6</title>
-<ellipse fill="none" stroke="#000000" cx="15199" cy="-1876.3557" rx="182.6779" ry="55.3091"/>
-<text text-anchor="middle" x="15199" y="-1900.1557" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="15199" y="-1886.1557" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$9 = parts.map() : untyped</text>
-<text text-anchor="middle" x="15199" y="-1872.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$47 = statTmp$9.compact() : untyped</text>
-<text text-anchor="middle" x="15199" y="-1858.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$67 = return &lt;ret&gt;$47 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="15199" y="-1844.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="15245" cy="-1876.3557" rx="182.6779" ry="55.3091"/>
+<text text-anchor="middle" x="15245" y="-1900.1557" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="15245" y="-1886.1557" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$9 = parts.map() : untyped</text>
+<text text-anchor="middle" x="15245" y="-1872.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$47 = statTmp$9.compact() : untyped</text>
+<text text-anchor="middle" x="15245" y="-1858.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$67 = return &lt;ret&gt;$47 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="15245" y="-1844.1557" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb87_5&#45;&gt;bb87_6 -->
 <g id="edge97" class="edge">
 <title>bb87_5&#45;&gt;bb87_6</title>
-<path fill="none" stroke="#000000" d="M15199,-2046.6993C15199,-2017.9477 15199,-1976.5984 15199,-1941.8393"/>
-<polygon fill="#000000" stroke="#000000" points="15202.5001,-1941.7569 15199,-1931.7569 15195.5001,-1941.757 15202.5001,-1941.7569"/>
+<path fill="none" stroke="#000000" d="M15245,-2046.6993C15245,-2017.9477 15245,-1976.5984 15245,-1941.8393"/>
+<polygon fill="#000000" stroke="#000000" points="15248.5001,-1941.7569 15245,-1931.7569 15241.5001,-1941.757 15248.5001,-1941.7569"/>
 </g>
 <!-- bb87_8 -->
 <g id="node84" class="node">
@@ -1544,14 +1544,14 @@
 <!-- bb87_7&#45;&gt;bb87_8 -->
 <g id="edge99" class="edge">
 <title>bb87_7&#45;&gt;bb87_8</title>
-<path fill="none" stroke="#000000" d="M16634.5159,-1761.9237C16685.2412,-1742.9863 16734.546,-1724.5793 16775.4336,-1709.3147"/>
-<polygon fill="#000000" stroke="#000000" points="16776.6876,-1712.5825 16784.8319,-1705.806 16774.2393,-1706.0246 16776.6876,-1712.5825"/>
+<path fill="none" stroke="#000000" d="M16732.5238,-1756.2494C16760.1866,-1740.0836 16786.8477,-1724.503 16809.6675,-1711.1674"/>
+<polygon fill="#000000" stroke="#000000" points="16811.6775,-1714.0466 16818.5453,-1705.9792 16808.1456,-1708.003 16811.6775,-1714.0466"/>
 </g>
 <!-- bb87_6&#45;&gt;bb87_1 -->
 <g id="edge98" class="edge">
 <title>bb87_6&#45;&gt;bb87_1</title>
-<path fill="none" stroke="#000000" d="M15199,-1820.9598C15199,-1788.3516 15199,-1747.5924 15199,-1716.7475"/>
-<polygon fill="#000000" stroke="#000000" points="15202.5001,-1716.6931 15199,-1706.6932 15195.5001,-1716.6932 15202.5001,-1716.6931"/>
+<path fill="none" stroke="#000000" d="M15245,-1820.9598C15245,-1788.3516 15245,-1747.5924 15245,-1716.7475"/>
+<polygon fill="#000000" stroke="#000000" points="15248.5001,-1716.6931 15245,-1706.6932 15241.5001,-1716.6932 15248.5001,-1716.6931"/>
 </g>
 <!-- bb87_10 -->
 <g id="node85" class="node">
@@ -1600,7 +1600,7 @@
 <!-- bb87_10&#45;&gt;bb87_11 -->
 <g id="edge104" class="edge">
 <title>bb87_10&#45;&gt;bb87_11</title>
-<path fill="none" stroke="#000000" d="M17472.3097,-1450.5927C17397.996,-1433.9471 17337.4331,-1412.1722 17307,-1383.6896 17270.2975,-1349.3394 17317.7999,-1308.6709 17282,-1273.381 17028.0335,-1023.0318 16850.6986,-1152.7815 16497,-1107.2733 16162.0485,-1064.1772 16072.6432,-1116.7013 15738,-1071.2733 15186.2286,-996.37 15065.7213,-883.5628 14516,-794.857 14434.8812,-781.7672 14203.2008,-819.7214 14148,-758.857 14128.5032,-737.3599 14149.8718,-472.4209 14158,-462.6417 14213.9549,-395.3214 14406.7846,-347.9868 14583.5471,-317.6571"/>
+<path fill="none" stroke="#000000" d="M17534.124,-1443.3691C17419.565,-1425.3647 17326.7509,-1404.7993 17307,-1383.6896 17264.8617,-1338.6523 17327.0458,-1149.4026 17282,-1107.2733 17250.6674,-1077.9693 15780.577,-1076.5318 15738,-1071.2733 15185.3666,-1003.0196 15065.7213,-883.5628 14516,-794.857 14434.8812,-781.7672 14203.2008,-819.7214 14148,-758.857 14128.5032,-737.3599 14149.8718,-472.4209 14158,-462.6417 14213.9549,-395.3214 14406.7846,-347.9868 14583.5471,-317.6571"/>
 <polygon fill="#000000" stroke="#000000" points="14584.2826,-321.0824 14593.5542,-315.9551 14583.1089,-314.1815 14584.2826,-321.0824"/>
 </g>
 <!-- bb87_12 -->
@@ -1720,12 +1720,12 @@
 <!-- bb87_37&#45;&gt;bb87_8 -->
 <g id="edge140" class="edge">
 <title>bb87_37&#45;&gt;bb87_8</title>
-<path fill="none" stroke="#000000" d="M14624.7184,-84.2069C14430.6043,-112.2233 14197.7784,-159.2521 14128,-229.4214 14113.4754,-244.0273 14118,-254.0777 14118,-274.6762 14118,-527.6955 14118,-527.6955 14118,-527.6955 14118,-630.745 14074.4189,-676.2316 14136,-758.857 14244.1483,-903.9632 14343.9329,-849.0876 14516,-905.1657 14786.4163,-993.2964 14853.3622,-1025.0737 15134,-1071.2733 15381.8409,-1112.0737 15448.4133,-1079.0549 15698,-1107.2733 16055.5107,-1147.6936 16139.1582,-1200.0052 16497,-1237.381 16539.5928,-1241.8297 17237.4341,-1242.4004 17267,-1273.381 17279.1209,-1286.0817 17278.069,-1575.768 17267,-1589.3952 17251.2187,-1608.8237 17213.0811,-1623.7715 17166.5655,-1635.2164"/>
+<path fill="none" stroke="#000000" d="M14624.7184,-84.2069C14430.6043,-112.2233 14197.7784,-159.2521 14128,-229.4214 14113.4754,-244.0273 14118,-254.0777 14118,-274.6762 14118,-527.6955 14118,-527.6955 14118,-527.6955 14118,-630.745 14074.4189,-676.2316 14136,-758.857 14411.9737,-1129.1401 14671.3992,-995.7816 15127,-1071.2733 15362.6232,-1110.3154 17107.2547,-1095.8309 17267,-1273.381 17290.4851,-1299.4836 17289.1381,-1562.1408 17267,-1589.3952 17251.2187,-1608.8237 17213.0811,-1623.7715 17166.5655,-1635.2164"/>
 <polygon fill="#000000" stroke="#000000" points="17165.7546,-1631.8115 17156.837,-1637.5322 17167.3757,-1638.6212 17165.7546,-1631.8115"/>
 </g>
-<!-- bb87_17 -->
+<!-- bb87_15 -->
 <g id="node94" class="node">
-<title>bb87_17</title>
+<title>bb87_15</title>
 <ellipse fill="none" stroke="#000000" cx="19661" cy="-1006.2195" rx="775.739" ry="55.3091"/>
 <text text-anchor="middle" x="19661" y="-1030.0195" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="19661" y="-1016.0195" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
@@ -1733,24 +1733,24 @@
 <text text-anchor="middle" x="19661" y="-988.0195" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$32 = &lt;block&#45;nested: b_name&gt;.start_with?(statTmp$35) : untyped</text>
 <text text-anchor="middle" x="19661" y="-974.0195" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb87_13&#45;&gt;bb87_17 -->
+<!-- bb87_13&#45;&gt;bb87_15 -->
 <g id="edge109" class="edge">
-<title>bb87_13&#45;&gt;bb87_17</title>
+<title>bb87_13&#45;&gt;bb87_15</title>
 <path fill="none" stroke="#000000" d="M19661,-1107.1537C19661,-1095.4842 19661,-1083.3203 19661,-1071.6438"/>
 <polygon fill="#000000" stroke="#000000" points="19664.5001,-1071.5327 19661,-1061.5327 19657.5001,-1071.5328 19664.5001,-1071.5327"/>
 </g>
-<!-- bb87_18 -->
+<!-- bb87_16 -->
 <g id="node95" class="node">
-<title>bb87_18</title>
+<title>bb87_16</title>
 <ellipse fill="none" stroke="#000000" cx="21230" cy="-1006.2195" rx="775.739" ry="45.011"/>
 <text text-anchor="middle" x="21230" y="-1023.0195" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="21230" y="-1009.0195" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="21230" y="-995.0195" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$32 = &lt;block&#45;nested: b_name&gt; : untyped</text>
 <text text-anchor="middle" x="21230" y="-981.0195" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb87_13&#45;&gt;bb87_18 -->
+<!-- bb87_13&#45;&gt;bb87_16 -->
 <g id="edge110" class="edge">
-<title>bb87_13&#45;&gt;bb87_18</title>
+<title>bb87_13&#45;&gt;bb87_16</title>
 <path fill="none" stroke="#000000" d="M20142.6819,-1121.3322C20368.3434,-1097.4418 20633.4945,-1069.3706 20845.4629,-1046.9298"/>
 <polygon fill="#000000" stroke="#000000" points="20845.9402,-1050.399 20855.5161,-1045.8655 20845.2031,-1043.4379 20845.9402,-1050.399"/>
 </g>
@@ -1787,29 +1787,29 @@
 <path fill="none" stroke="#000000" d="M17659.3704,-1126.5253C17443.5152,-1103.673 17182.8309,-1076.0748 16965.618,-1053.0788"/>
 <polygon fill="#000000" stroke="#000000" points="16965.9468,-1049.5941 16955.6339,-1052.0218 16965.2098,-1056.5552 16965.9468,-1049.5941"/>
 </g>
-<!-- bb87_19 -->
-<g id="node101" class="node">
-<title>bb87_19</title>
+<!-- bb87_17 -->
+<g id="node98" class="node">
+<title>bb87_17</title>
 <ellipse fill="none" stroke="#000000" cx="21230" cy="-850.0113" rx="775.739" ry="35.2113"/>
 <text text-anchor="middle" x="21230" y="-859.8113" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="21230" y="-845.8113" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="21230" y="-831.8113" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$32</text>
 </g>
-<!-- bb87_17&#45;&gt;bb87_19 -->
-<g id="edge115" class="edge">
-<title>bb87_17&#45;&gt;bb87_19</title>
+<!-- bb87_15&#45;&gt;bb87_17 -->
+<g id="edge113" class="edge">
+<title>bb87_15&#45;&gt;bb87_17</title>
 <path fill="none" stroke="#000000" d="M20111.9261,-961.3257C20362.2798,-936.4007 20668.3292,-905.9307 20896.8942,-883.175"/>
 <polygon fill="#000000" stroke="#000000" points="20897.432,-886.6389 20907.0361,-882.1653 20896.7385,-879.6733 20897.432,-886.6389"/>
 </g>
-<!-- bb87_18&#45;&gt;bb87_19 -->
-<g id="edge116" class="edge">
-<title>bb87_18&#45;&gt;bb87_19</title>
+<!-- bb87_16&#45;&gt;bb87_17 -->
+<g id="edge114" class="edge">
+<title>bb87_16&#45;&gt;bb87_17</title>
 <path fill="none" stroke="#000000" d="M21230,-960.6177C21230,-940.1258 21230,-916.0008 21230,-895.5199"/>
 <polygon fill="#000000" stroke="#000000" points="21233.5001,-895.4863 21230,-885.4864 21226.5001,-895.4864 21233.5001,-895.4863"/>
 </g>
-<!-- bb87_25 -->
+<!-- bb87_23 -->
 <g id="node103" class="node">
-<title>bb87_25</title>
+<title>bb87_23</title>
 <ellipse fill="none" stroke="#000000" cx="19661" cy="-850.0113" rx="775.739" ry="55.3091"/>
 <text text-anchor="middle" x="19661" y="-873.8113" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="19661" y="-859.8113" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
@@ -1817,24 +1817,24 @@
 <text text-anchor="middle" x="19661" y="-831.8113" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$44 = &lt;block&#45;nested: b_name&gt;.start_with?(statTmp$47) : untyped</text>
 <text text-anchor="middle" x="19661" y="-817.8113" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb87_21&#45;&gt;bb87_25 -->
+<!-- bb87_21&#45;&gt;bb87_23 -->
 <g id="edge120" class="edge">
-<title>bb87_21&#45;&gt;bb87_25</title>
+<title>bb87_21&#45;&gt;bb87_23</title>
 <path fill="none" stroke="#000000" d="M18591.9457,-956.4454C18786.8117,-937.0447 19008.7731,-914.9464 19199.7566,-895.9323"/>
 <polygon fill="#000000" stroke="#000000" points="19200.374,-899.3882 19209.9781,-894.9146 19199.6805,-892.4226 19200.374,-899.3882"/>
 </g>
-<!-- bb87_26 -->
+<!-- bb87_24 -->
 <g id="node104" class="node">
-<title>bb87_26</title>
+<title>bb87_24</title>
 <ellipse fill="none" stroke="#000000" cx="18092" cy="-850.0113" rx="775.739" ry="45.011"/>
 <text text-anchor="middle" x="18092" y="-866.8113" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="18092" y="-852.8113" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="18092" y="-838.8113" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$44 = &lt;block&#45;nested: b_name&gt; : untyped</text>
 <text text-anchor="middle" x="18092" y="-824.8113" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb87_21&#45;&gt;bb87_26 -->
+<!-- bb87_21&#45;&gt;bb87_24 -->
 <g id="edge121" class="edge">
-<title>bb87_21&#45;&gt;bb87_26</title>
+<title>bb87_21&#45;&gt;bb87_24</title>
 <path fill="none" stroke="#000000" d="M18092,-940.8783C18092,-929.2286 18092,-917.1896 18092,-905.836"/>
 <polygon fill="#000000" stroke="#000000" points="18095.5001,-905.6328 18092,-895.6328 18088.5001,-905.6329 18095.5001,-905.6328"/>
 </g>
@@ -1871,9 +1871,9 @@
 <path fill="none" stroke="#000000" d="M16515.5371,-950.7065C16514.0052,-939.3119 16512.379,-927.2154 16510.805,-915.5072"/>
 <polygon fill="#000000" stroke="#000000" points="16514.2402,-914.79 16509.4389,-905.3455 16507.3026,-915.7227 16514.2402,-914.79"/>
 </g>
-<!-- bb87_15 -->
-<g id="node98" class="node">
-<title>bb87_15</title>
+<!-- bb87_18 -->
+<g id="node99" class="node">
+<title>bb87_18</title>
 <ellipse fill="none" stroke="#000000" cx="19661" cy="-693.8032" rx="775.739" ry="55.3091"/>
 <text text-anchor="middle" x="19661" y="-717.6032" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="19661" y="-703.6032" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
@@ -1881,19 +1881,46 @@
 <text text-anchor="middle" x="19661" y="-675.6032" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: a_name&gt; = &lt;block&#45;nested: b_name&gt;.[](statTmp$37) : untyped</text>
 <text text-anchor="middle" x="19661" y="-661.6032" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
+<!-- bb87_17&#45;&gt;bb87_18 -->
+<g id="edge115" class="edge">
+<title>bb87_17&#45;&gt;bb87_18</title>
+<path fill="none" stroke="#000000" d="M20906.8046,-817.8343C20680.2909,-795.2828 20374.1984,-764.8085 20122.1097,-739.7108"/>
+<polygon fill="#000000" stroke="#000000" points="20122.333,-736.2158 20112.0355,-738.7078 20121.6395,-743.1814 20122.333,-736.2158"/>
+</g>
+<!-- bb87_19 -->
+<g id="node100" class="node">
+<title>bb87_19</title>
+<ellipse fill="none" stroke="#000000" cx="21230" cy="-693.8032" rx="775.739" ry="45.011"/>
+<text text-anchor="middle" x="21230" y="-710.6032" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
+<text text-anchor="middle" x="21230" y="-696.6032" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="21230" y="-682.6032" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;blockret&gt;$20 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="21230" y="-668.6032" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+</g>
+<!-- bb87_17&#45;&gt;bb87_19 -->
+<g id="edge116" class="edge">
+<title>bb87_17&#45;&gt;bb87_19</title>
+<path fill="none" stroke="#000000" d="M21230,-814.5653C21230,-795.2935 21230,-771.0234 21230,-749.3048"/>
+<polygon fill="#000000" stroke="#000000" points="21233.5001,-749.208 21230,-739.208 21226.5001,-749.208 21233.5001,-749.208"/>
+</g>
 <!-- bb87_20 -->
-<g id="node99" class="node">
+<g id="node101" class="node">
 <title>bb87_20</title>
 <ellipse fill="none" stroke="#000000" cx="21219" cy="-527.6955" rx="775.739" ry="35.2113"/>
 <text text-anchor="middle" x="21219" y="-537.4955" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="21219" y="-523.4955" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="21219" y="-509.4955" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb87_15&#45;&gt;bb87_20 -->
-<g id="edge113" class="edge">
-<title>bb87_15&#45;&gt;bb87_20</title>
+<!-- bb87_18&#45;&gt;bb87_20 -->
+<g id="edge117" class="edge">
+<title>bb87_18&#45;&gt;bb87_20</title>
 <path fill="none" stroke="#000000" d="M20091.6291,-647.8912C20349.007,-620.4507 20670.2818,-586.1976 20903.9461,-561.2853"/>
 <polygon fill="#000000" stroke="#000000" points="20904.3876,-564.7582 20913.9602,-560.2176 20903.6454,-557.7976 20904.3876,-564.7582"/>
+</g>
+<!-- bb87_19&#45;&gt;bb87_20 -->
+<g id="edge118" class="edge">
+<title>bb87_19&#45;&gt;bb87_20</title>
+<path fill="none" stroke="#000000" d="M21226.9942,-648.4135C21225.4482,-625.0682 21223.5687,-596.6858 21222.0206,-573.3085"/>
+<polygon fill="#000000" stroke="#000000" points="21225.5105,-573.0384 21221.3572,-563.2916 21218.5258,-573.501 21225.5105,-573.0384"/>
 </g>
 <!-- bb87_36 -->
 <g id="node102" class="node">
@@ -1909,56 +1936,29 @@
 <path fill="none" stroke="#000000" d="M20887.24,-495.7082C20314.7397,-440.6107 19104.2147,-324.5548 18081,-229.4214 17942.4181,-216.5367 17790.0486,-202.6274 17656.7198,-190.5413"/>
 <polygon fill="#000000" stroke="#000000" points="17657.0216,-187.0544 17646.7464,-189.6374 17656.3897,-194.0258 17657.0216,-187.0544"/>
 </g>
-<!-- bb87_16 -->
-<g id="node100" class="node">
-<title>bb87_16</title>
-<ellipse fill="none" stroke="#000000" cx="21230" cy="-693.8032" rx="775.739" ry="45.011"/>
-<text text-anchor="middle" x="21230" y="-710.6032" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
-<text text-anchor="middle" x="21230" y="-696.6032" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="21230" y="-682.6032" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;blockret&gt;$20 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="21230" y="-668.6032" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
-</g>
-<!-- bb87_16&#45;&gt;bb87_20 -->
-<g id="edge114" class="edge">
-<title>bb87_16&#45;&gt;bb87_20</title>
-<path fill="none" stroke="#000000" d="M21226.9942,-648.4135C21225.4482,-625.0682 21223.5687,-596.6858 21222.0206,-573.3085"/>
-<polygon fill="#000000" stroke="#000000" points="21225.5105,-573.0384 21221.3572,-563.2916 21218.5258,-573.501 21225.5105,-573.0384"/>
-</g>
-<!-- bb87_19&#45;&gt;bb87_15 -->
-<g id="edge117" class="edge">
-<title>bb87_19&#45;&gt;bb87_15</title>
-<path fill="none" stroke="#000000" d="M20906.8046,-817.8343C20680.2909,-795.2828 20374.1984,-764.8085 20122.1097,-739.7108"/>
-<polygon fill="#000000" stroke="#000000" points="20122.333,-736.2158 20112.0355,-738.7078 20121.6395,-743.1814 20122.333,-736.2158"/>
-</g>
-<!-- bb87_19&#45;&gt;bb87_16 -->
-<g id="edge118" class="edge">
-<title>bb87_19&#45;&gt;bb87_16</title>
-<path fill="none" stroke="#000000" d="M21230,-814.5653C21230,-795.2935 21230,-771.0234 21230,-749.3048"/>
-<polygon fill="#000000" stroke="#000000" points="21233.5001,-749.208 21230,-739.208 21226.5001,-749.208 21233.5001,-749.208"/>
-</g>
 <!-- bb87_36&#45;&gt;bb87_37 -->
 <g id="edge139" class="edge">
 <title>bb87_36&#45;&gt;bb87_37</title>
 <path fill="none" stroke="#000000" d="M16742.5521,-133.2826C16362.2923,-116.2546 15859.0546,-93.7196 15476.6259,-76.5945"/>
 <polygon fill="#000000" stroke="#000000" points="15476.6282,-73.0912 15466.4816,-76.1402 15476.315,-80.0842 15476.6282,-73.0912"/>
 </g>
-<!-- bb87_27 -->
-<g id="node110" class="node">
-<title>bb87_27</title>
+<!-- bb87_25 -->
+<g id="node107" class="node">
+<title>bb87_25</title>
 <ellipse fill="none" stroke="#000000" cx="18092" cy="-693.8032" rx="775.739" ry="35.2113"/>
 <text text-anchor="middle" x="18092" y="-703.6032" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="18092" y="-689.6032" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="18092" y="-675.6032" font-family="Times,serif" font-size="14.00" fill="#000000">ifTmp$44</text>
 </g>
-<!-- bb87_25&#45;&gt;bb87_27 -->
-<g id="edge126" class="edge">
-<title>bb87_25&#45;&gt;bb87_27</title>
+<!-- bb87_23&#45;&gt;bb87_25 -->
+<g id="edge124" class="edge">
+<title>bb87_23&#45;&gt;bb87_25</title>
 <path fill="none" stroke="#000000" d="M19210.0739,-805.1176C18959.7202,-780.1926 18653.6708,-749.7226 18425.1058,-726.9669"/>
 <polygon fill="#000000" stroke="#000000" points="18425.2615,-723.4652 18414.9639,-725.9572 18424.568,-730.4307 18425.2615,-723.4652"/>
 </g>
-<!-- bb87_26&#45;&gt;bb87_27 -->
-<g id="edge127" class="edge">
-<title>bb87_26&#45;&gt;bb87_27</title>
+<!-- bb87_24&#45;&gt;bb87_25 -->
+<g id="edge125" class="edge">
+<title>bb87_24&#45;&gt;bb87_25</title>
 <path fill="none" stroke="#000000" d="M18092,-804.4095C18092,-783.9176 18092,-759.7927 18092,-739.3118"/>
 <polygon fill="#000000" stroke="#000000" points="18095.5001,-739.2782 18092,-729.2782 18088.5001,-739.2782 18095.5001,-739.2782"/>
 </g>
@@ -2008,9 +2008,9 @@
 <path fill="none" stroke="#000000" d="M16502,-794.4983C16502,-779.8913 16502,-764.1309 16502,-749.5135"/>
 <polygon fill="#000000" stroke="#000000" points="16505.5001,-749.1046 16502,-739.1047 16498.5001,-749.1047 16505.5001,-749.1046"/>
 </g>
-<!-- bb87_23 -->
-<g id="node107" class="node">
-<title>bb87_23</title>
+<!-- bb87_26 -->
+<g id="node108" class="node">
+<title>bb87_26</title>
 <ellipse fill="none" stroke="#000000" cx="19650" cy="-527.6955" rx="775.739" ry="65.1077"/>
 <text text-anchor="middle" x="19650" y="-558.4955" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="19650" y="-544.4955" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
@@ -2019,19 +2019,46 @@
 <text text-anchor="middle" x="19650" y="-502.4955" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = statTmp$48.[](statTmp$49) : untyped</text>
 <text text-anchor="middle" x="19650" y="-488.4955" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
+<!-- bb87_25&#45;&gt;bb87_26 -->
+<g id="edge126" class="edge">
+<title>bb87_25&#45;&gt;bb87_26</title>
+<path fill="none" stroke="#000000" d="M18397.0237,-661.2828C18614.0436,-638.145 18910.2376,-606.566 19160.1573,-579.9206"/>
+<polygon fill="#000000" stroke="#000000" points="19160.5762,-583.3958 19170.1488,-578.8553 19159.8341,-576.4353 19160.5762,-583.3958"/>
+</g>
+<!-- bb87_27 -->
+<g id="node109" class="node">
+<title>bb87_27</title>
+<ellipse fill="none" stroke="#000000" cx="18081" cy="-527.6955" rx="775.739" ry="45.011"/>
+<text text-anchor="middle" x="18081" y="-544.4955" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
+<text text-anchor="middle" x="18081" y="-530.4955" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="18081" y="-516.4955" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;blockret&gt;$20 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="18081" y="-502.4955" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+</g>
+<!-- bb87_25&#45;&gt;bb87_27 -->
+<g id="edge127" class="edge">
+<title>bb87_25&#45;&gt;bb87_27</title>
+<path fill="none" stroke="#000000" d="M18089.6402,-658.1689C18088.1921,-636.3012 18086.3072,-607.8378 18084.6676,-583.0785"/>
+<polygon fill="#000000" stroke="#000000" points="18088.1588,-582.8294 18084.0056,-573.0826 18081.1741,-583.292 18088.1588,-582.8294"/>
+</g>
 <!-- bb87_28 -->
-<g id="node108" class="node">
+<g id="node110" class="node">
 <title>bb87_28</title>
 <ellipse fill="none" stroke="#000000" cx="18081" cy="-391.2864" rx="775.739" ry="35.2113"/>
 <text text-anchor="middle" x="18081" y="-401.0864" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
 <text text-anchor="middle" x="18081" y="-387.0864" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="18081" y="-373.0864" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb87_23&#45;&gt;bb87_28 -->
-<g id="edge124" class="edge">
-<title>bb87_23&#45;&gt;bb87_28</title>
+<!-- bb87_26&#45;&gt;bb87_28 -->
+<g id="edge128" class="edge">
+<title>bb87_26&#45;&gt;bb87_28</title>
 <path fill="none" stroke="#000000" d="M19111.4114,-480.8705C18893.9235,-461.9621 18648.3833,-440.6148 18451.5593,-423.5029"/>
 <polygon fill="#000000" stroke="#000000" points="18451.603,-419.9935 18441.3374,-422.6142 18450.9966,-426.9672 18451.603,-419.9935"/>
+</g>
+<!-- bb87_27&#45;&gt;bb87_28 -->
+<g id="edge129" class="edge">
+<title>bb87_27&#45;&gt;bb87_28</title>
+<path fill="none" stroke="#000000" d="M18081,-482.2733C18081,-467.8044 18081,-451.7902 18081,-437.2812"/>
+<polygon fill="#000000" stroke="#000000" points="18084.5001,-437.026 18081,-427.026 18077.5001,-437.026 18084.5001,-437.026"/>
 </g>
 <!-- bb87_35 -->
 <g id="node111" class="node">
@@ -2046,33 +2073,6 @@
 <title>bb87_28&#45;&gt;bb87_35</title>
 <path fill="none" stroke="#000000" d="M17853.4184,-357.4796C17753.0802,-342.5745 17635.1669,-325.0588 17533.6927,-309.985"/>
 <polygon fill="#000000" stroke="#000000" points="17534.0172,-306.4948 17523.6115,-308.4874 17532.9886,-313.4189 17534.0172,-306.4948"/>
-</g>
-<!-- bb87_24 -->
-<g id="node109" class="node">
-<title>bb87_24</title>
-<ellipse fill="none" stroke="#000000" cx="18081" cy="-527.6955" rx="775.739" ry="45.011"/>
-<text text-anchor="middle" x="18081" y="-544.4955" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line$28&gt;, statTmp$10, statTmp$19, ifTmp$32, ifTmp$44)</text>
-<text text-anchor="middle" x="18081" y="-530.4955" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="18081" y="-516.4955" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;blockret&gt;$20 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="18081" y="-502.4955" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
-</g>
-<!-- bb87_24&#45;&gt;bb87_28 -->
-<g id="edge125" class="edge">
-<title>bb87_24&#45;&gt;bb87_28</title>
-<path fill="none" stroke="#000000" d="M18081,-482.2733C18081,-467.8044 18081,-451.7902 18081,-437.2812"/>
-<polygon fill="#000000" stroke="#000000" points="18084.5001,-437.026 18081,-427.026 18077.5001,-437.026 18084.5001,-437.026"/>
-</g>
-<!-- bb87_27&#45;&gt;bb87_23 -->
-<g id="edge128" class="edge">
-<title>bb87_27&#45;&gt;bb87_23</title>
-<path fill="none" stroke="#000000" d="M18397.0237,-661.2828C18614.0436,-638.145 18910.2376,-606.566 19160.1573,-579.9206"/>
-<polygon fill="#000000" stroke="#000000" points="19160.5762,-583.3958 19170.1488,-578.8553 19159.8341,-576.4353 19160.5762,-583.3958"/>
-</g>
-<!-- bb87_27&#45;&gt;bb87_24 -->
-<g id="edge129" class="edge">
-<title>bb87_27&#45;&gt;bb87_24</title>
-<path fill="none" stroke="#000000" d="M18089.6402,-658.1689C18088.1921,-636.3012 18086.3072,-607.8378 18084.6676,-583.0785"/>
-<polygon fill="#000000" stroke="#000000" points="18088.1588,-582.8294 18084.0056,-573.0826 18081.1741,-583.292 18088.1588,-582.8294"/>
 </g>
 <!-- bb87_35&#45;&gt;bb87_36 -->
 <g id="edge138" class="edge">
@@ -2115,9 +2115,9 @@
 <!-- bb87_40&#45;&gt;bb87_5 -->
 <g id="edge143" class="edge">
 <title>bb87_40&#45;&gt;bb87_5</title>
-<path fill="none" stroke="#000000" d="M14443.4956,-1208.366C14290.1471,-1224.8371 14152.5176,-1246.6911 14128,-1273.381 14058.4323,-1349.1126 14118,-1401.7079 14118,-1504.5424 14118,-1670.6501 14118,-1670.6501 14118,-1670.6501 14118,-1854.7727 14672.7114,-1986.2198 14987.4075,-2045.977"/>
-<polygon fill="#000000" stroke="#000000" points="14987.0972,-2049.4803 14997.5733,-2047.8983 14988.3972,-2042.602 14987.0972,-2049.4803"/>
+<path fill="none" stroke="#000000" d="M14443.4956,-1208.366C14290.1471,-1224.8371 14152.5176,-1246.6911 14128,-1273.381 14058.4323,-1349.1126 14118,-1401.7079 14118,-1504.5424 14118,-1670.6501 14118,-1670.6501 14118,-1670.6501 14118,-1860.1823 14687.5567,-1988.1554 15016.8781,-2046.3091"/>
+<polygon fill="#000000" stroke="#000000" points="15016.5804,-2049.8104 15027.0353,-2048.0941 15017.792,-2042.916 15016.5804,-2049.8104"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: ff65cb57176d3f78be51b5eeddcbeb21343234165566e65332b3e372c1aa71ea -->
+<!-- ruby-types:sha256: fa63dd84dbdf8a19da35305520c272169ef187a8d5c87856502e490a14d43cb7 -->
