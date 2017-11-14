@@ -611,8 +611,7 @@ BasicBlock *CFG::walk(core::Context ctx, ast::Expression *what, BasicBlock *curr
                              aliases[info.argumentsOrMixins[i]] = argLoc;
                              bodyBlock->exprs.emplace_back(argLoc, arg->loc, make_unique<LoadArg>(recv, s->fun, i));
                          } else {
-                             // TODO(nelhage): this will be an error once the namer
-                             // is more complete and turns all args into Ident
+                             Error::check(false, "Should have been removed by namer");
                          }
                      }
 
@@ -698,7 +697,7 @@ string BasicBlock::toString(core::Context ctx) {
     if (this->bexit.cond.exists()) {
         buf << this->bexit.cond.name.name(ctx).toString(ctx);
     } else {
-        buf << "<unconditinal>";
+        buf << "<unconditional>";
     }
     return buf.str();
 }

@@ -172,10 +172,6 @@ public:
 
 class Binding {
 public:
-    /**
-     * This is inefficient as it pollutes global symbol table and in the future (when we start working on perfromance)
-     * we should consider using references to instructions similarly to how LuaJIT does it.
-     */
     core::LocalVariable bind;
     core::Loc loc;
 

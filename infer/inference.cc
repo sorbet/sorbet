@@ -125,12 +125,7 @@ public:
                 auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
-                //                if (i->what == ctx.state.defn_todo()) {
-                //                    tp.origins.push_back(core::Loc::none(0));
-                //                    tp.type = core::Types::dynamic();
-                //                } else {
-                //                    Error::check(tp.origins.size() > 0, "Inferencer did not assign location");
-                //                }
+                Error::check(tp.origins.size() > 0, "Inferencer did not assign location");
             },
             [&](cfg::Send *send) {
                 vector<core::TypeAndOrigins> args;

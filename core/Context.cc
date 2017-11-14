@@ -357,30 +357,6 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(basicObject_id == defn_Basic_Object());
     Error::check(kernel_id == defn_Kernel());
 
-    /* 0: <none>
-     * 1: <top>
-     * 2: <bottom>
-     * 3: <root>;
-     * 4: nil;
-     * 5: <todo>
-     * 6: Object;
-     * 7: <<JUNK>>;
-     * 8: Integer
-     * 9: Float
-     * 10: String
-     * 11: Symbol
-     * 12: Array
-     * 13: Hash
-     * 14: TrueClass
-     * 15: FalseClass
-     * 16: NilClass
-     * 17: dynamic
-     * 18: Opus
-     * 19: Opus::Types
-     * 20: Class
-     * 21: BasicObject
-     * 22: Kernel
-     */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }
 
@@ -440,8 +416,8 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
 }
 
 LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
-    // Error::check(owner.info(*this).isMethod());
     // THIS IS NOT TRUE. Top level code is still a thing
+    // Error::check(owner.info(*this).isMethod());
     LocalVariable r(name);
     return r;
 }
