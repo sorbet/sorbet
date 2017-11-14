@@ -462,7 +462,7 @@ core::LocalVariable global2Local(core::Context ctx, core::SymbolRef what, CFG &i
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *walk(CFGContext cctx) {
+BasicBlock *CFG::walk(CFGContext cctx) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
