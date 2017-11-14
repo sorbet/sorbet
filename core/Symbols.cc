@@ -4,6 +4,9 @@
 #include <sstream>
 #include <string>
 
+template class std::vector<ruby_typer::core::TypeAndOrigins>;
+template class std::vector<ruby_typer::core::LocalVariable>;
+
 namespace ruby_typer {
 namespace core {
 

@@ -8,6 +8,7 @@ using namespace std;
 
 // improve debugging.
 template class std::shared_ptr<ruby_typer::core::Type>;
+template class std::vector<core::Loc>;
 
 shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2);
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> &t1,
