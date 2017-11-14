@@ -1,6 +1,6 @@
 begin
   class <emptyTree>::Integer<Integer> < ()
-    def +<+>(::Integer#+#o)
+    def +<+>(o)
       <emptyTree>
 
   end
@@ -44,18 +44,18 @@ begin
         if begin
             true
           end
-          ::Examples#variables#a = 1
+          a = 1
         else
-          ::Examples#variables#a = 2
+          a = 2
         end
         if begin
             false
           end
-          ::Examples#variables#b = 1
+          b = 1
         else
-          ::Examples#variables#b = 2
+          b = 2
         end
-        ::Examples#variables#a.+(::Examples#variables#b)
+        a.+(b)
       end
 
     def variables_and_loop<variables_and_loop>()
@@ -63,20 +63,20 @@ begin
         if begin
             true
           end
-          ::Examples#variables_and_loop#a = 1
+          a = 1
         else
-          ::Examples#variables_and_loop#a = 2
+          a = 2
         end
         while true
           if begin
               false
             end
-            ::Examples#variables_and_loop#b = 1
+            b = 1
           else
-            ::Examples#variables_and_loop#b = 2
+            b = 2
           end
         end
-        ::Examples#variables_and_loop#b
+        b
       end
 
     def variables_loop_if<variables_loop_if>()
@@ -85,21 +85,21 @@ begin
           if begin
               false
             end
-            ::Examples#variables_loop_if#b = 1
+            b = 1
           else
-            ::Examples#variables_loop_if#b = 2
+            b = 2
           end
         end
-        ::Examples#variables_loop_if#b
+        b
       end
 
-    def take_arguments<take_arguments>(::Examples#take_arguments#i)
+    def take_arguments<take_arguments>(i)
       if begin
           false
         end
         2
       else
-        ::Examples#take_arguments#i
+        i
       end
 
   end

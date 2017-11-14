@@ -1,13 +1,9 @@
 class Opus ()
 class TestLocals (Object)
   method method ()
-    local a
-    local b
-    local c
     method <block>$0 ()
-      local b
       method <block>$1 ()
     method <block>$2 (a, b)
-      local a
-      local b
+      argument a
+      argument b
 

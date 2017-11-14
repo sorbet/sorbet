@@ -2,33 +2,33 @@ digraph "blocks2.rb"{
 subgraph "cluster_::Foo#bar" {
     label = "::Foo#bar";
     color = blue;
-    bb27_0 [shape = invhouse];
-    bb27_1 [shape = parallelogram];
+    bb24_0 [shape = invhouse];
+    bb24_1 [shape = parallelogram];
 
-    bb27_0 [label = "()\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$3 = return <ret>$1 : <bottom>\n<never>"];
-    bb27_0 -> bb27_1;
-    bb27_1 [label = "()\n<never>"];
-    bb27_1 -> bb27_1;
+    bb24_0 [label = "()\n<ret>$2 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$2 : <bottom>\n<unconditinal>"];
+    bb24_0 -> bb24_1;
+    bb24_1 [label = "()\n<unconditinal>"];
+    bb24_1 -> bb24_1;
 }
 
 subgraph "cluster_::Foo#baz" {
     label = "::Foo#baz";
     color = blue;
-    bb28_0 [shape = invhouse];
-    bb28_1 [shape = parallelogram];
+    bb25_0 [shape = invhouse];
+    bb25_1 [shape = parallelogram];
 
-    bb28_0 [label = "(statTmp$6)\nstatTmp$6 = self : Foo\n<always>"];
-    bb28_0 -> bb28_2;
-    bb28_1 [label = "()\n<never>"];
-    bb28_1 -> bb28_1;
-    bb28_2 [label = "(statTmp$6)\nouterLoops: 1\n<block-call>"];
-    bb28_2 -> bb28_4;
-    bb28_2 -> bb28_3;
+    bb25_0 [label = "(statTmp$2)\nstatTmp$2 = self : Foo\n<unconditinal>"];
+    bb25_0 -> bb25_2;
+    bb25_1 [label = "()\n<unconditinal>"];
+    bb25_1 -> bb25_1;
+    bb25_2 [label = "(statTmp$2)\nouterLoops: 1\n<block-call>"];
+    bb25_2 -> bb25_4;
+    bb25_2 -> bb25_3;
 
-    bb28_3 [label = "(statTmp$6)\n<ret>$4 = statTmp$6.bar() : <dynamic>\n<ret>$10 = return <ret>$4 : <bottom>\n<never>"];
-    bb28_3 -> bb28_1;
-    bb28_4 [label = "(statTmp$6)\nouterLoops: 1\nr = load_arg(statTmp$6#bar, 0) : <dynamic>\nstatTmp$8 = self : Foo\n<blockret>$7 = statTmp$8.puts(r) : <dynamic>\n<always>"];
-    bb28_4 -> bb28_2;
+    bb25_3 [label = "(statTmp$2)\n<ret>$3 = statTmp$2.bar() : <dynamic>\n<ret>$6 = return <ret>$3 : <bottom>\n<unconditinal>"];
+    bb25_3 -> bb25_1;
+    bb25_4 [label = "(statTmp$2)\nouterLoops: 1\nr$1 = load_arg(statTmp$2#bar, 0) : <dynamic>\nstatTmp$4 = self : Foo\n<blockret>$3 = statTmp$4.puts(r$1) : <dynamic>\n<unconditinal>"];
+    bb25_4 -> bb25_2;
 }
 
 }

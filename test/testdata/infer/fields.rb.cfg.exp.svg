@@ -14,36 +14,36 @@
 <polygon fill="none" stroke="#0000ff" points="8,-8 8,-314.8219 422,-314.8219 422,-8 8,-8"/>
 <text text-anchor="middle" x="215" y="-299.6219" font-family="Times,serif" font-size="14.00" fill="#000000">::Foo#foo</text>
 </g>
-<!-- bb28_0 -->
+<!-- bb25_0 -->
 <g id="node1" class="node">
-<title>bb28_0</title>
+<title>bb25_0</title>
 <polygon fill="none" stroke="#000000" points="16.0114,-179.5901 215,-124.089 413.9886,-179.5901 413.8028,-269.3928 16.1972,-269.3928 16.0114,-179.5901"/>
 <text text-anchor="middle" x="215" y="-235.2109" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="215" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$4 = alias @ivar : Integer</text>
-<text text-anchor="middle" x="215" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$4 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="215" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$4 = ss : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="215" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$5 = return @ivar$4 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="215" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
+<text text-anchor="middle" x="215" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = alias @ivar : Integer</text>
+<text text-anchor="middle" x="215" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="215" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = ss : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="215" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$4 = return @ivar$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="215" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
 </g>
-<!-- bb28_1 -->
+<!-- bb25_1 -->
 <g id="node2" class="node">
-<title>bb28_1</title>
-<polygon fill="none" stroke="#000000" points="280.3844,-88 176.3724,-88 149.6156,-16 253.6276,-16 280.3844,-88"/>
+<title>bb25_1</title>
+<polygon fill="none" stroke="#000000" points="320.536,-88 152.6519,-88 109.464,-16 277.3481,-16 320.536,-88"/>
 <text text-anchor="middle" x="215" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="215" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;never&gt;</text>
+<text text-anchor="middle" x="215" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
 </g>
-<!-- bb28_0&#45;&gt;bb28_1 -->
+<!-- bb25_0&#45;&gt;bb25_1 -->
 <g id="edge1" class="edge">
-<title>bb28_0&#45;&gt;bb28_1</title>
+<title>bb25_0&#45;&gt;bb25_1</title>
 <path fill="none" stroke="#000000" d="M215,-123.7426C215,-115.1039 215,-106.542 215,-98.5028"/>
 <polygon fill="#000000" stroke="#000000" points="218.5001,-98.2733 215,-88.2733 211.5001,-98.2733 218.5001,-98.2733"/>
 </g>
-<!-- bb28_1&#45;&gt;bb28_1 -->
+<!-- bb25_1&#45;&gt;bb25_1 -->
 <g id="edge2" class="edge">
-<title>bb28_1&#45;&gt;bb28_1</title>
-<path fill="none" stroke="#000000" d="M277.4023,-79.2319C289.5591,-76.0695 298.1919,-66.9922 298.1919,-52 298.1919,-33.1392 284.529,-23.6397 267.3752,-23.5015"/>
-<polygon fill="#000000" stroke="#000000" points="266.5688,-20.0627 256.9489,-24.502 267.2375,-27.0307 266.5688,-20.0627"/>
+<title>bb25_1&#45;&gt;bb25_1</title>
+<path fill="none" stroke="#000000" d="M314.8349,-77.5759C329.0076,-73.4394 338.518,-64.9141 338.518,-52 338.518,-33.0464 318.032,-23.5464 292.3871,-23.5002"/>
+<polygon fill="#000000" stroke="#000000" points="292.1731,-20.0061 282.3378,-23.9453 292.4829,-26.9993 292.1731,-20.0061"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 14508db22123d0682a1aba00b2313d4e7fd40984d4575ba45c4221762630e842 -->
+<!-- ruby-types:sha256: eebc9cd3b6ed51bbaaf7942826775a08495a1a7bcab8837aee4ce6c4a512a430 -->

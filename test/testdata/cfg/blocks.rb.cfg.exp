@@ -2,21 +2,21 @@ digraph "blocks.rb"{
 subgraph "cluster_::BlockTest#block_pass" {
     label = "::BlockTest#block_pass";
     color = blue;
-    bb27_0 [shape = invhouse];
-    bb27_1 [shape = parallelogram];
+    bb24_0 [shape = invhouse];
+    bb24_1 [shape = parallelogram];
 
-    bb27_0 [label = "(statTmp$3, statTmp$4, statTmp$5, statTmp$6)\nstatTmp$3 = self : BlockTest\nstatTmp$4 = 1 : Integer(1)\nstatTmp$5 = 2 : Integer(2)\nstatTmp$6 = 3 : Integer(3)\n<always>"];
-    bb27_0 -> bb27_2;
-    bb27_1 [label = "()\n<never>"];
-    bb27_1 -> bb27_1;
-    bb27_2 [label = "(statTmp$3, statTmp$4, statTmp$5, statTmp$6)\nouterLoops: 1\n<block-call>"];
-    bb27_2 -> bb27_4;
-    bb27_2 -> bb27_3;
+    bb24_0 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nstatTmp$2 = self : BlockTest\nstatTmp$3 = 1 : Integer(1)\nstatTmp$4 = 2 : Integer(2)\nstatTmp$5 = 3 : Integer(3)\n<unconditinal>"];
+    bb24_0 -> bb24_2;
+    bb24_1 [label = "()\n<unconditinal>"];
+    bb24_1 -> bb24_1;
+    bb24_2 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nouterLoops: 1\n<block-call>"];
+    bb24_2 -> bb24_4;
+    bb24_2 -> bb24_3;
 
-    bb27_3 [label = "(statTmp$3, statTmp$4, statTmp$5, statTmp$6)\n<ret>$1 = statTmp$3.foo(statTmp$4, statTmp$5, statTmp$6) : <dynamic>\n<ret>$8 = return <ret>$1 : <bottom>\n<never>"];
-    bb27_3 -> bb27_1;
-    bb27_4 [label = "(statTmp$3, statTmp$4, statTmp$5, statTmp$6)\nouterLoops: 1\nx = load_arg(statTmp$3#foo, 0) : <dynamic>\n<always>"];
-    bb27_4 -> bb27_2;
+    bb24_3 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\n<ret>$2 = statTmp$2.foo(statTmp$3, statTmp$4, statTmp$5) : <dynamic>\n<ret>$7 = return <ret>$2 : <bottom>\n<unconditinal>"];
+    bb24_3 -> bb24_1;
+    bb24_4 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nouterLoops: 1\nx$1 = load_arg(statTmp$2#foo, 0) : <dynamic>\n<unconditinal>"];
+    bb24_4 -> bb24_2;
 }
 
 }

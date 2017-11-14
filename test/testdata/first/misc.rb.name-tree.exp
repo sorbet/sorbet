@@ -4,18 +4,18 @@ begin
   #@@cv = 1
   #$gv = 1
   begin
-    #assignTmp$2 = [nil, nil]
-    self(<singleton class:<root>>).x().var=(#assignTmp$2.[](0))
-    #y = #assignTmp$2.[](1)
-    #assignTmp$2
+    assignTmp$2 = [nil, nil]
+    self(<singleton class:<root>>).x().var=(assignTmp$2.[](0))
+    y = assignTmp$2.[](1)
+    assignTmp$2
   end
   begin
-    #assignTmp$3 = self(<singleton class:<root>>).zaaaz()
-    #baaaar = #assignTmp$3.[](0)
-    #naaar = #assignTmp$3.[](1)
-    #assignTmp$3
+    assignTmp$3 = self(<singleton class:<root>>).zaaaz()
+    baaaar = assignTmp$3.[](0)
+    naaar = assignTmp$3.[](1)
+    assignTmp$3
   end
-  #xaaaaz = [self(<singleton class:<root>>).yayayaya(), self(<singleton class:<root>>).tutututu()]
+  xaaaaz = [self(<singleton class:<root>>).yayayaya(), self(<singleton class:<root>>).tutututu()]
   <emptyTree>
   begin
     nil
@@ -24,7 +24,7 @@ begin
     self(<singleton class:<root>>).a()
     self(<singleton class:<root>>).b()
   end
-  def foo<foo>(::Object#foo#x)
+  def foo<foo>(x)
     <emptyTree>
   self(<singleton class:<root>>).lambda() do ||
     <emptyTree>
@@ -38,9 +38,9 @@ begin
     <emptyTree>
   <Not Supported (SClass)>
   begin
-    #||$4 = true
-    if #||$4
-      #||$4
+    ||$4 = true
+    if ||$4
+      ||$4
     else
       false
     end
@@ -49,7 +49,7 @@ begin
   while 0.!=(1)
     <emptyTree>
   end
-  #x.[]=(0)
+  x.[]=(0)
   break(<emptyTree>)
   break(1)
   break([1, 2])
@@ -58,9 +58,9 @@ begin
   next([1, 2])
   <Not Supported (Defined)>
   <Not Supported (ZSuper)>
-  def foo<foo>(::Object#foo#x, ::Object#foo#y, ::Object#foo#z)
+  def foo<foo>(x, y, z)
     <emptyTree>
-  #x
+  x
   <Not Supported (LineLiteral)>
   while true
     nil
@@ -75,15 +75,15 @@ begin
     nil
   end
   begin
-    #assignTmp$5 = 1
-    #a = #assignTmp$5.[](0)
+    assignTmp$5 = 1
+    a = assignTmp$5.[](0)
     <Not Supported (Mlhs)>
-    #assignTmp$5
+    assignTmp$5
   end
   <Not Supported (NthRef)>
-  def foo<foo>(::Object#foo#x, ::Object#foo#y)
+  def foo<foo>(x, y)
     <emptyTree>
-  {#x => #y, <Not Supported (DSymbol)> => 1}
+  {x => y, <Not Supported (DSymbol)> => 1}
   <Not Supported (Preexe)>
   <Not Supported (Postexe)>
   <Not Supported (Rational)>
@@ -92,13 +92,13 @@ begin
     <Not Supported (Rescue)>
   end
   begin
-    #assignTmp$6 = [<Not Supported (Splat)>]
+    assignTmp$6 = [<Not Supported (Splat)>]
     <Not Supported (SplatLhs)>
-    #assignTmp$6
+    assignTmp$6
   end
   <Not Supported (DSymbol)>
   [:sym]
-  if #x
+  if x
     1
   else
     7
@@ -107,14 +107,14 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(<singleton class:<root>>).proc() do |::Object#<block>$10#x|
+  self(<singleton class:<root>>).proc() do |x$11|
     <emptyTree>
   end
   break(self(<todo sym>).foo(1) do ||
       <emptyTree>
     end)
-  def foo<foo>(::Object#foo#*$0)
+  def foo<foo>(*$0)
     <emptyTree>
-  def foo<foo>(::Object#foo#**$1)
+  def foo<foo>(**$1)
     <emptyTree>
 end

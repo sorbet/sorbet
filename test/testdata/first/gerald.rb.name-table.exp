@@ -11,43 +11,37 @@ class Opus ()
         field @parsed -> <dynamic>
         field @raw -> <dynamic>
         method added_files ()
-          method <block>$7 (part)
-            local part
+          method <block>$10 (part)
+            argument part
           method <block>$8 (part)
-            local part
+            argument part
         method added_lines ()
-          method <block>$13 (part)
-            local part
+          method <block>$20 (part)
+            argument part
         method affected_files ()
         method changed_files ()
-          method <block>$11 (part)
-            local part
-          method <block>$12 (part)
-            local part
+          method <block>$16 (part)
+            argument part
+          method <block>$18 (part)
+            argument part
         method changed_lines ()
         method changed_openapi? ()
         method deleted_files ()
-          method <block>$10 (part)
-            local part
-          method <block>$9 (part)
-            local part
-        method initialize (raw_diff)
-          local raw_diff
-        method parse (diff)
-          local diff
-          local parts
-          method <block>$16 (part)
-            local a_name
-            local added_lines
-            local b_name
-            local lines
-            local part
-            local removed_lines
-            method <block>$17 (line)
-              local line
-        method removed_lines ()
+          method <block>$12 (part)
+            argument part
           method <block>$14 (part)
-            local part
+            argument part
+        method initialize (raw_diff)
+          argument raw_diff
+        method parse (diff)
+          argument diff
+          method <block>$25 (part)
+            argument part
+            method <block>$27 (line)
+              argument line
+        method removed_lines ()
+          method <block>$22 (part)
+            argument part
       class MatchContext (Object)
         field @assignee -> <dynamic>
         field @body -> <dynamic>
@@ -58,43 +52,35 @@ class Opus ()
         field @repo -> <dynamic>
         field @title -> <dynamic>
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
-          local assignee
-          local body
-          local diff
-          local gh_user
-          local merge_branch
-          local openapi_diff
-          local repo
-          local title
+          argument assignee
+          argument body
+          argument diff
+          argument gh_user
+          argument merge_branch
+          argument openapi_diff
+          argument repo
+          argument title
         method user_stripe_suffix? ()
       class MatchTimeBudget (Object)
         field @start -> <dynamic>
         method check! ()
-          local dur_ms
         method initialize ()
         method time_rule (rule)
-          local dur_ms
-          local res
-          local rule
-          local rule_start
+          argument rule
         static-field PER_RULE_MS -> <dynamic>
         static-field TOTAL_TIME_MS -> <dynamic>
       class MatchTimeout (<dynamic>)
         field @rule_token -> <dynamic>
         method initialize (message, rule_token)
-          local message
-          local rule_token
+          argument message
+          argument rule_token
       class Matcher (<dynamic>)
         field @rules -> <dynamic>
         method initialize ()
-          local assignTmp$0
-          local invalid_rule_ids
-          local invalid_rules
         method match (match_context)
-          local budget
-          local match_context
+          argument match_context
           method <block>$4 (r)
-            local r
-            method <block>$5 ()
+            argument r
+            method <block>$6 ()
         static-field MAX_AFFECTED_FILES -> <dynamic>
 
