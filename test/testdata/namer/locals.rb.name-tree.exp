@@ -1,20 +1,20 @@
 class <emptyTree>::TestLocals<TestLocals> < ()
   def method<method>()
     begin
-      ::TestLocals#method#a = 1
-      ::TestLocals#method#c = 4
+      a = 1
+      c = 4
       self(TestLocals).proc() do ||
         begin
-          ::TestLocals#method#<block>$0#b = 2
-          ::TestLocals#method#a.+(::TestLocals#method#<block>$0#b)
+          <block-nested: b> = 2
+          a.+(<block-nested: b>)
           self(TestLocals).proc() do ||
-            ::TestLocals#method#<block>$0#b.+(::TestLocals#method#c)
+            <block-nested: b>.+(c)
           end
         end
       end
-      ::TestLocals#method#b = 3
-      self(TestLocals).proc() do |::TestLocals#method#<block>$2#a, ::TestLocals#method#<block>$2#b|
-        ::TestLocals#method#<block>$2#a.+(::TestLocals#method#<block>$2#b)
+      b = 3
+      self(TestLocals).proc() do |<block-nested: a$3>, <block-nested: b$1>|
+        <block-nested: a$3>.+(<block-nested: b$1>)
       end
     end
 

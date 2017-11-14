@@ -6,6 +6,7 @@
 #include "core/core.h"
 #include "parser/parser.h"
 #include <memory>
+#include <unordered_map>
 
 namespace ruby_typer {
 namespace cfg {
@@ -24,9 +25,9 @@ public:
 
 class Ident : public Instruction {
 public:
-    core::SymbolRef what;
+    core::LocalVariable what;
 
-    Ident(core::SymbolRef what);
+    Ident(core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
 
@@ -41,44 +42,44 @@ public:
 
 class Send : public Instruction {
 public:
-    core::SymbolRef recv;
+    core::LocalVariable recv;
     core::NameRef fun;
-    std::vector<core::SymbolRef> args;
+    std::vector<core::LocalVariable> args;
 
-    Send(core::SymbolRef recv, core::NameRef fun, std::vector<core::SymbolRef> &args);
+    Send(core::LocalVariable recv, core::NameRef fun, std::vector<core::LocalVariable> &args);
 
     virtual std::string toString(core::Context ctx);
 };
 
 class Return : public Instruction {
 public:
-    core::SymbolRef what;
+    core::LocalVariable what;
 
-    Return(core::SymbolRef what);
+    Return(core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
 
 class New : public Instruction {
 public:
-    core::SymbolRef klass;
-    std::vector<core::SymbolRef> args;
+    core::LocalVariable klass;
+    std::vector<core::LocalVariable> args;
 
-    New(core::SymbolRef klass, std::vector<core::SymbolRef> &args);
+    New(core::LocalVariable klass, std::vector<core::LocalVariable> &args);
     virtual std::string toString(core::Context ctx);
 };
 
 class Super : public Instruction {
 public:
-    std::vector<core::SymbolRef> args;
+    std::vector<core::LocalVariable> args;
 
-    Super(std::vector<core::SymbolRef> &args);
+    Super(std::vector<core::LocalVariable> &args);
     virtual std::string toString(core::Context ctx);
 };
 
 class NamedArg : public Instruction {
 public:
     core::NameRef name;
-    core::SymbolRef value;
+    core::LocalVariable value;
 };
 
 class FloatLit : public Instruction {
@@ -151,11 +152,12 @@ public:
 
 class LoadArg : public Instruction {
 public:
-    core::SymbolRef receiver;
+    core::LocalVariable receiver;
     core::NameRef method;
     u4 arg;
 
-    LoadArg(core::SymbolRef receiver, core::NameRef method, u4 arg) : receiver(receiver), method(method), arg(arg){};
+    LoadArg(core::LocalVariable receiver, core::NameRef method, u4 arg)
+        : receiver(receiver), method(method), arg(arg){};
     virtual std::string toString(core::Context ctx);
 };
 
@@ -163,24 +165,20 @@ class BasicBlock;
 
 class BlockExit {
 public:
-    core::SymbolRef cond;
+    core::LocalVariable cond;
     BasicBlock *thenb;
     BasicBlock *elseb;
 };
 
 class Binding {
 public:
-    /**
-     * This is inefficient as it pollutes global symbol table and in the future (when we start working on perfromance)
-     * we should consider using references to instructions similarly to how LuaJIT does it.
-     */
-    core::SymbolRef bind;
+    core::LocalVariable bind;
     core::Loc loc;
 
     std::unique_ptr<Instruction> value;
     std::shared_ptr<core::Type> tpe;
 
-    Binding(core::SymbolRef bind, core::Loc loc, std::unique_ptr<Instruction> value);
+    Binding(core::LocalVariable bind, core::Loc loc, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;
     Binding() = default;
 
@@ -189,7 +187,7 @@ public:
 
 class BasicBlock {
 public:
-    std::vector<core::SymbolRef> args;
+    std::vector<core::LocalVariable> args;
     int id = 0;
     int flags = 0;
     int outerLoops = 0;
@@ -230,11 +228,13 @@ public:
 
     static int FORWARD_TOPO_SORT_VISITED;
     static int BACKWARD_TOPO_SORT_VISITED;
+    std::unordered_map<core::LocalVariable, int> minLoops;
 
 private:
     CFG();
-    BasicBlock *walk(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, core::SymbolRef target,
-                     int loops, std::unordered_map<core::SymbolRef, core::SymbolRef> &aliases);
+    BasicBlock *walk(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat,
+                     core::LocalVariable target, int loops,
+                     std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases);
     BasicBlock *freshBlock(int outerLoops);
     void fillInTopoSorts(core::Context ctx);
     void dealias(core::Context ctx);

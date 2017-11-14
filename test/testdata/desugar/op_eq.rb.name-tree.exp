@@ -2,7 +2,7 @@ class <emptyTree>::OpEq<OpEq> < ()
   def b<b>()
     <emptyTree>
 
-  def b=<b=>(::OpEq#b=#_)
+  def b=<b=>(_)
     <emptyTree>
 
   def y<y>()
@@ -11,56 +11,56 @@ class <emptyTree>::OpEq<OpEq> < ()
   def z<z>()
     <emptyTree>
 
-  def example<example>(::OpEq#example#a)
+  def example<example>(a)
     begin
-      if ::OpEq#example#a
-        ::OpEq#example#a = :a
+      if a
+        a = :a
       else
-        ::OpEq#example#a
+        a
       end
       begin
-        ::OpEq#example#b$0 = self(OpEq)
-        ::OpEq#example#b$1 = ::OpEq#example#b$0.b()
-        if ::OpEq#example#b$1
-          ::OpEq#example#b$0.b=(:b)
+        b$0 = self(OpEq)
+        b$1 = b$0.b()
+        if b$1
+          b$0.b=(:b)
         else
-          ::OpEq#example#b$1
+          b$1
         end
       end
       begin
-        ::OpEq#example#[]$2 = ::OpEq#example#a
-        ::OpEq#example#[]$3 = self(OpEq).y()
-        ::OpEq#example#[]$4 = self(OpEq).z()
-        ::OpEq#example#[]$5 = ::OpEq#example#[]$2.[](::OpEq#example#[]$3, ::OpEq#example#[]$4)
-        if ::OpEq#example#[]$5
-          ::OpEq#example#[]$2.[]=(::OpEq#example#[]$3, ::OpEq#example#[]$4, 1)
+        []$2 = a
+        []$3 = self(OpEq).y()
+        []$4 = self(OpEq).z()
+        []$5 = []$2.[]([]$3, []$4)
+        if []$5
+          []$2.[]=([]$3, []$4, 1)
         else
-          ::OpEq#example#[]$5
+          []$5
         end
       end
-      if ::OpEq#example#a
-        ::OpEq#example#a
+      if a
+        a
       else
-        ::OpEq#example#a = :a
+        a = :a
       end
       begin
-        ::OpEq#example#b$6 = self(OpEq)
-        ::OpEq#example#b$7 = ::OpEq#example#b$6.b()
-        if ::OpEq#example#b$7
-          ::OpEq#example#b$7
+        b$6 = self(OpEq)
+        b$7 = b$6.b()
+        if b$7
+          b$7
         else
-          ::OpEq#example#b$6.b=(:b)
+          b$6.b=(:b)
         end
       end
       begin
-        ::OpEq#example#[]$8 = ::OpEq#example#a
-        ::OpEq#example#[]$9 = self(OpEq).y()
-        ::OpEq#example#[]$10 = self(OpEq).z()
-        ::OpEq#example#[]$11 = ::OpEq#example#[]$8.[](::OpEq#example#[]$9, ::OpEq#example#[]$10)
-        if ::OpEq#example#[]$11
-          ::OpEq#example#[]$11
+        []$8 = a
+        []$9 = self(OpEq).y()
+        []$10 = self(OpEq).z()
+        []$11 = []$8.[]([]$9, []$10)
+        if []$11
+          []$11
         else
-          ::OpEq#example#[]$8.[]=(::OpEq#example#[]$9, ::OpEq#example#[]$10, 1)
+          []$8.[]=([]$9, []$10, 1)
         end
       end
     end

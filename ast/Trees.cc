@@ -83,6 +83,8 @@ Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(sym
     Error::check(symbol.exists());
 }
 
+Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Expression(loc), localVariable(localVariable1) {}
+
 UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name)
     : Reference(loc), kind(kind), name(name) {}
 
@@ -420,11 +422,29 @@ string Ident::toString(core::GlobalState &gs, int tabs) {
     return this->symbol.info(gs, true).fullName(gs);
 }
 
+std::string Local::toString(core::GlobalState &gs, int tabs) {
+    return this->localVariable.name.toString(gs);
+}
+
+std::string Local::nodeName() {
+    return "Local";
+}
+
 string Ident::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "Ident{" << endl;
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.info(gs, true).name.name(gs).toString(gs) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
+string Local::showRaw(core::GlobalState &gs, int tabs) {
+    stringstream buf;
+    buf << "Local{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "localVariable = " << this->localVariable.name.toString(gs) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();

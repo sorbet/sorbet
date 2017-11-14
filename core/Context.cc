@@ -149,12 +149,6 @@ static UTF8Desc object_DESC{(char *)object_str, (int)strlen(object_str)};
 static const char *junk_str = "<<JUNK>>";
 static UTF8Desc junk_DESC{(char *)junk_str, (int)strlen(junk_str)};
 
-static const char *always_str = "<always>";
-static UTF8Desc always_DESC{(char *)always_str, (int)strlen(always_str)};
-
-static const char *never_str = "<never>";
-static UTF8Desc never_DESC{(char *)never_str, (int)strlen(never_str)};
-
 static const char *block_call_str = "<block-call>";
 static UTF8Desc block_call_DESC{(char *)block_call_str, (int)strlen(block_call_str)};
 
@@ -275,6 +269,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef new_id = enterNameUTF8(new_DESC);
     NameRef destructureArg_id = enterNameUTF8(destructureArg_DESC);
     NameRef ampersand_id = enterNameUTF8(ampersand_DESC);
+    NameRef block_call_id = enterNameUTF8(block_call_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -312,6 +307,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(new_id == Names::new_()));
     DEBUG_ONLY(Error::check(destructureArg_id == Names::destructureArg()));
     DEBUG_ONLY(Error::check(ampersand_id == Names::ampersand()));
+    DEBUG_ONLY(Error::check(block_call_id == Names::blockCall()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -321,9 +317,6 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef todo_id = synthesizeClass(todo_DESC);
     SymbolRef object_id = synthesizeClass(object_DESC);
     SymbolRef junk_id = synthesizeClass(junk_DESC);
-    SymbolRef always_id = synthesizeClass(always_DESC);
-    SymbolRef never_id = synthesizeClass(never_DESC);
-    SymbolRef block_call_id = synthesizeClass(block_call_DESC);
     SymbolRef integer_id = synthesizeClass(integer_DESC);
     SymbolRef float_id = synthesizeClass(float_DESC);
     SymbolRef string_id = synthesizeClass(string_DESC);
@@ -348,9 +341,6 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(todo_id == defn_todo());
     Error::check(object_id == defn_object());
     Error::check(junk_id == defn_junk());
-    Error::check(always_id == defn_cfg_always());
-    Error::check(never_id == defn_cfg_never());
-    Error::check(block_call_id == defn_cfg_block_call());
     Error::check(integer_id == defn_Integer());
     Error::check(float_id == defn_Float());
     Error::check(string_id == defn_String());
@@ -367,34 +357,6 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(basicObject_id == defn_Basic_Object());
     Error::check(kernel_id == defn_Kernel());
 
-    /* 0: <none>
-     * 1: <top>
-     * 2: <bottom>
-     * 3: <root>;
-     * 4: nil;
-     * 5: <todo>
-     * 6: <todo lvar>
-     * 7: <todo ivar>
-     * 8: <todo gvar>
-     * 9: <todo cvar>
-     * 10: Object;
-     * 11: <<JUNK>>;
-     * 12: <always>
-     * 13: <never>
-     * 14: <block-call>
-     * 15: Integer
-     * 16: Float
-     * 17: String
-     * 18: Symbol
-     * 19: Array
-     * 20: Hash
-     * 21: TrueClass
-     * 22: FalseClass
-     * 23: NilClass
-     * 24: Opus
-     * 25: Opus::Types
-     * 26: BasicObject
-     */
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }
 
@@ -402,7 +364,7 @@ GlobalState::~GlobalState() {}
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
-SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags, bool alwaysPinned) {
+SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
     DEBUG_ONLY(Error::check(owner.exists()));
     Error::check(name.exists());
     Symbol &ownerScope = owner.info(*this, true);
@@ -425,9 +387,6 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     info.flags = flags;
     info.owner = owner;
     info.definitionLoc = loc;
-    if (alwaysPinned) {
-        info.minLoops = -1;
-    }
 
     if (!reallocate)
         ownerScope.members.push_back(make_pair(name, ret));
@@ -437,23 +396,33 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 }
 
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS, true);
+    return enterSymbol(loc, owner, name, Symbol::Flags::CLASS);
 }
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, name, Symbol::Flags::METHOD, true);
+    return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, name, Symbol::Flags::FIELD, true);
+    return enterSymbol(loc, owner, name, Symbol::Flags::FIELD);
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    return enterSymbol(loc, owner, name, Symbol::Flags::STATIC_FIELD, true);
+    return enterSymbol(loc, owner, name, Symbol::Flags::STATIC_FIELD);
 }
 
-SymbolRef GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
-    return enterSymbol(Loc::none(0), owner, name, Symbol::Flags::LOCAL_VARIABLE, false);
+SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    return enterSymbol(loc, owner, name, Symbol::Flags::METHOD_ARGUMENT);
+}
+
+LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
+    // THIS IS NOT TRUE. Top level code is still a thing
+    // Error::check(owner.info(*this).isMethod());
+    if (owner.info(*this).isBlockSymbol(*this) && !name.isBlockClashSafe(*this)) {
+        name = freshNameUnique(UniqueNameKind::NestedScope, name, owner._id);
+    }
+    LocalVariable r(name);
+    return r;
 }
 
 NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
@@ -551,8 +520,10 @@ void GlobalState::expandNames() {
     names_by_hash.swap(new_names_by_hash);
 }
 
-NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original) {
-    u2 num = freshNameId++;
+NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
+    if (num == 0) {
+        num = freshNameId++;
+    }
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
     unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
@@ -610,8 +581,12 @@ FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
     return FileRef(idx);
 }
 
-SymbolRef GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
-    NameRef tempName = this->freshNameUnique(kind, name);
+LocalVariable GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
+    Symbol &info = owner.info(*this);
+    Error::check(info.isMethod());
+    int id = info.uniqueCounter++;
+    NameRef tempName = this->freshNameUnique(kind, name, id);
+
     return this->enterLocalSymbol(owner, tempName);
 }
 
@@ -645,9 +620,18 @@ SymbolRef Context::selfClass() {
     return this->contextClass();
 }
 
+SymbolRef Context::enclosingMethod() {
+    SymbolRef owner = this->owner;
+    while (!owner.info(this->state, false).isMethod()) {
+        Error::check(owner.exists());
+        owner = owner.info(this->state).owner;
+    }
+    return owner;
+}
+
 SymbolRef Context::contextClass() {
     SymbolRef owner = this->owner;
-    while (!owner.info(this->state).isClass()) {
+    while (!owner.info(this->state, false).isClass()) {
         Error::check(owner.exists());
         owner = owner.info(this->state).owner;
     }

@@ -1,5 +1,6 @@
 #include "namer/namer.h"
 #include "../ast/ast.h"
+#include "../core/Context.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "core/core.h"
@@ -42,8 +43,7 @@ class NameInserter {
     }
 
     struct LocalFrame {
-        bool is_block;
-        unordered_map<core::NameRef, core::SymbolRef> locals;
+        unordered_map<core::NameRef, core::LocalVariable> locals;
     };
 
     vector<LocalFrame> scopeStack;
@@ -111,12 +111,13 @@ public:
     }
 
     unique_ptr<ast::Expression> fillInArg(core::Context ctx, ast::UnresolvedIdent *nmarg, core::Symbol &method) {
-        auto tx = postTransformUnresolvedIdent(ctx.withOwner(method.ref(ctx)), nmarg);
+        core::SymbolRef owner = method.ref(ctx);
+        auto tx = postTransformUnresolvedIdent(ctx.withOwner(owner), nmarg);
         if (tx != nmarg) {
             unique_ptr<ast::Expression> res(tx);
-            ast::Ident *id = dynamic_cast<ast::Ident *>(tx);
+            ast::Local *id = dynamic_cast<ast::Local *>(tx);
             Error::check(id != nullptr);
-            method.argumentsOrMixins.push_back(id->symbol);
+            method.argumentsOrMixins.push_back(ctx.state.enterMethodArgumentSymbol(nmarg->loc, owner, nmarg->name));
             return res;
         }
         Error::notImplemented();
@@ -161,7 +162,6 @@ public:
         scopeStack.emplace_back();
         auto &parent = *(scopeStack.end() - 2);
         auto &frame = scopeStack.back();
-        frame.is_block = true;
 
         // We inherit our parent's locals
         for (auto &binding : parent.locals) {
@@ -176,7 +176,7 @@ public:
             if (nm->kind != ast::UnresolvedIdent::Local)
                 continue;
 
-            frame.locals.erase(nm->name);
+            frame.locals[nm->name] = ctx.state.newTemporary(core::UniqueNameKind::Namer, nm->name, blk->symbol);
         }
 
         fillInArgs(ctx, blk->args, symbol);
@@ -192,12 +192,12 @@ public:
         switch (nm->kind) {
             case ast::UnresolvedIdent::Local: {
                 auto &frame = scopeStack.back();
-                core::SymbolRef &cur = frame.locals[nm->name];
+                core::LocalVariable &cur = frame.locals[nm->name];
                 if (!cur.exists()) {
                     cur = ctx.state.enterLocalSymbol(ctx.owner, nm->name);
                     frame.locals[nm->name] = cur;
                 }
-                return new ast::Ident(nm->loc, cur);
+                return new ast::Local(nm->loc, cur);
             }
             case ast::UnresolvedIdent::Global: {
                 core::Symbol &root = ctx.state.defn_root().info(ctx);

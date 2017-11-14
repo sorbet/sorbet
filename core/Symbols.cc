@@ -79,8 +79,8 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
         type = "field";
     } else if (myInfo.isMethod()) {
         type = "method";
-    } else if (myInfo.isLocalVariable()) {
-        type = "local";
+    } else if (myInfo.isMethodArgument()) {
+        type = "argument";
     }
 
     os << type << " " << name;
@@ -153,10 +153,6 @@ string Symbol::fullName(GlobalState &gs) const {
         return owner_str + "#" + this->name.toString(gs);
 }
 
-bool Symbol::isSyntheticTemporary(GlobalState &gs) const {
-    return name.name(gs).kind == NameKind::UNIQUE;
-}
-
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Error::check(this->isClass());
     if (this->ref(gs) == GlobalState::defn_dynamic())
@@ -184,6 +180,24 @@ SymbolRef Symbol::attachedClass(GlobalState &gs) {
 
     SymbolRef singleton = findMember(Names::attachedClass());
     return singleton;
+}
+
+LocalVariable::LocalVariable(NameRef name) : name(name) {}
+LocalVariable::LocalVariable() : name(0) {}
+bool LocalVariable::exists() {
+    return name._id > 0;
+}
+
+bool LocalVariable::isSyntheticTemporary(GlobalState &gs) {
+    return name.name(gs).kind == NameKind::UNIQUE;
+}
+
+bool LocalVariable::operator==(const LocalVariable &rhs) const {
+    return this->name == rhs.name;
+}
+
+bool LocalVariable::operator!=(const LocalVariable &rhs) const {
+    return this->name != rhs.name;
 }
 
 } // namespace core
