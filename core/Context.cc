@@ -110,8 +110,8 @@ static UTF8Desc top_DESC{(char *)top_str, (int)strlen(top_str)};
 static const char *bottom_str = "<bottom>";
 static UTF8Desc bottom_DESC{(char *)bottom_str, (int)strlen(bottom_str)};
 
-static const char *dynamic_str = "<dynamic>";
-static UTF8Desc dynamic_DESC{(char *)dynamic_str, (int)strlen(dynamic_str)};
+static const char *untyped_str = "untyped";
+static UTF8Desc untyped_DESC{(char *)untyped_str, (int)strlen(untyped_str)};
 
 static const char *root_str = "<root>";
 static UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
@@ -336,7 +336,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef trueClass_id = synthesizeClass(trueClass_DESC);
     SymbolRef falseClass_id = synthesizeClass(falseClass_DESC);
     SymbolRef nilClass_id = synthesizeClass(nilClass_DESC);
-    SymbolRef dynamic_id = synthesizeClass(dynamic_DESC);
+    SymbolRef untyped_id = synthesizeClass(untyped_DESC);
     SymbolRef opus_id = synthesizeClass(opus_DESC);
     SymbolRef opus_types_id = enterClassSymbol(Loc::none(0), opus_id, enterNameUTF8(types_DESC));
     SymbolRef class_id = synthesizeClass(class_DESC);
@@ -360,7 +360,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(trueClass_id == defn_TrueClass());
     Error::check(falseClass_id == defn_FalseClass());
     Error::check(nilClass_id == defn_NilClass());
-    Error::check(dynamic_id == defn_dynamic());
+    Error::check(untyped_id == defn_untyped());
     Error::check(opus_id == defn_Opus());
     Error::check(opus_types_id == defn_Opus_Types());
     Error::check(class_id == defn_Class());
