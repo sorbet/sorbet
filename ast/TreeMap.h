@@ -140,6 +140,7 @@ GENERATE_HAS_MEMBER(preTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(preTransformBoolLit);
 GENERATE_HAS_MEMBER(preTransformStringLit);
 GENERATE_HAS_MEMBER(preTransformFloatLit);
+GENERATE_HAS_MEMBER(preTransformLocal);
 GENERATE_HAS_MEMBER(preTransformIntLit);
 GENERATE_HAS_MEMBER(preTransformConstantLit);
 GENERATE_HAS_MEMBER(preTransformSelf);
@@ -161,6 +162,7 @@ GENERATE_HAS_MEMBER(postTransformAssign);
 GENERATE_HAS_MEMBER(postTransformSend);
 GENERATE_HAS_MEMBER(postTransformNamedArg);
 GENERATE_HAS_MEMBER(postTransformHash);
+GENERATE_HAS_MEMBER(postTransformLocal);
 GENERATE_HAS_MEMBER(postTransformArray);
 GENERATE_HAS_MEMBER(postTransformBoolLit);
 GENERATE_HAS_MEMBER(postTransformFloatLit);
@@ -257,6 +259,7 @@ GENERATE_POSTPONE_POSTCLASS(NamedArg);
 GENERATE_POSTPONE_POSTCLASS(Hash);
 GENERATE_POSTPONE_POSTCLASS(Array);
 GENERATE_POSTPONE_POSTCLASS(BoolLit);
+GENERATE_POSTPONE_POSTCLASS(Local);
 GENERATE_POSTPONE_POSTCLASS(FloatLit);
 GENERATE_POSTPONE_POSTCLASS(IntLit);
 GENERATE_POSTPONE_POSTCLASS(StringLit);
@@ -287,6 +290,7 @@ private:
     static_assert(!HAS_MEMBER_preTransformIntLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformSelf<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformLocal<FUNC>::value, "use post*Transform instead");
 
     TreeMap(FUNC &func) : func(func) {}
 
@@ -710,6 +714,12 @@ private:
                                                                                                              func);
             }
 
+            return v;
+        } else if (Local *v = dynamic_cast<Local *>(what)) {
+            if (HAS_MEMBER_postTransformLocal<FUNC>::value) {
+                return PostPonePostTransform_Local<FUNC, HAS_MEMBER_postTransformLocal<FUNC>::value>::call(ctx, v,
+                                                                                                           func);
+            }
             return v;
         } else if (NotSupported *v = dynamic_cast<NotSupported *>(what)) {
             return what;

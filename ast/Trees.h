@@ -2,6 +2,7 @@
 #define SRUBY_TREES_H
 
 #include "../common/common.h"
+#include "../core/Symbols.h"
 #include "core/Context.h"
 #include "core/Symbols.h"
 #include <memory>
@@ -188,6 +189,16 @@ public:
     core::SymbolRef symbol;
 
     Ident(core::Loc loc, core::SymbolRef symbol);
+    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+};
+
+class Local : public Expression {
+public:
+    core::LocalVariable localVariable;
+
+    Local(core::Loc loc, core::LocalVariable localVariable1);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

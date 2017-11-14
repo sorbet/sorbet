@@ -4,7 +4,6 @@
 #include "Loc.h"
 #include "Names.h"
 #include "common/common.h"
-#include <climits> // INT_MAX
 #include <memory>
 #include <vector>
 
@@ -77,6 +76,23 @@ public:
 
 CheckSize(SymbolRef, 4, 4);
 
+class LocalVariable {
+public:
+    NameRef name;
+    LocalVariable(NameRef name);
+    LocalVariable();
+    bool exists();
+    bool isSyntheticTemporary(GlobalState &gs);
+    LocalVariable(const LocalVariable &) = default;
+    LocalVariable(LocalVariable &&) = default;
+    LocalVariable &operator=(LocalVariable &&) = default;
+    LocalVariable &operator=(const LocalVariable &) = default;
+
+    bool operator==(const LocalVariable &rhs) const;
+
+    bool operator!=(const LocalVariable &rhs) const;
+};
+
 class Symbol {
 public:
     Symbol(const Symbol &) = delete;
@@ -91,20 +107,18 @@ public:
         static constexpr int METHOD = 0x4000;
         static constexpr int FIELD = 0x2000;
         static constexpr int STATIC_FIELD = 0x1000;
-        static constexpr int LOCAL_VARIABLE = 0x0800;
+        static constexpr int METHOD_ARGUMENT = 0x0800;
     };
 
     SymbolRef owner;
     Loc definitionLoc;
+    u4 uniqueCounter = 0;
     /* isClass,   IsArray,  isField, isMethod
      * IsFromJar, IsFromFile
      * */
     u4 flags;
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
-
-    // TODO: this should belong to future LocalVariable class
-    int minLoops = INT_MAX; // minimal loop depth that refers to this variable.
 
     inline std::vector<SymbolRef> &arguments() {
         Error::check(!isClass());
@@ -146,8 +160,8 @@ public:
         return (flags & Symbol::Flags::METHOD) != 0;
     }
 
-    inline bool isLocalVariable() const {
-        return (flags & Symbol::Flags::LOCAL_VARIABLE) != 0;
+    inline bool isMethodArgument() const {
+        return (flags & Symbol::Flags::METHOD_ARGUMENT) != 0;
     }
 
     inline void setClass() {
@@ -175,8 +189,6 @@ public:
 
     std::string fullName(GlobalState &gs) const;
 
-    bool isSyntheticTemporary(GlobalState &ctx) const;
-
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
     SymbolRef singletonClass(GlobalState &gs);
@@ -184,10 +196,10 @@ public:
     // Returns attached class or noSymbol if it does not exist
     SymbolRef attachedClass(GlobalState &gs);
 
-    //    std::vector<Tree> implementation; // TODO: make into small vector too
     NameRef name; // todo: move out? it should not matter but it's important for
     // name resolution
-    std::vector<std::pair<NameRef, SymbolRef>> members; // TODO: replace with https://github.com/greg7mdp/sparsepp &
+    std::vector<std::pair<NameRef, SymbolRef>>
+        members; // TODO: replace with https://github.com/greg7mdp/sparsepp . Should be only in ClassSymbol
     // optimize for absence
 private:
     void ensureCompleted(GlobalState &gs);
@@ -202,6 +214,12 @@ namespace std {
 template <> struct hash<ruby_typer::core::SymbolRef> {
     std::size_t operator()(const ruby_typer::core::SymbolRef k) const {
         return k._id;
+    }
+};
+
+template <> struct hash<ruby_typer::core::LocalVariable> {
+    std::size_t operator()(const ruby_typer::core::LocalVariable k) const {
+        return k.name._id;
     }
 };
 } // namespace std

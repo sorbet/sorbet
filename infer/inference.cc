@@ -10,31 +10,22 @@ using namespace infer;
 
 class Environment {
 public:
-    vector<core::SymbolRef> vars;
+    vector<core::LocalVariable> vars;
     vector<core::TypeAndOrigins> types;
 
-    core::TypeAndOrigins getTypeAndOrigin(core::Context ctx, core::SymbolRef symbol) {
-        if (symbol == core::GlobalState::defn_dynamic()) {
-            core::TypeAndOrigins dynamicTypeAndOrigin;
-            dynamicTypeAndOrigin.type = core::Types::dynamic();
-            dynamicTypeAndOrigin.origins.push_back(core::Loc::none(0));
-            return dynamicTypeAndOrigin;
-        }
-
-        Error::check(symbol.info(ctx).isLocalVariable());
-
+    core::TypeAndOrigins getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             core::TypeAndOrigins ret;
             ret.type = core::Types::nil();
-            ret.origins.push_back(symbol.info(ctx).owner.info(ctx).definitionLoc);
+            ret.origins.push_back(ctx.owner.info(ctx).definitionLoc);
             return ret;
         }
         Error::check(types[fnd - vars.begin()].type.get() != nullptr);
         return types[fnd - vars.begin()];
     }
 
-    void setTypeAndOrigin(core::SymbolRef symbol, core::TypeAndOrigins typeAndOrigins) {
+    void setTypeAndOrigin(core::LocalVariable symbol, core::TypeAndOrigins typeAndOrigins) {
         Error::check(typeAndOrigins.type.get() != nullptr);
 
         auto fnd = find(vars.begin(), vars.end(), symbol);
@@ -50,7 +41,7 @@ public:
 
     void mergeWith(core::Context ctx, Environment &other) {
         int i = 0;
-        for (core::SymbolRef var : vars) {
+        for (core::LocalVariable var : vars) {
             auto otherTO = other.getTypeAndOrigin(ctx, var);
             if (types[i].type.get() != nullptr) {
                 types[i].type = core::Types::lub(ctx, types[i].type, otherTO.type);
@@ -106,7 +97,7 @@ public:
         return tp;
     }
 
-    shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount) {
+    shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops) {
         core::TypeAndOrigins tp;
         bool noLoopChecking = dynamic_cast<cfg::Alias *>(bind.value.get()) != nullptr;
         typecase(
@@ -118,7 +109,7 @@ public:
                     core::SymbolRef sym = info.singletonClass(ctx);
                     tp.type = make_shared<core::ClassType>(sym);
                     tp.origins.push_back(info.definitionLoc);
-                } else if (info.isField() || info.isStaticField()) {
+                } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
                     if (info.resultType.get() != nullptr) {
                         tp.type = info.resultType;
                         tp.origins.push_back(info.definitionLoc);
@@ -134,18 +125,18 @@ public:
                 auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
-                if (i->what == ctx.state.defn_todo()) {
-                    tp.origins.push_back(core::Loc::none(0));
-                    tp.type = core::Types::dynamic();
-                } else {
-                    Error::check(tp.origins.size() > 0, "Inferencer did not assign location");
-                }
+                //                if (i->what == ctx.state.defn_todo()) {
+                //                    tp.origins.push_back(core::Loc::none(0));
+                //                    tp.type = core::Types::dynamic();
+                //                } else {
+                //                    Error::check(tp.origins.size() > 0, "Inferencer did not assign location");
+                //                }
             },
             [&](cfg::Send *send) {
                 vector<core::TypeAndOrigins> args;
 
                 args.reserve(send->args.size());
-                for (core::SymbolRef arg : send->args) {
+                for (core::LocalVariable arg : send->args) {
                     args.emplace_back(getTypeAndOrigin(ctx, arg));
                 }
 
@@ -219,7 +210,7 @@ public:
 
         core::TypeAndOrigins cur = getTypeAndOrigin(ctx, bind.bind);
 
-        if (noLoopChecking || loopCount == bind.bind.info(ctx).minLoops) {
+        if (noLoopChecking || loopCount == bindMinLoops) {
             setTypeAndOrigin(bind.bind, tp);
         } else {
             if (!core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {
@@ -233,8 +224,8 @@ public:
         return tp.type;
     }
 
-    void ensureGoodCondition(core::Context ctx, core::SymbolRef cond) {}
-    void ensureGoodAssignTarget(core::Context ctx, core::SymbolRef target) {}
+    void ensureGoodCondition(core::Context ctx, core::LocalVariable cond) {}
+    void ensureGoodAssignTarget(core::Context ctx, core::LocalVariable target) {}
 };
 
 void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
@@ -248,7 +239,7 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
         Environment &current = outEnvironments[bb->id];
         current.vars.reserve(bb->args.size());
         current.types.reserve(bb->args.size());
-        for (core::SymbolRef arg : bb->args) {
+        for (core::LocalVariable arg : bb->args) {
             current.vars.push_back(arg);
             current.types.emplace_back();
         }
@@ -261,13 +252,13 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
         for (auto &uninitialized : current.types) {
             if (uninitialized.type.get() == nullptr) {
                 uninitialized.type = core::Types::nil();
-                uninitialized.origins.push_back(current.vars[i].info(ctx).owner.info(ctx).definitionLoc);
+                uninitialized.origins.push_back(ctx.owner.info(ctx).definitionLoc);
             }
             i++;
         }
         for (cfg::Binding &bind : bb->exprs) {
             current.ensureGoodAssignTarget(ctx, bind.bind);
-            bind.tpe = current.processBinding(ctx, bind, bb->outerLoops);
+            bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind]);
         }
         current.ensureGoodCondition(ctx, bb->bexit.cond);
         visited[bb->id] = true;

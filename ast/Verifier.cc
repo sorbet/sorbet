@@ -56,6 +56,10 @@ public:
         check(original);
         return original;
     }
+    Expression *postTransformLocal(core::Context ctx, Local *original) {
+        check(original);
+        return original;
+    }
     Expression *postTransformAssign(core::Context ctx, Assign *original) {
         check(original);
         return original;

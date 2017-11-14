@@ -42,13 +42,14 @@ public:
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
-    SymbolRef enterLocalSymbol(SymbolRef owner, NameRef name);
+    SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
+    LocalVariable enterLocalSymbol(SymbolRef owner, NameRef name);
 
-    SymbolRef newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
+    LocalVariable newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
 
     NameRef enterNameUTF8(UTF8Desc nm);
 
-    NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original);
+    NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num = 0);
 
     FileRef enterFile(UTF8Desc path, UTF8Desc source);
 
@@ -97,76 +98,64 @@ public:
         return SymbolRef(7);
     }
 
-    static constexpr SymbolRef defn_cfg_always() {
+    static constexpr SymbolRef defn_Integer() {
         return SymbolRef(8);
     }
 
-    static constexpr SymbolRef defn_cfg_never() {
+    static constexpr SymbolRef defn_Float() {
         return SymbolRef(9);
     }
 
-    static constexpr SymbolRef defn_cfg_block_call() {
+    static constexpr SymbolRef defn_String() {
         return SymbolRef(10);
     }
 
-    static constexpr SymbolRef defn_Integer() {
+    static constexpr SymbolRef defn_Symbol() {
         return SymbolRef(11);
     }
 
-    static constexpr SymbolRef defn_Float() {
+    static constexpr SymbolRef defn_Array() {
         return SymbolRef(12);
     }
 
-    static constexpr SymbolRef defn_String() {
+    static constexpr SymbolRef defn_Hash() {
         return SymbolRef(13);
     }
 
-    static constexpr SymbolRef defn_Symbol() {
+    static constexpr SymbolRef defn_TrueClass() {
         return SymbolRef(14);
     }
 
-    static constexpr SymbolRef defn_Array() {
+    static constexpr SymbolRef defn_FalseClass() {
         return SymbolRef(15);
     }
 
-    static constexpr SymbolRef defn_Hash() {
+    static constexpr SymbolRef defn_NilClass() {
         return SymbolRef(16);
     }
 
-    static constexpr SymbolRef defn_TrueClass() {
+    static constexpr SymbolRef defn_dynamic() {
         return SymbolRef(17);
     }
 
-    static constexpr SymbolRef defn_FalseClass() {
+    static constexpr SymbolRef defn_Opus() {
         return SymbolRef(18);
     }
 
-    static constexpr SymbolRef defn_NilClass() {
+    static constexpr SymbolRef defn_Opus_Types() {
         return SymbolRef(19);
     }
 
-    static constexpr SymbolRef defn_dynamic() {
+    static constexpr SymbolRef defn_Class() {
         return SymbolRef(20);
     }
 
-    static constexpr SymbolRef defn_Opus() {
+    static constexpr SymbolRef defn_Basic_Object() {
         return SymbolRef(21);
     }
 
-    static constexpr SymbolRef defn_Opus_Types() {
-        return SymbolRef(22);
-    }
-
-    static constexpr SymbolRef defn_Class() {
-        return SymbolRef(23);
-    }
-
-    static constexpr SymbolRef defn_Basic_Object() {
-        return SymbolRef(24);
-    }
-
     static constexpr SymbolRef defn_Kernel() {
-        return SymbolRef(25);
+        return SymbolRef(22);
     }
 
     // Keep as last and update to match the last entry
@@ -195,7 +184,7 @@ private:
 
     SymbolRef synthesizeClass(UTF8Desc name);
 
-    SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags, bool alwaysPinned);
+    SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef getTopLevelClassSymbol(NameRef name);
 
@@ -221,6 +210,8 @@ public:
     // their singleton classes for most purposes)
     SymbolRef selfClass();
 
+    SymbolRef enclosingMethod();
+
     // Returns the SymbolRef corresponding to the class `self.class`, unless the
     // context is a class, in which case return it. This class is most notably
     // the class in which to look up class variables.
@@ -231,6 +222,7 @@ public:
         r.owner = sym;
         return r;
     }
+    SymbolRef newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
 };
 
 } // namespace core

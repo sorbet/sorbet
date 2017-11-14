@@ -162,7 +162,7 @@ TEST(PreOrderTreeMap, CountTrees) {
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = ctx.state.enterLocalSymbol(methodSym, name);
     unique_ptr<Expression> rhs(new IntLit(loc, 5));
-    auto arg = unique_ptr<Expression>(new Ident(loc, argumentSym));
+    auto arg = unique_ptr<Expression>(new Local(loc, argumentSym));
     MethodDef::ARGS_store args;
     args.emplace_back(move(arg));
 

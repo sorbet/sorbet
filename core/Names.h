@@ -306,6 +306,10 @@ public:
     static inline NameRef ampersand() {
         return NameRef(36);
     }
+
+    static inline NameRef blockCall() {
+        return NameRef(37);
+    }
 };
 
 class Name {
