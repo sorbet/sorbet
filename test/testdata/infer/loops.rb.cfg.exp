@@ -5,17 +5,17 @@ subgraph "cluster_::HasLoops#variable_only_inside_loop" {
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
 
-    bb24_0 [label = "()\n<unconditinal>"];
+    bb24_0 [label = "()\n<unconditional>"];
     bb24_0 -> bb24_2;
-    bb24_1 [label = "()\n<unconditinal>"];
+    bb24_1 [label = "()\n<unconditional>"];
     bb24_1 -> bb24_1;
     bb24_2 [label = "()\nouterLoops: 1\nwhileTmp$2 = true : TrueClass(true)\nwhileTmp$2"];
     bb24_2 -> bb24_3;
     bb24_2 -> bb24_4;
 
-    bb24_3 [label = "()\nouterLoops: 1\na = 1 : Integer(1)\n<unconditinal>"];
+    bb24_3 [label = "()\nouterLoops: 1\na = 1 : Integer(1)\n<unconditional>"];
     bb24_3 -> bb24_2;
-    bb24_4 [label = "()\n<ret>$0 = nil : NilClass\n<ret>$4 = return <ret>$0 : <bottom>\n<unconditinal>"];
+    bb24_4 [label = "()\n<ret>$0 = nil : NilClass\n<ret>$4 = return <ret>$0 : <bottom>\n<unconditional>"];
     bb24_4 -> bb24_1;
 }
 
@@ -25,17 +25,17 @@ subgraph "cluster_::HasLoops#incorrect_assignment" {
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];
 
-    bb25_0 [label = "(a)\na = s : String(\"s\")\n<unconditinal>"];
+    bb25_0 [label = "(a)\na = s : String(\"s\")\n<unconditional>"];
     bb25_0 -> bb25_2;
-    bb25_1 [label = "()\n<unconditinal>"];
+    bb25_1 [label = "()\n<unconditional>"];
     bb25_1 -> bb25_1;
     bb25_2 [label = "(a)\nouterLoops: 1\nwhileTmp$3 = false : FalseClass(false)\nwhileTmp$3"];
     bb25_2 -> bb25_3;
     bb25_2 -> bb25_4;
 
-    bb25_3 [label = "(a)\nouterLoops: 1\na = 1 : <dynamic>\n<unconditinal>"];
+    bb25_3 [label = "(a)\nouterLoops: 1\na = 1 : <dynamic>\n<unconditional>"];
     bb25_3 -> bb25_2;
-    bb25_4 [label = "()\n<ret>$1 = nil : NilClass\n<ret>$5 = return <ret>$1 : <bottom>\n<unconditinal>"];
+    bb25_4 [label = "()\n<ret>$1 = nil : NilClass\n<ret>$5 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb25_4 -> bb25_1;
 }
 
@@ -45,17 +45,17 @@ subgraph "cluster_::HasLoops#correct_assignment" {
     bb26_0 [shape = invhouse];
     bb26_1 [shape = parallelogram];
 
-    bb26_0 [label = "(a)\na = s : String(\"s\")\n<unconditinal>"];
+    bb26_0 [label = "(a)\na = s : String(\"s\")\n<unconditional>"];
     bb26_0 -> bb26_2;
-    bb26_1 [label = "()\n<unconditinal>"];
+    bb26_1 [label = "()\n<unconditional>"];
     bb26_1 -> bb26_1;
     bb26_2 [label = "(a)\nouterLoops: 1\nwhileTmp$3 = false : FalseClass(false)\nwhileTmp$3"];
     bb26_2 -> bb26_3;
     bb26_2 -> bb26_4;
 
-    bb26_3 [label = "(a)\nouterLoops: 1\na = a : String(\"a\")\n<unconditinal>"];
+    bb26_3 [label = "(a)\nouterLoops: 1\na = a : String(\"a\")\n<unconditional>"];
     bb26_3 -> bb26_2;
-    bb26_4 [label = "()\n<ret>$2 = nil : NilClass\n<ret>$5 = return <ret>$2 : <bottom>\n<unconditinal>"];
+    bb26_4 [label = "()\n<ret>$2 = nil : NilClass\n<ret>$5 = return <ret>$2 : <bottom>\n<unconditional>"];
     bb26_4 -> bb26_1;
 }
 

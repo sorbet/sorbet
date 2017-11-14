@@ -47,9 +47,9 @@ begin
             <emptyTree>
           end
           budget = ::Opus::CIBot::Gerald::MatchTimeBudget.new()
-          ::Opus::CIBot::Gerald::Matcher#@rules.select() do |r$5|
-            budget.time_rule(r$5) do ||
-              r$5.matches?(match_context)
+          ::Opus::CIBot::Gerald::Matcher#@rules.select() do |<block-nested: r$5>|
+            budget.time_rule(<block-nested: r$5>) do ||
+              <block-nested: r$5>.matches?(match_context)
             end
           end
         end
@@ -147,34 +147,34 @@ begin
         self(Diff).added_files().+(self(Diff).deleted_files()).+(self(Diff).changed_files())
 
       def added_files<added_files>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |part$9|
-          part$9.[](:a_name).==("/dev/null")
-        end.map() do |part$11|
-          part$11.[](:b_name)
+        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |<block-nested: part$9>|
+          <block-nested: part$9>.[](:a_name).==("/dev/null")
+        end.map() do |<block-nested: part$11>|
+          <block-nested: part$11>.[](:b_name)
         end
 
       def deleted_files<deleted_files>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |part$13|
-          part$13.[](:b_name).==("/dev/null")
-        end.map() do |part$15|
-          part$15.[](:a_name)
+        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |<block-nested: part$13>|
+          <block-nested: part$13>.[](:b_name).==("/dev/null")
+        end.map() do |<block-nested: part$15>|
+          <block-nested: part$15>.[](:a_name)
         end
 
       def changed_files<changed_files>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |part$17|
-          part$17.[](:a_name).==(part$17.[](:b_name))
-        end.map() do |part$19|
-          part$19.[](:b_name)
+        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |<block-nested: part$17>|
+          <block-nested: part$17>.[](:a_name).==(<block-nested: part$17>.[](:b_name))
+        end.map() do |<block-nested: part$19>|
+          <block-nested: part$19>.[](:b_name)
         end
 
       def added_lines<added_lines>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.map() do |part$21|
-          part$21.[](:added_lines)
+        ::Opus::CIBot::Gerald::Diff#@parsed.map() do |<block-nested: part$21>|
+          <block-nested: part$21>.[](:added_lines)
         end.flatten()
 
       def removed_lines<removed_lines>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.map() do |part$23|
-          part$23.[](:removed_lines)
+        ::Opus::CIBot::Gerald::Diff#@parsed.map() do |<block-nested: part$23>|
+          <block-nested: part$23>.[](:removed_lines)
         end.flatten()
 
       def changed_lines<changed_lines>()
@@ -191,50 +191,50 @@ begin
             else
               parts = []
             end
-            parts.map() do |part$26|
+            parts.map() do |<block-nested: part$26>|
               begin
-                lines = part$26.split("
+                <block-nested: lines> = <block-nested: part$26>.split("
 ")
-                a_name = b_name = nil
-                added_lines = []
-                removed_lines = []
-                lines.each() do |line$28|
-                  if line$28.start_with?("index ", "@@", "new file mode")
+                <block-nested: a_name> = <block-nested: b_name> = nil
+                <block-nested: added_lines> = []
+                <block-nested: removed_lines> = []
+                <block-nested: lines>.each() do |<block-nested: line$28>|
+                  if <block-nested: line$28>.start_with?("index ", "@@", "new file mode")
                     next(<emptyTree>)
                   else
-                    if line$28.start_with?("---")
+                    if <block-nested: line$28>.start_with?("---")
                       begin
-                        a_name = line$28.[](<Not Supported (IRange)>)
-                        if if a_name
-                            a_name.start_with?("a/")
+                        <block-nested: a_name> = <block-nested: line$28>.[](<Not Supported (IRange)>)
+                        if if <block-nested: a_name>
+                            <block-nested: a_name>.start_with?("a/")
                           else
-                            a_name
+                            <block-nested: a_name>
                           end
-                          a_name = a_name.[](<Not Supported (IRange)>)
+                          <block-nested: a_name> = <block-nested: a_name>.[](<Not Supported (IRange)>)
                         else
                           <emptyTree>
                         end
                       end
                     else
-                      if line$28.start_with?("+++")
+                      if <block-nested: line$28>.start_with?("+++")
                         begin
-                          b_name = line$28.[](<Not Supported (IRange)>)
-                          if if b_name
-                              b_name.start_with?("b/")
+                          <block-nested: b_name> = <block-nested: line$28>.[](<Not Supported (IRange)>)
+                          if if <block-nested: b_name>
+                              <block-nested: b_name>.start_with?("b/")
                             else
-                              b_name
+                              <block-nested: b_name>
                             end
-                            b_name = b_name.[](<Not Supported (IRange)>)
+                            <block-nested: b_name> = <block-nested: b_name>.[](<Not Supported (IRange)>)
                           else
                             <emptyTree>
                           end
                         end
                       else
-                        if line$28.start_with?("+")
-                          added_lines.<<(line$28.[](<Not Supported (IRange)>))
+                        if <block-nested: line$28>.start_with?("+")
+                          <block-nested: added_lines>.<<(<block-nested: line$28>.[](<Not Supported (IRange)>))
                         else
-                          if line$28.start_with?("-")
-                            removed_lines.<<(line$28.[](<Not Supported (IRange)>))
+                          if <block-nested: line$28>.start_with?("-")
+                            <block-nested: removed_lines>.<<(<block-nested: line$28>.[](<Not Supported (IRange)>))
                           else
                             <emptyTree>
                           end
@@ -243,12 +243,12 @@ begin
                     end
                   end
                 end
-                if a_name.nil?()
+                if <block-nested: a_name>.nil?()
                   next(<emptyTree>)
                 else
                   <emptyTree>
                 end
-                {:a_name => a_name, :b_name => b_name, :added_lines => added_lines, :removed_lines => removed_lines}
+                {:a_name => <block-nested: a_name>, :b_name => <block-nested: b_name>, :added_lines => <block-nested: added_lines>, :removed_lines => <block-nested: removed_lines>}
               end
             end.compact()
           end)

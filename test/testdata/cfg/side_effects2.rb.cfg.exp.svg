@@ -36,7 +36,7 @@
 <ellipse fill="none" stroke="#000000" cx="133" cy="-286.5097" rx="116.7749" ry="35.2113"/>
 <text text-anchor="middle" x="133" y="-296.3097" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTmp$3, statTmp$4)</text>
 <text text-anchor="middle" x="133" y="-282.3097" font-family="Times,serif" font-size="14.00" fill="#000000">a = true : TrueClass(true)</text>
-<text text-anchor="middle" x="133" y="-268.3097" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="133" y="-268.3097" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_0&#45;&gt;bb24_2 -->
 <g id="edge1" class="edge">
@@ -50,7 +50,7 @@
 <ellipse fill="none" stroke="#000000" cx="385" cy="-286.5097" rx="116.7749" ry="35.2113"/>
 <text text-anchor="middle" x="385" y="-296.3097" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTmp$3, statTmp$4)</text>
 <text text-anchor="middle" x="385" y="-282.3097" font-family="Times,serif" font-size="14.00" fill="#000000">a = 2 : Integer(2)</text>
-<text text-anchor="middle" x="385" y="-268.3097" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="385" y="-268.3097" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_0&#45;&gt;bb24_3 -->
 <g id="edge2" class="edge">
@@ -61,15 +61,15 @@
 <!-- bb24_1 -->
 <g id="node2" class="node">
 <title>bb24_1</title>
-<polygon fill="none" stroke="#000000" points="364.536,-88 196.6519,-88 153.464,-16 321.3481,-16 364.536,-88"/>
+<polygon fill="none" stroke="#000000" points="371.551,-88 192.5076,-88 146.449,-16 325.4924,-16 371.551,-88"/>
 <text text-anchor="middle" x="259" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="259" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="259" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_1&#45;&gt;bb24_1 -->
 <g id="edge3" class="edge">
 <title>bb24_1&#45;&gt;bb24_1</title>
-<path fill="none" stroke="#000000" d="M355.3259,-72.2154C371.4156,-69.3869 382.518,-62.6484 382.518,-52 382.518,-38.2602 364.0337,-31.0302 340.2015,-30.3098"/>
-<polygon fill="#000000" stroke="#000000" points="340.0552,-26.8107 330.0807,-30.3828 340.1057,-33.8105 340.0552,-26.8107"/>
+<path fill="none" stroke="#000000" d="M361.5274,-72.1238C378.2694,-69.2431 389.7753,-62.5352 389.7753,-52 389.7753,-38.2992 370.3157,-31.0712 345.1869,-30.3161"/>
+<polygon fill="#000000" stroke="#000000" points="344.8982,-26.8171 334.9124,-30.3575 344.9265,-33.8171 344.8982,-26.8171"/>
 </g>
 <!-- bb24_4 -->
 <g id="node5" class="node">
@@ -78,7 +78,7 @@
 <text text-anchor="middle" x="259" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTmp$3, statTmp$4)</text>
 <text text-anchor="middle" x="259" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$0 = statTmp$3.bar(statTmp$4, a, a) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="259" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$8 = return &lt;ret&gt;$0 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="259" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="259" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_2&#45;&gt;bb24_4 -->
 <g id="edge4" class="edge">
@@ -110,14 +110,14 @@
 <text text-anchor="middle" x="771" y="-457.43" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$2 = self : Side</text>
 <text text-anchor="middle" x="771" y="-443.43" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$1 = statTmp$2.puts(a, b, c) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="771" y="-429.43" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$6 = return &lt;ret&gt;$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="771" y="-415.43" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="771" y="-415.43" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb25_1 -->
 <g id="node7" class="node">
 <title>bb25_1</title>
-<polygon fill="none" stroke="#000000" points="876.536,-322.5097 708.6519,-322.5097 665.464,-250.5097 833.3481,-250.5097 876.536,-322.5097"/>
+<polygon fill="none" stroke="#000000" points="883.551,-322.5097 704.5076,-322.5097 658.449,-250.5097 837.4924,-250.5097 883.551,-322.5097"/>
 <text text-anchor="middle" x="771" y="-289.3097" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="771" y="-275.3097" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="771" y="-275.3097" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb25_0&#45;&gt;bb25_1 -->
 <g id="edge7" class="edge">
@@ -128,9 +128,9 @@
 <!-- bb25_1&#45;&gt;bb25_1 -->
 <g id="edge8" class="edge">
 <title>bb25_1&#45;&gt;bb25_1</title>
-<path fill="none" stroke="#000000" d="M867.3259,-306.7251C883.4156,-303.8966 894.518,-297.1581 894.518,-286.5097 894.518,-272.7699 876.0337,-265.5398 852.2015,-264.8195"/>
-<polygon fill="#000000" stroke="#000000" points="852.0552,-261.3203 842.0807,-264.8924 852.1057,-268.3201 852.0552,-261.3203"/>
+<path fill="none" stroke="#000000" d="M873.5274,-306.6335C890.2694,-303.7528 901.7753,-297.0448 901.7753,-286.5097 901.7753,-272.8088 882.3157,-265.5809 857.1869,-264.8257"/>
+<polygon fill="#000000" stroke="#000000" points="856.8982,-261.3268 846.9124,-264.8672 856.9265,-268.3267 856.8982,-261.3268"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: c5b8bf5263628608bf16a5fabb3c6f52608b39db8b4f6417714dd1d6e767ea12 -->
+<!-- ruby-types:sha256: 9f38a8782aada67d4ca5a6da91154022f7d3b611417b822ca4cfacfd5c97ac60 -->

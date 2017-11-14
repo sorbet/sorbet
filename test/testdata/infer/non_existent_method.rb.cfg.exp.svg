@@ -23,14 +23,14 @@
 <text text-anchor="middle" x="251" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">a = statTmp$3.does_not_exist() : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="251" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$0 = a.bla() : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="251" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$5 = return &lt;ret&gt;$0 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="251" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="251" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_1 -->
 <g id="node2" class="node">
 <title>bb24_1</title>
-<polygon fill="none" stroke="#000000" points="356.536,-88 188.6519,-88 145.464,-16 313.3481,-16 356.536,-88"/>
+<polygon fill="none" stroke="#000000" points="363.551,-88 184.5076,-88 138.449,-16 317.4924,-16 363.551,-88"/>
 <text text-anchor="middle" x="251" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="251" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="251" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_0&#45;&gt;bb24_1 -->
 <g id="edge1" class="edge">
@@ -41,9 +41,9 @@
 <!-- bb24_1&#45;&gt;bb24_1 -->
 <g id="edge2" class="edge">
 <title>bb24_1&#45;&gt;bb24_1</title>
-<path fill="none" stroke="#000000" d="M350.8349,-77.5759C365.0076,-73.4394 374.518,-64.9141 374.518,-52 374.518,-33.0464 354.032,-23.5464 328.3871,-23.5002"/>
-<polygon fill="#000000" stroke="#000000" points="328.1731,-20.0061 318.3378,-23.9453 328.4829,-26.9993 328.1731,-20.0061"/>
+<path fill="none" stroke="#000000" d="M356.9589,-77.5041C371.8215,-73.3412 381.7753,-64.8398 381.7753,-52 381.7753,-33.029 360.0458,-23.529 332.8592,-23.5001"/>
+<polygon fill="#000000" stroke="#000000" points="332.4752,-20.0127 322.6263,-23.9179 332.7608,-27.0069 332.4752,-20.0127"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: b4df4c222b2992323efad4458df08af9dba265dcc8d50aa3450800576c5b9650 -->
+<!-- ruby-types:sha256: 90e00e6ef28826abcbff21ba40c206a9a8409742dd36bacb711cad3975d26db2 -->

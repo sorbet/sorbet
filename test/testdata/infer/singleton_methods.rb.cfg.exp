@@ -5,9 +5,9 @@ subgraph "cluster_::<singleton class:Foo>#bar" {
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];
 
-    bb25_0 [label = "()\n<ret>$1 = 1 : Integer(1)\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditinal>"];
+    bb25_0 [label = "()\n<ret>$1 = 1 : Integer(1)\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb25_0 -> bb25_1;
-    bb25_1 [label = "()\n<unconditinal>"];
+    bb25_1 [label = "()\n<unconditional>"];
     bb25_1 -> bb25_1;
 }
 
@@ -17,9 +17,9 @@ subgraph "cluster_::Bar#baz" {
     bb27_0 [shape = invhouse];
     bb27_1 [shape = parallelogram];
 
-    bb27_0 [label = "()\nFoo$3 = alias Foo : <singleton class:Foo>\n<ret>$2 = Foo$3.bar() : <dynamic>\n<ret>$4 = return <ret>$2 : <bottom>\n<unconditinal>"];
+    bb27_0 [label = "()\nFoo$3 = alias Foo : <singleton class:Foo>\n<ret>$2 = Foo$3.bar() : <dynamic>\n<ret>$4 = return <ret>$2 : <bottom>\n<unconditional>"];
     bb27_0 -> bb27_1;
-    bb27_1 [label = "()\n<unconditinal>"];
+    bb27_1 [label = "()\n<unconditional>"];
     bb27_1 -> bb27_1;
 }
 

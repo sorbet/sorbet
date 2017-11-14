@@ -67,14 +67,14 @@
 <text text-anchor="middle" x="224" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$1 = self : String</text>
 <text text-anchor="middle" x="224" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$2 = NotSupported() : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="224" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$2 = return &lt;ret&gt;$2 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="224" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="224" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_1 -->
 <g id="node2" class="node">
 <title>bb24_1</title>
-<polygon fill="none" stroke="#000000" points="329.536,-371.3625 161.6519,-371.3625 118.464,-299.3625 286.3481,-299.3625 329.536,-371.3625"/>
+<polygon fill="none" stroke="#000000" points="336.551,-371.3625 157.5076,-371.3625 111.449,-299.3625 290.4924,-299.3625 336.551,-371.3625"/>
 <text text-anchor="middle" x="224" y="-338.1625" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="224" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="224" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_0&#45;&gt;bb24_1 -->
 <g id="edge1" class="edge">
@@ -85,8 +85,8 @@
 <!-- bb24_1&#45;&gt;bb24_1 -->
 <g id="edge2" class="edge">
 <title>bb24_1&#45;&gt;bb24_1</title>
-<path fill="none" stroke="#000000" d="M322.8502,-360.1961C337.5653,-356.3298 347.518,-348.0519 347.518,-335.3625 347.518,-317.3631 327.4932,-308.2398 302.256,-307.9926"/>
-<polygon fill="#000000" stroke="#000000" points="301.8323,-304.5055 291.9648,-308.3634 302.0844,-311.501 301.8323,-304.5055"/>
+<path fill="none" stroke="#000000" d="M329.4415,-359.9969C344.59,-356.0495 354.7753,-347.8381 354.7753,-335.3625 354.7753,-317.2673 333.3476,-308.143 306.4268,-307.9895"/>
+<polygon fill="#000000" stroke="#000000" points="306.163,-304.4964 296.2895,-308.3388 306.4042,-311.4922 306.163,-304.4964"/>
 </g>
 <!-- bb27_0 -->
 <g id="node3" class="node">
@@ -96,14 +96,14 @@
 <text text-anchor="middle" x="664" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$1 = self : Integer</text>
 <text text-anchor="middle" x="664" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$3 = NotSupported() : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="664" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$2 = return &lt;ret&gt;$3 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="664" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="664" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb27_1 -->
 <g id="node4" class="node">
 <title>bb27_1</title>
-<polygon fill="none" stroke="#000000" points="769.536,-371.3625 601.6519,-371.3625 558.464,-299.3625 726.3481,-299.3625 769.536,-371.3625"/>
+<polygon fill="none" stroke="#000000" points="776.551,-371.3625 597.5076,-371.3625 551.449,-299.3625 730.4924,-299.3625 776.551,-371.3625"/>
 <text text-anchor="middle" x="664" y="-338.1625" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="664" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="664" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb27_0&#45;&gt;bb27_1 -->
 <g id="edge3" class="edge">
@@ -114,8 +114,8 @@
 <!-- bb27_1&#45;&gt;bb27_1 -->
 <g id="edge4" class="edge">
 <title>bb27_1&#45;&gt;bb27_1</title>
-<path fill="none" stroke="#000000" d="M762.8502,-360.1961C777.5653,-356.3298 787.518,-348.0519 787.518,-335.3625 787.518,-317.3631 767.4932,-308.2398 742.256,-307.9926"/>
-<polygon fill="#000000" stroke="#000000" points="741.8323,-304.5055 731.9648,-308.3634 742.0844,-311.501 741.8323,-304.5055"/>
+<path fill="none" stroke="#000000" d="M769.4415,-359.9969C784.59,-356.0495 794.7753,-347.8381 794.7753,-335.3625 794.7753,-317.2673 773.3476,-308.143 746.4268,-307.9895"/>
+<polygon fill="#000000" stroke="#000000" points="746.163,-304.4964 736.2895,-308.3388 746.4042,-311.4922 746.163,-304.4964"/>
 </g>
 <!-- bb29_0 -->
 <g id="node5" class="node">
@@ -125,14 +125,14 @@
 <text text-anchor="middle" x="1082" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">a = foo : String(&quot;foo&quot;)</text>
 <text text-anchor="middle" x="1082" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = a.getbyte(a) : Integer | NilClass</text>
 <text text-anchor="middle" x="1082" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$5 = return b : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="1082" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="1082" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb29_1 -->
 <g id="node6" class="node">
 <title>bb29_1</title>
-<polygon fill="none" stroke="#000000" points="1187.536,-371.3625 1019.6519,-371.3625 976.464,-299.3625 1144.3481,-299.3625 1187.536,-371.3625"/>
+<polygon fill="none" stroke="#000000" points="1194.551,-371.3625 1015.5076,-371.3625 969.449,-299.3625 1148.4924,-299.3625 1194.551,-371.3625"/>
 <text text-anchor="middle" x="1082" y="-338.1625" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1082" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="1082" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb29_0&#45;&gt;bb29_1 -->
 <g id="edge5" class="edge">
@@ -143,8 +143,8 @@
 <!-- bb29_1&#45;&gt;bb29_1 -->
 <g id="edge6" class="edge">
 <title>bb29_1&#45;&gt;bb29_1</title>
-<path fill="none" stroke="#000000" d="M1180.8502,-360.1961C1195.5653,-356.3298 1205.518,-348.0519 1205.518,-335.3625 1205.518,-317.3631 1185.4932,-308.2398 1160.256,-307.9926"/>
-<polygon fill="#000000" stroke="#000000" points="1159.8323,-304.5055 1149.9648,-308.3634 1160.0844,-311.501 1159.8323,-304.5055"/>
+<path fill="none" stroke="#000000" d="M1187.4415,-359.9969C1202.59,-356.0495 1212.7753,-347.8381 1212.7753,-335.3625 1212.7753,-317.2673 1191.3476,-308.143 1164.4268,-307.9895"/>
+<polygon fill="#000000" stroke="#000000" points="1164.163,-304.4964 1154.2895,-308.3388 1164.4042,-311.4922 1164.163,-304.4964"/>
 </g>
 <!-- bb30_0 -->
 <g id="node7" class="node">
@@ -155,14 +155,14 @@
 <text text-anchor="middle" x="1525" y="-512.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$4 = foo : String(&quot;foo&quot;)</text>
 <text text-anchor="middle" x="1525" y="-498.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = a.getbyte(statTmp$4) : Integer | NilClass</text>
 <text text-anchor="middle" x="1525" y="-484.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$5 = return b : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="1525" y="-470.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="1525" y="-470.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb30_1 -->
 <g id="node8" class="node">
 <title>bb30_1</title>
-<polygon fill="none" stroke="#000000" points="1630.536,-371.3625 1462.6519,-371.3625 1419.464,-299.3625 1587.3481,-299.3625 1630.536,-371.3625"/>
+<polygon fill="none" stroke="#000000" points="1637.551,-371.3625 1458.5076,-371.3625 1412.449,-299.3625 1591.4924,-299.3625 1637.551,-371.3625"/>
 <text text-anchor="middle" x="1525" y="-338.1625" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1525" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="1525" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb30_0&#45;&gt;bb30_1 -->
 <g id="edge7" class="edge">
@@ -173,8 +173,8 @@
 <!-- bb30_1&#45;&gt;bb30_1 -->
 <g id="edge8" class="edge">
 <title>bb30_1&#45;&gt;bb30_1</title>
-<path fill="none" stroke="#000000" d="M1623.8502,-360.1961C1638.5653,-356.3298 1648.518,-348.0519 1648.518,-335.3625 1648.518,-317.3631 1628.4932,-308.2398 1603.256,-307.9926"/>
-<polygon fill="#000000" stroke="#000000" points="1602.8323,-304.5055 1592.9648,-308.3634 1603.0844,-311.501 1602.8323,-304.5055"/>
+<path fill="none" stroke="#000000" d="M1630.4415,-359.9969C1645.59,-356.0495 1655.7753,-347.8381 1655.7753,-335.3625 1655.7753,-317.2673 1634.3476,-308.143 1607.4268,-307.9895"/>
+<polygon fill="#000000" stroke="#000000" points="1607.163,-304.4964 1597.2895,-308.3388 1607.4042,-311.4922 1607.163,-304.4964"/>
 </g>
 <!-- bb31_0 -->
 <g id="node9" class="node">
@@ -185,14 +185,14 @@
 <text text-anchor="middle" x="2062" y="-512.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$3 = foo : String(&quot;foo&quot;)</text>
 <text text-anchor="middle" x="2062" y="-498.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTmp$2.getbyte(statTmp$3) : Integer | NilClass</text>
 <text text-anchor="middle" x="2062" y="-484.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$4 = return b : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="2062" y="-470.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="2062" y="-470.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb31_1 -->
 <g id="node10" class="node">
 <title>bb31_1</title>
-<polygon fill="none" stroke="#000000" points="2167.536,-371.3625 1999.6519,-371.3625 1956.464,-299.3625 2124.3481,-299.3625 2167.536,-371.3625"/>
+<polygon fill="none" stroke="#000000" points="2174.551,-371.3625 1995.5076,-371.3625 1949.449,-299.3625 2128.4924,-299.3625 2174.551,-371.3625"/>
 <text text-anchor="middle" x="2062" y="-338.1625" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="2062" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="2062" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb31_0&#45;&gt;bb31_1 -->
 <g id="edge9" class="edge">
@@ -203,8 +203,8 @@
 <!-- bb31_1&#45;&gt;bb31_1 -->
 <g id="edge10" class="edge">
 <title>bb31_1&#45;&gt;bb31_1</title>
-<path fill="none" stroke="#000000" d="M2160.8502,-360.1961C2175.5653,-356.3298 2185.518,-348.0519 2185.518,-335.3625 2185.518,-317.3631 2165.4932,-308.2398 2140.256,-307.9926"/>
-<polygon fill="#000000" stroke="#000000" points="2139.8323,-304.5055 2129.9648,-308.3634 2140.0844,-311.501 2139.8323,-304.5055"/>
+<path fill="none" stroke="#000000" d="M2167.4415,-359.9969C2182.59,-356.0495 2192.7753,-347.8381 2192.7753,-335.3625 2192.7753,-317.2673 2171.3476,-308.143 2144.4268,-307.9895"/>
+<polygon fill="#000000" stroke="#000000" points="2144.163,-304.4964 2134.2895,-308.3388 2144.4042,-311.4922 2144.163,-304.4964"/>
 </g>
 <!-- bb32_0 -->
 <g id="node11" class="node">
@@ -216,14 +216,14 @@
 <text text-anchor="middle" x="2616" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$4 = foo : String(&quot;foo&quot;)</text>
 <text text-anchor="middle" x="2616" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTmp$2.getbyte(statTmp$4) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="2616" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$5 = return b : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="2616" y="-463.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="2616" y="-463.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb32_1 -->
 <g id="node12" class="node">
 <title>bb32_1</title>
-<polygon fill="none" stroke="#000000" points="2721.536,-371.3625 2553.6519,-371.3625 2510.464,-299.3625 2678.3481,-299.3625 2721.536,-371.3625"/>
+<polygon fill="none" stroke="#000000" points="2728.551,-371.3625 2549.5076,-371.3625 2503.449,-299.3625 2682.4924,-299.3625 2728.551,-371.3625"/>
 <text text-anchor="middle" x="2616" y="-338.1625" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="2616" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="2616" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb32_0&#45;&gt;bb32_1 -->
 <g id="edge11" class="edge">
@@ -234,8 +234,8 @@
 <!-- bb32_1&#45;&gt;bb32_1 -->
 <g id="edge12" class="edge">
 <title>bb32_1&#45;&gt;bb32_1</title>
-<path fill="none" stroke="#000000" d="M2714.8502,-360.1961C2729.5653,-356.3298 2739.518,-348.0519 2739.518,-335.3625 2739.518,-317.3631 2719.4932,-308.2398 2694.256,-307.9926"/>
-<polygon fill="#000000" stroke="#000000" points="2693.8323,-304.5055 2683.9648,-308.3634 2694.0844,-311.501 2693.8323,-304.5055"/>
+<path fill="none" stroke="#000000" d="M2721.4415,-359.9969C2736.59,-356.0495 2746.7753,-347.8381 2746.7753,-335.3625 2746.7753,-317.2673 2725.3476,-308.143 2698.4268,-307.9895"/>
+<polygon fill="#000000" stroke="#000000" points="2698.163,-304.4964 2688.2895,-308.3388 2698.4042,-311.4922 2698.163,-304.4964"/>
 </g>
 <!-- bb33_0 -->
 <g id="node13" class="node">
@@ -251,7 +251,7 @@
 <ellipse fill="none" stroke="#000000" cx="2984" cy="-335.3625" rx="79.0398" ry="35.2113"/>
 <text text-anchor="middle" x="2984" y="-345.1625" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="2984" y="-331.1625" font-family="Times,serif" font-size="14.00" fill="#000000">b = 1 : Integer(1)</text>
-<text text-anchor="middle" x="2984" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="2984" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb33_0&#45;&gt;bb33_2 -->
 <g id="edge13" class="edge">
@@ -265,7 +265,7 @@
 <ellipse fill="none" stroke="#000000" cx="3181" cy="-335.3625" rx="99.5331" ry="35.2113"/>
 <text text-anchor="middle" x="3181" y="-345.1625" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="3181" y="-331.1625" font-family="Times,serif" font-size="14.00" fill="#000000">b = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="3181" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="3181" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb33_0&#45;&gt;bb33_3 -->
 <g id="edge14" class="edge">
@@ -276,15 +276,15 @@
 <!-- bb33_1 -->
 <g id="node14" class="node">
 <title>bb33_1</title>
-<polygon fill="none" stroke="#000000" points="3198.536,-88 3030.6519,-88 2987.464,-16 3155.3481,-16 3198.536,-88"/>
+<polygon fill="none" stroke="#000000" points="3205.551,-88 3026.5076,-88 2980.449,-16 3159.4924,-16 3205.551,-88"/>
 <text text-anchor="middle" x="3093" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="3093" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="3093" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb33_1&#45;&gt;bb33_1 -->
 <g id="edge15" class="edge">
 <title>bb33_1&#45;&gt;bb33_1</title>
-<path fill="none" stroke="#000000" d="M3191.1021,-75.3113C3206.227,-71.79 3216.518,-64.0195 3216.518,-52 3216.518,-35.4093 3196.9111,-26.9143 3172.0484,-26.5148"/>
-<polygon fill="#000000" stroke="#000000" points="3171.8068,-23.0199 3161.9031,-26.7837 3171.9923,-30.0174 3171.8068,-23.0199"/>
+<path fill="none" stroke="#000000" d="M3197.395,-75.193C3213.1191,-71.6177 3223.7753,-63.8867 3223.7753,-52 3223.7753,-35.4537 3203.1272,-26.9597 3176.9039,-26.5182"/>
+<polygon fill="#000000" stroke="#000000" points="3176.533,-23.0253 3166.612,-26.7432 3176.6861,-30.0237 3176.533,-23.0253"/>
 </g>
 <!-- bb33_4 -->
 <g id="node17" class="node">
@@ -295,7 +295,7 @@
 <text text-anchor="middle" x="3093" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$5 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="3093" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTmp$4.getbyte(statTmp$5) : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="3093" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$6 = return b : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="3093" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="3093" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb33_2&#45;&gt;bb33_4 -->
 <g id="edge16" class="edge">
@@ -329,7 +329,7 @@
 <ellipse fill="none" stroke="#000000" cx="3437" cy="-335.3625" rx="79.0398" ry="35.2113"/>
 <text text-anchor="middle" x="3437" y="-345.1625" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="3437" y="-331.1625" font-family="Times,serif" font-size="14.00" fill="#000000">b = 1 : Integer(1)</text>
-<text text-anchor="middle" x="3437" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="3437" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb34_0&#45;&gt;bb34_2 -->
 <g id="edge19" class="edge">
@@ -343,7 +343,7 @@
 <ellipse fill="none" stroke="#000000" cx="3634" cy="-335.3625" rx="99.5331" ry="35.2113"/>
 <text text-anchor="middle" x="3634" y="-345.1625" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="3634" y="-331.1625" font-family="Times,serif" font-size="14.00" fill="#000000">b = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="3634" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="3634" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb34_0&#45;&gt;bb34_3 -->
 <g id="edge20" class="edge">
@@ -354,15 +354,15 @@
 <!-- bb34_1 -->
 <g id="node19" class="node">
 <title>bb34_1</title>
-<polygon fill="none" stroke="#000000" points="3651.536,-88 3483.6519,-88 3440.464,-16 3608.3481,-16 3651.536,-88"/>
+<polygon fill="none" stroke="#000000" points="3658.551,-88 3479.5076,-88 3433.449,-16 3612.4924,-16 3658.551,-88"/>
 <text text-anchor="middle" x="3546" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="3546" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="3546" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb34_1&#45;&gt;bb34_1 -->
 <g id="edge21" class="edge">
 <title>bb34_1&#45;&gt;bb34_1</title>
-<path fill="none" stroke="#000000" d="M3644.1021,-75.3113C3659.227,-71.79 3669.518,-64.0195 3669.518,-52 3669.518,-35.4093 3649.9111,-26.9143 3625.0484,-26.5148"/>
-<polygon fill="#000000" stroke="#000000" points="3624.8068,-23.0199 3614.9031,-26.7837 3624.9923,-30.0174 3624.8068,-23.0199"/>
+<path fill="none" stroke="#000000" d="M3650.395,-75.193C3666.1191,-71.6177 3676.7753,-63.8867 3676.7753,-52 3676.7753,-35.4537 3656.1272,-26.9597 3629.9039,-26.5182"/>
+<polygon fill="#000000" stroke="#000000" points="3629.533,-23.0253 3619.612,-26.7432 3629.6861,-30.0237 3629.533,-23.0253"/>
 </g>
 <!-- bb34_4 -->
 <g id="node22" class="node">
@@ -373,7 +373,7 @@
 <text text-anchor="middle" x="3546" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$5 = b : Integer | String</text>
 <text text-anchor="middle" x="3546" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTmp$4.getbyte(statTmp$5) : Integer | NilClass</text>
 <text text-anchor="middle" x="3546" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$6 = return b : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="3546" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="3546" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb34_2&#45;&gt;bb34_4 -->
 <g id="edge22" class="edge">
@@ -407,7 +407,7 @@
 <ellipse fill="none" stroke="#000000" cx="3875" cy="-335.3625" rx="79.0398" ry="35.2113"/>
 <text text-anchor="middle" x="3875" y="-345.1625" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="3875" y="-331.1625" font-family="Times,serif" font-size="14.00" fill="#000000">b = 1 : Integer(1)</text>
-<text text-anchor="middle" x="3875" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="3875" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb35_0&#45;&gt;bb35_2 -->
 <g id="edge25" class="edge">
@@ -421,7 +421,7 @@
 <ellipse fill="none" stroke="#000000" cx="4151" cy="-335.3625" rx="179.0628" ry="35.2113"/>
 <text text-anchor="middle" x="4151" y="-345.1625" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="4151" y="-331.1625" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$2 = NotSupported() : &lt;dynamic&gt;</text>
-<text text-anchor="middle" x="4151" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="4151" y="-317.1625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb35_0&#45;&gt;bb35_3 -->
 <g id="edge26" class="edge">
@@ -432,15 +432,15 @@
 <!-- bb35_1 -->
 <g id="node24" class="node">
 <title>bb35_1</title>
-<polygon fill="none" stroke="#000000" points="4168.536,-88 4000.6519,-88 3957.464,-16 4125.3481,-16 4168.536,-88"/>
+<polygon fill="none" stroke="#000000" points="4175.551,-88 3996.5076,-88 3950.449,-16 4129.4924,-16 4175.551,-88"/>
 <text text-anchor="middle" x="4063" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="4063" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="4063" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb35_1&#45;&gt;bb35_1 -->
 <g id="edge27" class="edge">
 <title>bb35_1&#45;&gt;bb35_1</title>
-<path fill="none" stroke="#000000" d="M4161.1021,-75.3113C4176.227,-71.79 4186.518,-64.0195 4186.518,-52 4186.518,-35.4093 4166.9111,-26.9143 4142.0484,-26.5148"/>
-<polygon fill="#000000" stroke="#000000" points="4141.8068,-23.0199 4131.9031,-26.7837 4141.9923,-30.0174 4141.8068,-23.0199"/>
+<path fill="none" stroke="#000000" d="M4167.395,-75.193C4183.1191,-71.6177 4193.7753,-63.8867 4193.7753,-52 4193.7753,-35.4537 4173.1272,-26.9597 4146.9039,-26.5182"/>
+<polygon fill="#000000" stroke="#000000" points="4146.533,-23.0253 4136.612,-26.7432 4146.6861,-30.0237 4146.533,-23.0253"/>
 </g>
 <!-- bb35_4 -->
 <g id="node27" class="node">
@@ -451,7 +451,7 @@
 <text text-anchor="middle" x="4063" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$5 = b : Integer | NilClass</text>
 <text text-anchor="middle" x="4063" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTmp$4.getbyte(statTmp$5) : Integer | NilClass</text>
 <text text-anchor="middle" x="4063" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$6 = return b : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="4063" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="4063" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb35_2&#45;&gt;bb35_4 -->
 <g id="edge28" class="edge">
@@ -474,9 +474,9 @@
 <!-- bb36_0 -->
 <g id="node28" class="node">
 <title>bb36_0</title>
-<polygon fill="none" stroke="#000000" points="4422.0867,-499.5522 4511,-477.8344 4599.9133,-499.5522 4599.8304,-534.6924 4422.1696,-534.6924 4422.0867,-499.5522"/>
+<polygon fill="none" stroke="#000000" points="4415.8502,-499.5522 4511,-477.8344 4606.1498,-499.5522 4606.061,-534.6924 4415.939,-534.6924 4415.8502,-499.5522"/>
 <text text-anchor="middle" x="4511" y="-512.0647" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="4511" y="-498.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="4511" y="-498.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb36_2 -->
 <g id="node30" class="node">
@@ -496,15 +496,15 @@
 <!-- bb36_1 -->
 <g id="node29" class="node">
 <title>bb36_1</title>
-<polygon fill="none" stroke="#000000" points="4797.536,-88 4629.6519,-88 4586.464,-16 4754.3481,-16 4797.536,-88"/>
+<polygon fill="none" stroke="#000000" points="4804.551,-88 4625.5076,-88 4579.449,-16 4758.4924,-16 4804.551,-88"/>
 <text text-anchor="middle" x="4692" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="4692" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="4692" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb36_1&#45;&gt;bb36_1 -->
 <g id="edge32" class="edge">
 <title>bb36_1&#45;&gt;bb36_1</title>
-<path fill="none" stroke="#000000" d="M4790.1021,-75.3113C4805.227,-71.79 4815.518,-64.0195 4815.518,-52 4815.518,-35.4093 4795.9111,-26.9143 4771.0484,-26.5148"/>
-<polygon fill="#000000" stroke="#000000" points="4770.8068,-23.0199 4760.9031,-26.7837 4770.9923,-30.0174 4770.8068,-23.0199"/>
+<path fill="none" stroke="#000000" d="M4796.395,-75.193C4812.1191,-71.6177 4822.7753,-63.8867 4822.7753,-52 4822.7753,-35.4537 4802.1272,-26.9597 4775.9039,-26.5182"/>
+<polygon fill="#000000" stroke="#000000" points="4775.533,-23.0253 4765.612,-26.7432 4775.6861,-30.0237 4775.533,-23.0253"/>
 </g>
 <!-- bb36_3 -->
 <g id="node31" class="node">
@@ -513,7 +513,7 @@
 <text text-anchor="middle" x="4433" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="4433" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
 <text text-anchor="middle" x="4433" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = 1 : Integer(1)</text>
-<text text-anchor="middle" x="4433" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="4433" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb36_2&#45;&gt;bb36_3 -->
 <g id="edge33" class="edge">
@@ -528,7 +528,7 @@
 <text text-anchor="middle" x="4692" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="4692" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$11 = nil : NilClass</text>
 <text text-anchor="middle" x="4692" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$4 = return &lt;ret&gt;$11 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="4692" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="4692" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb36_2&#45;&gt;bb36_4 -->
 <g id="edge34" class="edge">
@@ -550,4 +550,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 642288cc083d514065876ea66115d4844c89dabc7283f3f1d4051fcbe31d3c58 -->
+<!-- ruby-types:sha256: c864f90b7b5332800b40ff8677aece979aab0ea86ec9173dc6981ac87f6ad785 -->

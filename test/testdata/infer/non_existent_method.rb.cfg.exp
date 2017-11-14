@@ -5,9 +5,9 @@ subgraph "cluster_::Foo#baz" {
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
 
-    bb24_0 [label = "()\nstatTmp$3 = self : Foo\na = statTmp$3.does_not_exist() : <dynamic>\n<ret>$0 = a.bla() : <dynamic>\n<ret>$5 = return <ret>$0 : <bottom>\n<unconditinal>"];
+    bb24_0 [label = "()\nstatTmp$3 = self : Foo\na = statTmp$3.does_not_exist() : <dynamic>\n<ret>$0 = a.bla() : <dynamic>\n<ret>$5 = return <ret>$0 : <bottom>\n<unconditional>"];
     bb24_0 -> bb24_1;
-    bb24_1 [label = "()\n<unconditinal>"];
+    bb24_1 [label = "()\n<unconditional>"];
     bb24_1 -> bb24_1;
 }
 

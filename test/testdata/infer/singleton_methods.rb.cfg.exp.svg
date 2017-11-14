@@ -26,14 +26,14 @@
 <text text-anchor="middle" x="211" y="-208.9745" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="211" y="-194.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$1 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="211" y="-180.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$2 = return &lt;ret&gt;$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="211" y="-166.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="211" y="-166.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb25_1 -->
 <g id="node2" class="node">
 <title>bb25_1</title>
-<polygon fill="none" stroke="#000000" points="316.536,-88 148.6519,-88 105.464,-16 273.3481,-16 316.536,-88"/>
+<polygon fill="none" stroke="#000000" points="323.551,-88 144.5076,-88 98.449,-16 277.4924,-16 323.551,-88"/>
 <text text-anchor="middle" x="211" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="211" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="211" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb25_0&#45;&gt;bb25_1 -->
 <g id="edge1" class="edge">
@@ -44,8 +44,8 @@
 <!-- bb25_1&#45;&gt;bb25_1 -->
 <g id="edge2" class="edge">
 <title>bb25_1&#45;&gt;bb25_1</title>
-<path fill="none" stroke="#000000" d="M309.3524,-75.9365C324.3404,-72.2835 334.518,-64.3047 334.518,-52 334.518,-34.861 314.7723,-26.1147 289.7846,-25.7612"/>
-<polygon fill="#000000" stroke="#000000" points="289.4822,-22.2685 279.5906,-26.064 289.6902,-29.2654 289.4822,-22.2685"/>
+<path fill="none" stroke="#000000" d="M315.9202,-75.7502C331.3559,-72.0163 341.7753,-64.0996 341.7753,-52 341.7753,-34.7702 320.6473,-26.0223 293.9927,-25.7563"/>
+<polygon fill="#000000" stroke="#000000" points="293.8478,-22.2589 283.9514,-26.042 294.047,-29.256 293.8478,-22.2589"/>
 </g>
 <!-- bb27_0 -->
 <g id="node3" class="node">
@@ -55,14 +55,14 @@
 <text text-anchor="middle" x="650" y="-201.9745" font-family="Times,serif" font-size="14.00" fill="#000000">Foo$3 = alias Foo : &lt;singleton class:Foo&gt;</text>
 <text text-anchor="middle" x="650" y="-187.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$2 = Foo$3.bar() : &lt;dynamic&gt;</text>
 <text text-anchor="middle" x="650" y="-173.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$4 = return &lt;ret&gt;$2 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="650" y="-159.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="650" y="-159.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb27_1 -->
 <g id="node4" class="node">
 <title>bb27_1</title>
-<polygon fill="none" stroke="#000000" points="755.536,-88 587.6519,-88 544.464,-16 712.3481,-16 755.536,-88"/>
+<polygon fill="none" stroke="#000000" points="762.551,-88 583.5076,-88 537.449,-16 716.4924,-16 762.551,-88"/>
 <text text-anchor="middle" x="650" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="650" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditinal&gt;</text>
+<text text-anchor="middle" x="650" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb27_0&#45;&gt;bb27_1 -->
 <g id="edge3" class="edge">
@@ -73,9 +73,9 @@
 <!-- bb27_1&#45;&gt;bb27_1 -->
 <g id="edge4" class="edge">
 <title>bb27_1&#45;&gt;bb27_1</title>
-<path fill="none" stroke="#000000" d="M748.3524,-75.9365C763.3404,-72.2835 773.518,-64.3047 773.518,-52 773.518,-34.861 753.7723,-26.1147 728.7846,-25.7612"/>
-<polygon fill="#000000" stroke="#000000" points="728.4822,-22.2685 718.5906,-26.064 728.6902,-29.2654 728.4822,-22.2685"/>
+<path fill="none" stroke="#000000" d="M754.9202,-75.7502C770.3559,-72.0163 780.7753,-64.0996 780.7753,-52 780.7753,-34.7702 759.6473,-26.0223 732.9927,-25.7563"/>
+<polygon fill="#000000" stroke="#000000" points="732.8478,-22.2589 722.9514,-26.042 733.047,-29.256 732.8478,-22.2589"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 2e683d9ad591620e9e1f41e48ce44b939db40e443903c84af33c4ba2c9524702 -->
+<!-- ruby-types:sha256: ab55dfce422fe270c786a059cc5ab2abf9caa6db29ba6f76d71acfd0cd6a5c55 -->

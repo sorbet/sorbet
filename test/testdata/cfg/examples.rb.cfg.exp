@@ -5,9 +5,9 @@ subgraph "cluster_::Integer#+" {
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
 
-    bb24_0 [label = "()\n<self>$1 = self : Integer\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditinal>"];
+    bb24_0 [label = "()\n<self>$1 = self : Integer\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb24_0 -> bb24_1;
-    bb24_1 [label = "()\n<unconditinal>"];
+    bb24_1 [label = "()\n<unconditional>"];
     bb24_1 -> bb24_1;
 }
 
@@ -21,11 +21,11 @@ subgraph "cluster_::Examples#i_like_ifs" {
     bb27_0 -> bb27_2;
     bb27_0 -> bb27_3;
 
-    bb27_1 [label = "(<ret>$2)\n<ret>$5 = return <ret>$2\n<unconditinal>"];
+    bb27_1 [label = "(<ret>$2)\n<ret>$5 = return <ret>$2\n<unconditional>"];
     bb27_1 -> bb27_1;
-    bb27_2 [label = "()\nreturnTmp$3 = 1 : Integer(1)\n<ret>$2 = return returnTmp$3 : <bottom>\n<unconditinal>"];
+    bb27_2 [label = "()\nreturnTmp$3 = 1 : Integer(1)\n<ret>$2 = return returnTmp$3 : <bottom>\n<unconditional>"];
     bb27_2 -> bb27_1;
-    bb27_3 [label = "()\nreturnTmp$4 = 2 : Integer(2)\n<ret>$2 = return returnTmp$4 : <bottom>\n<unconditinal>"];
+    bb27_3 [label = "()\nreturnTmp$4 = 2 : Integer(2)\n<ret>$2 = return returnTmp$4 : <bottom>\n<unconditional>"];
     bb27_3 -> bb27_1;
 }
 
@@ -39,13 +39,13 @@ subgraph "cluster_::Examples#i_like_exps" {
     bb28_0 -> bb28_2;
     bb28_0 -> bb28_3;
 
-    bb28_1 [label = "()\n<unconditinal>"];
+    bb28_1 [label = "()\n<unconditional>"];
     bb28_1 -> bb28_1;
-    bb28_2 [label = "(<ret>$3)\n<ret>$3 = 1 : Integer(1)\n<unconditinal>"];
+    bb28_2 [label = "(<ret>$3)\n<ret>$3 = 1 : Integer(1)\n<unconditional>"];
     bb28_2 -> bb28_4;
-    bb28_3 [label = "(<ret>$3)\n<ret>$3 = 2 : Integer(2)\n<unconditinal>"];
+    bb28_3 [label = "(<ret>$3)\n<ret>$3 = 2 : Integer(2)\n<unconditional>"];
     bb28_3 -> bb28_4;
-    bb28_4 [label = "(<ret>$3)\n<ret>$3 = return <ret>$3 : <bottom>\n<unconditinal>"];
+    bb28_4 [label = "(<ret>$3)\n<ret>$3 = return <ret>$3 : <bottom>\n<unconditional>"];
     bb28_4 -> bb28_1;
 }
 
@@ -59,11 +59,11 @@ subgraph "cluster_::Examples#return_in_one_branch1" {
     bb29_0 -> bb29_2;
     bb29_0 -> bb29_3;
 
-    bb29_1 [label = "()\n<unconditinal>"];
+    bb29_1 [label = "()\n<unconditional>"];
     bb29_1 -> bb29_1;
-    bb29_2 [label = "()\nreturnTmp$3 = 1 : Integer(1)\n<ret>$4 = return returnTmp$3 : <bottom>\n<unconditinal>"];
+    bb29_2 [label = "()\nreturnTmp$3 = 1 : Integer(1)\n<ret>$4 = return returnTmp$3 : <bottom>\n<unconditional>"];
     bb29_2 -> bb29_1;
-    bb29_3 [label = "(<ret>$4)\n<ret>$4 = 2 : Integer(2)\n<ret>$4 = return <ret>$4 : <bottom>\n<unconditinal>"];
+    bb29_3 [label = "(<ret>$4)\n<ret>$4 = 2 : Integer(2)\n<ret>$4 = return <ret>$4 : <bottom>\n<unconditional>"];
     bb29_3 -> bb29_1;
 }
 
@@ -77,13 +77,13 @@ subgraph "cluster_::Examples#return_in_one_branch2" {
     bb30_0 -> bb30_2;
     bb30_0 -> bb30_3;
 
-    bb30_1 [label = "()\n<unconditinal>"];
+    bb30_1 [label = "()\n<unconditional>"];
     bb30_1 -> bb30_1;
-    bb30_2 [label = "(<ret>$5)\n<ret>$5 = 1 : Integer(1)\n<unconditinal>"];
+    bb30_2 [label = "(<ret>$5)\n<ret>$5 = 1 : Integer(1)\n<unconditional>"];
     bb30_2 -> bb30_4;
-    bb30_3 [label = "()\nreturnTmp$3 = 2 : Integer(2)\n<ret>$5 = return returnTmp$3 : <bottom>\n<unconditinal>"];
+    bb30_3 [label = "()\nreturnTmp$3 = 2 : Integer(2)\n<ret>$5 = return returnTmp$3 : <bottom>\n<unconditional>"];
     bb30_3 -> bb30_1;
-    bb30_4 [label = "(<ret>$5)\n<ret>$4 = return <ret>$5 : <bottom>\n<unconditinal>"];
+    bb30_4 [label = "(<ret>$5)\n<ret>$4 = return <ret>$5 : <bottom>\n<unconditional>"];
     bb30_4 -> bb30_1;
 }
 
@@ -97,21 +97,21 @@ subgraph "cluster_::Examples#variables" {
     bb31_0 -> bb31_2;
     bb31_0 -> bb31_3;
 
-    bb31_1 [label = "()\n<unconditinal>"];
+    bb31_1 [label = "()\n<unconditional>"];
     bb31_1 -> bb31_1;
-    bb31_2 [label = "(a)\na = 1 : Integer(1)\n<unconditinal>"];
+    bb31_2 [label = "(a)\na = 1 : Integer(1)\n<unconditional>"];
     bb31_2 -> bb31_4;
-    bb31_3 [label = "(a)\na = 2 : Integer(2)\n<unconditinal>"];
+    bb31_3 [label = "(a)\na = 2 : Integer(2)\n<unconditional>"];
     bb31_3 -> bb31_4;
     bb31_4 [label = "(a)\nifTmp$5 = false : FalseClass(false)\nifTmp$5"];
     bb31_4 -> bb31_5;
     bb31_4 -> bb31_6;
 
-    bb31_5 [label = "(a, b)\nb = 1 : Integer(1)\n<unconditinal>"];
+    bb31_5 [label = "(a, b)\nb = 1 : Integer(1)\n<unconditional>"];
     bb31_5 -> bb31_7;
-    bb31_6 [label = "(a, b)\nb = 2 : Integer(2)\n<unconditinal>"];
+    bb31_6 [label = "(a, b)\nb = 2 : Integer(2)\n<unconditional>"];
     bb31_6 -> bb31_7;
-    bb31_7 [label = "(a, b)\n<ret>$6 = a.+(b) : Integer\n<ret>$8 = return <ret>$6 : <bottom>\n<unconditinal>"];
+    bb31_7 [label = "(a, b)\n<ret>$6 = a.+(b) : Integer\n<ret>$8 = return <ret>$6 : <bottom>\n<unconditional>"];
     bb31_7 -> bb31_1;
 }
 
@@ -125,13 +125,13 @@ subgraph "cluster_::Examples#variables_and_loop" {
     bb32_0 -> bb32_2;
     bb32_0 -> bb32_3;
 
-    bb32_1 [label = "()\n<unconditinal>"];
+    bb32_1 [label = "()\n<unconditional>"];
     bb32_1 -> bb32_1;
-    bb32_2 [label = "(a)\na = 1 : Integer(1)\n<unconditinal>"];
+    bb32_2 [label = "(a)\na = 1 : Integer(1)\n<unconditional>"];
     bb32_2 -> bb32_4;
-    bb32_3 [label = "(a)\na = 2 : Integer(2)\n<unconditinal>"];
+    bb32_3 [label = "(a)\na = 2 : Integer(2)\n<unconditional>"];
     bb32_3 -> bb32_4;
-    bb32_4 [label = "()\n<unconditinal>"];
+    bb32_4 [label = "()\n<unconditional>"];
     bb32_4 -> bb32_5;
     bb32_5 [label = "(b)\nouterLoops: 1\nwhileTmp$5 = true : TrueClass(true)\nwhileTmp$5"];
     bb32_5 -> bb32_6;
@@ -141,13 +141,13 @@ subgraph "cluster_::Examples#variables_and_loop" {
     bb32_6 -> bb32_8;
     bb32_6 -> bb32_9;
 
-    bb32_7 [label = "(b)\nstatTmp$4 = nil : NilClass\n<ret>$8 = return b : <bottom>\n<unconditinal>"];
+    bb32_7 [label = "(b)\nstatTmp$4 = nil : NilClass\n<ret>$8 = return b : <bottom>\n<unconditional>"];
     bb32_7 -> bb32_1;
-    bb32_8 [label = "(b)\nouterLoops: 1\nb = 1 : <dynamic>\n<unconditinal>"];
+    bb32_8 [label = "(b)\nouterLoops: 1\nb = 1 : <dynamic>\n<unconditional>"];
     bb32_8 -> bb32_10;
-    bb32_9 [label = "(b)\nouterLoops: 1\nb = 2 : <dynamic>\n<unconditinal>"];
+    bb32_9 [label = "(b)\nouterLoops: 1\nb = 2 : <dynamic>\n<unconditional>"];
     bb32_9 -> bb32_10;
-    bb32_10 [label = "(b)\nouterLoops: 1\n<unconditinal>"];
+    bb32_10 [label = "(b)\nouterLoops: 1\n<unconditional>"];
     bb32_10 -> bb32_5;
 }
 
@@ -157,9 +157,9 @@ subgraph "cluster_::Examples#variables_loop_if" {
     bb33_0 [shape = invhouse];
     bb33_1 [shape = parallelogram];
 
-    bb33_0 [label = "()\n<unconditinal>"];
+    bb33_0 [label = "()\n<unconditional>"];
     bb33_0 -> bb33_2;
-    bb33_1 [label = "()\n<unconditinal>"];
+    bb33_1 [label = "()\n<unconditional>"];
     bb33_1 -> bb33_1;
     bb33_2 [label = "(b)\nouterLoops: 1\nwhileTmp$3 = true : TrueClass(true)\nwhileTmp$3"];
     bb33_2 -> bb33_3;
@@ -169,13 +169,13 @@ subgraph "cluster_::Examples#variables_loop_if" {
     bb33_3 -> bb33_5;
     bb33_3 -> bb33_6;
 
-    bb33_4 [label = "(b)\nstatTmp$2 = nil : NilClass\n<ret>$6 = return b : <bottom>\n<unconditinal>"];
+    bb33_4 [label = "(b)\nstatTmp$2 = nil : NilClass\n<ret>$6 = return b : <bottom>\n<unconditional>"];
     bb33_4 -> bb33_1;
-    bb33_5 [label = "(b)\nouterLoops: 1\nb = 1 : <dynamic>\n<unconditinal>"];
+    bb33_5 [label = "(b)\nouterLoops: 1\nb = 1 : <dynamic>\n<unconditional>"];
     bb33_5 -> bb33_7;
-    bb33_6 [label = "(b)\nouterLoops: 1\nb = 2 : <dynamic>\n<unconditinal>"];
+    bb33_6 [label = "(b)\nouterLoops: 1\nb = 2 : <dynamic>\n<unconditional>"];
     bb33_6 -> bb33_7;
-    bb33_7 [label = "(b)\nouterLoops: 1\n<unconditinal>"];
+    bb33_7 [label = "(b)\nouterLoops: 1\n<unconditional>"];
     bb33_7 -> bb33_2;
 }
 
@@ -189,13 +189,13 @@ subgraph "cluster_::Examples#take_arguments" {
     bb34_0 -> bb34_2;
     bb34_0 -> bb34_3;
 
-    bb34_1 [label = "()\n<unconditinal>"];
+    bb34_1 [label = "()\n<unconditional>"];
     bb34_1 -> bb34_1;
-    bb34_2 [label = "(<ret>$9)\n<ret>$9 = 2 : Integer(2)\n<unconditinal>"];
+    bb34_2 [label = "(<ret>$9)\n<ret>$9 = 2 : Integer(2)\n<unconditional>"];
     bb34_2 -> bb34_4;
-    bb34_3 [label = "(i, <ret>$9)\n<ret>$9 = i : <dynamic>\n<unconditinal>"];
+    bb34_3 [label = "(i, <ret>$9)\n<ret>$9 = i : <dynamic>\n<unconditional>"];
     bb34_3 -> bb34_4;
-    bb34_4 [label = "(<ret>$9)\n<ret>$3 = return <ret>$9 : <bottom>\n<unconditinal>"];
+    bb34_4 [label = "(<ret>$9)\n<ret>$3 = return <ret>$9 : <bottom>\n<unconditional>"];
     bb34_4 -> bb34_1;
 }
 

@@ -107,7 +107,7 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(<singleton class:<root>>).proc() do |x$11|
+  self(<singleton class:<root>>).proc() do |<block-nested: x$11>|
     <emptyTree>
   end
   break(self(<todo sym>).foo(1) do ||

@@ -5,9 +5,9 @@ subgraph "cluster_::<singleton class:Foo2>#new" {
     bb26_0 [shape = invhouse];
     bb26_1 [shape = parallelogram];
 
-    bb26_0 [label = "()\n<self>$1 = self : <singleton class:Foo2>\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditinal>"];
+    bb26_0 [label = "()\n<self>$1 = self : <singleton class:Foo2>\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb26_0 -> bb26_1;
-    bb26_1 [label = "()\n<unconditinal>"];
+    bb26_1 [label = "()\n<unconditional>"];
     bb26_1 -> bb26_1;
 }
 
@@ -17,9 +17,9 @@ subgraph "cluster_::Foo3#initialize" {
     bb29_0 [shape = invhouse];
     bb29_1 [shape = parallelogram];
 
-    bb29_0 [label = "()\n<self>$1 = self : Foo3\n<ret>$2 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$2 : <bottom>\n<unconditinal>"];
+    bb29_0 [label = "()\n<self>$1 = self : Foo3\n<ret>$2 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$2 : <bottom>\n<unconditional>"];
     bb29_0 -> bb29_1;
-    bb29_1 [label = "()\n<unconditinal>"];
+    bb29_1 [label = "()\n<unconditional>"];
     bb29_1 -> bb29_1;
 }
 
@@ -29,9 +29,9 @@ subgraph "cluster_::Bar#foo" {
     bb33_0 [shape = invhouse];
     bb33_1 [shape = parallelogram];
 
-    bb33_0 [label = "()\nFoo1$4 = alias Foo1 : <singleton class:Foo1>\nFoo2$7 = alias Foo2 : <singleton class:Foo2>\nFoo3$10 = alias Foo3 : <singleton class:Foo3>\nstatTmp$2 = Foo1$4.new() : Foo1\nstatTmp$8 = 1 : Integer(1)\nstatTmp$5 = Foo2$7.new(statTmp$8) : <dynamic>\nstatTmp$11 = 1 : Integer(1)\nstatTmp$12 = 2 : Integer(2)\n<ret>$3 = Foo3$10.new(statTmp$11, statTmp$12) : Foo3\n<ret>$13 = return <ret>$3 : <bottom>\n<unconditinal>"];
+    bb33_0 [label = "()\nFoo1$4 = alias Foo1 : <singleton class:Foo1>\nFoo2$7 = alias Foo2 : <singleton class:Foo2>\nFoo3$10 = alias Foo3 : <singleton class:Foo3>\nstatTmp$2 = Foo1$4.new() : Foo1\nstatTmp$8 = 1 : Integer(1)\nstatTmp$5 = Foo2$7.new(statTmp$8) : <dynamic>\nstatTmp$11 = 1 : Integer(1)\nstatTmp$12 = 2 : Integer(2)\n<ret>$3 = Foo3$10.new(statTmp$11, statTmp$12) : Foo3\n<ret>$13 = return <ret>$3 : <bottom>\n<unconditional>"];
     bb33_0 -> bb33_1;
-    bb33_1 [label = "()\n<unconditinal>"];
+    bb33_1 [label = "()\n<unconditional>"];
     bb33_1 -> bb33_1;
 }
 

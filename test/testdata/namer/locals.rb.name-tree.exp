@@ -5,16 +5,16 @@ class <emptyTree>::TestLocals<TestLocals> < ()
       c = 4
       self(TestLocals).proc() do ||
         begin
-          b = 2
-          a.+(b)
+          <block-nested: b> = 2
+          a.+(<block-nested: b>)
           self(TestLocals).proc() do ||
-            b.+(c)
+            <block-nested: b>.+(c)
           end
         end
       end
       b = 3
-      self(TestLocals).proc() do |a$3, b$1|
-        a$3.+(b$1)
+      self(TestLocals).proc() do |<block-nested: a$3>, <block-nested: b$1>|
+        <block-nested: a$3>.+(<block-nested: b$1>)
       end
     end
 

@@ -9,13 +9,13 @@ class <emptyTree>::Destructure<Destructure> < ()
       end
       begin
         x.+(y)
-        self(Destructure).lambda() do |<destructure>$2$5|
+        self(Destructure).lambda() do |<block-nested: <destructure>$2$5>|
           begin
             begin
-              assignTmp$3 = <destructure>$2$5
-              a = assignTmp$3.[](0)
-              b = assignTmp$3.[](1)
-              assignTmp$3
+              <block-nested: assignTmp$3> = <block-nested: <destructure>$2$5>
+              <block-nested: a> = <block-nested: assignTmp$3>.[](0)
+              <block-nested: b> = <block-nested: assignTmp$3>.[](1)
+              <block-nested: assignTmp$3>
             end
             <emptyTree>
           end
