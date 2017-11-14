@@ -7,7 +7,7 @@ RE_FUNC = /foreign_ptr\(\*(\w+)\)\((.*?)\);/
 
 CHECK_COOKIES = false
 TYPE_CONVERSION = {
-  "foreign_ptr" => "*mut Rc<Node>",
+  "foreign_ptr" => "NodeId",
   "const token*" => "*const TokenPtr",
   "const node_list*" => "*mut NodeListPtr",
   "bool" => "bool",
@@ -30,11 +30,11 @@ class Argument
 
   def as_safe_arg
     if type == "*mut Builder"
-      return "&self"
+      return "&mut self"
     end
 
     t = case type
-        when "*mut Rc<Node>"
+        when "NodeId"
           "Option<Rc<Node>>"
         when "*mut NodeListPtr"
           "Vec<Rc<Node>>"
@@ -55,10 +55,12 @@ class Argument
 
   def convert
     case type
-    when "*mut Rc<Node>"
-      "let #{name} = node_from_c(#{name})"
+    when "*mut Builder"
+      "let #{name} = &mut *#{name}"
+    when "NodeId"
+      "let #{name} = node_from_c(builder, #{name})"
     when "*mut NodeListPtr"
-      "let #{name} = node_list_from_c(#{name})"
+      "let #{name} = node_list_from_c(builder, #{name})"
     when "*const TokenPtr"
       "let #{name} = token_from_c(#{name})"
     when "size_t"
@@ -81,7 +83,7 @@ class Interface
   end
 
   def signature
-    "pub #{name}: unsafe extern \"C\" fn(#{arg_block}) -> *mut Rc<Node>"
+    "pub #{name}: unsafe extern \"C\" fn(#{arg_block}) -> NodeId"
   end
 
   def signature_safe
@@ -90,7 +92,7 @@ class Interface
   end
 
   def definition
-    "unsafe extern \"C\" fn #{name}(#{arg_block}) -> *mut Rc<Node>"
+    "unsafe extern \"C\" fn #{name}(#{arg_block}) -> NodeId"
   end
 
   def callsite
@@ -150,7 +152,7 @@ def generate_rs(apis, out)
       out.puts "\t#{cv};" if cv
     end
     out.puts "\t#{api.cookie_check};" if CHECK_COOKIES
-    out.puts "\t#{api.callsite}.to_raw()"
+    out.puts "\t#{api.callsite}.to_raw(builder)"
     out.puts "}"
   end
 

@@ -253,8 +253,6 @@ using namespace std::string_literals;
   words
   xstring
 
-%destructor { driver.build.free_node(self, $$); } <node>
-
 %type <list>
   aref_args
   args
@@ -306,8 +304,6 @@ using namespace std::string_literals;
   word_list
   xstring_contents
 
-%destructor { driver.build.free_node_list(self, $$); } <list>
-
 %type <token>
   blkarg_mark
   call_op
@@ -336,8 +332,6 @@ using namespace std::string_literals;
   opt_paren_args
   paren_args
 
-%destructor { driver.build.free_node_list(self, $$->inner); } <delimited_list>
-
 %type <delimited_block>
   brace_block
   brace_body
@@ -347,11 +341,6 @@ using namespace std::string_literals;
   lambda
   lambda_body
 
-%destructor {
-  driver.build.free_node(self, $$->args);
-  driver.build.free_node(self, $$->body);
-} <delimited_block>
-
 %type <with_token>
   exc_var
   if_tail
@@ -359,19 +348,9 @@ using namespace std::string_literals;
   opt_ensure
   superclass
 
-%destructor {
-  driver.build.free_node(self, $$->nod);
-} <with_token>
-
 %type <case_body>
   case_body
   cases
-
-%destructor {
-  driver.build.free_node_list(self, &$$->whens);
-  if ($$->els)
-    driver.build.free_node(self, $$->els->nod);
-} <case_body>
 
 %nonassoc tLOWEST
 %nonassoc tLBRACE_ARG
@@ -446,8 +425,6 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
 %%
          program: top_compstmt
                     {
-                      if (driver.ast != nullptr)
-                        driver.build.free_node(self, driver.ast);
                       driver.ast = $1;
                     }
 

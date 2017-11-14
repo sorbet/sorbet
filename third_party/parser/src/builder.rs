@@ -2,6 +2,7 @@ use ffi::{Token, Driver};
 use std::rc::Rc;
 use ast::{Node, Id, Loc, SourceFile, RubyString, Error};
 use std::collections::HashSet;
+use id_arena::IdArena;
 
 #[cfg(feature = "regex")]
 use onig::Regex;
@@ -12,6 +13,7 @@ pub struct Builder<'a> {
     pub emit_lambda: bool,
     pub emit_procarg0: bool,
     pub cookie: usize,
+    pub nodes: IdArena<Rc<Node>>,
 }
 
 fn collapse_string_parts(parts: &[Rc<Node>]) -> bool {
@@ -388,29 +390,31 @@ impl<'a> Builder<'a> {
     }
 
     pub fn assign(&self, lhs: Option<Rc<Node>>, _eql: Option<Token>, rhs: Option<Rc<Node>>) -> Node {
-        let lhs = Rc::try_unwrap(lhs.unwrap()).expect("unique ownership of AST nodes during parse");
+        let lhs = lhs.unwrap();
         let rhs = rhs.unwrap();
         let asgn_loc = lhs.loc().join(rhs.loc());
 
-        match lhs {
-            Node::Send(_, recv, mid, mut args) => {
+        match *lhs {
+            Node::Send(_, ref recv, ref mid, ref args) => {
+                let mut args = args.clone();
                 args.push(rhs);
-                Node::Send(asgn_loc, recv, mid, args)
+                Node::Send(asgn_loc, recv.clone(), mid.clone(), args)
             },
-            Node::CSend(_, recv, mid, mut args) => {
+            Node::CSend(_, ref recv, ref mid, ref args) => {
+                let mut args = args.clone();
                 args.push(rhs);
-                Node::CSend(asgn_loc, recv, mid, args)
+                Node::CSend(asgn_loc, recv.clone(), mid.clone(), args)
             },
-            Node::LvarLhs(_, name) =>
-                Node::LvarAsgn(asgn_loc, name, rhs),
-            Node::ConstLhs(_, scope, name) =>
-                Node::ConstAsgn(asgn_loc, scope, name, rhs),
-            Node::CvarLhs(_, id) =>
-                Node::CvarAsgn(asgn_loc, id, rhs),
-            Node::IvarLhs(_, id) =>
-                Node::IvarAsgn(asgn_loc, id, rhs),
-            Node::GvarLhs(_, id) =>
-                Node::GvarAsgn(asgn_loc, id, rhs),
+            Node::LvarLhs(_, ref name) =>
+                Node::LvarAsgn(asgn_loc, name.clone(), rhs),
+            Node::ConstLhs(_, ref scope, ref name) =>
+                Node::ConstAsgn(asgn_loc, scope.clone(), name.clone(), rhs),
+            Node::CvarLhs(_, ref id) =>
+                Node::CvarAsgn(asgn_loc, id.clone(), rhs),
+            Node::IvarLhs(_, ref id) =>
+                Node::IvarAsgn(asgn_loc, id.clone(), rhs),
+            Node::GvarLhs(_, ref id) =>
+                Node::GvarAsgn(asgn_loc, id.clone(), rhs),
             _ => {
                 panic!("unimplemented lhs: {:?}", lhs);
             }
@@ -418,33 +422,34 @@ impl<'a> Builder<'a> {
     }
 
     pub fn assignable(&mut self, node: Option<Rc<Node>>) -> Node {
-        let node = Rc::try_unwrap(node.unwrap()).expect("unique ownership of AST nodes during parse");
-        match node {
-            Node::Ident(loc, name) => {
-                self.driver.declare(&name);
-                Node::LvarLhs(loc.clone(), Id(loc.clone(), name))
+        let node = node.unwrap();
+
+        match *node {
+            Node::Ident(ref loc, ref name) => {
+                self.driver.declare(name);
+                Node::LvarLhs(loc.clone(), Id(loc.clone(), name.clone()))
             },
-            Node::Ivar(loc, name) =>
-                Node::IvarLhs(loc.clone(), Id(loc.clone(), name)),
-            Node::Const(loc, lhs, name) => {
+            Node::Ivar(ref loc, ref name) =>
+                Node::IvarLhs(loc.clone(), Id(loc.clone(), name.clone())),
+            Node::Const(ref loc, ref lhs, ref name) => {
                 if self.driver.is_in_definition() {
                     self.driver.error(Error::DynamicConst, loc.clone());
                 }
-                Node::ConstLhs(loc.clone(), lhs, name)
+                Node::ConstLhs(loc.clone(), lhs.clone(), name.clone())
             },
-            Node::Cvar(loc, name) =>
-                Node::CvarLhs(loc.clone(), Id(loc.clone(), name)),
-            Node::Gvar(loc, name) =>
-                Node::GvarLhs(loc.clone(), Id(loc.clone(), name)),
-            Node::Backref(loc, _) |
-            Node::NthRef(loc, _) => {
+            Node::Cvar(ref loc, ref name) =>
+                Node::CvarLhs(loc.clone(), Id(loc.clone(), name.clone())),
+            Node::Gvar(ref loc, ref name) =>
+                Node::GvarLhs(loc.clone(), Id(loc.clone(), name.clone())),
+            Node::Backref(ref loc, _) |
+            Node::NthRef(ref loc, _) => {
                 self.driver.error(Error::BackrefAssignment, loc.clone());
-                Node::Nil(loc)
+                Node::Nil(loc.clone())
             },
             _ => {
                 let loc = node.loc().clone();
                 self.driver.error(Error::InvalidAssignment, loc.clone());
-                Node::Nil(loc)
+                Node::Nil(loc.clone())
             },
         }
     }
@@ -868,14 +873,6 @@ impl<'a> Builder<'a> {
         let iterator = iterator.unwrap();
         let iteratee = iteratee.unwrap();
         Node::For(self.loc(&for_).join(&self.loc(&end)), iterator, iteratee, body)
-    }
-
-    pub fn free_node(&self, _node: Option<Rc<Node>>) -> Option<Node> {
-        return None;
-    }
-
-    pub fn free_node_list(&self, _nodes: Vec<Rc<Node>>) -> Option<Node> {
-        return None;
     }
 
     pub fn gvar(&self, tok: Option<Token>) -> Node {

@@ -26,10 +26,10 @@ pub fn parse(source_file: Rc<SourceFile>) -> Ast {
 
 pub fn parse_with_opts(source_file: Rc<SourceFile>, opts: &ParserOptions) -> Ast {
     let mut driver = Driver::new(source_file.clone());
-    let ast = driver.parse(&opts);
+    let node = driver.parse(&opts);
 
     Ast {
-        node: ast.map(|node| *node),
+        node: node,
         diagnostics: driver.diagnostics(),
     }
 }
