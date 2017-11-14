@@ -495,11 +495,11 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
 }
 
 // TODO: somehow reuse existing references instead of allocating new ones.
-ruby_typer::core::Literal::Literal(int val)
+ruby_typer::core::Literal::Literal(int64_t val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Integer())), value(val) {}
 
 ruby_typer::core::Literal::Literal(float val)
-    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<int *>(&val)) {}
+    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<u4 *>(&val)) {}
 
 ruby_typer::core::Literal::Literal(core::NameRef val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_String())), value(val._id) {}

@@ -189,7 +189,8 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             auto lhs = node2TreeImpl(ctx, a->left);
             if (auto i = dynamic_cast<Reference *>(lhs.get())) {
                 auto cond = cpRef(what->loc, *i);
-                mkIf(what->loc, move(cond), move(lhs), node2TreeImpl(ctx, a->right));
+                auto iff = mkIf(what->loc, move(cond), move(lhs), node2TreeImpl(ctx, a->right));
+                result.swap(iff);
             } else {
                 core::NameRef tempName = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::orOr());
                 auto temp = mkAssign(what->loc, tempName, lhs);
@@ -289,6 +290,29 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
 
             auto send = mkSend(what->loc, rec, a->method, args, flags);
             result.swap(send);
+        },
+        [&](parser::CSend *a) {
+            core::NameRef tempRecv =
+                ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp());
+            core::Loc recvLoc = a->receiver->loc;
+
+            // NOTE(nelhage): We actually desugar into a call to `nil?`. If an
+            // object has overridden `nil?`, this technically will not match
+            // Ruby's behavior.
+
+            auto assgn = mkAssign(recvLoc, tempRecv, node2TreeImpl(ctx, a->receiver));
+            auto cond = mkSend0(a->loc, mkLocal(recvLoc, tempRecv), core::Names::nil_p());
+
+            unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
+                a->loc, make_unique<parser::LVar>(recvLoc, tempRecv), a->method, move(a->args));
+            auto send = node2TreeImpl(ctx, sendNode);
+
+            unique_ptr<Expression> nil = make_unique<Nil>(a->loc);
+            auto iff = mkIf(a->loc, cond, nil, send);
+            InsSeq::STATS_store stats;
+            stats.emplace_back(move(assgn));
+            auto res = mkInsSeq(a->loc, stats, move(iff));
+            result.swap(res);
         },
         [&](parser::Self *a) {
             unique_ptr<Expression> self = make_unique<Self>(what->loc, ctx.state.defn_todo());
@@ -481,13 +505,24 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
         },
         [&](parser::Block *block) {
             auto recv = node2TreeImpl(ctx, block->send);
-            Error::check(dynamic_cast<Send *>(recv.get()));
-            unique_ptr<Send> send(dynamic_cast<Send *>(recv.release()));
-
+            Send *send;
+            unique_ptr<Expression> res;
+            if ((send = dynamic_cast<Send *>(recv.get())) != nullptr) {
+                res.swap(recv);
+            } else {
+                // This must have been a csend; That will have been desugared
+                // into an insseq with an If in the expression.
+                res.swap(recv);
+                InsSeq *is = dynamic_cast<InsSeq *>(res.get());
+                Error::check(is != nullptr);
+                If *iff = dynamic_cast<If *>(is->expr.get());
+                Error::check(iff != nullptr);
+                send = dynamic_cast<Send *>(iff->elsep.get());
+                Error::check(send != nullptr);
+            }
             auto argsAndBody = desugarArgsAndBody(ctx, block->loc, block->args, block->body);
 
             send->block = make_unique<Block>(what->loc, argsAndBody.first, move(argsAndBody.second));
-            unique_ptr<Expression> res(send.release());
             result.swap(res);
         },
         [&](parser::While *wl) {
@@ -567,7 +602,16 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             result.swap(res);
         },
         [&](parser::Integer *integer) {
-            unique_ptr<Expression> res = make_unique<IntLit>(what->loc, stoi(integer->val));
+            int64_t val;
+            try {
+                val = stol(integer->val);
+            } catch (std::out_of_range &) {
+                val = 0;
+                ctx.state.errors.error(integer->loc, core::ErrorClass::IntegerOutOfRange,
+                                       "Unsupported large integer literal: {}", integer->val);
+            }
+
+            unique_ptr<Expression> res = make_unique<IntLit>(what->loc, val);
             result.swap(res);
         },
         [&](parser::Array *array) {

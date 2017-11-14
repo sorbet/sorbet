@@ -1,0 +1,4 @@
+def test_lambda<<todo sym>>()
+  self(<todo sym>).lambda() do |x|
+    x.*(x)
+  end

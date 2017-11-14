@@ -92,9 +92,9 @@ public:
 
 class IntLit : public Instruction {
 public:
-    int value;
+    int64_t value;
 
-    IntLit(int value);
+    IntLit(int64_t value);
     virtual std::string toString(core::Context ctx);
 };
 
