@@ -5,9 +5,13 @@ passes=(cfg parse-tree ast ast-raw name-table name-tree name-tree-raw)
 
 bazel build //main:ruby-typer
 
-rb_src=(
-    $(find ./test/testdata/ -name '*.rb')
-)
+rb_src=("$@")
+
+if [ -z "${rb_src[*]}" ]; then
+    rb_src=(
+        $(find ./test/testdata/ -name '*.rb')
+    )
+fi
 
 for src in "${rb_src[@]}"; do
     for pass in "${passes[@]}" ; do
