@@ -53,7 +53,7 @@
 <polygon fill="none" stroke="#000000" points="429.9449,-171.0534 650,-123.8251 870.0551,-171.0534 869.8497,-247.4704 430.1503,-247.4704 429.9449,-171.0534"/>
 <text text-anchor="middle" x="650" y="-215.9745" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="650" y="-201.9745" font-family="Times,serif" font-size="14.00" fill="#000000">Foo$3 = alias Foo : &lt;singleton class:Foo&gt;</text>
-<text text-anchor="middle" x="650" y="-187.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$2 = Foo$3.bar() : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="650" y="-187.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$2 = Foo$3.bar() : untyped</text>
 <text text-anchor="middle" x="650" y="-173.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$4 = return &lt;ret&gt;$2 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="650" y="-159.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -78,4 +78,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: ab55dfce422fe270c786a059cc5ab2abf9caa6db29ba6f76d71acfd0cd6a5c55 -->
+<!-- ruby-types:sha256: a01025c35cd63af1fd4ed682b6c30b2d9781e09b66764b87ee8ead779ad27fc3 -->

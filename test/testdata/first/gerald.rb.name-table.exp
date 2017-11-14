@@ -8,8 +8,8 @@ class Opus ()
       class <singleton class:MatchTimeout> (Class)
       class <singleton class:Matcher> (Class)
       class Diff (Object)
-        field @parsed -> <dynamic>
-        field @raw -> <dynamic>
+        field @parsed -> untyped
+        field @raw -> untyped
         method added_files ()
           method <block>$10 (part)
             argument part
@@ -43,14 +43,14 @@ class Opus ()
           method <block>$22 (part)
             argument part
       class MatchContext (Object)
-        field @assignee -> <dynamic>
-        field @body -> <dynamic>
-        field @diff -> <dynamic>
-        field @gh_user -> <dynamic>
-        field @merge_branch -> <dynamic>
-        field @openapi_diff -> <dynamic>
-        field @repo -> <dynamic>
-        field @title -> <dynamic>
+        field @assignee -> untyped
+        field @body -> untyped
+        field @diff -> untyped
+        field @gh_user -> untyped
+        field @merge_branch -> untyped
+        field @openapi_diff -> untyped
+        field @repo -> untyped
+        field @title -> untyped
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
           argument assignee
           argument body
@@ -62,25 +62,25 @@ class Opus ()
           argument title
         method user_stripe_suffix? ()
       class MatchTimeBudget (Object)
-        field @start -> <dynamic>
+        field @start -> untyped
         method check! ()
         method initialize ()
         method time_rule (rule)
           argument rule
-        static-field PER_RULE_MS -> <dynamic>
-        static-field TOTAL_TIME_MS -> <dynamic>
-      class MatchTimeout (<dynamic>)
-        field @rule_token -> <dynamic>
+        static-field PER_RULE_MS -> untyped
+        static-field TOTAL_TIME_MS -> untyped
+      class MatchTimeout (untyped)
+        field @rule_token -> untyped
         method initialize (message, rule_token)
           argument message
           argument rule_token
-      class Matcher (<dynamic>)
-        field @rules -> <dynamic>
+      class Matcher (untyped)
+        field @rules -> untyped
         method initialize ()
         method match (match_context)
           argument match_context
           method <block>$4 (r)
             argument r
             method <block>$6 ()
-        static-field MAX_AFFECTED_FILES -> <dynamic>
+        static-field MAX_AFFECTED_FILES -> untyped
 

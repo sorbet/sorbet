@@ -5,7 +5,7 @@ subgraph "cluster_::String#getbyte" {
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
 
-    bb24_0 [label = "()\n<self>$1 = self : String\n<ret>$2 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$2 : <bottom>\n<unconditional>"];
+    bb24_0 [label = "()\n<self>$1 = self : String\n<ret>$2 = NotSupported() : untyped\n<ret>$2 = return <ret>$2 : <bottom>\n<unconditional>"];
     bb24_0 -> bb24_1;
     bb24_1 [label = "()\n<unconditional>"];
     bb24_1 -> bb24_1;
@@ -17,7 +17,7 @@ subgraph "cluster_::Integer#+" {
     bb27_0 [shape = invhouse];
     bb27_1 [shape = parallelogram];
 
-    bb27_0 [label = "()\n<self>$1 = self : Integer\n<ret>$3 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$3 : <bottom>\n<unconditional>"];
+    bb27_0 [label = "()\n<self>$1 = self : Integer\n<ret>$3 = NotSupported() : untyped\n<ret>$2 = return <ret>$3 : <bottom>\n<unconditional>"];
     bb27_0 -> bb27_1;
     bb27_1 [label = "()\n<unconditional>"];
     bb27_1 -> bb27_1;
@@ -65,7 +65,7 @@ subgraph "cluster_::Object#baz4" {
     bb32_0 [shape = invhouse];
     bb32_1 [shape = parallelogram];
 
-    bb32_0 [label = "()\nstatTmp$3 = self : Object\nstatTmp$2 = statTmp$3.a() : <dynamic>\nstatTmp$4 = foo : String(\"foo\")\nb = statTmp$2.getbyte(statTmp$4) : <dynamic>\n<ret>$5 = return b : <bottom>\n<unconditional>"];
+    bb32_0 [label = "()\nstatTmp$3 = self : Object\nstatTmp$2 = statTmp$3.a() : untyped\nstatTmp$4 = foo : String(\"foo\")\nb = statTmp$2.getbyte(statTmp$4) : untyped\n<ret>$5 = return b : <bottom>\n<unconditional>"];
     bb32_0 -> bb32_1;
     bb32_1 [label = "()\n<unconditional>"];
     bb32_1 -> bb32_1;
@@ -87,7 +87,7 @@ subgraph "cluster_::Object#baz5" {
     bb33_2 -> bb33_4;
     bb33_3 [label = "(b)\nb = foo : String(\"foo\")\n<unconditional>"];
     bb33_3 -> bb33_4;
-    bb33_4 [label = "(b)\nstatTmp$4 = b : Integer | String\nstatTmp$5 = 1 : Integer(1)\nb = statTmp$4.getbyte(statTmp$5) : <dynamic>\n<ret>$6 = return b : <bottom>\n<unconditional>"];
+    bb33_4 [label = "(b)\nstatTmp$4 = b : Integer | String\nstatTmp$5 = 1 : Integer(1)\nb = statTmp$4.getbyte(statTmp$5) : untyped\n<ret>$6 = return b : <bottom>\n<unconditional>"];
     bb33_4 -> bb33_1;
 }
 
@@ -125,7 +125,7 @@ subgraph "cluster_::Object#baz7" {
     bb35_1 -> bb35_1;
     bb35_2 [label = "(b)\nb = 1 : Integer(1)\n<unconditional>"];
     bb35_2 -> bb35_4;
-    bb35_3 [label = "()\nstatTmp$2 = NotSupported() : <dynamic>\n<unconditional>"];
+    bb35_3 [label = "()\nstatTmp$2 = NotSupported() : untyped\n<unconditional>"];
     bb35_3 -> bb35_4;
     bb35_4 [label = "(b)\nstatTmp$4 = foo : String(\"foo\")\nstatTmp$5 = b : Integer | NilClass\nb = statTmp$4.getbyte(statTmp$5) : Integer | NilClass\n<ret>$6 = return b : <bottom>\n<unconditional>"];
     bb35_4 -> bb35_1;

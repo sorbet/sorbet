@@ -1,6 +1,6 @@
 class A ()
   class B ()
-    static-field C -> <dynamic>
-    static-field D -> <dynamic>
+    static-field C -> untyped
+    static-field D -> untyped
 class Opus ()
 

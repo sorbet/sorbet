@@ -33,7 +33,7 @@ subgraph "cluster_::HasLoops#incorrect_assignment" {
     bb25_2 -> bb25_3;
     bb25_2 -> bb25_4;
 
-    bb25_3 [label = "(a)\nouterLoops: 1\na = 1 : <dynamic>\n<unconditional>"];
+    bb25_3 [label = "(a)\nouterLoops: 1\na = 1 : untyped\n<unconditional>"];
     bb25_3 -> bb25_2;
     bb25_4 [label = "()\n<ret>$1 = nil : NilClass\n<ret>$5 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb25_4 -> bb25_1;
