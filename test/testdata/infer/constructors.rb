@@ -18,3 +18,10 @@ class Bar
     Foo3.new(1, 2)
   end
 end
+
+class InstanceMethod
+  def test_imethod_new
+    o = Object.new
+    o.new # error: Method new does not exist
+  end
+end

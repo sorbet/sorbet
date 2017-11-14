@@ -90,7 +90,7 @@ private:
                          result = make_shared<core::ClassType>(i->symbol);
                      } else {
                          ctx.state.errors.error(i->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                                "Malformed type declaration. Not a class type {}" + i->toString(ctx));
+                                                "Malformed type declaration. Not a class type {}", i->toString(ctx));
                          result = core::Types::dynamic();
                      }
                  },
@@ -158,8 +158,8 @@ private:
                                     [&](core::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
                                 if (fnd == methoInfo.arguments().end()) {
                                     ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                                           "Misformed standard_method. Unknown argument name type {}" +
-                                                               key->toString(ctx));
+                                                           "Misformed standard_method. Unknown argument name type {}",
+                                                           key->toString(ctx));
                                 } else {
                                     core::SymbolRef arg = *fnd;
                                     arg.info(ctx).resultType = getResultType(ctx, value);
@@ -168,8 +168,8 @@ private:
                             }
                         } else {
                             ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                                   "Misformed standard_method. Unknown key type {}" +
-                                                       key->toString(ctx));
+                                                   "Misformed standard_method. Unknown key type {}",
+                                                   key->toString(ctx));
                         }
                     }
                 }

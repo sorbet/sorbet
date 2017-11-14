@@ -137,7 +137,8 @@ public:
         scopeStack.emplace_back();
         core::SymbolRef owner = ownerFromContext(ctx);
         if (method->isSelf) {
-            owner = owner.info(ctx).singletonClass(ctx);
+            if (owner.info(ctx).isClass())
+                owner = owner.info(ctx).singletonClass(ctx);
         }
 
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);

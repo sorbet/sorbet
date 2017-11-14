@@ -53,41 +53,43 @@ public:
         }
     }
 
-    core::TypeAndOrigins dispatchNew(core::Context ctx, core::TypeAndOrigins recvType, cfg::Send *send,
-                                     vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
-        core::TypeAndOrigins result;
-        if (core::ClassType *classType = dynamic_cast<core::ClassType *>(recvType.type.get())) {
-            if (classType->symbol == core::GlobalState::defn_untyped()) {
-                return recvType;
-            }
-            core::SymbolRef newSymbol = classType->symbol.info(ctx).findMember(core::Names::new_());
-            if (!newSymbol.exists() || newSymbol.info(ctx).owner == core::GlobalState::defn_Basic_Object()) {
-                core::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
-                Error::check(attachedClass.exists());
-                result.type = make_shared<core::ClassType>(attachedClass);
-                result.origins.push_back(bind.loc);
-
-                // call constructor
-                newSymbol = attachedClass.info(ctx).findMember(core::Names::initialize());
-                if (newSymbol.exists()) {
-                    auto initilizeResult =
-                        result.type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, recvType.type);
-                } else {
-                    if (args.size() > 0) {
-                        ctx.state.errors.error(bind.loc, core::ErrorClass::MethodArgumentCountMismatch,
-                                               "Wrong number of arguments for constructor.\n Expected: 0, found: {}",
-                                               args.size());
-                    }
-                }
-            } else { // custom new was defined
-                result.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
-                result.origins.push_back(bind.loc);
-            }
-        } else {
-            result.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
-            result.origins.push_back(bind.loc);
+    shared_ptr<core::Type> dispatchNew(core::Context ctx, core::TypeAndOrigins recvType, cfg::Send *send,
+                                       vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
+        core::ClassType *classType = dynamic_cast<core::ClassType *>(recvType.type.get());
+        if (classType == nullptr) {
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
         }
-        return result;
+
+        if (classType->symbol == core::GlobalState::defn_untyped()) {
+            return recvType.type;
+        }
+
+        core::SymbolRef newSymbol = classType->symbol.info(ctx).findMember(core::Names::new_());
+        if (newSymbol.exists() && newSymbol.info(ctx).owner != core::GlobalState::defn_Basic_Object()) {
+            // custom `new` was defined
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+        }
+
+        core::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            // `foo`.new() but `foo` isn't a Class
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+        }
+
+        auto type = make_shared<core::ClassType>(attachedClass);
+
+        // call constructor
+        newSymbol = attachedClass.info(ctx).findMember(core::Names::initialize());
+        if (newSymbol.exists()) {
+            auto initializeResult = type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, recvType.type);
+        } else {
+            if (args.size() > 0) {
+                ctx.state.errors.error(bind.loc, core::ErrorClass::MethodArgumentCountMismatch,
+                                       "Wrong number of arguments for constructor.\n Expected: 0, found: {}",
+                                       args.size());
+            }
+        }
+        return type;
     }
 
     shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
@@ -137,11 +139,11 @@ public:
 
                 auto recvType = getTypeAndOrigin(ctx, send->recv);
                 if (send->fun == core::Names::new_()) {
-                    tp = dispatchNew(ctx, recvType, send, args, bind);
+                    tp.type = dispatchNew(ctx, recvType, send, args, bind);
                 } else {
                     tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
-                    tp.origins.push_back(bind.loc);
                 }
+                tp.origins.push_back(bind.loc);
             },
             [&](cfg::Super *i) { Error::notImplemented(); },
             [&](cfg::FloatLit *i) {
