@@ -6,7 +6,7 @@
 namespace ruby_typer {
 namespace parser {
 
-class Parser {
+class Parser final {
 public:
     static std::unique_ptr<Node> run(ruby_typer::core::GlobalState &gs, ruby_typer::core::FileRef file);
     static std::unique_ptr<Node> run(ruby_typer::core::GlobalState &gs, const std::string &path,

@@ -76,13 +76,13 @@ CheckSize(u4, 4, 4);
 typedef unsigned long u8;
 CheckSize(u8, 8, 8);
 
-class File {
+class File final {
 public:
     static std::string read(const char *filename);
     static std::string getFileName(const std::string path);
 };
 
-class Strings {
+class Strings final {
 public:
     static std::string escapeCString(std::string what);
 };

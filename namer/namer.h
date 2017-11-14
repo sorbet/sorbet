@@ -4,7 +4,7 @@
 namespace ruby_typer {
 namespace namer {
 
-class Namer {
+class Namer final {
 public:
     static unique_ptr<ast::Expression> run(core::Context &ctx, unique_ptr<ast::Expression> tree);
 

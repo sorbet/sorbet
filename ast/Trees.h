@@ -40,7 +40,7 @@ public:
 
 enum ClassDefKind : u1 { Module, Class };
 
-class ClassDef : public Declaration {
+class ClassDef final : public Declaration {
 public:
     inline core::SymbolRef parent(core::Context ctx) {
         return symbol.info(ctx).parent(ctx);
@@ -74,7 +74,7 @@ public:
     virtual std::string nodeName();
 };
 
-class MethodDef : public Declaration {
+class MethodDef final : public Declaration {
 public:
     std::unique_ptr<Expression> rhs;
 
@@ -92,7 +92,7 @@ public:
     virtual std::string nodeName();
 };
 
-class ConstDef : public Declaration {
+class ConstDef final : public Declaration {
 public:
     std::unique_ptr<Expression> rhs;
 
@@ -102,7 +102,7 @@ public:
     virtual std::string nodeName();
 };
 
-class If : public ControlFlow {
+class If final : public ControlFlow {
 public:
     std::unique_ptr<Expression> cond;
     std::unique_ptr<Expression> thenp;
@@ -114,7 +114,7 @@ public:
     virtual std::string nodeName();
 };
 
-class While : public ControlFlow {
+class While final : public ControlFlow {
 public:
     std::unique_ptr<Expression> cond;
     std::unique_ptr<Expression> body;
@@ -131,7 +131,7 @@ public:
     // TODO
 };
 
-class Break : public ControlFlow {
+class Break final : public ControlFlow {
 public:
     std::unique_ptr<Expression> expr;
 
@@ -141,7 +141,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Next : public ControlFlow {
+class Next final : public ControlFlow {
 public:
     std::unique_ptr<Expression> expr;
 
@@ -151,7 +151,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Return : public ControlFlow {
+class Return final : public ControlFlow {
 public:
     std::unique_ptr<Expression> expr;
 
@@ -161,7 +161,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Yield : public ControlFlow {
+class Yield final : public ControlFlow {
 public:
     std::unique_ptr<Expression> expr;
 
@@ -171,7 +171,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Rescue : public ControlFlow {
+class Rescue final : public ControlFlow {
 public:
     std::unique_ptr<Expression> body;
     core::SymbolRef binder;
@@ -184,7 +184,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Ident : public Reference {
+class Ident final : public Reference {
 public:
     core::SymbolRef symbol;
 
@@ -194,7 +194,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Local : public Expression {
+class Local final : public Expression {
 public:
     core::LocalVariable localVariable;
 
@@ -204,7 +204,7 @@ public:
     virtual std::string nodeName();
 };
 
-class UnresolvedIdent : public Reference {
+class UnresolvedIdent final : public Reference {
 public:
     enum VarKind {
         Local,
@@ -221,7 +221,7 @@ public:
     virtual std::string nodeName();
 };
 
-class RestArg : public Reference {
+class RestArg final : public Reference {
 public:
     std::unique_ptr<Reference> expr;
 
@@ -231,7 +231,7 @@ public:
     virtual std::string nodeName();
 };
 
-class KeywordArg : public Reference {
+class KeywordArg final : public Reference {
 public:
     std::unique_ptr<Reference> expr;
 
@@ -241,7 +241,7 @@ public:
     virtual std::string nodeName();
 };
 
-class OptionalArg : public Reference {
+class OptionalArg final : public Reference {
 public:
     std::unique_ptr<Reference> expr;
     std::unique_ptr<Expression> default_;
@@ -252,7 +252,7 @@ public:
     virtual std::string nodeName();
 };
 
-class BlockArg : public Reference {
+class BlockArg final : public Reference {
 public:
     std::unique_ptr<Reference> expr;
 
@@ -262,7 +262,7 @@ public:
     virtual std::string nodeName();
 };
 
-class ShadowArg : public Reference {
+class ShadowArg final : public Reference {
 public:
     std::unique_ptr<Reference> expr;
 
@@ -272,7 +272,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Nil : public Expression {
+class Nil final : public Expression {
 public:
     Nil(core::Loc loc);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
@@ -280,7 +280,7 @@ public:
     virtual std::string nodeName();
 };
 
-class SymbolLit : public Expression {
+class SymbolLit final : public Expression {
 public:
     core::NameRef name;
 
@@ -291,7 +291,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Assign : public Expression {
+class Assign final : public Expression {
 public:
     std::unique_ptr<Expression> lhs;
     std::unique_ptr<Expression> rhs;
@@ -304,7 +304,7 @@ public:
 
 class Block;
 
-class Send : public Expression {
+class Send final : public Expression {
 public:
     std::unique_ptr<Expression> recv;
     core::NameRef fun;
@@ -325,7 +325,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Super : public Expression {
+class Super final : public Expression {
 public:
     Send::ARGS_store args;
 
@@ -336,7 +336,7 @@ public:
     virtual std::string nodeName();
 };
 
-class NamedArg : public Expression {
+class NamedArg final : public Expression {
 public:
     core::NameRef name;
     std::unique_ptr<Expression> arg;
@@ -347,7 +347,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Hash : public Expression {
+class Hash final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 2;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
@@ -362,7 +362,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Array : public Expression {
+class Array final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 4;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ENTRY_COUNT> ENTRY_store;
@@ -376,7 +376,7 @@ public:
     virtual std::string nodeName();
 };
 
-class FloatLit : public Expression {
+class FloatLit final : public Expression {
 public:
     float value;
 
@@ -386,7 +386,7 @@ public:
     virtual std::string nodeName();
 };
 
-class IntLit : public Expression {
+class IntLit final : public Expression {
 public:
     int64_t value;
 
@@ -396,7 +396,7 @@ public:
     virtual std::string nodeName();
 };
 
-class StringLit : public Expression {
+class StringLit final : public Expression {
 public:
     core::NameRef value;
 
@@ -406,7 +406,7 @@ public:
     virtual std::string nodeName();
 };
 
-class BoolLit : public Expression {
+class BoolLit final : public Expression {
 public:
     bool value;
 
@@ -416,7 +416,7 @@ public:
     virtual std::string nodeName();
 };
 
-class ConstantLit : public Expression {
+class ConstantLit final : public Expression {
 public:
     core::NameRef cnst;
     std::unique_ptr<Expression> scope;
@@ -427,7 +427,7 @@ public:
     virtual std::string nodeName();
 };
 
-class ArraySplat : public Expression {
+class ArraySplat final : public Expression {
 public:
     std::unique_ptr<Expression> arg;
 
@@ -437,7 +437,7 @@ public:
     virtual std::string nodeName();
 };
 
-class HashSplat : public Expression {
+class HashSplat final : public Expression {
 public:
     std::unique_ptr<Expression> arg;
 
@@ -447,7 +447,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Self : public Expression {
+class Self final : public Expression {
 public:
     core::SymbolRef claz;
 
@@ -457,7 +457,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Block : public Expression {
+class Block final : public Expression {
 public:
     MethodDef::ARGS_store args;
     std::unique_ptr<Expression> body;
@@ -469,7 +469,7 @@ public:
     virtual std::string nodeName();
 };
 
-class InsSeq : public Expression {
+class InsSeq final : public Expression {
 public:
     static constexpr int EXPECTED_STATS_COUNT = 4;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT> STATS_store;
@@ -483,7 +483,7 @@ public:
     virtual std::string nodeName();
 };
 
-class EmptyTree : public Expression {
+class EmptyTree final : public Expression {
 public:
     EmptyTree(core::Loc loc);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
@@ -491,7 +491,7 @@ public:
     virtual std::string nodeName();
 };
 
-class NotSupported : public Expression {
+class NotSupported final : public Expression {
     std::string why;
 
 public:

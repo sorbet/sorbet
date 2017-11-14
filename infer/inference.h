@@ -8,7 +8,7 @@
 
 namespace ruby_typer {
 namespace infer {
-class Inference {
+class Inference final {
 public:
     static void run(core::Context ctx, std::unique_ptr<cfg::CFG> &cfg);
 };
