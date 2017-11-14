@@ -151,8 +151,8 @@ public:
 
 class Literal : public ProxyType {
 public:
-    int value;
-    Literal(int val);
+    int64_t value;
+    Literal(int64_t val);
     Literal(float val);
     Literal(core::NameRef val);
     Literal(bool val);

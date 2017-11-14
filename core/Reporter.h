@@ -11,6 +11,7 @@ enum class ErrorClass {
     ParserError = 2001, // Parser Errors
 
     InvalidSingletonDef = 3001, // Desugarer Errors
+    IntegerOutOfRange = 3002,
 
     IncludeMutipleParam = 4001, // Namer Errors
     IncludeNotConstant = 4002,

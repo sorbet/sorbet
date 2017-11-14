@@ -602,7 +602,16 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             result.swap(res);
         },
         [&](parser::Integer *integer) {
-            unique_ptr<Expression> res = make_unique<IntLit>(what->loc, stoi(integer->val));
+            int64_t val;
+            try {
+                val = stol(integer->val);
+            } catch (std::out_of_range &) {
+                val = 0;
+                ctx.state.errors.error(integer->loc, core::ErrorClass::IntegerOutOfRange,
+                                       "Unsupported large integer literal: {}", integer->val);
+            }
+
+            unique_ptr<Expression> res = make_unique<IntLit>(what->loc, val);
             result.swap(res);
         },
         [&](parser::Array *array) {

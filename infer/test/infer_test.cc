@@ -38,7 +38,7 @@ unique_ptr<ast::Expression> getTree(core::GlobalState &cb, string str) {
 
 TEST_F(InferFixture, LiteralsSubtyping) {
     auto ctx = getCtx();
-    auto intLit = make_shared<core::Literal>(1);
+    auto intLit = make_shared<core::Literal>(int64_t(1));
     auto intClass = make_shared<core::ClassType>(core::GlobalState::defn_Integer());
     auto floatLit = make_shared<core::Literal>(1.0f);
     auto floatClass = make_shared<core::ClassType>(core::GlobalState::defn_Float());

@@ -737,7 +737,7 @@ string FloatLit::toString(core::Context ctx) {
     return to_string(this->value);
 }
 
-IntLit::IntLit(int value) : value(value) {}
+IntLit::IntLit(int64_t value) : value(value) {}
 
 string IntLit::toString(core::Context ctx) {
     return to_string(this->value);

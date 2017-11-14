@@ -388,9 +388,9 @@ public:
 
 class IntLit : public Expression {
 public:
-    int value;
+    int64_t value;
 
-    IntLit(core::Loc loc, int value);
+    IntLit(core::Loc loc, int64_t value);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

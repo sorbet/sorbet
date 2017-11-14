@@ -114,7 +114,7 @@ Nil::Nil(core::Loc loc) : Expression(loc) {}
 
 FloatLit::FloatLit(core::Loc loc, float value) : Expression(loc), value(value) {}
 
-IntLit::IntLit(core::Loc loc, int value) : Expression(loc), value(value) {}
+IntLit::IntLit(core::Loc loc, int64_t value) : Expression(loc), value(value) {}
 
 StringLit::StringLit(core::Loc loc, core::NameRef value) : Expression(loc), value(value) {}
 
