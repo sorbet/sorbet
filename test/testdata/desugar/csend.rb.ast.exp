@@ -1,0 +1,21 @@
+def test_csend<<todo sym>>()
+  begin
+    begin
+      assignTmp$0 = self(<todo sym>).foo()
+      if assignTmp$0.nil?()
+        nil
+      else
+        assignTmp$0.bar()
+      end
+    end
+    begin
+      assignTmp$1 = self(<todo sym>).foo()
+      if assignTmp$1.nil?()
+        nil
+      else
+        assignTmp$1.bar() do |x|
+          x
+        end
+      end
+    end
+  end
