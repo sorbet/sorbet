@@ -372,7 +372,7 @@ unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md) {
         aliases[argSym] = arg;
         i++;
     }
-    auto cont = res->walk(CFGContext(ctx, md.rhs.get(), entry, *res.get(), retSym, 0, aliases));
+    auto cont = res->walk(CFGContext(ctx, *res.get(), retSym, 0, aliases), md.rhs.get(), entry);
     core::LocalVariable retSym1 =
         ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
 
@@ -462,24 +462,23 @@ core::LocalVariable global2Local(core::Context ctx, core::SymbolRef what, CFG &i
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
-BasicBlock *CFG::walk(CFGContext cctx) {
+BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *current) {
     /** Try to pay additional attention not to duplicate any part of tree.
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
      * for some code snippets. */
-    Error::check(!cctx.current->bexit.cond.exists());
+    Error::check(!current->bexit.cond.exists());
 
     BasicBlock *ret = nullptr;
     typecase(
-        cctx.what,
+        what,
         [&](ast::While *a) {
             auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
-            unconditionalJump(cctx.current, headerBlock, cctx.inWhat);
+            unconditionalJump(current, headerBlock, cctx.inWhat);
 
             core::LocalVariable condSym =
                 cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::whileTemp(), cctx.inWhat.symbol);
-            auto headerEnd = walk(
-                CFGContext(cctx.ctx, a->cond.get(), headerBlock, cctx.inWhat, condSym, cctx.loops + 1, cctx.aliases));
+            auto headerEnd = walk(cctx.withTarget(condSym).withDeeperLoops(), a->cond.get(), headerBlock);
             auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
             auto continueBlock = cctx.inWhat.freshBlock(cctx.loops);
             conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, cctx.inWhat);
@@ -487,8 +486,7 @@ BasicBlock *CFG::walk(CFGContext cctx) {
             core::LocalVariable bodySym =
                 cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), cctx.inWhat.symbol);
 
-            auto body = walk(
-                CFGContext(cctx.ctx, a->body.get(), bodyBlock, cctx.inWhat, bodySym, cctx.loops + 1, cctx.aliases));
+            auto body = walk(cctx.withTarget(bodySym).withDeeperLoops(), a->body.get(), bodyBlock);
             unconditionalJump(body, headerBlock, cctx.inWhat);
 
             continueBlock->exprs.emplace_back(cctx.target, a->loc, make_unique<Nil>());
@@ -497,8 +495,7 @@ BasicBlock *CFG::walk(CFGContext cctx) {
         [&](ast::Return *a) {
             core::LocalVariable retSym =
                 cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnTemp(), cctx.inWhat.symbol);
-            auto cont =
-                walk(CFGContext(cctx.ctx, a->expr.get(), cctx.current, cctx.inWhat, retSym, cctx.loops, cctx.aliases));
+            auto cont = walk(cctx.withTarget(retSym), a->expr.get(), current);
             cont->exprs.emplace_back(cctx.target, a->loc, make_unique<Return>(retSym)); // dead assign.
             jumpToDead(cont, cctx.inWhat);
             ret = deadBlock();
@@ -509,14 +506,11 @@ BasicBlock *CFG::walk(CFGContext cctx) {
             Error::check(ifSym.exists());
             auto thenBlock = cctx.inWhat.freshBlock(cctx.loops);
             auto elseBlock = cctx.inWhat.freshBlock(cctx.loops);
-            auto cont =
-                walk(CFGContext(cctx.ctx, a->cond.get(), cctx.current, cctx.inWhat, ifSym, cctx.loops, cctx.aliases));
+            auto cont = walk(cctx.withTarget(ifSym), a->cond.get(), current);
             conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat);
 
-            auto thenEnd = walk(
-                CFGContext(cctx.ctx, a->thenp.get(), thenBlock, cctx.inWhat, cctx.target, cctx.loops, cctx.aliases));
-            auto elseEnd = walk(
-                CFGContext(cctx.ctx, a->elsep.get(), elseBlock, cctx.inWhat, cctx.target, cctx.loops, cctx.aliases));
+            auto thenEnd = walk(cctx, a->thenp.get(), thenBlock);
+            auto elseEnd = walk(cctx, a->elsep.get(), elseBlock);
             if (thenEnd != deadBlock() || elseEnd != deadBlock()) {
                 if (thenEnd == deadBlock()) {
                     ret = elseEnd;
@@ -532,34 +526,34 @@ BasicBlock *CFG::walk(CFGContext cctx) {
             }
         },
         [&](ast::IntLit *a) {
-            cctx.current->exprs.emplace_back(cctx.target, a->loc, make_unique<IntLit>(a->value));
-            ret = cctx.current;
+            current->exprs.emplace_back(cctx.target, a->loc, make_unique<IntLit>(a->value));
+            ret = current;
         },
         [&](ast::FloatLit *a) {
-            cctx.current->exprs.emplace_back(cctx.target, a->loc, make_unique<FloatLit>(a->value));
-            ret = cctx.current;
+            current->exprs.emplace_back(cctx.target, a->loc, make_unique<FloatLit>(a->value));
+            ret = current;
         },
         [&](ast::StringLit *a) {
-            cctx.current->exprs.emplace_back(cctx.target, a->loc, make_unique<StringLit>(a->value));
-            ret = cctx.current;
+            current->exprs.emplace_back(cctx.target, a->loc, make_unique<StringLit>(a->value));
+            ret = current;
         },
         [&](ast::BoolLit *a) {
-            cctx.current->exprs.emplace_back(cctx.target, a->loc, make_unique<BoolLit>(a->value));
-            ret = cctx.current;
+            current->exprs.emplace_back(cctx.target, a->loc, make_unique<BoolLit>(a->value));
+            ret = current;
         },
         [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
         [&](ast::Ident *a) {
-            cctx.current->exprs.emplace_back(
+            current->exprs.emplace_back(
                 cctx.target, a->loc, make_unique<Ident>(global2Local(cctx.ctx, a->symbol, cctx.inWhat, cctx.aliases)));
-            ret = cctx.current;
+            ret = current;
         },
         [&](ast::Local *a) {
-            cctx.current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(a->localVariable));
-            ret = cctx.current;
+            current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(a->localVariable));
+            ret = current;
         },
         [&](ast::Self *a) {
-            cctx.current->exprs.emplace_back(cctx.target, a->loc, make_unique<Self>(a->claz));
-            ret = cctx.current;
+            current->exprs.emplace_back(cctx.target, a->loc, make_unique<Self>(a->claz));
+            ret = current;
         },
         [&](ast::Assign *a) {
             auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
@@ -574,8 +568,7 @@ BasicBlock *CFG::walk(CFGContext cctx) {
                 // lhs = cctx.ctx.state.defn_todo();
                 Error::check(false, "should never be reached");
             }
-            auto rhsCont =
-                walk(CFGContext(cctx.ctx, a->rhs.get(), cctx.current, cctx.inWhat, lhs, cctx.loops, cctx.aliases));
+            auto rhsCont = walk(cctx.withTarget(lhs), a->rhs.get(), current);
             rhsCont->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(lhs));
             ret = rhsCont;
         },
@@ -583,26 +576,22 @@ BasicBlock *CFG::walk(CFGContext cctx) {
             for (auto &exp : a->stats) {
                 core::LocalVariable temp =
                     cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), cctx.inWhat.symbol);
-                cctx.current =
-                    walk(CFGContext(cctx.ctx, exp.get(), cctx.current, cctx.inWhat, temp, cctx.loops, cctx.aliases));
+                current = walk(cctx.withTarget(temp), exp.get(), current);
             }
-            ret = walk(
-                CFGContext(cctx.ctx, a->expr.get(), cctx.current, cctx.inWhat, cctx.target, cctx.loops, cctx.aliases));
+            ret = walk(cctx, a->expr.get(), current);
         },
         [&](ast::Send *s) {
             core::LocalVariable recv;
 
             recv = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), cctx.inWhat.symbol);
-            cctx.current =
-                walk(CFGContext(cctx.ctx, s->recv.get(), cctx.current, cctx.inWhat, recv, cctx.loops, cctx.aliases));
+            current = walk(cctx.withTarget(recv), s->recv.get(), current);
 
             vector<core::LocalVariable> args;
             for (auto &exp : s->args) {
                 core::LocalVariable temp;
                 temp =
                     cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), cctx.inWhat.symbol);
-                cctx.current =
-                    walk(CFGContext(cctx.ctx, exp.get(), cctx.current, cctx.inWhat, temp, cctx.loops, cctx.aliases));
+                current = walk(cctx.withTarget(temp), exp.get(), current);
 
                 args.push_back(temp);
             }
@@ -629,26 +618,25 @@ BasicBlock *CFG::walk(CFGContext cctx) {
                 conditionalJump(headerBlock, core::LocalVariable(core::Names::blockCall()), bodyBlock, postBlock,
                                 cctx.inWhat);
 
-                unconditionalJump(cctx.current, headerBlock, cctx.inWhat);
+                unconditionalJump(current, headerBlock, cctx.inWhat);
 
                 // TODO: handle block arguments somehow??
                 core::LocalVariable blockrv = cctx.ctx.state.newTemporary(
                     core::UniqueNameKind::CFG, core::Names::blockReturnTemp(), cctx.inWhat.symbol);
-                auto blockLast = walk(CFGContext(cctx.ctx, s->block->body.get(), bodyBlock, cctx.inWhat, blockrv,
-                                                 cctx.loops + 1, cctx.aliases));
+                auto blockLast = walk(cctx.withTarget(blockrv).withDeeperLoops(), s->block->body.get(), bodyBlock);
 
                 unconditionalJump(blockLast, headerBlock, cctx.inWhat);
 
-                cctx.current = postBlock;
+                current = postBlock;
             }
 
-            cctx.current->exprs.emplace_back(cctx.target, s->loc, make_unique<Send>(recv, s->fun, args));
-            ret = cctx.current;
+            current->exprs.emplace_back(cctx.target, s->loc, make_unique<Send>(recv, s->fun, args));
+            ret = current;
         },
 
         [&](ast::Expression *n) {
-            cctx.current->exprs.emplace_back(cctx.target, n->loc, make_unique<NotSupported>(""));
-            ret = cctx.current;
+            current->exprs.emplace_back(cctx.target, n->loc, make_unique<NotSupported>(""));
+            ret = current;
         },
 
         [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); });
@@ -815,5 +803,18 @@ string LoadArg::toString(core::Context ctx) {
 string NotSupported::toString(core::Context ctx) {
     return "NotSupported(" + why + ")";
 }
+
+CFGContext CFGContext::withTarget(core::LocalVariable target) {
+    auto ret = CFGContext(*this);
+    ret.target = target;
+    return ret;
+}
+
+CFGContext CFGContext::withDeeperLoops() {
+    auto ret = CFGContext(*this);
+    ret.loops += 1;
+    return ret;
+}
+
 } // namespace cfg
 } // namespace ruby_typer

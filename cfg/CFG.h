@@ -225,7 +225,7 @@ public:
 
 private:
     CFG();
-    BasicBlock *walk(CFGContext cctx);
+    BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);
     BasicBlock *freshBlock(int outerLoops);
     void fillInTopoSorts(core::Context ctx);
     void dealias(core::Context ctx);
@@ -237,16 +237,19 @@ private:
 class CFGContext {
 public:
     core::Context ctx;
-    ast::Expression *what;
-    BasicBlock *current;
     CFG &inWhat;
     core::LocalVariable target;
     int loops;
     std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
 
-    CFGContext(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, core::LocalVariable target,
-               int loops, std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases)
-        : ctx(ctx), what(what), current(current), inWhat(inWhat), target(target), loops(loops), aliases(aliases){};
+    CFGContext withTarget(core::LocalVariable target);
+    CFGContext withDeeperLoops();
+
+private:
+    friend std::unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md);
+    CFGContext(core::Context ctx, CFG &inWhat, core::LocalVariable target, int loops,
+               std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases)
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), aliases(aliases){};
 };
 
 } // namespace cfg
