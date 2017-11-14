@@ -57,12 +57,15 @@ class Builder::Impl {
 public:
     Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
         this->max_off_ = file.file(gs).source().to;
+        foreign_nodes_.emplace_back();
     }
 
     GlobalState &gs_;
     core::FileRef file_;
     u4 max_off_;
     ruby_parser::base_driver *driver_;
+
+    vector<unique_ptr<Node>> foreign_nodes_;
 
     u4 clamp(u4 off) {
         return std::min(off, max_off_);
@@ -547,14 +550,6 @@ public:
     unique_ptr<Node> for_(const token *for_, unique_ptr<Node> iterator, const token *in_, unique_ptr<Node> iteratee,
                           const token *do_, unique_ptr<Node> body, const token *end) {
         return make_unique<For>(loc_join(tok_loc(for_), tok_loc(end)), move(iterator), move(iteratee), move(body));
-    }
-
-    unique_ptr<Node> free_node(unique_ptr<Node> UNUSED(_node)) {
-        return nullptr;
-    }
-
-    unique_ptr<Node> free_node_list(NodeVec UNUSED(_node)) {
-        return nullptr;
     }
 
     unique_ptr<Node> gvar(const token *tok) {
@@ -1068,6 +1063,39 @@ public:
     unique_ptr<Node> xstring_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
         return make_unique<XString>(collection_loc(begin, parts, end), move(parts));
     }
+
+    /* End callback methods */
+
+    /* methods for marshalling to and from the parser's foreign pointers */
+
+    unique_ptr<Node> cast_node(foreign_ptr node) {
+        size_t off = reinterpret_cast<size_t>(node);
+        if (off == 0)
+            return nullptr;
+
+        Error::check(foreign_nodes_[off] != nullptr);
+        return move(foreign_nodes_[off]);
+    }
+
+    foreign_ptr to_foreign(unique_ptr<Node> node) {
+        if (node == nullptr)
+            return 0;
+        foreign_nodes_.emplace_back(move(node));
+        return reinterpret_cast<foreign_ptr>(foreign_nodes_.size() - 1);
+    }
+
+    ruby_typer::parser::NodeVec convert_node_list(const node_list *cargs) {
+        ruby_typer::parser::NodeVec out;
+        if (cargs == nullptr)
+            return out;
+
+        node_list *args = const_cast<node_list *>(cargs);
+        out.reserve(args->size());
+        for (int i = 0; i < args->size(); i++) {
+            out.push_back(cast_node(args->at(i)));
+        }
+        return out;
+    }
 };
 
 Builder::Builder(GlobalState &ctx, core::FileRef file) : impl_(new Builder::Impl(ctx, file)) {}
@@ -1085,624 +1113,731 @@ Builder::Impl *cast_builder(self_ptr builder) {
     return const_cast<Builder::Impl *>(reinterpret_cast<const Builder::Impl *>(builder));
 }
 
-unique_ptr<Node> cast_node(foreign_ptr node) {
-    return unique_ptr<Node>(const_cast<Node *>(reinterpret_cast<const Node *>(node)));
-}
-
-ruby_typer::parser::NodeVec convert_node_list(const node_list *cargs) {
-    ruby_typer::parser::NodeVec out;
-    if (cargs == nullptr)
-        return out;
-
-    node_list *args = const_cast<node_list *>(cargs);
-    out.reserve(args->size());
-    for (int i = 0; i < args->size(); i++) {
-        out.push_back(cast_node(args->at(i)));
-    }
-    return out;
-}
-
 foreign_ptr accessible(self_ptr builder, foreign_ptr node) {
-    return cast_builder(builder)->accessible(cast_node(node)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->accessible(build->cast_node(node)));
 }
 
 foreign_ptr alias(self_ptr builder, const token *alias, foreign_ptr to, foreign_ptr from) {
-    return cast_builder(builder)->alias(alias, cast_node(to), cast_node(from)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->alias(alias, build->cast_node(to), build->cast_node(from)));
 }
 
 foreign_ptr arg(self_ptr builder, const token *name) {
-    return cast_builder(builder)->arg(name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->arg(name));
 }
 
 foreign_ptr args(self_ptr builder, const token *begin, const node_list *args, const token *end, bool check_args) {
-    return cast_builder(builder)->args(begin, convert_node_list(args), end, check_args).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->args(begin, build->convert_node_list(args), end, check_args));
 }
 
 foreign_ptr array(self_ptr builder, const token *begin, const node_list *elements, const token *end) {
-    return cast_builder(builder)->array(begin, convert_node_list(elements), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->array(begin, build->convert_node_list(elements), end));
 }
 
 foreign_ptr assign(self_ptr builder, foreign_ptr lhs, const token *eql, foreign_ptr rhs) {
-    return cast_builder(builder)->assign(cast_node(lhs), eql, cast_node(rhs)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->assign(build->cast_node(lhs), eql, build->cast_node(rhs)));
 }
 
 foreign_ptr assignable(self_ptr builder, foreign_ptr node) {
-    return cast_builder(builder)->assignable(cast_node(node)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->assignable(build->cast_node(node)));
 }
 
 foreign_ptr associate(self_ptr builder, const token *begin, const node_list *pairs, const token *end) {
-    return cast_builder(builder)->associate(begin, convert_node_list(pairs), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->associate(begin, build->convert_node_list(pairs), end));
 }
 
 foreign_ptr attr_asgn(self_ptr builder, foreign_ptr receiver, const token *dot, const token *selector) {
-    return cast_builder(builder)->attr_asgn(cast_node(receiver), dot, selector).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->attr_asgn(build->cast_node(receiver), dot, selector));
 }
 
 foreign_ptr back_ref(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->back_ref(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->back_ref(tok));
 }
 
 foreign_ptr begin(self_ptr builder, const token *begin, foreign_ptr body, const token *end) {
-    return cast_builder(builder)->begin(begin, cast_node(body), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->begin(begin, build->cast_node(body), end));
 }
 
 foreign_ptr begin_body(self_ptr builder, foreign_ptr body, const node_list *rescue_bodies, const token *else_tok,
                        foreign_ptr else_, const token *ensure_tok, foreign_ptr ensure) {
-    return cast_builder(builder)
-        ->begin_body(cast_node(body), convert_node_list(rescue_bodies), else_tok, cast_node(else_), ensure_tok,
-                     cast_node(ensure))
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->begin_body(build->cast_node(body), build->convert_node_list(rescue_bodies),
+                                               else_tok, build->cast_node(else_), ensure_tok,
+                                               build->cast_node(ensure)));
 }
 
 foreign_ptr begin_keyword(self_ptr builder, const token *begin, foreign_ptr body, const token *end) {
-    return cast_builder(builder)->begin_keyword(begin, cast_node(body), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->begin_keyword(begin, build->cast_node(body), end));
 }
 
 foreign_ptr binary_op(self_ptr builder, foreign_ptr receiver, const token *oper, foreign_ptr arg) {
-    return cast_builder(builder)->binary_op(cast_node(receiver), oper, cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->binary_op(build->cast_node(receiver), oper, build->cast_node(arg)));
 }
 
 foreign_ptr block(self_ptr builder, foreign_ptr method_call, const token *begin, foreign_ptr args, foreign_ptr body,
                   const token *end) {
-    return cast_builder(builder)->block(cast_node(method_call), begin, cast_node(args), cast_node(body), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->block(build->cast_node(method_call), begin, build->cast_node(args), build->cast_node(body), end));
 }
 
 foreign_ptr block_pass(self_ptr builder, const token *amper, foreign_ptr arg) {
-    return cast_builder(builder)->block_pass(amper, cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->block_pass(amper, build->cast_node(arg)));
 }
 
 foreign_ptr blockarg(self_ptr builder, const token *amper, const token *name) {
-    return cast_builder(builder)->blockarg(amper, name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->blockarg(amper, name));
 }
 
 foreign_ptr call_lambda(self_ptr builder, const token *lambda) {
-    return cast_builder(builder)->call_lambda(lambda).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->call_lambda(lambda));
 }
 
 foreign_ptr call_method(self_ptr builder, foreign_ptr receiver, const token *dot, const token *selector,
                         const token *lparen, const node_list *args, const token *rparen) {
-    return cast_builder(builder)
-        ->call_method(cast_node(receiver), dot, selector, lparen, convert_node_list(args), rparen)
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->call_method(build->cast_node(receiver), dot, selector, lparen, build->convert_node_list(args), rparen));
 }
 
 foreign_ptr case_(self_ptr builder, const token *case_, foreign_ptr expr, const node_list *when_bodies,
                   const token *else_tok, foreign_ptr else_body, const token *end) {
-    return cast_builder(builder)
-        ->case_(case_, cast_node(expr), convert_node_list(when_bodies), else_tok, cast_node(else_body), end)
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->case_(case_, build->cast_node(expr), build->convert_node_list(when_bodies),
+                                          else_tok, build->cast_node(else_body), end));
 }
 
 foreign_ptr character(self_ptr builder, const token *char_) {
-    return cast_builder(builder)->character(char_).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->character(char_));
 }
 
 foreign_ptr complex(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->complex(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->complex(tok));
 }
 
 foreign_ptr compstmt(self_ptr builder, const node_list *node) {
-    return cast_builder(builder)->compstmt(convert_node_list(node)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->compstmt(build->convert_node_list(node)));
 }
 
 foreign_ptr condition(self_ptr builder, const token *cond_tok, foreign_ptr cond, const token *then, foreign_ptr if_true,
                       const token *else_, foreign_ptr if_false, const token *end) {
-    return cast_builder(builder)
-        ->condition(cond_tok, cast_node(cond), then, cast_node(if_true), else_, cast_node(if_false), end)
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->condition(cond_tok, build->cast_node(cond), then, build->cast_node(if_true), else_,
+                                              build->cast_node(if_false), end));
 }
 
 foreign_ptr condition_mod(self_ptr builder, foreign_ptr if_true, foreign_ptr if_false, foreign_ptr cond) {
-    return cast_builder(builder)->condition_mod(cast_node(if_true), cast_node(if_false), cast_node(cond)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->condition_mod(build->cast_node(if_true), build->cast_node(if_false), build->cast_node(cond)));
 }
 
 foreign_ptr const_(self_ptr builder, const token *name) {
-    return cast_builder(builder)->const_(name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->const_(name));
 }
 
 foreign_ptr const_fetch(self_ptr builder, foreign_ptr scope, const token *colon, const token *name) {
-    return cast_builder(builder)->const_fetch(cast_node(scope), colon, name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->const_fetch(build->cast_node(scope), colon, name));
 }
 
 foreign_ptr const_global(self_ptr builder, const token *colon, const token *name) {
-    return cast_builder(builder)->const_global(colon, name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->const_global(colon, name));
 }
 
 foreign_ptr const_op_assignable(self_ptr builder, foreign_ptr node) {
-    return cast_builder(builder)->const_op_assignable(cast_node(node)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->const_op_assignable(build->cast_node(node)));
 }
 
 foreign_ptr cvar(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->cvar(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->cvar(tok));
 }
 
 foreign_ptr dedent_string(self_ptr builder, foreign_ptr node, size_t dedent_level) {
-    return cast_builder(builder)->dedent_string(cast_node(node), dedent_level).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->dedent_string(build->cast_node(node), dedent_level));
 }
 
 foreign_ptr def_class(self_ptr builder, const token *class_, foreign_ptr name, const token *lt_, foreign_ptr superclass,
                       foreign_ptr body, const token *end_) {
-    return cast_builder(builder)
-        ->def_class(class_, cast_node(name), lt_, cast_node(superclass), cast_node(body), end_)
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->def_class(class_, build->cast_node(name), lt_, build->cast_node(superclass),
+                                              build->cast_node(body), end_));
 }
 
 foreign_ptr def_method(self_ptr builder, const token *def, const token *name, foreign_ptr args, foreign_ptr body,
                        const token *end) {
-    return cast_builder(builder)->def_method(def, name, cast_node(args), cast_node(body), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->def_method(def, name, build->cast_node(args), build->cast_node(body), end));
 }
 
 foreign_ptr def_module(self_ptr builder, const token *module, foreign_ptr name, foreign_ptr body, const token *end_) {
-    return cast_builder(builder)->def_module(module, cast_node(name), cast_node(body), end_).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->def_module(module, build->cast_node(name), build->cast_node(body), end_));
 }
 
 foreign_ptr def_sclass(self_ptr builder, const token *class_, const token *lshft_, foreign_ptr expr, foreign_ptr body,
                        const token *end_) {
-    return cast_builder(builder)->def_sclass(class_, lshft_, cast_node(expr), cast_node(body), end_).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->def_sclass(class_, lshft_, build->cast_node(expr), build->cast_node(body), end_));
 }
 
 foreign_ptr def_singleton(self_ptr builder, const token *def, foreign_ptr definee, const token *dot, const token *name,
                           foreign_ptr args, foreign_ptr body, const token *end) {
-    return cast_builder(builder)
-        ->def_singleton(def, cast_node(definee), dot, name, cast_node(args), cast_node(body), end)
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->def_singleton(def, build->cast_node(definee), dot, name, build->cast_node(args),
+                                                  build->cast_node(body), end));
 }
 
 foreign_ptr encoding_literal(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->encoding_literal(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->encoding_literal(tok));
 }
 
 foreign_ptr false_(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->false_(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->false_(tok));
 }
 
 foreign_ptr file_literal(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->file_literal(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->file_literal(tok));
 }
 
 foreign_ptr float_(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->float_(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->float_(tok));
 }
 
 foreign_ptr float_complex(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->float_complex(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->float_complex(tok));
 }
 
 foreign_ptr for_(self_ptr builder, const token *for_, foreign_ptr iterator, const token *in_, foreign_ptr iteratee,
                  const token *do_, foreign_ptr body, const token *end) {
-    return cast_builder(builder)
-        ->for_(for_, cast_node(iterator), in_, cast_node(iteratee), do_, cast_node(body), end)
-        .release();
-}
-
-foreign_ptr free_node(self_ptr builder, foreign_ptr node) {
-    return cast_builder(builder)->free_node(cast_node(node)).release();
-}
-
-foreign_ptr free_node_list(self_ptr builder, const node_list *nodes) {
-    return cast_builder(builder)->free_node_list(convert_node_list(nodes)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->for_(for_, build->cast_node(iterator), in_, build->cast_node(iteratee), do_,
+                                         build->cast_node(body), end));
 }
 
 foreign_ptr gvar(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->gvar(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->gvar(tok));
 }
 
 foreign_ptr ident(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->ident(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->ident(tok));
 }
 
 foreign_ptr index(self_ptr builder, foreign_ptr receiver, const token *lbrack, const node_list *indexes,
                   const token *rbrack) {
-    return cast_builder(builder)->index(cast_node(receiver), lbrack, convert_node_list(indexes), rbrack).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->index(build->cast_node(receiver), lbrack, build->convert_node_list(indexes), rbrack));
 }
 
 foreign_ptr index_asgn(self_ptr builder, foreign_ptr receiver, const token *lbrack, const node_list *indexes,
                        const token *rbrack) {
-    return cast_builder(builder)->index_asgn(cast_node(receiver), lbrack, convert_node_list(indexes), rbrack).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->index_asgn(build->cast_node(receiver), lbrack, build->convert_node_list(indexes), rbrack));
 }
 
 foreign_ptr integer(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->integer(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->integer(tok));
 }
 
 foreign_ptr ivar(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->ivar(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->ivar(tok));
 }
 
 foreign_ptr keyword_break(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
                           const token *rparen) {
-    return cast_builder(builder)->keyword_break(keyword, lparen, convert_node_list(args), rparen).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_break(keyword, lparen, build->convert_node_list(args), rparen));
 }
 
 foreign_ptr keyword_defined(self_ptr builder, const token *keyword, foreign_ptr arg) {
-    return cast_builder(builder)->keyword_defined(keyword, cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_defined(keyword, build->cast_node(arg)));
 }
 
 foreign_ptr keyword_next(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
                          const token *rparen) {
-    return cast_builder(builder)->keyword_next(keyword, lparen, convert_node_list(args), rparen).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_next(keyword, lparen, build->convert_node_list(args), rparen));
 }
 
 foreign_ptr keyword_redo(self_ptr builder, const token *keyword) {
-    return cast_builder(builder)->keyword_redo(keyword).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_redo(keyword));
 }
 
 foreign_ptr keyword_retry(self_ptr builder, const token *keyword) {
-    return cast_builder(builder)->keyword_retry(keyword).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_retry(keyword));
 }
 
 foreign_ptr keyword_return(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
                            const token *rparen) {
-    return cast_builder(builder)->keyword_return(keyword, lparen, convert_node_list(args), rparen).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_return(keyword, lparen, build->convert_node_list(args), rparen));
 }
 
 foreign_ptr keyword_super(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
                           const token *rparen) {
-    return cast_builder(builder)->keyword_super(keyword, lparen, convert_node_list(args), rparen).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_super(keyword, lparen, build->convert_node_list(args), rparen));
 }
 
 foreign_ptr keyword_yield(self_ptr builder, const token *keyword, const token *lparen, const node_list *args,
                           const token *rparen) {
-    return cast_builder(builder)->keyword_yield(keyword, lparen, convert_node_list(args), rparen).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_yield(keyword, lparen, build->convert_node_list(args), rparen));
 }
 
 foreign_ptr keyword_zsuper(self_ptr builder, const token *keyword) {
-    return cast_builder(builder)->keyword_zsuper(keyword).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->keyword_zsuper(keyword));
 }
 
 foreign_ptr kwarg(self_ptr builder, const token *name) {
-    return cast_builder(builder)->kwarg(name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->kwarg(name));
 }
 
 foreign_ptr kwoptarg(self_ptr builder, const token *name, foreign_ptr value) {
-    return cast_builder(builder)->kwoptarg(name, cast_node(value)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->kwoptarg(name, build->cast_node(value)));
 }
 
 foreign_ptr kwrestarg(self_ptr builder, const token *dstar, const token *name) {
-    return cast_builder(builder)->kwrestarg(dstar, name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->kwrestarg(dstar, name));
 }
 
 foreign_ptr kwsplat(self_ptr builder, const token *dstar, foreign_ptr arg) {
-    return cast_builder(builder)->kwsplat(dstar, cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->kwsplat(dstar, build->cast_node(arg)));
 }
 
 foreign_ptr line_literal(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->line_literal(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->line_literal(tok));
 }
 
 foreign_ptr logical_and(self_ptr builder, foreign_ptr lhs, const token *op, foreign_ptr rhs) {
-    return cast_builder(builder)->logical_and(cast_node(lhs), op, cast_node(rhs)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->logical_and(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
 foreign_ptr logical_or(self_ptr builder, foreign_ptr lhs, const token *op, foreign_ptr rhs) {
-    return cast_builder(builder)->logical_or(cast_node(lhs), op, cast_node(rhs)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->logical_or(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
 foreign_ptr loop_until(self_ptr builder, const token *keyword, foreign_ptr cond, const token *do_, foreign_ptr body,
                        const token *end) {
-    return cast_builder(builder)->loop_until(keyword, cast_node(cond), do_, cast_node(body), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->loop_until(keyword, build->cast_node(cond), do_, build->cast_node(body), end));
 }
 
 foreign_ptr loop_until_mod(self_ptr builder, foreign_ptr body, foreign_ptr cond) {
-    return cast_builder(builder)->loop_until_mod(cast_node(body), cast_node(cond)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->loop_until_mod(build->cast_node(body), build->cast_node(cond)));
 }
 
 foreign_ptr loop_while(self_ptr builder, const token *keyword, foreign_ptr cond, const token *do_, foreign_ptr body,
                        const token *end) {
-    return cast_builder(builder)->loop_while(keyword, cast_node(cond), do_, cast_node(body), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->loop_while(keyword, build->cast_node(cond), do_, build->cast_node(body), end));
 }
 
 foreign_ptr loop_while_mod(self_ptr builder, foreign_ptr body, foreign_ptr cond) {
-    return cast_builder(builder)->loop_while_mod(cast_node(body), cast_node(cond)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->loop_while_mod(build->cast_node(body), build->cast_node(cond)));
 }
 
 foreign_ptr match_op(self_ptr builder, foreign_ptr receiver, const token *oper, foreign_ptr arg) {
-    return cast_builder(builder)->match_op(cast_node(receiver), oper, cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->match_op(build->cast_node(receiver), oper, build->cast_node(arg)));
 }
 
 foreign_ptr multi_assign(self_ptr builder, foreign_ptr mlhs, foreign_ptr rhs) {
-    return cast_builder(builder)->multi_assign(cast_node(mlhs), cast_node(rhs)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->multi_assign(build->cast_node(mlhs), build->cast_node(rhs)));
 }
 
 foreign_ptr multi_lhs(self_ptr builder, const token *begin, const node_list *items, const token *end) {
-    return cast_builder(builder)->multi_lhs(begin, convert_node_list(items), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->multi_lhs(begin, build->convert_node_list(items), end));
 }
 
 foreign_ptr multi_lhs1(self_ptr builder, const token *begin, foreign_ptr item, const token *end) {
-    return cast_builder(builder)->multi_lhs1(begin, cast_node(item), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->multi_lhs1(begin, build->cast_node(item), end));
 }
 
 foreign_ptr negate(self_ptr builder, const token *uminus, foreign_ptr numeric) {
-    return cast_builder(builder)->negate(uminus, cast_node(numeric)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->negate(uminus, build->cast_node(numeric)));
 }
 
 foreign_ptr nil(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->nil(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->nil(tok));
 }
 
 foreign_ptr not_op(self_ptr builder, const token *not_, const token *begin, foreign_ptr receiver, const token *end) {
-    return cast_builder(builder)->not_op(not_, begin, cast_node(receiver), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->not_op(not_, begin, build->cast_node(receiver), end));
 }
 
 foreign_ptr nth_ref(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->nth_ref(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->nth_ref(tok));
 }
 
 foreign_ptr op_assign(self_ptr builder, foreign_ptr lhs, const token *op, foreign_ptr rhs) {
-    return cast_builder(builder)->op_assign(cast_node(lhs), op, cast_node(rhs)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->op_assign(build->cast_node(lhs), op, build->cast_node(rhs)));
 }
 
 foreign_ptr optarg_(self_ptr builder, const token *name, const token *eql, foreign_ptr value) {
-    return cast_builder(builder)->optarg_(name, eql, cast_node(value)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->optarg_(name, eql, build->cast_node(value)));
 }
 
 foreign_ptr pair(self_ptr builder, foreign_ptr key, const token *assoc, foreign_ptr value) {
-    return cast_builder(builder)->pair(cast_node(key), assoc, cast_node(value)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->pair(build->cast_node(key), assoc, build->cast_node(value)));
 }
 
 foreign_ptr pair_keyword(self_ptr builder, const token *key, foreign_ptr value) {
-    return cast_builder(builder)->pair_keyword(key, cast_node(value)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->pair_keyword(key, build->cast_node(value)));
 }
 
 foreign_ptr pair_quoted(self_ptr builder, const token *begin, const node_list *parts, const token *end,
                         foreign_ptr value) {
-    return cast_builder(builder)->pair_quoted(begin, convert_node_list(parts), end, cast_node(value)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->pair_quoted(begin, build->convert_node_list(parts), end, build->cast_node(value)));
 }
 
 foreign_ptr postexe(self_ptr builder, const token *begin, foreign_ptr node, const token *rbrace) {
-    return cast_builder(builder)->postexe(begin, cast_node(node), rbrace).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->postexe(begin, build->cast_node(node), rbrace));
 }
 
 foreign_ptr preexe(self_ptr builder, const token *begin, foreign_ptr node, const token *rbrace) {
-    return cast_builder(builder)->preexe(begin, cast_node(node), rbrace).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->preexe(begin, build->cast_node(node), rbrace));
 }
 
 foreign_ptr procarg0(self_ptr builder, foreign_ptr arg) {
-    return cast_builder(builder)->procarg0(cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->procarg0(build->cast_node(arg)));
 }
 
 foreign_ptr range_exclusive(self_ptr builder, foreign_ptr lhs, const token *oper, foreign_ptr rhs) {
-    return cast_builder(builder)->range_exclusive(cast_node(lhs), oper, cast_node(rhs)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->range_exclusive(build->cast_node(lhs), oper, build->cast_node(rhs)));
 }
 
 foreign_ptr range_inclusive(self_ptr builder, foreign_ptr lhs, const token *oper, foreign_ptr rhs) {
-    return cast_builder(builder)->range_inclusive(cast_node(lhs), oper, cast_node(rhs)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->range_inclusive(build->cast_node(lhs), oper, build->cast_node(rhs)));
 }
 
 foreign_ptr rational(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->rational(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->rational(tok));
 }
 
 foreign_ptr rational_complex(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->rational_complex(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->rational_complex(tok));
 }
 
 foreign_ptr regexp_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end,
                            foreign_ptr options) {
-    return cast_builder(builder)->regexp_compose(begin, convert_node_list(parts), end, cast_node(options)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->regexp_compose(begin, build->convert_node_list(parts), end, build->cast_node(options)));
 }
 
 foreign_ptr regexp_options(self_ptr builder, const token *regopt) {
-    return cast_builder(builder)->regexp_options(regopt).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->regexp_options(regopt));
 }
 
 foreign_ptr rescue_body(self_ptr builder, const token *rescue, foreign_ptr exc_list, const token *assoc,
                         foreign_ptr exc_var, const token *then, foreign_ptr body) {
-    return cast_builder(builder)
-        ->rescue_body(rescue, cast_node(exc_list), assoc, cast_node(exc_var), then, cast_node(body))
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->rescue_body(rescue, build->cast_node(exc_list), assoc, build->cast_node(exc_var),
+                                                then, build->cast_node(body)));
 }
 
 foreign_ptr restarg(self_ptr builder, const token *star, const token *name) {
-    return cast_builder(builder)->restarg(star, name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->restarg(star, name));
 }
 
 foreign_ptr self_(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->self_(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->self_(tok));
 }
 
 foreign_ptr shadowarg(self_ptr builder, const token *name) {
-    return cast_builder(builder)->shadowarg(name).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->shadowarg(name));
 }
 
 foreign_ptr splat(self_ptr builder, const token *star, foreign_ptr arg) {
-    return cast_builder(builder)->splat(star, cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->splat(star, build->cast_node(arg)));
 }
 
 foreign_ptr splat_mlhs(self_ptr builder, const token *star, foreign_ptr arg) {
-    return cast_builder(builder)->splat_mlhs(star, cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->splat_mlhs(star, build->cast_node(arg)));
 }
 
 foreign_ptr string_(self_ptr builder, const token *string_) {
-    return cast_builder(builder)->string(string_).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->string(string_));
 }
 
 foreign_ptr string_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
-    return cast_builder(builder)->string_compose(begin, convert_node_list(parts), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->string_compose(begin, build->convert_node_list(parts), end));
 }
 
 foreign_ptr string_internal(self_ptr builder, const token *string_) {
-    return cast_builder(builder)->string_internal(string_).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->string_internal(string_));
 }
 
 foreign_ptr symbol(self_ptr builder, const token *symbol) {
-    return cast_builder(builder)->symbol(symbol).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->symbol(symbol));
 }
 
 foreign_ptr symbol_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
-    return cast_builder(builder)->symbol_compose(begin, convert_node_list(parts), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->symbol_compose(begin, build->convert_node_list(parts), end));
 }
 
 foreign_ptr symbol_internal(self_ptr builder, const token *symbol) {
-    return cast_builder(builder)->symbol_internal(symbol).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->symbol_internal(symbol));
 }
 
 foreign_ptr symbols_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
-    return cast_builder(builder)->symbols_compose(begin, convert_node_list(parts), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->symbols_compose(begin, build->convert_node_list(parts), end));
 }
 
 foreign_ptr ternary(self_ptr builder, foreign_ptr cond, const token *question, foreign_ptr if_true, const token *colon,
                     foreign_ptr if_false) {
-    return cast_builder(builder)
-        ->ternary(cast_node(cond), question, cast_node(if_true), colon, cast_node(if_false))
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->ternary(build->cast_node(cond), question, build->cast_node(if_true), colon, build->cast_node(if_false)));
 }
 
 foreign_ptr tr_any(self_ptr builder, const token *special) {
-    return cast_builder(builder)->tr_any(special).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_any(special));
 }
 
 foreign_ptr tr_arg_instance(self_ptr builder, foreign_ptr base, const node_list *types, const token *end) {
-    return cast_builder(builder)->tr_arg_instance(cast_node(base), convert_node_list(types), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_arg_instance(build->cast_node(base), build->convert_node_list(types), end));
 }
 
 foreign_ptr tr_array(self_ptr builder, const token *begin, foreign_ptr type_, const token *end) {
-    return cast_builder(builder)->tr_array(begin, cast_node(type_), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_array(begin, build->cast_node(type_), end));
 }
 
 foreign_ptr tr_cast(self_ptr builder, const token *begin, foreign_ptr expr, const token *colon, foreign_ptr type_,
                     const token *end) {
-    return cast_builder(builder)->tr_cast(begin, cast_node(expr), colon, cast_node(type_), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_cast(begin, build->cast_node(expr), colon, build->cast_node(type_), end));
 }
 
 foreign_ptr tr_class(self_ptr builder, const token *special) {
-    return cast_builder(builder)->tr_class(special).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_class(special));
 }
 
 foreign_ptr tr_consubtype(self_ptr builder, foreign_ptr sub, foreign_ptr super_) {
-    return cast_builder(builder)->tr_consubtype(cast_node(sub), cast_node(super_)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_consubtype(build->cast_node(sub), build->cast_node(super_)));
 }
 
 foreign_ptr tr_conunify(self_ptr builder, foreign_ptr a, foreign_ptr b) {
-    return cast_builder(builder)->tr_conunify(cast_node(a), cast_node(b)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_conunify(build->cast_node(a), build->cast_node(b)));
 }
 
 foreign_ptr tr_cpath(self_ptr builder, foreign_ptr cpath) {
-    return cast_builder(builder)->tr_cpath(cast_node(cpath)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_cpath(build->cast_node(cpath)));
 }
 
 foreign_ptr tr_genargs(self_ptr builder, const token *begin, const node_list *genargs, const node_list *constraints,
                        const token *end) {
-    return cast_builder(builder)
-        ->tr_genargs(begin, convert_node_list(genargs), convert_node_list(constraints), end)
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->tr_genargs(begin, build->convert_node_list(genargs), build->convert_node_list(constraints), end));
 }
 
 foreign_ptr tr_gendecl(self_ptr builder, foreign_ptr cpath, const token *begin, const node_list *genargs,
                        const node_list *constraints, const token *end) {
-    return cast_builder(builder)
-        ->tr_gendecl(cast_node(cpath), begin, convert_node_list(genargs), convert_node_list(constraints), end)
-        .release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_gendecl(build->cast_node(cpath), begin, build->convert_node_list(genargs),
+                                               build->convert_node_list(constraints), end));
 }
 
 foreign_ptr tr_gendeclarg(self_ptr builder, const token *tok, foreign_ptr constraint) {
-    return cast_builder(builder)->tr_gendeclarg(tok, cast_node(constraint)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_gendeclarg(tok, build->cast_node(constraint)));
 }
 
 foreign_ptr tr_geninst(self_ptr builder, foreign_ptr cpath, const token *begin, const node_list *genargs,
                        const token *end) {
-    return cast_builder(builder)->tr_geninst(cast_node(cpath), begin, convert_node_list(genargs), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_geninst(build->cast_node(cpath), begin, build->convert_node_list(genargs), end));
 }
 
 foreign_ptr tr_hash(self_ptr builder, const token *begin, foreign_ptr key_type, const token *assoc,
                     foreign_ptr value_type, const token *end) {
-    return cast_builder(builder)->tr_hash(begin, cast_node(key_type), assoc, cast_node(value_type), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->tr_hash(begin, build->cast_node(key_type), assoc, build->cast_node(value_type), end));
 }
 
 foreign_ptr tr_instance(self_ptr builder, const token *special) {
-    return cast_builder(builder)->tr_instance(special).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_instance(special));
 }
 
 foreign_ptr tr_ivardecl(self_ptr builder, const token *def, const token *name, foreign_ptr type_) {
-    return cast_builder(builder)->tr_ivardecl(def, name, cast_node(type_)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_ivardecl(def, name, build->cast_node(type_)));
 }
 
 foreign_ptr tr_nil(self_ptr builder, const token *nil) {
-    return cast_builder(builder)->tr_nil(nil).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_nil(nil));
 }
 
 foreign_ptr tr_nillable(self_ptr builder, const token *tilde, foreign_ptr type_) {
-    return cast_builder(builder)->tr_nillable(tilde, cast_node(type_)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_nillable(tilde, build->cast_node(type_)));
 }
 
 foreign_ptr tr_or(self_ptr builder, foreign_ptr a, foreign_ptr b) {
-    return cast_builder(builder)->tr_or(cast_node(a), cast_node(b)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_or(build->cast_node(a), build->cast_node(b)));
 }
 
 foreign_ptr tr_paren(self_ptr builder, const token *begin, foreign_ptr node, const token *end) {
-    return cast_builder(builder)->tr_paren(begin, cast_node(node), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_paren(begin, build->cast_node(node), end));
 }
 
 foreign_ptr tr_proc(self_ptr builder, const token *begin, foreign_ptr args, const token *end) {
-    return cast_builder(builder)->tr_proc(begin, cast_node(args), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_proc(begin, build->cast_node(args), end));
 }
 
 foreign_ptr tr_prototype(self_ptr builder, foreign_ptr genargs, foreign_ptr args, foreign_ptr return_type) {
-    return cast_builder(builder)->tr_prototype(cast_node(genargs), cast_node(args), cast_node(return_type)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(
+        build->tr_prototype(build->cast_node(genargs), build->cast_node(args), build->cast_node(return_type)));
 }
 
 foreign_ptr tr_returnsig(self_ptr builder, const token *arrow, foreign_ptr ret) {
-    return cast_builder(builder)->tr_returnsig(arrow, cast_node(ret)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_returnsig(arrow, build->cast_node(ret)));
 }
 
 foreign_ptr tr_self(self_ptr builder, const token *special) {
-    return cast_builder(builder)->tr_self(special).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_self(special));
 }
 
 foreign_ptr tr_tuple(self_ptr builder, const token *begin, const node_list *types, const token *end) {
-    return cast_builder(builder)->tr_tuple(begin, convert_node_list(types), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_tuple(begin, build->convert_node_list(types), end));
 }
 
 foreign_ptr tr_typed_arg(self_ptr builder, foreign_ptr type_, foreign_ptr arg) {
-    return cast_builder(builder)->tr_typed_arg(cast_node(type_), cast_node(arg)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->tr_typed_arg(build->cast_node(type_), build->cast_node(arg)));
 }
 
 foreign_ptr true_(self_ptr builder, const token *tok) {
-    return cast_builder(builder)->true_(tok).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->true_(tok));
 }
 
 foreign_ptr unary_op(self_ptr builder, const token *oper, foreign_ptr receiver) {
-    return cast_builder(builder)->unary_op(oper, cast_node(receiver)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->unary_op(oper, build->cast_node(receiver)));
 }
 
 foreign_ptr undef_method(self_ptr builder, const token *undef, const node_list *name_list) {
-    return cast_builder(builder)->undef_method(undef, convert_node_list(name_list)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->undef_method(undef, build->convert_node_list(name_list)));
 }
 
 foreign_ptr when(self_ptr builder, const token *when, const node_list *patterns, const token *then, foreign_ptr body) {
-    return cast_builder(builder)->when(when, convert_node_list(patterns), then, cast_node(body)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->when(when, build->convert_node_list(patterns), then, build->cast_node(body)));
 }
 
 foreign_ptr word(self_ptr builder, const node_list *parts) {
-    return cast_builder(builder)->word(convert_node_list(parts)).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->word(build->convert_node_list(parts)));
 }
 
 foreign_ptr words_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
-    return cast_builder(builder)->words_compose(begin, convert_node_list(parts), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->words_compose(begin, build->convert_node_list(parts), end));
 }
 
 foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_list *parts, const token *end) {
-    return cast_builder(builder)->xstring_compose(begin, convert_node_list(parts), end).release();
+    auto build = cast_builder(builder);
+    return build->to_foreign(build->xstring_compose(begin, build->convert_node_list(parts), end));
 }
 }; // namespace
 
@@ -1711,7 +1846,7 @@ namespace parser {
 
 unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver) {
     impl_->driver_ = driver;
-    return cast_node(driver->parse(impl_.get()));
+    return impl_->cast_node(driver->parse(impl_.get()));
 }
 
 struct ruby_parser::builder Builder::interface = {
@@ -1757,8 +1892,6 @@ struct ruby_parser::builder Builder::interface = {
     float_,
     float_complex,
     for_,
-    free_node,
-    free_node_list,
     gvar,
     ident,
     index,

@@ -13,48 +13,41 @@ use std::ptr;
 use std::slice;
 use std::str;
 use std::mem;
+use id_arena::IdArena;
+
+type NodeId = usize;
 
 trait ToRaw {
-    fn to_raw(self) -> *mut Rc<Node>;
+    fn to_raw(self, builder: &mut Builder) -> NodeId;
 }
 
 impl ToRaw for Option<Rc<Node>> {
-    fn to_raw(self) -> *mut Rc<Node> {
-        match self {
-            None => ptr::null_mut(),
-            Some(x) => x.to_raw(),
-        }
+    fn to_raw(self, builder: &mut Builder) -> NodeId {
+        builder.nodes.insert(self)
     }
 }
 
 impl ToRaw for Rc<Node> {
-    fn to_raw(self) -> *mut Rc<Node> {
-        Box::into_raw(Box::new(self))
+    fn to_raw(self, builder: &mut Builder) -> NodeId {
+        builder.nodes.insert(Some(self))
     }
 }
 
 impl ToRaw for Option<Node> {
-    fn to_raw(self) -> *mut Rc<Node> {
-        match self {
-            None => ptr::null_mut(),
-            Some(x) => Box::new(x).to_raw(),
-        }
+    fn to_raw(self, builder: &mut Builder) -> NodeId {
+        builder.nodes.insert(self.map(Rc::new))
     }
 }
 
 impl ToRaw for Node {
-    fn to_raw(self) -> *mut Rc<Node> {
-        Box::into_raw(Box::new(Rc::new(self)))
+    fn to_raw(self, builder: &mut Builder) -> NodeId {
+        builder.nodes.insert(Some(Rc::new(self)))
     }
 }
 
 #[inline(always)]
-unsafe fn node_from_c(p: *mut Rc<Node>) -> Option<Rc<Node>> {
-    if p.is_null() {
-        None
-    } else {
-        Some(*Box::from_raw(p))
-    }
+unsafe fn node_from_c(builder: &Builder, p: NodeId) -> Option<Rc<Node>> {
+    builder.nodes.get(p).cloned()
 }
 
 #[inline(always)]
@@ -67,7 +60,7 @@ unsafe fn token_from_c(t: *const TokenPtr) -> Option<Token> {
 }
 
 #[inline(always)]
-unsafe fn node_list_from_c(list: *mut NodeListPtr) -> Vec<Rc<Node>> {
+unsafe fn node_list_from_c(builder: &Builder, list: *mut NodeListPtr) -> Vec<Rc<Node>> {
     if list.is_null() {
         Vec::new()
     } else {
@@ -76,8 +69,9 @@ unsafe fn node_list_from_c(list: *mut NodeListPtr) -> Vec<Rc<Node>> {
 
         for index in 0..len {
             let node_ptr = rblist_index(list, index);
-            assert!(node_ptr != ptr::null_mut());
-            vec.push(*Box::from_raw(node_ptr));
+            let node = builder.nodes.get(node_ptr).cloned()
+                .expect("node list should not contain None node");
+            vec.push(node);
         }
 
         vec
@@ -102,7 +96,7 @@ include!(concat!(env!("OUT_DIR"), "/ffi_builder.rs"));
 extern "C" {
     fn rbdriver_typedruby24_new(source: *const u8, source_length: size_t, builder: *const BuilderInterface) -> *mut DriverPtr;
     fn rbdriver_typedruby24_free(driver: *mut DriverPtr);
-    fn rbdriver_parse(driver: *mut DriverPtr, builder: *mut Builder) -> *mut Rc<Node>;
+    fn rbdriver_parse(driver: *mut DriverPtr, builder: *mut Builder) -> NodeId;
     fn rbdriver_in_definition(driver: *const DriverPtr) -> bool;
     fn rbdriver_env_is_declared(driver: *const DriverPtr, name: *const u8, len: size_t) -> bool;
     fn rbdriver_env_declare(driver: *mut DriverPtr, name: *const u8, len: size_t);
@@ -110,7 +104,7 @@ extern "C" {
     fn rbtoken_get_end(token: *const TokenPtr) -> size_t;
     fn rbtoken_get_string(token: *const TokenPtr, ptr: *mut *const u8) -> size_t;
     fn rblist_get_length(list: *mut NodeListPtr) -> size_t;
-    fn rblist_index(list: *mut NodeListPtr, index: size_t) -> *mut Rc<Node>;
+    fn rblist_index(list: *mut NodeListPtr, index: size_t) -> NodeId;
     fn rbdriver_diag_get_length(driver: *const DriverPtr) -> size_t;
     fn rbdriver_diag_get(driver: *const DriverPtr, index: size_t, diag: *mut CDiagnostic);
     fn rbdriver_diag_report(driver: *const DriverPtr, diag: *const CDiagnostic);
@@ -164,26 +158,25 @@ impl Driver {
         Driver { ptr: ptr, current_file: file.clone() }
     }
 
-    pub fn parse(&mut self, opt: &ParserOptions) -> Option<Box<Rc<Node>>> {
+    pub fn parse(&mut self, opt: &ParserOptions) -> Option<Rc<Node>> {
         for var in opt.declare_env.iter() {
             self.declare(var);
         }
 
         let driver = self.ptr;
-        let mut builder = Box::new(Builder {
+
+        let mut builder = Builder {
             driver: self,
             cookie: 12345678,
             magic_literals: opt.emit_file_vars_as_literals,
             emit_lambda: opt.emit_lambda,
             emit_procarg0: opt.emit_procarg0,
-        });
-        let ast = unsafe { rbdriver_parse(driver, &mut *builder) };
+            nodes: IdArena::new(),
+        };
 
-        if ast.is_null() {
-            None
-        } else {
-            Some(unsafe { Box::from_raw(ast) })
-        }
+        let ast = unsafe { rbdriver_parse(driver, &mut builder) };
+
+        builder.nodes.get(ast).cloned()
     }
 
     fn diagnostic(&mut self, level: Level, err: Error, loc: Loc, data: *const c_char) {
