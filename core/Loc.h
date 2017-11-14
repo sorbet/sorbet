@@ -34,6 +34,10 @@ public:
 
     std::pair<Detail, Detail> position(core::GlobalState &gs);
     std::string toString(core::GlobalState &gs);
+
+    bool operator==(const Loc &rhs) const;
+
+    bool operator!=(const Loc &rhs) const;
 };
 } // namespace core
 } // namespace ruby_typer

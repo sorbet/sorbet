@@ -65,5 +65,13 @@ string Loc::toString(core::GlobalState &gs) {
     return buf.str();
 }
 
+bool Loc::operator==(const Loc &rhs) const {
+    return file == rhs.file && begin_pos == rhs.begin_pos && end_pos == rhs.end_pos;
+}
+
+bool Loc::operator!=(const Loc &rhs) const {
+    return !(rhs == *this);
+}
+
 } // namespace core
 } // namespace ruby_typer
