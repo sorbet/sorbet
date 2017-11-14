@@ -59,7 +59,7 @@ TEST_F(InferFixture, LiteralsSubtyping) {
     EXPECT_FALSE(core::Types::isSubType(ctx, intClass, intLit));
 }
 
-TEST_F(InferFixture, ClassesLubs) {
+TEST_F(InferFixture, ClassesSubtyping) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo < Bar; end");
     namer::Namer::run(ctx, move(tree));
@@ -79,7 +79,7 @@ TEST_F(InferFixture, ClassesLubs) {
     ASSERT_FALSE(core::Types::isSubType(ctx, barType, fooType));
 }
 
-TEST_F(InferFixture, ClassesSubtyping) {
+TEST_F(InferFixture, ClassesLubs) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     namer::Namer::run(ctx, move(tree));
@@ -119,6 +119,48 @@ TEST_F(InferFixture, ClassesSubtyping) {
     ASSERT_TRUE(core::Types::equiv(ctx, barNfoo2, foo2Nbar));
     ASSERT_TRUE(core::Types::equiv(ctx, barNfoo1, foo1Nbar));
     ASSERT_TRUE(core::Types::equiv(ctx, foo1Nfoo2, foo2Nfoo1));
+}
+
+TEST_F(InferFixture, ClassesGlbs) {
+    auto ctx = getCtx();
+    auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
+    namer::Namer::run(ctx, move(tree));
+    auto &rootScope = core::GlobalState::defn_root().info(ctx);
+
+    auto barPair = rootScope.members[rootScope.members.size() - 3];
+    auto foo1Pair = rootScope.members[rootScope.members.size() - 2];
+    auto foo2Pair = rootScope.members[rootScope.members.size() - 1];
+    ASSERT_EQ("Foo2", foo2Pair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("Foo1", foo1Pair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("Bar", barPair.first.name(ctx).toString(ctx));
+
+    auto foo1Type = make_shared<core::ClassType>(foo1Pair.second);
+    auto foo2Type = make_shared<core::ClassType>(foo2Pair.second);
+    auto barType = make_shared<core::ClassType>(barPair.second);
+
+    auto barOrfoo1 = core::Types::glb(ctx, barType, foo1Type);
+    auto foo1Orbar = core::Types::glb(ctx, foo1Type, barType);
+    auto barOrfoo2 = core::Types::glb(ctx, barType, foo2Type);
+    auto foo2Orbar = core::Types::glb(ctx, foo2Type, barType);
+    auto foo1Orfoo2 = core::Types::glb(ctx, foo1Type, foo2Type);
+    auto foo2Orfoo1 = core::Types::glb(ctx, foo2Type, foo1Type);
+
+    ASSERT_EQ("ClassType", barOrfoo1->typeName());
+    ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo1, barType));
+    ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo1, foo1Type));
+    ASSERT_EQ("ClassType", barOrfoo2->typeName());
+    ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo2, barType));
+    ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo2, foo2Type));
+    ASSERT_EQ("ClassType", foo1Orbar->typeName());
+    ASSERT_TRUE(core::Types::isSubType(ctx, foo1Orbar, barType));
+    ASSERT_TRUE(core::Types::isSubType(ctx, foo1Orbar, foo1Type));
+    ASSERT_EQ("ClassType", foo2Orbar->typeName());
+    ASSERT_TRUE(core::Types::isSubType(ctx, foo2Orbar, barType));
+    ASSERT_TRUE(core::Types::isSubType(ctx, foo2Orbar, foo2Type));
+
+    ASSERT_TRUE(core::Types::equiv(ctx, barOrfoo2, foo2Orbar));
+    ASSERT_TRUE(core::Types::equiv(ctx, barOrfoo1, foo1Orbar));
+    ASSERT_TRUE(core::Types::equiv(ctx, foo1Orfoo2, foo2Orfoo1));
 }
 
 } // namespace test
