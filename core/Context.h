@@ -134,7 +134,7 @@ public:
         return SymbolRef(16);
     }
 
-    static constexpr SymbolRef defn_dynamic() {
+    static constexpr SymbolRef defn_untyped() {
         return SymbolRef(17);
     }
 

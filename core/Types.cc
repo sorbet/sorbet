@@ -17,7 +17,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
     }
 
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
             return t1;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
@@ -29,7 +29,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
             return t2;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
@@ -264,7 +264,7 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
         return true;
     }
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
             return true;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
@@ -280,7 +280,7 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
             return true;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
@@ -370,7 +370,7 @@ shared_ptr<Type> Types::nil() {
 }
 
 shared_ptr<Type> Types::dynamic() {
-    return make_shared<ClassType>(core::GlobalState::defn_dynamic());
+    return make_shared<ClassType>(core::GlobalState::defn_untyped());
 }
 
 ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {}
@@ -625,5 +625,5 @@ string OrType::toString(core::Context ctx, int tabs) {
 
 bool Type::isDynamic() {
     auto *t = dynamic_cast<ClassType *>(this);
-    return t != nullptr && t->symbol == core::GlobalState::defn_dynamic();
+    return t != nullptr && t->symbol == core::GlobalState::defn_untyped();
 }

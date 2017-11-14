@@ -57,7 +57,7 @@ public:
                                      vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
         core::TypeAndOrigins result;
         if (core::ClassType *classType = dynamic_cast<core::ClassType *>(recvType.type.get())) {
-            if (classType->symbol == core::GlobalState::defn_dynamic()) {
+            if (classType->symbol == core::GlobalState::defn_untyped()) {
                 return recvType;
             }
             core::SymbolRef newSymbol = classType->symbol.info(ctx).findMember(core::Names::new_());

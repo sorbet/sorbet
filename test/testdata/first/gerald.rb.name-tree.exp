@@ -1,8 +1,8 @@
 begin
   self(<singleton class:<root>>).require_relative("../../../extn")
-  ::<dynamic>.init("__FILE__")
+  ::untyped.init("__FILE__")
   module <emptyTree>::Opus::CIBot::Gerald<Gerald> < ()
-    class <emptyTree>::MatchTimeout<MatchTimeout> < (::<dynamic>)
+    class <emptyTree>::MatchTimeout<MatchTimeout> < (::untyped)
       self(<singleton class:MatchTimeout>).attr_reader(:rule_token)
 
       def initialize<initialize>(message, rule_token)
@@ -13,13 +13,13 @@ begin
 
     end
 
-    class <emptyTree>::Matcher<Matcher> < (::<dynamic>)
+    class <emptyTree>::Matcher<Matcher> < (::untyped)
       ::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES = 100
 
       def initialize<initialize>()
         begin
           begin
-            assignTmp$0 = ::<dynamic>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
+            assignTmp$0 = ::untyped.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
             ::Opus::CIBot::Gerald::Matcher#@rules = assignTmp$0.[](0)
             invalid_rules = assignTmp$0.[](1)
             assignTmp$0
@@ -96,12 +96,12 @@ begin
       ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS = 2000
 
       def initialize<initialize>()
-        ::Opus::CIBot::Gerald::MatchTimeBudget#@start = ::<dynamic>.now()
+        ::Opus::CIBot::Gerald::MatchTimeBudget#@start = ::untyped.now()
 
       def check!<check!>()
         begin
           dur_ms = begin
-            ::<dynamic>.now().-(::Opus::CIBot::Gerald::MatchTimeBudget#@start)
+            ::untyped.now().-(::Opus::CIBot::Gerald::MatchTimeBudget#@start)
           end.*(1000)
           if dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS)
             self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
@@ -114,10 +114,10 @@ begin
 
       def time_rule<time_rule>(rule)
         begin
-          rule_start = ::<dynamic>.now()
+          rule_start = ::untyped.now()
           res = yield(<emptyTree>)
           dur_ms = begin
-            ::<dynamic>.now().-(rule_start)
+            ::untyped.now().-(rule_start)
           end.*(1000)
           if dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS)
             self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald rule '".concat(begin
@@ -181,7 +181,7 @@ begin
         self(Diff).added_lines().+(self(Diff).removed_lines())
 
       def changed_openapi?<changed_openapi?>()
-        self(Diff).changed_files().include?(::<dynamic>)
+        self(Diff).changed_files().include?(::untyped)
 
       self(<singleton class:Diff>).private(def parse<parse>(diff)
           begin

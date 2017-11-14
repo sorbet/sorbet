@@ -1,7 +1,7 @@
 class <singleton class:A> (Class)
 class A (Object)
   field @foo -> Integer
-  field @llamas -> <dynamic>
+  field @llamas -> untyped
   method <block>$1 ()
 class Opus ()
 

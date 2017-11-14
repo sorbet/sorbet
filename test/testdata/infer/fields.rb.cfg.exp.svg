@@ -21,7 +21,7 @@
 <text text-anchor="middle" x="215" y="-235.2109" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="215" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = alias @ivar : Integer</text>
 <text text-anchor="middle" x="215" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="215" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = ss : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="215" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = ss : untyped</text>
 <text text-anchor="middle" x="215" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$4 = return @ivar$3 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="215" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -46,4 +46,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: c9dae03efbe34d039a432f36d947bd69053a234890c766da52c99435a1913ed7 -->
+<!-- ruby-types:sha256: ef0d8db0e1ecba9c10f27f30a53961ddca20f55d23508abb3638e033b2d90df9 -->

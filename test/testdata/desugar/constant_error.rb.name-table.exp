@@ -1,4 +1,4 @@
 class Foo (Object)
-  static-field BAR -> <dynamic>
+  static-field BAR -> untyped
 class Opus ()
 

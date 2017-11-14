@@ -5,7 +5,7 @@ subgraph "cluster_::Integer#+" {
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
 
-    bb24_0 [label = "()\n<self>$1 = self : Integer\n<ret>$1 = NotSupported() : <dynamic>\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
+    bb24_0 [label = "()\n<self>$1 = self : Integer\n<ret>$1 = NotSupported() : untyped\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb24_0 -> bb24_1;
     bb24_1 [label = "()\n<unconditional>"];
     bb24_1 -> bb24_1;
@@ -143,9 +143,9 @@ subgraph "cluster_::Examples#variables_and_loop" {
 
     bb32_7 [label = "(b)\nstatTmp$4 = nil : NilClass\n<ret>$8 = return b : <bottom>\n<unconditional>"];
     bb32_7 -> bb32_1;
-    bb32_8 [label = "(b)\nouterLoops: 1\nb = 1 : <dynamic>\n<unconditional>"];
+    bb32_8 [label = "(b)\nouterLoops: 1\nb = 1 : untyped\n<unconditional>"];
     bb32_8 -> bb32_10;
-    bb32_9 [label = "(b)\nouterLoops: 1\nb = 2 : <dynamic>\n<unconditional>"];
+    bb32_9 [label = "(b)\nouterLoops: 1\nb = 2 : untyped\n<unconditional>"];
     bb32_9 -> bb32_10;
     bb32_10 [label = "(b)\nouterLoops: 1\n<unconditional>"];
     bb32_10 -> bb32_5;
@@ -171,9 +171,9 @@ subgraph "cluster_::Examples#variables_loop_if" {
 
     bb33_4 [label = "(b)\nstatTmp$2 = nil : NilClass\n<ret>$6 = return b : <bottom>\n<unconditional>"];
     bb33_4 -> bb33_1;
-    bb33_5 [label = "(b)\nouterLoops: 1\nb = 1 : <dynamic>\n<unconditional>"];
+    bb33_5 [label = "(b)\nouterLoops: 1\nb = 1 : untyped\n<unconditional>"];
     bb33_5 -> bb33_7;
-    bb33_6 [label = "(b)\nouterLoops: 1\nb = 2 : <dynamic>\n<unconditional>"];
+    bb33_6 [label = "(b)\nouterLoops: 1\nb = 2 : untyped\n<unconditional>"];
     bb33_6 -> bb33_7;
     bb33_7 [label = "(b)\nouterLoops: 1\n<unconditional>"];
     bb33_7 -> bb33_2;
@@ -185,7 +185,7 @@ subgraph "cluster_::Examples#take_arguments" {
     bb34_0 [shape = invhouse];
     bb34_1 [shape = parallelogram];
 
-    bb34_0 [label = "(i)\n<self>$1 = self : Examples\ni = load_arg(<self>$1#take_arguments, 0) : <dynamic>\nifTmp$2 = false : FalseClass(false)\nifTmp$2"];
+    bb34_0 [label = "(i)\n<self>$1 = self : Examples\ni = load_arg(<self>$1#take_arguments, 0) : untyped\nifTmp$2 = false : FalseClass(false)\nifTmp$2"];
     bb34_0 -> bb34_2;
     bb34_0 -> bb34_3;
 
@@ -193,7 +193,7 @@ subgraph "cluster_::Examples#take_arguments" {
     bb34_1 -> bb34_1;
     bb34_2 [label = "(<ret>$9)\n<ret>$9 = 2 : Integer(2)\n<unconditional>"];
     bb34_2 -> bb34_4;
-    bb34_3 [label = "(i, <ret>$9)\n<ret>$9 = i : <dynamic>\n<unconditional>"];
+    bb34_3 [label = "(i, <ret>$9)\n<ret>$9 = i : untyped\n<unconditional>"];
     bb34_3 -> bb34_4;
     bb34_4 [label = "(<ret>$9)\n<ret>$3 = return <ret>$9 : <bottom>\n<unconditional>"];
     bb34_4 -> bb34_1;

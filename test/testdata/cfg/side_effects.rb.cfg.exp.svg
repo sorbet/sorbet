@@ -69,23 +69,23 @@
 <!-- bb24_4 -->
 <g id="node5" class="node">
 <title>bb24_4</title>
-<ellipse fill="none" stroke="#000000" cx="259" cy="-169.2548" rx="222.7025" ry="45.011"/>
+<ellipse fill="none" stroke="#000000" cx="259" cy="-169.2548" rx="209.4818" ry="45.011"/>
 <text text-anchor="middle" x="259" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTmp$3, statTmp$4)</text>
-<text text-anchor="middle" x="259" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$0 = statTmp$3.foo(statTmp$4, a) : &lt;dynamic&gt;</text>
+<text text-anchor="middle" x="259" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$0 = statTmp$3.foo(statTmp$4, a) : untyped</text>
 <text text-anchor="middle" x="259" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$7 = return &lt;ret&gt;$0 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="259" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb24_2&#45;&gt;bb24_4 -->
 <g id="edge4" class="edge">
 <title>bb24_2&#45;&gt;bb24_4</title>
-<path fill="none" stroke="#000000" d="M169.4444,-252.1365C180.057,-242.3148 191.9001,-231.3543 203.4087,-220.7033"/>
-<polygon fill="#000000" stroke="#000000" points="205.945,-223.1249 210.907,-213.7638 201.1904,-217.9874 205.945,-223.1249"/>
+<path fill="none" stroke="#000000" d="M169.4444,-252.1365C180.1762,-242.2045 192.1664,-231.1079 203.7966,-220.3444"/>
+<polygon fill="#000000" stroke="#000000" points="206.4085,-222.696 211.3704,-213.3349 201.6538,-217.5585 206.4085,-222.696"/>
 </g>
 <!-- bb24_3&#45;&gt;bb24_4 -->
 <g id="edge5" class="edge">
 <title>bb24_3&#45;&gt;bb24_4</title>
-<path fill="none" stroke="#000000" d="M348.5556,-252.1365C337.943,-242.3148 326.0999,-231.3543 314.5913,-220.7033"/>
-<polygon fill="#000000" stroke="#000000" points="316.8096,-217.9874 307.093,-213.7638 312.055,-223.1249 316.8096,-217.9874"/>
+<path fill="none" stroke="#000000" d="M348.5556,-252.1365C337.8238,-242.2045 325.8336,-231.1079 314.2034,-220.3444"/>
+<polygon fill="#000000" stroke="#000000" points="316.3462,-217.5585 306.6296,-213.3349 311.5915,-222.696 316.3462,-217.5585"/>
 </g>
 <!-- bb24_4&#45;&gt;bb24_1 -->
 <g id="edge6" class="edge">
@@ -95,4 +95,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 319d4f14a63d38addac83a55dc8396bc6019ddb734c3203075f5962a973167b5 -->
+<!-- ruby-types:sha256: c8462781b34603a0dd28cfbc4a03916c6fb38256eb4d62a05f7037b9f76fa48c -->

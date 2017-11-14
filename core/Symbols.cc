@@ -155,8 +155,8 @@ string Symbol::fullName(GlobalState &gs) const {
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Error::check(this->isClass());
-    if (this->ref(gs) == GlobalState::defn_dynamic())
-        return GlobalState::defn_dynamic();
+    if (this->ref(gs) == GlobalState::defn_untyped())
+        return GlobalState::defn_untyped();
 
     SymbolRef singleton = findMember(Names::singletonClass());
     if (singleton.exists())
@@ -175,8 +175,8 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
 SymbolRef Symbol::attachedClass(GlobalState &gs) {
     Error::check(this->isClass());
-    if (this->ref(gs) == GlobalState::defn_dynamic())
-        return GlobalState::defn_dynamic();
+    if (this->ref(gs) == GlobalState::defn_untyped())
+        return GlobalState::defn_untyped();
 
     SymbolRef singleton = findMember(Names::attachedClass());
     return singleton;
