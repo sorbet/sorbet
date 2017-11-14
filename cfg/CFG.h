@@ -225,7 +225,7 @@ public:
 
 private:
     CFG();
-    BasicBlock *walk(CFGContext ctx);
+    BasicBlock *walk(CFGContext cctx);
     BasicBlock *freshBlock(int outerLoops);
     void fillInTopoSorts(core::Context ctx);
     void dealias(core::Context ctx);
@@ -237,7 +237,7 @@ private:
 class CFGContext {
 public:
     core::Context ctx;
-    core::Expression *what;
+    ast::Expression *what;
     BasicBlock *current;
     CFG &inWhat;
     core::LocalVariable target;
