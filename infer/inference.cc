@@ -71,7 +71,10 @@ public:
         }
 
         core::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
-        Error::check(attachedClass.exists());
+        if (!attachedClass.exists()) {
+            // `foo`.new() but `foo` isn't a Class
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+        }
 
         auto type = make_shared<core::ClassType>(attachedClass);
 
