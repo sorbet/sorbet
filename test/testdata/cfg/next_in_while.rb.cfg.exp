@@ -1,0 +1,23 @@
+digraph "next_in_while.rb"{
+subgraph "cluster_::Object#foo" {
+    label = "::Object#foo";
+    color = blue;
+    bb23_0 [shape = invhouse];
+    bb23_1 [shape = parallelogram];
+
+    bb23_0 [label = "()\n<unconditional>"];
+    bb23_0 -> bb23_2;
+    bb23_1 [label = "()\nstatTmp$9 = self\nstatTmp$3 = statTmp$9.bad()\n<unconditional>"];
+    bb23_1 -> bb23_1;
+    bb23_2 [label = "()\nouterLoops: 1\nwhileTmp$2 = true : TrueClass(true)\nwhileTmp$2"];
+    bb23_2 -> bb23_3;
+    bb23_2 -> bb23_4;
+
+    bb23_3 [label = "()\nouterLoops: 1\nstatTmp$5 = self : Object\nstatTmp$4 = statTmp$5.good() : untyped\nstatTmp$8 = self : <todo sym>\nreturnTmp$7 = statTmp$8.value() : untyped\n<unconditional>"];
+    bb23_3 -> bb23_2;
+    bb23_4 [label = "()\n<ret>$0 = nil : NilClass\n<ret>$10 = return <ret>$0 : <bottom>\n<unconditional>"];
+    bb23_4 -> bb23_1;
+}
+
+}
+

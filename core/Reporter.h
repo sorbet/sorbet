@@ -20,13 +20,15 @@ enum class ErrorClass {
     RedefinitionOfParents = 4005,
     DynamicMethodDefinition = 4006,
 
-    DynamicConstant = 5001, // Resolver errors
+    DynamicConstant = 5001, // Resolver Errors
     StubConstant = 5002,
     InvalidMethodSignature = 5003,
     InvalidTypeDeclaration = 5004,
     InvalidDeclareVariables = 5005,
     DuplicateVariableDeclaration = 5006,
     UndeclaredVariable = 5007,
+
+    NoNextScope = 6001, // CFG Errors
 
     PinnedVariableMismatch = 7001, // Inferencer Errors
     MethodArgumentMismatch = 7002,

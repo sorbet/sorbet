@@ -240,16 +240,17 @@ public:
     CFG &inWhat;
     core::LocalVariable target;
     int loops;
+    BasicBlock *scope;
     std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
 
     CFGContext withTarget(core::LocalVariable target);
-    CFGContext withDeeperLoops();
+    CFGContext withScope(BasicBlock *scope);
 
 private:
     friend std::unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md);
-    CFGContext(core::Context ctx, CFG &inWhat, core::LocalVariable target, int loops,
+    CFGContext(core::Context ctx, CFG &inWhat, core::LocalVariable target, int loops, BasicBlock *scope,
                std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), aliases(aliases){};
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), scope(scope), aliases(aliases){};
 };
 
 } // namespace cfg
