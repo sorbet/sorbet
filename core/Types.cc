@@ -130,7 +130,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
     }
 }
 
-shared_ptr<ruby_typer::core::Type> distributeOr(core::Context ctx, OrType *t1, shared_ptr<Type> t2) {
+shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, OrType *t1, shared_ptr<Type> t2) {
     shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, t1->left, t2);
     shared_ptr<ruby_typer::core::Type> n2 = Types::lub(ctx, t1->right, t2);
     if (Types::isSubType(ctx, n1, n2)) {
@@ -167,7 +167,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     shared_ptr<ruby_typer::core::Type> result;
 
     if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
-        return distributeOr(ctx, o2, t1);
+        return lubDistributeOr(ctx, o2, t1);
     } else if (dynamic_cast<OrType *>(t1.get()) != nullptr) {
         Error::raise("should not happen");
     } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
@@ -200,9 +200,123 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     }
 }
 
+shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, AndType *t1, shared_ptr<Type> t2) {
+    shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, t1->left, t2);
+    shared_ptr<ruby_typer::core::Type> n2 = Types::glb(ctx, t1->right, t2);
+    if (Types::isSubType(ctx, n1, n2)) {
+        return n2;
+    } else if (Types::isSubType(ctx, n2, n1)) {
+        return n1;
+    }
+    return make_shared<AndType>(n1, n2);
+}
+
+shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+    auto *g1 = dynamic_cast<GroundType *>(t1.get());
+    auto *g2 = dynamic_cast<GroundType *>(t2.get());
+    ruby_typer::Error::check(g1 != nullptr);
+    ruby_typer::Error::check(g2 != nullptr);
+
+    if (g1->kind() > g2->kind()) // force the relation to be symmentric and half the implementation
+        return glbGround(ctx, t2, t1);
+    /** this implementation makes a bet that types are small and very likely to be collapsable.
+     * The more complex types we have, the more likely this bet is to be wrong.
+     */
+    if (t1.get() == t2.get()) {
+        return t1;
+    }
+
+    // Prereq: t1.kind <= t2.kind
+    // pairs to cover: 1  (Class, Class)
+    //                 2  (Class, And)
+    //                 3  (Class, Or)
+    //                 4  (And, And)
+    //                 5  (And, Or)
+    //                 6  (Or, Or)
+
+    shared_ptr<ruby_typer::core::Type> result;
+
+    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4, 5
+        return glbDistributeAnd(ctx, a1, t2);
+    } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2
+        return glbDistributeAnd(ctx, a2, t1);
+    } else if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
+        bool collapseInLeft = Types::isSubType(ctx, t1, o2->left);
+        bool collapseInRight = Types::isSubType(ctx, t1, o2->right);
+        if (collapseInLeft || collapseInRight) {
+            return t2;
+        } else if (auto *o1 = dynamic_cast<OrType *>(t1.get())) { // 6
+            bool collapseInLeft1 = Types::isSubType(ctx, t2, o1->left);
+            bool collapseInRight1 = Types::isSubType(ctx, t1, o1->right);
+            if (collapseInLeft1 || collapseInRight1) {
+                return t1;
+            }
+        } else {
+            return make_shared<AndType>(t1, t2);
+        }
+    }
+    // 1 :-)
+    ClassType *c1 = dynamic_cast<ClassType *>(t1.get());
+    ClassType *c2 = dynamic_cast<ClassType *>(t2.get());
+    Error::check(c1 != nullptr && c2 != nullptr);
+
+    core::SymbolRef sym1 = c1->symbol;
+    core::SymbolRef sym2 = c2->symbol;
+    if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
+        return t1;
+    } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
+        return t2;
+    } else {
+        return make_shared<AndType>(t1, t2);
+    }
+}
+
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> &t1,
                                                                 shared_ptr<Type> &t2) {
-    Error::notImplemented();
+    if (t1.get() == t2.get()) {
+        return t1;
+    }
+
+    if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_dynamic()) {
+            return t1;
+        }
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
+            return t1;
+        }
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
+            return t2;
+        }
+    }
+
+    if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_dynamic()) {
+            return t2;
+        }
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
+            return t2;
+        }
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
+            return t1;
+        }
+    }
+
+    if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
+        if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+            Error::notImplemented();
+            // Users can't write it yet. Not clear what this means.
+            // Should we return bottom early?
+            // what is an intersection between [1] and [:foo]?
+        } else {
+            // only 1st is proxy
+            return t1;
+        }
+    } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+        return t2;
+    } else {
+        // none is proxy
+        return glbGround(ctx, t1, t2);
+    }
 }
 
 bool isSubTypeGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
