@@ -59,6 +59,8 @@ public:
         return _id != 0;
     }
 
+    bool isBlockClashSafe(GlobalState &gs) const;
+
     NameRef addEq(GlobalState &gs) const;
 
     std::string toString(GlobalState &gs) const;
@@ -112,6 +114,7 @@ enum UniqueNameKind : u2 {
     Desugar,
     Namer,
     CFG,
+    NestedScope, // used by freshName to make sure blocks local variables do not collapse into method variables
     Singleton,
 };
 

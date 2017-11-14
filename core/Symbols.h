@@ -164,6 +164,11 @@ public:
         return (flags & Symbol::Flags::METHOD_ARGUMENT) != 0;
     }
 
+    inline bool isBlockSymbol(GlobalState &gs) const {
+        core::Name &nm = name.name(gs);
+        return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
+    }
+
     inline void setClass() {
         DEBUG_ONLY(Error::check(!isStaticField() && !isField() && !isMethod()));
         flags = flags | Symbol::Flags::CLASS;

@@ -418,6 +418,9 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
 LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
     // THIS IS NOT TRUE. Top level code is still a thing
     // Error::check(owner.info(*this).isMethod());
+    if (owner.info(*this).isBlockSymbol(*this) && !name.isBlockClashSafe(*this)) {
+        name = freshNameUnique(UniqueNameKind::NestedScope, name, owner._id);
+    }
     LocalVariable r(name);
     return r;
 }

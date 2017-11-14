@@ -38,6 +38,8 @@ string Name::toString(GlobalState &gs) const {
     } else if (kind == UNIQUE) {
         if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
             return "<singleton class:" + this->unique.original.name(gs).toString(gs) + ">";
+        } else if (this->unique.uniqueNameKind == UniqueNameKind::NestedScope) {
+            return "<block-nested: " + this->unique.original.name(gs).toString(gs) + ">";
         }
         return this->unique.original.name(gs).toString(gs) + "$" + to_string(this->unique.num);
     } else {
@@ -52,6 +54,12 @@ Name &NameRef::name(GlobalState &gs) const {
 }
 string NameRef::toString(GlobalState &gs) const {
     return name(gs).toString(gs);
+}
+
+bool NameRef::isBlockClashSafe(GlobalState &gs) const {
+    Name &nm = this->name(gs);
+    return nm.kind == NameKind ::UNIQUE && (nm.unique.uniqueNameKind == UniqueNameKind ::CFG ||
+                                            nm.unique.uniqueNameKind == UniqueNameKind ::NestedScope);
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {
