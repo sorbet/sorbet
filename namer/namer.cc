@@ -137,8 +137,13 @@ public:
         scopeStack.emplace_back();
         core::SymbolRef owner = ownerFromContext(ctx);
         if (method->isSelf) {
-            if (owner.info(ctx).isClass())
+            if (owner.info(ctx).isClass()) {
                 owner = owner.info(ctx).singletonClass(ctx);
+            }
+        }
+        if (!owner.info(ctx).isClass()) {
+            ctx.state.errors.error(method->loc, core::ErrorClass::DynamicMethodDefinition,
+                                   "Unsupported dynamic method definition");
         }
 
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);

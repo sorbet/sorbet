@@ -18,6 +18,7 @@ enum class ErrorClass {
     IncludePassedBlock = 4003,
     DynamicConstantDefinition = 4004,
     RedefinitionOfParents = 4005,
+    DynamicMethodDefinition = 4006,
 
     DynamicConstant = 5001, // Resolver errors
     StubConstant = 5002,
