@@ -278,7 +278,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ct
     }
 
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
             return t1;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
@@ -290,7 +290,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ct
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_dynamic()) {
+        if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
             return t2;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
