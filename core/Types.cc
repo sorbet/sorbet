@@ -540,9 +540,8 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         if (fullType.get() != this) {
             maybeComponent = " component of " + fullType->toString(ctx);
         }
-        ctx.state.errors.error(callLoc, core::ErrorClass::UnknownMethod,
-                               "Method {} does not exist on {}" + maybeComponent, fun.name(ctx).toString(ctx),
-                               this->toString(ctx));
+        ctx.state.errors.error(callLoc, core::ErrorClass::UnknownMethod, "Method {} does not exist on {}{}",
+                               fun.name(ctx).toString(ctx), this->toString(ctx), maybeComponent);
         return Types::dynamic();
     }
     core::Symbol &info = method.info(ctx);
