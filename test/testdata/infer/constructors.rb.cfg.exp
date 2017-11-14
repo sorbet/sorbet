@@ -35,5 +35,17 @@ subgraph "cluster_::Bar#foo" {
     bb33_1 -> bb33_1;
 }
 
+subgraph "cluster_::InstanceMethod#test_imethod_new" {
+    label = "::InstanceMethod#test_imethod_new";
+    color = blue;
+    bb35_0 [shape = invhouse];
+    bb35_1 [shape = parallelogram];
+
+    bb35_0 [label = "()\nObject$4 = alias Object : <singleton class:Object>\no = Object$4.new() : Object\n<ret>$6 = o.new() : untyped\n<ret>$6 = return <ret>$6 : <bottom>\n<unconditional>"];
+    bb35_0 -> bb35_1;
+    bb35_1 [label = "()\n<unconditional>"];
+    bb35_1 -> bb35_1;
+}
+
 }
 
