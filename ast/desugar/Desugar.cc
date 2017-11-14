@@ -505,13 +505,24 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
         },
         [&](parser::Block *block) {
             auto recv = node2TreeImpl(ctx, block->send);
-            Error::check(dynamic_cast<Send *>(recv.get()));
-            unique_ptr<Send> send(dynamic_cast<Send *>(recv.release()));
-
+            Send *send;
+            unique_ptr<Expression> res;
+            if ((send = dynamic_cast<Send *>(recv.get())) != nullptr) {
+                res.swap(recv);
+            } else {
+                // This must have been a csend; That will have been desugared
+                // into an insseq with an If in the expression.
+                res.swap(recv);
+                InsSeq *is = dynamic_cast<InsSeq *>(res.get());
+                Error::check(is != nullptr);
+                If *iff = dynamic_cast<If *>(is->expr.get());
+                Error::check(iff != nullptr);
+                send = dynamic_cast<Send *>(iff->elsep.get());
+                Error::check(send != nullptr);
+            }
             auto argsAndBody = desugarArgsAndBody(ctx, block->loc, block->args, block->body);
 
             send->block = make_unique<Block>(what->loc, argsAndBody.first, move(argsAndBody.second));
-            unique_ptr<Expression> res(send.release());
             result.swap(res);
         },
         [&](parser::While *wl) {
