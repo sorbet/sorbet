@@ -374,7 +374,7 @@ unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md) {
         aliases[argSym] = arg;
         i++;
     }
-    auto cont = res->walk(CFGContext(ctx, *res.get(), retSym, 0, aliases), md.rhs.get(), entry);
+    auto cont = res->walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, aliases), md.rhs.get(), entry);
     core::LocalVariable retSym1 =
         ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
 
@@ -483,7 +483,7 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
 
             core::LocalVariable condSym =
                 cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::whileTemp(), cctx.inWhat.symbol);
-            auto headerEnd = walk(cctx.withTarget(condSym).withDeeperLoops(), a->cond.get(), headerBlock);
+            auto headerEnd = walk(cctx.withTarget(condSym).withScope(headerBlock), a->cond.get(), headerBlock);
             auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, headerEnd);
             auto continueBlock = cctx.inWhat.freshBlock(cctx.loops, headerEnd);
             conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, cctx.inWhat);
@@ -491,7 +491,7 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
             core::LocalVariable bodySym =
                 cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), cctx.inWhat.symbol);
 
-            auto body = walk(cctx.withTarget(bodySym).withDeeperLoops(), a->body.get(), bodyBlock);
+            auto body = walk(cctx.withTarget(bodySym).withScope(headerBlock), a->body.get(), bodyBlock);
             unconditionalJump(body, headerBlock, cctx.inWhat);
 
             continueBlock->exprs.emplace_back(cctx.target, a->loc, make_unique<Nil>());
@@ -628,7 +628,7 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 // TODO: handle block arguments somehow??
                 core::LocalVariable blockrv = cctx.ctx.state.newTemporary(
                     core::UniqueNameKind::CFG, core::Names::blockReturnTemp(), cctx.inWhat.symbol);
-                auto blockLast = walk(cctx.withTarget(blockrv).withDeeperLoops(), s->block->body.get(), bodyBlock);
+                auto blockLast = walk(cctx.withTarget(blockrv).withScope(headerBlock), s->block->body.get(), bodyBlock);
 
                 unconditionalJump(blockLast, headerBlock, cctx.inWhat);
 
@@ -639,14 +639,30 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
             ret = current;
         },
 
+        [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); },
+
+        [&](ast::Next *a) {
+            core::LocalVariable nextSym =
+                cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnTemp(), cctx.inWhat.symbol);
+            auto afterNext = walk(cctx.withTarget(nextSym), a->expr.get(), current);
+
+            if (cctx.scope == nullptr) {
+                cctx.ctx.state.errors.error(a->loc, core::ErrorClass::NoNextScope, "No `do` block around `next`");
+                // I guess just keep going into deadcode?
+                unconditionalJump(afterNext, deadBlock(), cctx.inWhat);
+            } else {
+                unconditionalJump(afterNext, cctx.scope, cctx.inWhat);
+            }
+
+            ret = deadBlock();
+        },
+
         [&](ast::Expression *n) {
             current->exprs.emplace_back(cctx.target, n->loc, make_unique<NotSupported>(""));
             ret = current;
-        },
+        });
 
-        [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); });
-
-    /*[&](ast::Break *a) {}, [&](ast::Next *a) {},*/
+    /*[&](ast::Break *a) {}, */
     // For, Next, Rescue,
     // Symbol, Send, New, Super, NamedArg, Hash, Array,
     // ArraySplat, HashAplat, Block,
@@ -815,8 +831,9 @@ CFGContext CFGContext::withTarget(core::LocalVariable target) {
     return ret;
 }
 
-CFGContext CFGContext::withDeeperLoops() {
+CFGContext CFGContext::withScope(BasicBlock *scope) {
     auto ret = CFGContext(*this);
+    ret.scope = scope;
     ret.loops += 1;
     return ret;
 }
