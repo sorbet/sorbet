@@ -244,9 +244,10 @@ public:
     int loops;
     std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
 
-    CFGContext(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, core::LocalVariable target, int loops, std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases) : ctx(ctx), what(what), current(current), inWhat(inWhat), target(target), loops(loops), aliases(aliases) {};
+    CFGContext(core::Context ctx, ast::Expression *what, BasicBlock *current, CFG &inWhat, core::LocalVariable target,
+               int loops, std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases)
+        : ctx(ctx), what(what), current(current), inWhat(inWhat), target(target), loops(loops), aliases(aliases){};
 };
-
 
 } // namespace cfg
 } // namespace ruby_typer
