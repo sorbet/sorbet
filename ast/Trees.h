@@ -21,6 +21,12 @@ public:
     core::Loc loc;
 };
 
+template<class To> To cast_tree(Expression *what) {
+    static_assert(std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Expression*&, To>::value, "Ill Formed To, has to be a subclass of Expression");
+    return fast_cast<Expression *, To>(what);
+}
+
 class Reference : public Expression {
 public:
     Reference(core::Loc loc);
