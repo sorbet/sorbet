@@ -1,20 +1,20 @@
 begin
-  class <emptyTree>::Integer<<todo sym>> < ()
-    self(<todo sym>).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
+  class <emptyTree>::<constant:Integer><<constant:<todo sym>>> < ()
+    self(<constant:<todo sym>>).standard_method({:o => <emptyTree>::<constant:Integer>}, {:returns => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:Integer>)})
 
-    def +<<todo sym>>(o)
+    def +<<constant:<todo sym>>>(o)
       <emptyTree>
 
   end
-  class <emptyTree>::Examples<<todo sym>> < ()
-    def i_like_ifs<<todo sym>>()
+  class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < ()
+    def i_like_ifs<<constant:<todo sym>>>()
       if true
         return 1
       else
         return 2
       end
 
-    def i_like_exps<<todo sym>>()
+    def i_like_exps<<constant:<todo sym>>>()
       if begin
           true
         end
@@ -23,7 +23,7 @@ begin
         2
       end
 
-    def return_in_one_branch1<<todo sym>>()
+    def return_in_one_branch1<<constant:<todo sym>>>()
       if begin
           true
         end
@@ -32,7 +32,7 @@ begin
         2
       end
 
-    def return_in_one_branch2<<todo sym>>()
+    def return_in_one_branch2<<constant:<todo sym>>>()
       if begin
           true
         end
@@ -41,7 +41,7 @@ begin
         return 2
       end
 
-    def variables<<todo sym>>()
+    def variables<<constant:<todo sym>>>()
       begin
         if begin
             true
@@ -60,7 +60,7 @@ begin
         a.+(b)
       end
 
-    def variables_and_loop<<todo sym>>()
+    def variables_and_loop<<constant:<todo sym>>>()
       begin
         if begin
             true
@@ -81,7 +81,7 @@ begin
         b
       end
 
-    def variables_loop_if<<todo sym>>()
+    def variables_loop_if<<constant:<todo sym>>>()
       begin
         while true
           if begin
@@ -95,7 +95,7 @@ begin
         b
       end
 
-    def take_arguments<<todo sym>>(i)
+    def take_arguments<<constant:<todo sym>>>(i)
       if begin
           false
         end

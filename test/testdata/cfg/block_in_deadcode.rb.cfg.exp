@@ -1,11 +1,11 @@
 digraph "block_in_deadcode.rb"{
-subgraph "cluster_::Object#foo" {
-    label = "::Object#foo";
+subgraph "cluster_::<constant:Object>#foo" {
+    label = "::<constant:Object>#foo";
     color = blue;
     bb23_0 [shape = invhouse];
     bb23_1 [shape = parallelogram];
 
-    bb23_0 [label = "(statTmp$2)\nstatTmp$2 = self : Object\n<unconditional>"];
+    bb23_0 [label = "(statTmp$2)\nstatTmp$2 = self : <constant:Object>\n<unconditional>"];
     bb23_0 -> bb23_2;
     bb23_1 [label = "()\nstatTmp$6 = self\nstatTmp$8 = self\n<blockret>$7 = statTmp$8.foo()\n<blockret>$3 = statTmp$6.inner()\n<unconditional>"];
     bb23_1 -> bb23_1;
@@ -13,9 +13,9 @@ subgraph "cluster_::Object#foo" {
     bb23_2 -> bb23_4;
     bb23_2 -> bb23_3;
 
-    bb23_3 [label = "(statTmp$2)\n<ret>$2 = statTmp$2.outer() : untyped\n<ret>$9 = return <ret>$2 : <bottom>\n<unconditional>"];
+    bb23_3 [label = "(statTmp$2)\n<ret>$2 = statTmp$2.outer() : <constant:untyped>\n<ret>$9 = return <ret>$2 : <constant:<bottom>>\n<unconditional>"];
     bb23_3 -> bb23_1;
-    bb23_4 [label = "()\nouterLoops: 1\nreturnTmp$5 = NotSupported() : untyped\nstatTmp$4 = return returnTmp$5 : <bottom>\n<unconditional>"];
+    bb23_4 [label = "()\nouterLoops: 1\nreturnTmp$5 = NotSupported() : <constant:untyped>\nstatTmp$4 = return returnTmp$5 : <constant:<bottom>>\n<unconditional>"];
     bb23_4 -> bb23_1;
 }
 

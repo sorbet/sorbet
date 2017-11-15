@@ -1,4 +1,4 @@
-class Foo (Object)
-  static-field BAR -> untyped
-class Opus ()
+class <constant:Foo> (<constant:Object>)
+  static-field <constant:BAR> -> <constant:untyped>
+class <constant:Opus> ()
 

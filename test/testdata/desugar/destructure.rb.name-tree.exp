@@ -1,4 +1,4 @@
-class <emptyTree>::Destructure<Destructure> < ()
+class <emptyTree>::<constant:Destructure><<constant:Destructure>> < ()
   def f<f>(<destructure>$0, z)
     begin
       begin
@@ -9,7 +9,7 @@ class <emptyTree>::Destructure<Destructure> < ()
       end
       begin
         x.+(y)
-        self(Destructure).lambda() do |<block-nested: <destructure>$2>|
+        self(<constant:Destructure>).lambda() do |<block-nested: <destructure>$2>|
           begin
             begin
               <block-nested: assignTmp$3> = <block-nested: <destructure>$2>

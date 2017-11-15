@@ -1,35 +1,35 @@
 begin
-  class <emptyTree>::Parent<Parent> < ()
-    self(<singleton class:Parent>).declare_variables({:@ivar => ::Integer, :@ivar2 => ::Integer, :@@class_var => ::String})
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < ()
+    self(<singleton class:<constant:Parent>>).declare_variables({:@ivar => ::<constant:Integer>, :@ivar2 => ::<constant:Integer>, :@@class_var => ::<constant:String>})
 
-    ::Parent#@@class_var = "hi"
+    ::<constant:Parent>#@@class_var = "hi"
 
     def hi<hi>()
       begin
-        ::Parent#@ivar = 1
-        ::Parent#@ivar2
+        ::<constant:Parent>#@ivar = 1
+        ::<constant:Parent>#@ivar2
       end
 
   end
-  module <emptyTree>::Mixin<Mixin> < ()
-    self(<singleton class:Mixin>).declare_variables({:@@mixin_cvar => ::Integer})
+  module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
+    self(<singleton class:<constant:Mixin>>).declare_variables({:@@mixin_cvar => ::<constant:Integer>})
 
-    ::Mixin#@@mixin_cvar
+    ::<constant:Mixin>#@@mixin_cvar
 
   end
-  class <emptyTree>::Child<Child> < (::Parent, ::Mixin)
-    ::Parent#@@class_var
+  class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
+    ::<constant:Parent>#@@class_var
 
-    ::Mixin#@@mixin_cvar
+    ::<constant:Mixin>#@@mixin_cvar
 
-    ::Child#@@undefined_cvar
+    ::<constant:Child>#@@undefined_cvar
 
     def child_method<child_method>()
       begin
-        ::Parent#@@class_var
-        ::Mixin#@@mixin_cvar
-        ::Parent#@ivar2
-        ::Child#@undefinedivar
+        ::<constant:Parent>#@@class_var
+        ::<constant:Mixin>#@@mixin_cvar
+        ::<constant:Parent>#@ivar2
+        ::<constant:Child>#@undefinedivar
       end
 
   end

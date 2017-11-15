@@ -1,15 +1,15 @@
 begin
-  module <emptyTree>::A<A> < ()
-    ::A::B#C = 1
+  module <emptyTree>::<constant:A><<constant:A>> < ()
+    ::<constant:A>::<constant:B>#<constant:C> = 1
 
-    module <emptyTree>::B<B> < ()
-      ::A::B#C
+    module <emptyTree>::<constant:B><<constant:B>> < ()
+      ::<constant:A>::<constant:B>#<constant:C>
 
-      ::A::B#D = 1
+      ::<constant:A>::<constant:B>#<constant:D> = 1
 
     end
 
   end
-  ::A::B#C
-  ::A::B#D
+  ::<constant:A>::<constant:B>#<constant:C>
+  ::<constant:A>::<constant:B>#<constant:D>
 end

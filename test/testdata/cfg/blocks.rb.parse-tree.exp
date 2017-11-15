@@ -1,7 +1,7 @@
 Class {
   name = Const {
     scope = NULL
-    name = BlockTest
+    name = <constant:BlockTest>
   }
   superclass = NULL
   body = DefMethod {

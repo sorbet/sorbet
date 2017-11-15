@@ -17,9 +17,9 @@ Begin {
       receiver = Const {
         scope = Const {
           scope = NULL
-          name = Opus
+          name = <constant:Opus>
         }
-        name = AutogenLoader
+        name = <constant:AutogenLoader>
       }
       method = init
       args = [
@@ -32,22 +32,22 @@ Begin {
         scope = Const {
           scope = Const {
             scope = NULL
-            name = Opus
+            name = <constant:Opus>
           }
-          name = CIBot
+          name = <constant:CIBot>
         }
-        name = Gerald
+        name = <constant:Gerald>
       }
       body = Begin {
         stmts = [
           Class {
             name = Const {
               scope = NULL
-              name = MatchTimeout
+              name = <constant:MatchTimeout>
             }
             superclass = Const {
               scope = NULL
-              name = StandardError
+              name = <constant:StandardError>
             }
             body = Begin {
               stmts = [
@@ -105,7 +105,7 @@ Begin {
           Class {
             name = Const {
               scope = NULL
-              name = Matcher
+              name = <constant:Matcher>
             }
             superclass = NULL
             body = Begin {
@@ -117,16 +117,16 @@ Begin {
                     Const {
                       scope = Const {
                         scope = NULL
-                        name = Chalk
+                        name = <constant:Chalk>
                       }
-                      name = Log
+                      name = <constant:Log>
                     }
                   ]
                 }
                 Assign {
                   lhs = ConstLhs {
                     scope = NULL
-                    name = MAX_AFFECTED_FILES
+                    name = <constant:MAX_AFFECTED_FILES>
                   }
                   rhs = Integer {
                     val = "100"
@@ -156,13 +156,13 @@ Begin {
                                   scope = Const {
                                     scope = Const {
                                       scope = NULL
-                                      name = Opus
+                                      name = <constant:Opus>
                                     }
-                                    name = CIBot
+                                    name = <constant:CIBot>
                                   }
-                                  name = Model
+                                  name = <constant:Model>
                                 }
-                                name = GeraldRule
+                                name = <constant:GeraldRule>
                               }
                               method = query_by
                               args = [
@@ -303,7 +303,7 @@ Begin {
                           args = [
                             Const {
                               scope = NULL
-                              name = MAX_AFFECTED_FILES
+                              name = <constant:MAX_AFFECTED_FILES>
                             }
                           ]
                         }
@@ -375,7 +375,7 @@ Begin {
                         rhs = Send {
                           receiver = Const {
                             scope = NULL
-                            name = MatchTimeBudget
+                            name = <constant:MatchTimeBudget>
                           }
                           method = new
                           args = [
@@ -433,7 +433,7 @@ Begin {
           Class {
             name = Const {
               scope = NULL
-              name = MatchContext
+              name = <constant:MatchContext>
             }
             superclass = NULL
             body = Begin {
@@ -639,7 +639,7 @@ Begin {
           Class {
             name = Const {
               scope = NULL
-              name = MatchTimeBudget
+              name = <constant:MatchTimeBudget>
             }
             superclass = NULL
             body = Begin {
@@ -647,7 +647,7 @@ Begin {
                 Assign {
                   lhs = ConstLhs {
                     scope = NULL
-                    name = TOTAL_TIME_MS
+                    name = <constant:TOTAL_TIME_MS>
                   }
                   rhs = Integer {
                     val = "10000"
@@ -656,7 +656,7 @@ Begin {
                 Assign {
                   lhs = ConstLhs {
                     scope = NULL
-                    name = PER_RULE_MS
+                    name = <constant:PER_RULE_MS>
                   }
                   rhs = Integer {
                     val = "2000"
@@ -672,7 +672,7 @@ Begin {
                     rhs = Send {
                       receiver = Const {
                         scope = NULL
-                        name = Time
+                        name = <constant:Time>
                       }
                       method = now
                       args = [
@@ -696,7 +696,7 @@ Begin {
                                 receiver = Send {
                                   receiver = Const {
                                     scope = NULL
-                                    name = Time
+                                    name = <constant:Time>
                                   }
                                   method = now
                                   args = [
@@ -728,7 +728,7 @@ Begin {
                           args = [
                             Const {
                               scope = NULL
-                              name = TOTAL_TIME_MS
+                              name = <constant:TOTAL_TIME_MS>
                             }
                           ]
                         }
@@ -739,7 +739,7 @@ Begin {
                             Send {
                               receiver = Const {
                                 scope = NULL
-                                name = MatchTimeout
+                                name = <constant:MatchTimeout>
                               }
                               method = new
                               args = [
@@ -754,7 +754,7 @@ Begin {
                                           stmts = [
                                             Const {
                                               scope = NULL
-                                              name = TOTAL_TIME_MS
+                                              name = <constant:TOTAL_TIME_MS>
                                             }
                                           ]
                                         }
@@ -792,7 +792,7 @@ Begin {
                         rhs = Send {
                           receiver = Const {
                             scope = NULL
-                            name = Time
+                            name = <constant:Time>
                           }
                           method = now
                           args = [
@@ -819,7 +819,7 @@ Begin {
                                 receiver = Send {
                                   receiver = Const {
                                     scope = NULL
-                                    name = Time
+                                    name = <constant:Time>
                                   }
                                   method = now
                                   args = [
@@ -851,7 +851,7 @@ Begin {
                           args = [
                             Const {
                               scope = NULL
-                              name = PER_RULE_MS
+                              name = <constant:PER_RULE_MS>
                             }
                           ]
                         }
@@ -862,7 +862,7 @@ Begin {
                             Send {
                               receiver = Const {
                                 scope = NULL
-                                name = MatchTimeout
+                                name = <constant:MatchTimeout>
                               }
                               method = new
                               args = [
@@ -907,7 +907,7 @@ Begin {
                                           stmts = [
                                             Const {
                                               scope = NULL
-                                              name = PER_RULE_MS
+                                              name = <constant:PER_RULE_MS>
                                             }
                                           ]
                                         }
@@ -959,7 +959,7 @@ Begin {
           Class {
             name = Const {
               scope = NULL
-              name = Diff
+              name = <constant:Diff>
             }
             superclass = NULL
             body = Begin {
@@ -1356,15 +1356,15 @@ Begin {
                             scope = Const {
                               scope = Const {
                                 scope = NULL
-                                name = Opus
+                                name = <constant:Opus>
                               }
-                              name = CIBot
+                              name = <constant:CIBot>
                             }
-                            name = Actions
+                            name = <constant:Actions>
                           }
-                          name = OpenAPI
+                          name = <constant:OpenAPI>
                         }
-                        name = SPEC_PATH
+                        name = <constant:SPEC_PATH>
                       }
                     ]
                   }

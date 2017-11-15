@@ -1,4 +1,4 @@
-self(<singleton class:<root>>).foobar() do ||
+self(<singleton class:<constant:<root>>>).foobar() do ||
   begin
     def a_method<a_method>()
       <emptyTree>

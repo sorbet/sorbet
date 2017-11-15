@@ -1,10 +1,10 @@
 begin
-  module <emptyTree>::B<B> < ()
+  module <emptyTree>::<constant:B><<constant:B>> < ()
     <emptyTree>
 
   end
-  module <emptyTree>::A<A> < ()
-    class <emptyTree>::B::C<C> < ()
+  module <emptyTree>::<constant:A><<constant:A>> < ()
+    class <emptyTree>::<constant:B>::<constant:C><<constant:C>> < ()
       <emptyTree>
 
     end

@@ -1,11 +1,11 @@
 digraph "non_existent_method.rb"{
-subgraph "cluster_::Foo#baz" {
-    label = "::Foo#baz";
+subgraph "cluster_::<constant:Foo>#baz" {
+    label = "::<constant:Foo>#baz";
     color = blue;
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
 
-    bb24_0 [label = "()\nstatTmp$3 = self : Foo\na = statTmp$3.does_not_exist() : untyped\n<ret>$0 = a.bla() : untyped\n<ret>$5 = return <ret>$0 : <bottom>\n<unconditional>"];
+    bb24_0 [label = "()\nstatTmp$3 = self : <constant:Foo>\na = statTmp$3.does_not_exist() : <constant:untyped>\n<ret>$0 = a.bla() : <constant:untyped>\n<ret>$5 = return <ret>$0 : <constant:<bottom>>\n<unconditional>"];
     bb24_0 -> bb24_1;
     bb24_1 [label = "()\n<unconditional>"];
     bb24_1 -> bb24_1;

@@ -3,22 +3,22 @@ Begin {
     Module {
       name = Const {
         scope = NULL
-        name = B
+        name = <constant:B>
       }
       body = NULL
     }
     Module {
       name = Const {
         scope = NULL
-        name = A
+        name = <constant:A>
       }
       body = Class {
         name = Const {
           scope = Const {
             scope = NULL
-            name = B
+            name = <constant:B>
           }
-          name = C
+          name = <constant:C>
         }
         superclass = NULL
         body = NULL

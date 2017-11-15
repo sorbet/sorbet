@@ -1,4 +1,4 @@
-class <singleton class:<root>> (Class)
-class <singleton class:<root>> (Class)
-class Opus ()
+class <constant:Opus> ()
+class <singleton class:<constant:<root>>> (<constant:Class>)
+class <singleton class:<constant:<root>>> (<constant:Class>)
 

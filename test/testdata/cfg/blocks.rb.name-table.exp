@@ -1,7 +1,7 @@
-class BlockTest (Object)
+class <constant:BlockTest> (<constant:Object>)
   method block_pass ()
     method <block>$0 (x, y)
       argument x<>
       argument y<>
-class Opus ()
+class <constant:Opus> ()
 

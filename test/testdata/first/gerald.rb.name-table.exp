@@ -1,15 +1,9 @@
-class <singleton class:<root>> (Class)
-class <singleton class:<root>> (Class)
-class Opus ()
-  class CIBot ()
-    class Gerald ()
-      class <singleton class:Diff> (Class)
-      class <singleton class:MatchContext> (Class)
-      class <singleton class:MatchTimeout> (Class)
-      class <singleton class:Matcher> (Class)
-      class Diff (Object)
-        field @parsed -> untyped
-        field @raw -> untyped
+class <constant:Opus> ()
+  class <constant:CIBot> ()
+    class <constant:Gerald> ()
+      class <constant:Diff> (<constant:Object>)
+        field @parsed -> <constant:untyped>
+        field @raw -> <constant:untyped>
         method added_files ()
           method <block>$7 (part)
             argument part<>
@@ -42,15 +36,15 @@ class Opus ()
         method removed_lines ()
           method <block>$14 (part)
             argument part<>
-      class MatchContext (Object)
-        field @assignee -> untyped
-        field @body -> untyped
-        field @diff -> untyped
-        field @gh_user -> untyped
-        field @merge_branch -> untyped
-        field @openapi_diff -> untyped
-        field @repo -> untyped
-        field @title -> untyped
+      class <constant:MatchContext> (<constant:Object>)
+        field @assignee -> <constant:untyped>
+        field @body -> <constant:untyped>
+        field @diff -> <constant:untyped>
+        field @gh_user -> <constant:untyped>
+        field @merge_branch -> <constant:untyped>
+        field @openapi_diff -> <constant:untyped>
+        field @repo -> <constant:untyped>
+        field @title -> <constant:untyped>
         method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
           argument assignee<>
           argument body<>
@@ -61,26 +55,32 @@ class Opus ()
           argument repo<>
           argument title<>
         method user_stripe_suffix? ()
-      class MatchTimeBudget (Object)
-        field @start -> untyped
+      class <constant:MatchTimeBudget> (<constant:Object>)
+        field @start -> <constant:untyped>
         method check! ()
         method initialize ()
         method time_rule (rule)
           argument rule<>
-        static-field PER_RULE_MS -> untyped
-        static-field TOTAL_TIME_MS -> untyped
-      class MatchTimeout (untyped)
-        field @rule_token -> untyped
+        static-field <constant:PER_RULE_MS> -> <constant:untyped>
+        static-field <constant:TOTAL_TIME_MS> -> <constant:untyped>
+      class <constant:MatchTimeout> (<constant:untyped>)
+        field @rule_token -> <constant:untyped>
         method initialize (message, rule_token)
           argument message<>
           argument rule_token<optional, keyword>
-      class Matcher (untyped)
-        field @rules -> untyped
+      class <constant:Matcher> (<constant:untyped>)
+        field @rules -> <constant:untyped>
         method initialize ()
         method match (match_context)
           argument match_context<>
           method <block>$4 (r)
             argument r<>
             method <block>$5 ()
-        static-field MAX_AFFECTED_FILES -> untyped
+        static-field <constant:MAX_AFFECTED_FILES> -> <constant:untyped>
+      class <singleton class:<constant:Diff>> (<constant:Class>)
+      class <singleton class:<constant:MatchContext>> (<constant:Class>)
+      class <singleton class:<constant:MatchTimeout>> (<constant:Class>)
+      class <singleton class:<constant:Matcher>> (<constant:Class>)
+class <singleton class:<constant:<root>>> (<constant:Class>)
+class <singleton class:<constant:<root>>> (<constant:Class>)
 

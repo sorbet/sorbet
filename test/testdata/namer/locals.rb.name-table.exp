@@ -1,5 +1,5 @@
-class Opus ()
-class TestLocals (Object)
+class <constant:Opus> ()
+class <constant:TestLocals> (<constant:Object>)
   method method ()
     method <block>$0 ()
       method <block>$1 ()
