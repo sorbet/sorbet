@@ -126,12 +126,6 @@ public:
     virtual std::string nodeName();
 };
 
-class For : public Expression {
-public:
-    For(core::Loc loc);
-    // TODO
-};
-
 class Break final : public Expression {
 public:
     std::unique_ptr<Expression> expr;

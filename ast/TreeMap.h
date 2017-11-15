@@ -30,9 +30,6 @@ public:
     While *preTransformWhile(core::Context ctx, While *original);
     Expression *postTransformWhile(core::Context ctx, While *original);
 
-    For *preTransformFor(core::Context ctx, For *original);
-    Expression *postTransformFor(core::Context ctx, For *original);
-
     Expression *postTransformBreak(core::Context ctx, Break *original);
 
     Expression *postTransformNext(core::Context ctx, Next *original);
@@ -118,7 +115,6 @@ GENERATE_HAS_MEMBER(preTransformMethodDef);
 GENERATE_HAS_MEMBER(preTransformConstDef);
 GENERATE_HAS_MEMBER(preTransformIf);
 GENERATE_HAS_MEMBER(preTransformWhile);
-GENERATE_HAS_MEMBER(preTransformFor);
 GENERATE_HAS_MEMBER(preTransformBreak);
 GENERATE_HAS_MEMBER(preTransformNext);
 GENERATE_HAS_MEMBER(preTransformReturn);
@@ -150,7 +146,6 @@ GENERATE_HAS_MEMBER(postTransformMethodDef);
 GENERATE_HAS_MEMBER(postTransformConstDef);
 GENERATE_HAS_MEMBER(postTransformIf);
 GENERATE_HAS_MEMBER(postTransformWhile);
-GENERATE_HAS_MEMBER(postTransformFor);
 GENERATE_HAS_MEMBER(postTransformBreak);
 GENERATE_HAS_MEMBER(postTransformNext);
 GENERATE_HAS_MEMBER(postTransformReturn);
@@ -228,7 +223,6 @@ GENERATE_POSTPONE_PRECLASS(MethodDef);
 GENERATE_POSTPONE_PRECLASS(ConstDef);
 GENERATE_POSTPONE_PRECLASS(If);
 GENERATE_POSTPONE_PRECLASS(While);
-GENERATE_POSTPONE_PRECLASS(For);
 GENERATE_POSTPONE_PRECLASS(Break);
 GENERATE_POSTPONE_PRECLASS(Next);
 GENERATE_POSTPONE_PRECLASS(Return);
@@ -248,7 +242,6 @@ GENERATE_POSTPONE_POSTCLASS(MethodDef);
 GENERATE_POSTPONE_POSTCLASS(ConstDef);
 GENERATE_POSTPONE_POSTCLASS(If);
 GENERATE_POSTPONE_POSTCLASS(While);
-GENERATE_POSTPONE_POSTCLASS(For);
 GENERATE_POSTPONE_POSTCLASS(Break);
 GENERATE_POSTPONE_POSTCLASS(Next);
 GENERATE_POSTPONE_POSTCLASS(Return);
@@ -397,8 +390,6 @@ private:
             }
 
             return v;
-        } else if (For *v = cast_tree<For>(what)) {
-            Error::notImplemented();
         } else if (Break *v = cast_tree<Break>(what)) {
             if (HAS_MEMBER_preTransformBreak<FUNC>::value) {
                 return PostPonePreTransform_Break<FUNC, HAS_MEMBER_preTransformBreak<FUNC>::value>::call(ctx, v, func);

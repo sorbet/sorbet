@@ -28,10 +28,6 @@ public:
         check(original);
         return original;
     }
-    Expression *postTransformFor(core::Context ctx, For *original) {
-        check(original);
-        return original;
-    }
     Expression *postTransformBreak(core::Context ctx, Break *original) {
         check(original);
         return original;
