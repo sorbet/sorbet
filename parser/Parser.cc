@@ -52,12 +52,13 @@ std::unique_ptr<Node> Parser::run(ruby_typer::core::GlobalState &gs, core::FileR
     Builder builder(gs, file);
     ruby_parser::typedruby24 driver(file.file(gs).source().toString(), Builder::interface);
     auto ast = unique_ptr<Node>(builder.build(&driver));
-    if (!ast && driver.diagnostics.size() == 0) {
+    DiagnosticToError::run(gs, file, driver.diagnostics);
+
+    if (!ast) {
         core::Loc loc(file, 0, 0);
         NodeVec empty;
         return make_unique<Begin>(loc, move(empty));
     }
-    DiagnosticToError::run(gs, file, driver.diagnostics);
 
     return ast;
 }
