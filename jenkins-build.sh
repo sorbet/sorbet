@@ -18,6 +18,8 @@ err=0
 bazel test //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0" --test_env="LSAN_OPTIONS=verbosity=1:log_threads=1" || err=$?
 
 mkdir -p /log/junit
-cp -a bazel-testlogs/. /log/junit
+find bazel-testlogs/ -name '*.xml' | while read -r line; do
+    cp "$line" /log/junit/"$(echo "${line#bazel-testlogs/}" | sed s,/,_,g)"
+done
 
 exit "$err"
