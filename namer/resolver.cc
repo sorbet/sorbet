@@ -259,17 +259,21 @@ public:
         if (original->ancestors.size() > 0) {
             core::Symbol &info = original->symbol.info(ctx);
             for (auto &ancst : original->ancestors) {
-                if (ast::Ident *id = dynamic_cast<ast::Ident *>(ancst.get())) {
-                    info.argumentsOrMixins.emplace_back(id->symbol);
-                    if (&ancst == &original->ancestors.front()) {
-                        if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_object() ||
-                            info.superClass == id->symbol) {
-                            info.superClass = id->symbol;
-                        } else {
-                            ctx.state.errors.error(id->loc, core::ErrorClass::RedefinitionOfParents,
-                                                   "Class parents redefined for class {}",
-                                                   original->symbol.info(ctx).name.toString(ctx));
-                        }
+                ast::Ident *id = dynamic_cast<ast::Ident *>(ancst.get());
+                if (id == nullptr || !id->symbol.info(ctx).isClass()) {
+                    ctx.state.errors.error(id->loc, core::ErrorClass::DynamicSuperclass,
+                                           "Superclasses and mixins must be statically resolved.");
+                    continue;
+                }
+                info.argumentsOrMixins.emplace_back(id->symbol);
+                if (&ancst == &original->ancestors.front()) {
+                    if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_object() ||
+                        info.superClass == id->symbol) {
+                        info.superClass = id->symbol;
+                    } else {
+                        ctx.state.errors.error(id->loc, core::ErrorClass::RedefinitionOfParents,
+                                               "Class parents redefined for class {}",
+                                               original->symbol.info(ctx).name.toString(ctx));
                     }
                 }
             }
