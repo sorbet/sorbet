@@ -337,6 +337,11 @@ public:
     static inline NameRef super() {
         return NameRef(40);
     }
+
+    // the empty string
+    static inline NameRef empty() {
+        return NameRef(41);
+    }
 };
 
 class Name final {

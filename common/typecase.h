@@ -31,7 +31,7 @@ template <typename T> using get_signature = typename get_signature_impl<T>::type
 
 // Begin typecase code
 template <typename Base, typename T> bool typecaseHelper(Base *base, std::function<void(T *)> func) {
-    if (T *first = dynamic_cast<T *>(base)) {
+    if (T *first = fast_cast<Base *, T *>(base)) {
         func(first);
         return true;
     } else {

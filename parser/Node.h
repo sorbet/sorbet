@@ -30,6 +30,12 @@ protected:
     void printNode(std::stringstream &to, unique_ptr<Node> &node, core::GlobalState &gs, int tabs);
 };
 
+template <class To> To cast_node(Node *what) {
+    static_assert(std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Node *&, To>::value, "Ill Formed To, has to be a subclass of Expression");
+    return fast_cast<Node *, To>(what);
+}
+
 typedef InlinedVector<std::unique_ptr<Node>, 4> NodeVec;
 
 #include "parser/Node_gen.h"

@@ -28,6 +28,7 @@ enum class ErrorClass {
     InvalidDeclareVariables = 5005,
     DuplicateVariableDeclaration = 5006,
     UndeclaredVariable = 5007,
+    DynamicSuperclass = 5008,
 
     NoNextScope = 6001, // CFG Errors
 

@@ -1,3 +1,5 @@
+class <constant:Child1> ()
+  static-field @@class_var -> untyped
 class <constant:Child> (<constant:Parent>, <constant:Mixin>)
   field @undefinedivar -> untyped
   method child_method ()
@@ -13,4 +15,5 @@ class <constant:Parent> (<constant:Object>)
 class <singleton class:<constant:Child>> (<constant:Class>)
 class <singleton class:<constant:Mixin>> (<constant:Class>)
 class <singleton class:<constant:Parent>> (<constant:Class>)
+static-field <constant:Alias> -> untyped
 

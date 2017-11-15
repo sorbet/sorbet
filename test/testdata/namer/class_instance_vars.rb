@@ -33,3 +33,8 @@ class Child < Parent
     @undefinedivar # error: Use of undeclared variable
   end
 end
+
+Alias = Parent
+class Child1 < Alias # error: must be statically resolved
+  @@class_var # error: undeclared variable
+end

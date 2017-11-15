@@ -19,7 +19,7 @@ namespace namer {
 class NameInserter {
     friend class Namer;
     core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, unique_ptr<ast::Expression> &node) {
-        auto constLit = dynamic_cast<ast::ConstantLit *>(node.get());
+        auto constLit = ast::cast_tree<ast::ConstantLit *>(node.get());
         if (constLit == nullptr) {
             Error::check(node.get() != nullptr);
             return owner;
@@ -34,7 +34,7 @@ class NameInserter {
         bool optional = false, keyword = false, block = false, repeated = false;
 
         while (true) {
-            if (ast::UnresolvedIdent *nm = dynamic_cast<ast::UnresolvedIdent *>(arg)) {
+            if (ast::UnresolvedIdent *nm = ast::cast_tree<ast::UnresolvedIdent *>(arg)) {
                 core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(loc, ctx.owner, nm->name);
                 core::Symbol &info = sym.info(ctx);
                 if (optional)
@@ -76,7 +76,7 @@ class NameInserter {
 
     unique_ptr<ast::Expression> addAncestor(core::Context ctx, ast::ClassDef *klass,
                                             unique_ptr<ast::Expression> &node) {
-        auto send = dynamic_cast<ast::Send *>(node.get());
+        auto send = ast::cast_tree<ast::Send *>(node.get());
         if (send == nullptr) {
             Error::check(node.get() != nullptr);
             return nullptr;
@@ -85,7 +85,7 @@ class NameInserter {
         if (send->fun != core::Names::include()) {
             return nullptr;
         }
-        if (dynamic_cast<ast::Self *>(send->recv.get()) == nullptr) {
+        if (ast::cast_tree<ast::Self *>(send->recv.get()) == nullptr) {
             // ignore `something.include`
             return nullptr;
         }
@@ -96,7 +96,7 @@ class NameInserter {
                                    send->args.size());
             return nullptr;
         }
-        auto constLit = dynamic_cast<ast::ConstantLit *>(send->args[0].get());
+        auto constLit = ast::cast_tree<ast::ConstantLit *>(send->args[0].get());
         if (constLit == nullptr) {
             ctx.state.errors.error(send->loc, core::ErrorClass::IncludeNotConstant,
                                    "`include` must be passed a constant literal. You passed {}.",
@@ -142,11 +142,11 @@ public:
 
         for (auto &arg : args) {
             core::NameRef name;
-            ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
+            ast::Reference *ref = ast::cast_tree<ast::Reference *>(arg.get());
             Error::check(ref != nullptr);
 
-            if (ast::ShadowArg *arg = dynamic_cast<ast::ShadowArg *>(ref)) {
-                auto id = dynamic_cast<ast::UnresolvedIdent *>(arg->expr.get());
+            if (ast::ShadowArg *arg = ast::cast_tree<ast::ShadowArg *>(ref)) {
+                auto id = ast::cast_tree<ast::UnresolvedIdent *>(arg->expr.get());
                 Error::check(id);
                 name = id->name;
                 inShadows = true;
@@ -166,7 +166,7 @@ public:
     }
 
     ast::Send *preTransformSend(core::Context ctx, ast::Send *original) {
-        if (original->args.size() == 1 && dynamic_cast<ast::ZSuperArgs *>(original->args[0].get()) != nullptr) {
+        if (original->args.size() == 1 && ast::cast_tree<ast::ZSuperArgs *>(original->args[0].get()) != nullptr) {
             original->args.clear();
             core::SymbolRef method = ctx.enclosingMethod();
             if (method.exists()) {
@@ -262,7 +262,7 @@ public:
     }
 
     ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
-        ast::ConstantLit *lhs = dynamic_cast<ast::ConstantLit *>(asgn->lhs.get());
+        ast::ConstantLit *lhs = ast::cast_tree<ast::ConstantLit *>(asgn->lhs.get());
         if (lhs == nullptr)
             return asgn;
 
