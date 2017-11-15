@@ -26,11 +26,6 @@ public:
     Reference(core::Loc loc);
 };
 
-class ControlFlow : public Expression {
-public:
-    ControlFlow(core::Loc loc);
-};
-
 class Declaration : public Expression {
 public:
     core::SymbolRef symbol;
@@ -102,7 +97,7 @@ public:
     virtual std::string nodeName();
 };
 
-class If final : public ControlFlow {
+class If final : public Expression {
 public:
     std::unique_ptr<Expression> cond;
     std::unique_ptr<Expression> thenp;
@@ -114,7 +109,7 @@ public:
     virtual std::string nodeName();
 };
 
-class While final : public ControlFlow {
+class While final : public Expression {
 public:
     std::unique_ptr<Expression> cond;
     std::unique_ptr<Expression> body;
@@ -125,13 +120,13 @@ public:
     virtual std::string nodeName();
 };
 
-class For : public ControlFlow {
+class For : public Expression {
 public:
     For(core::Loc loc);
     // TODO
 };
 
-class Break final : public ControlFlow {
+class Break final : public Expression {
 public:
     std::unique_ptr<Expression> expr;
 
@@ -141,7 +136,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Next final : public ControlFlow {
+class Next final : public Expression {
 public:
     std::unique_ptr<Expression> expr;
 
@@ -151,7 +146,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Return final : public ControlFlow {
+class Return final : public Expression {
 public:
     std::unique_ptr<Expression> expr;
 
@@ -161,7 +156,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Yield final : public ControlFlow {
+class Yield final : public Expression {
 public:
     std::unique_ptr<Expression> expr;
 
@@ -171,7 +166,7 @@ public:
     virtual std::string nodeName();
 };
 
-class Rescue final : public ControlFlow {
+class Rescue final : public Expression {
 public:
     std::unique_ptr<Expression> body;
     core::SymbolRef binder;
