@@ -86,6 +86,8 @@ template <class From, class To> To *fast_cast(From *what) {
 #else
     static_assert(false);
 #endif
+    if (std::is_same<From, To>::value)
+        return static_cast<To *>(what);
     if (what == nullptr) {
         return nullptr;
     }
