@@ -20,6 +20,9 @@ build --cxxopt=-Werror
 build --linkopt=-fsanitize=address
 build --linkopt=-fsanitize=undefined
 
+# fix build on mac. For some reason path stopped being propagated.
+build --action_env PATH
+
 # The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
 # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
 build --copt=-Wno-macro-redefined
