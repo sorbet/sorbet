@@ -49,11 +49,6 @@ TEST(PreOrderTreeMap, CountTrees) {
             return original;
         }
 
-        For *preTransformFor(core::Context ctx, For *original) {
-            count++;
-            return original;
-        }
-
         Break *postTransformBreak(core::Context ctx, Break *original) {
             count++;
             return original;
