@@ -33,4 +33,9 @@ begin
       end
 
   end
+  #Alias = ::Parent
+  class <emptyTree>::Child1<Child1> < (#Alias)
+    ::Child1#@@class_var
+
+  end
 end
