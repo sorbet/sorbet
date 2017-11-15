@@ -77,60 +77,64 @@ private:
 
     shared_ptr<core::Type> getResultType(core::Context ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
-        typecase(expr.get(),
-                 [&](ast::Array *arr) {
-                     vector<shared_ptr<core::Type>> elems;
-                     for (auto &el : arr->elems) {
-                         elems.emplace_back(getResultType(ctx, el));
-                     }
-                     result = make_shared<core::ArrayType>(elems);
-                 },
-                 [&](ast::Ident *i) {
-                     if (i->symbol.info(ctx).isClass()) {
-                         result = make_shared<core::ClassType>(i->symbol);
-                     } else {
-                         ctx.state.errors.error(i->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                                "Malformed type declaration. Not a class type {}", i->toString(ctx));
-                         result = core::Types::dynamic();
-                     }
-                 },
-                 [&](ast::Send *s) {
-                     if (auto *recvi = dynamic_cast<ast::Ident *>(s->recv.get())) {
-                         if (recvi->symbol != core::GlobalState::defn_Opus_Types()) {
-                             ctx.state.errors.error(recvi->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                                    "Misformed type declaration. Unknown argument type type {}",
-                                                    expr->toString(ctx));
-                             result = core::Types::dynamic();
-                         } else {
-                             if (s->fun == core::Names::nilable()) {
-                                 result = make_shared<core::OrType>(getResultType(ctx, s->args[0]), core::Types::nil());
-                             } else if (s->fun == core::Names::all()) {
-                                 result = getResultType(ctx, s->args[0]);
-                                 int i = 1;
-                                 while (i < s->args.size()) {
-                                     result = make_shared<core::AndType>(result, getResultType(ctx, s->args[i]));
-                                     i++;
-                                 }
-                             } else if (s->fun == core::Names::any()) {
-                                 result = getResultType(ctx, s->args[0]);
-                                 int i = 1;
-                                 while (i < s->args.size()) {
-                                     result = make_shared<core::OrType>(result, getResultType(ctx, s->args[i]));
-                                     i++;
-                                 }
-                             } else {
-                                 ctx.state.errors.error(s->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                                        "Unsupported type combinator {}", s->fun.toString(ctx));
-                                 result = core::Types::dynamic();
-                             }
-                         }
-                     } else {
-                         ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                                "Misformed type declaration. Unknown type syntax {}",
-                                                expr->toString(ctx));
-                         result = core::Types::dynamic();
-                     }
-                 });
+        typecase(
+            expr.get(),
+            [&](ast::Array *arr) {
+                vector<shared_ptr<core::Type>> elems;
+                for (auto &el : arr->elems) {
+                    elems.emplace_back(getResultType(ctx, el));
+                }
+                result = make_shared<core::ArrayType>(elems);
+            },
+            [&](ast::Ident *i) {
+                if (i->symbol.info(ctx).isClass()) {
+                    result = make_shared<core::ClassType>(i->symbol);
+                } else {
+                    ctx.state.errors.error(i->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                           "Malformed type declaration. Not a class type {}", i->toString(ctx));
+                    result = core::Types::dynamic();
+                }
+            },
+            [&](ast::Send *s) {
+                if (auto *recvi = dynamic_cast<ast::Ident *>(s->recv.get())) {
+                    if (recvi->symbol != core::GlobalState::defn_Opus_Types()) {
+                        ctx.state.errors.error(recvi->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                               "Misformed type declaration. Unknown argument type type {}",
+                                               expr->toString(ctx));
+                        result = core::Types::dynamic();
+                    } else {
+                        if (s->fun == core::Names::nilable()) {
+                            result = make_shared<core::OrType>(getResultType(ctx, s->args[0]), core::Types::nil());
+                        } else if (s->fun == core::Names::all()) {
+                            result = getResultType(ctx, s->args[0]);
+                            int i = 1;
+                            while (i < s->args.size()) {
+                                result = make_shared<core::AndType>(result, getResultType(ctx, s->args[i]));
+                                i++;
+                            }
+                        } else if (s->fun == core::Names::any()) {
+                            result = getResultType(ctx, s->args[0]);
+                            int i = 1;
+                            while (i < s->args.size()) {
+                                result = make_shared<core::OrType>(result, getResultType(ctx, s->args[i]));
+                                i++;
+                            }
+                        } else {
+                            ctx.state.errors.error(s->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                                   "Unsupported type combinator {}", s->fun.toString(ctx));
+                            result = core::Types::dynamic();
+                        }
+                    }
+                } else {
+                    ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                           "Misformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                    result = core::Types::dynamic();
+                }
+            },
+            [&](ast::Expression *expr) {
+                ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration, "Unsupported type syntax");
+                result = core::Types::dynamic();
+            });
         Error::check(result.get() != nullptr);
         return result;
     }
