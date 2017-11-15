@@ -57,7 +57,7 @@ begin
   next(1)
   next([1, 2])
   <Not Supported (Defined)>
-  <Not Supported (ZSuper)>
+  self(<singleton class:<root>>).super()
   def foo<foo>(x, y, z)
     <emptyTree>
   x

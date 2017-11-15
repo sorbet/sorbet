@@ -9,10 +9,25 @@
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 3429.238)">
 <title>gerald.rb</title>
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-3429.238 22006,-3429.238 22006,4 -4,4"/>
+<g id="clust13" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#changed_files</title>
+<polygon fill="none" stroke="#0000ff" points="10136,-1500.1404 10136,-3221.4548 11089,-3221.4548 11089,-1500.1404 10136,-1500.1404"/>
+<text text-anchor="middle" x="10612.5" y="-3206.2548" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_files</text>
+</g>
+<g id="clust14" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#added_lines</title>
+<polygon fill="none" stroke="#0000ff" points="11097,-1911.5517 11097,-3221.4548 12029,-3221.4548 12029,-1911.5517 11097,-1911.5517"/>
+<text text-anchor="middle" x="11563" y="-3206.2548" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#added_lines</text>
+</g>
+<g id="clust15" class="cluster">
+<title>cluster_::Opus::CIBot::Gerald::Diff#removed_lines</title>
+<polygon fill="none" stroke="#0000ff" points="12037,-1911.5517 12037,-3221.4548 12969,-3221.4548 12969,-1911.5517 12037,-1911.5517"/>
+<text text-anchor="middle" x="12503" y="-3206.2548" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#removed_lines</text>
+</g>
 <g id="clust1" class="cluster">
 <title>cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize</title>
-<polygon fill="none" stroke="#0000ff" points="8,-2580.3498 8,-3258.1642 592,-3258.1642 592,-2580.3498 8,-2580.3498"/>
-<text text-anchor="middle" x="300" y="-3242.9642" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::MatchTimeout#initialize</text>
+<polygon fill="none" stroke="#0000ff" points="8,-2580.3498 8,-3282.637 592,-3282.637 592,-2580.3498 8,-2580.3498"/>
+<text text-anchor="middle" x="300" y="-3267.437" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::MatchTimeout#initialize</text>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_::Opus::CIBot::Gerald::Matcher#initialize</title>
@@ -69,21 +84,6 @@
 <polygon fill="none" stroke="#0000ff" points="9175,-1500.1404 9175,-3221.4548 10128,-3221.4548 10128,-1500.1404 9175,-1500.1404"/>
 <text text-anchor="middle" x="9651.5" y="-3206.2548" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#deleted_files</text>
 </g>
-<g id="clust13" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#changed_files</title>
-<polygon fill="none" stroke="#0000ff" points="10136,-1500.1404 10136,-3221.4548 11089,-3221.4548 11089,-1500.1404 10136,-1500.1404"/>
-<text text-anchor="middle" x="10612.5" y="-3206.2548" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#changed_files</text>
-</g>
-<g id="clust14" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#added_lines</title>
-<polygon fill="none" stroke="#0000ff" points="11097,-1911.5517 11097,-3221.4548 12029,-3221.4548 12029,-1911.5517 11097,-1911.5517"/>
-<text text-anchor="middle" x="11563" y="-3206.2548" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#added_lines</text>
-</g>
-<g id="clust15" class="cluster">
-<title>cluster_::Opus::CIBot::Gerald::Diff#removed_lines</title>
-<polygon fill="none" stroke="#0000ff" points="12037,-1911.5517 12037,-3221.4548 12969,-3221.4548 12969,-1911.5517 12037,-1911.5517"/>
-<text text-anchor="middle" x="12503" y="-3206.2548" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::Diff#removed_lines</text>
-</g>
 <g id="clust16" class="cluster">
 <title>cluster_::Opus::CIBot::Gerald::Diff#changed_lines</title>
 <polygon fill="none" stroke="#0000ff" points="12977,-2580.3498 12977,-3270.4006 13521,-3270.4006 13521,-2580.3498 12977,-2580.3498"/>
@@ -102,14 +102,16 @@
 <!-- bb28_0 -->
 <g id="node1" class="node">
 <title>bb28_0</title>
-<polygon fill="none" stroke="#000000" points="16.2291,-3106.8415 300,-3042.7217 583.7709,-3106.8415 583.5061,-3210.5895 16.4939,-3210.5895 16.2291,-3106.8415"/>
-<text text-anchor="middle" x="300" y="-3173.3168" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="300" y="-3159.3168" font-family="Times,serif" font-size="14.00" fill="#000000">@rule_token$3 = alias @rule_token : untyped</text>
-<text text-anchor="middle" x="300" y="-3145.3168" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$1 = self : MatchTimeout</text>
+<polygon fill="none" stroke="#000000" points="16.2291,-3099.2874 300,-3018.276 583.7709,-3099.2874 583.5061,-3230.3665 16.4939,-3230.3665 16.2291,-3099.2874"/>
+<text text-anchor="middle" x="300" y="-3187.3168" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="300" y="-3173.3168" font-family="Times,serif" font-size="14.00" fill="#000000">@rule_token$5 = alias @rule_token : untyped</text>
+<text text-anchor="middle" x="300" y="-3159.3168" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$1 = self : MatchTimeout</text>
+<text text-anchor="middle" x="300" y="-3145.3168" font-family="Times,serif" font-size="14.00" fill="#000000">message = load_arg(&lt;self&gt;$1#initialize, 0) : untyped</text>
 <text text-anchor="middle" x="300" y="-3131.3168" font-family="Times,serif" font-size="14.00" fill="#000000">rule_token = load_arg(&lt;self&gt;$1#initialize, 1) : untyped</text>
-<text text-anchor="middle" x="300" y="-3117.3168" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$2 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="300" y="-3103.3168" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$4 = return rule_token : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="300" y="-3089.3168" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<text text-anchor="middle" x="300" y="-3117.3168" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$3 = self : MatchTimeout</text>
+<text text-anchor="middle" x="300" y="-3103.3168" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$2 = statTmp$3.super(message) : untyped</text>
+<text text-anchor="middle" x="300" y="-3089.3168" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$6 = return rule_token : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="300" y="-3075.3168" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb28_1 -->
 <g id="node2" class="node">
@@ -121,8 +123,8 @@
 <!-- bb28_0&#45;&gt;bb28_1 -->
 <g id="edge1" class="edge">
 <title>bb28_0&#45;&gt;bb28_1</title>
-<path fill="none" stroke="#000000" d="M300,-3042.6519C300,-2932.9303 300,-2754.7179 300,-2670.8212"/>
-<polygon fill="#000000" stroke="#000000" points="303.5001,-2670.5867 300,-2660.5868 296.5001,-2670.5868 303.5001,-2670.5867"/>
+<path fill="none" stroke="#000000" d="M300,-3018.2447C300,-2908.0324 300,-2748.7174 300,-2670.7992"/>
+<polygon fill="#000000" stroke="#000000" points="303.5001,-2670.3584 300,-2660.3584 296.5001,-2670.3585 303.5001,-2670.3584"/>
 </g>
 <!-- bb28_1&#45;&gt;bb28_1 -->
 <g id="edge2" class="edge">
@@ -2092,4 +2094,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 9b760697e689af3185a374b39bf4c26a76032905043851d9dc1a55068fd32bfe -->
+<!-- ruby-types:sha256: c045852124050f271f24c722d1b5099f8c5912d68615799ec27dc896220a07c4 -->

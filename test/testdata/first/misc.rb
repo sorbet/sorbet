@@ -74,7 +74,7 @@ defined?(X)
 
 
 # zsuper
-super
+super # error: super outside
 
 # kwargs
 def foo(x:,y:1,**z); end
