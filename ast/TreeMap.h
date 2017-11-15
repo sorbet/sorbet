@@ -119,6 +119,8 @@ GENERATE_HAS_MEMBER(preTransformConstDef);
 GENERATE_HAS_MEMBER(preTransformIf);
 GENERATE_HAS_MEMBER(preTransformWhile);
 GENERATE_HAS_MEMBER(preTransformFor);
+GENERATE_HAS_MEMBER(preTransformBreak);
+GENERATE_HAS_MEMBER(preTransformNext);
 GENERATE_HAS_MEMBER(preTransformReturn);
 GENERATE_HAS_MEMBER(preTransformYield);
 GENERATE_HAS_MEMBER(preTransformRescue);
@@ -133,8 +135,6 @@ GENERATE_HAS_MEMBER(preTransformBlock);
 GENERATE_HAS_MEMBER(preTransformInsSeq);
 
 // used to check for ABSENCE of method
-GENERATE_HAS_MEMBER(preTransformBreak);
-GENERATE_HAS_MEMBER(preTransformNext);
 GENERATE_HAS_MEMBER(preTransformIdent);
 GENERATE_HAS_MEMBER(preTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(preTransformBoolLit);
@@ -229,6 +229,8 @@ GENERATE_POSTPONE_PRECLASS(ConstDef);
 GENERATE_POSTPONE_PRECLASS(If);
 GENERATE_POSTPONE_PRECLASS(While);
 GENERATE_POSTPONE_PRECLASS(For);
+GENERATE_POSTPONE_PRECLASS(Break);
+GENERATE_POSTPONE_PRECLASS(Next);
 GENERATE_POSTPONE_PRECLASS(Return);
 GENERATE_POSTPONE_PRECLASS(Yield);
 GENERATE_POSTPONE_PRECLASS(Assign);
@@ -280,8 +282,6 @@ template <class FUNC> class TreeMap {
 private:
     FUNC &func;
 
-    static_assert(!HAS_MEMBER_preTransformBreak<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformNext<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformIdent<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformBoolLit<FUNC>::value, "use post*Transform instead");
@@ -406,12 +406,32 @@ private:
         } else if (For *v = dynamic_cast<For *>(what)) {
             Error::notImplemented();
         } else if (Break *v = dynamic_cast<Break *>(what)) {
+            if (HAS_MEMBER_preTransformBreak<FUNC>::value) {
+                return PostPonePreTransform_Break<FUNC, HAS_MEMBER_preTransformBreak<FUNC>::value>::call(ctx, v, func);
+            }
+
+            auto oexpr = v->expr.get();
+            auto nexpr = mapIt(oexpr, ctx);
+            if (oexpr != nexpr) {
+                v->expr.reset(nexpr);
+            }
+
             if (HAS_MEMBER_postTransformBreak<FUNC>::value) {
                 return PostPonePostTransform_Break<FUNC, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(ctx, v,
                                                                                                            func);
             }
             return v;
         } else if (Next *v = dynamic_cast<Next *>(what)) {
+            if (HAS_MEMBER_preTransformNext<FUNC>::value) {
+                return PostPonePreTransform_Next<FUNC, HAS_MEMBER_preTransformNext<FUNC>::value>::call(ctx, v, func);
+            }
+
+            auto oexpr = v->expr.get();
+            auto nexpr = mapIt(oexpr, ctx);
+            if (oexpr != nexpr) {
+                v->expr.reset(nexpr);
+            }
+
             if (HAS_MEMBER_postTransformNext<FUNC>::value) {
                 return PostPonePostTransform_Next<FUNC, HAS_MEMBER_postTransformNext<FUNC>::value>::call(ctx, v, func);
             }
