@@ -138,14 +138,28 @@ public:
 
     void fillInArgs(core::Context ctx, ast::MethodDef::ARGS_store &args) {
         core::Symbol &symbol = ctx.owner.info(ctx);
+        bool inShadows = false;
+
         for (auto &arg : args) {
+            core::NameRef name;
             ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
             Error::check(ref != nullptr);
-            core::SymbolRef sym = arg2Symbol(ctx, ref);
-            symbol.argumentsOrMixins.push_back(sym);
-            core::NameRef name = sym.info(ctx).name;
+
+            if (ast::ShadowArg *arg = dynamic_cast<ast::ShadowArg *>(ref)) {
+                auto id = dynamic_cast<ast::UnresolvedIdent *>(arg->expr.get());
+                Error::check(id);
+                name = id->name;
+                inShadows = true;
+            } else {
+                Error::check(!inShadows, "shadow argument followed by non-shadow argument!");
+                core::SymbolRef sym = arg2Symbol(ctx, ref);
+                symbol.argumentsOrMixins.push_back(sym);
+                name = sym.info(ctx).name;
+            }
+
             core::LocalVariable local = ctx.state.enterLocalSymbol(ctx.owner, name);
             scopeStack.back().locals[name] = local;
+
             unique_ptr<ast::Expression> localExpr = make_unique<ast::Local>(arg->loc, local);
             arg.swap(localExpr);
         }
