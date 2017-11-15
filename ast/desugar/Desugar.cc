@@ -318,9 +318,13 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             result.swap(self);
         },
         [&](parser::DString *a) {
+            if (a->nodes.empty()) {
+                unique_ptr<Expression> res = make_unique<StringLit>(a->loc, core::Names::empty());
+                result.swap(res);
+                return;
+            }
             auto it = a->nodes.begin();
             auto end = a->nodes.end();
-            Error::check(it != end);
             unique_ptr<Expression> res;
             unique_ptr<Expression> first = node2TreeImpl(ctx, *it);
             if (cast_tree<StringLit *>(first.get()) == nullptr) {
