@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "../core/Loc.h"
 #include "Builder.h"
 #include "ruby_parser/driver.hh"
 #include <algorithm>
@@ -52,6 +53,12 @@ std::unique_ptr<Node> Parser::run(ruby_typer::core::GlobalState &gs, core::FileR
     ruby_parser::typedruby24 driver(file.file(gs).source().toString(), Builder::interface);
     auto ast = unique_ptr<Node>(builder.build(&driver));
     DiagnosticToError::run(gs, file, driver.diagnostics);
+
+    if (!ast) {
+        core::Loc loc(file, 0, 0);
+        NodeVec empty;
+        return make_unique<Begin>(loc, move(empty));
+    }
 
     return ast;
 }
