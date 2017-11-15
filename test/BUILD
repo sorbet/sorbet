@@ -81,3 +81,9 @@ cc_binary(
     name = "backtrace-test-raise",
     srcs = ["backtrace-test-raise.cc"],
 )
+
+cc_binary(
+    name = "backtrace-test-error",
+    srcs = ["backtrace-test-error.cc"],
+    deps = ["//common"],
+)
