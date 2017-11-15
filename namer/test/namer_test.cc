@@ -78,11 +78,11 @@ TEST_F(NamerFixture, NameClass) {
     auto tree = getTree(ctx, "class Test; class Foo; end; end");
     namer::Namer::run(ctx, move(tree));
     auto &rootScope =
-        core::GlobalState::defn_root().info(ctx).findMember(ctx.state.enterNameUTF8(testClass_DESC)).info(ctx);
+        core::GlobalState::defn_root().info(ctx).findMember(ctx.state.enterNameConstant(testClass_DESC)).info(ctx);
 
     ASSERT_EQ(1, rootScope.members.size());
     auto fooPair = rootScope.members[0];
-    ASSERT_EQ("Foo", fooPair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo>", fooPair.first.name(ctx).toString(ctx));
     auto &fooInfo = fooPair.second.info(ctx);
     ASSERT_EQ(0, fooInfo.members.size());
 }
@@ -92,7 +92,7 @@ TEST_F(NamerFixture, InsideClass) {
     auto tree = getTree(ctx, "class Test; class Foo; def bar; end; end; end");
     namer::Namer::run(ctx, move(tree));
     auto &rootScope =
-        core::GlobalState::defn_root().info(ctx).findMember(ctx.state.enterNameUTF8(testClass_DESC)).info(ctx);
+        core::GlobalState::defn_root().info(ctx).findMember(ctx.state.enterNameConstant(testClass_DESC)).info(ctx);
 
     ASSERT_EQ(1, rootScope.members.size());
     auto fooSym = rootScope.members[0].second;

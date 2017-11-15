@@ -67,8 +67,8 @@ TEST_F(InferFixture, ClassesSubtyping) {
 
     auto barPair = rootScope.members[rootScope.members.size() - 2];
     auto fooPair = rootScope.members[rootScope.members.size() - 1];
-    ASSERT_EQ("Foo", fooPair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("Bar", barPair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo>", fooPair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
 
     auto fooType = make_shared<core::ClassType>(fooPair.second);
     auto barType = make_shared<core::ClassType>(barPair.second);
@@ -88,9 +88,9 @@ TEST_F(InferFixture, ClassesLubs) {
     auto barPair = rootScope.members[rootScope.members.size() - 3];
     auto foo1Pair = rootScope.members[rootScope.members.size() - 2];
     auto foo2Pair = rootScope.members[rootScope.members.size() - 1];
-    ASSERT_EQ("Foo2", foo2Pair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("Foo1", foo1Pair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("Bar", barPair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo2>", foo2Pair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo1>", foo1Pair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
 
     auto foo1Type = make_shared<core::ClassType>(foo1Pair.second);
     auto foo2Type = make_shared<core::ClassType>(foo2Pair.second);
@@ -130,9 +130,9 @@ TEST_F(InferFixture, ClassesGlbs) {
     auto barPair = rootScope.members[rootScope.members.size() - 3];
     auto foo1Pair = rootScope.members[rootScope.members.size() - 2];
     auto foo2Pair = rootScope.members[rootScope.members.size() - 1];
-    ASSERT_EQ("Foo2", foo2Pair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("Foo1", foo1Pair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("Bar", barPair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo2>", foo2Pair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo1>", foo1Pair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
 
     auto foo1Type = make_shared<core::ClassType>(foo1Pair.second);
     auto foo2Type = make_shared<core::ClassType>(foo2Pair.second);
