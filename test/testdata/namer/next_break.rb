@@ -4,10 +4,10 @@ class Test
   def test_next_break
     each do
       if rand
-        next Foo
+        next Foo # error: unknown constant
       end
       if rand
-        break Bar
+        break Bar # error: unknown constant
       end
     end
   end
