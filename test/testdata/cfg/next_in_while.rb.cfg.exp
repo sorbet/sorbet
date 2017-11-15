@@ -13,7 +13,7 @@ subgraph "cluster_::Object#foo" {
     bb23_2 -> bb23_3;
     bb23_2 -> bb23_4;
 
-    bb23_3 [label = "()\nouterLoops: 1\nstatTmp$5 = self : Object\nstatTmp$4 = statTmp$5.good() : untyped\nstatTmp$8 = self : <todo sym>\nreturnTmp$7 = statTmp$8.value() : untyped\n<unconditional>"];
+    bb23_3 [label = "()\nouterLoops: 1\nstatTmp$5 = self : Object\nstatTmp$4 = statTmp$5.good() : untyped\nstatTmp$8 = self : Object\nreturnTmp$7 = statTmp$8.value() : untyped\n<unconditional>"];
     bb23_3 -> bb23_2;
     bb23_4 [label = "()\n<ret>$0 = nil : NilClass\n<ret>$10 = return <ret>$0 : <bottom>\n<unconditional>"];
     bb23_4 -> bb23_1;
