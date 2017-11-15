@@ -1,0 +1,18 @@
+class <emptyTree>::Test<Test> < ()
+  def test_next_break<test_next_break>()
+    self(Test).each() do ||
+      begin
+        if self(Test).rand()
+          next(::untyped)
+        else
+          <emptyTree>
+        end
+        if self(Test).rand()
+          break(::untyped)
+        else
+          <emptyTree>
+        end
+      end
+    end
+
+end

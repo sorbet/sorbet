@@ -110,7 +110,7 @@ begin
   self(<singleton class:<root>>).proc() do |<block-nested: x>|
     <emptyTree>
   end
-  break(self(<todo sym>).foo(1) do ||
+  break(self(<singleton class:<root>>).foo(1) do ||
       <emptyTree>
     end)
   def foo<foo>(*$0)
