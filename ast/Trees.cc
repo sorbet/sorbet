@@ -47,7 +47,7 @@ void printTabs(stringstream &to, int count) {
 Expression::Expression(core::Loc loc) : loc(loc) {}
 
 Reference::Reference(core::Loc loc) : Expression(loc) {}
-    
+
 ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors,
                    RHS_store &rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
