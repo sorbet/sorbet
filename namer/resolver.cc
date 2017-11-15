@@ -150,7 +150,7 @@ private:
                 if (auto *hash = dynamic_cast<ast::Hash *>(arg.get())) {
                     int i = 0;
                     for (unique_ptr<ast::Expression> &key : hash->keys) {
-                        unique_ptr<ast::Expression> &value = hash->values[i];
+                        unique_ptr<ast::Expression> &value = hash->values[i++];
                         if (auto *symbolLit = dynamic_cast<ast::SymbolLit *>(key.get())) {
                             if (symbolLit->name == core::Names::returns()) {
                                 // fill in return type
