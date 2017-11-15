@@ -29,7 +29,7 @@ class NameInserter {
         return ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
     }
 
-    core::SymbolRef arg2Symbol(core::Context ctx, ast::Reference *arg) {
+    core::SymbolRef arg2Symbol(core::Context ctx, ast::Expression *arg) {
         auto loc = arg->loc;
         bool optional = false, keyword = false, block = false, repeated = false;
 
@@ -142,17 +142,15 @@ public:
 
         for (auto &arg : args) {
             core::NameRef name;
-            ast::Reference *ref = ast::cast_tree<ast::Reference>(arg.get());
-            Error::check(ref != nullptr);
 
-            if (ast::ShadowArg *arg = ast::cast_tree<ast::ShadowArg>(ref)) {
-                auto id = ast::cast_tree<ast::UnresolvedIdent>(arg->expr.get());
+            if (ast::ShadowArg *sarg = ast::cast_tree<ast::ShadowArg>(arg.get())) {
+                auto id = ast::cast_tree<ast::UnresolvedIdent>(sarg->expr.get());
                 Error::check(id);
                 name = id->name;
                 inShadows = true;
             } else {
                 Error::check(!inShadows, "shadow argument followed by non-shadow argument!");
-                core::SymbolRef sym = arg2Symbol(ctx, ref);
+                core::SymbolRef sym = arg2Symbol(ctx, arg.get());
                 symbol.argumentsOrMixins.push_back(sym);
                 name = sym.info(ctx).name;
             }
