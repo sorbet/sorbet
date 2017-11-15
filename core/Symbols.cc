@@ -100,6 +100,27 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
         }
         os << ")";
     }
+    if (myInfo.isMethodArgument()) {
+        vector<pair<int, const char *>> methodFlags = {
+            {Symbol::Flags::ARGUMENT_OPTIONAL, "optional"},
+            {Symbol::Flags::ARGUMENT_KEYWORD, "keyword"},
+            {Symbol::Flags::ARGUMENT_REPEATED, "repeated"},
+            {Symbol::Flags::ARGUMENT_BLOCK, "block"},
+        };
+        os << "<";
+        bool first = true;
+        for (auto &flag : methodFlags) {
+            if ((myInfo.flags & flag.first) != 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    os << ", ";
+                }
+                os << flag.second;
+            }
+        }
+        os << ">";
+    }
     if (myInfo.resultType) {
         os << " -> " << myInfo.resultType->toString(Context(gs, gs.defn_root()), tabs + 2);
     }
