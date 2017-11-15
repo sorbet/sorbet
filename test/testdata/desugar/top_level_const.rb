@@ -1,1 +1,1 @@
-::TopLevelConst # error: Dynamic constant references are unsupported ::<root>::TopLevelConst
+::TopLevelConst # error: Dynamic constant references are unsupported
