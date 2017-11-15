@@ -327,8 +327,7 @@ private:
             auto originalRhs = v->rhs.get();
             auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
             if (newRhs != originalRhs) {
-                Error::check(dynamic_cast<Expression *>(newRhs) != nullptr);
-                v->rhs.reset(dynamic_cast<Expression *>(newRhs));
+                v->rhs.reset(newRhs);
             }
 
             if (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
@@ -345,8 +344,7 @@ private:
             auto originalRhs = v->rhs.get();
             auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
             if (newRhs != originalRhs) {
-                Error::check(dynamic_cast<Expression *>(newRhs) != nullptr);
-                v->rhs.reset(dynamic_cast<Expression *>(newRhs));
+                v->rhs.reset(newRhs);
             }
 
             if (HAS_MEMBER_postTransformConstDef<FUNC>::value) {
@@ -366,16 +364,13 @@ private:
             auto newThen = mapIt(originalThen, ctx);
             auto newElse = mapIt(originalElse, ctx);
             if (newCond != originalCond) {
-                Error::check(dynamic_cast<Expression *>(newCond) != nullptr);
-                v->cond.reset(dynamic_cast<Expression *>(newCond));
+                v->cond.reset(newCond);
             }
             if (originalThen != newThen) {
-                Error::check(dynamic_cast<Expression *>(newThen) != nullptr);
-                v->thenp.reset(dynamic_cast<Expression *>(newThen));
+                v->thenp.reset(newThen);
             }
             if (originalElse != newElse) {
-                Error::check(dynamic_cast<Expression *>(newElse) != nullptr);
-                v->elsep.reset(dynamic_cast<Expression *>(newElse));
+                v->elsep.reset(newElse);
             }
             if (HAS_MEMBER_postTransformIf<FUNC>::value) {
                 return PostPonePostTransform_If<FUNC, HAS_MEMBER_postTransformIf<FUNC>::value>::call(ctx, v, func);
@@ -390,8 +385,7 @@ private:
             auto newCond = mapIt(originalCond, ctx);
             auto newBody = mapIt(originalBody, ctx);
             if (newCond != originalCond) {
-                Error::check(dynamic_cast<Expression *>(newCond) != nullptr);
-                v->cond.reset(dynamic_cast<Expression *>(newCond));
+                v->cond.reset(newCond);
             }
             if (newBody != originalBody) {
                 v->body.reset(newBody);
@@ -423,8 +417,7 @@ private:
             auto oexpr = v->expr.get();
             auto nexpr = mapIt(oexpr, ctx);
             if (oexpr != nexpr) {
-                Error::check(dynamic_cast<Expression *>(nexpr) != nullptr);
-                v->expr.reset(dynamic_cast<Expression *>(nexpr));
+                v->expr.reset(nexpr);
             }
 
             if (HAS_MEMBER_postTransformReturn<FUNC>::value) {
@@ -440,8 +433,7 @@ private:
             auto oexpr = v->expr.get();
             auto nexpr = mapIt(oexpr, ctx);
             if (oexpr != nexpr) {
-                Error::check(dynamic_cast<Expression *>(nexpr) != nullptr);
-                v->expr.reset(dynamic_cast<Expression *>(nexpr));
+                v->expr.reset(nexpr);
             }
 
             if (HAS_MEMBER_postTransformYield<FUNC>::value) {
@@ -471,12 +463,10 @@ private:
             auto nlhs = mapIt(olhs, ctx);
             auto nrhs = mapIt(orhs, ctx);
             if (nlhs != olhs) {
-                Error::check(dynamic_cast<Expression *>(nlhs) != nullptr);
-                v->lhs.reset(dynamic_cast<Expression *>(nlhs));
+                v->lhs.reset(nlhs);
             }
             if (nrhs != orhs) {
-                Error::check(dynamic_cast<Expression *>(nrhs) != nullptr);
-                v->rhs.reset(dynamic_cast<Expression *>(nrhs));
+                v->rhs.reset(nrhs);
             }
 
             if (HAS_MEMBER_postTransformAssign<FUNC>::value) {
@@ -493,8 +483,7 @@ private:
             auto nrecv = mapIt(orecv, ctx);
             auto &vec = v->args;
             if (nrecv != orecv) {
-                Error::check(dynamic_cast<Expression *>(nrecv) != nullptr);
-                v->recv.reset(dynamic_cast<Expression *>(nrecv));
+                v->recv.reset(nrecv);
             }
             auto i = 0;
             while (i < vec.size()) {
@@ -502,8 +491,7 @@ private:
                 auto oarg = el.get();
                 auto narg = mapIt(oarg, ctx);
                 if (oarg != narg) {
-                    Error::check(dynamic_cast<Expression *>(narg) != nullptr);
-                    el.reset(dynamic_cast<Expression *>(narg));
+                    el.reset(narg);
                 }
                 i++;
             }
@@ -530,8 +518,7 @@ private:
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
-                Error::check(dynamic_cast<Expression *>(narg) != nullptr);
-                v->arg.reset(dynamic_cast<Expression *>(narg));
+                v->arg.reset(narg);
             }
 
             if (HAS_MEMBER_postTransformNamedArg<FUNC>::value) {
@@ -550,8 +537,7 @@ private:
                 auto oarg = el.get();
                 auto narg = mapIt(oarg, ctx);
                 if (oarg != narg) {
-                    Error::check(dynamic_cast<Expression *>(narg) != nullptr);
-                    el.reset(dynamic_cast<Expression *>(narg));
+                    el.reset(narg);
                 }
                 i++;
             }
@@ -562,8 +548,7 @@ private:
                 auto oarg = el.get();
                 auto narg = mapIt(oarg, ctx);
                 if (oarg != narg) {
-                    Error::check(dynamic_cast<Expression *>(narg) != nullptr);
-                    el.reset(dynamic_cast<Expression *>(narg));
+                    el.reset(narg);
                 }
                 i++;
             }
@@ -582,8 +567,7 @@ private:
                 auto oarg = el.get();
                 auto narg = mapIt(oarg, ctx);
                 if (oarg != narg) {
-                    Error::check(dynamic_cast<Expression *>(narg) != nullptr);
-                    el.reset(dynamic_cast<Expression *>(narg));
+                    el.reset(narg);
                 }
                 i++;
             }
@@ -634,8 +618,7 @@ private:
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
-                Error::check(dynamic_cast<Expression *>(narg) != nullptr);
-                v->arg.reset(dynamic_cast<Expression *>(narg));
+                v->arg.reset(narg);
             }
 
             if (HAS_MEMBER_postTransformArraySplat<FUNC>::value) {
@@ -652,8 +635,7 @@ private:
             auto oarg = v->arg.get();
             auto narg = mapIt(oarg, ctx);
             if (oarg != narg) {
-                Error::check(dynamic_cast<Expression *>(narg) != nullptr);
-                v->arg.reset(dynamic_cast<Expression *>(narg));
+                v->arg.reset(narg);
             }
 
             if (HAS_MEMBER_postTransformHashSplat<FUNC>::value) {
@@ -676,8 +658,7 @@ private:
             auto originalBody = v->body.get();
             auto newBody = mapIt(originalBody, ctx.withOwner(v->symbol));
             if (newBody != originalBody) {
-                Error::check(dynamic_cast<Expression *>(newBody) != nullptr);
-                v->body.reset(dynamic_cast<Expression *>(newBody));
+                v->body.reset(newBody);
             }
 
             if (HAS_MEMBER_postTransformBlock<FUNC>::value) {
@@ -703,8 +684,7 @@ private:
             }
             auto nexpr = mapIt(oexpr, ctx);
             if (nexpr != oexpr) {
-                Error::check(dynamic_cast<Expression *>(nexpr) != nullptr);
-                v->expr.reset(dynamic_cast<Expression *>(nexpr));
+                v->expr.reset(nexpr);
             }
 
             if (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
