@@ -11,8 +11,8 @@
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-3619.3485 21355,-3619.3485 21355,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize</title>
-<polygon fill="none" stroke="#0000ff" points="8,-2716.9427 8,-3436.9123 582,-3436.9123 582,-2716.9427 8,-2716.9427"/>
-<text text-anchor="middle" x="295" y="-3421.7123" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::MatchTimeout#initialize</text>
+<polygon fill="none" stroke="#0000ff" points="8,-2716.9427 8,-3463.1333 582,-3463.1333 582,-2716.9427 8,-2716.9427"/>
+<text text-anchor="middle" x="295" y="-3447.9333" font-family="Times,serif" font-size="14.00" fill="#000000">::Opus::CIBot::Gerald::MatchTimeout#initialize</text>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_::Opus::CIBot::Gerald::Matcher#initialize</title>
@@ -102,14 +102,16 @@
 <!-- bb28_0 -->
 <g id="node1" class="node">
 <title>bb28_0</title>
-<polygon fill="none" stroke="#000000" points="16.3674,-3276.6987 295,-3208.6149 573.6326,-3276.6987 573.3725,-3386.8606 16.6275,-3386.8606 16.3674,-3276.6987"/>
-<text text-anchor="middle" x="295" y="-3348.4467" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="295" y="-3333.4467" font-family="Times,serif" font-size="14.00" fill="#000000">@rule_token$3 = alias @rule_token : untyped</text>
-<text text-anchor="middle" x="295" y="-3318.4467" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$1 = self : MatchTimeout</text>
+<polygon fill="none" stroke="#000000" points="16.3674,-3268.5278 295,-3182.1735 573.6326,-3268.5278 573.3725,-3408.2521 16.6275,-3408.2521 16.3674,-3268.5278"/>
+<text text-anchor="middle" x="295" y="-3363.4467" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="295" y="-3348.4467" font-family="Times,serif" font-size="14.00" fill="#000000">@rule_token$5 = alias @rule_token : untyped</text>
+<text text-anchor="middle" x="295" y="-3333.4467" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;self&gt;$1 = self : MatchTimeout</text>
+<text text-anchor="middle" x="295" y="-3318.4467" font-family="Times,serif" font-size="14.00" fill="#000000">message = load_arg(&lt;self&gt;$1#initialize, 0) : untyped</text>
 <text text-anchor="middle" x="295" y="-3303.4467" font-family="Times,serif" font-size="14.00" fill="#000000">rule_token = load_arg(&lt;self&gt;$1#initialize, 1) : untyped</text>
-<text text-anchor="middle" x="295" y="-3288.4467" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$2 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="295" y="-3273.4467" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$4 = return rule_token : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="295" y="-3258.4467" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<text text-anchor="middle" x="295" y="-3288.4467" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$3 = self : MatchTimeout</text>
+<text text-anchor="middle" x="295" y="-3273.4467" font-family="Times,serif" font-size="14.00" fill="#000000">statTmp$2 = statTmp$3.super(message) : untyped</text>
+<text text-anchor="middle" x="295" y="-3258.4467" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;ret&gt;$6 = return rule_token : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="295" y="-3243.4467" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb28_1 -->
 <g id="node2" class="node">
@@ -121,8 +123,8 @@
 <!-- bb28_0&#45;&gt;bb28_1 -->
 <g id="edge1" class="edge">
 <title>bb28_0&#45;&gt;bb28_1</title>
-<path fill="none" stroke="#000000" d="M295,-3208.5954C295,-3091.3317 295,-2900.2633 295,-2811.3268"/>
-<polygon fill="#000000" stroke="#000000" points="298.5001,-2811.254 295,-2801.2541 291.5001,-2811.2541 298.5001,-2811.254"/>
+<path fill="none" stroke="#000000" d="M295,-3181.9538C295,-3064.1203 295,-2893.7924 295,-2811.3169"/>
+<polygon fill="#000000" stroke="#000000" points="298.5001,-2811.2276 295,-2801.2276 291.5001,-2811.2277 298.5001,-2811.2276"/>
 </g>
 <!-- bb28_1&#45;&gt;bb28_1 -->
 <g id="edge2" class="edge">
@@ -2092,4 +2094,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 3b24606147ae73b7767f0df7a41d2ac36dfca79b4ef58c48895808554eebbd00 -->
+<!-- ruby-types:sha256: f8257c389aa49892cde5645b9204ba8d3dca877c3e9c760449ded8dab22742fd -->

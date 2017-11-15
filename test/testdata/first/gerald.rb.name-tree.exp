@@ -7,7 +7,7 @@ begin
 
       def initialize<initialize>(message, rule_token)
         begin
-          super(message)
+          self(MatchTimeout).super(message)
           ::Opus::CIBot::Gerald::MatchTimeout#@rule_token = rule_token
         end
 

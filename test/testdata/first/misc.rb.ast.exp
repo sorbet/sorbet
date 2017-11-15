@@ -57,7 +57,7 @@ begin
   next(1)
   next([1, 2])
   <Not Supported (Defined)>
-  <Not Supported (ZSuper)>
+  self(<todo sym>).super(ZSuperArgs)
   def foo<<todo sym>>(x:, y: = 1, *z:)
     <emptyTree>
   x

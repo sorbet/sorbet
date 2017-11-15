@@ -85,10 +85,6 @@ void CFG::dealias(core::Context ctx) {
                 for (auto &arg : v->args) {
                     arg = maybeDealias(ctx, arg, current);
                 }
-            } else if (auto *v = dynamic_cast<Super *>(bind.value.get())) {
-                for (auto &arg : v->args) {
-                    arg = maybeDealias(ctx, arg, current);
-                }
             } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
                 v->what = maybeDealias(ctx, v->what, current);
             } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
@@ -125,10 +121,6 @@ void CFG::fillInBlockArguments(core::Context ctx) {
                 reads[v->what].insert(bb.get());
             } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
                 reads[v->recv].insert(bb.get());
-                for (auto arg : v->args) {
-                    reads[arg].insert(bb.get());
-                }
-            } else if (auto *v = dynamic_cast<Super *>(bind.value.get())) {
                 for (auto arg : v->args) {
                     reads[arg].insert(bb.get());
                 }
@@ -663,8 +655,8 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
         });
 
     /*[&](ast::Break *a) {}, */
-    // For, Next, Rescue,
-    // Symbol, Send, New, Super, NamedArg, Hash, Array,
+    // For, Rescue,
+    // Symbol, NamedArg, Hash, Array,
     // ArraySplat, HashAplat, Block,
     Error::check(ret != nullptr);
     return ret;
@@ -734,23 +726,6 @@ string Return::toString(core::Context ctx) {
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args)
     : recv(recv), fun(fun), args(move(args)) {}
-
-Super::Super(vector<core::LocalVariable> &args) : args(move(args)) {}
-
-string Super::toString(core::Context ctx) {
-    stringstream buf;
-    buf << "super(";
-    bool isFirst = true;
-    for (auto arg : this->args) {
-        if (!isFirst) {
-            buf << ", ";
-        }
-        isFirst = false;
-        buf << arg.name.name(ctx).toString(ctx);
-    }
-    buf << ")";
-    return buf.str();
-}
 
 FloatLit::FloatLit(float value) : value(value) {}
 

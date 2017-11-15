@@ -7,7 +7,7 @@ begin
 
       def initialize<<todo sym>>(message, rule_token: = "")
         begin
-          super(message)
+          self(<todo sym>).super(message)
           @rule_token = rule_token
         end
 

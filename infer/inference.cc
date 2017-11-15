@@ -147,12 +147,15 @@ public:
                 auto recvType = getTypeAndOrigin(ctx, send->recv);
                 if (send->fun == core::Names::new_()) {
                     tp.type = dispatchNew(ctx, recvType, send, args, bind);
+                } else if (send->fun == core::Names::super()) {
+                    // TODO
+                    tp.type = core::Types::dynamic();
+                    tp.origins.push_back(bind.loc);
                 } else {
                     tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
                 }
                 tp.origins.push_back(bind.loc);
             },
-            [&](cfg::Super *i) { Error::notImplemented(); },
             [&](cfg::FloatLit *i) {
                 tp.type = make_shared<core::Literal>(i->value);
                 tp.origins.push_back(bind.loc);

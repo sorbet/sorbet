@@ -165,6 +165,21 @@ public:
         }
     }
 
+    ast::Send *preTransformSend(core::Context ctx, ast::Send *original) {
+        if (original->args.size() == 1 && dynamic_cast<ast::ZSuperArgs *>(original->args[0].get()) != nullptr) {
+            original->args.clear();
+            core::SymbolRef method = ctx.enclosingMethod();
+            if (method.exists()) {
+                for (auto arg : ctx.enclosingMethod().info(ctx).argumentsOrMixins) {
+                    original->args.emplace_back(make_unique<ast::Ident>(original->loc, arg));
+                }
+            } else {
+                ctx.state.errors.error(original->loc, core::ErrorClass::SelfOutsideClass, "super outside of method");
+            }
+        }
+        return original;
+    }
+
     ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
         scopeStack.emplace_back();
         core::SymbolRef owner = ownerFromContext(ctx);

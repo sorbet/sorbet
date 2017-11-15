@@ -5,7 +5,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize" {
     bb28_0 [shape = invhouse];
     bb28_1 [shape = parallelogram];
 
-    bb28_0 [label = "()\n@rule_token$3 = alias @rule_token : untyped\n<self>$1 = self : MatchTimeout\nrule_token = load_arg(<self>$1#initialize, 1) : untyped\nstatTmp$2 = NotSupported() : untyped\n<ret>$4 = return rule_token : <bottom>\n<unconditional>"];
+    bb28_0 [label = "()\n@rule_token$5 = alias @rule_token : untyped\n<self>$1 = self : MatchTimeout\nmessage = load_arg(<self>$1#initialize, 0) : untyped\nrule_token = load_arg(<self>$1#initialize, 1) : untyped\nstatTmp$3 = self : MatchTimeout\nstatTmp$2 = statTmp$3.super(message) : untyped\n<ret>$6 = return rule_token : <bottom>\n<unconditional>"];
     bb28_0 -> bb28_1;
     bb28_1 [label = "()\n<unconditional>"];
     bb28_1 -> bb28_1;

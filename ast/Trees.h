@@ -325,17 +325,6 @@ public:
     virtual std::string nodeName();
 };
 
-class Super final : public Expression {
-public:
-    Send::ARGS_store args;
-
-    Super(core::Loc loc, Send::ARGS_store &args);
-
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-};
-
 class NamedArg final : public Expression {
 public:
     core::NameRef name;
@@ -442,6 +431,16 @@ public:
     std::unique_ptr<Expression> arg;
 
     HashSplat(core::Loc loc, std::unique_ptr<Expression> arg);
+    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+};
+
+class ZSuperArgs final : public Expression {
+public:
+    // null if no block passed
+    ZSuperArgs(core::Loc loc);
+
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
