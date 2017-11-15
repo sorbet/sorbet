@@ -13,9 +13,9 @@ subgraph "cluster_::BlockTest#block_pass" {
     bb24_2 -> bb24_4;
     bb24_2 -> bb24_3;
 
-    bb24_3 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\n<ret>$2 = statTmp$2.foo(statTmp$3, statTmp$4, statTmp$5) : untyped\n<ret>$7 = return <ret>$2 : <bottom>\n<unconditional>"];
+    bb24_3 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\n<ret>$1 = statTmp$2.foo(statTmp$3, statTmp$4, statTmp$5) : untyped\n<ret>$7 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb24_3 -> bb24_1;
-    bb24_4 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nouterLoops: 1\n<block-nested: x$1> = load_arg(statTmp$2#foo, 0) : untyped\n<unconditional>"];
+    bb24_4 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nouterLoops: 1\n<block-nested: x> = load_arg(statTmp$2#foo, 0) : untyped\n<unconditional>"];
     bb24_4 -> bb24_2;
 }
 
