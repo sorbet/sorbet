@@ -473,7 +473,6 @@ NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
     bucket.second = idx;
     names.emplace_back();
 
-    Error::check(nm.to < GlobalState::STRINGS_PAGE_SIZE);
     char *from = nullptr;
     if (nm.to > GlobalState::STRINGS_PAGE_SIZE) {
         strings.push_back(make_unique<vector<char>>(nm.to));
