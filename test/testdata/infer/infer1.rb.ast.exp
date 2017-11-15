@@ -1,33 +1,33 @@
 begin
-  class <emptyTree>::String<<todo sym>> < ()
-    self(<todo sym>).standard_method({:i => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer, <emptyTree>::NilClass)})
+  class <emptyTree>::<constant:String><<constant:<todo sym>>> < ()
+    self(<constant:<todo sym>>).standard_method({:i => <emptyTree>::<constant:Integer>}, {:returns => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:Integer>, <emptyTree>::<constant:NilClass>)})
 
-    def getbyte<<todo sym>>(i)
+    def getbyte<<constant:<todo sym>>>(i)
       <emptyTree>
 
   end
-  class <emptyTree>::Integer<<todo sym>> < ()
-    self(<todo sym>).standard_method({:o => <emptyTree>::Integer}, {:returns => <emptyTree>::Opus::Types.any(<emptyTree>::Integer)})
+  class <emptyTree>::<constant:Integer><<constant:<todo sym>>> < ()
+    self(<constant:<todo sym>>).standard_method({:o => <emptyTree>::<constant:Integer>}, {:returns => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:Integer>)})
 
-    def +<<todo sym>>(o)
+    def +<<constant:<todo sym>>>(o)
       <emptyTree>
 
   end
-  def baz1<<todo sym>>()
+  def baz1<<constant:<todo sym>>>()
     begin
       a = "foo"
       b = a.getbyte(a)
     end
-  def baz2<<todo sym>>()
+  def baz2<<constant:<todo sym>>>()
     begin
       a = "foo"
       b = a.getbyte("foo")
     end
-  def baz3<<todo sym>>()
+  def baz3<<constant:<todo sym>>>()
     b = "foo".getbyte("foo")
-  def baz4<<todo sym>>()
-    b = self(<todo sym>).a().getbyte("foo")
-  def baz5<<todo sym>>()
+  def baz4<<constant:<todo sym>>>()
+    b = self(<constant:<todo sym>>).a().getbyte("foo")
+  def baz5<<constant:<todo sym>>>()
     begin
       if begin
           true
@@ -38,7 +38,7 @@ begin
       end
       b = b.getbyte(1)
     end
-  def baz6<<todo sym>>()
+  def baz6<<constant:<todo sym>>>()
     begin
       if begin
           true
@@ -49,7 +49,7 @@ begin
       end
       b = "foo".getbyte(b)
     end
-  def baz7<<todo sym>>()
+  def baz7<<constant:<todo sym>>>()
     begin
       if begin
           true
@@ -60,7 +60,7 @@ begin
       end
       b = "foo".getbyte(b)
     end
-  def baz8<<todo sym>>()
+  def baz8<<constant:<todo sym>>>()
     while begin
         true
       end

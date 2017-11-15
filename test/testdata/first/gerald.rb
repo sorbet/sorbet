@@ -1,9 +1,9 @@
 require_relative '../../../extn'
-Opus::AutogenLoader.init(__FILE__) # error: Stubbing out unknown constant <emptyTree>::Opus::AutogenLoader
+Opus::AutogenLoader.init(__FILE__) # error: Stubbing out unknown constant
 
 module Opus::CIBot::Gerald
 
-  class MatchTimeout < StandardError # error: Stubbing out unknown constant <emptyTree>::StandardError
+  class MatchTimeout < StandardError # error: Stubbing out unknown constant
 
     attr_reader :rule_token
 
@@ -81,20 +81,20 @@ module Opus::CIBot::Gerald
 
     def initialize
       @start =   # error: undeclared variable
-        Time.now # error: Stubbing out unknown constant <emptyTree>::Time
+        Time.now # error: Stubbing out unknown constant
     end
 
     def check!
-      dur_ms = (Time.now - @start) * 1000 # error: Stubbing out unknown constant <emptyTree>::Time
+      dur_ms = (Time.now - @start) * 1000 # error: Stubbing out unknown constant
       if dur_ms > TOTAL_TIME_MS
         raise MatchTimeout.new("Gerald match time budged exceeded #{TOTAL_TIME_MS}ms") # error: MULTI: no concat and no to_s.
       end
     end
 
     def time_rule(rule)
-      rule_start = Time.now # error: Stubbing out unknown constant <emptyTree>::Time
+      rule_start = Time.now # error: Stubbing out unknown constant
       res = yield
-      dur_ms = (Time.now - rule_start) * 1000 # error: Stubbing out unknown constant <emptyTree>::Time
+      dur_ms = (Time.now - rule_start) * 1000 # error: Stubbing out unknown constant
       if dur_ms > PER_RULE_MS
         raise MatchTimeout.new( # error: Method raise does not exist
           "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms", # error: MULTI: no concat and no to_s.

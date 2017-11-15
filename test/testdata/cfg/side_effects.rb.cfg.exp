@@ -1,6 +1,6 @@
 digraph "side_effects.rb"{
-subgraph "cluster_::Side#foo" {
-    label = "::Side#foo";
+subgraph "cluster_::<constant:Side>#foo" {
+    label = "::<constant:Side>#foo";
     color = blue;
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];

@@ -3,7 +3,7 @@ Begin {
     Class {
       name = Const {
         scope = NULL
-        name = Integer
+        name = <constant:Integer>
       }
       superclass = NULL
       body = Begin {
@@ -20,7 +20,7 @@ Begin {
                     }
                     value = Const {
                       scope = NULL
-                      name = Integer
+                      name = <constant:Integer>
                     }
                   }
                 ]
@@ -35,15 +35,15 @@ Begin {
                       receiver = Const {
                         scope = Const {
                           scope = NULL
-                          name = Opus
+                          name = <constant:Opus>
                         }
-                        name = Types
+                        name = <constant:Types>
                       }
                       method = any
                       args = [
                         Const {
                           scope = NULL
-                          name = Integer
+                          name = <constant:Integer>
                         }
                       ]
                     }
@@ -69,7 +69,7 @@ Begin {
     Class {
       name = Const {
         scope = NULL
-        name = Examples
+        name = <constant:Examples>
       }
       superclass = NULL
       body = Begin {

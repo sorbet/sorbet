@@ -1,10 +1,10 @@
 begin
-  class <emptyTree>::String<String> < ()
+  class <emptyTree>::<constant:String><<constant:String>> < ()
     def getbyte<getbyte>(i)
       <emptyTree>
 
   end
-  class <emptyTree>::Integer<Integer> < ()
+  class <emptyTree>::<constant:Integer><<constant:Integer>> < ()
     def +<+>(o)
       <emptyTree>
 
@@ -22,7 +22,7 @@ begin
   def baz3<baz3>()
     b = "foo".getbyte("foo")
   def baz4<baz4>()
-    b = self(Object).a().getbyte("foo")
+    b = self(<constant:Object>).a().getbyte("foo")
   def baz5<baz5>()
     begin
       if begin

@@ -1,33 +1,33 @@
 begin
-  self(<singleton class:<root>>).require_relative("../../../extn")
-  ::untyped.init("__FILE__")
-  module <emptyTree>::Opus::CIBot::Gerald<Gerald> < ()
-    class <emptyTree>::MatchTimeout<MatchTimeout> < (::untyped)
-      self(<singleton class:MatchTimeout>).attr_reader(:rule_token)
+  self(<singleton class:<constant:<root>>>).require_relative("../../../extn")
+  ::<constant:untyped>.init("__FILE__")
+  module <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Gerald><<constant:Gerald>> < ()
+    class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::<constant:untyped>)
+      self(<singleton class:<constant:MatchTimeout>>).attr_reader(:rule_token)
 
       def initialize<initialize>(message, rule_token)
         begin
-          self(MatchTimeout).super(message)
-          ::Opus::CIBot::Gerald::MatchTimeout#@rule_token = rule_token
+          self(<constant:MatchTimeout>).super(message)
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#@rule_token = rule_token
         end
 
     end
 
-    class <emptyTree>::Matcher<Matcher> < (::untyped)
-      ::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES = 100
+    class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:untyped>)
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#<constant:MAX_AFFECTED_FILES> = 100
 
       def initialize<initialize>()
         begin
           begin
-            assignTmp$0 = ::untyped.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
-            ::Opus::CIBot::Gerald::Matcher#@rules = assignTmp$0.[](0)
+            assignTmp$0 = ::<constant:untyped>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
+            ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTmp$0.[](0)
             invalid_rules = assignTmp$0.[](1)
             assignTmp$0
           end
           if invalid_rules.empty?().!()
             begin
               invalid_rule_ids = invalid_rules.map(<Not Supported (BlockPass)>).join(",")
-              self(Matcher).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
+              self(<constant:Matcher>).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
             end
           else
             <emptyTree>
@@ -36,9 +36,9 @@ begin
 
       def match<match>(match_context)
         begin
-          if match_context.diff().affected_files().count().>(::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES)
+          if match_context.diff().affected_files().count().>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#<constant:MAX_AFFECTED_FILES>)
             begin
-              self(Matcher).log().warn("Gerald skipping large PR with ".concat(begin
+              self(<constant:Matcher>).log().warn("Gerald skipping large PR with ".concat(begin
                     match_context.diff().affected_files().count()
                   end.to_s()).concat(" affected files").to_s())
               return []
@@ -46,8 +46,8 @@ begin
           else
             <emptyTree>
           end
-          budget = ::Opus::CIBot::Gerald::MatchTimeBudget.new()
-          ::Opus::CIBot::Gerald::Matcher#@rules.select() do |<block-nested: r>|
+          budget = ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>.new()
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules.select() do |<block-nested: r>|
             budget.time_rule(<block-nested: r>) do ||
               <block-nested: r>.matches?(match_context)
             end
@@ -56,56 +56,56 @@ begin
 
     end
 
-    class <emptyTree>::MatchContext<MatchContext> < ()
-      self(<singleton class:MatchContext>).attr_reader(:repo)
+    class <emptyTree>::<constant:MatchContext><<constant:MatchContext>> < ()
+      self(<singleton class:<constant:MatchContext>>).attr_reader(:repo)
 
-      self(<singleton class:MatchContext>).attr_reader(:assignee)
+      self(<singleton class:<constant:MatchContext>>).attr_reader(:assignee)
 
-      self(<singleton class:MatchContext>).attr_reader(:gh_user)
+      self(<singleton class:<constant:MatchContext>>).attr_reader(:gh_user)
 
-      self(<singleton class:MatchContext>).attr_reader(:merge_branch)
+      self(<singleton class:<constant:MatchContext>>).attr_reader(:merge_branch)
 
-      self(<singleton class:MatchContext>).attr_reader(:body)
+      self(<singleton class:<constant:MatchContext>>).attr_reader(:body)
 
-      self(<singleton class:MatchContext>).attr_reader(:title)
+      self(<singleton class:<constant:MatchContext>>).attr_reader(:title)
 
-      self(<singleton class:MatchContext>).attr_reader(:diff)
+      self(<singleton class:<constant:MatchContext>>).attr_reader(:diff)
 
-      self(<singleton class:MatchContext>).attr_reader(:openapi_diff)
+      self(<singleton class:<constant:MatchContext>>).attr_reader(:openapi_diff)
 
       def initialize<initialize>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
         begin
-          ::Opus::CIBot::Gerald::MatchContext#@repo = repo
-          ::Opus::CIBot::Gerald::MatchContext#@assignee = assignee
-          ::Opus::CIBot::Gerald::MatchContext#@gh_user = gh_user
-          ::Opus::CIBot::Gerald::MatchContext#@merge_branch = merge_branch
-          ::Opus::CIBot::Gerald::MatchContext#@body = body
-          ::Opus::CIBot::Gerald::MatchContext#@title = title
-          ::Opus::CIBot::Gerald::MatchContext#@diff = diff
-          ::Opus::CIBot::Gerald::MatchContext#@openapi_diff = openapi_diff
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo = repo
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@assignee = assignee
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@gh_user = gh_user
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@merge_branch = merge_branch
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@body = body
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@title = title
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@diff = diff
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@openapi_diff = openapi_diff
         end
 
       def user_stripe_suffix?<user_stripe_suffix?>()
-        ::Opus::CIBot::Gerald::MatchContext#@repo.start_with?("stripe-internal/").!()
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo.start_with?("stripe-internal/").!()
 
     end
 
-    class <emptyTree>::MatchTimeBudget<MatchTimeBudget> < ()
-      ::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS = 10000
+    class <emptyTree>::<constant:MatchTimeBudget><<constant:MatchTimeBudget>> < ()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS> = 10000
 
-      ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS = 2000
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS> = 2000
 
       def initialize<initialize>()
-        ::Opus::CIBot::Gerald::MatchTimeBudget#@start = ::untyped.now()
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:untyped>.now()
 
       def check!<check!>()
         begin
           dur_ms = begin
-            ::untyped.now().-(::Opus::CIBot::Gerald::MatchTimeBudget#@start)
+            ::<constant:untyped>.now().-(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start)
           end.*(1000)
-          if dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS)
-            self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
-                    ::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS
+          if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>)
+            self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald match time budged exceeded ".concat(begin
+                    ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>
                   end.to_s()).concat("ms").to_s()))
           else
             <emptyTree>
@@ -114,76 +114,76 @@ begin
 
       def time_rule<time_rule>(rule)
         begin
-          rule_start = ::untyped.now()
+          rule_start = ::<constant:untyped>.now()
           res = yield(<emptyTree>)
           dur_ms = begin
-            ::untyped.now().-(rule_start)
+            ::<constant:untyped>.now().-(rule_start)
           end.*(1000)
-          if dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS)
-            self(MatchTimeBudget).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald rule '".concat(begin
+          if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>)
+            self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald rule '".concat(begin
                     rule.token()
                   end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
                     dur_ms.to_i()
                   end.to_s()).concat("ms budget=").concat(begin
-                    ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS
+                    ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>
                   end.to_s()).concat("ms").to_s(), {:rule_token => rule.token()}))
           else
             <emptyTree>
           end
-          self(MatchTimeBudget).check!()
+          self(<constant:MatchTimeBudget>).check!()
           res
         end
 
     end
 
-    class <emptyTree>::Diff<Diff> < ()
+    class <emptyTree>::<constant:Diff><<constant:Diff>> < ()
       def initialize<initialize>(raw_diff)
         begin
-          ::Opus::CIBot::Gerald::Diff#@raw = raw_diff
-          ::Opus::CIBot::Gerald::Diff#@parsed = self(Diff).parse(raw_diff)
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@raw = raw_diff
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed = self(<constant:Diff>).parse(raw_diff)
         end
 
       def affected_files<affected_files>()
-        self(Diff).added_files().+(self(Diff).deleted_files()).+(self(Diff).changed_files())
+        self(<constant:Diff>).added_files().+(self(<constant:Diff>).deleted_files()).+(self(<constant:Diff>).changed_files())
 
       def added_files<added_files>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |<block-nested: part>|
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
           <block-nested: part>.[](:a_name).==("/dev/null")
         end.map() do |<block-nested: part>|
           <block-nested: part>.[](:b_name)
         end
 
       def deleted_files<deleted_files>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |<block-nested: part>|
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
           <block-nested: part>.[](:b_name).==("/dev/null")
         end.map() do |<block-nested: part>|
           <block-nested: part>.[](:a_name)
         end
 
       def changed_files<changed_files>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.select() do |<block-nested: part>|
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
           <block-nested: part>.[](:a_name).==(<block-nested: part>.[](:b_name))
         end.map() do |<block-nested: part>|
           <block-nested: part>.[](:b_name)
         end
 
       def added_lines<added_lines>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.map() do |<block-nested: part>|
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |<block-nested: part>|
           <block-nested: part>.[](:added_lines)
         end.flatten()
 
       def removed_lines<removed_lines>()
-        ::Opus::CIBot::Gerald::Diff#@parsed.map() do |<block-nested: part>|
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |<block-nested: part>|
           <block-nested: part>.[](:removed_lines)
         end.flatten()
 
       def changed_lines<changed_lines>()
-        self(Diff).added_lines().+(self(Diff).removed_lines())
+        self(<constant:Diff>).added_lines().+(self(<constant:Diff>).removed_lines())
 
       def changed_openapi?<changed_openapi?>()
-        self(Diff).changed_files().include?(::untyped)
+        self(<constant:Diff>).changed_files().include?(::<constant:untyped>)
 
-      self(<singleton class:Diff>).private(def parse<parse>(diff)
+      self(<singleton class:<constant:Diff>>).private(def parse<parse>(diff)
           begin
             parts = diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
             if parts

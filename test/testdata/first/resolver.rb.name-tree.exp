@@ -1,41 +1,41 @@
 begin
-  class <emptyTree>::Outer1<Outer1> < ()
+  class <emptyTree>::<constant:Outer1><<constant:Outer1>> < ()
     <emptyTree>
 
   end
-  class <emptyTree>::Outer2<Outer2> < ()
-    class <emptyTree>::C<C> < ()
+  class <emptyTree>::<constant:Outer2><<constant:Outer2>> < ()
+    class <emptyTree>::<constant:C><<constant:C>> < ()
       <emptyTree>
 
     end
 
-    class <emptyTree>::Inner1<Inner1> < ()
-      class <emptyTree>::A<A> < ()
+    class <emptyTree>::<constant:Inner1><<constant:Inner1>> < ()
+      class <emptyTree>::<constant:A><<constant:A>> < ()
         <emptyTree>
 
       end
 
-      class <emptyTree>::Inner2<Inner2> < ()
-        ::Outer2::Inner1::A
+      class <emptyTree>::<constant:Inner2><<constant:Inner2>> < ()
+        ::<constant:Outer2>::<constant:Inner1>::<constant:A>
 
-        ::Outer2::Inner1
+        ::<constant:Outer2>::<constant:Inner1>
 
-        ::Outer2::Inner1::Inner2
+        ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>
 
-        ::Outer1
+        ::<constant:Outer1>
 
       end
 
     end
 
-    class <emptyTree>::Inner1::Inner2<Inner2> < ()
-      ::Outer2::C
+    class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < ()
+      ::<constant:Outer2>::<constant:C>
 
-      ::untyped
+      ::<constant:untyped>
 
     end
 
-    class <emptyTree>::Other<Other> < (::Outer2::Inner1::Inner2)
+    class <emptyTree>::<constant:Other><<constant:Other>> < (::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>)
       <emptyTree>
 
     end

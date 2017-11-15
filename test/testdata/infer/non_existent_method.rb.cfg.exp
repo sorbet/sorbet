@@ -1,6 +1,6 @@
 digraph "non_existent_method.rb"{
-subgraph "cluster_::Foo#baz" {
-    label = "::Foo#baz";
+subgraph "cluster_::<constant:Foo>#baz" {
+    label = "::<constant:Foo>#baz";
     color = blue;
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];

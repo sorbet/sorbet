@@ -1,6 +1,6 @@
 digraph "blocks.rb"{
-subgraph "cluster_::BlockTest#block_pass" {
-    label = "::BlockTest#block_pass";
+subgraph "cluster_::<constant:BlockTest>#block_pass" {
+    label = "::<constant:BlockTest>#block_pass";
     color = blue;
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];

@@ -1,4 +1,4 @@
-def test_strings<<todo sym>>()
+def test_strings<<constant:<todo sym>>>()
   begin
     ""
     "foo"

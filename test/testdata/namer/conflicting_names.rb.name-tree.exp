@@ -1,0 +1,10 @@
+module <emptyTree>::<constant:A><<constant:A>> < ()
+  def Foo<Foo>()
+    <emptyTree>
+
+  class <emptyTree>::<constant:Foo><<constant:Foo>> < ()
+    <emptyTree>
+
+  end
+
+end

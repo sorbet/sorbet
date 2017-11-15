@@ -1,13 +1,7 @@
-class <singleton class:<root>> (Class)
-class <singleton class:<root>> (Class)
-class Opus ()
-  class CIBot ()
-    class Gerald ()
-      class <singleton class:Diff> (Class)
-      class <singleton class:MatchContext> (Class)
-      class <singleton class:MatchTimeout> (Class)
-      class <singleton class:Matcher> (Class)
-      class Diff (Object)
+class <constant:Opus> ()
+  class <constant:CIBot> ()
+    class <constant:Gerald> ()
+      class <constant:Diff> (<constant:Object>)
         field @parsed -> untyped
         field @raw -> untyped
         method added_files ()
@@ -42,7 +36,7 @@ class Opus ()
         method removed_lines ()
           method <block>$14 (part)
             argument part<>
-      class MatchContext (Object)
+      class <constant:MatchContext> (<constant:Object>)
         field @assignee -> untyped
         field @body -> untyped
         field @diff -> untyped
@@ -61,20 +55,20 @@ class Opus ()
           argument repo<>
           argument title<>
         method user_stripe_suffix? ()
-      class MatchTimeBudget (Object)
+      class <constant:MatchTimeBudget> (<constant:Object>)
         field @start -> untyped
         method check! ()
         method initialize ()
         method time_rule (rule)
           argument rule<>
-        static-field PER_RULE_MS -> untyped
-        static-field TOTAL_TIME_MS -> untyped
-      class MatchTimeout (untyped)
+        static-field <constant:PER_RULE_MS> -> untyped
+        static-field <constant:TOTAL_TIME_MS> -> untyped
+      class <constant:MatchTimeout> (<constant:untyped>)
         field @rule_token -> untyped
         method initialize (message, rule_token)
           argument message<>
           argument rule_token<optional, keyword>
-      class Matcher (untyped)
+      class <constant:Matcher> (<constant:untyped>)
         field @rules -> untyped
         method initialize ()
         method match (match_context)
@@ -82,5 +76,11 @@ class Opus ()
           method <block>$4 (r)
             argument r<>
             method <block>$5 ()
-        static-field MAX_AFFECTED_FILES -> untyped
+        static-field <constant:MAX_AFFECTED_FILES> -> untyped
+      class <singleton class:<constant:Diff>> (<constant:Class>)
+      class <singleton class:<constant:MatchContext>> (<constant:Class>)
+      class <singleton class:<constant:MatchTimeout>> (<constant:Class>)
+      class <singleton class:<constant:Matcher>> (<constant:Class>)
+class <singleton class:<constant:<root>>> (<constant:Class>)
+class <singleton class:<constant:<root>>> (<constant:Class>)
 

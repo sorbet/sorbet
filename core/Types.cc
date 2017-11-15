@@ -491,7 +491,16 @@ shared_ptr<Type> Types::dynamic() {
 ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {}
 
 string ruby_typer::core::ClassType::toString(ruby_typer::core::Context ctx, int tabs) {
-    return this->symbol.info(ctx).name.toString(ctx);
+    core::Name &name = this->symbol.info(ctx).name.name(ctx);
+    if (name.kind == core::CONSTANT) {
+        return name.cnst.original.toString(ctx);
+    } else {
+        Error::check(name.kind == core::UNIQUE);
+        Error::check(name.unique.uniqueNameKind == core::Singleton);
+        core::Name &inner = name.unique.original.name(ctx);
+        Error::check(inner.kind == core::CONSTANT);
+        return "<class:" + inner.cnst.original.toString(ctx) + ">";
+    }
 }
 
 string ruby_typer::core::ClassType::typeName() {

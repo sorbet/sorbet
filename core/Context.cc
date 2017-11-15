@@ -11,7 +11,7 @@ namespace ruby_typer {
 namespace core {
 
 SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
-    NameRef nameId = enterNameUTF8(name);
+    NameRef nameId = enterNameConstant(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to defn_root().members later.
@@ -348,7 +348,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef nilClass_id = synthesizeClass(nilClass_DESC);
     SymbolRef untyped_id = synthesizeClass(untyped_DESC);
     SymbolRef opus_id = synthesizeClass(opus_DESC);
-    SymbolRef opus_types_id = enterClassSymbol(Loc::none(0), opus_id, enterNameUTF8(types_DESC));
+    SymbolRef opus_types_id = enterClassSymbol(Loc::none(0), opus_id, enterNameConstant(types_DESC));
     SymbolRef class_id = synthesizeClass(class_DESC);
     SymbolRef basicObject_id = synthesizeClass(basicObject_DESC);
     SymbolRef kernel_id = synthesizeClass(kernel_DESC);
@@ -507,6 +507,59 @@ NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
     strings_last_page_used += nm.to;
 
     return idx;
+}
+
+NameRef GlobalState::enterNameConstant(NameRef original) {
+    Error::check(original.exists());
+    Error::check(original.name(*this).kind == UTF8);
+
+    const auto hs = _hash_mix_constant(CONSTANT, original.id());
+    unsigned int hashTableSize = names_by_hash.size();
+    unsigned int mask = hashTableSize - 1;
+    auto bucketId = hs & mask;
+    unsigned int probe_count = 1;
+
+    while (names_by_hash[bucketId].second != 0 && probe_count < hashTableSize) {
+        auto &bucket = names_by_hash[bucketId];
+        if (bucket.first == hs) {
+            auto &nm2 = names[bucket.second];
+            if (nm2.kind == CONSTANT && nm2.cnst.original == original)
+                return bucket.second;
+        }
+        bucketId = (bucketId + probe_count) & mask;
+        probe_count++;
+    }
+    if (probe_count == hashTableSize) {
+        Error::raise("Full table?");
+    }
+
+    if (names.size() == names.capacity()) {
+        expandNames();
+        hashTableSize = names_by_hash.size();
+        mask = hashTableSize - 1;
+
+        bucketId = hs & mask; // look for place in the new size
+        probe_count = 1;
+        while (names_by_hash[bucketId].second != 0) {
+            bucketId = (bucketId + probe_count) & mask;
+            probe_count++;
+        }
+    }
+
+    auto &bucket = names_by_hash[bucketId];
+    bucket.first = hs;
+    bucket.second = names.size();
+
+    auto idx = names.size();
+    names.emplace_back();
+
+    names[idx].kind = CONSTANT;
+    names[idx].cnst.original = original;
+    return idx;
+}
+
+NameRef GlobalState::enterNameConstant(UTF8Desc original) {
+    return enterNameConstant(enterNameUTF8(original));
 }
 
 void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsigned int> *to, unsigned int szFrom,

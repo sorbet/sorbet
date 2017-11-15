@@ -1,32 +1,32 @@
 begin
   <Not Supported (Alias)>
-  ::<singleton class:<root>>#@iv = 1
+  ::<singleton class:<constant:<root>>>#@iv = 1
   #@@cv = 1
   #$gv = 1
   begin
     assignTmp$2 = [nil, nil]
-    self(<singleton class:<root>>).x().var=(assignTmp$2.[](0))
+    self(<singleton class:<constant:<root>>>).x().var=(assignTmp$2.[](0))
     y = assignTmp$2.[](1)
     assignTmp$2
   end
   begin
-    assignTmp$3 = self(<singleton class:<root>>).zaaaz()
+    assignTmp$3 = self(<singleton class:<constant:<root>>>).zaaaz()
     baaaar = assignTmp$3.[](0)
     naaar = assignTmp$3.[](1)
     assignTmp$3
   end
-  xaaaaz = [self(<singleton class:<root>>).yayayaya(), self(<singleton class:<root>>).tutututu()]
+  xaaaaz = [self(<singleton class:<constant:<root>>>).yayayaya(), self(<singleton class:<constant:<root>>>).tutututu()]
   <emptyTree>
   begin
     nil
   end
   begin
-    self(<singleton class:<root>>).a()
-    self(<singleton class:<root>>).b()
+    self(<singleton class:<constant:<root>>>).a()
+    self(<singleton class:<constant:<root>>>).b()
   end
   def foo<foo>(x)
     <emptyTree>
-  self(<singleton class:<root>>).lambda() do ||
+  self(<singleton class:<constant:<root>>>).lambda() do ||
     <emptyTree>
   end
   <Not Supported (Case)>
@@ -57,7 +57,7 @@ begin
   next(1)
   next([1, 2])
   <Not Supported (Defined)>
-  self(<singleton class:<root>>).super()
+  self(<singleton class:<constant:<root>>>).super()
   def foo<foo>(x, y, z)
     <emptyTree>
   x
@@ -107,10 +107,10 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(<singleton class:<root>>).proc() do |<block-nested: x>|
+  self(<singleton class:<constant:<root>>>).proc() do |<block-nested: x>|
     <emptyTree>
   end
-  break(self(<singleton class:<root>>).foo(1) do ||
+  break(self(<singleton class:<constant:<root>>>).foo(1) do ||
       <emptyTree>
     end)
   def foo<foo>(*$0)

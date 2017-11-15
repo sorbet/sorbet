@@ -1,19 +1,19 @@
-class <emptyTree>::TestLocals<TestLocals> < ()
+class <emptyTree>::<constant:TestLocals><<constant:TestLocals>> < ()
   def method<method>()
     begin
       a = 1
       c = 4
-      self(TestLocals).proc() do ||
+      self(<constant:TestLocals>).proc() do ||
         begin
           <block-nested: b> = 2
           a.+(<block-nested: b>)
-          self(TestLocals).proc() do ||
+          self(<constant:TestLocals>).proc() do ||
             <block-nested: b>.+(c)
           end
         end
       end
       b = 3
-      self(TestLocals).proc() do |<block-nested: a>, <block-nested: b>|
+      self(<constant:TestLocals>).proc() do |<block-nested: a>, <block-nested: b>|
         <block-nested: a>.+(<block-nested: b>)
       end
     end

@@ -450,16 +450,17 @@ public:
     }
 
     unique_ptr<Node> const_(const token *name) {
-        return make_unique<Const>(tok_loc(name), nullptr, gs_.enterNameUTF8(name->string()));
+        return make_unique<Const>(tok_loc(name), nullptr, gs_.enterNameConstant(name->string()));
     }
 
     unique_ptr<Node> const_fetch(unique_ptr<Node> scope, const token *colon, const token *name) {
-        return make_unique<Const>(loc_join(scope->loc, tok_loc(name)), move(scope), gs_.enterNameUTF8(name->string()));
+        return make_unique<Const>(loc_join(scope->loc, tok_loc(name)), move(scope),
+                                  gs_.enterNameConstant(name->string()));
     }
 
     unique_ptr<Node> const_global(const token *colon, const token *name) {
         return make_unique<Const>(loc_join(tok_loc(colon), tok_loc(name)), make_unique<Cbase>(tok_loc(colon)),
-                                  gs_.enterNameUTF8(name->string()));
+                                  gs_.enterNameConstant(name->string()));
     }
 
     unique_ptr<Node> const_op_assignable(unique_ptr<Node> node) {

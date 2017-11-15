@@ -10,14 +10,14 @@
 <title>blocks2.rb</title>
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-576.4613 1286,-576.4613 1286,4 -4,4"/>
 <g id="clust1" class="cluster">
-<title>cluster_::Foo#bar</title>
+<title>cluster_::&lt;constant:Foo&gt;#bar</title>
 <polygon fill="none" stroke="#0000ff" points="8,-294.5929 8,-564.4613 416,-564.4613 416,-294.5929 8,-294.5929"/>
-<text text-anchor="middle" x="212" y="-549.2613" font-family="Times,serif" font-size="14.00" fill="#000000">::Foo#bar</text>
+<text text-anchor="middle" x="212" y="-549.2613" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Foo&gt;#bar</text>
 </g>
 <g id="clust2" class="cluster">
-<title>cluster_::Foo#baz</title>
+<title>cluster_::&lt;constant:Foo&gt;#baz</title>
 <polygon fill="none" stroke="#0000ff" points="424,-8 424,-551.3508 1274,-551.3508 1274,-8 424,-8"/>
-<text text-anchor="middle" x="849" y="-536.1508" font-family="Times,serif" font-size="14.00" fill="#000000">::Foo#baz</text>
+<text text-anchor="middle" x="849" y="-536.1508" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Foo&gt;#baz</text>
 </g>
 <!-- bb24_0 -->
 <g id="node1" class="node">
@@ -128,4 +128,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 2d202b5fc49df4593c1236d9d0987e6823f1ca6478d125b37b5336566db0dc73 -->
+<!-- ruby-types:sha256: 885adac9903bc8866cf331c5a5cecbcb2e755fec1c7bed6b31c22f09294092ab -->

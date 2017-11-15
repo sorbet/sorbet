@@ -1,14 +1,14 @@
 begin
-  module <emptyTree>::Mixin1<Mixin1> < ()
+  module <emptyTree>::<constant:Mixin1><<constant:Mixin1>> < ()
     <emptyTree>
 
   end
-  module <emptyTree>::Mixin2<Mixin2> < ()
+  module <emptyTree>::<constant:Mixin2><<constant:Mixin2>> < ()
     <emptyTree>
 
   end
-  class <emptyTree>::Parent<Parent> < (::Mixin1)
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:Mixin1>)
   end
-  class <emptyTree>::Child<Child> < (::Parent, ::Mixin2)
+  class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin2>)
   end
 end

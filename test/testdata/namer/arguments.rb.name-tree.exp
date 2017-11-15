@@ -1,9 +1,9 @@
-class <emptyTree>::A<A> < ()
+class <emptyTree>::<constant:A><<constant:A>> < ()
   def take_arguments<take_arguments>(a, b, c, d, e, f, g)
     begin
       [a, b, c, d, e, f, g]
       h = 1
-      self(A).proc() do |<block-nested: a>, <block-nested: b>, <block-nested: c>, <block-nested: d>, <block-nested: e>, <block-nested: f>, <block-nested: g>, <block-nested: h>|
+      self(<constant:A>).proc() do |<block-nested: a>, <block-nested: b>, <block-nested: c>, <block-nested: d>, <block-nested: e>, <block-nested: f>, <block-nested: g>, <block-nested: h>|
         [<block-nested: a>, <block-nested: b>, <block-nested: c>, <block-nested: d>, <block-nested: e>, <block-nested: f>, <block-nested: g>, <block-nested: h>]
       end
     end

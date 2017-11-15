@@ -1,6 +1,6 @@
-class A (Object)
+class <constant:A> (<constant:Object>)
   method meth ()
-class Opus ()
+class <constant:Opus> ()
 field $a
 field $b
 field $c

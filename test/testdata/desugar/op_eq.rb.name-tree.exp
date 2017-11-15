@@ -1,4 +1,4 @@
-class <emptyTree>::OpEq<OpEq> < ()
+class <emptyTree>::<constant:OpEq><<constant:OpEq>> < ()
   def b<b>()
     <emptyTree>
 
@@ -19,7 +19,7 @@ class <emptyTree>::OpEq<OpEq> < ()
         a
       end
       begin
-        b$0 = self(OpEq)
+        b$0 = self(<constant:OpEq>)
         b$1 = b$0.b()
         if b$1
           b$0.b=(:b)
@@ -29,8 +29,8 @@ class <emptyTree>::OpEq<OpEq> < ()
       end
       begin
         []$2 = a
-        []$3 = self(OpEq).y()
-        []$4 = self(OpEq).z()
+        []$3 = self(<constant:OpEq>).y()
+        []$4 = self(<constant:OpEq>).z()
         []$5 = []$2.[]([]$3, []$4)
         if []$5
           []$2.[]=([]$3, []$4, 1)
@@ -44,7 +44,7 @@ class <emptyTree>::OpEq<OpEq> < ()
         a = :a
       end
       begin
-        b$6 = self(OpEq)
+        b$6 = self(<constant:OpEq>)
         b$7 = b$6.b()
         if b$7
           b$7
@@ -54,8 +54,8 @@ class <emptyTree>::OpEq<OpEq> < ()
       end
       begin
         []$8 = a
-        []$9 = self(OpEq).y()
-        []$10 = self(OpEq).z()
+        []$9 = self(<constant:OpEq>).y()
+        []$10 = self(<constant:OpEq>).z()
         []$11 = []$8.[]([]$9, []$10)
         if []$11
           []$11

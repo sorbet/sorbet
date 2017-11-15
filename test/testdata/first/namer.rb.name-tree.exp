@@ -1,55 +1,55 @@
 begin
-  class <emptyTree>::NormalClass<NormalClass> < ()
+  class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < ()
     def normal_method<normal_method>()
       <emptyTree>
 
     def self.normal_static_method<normal_static_method>()
       <emptyTree>
 
-    class <emptyTree>::InnerClass<InnerClass> < ()
+    class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < ()
       <emptyTree>
 
     end
 
-    module <emptyTree>::InnerModule<InnerModule> < ()
-      <emptyTree>
-
-    end
-
-  end
-  module <emptyTree>::ANamespace<ANamespace> < ()
-    class <emptyTree>::ObviousChild<ObviousChild> < ()
+    module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()
       <emptyTree>
 
     end
 
   end
-  class <emptyTree>::ANamespace::ClassInNamespace<ClassInNamespace> < ()
+  module <emptyTree>::<constant:ANamespace><<constant:ANamespace>> < ()
+    class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < ()
+      <emptyTree>
+
+    end
+
+  end
+  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < ()
     <emptyTree>
 
   end
-  class <emptyTree>::Parent<Parent> < ()
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < ()
     <emptyTree>
 
   end
-  module <emptyTree>::Mixin<Mixin> < ()
+  module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
     <emptyTree>
 
   end
-  module <emptyTree>::OtherMixin<OtherMixin> < ()
+  module <emptyTree>::<constant:OtherMixin><<constant:OtherMixin>> < ()
     <emptyTree>
 
   end
-  class <emptyTree>::Child<Child> < (::Parent, ::Mixin)
-    self(<singleton class:Child>).include(::Mixin, ::Mixin)
+  class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
+    self(<singleton class:<constant:Child>>).include(::<constant:Mixin>, ::<constant:Mixin>)
 
-    self(<singleton class:Child>).include(3)
+    self(<singleton class:<constant:Child>>).include(3)
 
-    self(<singleton class:Child>).include(::Mixin) do ||
+    self(<singleton class:<constant:Child>>).include(::<constant:Mixin>) do ||
       <emptyTree>
     end
 
-    self(<singleton class:Child>).whatever().include(::OtherMixin)
+    self(<singleton class:<constant:Child>>).whatever().include(::<constant:OtherMixin>)
 
   end
 end

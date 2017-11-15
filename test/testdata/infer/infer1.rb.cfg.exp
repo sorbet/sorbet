@@ -1,6 +1,6 @@
 digraph "infer1.rb"{
-subgraph "cluster_::String#getbyte" {
-    label = "::String#getbyte";
+subgraph "cluster_::<constant:String>#getbyte" {
+    label = "::<constant:String>#getbyte";
     color = blue;
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
@@ -11,8 +11,8 @@ subgraph "cluster_::String#getbyte" {
     bb24_1 -> bb24_1;
 }
 
-subgraph "cluster_::Integer#+" {
-    label = "::Integer#+";
+subgraph "cluster_::<constant:Integer>#+" {
+    label = "::<constant:Integer>#+";
     color = blue;
     bb27_0 [shape = invhouse];
     bb27_1 [shape = parallelogram];
@@ -23,8 +23,8 @@ subgraph "cluster_::Integer#+" {
     bb27_1 -> bb27_1;
 }
 
-subgraph "cluster_::Object#baz1" {
-    label = "::Object#baz1";
+subgraph "cluster_::<constant:Object>#baz1" {
+    label = "::<constant:Object>#baz1";
     color = blue;
     bb29_0 [shape = invhouse];
     bb29_1 [shape = parallelogram];
@@ -35,8 +35,8 @@ subgraph "cluster_::Object#baz1" {
     bb29_1 -> bb29_1;
 }
 
-subgraph "cluster_::Object#baz2" {
-    label = "::Object#baz2";
+subgraph "cluster_::<constant:Object>#baz2" {
+    label = "::<constant:Object>#baz2";
     color = blue;
     bb30_0 [shape = invhouse];
     bb30_1 [shape = parallelogram];
@@ -47,8 +47,8 @@ subgraph "cluster_::Object#baz2" {
     bb30_1 -> bb30_1;
 }
 
-subgraph "cluster_::Object#baz3" {
-    label = "::Object#baz3";
+subgraph "cluster_::<constant:Object>#baz3" {
+    label = "::<constant:Object>#baz3";
     color = blue;
     bb31_0 [shape = invhouse];
     bb31_1 [shape = parallelogram];
@@ -59,8 +59,8 @@ subgraph "cluster_::Object#baz3" {
     bb31_1 -> bb31_1;
 }
 
-subgraph "cluster_::Object#baz4" {
-    label = "::Object#baz4";
+subgraph "cluster_::<constant:Object>#baz4" {
+    label = "::<constant:Object>#baz4";
     color = blue;
     bb32_0 [shape = invhouse];
     bb32_1 [shape = parallelogram];
@@ -71,8 +71,8 @@ subgraph "cluster_::Object#baz4" {
     bb32_1 -> bb32_1;
 }
 
-subgraph "cluster_::Object#baz5" {
-    label = "::Object#baz5";
+subgraph "cluster_::<constant:Object>#baz5" {
+    label = "::<constant:Object>#baz5";
     color = blue;
     bb33_0 [shape = invhouse];
     bb33_1 [shape = parallelogram];
@@ -91,8 +91,8 @@ subgraph "cluster_::Object#baz5" {
     bb33_4 -> bb33_1;
 }
 
-subgraph "cluster_::Object#baz6" {
-    label = "::Object#baz6";
+subgraph "cluster_::<constant:Object>#baz6" {
+    label = "::<constant:Object>#baz6";
     color = blue;
     bb34_0 [shape = invhouse];
     bb34_1 [shape = parallelogram];
@@ -111,8 +111,8 @@ subgraph "cluster_::Object#baz6" {
     bb34_4 -> bb34_1;
 }
 
-subgraph "cluster_::Object#baz7" {
-    label = "::Object#baz7";
+subgraph "cluster_::<constant:Object>#baz7" {
+    label = "::<constant:Object>#baz7";
     color = blue;
     bb35_0 [shape = invhouse];
     bb35_1 [shape = parallelogram];
@@ -131,8 +131,8 @@ subgraph "cluster_::Object#baz7" {
     bb35_4 -> bb35_1;
 }
 
-subgraph "cluster_::Object#baz8" {
-    label = "::Object#baz8";
+subgraph "cluster_::<constant:Object>#baz8" {
+    label = "::<constant:Object>#baz8";
     color = blue;
     bb36_0 [shape = invhouse];
     bb36_1 [shape = parallelogram];

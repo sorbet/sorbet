@@ -3,7 +3,7 @@ Begin {
     Class {
       name = Const {
         scope = NULL
-        name = NormalClass
+        name = <constant:NormalClass>
       }
       superclass = NULL
       body = Begin {
@@ -23,7 +23,7 @@ Begin {
           Class {
             name = Const {
               scope = NULL
-              name = InnerClass
+              name = <constant:InnerClass>
             }
             superclass = NULL
             body = NULL
@@ -31,7 +31,7 @@ Begin {
           Module {
             name = Const {
               scope = NULL
-              name = InnerModule
+              name = <constant:InnerModule>
             }
             body = NULL
           }
@@ -41,12 +41,12 @@ Begin {
     Module {
       name = Const {
         scope = NULL
-        name = ANamespace
+        name = <constant:ANamespace>
       }
       body = Class {
         name = Const {
           scope = NULL
-          name = ObviousChild
+          name = <constant:ObviousChild>
         }
         superclass = NULL
         body = NULL
@@ -56,9 +56,9 @@ Begin {
       name = Const {
         scope = Const {
           scope = NULL
-          name = ANamespace
+          name = <constant:ANamespace>
         }
-        name = ClassInNamespace
+        name = <constant:ClassInNamespace>
       }
       superclass = NULL
       body = NULL
@@ -66,7 +66,7 @@ Begin {
     Class {
       name = Const {
         scope = NULL
-        name = Parent
+        name = <constant:Parent>
       }
       superclass = NULL
       body = NULL
@@ -74,25 +74,25 @@ Begin {
     Module {
       name = Const {
         scope = NULL
-        name = Mixin
+        name = <constant:Mixin>
       }
       body = NULL
     }
     Module {
       name = Const {
         scope = NULL
-        name = OtherMixin
+        name = <constant:OtherMixin>
       }
       body = NULL
     }
     Class {
       name = Const {
         scope = NULL
-        name = Child
+        name = <constant:Child>
       }
       superclass = Const {
         scope = NULL
-        name = Parent
+        name = <constant:Parent>
       }
       body = Begin {
         stmts = [
@@ -102,7 +102,7 @@ Begin {
             args = [
               Const {
                 scope = NULL
-                name = Mixin
+                name = <constant:Mixin>
               }
             ]
           }
@@ -112,11 +112,11 @@ Begin {
             args = [
               Const {
                 scope = NULL
-                name = Mixin
+                name = <constant:Mixin>
               }
               Const {
                 scope = NULL
-                name = Mixin
+                name = <constant:Mixin>
               }
             ]
           }
@@ -136,7 +136,7 @@ Begin {
               args = [
                 Const {
                   scope = NULL
-                  name = Mixin
+                  name = <constant:Mixin>
                 }
               ]
             }
@@ -154,7 +154,7 @@ Begin {
             args = [
               Const {
                 scope = NULL
-                name = OtherMixin
+                name = <constant:OtherMixin>
               }
             ]
           }

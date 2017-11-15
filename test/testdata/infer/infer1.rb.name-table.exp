@@ -1,4 +1,4 @@
-class <singleton class:Integer> (Class)
-class <singleton class:String> (Class)
-class Opus ()
+class <constant:Opus> ()
+class <singleton class:<constant:Integer>> (<constant:Class>)
+class <singleton class:<constant:String>> (<constant:Class>)
 

@@ -1,4 +1,4 @@
-class A (Object)
+class <constant:A> (<constant:Object>)
   method take_arguments (a, b, c, d, e, f, g)
     argument a<>
     argument b<optional>
@@ -15,5 +15,5 @@ class A (Object)
       argument e<optional, keyword>
       argument f<keyword, repeated>
       argument g<block>
-class Opus ()
+class <constant:Opus> ()
 

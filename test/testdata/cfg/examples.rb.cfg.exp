@@ -1,6 +1,6 @@
 digraph "examples.rb"{
-subgraph "cluster_::Integer#+" {
-    label = "::Integer#+";
+subgraph "cluster_::<constant:Integer>#+" {
+    label = "::<constant:Integer>#+";
     color = blue;
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
@@ -11,8 +11,8 @@ subgraph "cluster_::Integer#+" {
     bb24_1 -> bb24_1;
 }
 
-subgraph "cluster_::Examples#i_like_ifs" {
-    label = "::Examples#i_like_ifs";
+subgraph "cluster_::<constant:Examples>#i_like_ifs" {
+    label = "::<constant:Examples>#i_like_ifs";
     color = blue;
     bb27_0 [shape = invhouse];
     bb27_1 [shape = parallelogram];
@@ -29,8 +29,8 @@ subgraph "cluster_::Examples#i_like_ifs" {
     bb27_3 -> bb27_1;
 }
 
-subgraph "cluster_::Examples#i_like_exps" {
-    label = "::Examples#i_like_exps";
+subgraph "cluster_::<constant:Examples>#i_like_exps" {
+    label = "::<constant:Examples>#i_like_exps";
     color = blue;
     bb28_0 [shape = invhouse];
     bb28_1 [shape = parallelogram];
@@ -49,8 +49,8 @@ subgraph "cluster_::Examples#i_like_exps" {
     bb28_4 -> bb28_1;
 }
 
-subgraph "cluster_::Examples#return_in_one_branch1" {
-    label = "::Examples#return_in_one_branch1";
+subgraph "cluster_::<constant:Examples>#return_in_one_branch1" {
+    label = "::<constant:Examples>#return_in_one_branch1";
     color = blue;
     bb29_0 [shape = invhouse];
     bb29_1 [shape = parallelogram];
@@ -67,8 +67,8 @@ subgraph "cluster_::Examples#return_in_one_branch1" {
     bb29_3 -> bb29_1;
 }
 
-subgraph "cluster_::Examples#return_in_one_branch2" {
-    label = "::Examples#return_in_one_branch2";
+subgraph "cluster_::<constant:Examples>#return_in_one_branch2" {
+    label = "::<constant:Examples>#return_in_one_branch2";
     color = blue;
     bb30_0 [shape = invhouse];
     bb30_1 [shape = parallelogram];
@@ -87,8 +87,8 @@ subgraph "cluster_::Examples#return_in_one_branch2" {
     bb30_4 -> bb30_1;
 }
 
-subgraph "cluster_::Examples#variables" {
-    label = "::Examples#variables";
+subgraph "cluster_::<constant:Examples>#variables" {
+    label = "::<constant:Examples>#variables";
     color = blue;
     bb31_0 [shape = invhouse];
     bb31_1 [shape = parallelogram];
@@ -115,8 +115,8 @@ subgraph "cluster_::Examples#variables" {
     bb31_7 -> bb31_1;
 }
 
-subgraph "cluster_::Examples#variables_and_loop" {
-    label = "::Examples#variables_and_loop";
+subgraph "cluster_::<constant:Examples>#variables_and_loop" {
+    label = "::<constant:Examples>#variables_and_loop";
     color = blue;
     bb32_0 [shape = invhouse];
     bb32_1 [shape = parallelogram];
@@ -151,8 +151,8 @@ subgraph "cluster_::Examples#variables_and_loop" {
     bb32_10 -> bb32_5;
 }
 
-subgraph "cluster_::Examples#variables_loop_if" {
-    label = "::Examples#variables_loop_if";
+subgraph "cluster_::<constant:Examples>#variables_loop_if" {
+    label = "::<constant:Examples>#variables_loop_if";
     color = blue;
     bb33_0 [shape = invhouse];
     bb33_1 [shape = parallelogram];
@@ -179,8 +179,8 @@ subgraph "cluster_::Examples#variables_loop_if" {
     bb33_7 -> bb33_2;
 }
 
-subgraph "cluster_::Examples#take_arguments" {
-    label = "::Examples#take_arguments";
+subgraph "cluster_::<constant:Examples>#take_arguments" {
+    label = "::<constant:Examples>#take_arguments";
     color = blue;
     bb34_0 [shape = invhouse];
     bb34_1 [shape = parallelogram];

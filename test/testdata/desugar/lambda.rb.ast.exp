@@ -1,4 +1,4 @@
-def test_lambda<<todo sym>>()
-  self(<todo sym>).lambda() do |x|
+def test_lambda<<constant:<todo sym>>>()
+  self(<constant:<todo sym>>).lambda() do |x|
     x.*(x)
   end

@@ -296,7 +296,7 @@ Begin {
     Defined {
       value = Const {
         scope = NULL
-        name = X
+        name = <constant:X>
       }
     }
     ZSuper {
@@ -451,7 +451,7 @@ Begin {
                 elts = [
                   Const {
                     scope = NULL
-                    name = E
+                    name = <constant:E>
                   }
                 ]
               }

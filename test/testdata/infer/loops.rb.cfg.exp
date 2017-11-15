@@ -1,6 +1,6 @@
 digraph "loops.rb"{
-subgraph "cluster_::HasLoops#variable_only_inside_loop" {
-    label = "::HasLoops#variable_only_inside_loop";
+subgraph "cluster_::<constant:HasLoops>#variable_only_inside_loop" {
+    label = "::<constant:HasLoops>#variable_only_inside_loop";
     color = blue;
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
@@ -19,8 +19,8 @@ subgraph "cluster_::HasLoops#variable_only_inside_loop" {
     bb24_4 -> bb24_1;
 }
 
-subgraph "cluster_::HasLoops#incorrect_assignment" {
-    label = "::HasLoops#incorrect_assignment";
+subgraph "cluster_::<constant:HasLoops>#incorrect_assignment" {
+    label = "::<constant:HasLoops>#incorrect_assignment";
     color = blue;
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];
@@ -39,8 +39,8 @@ subgraph "cluster_::HasLoops#incorrect_assignment" {
     bb25_4 -> bb25_1;
 }
 
-subgraph "cluster_::HasLoops#correct_assignment" {
-    label = "::HasLoops#correct_assignment";
+subgraph "cluster_::<constant:HasLoops>#correct_assignment" {
+    label = "::<constant:HasLoops>#correct_assignment";
     color = blue;
     bb26_0 [shape = invhouse];
     bb26_1 [shape = parallelogram];

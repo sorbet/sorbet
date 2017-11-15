@@ -5,28 +5,28 @@ begin
   $gv = 1
   begin
     assignTmp$2 = [nil, nil]
-    self(<todo sym>).x().var=(assignTmp$2.[](0))
+    self(<constant:<todo sym>>).x().var=(assignTmp$2.[](0))
     y = assignTmp$2.[](1)
     assignTmp$2
   end
   begin
-    assignTmp$3 = self(<todo sym>).zaaaz()
+    assignTmp$3 = self(<constant:<todo sym>>).zaaaz()
     baaaar = assignTmp$3.[](0)
     naaar = assignTmp$3.[](1)
     assignTmp$3
   end
-  xaaaaz = [self(<todo sym>).yayayaya(), self(<todo sym>).tutututu()]
+  xaaaaz = [self(<constant:<todo sym>>).yayayaya(), self(<constant:<todo sym>>).tutututu()]
   <emptyTree>
   begin
     nil
   end
   begin
-    self(<todo sym>).a()
-    self(<todo sym>).b()
+    self(<constant:<todo sym>>).a()
+    self(<constant:<todo sym>>).b()
   end
-  def foo<<todo sym>>(&x)
+  def foo<<constant:<todo sym>>>(&x)
     <emptyTree>
-  self(<todo sym>).lambda() do ||
+  self(<constant:<todo sym>>).lambda() do ||
     <emptyTree>
   end
   <Not Supported (Case)>
@@ -34,7 +34,7 @@ begin
   1.+(<Not Supported (Complex)>)
   <Not Supported (Float)>
   <Not Supported (Complex)>
-  def self.classmeth<<todo sym>>()
+  def self.classmeth<<constant:<todo sym>>>()
     <emptyTree>
   <Not Supported (SClass)>
   begin
@@ -57,8 +57,8 @@ begin
   next(1)
   next([1, 2])
   <Not Supported (Defined)>
-  self(<todo sym>).super(ZSuperArgs)
-  def foo<<todo sym>>(x:, y: = 1, *z:)
+  self(<constant:<todo sym>>).super(ZSuperArgs)
+  def foo<<constant:<todo sym>>>(x:, y: = 1, *z:)
     <emptyTree>
   x
   <Not Supported (LineLiteral)>
@@ -81,7 +81,7 @@ begin
     assignTmp$5
   end
   <Not Supported (NthRef)>
-  def foo<<todo sym>>(x = 1, *y)
+  def foo<<constant:<todo sym>>>(x = 1, *y)
     <emptyTree>
   {x => y, <Not Supported (DSymbol)> => 1}
   <Not Supported (Preexe)>
@@ -107,14 +107,14 @@ begin
   ["a", "b"]
   ["a", "b"]
   <Not Supported (XString)>
-  self(<todo sym>).proc() do |x|
+  self(<constant:<todo sym>>).proc() do |x|
     <emptyTree>
   end
-  break(self(<todo sym>).foo(1) do ||
+  break(self(<constant:<todo sym>>).foo(1) do ||
       <emptyTree>
     end)
-  def foo<<todo sym>>(**$0)
+  def foo<<constant:<todo sym>>>(**$0)
     <emptyTree>
-  def foo<<todo sym>>(***$1:)
+  def foo<<constant:<todo sym>>>(***$1:)
     <emptyTree>
 end

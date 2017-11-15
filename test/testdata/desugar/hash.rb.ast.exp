@@ -1,12 +1,12 @@
 begin
   {}
   {:a => "a"}
-  self(<todo sym>).x()
-  self(<todo sym>).x()
-  {:a => "a"}.merge(self(<todo sym>).x())
-  {:a => "a"}.merge(self(<todo sym>).x())
-  self(<todo sym>).x().merge({:a => "a"})
-  self(<todo sym>).x().merge({:a => "a"})
-  {:a => "a"}.merge(self(<todo sym>).x()).merge(self(<todo sym>).y()).merge({:b => "b", :c => "c"}).merge(self(<todo sym>).y()).merge({:d => "d"})
-  {:a => "a"}.merge(self(<todo sym>).x()).merge(self(<todo sym>).y()).merge({:b => "b", :c => "c"}).merge(self(<todo sym>).y()).merge({:d => "d"})
+  self(<constant:<todo sym>>).x()
+  self(<constant:<todo sym>>).x()
+  {:a => "a"}.merge(self(<constant:<todo sym>>).x())
+  {:a => "a"}.merge(self(<constant:<todo sym>>).x())
+  self(<constant:<todo sym>>).x().merge({:a => "a"})
+  self(<constant:<todo sym>>).x().merge({:a => "a"})
+  {:a => "a"}.merge(self(<constant:<todo sym>>).x()).merge(self(<constant:<todo sym>>).y()).merge({:b => "b", :c => "c"}).merge(self(<constant:<todo sym>>).y()).merge({:d => "d"})
+  {:a => "a"}.merge(self(<constant:<todo sym>>).x()).merge(self(<constant:<todo sym>>).y()).merge({:b => "b", :c => "c"}).merge(self(<constant:<todo sym>>).y()).merge({:d => "d"})
 end

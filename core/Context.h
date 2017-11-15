@@ -51,6 +51,9 @@ public:
 
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num = 0);
 
+    NameRef enterNameConstant(NameRef original);
+    NameRef enterNameConstant(UTF8Desc original);
+
     FileRef enterFile(UTF8Desc path, UTF8Desc source);
 
     int indexClassOrJar(const char *name);

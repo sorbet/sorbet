@@ -1,6 +1,6 @@
 digraph "gerald.rb"{
-subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize" {
-    label = "::Opus::CIBot::Gerald::MatchTimeout#initialize";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize";
     color = blue;
     bb28_0 [shape = invhouse];
     bb28_1 [shape = parallelogram];
@@ -11,13 +11,13 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize" {
     bb28_1 -> bb28_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Matcher#initialize" {
-    label = "::Opus::CIBot::Gerald::Matcher#initialize";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize";
     color = blue;
     bb34_0 [shape = invhouse];
     bb34_1 [shape = parallelogram];
 
-    bb34_0 [label = "(invalid_rules)\nuntyped$7 = alias untyped : untyped\n@rules$12 = alias @rules : untyped\nstatTmp$8 = NotSupported() : untyped\nstatTmp$5 = untyped$7.query_by(statTmp$8) : untyped\nstatTmp$9 = NotSupported() : untyped\nstatTmp$4 = statTmp$5.load_all(statTmp$9) : untyped\nstatTmp$10 = NotSupported() : untyped\nassignTmp$0 = statTmp$4.partition(statTmp$10) : untyped\nstatTmp$14 = 0 : Integer(0)\n@rules$12 = assignTmp$0.[](statTmp$14) : untyped\nstatTmp$17 = 1 : Integer(1)\ninvalid_rules = assignTmp$0.[](statTmp$17) : untyped\nstatTmp$19 = invalid_rules.empty?() : untyped\nifTmp$18 = statTmp$19.!() : untyped\nifTmp$18"];
+    bb34_0 [label = "(invalid_rules)\n<constant:untyped>$7 = alias <constant:untyped> : untyped\n@rules$12 = alias @rules : untyped\nstatTmp$8 = NotSupported() : untyped\nstatTmp$5 = <constant:untyped>$7.query_by(statTmp$8) : untyped\nstatTmp$9 = NotSupported() : untyped\nstatTmp$4 = statTmp$5.load_all(statTmp$9) : untyped\nstatTmp$10 = NotSupported() : untyped\nassignTmp$0 = statTmp$4.partition(statTmp$10) : untyped\nstatTmp$14 = 0 : Integer(0)\n@rules$12 = assignTmp$0.[](statTmp$14) : untyped\nstatTmp$17 = 1 : Integer(1)\ninvalid_rules = assignTmp$0.[](statTmp$17) : untyped\nstatTmp$19 = invalid_rules.empty?() : untyped\nifTmp$18 = statTmp$19.!() : untyped\nifTmp$18"];
     bb34_0 -> bb34_2;
     bb34_0 -> bb34_3;
 
@@ -31,13 +31,13 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#initialize" {
     bb34_4 -> bb34_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Matcher#match" {
-    label = "::Opus::CIBot::Gerald::Matcher#match";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match";
     color = blue;
     bb35_0 [shape = invhouse];
     bb35_1 [shape = parallelogram];
 
-    bb35_0 [label = "(match_context, MatchTimeBudget$26, @rules$28)\nMAX_AFFECTED_FILES$9 = alias MAX_AFFECTED_FILES : untyped\nMatchTimeBudget$26 = alias MatchTimeBudget : <singleton class:MatchTimeBudget>\n@rules$28 = alias @rules : untyped\n<self>$1 = self : Matcher\nmatch_context = load_arg(<self>$1#match, 0) : untyped\nstatTmp$6 = match_context.diff() : untyped\nstatTmp$5 = statTmp$6.affected_files() : untyped\nstatTmp$4 = statTmp$5.count() : untyped\nifTmp$3 = statTmp$4.>(MAX_AFFECTED_FILES$9) : untyped\nifTmp$3"];
+    bb35_0 [label = "(match_context, <constant:MatchTimeBudget>$26, @rules$28)\n<constant:MAX_AFFECTED_FILES>$9 = alias <constant:MAX_AFFECTED_FILES> : untyped\n<constant:MatchTimeBudget>$26 = alias <constant:MatchTimeBudget> : <class:MatchTimeBudget>\n@rules$28 = alias @rules : untyped\n<self>$1 = self : Matcher\nmatch_context = load_arg(<self>$1#match, 0) : untyped\nstatTmp$6 = match_context.diff() : untyped\nstatTmp$5 = statTmp$6.affected_files() : untyped\nstatTmp$4 = statTmp$5.count() : untyped\nifTmp$3 = statTmp$4.>(<constant:MAX_AFFECTED_FILES>$9) : untyped\nifTmp$3"];
     bb35_0 -> bb35_2;
     bb35_0 -> bb35_3;
 
@@ -45,7 +45,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#match" {
     bb35_1 -> bb35_1;
     bb35_2 [label = "(match_context)\nstatTmp$12 = self : Matcher\nstatTmp$11 = statTmp$12.log() : untyped\nstatTmp$16 = Gerald skipping large PR with  : String(\"Gerald skipping large PR with \")\nstatTmp$20 = match_context.diff() : untyped\nstatTmp$19 = statTmp$20.affected_files() : untyped\nstatTmp$18 = statTmp$19.count() : untyped\nstatTmp$17 = statTmp$18.to_s() : untyped\nstatTmp$15 = statTmp$16.concat(statTmp$17) : untyped\nstatTmp$22 =  affected files : String(\" affected files\")\nstatTmp$14 = statTmp$15.concat(statTmp$22) : untyped\nstatTmp$13 = statTmp$14.to_s() : untyped\nstatTmp$10 = statTmp$11.warn(statTmp$13) : untyped\nreturnTmp$23 = NotSupported() : untyped\nstatTmp$2 = return returnTmp$23 : <bottom>\n<unconditional>"];
     bb35_2 -> bb35_1;
-    bb35_3 [label = "(match_context, budget, statTmp$27, MatchTimeBudget$26, @rules$28)\nstatTmp$2 = NotSupported() : untyped\nbudget = MatchTimeBudget$26.new() : MatchTimeBudget\nstatTmp$27 = @rules$28 : untyped\n<unconditional>"];
+    bb35_3 [label = "(match_context, budget, statTmp$27, <constant:MatchTimeBudget>$26, @rules$28)\nstatTmp$2 = NotSupported() : untyped\nbudget = <constant:MatchTimeBudget>$26.new() : MatchTimeBudget\nstatTmp$27 = @rules$28 : untyped\n<unconditional>"];
     bb35_3 -> bb35_4;
     bb35_4 [label = "(match_context, budget, <block-nested: r>, statTmp$27, @rules$28)\nouterLoops: 1\n<block-call>"];
     bb35_4 -> bb35_6;
@@ -65,8 +65,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#match" {
     bb35_9 -> bb35_7;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#initialize" {
-    label = "::Opus::CIBot::Gerald::MatchContext#initialize";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize";
     color = blue;
     bb42_0 [shape = invhouse];
     bb42_1 [shape = parallelogram];
@@ -77,8 +77,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#initialize" {
     bb42_1 -> bb42_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?" {
-    label = "::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?";
     color = blue;
     bb51_0 [shape = invhouse];
     bb51_1 [shape = parallelogram];
@@ -89,31 +89,31 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?" {
     bb51_1 -> bb51_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#initialize" {
-    label = "::Opus::CIBot::Gerald::MatchTimeBudget#initialize";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize";
     color = blue;
     bb55_0 [shape = invhouse];
     bb55_1 [shape = parallelogram];
 
-    bb55_0 [label = "()\n@start$2 = alias @start : untyped\nuntyped$4 = alias untyped : untyped\n@start$2 = untyped$4.now() : untyped\n<ret>$5 = return @start$2 : <bottom>\n<unconditional>"];
+    bb55_0 [label = "()\n@start$2 = alias @start : untyped\n<constant:untyped>$4 = alias <constant:untyped> : untyped\n@start$2 = <constant:untyped>$4.now() : untyped\n<ret>$5 = return @start$2 : <bottom>\n<unconditional>"];
     bb55_0 -> bb55_1;
     bb55_1 [label = "()\n<unconditional>"];
     bb55_1 -> bb55_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#check!" {
-    label = "::Opus::CIBot::Gerald::MatchTimeBudget#check!";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!";
     color = blue;
     bb56_0 [shape = invhouse];
     bb56_1 [shape = parallelogram];
 
-    bb56_0 [label = "(TOTAL_TIME_MS$13, MatchTimeout$17)\nuntyped$6 = alias untyped : untyped\n@start$8 = alias @start : untyped\nTOTAL_TIME_MS$13 = alias TOTAL_TIME_MS : untyped\nMatchTimeout$17 = alias MatchTimeout : <singleton class:MatchTimeout>\nstatTmp$4 = untyped$6.now() : untyped\nstatTmp$3 = statTmp$4.-(@start$8) : untyped\nstatTmp$9 = 1000 : Integer(1000)\ndur_ms = statTmp$3.*(statTmp$9) : untyped\nifTmp$10 = dur_ms.>(TOTAL_TIME_MS$13) : untyped\nifTmp$10"];
+    bb56_0 [label = "(<constant:TOTAL_TIME_MS>$13, <constant:MatchTimeout>$17)\n<constant:untyped>$6 = alias <constant:untyped> : untyped\n@start$8 = alias @start : untyped\n<constant:TOTAL_TIME_MS>$13 = alias <constant:TOTAL_TIME_MS> : untyped\n<constant:MatchTimeout>$17 = alias <constant:MatchTimeout> : <class:MatchTimeout>\nstatTmp$4 = <constant:untyped>$6.now() : untyped\nstatTmp$3 = statTmp$4.-(@start$8) : untyped\nstatTmp$9 = 1000 : Integer(1000)\ndur_ms = statTmp$3.*(statTmp$9) : untyped\nifTmp$10 = dur_ms.>(<constant:TOTAL_TIME_MS>$13) : untyped\nifTmp$10"];
     bb56_0 -> bb56_2;
     bb56_0 -> bb56_3;
 
     bb56_1 [label = "()\n<unconditional>"];
     bb56_1 -> bb56_1;
-    bb56_2 [label = "(<ret>$25, TOTAL_TIME_MS$13, MatchTimeout$17)\nstatTmp$14 = self : MatchTimeBudget\nstatTmp$21 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")\nstatTmp$22 = TOTAL_TIME_MS$13.to_s() : untyped\nstatTmp$20 = statTmp$21.concat(statTmp$22) : untyped\nstatTmp$24 = ms : String(\"ms\")\nstatTmp$19 = statTmp$20.concat(statTmp$24) : untyped\nstatTmp$18 = statTmp$19.to_s() : untyped\nstatTmp$15 = MatchTimeout$17.new(statTmp$18) : MatchTimeout\n<ret>$25 = statTmp$14.raise(statTmp$15) : untyped\n<unconditional>"];
+    bb56_2 [label = "(<ret>$25, <constant:TOTAL_TIME_MS>$13, <constant:MatchTimeout>$17)\nstatTmp$14 = self : MatchTimeBudget\nstatTmp$21 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")\nstatTmp$22 = <constant:TOTAL_TIME_MS>$13.to_s() : untyped\nstatTmp$20 = statTmp$21.concat(statTmp$22) : untyped\nstatTmp$24 = ms : String(\"ms\")\nstatTmp$19 = statTmp$20.concat(statTmp$24) : untyped\nstatTmp$18 = statTmp$19.to_s() : untyped\nstatTmp$15 = <constant:MatchTimeout>$17.new(statTmp$18) : MatchTimeout\n<ret>$25 = statTmp$14.raise(statTmp$15) : untyped\n<unconditional>"];
     bb56_2 -> bb56_4;
     bb56_3 [label = "(<ret>$25)\n<ret>$25 = NotSupported() : untyped\n<unconditional>"];
     bb56_3 -> bb56_4;
@@ -121,19 +121,19 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#check!" {
     bb56_4 -> bb56_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#time_rule" {
-    label = "::Opus::CIBot::Gerald::MatchTimeBudget#time_rule";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule";
     color = blue;
     bb57_0 [shape = invhouse];
     bb57_1 [shape = parallelogram];
 
-    bb57_0 [label = "(dur_ms, rule, res, PER_RULE_MS$16, MatchTimeout$20)\nuntyped$4 = alias untyped : untyped\nPER_RULE_MS$16 = alias PER_RULE_MS : untyped\nMatchTimeout$20 = alias MatchTimeout : <singleton class:MatchTimeout>\n<self>$1 = self : MatchTimeBudget\nrule = load_arg(<self>$1#time_rule, 0) : untyped\nrule_start = untyped$4.now() : untyped\nres = NotSupported() : untyped\nstatTmp$8 = untyped$4.now() : untyped\nstatTmp$7 = statTmp$8.-(rule_start) : untyped\nstatTmp$11 = 1000 : Integer(1000)\ndur_ms = statTmp$7.*(statTmp$11) : untyped\nifTmp$13 = dur_ms.>(PER_RULE_MS$16) : untyped\nifTmp$13"];
+    bb57_0 [label = "(dur_ms, rule, res, <constant:PER_RULE_MS>$16, <constant:MatchTimeout>$20)\n<constant:untyped>$4 = alias <constant:untyped> : untyped\n<constant:PER_RULE_MS>$16 = alias <constant:PER_RULE_MS> : untyped\n<constant:MatchTimeout>$20 = alias <constant:MatchTimeout> : <class:MatchTimeout>\n<self>$1 = self : MatchTimeBudget\nrule = load_arg(<self>$1#time_rule, 0) : untyped\nrule_start = <constant:untyped>$4.now() : untyped\nres = NotSupported() : untyped\nstatTmp$8 = <constant:untyped>$4.now() : untyped\nstatTmp$7 = statTmp$8.-(rule_start) : untyped\nstatTmp$11 = 1000 : Integer(1000)\ndur_ms = statTmp$7.*(statTmp$11) : untyped\nifTmp$13 = dur_ms.>(<constant:PER_RULE_MS>$16) : untyped\nifTmp$13"];
     bb57_0 -> bb57_2;
     bb57_0 -> bb57_3;
 
     bb57_1 [label = "()\n<unconditional>"];
     bb57_1 -> bb57_1;
-    bb57_2 [label = "(dur_ms, rule, res, PER_RULE_MS$16, MatchTimeout$20)\nstatTmp$17 = self : MatchTimeBudget\nstatTmp$28 = Gerald rule ' : String(\"Gerald rule '\")\nstatTmp$30 = rule.token() : untyped\nstatTmp$29 = statTmp$30.to_s() : untyped\nstatTmp$27 = statTmp$28.concat(statTmp$29) : untyped\nstatTmp$32 = ' exceeded per-rule time budget actual= : String(\"' exceeded per-rule time budget actual=\")\nstatTmp$26 = statTmp$27.concat(statTmp$32) : untyped\nstatTmp$34 = dur_ms.to_i() : untyped\nstatTmp$33 = statTmp$34.to_s() : untyped\nstatTmp$25 = statTmp$26.concat(statTmp$33) : untyped\nstatTmp$36 = ms budget= : String(\"ms budget=\")\nstatTmp$24 = statTmp$25.concat(statTmp$36) : untyped\nstatTmp$37 = PER_RULE_MS$16.to_s() : untyped\nstatTmp$23 = statTmp$24.concat(statTmp$37) : untyped\nstatTmp$39 = ms : String(\"ms\")\nstatTmp$22 = statTmp$23.concat(statTmp$39) : untyped\nstatTmp$21 = statTmp$22.to_s() : untyped\nstatTmp$40 = NotSupported() : untyped\nstatTmp$18 = MatchTimeout$20.new(statTmp$21, statTmp$40) : MatchTimeout\nstatTmp$12 = statTmp$17.raise(statTmp$18) : untyped\n<unconditional>"];
+    bb57_2 [label = "(dur_ms, rule, res, <constant:PER_RULE_MS>$16, <constant:MatchTimeout>$20)\nstatTmp$17 = self : MatchTimeBudget\nstatTmp$28 = Gerald rule ' : String(\"Gerald rule '\")\nstatTmp$30 = rule.token() : untyped\nstatTmp$29 = statTmp$30.to_s() : untyped\nstatTmp$27 = statTmp$28.concat(statTmp$29) : untyped\nstatTmp$32 = ' exceeded per-rule time budget actual= : String(\"' exceeded per-rule time budget actual=\")\nstatTmp$26 = statTmp$27.concat(statTmp$32) : untyped\nstatTmp$34 = dur_ms.to_i() : untyped\nstatTmp$33 = statTmp$34.to_s() : untyped\nstatTmp$25 = statTmp$26.concat(statTmp$33) : untyped\nstatTmp$36 = ms budget= : String(\"ms budget=\")\nstatTmp$24 = statTmp$25.concat(statTmp$36) : untyped\nstatTmp$37 = <constant:PER_RULE_MS>$16.to_s() : untyped\nstatTmp$23 = statTmp$24.concat(statTmp$37) : untyped\nstatTmp$39 = ms : String(\"ms\")\nstatTmp$22 = statTmp$23.concat(statTmp$39) : untyped\nstatTmp$21 = statTmp$22.to_s() : untyped\nstatTmp$40 = NotSupported() : untyped\nstatTmp$18 = <constant:MatchTimeout>$20.new(statTmp$21, statTmp$40) : MatchTimeout\nstatTmp$12 = statTmp$17.raise(statTmp$18) : untyped\n<unconditional>"];
     bb57_2 -> bb57_4;
     bb57_3 [label = "(res)\nstatTmp$12 = NotSupported() : untyped\n<unconditional>"];
     bb57_3 -> bb57_4;
@@ -141,8 +141,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#time_rule" {
     bb57_4 -> bb57_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#initialize" {
-    label = "::Opus::CIBot::Gerald::Diff#initialize";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize";
     color = blue;
     bb60_0 [shape = invhouse];
     bb60_1 [shape = parallelogram];
@@ -153,8 +153,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#initialize" {
     bb60_1 -> bb60_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#affected_files" {
-    label = "::Opus::CIBot::Gerald::Diff#affected_files";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files";
     color = blue;
     bb62_0 [shape = invhouse];
     bb62_1 [shape = parallelogram];
@@ -165,8 +165,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#affected_files" {
     bb62_1 -> bb62_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#added_files" {
-    label = "::Opus::CIBot::Gerald::Diff#added_files";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files";
     color = blue;
     bb63_0 [shape = invhouse];
     bb63_1 [shape = parallelogram];
@@ -193,8 +193,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#added_files" {
     bb63_7 -> bb63_5;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#deleted_files" {
-    label = "::Opus::CIBot::Gerald::Diff#deleted_files";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files";
     color = blue;
     bb68_0 [shape = invhouse];
     bb68_1 [shape = parallelogram];
@@ -221,8 +221,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#deleted_files" {
     bb68_7 -> bb68_5;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_files" {
-    label = "::Opus::CIBot::Gerald::Diff#changed_files";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files";
     color = blue;
     bb73_0 [shape = invhouse];
     bb73_1 [shape = parallelogram];
@@ -249,8 +249,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_files" {
     bb73_7 -> bb73_5;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#added_lines" {
-    label = "::Opus::CIBot::Gerald::Diff#added_lines";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines";
     color = blue;
     bb78_0 [shape = invhouse];
     bb78_1 [shape = parallelogram];
@@ -269,8 +269,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#added_lines" {
     bb78_4 -> bb78_2;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#removed_lines" {
-    label = "::Opus::CIBot::Gerald::Diff#removed_lines";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines";
     color = blue;
     bb81_0 [shape = invhouse];
     bb81_1 [shape = parallelogram];
@@ -289,8 +289,8 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#removed_lines" {
     bb81_4 -> bb81_2;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_lines" {
-    label = "::Opus::CIBot::Gerald::Diff#changed_lines";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines";
     color = blue;
     bb84_0 [shape = invhouse];
     bb84_1 [shape = parallelogram];
@@ -301,20 +301,20 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_lines" {
     bb84_1 -> bb84_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_openapi?" {
-    label = "::Opus::CIBot::Gerald::Diff#changed_openapi?";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?";
     color = blue;
     bb85_0 [shape = invhouse];
     bb85_1 [shape = parallelogram];
 
-    bb85_0 [label = "()\nuntyped$5 = alias untyped : untyped\nstatTmp$3 = self : Diff\nstatTmp$2 = statTmp$3.changed_files() : untyped\n<ret>$35 = statTmp$2.include?(untyped$5) : untyped\n<ret>$6 = return <ret>$35 : <bottom>\n<unconditional>"];
+    bb85_0 [label = "()\n<constant:untyped>$5 = alias <constant:untyped> : untyped\nstatTmp$3 = self : Diff\nstatTmp$2 = statTmp$3.changed_files() : untyped\n<ret>$35 = statTmp$2.include?(<constant:untyped>$5) : untyped\n<ret>$6 = return <ret>$35 : <bottom>\n<unconditional>"];
     bb85_0 -> bb85_1;
     bb85_1 [label = "()\n<unconditional>"];
     bb85_1 -> bb85_1;
 }
 
-subgraph "cluster_::Opus::CIBot::Gerald::Diff#parse" {
-    label = "::Opus::CIBot::Gerald::Diff#parse";
+subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse" {
+    label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse";
     color = blue;
     bb87_0 [shape = invhouse];
     bb87_1 [shape = parallelogram];

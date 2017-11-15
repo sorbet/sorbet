@@ -10,9 +10,9 @@
 <title>next_in_while.rb</title>
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-625.3991 747,-625.3991 747,4 -4,4"/>
 <g id="clust1" class="cluster">
-<title>cluster_::Object#foo</title>
+<title>cluster_::&lt;constant:Object&gt;#foo</title>
 <polygon fill="none" stroke="#0000ff" points="8,-8 8,-613.3991 735,-613.3991 735,-8 8,-8"/>
-<text text-anchor="middle" x="371.5" y="-598.1991" font-family="Times,serif" font-size="14.00" fill="#000000">::Object#foo</text>
+<text text-anchor="middle" x="371.5" y="-598.1991" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#foo</text>
 </g>
 <!-- bb23_0 -->
 <g id="node1" class="node">
@@ -98,4 +98,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: f53830a0d6fa26bc710749150b4b4bbded01d302f03d2ecedea6fcf6d455f25f -->
+<!-- ruby-types:sha256: 27a1bdbf39c5c686d2c136ade5f3c9702610309d8407faff28ff50a9e0ec095e -->

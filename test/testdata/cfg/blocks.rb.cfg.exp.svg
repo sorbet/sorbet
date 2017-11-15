@@ -10,9 +10,9 @@
 <title>blocks.rb</title>
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-585.4301 1118,-585.4301 1118,4 -4,4"/>
 <g id="clust1" class="cluster">
-<title>cluster_::BlockTest#block_pass</title>
+<title>cluster_::&lt;constant:BlockTest&gt;#block_pass</title>
 <polygon fill="none" stroke="#0000ff" points="8,-8 8,-573.4301 1106,-573.4301 1106,-8 8,-8"/>
-<text text-anchor="middle" x="557" y="-558.2301" font-family="Times,serif" font-size="14.00" fill="#000000">::BlockTest#block_pass</text>
+<text text-anchor="middle" x="557" y="-558.2301" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:BlockTest&gt;#block_pass</text>
 </g>
 <!-- bb24_0 -->
 <g id="node1" class="node">
@@ -96,4 +96,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 87d176add995ceaa9437db0d195b3df61e12933f2fbbff631916177997669494 -->
+<!-- ruby-types:sha256: 9b2dcfa4b33ae6ab90861ce5188721631f1648450b38d480205b64718afb6669 -->

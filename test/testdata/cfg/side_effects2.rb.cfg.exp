@@ -1,6 +1,6 @@
 digraph "side_effects2.rb"{
-subgraph "cluster_::Side#foo" {
-    label = "::Side#foo";
+subgraph "cluster_::<constant:Side>#foo" {
+    label = "::<constant:Side>#foo";
     color = blue;
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
@@ -19,8 +19,8 @@ subgraph "cluster_::Side#foo" {
     bb24_4 -> bb24_1;
 }
 
-subgraph "cluster_::Side#bar" {
-    label = "::Side#bar";
+subgraph "cluster_::<constant:Side>#bar" {
+    label = "::<constant:Side>#bar";
     color = blue;
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];

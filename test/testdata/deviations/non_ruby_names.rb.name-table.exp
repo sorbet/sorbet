@@ -1,6 +1,6 @@
-class A ()
-  class B ()
-    class C (Object)
-class B ()
-class Opus ()
+class <constant:A> ()
+  class <constant:B> ()
+    class <constant:C> (<constant:Object>)
+class <constant:B> ()
+class <constant:Opus> ()
 

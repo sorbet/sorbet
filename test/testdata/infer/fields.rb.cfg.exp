@@ -1,6 +1,6 @@
 digraph "fields.rb"{
-subgraph "cluster_::Foo#foo" {
-    label = "::Foo#foo";
+subgraph "cluster_::<constant:Foo>#foo" {
+    label = "::<constant:Foo>#foo";
     color = blue;
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];

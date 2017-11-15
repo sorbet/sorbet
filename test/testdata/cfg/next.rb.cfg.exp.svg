@@ -10,9 +10,9 @@
 <title>next.rb</title>
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-651.6201 870,-651.6201 870,4 -4,4"/>
 <g id="clust1" class="cluster">
-<title>cluster_::Object#foo</title>
+<title>cluster_::&lt;constant:Object&gt;#foo</title>
 <polygon fill="none" stroke="#0000ff" points="8,-8 8,-639.6201 858,-639.6201 858,-8 8,-8"/>
-<text text-anchor="middle" x="433" y="-624.4201" font-family="Times,serif" font-size="14.00" fill="#000000">::Object#foo</text>
+<text text-anchor="middle" x="433" y="-624.4201" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#foo</text>
 </g>
 <!-- bb23_0 -->
 <g id="node1" class="node">
@@ -99,4 +99,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: f283b3d23b832e104c8d20b3b7f276e7393f47ef956897c5b73bd8eb410d88f3 -->
+<!-- ruby-types:sha256: 3ec4481dbce98dff52269c1ba0b56bd4bdcde3a610e1afcdcb3f7c0bbd8ac7ef -->

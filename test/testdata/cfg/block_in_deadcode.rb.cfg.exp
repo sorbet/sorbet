@@ -1,6 +1,6 @@
 digraph "block_in_deadcode.rb"{
-subgraph "cluster_::Object#foo" {
-    label = "::Object#foo";
+subgraph "cluster_::<constant:Object>#foo" {
+    label = "::<constant:Object>#foo";
     color = blue;
     bb23_0 [shape = invhouse];
     bb23_1 [shape = parallelogram];

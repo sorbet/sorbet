@@ -12,6 +12,7 @@ class Name;
 enum NameKind : u1 {
     UTF8 = 1,
     UNIQUE = 2,
+    CONSTANT = 3,
 };
 
 CheckSize(NameKind, 1, 1);
@@ -24,6 +25,11 @@ inline int _NameKind2Id_UTF8(NameKind nm) {
 inline int _NameKind2Id_UNIQUE(NameKind nm) {
     DEBUG_ONLY(Error::check(nm == UNIQUE));
     return 2;
+}
+
+inline int _NameKind2Id_CONSTANT(NameKind nm) {
+    DEBUG_ONLY(Error::check(nm == CONSTANT));
+    return 3;
 }
 
 class NameRef final {
@@ -124,9 +130,13 @@ struct UniqueName final {
     u2 num;
 };
 
-CheckSize(UniqueName, 8, 4)
+CheckSize(UniqueName, 8, 4);
 
-    class Names final {
+struct ConstantName final {
+    NameRef original;
+};
+
+class Names final {
 public:
     static inline NameRef initialize() {
         return NameRef(1);
@@ -346,6 +356,7 @@ public:
         // itself using lower bits
         RawName raw;
         UniqueName unique;
+        ConstantName cnst;
     };
 
     Name() noexcept {};
