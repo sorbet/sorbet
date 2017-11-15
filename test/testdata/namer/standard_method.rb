@@ -8,7 +8,7 @@ class A
       b: T1,
       c: Opus::Types.nilable(T1),
       d: Opus::Types.any(T1, T2),
-      e: unsupported,
+      e: unsupported, # error: Unknown type syntax
     }, returns: T2)
   def f(a, b, c, d, e)
   end
