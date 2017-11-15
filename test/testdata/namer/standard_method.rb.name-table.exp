@@ -1,0 +1,27 @@
+class <singleton class:A> (Class)
+class A (Object)
+  method f (a, b, c, d, e) -> T2
+    argument a<> -> ArrayType {
+          0 = T1
+          0 = T2
+        }
+    argument b<> -> ArrayType {
+          0 = T1
+          0 = T2
+        }
+    argument c<> -> ArrayType {
+          0 = T1
+          0 = T2
+        }
+    argument d<> -> ArrayType {
+          0 = T1
+          0 = T2
+        }
+    argument e<> -> ArrayType {
+          0 = T1
+          0 = T2
+        }
+class Opus ()
+class T1 (Object)
+class T2 (Object)
+
