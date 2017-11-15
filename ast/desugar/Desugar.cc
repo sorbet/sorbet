@@ -119,10 +119,10 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     MethodDef::ARGS_store args;
     InsSeq::STATS_store destructures;
 
-    if (auto *oargs = dynamic_cast<parser::Args *>(argnode.get())) {
+    if (auto *oargs = parser::cast_node<parser::Args *>(argnode.get())) {
         args.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
-            if (parser::Mlhs *lhs = dynamic_cast<parser::Mlhs *>(arg.get())) {
+            if (parser::Mlhs *lhs = parser::cast_node<parser::Mlhs *>(arg.get())) {
                 core::NameRef temporary =
                     ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::destructureArg());
                 args.emplace_back(make_unique<UnresolvedIdent>(arg->loc, UnresolvedIdent::Local, temporary));
@@ -407,7 +407,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
         },
         [&](parser::Module *module) {
             ClassDef::RHS_store body;
-            if (auto *a = dynamic_cast<parser::Begin *>(module->body.get())) {
+            if (auto *a = parser::cast_node<parser::Begin *>(module->body.get())) {
                 body.reserve(a->stmts.size());
                 for (auto &stat : a->stmts) {
                     body.emplace_back(node2TreeImpl(ctx, stat));
@@ -423,7 +423,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
         },
         [&](parser::Class *claz) {
             ClassDef::RHS_store body;
-            if (auto *a = dynamic_cast<parser::Begin *>(claz->body.get())) {
+            if (auto *a = parser::cast_node<parser::Begin *>(claz->body.get())) {
                 body.reserve(a->stmts.size());
                 for (auto &stat : a->stmts) {
                     body.emplace_back(node2TreeImpl(ctx, stat));
@@ -489,7 +489,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             result.swap(res);
         },
         [&](parser::DefS *method) {
-            parser::Self *self = dynamic_cast<parser::Self *>(method->singleton.get());
+            parser::Self *self = parser::cast_node<parser::Self *>(method->singleton.get());
             if (self == nullptr) {
                 ctx.state.errors.error(method->loc, core::ErrorClass::InvalidSingletonDef,
                                        "`def EXPRESSION.method' is only supported for `def self.method'");
@@ -643,14 +643,14 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             unique_ptr<Expression> lastMerge;
 
             for (auto &pairAsExpression : hash->pairs) {
-                parser::Pair *pair = dynamic_cast<parser::Pair *>(pairAsExpression.get());
+                parser::Pair *pair = parser::cast_node<parser::Pair *>(pairAsExpression.get());
                 if (pair != nullptr) {
                     auto key = node2TreeImpl(ctx, pair->key);
                     auto value = node2TreeImpl(ctx, pair->value);
                     keys.emplace_back(move(key));
                     values.emplace_back(move(value));
                 } else {
-                    parser::Kwsplat *splat = dynamic_cast<parser::Kwsplat *>(pairAsExpression.get());
+                    parser::Kwsplat *splat = parser::cast_node<parser::Kwsplat *>(pairAsExpression.get());
                     Error::check(splat);
 
                     // Desguar
@@ -794,7 +794,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             result.swap(iff);
         },
         [&](parser::Masgn *masgn) {
-            parser::Mlhs *lhs = dynamic_cast<parser::Mlhs *>(masgn->lhs.get());
+            parser::Mlhs *lhs = parser::cast_node<parser::Mlhs *>(masgn->lhs.get());
             Error::check(lhs != nullptr);
             core::NameRef tempName =
                 ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp());
