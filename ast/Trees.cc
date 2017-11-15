@@ -94,7 +94,7 @@ Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression>
 Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store &args)
     : Expression(loc), recv(move(recv)), fun(move(fun)), args(move(args)) {}
 
-Super::Super(core::Loc loc, Send::ARGS_store &args) : Expression(loc), args(move(args)) {}
+ZSuperArgs::ZSuperArgs(core::Loc loc) : Expression(loc) {}
 
 NamedArg::NamedArg(core::Loc loc, core::NameRef name, unique_ptr<Expression> arg)
     : Expression(loc), name(name), arg(move(arg)) {}
@@ -631,21 +631,8 @@ string Send::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Super::showRaw(core::GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << nodeName() << "{" << endl;
-    printTabs(buf, tabs + 1);
-    buf << "args = [" << endl;
-    for (auto &a : args) {
-        printTabs(buf, tabs + 2);
-        buf << a->showRaw(gs, tabs + 2) << endl;
-    }
-    printTabs(buf, tabs + 1);
-    buf << "]" << endl;
-    printTabs(buf, tabs);
-    buf << "}";
-
-    return buf.str();
+string ZSuperArgs::showRaw(core::GlobalState &gs, int tabs) {
+    return nodeName() + "{ }";
 }
 
 string Hash::showRaw(core::GlobalState &gs, int tabs) {
@@ -693,11 +680,8 @@ string Array::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Super::toString(core::GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "super";
-    printArgs(gs, buf, this->args, tabs);
-    return buf.str();
+string ZSuperArgs::toString(core::GlobalState &gs, int tabs) {
+    return "ZSuperArgs";
 }
 
 string Hash::toString(core::GlobalState &gs, int tabs) {
@@ -848,8 +832,8 @@ string Send::nodeName() {
     return "Send";
 }
 
-string Super::nodeName() {
-    return "Super";
+string ZSuperArgs::nodeName() {
+    return "ZSuperArgs";
 }
 string NamedArg::nodeName() {
     return "NamedArg";
