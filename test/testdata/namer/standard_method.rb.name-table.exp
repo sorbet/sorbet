@@ -5,22 +5,10 @@ class A (Object)
           0 = T1
           0 = T2
         }
-    argument b<> -> ArrayType {
-          0 = T1
-          0 = T2
-        }
-    argument c<> -> ArrayType {
-          0 = T1
-          0 = T2
-        }
-    argument d<> -> ArrayType {
-          0 = T1
-          0 = T2
-        }
-    argument e<> -> ArrayType {
-          0 = T1
-          0 = T2
-        }
+    argument b<> -> T1
+    argument c<> -> T1 | NilClass
+    argument d<> -> T1 | T2
+    argument e<> -> untyped
 class Opus ()
 class T1 (Object)
 class T2 (Object)
