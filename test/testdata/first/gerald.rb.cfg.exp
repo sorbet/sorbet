@@ -23,11 +23,11 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#initialize" {
 
     bb34_1 [label = "()\n<unconditional>"];
     bb34_1 -> bb34_1;
-    bb34_2 [label = "(invalid_rules, <ret>$30)\nstatTmp$24 = NotSupported() : untyped\nstatTmp$22 = invalid_rules.map(statTmp$24) : untyped\nstatTmp$25 = , : String(\",\")\ninvalid_rule_ids = statTmp$22.join(statTmp$25) : untyped\nstatTmp$27 = self : Matcher\nstatTmp$26 = statTmp$27.log() : untyped\nstatTmp$29 = Gerald skipping invalid rules:  : String(\"Gerald skipping invalid rules: \")\nstatTmp$28 = statTmp$29.+(invalid_rule_ids) : untyped\n<ret>$30 = statTmp$26.warn(statTmp$28) : untyped\n<unconditional>"];
+    bb34_2 [label = "(invalid_rules, <ret>$19)\nstatTmp$24 = NotSupported() : untyped\nstatTmp$22 = invalid_rules.map(statTmp$24) : untyped\nstatTmp$25 = , : String(\",\")\ninvalid_rule_ids = statTmp$22.join(statTmp$25) : untyped\nstatTmp$27 = self : Matcher\nstatTmp$26 = statTmp$27.log() : untyped\nstatTmp$29 = Gerald skipping invalid rules:  : String(\"Gerald skipping invalid rules: \")\nstatTmp$28 = statTmp$29.+(invalid_rule_ids) : untyped\n<ret>$19 = statTmp$26.warn(statTmp$28) : untyped\n<unconditional>"];
     bb34_2 -> bb34_4;
-    bb34_3 [label = "(<ret>$30)\n<ret>$30 = NotSupported() : untyped\n<unconditional>"];
+    bb34_3 [label = "(<ret>$19)\n<ret>$19 = NotSupported() : untyped\n<unconditional>"];
     bb34_3 -> bb34_4;
-    bb34_4 [label = "(<ret>$30)\n<ret>$31 = return <ret>$30 : <bottom>\n<unconditional>"];
+    bb34_4 [label = "(<ret>$19)\n<ret>$31 = return <ret>$19 : <bottom>\n<unconditional>"];
     bb34_4 -> bb34_1;
 }
 
@@ -47,21 +47,21 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#match" {
     bb35_2 -> bb35_1;
     bb35_3 [label = "(match_context, budget, statTmp$27, MatchTimeBudget$26, @rules$28)\nstatTmp$2 = NotSupported() : untyped\nbudget = MatchTimeBudget$26.new() : MatchTimeBudget\nstatTmp$27 = @rules$28 : untyped\n<unconditional>"];
     bb35_3 -> bb35_4;
-    bb35_4 [label = "(match_context, budget, <block-nested: r$5>, statTmp$27, @rules$28)\nouterLoops: 1\n<block-call>"];
+    bb35_4 [label = "(match_context, budget, <block-nested: r>, statTmp$27, @rules$28)\nouterLoops: 1\n<block-call>"];
     bb35_4 -> bb35_6;
     bb35_4 -> bb35_5;
 
-    bb35_5 [label = "(@rules$28)\n<ret>$31 = @rules$28.select() : untyped\n<ret>$35 = return <ret>$31 : <bottom>\n<unconditional>"];
+    bb35_5 [label = "(@rules$28)\n<ret>$20 = @rules$28.select() : untyped\n<ret>$35 = return <ret>$20 : <bottom>\n<unconditional>"];
     bb35_5 -> bb35_1;
-    bb35_6 [label = "(match_context, budget, <block-nested: r$5>, statTmp$27, @rules$28)\nouterLoops: 1\n<block-nested: r$5> = load_arg(statTmp$27#select, 0) : untyped\n<unconditional>"];
+    bb35_6 [label = "(match_context, budget, <block-nested: r>, statTmp$27, @rules$28)\nouterLoops: 1\n<block-nested: r> = load_arg(statTmp$27#select, 0) : untyped\n<unconditional>"];
     bb35_6 -> bb35_7;
-    bb35_7 [label = "(match_context, budget, <block-nested: r$5>, statTmp$27, @rules$28)\nouterLoops: 2\n<block-call>"];
+    bb35_7 [label = "(match_context, budget, <block-nested: r>, statTmp$27, @rules$28)\nouterLoops: 2\n<block-call>"];
     bb35_7 -> bb35_9;
     bb35_7 -> bb35_8;
 
-    bb35_8 [label = "(match_context, budget, <block-nested: r$5>, statTmp$27, @rules$28)\nouterLoops: 1\n<blockret>$29 = budget.time_rule(<block-nested: r$5>) : untyped\n<unconditional>"];
+    bb35_8 [label = "(match_context, budget, <block-nested: r>, statTmp$27, @rules$28)\nouterLoops: 1\n<blockret>$29 = budget.time_rule(<block-nested: r>) : untyped\n<unconditional>"];
     bb35_8 -> bb35_4;
-    bb35_9 [label = "(match_context, budget, <block-nested: r$5>, statTmp$27, @rules$28)\nouterLoops: 2\n<blockret>$32 = <block-nested: r$5>.matches?(match_context) : untyped\n<unconditional>"];
+    bb35_9 [label = "(match_context, budget, <block-nested: r>, statTmp$27, @rules$28)\nouterLoops: 2\n<blockret>$32 = <block-nested: r>.matches?(match_context) : untyped\n<unconditional>"];
     bb35_9 -> bb35_7;
 }
 
@@ -83,7 +83,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?" {
     bb51_0 [shape = invhouse];
     bb51_1 [shape = parallelogram];
 
-    bb51_0 [label = "()\n@repo$4 = alias @repo : untyped\nstatTmp$5 = stripe-internal/ : String(\"stripe-internal/\")\nstatTmp$2 = @repo$4.start_with?(statTmp$5) : untyped\n<ret>$34 = statTmp$2.!() : untyped\n<ret>$6 = return <ret>$34 : <bottom>\n<unconditional>"];
+    bb51_0 [label = "()\n@repo$4 = alias @repo : untyped\nstatTmp$5 = stripe-internal/ : String(\"stripe-internal/\")\nstatTmp$2 = @repo$4.start_with?(statTmp$5) : untyped\n<ret>$23 = statTmp$2.!() : untyped\n<ret>$6 = return <ret>$23 : <bottom>\n<unconditional>"];
     bb51_0 -> bb51_1;
     bb51_1 [label = "()\n<unconditional>"];
     bb51_1 -> bb51_1;
@@ -113,11 +113,11 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#check!" {
 
     bb56_1 [label = "()\n<unconditional>"];
     bb56_1 -> bb56_1;
-    bb56_2 [label = "(<ret>$36, TOTAL_TIME_MS$13, MatchTimeout$17)\nstatTmp$14 = self : MatchTimeBudget\nstatTmp$21 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")\nstatTmp$22 = TOTAL_TIME_MS$13.to_s() : untyped\nstatTmp$20 = statTmp$21.concat(statTmp$22) : untyped\nstatTmp$24 = ms : String(\"ms\")\nstatTmp$19 = statTmp$20.concat(statTmp$24) : untyped\nstatTmp$18 = statTmp$19.to_s() : untyped\nstatTmp$15 = MatchTimeout$17.new(statTmp$18) : MatchTimeout\n<ret>$36 = statTmp$14.raise(statTmp$15) : untyped\n<unconditional>"];
+    bb56_2 [label = "(<ret>$25, TOTAL_TIME_MS$13, MatchTimeout$17)\nstatTmp$14 = self : MatchTimeBudget\nstatTmp$21 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")\nstatTmp$22 = TOTAL_TIME_MS$13.to_s() : untyped\nstatTmp$20 = statTmp$21.concat(statTmp$22) : untyped\nstatTmp$24 = ms : String(\"ms\")\nstatTmp$19 = statTmp$20.concat(statTmp$24) : untyped\nstatTmp$18 = statTmp$19.to_s() : untyped\nstatTmp$15 = MatchTimeout$17.new(statTmp$18) : MatchTimeout\n<ret>$25 = statTmp$14.raise(statTmp$15) : untyped\n<unconditional>"];
     bb56_2 -> bb56_4;
-    bb56_3 [label = "(<ret>$36)\n<ret>$36 = NotSupported() : untyped\n<unconditional>"];
+    bb56_3 [label = "(<ret>$25)\n<ret>$25 = NotSupported() : untyped\n<unconditional>"];
     bb56_3 -> bb56_4;
-    bb56_4 [label = "(<ret>$36)\n<ret>$25 = return <ret>$36 : <bottom>\n<unconditional>"];
+    bb56_4 [label = "(<ret>$25)\n<ret>$25 = return <ret>$25 : <bottom>\n<unconditional>"];
     bb56_4 -> bb56_1;
 }
 
@@ -159,7 +159,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#affected_files" {
     bb62_0 [shape = invhouse];
     bb62_1 [shape = parallelogram];
 
-    bb62_0 [label = "()\nstatTmp$4 = self : Diff\nstatTmp$3 = statTmp$4.added_files() : untyped\nstatTmp$6 = self : Diff\nstatTmp$5 = statTmp$6.deleted_files() : untyped\nstatTmp$2 = statTmp$3.+(statTmp$5) : untyped\nstatTmp$8 = self : Diff\nstatTmp$7 = statTmp$8.changed_files() : untyped\n<ret>$39 = statTmp$2.+(statTmp$7) : untyped\n<ret>$9 = return <ret>$39 : <bottom>\n<unconditional>"];
+    bb62_0 [label = "()\nstatTmp$4 = self : Diff\nstatTmp$3 = statTmp$4.added_files() : untyped\nstatTmp$6 = self : Diff\nstatTmp$5 = statTmp$6.deleted_files() : untyped\nstatTmp$2 = statTmp$3.+(statTmp$5) : untyped\nstatTmp$8 = self : Diff\nstatTmp$7 = statTmp$8.changed_files() : untyped\n<ret>$28 = statTmp$2.+(statTmp$7) : untyped\n<ret>$9 = return <ret>$28 : <bottom>\n<unconditional>"];
     bb62_0 -> bb62_1;
     bb62_1 [label = "()\n<unconditional>"];
     bb62_1 -> bb62_1;
@@ -181,15 +181,15 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#added_files" {
 
     bb63_3 [label = "(statTmp$2, @parsed$4)\nstatTmp$2 = @parsed$4.select() : untyped\n<unconditional>"];
     bb63_3 -> bb63_5;
-    bb63_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part$9> = load_arg(statTmp$3#select, 0) : untyped\nstatTmp$8 = NotSupported() : untyped\nstatTmp$6 = <block-nested: part$9>.[](statTmp$8) : untyped\nstatTmp$9 = /dev/null : String(\"/dev/null\")\n<blockret>$5 = statTmp$6.==(statTmp$9) : untyped\n<unconditional>"];
+    bb63_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$3#select, 0) : untyped\nstatTmp$8 = NotSupported() : untyped\nstatTmp$6 = <block-nested: part>.[](statTmp$8) : untyped\nstatTmp$9 = /dev/null : String(\"/dev/null\")\n<blockret>$5 = statTmp$6.==(statTmp$9) : untyped\n<unconditional>"];
     bb63_4 -> bb63_2;
     bb63_5 [label = "(statTmp$2)\nouterLoops: 1\n<block-call>"];
     bb63_5 -> bb63_7;
     bb63_5 -> bb63_6;
 
-    bb63_6 [label = "(statTmp$2)\n<ret>$40 = statTmp$2.map() : untyped\n<ret>$13 = return <ret>$40 : <bottom>\n<unconditional>"];
+    bb63_6 [label = "(statTmp$2)\n<ret>$29 = statTmp$2.map() : untyped\n<ret>$13 = return <ret>$29 : <bottom>\n<unconditional>"];
     bb63_6 -> bb63_1;
-    bb63_7 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: part$11> = load_arg(statTmp$2#map, 0) : untyped\nstatTmp$12 = NotSupported() : untyped\n<blockret>$10 = <block-nested: part$11>.[](statTmp$12) : untyped\n<unconditional>"];
+    bb63_7 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$2#map, 0) : untyped\nstatTmp$12 = NotSupported() : untyped\n<blockret>$10 = <block-nested: part>.[](statTmp$12) : untyped\n<unconditional>"];
     bb63_7 -> bb63_5;
 }
 
@@ -209,15 +209,15 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#deleted_files" {
 
     bb68_3 [label = "(statTmp$2, @parsed$4)\nstatTmp$2 = @parsed$4.select() : untyped\n<unconditional>"];
     bb68_3 -> bb68_5;
-    bb68_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part$13> = load_arg(statTmp$3#select, 0) : untyped\nstatTmp$8 = NotSupported() : untyped\nstatTmp$6 = <block-nested: part$13>.[](statTmp$8) : untyped\nstatTmp$9 = /dev/null : String(\"/dev/null\")\n<blockret>$5 = statTmp$6.==(statTmp$9) : untyped\n<unconditional>"];
+    bb68_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$3#select, 0) : untyped\nstatTmp$8 = NotSupported() : untyped\nstatTmp$6 = <block-nested: part>.[](statTmp$8) : untyped\nstatTmp$9 = /dev/null : String(\"/dev/null\")\n<blockret>$5 = statTmp$6.==(statTmp$9) : untyped\n<unconditional>"];
     bb68_4 -> bb68_2;
     bb68_5 [label = "(statTmp$2)\nouterLoops: 1\n<block-call>"];
     bb68_5 -> bb68_7;
     bb68_5 -> bb68_6;
 
-    bb68_6 [label = "(statTmp$2)\n<ret>$41 = statTmp$2.map() : untyped\n<ret>$13 = return <ret>$41 : <bottom>\n<unconditional>"];
+    bb68_6 [label = "(statTmp$2)\n<ret>$30 = statTmp$2.map() : untyped\n<ret>$13 = return <ret>$30 : <bottom>\n<unconditional>"];
     bb68_6 -> bb68_1;
-    bb68_7 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: part$15> = load_arg(statTmp$2#map, 0) : untyped\nstatTmp$12 = NotSupported() : untyped\n<blockret>$10 = <block-nested: part$15>.[](statTmp$12) : untyped\n<unconditional>"];
+    bb68_7 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$2#map, 0) : untyped\nstatTmp$12 = NotSupported() : untyped\n<blockret>$10 = <block-nested: part>.[](statTmp$12) : untyped\n<unconditional>"];
     bb68_7 -> bb68_5;
 }
 
@@ -237,15 +237,15 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_files" {
 
     bb73_3 [label = "(statTmp$2, @parsed$4)\nstatTmp$2 = @parsed$4.select() : untyped\n<unconditional>"];
     bb73_3 -> bb73_5;
-    bb73_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part$17> = load_arg(statTmp$3#select, 0) : untyped\nstatTmp$8 = NotSupported() : untyped\nstatTmp$6 = <block-nested: part$17>.[](statTmp$8) : untyped\nstatTmp$11 = NotSupported() : untyped\nstatTmp$9 = <block-nested: part$17>.[](statTmp$11) : untyped\n<blockret>$5 = statTmp$6.==(statTmp$9) : untyped\n<unconditional>"];
+    bb73_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$3#select, 0) : untyped\nstatTmp$8 = NotSupported() : untyped\nstatTmp$6 = <block-nested: part>.[](statTmp$8) : untyped\nstatTmp$11 = NotSupported() : untyped\nstatTmp$9 = <block-nested: part>.[](statTmp$11) : untyped\n<blockret>$5 = statTmp$6.==(statTmp$9) : untyped\n<unconditional>"];
     bb73_4 -> bb73_2;
     bb73_5 [label = "(statTmp$2)\nouterLoops: 1\n<block-call>"];
     bb73_5 -> bb73_7;
     bb73_5 -> bb73_6;
 
-    bb73_6 [label = "(statTmp$2)\n<ret>$42 = statTmp$2.map() : untyped\n<ret>$15 = return <ret>$42 : <bottom>\n<unconditional>"];
+    bb73_6 [label = "(statTmp$2)\n<ret>$31 = statTmp$2.map() : untyped\n<ret>$15 = return <ret>$31 : <bottom>\n<unconditional>"];
     bb73_6 -> bb73_1;
-    bb73_7 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: part$19> = load_arg(statTmp$2#map, 0) : untyped\nstatTmp$14 = NotSupported() : untyped\n<blockret>$12 = <block-nested: part$19>.[](statTmp$14) : untyped\n<unconditional>"];
+    bb73_7 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$2#map, 0) : untyped\nstatTmp$14 = NotSupported() : untyped\n<blockret>$12 = <block-nested: part>.[](statTmp$14) : untyped\n<unconditional>"];
     bb73_7 -> bb73_5;
 }
 
@@ -263,9 +263,9 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#added_lines" {
     bb78_2 -> bb78_4;
     bb78_2 -> bb78_3;
 
-    bb78_3 [label = "(@parsed$4)\nstatTmp$2 = @parsed$4.map() : untyped\n<ret>$43 = statTmp$2.flatten() : untyped\n<ret>$8 = return <ret>$43 : <bottom>\n<unconditional>"];
+    bb78_3 [label = "(@parsed$4)\nstatTmp$2 = @parsed$4.map() : untyped\n<ret>$32 = statTmp$2.flatten() : untyped\n<ret>$8 = return <ret>$32 : <bottom>\n<unconditional>"];
     bb78_3 -> bb78_1;
-    bb78_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part$21> = load_arg(statTmp$3#map, 0) : untyped\nstatTmp$7 = NotSupported() : untyped\n<blockret>$5 = <block-nested: part$21>.[](statTmp$7) : untyped\n<unconditional>"];
+    bb78_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$3#map, 0) : untyped\nstatTmp$7 = NotSupported() : untyped\n<blockret>$5 = <block-nested: part>.[](statTmp$7) : untyped\n<unconditional>"];
     bb78_4 -> bb78_2;
 }
 
@@ -283,9 +283,9 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#removed_lines" {
     bb81_2 -> bb81_4;
     bb81_2 -> bb81_3;
 
-    bb81_3 [label = "(@parsed$4)\nstatTmp$2 = @parsed$4.map() : untyped\n<ret>$44 = statTmp$2.flatten() : untyped\n<ret>$8 = return <ret>$44 : <bottom>\n<unconditional>"];
+    bb81_3 [label = "(@parsed$4)\nstatTmp$2 = @parsed$4.map() : untyped\n<ret>$33 = statTmp$2.flatten() : untyped\n<ret>$8 = return <ret>$33 : <bottom>\n<unconditional>"];
     bb81_3 -> bb81_1;
-    bb81_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part$23> = load_arg(statTmp$3#map, 0) : untyped\nstatTmp$7 = NotSupported() : untyped\n<blockret>$5 = <block-nested: part$23>.[](statTmp$7) : untyped\n<unconditional>"];
+    bb81_4 [label = "(statTmp$3, @parsed$4)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$3#map, 0) : untyped\nstatTmp$7 = NotSupported() : untyped\n<blockret>$5 = <block-nested: part>.[](statTmp$7) : untyped\n<unconditional>"];
     bb81_4 -> bb81_2;
 }
 
@@ -295,7 +295,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_lines" {
     bb84_0 [shape = invhouse];
     bb84_1 [shape = parallelogram];
 
-    bb84_0 [label = "()\nstatTmp$3 = self : Diff\nstatTmp$2 = statTmp$3.added_lines() : untyped\nstatTmp$5 = self : Diff\nstatTmp$4 = statTmp$5.removed_lines() : untyped\n<ret>$45 = statTmp$2.+(statTmp$4) : untyped\n<ret>$6 = return <ret>$45 : <bottom>\n<unconditional>"];
+    bb84_0 [label = "()\nstatTmp$3 = self : Diff\nstatTmp$2 = statTmp$3.added_lines() : untyped\nstatTmp$5 = self : Diff\nstatTmp$4 = statTmp$5.removed_lines() : untyped\n<ret>$34 = statTmp$2.+(statTmp$4) : untyped\n<ret>$6 = return <ret>$34 : <bottom>\n<unconditional>"];
     bb84_0 -> bb84_1;
     bb84_1 [label = "()\n<unconditional>"];
     bb84_1 -> bb84_1;
@@ -307,7 +307,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_openapi?" {
     bb85_0 [shape = invhouse];
     bb85_1 [shape = parallelogram];
 
-    bb85_0 [label = "()\nuntyped$5 = alias untyped : untyped\nstatTmp$3 = self : Diff\nstatTmp$2 = statTmp$3.changed_files() : untyped\n<ret>$46 = statTmp$2.include?(untyped$5) : untyped\n<ret>$6 = return <ret>$46 : <bottom>\n<unconditional>"];
+    bb85_0 [label = "()\nuntyped$5 = alias untyped : untyped\nstatTmp$3 = self : Diff\nstatTmp$2 = statTmp$3.changed_files() : untyped\n<ret>$35 = statTmp$2.include?(untyped$5) : untyped\n<ret>$6 = return <ret>$35 : <bottom>\n<unconditional>"];
     bb85_0 -> bb85_1;
     bb85_1 [label = "()\n<unconditional>"];
     bb85_1 -> bb85_1;
@@ -331,98 +331,98 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#parse" {
     bb87_3 -> bb87_4;
     bb87_4 [label = "(parts, statTmp$10)\nstatTmp$10 = parts : untyped\n<unconditional>"];
     bb87_4 -> bb87_5;
-    bb87_5 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\n<block-call>"];
+    bb87_5 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\n<block-call>"];
     bb87_5 -> bb87_7;
     bb87_5 -> bb87_6;
 
-    bb87_6 [label = "(parts)\nstatTmp$9 = parts.map() : untyped\n<ret>$47 = statTmp$9.compact() : untyped\n<ret>$69 = return <ret>$47 : <bottom>\n<unconditional>"];
+    bb87_6 [label = "(parts)\nstatTmp$9 = parts.map() : untyped\n<ret>$36 = statTmp$9.compact() : untyped\n<ret>$69 = return <ret>$36 : <bottom>\n<unconditional>"];
     bb87_6 -> bb87_1;
-    bb87_7 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\n<block-nested: part$26> = load_arg(statTmp$10#map, 0) : untyped\nstatTmp$14 = 
- : String(\"\n\")\n<block-nested: lines> = <block-nested: part$26>.split(statTmp$14) : untyped\n<block-nested: b_name> = NotSupported() : untyped\n<block-nested: added_lines> = NotSupported() : untyped\n<block-nested: removed_lines> = NotSupported() : untyped\nstatTmp$19 = <block-nested: lines> : untyped\n<unconditional>"];
+    bb87_7 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\n<block-nested: part> = load_arg(statTmp$10#map, 0) : untyped\nstatTmp$14 = 
+ : String(\"\n\")\n<block-nested: lines> = <block-nested: part>.split(statTmp$14) : untyped\n<block-nested: b_name> = NotSupported() : untyped\n<block-nested: added_lines> = NotSupported() : untyped\n<block-nested: removed_lines> = NotSupported() : untyped\nstatTmp$19 = <block-nested: lines> : untyped\n<unconditional>"];
     bb87_7 -> bb87_8;
-    bb87_8 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<block-call>"];
+    bb87_8 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<block-call>"];
     bb87_8 -> bb87_10;
     bb87_8 -> bb87_9;
 
-    bb87_9 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\nstatTmp$18 = <block-nested: lines>.each() : untyped\nifTmp$66 = <block-nested: b_name>.nil?() : untyped\nifTmp$66"];
+    bb87_9 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\nstatTmp$18 = <block-nested: lines>.each() : untyped\nifTmp$66 = <block-nested: b_name>.nil?() : untyped\nifTmp$66"];
     bb87_9 -> bb87_37;
     bb87_9 -> bb87_38;
 
-    bb87_10 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<block-nested: line$28> = load_arg(statTmp$19#each, 0) : untyped\nstatTmp$23 = index  : String(\"index \")\nstatTmp$24 = @@ : String(\"@@\")\nstatTmp$25 = new file mode : String(\"new file mode\")\nifTmp$21 = <block-nested: line$28>.start_with?(statTmp$23, statTmp$24, statTmp$25) : untyped\nifTmp$21"];
+    bb87_10 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<block-nested: line> = load_arg(statTmp$19#each, 0) : untyped\nstatTmp$23 = index  : String(\"index \")\nstatTmp$24 = @@ : String(\"@@\")\nstatTmp$25 = new file mode : String(\"new file mode\")\nifTmp$21 = <block-nested: line>.start_with?(statTmp$23, statTmp$24, statTmp$25) : untyped\nifTmp$21"];
     bb87_10 -> bb87_11;
     bb87_10 -> bb87_12;
 
-    bb87_11 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nreturnTmp$26 = NotSupported() : untyped\n<unconditional>"];
+    bb87_11 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nreturnTmp$26 = NotSupported() : untyped\n<unconditional>"];
     bb87_11 -> bb87_8;
-    bb87_12 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$29 = --- : String(\"---\")\nifTmp$27 = <block-nested: line$28>.start_with?(statTmp$29) : untyped\nifTmp$27"];
+    bb87_12 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$29 = --- : String(\"---\")\nifTmp$27 = <block-nested: line>.start_with?(statTmp$29) : untyped\nifTmp$27"];
     bb87_12 -> bb87_13;
     bb87_12 -> bb87_14;
 
-    bb87_13 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$32 = NotSupported() : untyped\n<block-nested: a_name> = <block-nested: line$28>.[](statTmp$32) : untyped\nifTmp$34 = <block-nested: b_name> : untyped\nifTmp$34"];
+    bb87_13 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$32 = NotSupported() : untyped\n<block-nested: a_name> = <block-nested: line>.[](statTmp$32) : untyped\nifTmp$34 = <block-nested: b_name> : untyped\nifTmp$34"];
     bb87_13 -> bb87_15;
     bb87_13 -> bb87_16;
 
-    bb87_14 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$41 = +++ : String(\"+++\")\nifTmp$39 = <block-nested: line$28>.start_with?(statTmp$41) : untyped\nifTmp$39"];
+    bb87_14 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$41 = +++ : String(\"+++\")\nifTmp$39 = <block-nested: line>.start_with?(statTmp$41) : untyped\nifTmp$39"];
     bb87_14 -> bb87_21;
     bb87_14 -> bb87_22;
 
-    bb87_15 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$36 = a/ : String(\"a/\")\nifTmp$33 = <block-nested: b_name>.start_with?(statTmp$36) : untyped\n<unconditional>"];
+    bb87_15 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$36 = a/ : String(\"a/\")\nifTmp$33 = <block-nested: b_name>.start_with?(statTmp$36) : untyped\n<unconditional>"];
     bb87_15 -> bb87_17;
-    bb87_16 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nifTmp$33 = <block-nested: b_name> : untyped\n<unconditional>"];
+    bb87_16 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nifTmp$33 = <block-nested: b_name> : untyped\n<unconditional>"];
     bb87_16 -> bb87_17;
-    bb87_17 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nifTmp$33"];
+    bb87_17 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nifTmp$33"];
     bb87_17 -> bb87_18;
     bb87_17 -> bb87_19;
 
-    bb87_18 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$38 = NotSupported() : untyped\n<block-nested: a_name> = <block-nested: b_name>.[](statTmp$38) : untyped\n<unconditional>"];
+    bb87_18 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$38 = NotSupported() : untyped\n<block-nested: a_name> = <block-nested: b_name>.[](statTmp$38) : untyped\n<unconditional>"];
     bb87_18 -> bb87_20;
-    bb87_19 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<blockret>$20 = NotSupported() : untyped\n<unconditional>"];
+    bb87_19 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<blockret>$20 = NotSupported() : untyped\n<unconditional>"];
     bb87_19 -> bb87_20;
-    bb87_20 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
+    bb87_20 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
     bb87_20 -> bb87_36;
-    bb87_21 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$44 = NotSupported() : untyped\n<block-nested: b_name> = <block-nested: line$28>.[](statTmp$44) : untyped\nifTmp$46 = <block-nested: b_name> : untyped\nifTmp$46"];
+    bb87_21 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$44 = NotSupported() : untyped\n<block-nested: b_name> = <block-nested: line>.[](statTmp$44) : untyped\nifTmp$46 = <block-nested: b_name> : untyped\nifTmp$46"];
     bb87_21 -> bb87_23;
     bb87_21 -> bb87_24;
 
-    bb87_22 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$53 = + : String(\"+\")\nifTmp$51 = <block-nested: line$28>.start_with?(statTmp$53) : untyped\nifTmp$51"];
+    bb87_22 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$53 = + : String(\"+\")\nifTmp$51 = <block-nested: line>.start_with?(statTmp$53) : untyped\nifTmp$51"];
     bb87_22 -> bb87_29;
     bb87_22 -> bb87_30;
 
-    bb87_23 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$48 = b/ : String(\"b/\")\nifTmp$45 = <block-nested: b_name>.start_with?(statTmp$48) : untyped\n<unconditional>"];
+    bb87_23 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$48 = b/ : String(\"b/\")\nifTmp$45 = <block-nested: b_name>.start_with?(statTmp$48) : untyped\n<unconditional>"];
     bb87_23 -> bb87_25;
-    bb87_24 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nifTmp$45 = <block-nested: b_name> : untyped\n<unconditional>"];
+    bb87_24 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nifTmp$45 = <block-nested: b_name> : untyped\n<unconditional>"];
     bb87_24 -> bb87_25;
-    bb87_25 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nifTmp$45"];
+    bb87_25 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nifTmp$45"];
     bb87_25 -> bb87_26;
     bb87_25 -> bb87_27;
 
-    bb87_26 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$49 = <block-nested: b_name> : untyped\nstatTmp$50 = NotSupported() : untyped\n<block-nested: b_name> = statTmp$49.[](statTmp$50) : untyped\n<unconditional>"];
+    bb87_26 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$49 = <block-nested: b_name> : untyped\nstatTmp$50 = NotSupported() : untyped\n<block-nested: b_name> = statTmp$49.[](statTmp$50) : untyped\n<unconditional>"];
     bb87_26 -> bb87_28;
-    bb87_27 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<blockret>$20 = NotSupported() : untyped\n<unconditional>"];
+    bb87_27 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<blockret>$20 = NotSupported() : untyped\n<unconditional>"];
     bb87_27 -> bb87_28;
-    bb87_28 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
+    bb87_28 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
     bb87_28 -> bb87_35;
-    bb87_29 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$57 = NotSupported() : untyped\nstatTmp$55 = <block-nested: line$28>.[](statTmp$57) : untyped\n<blockret>$20 = <block-nested: added_lines>.<<(statTmp$55) : untyped\n<unconditional>"];
+    bb87_29 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$57 = NotSupported() : untyped\nstatTmp$55 = <block-nested: line>.[](statTmp$57) : untyped\n<blockret>$20 = <block-nested: added_lines>.<<(statTmp$55) : untyped\n<unconditional>"];
     bb87_29 -> bb87_34;
-    bb87_30 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$60 = - : String(\"-\")\nifTmp$58 = <block-nested: line$28>.start_with?(statTmp$60) : untyped\nifTmp$58"];
+    bb87_30 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$60 = - : String(\"-\")\nifTmp$58 = <block-nested: line>.start_with?(statTmp$60) : untyped\nifTmp$58"];
     bb87_30 -> bb87_31;
     bb87_30 -> bb87_32;
 
-    bb87_31 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$64 = NotSupported() : untyped\nstatTmp$62 = <block-nested: line$28>.[](statTmp$64) : untyped\n<blockret>$20 = <block-nested: removed_lines>.<<(statTmp$62) : untyped\n<unconditional>"];
+    bb87_31 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\nstatTmp$64 = NotSupported() : untyped\nstatTmp$62 = <block-nested: line>.[](statTmp$64) : untyped\n<blockret>$20 = <block-nested: removed_lines>.<<(statTmp$62) : untyped\n<unconditional>"];
     bb87_31 -> bb87_33;
-    bb87_32 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<blockret>$20 = NotSupported() : untyped\n<unconditional>"];
+    bb87_32 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<blockret>$20 = NotSupported() : untyped\n<unconditional>"];
     bb87_32 -> bb87_33;
-    bb87_33 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
+    bb87_33 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
     bb87_33 -> bb87_34;
-    bb87_34 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
+    bb87_34 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
     bb87_34 -> bb87_35;
-    bb87_35 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
+    bb87_35 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
     bb87_35 -> bb87_36;
-    bb87_36 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
+    bb87_36 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 2\n<unconditional>"];
     bb87_36 -> bb87_8;
-    bb87_37 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\nreturnTmp$68 = NotSupported() : untyped\n<unconditional>"];
+    bb87_37 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\nreturnTmp$68 = NotSupported() : untyped\n<unconditional>"];
     bb87_37 -> bb87_5;
-    bb87_38 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line$28>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\nstatTmp$65 = NotSupported() : untyped\n<blockret>$11 = NotSupported() : untyped\n<unconditional>"];
+    bb87_38 [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTmp$10, statTmp$19, ifTmp$33, ifTmp$45)\nouterLoops: 1\nstatTmp$65 = NotSupported() : untyped\n<blockret>$11 = NotSupported() : untyped\n<unconditional>"];
     bb87_38 -> bb87_5;
 }
 

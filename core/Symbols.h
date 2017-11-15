@@ -108,6 +108,12 @@ public:
         static constexpr int FIELD = 0x2000;
         static constexpr int STATIC_FIELD = 0x1000;
         static constexpr int METHOD_ARGUMENT = 0x0800;
+
+        // Method argument flags
+        static constexpr int ARGUMENT_OPTIONAL = 0x400;
+        static constexpr int ARGUMENT_KEYWORD = 0x200;
+        static constexpr int ARGUMENT_REPEATED = 0x100;
+        static constexpr int ARGUMENT_BLOCK = 0x0080;
     };
 
     SymbolRef owner;
@@ -187,6 +193,26 @@ public:
     inline void setMethod() {
         DEBUG_ONLY(Error::check(!isClass() && !isStaticField() && !isField()));
         flags = flags | Symbol::Flags::METHOD;
+    }
+
+    inline void setOptional() {
+        DEBUG_ONLY(Error::check(isMethodArgument()));
+        flags |= Symbol::Flags::ARGUMENT_OPTIONAL;
+    }
+
+    inline void setKeyword() {
+        DEBUG_ONLY(Error::check(isMethodArgument()));
+        flags |= Symbol::Flags::ARGUMENT_KEYWORD;
+    }
+
+    inline void setRepeated() {
+        DEBUG_ONLY(Error::check(isMethodArgument()));
+        flags |= Symbol::Flags::ARGUMENT_REPEATED;
+    }
+
+    inline void setBlockArgument() {
+        DEBUG_ONLY(Error::check(isMethodArgument()));
+        flags |= Symbol::Flags::ARGUMENT_BLOCK;
     }
 
     SymbolRef findMember(NameRef name);

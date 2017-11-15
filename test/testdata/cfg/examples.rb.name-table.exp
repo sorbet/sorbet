@@ -5,7 +5,7 @@ class Examples (Object)
   method return_in_one_branch1 ()
   method return_in_one_branch2 ()
   method take_arguments (i)
-    argument i
+    argument i<>
   method variables ()
   method variables_and_loop ()
   method variables_loop_if ()

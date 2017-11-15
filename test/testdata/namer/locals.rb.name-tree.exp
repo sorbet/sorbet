@@ -13,8 +13,8 @@ class <emptyTree>::TestLocals<TestLocals> < ()
         end
       end
       b = 3
-      self(TestLocals).proc() do |<block-nested: a$3>, <block-nested: b$1>|
-        <block-nested: a$3>.+(<block-nested: b$1>)
+      self(TestLocals).proc() do |<block-nested: a>, <block-nested: b>|
+        <block-nested: a>.+(<block-nested: b>)
       end
     end
 

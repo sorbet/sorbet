@@ -29,16 +29,42 @@ class NameInserter {
         return ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
     }
 
-    ast::UnresolvedIdent *arg2NameRef(ast::Reference *arg) {
+    core::SymbolRef arg2Symbol(core::Context ctx, ast::Reference *arg) {
+        auto loc = arg->loc;
+        bool optional = false, keyword = false, block = false, repeated = false;
+
         while (true) {
             if (ast::UnresolvedIdent *nm = dynamic_cast<ast::UnresolvedIdent *>(arg)) {
-                return nm;
+                core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(loc, ctx.owner, nm->name);
+                core::Symbol &info = sym.info(ctx);
+                if (optional)
+                    info.setOptional();
+                if (keyword)
+                    info.setKeyword();
+                if (block)
+                    info.setBlockArgument();
+                if (repeated)
+                    info.setRepeated();
+                return sym;
             }
-            typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
-                     [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
-                     [&](ast::OptionalArg *opt) { arg = opt->expr.get(); },
-                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); },
-                     [&](ast::BlockArg *opt) { arg = opt->expr.get(); });
+            typecase(arg,
+                     [&](ast::RestArg *rest) {
+                         repeated = true;
+                         arg = rest->expr.get();
+                     },
+                     [&](ast::KeywordArg *kw) {
+                         keyword = true;
+                         arg = kw->expr.get();
+                     },
+                     [&](ast::OptionalArg *opt) {
+                         optional = true;
+                         arg = opt->expr.get();
+                     },
+                     [&](ast::BlockArg *opt) {
+                         block = true;
+                         arg = opt->expr.get();
+                     },
+                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); });
         }
     }
 
@@ -110,26 +136,32 @@ public:
         return klass;
     }
 
-    unique_ptr<ast::Expression> fillInArg(core::Context ctx, ast::UnresolvedIdent *nmarg, core::Symbol &method) {
-        core::SymbolRef owner = method.ref(ctx);
-        auto tx = postTransformUnresolvedIdent(ctx.withOwner(owner), nmarg);
-        if (tx != nmarg) {
-            unique_ptr<ast::Expression> res(tx);
-            ast::Local *id = dynamic_cast<ast::Local *>(tx);
-            Error::check(id != nullptr);
-            method.argumentsOrMixins.push_back(ctx.state.enterMethodArgumentSymbol(nmarg->loc, owner, nmarg->name));
-            return res;
-        }
-        Error::notImplemented();
-    }
+    void fillInArgs(core::Context ctx, ast::MethodDef::ARGS_store &args) {
+        core::Symbol &symbol = ctx.owner.info(ctx);
+        bool inShadows = false;
 
-    void fillInArgs(core::Context ctx, ast::MethodDef::ARGS_store &args, core::Symbol &symbol) {
-        // Fill in the arity right with TODOs
-        symbol.argumentsOrMixins.reserve(args.size());
         for (auto &arg : args) {
+            core::NameRef name;
             ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
             Error::check(ref != nullptr);
-            arg = fillInArg(ctx, arg2NameRef(ref), symbol);
+
+            if (ast::ShadowArg *arg = dynamic_cast<ast::ShadowArg *>(ref)) {
+                auto id = dynamic_cast<ast::UnresolvedIdent *>(arg->expr.get());
+                Error::check(id);
+                name = id->name;
+                inShadows = true;
+            } else {
+                Error::check(!inShadows, "shadow argument followed by non-shadow argument!");
+                core::SymbolRef sym = arg2Symbol(ctx, ref);
+                symbol.argumentsOrMixins.push_back(sym);
+                name = sym.info(ctx).name;
+            }
+
+            core::LocalVariable local = ctx.state.enterLocalSymbol(ctx.owner, name);
+            scopeStack.back().locals[name] = local;
+
+            unique_ptr<ast::Expression> localExpr = make_unique<ast::Local>(arg->loc, local);
+            arg.swap(localExpr);
         }
     }
 
@@ -163,7 +195,7 @@ public:
 
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
         core::Symbol &symbol = method->symbol.info(ctx);
-        fillInArgs(ctx, method->args, symbol);
+        fillInArgs(ctx.withOwner(method->symbol), method->args);
         symbol.definitionLoc = method->loc;
 
         return method;
@@ -178,7 +210,6 @@ public:
         core::SymbolRef owner = ownerFromContext(ctx);
         blk->symbol = ctx.state.enterMethodSymbol(
             blk->loc, owner, ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp()));
-        core::Symbol &symbol = blk->symbol.info(ctx);
 
         scopeStack.emplace_back();
         auto &parent = *(scopeStack.end() - 2);
@@ -188,19 +219,11 @@ public:
         for (auto &binding : parent.locals) {
             frame.locals.insert(binding);
         }
-        // Except that any arguments we have exist in our own frame
-        for (auto &arg : blk->args) {
-            ast::Reference *ref = dynamic_cast<ast::Reference *>(arg.get());
-            if (ref == nullptr)
-                continue;
-            ast::UnresolvedIdent *nm = arg2NameRef(ref);
-            if (nm->kind != ast::UnresolvedIdent::Local)
-                continue;
 
-            frame.locals[nm->name] = ctx.state.newTemporary(core::UniqueNameKind::Namer, nm->name, blk->symbol);
-        }
+        // If any of our arguments shadow our parent, fillInArgs will overwrite
+        // them in `frame.locals`
+        fillInArgs(ctx.withOwner(blk->symbol), blk->args);
 
-        fillInArgs(ctx, blk->args, symbol);
         return blk;
     }
 

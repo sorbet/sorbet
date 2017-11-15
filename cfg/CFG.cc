@@ -600,7 +600,7 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 core::SymbolRef sym = s->block->symbol;
                 core::Symbol &info = sym.info(cctx.ctx);
 
-                for (int i = 0; i < s->block->args.size(); ++i) {
+                for (int i = 0; i < info.argumentsOrMixins.size(); ++i) {
                     auto &arg = s->block->args[i];
 
                     if (auto id = dynamic_cast<ast::Local *>(arg.get())) {

@@ -1,8 +1,8 @@
 class Destructure (Object)
   method f (<destructure>$0, z)
-    argument <destructure>$0
-    argument z
+    argument <destructure>$0<>
+    argument z<>
     method <block>$4 (<destructure>$2)
-      argument <destructure>$2
+      argument <destructure>$2<>
 class Opus ()
 
