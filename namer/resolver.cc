@@ -42,8 +42,8 @@ private:
             if (result.exists()) {
                 return result;
             }
-            ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant,
-                                   "Stubbing out unknown constant " + c->toString(ctx));
+            ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
+                                   c->toString(ctx));
             return core::GlobalState::defn_untyped();
 
         } else if (ast::ConstantLit *scope = dynamic_cast<ast::ConstantLit *>(c->scope.get())) {
@@ -52,8 +52,8 @@ private:
                 return resolved;
             core::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
             if (!result.exists()) {
-                ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant,
-                                       "Stubbing out unknown constant " + c->toString(ctx));
+                ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
+                                       c->toString(ctx));
                 result = core::GlobalState::defn_untyped();
             }
             c->scope = make_unique<ast::Ident>(c->loc, resolved);
@@ -61,7 +61,7 @@ private:
             return result;
         } else {
             ctx.state.errors.error(c->loc, core::ErrorClass::DynamicConstant,
-                                   "Dynamic constant references are unsupported " + c->toString(ctx));
+                                   "Dynamic constant references are unsupported {}", c->toString(ctx));
             return core::GlobalState::defn_untyped();
         }
     }
