@@ -32,8 +32,7 @@ public:
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             vars.emplace_back(symbol);
-            types.emplace_back();
-            types[types.size() - 1] = typeAndOrigins;
+            types.push_back(typeAndOrigins);
             return;
         }
         types[fnd - vars.begin()] = typeAndOrigins;

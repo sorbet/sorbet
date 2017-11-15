@@ -152,6 +152,7 @@ int realmain(int argc, char **argv) {
     options.add_options()("h,help", "Show help");
     options.add_options()("n,no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options()("t,no-typer", "Do not type the CFG");
+    options.add_options()("q,quiet", "Silence output of errors");
     options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
                           cxxopts::value<vector<string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
@@ -185,6 +186,10 @@ int realmain(int argc, char **argv) {
             spd::set_level(spd::level::trace);
             console->trace("Trace logging enabled");
             break;
+    }
+
+    if (options.count("q")) {
+        spd::set_level(spd::level::critical);
     }
 
     ruby_typer::core::GlobalState gs(*console);

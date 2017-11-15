@@ -48,8 +48,6 @@ Expression::Expression(core::Loc loc) : loc(loc) {}
 
 Reference::Reference(core::Loc loc) : Expression(loc) {}
 
-ControlFlow::ControlFlow(core::Loc loc) : Expression(loc) {}
-
 ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors,
                    RHS_store &rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
@@ -64,20 +62,20 @@ ConstDef::ConstDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression>
     : Declaration(loc, symbol), rhs(move(rhs)) {}
 
 If::If(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
-    : ControlFlow(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
+    : Expression(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {}
 
 While::While(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> body)
-    : ControlFlow(loc), cond(move(cond)), body(move(body)) {}
+    : Expression(loc), cond(move(cond)), body(move(body)) {}
 
-Break::Break(core::Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
+Break::Break(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {}
 
-Next::Next(core::Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
+Next::Next(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {}
 
 BoolLit::BoolLit(core::Loc loc, bool value) : Expression(loc), value(value) {}
 
-Return::Return(core::Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
+Return::Return(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {}
 
-Yield::Yield(core::Loc loc, unique_ptr<Expression> expr) : ControlFlow(loc), expr(move(expr)) {}
+Yield::Yield(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {}
 
 Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
     Error::check(symbol.exists());
