@@ -212,6 +212,9 @@ static UTF8Desc any_DESC{(char *)any, (int)strlen(any)};
 static const char *all = "all";
 static UTF8Desc all_DESC{(char *)all, (int)strlen(all)};
 
+static const char *super = "super";
+static UTF8Desc super_DESC{(char *)super, (int)strlen(super)};
+
 static const char *nilable = "nilable";
 static UTF8Desc nilable_DESC{(char *)nilable, (int)strlen(nilable)};
 
@@ -278,6 +281,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef block_call_id = enterNameUTF8(block_call_DESC);
     NameRef lambda_id = enterNameUTF8(lambda_DESC);
     NameRef nil_p_id = enterNameUTF8(nil_p_DESC);
+    NameRef super_id = enterNameUTF8(super_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -318,6 +322,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(block_call_id == Names::blockCall()));
     DEBUG_ONLY(Error::check(lambda_id == Names::lambda()));
     DEBUG_ONLY(Error::check(nil_p_id == Names::nil_p()));
+    DEBUG_ONLY(Error::check(super_id == Names::super()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
@@ -631,10 +636,12 @@ SymbolRef Context::selfClass() {
 
 SymbolRef Context::enclosingMethod() {
     SymbolRef owner = this->owner;
-    while (!owner.info(this->state, false).isMethod()) {
+    while (owner != GlobalState::defn_root() && !owner.info(this->state, false).isMethod()) {
         Error::check(owner.exists());
         owner = owner.info(this->state).owner;
     }
+    if (owner == GlobalState::defn_root())
+        owner._id = 0;
     return owner;
 }
 

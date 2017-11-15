@@ -59,14 +59,6 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class Super final : public Instruction {
-public:
-    std::vector<core::LocalVariable> args;
-
-    Super(std::vector<core::LocalVariable> &args);
-    virtual std::string toString(core::Context ctx);
-};
-
 class NamedArg : public Instruction {
 public:
     core::NameRef name;

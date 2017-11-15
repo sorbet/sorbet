@@ -296,7 +296,8 @@ private:
 
     Expression *mapIt(Expression *what, core::Context ctx) {
         // TODO: reorder by frequency
-        if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr || dynamic_cast<Nil *>(what) != nullptr)
+        if (what == nullptr || dynamic_cast<EmptyTree *>(what) != nullptr || dynamic_cast<Nil *>(what) != nullptr ||
+            dynamic_cast<ZSuperArgs *>(what) != nullptr)
             return what;
         if (ClassDef *v = dynamic_cast<ClassDef *>(what)) {
             if (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
@@ -661,9 +662,6 @@ private:
             }
             return v;
         } else if (SymbolLit *v = dynamic_cast<SymbolLit *>(what)) {
-            return what;
-        } else if (Super *v = dynamic_cast<Super *>(what)) {
-            // TODO Need to recursivly walk arguments
             return what;
         } else if (Self *v = dynamic_cast<Self *>(what)) {
             if (HAS_MEMBER_postTransformSelf<FUNC>::value) {

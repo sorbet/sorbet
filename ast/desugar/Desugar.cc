@@ -598,7 +598,15 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 args.emplace_back(node2TreeImpl(ctx, stat));
             };
 
-            unique_ptr<Expression> res = make_unique<Super>(what->loc, args);
+            unique_ptr<Expression> res = make_unique<Send>(
+                what->loc, make_unique<Self>(what->loc, ctx.state.defn_todo()), core::Names::super(), args);
+            result.swap(res);
+        },
+        [&](parser::ZSuper *zuper) {
+            Send::ARGS_store args;
+            args.emplace_back(make_unique<ZSuperArgs>(zuper->loc));
+            unique_ptr<Expression> res = make_unique<Send>(
+                what->loc, make_unique<Self>(what->loc, ctx.state.defn_todo()), core::Names::super(), args);
             result.swap(res);
         },
         [&](parser::Integer *integer) {

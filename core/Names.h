@@ -322,6 +322,11 @@ public:
     static inline NameRef nil_p() {
         return NameRef(39);
     }
+
+    // super calls
+    static inline NameRef super() {
+        return NameRef(40);
+    }
 };
 
 class Name final {
