@@ -388,6 +388,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     while (from != to) {
         auto &el = *from;
         if (el.first == name) {
+            Error::check((from->second.info(*this).flags & flags) == flags);
             return from->second;
         }
         from++;
