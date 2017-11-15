@@ -73,7 +73,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class IntLit : public Instruction {
+class IntLit final : public Instruction {
 public:
     int64_t value;
 
@@ -81,7 +81,7 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class StringLit : public Instruction {
+class StringLit final : public Instruction {
 public:
     core::NameRef value;
 
@@ -105,18 +105,20 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class ArraySplat : public Instruction {
+class ArraySplat final : public Instruction {
 public:
     core::NameRef arg;
 
     ArraySplat(core::NameRef arg) : arg(arg){};
+    virtual std::string toString(core::Context ctx);
 };
 
-class HashSplat : public Instruction {
+class HashSplat final : public Instruction {
 public:
     core::NameRef arg;
 
     HashSplat(core::NameRef arg) : arg(arg){};
+    virtual std::string toString(core::Context ctx);
 };
 
 class Nil final : public Instruction {

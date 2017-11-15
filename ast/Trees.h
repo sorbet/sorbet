@@ -21,10 +21,10 @@ public:
     core::Loc loc;
 };
 
-template <class To> To cast_tree(Expression *what) {
-    static_assert(std::is_pointer<To>::value, "To has to be a pointer");
-    static_assert(std::is_assignable<Expression *&, To>::value, "Ill Formed To, has to be a subclass of Expression");
-    return fast_cast<Expression *, To>(what);
+template <class To> To *cast_tree(Expression *what) {
+    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Expression *&, To *>::value, "Ill Formed To, has to be a subclass of Expression");
+    return fast_cast<Expression, To>(what);
 }
 
 class Reference : public Expression {
@@ -124,12 +124,6 @@ public:
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-};
-
-class For : public Expression {
-public:
-    For(core::Loc loc);
-    // TODO
 };
 
 class Break final : public Expression {
