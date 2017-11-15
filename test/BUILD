@@ -41,10 +41,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     visibility = ["//tools:__pkg__"],
     deps = [
+        "//ast",
         "//common",
         "//core",
         "//parser",
-        "//ast",
         "@cxxopts//:cxxopts",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
@@ -57,9 +57,9 @@ cc_test(
     srcs = ["error-check-test.cc"],
     copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
-                         "//tools/config:fastbuild": 0,
-                         "//conditions:default": 1,
-                     }),
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast",
