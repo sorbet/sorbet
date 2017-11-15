@@ -147,7 +147,7 @@ template <class T> void printElems(core::GlobalState &gs, stringstream &buf, T &
     bool didshadow = false;
     for (auto &a : args) {
         if (!first) {
-            if (dynamic_cast<ShadowArg *>(a.get()) && !didshadow) {
+            if (cast_tree<ShadowArg *>(a.get()) && !didshadow) {
                 buf << "; ";
                 didshadow = true;
             } else {

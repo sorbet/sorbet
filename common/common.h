@@ -7,6 +7,8 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <type_traits>
+#include <typeinfo>
 
 namespace ruby_typer {
 
@@ -75,6 +77,33 @@ CheckSize(u4, 4, 4);
  */
 typedef unsigned long u8;
 CheckSize(u8, 8, 8);
+
+template <class From, class To, bool isFinal> class FastCaster {
+public:
+    static To fast_cast_impl(From what) {
+        return dynamic_cast<To>(what);
+    }
+};
+
+template <class From, class To> class FastCaster<From, To, true> {
+public:
+    static To fast_cast_impl(From what) {
+        const std::type_info &ty = typeid(*what);
+        if (ty == typeid(To))
+            return static_cast<To>(what);
+        return nullptr;
+    }
+};
+
+template <class From, class To> To fast_cast(From what) {
+#if __cplusplus >= 201402L
+    return FastCaster<From, To, std::is_final<To>::value>::fast_cast_impl(what);
+#elif __has_feature(is_final)
+    return FastCaster<From, To, __is_final(To)>::fast_cast_impl(what);
+#else
+    static_assert(false);
+#endif
+};
 
 class File final {
 public:

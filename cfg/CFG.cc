@@ -553,11 +553,11 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
             ret = current;
         },
         [&](ast::Assign *a) {
-            auto lhsIdent = dynamic_cast<ast::Ident *>(a->lhs.get());
+            auto lhsIdent = ast::cast_tree<ast::Ident *>(a->lhs.get());
             core::LocalVariable lhs;
             if (lhsIdent != nullptr) {
                 lhs = global2Local(cctx.ctx, lhsIdent->symbol, cctx.inWhat, cctx.aliases);
-            } else if (auto lhsLocal = dynamic_cast<ast::Local *>(a->lhs.get())) {
+            } else if (auto lhsLocal = ast::cast_tree<ast::Local *>(a->lhs.get())) {
                 lhs = lhsLocal->localVariable;
             } else {
                 // TODO(nelhage): Once namer is complete this should be a
@@ -603,7 +603,7 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 for (int i = 0; i < info.argumentsOrMixins.size(); ++i) {
                     auto &arg = s->block->args[i];
 
-                    if (auto id = dynamic_cast<ast::Local *>(arg.get())) {
+                    if (auto id = ast::cast_tree<ast::Local *>(arg.get())) {
                         core::LocalVariable argLoc = id->localVariable;
                         cctx.aliases[info.argumentsOrMixins[i]] = argLoc;
                         bodyBlock->exprs.emplace_back(argLoc, arg->loc, make_unique<LoadArg>(recv, s->fun, i));
