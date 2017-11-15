@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Foo>#bar" {
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
 
-    bb24_0 [label = "()\n<ret>$1 = NotSupported() : <constant:untyped>\n<ret>$2 = return <ret>$1 : <constant:<bottom>>\n<unconditional>"];
+    bb24_0 [label = "()\n<ret>$1 = NotSupported() : untyped\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb24_0 -> bb24_1;
     bb24_1 [label = "()\n<unconditional>"];
     bb24_1 -> bb24_1;
@@ -17,7 +17,7 @@ subgraph "cluster_::<constant:Foo>#baz" {
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];
 
-    bb25_0 [label = "(statTmp$2)\nstatTmp$2 = self : <constant:Foo>\n<unconditional>"];
+    bb25_0 [label = "(statTmp$2)\nstatTmp$2 = self : Foo\n<unconditional>"];
     bb25_0 -> bb25_2;
     bb25_1 [label = "()\n<unconditional>"];
     bb25_1 -> bb25_1;
@@ -25,9 +25,9 @@ subgraph "cluster_::<constant:Foo>#baz" {
     bb25_2 -> bb25_4;
     bb25_2 -> bb25_3;
 
-    bb25_3 [label = "(statTmp$2)\n<ret>$2 = statTmp$2.bar() : <constant:untyped>\n<ret>$6 = return <ret>$2 : <constant:<bottom>>\n<unconditional>"];
+    bb25_3 [label = "(statTmp$2)\n<ret>$2 = statTmp$2.bar() : untyped\n<ret>$6 = return <ret>$2 : <bottom>\n<unconditional>"];
     bb25_3 -> bb25_1;
-    bb25_4 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: r> = load_arg(statTmp$2#bar, 0) : <constant:untyped>\nstatTmp$4 = self : <constant:Foo>\n<blockret>$3 = statTmp$4.puts(<block-nested: r>) : <constant:untyped>\n<unconditional>"];
+    bb25_4 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: r> = load_arg(statTmp$2#bar, 0) : untyped\nstatTmp$4 = self : Foo\n<blockret>$3 = statTmp$4.puts(<block-nested: r>) : untyped\n<unconditional>"];
     bb25_4 -> bb25_2;
 }
 

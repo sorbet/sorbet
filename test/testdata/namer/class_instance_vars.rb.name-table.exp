@@ -1,15 +1,15 @@
 class <constant:Child> (<constant:Parent>, <constant:Mixin>)
-  field @undefinedivar -> <constant:untyped>
+  field @undefinedivar -> untyped
   method child_method ()
-  static-field @@undefined_cvar -> <constant:untyped>
+  static-field @@undefined_cvar -> untyped
 class <constant:Mixin> ()
-  static-field @@mixin_cvar -> <constant:Integer>
+  static-field @@mixin_cvar -> Integer
 class <constant:Opus> ()
 class <constant:Parent> (<constant:Object>)
-  field @ivar -> <constant:Integer>
-  field @ivar2 -> <constant:Integer>
+  field @ivar -> Integer
+  field @ivar2 -> Integer
   method hi ()
-  static-field @@class_var -> <constant:String>
+  static-field @@class_var -> String
 class <singleton class:<constant:Child>> (<constant:Class>)
 class <singleton class:<constant:Mixin>> (<constant:Class>)
 class <singleton class:<constant:Parent>> (<constant:Class>)

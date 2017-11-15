@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Foo>#foo" {
     bb25_0 [shape = invhouse];
     bb25_1 [shape = parallelogram];
 
-    bb25_0 [label = "()\n@ivar$3 = alias @ivar : <constant:Integer>\n@ivar$3 = 2 : <constant:Integer>(2)\n@ivar$3 = ss : <constant:untyped>\n<ret>$4 = return @ivar$3 : <constant:<bottom>>\n<unconditional>"];
+    bb25_0 [label = "()\n@ivar$3 = alias @ivar : Integer\n@ivar$3 = 2 : Integer(2)\n@ivar$3 = ss : untyped\n<ret>$4 = return @ivar$3 : <bottom>\n<unconditional>"];
     bb25_0 -> bb25_1;
     bb25_1 [label = "()\n<unconditional>"];
     bb25_1 -> bb25_1;

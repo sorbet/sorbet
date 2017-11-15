@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:BlockTest>#block_pass" {
     bb24_0 [shape = invhouse];
     bb24_1 [shape = parallelogram];
 
-    bb24_0 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nstatTmp$2 = self : <constant:BlockTest>\nstatTmp$3 = 1 : <constant:Integer>(1)\nstatTmp$4 = 2 : <constant:Integer>(2)\nstatTmp$5 = 3 : <constant:Integer>(3)\n<unconditional>"];
+    bb24_0 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nstatTmp$2 = self : BlockTest\nstatTmp$3 = 1 : Integer(1)\nstatTmp$4 = 2 : Integer(2)\nstatTmp$5 = 3 : Integer(3)\n<unconditional>"];
     bb24_0 -> bb24_2;
     bb24_1 [label = "()\n<unconditional>"];
     bb24_1 -> bb24_1;
@@ -13,9 +13,9 @@ subgraph "cluster_::<constant:BlockTest>#block_pass" {
     bb24_2 -> bb24_4;
     bb24_2 -> bb24_3;
 
-    bb24_3 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\n<ret>$1 = statTmp$2.foo(statTmp$3, statTmp$4, statTmp$5) : <constant:untyped>\n<ret>$7 = return <ret>$1 : <constant:<bottom>>\n<unconditional>"];
+    bb24_3 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\n<ret>$1 = statTmp$2.foo(statTmp$3, statTmp$4, statTmp$5) : untyped\n<ret>$7 = return <ret>$1 : <bottom>\n<unconditional>"];
     bb24_3 -> bb24_1;
-    bb24_4 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nouterLoops: 1\n<block-nested: x> = load_arg(statTmp$2#foo, 0) : <constant:untyped>\n<unconditional>"];
+    bb24_4 [label = "(statTmp$2, statTmp$3, statTmp$4, statTmp$5)\nouterLoops: 1\n<block-nested: x> = load_arg(statTmp$2#foo, 0) : untyped\n<unconditional>"];
     bb24_4 -> bb24_2;
 }
 

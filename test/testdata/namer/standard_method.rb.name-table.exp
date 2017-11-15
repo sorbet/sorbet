@@ -1,13 +1,13 @@
 class <constant:A> (<constant:Object>)
-  method f (a, b, c, d, e) -> <constant:T2>
+  method f (a, b, c, d, e) -> T2
     argument a<> -> ArrayType {
-          0 = <constant:T1>
-          0 = <constant:T2>
+          0 = T1
+          0 = T2
         }
-    argument b<> -> <constant:T1>
-    argument c<> -> <constant:T1> | <constant:NilClass>
-    argument d<> -> <constant:T1> | <constant:T2>
-    argument e<> -> <constant:untyped>
+    argument b<> -> T1
+    argument c<> -> T1 | NilClass
+    argument d<> -> T1 | T2
+    argument e<> -> untyped
 class <constant:Opus> ()
 class <constant:T1> (<constant:Object>)
 class <constant:T2> (<constant:Object>)

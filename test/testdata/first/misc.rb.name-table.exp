@@ -1,10 +1,10 @@
 class <constant:Opus> ()
 class <singleton class:<constant:<root>>> (<constant:Class>)
-  field @iv -> <constant:untyped>
+  field @iv -> untyped
 class <singleton class:<constant:<root>>> (<constant:Class>)
-  field @iv -> <constant:untyped>
+  field @iv -> untyped
 class <singleton class:<constant:Object>> (<constant:Class>)
   method classmeth ()
 field $gv
-static-field @@cv -> <constant:untyped>
+static-field @@cv -> untyped
 

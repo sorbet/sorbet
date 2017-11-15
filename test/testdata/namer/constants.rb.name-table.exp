@@ -1,6 +1,6 @@
 class <constant:A> ()
   class <constant:B> ()
-    static-field <constant:C> -> <constant:untyped>
-    static-field <constant:D> -> <constant:untyped>
+    static-field <constant:C> -> untyped
+    static-field <constant:D> -> untyped
 class <constant:Opus> ()
 
