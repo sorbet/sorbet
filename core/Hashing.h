@@ -16,6 +16,10 @@ inline unsigned int _hash_mix_unique(unsigned int hash1, NameKind nk, unsigned i
     return mix(mix(hash2, hash1), hash3) * HASH_MULT2 + _NameKind2Id_UNIQUE(nk);
 }
 
+inline unsigned int _hash_mix_constant(NameKind nk, unsigned int id) {
+    return id * HASH_MULT2 + _NameKind2Id_CONSTANT(nk);
+}
+
 inline unsigned int _hash(UTF8Desc utf8) {
     // TODO: replace with http://www.sanmayce.com/Fastest_Hash/, see https://www.strchr.com/hash_functions
     // and https://github.com/rurban/smhasher

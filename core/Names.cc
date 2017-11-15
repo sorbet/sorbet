@@ -25,25 +25,30 @@ unsigned int Name::hash(GlobalState &gs) const {
     switch (kind) {
         case UTF8:
             return _hash(raw.utf8);
-        case UNIQUE: {
+        case UNIQUE:
             return _hash_mix_unique((u2)unique.uniqueNameKind, UNIQUE, unique.num, unique.original.id());
-        }
-            DEBUG_ONLY(default : Error::raise("Unknown name kind?", kind);)
+        case CONSTANT:
+            return _hash_mix_constant(CONSTANT, cnst.original.id());
+        default:
+            DEBUG_ONLY(Error::raise("Unknown name kind?", kind);)
     }
 }
 
 string Name::toString(GlobalState &gs) const {
-    if (kind == UTF8) {
-        return raw.utf8.toString();
-    } else if (kind == UNIQUE) {
-        if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-            return "<singleton class:" + this->unique.original.name(gs).toString(gs) + ">";
-        } else if (this->unique.uniqueNameKind == UniqueNameKind::NestedScope) {
-            return "<block-nested: " + this->unique.original.name(gs).toString(gs) + ">";
-        }
-        return this->unique.original.name(gs).toString(gs) + "$" + to_string(this->unique.num);
-    } else {
-        Error::notImplemented();
+    switch (this->kind) {
+        case UTF8:
+            return raw.utf8.toString();
+        case UNIQUE:
+            if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
+                return "<singleton class:" + this->unique.original.name(gs).toString(gs) + ">";
+            } else if (this->unique.uniqueNameKind == UniqueNameKind::NestedScope) {
+                return "<block-nested: " + this->unique.original.name(gs).toString(gs) + ">";
+            }
+            return this->unique.original.name(gs).toString(gs) + "$" + to_string(this->unique.num);
+        case CONSTANT:
+            return "<constant:" + this->cnst.original.toString(gs) + ">";
+        default:
+            Error::notImplemented();
     }
 }
 
