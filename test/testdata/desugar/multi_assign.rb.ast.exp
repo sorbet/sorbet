@@ -1,0 +1,20 @@
+begin
+  begin
+    assignTmp$0 = self(<todo sym>).some_array()
+    <emptyTree>::A = assignTmp$0.[](0)
+    <emptyTree>::B = assignTmp$0.[](1)
+    <emptyTree>::C = assignTmp$0.[](2)
+    assignTmp$0
+  end
+  class <emptyTree>::Test<<todo sym>> < ()
+    def some_method<<todo sym>>(array)
+      begin
+        assignTmp$1 = array
+        a = assignTmp$1.[](0)
+        b = assignTmp$1.[](1)
+        <Not Supported (Mlhs)>
+        assignTmp$1
+      end
+
+  end
+end

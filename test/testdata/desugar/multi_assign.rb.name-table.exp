@@ -1,0 +1,10 @@
+class <singleton class:<root>> (Class)
+class <singleton class:<root>> (Class)
+class Opus ()
+class Test (Object)
+  method some_method (array)
+    argument array<>
+static-field A -> untyped
+static-field B -> untyped
+static-field C -> untyped
+

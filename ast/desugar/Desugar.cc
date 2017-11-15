@@ -814,7 +814,8 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                                 make_unique<IntLit>(what->loc, i));
                     snd->args.emplace_back(move(getElement));
                     stats.emplace_back(move(lh));
-                } else if (ast::Reference *ref = cast_tree<ast::Reference *>(lh.get())) {
+                } else if (cast_tree<ast::Reference *>(lh.get()) != nullptr ||
+                           cast_tree<ast::ConstantLit *>(lh.get()) != nullptr) {
                     auto access = mkSend1(what->loc, mkLocal(what->loc, tempName), core::Names::squareBrackets(),
                                           make_unique<IntLit>(what->loc, i));
                     unique_ptr<Expression> assign = mkAssign(what->loc, lh, access);
