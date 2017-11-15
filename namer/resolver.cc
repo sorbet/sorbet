@@ -37,7 +37,7 @@ private:
     }
 
     core::SymbolRef resolveConstant(core::Context ctx, ast::ConstantLit *c) {
-        if (dynamic_cast<ast::EmptyTree *>(c->scope.get()) != nullptr) {
+        if (ast::cast_tree<ast::EmptyTree *>(c->scope.get()) != nullptr) {
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (result.exists()) {
                 return result;
@@ -46,7 +46,7 @@ private:
                                    c->toString(ctx));
             return core::GlobalState::defn_untyped();
 
-        } else if (ast::ConstantLit *scope = dynamic_cast<ast::ConstantLit *>(c->scope.get())) {
+        } else if (ast::ConstantLit *scope = ast::cast_tree<ast::ConstantLit *>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, scope);
             if (!resolved.exists() || resolved == core::GlobalState::defn_untyped())
                 return resolved;
@@ -67,7 +67,7 @@ private:
     }
 
     unique_ptr<ast::Expression> maybeResolve(core::Context ctx, ast::Expression *expr) {
-        if (ast::ConstantLit *cnst = dynamic_cast<ast::ConstantLit *>(expr)) {
+        if (ast::ConstantLit *cnst = ast::cast_tree<ast::ConstantLit *>(expr)) {
             core::SymbolRef resolved = resolveConstant(ctx, cnst);
             if (resolved.exists())
                 return make_unique<ast::Ident>(expr->loc, resolved);
@@ -96,7 +96,7 @@ private:
                 }
             },
             [&](ast::Send *s) {
-                if (auto *recvi = dynamic_cast<ast::Ident *>(s->recv.get())) {
+                if (auto *recvi = ast::cast_tree<ast::Ident *>(s->recv.get())) {
                     if (recvi->symbol != core::GlobalState::defn_Opus_Types()) {
                         ctx.state.errors.error(recvi->loc, core::ErrorClass::InvalidTypeDeclaration,
                                                "Misformed type declaration. Unknown argument type type {}",
@@ -141,17 +141,17 @@ private:
 
     void fillInInfoFromStandardMethod(core::Context ctx, core::Symbol &methoInfo,
                                       unique_ptr<ast::Send> &lastStandardMethod, int argsSize) {
-        if (dynamic_cast<ast::Self *>(lastStandardMethod->recv.get()) == nullptr ||
+        if (ast::cast_tree<ast::Self *>(lastStandardMethod->recv.get()) == nullptr ||
             lastStandardMethod->block != nullptr) {
             ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
                                    "Misformed standard_method " + lastStandardMethod->toString(ctx));
         } else {
             for (auto &arg : lastStandardMethod->args) {
-                if (auto *hash = dynamic_cast<ast::Hash *>(arg.get())) {
+                if (auto *hash = ast::cast_tree<ast::Hash *>(arg.get())) {
                     int i = 0;
                     for (unique_ptr<ast::Expression> &key : hash->keys) {
                         unique_ptr<ast::Expression> &value = hash->values[i++];
-                        if (auto *symbolLit = dynamic_cast<ast::SymbolLit *>(key.get())) {
+                        if (auto *symbolLit = ast::cast_tree<ast::SymbolLit *>(key.get())) {
                             if (symbolLit->name == core::Names::returns()) {
                                 // fill in return type
                                 methoInfo.resultType = getResultType(ctx, value);
@@ -182,7 +182,7 @@ private:
     }
 
     void processDeclareVariables(core::Context ctx, ast::Send *send) {
-        if (dynamic_cast<ast::Self *>(send->recv.get()) == nullptr || send->block != nullptr) {
+        if (ast::cast_tree<ast::Self *>(send->recv.get()) == nullptr || send->block != nullptr) {
             ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
                                    "Malformed `declare_variables'");
             return;
@@ -193,7 +193,7 @@ private:
                                    "Wrong number of arguments to `declare_variables'");
             return;
         }
-        auto hash = dynamic_cast<ast::Hash *>(send->args.front().get());
+        auto hash = ast::cast_tree<ast::Hash *>(send->args.front().get());
         if (hash == nullptr) {
             ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
                                    "Malformed `declare_variables': Argument must be a hash");
@@ -202,7 +202,7 @@ private:
         for (int i = 0; i < hash->keys.size(); ++i) {
             auto &key = hash->keys[i];
             auto &value = hash->values[i];
-            auto sym = dynamic_cast<ast::SymbolLit *>(key.get());
+            auto sym = ast::cast_tree<ast::SymbolLit *>(key.get());
             if (sym == nullptr) {
                 ctx.state.errors.error(key->loc, core::ErrorClass::InvalidDeclareVariables,
                                        "`declare_variables': variable names must be symbols");
@@ -259,7 +259,7 @@ public:
         if (original->ancestors.size() > 0) {
             core::Symbol &info = original->symbol.info(ctx);
             for (auto &ancst : original->ancestors) {
-                ast::Ident *id = dynamic_cast<ast::Ident *>(ancst.get());
+                ast::Ident *id = ast::cast_tree<ast::Ident *>(ancst.get());
                 if (id == nullptr || !id->symbol.info(ctx).isClass()) {
                     ctx.state.errors.error(id->loc, core::ErrorClass::DynamicSuperclass,
                                            "Superclasses and mixins must be statically resolved.");
@@ -286,14 +286,14 @@ public:
 
         unique_ptr<ast::Send> lastStandardMethod;
         for (auto &stat : original->rhs) {
-            if (auto send = dynamic_cast<ast::Send *>(stat.get())) {
+            if (auto send = ast::cast_tree<ast::Send *>(stat.get())) {
                 if (send->fun == core::Names::standardMethod()) {
                     lastStandardMethod.reset(send);
                     stat.release();
                 } else if (send->fun == core::Names::declareVariables()) {
                     processDeclareVariables(ctx.withOwner(original->symbol), send);
                 }
-            } else if (auto mdef = dynamic_cast<ast::MethodDef *>(stat.get())) {
+            } else if (auto mdef = ast::cast_tree<ast::MethodDef *>(stat.get())) {
                 if (lastStandardMethod) {
                     core::Symbol &methoInfo = mdef->symbol.info(ctx);
                     fillInInfoFromStandardMethod(ctx, methoInfo, lastStandardMethod, mdef->args.size());

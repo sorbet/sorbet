@@ -96,13 +96,13 @@ public:
 };
 
 template <class From, class To> To fast_cast(From what) {
-    #if __cplusplus >= 201402L
-        return FastCaster<From, To, std::is_final<To>::value>::fast_cast_impl(what);
-    #elif __has_feature(is_final)
-        return FastCaster<From, To, __is_final(To)>::fast_cast_impl(what);
-    #else
-        static_assert(false);
-    #endif
+#if __cplusplus >= 201402L
+    return FastCaster<From, To, std::is_final<To>::value>::fast_cast_impl(what);
+#elif __has_feature(is_final)
+    return FastCaster<From, To, __is_final(To)>::fast_cast_impl(what);
+#else
+    static_assert(false);
+#endif
 };
 
 class File final {
