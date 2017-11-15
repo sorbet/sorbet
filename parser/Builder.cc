@@ -112,22 +112,22 @@ public:
     }
 
     unique_ptr<Node> transform_condition(unique_ptr<Node> cond) {
-        if (Begin *b = parser::cast_node<Begin *>(cond.get())) {
+        if (Begin *b = parser::cast_node<Begin>(cond.get())) {
             if (b->stmts.size() == 1)
                 b->stmts[0] = transform_condition(move(b->stmts[0]));
-        } else if (And *a = parser::cast_node<And *>(cond.get())) {
+        } else if (And *a = parser::cast_node<And>(cond.get())) {
             a->left = transform_condition(move(a->left));
             a->right = transform_condition(move(a->right));
-        } else if (Or *o = parser::cast_node<Or *>(cond.get())) {
+        } else if (Or *o = parser::cast_node<Or>(cond.get())) {
             o->left = transform_condition(move(o->left));
             o->right = transform_condition(move(o->right));
-        } else if (IRange *ir = parser::cast_node<IRange *>(cond.get())) {
+        } else if (IRange *ir = parser::cast_node<IRange>(cond.get())) {
             return make_unique<IFlipflop>(ir->loc, transform_condition(move(ir->from)),
                                           transform_condition(move(ir->to)));
-        } else if (ERange *er = parser::cast_node<ERange *>(cond.get())) {
+        } else if (ERange *er = parser::cast_node<ERange>(cond.get())) {
             return make_unique<EFlipflop>(er->loc, transform_condition(move(er->from)),
                                           transform_condition(move(er->to)));
-        } else if (Regexp *re = parser::cast_node<Regexp *>(cond.get())) {
+        } else if (Regexp *re = parser::cast_node<Regexp>(cond.get())) {
             return make_unique<MatchCurLine>(re->loc, move(cond));
         }
         return cond;
@@ -140,7 +140,7 @@ public:
     /* Begin callback methods */
 
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
-        if (Ident *id = parser::cast_node<Ident *>(node.get())) {
+        if (Ident *id = parser::cast_node<Ident>(node.get())) {
             core::Name &name = id->name.name(gs_);
             DEBUG_ONLY(Error::check(name.kind == core::UTF8));
             if (driver_->lex.is_declared(name.toString(gs_))) {
@@ -173,10 +173,10 @@ public:
     unique_ptr<Node> assign(unique_ptr<Node> lhs, const token *eql, unique_ptr<Node> rhs) {
         Loc loc = loc_join(lhs->loc, rhs->loc);
 
-        if (Send *s = parser::cast_node<Send *>(lhs.get())) {
+        if (Send *s = parser::cast_node<Send>(lhs.get())) {
             s->args.push_back(move(rhs));
             return make_unique<Send>(loc, move(s->receiver), s->method, move(s->args));
-        } else if (CSend *s = parser::cast_node<CSend *>(lhs.get())) {
+        } else if (CSend *s = parser::cast_node<CSend>(lhs.get())) {
             s->args.push_back(move(rhs));
             return make_unique<CSend>(loc, move(s->receiver), s->method, move(s->args));
         } else {
@@ -185,20 +185,20 @@ public:
     }
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
-        if (Ident *id = parser::cast_node<Ident *>(node.get())) {
+        if (Ident *id = parser::cast_node<Ident>(node.get())) {
             core::Name &name = id->name.name(gs_);
             driver_->lex.declare(name.toString(gs_));
             return make_unique<LVarLhs>(id->loc, id->name);
-        } else if (IVar *iv = parser::cast_node<IVar *>(node.get())) {
+        } else if (IVar *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
-        } else if (Const *c = parser::cast_node<Const *>(node.get())) {
+        } else if (Const *c = parser::cast_node<Const>(node.get())) {
             return make_unique<ConstLhs>(c->loc, move(c->scope), move(c->name));
-        } else if (CVar *cv = parser::cast_node<CVar *>(node.get())) {
+        } else if (CVar *cv = parser::cast_node<CVar>(node.get())) {
             return make_unique<CVarLhs>(cv->loc, cv->name);
-        } else if (GVar *gv = parser::cast_node<GVar *>(node.get())) {
+        } else if (GVar *gv = parser::cast_node<GVar>(node.get())) {
             return make_unique<GVarLhs>(gv->loc, gv->name);
-        } else if (parser::cast_node<Backref *>(node.get()) != nullptr ||
-                   parser::cast_node<NthRef *>(node.get()) != nullptr) {
+        } else if (parser::cast_node<Backref>(node.get()) != nullptr ||
+                   parser::cast_node<NthRef>(node.get()) != nullptr) {
             error(ruby_parser::dclass::BackrefAssignment, node->loc);
             return make_unique<Nil>(node->loc);
         } else {
@@ -234,9 +234,9 @@ public:
         if (body == nullptr) {
             return make_unique<Begin>(loc, ruby_typer::parser::NodeVec());
         }
-        if (Begin *b = parser::cast_node<Begin *>(body.get()))
+        if (Begin *b = parser::cast_node<Begin>(body.get()))
             return body;
-        if (Mlhs *m = parser::cast_node<Mlhs *>(body.get()))
+        if (Mlhs *m = parser::cast_node<Mlhs>(body.get()))
             return body;
         ruby_typer::parser::NodeVec stmts;
         stmts.push_back(move(body));
@@ -280,7 +280,7 @@ public:
     unique_ptr<Node> begin_keyword(const token *begin, unique_ptr<Node> body, const token *end) {
         Loc loc = loc_join(tok_loc(begin), tok_loc(end));
         if (body != nullptr) {
-            if (Begin *b = parser::cast_node<Begin *>(body.get())) {
+            if (Begin *b = parser::cast_node<Begin>(body.get())) {
                 return make_unique<Kwbegin>(loc, move(b->stmts));
             } else {
                 ruby_typer::parser::NodeVec nodes;
@@ -302,23 +302,23 @@ public:
 
     unique_ptr<Node> block(unique_ptr<Node> method_call, const token *begin, unique_ptr<Node> args,
                            unique_ptr<Node> body, const token *end) {
-        if (Yield *y = parser::cast_node<Yield *>(method_call.get())) {
+        if (Yield *y = parser::cast_node<Yield>(method_call.get())) {
             error(ruby_parser::dclass::BlockGivenToYield, y->loc);
             return make_unique<Yield>(y->loc, ruby_typer::parser::NodeVec());
         }
 
         ruby_typer::parser::NodeVec *callargs = nullptr;
-        if (Send *s = parser::cast_node<Send *>(method_call.get())) {
+        if (Send *s = parser::cast_node<Send>(method_call.get())) {
             callargs = &s->args;
         }
-        if (CSend *s = parser::cast_node<CSend *>(method_call.get())) {
+        if (CSend *s = parser::cast_node<CSend>(method_call.get())) {
             callargs = &s->args;
         }
-        if (Super *s = parser::cast_node<Super *>(method_call.get())) {
+        if (Super *s = parser::cast_node<Super>(method_call.get())) {
             callargs = &s->args;
         }
         if (callargs != nullptr && callargs->size() > 0) {
-            if (BlockPass *bp = parser::cast_node<BlockPass *>(callargs->back().get()))
+            if (BlockPass *bp = parser::cast_node<BlockPass>(callargs->back().get()))
                 error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
         }
 
@@ -487,7 +487,7 @@ public:
 
                  [&](DString *d) {
                      for (auto &p : d->nodes) {
-                         if (String *s = parser::cast_node<String *>(p.get())) {
+                         if (String *s = parser::cast_node<String>(p.get())) {
                              std::string dedented = dedenter.dedent(s->val.name(gs_).toString(gs_));
                              unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                              p.swap(newstr);
@@ -623,7 +623,7 @@ public:
     unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
-        if (args.size() > 0 && parser::cast_node<BlockPass *>(args.back().get()) != nullptr) {
+        if (args.size() > 0 && parser::cast_node<BlockPass>(args.back().get()) != nullptr) {
             error(ruby_parser::dclass::BlockGivenToYield, loc);
         }
         return make_unique<Yield>(loc, move(args));
@@ -709,7 +709,7 @@ public:
     }
 
     unique_ptr<Node> multi_lhs1(const token *begin, unique_ptr<Node> item, const token *end) {
-        if (Mlhs *mlhs = parser::cast_node<Mlhs *>(item.get())) {
+        if (Mlhs *mlhs = parser::cast_node<Mlhs>(item.get())) {
             return item;
         }
         ruby_typer::parser::NodeVec args;
@@ -719,11 +719,11 @@ public:
 
     unique_ptr<Node> negate(const token *uminus, unique_ptr<Node> numeric) {
         Loc loc = loc_join(tok_loc(uminus), numeric->loc);
-        if (Integer *i = parser::cast_node<Integer *>(numeric.get()))
+        if (Integer *i = parser::cast_node<Integer>(numeric.get()))
             return make_unique<Integer>(loc, "-" + i->val);
-        if (Float *i = parser::cast_node<Float *>(numeric.get()))
+        if (Float *i = parser::cast_node<Float>(numeric.get()))
             return make_unique<Float>(loc, "-" + i->val);
-        if (Rational *r = parser::cast_node<Rational *>(numeric.get()))
+        if (Rational *r = parser::cast_node<Rational>(numeric.get()))
             return make_unique<Float>(loc, "-" + r->val);
         Error::raise("unexpected numeric type: ", numeric->nodeName());
     }
@@ -753,7 +753,7 @@ public:
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        if (parser::cast_node<Backref *>(lhs.get()) != nullptr || parser::cast_node<NthRef *>(lhs.get()) != nullptr)
+        if (parser::cast_node<Backref>(lhs.get()) != nullptr || parser::cast_node<NthRef>(lhs.get()) != nullptr)
             error(ruby_parser::dclass::BackrefAssignment, lhs->loc);
 
         if (op->string() == "&&")
@@ -894,9 +894,9 @@ public:
         ruby_typer::parser::NodeVec out_parts;
         out_parts.reserve(parts.size());
         for (auto &p : parts) {
-            if (String *s = parser::cast_node<String *>(p.get())) {
+            if (String *s = parser::cast_node<String>(p.get())) {
                 out_parts.emplace_back(make_unique<Symbol>(s->loc, s->val));
-            } else if (DString *d = parser::cast_node<DString *>(p.get())) {
+            } else if (DString *d = parser::cast_node<DString>(p.get())) {
                 out_parts.emplace_back(make_unique<DSymbol>(d->loc, move(d->nodes)));
             } else {
                 out_parts.push_back(move(p));
