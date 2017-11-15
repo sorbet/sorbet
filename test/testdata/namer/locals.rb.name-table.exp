@@ -3,7 +3,6 @@ class TestLocals (Object)
   method method ()
     method <block>$0 ()
       method <block>$1 ()
-    method <block>$2 (a, b)
+    method <block>$2 (a)
       argument a<>
-      argument b<>
 
