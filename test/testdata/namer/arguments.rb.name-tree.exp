@@ -1,0 +1,7 @@
+class <emptyTree>::A<A> < ()
+  def take_arguments<take_arguments>(a, b, c, d, e, f, g)
+    self(A).proc() do |<block-nested: a>, <block-nested: b>, <block-nested: c>, <block-nested: d>, <block-nested: e>, <block-nested: f>, <block-nested: g>, <block-nested: h>|
+      <emptyTree>
+    end
+
+end

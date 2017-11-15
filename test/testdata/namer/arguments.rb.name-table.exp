@@ -1,0 +1,20 @@
+class A (Object)
+  method take_arguments (a, b, c, d, e, f, g)
+    argument a<>
+    argument b<optional>
+    argument c<repeated>
+    argument d<keyword>
+    argument e<optional, keyword>
+    argument f<keyword, repeated>
+    argument g<block>
+    method <block>$0 (a, b, c, d, e, f, g, h)
+      argument a<>
+      argument b<optional>
+      argument c<repeated>
+      argument d<keyword>
+      argument e<optional, keyword>
+      argument f<keyword, repeated>
+      argument g<block>
+      argument h<>
+class Opus ()
+
