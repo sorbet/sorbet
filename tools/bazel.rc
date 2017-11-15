@@ -48,7 +48,6 @@ build:lto --cxxopt=-fno-pie
 # Unsafe build: disable sanitizers. Smaller size and better perf, undefined behaviour in case of bugs.
 build:unsafe --copt=-fno-stack-protector
 build:unsafe --cxxopt=-fno-stack-protector
-build:unsafe --linkopt=-flto=thin
 build:unsafe --copt=-fno-sanitize=address
 build:unsafe --cxxopt=-fno-sanitize=address
 build:unsafe --linkopt=-fno-sanitize=address
