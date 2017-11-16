@@ -1,3 +1,4 @@
+#include "../Context.h"
 #include "core/core.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
@@ -7,8 +8,6 @@ using namespace std;
 
 namespace ruby_typer {
 namespace core {
-core::Loc::Detail offset2Pos(core::UTF8Desc source, u4 off);
-
 auto console = spd::stderr_color_mt("parse");
 
 struct Offset2PosTest {
@@ -19,18 +18,21 @@ struct Offset2PosTest {
 };
 
 TEST(ASTTest, TestOffset2Pos) {
-    vector<Offset2PosTest> cases = {
-        {"hello", 0, 1, 0},
-        {"line 1\nline 2", 1, 1, 1},
-        {"line 1\nline 2", 7, 2, 0},
-        {"line 1\nline 2", 11, 2, 4},
-        {"a long line with no newlines\n", 20, 1, 20},
-    };
+    core::GlobalState gs(*console);
+
+    vector<Offset2PosTest> cases = {{"hello", 0, 1, 1},
+                                    {"line 1\nline 2", 1, 1, 2},
+                                    {"line 1\nline 2", 7, 2, 1},
+                                    {"line 1\nline 2", 11, 2, 5},
+                                    {"a long line with no newlines\n", 20, 1, 21},
+                                    {"line 1\nline 2\nline3\n", 7, 2, 1},
+                                    {"line 1\nline 2\nline3", 7, 2, 1}};
     int i = 0;
     for (auto &tc : cases) {
         SCOPED_TRACE(string("case: ") + to_string(i));
+        core::FileRef f = gs.enterFile(string(""), tc.src);
 
-        auto detail = offset2Pos(tc.src, tc.off);
+        auto detail = Loc::offset2Pos(f, tc.off, gs);
 
         EXPECT_EQ(tc.col, detail.column);
         EXPECT_EQ(tc.line, detail.line);

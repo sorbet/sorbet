@@ -38,6 +38,7 @@ public:
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
+    static Detail offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs);
 };
 } // namespace core
 } // namespace ruby_typer

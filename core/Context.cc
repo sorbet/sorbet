@@ -659,10 +659,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
 FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
     auto idx = files.size();
-    files.emplace_back();
-    auto &file = files.back();
-    file.path_ = path.toString();
-    file.source_ = source.toString();
+    files.emplace_back(path.toString(), source.toString());
     return FileRef(idx);
 }
 
