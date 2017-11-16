@@ -114,7 +114,7 @@ void parse_and_print(ruby_typer::core::GlobalState &gs, cxxopts::Options &opts, 
             return;
     }
 
-    CFG_Collector_and_Typer collector(!opts["t"].as<bool>());
+    CFG_Collector_and_Typer collector(!opts["no-typer"].as<bool>());
 
     auto cfg_and_throw_out_result =
         ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(desugared));
@@ -150,9 +150,9 @@ int realmain(int argc, char **argv) {
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
-    options.add_options()("n,no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options()("t,no-typer", "Do not type the CFG");
-    options.add_options()("q,quiet", "Silence output of errors");
+    options.add_options()("no-stdlib", "Do not load included rbi files for stdlib");
+    options.add_options()("no-typer", "Do not type the CFG");
+    options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
                           cxxopts::value<vector<string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
@@ -194,7 +194,7 @@ int realmain(int argc, char **argv) {
 
     ruby_typer::core::GlobalState gs(*console);
 
-    if (!options["n"].as<bool>()) {
+    if (!options["no-typer"].as<bool>()) {
         clock_t begin = clock();
 
         index(gs, ruby_typer::rbi::all());
