@@ -1,3 +1,4 @@
+#include "../../namer/namer.h"
 #include "../infer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -62,7 +63,7 @@ TEST_F(InferFixture, LiteralsSubtyping) {
 TEST_F(InferFixture, ClassesSubtyping) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo < Bar; end");
-    namer::Namer::run(ctx, move(tree));
+    namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 2];
@@ -82,7 +83,7 @@ TEST_F(InferFixture, ClassesSubtyping) {
 TEST_F(InferFixture, ClassesLubs) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    namer::Namer::run(ctx, move(tree));
+    namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 3];
@@ -124,7 +125,7 @@ TEST_F(InferFixture, ClassesLubs) {
 TEST_F(InferFixture, ClassesGlbs) {
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    namer::Namer::run(ctx, move(tree));
+    namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 3];

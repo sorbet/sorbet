@@ -1,3 +1,4 @@
+#include "../namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
@@ -170,17 +171,10 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
     // Namer
     auto namedTree = ruby_typer::namer::Namer::run(context, move(desugared));
+    auto resolvedTree = ruby_typer::namer::Resolver::run(context, move(namedTree));
 
     expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
-        auto checker = test.folder + expectation->second;
-        auto exp = ruby_typer::File::read(checker.c_str());
-        SCOPED_TRACE(checker);
-
-        EXPECT_EQ(exp, gs.toString() + "\n");
-        if (exp == gs.toString() + "\n") {
-            TEST_COUT << "name-table OK" << endl;
-        }
         auto newErrors = gs.errors.getAndEmptyErrors();
         errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                       std::make_move_iterator(newErrors.end()));
@@ -192,8 +186,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, namedTree->toString(gs) + "\n");
-        if (exp == namedTree->toString(gs) + "\n") {
+        EXPECT_EQ(exp, resolvedTree->toString(gs) + "\n");
+        if (exp == resolvedTree->toString(gs) + "\n") {
             TEST_COUT << "name-tree OK" << endl;
         }
         auto newErrors = gs.errors.getAndEmptyErrors();
@@ -207,8 +201,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto exp = ruby_typer::File::read(checker.c_str());
         SCOPED_TRACE(checker);
 
-        EXPECT_EQ(exp, namedTree->showRaw(gs) + "\n");
-        if (exp == namedTree->showRaw(gs) + "\n") {
+        EXPECT_EQ(exp, resolvedTree->showRaw(gs) + "\n");
+        if (exp == resolvedTree->showRaw(gs) + "\n") {
             TEST_COUT << "name-tree-raw OK" << endl;
         }
         auto newErrors = gs.errors.getAndEmptyErrors();
@@ -218,7 +212,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
     // CFG
     CFG_Collector_and_Typer collector;
-    auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(namedTree));
+    auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
 
     expectation = test.expectations.find("cfg");
     if (expectation != test.expectations.end()) {
@@ -243,6 +237,18 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         auto newErrors = gs.errors.getAndEmptyErrors();
         errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                       std::make_move_iterator(newErrors.end()));
+    }
+
+    expectation = test.expectations.find("name-table");
+    if (expectation != test.expectations.end()) {
+        auto checker = test.folder + expectation->second;
+        auto exp = ruby_typer::File::read(checker.c_str());
+        SCOPED_TRACE(checker);
+
+        EXPECT_EQ(exp, gs.toString() + "\n");
+        if (exp == gs.toString() + "\n") {
+            TEST_COUT << "name-table OK" << endl;
+        }
     }
 
     // Check warnings and errors

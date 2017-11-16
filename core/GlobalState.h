@@ -62,6 +62,7 @@ public:
     unsigned int namesUsed();
 
     unsigned int symbolsUsed();
+    unsigned int filesUsed();
 
     unsigned int symbolCapacity();
 

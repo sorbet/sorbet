@@ -587,6 +587,10 @@ unsigned int GlobalState::symbolsUsed() {
     return symbols.size();
 }
 
+    unsigned int GlobalState::filesUsed() {
+        return files.size();
+    }
+
 unsigned int GlobalState::namesUsed() {
     return names.size();
 }
