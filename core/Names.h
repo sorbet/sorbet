@@ -342,6 +342,11 @@ public:
     static inline NameRef empty() {
         return NameRef(41);
     }
+
+    // ===
+    static inline NameRef tripleEq() {
+        return NameRef(42);
+    }
 };
 
 class Name final {

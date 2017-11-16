@@ -838,7 +838,43 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             auto res = mkFalse(what->loc);
             result.swap(res);
         },
+        [&](parser::Case *c) {
+            unique_ptr<Expression> assign;
+            core::NameRef temp(0);
+            core::Loc cloc;
 
+            if (c->condition != nullptr) {
+                cloc = c->condition->loc;
+                temp = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp());
+                assign = mkAssign(cloc, temp, node2TreeImpl(ctx, c->condition));
+            }
+            unique_ptr<Expression> res = node2TreeImpl(ctx, c->else_);
+            for (auto it = c->whens.rbegin(); it != c->whens.rend(); ++it) {
+                auto when = parser::cast_node<parser::When>(it->get());
+                Error::check(when != nullptr);
+                unique_ptr<Expression> cond;
+                for (auto &cnode : when->patterns) {
+                    auto ctree = node2TreeImpl(ctx, cnode);
+                    unique_ptr<Expression> test;
+                    if (temp.exists()) {
+                        auto local = mkLocal(cloc, temp);
+                        test = mkSend1(cnode->loc, local, core::Names::tripleEq(), ctree);
+                    } else {
+                        test.swap(ctree);
+                    }
+                    if (cond == nullptr) {
+                        cond.swap(test);
+                    } else {
+                        cond = make_unique<If>(test->loc, move(test), mkTrue(test->loc), move(cond));
+                    }
+                }
+                res = make_unique<If>(when->loc, move(cond), node2TreeImpl(ctx, when->body), move(res));
+            }
+            if (assign != nullptr) {
+                res = mkInsSeq1(c->loc, move(assign), move(res));
+            }
+            result.swap(res);
+        },
         [&](parser::Node *a) {
             ctx.state.errors.error(what->loc, core::ErrorClass::UnsupportedNode, "Unsupported node type {}",
                                    a->nodeName());
