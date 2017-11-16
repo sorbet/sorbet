@@ -180,16 +180,18 @@ public:
 
     ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
         scopeStack.emplace_back();
-        core::SymbolRef owner = ownerFromContext(ctx);
+        core::SymbolRef owner = ctx.enclosingClass();
+        if (owner == core::GlobalState::noSymbol()) {
+            // Root methods end up going on object
+            owner = core::GlobalState::defn_object();
+        }
+
         if (method->isSelf) {
             if (owner.info(ctx).isClass()) {
                 owner = owner.info(ctx).singletonClass(ctx);
             }
         }
-        if (!owner.info(ctx).isClass()) {
-            ctx.state.errors.error(method->loc, core::ErrorClass::DynamicMethodDefinition,
-                                   "Unsupported dynamic method definition");
-        }
+        Error::check(owner.info(ctx).isClass());
 
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
         core::Symbol &symbol = method->symbol.info(ctx);
@@ -205,7 +207,11 @@ public:
     }
 
     ast::Block *preTransformBlock(core::Context ctx, ast::Block *blk) {
-        core::SymbolRef owner = ownerFromContext(ctx);
+        core::SymbolRef owner = ctx.owner;
+        if (owner == core::GlobalState::noSymbol()) {
+            // Root methods end up going on object
+            owner = core::GlobalState::defn_object();
+        }
         blk->symbol = ctx.state.enterMethodSymbol(
             blk->loc, owner, ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp()));
 
@@ -273,15 +279,6 @@ public:
     }
 
 private:
-    core::SymbolRef ownerFromContext(core::Context ctx) {
-        core::SymbolRef owner = ctx.owner;
-        if (owner == core::GlobalState::defn_root()) {
-            // Root methods end up going on object
-            owner = core::GlobalState::defn_object();
-        }
-        return owner;
-    }
-
     NameInserter() {
         scopeStack.emplace_back();
     }

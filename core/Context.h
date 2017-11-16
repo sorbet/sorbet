@@ -215,6 +215,7 @@ public:
     SymbolRef selfClass();
 
     SymbolRef enclosingMethod();
+    SymbolRef enclosingClass();
 
     // Returns the SymbolRef corresponding to the class `self.class`, unless the
     // context is a class, in which case return it. This class is most notably

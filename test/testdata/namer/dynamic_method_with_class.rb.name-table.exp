@@ -1,0 +1,8 @@
+class <constant:F> (<constant:Object>)
+  method bar (baz)
+    argument baz<>
+  method bla ()
+    method <block>$0 ()
+  method foo ()
+class <constant:Opus> ()
+
