@@ -4,8 +4,8 @@
 alias foo bar
 
 # various LHSs
-@iv = 1         # error: undeclared variable
-@@cv = 1        # error: undeclared variable
+@iv = 1
+@@cv = 1
 $gv = 1
 
 x.var, y = nil, nil
@@ -74,7 +74,7 @@ defined?(X)
 
 
 # zsuper
-super # error: super outside
+super
 
 # kwargs
 def foo(x:,y:1,**z); end
