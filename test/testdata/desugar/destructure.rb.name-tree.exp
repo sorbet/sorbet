@@ -2,20 +2,20 @@ class <emptyTree>::<constant:Destructure><<constant:Destructure>> < ()
   def f<f>(<destructure>$0, z)
     begin
       begin
-        assignTmp$1 = <destructure>$0
-        x = assignTmp$1.[](0)
-        y = assignTmp$1.[](1)
-        assignTmp$1
+        assignTemp$1 = <destructure>$0
+        x = assignTemp$1.[](0)
+        y = assignTemp$1.[](1)
+        assignTemp$1
       end
       begin
         x.+(y)
         self(<constant:Destructure>).lambda() do |<block-nested: <destructure>$2>|
           begin
             begin
-              <block-nested: assignTmp$3> = <block-nested: <destructure>$2>
-              <block-nested: a> = <block-nested: assignTmp$3>.[](0)
-              <block-nested: b> = <block-nested: assignTmp$3>.[](1)
-              <block-nested: assignTmp$3>
+              <block-nested: assignTemp$3> = <block-nested: <destructure>$2>
+              <block-nested: a> = <block-nested: assignTemp$3>.[](0)
+              <block-nested: b> = <block-nested: assignTemp$3>.[](1)
+              <block-nested: assignTemp$3>
             end
             <emptyTree>
           end

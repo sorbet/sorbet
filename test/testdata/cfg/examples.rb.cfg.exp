@@ -1,11 +1,11 @@
-digraph "examples.rb"{
+digraph "-e"{
 subgraph "cluster_::<constant:Integer>#+" {
     label = "::<constant:Integer>#+";
     color = blue;
     bb101_0 [shape = invhouse];
     bb101_1 [shape = parallelogram];
 
-    bb101_0 [label = "()\n<self>$1 = self : Integer\n<ret>$1 = NotSupported() : untyped\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
+    bb101_0 [label = "()\nselfMethodTemp$1 = self : Integer\nreturnMethodTemp$1 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$1 : <bottom>\n<unconditional>"];
     bb101_0 -> bb101_1;
     bb101_1 [label = "()\n<unconditional>"];
     bb101_1 -> bb101_1;
@@ -17,15 +17,15 @@ subgraph "cluster_::<constant:Examples>#i_like_ifs" {
     bb104_0 [shape = invhouse];
     bb104_1 [shape = parallelogram];
 
-    bb104_0 [label = "()\nifTmp$2 = true : TrueClass(true)\nifTmp$2"];
+    bb104_0 [label = "()\nifTemp$2 = true : TrueClass(true)\nifTemp$2"];
     bb104_0 -> bb104_2;
     bb104_0 -> bb104_3;
 
-    bb104_1 [label = "(<ret>$2)\n<ret>$5 = return <ret>$2\n<unconditional>"];
+    bb104_1 [label = "(returnMethodTemp$2)\nreturnMethodTemp$5 = return returnMethodTemp$2\n<unconditional>"];
     bb104_1 -> bb104_1;
-    bb104_2 [label = "()\nreturnTmp$3 = 1 : Integer(1)\n<ret>$2 = return returnTmp$3 : <bottom>\n<unconditional>"];
+    bb104_2 [label = "()\nreturnTemp$3 = 1 : Integer(1)\nreturnMethodTemp$2 = return returnTemp$3 : <bottom>\n<unconditional>"];
     bb104_2 -> bb104_1;
-    bb104_3 [label = "()\nreturnTmp$4 = 2 : Integer(2)\n<ret>$2 = return returnTmp$4 : <bottom>\n<unconditional>"];
+    bb104_3 [label = "()\nreturnTemp$4 = 2 : Integer(2)\nreturnMethodTemp$2 = return returnTemp$4 : <bottom>\n<unconditional>"];
     bb104_3 -> bb104_1;
 }
 
@@ -35,17 +35,17 @@ subgraph "cluster_::<constant:Examples>#i_like_exps" {
     bb105_0 [shape = invhouse];
     bb105_1 [shape = parallelogram];
 
-    bb105_0 [label = "()\nifTmp$2 = true : TrueClass(true)\nifTmp$2"];
+    bb105_0 [label = "()\nifTemp$2 = true : TrueClass(true)\nifTemp$2"];
     bb105_0 -> bb105_2;
     bb105_0 -> bb105_3;
 
     bb105_1 [label = "()\n<unconditional>"];
     bb105_1 -> bb105_1;
-    bb105_2 [label = "(<ret>$3)\n<ret>$3 = 1 : Integer(1)\n<unconditional>"];
+    bb105_2 [label = "(returnMethodTemp$3)\nreturnMethodTemp$3 = 1 : Integer(1)\n<unconditional>"];
     bb105_2 -> bb105_4;
-    bb105_3 [label = "(<ret>$3)\n<ret>$3 = 2 : Integer(2)\n<unconditional>"];
+    bb105_3 [label = "(returnMethodTemp$3)\nreturnMethodTemp$3 = 2 : Integer(2)\n<unconditional>"];
     bb105_3 -> bb105_4;
-    bb105_4 [label = "(<ret>$3)\n<ret>$3 = return <ret>$3 : <bottom>\n<unconditional>"];
+    bb105_4 [label = "(returnMethodTemp$3)\nreturnMethodTemp$3 = return returnMethodTemp$3 : <bottom>\n<unconditional>"];
     bb105_4 -> bb105_1;
 }
 
@@ -55,15 +55,15 @@ subgraph "cluster_::<constant:Examples>#return_in_one_branch1" {
     bb106_0 [shape = invhouse];
     bb106_1 [shape = parallelogram];
 
-    bb106_0 [label = "()\nifTmp$2 = true : TrueClass(true)\nifTmp$2"];
+    bb106_0 [label = "()\nifTemp$2 = true : TrueClass(true)\nifTemp$2"];
     bb106_0 -> bb106_2;
     bb106_0 -> bb106_3;
 
     bb106_1 [label = "()\n<unconditional>"];
     bb106_1 -> bb106_1;
-    bb106_2 [label = "()\nreturnTmp$3 = 1 : Integer(1)\n<ret>$4 = return returnTmp$3 : <bottom>\n<unconditional>"];
+    bb106_2 [label = "()\nreturnTemp$3 = 1 : Integer(1)\nreturnMethodTemp$4 = return returnTemp$3 : <bottom>\n<unconditional>"];
     bb106_2 -> bb106_1;
-    bb106_3 [label = "(<ret>$4)\n<ret>$4 = 2 : Integer(2)\n<ret>$4 = return <ret>$4 : <bottom>\n<unconditional>"];
+    bb106_3 [label = "(returnMethodTemp$4)\nreturnMethodTemp$4 = 2 : Integer(2)\nreturnMethodTemp$4 = return returnMethodTemp$4 : <bottom>\n<unconditional>"];
     bb106_3 -> bb106_1;
 }
 
@@ -73,17 +73,17 @@ subgraph "cluster_::<constant:Examples>#return_in_one_branch2" {
     bb107_0 [shape = invhouse];
     bb107_1 [shape = parallelogram];
 
-    bb107_0 [label = "()\nifTmp$2 = true : TrueClass(true)\nifTmp$2"];
+    bb107_0 [label = "()\nifTemp$2 = true : TrueClass(true)\nifTemp$2"];
     bb107_0 -> bb107_2;
     bb107_0 -> bb107_3;
 
     bb107_1 [label = "()\n<unconditional>"];
     bb107_1 -> bb107_1;
-    bb107_2 [label = "(<ret>$5)\n<ret>$5 = 1 : Integer(1)\n<unconditional>"];
+    bb107_2 [label = "(returnMethodTemp$5)\nreturnMethodTemp$5 = 1 : Integer(1)\n<unconditional>"];
     bb107_2 -> bb107_4;
-    bb107_3 [label = "()\nreturnTmp$3 = 2 : Integer(2)\n<ret>$5 = return returnTmp$3 : <bottom>\n<unconditional>"];
+    bb107_3 [label = "()\nreturnTemp$3 = 2 : Integer(2)\nreturnMethodTemp$5 = return returnTemp$3 : <bottom>\n<unconditional>"];
     bb107_3 -> bb107_1;
-    bb107_4 [label = "(<ret>$5)\n<ret>$4 = return <ret>$5 : <bottom>\n<unconditional>"];
+    bb107_4 [label = "(returnMethodTemp$5)\nreturnMethodTemp$4 = return returnMethodTemp$5 : <bottom>\n<unconditional>"];
     bb107_4 -> bb107_1;
 }
 
@@ -93,7 +93,7 @@ subgraph "cluster_::<constant:Examples>#variables" {
     bb108_0 [shape = invhouse];
     bb108_1 [shape = parallelogram];
 
-    bb108_0 [label = "()\nifTmp$3 = true : TrueClass(true)\nifTmp$3"];
+    bb108_0 [label = "()\nifTemp$3 = true : TrueClass(true)\nifTemp$3"];
     bb108_0 -> bb108_2;
     bb108_0 -> bb108_3;
 
@@ -103,7 +103,7 @@ subgraph "cluster_::<constant:Examples>#variables" {
     bb108_2 -> bb108_4;
     bb108_3 [label = "(a)\na = 2 : Integer(2)\n<unconditional>"];
     bb108_3 -> bb108_4;
-    bb108_4 [label = "(a)\nifTmp$5 = false : FalseClass(false)\nifTmp$5"];
+    bb108_4 [label = "(a)\nifTemp$5 = false : FalseClass(false)\nifTemp$5"];
     bb108_4 -> bb108_5;
     bb108_4 -> bb108_6;
 
@@ -111,7 +111,7 @@ subgraph "cluster_::<constant:Examples>#variables" {
     bb108_5 -> bb108_7;
     bb108_6 [label = "(a, b)\nb = 2 : Integer(2)\n<unconditional>"];
     bb108_6 -> bb108_7;
-    bb108_7 [label = "(a, b)\n<ret>$6 = a.+(b) : Integer\n<ret>$8 = return <ret>$6 : <bottom>\n<unconditional>"];
+    bb108_7 [label = "(a, b)\nreturnMethodTemp$6 = a.+(b) : Integer\nreturnMethodTemp$8 = return returnMethodTemp$6 : <bottom>\n<unconditional>"];
     bb108_7 -> bb108_1;
 }
 
@@ -121,7 +121,7 @@ subgraph "cluster_::<constant:Examples>#variables_and_loop" {
     bb109_0 [shape = invhouse];
     bb109_1 [shape = parallelogram];
 
-    bb109_0 [label = "()\nifTmp$3 = true : TrueClass(true)\nifTmp$3"];
+    bb109_0 [label = "()\nifTemp$3 = true : TrueClass(true)\nifTemp$3"];
     bb109_0 -> bb109_2;
     bb109_0 -> bb109_3;
 
@@ -133,15 +133,15 @@ subgraph "cluster_::<constant:Examples>#variables_and_loop" {
     bb109_3 -> bb109_4;
     bb109_4 [label = "()\n<unconditional>"];
     bb109_4 -> bb109_5;
-    bb109_5 [label = "(b)\nouterLoops: 1\nwhileTmp$5 = true : TrueClass(true)\nwhileTmp$5"];
+    bb109_5 [label = "(b)\nouterLoops: 1\nwhileTemp$5 = true : TrueClass(true)\nwhileTemp$5"];
     bb109_5 -> bb109_6;
     bb109_5 -> bb109_7;
 
-    bb109_6 [label = "(b)\nouterLoops: 1\nifTmp$7 = false : FalseClass(false)\nifTmp$7"];
+    bb109_6 [label = "(b)\nouterLoops: 1\nifTemp$7 = false : FalseClass(false)\nifTemp$7"];
     bb109_6 -> bb109_8;
     bb109_6 -> bb109_9;
 
-    bb109_7 [label = "(b)\nstatTmp$4 = nil : NilClass\n<ret>$8 = return b : <bottom>\n<unconditional>"];
+    bb109_7 [label = "(b)\nstatTemp$4 = nil : NilClass\nreturnMethodTemp$8 = return b : <bottom>\n<unconditional>"];
     bb109_7 -> bb109_1;
     bb109_8 [label = "(b)\nouterLoops: 1\nb = 1 : untyped\n<unconditional>"];
     bb109_8 -> bb109_10;
@@ -161,15 +161,15 @@ subgraph "cluster_::<constant:Examples>#variables_loop_if" {
     bb110_0 -> bb110_2;
     bb110_1 [label = "()\n<unconditional>"];
     bb110_1 -> bb110_1;
-    bb110_2 [label = "(b)\nouterLoops: 1\nwhileTmp$3 = true : TrueClass(true)\nwhileTmp$3"];
+    bb110_2 [label = "(b)\nouterLoops: 1\nwhileTemp$3 = true : TrueClass(true)\nwhileTemp$3"];
     bb110_2 -> bb110_3;
     bb110_2 -> bb110_4;
 
-    bb110_3 [label = "(b)\nouterLoops: 1\nifTmp$5 = false : FalseClass(false)\nifTmp$5"];
+    bb110_3 [label = "(b)\nouterLoops: 1\nifTemp$5 = false : FalseClass(false)\nifTemp$5"];
     bb110_3 -> bb110_5;
     bb110_3 -> bb110_6;
 
-    bb110_4 [label = "(b)\nstatTmp$2 = nil : NilClass\n<ret>$6 = return b : <bottom>\n<unconditional>"];
+    bb110_4 [label = "(b)\nstatTemp$2 = nil : NilClass\nreturnMethodTemp$6 = return b : <bottom>\n<unconditional>"];
     bb110_4 -> bb110_1;
     bb110_5 [label = "(b)\nouterLoops: 1\nb = 1 : untyped\n<unconditional>"];
     bb110_5 -> bb110_7;
@@ -185,17 +185,17 @@ subgraph "cluster_::<constant:Examples>#take_arguments" {
     bb111_0 [shape = invhouse];
     bb111_1 [shape = parallelogram];
 
-    bb111_0 [label = "(i)\n<self>$1 = self : Examples\ni = load_arg(<self>$1#take_arguments, 0) : untyped\nifTmp$2 = false : FalseClass(false)\nifTmp$2"];
+    bb111_0 [label = "(i)\nselfMethodTemp$1 = self : Examples\ni = load_arg(selfMethodTemp$1#take_arguments, 0) : untyped\nifTemp$2 = false : FalseClass(false)\nifTemp$2"];
     bb111_0 -> bb111_2;
     bb111_0 -> bb111_3;
 
     bb111_1 [label = "()\n<unconditional>"];
     bb111_1 -> bb111_1;
-    bb111_2 [label = "(<ret>$9)\n<ret>$9 = 2 : Integer(2)\n<unconditional>"];
+    bb111_2 [label = "(returnMethodTemp$9)\nreturnMethodTemp$9 = 2 : Integer(2)\n<unconditional>"];
     bb111_2 -> bb111_4;
-    bb111_3 [label = "(i, <ret>$9)\n<ret>$9 = i : untyped\n<unconditional>"];
+    bb111_3 [label = "(i, returnMethodTemp$9)\nreturnMethodTemp$9 = i : untyped\n<unconditional>"];
     bb111_3 -> bb111_4;
-    bb111_4 [label = "(<ret>$9)\n<ret>$3 = return <ret>$9 : <bottom>\n<unconditional>"];
+    bb111_4 [label = "(returnMethodTemp$9)\nreturnMethodTemp$3 = return returnMethodTemp$9 : <bottom>\n<unconditional>"];
     bb111_4 -> bb111_1;
 }
 

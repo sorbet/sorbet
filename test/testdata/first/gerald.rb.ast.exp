@@ -21,10 +21,10 @@ begin
       def initialize<<constant:<todo sym>>>()
         begin
           begin
-            assignTmp$0 = <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
-            @rules = assignTmp$0.[](0)
-            invalid_rules = assignTmp$0.[](1)
-            assignTmp$0
+            assignTemp$0 = <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
+            @rules = assignTemp$0.[](0)
+            invalid_rules = assignTemp$0.[](1)
+            assignTemp$0
           end
           if invalid_rules.empty?().!()
             begin
