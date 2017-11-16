@@ -566,6 +566,33 @@ shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, co
     return make_unique<HashType>(keys, values);
 }
 
+namespace {
+void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef method, TypeAndOrigins &argTpe,
+                  core::SymbolRef argSym) {
+    shared_ptr<Type> expectedType = argSym.info(ctx).resultType;
+    if (!expectedType) {
+        expectedType = Types::dynamic();
+    }
+
+    if (Types::isSubType(ctx, argTpe.type, expectedType)) {
+        return;
+    }
+    ctx.state.errors.error(core::Reporter::ComplexError(
+        callLoc, core::ErrorClass::MethodArgumentMismatch,
+        "Argument `" + argSym.info(ctx).name.toString(ctx) + "' does not match expected type.",
+        {core::Reporter::ErrorSection(
+             "Expected " + expectedType->toString(ctx),
+             {
+                 core::Reporter::ErrorLine::from(argSym.info(ctx).definitionLoc,
+                                                 "Method {} has specified type of argument {} as {}",
+                                                 method.info(ctx).name.toString(ctx),
+                                                 argSym.info(ctx).name.toString(ctx), expectedType->toString(ctx)),
+             }),
+         core::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
+                                      argTpe.origins2Explanations(ctx))}));
+}
+}; // namespace
+
 shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     if (isDynamic()) {
@@ -593,26 +620,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     }
     int i = 0;
     for (TypeAndOrigins &argTpe : args) {
-        shared_ptr<Type> expectedType = info.arguments()[i].info(ctx).resultType;
-        if (!expectedType) {
-            expectedType = Types::dynamic();
-        }
-
-        if (!Types::isSubType(ctx, argTpe.type, expectedType)) {
-            ctx.state.errors.error(core::Reporter::ComplexError(
-                callLoc, core::ErrorClass::MethodArgumentMismatch,
-                "Argument number " + to_string(i + 1) + " does not match expected type.",
-                {core::Reporter::ErrorSection(
-                     "Expected " + expectedType->toString(ctx),
-                     {
-                         core::Reporter::ErrorLine::from(
-                             info.arguments()[i].info(ctx).definitionLoc,
-                             "Method {} has specified type of argument {} as {}", info.name.toString(ctx),
-                             info.arguments()[i].info(ctx).name.toString(ctx), expectedType->toString(ctx)),
-                     }),
-                 core::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
-                                              argTpe.origins2Explanations(ctx))}));
-        }
+        matchArgType(ctx, callLoc, method, argTpe, info.arguments()[i]);
 
         i++;
     }
