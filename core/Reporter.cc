@@ -11,7 +11,8 @@ void Reporter::_error(BasicError error) {
         errors.emplace_back(make_unique<BasicError>(error));
         return;
     }
-    gs_.logger.error("{}", error.toString(gs_));
+    gs_.logger.log(error.what == ErrorClass::Internal ? spdlog::level::critical : spdlog::level::err, "{}",
+                   error.toString(gs_));
 }
 
 void Reporter::_error(ComplexError error) {
@@ -19,7 +20,8 @@ void Reporter::_error(ComplexError error) {
         errors.emplace_back(make_unique<ComplexError>(error));
         return;
     }
-    gs_.logger.error("{}", error.toString(gs_));
+    gs_.logger.log(error.what == ErrorClass::Internal ? spdlog::level::critical : spdlog::level::err, "{}",
+                   error.toString(gs_));
 }
 
 string Reporter::BasicError::toString(GlobalState &gs) {
