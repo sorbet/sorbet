@@ -131,7 +131,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                 }
                 CFG_Collector_and_Typer collector(!opts["no-typer"].as<bool>(), printCFG);
                 result.emplace_back(
-                        ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
+                    ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
 
                 if (printCFG) {
                     cout << "}" << endl << endl;
@@ -258,7 +258,7 @@ int realmain(int argc, char **argv) {
 
     if (!prints.empty()) {
         for (auto option : prints) {
-            console_err->error("Unknown --print option: {}", option);`
+            console_err->error("Unknown --print option: {}", option);
             return 1;
         }
     }
