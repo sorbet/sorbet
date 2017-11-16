@@ -356,7 +356,7 @@ public:
     };
 };
 
-unique_ptr<ast::Expression> Namer::resolve(core::Context &ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> Resolver::run(core::Context &ctx, unique_ptr<ast::Expression> tree) {
     ResolveWalk walk(ctx);
     tree = ast::TreeMap<ResolveWalk>::apply(ctx, walk, move(tree));
     ResolveVariablesWalk vars;

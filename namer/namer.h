@@ -1,3 +1,5 @@
+#ifndef SRUBY_NAMER_NAMER_H
+#define SRUBY_NAMER_NAMER_H
 #include "ast/ast.h"
 #include "parser/parser.h"
 
@@ -9,10 +11,15 @@ public:
     static unique_ptr<ast::Expression> run(core::Context &ctx, unique_ptr<ast::Expression> tree);
 
 private:
-    static unique_ptr<ast::Expression> resolve(core::Context &ctx, unique_ptr<ast::Expression> tree);
-
     Namer() = default;
+};
+
+class Resolver final {
+public:
+    static unique_ptr<ast::Expression> run(core::Context &ctx, unique_ptr<ast::Expression> tree);
 };
 
 } // namespace namer
 }; // namespace ruby_typer
+
+#endif
