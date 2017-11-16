@@ -9,31 +9,26 @@ namespace core {
 
 using namespace std;
 
-Loc::Detail offset2Pos(core::UTF8Desc source, u4 off) {
+Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs) {
     Loc::Detail pos;
 
-    Error::check(off <= source.to);
-
-    pos.line = 1 + count(source.from, source.from + off, '\n');
-
-    auto end = make_reverse_iterator(source.from + off);
-    auto begin = make_reverse_iterator(source.from);
-    auto nl = find(end, begin, '\n');
-
-    if (nl == begin) {
-        pos.column = off;
-    } else {
-        pos.column = nl - end;
+    core::File &file = source.file(gs);
+    Error::check(off <= file.source().to);
+    auto it = std::upper_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
+    if (it == file.line_breaks.begin()) {
+        pos.line = 1;
+        pos.column = off + 1;
+        return pos;
     }
-
+    --it;
+    pos.line = (it - file.line_breaks.begin()) + 2;
+    pos.column = off - *it;
     return pos;
 }
 
 pair<Loc::Detail, Loc::Detail> Loc::position(core::GlobalState &gs) {
-    core::File &file = this->file.file(gs);
-    core::UTF8Desc source(file.source());
-    Loc::Detail begin(offset2Pos(source, begin_pos));
-    Loc::Detail end(offset2Pos(source, end_pos));
+    Loc::Detail begin(offset2Pos(this->file, begin_pos, gs));
+    Loc::Detail end(offset2Pos(this->file, end_pos, gs));
     return make_pair(begin, end);
 }
 

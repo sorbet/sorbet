@@ -48,15 +48,18 @@ public:
     UTF8Desc path();
     UTF8Desc source();
 
-    File() noexcept {};
+    File(std::string &&path_, std::string &&source_);
 
-    File(File &&other) noexcept = default;
+    File(File &&other) = default;
 
     File(const File &other) = delete;
 
 private:
     std::string path_;
     std::string source_;
+
+public:
+    const std::vector<int> line_breaks;
 };
 } // namespace core
 } // namespace ruby_typer
