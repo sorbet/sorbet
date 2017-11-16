@@ -233,6 +233,9 @@ static UTF8Desc basicObject_DESC{(char *)basicObject, (int)strlen(basicObject)};
 static const char *kernel = "Kernel";
 static UTF8Desc kernel_DESC{(char *)kernel, (int)strlen(kernel)};
 
+static const char *reserved = "<<RESERVED>>";
+static UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
+
 GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
@@ -376,6 +379,10 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(class_id == defn_Class());
     Error::check(basicObject_id == defn_Basic_Object());
     Error::check(kernel_id == defn_Kernel());
+
+    while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
+        synthesizeClass(reserved_DESC);
+    }
 
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }
