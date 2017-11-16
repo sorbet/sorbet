@@ -1,6 +1,7 @@
 #ifndef SRUBY_TREEMAP_H
 #define SRUBY_TREEMAP_H
 
+#include "../core/Context.h"
 #include "Trees.h"
 #include "memory"
 #include <type_traits> // To use 'std::integral_constant'.
@@ -274,6 +275,7 @@ GENERATE_POSTPONE_POSTCLASS(InsSeq);
 template <class FUNC> class TreeMap {
 private:
     FUNC &func;
+    bool locReported = false;
 
     static_assert(!HAS_MEMBER_preTransformIdent<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
@@ -288,432 +290,449 @@ private:
     TreeMap(FUNC &func) : func(func) {}
 
     Expression *mapIt(Expression *what, core::Context ctx) {
-        // TODO: reorder by frequency
-        if (what == nullptr || cast_tree<EmptyTree>(what) != nullptr || cast_tree<Nil>(what) != nullptr ||
-            cast_tree<ZSuperArgs>(what) != nullptr)
-            return what;
-        if (ClassDef *v = cast_tree<ClassDef>(what)) {
-            if (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
-                v = PostPonePreTransform_ClassDef<FUNC, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(ctx, v,
-                                                                                                            func);
-            }
-
-            for (auto &def : v->rhs) {
-                auto originalDef = def.get();
-                auto newDef = mapIt(originalDef, ctx.withOwner(v->symbol));
-                if (newDef != originalDef) {
-                    def.reset(newDef);
-                }
-            }
-
-            if (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
-                return PostPonePostTransform_ClassDef<FUNC, HAS_MEMBER_postTransformClassDef<FUNC>::value>::call(ctx, v,
-                                                                                                                 func);
-            }
-
-            return v;
-        } else if (MethodDef *v = cast_tree<MethodDef>(what)) {
-            if (HAS_MEMBER_preTransformMethodDef<FUNC>::value) {
-                v = PostPonePreTransform_MethodDef<FUNC, HAS_MEMBER_preTransformMethodDef<FUNC>::value>::call(ctx, v,
-                                                                                                              func);
-            }
-            auto originalRhs = v->rhs.get();
-            auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
-            if (newRhs != originalRhs) {
-                v->rhs.reset(newRhs);
-            }
-
-            if (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
-                return PostPonePostTransform_MethodDef<FUNC, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(
-                    ctx, v, func);
-            }
-
-            return v;
-        } else if (ConstDef *v = cast_tree<ConstDef>(what)) {
-            if (HAS_MEMBER_preTransformConstDef<FUNC>::value) {
-                v = PostPonePreTransform_ConstDef<FUNC, HAS_MEMBER_preTransformConstDef<FUNC>::value>::call(ctx, v,
-                                                                                                            func);
-            }
-            auto originalRhs = v->rhs.get();
-            auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
-            if (newRhs != originalRhs) {
-                v->rhs.reset(newRhs);
-            }
-
-            if (HAS_MEMBER_postTransformConstDef<FUNC>::value) {
-                return PostPonePostTransform_ConstDef<FUNC, HAS_MEMBER_postTransformConstDef<FUNC>::value>::call(ctx, v,
-                                                                                                                 func);
-            }
-
-            return v;
-        } else if (If *v = cast_tree<If>(what)) {
-            if (HAS_MEMBER_preTransformIf<FUNC>::value) {
-                v = PostPonePreTransform_If<FUNC, HAS_MEMBER_preTransformIf<FUNC>::value>::call(ctx, v, func);
-            }
-            auto originalCond = v->cond.get();
-            auto originalThen = v->thenp.get();
-            auto originalElse = v->elsep.get();
-            auto newCond = mapIt(originalCond, ctx);
-            auto newThen = mapIt(originalThen, ctx);
-            auto newElse = mapIt(originalElse, ctx);
-            if (newCond != originalCond) {
-                v->cond.reset(newCond);
-            }
-            if (originalThen != newThen) {
-                v->thenp.reset(newThen);
-            }
-            if (originalElse != newElse) {
-                v->elsep.reset(newElse);
-            }
-            if (HAS_MEMBER_postTransformIf<FUNC>::value) {
-                return PostPonePostTransform_If<FUNC, HAS_MEMBER_postTransformIf<FUNC>::value>::call(ctx, v, func);
-            }
-            return v;
-        } else if (While *v = cast_tree<While>(what)) {
-            if (HAS_MEMBER_preTransformWhile<FUNC>::value) {
-                v = PostPonePreTransform_While<FUNC, HAS_MEMBER_preTransformWhile<FUNC>::value>::call(ctx, v, func);
-            }
-            auto originalCond = v->cond.get();
-            auto originalBody = v->body.get();
-            auto newCond = mapIt(originalCond, ctx);
-            auto newBody = mapIt(originalBody, ctx);
-            if (newCond != originalCond) {
-                v->cond.reset(newCond);
-            }
-            if (newBody != originalBody) {
-                v->body.reset(newBody);
-            }
-
-            if (HAS_MEMBER_postTransformWhile<FUNC>::value) {
-                return PostPonePostTransform_While<FUNC, HAS_MEMBER_postTransformWhile<FUNC>::value>::call(ctx, v,
-                                                                                                           func);
-            }
-
-            return v;
-        } else if (Break *v = cast_tree<Break>(what)) {
-            if (HAS_MEMBER_preTransformBreak<FUNC>::value) {
-                return PostPonePreTransform_Break<FUNC, HAS_MEMBER_preTransformBreak<FUNC>::value>::call(ctx, v, func);
-            }
-
-            auto oexpr = v->expr.get();
-            auto nexpr = mapIt(oexpr, ctx);
-            if (oexpr != nexpr) {
-                v->expr.reset(nexpr);
-            }
-
-            if (HAS_MEMBER_postTransformBreak<FUNC>::value) {
-                return PostPonePostTransform_Break<FUNC, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(ctx, v,
-                                                                                                           func);
-            }
-            return v;
-        } else if (Next *v = cast_tree<Next>(what)) {
-            if (HAS_MEMBER_preTransformNext<FUNC>::value) {
-                return PostPonePreTransform_Next<FUNC, HAS_MEMBER_preTransformNext<FUNC>::value>::call(ctx, v, func);
-            }
-
-            auto oexpr = v->expr.get();
-            auto nexpr = mapIt(oexpr, ctx);
-            if (oexpr != nexpr) {
-                v->expr.reset(nexpr);
-            }
-
-            if (HAS_MEMBER_postTransformNext<FUNC>::value) {
-                return PostPonePostTransform_Next<FUNC, HAS_MEMBER_postTransformNext<FUNC>::value>::call(ctx, v, func);
-            }
-            return v;
-        } else if (Return *v = cast_tree<Return>(what)) {
-            if (HAS_MEMBER_preTransformReturn<FUNC>::value) {
-                v = PostPonePreTransform_Return<FUNC, HAS_MEMBER_preTransformReturn<FUNC>::value>::call(ctx, v, func);
-            }
-            auto oexpr = v->expr.get();
-            auto nexpr = mapIt(oexpr, ctx);
-            if (oexpr != nexpr) {
-                v->expr.reset(nexpr);
-            }
-
-            if (HAS_MEMBER_postTransformReturn<FUNC>::value) {
-                return PostPonePostTransform_Return<FUNC, HAS_MEMBER_postTransformReturn<FUNC>::value>::call(ctx, v,
-                                                                                                             func);
-            }
-
-            return v;
-        } else if (Yield *v = cast_tree<Yield>(what)) {
-            if (HAS_MEMBER_preTransformYield<FUNC>::value) {
-                v = PostPonePreTransform_Yield<FUNC, HAS_MEMBER_preTransformYield<FUNC>::value>::call(ctx, v, func);
-            }
-            auto oexpr = v->expr.get();
-            auto nexpr = mapIt(oexpr, ctx);
-            if (oexpr != nexpr) {
-                v->expr.reset(nexpr);
-            }
-
-            if (HAS_MEMBER_postTransformYield<FUNC>::value) {
-                return PostPonePostTransform_Yield<FUNC, HAS_MEMBER_postTransformYield<FUNC>::value>::call(ctx, v,
-                                                                                                           func);
-            }
-
-            return v;
-        } else if (Ident *v = cast_tree<Ident>(what)) {
-            if (HAS_MEMBER_postTransformIdent<FUNC>::value) {
-                return PostPonePostTransform_Ident<FUNC, HAS_MEMBER_postTransformIdent<FUNC>::value>::call(ctx, v,
-                                                                                                           func);
-            }
-            return v;
-        } else if (UnresolvedIdent *v = cast_tree<UnresolvedIdent>(what)) {
-            if (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value) {
-                return PostPonePostTransform_UnresolvedIdent<
-                    FUNC, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value>::call(ctx, v, func);
-            }
-            return v;
-        } else if (Assign *v = cast_tree<Assign>(what)) {
-            if (HAS_MEMBER_preTransformAssign<FUNC>::value) {
-                v = PostPonePreTransform_Assign<FUNC, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(ctx, v, func);
-            }
-            auto olhs = v->lhs.get();
-            auto orhs = v->rhs.get();
-            auto nlhs = mapIt(olhs, ctx);
-            auto nrhs = mapIt(orhs, ctx);
-            if (nlhs != olhs) {
-                v->lhs.reset(nlhs);
-            }
-            if (nrhs != orhs) {
-                v->rhs.reset(nrhs);
-            }
-
-            if (HAS_MEMBER_postTransformAssign<FUNC>::value) {
-                return PostPonePostTransform_Assign<FUNC, HAS_MEMBER_postTransformAssign<FUNC>::value>::call(ctx, v,
-                                                                                                             func);
-            }
-
-            return v;
-        } else if (Send *v = cast_tree<Send>(what)) {
-            if (HAS_MEMBER_preTransformSend<FUNC>::value) {
-                v = PostPonePreTransform_Send<FUNC, HAS_MEMBER_preTransformSend<FUNC>::value>::call(ctx, v, func);
-            }
-            auto orecv = v->recv.get();
-            auto nrecv = mapIt(orecv, ctx);
-            auto &vec = v->args;
-            if (nrecv != orecv) {
-                v->recv.reset(nrecv);
-            }
-            auto i = 0;
-            while (i < vec.size()) {
-                auto &el = vec[i];
-                auto oarg = el.get();
-                auto narg = mapIt(oarg, ctx);
-                if (oarg != narg) {
-                    el.reset(narg);
-                }
-                i++;
-            }
-
-            if (v->block != nullptr) {
-                auto oblock = v->block.get();
-                auto nblock = mapIt(oblock, ctx);
-                if (oblock != nblock) {
-                    Error::check(cast_tree<Block>(nblock) != nullptr);
-                    v->block.reset(cast_tree<Block>(nblock));
-                }
-            }
-
-            if (HAS_MEMBER_postTransformSend<FUNC>::value) {
-                return PostPonePostTransform_Send<FUNC, HAS_MEMBER_postTransformSend<FUNC>::value>::call(ctx, v, func);
-            }
-
-            return v;
-        } else if (NamedArg *v = cast_tree<NamedArg>(what)) {
-            if (HAS_MEMBER_preTransformNamedArg<FUNC>::value) {
-                v = PostPonePreTransform_NamedArg<FUNC, HAS_MEMBER_preTransformNamedArg<FUNC>::value>::call(ctx, v,
-                                                                                                            func);
-            }
-            auto oarg = v->arg.get();
-            auto narg = mapIt(oarg, ctx);
-            if (oarg != narg) {
-                v->arg.reset(narg);
-            }
-
-            if (HAS_MEMBER_postTransformNamedArg<FUNC>::value) {
-                return PostPonePostTransform_NamedArg<FUNC, HAS_MEMBER_postTransformNamedArg<FUNC>::value>::call(ctx, v,
-                                                                                                                 func);
-            }
-
-            return v;
-        } else if (Hash *v = cast_tree<Hash>(what)) {
-            if (HAS_MEMBER_preTransformHash<FUNC>::value) {
-                v = PostPonePreTransform_Hash<FUNC, HAS_MEMBER_preTransformHash<FUNC>::value>::call(ctx, v, func);
-            }
-            int i = 0;
-            while (i < v->keys.size()) {
-                auto &el = v->keys[i];
-                auto oarg = el.get();
-                auto narg = mapIt(oarg, ctx);
-                if (oarg != narg) {
-                    el.reset(narg);
-                }
-                i++;
-            }
-
-            i = 0;
-            while (i < v->values.size()) {
-                auto &el = v->values[i];
-                auto oarg = el.get();
-                auto narg = mapIt(oarg, ctx);
-                if (oarg != narg) {
-                    el.reset(narg);
-                }
-                i++;
-            }
-
-            if (HAS_MEMBER_postTransformArray<FUNC>::value) {
-                return PostPonePostTransform_Hash<FUNC, HAS_MEMBER_postTransformHash<FUNC>::value>::call(ctx, v, func);
-            }
-            return what;
-        } else if (Array *v = cast_tree<Array>(what)) {
-            if (HAS_MEMBER_preTransformArray<FUNC>::value) {
-                v = PostPonePreTransform_Array<FUNC, HAS_MEMBER_preTransformArray<FUNC>::value>::call(ctx, v, func);
-            }
-            int i = 0;
-            while (i < v->elems.size()) {
-                auto &el = v->elems[i];
-                auto oarg = el.get();
-                auto narg = mapIt(oarg, ctx);
-                if (oarg != narg) {
-                    el.reset(narg);
-                }
-                i++;
-            }
-
-            if (HAS_MEMBER_postTransformArray<FUNC>::value) {
-                return PostPonePostTransform_Array<FUNC, HAS_MEMBER_postTransformArray<FUNC>::value>::call(ctx, v,
-                                                                                                           func);
-            }
-            return what;
-        } else if (FloatLit *v = cast_tree<FloatLit>(what)) {
-            if (HAS_MEMBER_postTransformFloatLit<FUNC>::value) {
-                return PostPonePostTransform_FloatLit<FUNC, HAS_MEMBER_postTransformFloatLit<FUNC>::value>::call(ctx, v,
-                                                                                                                 func);
-            }
-            return v;
-        } else if (BoolLit *v = cast_tree<BoolLit>(what)) {
-            if (HAS_MEMBER_postTransformBoolLit<FUNC>::value) {
-                return PostPonePostTransform_BoolLit<FUNC, HAS_MEMBER_postTransformBoolLit<FUNC>::value>::call(ctx, v,
-                                                                                                               func);
-            }
-            return v;
-        } else if (IntLit *v = cast_tree<IntLit>(what)) {
-            if (HAS_MEMBER_postTransformIntLit<FUNC>::value) {
-                return PostPonePostTransform_IntLit<FUNC, HAS_MEMBER_postTransformIntLit<FUNC>::value>::call(ctx, v,
-                                                                                                             func);
-            }
-            return v;
-        } else if (StringLit *v = cast_tree<StringLit>(what)) {
-            if (HAS_MEMBER_postTransformStringLit<FUNC>::value) {
-                return PostPonePostTransform_StringLit<FUNC, HAS_MEMBER_postTransformStringLit<FUNC>::value>::call(
-                    ctx, v, func);
-            }
-            return v;
-        } else if (ConstantLit *v = cast_tree<ConstantLit>(what)) {
-            if (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
-                return PostPonePostTransform_ConstantLit<FUNC, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(
-                    ctx, v, func);
-            }
-            return v;
-        } else if (BoolLit *v = cast_tree<BoolLit>(what)) {
-            // Error::notImplemented();
-            return what;
-        } else if (ArraySplat *v = cast_tree<ArraySplat>(what)) {
-            if (HAS_MEMBER_preTransformArraySplat<FUNC>::value) {
-                v = PostPonePreTransform_ArraySplat<FUNC, HAS_MEMBER_preTransformArraySplat<FUNC>::value>::call(ctx, v,
+        try {
+            // TODO: reorder by frequency
+            if (what == nullptr || cast_tree<EmptyTree>(what) != nullptr || cast_tree<Nil>(what) != nullptr ||
+                cast_tree<ZSuperArgs>(what) != nullptr)
+                return what;
+            if (ClassDef *v = cast_tree<ClassDef>(what)) {
+                if (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
+                    v = PostPonePreTransform_ClassDef<FUNC, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(ctx, v,
                                                                                                                 func);
-            }
-            auto oarg = v->arg.get();
-            auto narg = mapIt(oarg, ctx);
-            if (oarg != narg) {
-                v->arg.reset(narg);
-            }
-
-            if (HAS_MEMBER_postTransformArraySplat<FUNC>::value) {
-                return PostPonePostTransform_ArraySplat<FUNC, HAS_MEMBER_postTransformArraySplat<FUNC>::value>::call(
-                    ctx, v, func);
-            }
-
-            return v;
-        } else if (HashSplat *v = cast_tree<HashSplat>(what)) {
-            if (HAS_MEMBER_preTransformHashSplat<FUNC>::value) {
-                v = PostPonePreTransform_HashSplat<FUNC, HAS_MEMBER_preTransformHashSplat<FUNC>::value>::call(ctx, v,
-                                                                                                              func);
-            }
-            auto oarg = v->arg.get();
-            auto narg = mapIt(oarg, ctx);
-            if (oarg != narg) {
-                v->arg.reset(narg);
-            }
-
-            if (HAS_MEMBER_postTransformHashSplat<FUNC>::value) {
-                return PostPonePostTransform_HashSplat<FUNC, HAS_MEMBER_postTransformHashSplat<FUNC>::value>::call(
-                    ctx, v, func);
-            }
-            return v;
-        } else if (SymbolLit *v = cast_tree<SymbolLit>(what)) {
-            return what;
-        } else if (Self *v = cast_tree<Self>(what)) {
-            if (HAS_MEMBER_postTransformSelf<FUNC>::value) {
-                return PostPonePostTransform_Self<FUNC, HAS_MEMBER_postTransformSelf<FUNC>::value>::call(ctx, v, func);
-            }
-            return v;
-        } else if (Block *v = cast_tree<Block>(what)) {
-            if (HAS_MEMBER_preTransformBlock<FUNC>::value) {
-                v = PostPonePreTransform_Block<FUNC, HAS_MEMBER_preTransformBlock<FUNC>::value>::call(ctx, v, func);
-            }
-
-            auto originalBody = v->body.get();
-            auto newBody = mapIt(originalBody, ctx.withOwner(v->symbol));
-            if (newBody != originalBody) {
-                v->body.reset(newBody);
-            }
-
-            if (HAS_MEMBER_postTransformBlock<FUNC>::value) {
-                return PostPonePostTransform_Block<FUNC, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(ctx, v,
-                                                                                                           func);
-            }
-            return v;
-        } else if (InsSeq *v = cast_tree<InsSeq>(what)) {
-            if (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
-                v = PostPonePreTransform_InsSeq<FUNC, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(ctx, v, func);
-            }
-            auto &stats = v->stats;
-            auto oexpr = v->expr.get();
-            auto i = 0;
-            while (i < stats.size()) {
-                auto &el = stats[i];
-                auto oexp = el.get();
-                auto nexp = mapIt(oexp, ctx);
-                if (oexp != nexp) {
-                    el.reset(nexp);
                 }
-                i++;
-            }
-            auto nexpr = mapIt(oexpr, ctx);
-            if (nexpr != oexpr) {
-                v->expr.reset(nexpr);
-            }
 
-            if (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
-                return PostPonePostTransform_InsSeq<FUNC, HAS_MEMBER_postTransformInsSeq<FUNC>::value>::call(ctx, v,
+                for (auto &def : v->rhs) {
+                    auto originalDef = def.get();
+                    auto newDef = mapIt(originalDef, ctx.withOwner(v->symbol));
+                    if (newDef != originalDef) {
+                        def.reset(newDef);
+                    }
+                }
+
+                if (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
+                    return PostPonePostTransform_ClassDef<FUNC, HAS_MEMBER_postTransformClassDef<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+
+                return v;
+            } else if (MethodDef *v = cast_tree<MethodDef>(what)) {
+                if (HAS_MEMBER_preTransformMethodDef<FUNC>::value) {
+                    v = PostPonePreTransform_MethodDef<FUNC, HAS_MEMBER_preTransformMethodDef<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                auto originalRhs = v->rhs.get();
+                auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
+                if (newRhs != originalRhs) {
+                    v->rhs.reset(newRhs);
+                }
+
+                if (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
+                    return PostPonePostTransform_MethodDef<FUNC, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+
+                return v;
+            } else if (ConstDef *v = cast_tree<ConstDef>(what)) {
+                if (HAS_MEMBER_preTransformConstDef<FUNC>::value) {
+                    v = PostPonePreTransform_ConstDef<FUNC, HAS_MEMBER_preTransformConstDef<FUNC>::value>::call(ctx, v,
+                                                                                                                func);
+                }
+                auto originalRhs = v->rhs.get();
+                auto newRhs = mapIt(originalRhs, ctx.withOwner(v->symbol));
+                if (newRhs != originalRhs) {
+                    v->rhs.reset(newRhs);
+                }
+
+                if (HAS_MEMBER_postTransformConstDef<FUNC>::value) {
+                    return PostPonePostTransform_ConstDef<FUNC, HAS_MEMBER_postTransformConstDef<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+
+                return v;
+            } else if (If *v = cast_tree<If>(what)) {
+                if (HAS_MEMBER_preTransformIf<FUNC>::value) {
+                    v = PostPonePreTransform_If<FUNC, HAS_MEMBER_preTransformIf<FUNC>::value>::call(ctx, v, func);
+                }
+                auto originalCond = v->cond.get();
+                auto originalThen = v->thenp.get();
+                auto originalElse = v->elsep.get();
+                auto newCond = mapIt(originalCond, ctx);
+                auto newThen = mapIt(originalThen, ctx);
+                auto newElse = mapIt(originalElse, ctx);
+                if (newCond != originalCond) {
+                    v->cond.reset(newCond);
+                }
+                if (originalThen != newThen) {
+                    v->thenp.reset(newThen);
+                }
+                if (originalElse != newElse) {
+                    v->elsep.reset(newElse);
+                }
+                if (HAS_MEMBER_postTransformIf<FUNC>::value) {
+                    return PostPonePostTransform_If<FUNC, HAS_MEMBER_postTransformIf<FUNC>::value>::call(ctx, v, func);
+                }
+                return v;
+            } else if (While *v = cast_tree<While>(what)) {
+                if (HAS_MEMBER_preTransformWhile<FUNC>::value) {
+                    v = PostPonePreTransform_While<FUNC, HAS_MEMBER_preTransformWhile<FUNC>::value>::call(ctx, v, func);
+                }
+                auto originalCond = v->cond.get();
+                auto originalBody = v->body.get();
+                auto newCond = mapIt(originalCond, ctx);
+                auto newBody = mapIt(originalBody, ctx);
+                if (newCond != originalCond) {
+                    v->cond.reset(newCond);
+                }
+                if (newBody != originalBody) {
+                    v->body.reset(newBody);
+                }
+
+                if (HAS_MEMBER_postTransformWhile<FUNC>::value) {
+                    return PostPonePostTransform_While<FUNC, HAS_MEMBER_postTransformWhile<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
+                }
+
+                return v;
+            } else if (Break *v = cast_tree<Break>(what)) {
+                if (HAS_MEMBER_preTransformBreak<FUNC>::value) {
+                    return PostPonePreTransform_Break<FUNC, HAS_MEMBER_preTransformBreak<FUNC>::value>::call(ctx, v,
                                                                                                              func);
-            }
+                }
 
-            return v;
-        } else if (Local *v = cast_tree<Local>(what)) {
-            if (HAS_MEMBER_postTransformLocal<FUNC>::value) {
-                return PostPonePostTransform_Local<FUNC, HAS_MEMBER_postTransformLocal<FUNC>::value>::call(ctx, v,
+                auto oexpr = v->expr.get();
+                auto nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->expr.reset(nexpr);
+                }
+
+                if (HAS_MEMBER_postTransformBreak<FUNC>::value) {
+                    return PostPonePostTransform_Break<FUNC, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
+                }
+                return v;
+            } else if (Next *v = cast_tree<Next>(what)) {
+                if (HAS_MEMBER_preTransformNext<FUNC>::value) {
+                    return PostPonePreTransform_Next<FUNC, HAS_MEMBER_preTransformNext<FUNC>::value>::call(ctx, v,
                                                                                                            func);
+                }
+
+                auto oexpr = v->expr.get();
+                auto nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->expr.reset(nexpr);
+                }
+
+                if (HAS_MEMBER_postTransformNext<FUNC>::value) {
+                    return PostPonePostTransform_Next<FUNC, HAS_MEMBER_postTransformNext<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+                }
+                return v;
+            } else if (Return *v = cast_tree<Return>(what)) {
+                if (HAS_MEMBER_preTransformReturn<FUNC>::value) {
+                    v = PostPonePreTransform_Return<FUNC, HAS_MEMBER_preTransformReturn<FUNC>::value>::call(ctx, v,
+                                                                                                            func);
+                }
+                auto oexpr = v->expr.get();
+                auto nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->expr.reset(nexpr);
+                }
+
+                if (HAS_MEMBER_postTransformReturn<FUNC>::value) {
+                    return PostPonePostTransform_Return<FUNC, HAS_MEMBER_postTransformReturn<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
+                }
+
+                return v;
+            } else if (Yield *v = cast_tree<Yield>(what)) {
+                if (HAS_MEMBER_preTransformYield<FUNC>::value) {
+                    v = PostPonePreTransform_Yield<FUNC, HAS_MEMBER_preTransformYield<FUNC>::value>::call(ctx, v, func);
+                }
+                auto oexpr = v->expr.get();
+                auto nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->expr.reset(nexpr);
+                }
+
+                if (HAS_MEMBER_postTransformYield<FUNC>::value) {
+                    return PostPonePostTransform_Yield<FUNC, HAS_MEMBER_postTransformYield<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
+                }
+
+                return v;
+            } else if (Ident *v = cast_tree<Ident>(what)) {
+                if (HAS_MEMBER_postTransformIdent<FUNC>::value) {
+                    return PostPonePostTransform_Ident<FUNC, HAS_MEMBER_postTransformIdent<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
+                }
+                return v;
+            } else if (UnresolvedIdent *v = cast_tree<UnresolvedIdent>(what)) {
+                if (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value) {
+                    return PostPonePostTransform_UnresolvedIdent<
+                        FUNC, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value>::call(ctx, v, func);
+                }
+                return v;
+            } else if (Assign *v = cast_tree<Assign>(what)) {
+                if (HAS_MEMBER_preTransformAssign<FUNC>::value) {
+                    v = PostPonePreTransform_Assign<FUNC, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(ctx, v,
+                                                                                                            func);
+                }
+                auto olhs = v->lhs.get();
+                auto orhs = v->rhs.get();
+                auto nlhs = mapIt(olhs, ctx);
+                auto nrhs = mapIt(orhs, ctx);
+                if (nlhs != olhs) {
+                    v->lhs.reset(nlhs);
+                }
+                if (nrhs != orhs) {
+                    v->rhs.reset(nrhs);
+                }
+
+                if (HAS_MEMBER_postTransformAssign<FUNC>::value) {
+                    return PostPonePostTransform_Assign<FUNC, HAS_MEMBER_postTransformAssign<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
+                }
+
+                return v;
+            } else if (Send *v = cast_tree<Send>(what)) {
+                if (HAS_MEMBER_preTransformSend<FUNC>::value) {
+                    v = PostPonePreTransform_Send<FUNC, HAS_MEMBER_preTransformSend<FUNC>::value>::call(ctx, v, func);
+                }
+                auto orecv = v->recv.get();
+                auto nrecv = mapIt(orecv, ctx);
+                auto &vec = v->args;
+                if (nrecv != orecv) {
+                    v->recv.reset(nrecv);
+                }
+                auto i = 0;
+                while (i < vec.size()) {
+                    auto &el = vec[i];
+                    auto oarg = el.get();
+                    auto narg = mapIt(oarg, ctx);
+                    if (oarg != narg) {
+                        el.reset(narg);
+                    }
+                    i++;
+                }
+
+                if (v->block != nullptr) {
+                    auto oblock = v->block.get();
+                    auto nblock = mapIt(oblock, ctx);
+                    if (oblock != nblock) {
+                        Error::check(cast_tree<Block>(nblock) != nullptr);
+                        v->block.reset(cast_tree<Block>(nblock));
+                    }
+                }
+
+                if (HAS_MEMBER_postTransformSend<FUNC>::value) {
+                    return PostPonePostTransform_Send<FUNC, HAS_MEMBER_postTransformSend<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+                }
+
+                return v;
+            } else if (NamedArg *v = cast_tree<NamedArg>(what)) {
+                if (HAS_MEMBER_preTransformNamedArg<FUNC>::value) {
+                    v = PostPonePreTransform_NamedArg<FUNC, HAS_MEMBER_preTransformNamedArg<FUNC>::value>::call(ctx, v,
+                                                                                                                func);
+                }
+                auto oarg = v->arg.get();
+                auto narg = mapIt(oarg, ctx);
+                if (oarg != narg) {
+                    v->arg.reset(narg);
+                }
+
+                if (HAS_MEMBER_postTransformNamedArg<FUNC>::value) {
+                    return PostPonePostTransform_NamedArg<FUNC, HAS_MEMBER_postTransformNamedArg<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+
+                return v;
+            } else if (Hash *v = cast_tree<Hash>(what)) {
+                if (HAS_MEMBER_preTransformHash<FUNC>::value) {
+                    v = PostPonePreTransform_Hash<FUNC, HAS_MEMBER_preTransformHash<FUNC>::value>::call(ctx, v, func);
+                }
+                int i = 0;
+                while (i < v->keys.size()) {
+                    auto &el = v->keys[i];
+                    auto oarg = el.get();
+                    auto narg = mapIt(oarg, ctx);
+                    if (oarg != narg) {
+                        el.reset(narg);
+                    }
+                    i++;
+                }
+
+                i = 0;
+                while (i < v->values.size()) {
+                    auto &el = v->values[i];
+                    auto oarg = el.get();
+                    auto narg = mapIt(oarg, ctx);
+                    if (oarg != narg) {
+                        el.reset(narg);
+                    }
+                    i++;
+                }
+
+                if (HAS_MEMBER_postTransformArray<FUNC>::value) {
+                    return PostPonePostTransform_Hash<FUNC, HAS_MEMBER_postTransformHash<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+                }
+                return what;
+            } else if (Array *v = cast_tree<Array>(what)) {
+                if (HAS_MEMBER_preTransformArray<FUNC>::value) {
+                    v = PostPonePreTransform_Array<FUNC, HAS_MEMBER_preTransformArray<FUNC>::value>::call(ctx, v, func);
+                }
+                int i = 0;
+                while (i < v->elems.size()) {
+                    auto &el = v->elems[i];
+                    auto oarg = el.get();
+                    auto narg = mapIt(oarg, ctx);
+                    if (oarg != narg) {
+                        el.reset(narg);
+                    }
+                    i++;
+                }
+
+                if (HAS_MEMBER_postTransformArray<FUNC>::value) {
+                    return PostPonePostTransform_Array<FUNC, HAS_MEMBER_postTransformArray<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
+                }
+                return what;
+            } else if (FloatLit *v = cast_tree<FloatLit>(what)) {
+                if (HAS_MEMBER_postTransformFloatLit<FUNC>::value) {
+                    return PostPonePostTransform_FloatLit<FUNC, HAS_MEMBER_postTransformFloatLit<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                return v;
+            } else if (BoolLit *v = cast_tree<BoolLit>(what)) {
+                if (HAS_MEMBER_postTransformBoolLit<FUNC>::value) {
+                    return PostPonePostTransform_BoolLit<FUNC, HAS_MEMBER_postTransformBoolLit<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                return v;
+            } else if (IntLit *v = cast_tree<IntLit>(what)) {
+                if (HAS_MEMBER_postTransformIntLit<FUNC>::value) {
+                    return PostPonePostTransform_IntLit<FUNC, HAS_MEMBER_postTransformIntLit<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
+                }
+                return v;
+            } else if (StringLit *v = cast_tree<StringLit>(what)) {
+                if (HAS_MEMBER_postTransformStringLit<FUNC>::value) {
+                    return PostPonePostTransform_StringLit<FUNC, HAS_MEMBER_postTransformStringLit<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                return v;
+            } else if (ConstantLit *v = cast_tree<ConstantLit>(what)) {
+                if (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
+                    return PostPonePostTransform_ConstantLit<
+                        FUNC, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(ctx, v, func);
+                }
+                return v;
+            } else if (BoolLit *v = cast_tree<BoolLit>(what)) {
+                // Error::notImplemented();
+                return what;
+            } else if (ArraySplat *v = cast_tree<ArraySplat>(what)) {
+                if (HAS_MEMBER_preTransformArraySplat<FUNC>::value) {
+                    v = PostPonePreTransform_ArraySplat<FUNC, HAS_MEMBER_preTransformArraySplat<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                auto oarg = v->arg.get();
+                auto narg = mapIt(oarg, ctx);
+                if (oarg != narg) {
+                    v->arg.reset(narg);
+                }
+
+                if (HAS_MEMBER_postTransformArraySplat<FUNC>::value) {
+                    return PostPonePostTransform_ArraySplat<
+                        FUNC, HAS_MEMBER_postTransformArraySplat<FUNC>::value>::call(ctx, v, func);
+                }
+
+                return v;
+            } else if (HashSplat *v = cast_tree<HashSplat>(what)) {
+                if (HAS_MEMBER_preTransformHashSplat<FUNC>::value) {
+                    v = PostPonePreTransform_HashSplat<FUNC, HAS_MEMBER_preTransformHashSplat<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                auto oarg = v->arg.get();
+                auto narg = mapIt(oarg, ctx);
+                if (oarg != narg) {
+                    v->arg.reset(narg);
+                }
+
+                if (HAS_MEMBER_postTransformHashSplat<FUNC>::value) {
+                    return PostPonePostTransform_HashSplat<FUNC, HAS_MEMBER_postTransformHashSplat<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                return v;
+            } else if (SymbolLit *v = cast_tree<SymbolLit>(what)) {
+                return what;
+            } else if (Self *v = cast_tree<Self>(what)) {
+                if (HAS_MEMBER_postTransformSelf<FUNC>::value) {
+                    return PostPonePostTransform_Self<FUNC, HAS_MEMBER_postTransformSelf<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+                }
+                return v;
+            } else if (Block *v = cast_tree<Block>(what)) {
+                if (HAS_MEMBER_preTransformBlock<FUNC>::value) {
+                    v = PostPonePreTransform_Block<FUNC, HAS_MEMBER_preTransformBlock<FUNC>::value>::call(ctx, v, func);
+                }
+
+                auto originalBody = v->body.get();
+                auto newBody = mapIt(originalBody, ctx.withOwner(v->symbol));
+                if (newBody != originalBody) {
+                    v->body.reset(newBody);
+                }
+
+                if (HAS_MEMBER_postTransformBlock<FUNC>::value) {
+                    return PostPonePostTransform_Block<FUNC, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
+                }
+                return v;
+            } else if (InsSeq *v = cast_tree<InsSeq>(what)) {
+                if (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
+                    v = PostPonePreTransform_InsSeq<FUNC, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(ctx, v,
+                                                                                                            func);
+                }
+                auto &stats = v->stats;
+                auto oexpr = v->expr.get();
+                auto i = 0;
+                while (i < stats.size()) {
+                    auto &el = stats[i];
+                    auto oexp = el.get();
+                    auto nexp = mapIt(oexp, ctx);
+                    if (oexp != nexp) {
+                        el.reset(nexp);
+                    }
+                    i++;
+                }
+                auto nexpr = mapIt(oexpr, ctx);
+                if (nexpr != oexpr) {
+                    v->expr.reset(nexpr);
+                }
+
+                if (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
+                    return PostPonePostTransform_InsSeq<FUNC, HAS_MEMBER_postTransformInsSeq<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
+                }
+
+                return v;
+            } else if (Local *v = cast_tree<Local>(what)) {
+                if (HAS_MEMBER_postTransformLocal<FUNC>::value) {
+                    return PostPonePostTransform_Local<FUNC, HAS_MEMBER_postTransformLocal<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
+                }
+                return v;
+            } else if (NotSupported *v = cast_tree<NotSupported>(what)) {
+                return what;
+            } else {
+                Error::raise("should never happen. Forgot to add new tree kind?", demangle(typeid(what).name()));
             }
-            return v;
-        } else if (NotSupported *v = cast_tree<NotSupported>(what)) {
-            return what;
-        } else {
-            Error::raise("should never happen. Forgot to add new tree kind?", demangle(typeid(what).name()));
+        } catch (...) {
+            if (!locReported) {
+                locReported = true;
+                ctx.state.errors.error(what->loc, core::ErrorClass::Internal, "Failed to process tree");
+            }
+            throw;
         }
     }
 
