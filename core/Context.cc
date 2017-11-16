@@ -218,6 +218,9 @@ static UTF8Desc super_DESC{(char *)super, (int)strlen(super)};
 static const char *empty = "";
 static UTF8Desc empty_DESC{(char *)empty, (int)strlen(empty)};
 
+static const char *tripleEq = "===";
+static UTF8Desc tripleEq_DESC{(char *)tripleEq, (int)strlen(tripleEq)};
+
 static const char *nilable = "nilable";
 static UTF8Desc nilable_DESC{(char *)nilable, (int)strlen(nilable)};
 
@@ -289,6 +292,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     NameRef nil_p_id = enterNameUTF8(nil_p_DESC);
     NameRef super_id = enterNameUTF8(super_DESC);
     NameRef empty_id = enterNameUTF8(empty_DESC);
+    NameRef tripleEq_id = enterNameUTF8(tripleEq_DESC);
 
     DEBUG_ONLY(Error::check(init_id == Names::initialize()));
     DEBUG_ONLY(Error::check(andAnd_id == Names::andAnd()));
@@ -331,6 +335,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check(nil_p_id == Names::nil_p()));
     DEBUG_ONLY(Error::check(super_id == Names::super()));
     DEBUG_ONLY(Error::check(empty_id == Names::empty()));
+    DEBUG_ONLY(Error::check(tripleEq_id == Names::tripleEq()));
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
     SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject

@@ -1,0 +1,35 @@
+class <emptyTree>::<constant:Test><<constant:<todo sym>>> < ()
+  def test_case<<constant:<todo sym>>>()
+    begin
+      begin
+        assignTmp$0 = self(<constant:<todo sym>>).a()
+        if assignTmp$0.===(self(<constant:<todo sym>>).foo1())
+          :a
+        else
+          if if assignTmp$0.===(self(<constant:<todo sym>>).foo3())
+              true
+            else
+              assignTmp$0.===(self(<constant:<todo sym>>).foo2())
+            end
+            :b
+          else
+            :c
+          end
+        end
+      end
+      if self(<constant:<todo sym>>).test1()
+        :a
+      else
+        if if self(<constant:<todo sym>>).test3()
+            true
+          else
+            self(<constant:<todo sym>>).test2()
+          end
+          :b
+        else
+          <emptyTree>
+        end
+      end
+    end
+
+end
