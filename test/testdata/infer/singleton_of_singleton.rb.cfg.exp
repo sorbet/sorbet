@@ -1,0 +1,27 @@
+digraph "singleton_of_singleton.rb"{
+subgraph "cluster_::<singleton class:<constant:A>>#foo" {
+    label = "::<singleton class:<constant:A>>#foo";
+    color = blue;
+    bb102_0 [shape = invhouse];
+    bb102_1 [shape = parallelogram];
+
+    bb102_0 [label = "()\n<ret>$2 = NotSupported() : untyped\n<ret>$2 = return <ret>$2 : <bottom>\n<unconditional>"];
+    bb102_0 -> bb102_1;
+    bb102_1 [label = "()\n<unconditional>"];
+    bb102_1 -> bb102_1;
+}
+
+subgraph "cluster_::<singleton class:<singleton class:<constant:A>>>#bar" {
+    label = "::<singleton class:<singleton class:<constant:A>>>#bar";
+    color = blue;
+    bb104_0 [shape = invhouse];
+    bb104_1 [shape = parallelogram];
+
+    bb104_0 [label = "()\n<ret>$3 = self : <class:<class:A>>\n<ret>$2 = return <ret>$3 : <bottom>\n<unconditional>"];
+    bb104_0 -> bb104_1;
+    bb104_1 [label = "()\n<unconditional>"];
+    bb104_1 -> bb104_1;
+}
+
+}
+
