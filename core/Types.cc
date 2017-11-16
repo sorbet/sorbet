@@ -1,6 +1,7 @@
 #include "Types.h"
 #include "../common/common.h"
 #include <algorithm> // find_if
+#include <unordered_set>
 
 using namespace ruby_typer;
 using namespace ruby_typer::core;
@@ -568,8 +569,8 @@ shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, co
 
 namespace {
 void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef method, TypeAndOrigins &argTpe,
-                  core::SymbolRef argSym) {
-    shared_ptr<Type> expectedType = argSym.info(ctx).resultType;
+                  core::Symbol &argSym) {
+    shared_ptr<Type> expectedType = argSym.resultType;
     if (!expectedType) {
         expectedType = Types::dynamic();
     }
@@ -579,14 +580,13 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef method, 
     }
     ctx.state.errors.error(core::Reporter::ComplexError(
         callLoc, core::ErrorClass::MethodArgumentMismatch,
-        "Argument `" + argSym.info(ctx).name.toString(ctx) + "' does not match expected type.",
+        "Argument `" + argSym.name.toString(ctx) + "' does not match expected type.",
         {core::Reporter::ErrorSection(
              "Expected " + expectedType->toString(ctx),
              {
-                 core::Reporter::ErrorLine::from(argSym.info(ctx).definitionLoc,
-                                                 "Method {} has specified type of argument {} as {}",
-                                                 method.info(ctx).name.toString(ctx),
-                                                 argSym.info(ctx).name.toString(ctx), expectedType->toString(ctx)),
+                 core::Reporter::ErrorLine::from(
+                     argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
+                     method.info(ctx).name.toString(ctx), argSym.name.toString(ctx), expectedType->toString(ctx)),
              }),
          core::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
                                       argTpe.origins2Explanations(ctx))}));
@@ -610,20 +610,96 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         return Types::dynamic();
     }
     core::Symbol &info = method.info(ctx);
+    shared_ptr<Type> hashType = make_unique<ClassType>(ctx.state.defn_Hash());
 
-    if (info.arguments().size() != args.size()) { // todo: this should become actual argument matching
+    bool hasKwargs = std::any_of(info.arguments().begin(), info.arguments().end(),
+                                 [&ctx](core::SymbolRef arg) { return arg.info(ctx).isKeyword(); });
+
+    /*
+    bool requireKwargs = std::any_of(info.arguments().begin(), info.arguments().end(), [&ctx](core::SymbolRef arg) {
+        return arg.info(ctx).isKeyword() && !(arg.info(ctx).isOptional() || arg.info(ctx).isRepeated());
+    });
+    */
+
+    auto pit = info.arguments().begin();
+    auto ait = args.begin();
+
+    while (pit != info.arguments().end() && ait != args.end()) {
+        core::Symbol &spec = pit->info(ctx);
+        auto &arg = *ait;
+        if (spec.isKeyword() || spec.isBlockArgument() || spec.isRepeated())
+            break;
+        if (spec.isOptional() && hasKwargs && Types::isSubType(ctx, arg.type, hashType))
+            break;
+        ++pit;
+        ++ait;
+
+        matchArgType(ctx, callLoc, method, arg, spec);
+    }
+
+    if (pit != info.arguments().end()) {
+        if (!(pit->info(ctx).isKeyword() || pit->info(ctx).isOptional() || pit->info(ctx).isRepeated() ||
+              pit->info(ctx).isBlockArgument())) {
+            ctx.state.errors.error(
+                callLoc, core::ErrorClass::MethodArgumentCountMismatch,
+                "Not enough arguments provided for method {}.\n Expected: {}, provided: {}", fun.toString(ctx),
+
+                // TODO(nelhage): report actual counts of required arguments,
+                // and account for keyword arguments
+                info.arguments().size(),
+                args.size()); // TODO: should use position and print the source tree, not the cfg one.
+        }
+    }
+
+    if (hasKwargs && ait != args.end()) {
+        std::unordered_set<NameRef> consumed;
+        if (HashType *hash = dynamic_cast<HashType *>(args.back().type.get())) {
+            if (ait + 1 == args.end())
+                ++ait;
+
+            while (pit != info.arguments().end()) {
+                core::Symbol &spec = pit->info(ctx);
+                // skip optional+repeated arguments until we get to keyword
+                if (!spec.isKeyword()) {
+                    ++pit;
+                    continue;
+                }
+                if (spec.isRepeated() || spec.isBlockArgument())
+                    break;
+                ++pit;
+
+                auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<Literal> lit) {
+                    return dynamic_cast<ClassType *>(lit->underlying.get())->symbol == ctx.state.defn_Symbol() &&
+                           lit->value == spec.name._id;
+                });
+                if (arg == hash->keys.end()) {
+                    if (!spec.isOptional()) {
+                        ctx.state.errors.error(callLoc, core::ErrorClass::MethodArgumentCountMismatch,
+                                               "Missing argument {} for method {}.", spec.name.toString(ctx),
+                                               fun.toString(ctx));
+                    }
+                    continue;
+                }
+                consumed.insert(spec.name);
+                TypeAndOrigins tpe;
+                tpe.origins = args.back().origins;
+                tpe.type = hash->values[arg - hash->keys.begin()];
+                matchArgType(ctx, callLoc, method, tpe, spec);
+            }
+        }
+    }
+
+    if (ait != args.end()) {
         ctx.state.errors.error(callLoc, core::ErrorClass::MethodArgumentCountMismatch,
-                               "Wrong number of arguments for method {}.\n Expected: {}, found: {}", fun.toString(ctx),
+                               "Too many arguments provided for method {}.\n Expected: {}, provided: {}",
+                               fun.toString(ctx),
+
+                               // TODO(nelhage): report actual counts of required arguments,
+                               // and account for keyword arguments
                                info.arguments().size(),
                                args.size()); // TODO: should use position and print the source tree, not the cfg one.
-        return Types::dynamic();
     }
-    int i = 0;
-    for (TypeAndOrigins &argTpe : args) {
-        matchArgType(ctx, callLoc, method, argTpe, info.arguments()[i]);
 
-        i++;
-    }
     shared_ptr<Type> resultType = method.info(ctx).resultType;
     if (!resultType) {
         resultType = Types::dynamic();
