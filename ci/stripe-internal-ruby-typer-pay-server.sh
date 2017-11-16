@@ -1,18 +1,18 @@
 #!/bin/bash
 set -eux
-    
-DIR=/cache/pay-server
 
-if [ ! -d $DIR/.git ]; then
-    rm -r $DIR
-fi
+DIR=./pay-server
+
 if [ ! -d $DIR ]; then
-    git clone git@git.corp.stripe.com:stripe-internal/pay-server.git $DIR
+    echo "$DIR doesn't exist"
+    exit 1
 fi
+
 cd $DIR
-git fetch
-git checkout master-passing-tests
-git rebase origin/master-passing-tests
+if [ `git rev-parse --abbrev-ref HEAD` != "master-passing-tests" ]; then
+    echo "pay-server not on master-passing-tests branch"
+    exit 1
+fi
 cd -
 
 bazel build main:ruby-typer
