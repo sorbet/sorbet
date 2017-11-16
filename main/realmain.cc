@@ -242,6 +242,7 @@ int realmain(int argc, char **argv) {
         }
         st.bytes += src.size();
         st.lines += count(src.begin(), src.end(), '\n');
+        st.files++;
         inputFiles.push_back(gs.enterFile(fileName, src));
     }
     if (options.count("e")) {
