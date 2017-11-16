@@ -5,17 +5,17 @@ subgraph "cluster_::<constant:Object>#foo" {
     bb100_0 [shape = invhouse];
     bb100_1 [shape = parallelogram];
 
-    bb100_0 [label = "(statTmp$2)\nstatTmp$2 = NotSupported() : untyped\n<unconditional>"];
+    bb100_0 [label = "(statTemp$2)\nstatTemp$2 = NotSupported() : untyped\n<unconditional>"];
     bb100_0 -> bb100_2;
-    bb100_1 [label = "()\nstatTmp$10 = self\n<blockret>$3 = statTmp$10.bad()\n<unconditional>"];
+    bb100_1 [label = "()\nstatTemp$10 = self\nblockReturnTemp$3 = statTemp$10.bad()\n<unconditional>"];
     bb100_1 -> bb100_1;
-    bb100_2 [label = "(statTmp$2)\nouterLoops: 1\n<block-call>"];
+    bb100_2 [label = "(statTemp$2)\nouterLoops: 1\n<block-call>"];
     bb100_2 -> bb100_4;
     bb100_2 -> bb100_3;
 
-    bb100_3 [label = "(statTmp$2)\n<ret>$1 = statTmp$2.map() : untyped\n<ret>$11 = return <ret>$1 : <bottom>\n<unconditional>"];
+    bb100_3 [label = "(statTemp$2)\nreturnMethodTemp$1 = statTemp$2.map() : untyped\nreturnMethodTemp$11 = return returnMethodTemp$1 : <bottom>\n<unconditional>"];
     bb100_3 -> bb100_1;
-    bb100_4 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: x> = load_arg(statTmp$2#map, 0) : untyped\nstatTmp$5 = self : Object\nstatTmp$4 = statTmp$5.good() : untyped\nstatTmp$9 = 1 : Integer(1)\nreturnTmp$7 = <block-nested: x>.+(statTmp$9) : untyped\n<unconditional>"];
+    bb100_4 [label = "(statTemp$2)\nouterLoops: 1\n<block-nested: x> = load_arg(statTemp$2#map, 0) : untyped\nstatTemp$5 = self : Object\nstatTemp$4 = statTemp$5.good() : untyped\nstatTemp$9 = 1 : Integer(1)\nreturnTemp$7 = <block-nested: x>.+(statTemp$9) : untyped\n<unconditional>"];
     bb100_4 -> bb100_2;
 }
 

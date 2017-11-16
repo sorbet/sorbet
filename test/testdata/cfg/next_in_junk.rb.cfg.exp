@@ -7,7 +7,7 @@ subgraph "cluster_::<constant:Object>#foo" {
 
     bb100_0 [label = "()\n<unconditional>"];
     bb100_0 -> bb100_1;
-    bb100_1 [label = "()\n<ret>$3 = return <ret>$0\n<unconditional>"];
+    bb100_1 [label = "()\nreturnMethodTemp$3 = return returnMethodTemp$0\n<unconditional>"];
     bb100_1 -> bb100_1;
 }
 

@@ -7,15 +7,15 @@ subgraph "cluster_::<constant:Object>#foo" {
 
     bb100_0 [label = "()\n<unconditional>"];
     bb100_0 -> bb100_2;
-    bb100_1 [label = "()\nstatTmp$9 = self\nstatTmp$3 = statTmp$9.bad()\n<unconditional>"];
+    bb100_1 [label = "()\nstatTemp$9 = self\nstatTemp$3 = statTemp$9.bad()\n<unconditional>"];
     bb100_1 -> bb100_1;
-    bb100_2 [label = "()\nouterLoops: 1\nwhileTmp$2 = true : TrueClass(true)\nwhileTmp$2"];
+    bb100_2 [label = "()\nouterLoops: 1\nwhileTemp$2 = true : TrueClass(true)\nwhileTemp$2"];
     bb100_2 -> bb100_3;
     bb100_2 -> bb100_4;
 
-    bb100_3 [label = "()\nouterLoops: 1\nstatTmp$5 = self : Object\nstatTmp$4 = statTmp$5.good() : untyped\nstatTmp$8 = self : Object\nreturnTmp$7 = statTmp$8.value() : untyped\n<unconditional>"];
+    bb100_3 [label = "()\nouterLoops: 1\nstatTemp$5 = self : Object\nstatTemp$4 = statTemp$5.good() : untyped\nstatTemp$8 = self : Object\nreturnTemp$7 = statTemp$8.value() : untyped\n<unconditional>"];
     bb100_3 -> bb100_2;
-    bb100_4 [label = "()\n<ret>$0 = nil : NilClass\n<ret>$10 = return <ret>$0 : <bottom>\n<unconditional>"];
+    bb100_4 [label = "()\nreturnMethodTemp$0 = nil : NilClass\nreturnMethodTemp$10 = return returnMethodTemp$0 : <bottom>\n<unconditional>"];
     bb100_4 -> bb100_1;
 }
 

@@ -226,7 +226,7 @@ int realmain(int argc, char **argv) {
                 return 1;
             }
             try {
-                run(gs, options, "-e", src, prints);
+                run(gs, options, fileName, src, prints);
             } catch (...) {
                 console_err->error("Exception on file: {} (backtrace is above)", fileName);
                 // We could re-throw or continue, lets try continuing and see

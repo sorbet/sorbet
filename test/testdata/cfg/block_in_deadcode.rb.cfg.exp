@@ -5,17 +5,17 @@ subgraph "cluster_::<constant:Object>#foo" {
     bb100_0 [shape = invhouse];
     bb100_1 [shape = parallelogram];
 
-    bb100_0 [label = "(statTmp$2)\nstatTmp$2 = self : Object\n<unconditional>"];
+    bb100_0 [label = "(statTemp$2)\nstatTemp$2 = self : Object\n<unconditional>"];
     bb100_0 -> bb100_2;
-    bb100_1 [label = "()\nstatTmp$6 = self\nstatTmp$8 = self\n<blockret>$7 = statTmp$8.foo()\n<blockret>$3 = statTmp$6.inner()\n<unconditional>"];
+    bb100_1 [label = "()\nstatTemp$6 = self\nstatTemp$8 = self\nblockReturnTemp$7 = statTemp$8.foo()\nblockReturnTemp$3 = statTemp$6.inner()\n<unconditional>"];
     bb100_1 -> bb100_1;
-    bb100_2 [label = "(statTmp$2)\nouterLoops: 1\n<block-call>"];
+    bb100_2 [label = "(statTemp$2)\nouterLoops: 1\n<block-call>"];
     bb100_2 -> bb100_4;
     bb100_2 -> bb100_3;
 
-    bb100_3 [label = "(statTmp$2)\n<ret>$2 = statTmp$2.outer() : untyped\n<ret>$9 = return <ret>$2 : <bottom>\n<unconditional>"];
+    bb100_3 [label = "(statTemp$2)\nreturnMethodTemp$2 = statTemp$2.outer() : untyped\nreturnMethodTemp$9 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
     bb100_3 -> bb100_1;
-    bb100_4 [label = "()\nouterLoops: 1\nreturnTmp$5 = NotSupported() : untyped\nstatTmp$4 = return returnTmp$5 : <bottom>\n<unconditional>"];
+    bb100_4 [label = "()\nouterLoops: 1\nreturnTemp$5 = NotSupported() : untyped\nstatTemp$4 = return returnTemp$5 : <bottom>\n<unconditional>"];
     bb100_4 -> bb100_1;
 }
 
