@@ -2,6 +2,8 @@ self(<singleton class:<constant:<root>>>).foobar() do ||
   begin
     def a_method<a_method>()
       <emptyTree>
+    def a_method_with_param<a_method_with_param>(a)
+      <emptyTree>
     def self.a_static_method<a_static_method>()
       <emptyTree>
   end

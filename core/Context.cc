@@ -236,6 +236,7 @@ static UTF8Desc basicObject_DESC{(char *)basicObject, (int)strlen(basicObject)};
 static const char *kernel = "Kernel";
 static UTF8Desc kernel_DESC{(char *)kernel, (int)strlen(kernel)};
 
+// This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 static const char *reserved = "<<RESERVED>>";
 static UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
 
@@ -708,8 +709,21 @@ SymbolRef Context::enclosingMethod() {
         Error::check(owner.exists());
         owner = owner.info(this->state).owner;
     }
-    if (owner == GlobalState::defn_root())
-        owner._id = 0;
+    if (owner == GlobalState::defn_root()) {
+        return GlobalState::noSymbol();
+    }
+    return owner;
+}
+
+SymbolRef Context::enclosingClass() {
+    SymbolRef owner = this->owner;
+    while (owner != GlobalState::defn_root() && !owner.info(this->state, false).isClass()) {
+        Error::check(owner.exists());
+        owner = owner.info(this->state).owner;
+    }
+    if (owner == GlobalState::defn_root()) {
+        return GlobalState::noSymbol();
+    }
     return owner;
 }
 
