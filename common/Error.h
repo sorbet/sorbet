@@ -75,7 +75,11 @@ template <typename... TArgs>[[noreturn]] void Error::raise(const TArgs &... args
     std::stringstream message;
     _raise(message, args...);
 
-    fprintf(stderr, "%s\n", message.str().c_str());
+    if (message.str().size() > 0) {
+        fprintf(stderr, "Error::raise(): %s\n", message.str().c_str());
+    } else {
+        fprintf(stderr, "Error::raise() (sadly without a message)\n");
+    }
     print_backtrace();
 
     throw SRubyException(message.str());

@@ -136,7 +136,7 @@ void ruby_typer::Error::print_backtrace() {
 
     string res = addr2line(program_name, stack_traces, trace_size);
     filter_unnecessary(res);
-    fprintf(stderr, "%s", res.c_str());
+    fprintf(stderr, "Backtrace:\n%s", res.c_str());
 
     if (messages) {
         free(messages);

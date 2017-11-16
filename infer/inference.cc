@@ -231,7 +231,7 @@ public:
             }
             return tp.type;
         } catch (...) {
-            ctx.state.errors.error(bind.loc, core::ErrorClass::Internal, "Failed to type");
+            ctx.state.errors.error(bind.loc, core::ErrorClass::Internal, "Failed to type (backtrace is above)");
             throw;
         }
     }
