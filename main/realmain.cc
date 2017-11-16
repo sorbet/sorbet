@@ -194,7 +194,7 @@ int realmain(int argc, char **argv) {
 
     ruby_typer::core::GlobalState gs(*console);
 
-    if (!options["no-typer"].as<bool>()) {
+    if (!options["no-stdlib"].as<bool>()) {
         clock_t begin = clock();
 
         index(gs, ruby_typer::rbi::all());
