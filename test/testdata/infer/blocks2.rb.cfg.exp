@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "blocks2.rb"{
 subgraph "cluster_::<constant:Foo>#bar" {
     label = "::<constant:Foo>#bar";
     color = blue;

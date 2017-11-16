@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "next_in_junk.rb"{
 subgraph "cluster_::<constant:Object>#foo" {
     label = "::<constant:Object>#foo";
     color = blue;

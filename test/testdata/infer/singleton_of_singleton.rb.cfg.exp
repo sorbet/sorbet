@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "singleton_of_singleton.rb"{
 subgraph "cluster_::<singleton class:<constant:A>>#foo" {
     label = "::<singleton class:<constant:A>>#foo";
     color = blue;

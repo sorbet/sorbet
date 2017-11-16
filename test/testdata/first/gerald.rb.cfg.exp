@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "gerald.rb"{
 subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize" {
     label = "::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize";
     color = blue;

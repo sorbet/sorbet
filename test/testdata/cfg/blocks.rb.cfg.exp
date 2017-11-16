@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "blocks.rb"{
 subgraph "cluster_::<constant:BlockTest>#block_pass" {
     label = "::<constant:BlockTest>#block_pass";
     color = blue;

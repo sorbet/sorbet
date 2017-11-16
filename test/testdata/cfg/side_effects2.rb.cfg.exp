@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "side_effects2.rb"{
 subgraph "cluster_::<constant:Side>#foo" {
     label = "::<constant:Side>#foo";
     color = blue;

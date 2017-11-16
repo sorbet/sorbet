@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "loops.rb"{
 subgraph "cluster_::<constant:HasLoops>#variable_only_inside_loop" {
     label = "::<constant:HasLoops>#variable_only_inside_loop";
     color = blue;

@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "examples.rb"{
 subgraph "cluster_::<constant:Integer>#+" {
     label = "::<constant:Integer>#+";
     color = blue;

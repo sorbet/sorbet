@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "infer1.rb"{
 subgraph "cluster_::<constant:String>#getbyte" {
     label = "::<constant:String>#getbyte";
     color = blue;

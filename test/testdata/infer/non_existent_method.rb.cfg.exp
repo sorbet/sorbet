@@ -1,4 +1,4 @@
-digraph "-e"{
+digraph "non_existent_method.rb"{
 subgraph "cluster_::<constant:Foo>#baz" {
     label = "::<constant:Foo>#baz";
     color = blue;
