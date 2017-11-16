@@ -2,6 +2,7 @@
 #define SRUBY_CORE_H
 
 #include "Context.h"
+#include "GlobalState.h"
 #include "Loc.h"
 #include "Names.h"
 #include "Types.h"
