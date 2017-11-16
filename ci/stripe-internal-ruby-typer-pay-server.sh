@@ -21,4 +21,4 @@ BLACKLIST="\(api/lib/api_param/pagination.rb\|lib/fees/charge_based_fee_rules.rb
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
-find $DIR -name *.rb | sort | grep -v "$BLACKLIST" | ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 xargs ./bazel-bin/main/ruby-typer -v
+find $DIR -name *.rb | sort | grep -v "$BLACKLIST" | ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 xargs ./bazel-bin/main/ruby-typer -q
