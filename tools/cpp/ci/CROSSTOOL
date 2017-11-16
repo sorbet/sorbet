@@ -25,11 +25,11 @@ toolchain {
   target_system_name: "local"
   toolchain_identifier: "local_linux"
 
-  tool_path { name: "ar" path: "/usr/bin/ar" }
+  tool_path { name: "ar" path: "/usr/lib/llvm-4.0/bin/llvm-ar" }
   tool_path { name: "compat-ld" path: "/usr/bin/ld" }
-  tool_path { name: "cpp" path: "/usr/bin/clang-cpp-4.0" }
+  tool_path { name: "cpp" path: "/usr/lib/llvm-4.0/bin/clang-cpp" }
   tool_path { name: "dwp" path: "/usr/bin/dwp" }
-  tool_path { name: "gcc" path: "/usr/bin/clang-4.0" }
+  tool_path { name: "gcc" path: "/usr/lib/llvm-4.0/bin/clang" }
   cxx_flag: "-std=c++14"
   linker_flag: "-lstdc++"
   linker_flag: "-B/usr/bin/"
@@ -124,8 +124,6 @@ toolchain {
     # Profile first and / or use FDO if you need better performance than this.
     compiler_flag: "-O2"
 
-    # compiler_flag: "-flto"
-
     # Disable assertions
     compiler_flag: "-DNDEBUG"
 
@@ -139,8 +137,7 @@ toolchain {
     compiler_flag:  "-fno-omit-frame-pointer"
 
     linker_flag: "-Wl,--gc-sections"
-    # linker_flag: "-flto"
-    # linker_flag: "-Wl,-plugin /usr/lib/llvm-4.0/lib/LLVMgold.so"
+    linker_flag: "-lpthread"
   }
   linking_mode_flags { mode: DYNAMIC }
 }
