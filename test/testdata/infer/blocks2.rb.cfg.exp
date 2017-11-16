@@ -2,33 +2,33 @@ digraph "blocks2.rb"{
 subgraph "cluster_::<constant:Foo>#bar" {
     label = "::<constant:Foo>#bar";
     color = blue;
-    bb24_0 [shape = invhouse];
-    bb24_1 [shape = parallelogram];
+    bb101_0 [shape = invhouse];
+    bb101_1 [shape = parallelogram];
 
-    bb24_0 [label = "()\n<ret>$1 = NotSupported() : untyped\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
-    bb24_0 -> bb24_1;
-    bb24_1 [label = "()\n<unconditional>"];
-    bb24_1 -> bb24_1;
+    bb101_0 [label = "()\n<ret>$1 = NotSupported() : untyped\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
+    bb101_0 -> bb101_1;
+    bb101_1 [label = "()\n<unconditional>"];
+    bb101_1 -> bb101_1;
 }
 
 subgraph "cluster_::<constant:Foo>#baz" {
     label = "::<constant:Foo>#baz";
     color = blue;
-    bb25_0 [shape = invhouse];
-    bb25_1 [shape = parallelogram];
+    bb102_0 [shape = invhouse];
+    bb102_1 [shape = parallelogram];
 
-    bb25_0 [label = "(statTmp$2)\nstatTmp$2 = self : Foo\n<unconditional>"];
-    bb25_0 -> bb25_2;
-    bb25_1 [label = "()\n<unconditional>"];
-    bb25_1 -> bb25_1;
-    bb25_2 [label = "(statTmp$2)\nouterLoops: 1\n<block-call>"];
-    bb25_2 -> bb25_4;
-    bb25_2 -> bb25_3;
+    bb102_0 [label = "(statTmp$2)\nstatTmp$2 = self : Foo\n<unconditional>"];
+    bb102_0 -> bb102_2;
+    bb102_1 [label = "()\n<unconditional>"];
+    bb102_1 -> bb102_1;
+    bb102_2 [label = "(statTmp$2)\nouterLoops: 1\n<block-call>"];
+    bb102_2 -> bb102_4;
+    bb102_2 -> bb102_3;
 
-    bb25_3 [label = "(statTmp$2)\n<ret>$2 = statTmp$2.bar() : untyped\n<ret>$6 = return <ret>$2 : <bottom>\n<unconditional>"];
-    bb25_3 -> bb25_1;
-    bb25_4 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: r> = load_arg(statTmp$2#bar, 0) : untyped\nstatTmp$4 = self : Foo\n<blockret>$3 = statTmp$4.puts(<block-nested: r>) : untyped\n<unconditional>"];
-    bb25_4 -> bb25_2;
+    bb102_3 [label = "(statTmp$2)\n<ret>$2 = statTmp$2.bar() : untyped\n<ret>$6 = return <ret>$2 : <bottom>\n<unconditional>"];
+    bb102_3 -> bb102_1;
+    bb102_4 [label = "(statTmp$2)\nouterLoops: 1\n<block-nested: r> = load_arg(statTmp$2#bar, 0) : untyped\nstatTmp$4 = self : Foo\n<blockret>$3 = statTmp$4.puts(<block-nested: r>) : untyped\n<unconditional>"];
+    bb102_4 -> bb102_2;
 }
 
 }

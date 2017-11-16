@@ -2,49 +2,49 @@ digraph "constructors.rb"{
 subgraph "cluster_::<singleton class:<constant:Foo2>>#new" {
     label = "::<singleton class:<constant:Foo2>>#new";
     color = blue;
-    bb26_0 [shape = invhouse];
-    bb26_1 [shape = parallelogram];
+    bb103_0 [shape = invhouse];
+    bb103_1 [shape = parallelogram];
 
-    bb26_0 [label = "()\n<self>$1 = self : <class:Foo2>\n<ret>$1 = NotSupported() : untyped\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
-    bb26_0 -> bb26_1;
-    bb26_1 [label = "()\n<unconditional>"];
-    bb26_1 -> bb26_1;
+    bb103_0 [label = "()\n<self>$1 = self : <class:Foo2>\n<ret>$1 = NotSupported() : untyped\n<ret>$2 = return <ret>$1 : <bottom>\n<unconditional>"];
+    bb103_0 -> bb103_1;
+    bb103_1 [label = "()\n<unconditional>"];
+    bb103_1 -> bb103_1;
 }
 
 subgraph "cluster_::<constant:Foo3>#initialize" {
     label = "::<constant:Foo3>#initialize";
     color = blue;
-    bb29_0 [shape = invhouse];
-    bb29_1 [shape = parallelogram];
+    bb106_0 [shape = invhouse];
+    bb106_1 [shape = parallelogram];
 
-    bb29_0 [label = "()\n<self>$1 = self : Foo3\n<ret>$2 = NotSupported() : untyped\n<ret>$2 = return <ret>$2 : <bottom>\n<unconditional>"];
-    bb29_0 -> bb29_1;
-    bb29_1 [label = "()\n<unconditional>"];
-    bb29_1 -> bb29_1;
+    bb106_0 [label = "()\n<self>$1 = self : Foo3\n<ret>$2 = NotSupported() : untyped\n<ret>$2 = return <ret>$2 : <bottom>\n<unconditional>"];
+    bb106_0 -> bb106_1;
+    bb106_1 [label = "()\n<unconditional>"];
+    bb106_1 -> bb106_1;
 }
 
 subgraph "cluster_::<constant:Bar>#foo" {
     label = "::<constant:Bar>#foo";
     color = blue;
-    bb33_0 [shape = invhouse];
-    bb33_1 [shape = parallelogram];
+    bb110_0 [shape = invhouse];
+    bb110_1 [shape = parallelogram];
 
-    bb33_0 [label = "()\n<constant:Foo1>$4 = alias <constant:Foo1> : <class:Foo1>\n<constant:Foo2>$7 = alias <constant:Foo2> : <class:Foo2>\n<constant:Foo3>$10 = alias <constant:Foo3> : <class:Foo3>\nstatTmp$2 = <constant:Foo1>$4.new() : Foo1\nstatTmp$8 = 1 : Integer(1)\nstatTmp$5 = <constant:Foo2>$7.new(statTmp$8) : untyped\nstatTmp$11 = 1 : Integer(1)\nstatTmp$12 = 2 : Integer(2)\n<ret>$3 = <constant:Foo3>$10.new(statTmp$11, statTmp$12) : Foo3\n<ret>$13 = return <ret>$3 : <bottom>\n<unconditional>"];
-    bb33_0 -> bb33_1;
-    bb33_1 [label = "()\n<unconditional>"];
-    bb33_1 -> bb33_1;
+    bb110_0 [label = "()\n<constant:Foo1>$4 = alias <constant:Foo1> : <class:Foo1>\n<constant:Foo2>$7 = alias <constant:Foo2> : <class:Foo2>\n<constant:Foo3>$10 = alias <constant:Foo3> : <class:Foo3>\nstatTmp$2 = <constant:Foo1>$4.new() : Foo1\nstatTmp$8 = 1 : Integer(1)\nstatTmp$5 = <constant:Foo2>$7.new(statTmp$8) : untyped\nstatTmp$11 = 1 : Integer(1)\nstatTmp$12 = 2 : Integer(2)\n<ret>$3 = <constant:Foo3>$10.new(statTmp$11, statTmp$12) : Foo3\n<ret>$13 = return <ret>$3 : <bottom>\n<unconditional>"];
+    bb110_0 -> bb110_1;
+    bb110_1 [label = "()\n<unconditional>"];
+    bb110_1 -> bb110_1;
 }
 
 subgraph "cluster_::<constant:InstanceMethod>#test_imethod_new" {
     label = "::<constant:InstanceMethod>#test_imethod_new";
     color = blue;
-    bb35_0 [shape = invhouse];
-    bb35_1 [shape = parallelogram];
+    bb112_0 [shape = invhouse];
+    bb112_1 [shape = parallelogram];
 
-    bb35_0 [label = "()\n<constant:Object>$4 = alias <constant:Object> : <class:Object>\no = <constant:Object>$4.new() : Object\n<ret>$6 = o.new() : untyped\n<ret>$6 = return <ret>$6 : <bottom>\n<unconditional>"];
-    bb35_0 -> bb35_1;
-    bb35_1 [label = "()\n<unconditional>"];
-    bb35_1 -> bb35_1;
+    bb112_0 [label = "()\n<constant:Object>$4 = alias <constant:Object> : <class:Object>\no = <constant:Object>$4.new() : Object\n<ret>$6 = o.new() : untyped\n<ret>$6 = return <ret>$6 : <bottom>\n<unconditional>"];
+    bb112_0 -> bb112_1;
+    bb112_1 [label = "()\n<unconditional>"];
+    bb112_1 -> bb112_1;
 }
 
 }

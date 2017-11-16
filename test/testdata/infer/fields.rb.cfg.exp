@@ -2,13 +2,13 @@ digraph "fields.rb"{
 subgraph "cluster_::<constant:Foo>#foo" {
     label = "::<constant:Foo>#foo";
     color = blue;
-    bb25_0 [shape = invhouse];
-    bb25_1 [shape = parallelogram];
+    bb102_0 [shape = invhouse];
+    bb102_1 [shape = parallelogram];
 
-    bb25_0 [label = "()\n@ivar$3 = alias @ivar : Integer\n@ivar$3 = 2 : Integer(2)\n@ivar$3 = ss : untyped\n<ret>$4 = return @ivar$3 : <bottom>\n<unconditional>"];
-    bb25_0 -> bb25_1;
-    bb25_1 [label = "()\n<unconditional>"];
-    bb25_1 -> bb25_1;
+    bb102_0 [label = "()\n@ivar$3 = alias @ivar : Integer\n@ivar$3 = 2 : Integer(2)\n@ivar$3 = ss : untyped\n<ret>$4 = return @ivar$3 : <bottom>\n<unconditional>"];
+    bb102_0 -> bb102_1;
+    bb102_1 [label = "()\n<unconditional>"];
+    bb102_1 -> bb102_1;
 }
 
 }

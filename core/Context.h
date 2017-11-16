@@ -163,10 +163,11 @@ public:
 
     // Keep as last and update to match the last entry
     static constexpr SymbolRef defn_last_synthetic_sym() {
-        return defn_Kernel();
+        return SymbolRef(MAX_SYNTHETIC_SYMBOLS - 1);
     }
 
 private:
+    static constexpr int MAX_SYNTHETIC_SYMBOLS = 100;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::unique_ptr<std::vector<char>>> strings;
     u2 strings_last_page_used = STRINGS_PAGE_SIZE;
