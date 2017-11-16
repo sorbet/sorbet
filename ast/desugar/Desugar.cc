@@ -895,7 +895,8 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
     } catch (...) {
         if (!locReported) {
             locReported = true;
-            ctx.state.errors.error(what->loc, core::ErrorClass::Internal, "Failed to process tree");
+            ctx.state.errors.error(what->loc, core::ErrorClass::Internal,
+                                   "Failed to process tree (backtrace is above)");
         }
         throw;
     }

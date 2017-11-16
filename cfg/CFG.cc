@@ -665,7 +665,8 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
         Error::check(ret != nullptr);
         return ret;
     } catch (...) {
-        cctx.ctx.state.errors.error(what->loc, core::ErrorClass::Internal, "Failed to convert tree to CFG");
+        cctx.ctx.state.errors.error(what->loc, core::ErrorClass::Internal,
+                                    "Failed to convert tree to CFG (backtrace is above)");
         throw;
     }
 }
