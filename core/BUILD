@@ -11,7 +11,10 @@ cc_library(
             # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
             "flycheck_*",
         ],
-    ),
+    ) + [
+        "Names_gen.h",
+        "Names_gen.cc",
+    ],
     hdrs = [
         "core.h",
     ],
@@ -35,4 +38,25 @@ cc_test(
         "@gtest//:gtest",
         "@gtest//:gtest_main",
     ],
+)
+
+cc_binary(
+    name = "generate_names",
+    srcs = [
+        "tools/generate_names.cc",
+    ],
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//common",
+    ],
+)
+
+genrule(
+    name = "generate_names_h",
+    outs = [
+        "Names_gen.h",
+        "Names_gen.cc",
+    ],
+    cmd = "$(location :generate_names) $(location Names_gen.h) $(location Names_gen.cc)",
+    tools = [":generate_names"],
 )

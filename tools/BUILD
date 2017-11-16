@@ -13,5 +13,7 @@ compilation_database(
         "//ast/desugar:desugar_test",
         "//test:test_corpus",
         "//main:ruby-typer",
+        "//core:generate_names",
+        "//parser:generate_ast",
     ],
 )
