@@ -839,7 +839,11 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             result.swap(res);
         },
 
-        [&](parser::Node *a) { result.reset(new NotSupported(what->loc, a->nodeName())); });
+        [&](parser::Node *a) {
+            ctx.state.errors.error(what->loc, core::ErrorClass::UnsupportedNode, "Unsupported node type {}",
+                                   a->nodeName());
+            result.reset(new NotSupported(what->loc, a->nodeName()));
+        });
     Error::check(result.get());
     return result;
 }

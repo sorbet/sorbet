@@ -12,6 +12,7 @@ enum class ErrorClass {
 
     InvalidSingletonDef = 3001, // Desugarer Errors
     IntegerOutOfRange = 3002,
+    UnsupportedNode = 3003,
 
     IncludeMutipleParam = 4001, // Namer Errors
     IncludeNotConstant = 4002,

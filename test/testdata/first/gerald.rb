@@ -20,9 +20,10 @@ module Opus::CIBot::Gerald
 
     def initialize
       @rules, invalid_rules =  # error: undeclared variable
-              Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).partition(&:valid?) # error: Stubbing out unknown constant
+              Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).  # error: Stubbing out unknown constant
+                partition(&:valid?) # error: Unsupported node type BlockPass
       if !invalid_rules.empty?
-        invalid_rule_ids = invalid_rules.map(&:token).join(',')
+        invalid_rule_ids = invalid_rules.map(&:token).join(',') # error: Unsupported node type BlockPass
         log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids) # error: MULTI: both log and invalid_rule_ids
       end
     end
@@ -146,7 +147,8 @@ module Opus::CIBot::Gerald
     end
 
     private def parse(diff)
-      parts = diff.split(/^diff [^\n]*\n/m)[1..-1] # rubocop:disable PrisonGuard/NoUnsafeRegexes (I meant multiline)
+      parts = diff.split(/^diff [^\n]*\n/m)[ # error: Unsupported node type Regexp
+        1..-1] # error: Unsupported node type IRange
       parts ||= []
       parts.map do |part|
         lines = part.split("\n")
@@ -158,15 +160,15 @@ module Opus::CIBot::Gerald
           if line.start_with?("index ", '@@', 'new file mode')
             next
           elsif line.start_with?('---')
-            a_name = line[4..-1]
-            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/')
+            a_name = line[4..-1] # error: Unsupported node type IRange
+            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: Unsupported node type IRange
           elsif line.start_with?('+++')
-            b_name = line[4..-1]
-            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/')
+            b_name = line[4..-1] # error: Unsupported node type IRange
+            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Unsupported node type IRange
           elsif line.start_with?('+')
-            added_lines << line[1..-1]
+            added_lines << line[1..-1] # error: Unsupported node type IRange
           elsif line.start_with?('-')
-            removed_lines << line[1..-1]
+            removed_lines << line[1..-1] # error: Unsupported node type IRange
           end
         end
         next if a_name.nil?
