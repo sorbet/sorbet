@@ -71,8 +71,8 @@ void index(ruby_typer::core::GlobalState &gs, const vector<pair<string, string>>
     gs.errors.keepErrorsInMemory = false;
 }
 
-void parse_and_print(ruby_typer::core::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
-                     vector<string> &prints) {
+void run(ruby_typer::core::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
+         vector<string> &prints) {
     auto ast = ruby_typer::parser::Parser::run(gs, path, src);
     if (!ast) {
         ruby_typer::Error::raise("Parse Error");
@@ -210,9 +210,13 @@ int realmain(int argc, char **argv) {
         st.files++;
         st.lines++;
         st.bytes += src.size();
-        parse_and_print(gs, options, "-e", src, prints);
+        try {
+            run(gs, options, "-e", src, prints);
+        } catch (...) {
+            console_err->error("Exception when running with -e option (backtrace is above)");
+        }
     } else {
-        for (auto &fileName : files) {
+        for (string &fileName : files) {
             console->debug("Parsing {}...", fileName);
             string src;
             try {
@@ -221,7 +225,13 @@ int realmain(int argc, char **argv) {
                 console->error("File Not Found: {}", fileName);
                 return 1;
             }
-            parse_and_print(gs, options, fileName, src, prints);
+            try {
+                run(gs, options, "-e", src, prints);
+            } catch (...) {
+                console_err->error("Exception on file: {} (backtrace is above)", fileName);
+                // We could re-throw or continue, lets try continuing and see
+                // how it goes
+            }
         }
     }
     clock_t end = clock();
