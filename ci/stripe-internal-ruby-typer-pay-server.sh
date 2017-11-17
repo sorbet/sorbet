@@ -9,10 +9,7 @@ if [ ! -d $DIR ]; then
 fi
 
 cd $DIR
-if [ `git rev-parse --abbrev-ref HEAD` != "master-passing-tests" ]; then
-    echo "pay-server not on master-passing-tests branch"
-    exit 1
-fi
+git checkout `cat ci/stripe-internal-ruby-typer-pay-server-sha`
 cd -
 
 bazel build main:ruby-typer -c opt
