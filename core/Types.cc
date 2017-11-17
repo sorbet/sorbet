@@ -599,6 +599,16 @@ void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
 }
 }; // namespace
 
+// This implements Ruby's argument matching logic (assigning values passed to a
+// method call to formal parameters of the method).
+//
+// Known incompleteness or inconsistencies with Ruby:
+//  - Missing handling of repeated keyword arguments (**kwargs)
+//  - Missing coercion to keyword arguments via `#to_hash`
+//  - Missing handling of block arguments
+//  - We never allow a non-shaped Hash to satisfy keyword arguments;
+//    We should, at a minimum, probably allow one to satisfy an **kwargs : dynamic
+//    (with a subtype check on the key type, once we have generics)
 shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     if (isDynamic()) {
