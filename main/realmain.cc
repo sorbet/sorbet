@@ -72,14 +72,14 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     try {
         for (auto f : frs) {
             try {
-                tracer->critical("Parsing: {}", f.file(gs).path().toString());
+                tracer->trace("Parsing: {}", f.file(gs).path().toString());
                 auto nodes = ruby_typer::parser::Parser::run(gs, f);
                 if (printParseTree) {
                     cout << nodes->toString(gs, 0) << endl;
                 }
 
                 ruby_typer::core::Context context(gs, gs.defn_root());
-                tracer->critical("Desugaring: {}", f.file(gs).path().toString());
+                tracer->trace("Desugaring: {}", f.file(gs).path().toString());
                 auto ast = ruby_typer::ast::desugar::node2Tree(context, nodes);
                 if (printDesugared) {
                     cout << ast->toString(gs, 0) << endl;
@@ -89,7 +89,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
                     cout << ast->showRaw(gs) << endl;
                 }
                 nodes = nullptr; // free up space early
-                tracer->critical("Naming: {}", f.file(gs).path().toString());
+                tracer->trace("Naming: {}", f.file(gs).path().toString());
                 result.emplace_back(ruby_typer::namer::Namer::run(context, move(ast)));
             } catch (...) {
                 console_err->error("Exception on file: {} (backtrace is above)", f.file(gs).path().toString());
@@ -123,7 +123,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
             ruby_typer::core::FileRef f = namedTree->loc.file;
             try {
                 ruby_typer::core::Context context(gs, gs.defn_root());
-                tracer->critical("Resolving: {}", f.file(gs).path().toString());
+                tracer->trace("Resolving: {}", f.file(gs).path().toString());
                 auto resolved = ruby_typer::namer::Resolver::run(context, move(namedTree));
                 if (printNameTree) {
                     cout << resolved->toString(gs, 0) << endl;
@@ -135,7 +135,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                 if (printCFG) {
                     cout << "digraph \"" + ruby_typer::File::getFileName(f.file(gs).path().toString()) + "\"{" << endl;
                 }
-                tracer->critical("CFG+Infer: {}", f.file(gs).path().toString());
+                tracer->trace("CFG+Infer: {}", f.file(gs).path().toString());
                 CFG_Collector_and_Typer collector(!opts["no-typer"].as<bool>(), printCFG);
                 result.emplace_back(
                     ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
@@ -222,7 +222,7 @@ int realmain(int argc, char **argv) {
         spd::set_level(spd::level::critical);
     }
 
-    if (options.count("q")) {
+    if (options.count("trace")) {
         tracer->set_level(spd::level::trace);
     } else {
         tracer->set_level(spd::level::off);
@@ -248,9 +248,9 @@ int realmain(int argc, char **argv) {
     stats st;
     clock_t begin = clock();
     vector<ruby_typer::core::FileRef> inputFiles;
-    console->critical("Files: ");
+    tracer->trace("Files: ");
     for (auto &fileName : files) {
-        console->debug("Reading {}...", fileName);
+        tracer->trace("Reading {}...", fileName);
         string src;
         try {
             src = ruby_typer::File::read(fileName.c_str());
@@ -262,7 +262,7 @@ int realmain(int argc, char **argv) {
         st.lines += count(src.begin(), src.end(), '\n');
         st.files++;
         inputFiles.push_back(gs.enterFile(fileName, src));
-        console->critical("{}", fileName);
+        tracer->trace("{}", fileName);
     }
     if (options.count("e")) {
         string src = options["e"].as<string>();
