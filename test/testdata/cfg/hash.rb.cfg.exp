@@ -41,7 +41,7 @@ subgraph "cluster_::<constant:TestHash>#test_shaped" {
     bb106_0 [shape = invhouse];
     bb106_1 [shape = parallelogram];
 
-    bb106_0 [label = "()\nhashTemp$2 = 1 : Integer(1)\nhashTemp$3 = 2 : Integer(2)\nhashTemp$4 = 2 : Integer(2)\nhashTemp$5 = 3 : Integer(3)\nhashTemp$6 = alias {} : HashType {\n}\nreturnMethodTemp$4 = hashTemp$6.<build-hash>(hashTemp$2, hashTemp$3, hashTemp$4, hashTemp$5) : HashType {\n  Integer(1) => Integer(2)\n  Integer(2) => Integer(3)\n}\nreturnMethodTemp$7 = return returnMethodTemp$4 : <bottom>\n<unconditional>"];
+    bb106_0 [label = "()\nhashTemp$2 = 1 : Integer(1)\nhashTemp$3 = 2 : Integer(2)\nhashTemp$4 = 2 : Integer(2)\nhashTemp$5 = 3 : Integer(3)\nhashTemp$6 = <symbol:foo> : Symbol(:\"foo\")\nhashTemp$7 = <symbol:bar> : Symbol(:\"bar\")\nhashTemp$8 = <symbol:baz> : Symbol(:\"baz\")\nstatTemp$10 = self : TestHash\nhashTemp$9 = statTemp$10.something() : untyped\nhashTemp$11 = alias {} : HashType {\n}\nreturnMethodTemp$4 = hashTemp$11.<build-hash>(hashTemp$2, hashTemp$3, hashTemp$4, hashTemp$5, hashTemp$6, hashTemp$7, hashTemp$8, hashTemp$9) : HashType {\n  Integer(1) => Integer(2)\n  Integer(2) => Integer(3)\n  Symbol(:\"foo\") => Symbol(:\"bar\")\n  Symbol(:\"baz\") => untyped\n}\nreturnMethodTemp$12 = return returnMethodTemp$4 : <bottom>\n<unconditional>"];
     bb106_0 -> bb106_1;
     bb106_1 [label = "()\n<unconditional>"];
     bb106_1 -> bb106_1;

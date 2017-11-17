@@ -20,6 +20,8 @@ class TestHash
     {
       1 => 2,
       2 => 3,
+      foo: :bar,
+      baz: something,
     }
   end
 end
