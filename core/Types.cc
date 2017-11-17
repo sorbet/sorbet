@@ -580,7 +580,7 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef method, 
     }
     ctx.state.errors.error(core::Reporter::ComplexError(
         callLoc, core::ErrorClass::MethodArgumentMismatch,
-        "Argument `" + argSym.name.toString(ctx) + "' does not match expected type.",
+        "Argument " + argSym.name.toString(ctx) + " does not match expected type.",
         {core::Reporter::ErrorSection(
              "Expected " + expectedType->toString(ctx),
              {
