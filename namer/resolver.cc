@@ -268,7 +268,8 @@ public:
                 if (id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
                     ctx.state.errors.error(id->loc, core::ErrorClass::CircularDependency,
                                            "Circular dependency: {} and {} are declared as parents of each other",
-                                           original->symbol.info(ctx).name.toString(ctx), id->symbol.info(ctx).name.toString(ctx));
+                                           original->symbol.info(ctx).name.toString(ctx),
+                                           id->symbol.info(ctx).name.toString(ctx));
                 } else {
                     info.argumentsOrMixins.emplace_back(id->symbol);
                 }
