@@ -750,7 +750,7 @@ string HashType::toString(core::Context ctx, int tabs) {
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
         printTabs(buf, tabs + 1);
-        buf << (*valueIterator)->toString(ctx, tabs + 2) << " -> " << el->toString(ctx, tabs + 2) << endl;
+        buf << el->toString(ctx, tabs + 2) << " => " << (*valueIterator)->toString(ctx, tabs + 2) << endl;
         ++valueIterator;
     }
     printTabs(buf, tabs);
