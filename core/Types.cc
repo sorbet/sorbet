@@ -670,7 +670,6 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     if (hasKwargs && ait != aend) {
         std::unordered_set<NameRef> consumed;
         auto &hashArg = *(aend - 1);
-        auto *klass = dynamic_cast<ClassType *>(hashArg.type.get());
 
         // find keyword arguments and advance `pend` before them; We'll walk
         // `kwit` ahead below
@@ -679,7 +678,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
             kwit++;
         pend = kwit;
 
-        if (klass != nullptr && klass->symbol == ctx.state.defn_untyped()) {
+        if (hashArg.type->isDynamic()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
         } else if (HashType *hash = dynamic_cast<HashType *>(hashArg.type.get())) {
