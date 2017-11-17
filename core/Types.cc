@@ -85,9 +85,9 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
                                     result = make_shared<ClassType>(core::GlobalState::defn_Hash());
                                     return;
                                 }
-                                result = make_shared<HashType>(keys, valueLubs);
                                 ++i;
                             }
+                            result = make_shared<HashType>(keys, valueLubs);
                         } else {
                             result = make_shared<ClassType>(core::GlobalState::defn_Hash());
                         }
