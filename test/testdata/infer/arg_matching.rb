@@ -1,4 +1,9 @@
 class TestArgs
+  def any; end
+
+  standard_method({}, returns: Hash)
+  def a_hash; end
+
   def required(a, b)
   end
 
@@ -30,5 +35,7 @@ class TestArgs
     kwarg(1, b: 2)
     kwarg(1, {}) # error: Missing argument b
     kwarg(1, b: "hi") # error: Argument `b' does not match expected type.
+    kwarg(1, any)
+    kwarg(1, a_hash) # error: Passing an untyped hash
   end
 end

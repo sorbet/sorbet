@@ -615,16 +615,11 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     bool hasKwargs = std::any_of(info.arguments().begin(), info.arguments().end(),
                                  [&ctx](core::SymbolRef arg) { return arg.info(ctx).isKeyword(); });
 
-    /*
-    bool requireKwargs = std::any_of(info.arguments().begin(), info.arguments().end(), [&ctx](core::SymbolRef arg) {
-        return arg.info(ctx).isKeyword() && !(arg.info(ctx).isOptional() || arg.info(ctx).isRepeated());
-    });
-    */
-
     auto pit = info.arguments().begin();
     auto ait = args.begin();
+    auto aend = args.end();
 
-    while (pit != info.arguments().end() && ait != args.end()) {
+    while (pit != info.arguments().end() && ait != aend) {
         core::Symbol &spec = pit->info(ctx);
         auto &arg = *ait;
         if (spec.isKeyword() || spec.isBlockArgument() || spec.isRepeated())
@@ -651,11 +646,15 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         }
     }
 
-    if (hasKwargs && ait != args.end()) {
+    if (hasKwargs && ait != aend) {
         std::unordered_set<NameRef> consumed;
-        if (HashType *hash = dynamic_cast<HashType *>(args.back().type.get())) {
-            if (ait + 1 == args.end())
-                ++ait;
+        auto &hashArg = *(aend - 1);
+        auto *klass = dynamic_cast<ClassType *>(hashArg.type.get());
+        if (klass != nullptr && klass->symbol == ctx.state.defn_untyped()) {
+            // Allow an untyped arg to satisfy all kwargs
+            --aend;
+        } else if (HashType *hash = dynamic_cast<HashType *>(hashArg.type.get())) {
+            --aend;
 
             while (pit != info.arguments().end()) {
                 core::Symbol &spec = pit->info(ctx);
@@ -686,18 +685,24 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 tpe.type = hash->values[arg - hash->keys.begin()];
                 matchArgType(ctx, callLoc, method, tpe, spec);
             }
+        } else if (Types::isSubType(ctx, hashArg.type, hashType)) {
+            --aend;
+            ctx.state.errors.error(core::Reporter::ComplexError(
+                callLoc, core::ErrorClass::MethodArgumentMismatch, "Passing an untyped hash to keyword arguments",
+                {core::Reporter::ErrorSection("Got " + hashArg.type->toString(ctx) + " originating from:",
+                                              hashArg.origins2Explanations(ctx))}));
         }
     }
 
-    if (ait != args.end()) {
-        ctx.state.errors.error(callLoc, core::ErrorClass::MethodArgumentCountMismatch,
-                               "Too many arguments provided for method {}.\n Expected: {}, provided: {}",
-                               fun.toString(ctx),
+    if (ait != aend) {
+        ctx.state.errors.error(
+            callLoc, core::ErrorClass::MethodArgumentCountMismatch,
+            "Too many arguments provided for method {}.\n Expected: {}, provided: {}", fun.toString(ctx),
 
-                               // TODO(nelhage): report actual counts of required arguments,
-                               // and account for keyword arguments
-                               info.arguments().size(),
-                               args.size()); // TODO: should use position and print the source tree, not the cfg one.
+            // TODO(nelhage): report actual counts of required arguments,
+            // and account for keyword arguments
+            info.arguments().size(),
+            aend - args.begin()); // TODO: should use position and print the source tree, not the cfg one.
     }
 
     shared_ptr<Type> resultType = method.info(ctx).resultType;
