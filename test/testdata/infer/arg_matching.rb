@@ -79,4 +79,14 @@ class TestArgs
     mixed(0, 1, {z: 1}, u: 1)
     mixed(0, 1, {z: 1}, "hi", "there", u: 1, v: 0)
   end
+
+  def optkw(x, y=_, u:)
+  end
+
+  def call_optkw
+    # There's ambiguity here about whether to report `u` or `x` as
+    # missing; We follow Ruby in complaining about `u`.
+    optkw(u: 1) # error: Missing required keyword argument u
+    optkw(1, 2, 3) # error: MULTI
+  end
 end

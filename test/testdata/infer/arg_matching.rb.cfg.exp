@@ -143,5 +143,29 @@ subgraph "cluster_::<constant:TestArgs>#call_mixed" {
     bb126_1 -> bb126_1;
 }
 
+subgraph "cluster_::<constant:TestArgs>#optkw" {
+    label = "::<constant:TestArgs>#optkw";
+    color = blue;
+    bb127_0 [shape = invhouse];
+    bb127_1 [shape = parallelogram];
+
+    bb127_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$13 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$13 : <bottom>\n<unconditional>"];
+    bb127_0 -> bb127_1;
+    bb127_1 [label = "()\n<unconditional>"];
+    bb127_1 -> bb127_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#call_optkw" {
+    label = "::<constant:TestArgs>#call_optkw";
+    color = blue;
+    bb131_0 [shape = invhouse];
+    bb131_1 [shape = parallelogram];
+
+    bb131_0 [label = "()\nstatTemp$3 = self : TestArgs\nhashTemp$5 = <symbol:u> : Symbol(:\"u\")\nhashTemp$6 = 1 : Integer(1)\nhashTemp$7 = alias {} : HashType {\n}\nstatTemp$4 = hashTemp$7.<build-hash>(hashTemp$5, hashTemp$6) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}\nstatTemp$2 = statTemp$3.optkw(statTemp$4) : untyped\nstatTemp$8 = self : TestArgs\nstatTemp$9 = 1 : Integer(1)\nstatTemp$10 = 2 : Integer(2)\nstatTemp$11 = 3 : Integer(3)\nreturnMethodTemp$14 = statTemp$8.optkw(statTemp$9, statTemp$10, statTemp$11) : untyped\nreturnMethodTemp$12 = return returnMethodTemp$14 : <bottom>\n<unconditional>"];
+    bb131_0 -> bb131_1;
+    bb131_1 [label = "()\n<unconditional>"];
+    bb131_1 -> bb131_1;
+}
+
 }
 

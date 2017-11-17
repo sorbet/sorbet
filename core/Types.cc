@@ -644,7 +644,8 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         auto &arg = *ait;
         if (spec.isKeyword())
             break;
-        if (ait + 1 == aend && hasKwargs && arg.type->derivesFrom(ctx, ctx.state.defn_Hash()))
+        if (ait + 1 == aend && hasKwargs && arg.type->derivesFrom(ctx, ctx.state.defn_Hash()) &&
+            (spec.isOptional() || spec.isRepeated()))
             break;
         if (!spec.isRepeated())
             ++pit;
