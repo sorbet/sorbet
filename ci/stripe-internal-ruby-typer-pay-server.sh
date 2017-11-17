@@ -12,7 +12,7 @@ cd $DIR
 git checkout "$(cat ci/stripe-internal-ruby-typer-pay-server-sha)"
 cd -
 
-bazel build main:ruby-typer -c opt
+bazel build main:ruby-typer -c opt --config=dbg
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
