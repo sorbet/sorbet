@@ -131,15 +131,29 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
     }
 }
 
-shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, OrType *t1, shared_ptr<Type> t2) {
-    shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, t1->left, t2);
-    shared_ptr<ruby_typer::core::Type> n2 = Types::lub(ctx, t1->right, t2);
+shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+    OrType *o1 = dynamic_cast<OrType *>(t1.get());
+    Error::check(o1 != nullptr);
+    shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, o1->left, t2);
+    if (n1.get() == o1->left.get()) {
+        return t1;
+    }
+    shared_ptr<ruby_typer::core::Type> n2 = Types::lub(ctx, o1->right, t2);
+    if (n1.get() == t2.get()) {
+        return n1;
+    }
+    if (n2.get() == o1->right.get()) {
+        return t1;
+    }
+    if (n2.get() == t2.get()) {
+        return n1;
+    }
     if (Types::isSubType(ctx, n1, n2)) {
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
         return n1;
     }
-    return make_shared<OrType>(n1, n2);
+    return make_shared<OrType>(t1, t2); // order matters for perf
 }
 
 shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
@@ -168,7 +182,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     shared_ptr<ruby_typer::core::Type> result;
 
     if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
-        return lubDistributeOr(ctx, o2, t1);
+        return lubDistributeOr(ctx, t2, t1);
     } else if (dynamic_cast<OrType *>(t1.get()) != nullptr) {
         Error::raise("should not happen");
     } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
@@ -201,15 +215,29 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     }
 }
 
-shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, AndType *t1, shared_ptr<Type> t2) {
-    shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, t1->left, t2);
-    shared_ptr<ruby_typer::core::Type> n2 = Types::glb(ctx, t1->right, t2);
+shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+    AndType *a1 = dynamic_cast<AndType *>(t1.get());
+    Error::check(t1 != nullptr);
+    shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, a1->left, t2);
+    if (n1.get() == a1->left.get()) {
+        return t1;
+    }
+    shared_ptr<ruby_typer::core::Type> n2 = Types::glb(ctx, a1->right, t2);
+    if (n1.get() == t2.get()) {
+        return n1;
+    }
+    if (n2.get() == a1->right.get()) {
+        return t1;
+    }
+    if (n2.get() == t2.get()) {
+        return n1;
+    }
     if (Types::isSubType(ctx, n1, n2)) {
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
         return n1;
     }
-    return make_shared<AndType>(n1, n2);
+    return make_shared<AndType>(t1, t2);
 }
 
 shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
@@ -238,9 +266,9 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
     shared_ptr<ruby_typer::core::Type> result;
 
     if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4, 5
-        return glbDistributeAnd(ctx, a1, t2);
+        return glbDistributeAnd(ctx, t1, t2);
     } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2
-        return glbDistributeAnd(ctx, a2, t1);
+        return glbDistributeAnd(ctx, t2, t1);
     } else if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
         bool collapseInLeft = Types::isSubType(ctx, t1, o2->left);
         bool collapseInRight = Types::isSubType(ctx, t1, o2->right);
