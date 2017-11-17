@@ -53,7 +53,6 @@ public:
         virtual ~BasicError() = default;
     };
 
-public:
     struct ErrorLine {
         Loc loc;
         std::string formattedMessage;
@@ -84,22 +83,19 @@ public:
             : BasicError(loc, what, header), sections(sections) {}
     };
 
-    void _error(BasicError error);
-    void _error(ComplexError error);
+    void _error(std::unique_ptr<BasicError> error);
     std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
 
     bool hadCriticalError() {
         return hadCriticalError_;
     };
 
-public:
     template <typename... Args> void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) {
         std::string formatted = fmt::format(msg, args...);
-        _error(BasicError(loc, what, formatted));
+        _error(std::make_unique<BasicError>(BasicError(loc, what, formatted)));
     }
-
     void error(ComplexError error) {
-        _error(error);
+        _error(std::make_unique<ComplexError>(error));
     }
 
     bool keepErrorsInMemory = false;

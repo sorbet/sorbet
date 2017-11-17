@@ -6,28 +6,16 @@ namespace core {
 
 using namespace std;
 
-void Reporter::_error(BasicError error) {
-    bool isCriticalError = (error.what == ErrorClass::Internal);
+void Reporter::_error(unique_ptr<BasicError> error) {
+    bool isCriticalError = (error->what == ErrorClass::Internal);
     if (isCriticalError) {
         hadCriticalError_ = true;
     }
     if (keepErrorsInMemory) {
-        errors.emplace_back(make_unique<BasicError>(error));
+        errors.emplace_back(move(error));
         return;
     }
-    gs_.logger.log(isCriticalError ? spdlog::level::critical : spdlog::level::err, "{}", error.toString(gs_));
-}
-
-void Reporter::_error(ComplexError error) {
-    bool isCriticalError = (error.what == ErrorClass::Internal);
-    if (isCriticalError) {
-        hadCriticalError_ = true;
-    }
-    if (keepErrorsInMemory) {
-        errors.emplace_back(make_unique<ComplexError>(error));
-        return;
-    }
-    gs_.logger.log(isCriticalError ? spdlog::level::critical : spdlog::level::err, "{}", error.toString(gs_));
+    gs_.logger.log(isCriticalError ? spdlog::level::critical : spdlog::level::err, "{}", error->toString(gs_));
 }
 
 string Reporter::BasicError::toString(GlobalState &gs) {
