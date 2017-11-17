@@ -231,6 +231,7 @@ int realmain(int argc, char **argv) {
     stats st;
     clock_t begin = clock();
     vector<ruby_typer::core::FileRef> inputFiles;
+    console->critical("Files: ");
     for (auto &fileName : files) {
         console->debug("Reading {}...", fileName);
         string src;
@@ -244,6 +245,7 @@ int realmain(int argc, char **argv) {
         st.lines += count(src.begin(), src.end(), '\n');
         st.files++;
         inputFiles.push_back(gs.enterFile(fileName, src));
+        console->critical("{}", fileName);
     }
     if (options.count("e")) {
         string src = options["e"].as<string>();
