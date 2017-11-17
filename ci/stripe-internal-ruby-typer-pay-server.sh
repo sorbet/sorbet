@@ -15,7 +15,7 @@ if [ `git rev-parse --abbrev-ref HEAD` != "master-passing-tests" ]; then
 fi
 cd -
 
-bazel build main:ruby-typer --config=lto
+bazel build main:ruby-typer -c opt
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
