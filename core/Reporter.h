@@ -88,6 +88,10 @@ public:
     void _error(ComplexError error);
     std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
 
+    bool hadCriticalError() {
+        return _hadCriticalError;
+    };
+
 public:
     template <typename... Args> void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) {
         std::string formatted = fmt::format(msg, args...);
@@ -104,6 +108,7 @@ public:
 private:
     Reporter(GlobalState &gs) : gs_(gs) {}
     GlobalState &gs_;
+    bool _hadCriticalError;
 };
 
 } // namespace core
