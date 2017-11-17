@@ -20,6 +20,7 @@ cc_library(
 
 cc_test(
     name = "infer_test",
+    size = "small",
     srcs = glob([
         "test/*.cc",
     ]),
