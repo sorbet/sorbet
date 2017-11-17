@@ -67,9 +67,9 @@ public:
 
 class FloatLit final : public Instruction {
 public:
-    float value;
+    double value;
 
-    FloatLit(float value);
+    FloatLit(double value);
     virtual std::string toString(core::Context ctx);
 };
 

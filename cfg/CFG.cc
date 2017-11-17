@@ -760,7 +760,7 @@ string Return::toString(core::Context ctx) {
 Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args)
     : recv(recv), fun(fun), args(move(args)) {}
 
-FloatLit::FloatLit(float value) : value(value) {}
+FloatLit::FloatLit(double value) : value(value) {}
 
 string FloatLit::toString(core::Context ctx) {
     return to_string(this->value);

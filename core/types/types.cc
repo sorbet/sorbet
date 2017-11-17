@@ -59,7 +59,7 @@ bool Type::isDynamic() {
 ruby_typer::core::Literal::Literal(int64_t val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Integer())), value(val) {}
 
-ruby_typer::core::Literal::Literal(float val)
+ruby_typer::core::Literal::Literal(double val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<u4 *>(&val)) {}
 
 ruby_typer::core::Literal::Literal(core::SymbolRef klass, core::NameRef val)
@@ -90,7 +90,7 @@ string Literal::toString(core::Context ctx, int tabs) {
             value = to_string(this->value);
             break;
         case GlobalState::defn_Float()._id:
-            value = to_string(*reinterpret_cast<float *>(&(this->value)));
+            value = to_string(*reinterpret_cast<double *>(&(this->value)));
             break;
         case GlobalState::defn_TrueClass()._id:
             value = "true";
