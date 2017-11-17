@@ -55,6 +55,7 @@ static bool removeOption(vector<string> &prints, string option) {
     }
 }
 shared_ptr<spd::logger> console_err;
+shared_ptr<spd::logger> tracer;
 
 vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalState &gs,
                                                       std::vector<ruby_typer::core::FileRef> frs,
@@ -71,11 +72,14 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     try {
         for (auto f : frs) {
             try {
+                tracer->critical("Parsing: {}", f.file(gs).path().toString());
                 auto nodes = ruby_typer::parser::Parser::run(gs, f);
                 if (printParseTree) {
                     cout << nodes->toString(gs, 0) << endl;
                 }
+
                 ruby_typer::core::Context context(gs, gs.defn_root());
+                tracer->critical("Desugaring: {}", f.file(gs).path().toString());
                 auto ast = ruby_typer::ast::desugar::node2Tree(context, nodes);
                 if (printDesugared) {
                     cout << ast->toString(gs, 0) << endl;
@@ -85,6 +89,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
                     cout << ast->showRaw(gs) << endl;
                 }
                 nodes = nullptr; // free up space early
+                tracer->critical("Naming: {}", f.file(gs).path().toString());
                 result.emplace_back(ruby_typer::namer::Namer::run(context, move(ast)));
             } catch (...) {
                 console_err->error("Exception on file: {} (backtrace is above)", f.file(gs).path().toString());
@@ -118,6 +123,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
             ruby_typer::core::FileRef f = namedTree->loc.file;
             try {
                 ruby_typer::core::Context context(gs, gs.defn_root());
+                tracer->critical("Resolving: {}", f.file(gs).path().toString());
                 auto resolved = ruby_typer::namer::Resolver::run(context, move(namedTree));
                 if (printNameTree) {
                     cout << resolved->toString(gs, 0) << endl;
@@ -129,6 +135,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                 if (printCFG) {
                     cout << "digraph \"" + ruby_typer::File::getFileName(f.file(gs).path().toString()) + "\"{" << endl;
                 }
+                tracer->critical("CFG+Infer: {}", f.file(gs).path().toString());
                 CFG_Collector_and_Typer collector(!opts["no-typer"].as<bool>(), printCFG);
                 result.emplace_back(
                     ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
@@ -171,6 +178,7 @@ int realmain(int argc, char **argv) {
     options.add_options()("h,help", "Show help");
     options.add_options()("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options()("no-typer", "Do not type the CFG");
+    options.add_options()("trace", "trace phases");
     options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
                           cxxopts::value<vector<string>>(prints));
@@ -209,6 +217,12 @@ int realmain(int argc, char **argv) {
 
     if (options.count("q")) {
         spd::set_level(spd::level::critical);
+    }
+
+    if (options.count("q")) {
+        tracer->set_level(spd::level::trace);
+    } else {
+        tracer->set_level(spd::level::off);
     }
 
     ruby_typer::core::GlobalState gs(*console);
