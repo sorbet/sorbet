@@ -70,7 +70,7 @@ class A
       when 20
         r = C20
       else
-        raise "Bla bla bla"
+        raise "Bla bla bla" # error: does not exist
     end
     s = r
     return s
