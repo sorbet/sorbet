@@ -89,7 +89,7 @@ public:
     std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
 
     bool hadCriticalError() {
-        return _hadCriticalError;
+        return hadCriticalError_;
     };
 
 public:
@@ -108,7 +108,7 @@ public:
 private:
     Reporter(GlobalState &gs) : gs_(gs) {}
     GlobalState &gs_;
-    bool _hadCriticalError;
+    bool hadCriticalError_;
 };
 
 } // namespace core

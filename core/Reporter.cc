@@ -9,7 +9,7 @@ using namespace std;
 void Reporter::_error(BasicError error) {
     bool isCriticalError = (error.what == ErrorClass::Internal);
     if (isCriticalError) {
-        _hadCriticalError = true;
+        hadCriticalError_ = true;
     }
     if (keepErrorsInMemory) {
         errors.emplace_back(make_unique<BasicError>(error));
@@ -21,7 +21,7 @@ void Reporter::_error(BasicError error) {
 void Reporter::_error(ComplexError error) {
     bool isCriticalError = (error.what == ErrorClass::Internal);
     if (isCriticalError) {
-        _hadCriticalError = true;
+        hadCriticalError_ = true;
     }
     if (keepErrorsInMemory) {
         errors.emplace_back(make_unique<ComplexError>(error));
