@@ -88,6 +88,7 @@ public:
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) = 0;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) = 0;
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) = 0;
     bool isDynamic();
 };
 
@@ -105,6 +106,7 @@ public:
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 };
 
 class ClassType final : public GroundType {
@@ -118,6 +120,7 @@ public:
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 };
 
 class OrType final : public GroundType {
@@ -132,6 +135,7 @@ public:
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 };
 
 class AndType final : public GroundType {
@@ -147,6 +151,7 @@ public:
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
 
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 };
 
 class Literal final : public ProxyType {

@@ -626,7 +626,6 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         return Types::dynamic();
     }
     core::Symbol &info = method.info(ctx);
-    shared_ptr<Type> hashType = make_unique<ClassType>(ctx.state.defn_Hash());
 
     bool hasKwargs = std::any_of(info.arguments().begin(), info.arguments().end(),
                                  [&ctx](core::SymbolRef arg) { return arg.info(ctx).isKeyword(); });
@@ -645,7 +644,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         auto &arg = *ait;
         if (spec.isKeyword() || spec.isBlockArgument() || spec.isRepeated())
             break;
-        if (spec.isOptional() && hasKwargs && Types::isSubType(ctx, arg.type, hashType))
+        if (spec.isOptional() && hasKwargs && arg.type->derivesFrom(ctx, ctx.state.defn_Hash()))
             break;
         ++pit;
         ++ait;
@@ -716,7 +715,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                                        "Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),
                                        fun.toString(ctx));
             }
-        } else if (Types::isSubType(ctx, hashArg.type, hashType)) {
+        } else if (hashArg.type->derivesFrom(ctx, ctx.state.defn_Hash())) {
             --aend;
             ctx.state.errors.error(core::Reporter::ComplexError(
                 callLoc, core::ErrorClass::MethodArgumentMismatch, "Passing an untyped hash to keyword arguments",
@@ -924,4 +923,22 @@ string OrType::toString(core::Context ctx, int tabs) {
 bool Type::isDynamic() {
     auto *t = dynamic_cast<ClassType *>(this);
     return t != nullptr && t->symbol == core::GlobalState::defn_untyped();
+}
+
+bool ProxyType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+    return underlying->derivesFrom(ctx, klass);
+}
+
+bool ClassType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+    if (symbol == ctx.state.defn_untyped() || symbol == klass)
+        return true;
+    return symbol.info(ctx).derivesFrom(ctx, klass);
+}
+
+bool OrType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+    return left->derivesFrom(ctx, klass) && right->derivesFrom(ctx, klass);
+}
+
+bool AndType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+    return left->derivesFrom(ctx, klass) || right->derivesFrom(ctx, klass);
 }
