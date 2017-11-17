@@ -44,6 +44,7 @@ TEST(ASTTest, ErrorReporter) {
     core::GlobalState gs(*console);
     core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
     gs.errors.error(core::Loc{f, 0, 3}, core::ErrorClass::Internal, "Use of metavariable: {}", "foo");
+    ASSERT_TRUE(gs.errors.hadCriticalError());
 }
 
 TEST(ASTTest, SymbolRef) {

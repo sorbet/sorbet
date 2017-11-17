@@ -257,5 +257,5 @@ int realmain(int argc, char **argv) {
     console_err->debug("Total {} files. Done in {} ms, lines: {}, bytes: {}\n", st.files, elapsed_secs, st.lines,
                        st.bytes);
 
-    return 0;
+    return gs.errors.hadCriticalError() ? 10 : 0;
 };
