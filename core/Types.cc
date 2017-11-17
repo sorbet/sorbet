@@ -707,6 +707,16 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 tpe.type = hash->values[arg - hash->keys.begin()];
                 matchArgType(ctx, callLoc, method, tpe, spec);
             }
+            for (auto &key : hash->keys) {
+                SymbolRef klass = dynamic_cast<ClassType *>(key->underlying.get())->symbol;
+                if (klass == ctx.state.defn_Symbol() && consumed.find(NameRef(key->value)) != consumed.end())
+                    continue;
+                NameRef arg(key->value);
+
+                ctx.state.errors.error(callLoc, core::ErrorClass::MethodArgumentCountMismatch,
+                                       "Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),
+                                       fun.toString(ctx));
+            }
         } else if (Types::isSubType(ctx, hashArg.type, hashType)) {
             --aend;
             ctx.state.errors.error(core::Reporter::ComplexError(
