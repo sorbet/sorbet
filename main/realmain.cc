@@ -250,7 +250,6 @@ int realmain(int argc, char **argv) {
     vector<ruby_typer::core::FileRef> inputFiles;
     tracer->trace("Files: ");
     for (auto &fileName : files) {
-        tracer->trace("Reading {}...", fileName);
         string src;
         try {
             src = ruby_typer::File::read(fileName.c_str());
