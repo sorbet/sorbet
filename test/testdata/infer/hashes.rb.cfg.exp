@@ -5,17 +5,17 @@ subgraph "cluster_::<constant:Foo>#bar" {
     bb101_0 [shape = invhouse];
     bb101_1 [shape = parallelogram];
 
-    bb101_0 [label = "()\nifTemp$2 = true : TrueClass(true)\nifTemp$2"];
+    bb101_0 [label = "()\nifTemp$3 = true : TrueClass(true)\nifTemp$3"];
     bb101_0 -> bb101_2;
     bb101_0 -> bb101_3;
 
-    bb101_1 [label = "()\n<unconditional>"];
+    bb101_1 [label = "(returnMethodTemp$0)\nreturnMethodTemp$8 = return returnMethodTemp$0\n<unconditional>"];
     bb101_1 -> bb101_1;
-    bb101_2 [label = "(returnMethodTemp$0)\nhashTemp$3 = alias {} : HashType {\n}\nreturnMethodTemp$0 = hashTemp$3.<build-hash>() : HashType {\n}\n<unconditional>"];
+    bb101_2 [label = "(s)\nhashTemp$4 = alias {} : HashType {\n}\ns = hashTemp$4.<build-hash>() : HashType {\n}\n<unconditional>"];
     bb101_2 -> bb101_4;
-    bb101_3 [label = "(returnMethodTemp$0)\nhashTemp$4 = alias {} : HashType {\n}\nreturnMethodTemp$0 = hashTemp$4.<build-hash>() : HashType {\n}\n<unconditional>"];
+    bb101_3 [label = "(s)\nhashTemp$5 = alias {} : HashType {\n}\ns = hashTemp$5.<build-hash>() : HashType {\n}\n<unconditional>"];
     bb101_3 -> bb101_4;
-    bb101_4 [label = "(returnMethodTemp$0)\nreturnMethodTemp$5 = return returnMethodTemp$0 : <bottom>\n<unconditional>"];
+    bb101_4 [label = "(s)\nr = s : HashType {\n}\nreturnMethodTemp$0 = return r : <bottom>\n<unconditional>"];
     bb101_4 -> bb101_1;
 }
 

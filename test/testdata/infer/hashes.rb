@@ -1,9 +1,11 @@
 class Foo
   def bar()
-    if (true)
-      {}
-    else
-      {}
-    end
+   s = if (true)
+         {}
+       else
+         {}
+       end
+   r = s
+   return r
   end
 end
