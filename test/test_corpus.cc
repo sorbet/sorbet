@@ -272,11 +272,11 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             int line = unknownLocErrorLine++;
             auto expectedError = expectedErrors.find(line);
             if (expectedError == expectedErrors.end()) {
-                ADD_FAILURE() << "Unknown location error thrown but not annotated. You should put a `error:` on line "
-                              << line;
+                ADD_FAILURE_AT(inputPath.c_str(), line) << "Unknown location error thrown but not annotated.";
             } else if (error->formatted.find(expectedError->second) == string::npos) {
-                ADD_FAILURE() << "Error string mismatch on line " << line << ". Expected to find '"
-                              << expectedError->second << "' inside of '" << error->formatted << "'";
+                ADD_FAILURE_AT(inputPath.c_str(), line) << "Error string mismatch." << endl
+                                                        << " Expectation: " << expectedError->second << endl
+                                                        << " Reported error: " << error->formatted;
             } else {
                 seenErrorLines.insert(line);
             }
@@ -291,11 +291,14 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                 bool isMultipleErrors =
                     expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
                 if (expectedError->second.empty()) {
-                    ADD_FAILURE() << "Please put a substring of the expected error message after `error:` on line " << i
-                                  << ". It should match a substring of '" << error->formatted << "'";
+                    ADD_FAILURE_AT(inputPath.c_str(), i) << "Error occurred, but no expected text found. Please put (a "
+                                                            "substring of) the expected error after `# error:` "
+                                                         << endl
+                                                         << "The message was: '" << error->formatted << "'";
                 } else if (error->formatted.find(expectedError->second) == string::npos && !isMultipleErrors) {
-                    ADD_FAILURE() << "Error string mismatch on line " << i << ". Expected to find '"
-                                  << expectedError->second << "' inside of '" << error->formatted << "'";
+                    ADD_FAILURE_AT(inputPath.c_str(), i) << "Error string mismatch." << endl
+                                                         << " Expectation: " << expectedError->second << endl
+                                                         << " Reported error: " << error->formatted;
                 } else {
                     found = true;
                     seenErrorLines.insert(i);
@@ -304,13 +307,13 @@ TEST_P(ExpectationTest, PerPhaseTest) {
             }
         }
         if (!found) {
-            ADD_FAILURE() << "Unexpected error:\n " << error->toString(gs);
+            ADD_FAILURE_AT(inputPath.c_str(), pos.first.line) << "Unexpected error:\n " << error->toString(gs);
         }
     }
 
     for (auto &error : expectedErrors) {
         if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
-            ADD_FAILURE() << "Expected error didn't happen on line " << error.first;
+            ADD_FAILURE_AT(inputPath.c_str(), error.first) << "Expected error didn't happen on line " << error.first;
         }
     }
 
