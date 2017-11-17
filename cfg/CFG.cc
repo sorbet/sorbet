@@ -174,6 +174,7 @@ void CFG::fillInBlockArguments(core::Context ctx) {
                     dynamic_cast<HashSplat *>(bind.value.get()) != nullptr ||
                     dynamic_cast<BoolLit *>(bind.value.get()) != nullptr ||
                     dynamic_cast<StringLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<SymbolLit *>(bind.value.get()) != nullptr ||
                     dynamic_cast<IntLit *>(bind.value.get()) != nullptr ||
                     dynamic_cast<FloatLit *>(bind.value.get()) != nullptr ||
                     dynamic_cast<Self *>(bind.value.get()) != nullptr ||
@@ -535,6 +536,10 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<StringLit>(a->value));
                 ret = current;
             },
+            [&](ast::SymbolLit *a) {
+                current->exprs.emplace_back(cctx.target, a->loc, make_unique<SymbolLit>(a->name));
+                ret = current;
+            },
             [&](ast::BoolLit *a) {
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<BoolLit>(a->value));
                 ret = current;
@@ -653,6 +658,26 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 ret = deadBlock();
             },
 
+            [&](ast::Hash *h) {
+                vector<core::LocalVariable> vars;
+                for (int i = 0; i < h->keys.size(); i++) {
+                    core::LocalVariable keyTmp = cctx.ctx.state.newTemporary(
+                        core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
+                    core::LocalVariable valTmp = cctx.ctx.state.newTemporary(
+                        core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
+                    current = walk(cctx.withTarget(keyTmp), h->keys[i].get(), current);
+                    current = walk(cctx.withTarget(valTmp), h->values[i].get(), current);
+                    vars.push_back(keyTmp);
+                    vars.push_back(valTmp);
+                }
+                core::LocalVariable hash =
+                    cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
+                current->exprs.emplace_back(hash, h->loc, make_unique<Alias>(cctx.ctx.state.defn_emptyHash()));
+                current->exprs.emplace_back(cctx.target, h->loc,
+                                            make_unique<Send>(hash, core::Names::buildHash(), vars));
+                ret = current;
+            },
+
             [&](ast::Expression *n) {
                 current->exprs.emplace_back(cctx.target, n->loc, make_unique<NotSupported>(""));
                 ret = current;
@@ -660,8 +685,7 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
 
         /*[&](ast::Break *a) {}, */
         // For, Rescue,
-        // Symbol, NamedArg, Hash, Array,
-        // ArraySplat, HashAplat, Block,
+        // Symbol, NamedArg, Array,
         Error::check(ret != nullptr);
         return ret;
     } catch (...) {
@@ -777,6 +801,10 @@ string Send::toString(core::Context ctx) {
 
 string StringLit::toString(core::Context ctx) {
     return this->value.name(ctx).toString(ctx);
+}
+
+string SymbolLit::toString(core::Context ctx) {
+    return "<symbol:" + this->value.name(ctx).toString(ctx) + ">";
 }
 
 string BoolLit::toString(core::Context ctx) {

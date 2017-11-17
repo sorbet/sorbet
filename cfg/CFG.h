@@ -89,6 +89,14 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
+class SymbolLit final : public Instruction {
+public:
+    core::NameRef value;
+
+    SymbolLit(core::NameRef value) : value(value){};
+    virtual std::string toString(core::Context ctx);
+};
+
 class NotSupported final : public Instruction {
 public:
     std::string why;

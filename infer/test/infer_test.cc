@@ -44,7 +44,7 @@ TEST_F(InferFixture, LiteralsSubtyping) {
     auto floatClass = make_shared<core::ClassType>(core::GlobalState::defn_Float());
     auto trueLit = make_shared<core::Literal>(true);
     auto trueClass = make_shared<core::ClassType>(core::GlobalState::defn_TrueClass());
-    auto stringLit = make_shared<core::Literal>(core::Names::assignTemp());
+    auto stringLit = make_shared<core::Literal>(core::GlobalState::defn_String(), core::Names::assignTemp());
     auto stringClass = make_shared<core::ClassType>(core::GlobalState::defn_String());
     EXPECT_TRUE(core::Types::isSubType(ctx, intLit, intClass));
     EXPECT_TRUE(core::Types::isSubType(ctx, floatLit, floatClass));

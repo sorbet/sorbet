@@ -154,7 +154,7 @@ public:
     int64_t value;
     Literal(int64_t val);
     Literal(float val);
-    Literal(core::NameRef val);
+    Literal(core::SymbolRef klass, core::NameRef val);
     Literal(bool val);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);
@@ -165,10 +165,13 @@ class HashType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<Literal>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
+    HashType();
     HashType(std::vector<std::shared_ptr<Literal>> &keys, std::vector<std::shared_ptr<Type>> &values);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);
     virtual std::string typeName();
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
 };
 
 class ArrayType final : public ProxyType {

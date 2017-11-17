@@ -1,4 +1,5 @@
 #include "GlobalState.h"
+#include "Types.h"
 
 using namespace std;
 
@@ -271,6 +272,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef class_id = synthesizeClass(class_DESC);
     SymbolRef basicObject_id = synthesizeClass(basicObject_DESC);
     SymbolRef kernel_id = synthesizeClass(kernel_DESC);
+    SymbolRef emptyHash_id = enterStaticFieldSymbol(Loc::none(0), defn_root(), Names::emptyHash());
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -295,6 +297,16 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(class_id == defn_Class());
     Error::check(basicObject_id == defn_Basic_Object());
     Error::check(kernel_id == defn_Kernel());
+    Error::check(emptyHash_id == defn_emptyHash());
+
+    // Synthesize ::{} = EmptyHash()
+    defn_emptyHash().info(*this).resultType = make_unique<HashType>();
+    // Synthesize Hash#build_hash(*vs : Object) => Hash
+    SymbolRef buildHash = enterMethodSymbol(Loc::none(0), defn_Hash(), Names::buildHash());
+    SymbolRef arg = enterMethodArgumentSymbol(Loc::none(0), buildHash, Names::arg0());
+    arg.info(*this).setRepeated();
+    arg.info(*this).resultType = make_unique<ClassType>(defn_object());
+    buildHash.info(*this).resultType = make_unique<ClassType>(defn_Hash());
 
     while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
         synthesizeClass(reserved_DESC);

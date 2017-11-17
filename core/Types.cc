@@ -541,6 +541,31 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
     return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
+shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
+                                        vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+    if (fun != Names::buildHash())
+        return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
+    Error::check(args.size() % 2 == 0);
+
+    vector<shared_ptr<Literal>> keys;
+    vector<shared_ptr<Type>> values;
+    for (int i = 0; i < args.size(); i += 2) {
+        auto *key = dynamic_cast<Literal *>(args[i].type.get());
+        if (key == nullptr) {
+            return make_unique<ClassType>(ctx.state.defn_Hash());
+        }
+
+        // HACK(nelhage): clone the Literal by hand, since there's no way to go
+        // from shared_ptr<Type> to shared_ptr<Literal>
+        auto lit = make_unique<Literal>(key->value);
+        lit->underlying = key->underlying;
+
+        keys.push_back(move(lit));
+        values.push_back(args[i + 1].type);
+    }
+    return make_unique<HashType>(keys, values);
+}
+
 shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     if (isDynamic()) {
@@ -628,8 +653,10 @@ ruby_typer::core::Literal::Literal(int64_t val)
 ruby_typer::core::Literal::Literal(float val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<u4 *>(&val)) {}
 
-ruby_typer::core::Literal::Literal(core::NameRef val)
-    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_String())), value(val._id) {}
+ruby_typer::core::Literal::Literal(core::SymbolRef klass, core::NameRef val)
+    : ProxyType(make_shared<ClassType>(klass)), value(val._id) {
+    Error::check(klass == core::GlobalState::defn_String() || klass == core::GlobalState::defn_Symbol());
+}
 
 ruby_typer::core::Literal::Literal(bool val)
     : ProxyType(
@@ -646,6 +673,9 @@ string Literal::toString(core::Context ctx, int tabs) {
     switch (undSymbol._id) {
         case GlobalState::defn_String()._id:
             value = "\"" + NameRef(this->value).toString(ctx) + "\"";
+            break;
+        case GlobalState::defn_Symbol()._id:
+            value = ":\"" + NameRef(this->value).toString(ctx) + "\"";
             break;
         case GlobalState::defn_Integer()._id:
             value = to_string(this->value);
@@ -709,6 +739,8 @@ string ArrayType::toString(core::Context ctx, int tabs) {
     return buf.str();
 }
 
+ruby_typer::core::HashType::HashType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())) {}
+
 ruby_typer::core::HashType::HashType(vector<shared_ptr<Literal>> &keys, vector<shared_ptr<Type>> &values)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())), keys(move(keys)), values(move(values)) {}
 
@@ -718,7 +750,7 @@ string HashType::toString(core::Context ctx, int tabs) {
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
         printTabs(buf, tabs + 1);
-        buf << (*valueIterator)->toString(ctx, tabs + 2) << " -> " << el->toString(ctx, tabs + 2) << endl;
+        buf << el->toString(ctx, tabs + 2) << " => " << (*valueIterator)->toString(ctx, tabs + 2) << endl;
         ++valueIterator;
     }
     printTabs(buf, tabs);
