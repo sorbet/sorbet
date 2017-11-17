@@ -279,7 +279,9 @@ public:
             }
         } else if (!info.superClass.exists() && original->symbol != core::GlobalState::defn_Basic_Object() &&
                    original->symbol != core::GlobalState::defn_Kernel() &&
-                   original->kind != ast::ClassDefKind::Module) {
+                   original->symbol != core::GlobalState::defn_object() &&
+                   !core::GlobalState::defn_object().info(ctx).derivesFrom(ctx, original->symbol) &&
+                   original->kind != ast::ClassDefKind::Module && original->kind) {
             info.superClass = core::GlobalState::defn_object();
             info.argumentsOrMixins.emplace_back(core::GlobalState::defn_object());
         }
