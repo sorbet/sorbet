@@ -591,6 +591,12 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef method, 
          core::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
                                       argTpe.origins2Explanations(ctx))}));
 }
+
+void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
+    ctx.state.errors.error(callLoc, core::ErrorClass::MethodArgumentCountMismatch,
+                           "Missing required keyword argument {} for method {}.", arg.info(ctx).name.toString(ctx),
+                           method.toString(ctx));
+}
 }; // namespace
 
 shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
@@ -673,9 +679,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.isOptional()) {
-                        ctx.state.errors.error(callLoc, core::ErrorClass::MethodArgumentCountMismatch,
-                                               "Missing argument {} for method {}.", spec.name.toString(ctx),
-                                               fun.toString(ctx));
+                        missingArg(ctx, callLoc, fun, spec.ref(ctx));
                     }
                     continue;
                 }
@@ -691,6 +695,15 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 callLoc, core::ErrorClass::MethodArgumentMismatch, "Passing an untyped hash to keyword arguments",
                 {core::Reporter::ErrorSection("Got " + hashArg.type->toString(ctx) + " originating from:",
                                               hashArg.origins2Explanations(ctx))}));
+        }
+    }
+    if (hasKwargs && aend == args.end()) {
+        // We have keyword arguments, but we didn't consume a hash at the
+        // end. Report an error for each missing required keyword arugment.
+        for (auto &spec : info.arguments()) {
+            if (!spec.info(ctx).isKeyword() || spec.info(ctx).isOptional() || spec.info(ctx).isRepeated())
+                continue;
+            missingArg(ctx, callLoc, fun, spec);
         }
     }
 
