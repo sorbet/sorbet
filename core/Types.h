@@ -154,7 +154,7 @@ public:
     int64_t value;
     Literal(int64_t val);
     Literal(float val);
-    Literal(core::NameRef val);
+    Literal(core::SymbolRef klass, core::NameRef val);
     Literal(bool val);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);

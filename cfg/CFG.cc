@@ -174,6 +174,7 @@ void CFG::fillInBlockArguments(core::Context ctx) {
                     dynamic_cast<HashSplat *>(bind.value.get()) != nullptr ||
                     dynamic_cast<BoolLit *>(bind.value.get()) != nullptr ||
                     dynamic_cast<StringLit *>(bind.value.get()) != nullptr ||
+                    dynamic_cast<SymbolLit *>(bind.value.get()) != nullptr ||
                     dynamic_cast<IntLit *>(bind.value.get()) != nullptr ||
                     dynamic_cast<FloatLit *>(bind.value.get()) != nullptr ||
                     dynamic_cast<Self *>(bind.value.get()) != nullptr ||
@@ -535,6 +536,10 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<StringLit>(a->value));
                 ret = current;
             },
+            [&](ast::SymbolLit *a) {
+                current->exprs.emplace_back(cctx.target, a->loc, make_unique<SymbolLit>(a->name));
+                ret = current;
+            },
             [&](ast::BoolLit *a) {
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<BoolLit>(a->value));
                 ret = current;
@@ -796,6 +801,10 @@ string Send::toString(core::Context ctx) {
 
 string StringLit::toString(core::Context ctx) {
     return this->value.name(ctx).toString(ctx);
+}
+
+string SymbolLit::toString(core::Context ctx) {
+    return "<symbol:" + this->value.name(ctx).toString(ctx) + ">";
 }
 
 string BoolLit::toString(core::Context ctx) {

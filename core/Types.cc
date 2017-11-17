@@ -653,8 +653,10 @@ ruby_typer::core::Literal::Literal(int64_t val)
 ruby_typer::core::Literal::Literal(float val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<u4 *>(&val)) {}
 
-ruby_typer::core::Literal::Literal(core::NameRef val)
-    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_String())), value(val._id) {}
+ruby_typer::core::Literal::Literal(core::SymbolRef klass, core::NameRef val)
+    : ProxyType(make_shared<ClassType>(klass)), value(val._id) {
+    Error::check(klass == core::GlobalState::defn_String() || klass == core::GlobalState::defn_Symbol());
+}
 
 ruby_typer::core::Literal::Literal(bool val)
     : ProxyType(
@@ -671,6 +673,9 @@ string Literal::toString(core::Context ctx, int tabs) {
     switch (undSymbol._id) {
         case GlobalState::defn_String()._id:
             value = "\"" + NameRef(this->value).toString(ctx) + "\"";
+            break;
+        case GlobalState::defn_Symbol()._id:
+            value = ":\"" + NameRef(this->value).toString(ctx) + "\"";
             break;
         case GlobalState::defn_Integer()._id:
             value = to_string(this->value);
