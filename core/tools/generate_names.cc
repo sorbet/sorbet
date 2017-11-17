@@ -41,6 +41,7 @@ NameDef names[] = {
     {"returnMethodTemp"},
     {"blockReturnTemp"},
     {"selfMethodTemp"},
+    {"hashTemp"},
     // end CFG temporaries
 
     {"include"},
@@ -79,6 +80,10 @@ NameDef names[] = {
     {"nil_p", "nil?"},
     {"super"},
     {"empty", ""},
+
+    {"emptyHash", "{}"},
+    {"buildHash", "<build-hash>"},
+    {"arg0"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

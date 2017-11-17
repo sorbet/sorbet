@@ -709,6 +709,8 @@ string ArrayType::toString(core::Context ctx, int tabs) {
     return buf.str();
 }
 
+ruby_typer::core::HashType::HashType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())) {}
+
 ruby_typer::core::HashType::HashType(vector<shared_ptr<Literal>> &keys, vector<shared_ptr<Type>> &values)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())), keys(move(keys)), values(move(values)) {}
 

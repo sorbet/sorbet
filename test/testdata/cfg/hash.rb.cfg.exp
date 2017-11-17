@@ -1,0 +1,39 @@
+digraph "hash.rb"{
+subgraph "cluster_::<constant:Integer>#+" {
+    label = "::<constant:Integer>#+";
+    color = blue;
+    bb103_0 [shape = invhouse];
+    bb103_1 [shape = parallelogram];
+
+    bb103_0 [label = "()\nselfMethodTemp$1 = self : Integer\nreturnMethodTemp$1 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$1 : <bottom>\n<unconditional>"];
+    bb103_0 -> bb103_1;
+    bb103_1 [label = "()\n<unconditional>"];
+    bb103_1 -> bb103_1;
+}
+
+subgraph "cluster_::<constant:TestHash>#something" {
+    label = "::<constant:TestHash>#something";
+    color = blue;
+    bb106_0 [shape = invhouse];
+    bb106_1 [shape = parallelogram];
+
+    bb106_0 [label = "()\nreturnMethodTemp$2 = 17 : Integer(17)\nreturnMethodTemp$2 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
+    bb106_0 -> bb106_1;
+    bb106_1 [label = "()\n<unconditional>"];
+    bb106_1 -> bb106_1;
+}
+
+subgraph "cluster_::<constant:TestHash>#test" {
+    label = "::<constant:TestHash>#test";
+    color = blue;
+    bb107_0 [shape = invhouse];
+    bb107_1 [shape = parallelogram];
+
+    bb107_0 [label = "()\nstatTemp$4 = self : TestHash\nhashTemp$2 = statTemp$4.something() : untyped\nhashTemp$3 = NotSupported() : untyped\nstatTemp$7 = 1 : Integer(1)\nstatTemp$8 = 2 : Integer(2)\nhashTemp$5 = statTemp$7.+(statTemp$8) : Integer\nhashTemp$6 = 2 : Integer(2)\nhashTemp$9 = alias {} : HashType {\n}\nreturnMethodTemp$3 = hashTemp$9.<build-hash>(hashTemp$2, hashTemp$3, hashTemp$5, hashTemp$6) : Hash\nreturnMethodTemp$10 = return returnMethodTemp$3 : <bottom>\n<unconditional>"];
+    bb107_0 -> bb107_1;
+    bb107_1 [label = "()\n<unconditional>"];
+    bb107_1 -> bb107_1;
+}
+
+}
+

@@ -653,6 +653,26 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 ret = deadBlock();
             },
 
+            [&](ast::Hash *h) {
+                vector<core::LocalVariable> vars;
+                for (int i = 0; i < h->keys.size(); i++) {
+                    core::LocalVariable keyTmp = cctx.ctx.state.newTemporary(
+                        core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
+                    core::LocalVariable valTmp = cctx.ctx.state.newTemporary(
+                        core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
+                    current = walk(cctx.withTarget(keyTmp), h->keys[i].get(), current);
+                    current = walk(cctx.withTarget(valTmp), h->values[i].get(), current);
+                    vars.push_back(keyTmp);
+                    vars.push_back(valTmp);
+                }
+                core::LocalVariable hash =
+                    cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
+                current->exprs.emplace_back(hash, h->loc, make_unique<Alias>(cctx.ctx.state.defn_emptyHash()));
+                current->exprs.emplace_back(cctx.target, h->loc,
+                                            make_unique<Send>(hash, core::Names::buildHash(), vars));
+                ret = current;
+            },
+
             [&](ast::Expression *n) {
                 current->exprs.emplace_back(cctx.target, n->loc, make_unique<NotSupported>(""));
                 ret = current;
@@ -660,8 +680,7 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
 
         /*[&](ast::Break *a) {}, */
         // For, Rescue,
-        // Symbol, NamedArg, Hash, Array,
-        // ArraySplat, HashAplat, Block,
+        // Symbol, NamedArg, Array,
         Error::check(ret != nullptr);
         return ret;
     } catch (...) {
