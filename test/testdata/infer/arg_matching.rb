@@ -59,4 +59,24 @@ class TestArgs
     # We error on each incorrect argument
     repeated("hi", "there") # error: MULTI
   end
+
+  standard_method(
+    {
+      x: Integer,
+      y: Integer,
+      z: Hash,
+      w: String,
+      u: Integer,
+      v: Integer
+    },
+    returns: NilClass)
+  def mixed(x, y=_, z=_, *w, u:, v: 0)
+  end
+
+  def call_mixed
+    mixed(0, u: 1)
+    mixed(0, 1, u: 1)
+    mixed(0, 1, {z: 1}, u: 1)
+    mixed(0, 1, {z: 1}, "hi", "there", u: 1, v: 0)
+  end
 end

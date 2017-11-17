@@ -119,5 +119,29 @@ subgraph "cluster_::<constant:TestArgs>#call_repeated" {
     bb118_1 -> bb118_1;
 }
 
+subgraph "cluster_::<constant:TestArgs>#mixed" {
+    label = "::<constant:TestArgs>#mixed";
+    color = blue;
+    bb119_0 [shape = invhouse];
+    bb119_1 [shape = parallelogram];
+
+    bb119_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$11 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$11 : <bottom>\n<unconditional>"];
+    bb119_0 -> bb119_1;
+    bb119_1 [label = "()\n<unconditional>"];
+    bb119_1 -> bb119_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#call_mixed" {
+    label = "::<constant:TestArgs>#call_mixed";
+    color = blue;
+    bb126_0 [shape = invhouse];
+    bb126_1 [shape = parallelogram];
+
+    bb126_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$4 = 0 : Integer(0)\nhashTemp$6 = <symbol:u> : Symbol(:\"u\")\nhashTemp$7 = 1 : Integer(1)\nhashTemp$8 = alias {} : HashType {\n}\nstatTemp$5 = hashTemp$8.<build-hash>(hashTemp$6, hashTemp$7) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}\nstatTemp$2 = statTemp$3.mixed(statTemp$4, statTemp$5) : NilClass\nstatTemp$10 = self : TestArgs\nstatTemp$11 = 0 : Integer(0)\nstatTemp$12 = 1 : Integer(1)\nhashTemp$14 = <symbol:u> : Symbol(:\"u\")\nhashTemp$15 = 1 : Integer(1)\nhashTemp$16 = alias {} : HashType {\n}\nstatTemp$13 = hashTemp$16.<build-hash>(hashTemp$14, hashTemp$15) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}\nstatTemp$9 = statTemp$10.mixed(statTemp$11, statTemp$12, statTemp$13) : NilClass\nstatTemp$18 = self : TestArgs\nstatTemp$19 = 0 : Integer(0)\nstatTemp$20 = 1 : Integer(1)\nhashTemp$22 = <symbol:z> : Symbol(:\"z\")\nhashTemp$23 = 1 : Integer(1)\nhashTemp$24 = alias {} : HashType {\n}\nstatTemp$21 = hashTemp$24.<build-hash>(hashTemp$22, hashTemp$23) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}\nhashTemp$26 = <symbol:u> : Symbol(:\"u\")\nhashTemp$27 = 1 : Integer(1)\nhashTemp$28 = alias {} : HashType {\n}\nstatTemp$25 = hashTemp$28.<build-hash>(hashTemp$26, hashTemp$27) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}\nstatTemp$17 = statTemp$18.mixed(statTemp$19, statTemp$20, statTemp$21, statTemp$25) : NilClass\nstatTemp$29 = self : TestArgs\nstatTemp$30 = 0 : Integer(0)\nstatTemp$31 = 1 : Integer(1)\nhashTemp$33 = <symbol:z> : Symbol(:\"z\")\nhashTemp$34 = 1 : Integer(1)\nhashTemp$35 = alias {} : HashType {\n}\nstatTemp$32 = hashTemp$35.<build-hash>(hashTemp$33, hashTemp$34) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}\nstatTemp$36 = hi : String(\"hi\")\nstatTemp$37 = there : String(\"there\")\nhashTemp$39 = <symbol:u> : Symbol(:\"u\")\nhashTemp$40 = 1 : Integer(1)\nhashTemp$41 = <symbol:v> : Symbol(:\"v\")\nhashTemp$42 = 0 : Integer(0)\nhashTemp$43 = alias {} : HashType {\n}\nstatTemp$38 = hashTemp$43.<build-hash>(hashTemp$39, hashTemp$40, hashTemp$41, hashTemp$42) : HashType {\n  Symbol(:\"u\") => Integer(1)\n  Symbol(:\"v\") => Integer(0)\n}\nreturnMethodTemp$12 = statTemp$29.mixed(statTemp$30, statTemp$31, statTemp$32, statTemp$36, statTemp$37, statTemp$38) : NilClass\nreturnMethodTemp$44 = return returnMethodTemp$12 : <bottom>\n<unconditional>"];
+    bb126_0 -> bb126_1;
+    bb126_1 [label = "()\n<unconditional>"];
+    bb126_1 -> bb126_1;
+}
+
 }
 
