@@ -95,5 +95,29 @@ subgraph "cluster_::<constant:TestArgs>#call_kwarg" {
     bb115_1 -> bb115_1;
 }
 
+subgraph "cluster_::<constant:TestArgs>#repeated" {
+    label = "::<constant:TestArgs>#repeated";
+    color = blue;
+    bb116_0 [shape = invhouse];
+    bb116_1 [shape = parallelogram];
+
+    bb116_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$9 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$9 : <bottom>\n<unconditional>"];
+    bb116_0 -> bb116_1;
+    bb116_1 [label = "()\n<unconditional>"];
+    bb116_1 -> bb116_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#call_repeated" {
+    label = "::<constant:TestArgs>#call_repeated";
+    color = blue;
+    bb118_0 [shape = invhouse];
+    bb118_1 [shape = parallelogram];
+
+    bb118_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$2 = statTemp$3.repeated() : NilClass\nstatTemp$5 = self : TestArgs\nstatTemp$6 = 1 : Integer(1)\nstatTemp$7 = 2 : Integer(2)\nstatTemp$8 = 3 : Integer(3)\nstatTemp$4 = statTemp$5.repeated(statTemp$6, statTemp$7, statTemp$8) : NilClass\nstatTemp$10 = self : TestArgs\nstatTemp$11 = 1 : Integer(1)\nstatTemp$12 = hi : String(\"hi\")\nstatTemp$9 = statTemp$10.repeated(statTemp$11, statTemp$12) : NilClass\nstatTemp$13 = self : TestArgs\nstatTemp$14 = hi : String(\"hi\")\nstatTemp$15 = there : String(\"there\")\nreturnMethodTemp$10 = statTemp$13.repeated(statTemp$14, statTemp$15) : NilClass\nreturnMethodTemp$16 = return returnMethodTemp$10 : <bottom>\n<unconditional>"];
+    bb118_0 -> bb118_1;
+    bb118_1 [label = "()\n<unconditional>"];
+    bb118_1 -> bb118_1;
+}
+
 }
 

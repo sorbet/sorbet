@@ -42,4 +42,20 @@ class TestArgs
     kwarg(1, any)
     kwarg(1, a_hash) # error: Passing an untyped hash
   end
+
+  standard_method(
+    {
+      x: Integer
+    }, returns: NilClass)
+  def repeated(*x)
+  end
+
+  def call_repeated
+    repeated
+    repeated(1, 2, 3)
+    repeated(1, "hi") # error: Argument `x' does not match expected type.
+
+    # We error on each incorrect argument
+    repeated("hi", "there") # error: MULTI
+  end
 end

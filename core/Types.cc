@@ -622,10 +622,15 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                                  [&ctx](core::SymbolRef arg) { return arg.info(ctx).isKeyword(); });
 
     auto pit = info.arguments().begin();
+    auto pend = info.arguments().end();
+
+    if (pit != pend && (pend - 1)->info(ctx).isBlockArgument())
+        --pend;
+
     auto ait = args.begin();
     auto aend = args.end();
 
-    while (pit != info.arguments().end() && ait != aend) {
+    while (pit != pend && ait != aend) {
         core::Symbol &spec = pit->info(ctx);
         auto &arg = *ait;
         if (spec.isKeyword() || spec.isBlockArgument() || spec.isRepeated())
@@ -638,7 +643,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         matchArgType(ctx, callLoc, method, arg, spec);
     }
 
-    if (pit != info.arguments().end()) {
+    if (pit != pend) {
         if (!(pit->info(ctx).isKeyword() || pit->info(ctx).isOptional() || pit->info(ctx).isRepeated() ||
               pit->info(ctx).isBlockArgument())) {
             ctx.state.errors.error(
@@ -656,22 +661,25 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         std::unordered_set<NameRef> consumed;
         auto &hashArg = *(aend - 1);
         auto *klass = dynamic_cast<ClassType *>(hashArg.type.get());
+
+        // find keyword arguments and advance `pend` before them; We'll walk
+        // `kwit` ahead below
+        auto kwit = pit;
+        while (!kwit->info(ctx).isKeyword())
+            kwit++;
+        pend = kwit;
+
         if (klass != nullptr && klass->symbol == ctx.state.defn_untyped()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
         } else if (HashType *hash = dynamic_cast<HashType *>(hashArg.type.get())) {
             --aend;
 
-            while (pit != info.arguments().end()) {
-                core::Symbol &spec = pit->info(ctx);
-                // skip optional+repeated arguments until we get to keyword
-                if (!spec.isKeyword()) {
-                    ++pit;
-                    continue;
-                }
+            while (kwit != info.arguments().end()) {
+                core::Symbol &spec = kwit->info(ctx);
                 if (spec.isRepeated() || spec.isBlockArgument())
                     break;
-                ++pit;
+                ++kwit;
 
                 auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<Literal> lit) {
                     return dynamic_cast<ClassType *>(lit->underlying.get())->symbol == ctx.state.defn_Symbol() &&
@@ -705,6 +713,16 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 continue;
             missingArg(ctx, callLoc, fun, spec);
         }
+    }
+
+    while (pit != pend && !pit->info(ctx).isRepeated())
+        ++pit;
+    if (pit != pend) {
+        Error::check(pit->info(ctx).isRepeated());
+        for (; ait != aend; ++ait) {
+            matchArgType(ctx, callLoc, method, *ait, pit->info(ctx));
+        }
+        ++pit;
     }
 
     if (ait != aend) {
