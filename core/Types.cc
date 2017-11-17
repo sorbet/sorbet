@@ -541,6 +541,31 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
     return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
+shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
+                                        vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+    if (fun != Names::buildHash())
+        return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
+    Error::check(args.size() % 2 == 0);
+
+    vector<shared_ptr<Literal>> keys;
+    vector<shared_ptr<Type>> values;
+    for (int i = 0; i < args.size(); i += 2) {
+        auto *key = dynamic_cast<Literal *>(args[i].type.get());
+        if (key == nullptr) {
+            return make_unique<ClassType>(ctx.state.defn_Hash());
+        }
+
+        // HACK(nelhage): clone the Literal by hand, since there's no way to go
+        // from shared_ptr<Type> to shared_ptr<Literal>
+        auto lit = make_unique<Literal>(key->value);
+        lit->underlying = key->underlying;
+
+        keys.push_back(move(lit));
+        values.push_back(args[i + 1].type);
+    }
+    return make_unique<HashType>(keys, values);
+}
+
 shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     if (isDynamic()) {

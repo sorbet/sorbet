@@ -15,4 +15,11 @@ class TestHash
       1 + 2 => 2,
     }
   end
+
+  def test_shaped
+    {
+      1 => 2,
+      2 => 3,
+    }
+  end
 end
