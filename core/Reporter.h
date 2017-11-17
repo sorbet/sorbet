@@ -106,7 +106,7 @@ public:
     std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> getAndEmptyErrors();
 
 private:
-    Reporter(GlobalState &gs) : gs_(gs) {}
+    Reporter(GlobalState &gs) : gs_(gs), hadCriticalError_(false) {}
     GlobalState &gs_;
     bool hadCriticalError_;
 };
