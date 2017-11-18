@@ -17,7 +17,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     bb111_0 [shape = invhouse];
     bb111_1 [shape = parallelogram];
 
-    bb111_0 [label = "(invalid_rules)\n<constant:untyped>$7 = alias <constant:untyped> : untyped\n@rules$13 = alias @rules : untyped\nstatTemp$8 = <symbol:deleted_at_is_nil> : Symbol(:\"deleted_at_is_nil\")\nstatTemp$5 = <constant:untyped>$7.query_by(statTemp$8) : untyped\nhashTemp$10 = alias {} : HashType {\n}\nstatTemp$9 = hashTemp$10.<build-hash>() : HashType {\n}\nstatTemp$4 = statTemp$5.load_all(statTemp$9) : untyped\nstatTemp$11 = NotSupported() : untyped\nassignTemp$0 = statTemp$4.partition(statTemp$11) : untyped\nstatTemp$15 = 0 : Integer(0)\n@rules$13 = assignTemp$0.[](statTemp$15) : untyped\nstatTemp$18 = 1 : Integer(1)\ninvalid_rules = assignTemp$0.[](statTemp$18) : untyped\nstatTemp$20 = invalid_rules.empty?() : untyped\nifTemp$19 = statTemp$20.!() : untyped\nifTemp$19"];
+    bb111_0 [label = "(invalid_rules)\n<constant:GeraldRule>$7 = alias <constant:GeraldRule> : untyped\n@rules$13 = alias @rules : untyped\nstatTemp$8 = <symbol:deleted_at_is_nil> : Symbol(:\"deleted_at_is_nil\")\nstatTemp$5 = <constant:GeraldRule>$7.query_by(statTemp$8) : untyped\nhashTemp$10 = alias {} : HashType {\n}\nstatTemp$9 = hashTemp$10.<build-hash>() : HashType {\n}\nstatTemp$4 = statTemp$5.load_all(statTemp$9) : untyped\nstatTemp$11 = NotSupported() : untyped\nassignTemp$0 = statTemp$4.partition(statTemp$11) : untyped\nstatTemp$15 = 0 : Integer(0)\n@rules$13 = assignTemp$0.[](statTemp$15) : untyped\nstatTemp$18 = 1 : Integer(1)\ninvalid_rules = assignTemp$0.[](statTemp$18) : untyped\nstatTemp$20 = invalid_rules.empty?() : untyped\nifTemp$19 = statTemp$20.!() : untyped\nifTemp$19"];
     bb111_0 -> bb111_2;
     bb111_0 -> bb111_3;
 
@@ -95,7 +95,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     bb132_0 [shape = invhouse];
     bb132_1 [shape = parallelogram];
 
-    bb132_0 [label = "()\n@start$2 = alias @start : untyped\n<constant:untyped>$4 = alias <constant:untyped> : untyped\n@start$2 = <constant:untyped>$4.now() : untyped\nreturnMethodTemp$5 = return @start$2 : <bottom>\n<unconditional>"];
+    bb132_0 [label = "()\n@start$2 = alias @start : untyped\n<constant:Time>$4 = alias <constant:Time> : untyped\n@start$2 = <constant:Time>$4.now() : untyped\nreturnMethodTemp$5 = return @start$2 : <bottom>\n<unconditional>"];
     bb132_0 -> bb132_1;
     bb132_1 [label = "()\n<unconditional>"];
     bb132_1 -> bb132_1;
@@ -107,7 +107,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     bb133_0 [shape = invhouse];
     bb133_1 [shape = parallelogram];
 
-    bb133_0 [label = "(<constant:TOTAL_TIME_MS>$13, <constant:MatchTimeout>$17)\n<constant:untyped>$6 = alias <constant:untyped> : untyped\n@start$8 = alias @start : untyped\n<constant:TOTAL_TIME_MS>$13 = alias <constant:TOTAL_TIME_MS> : untyped\n<constant:MatchTimeout>$17 = alias <constant:MatchTimeout> : <class:MatchTimeout>\nstatTemp$4 = <constant:untyped>$6.now() : untyped\nstatTemp$3 = statTemp$4.-(@start$8) : untyped\nstatTemp$9 = 1000 : Integer(1000)\ndur_ms = statTemp$3.*(statTemp$9) : untyped\nifTemp$10 = dur_ms.>(<constant:TOTAL_TIME_MS>$13) : untyped\nifTemp$10"];
+    bb133_0 [label = "(<constant:TOTAL_TIME_MS>$13, <constant:MatchTimeout>$17)\n<constant:Time>$6 = alias <constant:Time> : untyped\n@start$8 = alias @start : untyped\n<constant:TOTAL_TIME_MS>$13 = alias <constant:TOTAL_TIME_MS> : untyped\n<constant:MatchTimeout>$17 = alias <constant:MatchTimeout> : <class:MatchTimeout>\nstatTemp$4 = <constant:Time>$6.now() : untyped\nstatTemp$3 = statTemp$4.-(@start$8) : untyped\nstatTemp$9 = 1000 : Integer(1000)\ndur_ms = statTemp$3.*(statTemp$9) : untyped\nifTemp$10 = dur_ms.>(<constant:TOTAL_TIME_MS>$13) : untyped\nifTemp$10"];
     bb133_0 -> bb133_2;
     bb133_0 -> bb133_3;
 
@@ -127,7 +127,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     bb134_0 [shape = invhouse];
     bb134_1 [shape = parallelogram];
 
-    bb134_0 [label = "(dur_ms, rule, res, <constant:PER_RULE_MS>$16, <constant:MatchTimeout>$20)\n<constant:untyped>$4 = alias <constant:untyped> : untyped\n<constant:PER_RULE_MS>$16 = alias <constant:PER_RULE_MS> : untyped\n<constant:MatchTimeout>$20 = alias <constant:MatchTimeout> : <class:MatchTimeout>\nselfMethodTemp$1 = self : MatchTimeBudget\nrule = load_arg(selfMethodTemp$1#time_rule, 0) : untyped\nrule_start = <constant:untyped>$4.now() : untyped\nres = NotSupported() : untyped\nstatTemp$8 = <constant:untyped>$4.now() : untyped\nstatTemp$7 = statTemp$8.-(rule_start) : untyped\nstatTemp$11 = 1000 : Integer(1000)\ndur_ms = statTemp$7.*(statTemp$11) : untyped\nifTemp$13 = dur_ms.>(<constant:PER_RULE_MS>$16) : untyped\nifTemp$13"];
+    bb134_0 [label = "(dur_ms, rule, res, <constant:PER_RULE_MS>$16, <constant:MatchTimeout>$20)\n<constant:Time>$4 = alias <constant:Time> : untyped\n<constant:PER_RULE_MS>$16 = alias <constant:PER_RULE_MS> : untyped\n<constant:MatchTimeout>$20 = alias <constant:MatchTimeout> : <class:MatchTimeout>\nselfMethodTemp$1 = self : MatchTimeBudget\nrule = load_arg(selfMethodTemp$1#time_rule, 0) : untyped\nrule_start = <constant:Time>$4.now() : untyped\nres = NotSupported() : untyped\nstatTemp$8 = <constant:Time>$4.now() : untyped\nstatTemp$7 = statTemp$8.-(rule_start) : untyped\nstatTemp$11 = 1000 : Integer(1000)\ndur_ms = statTemp$7.*(statTemp$11) : untyped\nifTemp$13 = dur_ms.>(<constant:PER_RULE_MS>$16) : untyped\nifTemp$13"];
     bb134_0 -> bb134_2;
     bb134_0 -> bb134_3;
 
@@ -307,7 +307,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     bb162_0 [shape = invhouse];
     bb162_1 [shape = parallelogram];
 
-    bb162_0 [label = "()\n<constant:untyped>$5 = alias <constant:untyped> : untyped\nstatTemp$3 = self : Diff\nstatTemp$2 = statTemp$3.changed_files() : untyped\nreturnMethodTemp$35 = statTemp$2.include?(<constant:untyped>$5) : untyped\nreturnMethodTemp$6 = return returnMethodTemp$35 : <bottom>\n<unconditional>"];
+    bb162_0 [label = "()\n<constant:SPEC_PATH>$5 = alias <constant:SPEC_PATH> : untyped\nstatTemp$3 = self : Diff\nstatTemp$2 = statTemp$3.changed_files() : untyped\nreturnMethodTemp$35 = statTemp$2.include?(<constant:SPEC_PATH>$5) : untyped\nreturnMethodTemp$6 = return returnMethodTemp$35 : <bottom>\n<unconditional>"];
     bb162_0 -> bb162_1;
     bb162_1 [label = "()\n<unconditional>"];
     bb162_1 -> bb162_1;
