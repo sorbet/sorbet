@@ -91,3 +91,14 @@ cc_binary(
     srcs = ["backtrace-test-error.cc"],
     deps = ["//common"],
 )
+
+sh_test(
+    name = "end-to-end-test",
+    size = "small",
+    srcs = ["end-to-end-test.sh"],
+    data = [
+        "end-to-end-test-input.rb",
+        "end-to-end-test-output",
+        "//main:ruby-typer",
+    ],
+)
