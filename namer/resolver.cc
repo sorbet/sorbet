@@ -54,8 +54,8 @@ private:
             core::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
             if (!result.exists()) {
                 if (resolved.info(ctx).resultType.get() == nullptr || !resolved.info(ctx).resultType->isDynamic())
-                ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
-                                       c->toString(ctx));
+                    ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
+                                           c->toString(ctx));
                 result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
                 result.info(ctx).resultType = core::Types::dynamic();
             }
