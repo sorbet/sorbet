@@ -148,7 +148,7 @@ module Opus::CIBot::Gerald
 
     private def parse(diff)
       parts = diff.split(/^diff [^\n]*\n/m)[ # error: Unsupported node type Regexp
-        1..-1] # error: Unsupported node type IRange
+        1..-1] # error: Wrong number of arguments for constructor.
       parts ||= []
       parts.map do |part|
         lines = part.split("\n")
@@ -160,15 +160,15 @@ module Opus::CIBot::Gerald
           if line.start_with?("index ", '@@', 'new file mode')
             next
           elsif line.start_with?('---')
-            a_name = line[4..-1] # error: Unsupported node type IRange
-            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: Unsupported node type IRange
+            a_name = line[4..-1] # error: Wrong number of arguments for constructor.
+            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: Wrong number of arguments for constructor.
           elsif line.start_with?('+++')
-            b_name = line[4..-1] # error: Unsupported node type IRange
-            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Unsupported node type IRange
+            b_name = line[4..-1] # error: Wrong number of arguments for constructor.
+            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Wrong number of arguments for constructor.
           elsif line.start_with?('+')
-            added_lines << line[1..-1] # error: Unsupported node type IRange
+            added_lines << line[1..-1] # error: Wrong number of arguments for constructor.
           elsif line.start_with?('-')
-            removed_lines << line[1..-1] # error: Unsupported node type IRange
+            removed_lines << line[1..-1] # error: Wrong number of arguments for constructor.
           end
         end
         next if a_name.nil?

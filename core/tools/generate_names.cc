@@ -47,6 +47,7 @@ NameDef names[] = {
     {"include"},
     {"currentFile", "__FILE__"},
     {"merge"},
+    {"Range"},
 
     // standard_method keywords
     {"standardMethod", "standard_method"},

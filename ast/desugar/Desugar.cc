@@ -43,6 +43,24 @@ unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> &recv, core
     return mkSend1(loc, recv, fun, arg1);
 }
 
+unique_ptr<Expression> mkSend2(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun,
+                               unique_ptr<Expression> &arg1, unique_ptr<Expression> &arg2) {
+    Send::ARGS_store nargs;
+    nargs.emplace_back(move(arg1));
+    nargs.emplace_back(move(arg2));
+    return make_unique<Send>(loc, move(recv), fun, nargs);
+}
+
+unique_ptr<Expression> mkSend3(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun,
+                               unique_ptr<Expression> &arg1, unique_ptr<Expression> &arg2,
+                               unique_ptr<Expression> &arg3) {
+    Send::ARGS_store nargs;
+    nargs.emplace_back(move(arg1));
+    nargs.emplace_back(move(arg2));
+    nargs.emplace_back(move(arg3));
+    return make_unique<Send>(loc, move(recv), fun, nargs);
+}
+
 unique_ptr<Expression> mkSend0(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun) {
     Send::ARGS_store nargs;
     return make_unique<Send>(loc, move(recv), fun, nargs);
@@ -709,6 +727,23 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
 
                 result.swap(res);
+            },
+            [&](parser::IRange *ret) {
+                core::NameRef range_name = core::GlobalState::defn_Range().info(ctx).name;
+                unique_ptr<Expression> range = make_unique<ConstantLit>(what->loc, mkEmptyTree(what->loc), range_name);
+                auto from = node2TreeImpl(ctx, ret->from);
+                auto to = node2TreeImpl(ctx, ret->to);
+                auto send = mkSend2(what->loc, range, core::Names::new_(), from, to);
+                result.swap(send);
+            },
+            [&](parser::ERange *ret) {
+                core::NameRef range_name = core::GlobalState::defn_Range().info(ctx).name;
+                unique_ptr<Expression> range = make_unique<ConstantLit>(what->loc, mkEmptyTree(what->loc), range_name);
+                auto from = node2TreeImpl(ctx, ret->from);
+                auto to = node2TreeImpl(ctx, ret->to);
+                auto true_ = mkTrue(what->loc);
+                auto send = mkSend3(what->loc, range, core::Names::new_(), from, to, true_);
+                result.swap(send);
             },
             [&](parser::Return *ret) {
                 if (ret->exprs.size() > 1) {

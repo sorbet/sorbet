@@ -84,4 +84,5 @@ class <constant:Opus> ()
       class <singleton class:<constant:Matcher>> (<constant:Class>)
 class <singleton class:<constant:<root>>> (<constant:Class>)
 class <singleton class:<constant:<root>>> (<constant:Class>)
+class <singleton class:<constant:Range>> (<constant:Class>)
 
