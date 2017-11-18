@@ -213,6 +213,9 @@ static UTF8Desc basicObject_DESC{(char *)basicObject, (int)strlen(basicObject)};
 static const char *kernel = "Kernel";
 static UTF8Desc kernel_DESC{(char *)kernel, (int)strlen(kernel)};
 
+static const char *range = "Range";
+static UTF8Desc range_DESC{(char *)range, (int)strlen(range)};
+
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 static const char *reserved = "<<RESERVED>>";
 static UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
@@ -273,6 +276,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef basicObject_id = synthesizeClass(basicObject_DESC);
     SymbolRef kernel_id = synthesizeClass(kernel_DESC);
     SymbolRef emptyHash_id = enterStaticFieldSymbol(Loc::none(0), defn_root(), Names::emptyHash());
+    SymbolRef range_id = synthesizeClass(range_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -298,6 +302,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(basicObject_id == defn_Basic_Object());
     Error::check(kernel_id == defn_Kernel());
     Error::check(emptyHash_id == defn_emptyHash());
+    Error::check(range_id == defn_Range());
 
     // Synthesize ::{} = EmptyHash()
     defn_emptyHash().info(*this).resultType = make_unique<HashType>();

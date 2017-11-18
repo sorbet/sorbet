@@ -185,7 +185,7 @@ begin
 
       self(<singleton class:<constant:Diff>>).private(def parse<parse>(diff)
           begin
-            parts = diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
+            parts = diff.split(<Not Supported (Regexp)>).[](::<constant:Range>.new(1, -1))
             if parts
               parts
             else
@@ -204,13 +204,13 @@ begin
                   else
                     if <block-nested: line>.start_with?("---")
                       begin
-                        <block-nested: a_name> = <block-nested: line>.[](<Not Supported (IRange)>)
+                        <block-nested: a_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
                         if if <block-nested: a_name>
                             <block-nested: a_name>.start_with?("a/")
                           else
                             <block-nested: a_name>
                           end
-                          <block-nested: a_name> = <block-nested: a_name>.[](<Not Supported (IRange)>)
+                          <block-nested: a_name> = <block-nested: a_name>.[](::<constant:Range>.new(2, -1))
                         else
                           <emptyTree>
                         end
@@ -218,23 +218,23 @@ begin
                     else
                       if <block-nested: line>.start_with?("+++")
                         begin
-                          <block-nested: b_name> = <block-nested: line>.[](<Not Supported (IRange)>)
+                          <block-nested: b_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
                           if if <block-nested: b_name>
                               <block-nested: b_name>.start_with?("b/")
                             else
                               <block-nested: b_name>
                             end
-                            <block-nested: b_name> = <block-nested: b_name>.[](<Not Supported (IRange)>)
+                            <block-nested: b_name> = <block-nested: b_name>.[](::<constant:Range>.new(2, -1))
                           else
                             <emptyTree>
                           end
                         end
                       else
                         if <block-nested: line>.start_with?("+")
-                          <block-nested: added_lines>.<<(<block-nested: line>.[](<Not Supported (IRange)>))
+                          <block-nested: added_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
                         else
                           if <block-nested: line>.start_with?("-")
-                            <block-nested: removed_lines>.<<(<block-nested: line>.[](<Not Supported (IRange)>))
+                            <block-nested: removed_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
                           else
                             <emptyTree>
                           end

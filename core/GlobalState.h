@@ -167,6 +167,10 @@ public:
         return SymbolRef(23);
     }
 
+    static constexpr SymbolRef defn_Range() {
+        return SymbolRef(24);
+    }
+
     // Keep as last and update to match the last entry
     static constexpr SymbolRef defn_last_synthetic_sym() {
         return SymbolRef(MAX_SYNTHETIC_SYMBOLS - 1);

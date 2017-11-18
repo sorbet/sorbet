@@ -187,7 +187,7 @@ begin
 
       self(<constant:<todo sym>>).private(def parse<<constant:<todo sym>>>(diff)
           begin
-            parts = diff.split(<Not Supported (Regexp)>).[](<Not Supported (IRange)>)
+            parts = diff.split(<Not Supported (Regexp)>).[](<emptyTree>::<constant:Range>.new(1, -1))
             if parts
               parts
             else
@@ -206,13 +206,13 @@ begin
                   else
                     if line.start_with?("---")
                       begin
-                        a_name = line.[](<Not Supported (IRange)>)
+                        a_name = line.[](<emptyTree>::<constant:Range>.new(4, -1))
                         if if a_name
                             a_name.start_with?("a/")
                           else
                             a_name
                           end
-                          a_name = a_name.[](<Not Supported (IRange)>)
+                          a_name = a_name.[](<emptyTree>::<constant:Range>.new(2, -1))
                         else
                           <emptyTree>
                         end
@@ -220,23 +220,23 @@ begin
                     else
                       if line.start_with?("+++")
                         begin
-                          b_name = line.[](<Not Supported (IRange)>)
+                          b_name = line.[](<emptyTree>::<constant:Range>.new(4, -1))
                           if if b_name
                               b_name.start_with?("b/")
                             else
                               b_name
                             end
-                            b_name = b_name.[](<Not Supported (IRange)>)
+                            b_name = b_name.[](<emptyTree>::<constant:Range>.new(2, -1))
                           else
                             <emptyTree>
                           end
                         end
                       else
                         if line.start_with?("+")
-                          added_lines.<<(line.[](<Not Supported (IRange)>))
+                          added_lines.<<(line.[](<emptyTree>::<constant:Range>.new(1, -1)))
                         else
                           if line.start_with?("-")
-                            removed_lines.<<(line.[](<Not Supported (IRange)>))
+                            removed_lines.<<(line.[](<emptyTree>::<constant:Range>.new(1, -1)))
                           else
                             <emptyTree>
                           end
