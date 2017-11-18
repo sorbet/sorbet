@@ -5,7 +5,7 @@ test/end-to-end-test-input.rb:16 Changing type of pinned argument, Integer is no
       arg: Integer
        ^^^^
     foo("foo")
-[7002] Argument number 1 does not match expected type.
+[7002] Argument arg does not match expected type.
 Expected Integer
 test/end-to-end-test-input.rb:16 Method foo has specified type of argument arg as Integer
       arg: Integer
