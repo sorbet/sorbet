@@ -176,6 +176,8 @@ int realmain(int argc, char **argv) {
     console_err = spd::stderr_color_st("");
     console_err->set_pattern("%v");
 
+    std::string print_options("[parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]");
+
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show help");
@@ -183,8 +185,7 @@ int realmain(int argc, char **argv) {
     options.add_options()("no-typer", "Do not type the CFG");
     options.add_options()("trace", "trace phases");
     options.add_options()("q,quiet", "Silence all non-critical errors");
-    options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
-                          cxxopts::value<vector<string>>(prints));
+    options.add_options()("p,print", "Print " + print_options, cxxopts::value<vector<string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>(files));
     options.parse_positional("files");
@@ -277,7 +278,7 @@ int realmain(int argc, char **argv) {
 
     if (!prints.empty()) {
         for (auto option : prints) {
-            console_err->error("Unknown --print option: {}", option);
+            console_err->error("Unknown --print option: {}\nValid values: {}", option, print_options);
             return 1;
         }
     }
