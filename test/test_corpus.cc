@@ -261,7 +261,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
         linenum += 1;
     }
 
-    set<int> seenErrorLines;
+    map<int, int> seenErrorLines;
     int unknownLocErrorLine = 1;
     for (int i = 0; i < errors.size(); i++) {
         auto &error = errors[i];
@@ -278,7 +278,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                                                         << " Expectation: " << expectedError->second << endl
                                                         << " Reported error: " << error->formatted;
             } else {
-                seenErrorLines.insert(line);
+                seenErrorLines[line]++;
             }
             continue;
         }
@@ -301,7 +301,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
                                                          << " Reported error: " << error->formatted;
                 } else {
                     found = true;
-                    seenErrorLines.insert(i);
+                    seenErrorLines[i]++;
                     continue;
                 }
             }
@@ -313,7 +313,10 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
     for (auto &error : expectedErrors) {
         if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
-            ADD_FAILURE_AT(inputPath.c_str(), error.first) << "Expected error didn't happen on line " << error.first;
+            ADD_FAILURE_AT(inputPath.c_str(), error.first) << "Expected error did not happen.";
+        }
+        if (error.second.find("MULTI") != string::npos && seenErrorLines[error.first] == 1) {
+            ADD_FAILURE_AT(inputPath.c_str(), error.first) << "Expected multiple errors, but only saw one.";
         }
     }
 
