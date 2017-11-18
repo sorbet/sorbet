@@ -670,11 +670,13 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     while (pit != pend && ait != aend) {
         core::Symbol &spec = pit->info(ctx);
         auto &arg = *ait;
-        if (spec.isKeyword() || spec.isBlockArgument() || spec.isRepeated())
+        if (spec.isKeyword())
             break;
-        if (spec.isOptional() && hasKwargs && arg.type->derivesFrom(ctx, ctx.state.defn_Hash()))
+        if (ait + 1 == aend && hasKwargs && arg.type->derivesFrom(ctx, ctx.state.defn_Hash()) &&
+            (spec.isOptional() || spec.isRepeated()))
             break;
-        ++pit;
+        if (!spec.isRepeated())
+            ++pit;
         ++ait;
 
         matchArgType(ctx, callLoc, method, arg, spec);
@@ -759,16 +761,6 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 continue;
             missingArg(ctx, callLoc, fun, spec);
         }
-    }
-
-    while (pit != pend && !pit->info(ctx).isRepeated())
-        ++pit;
-    if (pit != pend) {
-        Error::check(pit->info(ctx).isRepeated());
-        for (; ait != aend; ++ait) {
-            matchArgType(ctx, callLoc, method, *ait, pit->info(ctx));
-        }
-        ++pit;
     }
 
     if (ait != aend) {
