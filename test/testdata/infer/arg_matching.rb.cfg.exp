@@ -1,0 +1,123 @@
+digraph "arg_matching.rb"{
+subgraph "cluster_::<constant:TestArgs>#any" {
+    label = "::<constant:TestArgs>#any";
+    color = blue;
+    bb101_0 [shape = invhouse];
+    bb101_1 [shape = parallelogram];
+
+    bb101_0 [label = "()\nreturnMethodTemp$1 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$1 : <bottom>\n<unconditional>"];
+    bb101_0 -> bb101_1;
+    bb101_1 [label = "()\n<unconditional>"];
+    bb101_1 -> bb101_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#a_hash" {
+    label = "::<constant:TestArgs>#a_hash";
+    color = blue;
+    bb103_0 [shape = invhouse];
+    bb103_1 [shape = parallelogram];
+
+    bb103_0 [label = "()\nreturnMethodTemp$2 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
+    bb103_0 -> bb103_1;
+    bb103_1 [label = "()\n<unconditional>"];
+    bb103_1 -> bb103_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#required" {
+    label = "::<constant:TestArgs>#required";
+    color = blue;
+    bb104_0 [shape = invhouse];
+    bb104_1 [shape = parallelogram];
+
+    bb104_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$3 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$3 : <bottom>\n<unconditional>"];
+    bb104_0 -> bb104_1;
+    bb104_1 [label = "()\n<unconditional>"];
+    bb104_1 -> bb104_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#call_required" {
+    label = "::<constant:TestArgs>#call_required";
+    color = blue;
+    bb107_0 [shape = invhouse];
+    bb107_1 [shape = parallelogram];
+
+    bb107_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$4 = 1 : Integer(1)\nstatTemp$2 = statTemp$3.required(statTemp$4) : untyped\nstatTemp$6 = self : TestArgs\nstatTemp$7 = 1 : Integer(1)\nstatTemp$8 = 2 : Integer(2)\nstatTemp$5 = statTemp$6.required(statTemp$7, statTemp$8) : untyped\nstatTemp$9 = self : TestArgs\nstatTemp$10 = 1 : Integer(1)\nstatTemp$11 = 2 : Integer(2)\nstatTemp$12 = 3 : Integer(3)\nreturnMethodTemp$4 = statTemp$9.required(statTemp$10, statTemp$11, statTemp$12) : untyped\nreturnMethodTemp$13 = return returnMethodTemp$4 : <bottom>\n<unconditional>"];
+    bb107_0 -> bb107_1;
+    bb107_1 [label = "()\n<unconditional>"];
+    bb107_1 -> bb107_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#optional" {
+    label = "::<constant:TestArgs>#optional";
+    color = blue;
+    bb108_0 [shape = invhouse];
+    bb108_1 [shape = parallelogram];
+
+    bb108_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$5 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$5 : <bottom>\n<unconditional>"];
+    bb108_0 -> bb108_1;
+    bb108_1 [label = "()\n<unconditional>"];
+    bb108_1 -> bb108_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#call_optional" {
+    label = "::<constant:TestArgs>#call_optional";
+    color = blue;
+    bb111_0 [shape = invhouse];
+    bb111_1 [shape = parallelogram];
+
+    bb111_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$4 = 1 : Integer(1)\nstatTemp$2 = statTemp$3.optional(statTemp$4) : untyped\nstatTemp$6 = self : TestArgs\nstatTemp$7 = 1 : Integer(1)\nstatTemp$8 = 2 : Integer(2)\nstatTemp$5 = statTemp$6.optional(statTemp$7, statTemp$8) : untyped\nstatTemp$9 = self : TestArgs\nstatTemp$10 = 1 : Integer(1)\nstatTemp$11 = 2 : Integer(2)\nstatTemp$12 = 3 : Integer(3)\nreturnMethodTemp$6 = statTemp$9.optional(statTemp$10, statTemp$11, statTemp$12) : untyped\nreturnMethodTemp$13 = return returnMethodTemp$6 : <bottom>\n<unconditional>"];
+    bb111_0 -> bb111_1;
+    bb111_1 [label = "()\n<unconditional>"];
+    bb111_1 -> bb111_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#kwarg" {
+    label = "::<constant:TestArgs>#kwarg";
+    color = blue;
+    bb112_0 [shape = invhouse];
+    bb112_1 [shape = parallelogram];
+
+    bb112_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$7 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$7 : <bottom>\n<unconditional>"];
+    bb112_0 -> bb112_1;
+    bb112_1 [label = "()\n<unconditional>"];
+    bb112_1 -> bb112_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#call_kwarg" {
+    label = "::<constant:TestArgs>#call_kwarg";
+    color = blue;
+    bb115_0 [shape = invhouse];
+    bb115_1 [shape = parallelogram];
+
+    bb115_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$4 = 1 : Integer(1)\nstatTemp$5 = 2 : Integer(2)\nstatTemp$2 = statTemp$3.kwarg(statTemp$4, statTemp$5) : NilClass\nstatTemp$7 = self : TestArgs\nstatTemp$8 = 1 : Integer(1)\nstatTemp$6 = statTemp$7.kwarg(statTemp$8) : NilClass\nstatTemp$10 = self : TestArgs\nstatTemp$11 = 1 : Integer(1)\nhashTemp$13 = <symbol:b> : Symbol(:\"b\")\nhashTemp$14 = 2 : Integer(2)\nhashTemp$15 = alias {} : HashType {\n}\nstatTemp$12 = hashTemp$15.<build-hash>(hashTemp$13, hashTemp$14) : HashType {\n  Symbol(:\"b\") => Integer(2)\n}\nstatTemp$9 = statTemp$10.kwarg(statTemp$11, statTemp$12) : NilClass\nstatTemp$17 = self : TestArgs\nstatTemp$18 = 1 : Integer(1)\nhashTemp$20 = <symbol:b> : Symbol(:\"b\")\nhashTemp$21 = 2 : Integer(2)\nhashTemp$22 = <symbol:c> : Symbol(:\"c\")\nhashTemp$23 = 3 : Integer(3)\nhashTemp$24 = alias {} : HashType {\n}\nstatTemp$19 = hashTemp$24.<build-hash>(hashTemp$20, hashTemp$21, hashTemp$22, hashTemp$23) : HashType {\n  Symbol(:\"b\") => Integer(2)\n  Symbol(:\"c\") => Integer(3)\n}\nstatTemp$16 = statTemp$17.kwarg(statTemp$18, statTemp$19) : NilClass\nstatTemp$26 = self : TestArgs\nstatTemp$27 = 1 : Integer(1)\nhashTemp$29 = alias {} : HashType {\n}\nstatTemp$28 = hashTemp$29.<build-hash>() : HashType {\n}\nstatTemp$25 = statTemp$26.kwarg(statTemp$27, statTemp$28) : NilClass\nstatTemp$31 = self : TestArgs\nstatTemp$32 = 1 : Integer(1)\nhashTemp$34 = <symbol:b> : Symbol(:\"b\")\nhashTemp$35 = hi : String(\"hi\")\nhashTemp$36 = alias {} : HashType {\n}\nstatTemp$33 = hashTemp$36.<build-hash>(hashTemp$34, hashTemp$35) : HashType {\n  Symbol(:\"b\") => String(\"hi\")\n}\nstatTemp$30 = statTemp$31.kwarg(statTemp$32, statTemp$33) : NilClass\nstatTemp$38 = self : TestArgs\nstatTemp$39 = 1 : Integer(1)\nstatTemp$41 = self : TestArgs\nstatTemp$40 = statTemp$41.any() : untyped\nstatTemp$37 = statTemp$38.kwarg(statTemp$39, statTemp$40) : NilClass\nstatTemp$42 = self : TestArgs\nstatTemp$43 = 1 : Integer(1)\nstatTemp$45 = self : TestArgs\nstatTemp$44 = statTemp$45.a_hash() : Hash\nreturnMethodTemp$8 = statTemp$42.kwarg(statTemp$43, statTemp$44) : NilClass\nreturnMethodTemp$46 = return returnMethodTemp$8 : <bottom>\n<unconditional>"];
+    bb115_0 -> bb115_1;
+    bb115_1 [label = "()\n<unconditional>"];
+    bb115_1 -> bb115_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#repeated" {
+    label = "::<constant:TestArgs>#repeated";
+    color = blue;
+    bb116_0 [shape = invhouse];
+    bb116_1 [shape = parallelogram];
+
+    bb116_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$9 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$9 : <bottom>\n<unconditional>"];
+    bb116_0 -> bb116_1;
+    bb116_1 [label = "()\n<unconditional>"];
+    bb116_1 -> bb116_1;
+}
+
+subgraph "cluster_::<constant:TestArgs>#call_repeated" {
+    label = "::<constant:TestArgs>#call_repeated";
+    color = blue;
+    bb118_0 [shape = invhouse];
+    bb118_1 [shape = parallelogram];
+
+    bb118_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$2 = statTemp$3.repeated() : NilClass\nstatTemp$5 = self : TestArgs\nstatTemp$6 = 1 : Integer(1)\nstatTemp$7 = 2 : Integer(2)\nstatTemp$8 = 3 : Integer(3)\nstatTemp$4 = statTemp$5.repeated(statTemp$6, statTemp$7, statTemp$8) : NilClass\nstatTemp$10 = self : TestArgs\nstatTemp$11 = 1 : Integer(1)\nstatTemp$12 = hi : String(\"hi\")\nstatTemp$9 = statTemp$10.repeated(statTemp$11, statTemp$12) : NilClass\nstatTemp$13 = self : TestArgs\nstatTemp$14 = hi : String(\"hi\")\nstatTemp$15 = there : String(\"there\")\nreturnMethodTemp$10 = statTemp$13.repeated(statTemp$14, statTemp$15) : NilClass\nreturnMethodTemp$16 = return returnMethodTemp$10 : <bottom>\n<unconditional>"];
+    bb118_0 -> bb118_1;
+    bb118_1 [label = "()\n<unconditional>"];
+    bb118_1 -> bb118_1;
+}
+
+}
+

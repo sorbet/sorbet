@@ -114,6 +114,8 @@ public:
         static constexpr int ARGUMENT_KEYWORD = 0x200;
         static constexpr int ARGUMENT_REPEATED = 0x100;
         static constexpr int ARGUMENT_BLOCK = 0x0080;
+
+        static constexpr int ARGUMENT_MASK = 0x0f80;
     };
 
     SymbolRef owner;
@@ -168,6 +170,26 @@ public:
 
     inline bool isMethodArgument() const {
         return (flags & Symbol::Flags::METHOD_ARGUMENT) != 0;
+    }
+
+    inline bool isOptional() const {
+        DEBUG_ONLY(Error::check(isMethodArgument()));
+        return (flags & Symbol::Flags::ARGUMENT_OPTIONAL) != 0;
+    }
+
+    inline bool isRepeated() const {
+        DEBUG_ONLY(Error::check(isMethodArgument()));
+        return (flags & Symbol::Flags::ARGUMENT_REPEATED) != 0;
+    }
+
+    inline bool isKeyword() const {
+        DEBUG_ONLY(Error::check(isMethodArgument()));
+        return (flags & Symbol::Flags::ARGUMENT_KEYWORD) != 0;
+    }
+
+    inline bool isBlockArgument() const {
+        DEBUG_ONLY(Error::check(isMethodArgument()));
+        return (flags & Symbol::Flags::ARGUMENT_BLOCK) != 0;
     }
 
     inline bool isBlockSymbol(GlobalState &gs) const {
