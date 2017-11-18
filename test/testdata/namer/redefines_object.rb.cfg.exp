@@ -1,0 +1,15 @@
+digraph "redefines_object.rb"{
+subgraph "cluster_::<constant:Trigger>#trigger" {
+    label = "::<constant:Trigger>#trigger";
+    color = blue;
+    bb101_0 [shape = invhouse];
+    bb101_1 [shape = parallelogram];
+
+    bb101_0 [label = "()\n@__fake_logger$2 = alias @__fake_logger : untyped\nreturnMethodTemp$3 = return @__fake_logger$2 : <bottom>\n<unconditional>"];
+    bb101_0 -> bb101_1;
+    bb101_1 [label = "()\n<unconditional>"];
+    bb101_1 -> bb101_1;
+}
+
+}
+

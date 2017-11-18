@@ -151,15 +151,32 @@ SymbolRef Symbol::findMember(NameRef name) {
     return SymbolRef(0);
 }
 
-SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name) {
+SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDepth) {
     Error::check(this->isClass());
+    if (maxDepth == 0) {
+        gs.logger.critical("findMemberTransitive hit a loop while resolving {} in {}. Parents are: ", name.toString(gs),
+                           this->fullName(gs));
+        int i = 0;
+        for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+            gs.logger.critical("{}:- {}", i, it->info(gs).fullName(gs));
+            int j = 0;
+            for (auto it2 = it->info(gs).argumentsOrMixins.rbegin(); it2 != it->info(gs).argumentsOrMixins.rend();
+                 ++it2) {
+                gs.logger.critical("{}:{} {}", i, j, it2->info(gs).fullName(gs));
+                j++;
+            }
+            i++;
+        }
+
+        Error::raise("findMemberTransitive hit a loop why resolving ");
+    }
 
     SymbolRef result = findMember(name);
     if (result.exists())
         return result;
     for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
         Error::check(it->exists());
-        result = it->info(gs).findMemberTransitive(gs, name);
+        result = it->info(gs).findMemberTransitive(gs, name, maxDepth - 1);
         if (result.exists())
             return result;
     }

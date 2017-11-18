@@ -1,0 +1,175 @@
+digraph "huge_unions.rb"{
+subgraph "cluster_::<singleton class:<constant:A>>#send_beta_invitation" {
+    label = "::<singleton class:<constant:A>>#send_beta_invitation";
+    color = blue;
+    bb122_0 [shape = invhouse];
+    bb122_1 [shape = parallelogram];
+
+    bb122_0 [label = "(invite, <constant:C1>$7, <constant:C2>$11, <constant:C3>$15, <constant:C4>$19, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\n<constant:C1>$7 = alias <constant:C1> : <class:C1>\n<constant:C2>$11 = alias <constant:C2> : <class:C2>\n<constant:C3>$15 = alias <constant:C3> : <class:C3>\n<constant:C4>$19 = alias <constant:C4> : <class:C4>\n<constant:C5>$23 = alias <constant:C5> : <class:C5>\n<constant:C6>$27 = alias <constant:C6> : <class:C6>\n<constant:C7>$31 = alias <constant:C7> : <class:C7>\n<constant:C8>$35 = alias <constant:C8> : <class:C8>\n<constant:C9>$39 = alias <constant:C9> : <class:C9>\n<constant:C10>$43 = alias <constant:C10> : <class:C10>\n<constant:C11>$47 = alias <constant:C11> : <class:C11>\n<constant:C12>$51 = alias <constant:C12> : <class:C12>\n<constant:C13>$55 = alias <constant:C13> : <class:C13>\n<constant:C14>$59 = alias <constant:C14> : <class:C14>\n<constant:C15>$63 = alias <constant:C15> : <class:C15>\n<constant:C16>$67 = alias <constant:C16> : <class:C16>\n<constant:C17>$71 = alias <constant:C17> : <class:C17>\n<constant:C18>$75 = alias <constant:C18> : <class:C18>\n<constant:C19>$79 = alias <constant:C19> : <class:C19>\n<constant:C20>$83 = alias <constant:C20> : <class:C20>\nselfMethodTemp$1 = self : <class:A>\ninvite = load_arg(selfMethodTemp$1#send_beta_invitation, 0) : untyped\nstatTemp$6 = 1 : Integer(1)\nifTemp$4 = invite.===(statTemp$6) : untyped\nifTemp$4"];
+    bb122_0 -> bb122_2;
+    bb122_0 -> bb122_3;
+
+    bb122_1 [label = "(returnMethodTemp$2)\nreturnMethodTemp$88 = return returnMethodTemp$2\n<unconditional>"];
+    bb122_1 -> bb122_1;
+    bb122_2 [label = "(r, <constant:C1>$7)\nr = <constant:C1>$7 : <class:C1>\n<unconditional>"];
+    bb122_2 -> bb122_61;
+    bb122_3 [label = "(invite, <constant:C2>$11, <constant:C3>$15, <constant:C4>$19, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$10 = 2 : Integer(2)\nifTemp$8 = invite.===(statTemp$10) : untyped\nifTemp$8"];
+    bb122_3 -> bb122_4;
+    bb122_3 -> bb122_5;
+
+    bb122_4 [label = "(r, <constant:C2>$11)\nr = <constant:C2>$11 : <class:C2>\n<unconditional>"];
+    bb122_4 -> bb122_60;
+    bb122_5 [label = "(invite, <constant:C3>$15, <constant:C4>$19, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$14 = 3 : Integer(3)\nifTemp$12 = invite.===(statTemp$14) : untyped\nifTemp$12"];
+    bb122_5 -> bb122_6;
+    bb122_5 -> bb122_7;
+
+    bb122_6 [label = "(r, <constant:C3>$15)\nr = <constant:C3>$15 : <class:C3>\n<unconditional>"];
+    bb122_6 -> bb122_59;
+    bb122_7 [label = "(invite, <constant:C4>$19, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$18 = 4 : Integer(4)\nifTemp$16 = invite.===(statTemp$18) : untyped\nifTemp$16"];
+    bb122_7 -> bb122_8;
+    bb122_7 -> bb122_9;
+
+    bb122_8 [label = "(r, <constant:C4>$19)\nr = <constant:C4>$19 : <class:C4>\n<unconditional>"];
+    bb122_8 -> bb122_58;
+    bb122_9 [label = "(invite, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$22 = 5 : Integer(5)\nifTemp$20 = invite.===(statTemp$22) : untyped\nifTemp$20"];
+    bb122_9 -> bb122_10;
+    bb122_9 -> bb122_11;
+
+    bb122_10 [label = "(r, <constant:C5>$23)\nr = <constant:C5>$23 : <class:C5>\n<unconditional>"];
+    bb122_10 -> bb122_57;
+    bb122_11 [label = "(invite, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$26 = 6 : Integer(6)\nifTemp$24 = invite.===(statTemp$26) : untyped\nifTemp$24"];
+    bb122_11 -> bb122_12;
+    bb122_11 -> bb122_13;
+
+    bb122_12 [label = "(r, <constant:C6>$27)\nr = <constant:C6>$27 : <class:C6>\n<unconditional>"];
+    bb122_12 -> bb122_56;
+    bb122_13 [label = "(invite, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$30 = 7 : Integer(7)\nifTemp$28 = invite.===(statTemp$30) : untyped\nifTemp$28"];
+    bb122_13 -> bb122_14;
+    bb122_13 -> bb122_15;
+
+    bb122_14 [label = "(r, <constant:C7>$31)\nr = <constant:C7>$31 : <class:C7>\n<unconditional>"];
+    bb122_14 -> bb122_55;
+    bb122_15 [label = "(invite, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$34 = 8 : Integer(8)\nifTemp$32 = invite.===(statTemp$34) : untyped\nifTemp$32"];
+    bb122_15 -> bb122_16;
+    bb122_15 -> bb122_17;
+
+    bb122_16 [label = "(r, <constant:C8>$35)\nr = <constant:C8>$35 : <class:C8>\n<unconditional>"];
+    bb122_16 -> bb122_54;
+    bb122_17 [label = "(invite, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$38 = 9 : Integer(9)\nifTemp$36 = invite.===(statTemp$38) : untyped\nifTemp$36"];
+    bb122_17 -> bb122_18;
+    bb122_17 -> bb122_19;
+
+    bb122_18 [label = "(r, <constant:C9>$39)\nr = <constant:C9>$39 : <class:C9>\n<unconditional>"];
+    bb122_18 -> bb122_53;
+    bb122_19 [label = "(invite, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$42 = 10 : Integer(10)\nifTemp$40 = invite.===(statTemp$42) : untyped\nifTemp$40"];
+    bb122_19 -> bb122_20;
+    bb122_19 -> bb122_21;
+
+    bb122_20 [label = "(r, <constant:C10>$43)\nr = <constant:C10>$43 : <class:C10>\n<unconditional>"];
+    bb122_20 -> bb122_52;
+    bb122_21 [label = "(invite, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$46 = 11 : Integer(11)\nifTemp$44 = invite.===(statTemp$46) : untyped\nifTemp$44"];
+    bb122_21 -> bb122_22;
+    bb122_21 -> bb122_23;
+
+    bb122_22 [label = "(r, <constant:C11>$47)\nr = <constant:C11>$47 : <class:C11>\n<unconditional>"];
+    bb122_22 -> bb122_51;
+    bb122_23 [label = "(invite, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$50 = 12 : Integer(12)\nifTemp$48 = invite.===(statTemp$50) : untyped\nifTemp$48"];
+    bb122_23 -> bb122_24;
+    bb122_23 -> bb122_25;
+
+    bb122_24 [label = "(r, <constant:C12>$51)\nr = <constant:C12>$51 : <class:C12>\n<unconditional>"];
+    bb122_24 -> bb122_50;
+    bb122_25 [label = "(invite, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$54 = 13 : Integer(13)\nifTemp$52 = invite.===(statTemp$54) : untyped\nifTemp$52"];
+    bb122_25 -> bb122_26;
+    bb122_25 -> bb122_27;
+
+    bb122_26 [label = "(r, <constant:C13>$55)\nr = <constant:C13>$55 : <class:C13>\n<unconditional>"];
+    bb122_26 -> bb122_49;
+    bb122_27 [label = "(invite, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$58 = 14 : Integer(14)\nifTemp$56 = invite.===(statTemp$58) : untyped\nifTemp$56"];
+    bb122_27 -> bb122_28;
+    bb122_27 -> bb122_29;
+
+    bb122_28 [label = "(r, <constant:C14>$59)\nr = <constant:C14>$59 : <class:C14>\n<unconditional>"];
+    bb122_28 -> bb122_48;
+    bb122_29 [label = "(invite, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$62 = 15 : Integer(15)\nifTemp$60 = invite.===(statTemp$62) : untyped\nifTemp$60"];
+    bb122_29 -> bb122_30;
+    bb122_29 -> bb122_31;
+
+    bb122_30 [label = "(r, <constant:C15>$63)\nr = <constant:C15>$63 : <class:C15>\n<unconditional>"];
+    bb122_30 -> bb122_47;
+    bb122_31 [label = "(invite, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$66 = 16 : Integer(16)\nifTemp$64 = invite.===(statTemp$66) : untyped\nifTemp$64"];
+    bb122_31 -> bb122_32;
+    bb122_31 -> bb122_33;
+
+    bb122_32 [label = "(r, <constant:C16>$67)\nr = <constant:C16>$67 : <class:C16>\n<unconditional>"];
+    bb122_32 -> bb122_46;
+    bb122_33 [label = "(invite, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$70 = 17 : Integer(17)\nifTemp$68 = invite.===(statTemp$70) : untyped\nifTemp$68"];
+    bb122_33 -> bb122_34;
+    bb122_33 -> bb122_35;
+
+    bb122_34 [label = "(r, <constant:C17>$71)\nr = <constant:C17>$71 : <class:C17>\n<unconditional>"];
+    bb122_34 -> bb122_45;
+    bb122_35 [label = "(invite, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)\nstatTemp$74 = 18 : Integer(18)\nifTemp$72 = invite.===(statTemp$74) : untyped\nifTemp$72"];
+    bb122_35 -> bb122_36;
+    bb122_35 -> bb122_37;
+
+    bb122_36 [label = "(r, <constant:C18>$75)\nr = <constant:C18>$75 : <class:C18>\n<unconditional>"];
+    bb122_36 -> bb122_44;
+    bb122_37 [label = "(invite, <constant:C19>$79, <constant:C20>$83)\nstatTemp$78 = 19 : Integer(19)\nifTemp$76 = invite.===(statTemp$78) : untyped\nifTemp$76"];
+    bb122_37 -> bb122_38;
+    bb122_37 -> bb122_39;
+
+    bb122_38 [label = "(r, <constant:C19>$79)\nr = <constant:C19>$79 : <class:C19>\n<unconditional>"];
+    bb122_38 -> bb122_43;
+    bb122_39 [label = "(invite, <constant:C20>$83)\nstatTemp$82 = 20 : Integer(20)\nifTemp$80 = invite.===(statTemp$82) : untyped\nifTemp$80"];
+    bb122_39 -> bb122_40;
+    bb122_39 -> bb122_41;
+
+    bb122_40 [label = "(r, <constant:C20>$83)\nr = <constant:C20>$83 : <class:C20>\n<unconditional>"];
+    bb122_40 -> bb122_42;
+    bb122_41 [label = "()\nstatTemp$84 = self : <class:A>\nstatTemp$85 = Bla bla bla : String(\"Bla bla bla\")\nstatTemp$2 = statTemp$84.raise(statTemp$85) : untyped\n<unconditional>"];
+    bb122_41 -> bb122_42;
+    bb122_42 [label = "(r)\n<unconditional>"];
+    bb122_42 -> bb122_43;
+    bb122_43 [label = "(r)\n<unconditional>"];
+    bb122_43 -> bb122_44;
+    bb122_44 [label = "(r)\n<unconditional>"];
+    bb122_44 -> bb122_45;
+    bb122_45 [label = "(r)\n<unconditional>"];
+    bb122_45 -> bb122_46;
+    bb122_46 [label = "(r)\n<unconditional>"];
+    bb122_46 -> bb122_47;
+    bb122_47 [label = "(r)\n<unconditional>"];
+    bb122_47 -> bb122_48;
+    bb122_48 [label = "(r)\n<unconditional>"];
+    bb122_48 -> bb122_49;
+    bb122_49 [label = "(r)\n<unconditional>"];
+    bb122_49 -> bb122_50;
+    bb122_50 [label = "(r)\n<unconditional>"];
+    bb122_50 -> bb122_51;
+    bb122_51 [label = "(r)\n<unconditional>"];
+    bb122_51 -> bb122_52;
+    bb122_52 [label = "(r)\n<unconditional>"];
+    bb122_52 -> bb122_53;
+    bb122_53 [label = "(r)\n<unconditional>"];
+    bb122_53 -> bb122_54;
+    bb122_54 [label = "(r)\n<unconditional>"];
+    bb122_54 -> bb122_55;
+    bb122_55 [label = "(r)\n<unconditional>"];
+    bb122_55 -> bb122_56;
+    bb122_56 [label = "(r)\n<unconditional>"];
+    bb122_56 -> bb122_57;
+    bb122_57 [label = "(r)\n<unconditional>"];
+    bb122_57 -> bb122_58;
+    bb122_58 [label = "(r)\n<unconditional>"];
+    bb122_58 -> bb122_59;
+    bb122_59 [label = "(r)\n<unconditional>"];
+    bb122_59 -> bb122_60;
+    bb122_60 [label = "(r)\n<unconditional>"];
+    bb122_60 -> bb122_61;
+    bb122_61 [label = "(r)\ns = r : <class:C20> | NilClass | <class:C19> | <class:C18> | <class:C17> | <class:C16> | <class:C15> | <class:C14> | <class:C13> | <class:C12> | <class:C11> | <class:C10> | <class:C9> | <class:C8> | <class:C7> | <class:C6> | <class:C5> | <class:C4> | <class:C3> | <class:C2> | <class:C1>\nreturnMethodTemp$2 = return s : <bottom>\n<unconditional>"];
+    bb122_61 -> bb122_1;
+}
+
+}
+

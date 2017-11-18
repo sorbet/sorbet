@@ -238,7 +238,7 @@ public:
     }
 
     SymbolRef findMember(NameRef name);
-    SymbolRef findMemberTransitive(GlobalState &gs, NameRef name);
+    SymbolRef findMemberTransitive(GlobalState &gs, NameRef name, int MaxDepth = 100);
 
     std::string fullName(GlobalState &gs) const;
 

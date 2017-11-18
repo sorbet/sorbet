@@ -21,6 +21,7 @@ enum class ErrorClass {
     RedefinitionOfParents = 4005,
     DynamicMethodDefinition = 4006,
     SelfOutsideClass = 4007,
+    CircularDependency = 4008,
 
     DynamicConstant = 5001, // Resolver Errors
     StubConstant = 5002,

@@ -1,3 +1,6 @@
+#include "../ast/ast.h"
+#include "../core/Files.h"
+#include "../namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
@@ -25,17 +28,19 @@ struct stats {
 
 class CFG_Collector_and_Typer {
     bool shouldType;
+    bool printCFGs;
 
 public:
-    vector<string> cfgs;
-    CFG_Collector_and_Typer(bool shouldType) : shouldType(shouldType){};
+    CFG_Collector_and_Typer(bool shouldType, bool printCFGs) : shouldType(shouldType), printCFGs(printCFGs){};
 
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
         if (shouldType) {
             ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
         }
-        cfgs.push_back(cfg->toString(ctx));
+        if (printCFGs) {
+            cout << cfg->toString(ctx) << endl << endl;
+        }
         return m;
     }
 };
@@ -49,90 +54,111 @@ static bool removeOption(vector<string> &prints, string option) {
         return false;
     }
 }
+shared_ptr<spd::logger> console_err;
+shared_ptr<spd::logger> tracer;
 
-void index(ruby_typer::core::GlobalState &gs, const vector<pair<string, string>> nameAndSource) {
-    ruby_typer::parser::NodeVec empty;
-    ruby_typer::core::Loc emptyLoc(0, 0, 0);
-    unique_ptr<ruby_typer::parser::Begin> join = make_unique<ruby_typer::parser::Begin>(emptyLoc, move(empty));
-    for (auto &pair : nameAndSource) {
-        auto ast = ruby_typer::parser::Parser::run(gs, pair.first, pair.second);
-        if (ast) {
-            join->stmts.emplace_back(move(ast));
-        } else {
-            ruby_typer::Error::raise("Failed to index " + pair.first);
+vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalState &gs,
+                                                      std::vector<ruby_typer::core::FileRef> frs,
+                                                      vector<string> &prints, cxxopts::Options &opts,
+                                                      bool silenceErrors = false) {
+    vector<unique_ptr<ruby_typer::ast::Expression>> result;
+    vector<unique_ptr<ruby_typer::ast::Expression>> empty;
+    bool oldErrors = gs.errors.keepErrorsInMemory;
+    gs.errors.keepErrorsInMemory = oldErrors || silenceErrors;
+    bool printParseTree = removeOption(prints, "parse-tree");
+    bool printDesugared = removeOption(prints, "ast");
+    bool printDesugaredRaw = removeOption(prints, "ast-raw");
+
+    try {
+        for (auto f : frs) {
+            try {
+                tracer->trace("Parsing: {}", f.file(gs).path().toString());
+                auto nodes = ruby_typer::parser::Parser::run(gs, f);
+                if (printParseTree) {
+                    cout << nodes->toString(gs, 0) << endl;
+                }
+
+                ruby_typer::core::Context context(gs, gs.defn_root());
+                tracer->trace("Desugaring: {}", f.file(gs).path().toString());
+                auto ast = ruby_typer::ast::desugar::node2Tree(context, nodes);
+                if (printDesugared) {
+                    cout << ast->toString(gs, 0) << endl;
+                }
+
+                if (printDesugaredRaw) {
+                    cout << ast->showRaw(gs) << endl;
+                }
+                nodes = nullptr; // free up space early
+                tracer->trace("Naming: {}", f.file(gs).path().toString());
+                result.emplace_back(ruby_typer::namer::Namer::run(context, move(ast)));
+            } catch (...) {
+                console_err->error("Exception on file: {} (backtrace is above)", f.file(gs).path().toString());
+            }
         }
+    } catch (...) {
+        gs.errors.keepErrorsInMemory = oldErrors;
+        throw;
     }
-    gs.errors.keepErrorsInMemory = true; // silence errors for stdlib.
-    ruby_typer::core::Context context(gs, gs.defn_root());
-    unique_ptr<ruby_typer::parser::Node> node(move(join));
-    auto desugared = ruby_typer::ast::desugar::node2Tree(context, node);
-    ruby_typer::namer::Namer::run(context, move(desugared));
-    gs.errors.getAndEmptyErrors();
-    gs.errors.keepErrorsInMemory = false;
+    if (silenceErrors) {
+        gs.errors.getAndEmptyErrors();
+    }
+    gs.errors.keepErrorsInMemory = oldErrors;
+    return result;
 }
 
-void run(ruby_typer::core::GlobalState &gs, cxxopts::Options &opts, const string &path, const string &src,
-         vector<string> &prints) {
-    auto ast = ruby_typer::parser::Parser::run(gs, path, src);
-    if (!ast) {
-        ruby_typer::Error::raise("Parse Error");
-    }
+vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::GlobalState &gs,
+                                                          vector<unique_ptr<ruby_typer::ast::Expression>> what,
+                                                          vector<string> &prints, cxxopts::Options &opts,
+                                                          bool silenceErrors = false) {
+    vector<unique_ptr<ruby_typer::ast::Expression>> result;
+    bool oldErrors = gs.errors.keepErrorsInMemory;
+    gs.errors.keepErrorsInMemory = oldErrors || silenceErrors;
+    bool printNameTable = removeOption(prints, "name-table");
+    bool printNameTree = removeOption(prints, "name-tree");
+    bool printNameTreeRaw = removeOption(prints, "name-tree-raw");
+    bool printCFG = removeOption(prints, "cfg");
 
-    if (removeOption(prints, "parse-tree")) {
-        cout << ast->toString(gs, 0) << endl;
-        if (prints.empty())
-            return;
-    }
+    try {
+        for (auto &namedTree : what) {
+            ruby_typer::core::FileRef f = namedTree->loc.file;
+            try {
+                ruby_typer::core::Context context(gs, gs.defn_root());
+                tracer->trace("Resolving: {}", f.file(gs).path().toString());
+                auto resolved = ruby_typer::namer::Resolver::run(context, move(namedTree));
+                if (printNameTree) {
+                    cout << resolved->toString(gs, 0) << endl;
+                }
+                if (printNameTreeRaw) {
+                    cout << resolved->showRaw(gs) << endl;
+                }
 
-    ruby_typer::core::Context context(gs, gs.defn_root());
-    auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
-    if (removeOption(prints, "ast")) {
-        cout << desugared->toString(gs, 0) << endl;
-        if (prints.empty())
-            return;
-    }
-    if (removeOption(prints, "ast-raw")) {
-        cout << desugared->showRaw(gs) << endl;
-        if (prints.empty())
-            return;
-    }
+                if (printCFG) {
+                    cout << "digraph \"" + ruby_typer::File::getFileName(f.file(gs).path().toString()) + "\"{" << endl;
+                }
+                tracer->trace("CFG+Infer: {}", f.file(gs).path().toString());
+                CFG_Collector_and_Typer collector(!opts["no-typer"].as<bool>(), printCFG);
+                result.emplace_back(
+                    ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
 
-    desugared = ruby_typer::namer::Namer::run(context, move(desugared));
-    if (removeOption(prints, "name-table")) {
-        cout << gs.toString() << endl;
-        if (prints.empty())
-            return;
-    }
-    if (removeOption(prints, "name-tree")) {
-        cout << desugared->toString(gs, 0) << endl;
-        if (prints.empty())
-            return;
-    }
-    if (removeOption(prints, "name-tree-raw")) {
-        cout << desugared->showRaw(gs) << endl;
-        if (prints.empty())
-            return;
-    }
-
-    CFG_Collector_and_Typer collector(!opts["no-typer"].as<bool>());
-
-    auto cfg_and_throw_out_result =
-        ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(desugared));
-    if (removeOption(prints, "cfg")) {
-        stringstream buf;
-
-        buf << "digraph \"" + ruby_typer::File::getFileName(path) + "\"{" << endl;
-        for (auto &cfg : collector.cfgs) {
-            buf << cfg << endl << endl;
+                if (printCFG) {
+                    cout << "}" << endl << endl;
+                }
+            } catch (...) {
+                console_err->error("Exception on file: {} (backtrace is above)", f.file(gs).path().toString());
+            }
         }
-        buf << "}" << endl;
-        auto got = buf.str();
-        cout << got << endl;
-        if (prints.empty())
-            return;
+        if (printNameTable) {
+            cout << gs.toString() << endl;
+        }
+    } catch (...) {
+        gs.errors.keepErrorsInMemory = oldErrors;
+        throw;
     }
-
-    // All good!
+    if (silenceErrors) {
+        gs.errors.getAndEmptyErrors();
+    }
+    gs.errors.keepErrorsInMemory = oldErrors;
+    return result;
 }
 
 int realmain(int argc, char **argv) {
@@ -142,9 +168,12 @@ int realmain(int argc, char **argv) {
     auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
+    tracer = spd::details::registry::instance().create("tracer", color_sink);
+    tracer->set_pattern("%v");
+
     shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
     console->set_pattern("%v");
-    shared_ptr<spd::logger> console_err = spd::stderr_color_st("");
+    console_err = spd::stderr_color_st("");
     console_err->set_pattern("%v");
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
@@ -152,6 +181,7 @@ int realmain(int argc, char **argv) {
     options.add_options()("h,help", "Show help");
     options.add_options()("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options()("no-typer", "Do not type the CFG");
+    options.add_options()("trace", "trace phases");
     options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("p,print", "Print [parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]",
                           cxxopts::value<vector<string>>(prints));
@@ -192,12 +222,24 @@ int realmain(int argc, char **argv) {
         spd::set_level(spd::level::critical);
     }
 
+    if (options.count("trace")) {
+        tracer->set_level(spd::level::trace);
+    } else {
+        tracer->set_level(spd::level::off);
+    }
+
     ruby_typer::core::GlobalState gs(*console);
 
     if (!options["no-stdlib"].as<bool>()) {
         clock_t begin = clock();
+        vector<ruby_typer::core::FileRef> payloadFiles;
+        for (auto &p : ruby_typer::rbi::all()) {
+            payloadFiles.push_back(gs.enterFile(p.first, p.second));
+        }
+        vector<string> emptyPrintsPayload;
+        cxxopts::Options emptyOpts("");
 
-        index(gs, ruby_typer::rbi::all());
+        index(gs, payloadFiles, emptyPrintsPayload, emptyOpts, true); // result is thrown away
 
         clock_t end = clock();
         double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
@@ -205,50 +247,38 @@ int realmain(int argc, char **argv) {
     }
     stats st;
     clock_t begin = clock();
+    vector<ruby_typer::core::FileRef> inputFiles;
+    tracer->trace("Files: ");
+    for (auto &fileName : files) {
+        string src;
+        try {
+            src = ruby_typer::File::read(fileName.c_str());
+        } catch (ruby_typer::FileNotFoundException e) {
+            console->error("File Not Found: {}", fileName);
+            return 1;
+        }
+        st.bytes += src.size();
+        st.lines += count(src.begin(), src.end(), '\n');
+        st.files++;
+        inputFiles.push_back(gs.enterFile(fileName, src));
+        tracer->trace("{}", fileName);
+    }
     if (options.count("e")) {
         string src = options["e"].as<string>();
         st.files++;
         st.lines++;
         st.bytes += src.size();
-        try {
-            run(gs, options, "-e", src, prints);
-        } catch (...) {
-            console_err->error("Exception when running with -e option (backtrace is above)");
-        }
-    } else {
-        for (string &fileName : files) {
-            console->debug("Parsing {}...", fileName);
-            string src;
-            try {
-                src = ruby_typer::File::read(fileName.c_str());
-            } catch (ruby_typer::FileNotFoundException e) {
-                console->error("File Not Found: {}", fileName);
-                return 1;
-            }
-            try {
-                run(gs, options, fileName, src, prints);
-            } catch (...) {
-                console_err->error("Exception on file: {} (backtrace is above)", fileName);
-                // We could re-throw or continue, lets try continuing and see
-                // how it goes
-            }
-        }
+        inputFiles.push_back(gs.enterFile(string("-e"), src));
     }
+
+    typecheck(gs, index(gs, inputFiles, prints, options), prints, options);
+
     clock_t end = clock();
 
     if (!prints.empty()) {
         for (auto option : prints) {
             console_err->error("Unknown --print option: {}", option);
             return 1;
-        }
-    }
-
-    if (!options.count("e")) {
-        st.files = files.size();
-        for (auto &fileName : files) {
-            string src = ruby_typer::File::read(fileName.c_str());
-            st.bytes += src.size();
-            st.lines += count(src.begin(), src.end(), '\n');
         }
     }
 

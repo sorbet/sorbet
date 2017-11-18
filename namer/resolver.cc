@@ -265,7 +265,14 @@ public:
                                            "Superclasses and mixins must be statically resolved.");
                     continue;
                 }
-                info.argumentsOrMixins.emplace_back(id->symbol);
+                if (id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
+                    ctx.state.errors.error(id->loc, core::ErrorClass::CircularDependency,
+                                           "Circular dependency: {} and {} are declared as parents of each other",
+                                           original->symbol.info(ctx).name.toString(ctx),
+                                           id->symbol.info(ctx).name.toString(ctx));
+                } else {
+                    info.argumentsOrMixins.emplace_back(id->symbol);
+                }
                 if (&ancst == &original->ancestors.front()) {
                     if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_object() ||
                         info.superClass == id->symbol) {
@@ -279,7 +286,9 @@ public:
             }
         } else if (!info.superClass.exists() && original->symbol != core::GlobalState::defn_Basic_Object() &&
                    original->symbol != core::GlobalState::defn_Kernel() &&
-                   original->kind != ast::ClassDefKind::Module) {
+                   original->symbol != core::GlobalState::defn_object() &&
+                   !core::GlobalState::defn_object().info(ctx).derivesFrom(ctx, original->symbol) &&
+                   original->kind != ast::ClassDefKind::Module && original->kind) {
             info.superClass = core::GlobalState::defn_object();
             info.argumentsOrMixins.emplace_back(core::GlobalState::defn_object());
         }
@@ -356,7 +365,7 @@ public:
     };
 };
 
-unique_ptr<ast::Expression> Namer::resolve(core::Context &ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> Resolver::run(core::Context &ctx, unique_ptr<ast::Expression> tree) {
     ResolveWalk walk(ctx);
     tree = ast::TreeMap<ResolveWalk>::apply(ctx, walk, move(tree));
     ResolveVariablesWalk vars;

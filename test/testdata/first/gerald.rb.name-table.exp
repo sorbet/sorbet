@@ -79,6 +79,7 @@ class <constant:Opus> ()
         static-field <constant:MAX_AFFECTED_FILES> -> untyped
       class <singleton class:<constant:Diff>> (<constant:Class>)
       class <singleton class:<constant:MatchContext>> (<constant:Class>)
+      class <singleton class:<constant:MatchTimeBudget>> (<constant:Class>)
       class <singleton class:<constant:MatchTimeout>> (<constant:Class>)
       class <singleton class:<constant:Matcher>> (<constant:Class>)
 class <singleton class:<constant:<root>>> (<constant:Class>)
