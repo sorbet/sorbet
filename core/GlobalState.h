@@ -29,6 +29,7 @@ class GlobalState final {
     friend SymbolRef;
     friend File;
     friend FileRef;
+    friend serialize::GlobalStateSerializer;
 
 public:
     GlobalState(spdlog::logger &logger);
