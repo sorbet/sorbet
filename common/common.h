@@ -1,6 +1,13 @@
 #ifndef SRUBY_COMMON_HPP
 #define SRUBY_COMMON_HPP
 
+#if __cplusplus < 201402L
+#define STRINGIZE(x) "C++ = " #x
+#define SSTRINGIZE(x) STRINGIZE(x)
+#pragma message(SSTRINGIZE(__cplusplus))
+static_assert(false, "Need c++14 to compile this codebase");
+#endif
+
 #include "absl/container/inlined_vector.h"
 #include <cstring>
 #include <functional>
@@ -79,13 +86,7 @@ typedef unsigned long u8;
 CheckSize(u8, 8, 8);
 
 template <class From, class To> To *fast_cast(From *what) {
-#if __cplusplus >= 201402L
     constexpr bool isFinal = std::is_final<To>::value;
-#elif __has_feature(is_final)
-    constexpr bool isFinal = __is_final(To);
-#else
-    static_assert(false);
-#endif
     if (std::is_same<From, To>::value)
         return static_cast<To *>(what);
     if (what == nullptr) {
