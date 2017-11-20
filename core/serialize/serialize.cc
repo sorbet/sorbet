@@ -55,7 +55,7 @@ void GlobalStateSerializer::Pickler::put4U1(u1 v1, u1 v2, u1 v3, u1 v4) {
     u4 uv2 = (u1)v2;
     u4 uv3 = (u1)v3;
     u4 uv4 = (u1)v4;
-    putU4((uv1 << 24u) + (uv2 << 16u) + (uv3 << 8u) + uv4);
+    putU4((uv1 << 24u) | (uv2 << 16u) | (uv3 << 8u) | uv4);
 }
 
 void GlobalStateSerializer::UnPickler::get4U1(u1 &v1, u1 &v2, u1 &v3, u1 &v4) {
