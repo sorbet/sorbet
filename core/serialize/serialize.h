@@ -12,6 +12,7 @@ public:
     public:
         std::vector<ruby_typer::u4> data;
         void putU4(const u4 u);
+        void put4U1(u1 v1, u1 v2, u1 v3, u1 v4);
         void putS8(const int64_t i);
         void putStr(const std::string s);
         Pickler() = default;
@@ -22,6 +23,7 @@ public:
         u4 zeroCounter = 0;
         const u4 *const data;
         u4 getU4();
+        void get4U1(u1 &v1, u1 &v2, u1 &v3, u1 &v4);
         int64_t getS8();
         std::string getStr();
         explicit UnPickler(const u4 *const data) : pos(0), data(data){};

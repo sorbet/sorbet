@@ -13,7 +13,7 @@ void GlobalStateSerializer::Pickler::putStr(const std::string s) {
 
     Error::check(step == 4);
     for (int i = 0; i < end; i += step) {
-        putU4(256u * (256u * (256u * ((u1)s[i]) + ((u1)s[i + 1])) + ((u1)s[i + 2])) + ((u1)s[i + 3]));
+        put4U1((u1)s[i], (u1)s[i + 1], (u1)s[i + 2], (u1)s[i + 3]);
     }
     if (end != s.size()) {
         u4 acc = 0;
@@ -48,6 +48,22 @@ std::string GlobalStateSerializer::UnPickler::getStr() {
         }
     }
     return result;
+}
+
+void GlobalStateSerializer::Pickler::put4U1(u1 v1, u1 v2, u1 v3, u1 v4) {
+    u4 uv1 = (u1)v1;
+    u4 uv2 = (u1)v2;
+    u4 uv3 = (u1)v3;
+    u4 uv4 = (u1)v4;
+    putU4((uv1 << 24u) + (uv2 << 16u) + (uv3 << 8u) + uv4);
+}
+
+void GlobalStateSerializer::UnPickler::get4U1(u1 &v1, u1 &v2, u1 &v3, u1 &v4) {
+    u4 el = getU4();
+    v4 = el & 255u;
+    v3 = (el >> 8u) & 255u;
+    v2 = (el >> 16u) & 255u;
+    v1 = (el >> 24u) & 255u;
 }
 
 void GlobalStateSerializer::Pickler::putU4(const u4 u) {
