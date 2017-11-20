@@ -12,4 +12,5 @@ begin
   end
   ::<constant:A>::<constant:B>#<constant:C>
   ::<constant:A>::<constant:B>#<constant:D>
+  ::<constant:A>
 end
