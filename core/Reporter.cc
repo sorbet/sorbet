@@ -1,5 +1,6 @@
 #include "Context.h"
 #include "spdlog/fmt/ostr.h"
+#include <algorithm>
 
 namespace ruby_typer {
 namespace core {
@@ -10,6 +11,13 @@ void Reporter::_error(unique_ptr<BasicError> error) {
     bool isCriticalError = (error->what == ErrorClass::Internal);
     if (isCriticalError) {
         hadCriticalError_ = true;
+    }
+    auto f = find_if(this->errorHistogram.begin(), this->errorHistogram.end(),
+                     [&](auto &el) -> bool { return el.first == (int)error->what; });
+    if (f != this->errorHistogram.end()) {
+        (*f).second++;
+    } else {
+        this->errorHistogram.push_back(std::make_pair((int)error->what, 1));
     }
     if (keepErrorsInMemory) {
         errors.emplace_back(move(error));
