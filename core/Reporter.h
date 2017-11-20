@@ -1,6 +1,10 @@
+#ifndef SRUBY_REPORTER_H
+#define SRUBY_REPORTER_H
+
 #include "Loc.h"
 #include "spdlog/fmt/fmt.h"
 #include <initializer_list>
+#include <memory>
 
 namespace ruby_typer {
 namespace core {
@@ -110,3 +114,5 @@ private:
 
 } // namespace core
 } // namespace ruby_typer
+
+#endif
