@@ -187,12 +187,10 @@ public:
             if (argv[i][0] == '@') {
                 try {
                     string argsP = ruby_typer::File::read(argv[i] + 1);
-                    for (string argsWithSpaces : split(argsP, '\n')) {
-                        for (string arg : split(argsWithSpaces, ' ')) {
-                            char *c_arg = (char *)malloc(arg.size() + 1);
-                            memcpy(c_arg, arg.c_str(), arg.size() + 1);
-                            args.push_back(c_arg);
-                        }
+                    for (string arg : split(argsP, '\n')) {
+                        char *c_arg = (char *)malloc(arg.size() + 1);
+                        memcpy(c_arg, arg.c_str(), arg.size() + 1);
+                        args.push_back(c_arg);
                     }
                 } catch (ruby_typer::FileNotFoundException e) {
                     console_err->error("File Not Found: {}", argv[i]);
