@@ -315,7 +315,7 @@ int realmain(int argc, char **argv) {
     }
 
     if (options.count("q")) {
-        spd::set_level(spd::level::critical);
+        console->set_level(spd::level::critical);
     }
 
     if (options.count("trace")) {
