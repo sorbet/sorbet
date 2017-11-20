@@ -32,6 +32,16 @@ string ruby_typer::File::read(const char *filename) {
     return src;
 }
 
+void ruby_typer::File::write(const char *filename, const vector<ruby_typer::u4> &data) {
+    ofstream fout(filename, ios::out | ios::binary);
+    if (!fout.good()) {
+        throw ruby_typer::FileNotFoundException();
+    }
+    fout.write((const char *)data.data(), data.size());
+
+    return;
+}
+
 string ruby_typer::Strings::escapeCString(string what) {
     char escaped[] = {'\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '\"'};
     char non_escaped[] = {'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '\"'};

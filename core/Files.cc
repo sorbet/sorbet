@@ -31,6 +31,5 @@ UTF8Desc File::path() {
 UTF8Desc File::source() {
     return this->source_;
 }
-
 } // namespace core
 } // namespace ruby_typer
