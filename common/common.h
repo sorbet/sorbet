@@ -1,6 +1,13 @@
 #ifndef SRUBY_COMMON_HPP
 #define SRUBY_COMMON_HPP
 
+#if __cplusplus < 201402L
+#define STRINGIZE(x) "C++ = " #x
+#define SSTRINGIZE(x) STRINGIZE(x)
+#pragma message (SSTRINGIZE(__cplusplus))
+static_assert(false, "Need c++14 to compile this codebase");
+#endif
+
 #include "absl/container/inlined_vector.h"
 #include <cstring>
 #include <functional>
