@@ -6,7 +6,7 @@ namespace serialize {
 class GlobalStateSerializer {
 public:
     static std::vector<u4> store(GlobalState &gs);
-    static GlobalState load(const u4 * const p, spdlog::logger &logger);
+    static GlobalState load(const u4 *const p, spdlog::logger &logger);
 
     class Picker {
     public:
@@ -19,11 +19,11 @@ public:
     class UnPicker {
     public:
         int pos;
-        const u4 * const data;
+        const u4 *const data;
         u4 getU4();
         int64_t getS8();
         std::string getStr();
-        explicit UnPicker(const u4 * const data) : pos(0), data(data){};
+        explicit UnPicker(const u4 *const data) : pos(0), data(data){};
     };
     static Picker pickle(GlobalState &gs);
     static void pickle(Picker &p, File &what);

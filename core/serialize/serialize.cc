@@ -344,7 +344,7 @@ std::vector<u4> GlobalStateSerializer::store(GlobalState &gs) {
     return move(p.data);
 }
 
-GlobalState GlobalStateSerializer::load(const u4 * const data, spdlog::logger &logger) {
+GlobalState GlobalStateSerializer::load(const u4 *const data, spdlog::logger &logger) {
     UnPicker p(data);
     return unpickleGS(p, logger);
 }

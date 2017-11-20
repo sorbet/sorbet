@@ -21,7 +21,7 @@
 namespace spd = spdlog;
 using namespace std;
 
-extern const ruby_typer::u4 * const getNameTablePayload;
+extern const ruby_typer::u4 *const getNameTablePayload;
 
 struct stats {
     unsigned int files = 0;
@@ -222,7 +222,7 @@ public:
 
 ruby_typer::core::GlobalState createInitialGlobalState(cxxopts::Options &options) {
     if (!options["no-stdlib"].as<bool>()) {
-        const ruby_typer::u4 * const nameTablePayload = getNameTablePayload;
+        const ruby_typer::u4 *const nameTablePayload = getNameTablePayload;
         if (nameTablePayload == nullptr) {
             ruby_typer::core::GlobalState gs(*console);
             clock_t begin = clock();
