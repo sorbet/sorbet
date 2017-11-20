@@ -4,7 +4,7 @@
 #if __cplusplus < 201402L
 #define STRINGIZE(x) "C++ = " #x
 #define SSTRINGIZE(x) STRINGIZE(x)
-#pragma message (SSTRINGIZE(__cplusplus))
+#pragma message(SSTRINGIZE(__cplusplus))
 static_assert(false, "Need c++14 to compile this codebase");
 #endif
 
