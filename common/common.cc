@@ -37,7 +37,7 @@ void ruby_typer::File::write(const char *filename, const vector<ruby_typer::u4> 
     if (!fout.good()) {
         throw ruby_typer::FileNotFoundException();
     }
-    fout.write((const char *)data.data(), data.size());
+    fout.write((const char *)data.data(), data.size() * sizeof(ruby_typer::u4));
 
     return;
 }
