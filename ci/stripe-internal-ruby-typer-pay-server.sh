@@ -9,7 +9,13 @@ if [ ! -d $DIR ]; then
 fi
 
 cd $DIR
-git checkout "$(cat ci/stripe-internal-ruby-typer-pay-server-sha)"
+
+if [ ! -f "../ci/stripe-internal-ruby-typer-pay-server-sha" ]; then
+    echo "ci/stripe-internal-ruby-typer-pay-server-sha doesn't exist"
+    exit 1
+fi
+git checkout "$(cat ../ci/stripe-internal-ruby-typer-pay-server-sha)"
+
 cd -
 
 bazel build main:ruby-typer -c opt
