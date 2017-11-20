@@ -85,7 +85,7 @@ cc_test(
     size = "small",
     srcs = glob([
         "test/*.cc",
-    ]) + ["realmain.cc"],
+    ]) + ["realmain.cc", "no_payload.cc"],
     copts = ["-Iexternal/gtest/include"],
     data = [
         "//rbi:stdlib",
