@@ -15,6 +15,7 @@ cc_library(
     hdrs = [
         "parser.h",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
         "//core",
@@ -27,6 +28,7 @@ cc_binary(
     srcs = [
         "tools/generate_ast.cc",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//tools:__pkg__"],
 )
 

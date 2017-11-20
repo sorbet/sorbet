@@ -120,7 +120,7 @@ public:
                              } else {
                                  tp.type = info.resultType;
                              }
-                             tp.origins.push_back(info.definitionLoc);
+                             tp.origins.push_back(symbol.info(ctx).definitionLoc);
                          } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
                              if (info.resultType.get() != nullptr) {
                                  tp.type = info.resultType;

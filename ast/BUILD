@@ -15,6 +15,7 @@ cc_library(
     hdrs = [
         "ast.h",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
         "//common",

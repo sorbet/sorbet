@@ -11,6 +11,7 @@ cc_binary(
     srcs = [
         "tools/generate_payload.cc",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//tools:__pkg__"],
     deps = ["//common"],
 )
@@ -24,6 +25,7 @@ cc_library(
     hdrs = [
         "payload.h",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [],
 )

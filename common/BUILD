@@ -13,6 +13,7 @@ cc_library(
         "common.h",
         "typecase.h",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
         "@com_google_absl//absl/container:inlined_vector",

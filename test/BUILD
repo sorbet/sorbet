@@ -84,11 +84,13 @@ cc_test(
 cc_binary(
     name = "backtrace-test-raise",
     srcs = ["backtrace-test-raise.cc"],
+    copts = ["--std=c++14"],
 )
 
 cc_binary(
     name = "backtrace-test-error",
     srcs = ["backtrace-test-error.cc"],
+    copts = ["--std=c++14"],
     deps = ["//common"],
 )
 

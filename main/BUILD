@@ -2,17 +2,78 @@ cc_binary(
     name = "ruby-typer",
     srcs = [
         "main.cc",
-        "realmain.cc",
+        "state-payload.cc",
     ],
+    copts = ["--std=c++14"],
     linkstatic = select({
         "//tools/config:fastbuild": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "realmain",
+    ],
+)
+
+cc_binary(
+    name = "ruby-typer-orig",
+    srcs = [
+        "main.cc",
+        "no_payload.cc",
+    ],
+    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "realmain",
+    ],
+)
+
+cc_binary(
+    name = "gen_state_payload",
+    srcs = [
+        "tools/gen_state_payload.cc",
+    ],
+    copts = ["--std=c++14"],
+    visibility = ["//tools:__pkg__"],
+    deps = ["//common"],
+)
+
+genrule(
+    name = "generate-state-payload-cc",
+    srcs = ["state-payload-raw"],
+    outs = [
+        "state-payload.cc",
+    ],
+    cmd = "$(location :gen_state_payload) $(location state-payload-raw) $(location state-payload.cc)",
+    tools = [":gen_state_payload"],
+)
+
+genrule(
+    name = "generate-state-payload-raw",
+    srcs = [],
+    outs = [
+        "state-payload-raw",
+    ],
+    cmd = "$(location :ruby-typer-orig) --store-state $(location state-payload-raw) -e \"1+1\"",
+    tools = [":ruby-typer-orig"],
+)
+
+cc_library(
+    name = "realmain",
+    srcs = [
+        "realmain.cc",
+    ],
+    copts = ["--std=c++14"],
+    visibility = ["//visibility:public"],
+    deps = [
         "//ast/desugar",
         "//cfg",
         "//core",
+        "//core/serialize",
         "//infer",
         "//namer",
         "//parser",
@@ -26,7 +87,9 @@ cc_test(
     size = "small",
     srcs = glob([
         "test/*.cc",
-    ]) + ["realmain.cc"],
+    ]) + [
+        "no_payload.cc",
+    ],
     copts = ["-Iexternal/gtest/include"],
     data = [
         "//rbi:stdlib",
@@ -38,12 +101,7 @@ cc_test(
     }),
     visibility = ["//tools:__pkg__"],
     deps = [
-        "//ast/desugar",
-        "//cfg",
-        "//infer",
-        "//namer",
-        "//parser",
-        "//rbi:payload",
+        "realmain",
         "@cxxopts//:cxxopts",
         "@gtest//:gtest",
         "@gtest//:gtest_main",

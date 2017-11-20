@@ -10,6 +10,7 @@ cc_library(
     hdrs = [
         "namer.h",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
         "//ast",

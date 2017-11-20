@@ -7,6 +7,7 @@ cc_library(
     ]),
     copts = [
         "-Iexternal/spdlog/",
+        "--std=c++14"
     ],
     includes = [
         "include/",

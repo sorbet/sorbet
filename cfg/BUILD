@@ -6,6 +6,7 @@ cc_library(
         exclude = ["flycheck_*"],
     ),
     hdrs = glob(["*.h"]),
+    copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
         "//ast",

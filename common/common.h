@@ -103,6 +103,7 @@ template <class From, class To> To *fast_cast(From *what) {
 class File final {
 public:
     static std::string read(const char *filename);
+    static void write(const char *filename, const std::vector<ruby_typer::u4> &data);
     static std::string getFileName(const std::string path);
 };
 

@@ -1,6 +1,5 @@
 #ifndef SRUBY_GLOBAL_STATE_H
 #define SRUBY_GLOBAL_STATE_H
-
 #include "Files.h"
 #include "Hashing.h"
 #include "Loc.h"
@@ -8,6 +7,7 @@
 #include "Reporter.h"
 #include "Symbols.h"
 #include "spdlog/spdlog.h"
+#include <memory>
 
 namespace ruby_typer {
 namespace core {
@@ -18,6 +18,10 @@ class Symbol;
 class SymbolRef;
 struct UTF8Desc;
 
+namespace serialize {
+class GlobalStateSerializer;
+}
+
 class GlobalState final {
     friend Name;
     friend NameRef;
@@ -25,19 +29,15 @@ class GlobalState final {
     friend SymbolRef;
     friend File;
     friend FileRef;
+    friend serialize::GlobalStateSerializer;
 
 public:
     GlobalState(spdlog::logger &logger);
 
     GlobalState(const GlobalState &) = delete;
-
-    GlobalState(GlobalState &&) = delete;
+    GlobalState(GlobalState &&) = default;
 
     ~GlobalState();
-
-    SymbolRef fillPreregistedSym(SymbolRef which, SymbolRef owner, NameRef name); // need to be implemented from scratch
-
-    SymbolRef prePregisterSym();
 
     SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
@@ -57,14 +57,10 @@ public:
 
     FileRef enterFile(UTF8Desc path, UTF8Desc source);
 
-    int indexClassOrJar(const char *name);
-
     unsigned int namesUsed();
 
     unsigned int symbolsUsed();
     unsigned int filesUsed();
-
-    unsigned int symbolCapacity();
 
     void sanityCheck() const;
 
@@ -180,13 +176,10 @@ private:
     static constexpr int MAX_SYNTHETIC_SYMBOLS = 100;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::unique_ptr<std::vector<char>>> strings;
+    UTF8Desc enterString(UTF8Desc nm);
     u2 strings_last_page_used = STRINGS_PAGE_SIZE;
     std::vector<Name> names;
     std::vector<Symbol> symbols;
-    unsigned int max_zips_count;
-    unsigned int zips_used;
-    unsigned int max_files_count;
-    unsigned int files_used;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<File> files;
 

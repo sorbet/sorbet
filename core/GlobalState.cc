@@ -250,6 +250,9 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check((names_by_hash_size & (names_by_hash_size - 1)) == 0));
 
     names.emplace_back(); // first name is used in hashes to indicate empty cell
+    names[0].kind = NameKind::UTF8;
+    names[0].raw.utf8.from = nullptr;
+    names[0].raw.utf8.to = 0;
     Names::registerNames(*this);
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
@@ -386,6 +389,29 @@ LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
     return r;
 }
 
+UTF8Desc GlobalState::enterString(UTF8Desc nm) {
+    char *from = nullptr;
+    if (nm.to > GlobalState::STRINGS_PAGE_SIZE) {
+        strings.push_back(make_unique<vector<char>>(nm.to));
+        from = strings.back()->data();
+        if (strings.size() > 1) {
+            swap(*(strings.end() - 1), *(strings.end() - 2));
+        }
+    } else {
+        if (strings_last_page_used + nm.to > GlobalState::STRINGS_PAGE_SIZE) {
+            strings.push_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
+            // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
+            strings_last_page_used = 0;
+        }
+        from = strings.back()->data() + strings_last_page_used;
+    }
+
+    memcpy(from, nm.from, nm.to);
+    strings_last_page_used += nm.to;
+    UTF8Desc res(from, nm.to);
+    return res;
+}
+
 NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
     const auto hs = _hash(nm);
     unsigned int hashTableSize = names_by_hash.size();
@@ -424,27 +450,8 @@ NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
     bucket.second = idx;
     names.emplace_back();
 
-    char *from = nullptr;
-    if (nm.to > GlobalState::STRINGS_PAGE_SIZE) {
-        strings.push_back(make_unique<vector<char>>(nm.to));
-        from = strings.back()->data();
-        if (strings.size() > 1) {
-            swap(*(strings.end() - 1), *(strings.end() - 2));
-        }
-    } else {
-        if (strings_last_page_used + nm.to > GlobalState::STRINGS_PAGE_SIZE) {
-            strings.push_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
-            // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
-            strings_last_page_used = 0;
-        }
-        from = strings.back()->data() + strings_last_page_used;
-    }
-
-    memcpy(from, nm.from, nm.to);
     names[idx].kind = NameKind::UTF8;
-    names[idx].raw.utf8.from = from;
-    names[idx].raw.utf8.to = nm.to;
-    strings_last_page_used += nm.to;
+    names[idx].raw.utf8 = enterString(nm);
 
     return idx;
 }
@@ -626,6 +633,8 @@ string GlobalState::toString() {
     }
     return os.str();
 }
+
+void GlobalState::sanityCheck() const {}
 
 } // namespace core
 } // namespace ruby_typer

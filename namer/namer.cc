@@ -137,7 +137,6 @@ public:
     }
 
     void fillInArgs(core::Context ctx, ast::MethodDef::ARGS_store &args) {
-        core::Symbol &symbol = ctx.owner.info(ctx);
         bool inShadows = false;
 
         for (auto &arg : args) {
@@ -151,7 +150,7 @@ public:
             } else {
                 Error::check(!inShadows, "shadow argument followed by non-shadow argument!");
                 core::SymbolRef sym = arg2Symbol(ctx, arg.get());
-                symbol.argumentsOrMixins.push_back(sym);
+                ctx.owner.info(ctx).argumentsOrMixins.push_back(sym);
                 name = sym.info(ctx).name;
             }
 
@@ -194,9 +193,8 @@ public:
         Error::check(owner.info(ctx).isClass());
 
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
-        core::Symbol &symbol = method->symbol.info(ctx);
         fillInArgs(ctx.withOwner(method->symbol), method->args);
-        symbol.definitionLoc = method->loc;
+        method->symbol.info(ctx).definitionLoc = method->loc;
 
         return method;
     }
