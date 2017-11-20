@@ -255,7 +255,9 @@ Symbol GlobalStateSerializer::unpickleSymbol(UnPicker &p) {
     int membersSize = p.getU4();
     result.members.reserve(membersSize);
     for (int i = 0; i < membersSize; i++) {
-        result.members.push_back(std::make_pair(p.getU4(), p.getU4()));
+        auto name = p.getU4();
+        auto sym = p.getU4();
+        result.members.push_back(std::make_pair(name, sym));
     }
     result.resultType = unpickleType(p);
 
@@ -328,7 +330,9 @@ GlobalState GlobalStateSerializer::unpickleGS(UnPicker &p, spdlog::logger &logge
     int namesByHashSize = p.getU4();
     names_by_hash.reserve(nearestPowerOf2(namesSize) * 2);
     for (int i = 0; i < namesByHashSize; i++) {
-        names_by_hash.emplace_back(std::make_pair(p.getU4(), p.getU4()));
+        auto hash = p.getU4();
+        auto value = p.getU4();
+        names_by_hash.emplace_back(std::make_pair(hash, value));
     }
     result.freshNameId = p.getU4();
     result.files = move(files);
