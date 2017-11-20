@@ -171,32 +171,52 @@ std::vector<std::string> split(const std::string &s, char delimiter) {
     return tokens;
 }
 
-/** read @file arguments and put them explicitly */
-void flatMapAtFiles(int &argc, char **&argv) {
+/** read @file arguments and put them explicitly
+ *  Steals the original arguments and will put them back on destruction.
+ * */
+class FileFlatMapper {
+    int origArgc;
+    char **origArgv;
+    int &argc;
+    char **&argv;
     std::vector<char *> args;
-    for (int i = 0; i < argc; i++) {
-        if (argv[i][0] == '@') {
-            try {
-                string argsP = ruby_typer::File::read(argv[i] + 1);
-                for (string argsWithSpaces : split(argsP, '\n')) {
-                    for (string arg : split(argsWithSpaces, ' ')) {
-                        char *c_arg = (char *)malloc(arg.size() + 1);
-                        memcpy(c_arg, arg.c_str(), arg.size() + 1);
-                        args.push_back(c_arg);
+
+public:
+    FileFlatMapper(int &argc, char **&argv) : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
+        for (int i = 0; i < argc; i++) {
+            if (argv[i][0] == '@') {
+                try {
+                    string argsP = ruby_typer::File::read(argv[i] + 1);
+                    for (string argsWithSpaces : split(argsP, '\n')) {
+                        for (string arg : split(argsWithSpaces, ' ')) {
+                            char *c_arg = (char *)malloc(arg.size() + 1);
+                            memcpy(c_arg, arg.c_str(), arg.size() + 1);
+                            args.push_back(c_arg);
+                        }
                     }
+                } catch (ruby_typer::FileNotFoundException e) {
+                    console_err->error("File Not Found: {}", argv[i]);
+                    throw;
                 }
-            } catch (ruby_typer::FileNotFoundException e) {
-                console_err->error("File Not Found: {}", argv[i]);
-                throw;
+            } else {
+                int length = strlen(argv[i]);
+                char *c_arg = (char *)malloc(length + 1);
+                memcpy(c_arg, argv[i], length);
+                c_arg[length] = '\0';
+                args.push_back(c_arg);
             }
-        } else {
-            args.push_back(argv[i]);
+        }
+        argc = args.size();
+        argv = args.data();
+    }
+    ~FileFlatMapper() {
+        argc = origArgc;
+        argv = origArgv;
+        for (char *c : args) {
+            free(c);
         }
     }
-    argc = args.size();
-    argv = (char **)malloc(argc * sizeof(char *));
-    memcpy(argv, args.data(), argc * sizeof(char *));
-}
+};
 
 int realmain(int argc, char **argv) {
     vector<string> files;
@@ -212,7 +232,7 @@ int realmain(int argc, char **argv) {
     console->set_pattern("%v");
     console_err = spd::stderr_color_st("");
     console_err->set_pattern("%v");
-    flatMapAtFiles(argc, argv);
+    FileFlatMapper flatMapper(argc, argv);
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
