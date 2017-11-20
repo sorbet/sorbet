@@ -4,6 +4,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "cfg/CFG.h"
+#include "core/serialize/serialize.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -19,6 +20,8 @@
 
 namespace spd = spdlog;
 using namespace std;
+
+extern const ruby_typer::u4 * const getNameTablePayload;
 
 struct stats {
     unsigned int files = 0;
@@ -56,6 +59,7 @@ static bool removeOption(vector<string> &prints, string option) {
 }
 shared_ptr<spd::logger> console_err;
 shared_ptr<spd::logger> tracer;
+shared_ptr<spd::logger> console;
 
 vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalState &gs,
                                                       std::vector<ruby_typer::core::FileRef> frs,
@@ -216,6 +220,39 @@ public:
     }
 };
 
+ruby_typer::core::GlobalState createInitialGlobalState(cxxopts::Options &options) {
+    if (!options["no-stdlib"].as<bool>()) {
+        const ruby_typer::u4 * const nameTablePayload = getNameTablePayload;
+        if (nameTablePayload == nullptr) {
+            ruby_typer::core::GlobalState gs(*console);
+            clock_t begin = clock();
+            vector<ruby_typer::core::FileRef> payloadFiles;
+            for (auto &p : ruby_typer::rbi::all()) {
+                payloadFiles.push_back(gs.enterFile(p.first, p.second));
+            }
+            vector<string> emptyPrintsPayload;
+            cxxopts::Options emptyOpts("");
+
+            index(gs, payloadFiles, emptyPrintsPayload, emptyOpts, true); // result is thrown away
+
+            clock_t end = clock();
+            double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
+            console_err->debug("Indexed payload in {} ms\n", elapsed_secs);
+            return gs;
+        } else {
+            clock_t begin = clock();
+            ruby_typer::core::GlobalState gs =
+                ruby_typer::core::serialize::GlobalStateSerializer::load(nameTablePayload, *console);
+            clock_t end = clock();
+            double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
+            console_err->debug("Read payload name-table in {} ms\n", elapsed_secs);
+            return gs;
+        }
+    } else {
+        return ruby_typer::core::GlobalState(*console);
+    }
+}
+
 int realmain(int argc, char **argv) {
     vector<string> files;
     vector<string> prints;
@@ -226,7 +263,7 @@ int realmain(int argc, char **argv) {
     tracer = spd::details::registry::instance().create("tracer", color_sink);
     tracer->set_pattern("%v");
 
-    shared_ptr<spd::logger> console = spd::details::registry::instance().create("console", color_sink);
+    console = spd::details::registry::instance().create("console", color_sink);
     console->set_pattern("%v");
     console_err = spd::stderr_color_st("");
     console_err->set_pattern("%v");
@@ -239,6 +276,7 @@ int realmain(int argc, char **argv) {
     options.add_options()("h,help", "Show help");
     options.add_options()("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options()("no-typer", "Do not type the CFG");
+    options.add_options()("store-state", "Store state into file", cxxopts::value<string>());
     options.add_options()("trace", "trace phases");
     options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("p,print", "Print " + print_options, cxxopts::value<vector<string>>(prints));
@@ -285,23 +323,7 @@ int realmain(int argc, char **argv) {
         tracer->set_level(spd::level::off);
     }
 
-    ruby_typer::core::GlobalState gs(*console);
-
-    if (!options["no-stdlib"].as<bool>()) {
-        clock_t begin = clock();
-        vector<ruby_typer::core::FileRef> payloadFiles;
-        for (auto &p : ruby_typer::rbi::all()) {
-            payloadFiles.push_back(gs.enterFile(p.first, p.second));
-        }
-        vector<string> emptyPrintsPayload;
-        cxxopts::Options emptyOpts("");
-
-        index(gs, payloadFiles, emptyPrintsPayload, emptyOpts, true); // result is thrown away
-
-        clock_t end = clock();
-        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
-        console_err->debug("Indexed payload in {} ms\n", elapsed_secs);
-    }
+    ruby_typer::core::GlobalState gs = createInitialGlobalState(options);
     stats st;
     clock_t begin = clock();
     vector<ruby_typer::core::FileRef> inputFiles;
@@ -343,6 +365,11 @@ int realmain(int argc, char **argv) {
 
     console_err->debug("Total {} files. Done in {} ms, lines: {}, bytes: {}\n", st.files, elapsed_secs, st.lines,
                        st.bytes);
+
+    if (options.count("store-state")) {
+        string outfile = options["store-state"].as<string>();
+        ruby_typer::File::write(outfile.c_str(), ruby_typer::core::serialize::GlobalStateSerializer::store(gs));
+    }
 
     return gs.errors.hadCriticalError() ? 10 : 0;
 };
