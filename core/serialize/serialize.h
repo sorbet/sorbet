@@ -19,6 +19,7 @@ public:
     class UnPicker {
     public:
         int pos;
+        u4 zeroCounter = 0;
         const u4 *const data;
         u4 getU4();
         int64_t getS8();

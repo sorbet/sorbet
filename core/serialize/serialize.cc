@@ -51,11 +51,27 @@ std::string GlobalStateSerializer::UnPicker::getStr() {
 }
 
 void GlobalStateSerializer::Picker::putU4(const u4 u) {
-    data.push_back(u);
+    if (u != 0) {
+        data.push_back(u);
+    } else if (data.size() >= 2 && data[data.size() - 2] == 0 && data[data.size() - 1] != UINT_MAX) {
+        data[data.size() - 1]++;
+    } else {
+        data.push_back(0);
+        data.push_back(1);
+    }
 }
 
 u4 GlobalStateSerializer::UnPicker::getU4() {
-    return data[pos++];
+    if (zeroCounter) {
+        zeroCounter--;
+        return 0;
+    }
+    auto r = data[pos++];
+    if (r == 0) {
+        zeroCounter = data[pos++];
+        zeroCounter--;
+    }
+    return r;
 }
 
 void GlobalStateSerializer::Picker::putS8(const int64_t i) {
