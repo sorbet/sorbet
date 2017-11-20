@@ -256,4 +256,9 @@ begin
     end
 
   end
+  class <emptyTree>::<constant:Range><<constant:Range>> < ()
+    def initialize<initialize>(begin_, end_, exclude_end)
+      <emptyTree>
+
+  end
 end

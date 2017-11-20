@@ -1875,5 +1875,105 @@ Begin {
         ]
       }
     }
+    Class {
+      name = Const {
+        scope = NULL
+        name = <constant:Range>
+      }
+      superclass = NULL
+      body = Begin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = standard_method
+            args = [
+              Hash {
+                pairs = [
+                  Pair {
+                    key = Symbol {
+                      val = begin_
+                    }
+                    value = Const {
+                      scope = NULL
+                      name = <constant:Integer>
+                    }
+                  }
+                  Pair {
+                    key = Symbol {
+                      val = end_
+                    }
+                    value = Const {
+                      scope = NULL
+                      name = <constant:Integer>
+                    }
+                  }
+                  Pair {
+                    key = Symbol {
+                      val = exclude_end
+                    }
+                    value = Send {
+                      receiver = Const {
+                        scope = Const {
+                          scope = NULL
+                          name = <constant:Opus>
+                        }
+                        name = <constant:Types>
+                      }
+                      method = any
+                      args = [
+                        Const {
+                          scope = NULL
+                          name = <constant:TrueClass>
+                        }
+                        Const {
+                          scope = NULL
+                          name = <constant:FalseClass>
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+              Hash {
+                pairs = [
+                  Pair {
+                    key = Symbol {
+                      val = returns
+                    }
+                    value = Const {
+                      scope = NULL
+                      name = <constant:Object>
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+          DefMethod {
+            name = initialize
+            args = Args {
+              args = [
+                Arg {
+                  name = begin_
+                }
+                Arg {
+                  name = end_
+                }
+                Optarg {
+                  name = exclude_end
+                  default_ = Send {
+                    receiver = NULL
+                    method = _
+                    args = [
+                    ]
+                  }
+                }
+              ]
+            }
+            body = NULL
+          }
+        ]
+      }
+    }
   ]
 }

@@ -148,7 +148,7 @@ module Opus::CIBot::Gerald
 
     private def parse(diff)
       parts = diff.split(/^diff [^\n]*\n/m)[ # error: Unsupported node type Regexp
-        1..-1] # error: Wrong number of arguments for constructor.
+        1..-1]
       parts ||= []
       parts.map do |part|
         lines = part.split("\n")
@@ -160,15 +160,15 @@ module Opus::CIBot::Gerald
           if line.start_with?("index ", '@@', 'new file mode')
             next
           elsif line.start_with?('---')
-            a_name = line[4..-1] # error: Wrong number of arguments for constructor.
-            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: Wrong number of arguments for constructor.
+            a_name = line[4..-1]
+            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/')
           elsif line.start_with?('+++')
-            b_name = line[4..-1] # error: Wrong number of arguments for constructor.
-            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Wrong number of arguments for constructor.
+            b_name = line[4..-1]
+            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/')
           elsif line.start_with?('+')
-            added_lines << line[1..-1] # error: Wrong number of arguments for constructor.
+            added_lines << line[1..-1]
           elsif line.start_with?('-')
-            removed_lines << line[1..-1] # error: Wrong number of arguments for constructor.
+            removed_lines << line[1..-1]
           end
         end
         next if a_name.nil?
@@ -182,3 +182,16 @@ module Opus::CIBot::Gerald
     end
   end
 end
+
+class Range
+  standard_method(
+    {
+      begin_: Integer,
+      end_: Integer,
+      exclude_end: Opus::Types.any(TrueClass, FalseClass),
+    },
+    returns: Object
+  )
+  def initialize(begin_, end_, exclude_end=_); end
+end
+
