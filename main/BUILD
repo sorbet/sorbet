@@ -4,6 +4,7 @@ cc_binary(
         "main.cc",
         "realmain.cc",
     ],
+    copts = ["--std=c++14"],
     linkstatic = select({
         "//tools/config:fastbuild": 0,
         "//conditions:default": 1,

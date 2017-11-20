@@ -18,6 +18,7 @@ cc_library(
     hdrs = [
         "core.h",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
         "//common",
@@ -45,6 +46,7 @@ cc_binary(
     srcs = [
         "tools/generate_names.cc",
     ],
+    copts = ["--std=c++14"],
     visibility = ["//tools:__pkg__"],
     deps = [
         "//common",

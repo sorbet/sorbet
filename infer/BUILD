@@ -9,6 +9,7 @@ cc_library(
         ],
     ),
     hdrs = glob(["*.h"]),
+    copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
         "//ast",

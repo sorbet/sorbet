@@ -6,6 +6,7 @@ cc_library(
     ],
     copts = [
         "-Iexternal/cxxopts/",
+        "--std=c++14"
     ],
     includes = [
         "include/",
