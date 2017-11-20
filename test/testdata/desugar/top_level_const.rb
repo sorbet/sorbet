@@ -1,1 +1,1 @@
-::TopLevelConst
+::TopLevelConst # error: unknown constant
