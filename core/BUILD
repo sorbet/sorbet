@@ -4,6 +4,7 @@ cc_library(
         [
             "*.cc",
             "*.h",
+            "types/*.cc",
         ],
         exclude = [
             "*_test.cc",
