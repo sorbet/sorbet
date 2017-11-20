@@ -120,6 +120,15 @@ TEST_F(InferFixture, ClassesLubs) {
     ASSERT_TRUE(core::Types::equiv(ctx, barNfoo2, foo2Nbar));
     ASSERT_TRUE(core::Types::equiv(ctx, barNfoo1, foo1Nbar));
     ASSERT_TRUE(core::Types::equiv(ctx, foo1Nfoo2, foo2Nfoo1));
+
+    auto intType = make_shared<core::ClassType>(ctx.state.defn_Integer());
+    auto intNfoo1 = core::Types::lub(ctx, foo1Type, intType);
+    auto intNbar = core::Types::lub(ctx, barType, intType);
+    auto intNfoo1Nbar = core::Types::lub(ctx, intNfoo1, barType);
+    ASSERT_TRUE(core::Types::equiv(ctx, intNfoo1Nbar, intNbar));
+    auto intNfoo1Nfoo2 = core::Types::lub(ctx, intNfoo1, foo2Type);
+    auto intNfoo1Nfoo2Nbar = core::Types::lub(ctx, intNfoo1Nfoo2, barType);
+    ASSERT_TRUE(core::Types::equiv(ctx, intNfoo1Nfoo2Nbar, intNbar));
 }
 
 TEST_F(InferFixture, ClassesGlbs) {
