@@ -3,6 +3,7 @@ set -eux
 
 ./tools/scripts/format_build_files.sh -t
 ./tools/scripts/format_cxx.sh -t
+./tools/scripts/generate_compdb_targets.sh -t
 
 err=0
 

@@ -87,12 +87,14 @@ cc_binary(
     name = "backtrace-test-raise",
     srcs = ["backtrace-test-raise.cc"],
     copts = ["--std=c++14"],
+    visibility = ["//tools:__pkg__"],
 )
 
 cc_binary(
     name = "backtrace-test-error",
     srcs = ["backtrace-test-error.cc"],
     copts = ["--std=c++14"],
+    visibility = ["//tools:__pkg__"],
     deps = ["//common"],
 )
 
