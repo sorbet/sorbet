@@ -5,5 +5,6 @@ class <constant:Outer2> (<constant:Object>)
   class <constant:Inner1> (<constant:Object>)
     class <constant:A> (<constant:Object>)
     class <constant:Inner2> (<constant:Object>)
+      class <constant:A> () -> untyped
   class <constant:Other> (<constant:Inner2>)
 

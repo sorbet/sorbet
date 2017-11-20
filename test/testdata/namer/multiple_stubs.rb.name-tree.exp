@@ -1,0 +1,4 @@
+begin
+  ::<constant:Foo>::<constant:Bar>.baz(1)
+  ::<constant:Foo>::<constant:Bar>.baz(2)
+end

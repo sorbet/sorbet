@@ -3,12 +3,12 @@ class <emptyTree>::<constant:Test><<constant:Test>> < ()
     self(<constant:Test>).each() do ||
       begin
         if self(<constant:Test>).rand()
-          next(::<constant:untyped>)
+          next(::<constant:Test>::<constant:Foo>)
         else
           <emptyTree>
         end
         if self(<constant:Test>).rand()
-          break(::<constant:untyped>)
+          break(::<constant:Test>::<constant:Bar>)
         else
           <emptyTree>
         end

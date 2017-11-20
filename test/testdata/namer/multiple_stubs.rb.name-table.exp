@@ -1,0 +1,4 @@
+class <constant:Foo> () -> untyped
+  class <constant:Bar> () -> untyped
+class <constant:Opus> ()
+

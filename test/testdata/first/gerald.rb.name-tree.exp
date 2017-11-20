@@ -1,8 +1,8 @@
 begin
   self(<singleton class:<constant:<root>>>).require_relative("../../../extn")
-  ::<constant:untyped>.init("__FILE__")
+  ::<constant:Opus>::<constant:AutogenLoader>.init("__FILE__")
   module <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Gerald><<constant:Gerald>> < ()
-    class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::<constant:untyped>)
+    class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:StandardError>)
       self(<singleton class:<constant:MatchTimeout>>).attr_reader(:rule_token)
 
       def initialize<initialize>(message, rule_token)
@@ -13,13 +13,13 @@ begin
 
     end
 
-    class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:untyped>)
+    class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Chalk>::<constant:Log>)
       ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#<constant:MAX_AFFECTED_FILES> = 100
 
       def initialize<initialize>()
         begin
           begin
-            assignTemp$0 = ::<constant:untyped>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
+            assignTemp$0 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
             ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTemp$0.[](0)
             invalid_rules = assignTemp$0.[](1)
             assignTemp$0
@@ -96,12 +96,12 @@ begin
       ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS> = 2000
 
       def initialize<initialize>()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:untyped>.now()
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>::<constant:Time>.now()
 
       def check!<check!>()
         begin
           dur_ms = begin
-            ::<constant:untyped>.now().-(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start)
+            ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>::<constant:Time>.now().-(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start)
           end.*(1000)
           if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>)
             self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald match time budged exceeded ".concat(begin
@@ -114,10 +114,10 @@ begin
 
       def time_rule<time_rule>(rule)
         begin
-          rule_start = ::<constant:untyped>.now()
+          rule_start = ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>::<constant:Time>.now()
           res = yield(<emptyTree>)
           dur_ms = begin
-            ::<constant:untyped>.now().-(rule_start)
+            ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>::<constant:Time>.now().-(rule_start)
           end.*(1000)
           if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>)
             self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald rule '".concat(begin
@@ -181,7 +181,7 @@ begin
         self(<constant:Diff>).added_lines().+(self(<constant:Diff>).removed_lines())
 
       def changed_openapi?<changed_openapi?>()
-        self(<constant:Diff>).changed_files().include?(::<constant:untyped>)
+        self(<constant:Diff>).changed_files().include?(::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
 
       self(<singleton class:<constant:Diff>>).private(def parse<parse>(diff)
           begin

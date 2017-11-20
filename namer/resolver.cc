@@ -39,12 +39,13 @@ private:
     core::SymbolRef resolveConstant(core::Context ctx, ast::ConstantLit *c) {
         if (ast::cast_tree<ast::EmptyTree>(c->scope.get()) != nullptr) {
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
-            if (result.exists()) {
-                return result;
+            if (!result.exists()) {
+                ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
+                                       c->toString(ctx));
+                result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
+                result.info(ctx).resultType = core::Types::dynamic();
             }
-            ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
-                                   c->toString(ctx));
-            return core::GlobalState::defn_untyped();
+            return result;
 
         } else if (ast::ConstantLit *scope = ast::cast_tree<ast::ConstantLit>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, scope);
@@ -52,9 +53,11 @@ private:
                 return resolved;
             core::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
             if (!result.exists()) {
-                ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
-                                       c->toString(ctx));
-                result = core::GlobalState::defn_untyped();
+                if (resolved.info(ctx).resultType.get() == nullptr || !resolved.info(ctx).resultType->isDynamic())
+                    ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
+                                           c->toString(ctx));
+                result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
+                result.info(ctx).resultType = core::Types::dynamic();
             }
             c->scope = make_unique<ast::Ident>(c->loc, resolved);
 

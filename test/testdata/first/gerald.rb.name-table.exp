@@ -1,6 +1,12 @@
 class <constant:Opus> ()
+  class <constant:AutogenLoader> () -> untyped
   class <constant:CIBot> ()
+    class <constant:Actions> () -> untyped
+      class <constant:OpenAPI> () -> untyped
+        class <constant:SPEC_PATH> () -> untyped
     class <constant:Gerald> ()
+      class <constant:Chalk> () -> untyped
+        class <constant:Log> () -> untyped
       class <constant:Diff> (<constant:Object>)
         field @parsed -> untyped
         field @raw -> untyped
@@ -56,6 +62,7 @@ class <constant:Opus> ()
           argument title<>
         method user_stripe_suffix? ()
       class <constant:MatchTimeBudget> (<constant:Object>)
+        class <constant:Time> () -> untyped
         field @start -> untyped
         method check! ()
         method initialize ()
@@ -63,12 +70,12 @@ class <constant:Opus> ()
           argument rule<>
         static-field <constant:PER_RULE_MS> -> untyped
         static-field <constant:TOTAL_TIME_MS> -> untyped
-      class <constant:MatchTimeout> (<constant:untyped>)
+      class <constant:MatchTimeout> (<constant:StandardError>)
         field @rule_token -> untyped
         method initialize (message, rule_token)
           argument message<>
           argument rule_token<optional, keyword>
-      class <constant:Matcher> (<constant:untyped>)
+      class <constant:Matcher> (<constant:Log>)
         field @rules -> untyped
         method initialize ()
         method match (match_context)
@@ -77,11 +84,14 @@ class <constant:Opus> ()
             argument r<>
             method <block>$5 ()
         static-field <constant:MAX_AFFECTED_FILES> -> untyped
+      class <constant:StandardError> () -> untyped
       class <singleton class:<constant:Diff>> (<constant:Class>)
       class <singleton class:<constant:MatchContext>> (<constant:Class>)
       class <singleton class:<constant:MatchTimeBudget>> (<constant:Class>)
       class <singleton class:<constant:MatchTimeout>> (<constant:Class>)
       class <singleton class:<constant:Matcher>> (<constant:Class>)
+    class <constant:Model> () -> untyped
+      class <constant:GeraldRule> () -> untyped
 class <singleton class:<constant:<root>>> (<constant:Class>)
 class <singleton class:<constant:<root>>> (<constant:Class>)
 class <singleton class:<constant:Range>> (<constant:Class>)

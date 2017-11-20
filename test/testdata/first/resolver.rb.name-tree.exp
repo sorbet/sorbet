@@ -31,7 +31,7 @@ begin
     class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < ()
       ::<constant:Outer2>::<constant:C>
 
-      ::<constant:untyped>
+      ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>::<constant:A>
 
     end
 
