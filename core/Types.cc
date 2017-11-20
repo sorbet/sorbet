@@ -141,7 +141,7 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr
     }
     shared_ptr<ruby_typer::core::Type> n2 = Types::lub(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
-        return n1;
+        return n2;
     }
     if (n2.get() == o1->right.get()) {
         return t1;
@@ -225,7 +225,7 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
     }
     shared_ptr<ruby_typer::core::Type> n2 = Types::glb(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
-        return n1;
+        return n2;
     }
     if (n2.get() == a1->right.get()) {
         return t1;

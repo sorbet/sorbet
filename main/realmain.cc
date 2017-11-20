@@ -161,6 +161,61 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
     return result;
 }
 
+std::vector<std::string> split(const std::string &s, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+/** read @file arguments and put them explicitly
+ *  Steals the original arguments and will put them back on destruction.
+ * */
+class FileFlatMapper {
+    int origArgc;
+    char **origArgv;
+    int &argc;
+    char **&argv;
+    std::vector<char *> args;
+
+public:
+    FileFlatMapper(int &argc, char **&argv) : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
+        for (int i = 0; i < argc; i++) {
+            if (argv[i][0] == '@') {
+                try {
+                    string argsP = ruby_typer::File::read(argv[i] + 1);
+                    for (string arg : split(argsP, '\n')) {
+                        char *c_arg = (char *)malloc(arg.size() + 1);
+                        memcpy(c_arg, arg.c_str(), arg.size() + 1);
+                        args.push_back(c_arg);
+                    }
+                } catch (ruby_typer::FileNotFoundException e) {
+                    console_err->error("File Not Found: {}", argv[i]);
+                    throw;
+                }
+            } else {
+                int length = strlen(argv[i]);
+                char *c_arg = (char *)malloc(length + 1);
+                memcpy(c_arg, argv[i], length);
+                c_arg[length] = '\0';
+                args.push_back(c_arg);
+            }
+        }
+        argc = args.size();
+        argv = args.data();
+    }
+    ~FileFlatMapper() {
+        argc = origArgc;
+        argv = origArgv;
+        for (char *c : args) {
+            free(c);
+        }
+    }
+};
+
 int realmain(int argc, char **argv) {
     vector<string> files;
     vector<string> prints;
@@ -175,6 +230,7 @@ int realmain(int argc, char **argv) {
     console->set_pattern("%v");
     console_err = spd::stderr_color_st("");
     console_err->set_pattern("%v");
+    FileFlatMapper flatMapper(argc, argv);
 
     std::string print_options("[parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]");
 
