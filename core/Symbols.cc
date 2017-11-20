@@ -54,7 +54,7 @@ bool SymbolRef::isSynthetic() const {
 }
 
 bool SymbolRef::isHiddenFromPrinting() const {
-    return isSynthetic() && _id != GlobalState::defn_Opus()._id;
+    return isSynthetic() && *this != GlobalState::defn_Opus();
 }
 
 void printTabs(ostringstream &to, int count) {

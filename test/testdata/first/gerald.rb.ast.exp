@@ -258,4 +258,11 @@ begin
     end
 
   end
+  class <emptyTree>::<constant:Range><<constant:<todo sym>>> < ()
+    self(<constant:<todo sym>>).standard_method({:begin_ => <emptyTree>::<constant:Integer>, :end_ => <emptyTree>::<constant:Integer>, :exclude_end => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:TrueClass>, <emptyTree>::<constant:FalseClass>)}, {:returns => <emptyTree>::<constant:Object>})
+
+    def initialize<<constant:<todo sym>>>(begin_, end_, exclude_end = self(<constant:<todo sym>>)._())
+      <emptyTree>
+
+  end
 end

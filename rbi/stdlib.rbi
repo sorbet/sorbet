@@ -7491,6 +7491,16 @@ end
 class Range
   standard_method(
     {
+      _begin: Integer,
+      _end: Integer,
+      exclude_end: Opus::Types.any(TrueClass, FalseClass),
+    },
+    returns: Object
+  )
+  def initialize(_begin, _end, exclude_end=_); end
+
+  standard_method(
+    {
       obj: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
