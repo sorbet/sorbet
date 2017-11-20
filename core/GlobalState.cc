@@ -250,6 +250,9 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     DEBUG_ONLY(Error::check((names_by_hash_size & (names_by_hash_size - 1)) == 0));
 
     names.emplace_back(); // first name is used in hashes to indicate empty cell
+    names[0].kind = NameKind::UTF8;
+    names[0].raw.utf8.from = nullptr;
+    names[0].raw.utf8.to = 0;
     Names::registerNames(*this);
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
