@@ -196,7 +196,8 @@ string Symbol::fullName(GlobalState &gs) const {
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Error::check(this->isClass());
-    if (this->ref(gs) == GlobalState::defn_untyped())
+    SymbolRef selfRef = this->ref(gs);
+    if (selfRef == GlobalState::defn_untyped())
         return GlobalState::defn_untyped();
 
     SymbolRef singleton = findMember(Names::singletonClass());
@@ -207,10 +208,10 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
     Symbol &singletonInfo = singleton.info(gs);
 
-    singletonInfo.members.push_back(make_pair(Names::attachedClass(), this->ref(gs)));
+    singletonInfo.members.push_back(make_pair(Names::attachedClass(), selfRef));
     singletonInfo.argumentsOrMixins.push_back(gs.defn_Class());
 
-    this->members.push_back(make_pair(Names::singletonClass(), singleton));
+    selfRef.info(gs).members.push_back(make_pair(Names::singletonClass(), singleton));
     return singleton;
 }
 
