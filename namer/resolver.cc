@@ -51,6 +51,11 @@ private:
             auto resolved = resolveConstant(ctx, scope);
             if (!resolved.exists() || resolved == core::GlobalState::defn_untyped())
                 return resolved;
+            c->scope = make_unique<ast::Ident>(c->loc, resolved);
+        }
+
+        if (ast::Ident *id = ast::cast_tree<ast::Ident>(c->scope.get())) {
+            core::SymbolRef resolved = id->symbol;
             core::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
             if (!result.exists()) {
                 if (resolved.info(ctx).resultType.get() == nullptr || !resolved.info(ctx).resultType->isDynamic())
@@ -59,7 +64,6 @@ private:
                 result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
                 result.info(ctx).resultType = core::Types::dynamic();
             }
-            c->scope = make_unique<ast::Ident>(c->loc, resolved);
 
             return result;
         } else {

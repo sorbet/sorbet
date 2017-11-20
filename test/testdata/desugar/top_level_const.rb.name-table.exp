@@ -1,2 +1,3 @@
 class <constant:Opus> ()
+class <constant:TopLevelConst> () -> untyped
 

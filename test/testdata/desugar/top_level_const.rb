@@ -1,1 +1,1 @@
-::TopLevelConst # error: Dynamic constant references are unsupported
+::TopLevelConst # error: unknown constant
