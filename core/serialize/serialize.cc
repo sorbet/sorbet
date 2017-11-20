@@ -6,7 +6,7 @@ namespace serialize {
 
 const u4 VERSION = 1;
 
-void GlobalStateSerializer::Picker::putStr(const std::string s) {
+void GlobalStateSerializer::Pickler::putStr(const std::string s) {
     putU4(s.size());
     constexpr int step = (sizeof(u4) / sizeof(u1));
     int end = (s.size() / step) * step;
@@ -28,7 +28,7 @@ char u4tochar(u4 u) {
     return *reinterpret_cast<char *>(&u);
 }
 
-std::string GlobalStateSerializer::UnPicker::getStr() {
+std::string GlobalStateSerializer::UnPickler::getStr() {
     int sz = getU4();
     constexpr int step = (sizeof(u4) / sizeof(u1));
     int end = (sz / step) * step;
@@ -50,7 +50,7 @@ std::string GlobalStateSerializer::UnPicker::getStr() {
     return result;
 }
 
-void GlobalStateSerializer::Picker::putU4(const u4 u) {
+void GlobalStateSerializer::Pickler::putU4(const u4 u) {
     if (u != 0) {
         data.push_back(u);
     } else if (data.size() >= 2 && data[data.size() - 2] == 0 && data[data.size() - 1] != UINT_MAX) {
@@ -61,7 +61,7 @@ void GlobalStateSerializer::Picker::putU4(const u4 u) {
     }
 }
 
-u4 GlobalStateSerializer::UnPicker::getU4() {
+u4 GlobalStateSerializer::UnPickler::getU4() {
     if (zeroCounter) {
         zeroCounter--;
         return 0;
@@ -74,31 +74,31 @@ u4 GlobalStateSerializer::UnPicker::getU4() {
     return r;
 }
 
-void GlobalStateSerializer::Picker::putS8(const int64_t i) {
+void GlobalStateSerializer::Pickler::putS8(const int64_t i) {
     putU4((u4)i);
     putU4((u4)(i >> 32));
 }
 
-int64_t GlobalStateSerializer::UnPicker::getS8() {
+int64_t GlobalStateSerializer::UnPickler::getS8() {
     u8 low = getU4();
     u8 high = getU4();
     u8 full = (high << 32) + low;
     return *reinterpret_cast<int64_t *>(&full);
 }
 
-void GlobalStateSerializer::pickle(Picker &p, File &what) {
+void GlobalStateSerializer::pickle(Pickler &p, File &what) {
     p.putStr(what.path().toString());
     p.putStr(what.source().toString());
 }
 
-File GlobalStateSerializer::unpickleFile(UnPicker &p) {
+File GlobalStateSerializer::unpickleFile(UnPickler &p) {
     std::string path = p.getStr();
     std::string source = p.getStr();
     File to(move(path), move(source));
     return to;
 }
 
-void GlobalStateSerializer::pickle(Picker &p, Name &what) {
+void GlobalStateSerializer::pickle(Pickler &p, Name &what) {
     p.putU4(what.kind);
     switch (what.kind) {
         case NameKind::UTF8:
@@ -115,7 +115,7 @@ void GlobalStateSerializer::pickle(Picker &p, Name &what) {
     }
 }
 
-Name GlobalStateSerializer::unpickleName(UnPicker &p, GlobalState &gs) {
+Name GlobalStateSerializer::unpickleName(UnPickler &p, GlobalState &gs) {
     Name result;
     result.kind = (NameKind)p.getU4();
     switch (result.kind) {
@@ -135,7 +135,7 @@ Name GlobalStateSerializer::unpickleName(UnPicker &p, GlobalState &gs) {
     return result;
 }
 
-void GlobalStateSerializer::pickle(Picker &p, Type *what) {
+void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
     if (what == nullptr) {
         p.putU4(0);
         return;
@@ -178,7 +178,7 @@ void GlobalStateSerializer::pickle(Picker &p, Type *what) {
     }
 }
 
-std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPicker &p) {
+std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
     switch (p.getU4()) {
         case 0: {
             std::shared_ptr<Type> empty;
@@ -234,7 +234,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPicker &p) {
     }
 }
 
-void GlobalStateSerializer::pickle(Picker &p, Symbol &what) {
+void GlobalStateSerializer::pickle(Pickler &p, Symbol &what) {
     p.putU4(what.owner._id);
     p.putU4(what.name._id);
     p.putU4(what.superClass._id);
@@ -256,7 +256,7 @@ void GlobalStateSerializer::pickle(Picker &p, Symbol &what) {
     p.putU4(what.definitionLoc.end_pos);
 }
 
-Symbol GlobalStateSerializer::unpickleSymbol(UnPicker &p) {
+Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p) {
     Symbol result;
     result.owner = p.getU4();
     result.name = p.getU4();
@@ -283,8 +283,8 @@ Symbol GlobalStateSerializer::unpickleSymbol(UnPicker &p) {
     return result;
 }
 
-GlobalStateSerializer::Picker GlobalStateSerializer::pickle(GlobalState &gs) {
-    Picker result;
+GlobalStateSerializer::Pickler GlobalStateSerializer::pickle(GlobalState &gs) {
+    Pickler result;
     result.putU4(VERSION);
     result.putU4(gs.files.size());
     for (File &f : gs.files) {
@@ -318,7 +318,7 @@ int nearestPowerOf2(int from) {
     return i;
 }
 
-GlobalState GlobalStateSerializer::unpickleGS(UnPicker &p, spdlog::logger &logger) {
+GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logger) {
     Error::check(p.getU4() == VERSION);
     GlobalState result(logger);
     std::vector<File> files;
@@ -360,12 +360,12 @@ GlobalState GlobalStateSerializer::unpickleGS(UnPicker &p, spdlog::logger &logge
 }
 
 std::vector<u4> GlobalStateSerializer::store(GlobalState &gs) {
-    Picker p = pickle(gs);
+    Pickler p = pickle(gs);
     return move(p.data);
 }
 
 GlobalState GlobalStateSerializer::load(const u4 *const data, spdlog::logger &logger) {
-    UnPicker p(data);
+    UnPickler p(data);
     return unpickleGS(p, logger);
 }
 } // namespace serialize

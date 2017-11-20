@@ -9,23 +9,23 @@ namespace core {
 namespace serialize {
 
 TEST(SerializeTest, U4) {
-    GlobalStateSerializer::Picker p;
+    GlobalStateSerializer::Pickler p;
     p.putU4(0);
     p.putU4(1);
     p.putU4(4294967295);
-    GlobalStateSerializer::UnPicker u(p.data.data());
+    GlobalStateSerializer::UnPickler u(p.data.data());
     EXPECT_EQ(u.getU4(), 0);
     EXPECT_EQ(u.getU4(), 1);
     EXPECT_EQ(u.getU4(), 4294967295);
 }
 
 TEST(SerializeTest, U8) {
-    GlobalStateSerializer::Picker p;
+    GlobalStateSerializer::Pickler p;
     p.putS8(0);
     p.putS8(1);
     p.putS8(-1);
     p.putS8(9223372036854775807);
-    GlobalStateSerializer::UnPicker u(p.data.data());
+    GlobalStateSerializer::UnPickler u(p.data.data());
     EXPECT_EQ(u.getS8(), 0);
     EXPECT_EQ(u.getS8(), 1);
     EXPECT_EQ(u.getS8(), -1);
@@ -33,7 +33,7 @@ TEST(SerializeTest, U8) {
 }
 
 TEST(SerializeTest, Strings) {
-    GlobalStateSerializer::Picker p;
+    GlobalStateSerializer::Pickler p;
     p.putStr("");
     p.putStr("a");
     p.putStr("aaaaa");
@@ -41,7 +41,7 @@ TEST(SerializeTest, Strings) {
     p.putStr("Z");
     p.putStr("НЯ");
     p.putStr("\0\0\0\t\n\f\rНЯЯЯЯЯ");
-    GlobalStateSerializer::UnPicker u(p.data.data());
+    GlobalStateSerializer::UnPickler u(p.data.data());
     EXPECT_EQ(u.getStr(), "");
     EXPECT_EQ(u.getStr(), "a");
     EXPECT_EQ(u.getStr(), "aaaaa");
