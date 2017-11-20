@@ -2,7 +2,6 @@ cc_binary(
     name = "ruby-typer",
     srcs = [
         "main.cc",
-        "realmain.cc",
         "state-payload.cc",
     ],
     copts = ["--std=c++14"],
@@ -12,15 +11,24 @@ cc_binary(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//ast/desugar",
-        "//cfg",
-        "//core",
-        "//core/serialize",
-        "//infer",
-        "//namer",
-        "//parser",
-        "//rbi:payload",
-        "@cxxopts//:cxxopts",
+        "realmain",
+    ],
+)
+
+cc_binary(
+    name = "ruby-typer-orig",
+    srcs = [
+        "main.cc",
+        "no_payload.cc",
+    ],
+    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "realmain",
     ],
 )
 
@@ -54,18 +62,12 @@ genrule(
     tools = [":ruby-typer-orig"],
 )
 
-cc_binary(
-    name = "ruby-typer-orig",
+cc_library(
+    name = "realmain",
     srcs = [
-        "main.cc",
-        "no_payload.cc",
         "realmain.cc",
     ],
     copts = ["--std=c++14"],
-    linkstatic = select({
-        "//tools/config:fastbuild": 0,
-        "//conditions:default": 1,
-    }),
     visibility = ["//visibility:public"],
     deps = [
         "//ast/desugar",
@@ -86,7 +88,6 @@ cc_test(
     srcs = glob([
         "test/*.cc",
     ]) + [
-        "realmain.cc",
         "no_payload.cc",
     ],
     copts = ["-Iexternal/gtest/include"],
@@ -100,13 +101,7 @@ cc_test(
     }),
     visibility = ["//tools:__pkg__"],
     deps = [
-        "//ast/desugar",
-        "//cfg",
-        "//core/serialize",
-        "//infer",
-        "//namer",
-        "//parser",
-        "//rbi:payload",
+        "realmain",
         "@cxxopts//:cxxopts",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
