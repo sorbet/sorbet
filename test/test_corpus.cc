@@ -43,11 +43,11 @@ string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
 
 class ExpectationTest : public testing::TestWithParam<Expectations> {
 public:
-    virtual ~ExpectationTest() {}
-    virtual void SetUp() {
+    ~ExpectationTest() override {}
+    void SetUp() override {
         exp_ = GetParam();
     }
-    virtual void TearDown() {}
+    void TearDown() override {}
 
 protected:
     Expectations exp_;
@@ -71,7 +71,7 @@ extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
 // C++ stream interface
 class TestCout : public stringstream {
 public:
-    ~TestCout() {
+    ~TestCout() override {
         PRINTF("%s", str().c_str());
     }
 };

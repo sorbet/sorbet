@@ -1,4 +1,4 @@
-Checks:          '-*,modernize-use-nullptr,readability-braces-around-statements,readability-implicit-bool-cast,modernize-loop-convert'
+Checks:          '-*,modernize-use-nullptr,readability-braces-around-statements,readability-implicit-bool-cast,modernize-loop-convert,hicpp-use-override'
 WarningsAsErrors: ''
 AnalyzeTemporaryDtors: false
 FormatStyle:     file

@@ -20,7 +20,7 @@ auto console = spd::stderr_color_mt("infer");
 
 class InferFixture : public ::testing::Test {
 public:
-    void SetUp() {
+    void SetUp() override {
         ctxPtr = make_unique<core::GlobalState>(*console);
     }
     core::Context getCtx() {

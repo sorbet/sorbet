@@ -18,7 +18,7 @@ auto console = spd::stderr_color_mt("namer");
 
 class NamerFixture : public ::testing::Test {
 public:
-    void SetUp() {
+    void SetUp() override {
         ctxPtr = make_unique<core::GlobalState>(*console);
     }
     core::Context getCtx() {
