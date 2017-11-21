@@ -37,14 +37,18 @@ class NameInserter {
             if (ast::UnresolvedIdent *nm = ast::cast_tree<ast::UnresolvedIdent>(arg)) {
                 core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(loc, ctx.owner, nm->name);
                 core::Symbol &info = sym.info(ctx);
-                if (optional)
+                if (optional) {
                     info.setOptional();
-                if (keyword)
+                }
+                if (keyword) {
                     info.setKeyword();
-                if (block)
+                }
+                if (block) {
                     info.setBlockArgument();
-                if (repeated)
+                }
+                if (repeated) {
                     info.setRepeated();
+                }
                 return sym;
             }
             typecase(arg,
@@ -270,8 +274,9 @@ public:
 
     ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
         ast::ConstantLit *lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
-        if (lhs == nullptr)
+        if (lhs == nullptr) {
             return asgn;
+        }
 
         // TODO(nelhage): forbid dynamic constant definition
         core::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);

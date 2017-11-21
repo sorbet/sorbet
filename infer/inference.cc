@@ -255,8 +255,9 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
     vector<bool> visited;
     visited.resize(cfg->basicBlocks.size());
     for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
-        if (bb == cfg->deadBlock())
+        if (bb == cfg->deadBlock()) {
             continue;
+        }
         Environment &current = outEnvironments[bb->id];
         current.vars.reserve(bb->args.size());
         current.types.reserve(bb->args.size());
@@ -265,8 +266,9 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
             current.types.emplace_back();
         }
         for (cfg::BasicBlock *parent : bb->backEdges) {
-            if (!visited[parent->id])
+            if (!visited[parent->id]) {
                 continue;
+            }
             current.mergeWith(ctx, outEnvironments[parent->id]);
         }
         int i = 0;

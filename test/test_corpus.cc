@@ -337,8 +337,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs()), prettyPrintTest);
 
 bool endsWith(const string &a, const string &b) {
-    if (b.size() > a.size())
+    if (b.size() > a.size()) {
         return false;
+    }
     return equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
 }
 
@@ -359,8 +360,9 @@ vector<Expectations> listDir(const char *name) {
 
     while ((entry = readdir(dir)) != nullptr) {
         if (entry->d_type == DT_DIR) {
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
                 continue;
+            }
             char path[1024];
             snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
             auto nested = listDir(path);

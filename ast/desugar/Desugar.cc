@@ -79,10 +79,12 @@ unique_ptr<Expression> mkLocal(core::Loc loc, core::NameRef name) {
 }
 
 unique_ptr<Expression> cpRef(core::Loc loc, Reference &name) {
-    if (UnresolvedIdent *nm = cast_tree<UnresolvedIdent>(&name))
+    if (UnresolvedIdent *nm = cast_tree<UnresolvedIdent>(&name)) {
         return make_unique<UnresolvedIdent>(loc, nm->kind, nm->name);
-    if (Ident *id = cast_tree<Ident>(&name))
+    }
+    if (Ident *id = cast_tree<Ident>(&name)) {
         return make_unique<Ident>(loc, id->symbol);
+    }
     Error::notImplemented();
 }
 
@@ -168,8 +170,9 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     auto body = node2TreeImpl(ctx, bodynode);
     if (destructures.size() > 0) {
         core::Loc bodyLoc = body->loc;
-        if (bodyLoc.is_none())
+        if (bodyLoc.is_none()) {
             bodyLoc = loc;
+        }
         body = make_unique<InsSeq>(loc, destructures, move(body));
     }
 

@@ -9,8 +9,9 @@ namespace ruby_typer {
 namespace core {
 
 ruby_typer::core::Name::~Name() noexcept {
-    if (kind == NameKind::UNIQUE)
+    if (kind == NameKind::UNIQUE) {
         unique.~UniqueName();
+    }
 }
 
 unsigned int Name::hashNames(vector<NameRef> &lhs, GlobalState &gs) {

@@ -32,8 +32,9 @@ string addr2line(const string program_name, void const *const *addr, int count) 
 string getProgramName() {
     char dest[512] = {}; // explicitly zero out
 
-    if (readlink("/proc/self/exe", dest, PATH_MAX) < 0)
+    if (readlink("/proc/self/exe", dest, PATH_MAX) < 0) {
         return "<error>";
+    }
 
     string res(dest);
     return res;

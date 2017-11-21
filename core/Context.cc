@@ -12,8 +12,9 @@ namespace core {
 
 SymbolRef Context::selfClass() {
     Symbol &info = this->owner.info(this->state);
-    if (info.isClass())
+    if (info.isClass()) {
         return info.singletonClass(this->state);
+    }
     return this->contextClass();
 }
 

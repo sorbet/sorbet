@@ -56,8 +56,9 @@ string ruby_typer::Strings::escapeCString(string what) {
                 break;
             }
         }
-        if (j == sizeof(escaped))
+        if (j == sizeof(escaped)) {
             buf << c;
+        }
     }
 
     return buf.str();
@@ -100,11 +101,13 @@ string exec(string cmd) {
     array<char, 128> buffer;
     string result;
     shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
-    if (!pipe)
+    if (!pipe) {
         throw runtime_error("popen() failed!");
+    }
     while (!feof(pipe.get())) {
-        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+        if (fgets(buffer.data(), 128, pipe.get()) != nullptr) {
             result += buffer.data();
+        }
     }
     return result;
 }

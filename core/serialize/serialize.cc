@@ -349,8 +349,9 @@ GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logg
 
     int filesSize = p.getU4();
     files.reserve(filesSize);
-    for (int i = 0; i < filesSize; i++)
+    for (int i = 0; i < filesSize; i++) {
         files.emplace_back(unpickleFile(p));
+    }
 
     int namesSize = p.getU4();
     names.reserve(nearestPowerOf2(namesSize));

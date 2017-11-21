@@ -25,8 +25,9 @@ core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
         auto fnd = aliases.find(what);
         if (fnd != aliases.end()) {
             return fnd->second;
-        } else
+        } else {
             return what;
+        }
     } else {
         return what;
     }
@@ -41,8 +42,9 @@ void CFG::dealias(core::Context ctx) {
 
     outAliases.resize(this->basicBlocks.size());
     for (BasicBlock *bb : this->backwardsTopoSort) {
-        if (bb == this->deadBlock())
+        if (bb == this->deadBlock()) {
             continue;
+        }
         unordered_map<core::LocalVariable, core::LocalVariable> &current = outAliases[bb->id];
         if (bb->backEdges.size() > 0) {
             current = outAliases[bb->backEdges[0]->id];

@@ -232,8 +232,9 @@ string ClassDef::showRaw(core::GlobalState &gs, int tabs) {
     for (auto &a : this->rhs) {
         printTabs(buf, tabs + 2);
         buf << a->showRaw(gs, tabs + 2) << endl;
-        if (&a != &this->rhs.back())
+        if (&a != &this->rhs.back()) {
             buf << endl;
+        }
     }
     printTabs(buf, tabs + 1);
     buf << "]" << endl;
@@ -580,10 +581,11 @@ string FloatLit::toString(core::GlobalState &gs, int tabs) {
 }
 
 string BoolLit::toString(core::GlobalState &gs, int tabs) {
-    if (this->value)
+    if (this->value) {
         return "true";
-    else
+    } else {
         return "false";
+    }
 }
 
 string Assign::toString(core::GlobalState &gs, int tabs) {
@@ -672,8 +674,9 @@ string Send::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << this->recv->toString(gs, tabs) << "." << this->fun.name(gs).toString(gs);
     printArgs(gs, buf, this->args, tabs);
-    if (this->block != nullptr)
+    if (this->block != nullptr) {
         buf << this->block->toString(gs, tabs);
+    }
 
     return buf.str();
 }
