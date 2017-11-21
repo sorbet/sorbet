@@ -763,24 +763,6 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     result.swap(res);
                 }
             },
-            [&](parser::Return *ret) {
-                if (ret->exprs.size() > 1) {
-                    Array::ENTRY_store elems;
-                    elems.reserve(ret->exprs.size());
-                    for (auto &stat : ret->exprs) {
-                        elems.emplace_back(node2TreeImpl(ctx, stat));
-                    };
-                    unique_ptr<Expression> arr = make_unique<Array>(what->loc, elems);
-                    unique_ptr<Expression> res = make_unique<Return>(what->loc, move(arr));
-                    result.swap(res);
-                } else if (ret->exprs.size() == 1) {
-                    unique_ptr<Expression> res = make_unique<Return>(what->loc, node2TreeImpl(ctx, ret->exprs[0]));
-                    result.swap(res);
-                } else {
-                    unique_ptr<Expression> res = make_unique<Return>(what->loc, mkEmptyTree(what->loc));
-                    result.swap(res);
-                }
-            },
             [&](parser::Break *ret) {
                 if (ret->exprs.size() > 1) {
                     Array::ENTRY_store elems;
