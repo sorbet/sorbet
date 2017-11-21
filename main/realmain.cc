@@ -375,9 +375,14 @@ int realmain(int argc, char **argv) {
     if (options.count("error-stats")) {
         console_err->warn("Statistics of errors:");
         int sum = 0;
+        vector<std::string> errors;
         for (auto e : gs.errors.errorHistogram) {
-            console_err->warn("{} : {}", e.first, e.second);
+            errors.push_back(to_string(e.first) + " : " + to_string(e.second));
             sum += e.second;
+        }
+        sort(errors.begin(), errors.end());
+        for (auto &l : errors) {
+            console_err->warn("{}", l);
         }
         console_err->warn("Total: {}", sum);
     }
