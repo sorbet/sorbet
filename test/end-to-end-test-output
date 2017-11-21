@@ -1,9 +1,19 @@
 test/end-to-end-test-input.rb:3 Stubbing out unknown constant <emptyTree>::<constant:MissingConstant>
     MissingConstant
     ^^^^^^^^^^^^^^^
-test/end-to-end-test-input.rb:10 Changing type of pinned argument, Integer is not a subtype of NilClass
+    raise arg
+    ^^^^^^^^^
+[7002] Argument _ does not match expected type.
+Expected String | Class | Exception
+rbi/stdlib.rbi:4814 Method raise has specified type of argument _ as String | Class | Exception
+      _: Opus::Types.any(String, Class, Exception),
+      ^^
+
+Got Integer originating from:
+test/end-to-end-test-input.rb:10 
       arg: Integer
       ^^^^
+
     foo("foo")
     ^^^^^^^^^^
 [7002] Argument arg does not match expected type.
@@ -13,7 +23,7 @@ test/end-to-end-test-input.rb:10 Method foo has specified type of argument arg a
       ^^^^
 
 Got String("foo") originating from:
-test/end-to-end-test-input.rb:19 
+test/end-to-end-test-input.rb:20 
     foo("foo")
         ^^^^^
 
