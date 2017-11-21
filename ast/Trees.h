@@ -362,9 +362,9 @@ public:
 
 class FloatLit final : public Expression {
 public:
-    float value;
+    double value;
 
-    FloatLit(core::Loc loc, float value);
+    FloatLit(core::Loc loc, double value);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

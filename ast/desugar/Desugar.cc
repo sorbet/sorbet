@@ -657,6 +657,28 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 unique_ptr<Expression> res = make_unique<IntLit>(what->loc, val);
                 result.swap(res);
             },
+            [&](parser::Float *floatNode) {
+                double val;
+                try {
+                    val = stod(floatNode->val);
+                    if (isinf(val)) {
+                        val = std::numeric_limits<double>::quiet_NaN();
+                        ctx.state.errors.error(floatNode->loc, core::ErrorClass::FloatOutOfRange,
+                                               "Unsupported large float literal: {}", floatNode->val);
+                    }
+                } catch (std::out_of_range &) {
+                    val = std::numeric_limits<double>::quiet_NaN();
+                    ctx.state.errors.error(floatNode->loc, core::ErrorClass::FloatOutOfRange,
+                                           "Unsupported large float literal: {}", floatNode->val);
+                } catch (std::invalid_argument &) {
+                    val = std::numeric_limits<double>::quiet_NaN();
+                    ctx.state.errors.error(floatNode->loc, core::ErrorClass::FloatOutOfRange,
+                                           "Unsupported float literal: {}", floatNode->val);
+                }
+
+                unique_ptr<Expression> res = make_unique<FloatLit>(what->loc, val);
+                result.swap(res);
+            },
             [&](parser::Array *array) {
                 Array::ENTRY_store elems;
                 elems.reserve(array->elts.size());

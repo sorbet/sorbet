@@ -110,7 +110,7 @@ BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), 
 
 Nil::Nil(core::Loc loc) : Expression(loc) {}
 
-FloatLit::FloatLit(core::Loc loc, float value) : Expression(loc), value(value) {}
+FloatLit::FloatLit(core::Loc loc, double value) : Expression(loc), value(value) {}
 
 IntLit::IntLit(core::Loc loc, int64_t value) : Expression(loc), value(value) {}
 
