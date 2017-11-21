@@ -337,10 +337,14 @@ int nearestPowerOf2(int from) {
 GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logger) {
     Error::check(p.getU4() == VERSION);
     GlobalState result(logger);
-    std::vector<File> files;
-    std::vector<Name> names;
-    std::vector<Symbol> symbols;
-    std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
+    std::vector<File> files(move(result.files));
+    files.clear();
+    std::vector<Name> names(move(result.names));
+    names.clear();
+    std::vector<Symbol> symbols(move(result.symbols));
+    symbols.clear();
+    std::vector<std::pair<unsigned int, unsigned int>> names_by_hash(move(result.names_by_hash));
+    names_by_hash.clear();
 
     int filesSize = p.getU4();
     files.reserve(filesSize);
@@ -360,7 +364,7 @@ GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logg
     }
 
     int namesByHashSize = p.getU4();
-    names_by_hash.reserve(nearestPowerOf2(namesSize) * 2);
+    names_by_hash.reserve(names.capacity() * 2);
     for (int i = 0; i < namesByHashSize; i++) {
         auto hash = p.getU4();
         auto value = p.getU4();
