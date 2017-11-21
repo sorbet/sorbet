@@ -118,6 +118,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
     bool oldErrors = gs.errors.keepErrorsInMemory;
     gs.errors.keepErrorsInMemory = oldErrors || silenceErrors;
     bool printNameTable = removeOption(prints, "name-table");
+    bool printNameTableFull = removeOption(prints, "name-table-full");
     bool printNameTree = removeOption(prints, "name-tree");
     bool printNameTreeRaw = removeOption(prints, "name-tree-raw");
     bool printCFG = removeOption(prints, "cfg");
@@ -153,6 +154,9 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
         }
         if (printNameTable) {
             cout << gs.toString() << endl;
+        }
+        if (printNameTableFull) {
+            cout << gs.toString(true) << endl;
         }
     } catch (...) {
         gs.errors.keepErrorsInMemory = oldErrors;
@@ -269,7 +273,7 @@ int realmain(int argc, char **argv) {
     console_err->set_pattern("%v");
     FileFlatMapper flatMapper(argc, argv);
 
-    std::string print_options("[parse-tree, ast, ast-raw, name-table, name-tree, name-tree-raw, cfg]");
+    std::string print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg]");
 
     cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
     options.add_options()("v,verbose", "Verbosity level [0-3]");

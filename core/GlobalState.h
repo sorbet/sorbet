@@ -64,7 +64,7 @@ public:
 
     void sanityCheck() const;
 
-    std::string toString();
+    std::string toString(bool showHidden = false);
 
     spdlog::logger &logger;
     Reporter errors;
