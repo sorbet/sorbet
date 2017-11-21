@@ -277,7 +277,8 @@ int realmain(int argc, char **argv) {
     options.add_options()("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options()("no-typer", "Do not type the CFG");
     options.add_options()("store-state", "Store state into file", cxxopts::value<string>());
-    options.add_options()("trace", "trace phases");
+    options.add_options()("trace", "Trace phases");
+    options.add_options()("error-stats", "Print error statistics");
     options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("p,print", "Print " + print_options, cxxopts::value<vector<string>>(prints));
     options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
@@ -314,7 +315,7 @@ int realmain(int argc, char **argv) {
     }
 
     if (options.count("q")) {
-        spd::set_level(spd::level::critical);
+        console->set_level(spd::level::critical);
     }
 
     if (options.count("trace")) {
@@ -369,6 +370,21 @@ int realmain(int argc, char **argv) {
     if (options.count("store-state")) {
         string outfile = options["store-state"].as<string>();
         ruby_typer::File::write(outfile.c_str(), ruby_typer::core::serialize::GlobalStateSerializer::store(gs));
+    }
+
+    if (options.count("error-stats")) {
+        console_err->warn("Statistics of errors:");
+        int sum = 0;
+        vector<std::string> errors;
+        for (auto e : gs.errors.errorHistogram) {
+            errors.push_back(to_string(e.first) + " : " + to_string(e.second));
+            sum += e.second;
+        }
+        sort(errors.begin(), errors.end());
+        for (auto &l : errors) {
+            console_err->warn("{}", l);
+        }
+        console_err->warn("Total: {}", sum);
     }
 
     return gs.errors.hadCriticalError() ? 10 : 0;

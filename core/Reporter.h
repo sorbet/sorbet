@@ -106,6 +106,8 @@ public:
     bool keepErrorsInMemory = false;
     std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> getAndEmptyErrors();
 
+    std::vector<std::pair<int, int>> errorHistogram;
+
 private:
     Reporter(GlobalState &gs) : gs_(gs), hadCriticalError_(false) {}
     GlobalState &gs_;
