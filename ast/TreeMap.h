@@ -41,6 +41,9 @@ public:
     Yield *preTransformYield(core::Context ctx, Yield *original);
     Expression *postTransformYield(core::Context ctx, Yield *original);
 
+    RescueCase *preTransformRescueCase(core::Context ctx, RescueCase *original);
+    Expression *postTransformRescueCase(core::Context ctx, RescueCase *original);
+
     Rescue *preTransformRescue(core::Context ctx, Rescue *original);
     Expression *postTransformRescue(core::Context ctx, Rescue *original);
 
@@ -120,6 +123,7 @@ GENERATE_HAS_MEMBER(preTransformBreak);
 GENERATE_HAS_MEMBER(preTransformNext);
 GENERATE_HAS_MEMBER(preTransformReturn);
 GENERATE_HAS_MEMBER(preTransformYield);
+GENERATE_HAS_MEMBER(preTransformRescueCase);
 GENERATE_HAS_MEMBER(preTransformRescue);
 GENERATE_HAS_MEMBER(preTransformAssign);
 GENERATE_HAS_MEMBER(preTransformSend);
@@ -151,6 +155,7 @@ GENERATE_HAS_MEMBER(postTransformBreak);
 GENERATE_HAS_MEMBER(postTransformNext);
 GENERATE_HAS_MEMBER(postTransformReturn);
 GENERATE_HAS_MEMBER(postTransformYield);
+GENERATE_HAS_MEMBER(postTransformRescueCase);
 GENERATE_HAS_MEMBER(postTransformRescue);
 GENERATE_HAS_MEMBER(postTransformIdent);
 GENERATE_HAS_MEMBER(postTransformUnresolvedIdent);
@@ -228,6 +233,8 @@ GENERATE_POSTPONE_PRECLASS(Break);
 GENERATE_POSTPONE_PRECLASS(Next);
 GENERATE_POSTPONE_PRECLASS(Return);
 GENERATE_POSTPONE_PRECLASS(Yield);
+GENERATE_POSTPONE_PRECLASS(RescueCase);
+GENERATE_POSTPONE_PRECLASS(Rescue);
 GENERATE_POSTPONE_PRECLASS(Assign);
 GENERATE_POSTPONE_PRECLASS(Send);
 GENERATE_POSTPONE_PRECLASS(NamedArg);
@@ -247,6 +254,8 @@ GENERATE_POSTPONE_POSTCLASS(Break);
 GENERATE_POSTPONE_POSTCLASS(Next);
 GENERATE_POSTPONE_POSTCLASS(Return);
 GENERATE_POSTPONE_POSTCLASS(Yield);
+GENERATE_POSTPONE_POSTCLASS(RescueCase);
+GENERATE_POSTPONE_POSTCLASS(Rescue);
 GENERATE_POSTPONE_POSTCLASS(Ident);
 GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent);
 GENERATE_POSTPONE_POSTCLASS(Assign);
@@ -457,6 +466,77 @@ private:
                 if (HAS_MEMBER_postTransformYield<FUNC>::value) {
                     return PostPonePostTransform_Yield<FUNC, HAS_MEMBER_postTransformYield<FUNC>::value>::call(ctx, v,
                                                                                                                func);
+                }
+
+                return v;
+            } else if (RescueCase *v = cast_tree<RescueCase>(what)) {
+                if (HAS_MEMBER_preTransformRescueCase<FUNC>::value) {
+                    v = PostPonePreTransform_RescueCase<FUNC, HAS_MEMBER_preTransformRescueCase<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                int i = 0;
+                while (i < v->exceptions.size()) {
+                    auto &el = v->exceptions[i];
+                    auto oarg = el.get();
+                    auto narg = mapIt(oarg, ctx);
+                    if (oarg != narg) {
+                        el.reset(narg);
+                    }
+                    i++;
+                }
+
+                auto oexpr = v->var.get();
+                auto nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->var.reset(nexpr);
+                }
+
+                oexpr = v->body.get();
+                nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->body.reset(nexpr);
+                }
+
+                if (HAS_MEMBER_postTransformRescueCase<FUNC>::value) {
+                    return PostPonePostTransform_RescueCase<
+                        FUNC, HAS_MEMBER_postTransformRescueCase<FUNC>::value>::call(ctx, v, func);
+                }
+
+                return v;
+            } else if (Rescue *v = cast_tree<Rescue>(what)) {
+                if (HAS_MEMBER_preTransformRescue<FUNC>::value) {
+                    v = PostPonePreTransform_Rescue<FUNC, HAS_MEMBER_preTransformRescue<FUNC>::value>::call(ctx, v,
+                                                                                                            func);
+                }
+
+                auto oexpr = v->body.get();
+                auto nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->body.reset(nexpr);
+                }
+
+                int i = 0;
+                while (i < v->rescueCases.size()) {
+                    auto &el = v->rescueCases[i];
+                    auto oarg = el.get();
+                    auto narg = mapIt(oarg, ctx);
+                    if (oarg != narg) {
+                        auto nargCase = cast_tree<RescueCase>(narg);
+                        Error::check(nargCase != nullptr);
+                        el.reset(nargCase);
+                    }
+                    i++;
+                }
+
+                oexpr = v->else_.get();
+                nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->else_.reset(nexpr);
+                }
+
+                if (HAS_MEMBER_postTransformRescue<FUNC>::value) {
+                    return PostPonePostTransform_Rescue<FUNC, HAS_MEMBER_postTransformRescue<FUNC>::value>::call(ctx, v,
+                                                                                                                 func);
                 }
 
                 return v;
@@ -725,7 +805,7 @@ private:
             } else if (NotSupported *v = cast_tree<NotSupported>(what)) {
                 return what;
             } else {
-                Error::raise("should never happen. Forgot to add new tree kind?", demangle(typeid(what).name()));
+                Error::raise("should never happen. Forgot to add new tree kind? ", demangle(typeid(*what).name()));
             }
         } catch (...) {
             if (!locReported) {

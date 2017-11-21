@@ -1,0 +1,11 @@
+begin
+  def foo<<constant:<todo sym>>>()
+    begin
+      1
+    rescue
+      2
+    else
+      3
+    end
+  self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).foo())
+end

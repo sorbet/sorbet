@@ -1,0 +1,39 @@
+InsSeq{
+  stats = [
+    MethodDef{
+      self = 0
+      name = foo<<constant:<todo sym>>>
+      args = []
+      rhs = InsSeq{
+        stats = [
+        ],
+        expr = Rescue{
+          body = IntLit{ value = 1 }
+          rescueCases = [
+            RescueCase{
+              exceptions = [
+              ]
+              var = EmptyTree
+              body = IntLit{ value = 2 }
+            }
+          ]
+          else = IntLit{ value = 3 }
+        }
+      }
+    }
+  ],
+  expr = Send{
+    recv = Self{ claz = ::<constant:<todo sym>> }
+    name = puts
+    block = nullptr
+    args = [
+      Send{
+        recv = Self{ claz = ::<constant:<todo sym>> }
+        name = foo
+        block = nullptr
+        args = [
+        ]
+      }
+    ]
+  }
+}

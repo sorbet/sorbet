@@ -1,0 +1,94 @@
+begin
+  def multiple_rescue<<constant:<todo sym>>>()
+    begin
+      self(<constant:<todo sym>>).meth()
+    rescue
+      self(<constant:<todo sym>>).baz()
+    rescue
+      self(<constant:<todo sym>>).bar()
+    else
+      <emptyTree>
+    end
+  def multiple_rescue_classes<<constant:<todo sym>>>()
+    begin
+      self(<constant:<todo sym>>).meth()
+    rescue <emptyTree>::<constant:Foo>, <emptyTree>::<constant:Bar> => baz
+      baz
+    else
+      <emptyTree>
+    end
+  def parse_rescue_ensure<<constant:<todo sym>>>()
+    begin
+      <Not Supported (Ensure)>
+    end
+  def parse_bug_rescue_empty_else<<constant:<todo sym>>>()
+    begin
+      <emptyTree>
+    rescue <emptyTree>::<constant:LoadError> => <emptyTree>
+      <emptyTree>
+    else
+      <emptyTree>
+    end
+  def parse_ruby_bug_12686<<constant:<todo sym>>>()
+    self(<constant:<todo sym>>).f(begin
+        self(<constant:<todo sym>>).g()
+      rescue
+        nil
+      else
+        <emptyTree>
+      end)
+  def parse_rescue_mod<<constant:<todo sym>>>()
+    self(<constant:<todo sym>>).meth()
+  rescue
+    self(<constant:<todo sym>>).bar()
+  else
+    <emptyTree>
+  def parse_resbody_list_var<<constant:<todo sym>>>()
+    begin
+      self(<constant:<todo sym>>).meth()
+    rescue self(<constant:<todo sym>>).foo() => ex
+      self(<constant:<todo sym>>).bar()
+    else
+      <emptyTree>
+    end
+  def parse_rescue_else_ensure<<constant:<todo sym>>>()
+    begin
+      <Not Supported (Ensure)>
+    end
+  def parse_rescue<<constant:<todo sym>>>()
+    begin
+      self(<constant:<todo sym>>).meth()
+    rescue
+      self(<constant:<todo sym>>).foo()
+    else
+      <emptyTree>
+    end
+  def parse_resbody_var<<constant:<todo sym>>>()
+    begin
+      self(<constant:<todo sym>>).meth()
+    rescue
+      self(<constant:<todo sym>>).bar()
+    else
+      <emptyTree>
+    end
+  def parse_resbody_var_1<<constant:<todo sym>>>()
+    begin
+      self(<constant:<todo sym>>).meth()
+    rescue
+      self(<constant:<todo sym>>).bar()
+    else
+      <emptyTree>
+    end
+  def parse_rescue_mod_op_assign<<constant:<todo sym>>>()
+    <Not Supported (OpAsgn)>
+  def parse_ruby_bug_12402<<constant:<todo sym>>>()
+    foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
+  rescue
+    nil
+  else
+    <emptyTree>
+  def parse_ruby_bug_12402_1<<constant:<todo sym>>>()
+    <Not Supported (OpAsgn)>
+  def parse_ruby_bug_12402_2<<constant:<todo sym>>>()
+    <Not Supported (OpAsgn)>
+end

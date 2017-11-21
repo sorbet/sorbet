@@ -658,6 +658,39 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
                 ret = deadBlock();
             },
 
+            [&](ast::Rescue *a) {
+                core::LocalVariable unanalyzableCondition = cctx.ctx.state.newTemporary(
+                    core::UniqueNameKind::CFG, core::Names::rescueTemp(), cctx.inWhat.symbol);
+                ret = current;
+
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, current);
+                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, current);
+                conditionalJump(current, unanalyzableCondition, bodyBlock, rescueHandlersBlock, cctx.inWhat);
+                bodyBlock = walk(cctx, a->body.get(), bodyBlock);
+
+                ret = freshBlock(cctx.loops, bodyBlock);
+                unconditionalJump(bodyBlock, ret, cctx.inWhat);
+
+                for (auto &rescueCase : a->rescueCases) {
+                    bodyBlock = cctx.inWhat.freshBlock(cctx.loops, rescueHandlersBlock);
+                    auto newRescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, rescueHandlersBlock);
+                    conditionalJump(rescueHandlersBlock, unanalyzableCondition, bodyBlock, newRescueHandlersBlock,
+                                    cctx.inWhat);
+                    rescueHandlersBlock = newRescueHandlersBlock;
+
+                    // TODO somehow make the result of this an OR type of all the rescueCase->exceptions
+                    // TODO if rescueCase->var is a ast::Send, pass in something of type rescueCase->exceptions
+                    bodyBlock = walk(cctx, rescueCase->var.get(), bodyBlock);
+                    bodyBlock = walk(cctx, rescueCase->body.get(), bodyBlock);
+                    unconditionalJump(bodyBlock, ret, cctx.inWhat);
+                }
+
+                bodyBlock = cctx.inWhat.freshBlock(cctx.loops, rescueHandlersBlock);
+                conditionalJump(rescueHandlersBlock, unanalyzableCondition, bodyBlock, ret, cctx.inWhat);
+                bodyBlock = walk(cctx, a->else_.get(), bodyBlock);
+                unconditionalJump(bodyBlock, ret, cctx.inWhat);
+            },
+
             [&](ast::Hash *h) {
                 vector<core::LocalVariable> vars;
                 for (int i = 0; i < h->keys.size(); i++) {
