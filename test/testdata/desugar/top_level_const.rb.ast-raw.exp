@@ -1,6 +1,6 @@
 ConstantLit{
   scope = Ident{
-      symbol = <constant:<root>>
-    }
+    symbol = <constant:<root>>
+  }
   cnst = <constant:TopLevelConst>
 }
