@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:A><<constant:A>> < ()
+class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)
   def take_arguments<take_arguments>(a, b, c, d, e, f, g)
     begin
       [a, b, c, d, e, f, g]

@@ -1,5 +1,5 @@
 class <constant:Opus> ()
-class <constant:Test> (<constant:Object>)
+class <constant:Test> < ::<constant:Object> ()
   method some_method (array)
     argument array<>
 class <singleton class:<constant:<root>>> (<constant:Class>)

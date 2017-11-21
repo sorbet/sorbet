@@ -13,7 +13,7 @@ begin
 
     end
 
-    class <emptyTree>::<constant:Matcher><<constant:<todo sym>>> < ()
+    class <emptyTree>::<constant:Matcher><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       self(<constant:<todo sym>>).include(<emptyTree>::<constant:Chalk>::<constant:Log>)
 
       <emptyTree>::<constant:MAX_AFFECTED_FILES> = 100
@@ -58,7 +58,7 @@ begin
 
     end
 
-    class <emptyTree>::<constant:MatchContext><<constant:<todo sym>>> < ()
+    class <emptyTree>::<constant:MatchContext><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       self(<constant:<todo sym>>).attr_reader(:repo)
 
       self(<constant:<todo sym>>).attr_reader(:assignee)
@@ -92,7 +92,7 @@ begin
 
     end
 
-    class <emptyTree>::<constant:MatchTimeBudget><<constant:<todo sym>>> < ()
+    class <emptyTree>::<constant:MatchTimeBudget><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       <emptyTree>::<constant:TOTAL_TIME_MS> = 10000
 
       <emptyTree>::<constant:PER_RULE_MS> = 2000
@@ -138,7 +138,7 @@ begin
 
     end
 
-    class <emptyTree>::<constant:Diff><<constant:<todo sym>>> < ()
+    class <emptyTree>::<constant:Diff><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       def initialize<<constant:<todo sym>>>(raw_diff)
         begin
           @raw = raw_diff
@@ -258,7 +258,7 @@ begin
     end
 
   end
-  class <emptyTree>::<constant:Range><<constant:<todo sym>>> < ()
+  class <emptyTree>::<constant:Range><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     self(<constant:<todo sym>>).standard_method({:begin_ => <emptyTree>::<constant:Integer>, :end_ => <emptyTree>::<constant:Integer>, :exclude_end => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:TrueClass>, <emptyTree>::<constant:FalseClass>)}, {:returns => <emptyTree>::<constant:Object>})
 
     def initialize<<constant:<todo sym>>>(begin_, end_, exclude_end = self(<constant:<todo sym>>)._())

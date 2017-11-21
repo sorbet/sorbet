@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:BlockTest><<constant:<todo sym>>> < ()
+class <emptyTree>::<constant:BlockTest><<constant:<todo sym>>> < (::<constant:<todo sym>>)
   def block_pass<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).foo(1, 2, 3) do |x, y|
       x

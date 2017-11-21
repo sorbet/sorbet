@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:Destructure><<constant:Destructure>> < ()
+class <emptyTree>::<constant:Destructure><<constant:Destructure>> < (::<constant:<todo sym>>)
   def f<f>(<destructure>$0, z)
     begin
       begin

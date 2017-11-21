@@ -1,4 +1,4 @@
-class <constant:Destructure> (<constant:Object>)
+class <constant:Destructure> < ::<constant:Object> ()
   method f (<destructure>$0, z)
     argument <destructure>$0<>
     argument z<>

@@ -7,7 +7,7 @@ class <constant:Opus> ()
     class <constant:Gerald> ()
       class <constant:Chalk> () -> untyped
         class <constant:Log> () -> untyped
-      class <constant:Diff> (<constant:Object>)
+      class <constant:Diff> < ::<constant:Object> ()
         field @parsed -> untyped
         field @raw -> untyped
         method added_files ()
@@ -42,7 +42,7 @@ class <constant:Opus> ()
         method removed_lines ()
           method <block>$14 (part)
             argument part<>
-      class <constant:MatchContext> (<constant:Object>)
+      class <constant:MatchContext> < ::<constant:Object> ()
         field @assignee -> untyped
         field @body -> untyped
         field @diff -> untyped
@@ -61,7 +61,7 @@ class <constant:Opus> ()
           argument repo<>
           argument title<>
         method user_stripe_suffix? ()
-      class <constant:MatchTimeBudget> (<constant:Object>)
+      class <constant:MatchTimeBudget> < ::<constant:Object> ()
         class <constant:Time> () -> untyped
         field @start -> untyped
         method check! ()
@@ -70,12 +70,12 @@ class <constant:Opus> ()
           argument rule<>
         static-field <constant:PER_RULE_MS> -> untyped
         static-field <constant:TOTAL_TIME_MS> -> untyped
-      class <constant:MatchTimeout> (<constant:StandardError>)
+      class <constant:MatchTimeout> < ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:StandardError> ()
         field @rule_token -> untyped
         method initialize (message, rule_token)
           argument message<>
           argument rule_token<optional, keyword>
-      class <constant:Matcher> (<constant:Log>)
+      class <constant:Matcher> < ::<constant:Object> (<constant:Log>)
         field @rules -> untyped
         method initialize ()
         method match (match_context)

@@ -1,6 +1,6 @@
 begin
   #$a = 1
-  class <emptyTree>::<constant:A><<constant:A>> < ()
+  class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)
     #$b = 2
 
     #$a

@@ -1,4 +1,4 @@
-class <constant:A> (<constant:Object>)
+class <constant:A> < ::<constant:Object> ()
   method take_arguments (a, b, c, d, e, f, g)
     argument a<>
     argument b<optional>

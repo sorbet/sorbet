@@ -1,21 +1,21 @@
 begin
-  class <emptyTree>::<constant:Outer1><<constant:Outer1>> < ()
+  class <emptyTree>::<constant:Outer1><<constant:Outer1>> < (::<constant:<todo sym>>)
     <emptyTree>
 
   end
-  class <emptyTree>::<constant:Outer2><<constant:Outer2>> < ()
-    class <emptyTree>::<constant:C><<constant:C>> < ()
+  class <emptyTree>::<constant:Outer2><<constant:Outer2>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:C><<constant:C>> < (::<constant:<todo sym>>)
       <emptyTree>
 
     end
 
-    class <emptyTree>::<constant:Inner1><<constant:Inner1>> < ()
-      class <emptyTree>::<constant:A><<constant:A>> < ()
+    class <emptyTree>::<constant:Inner1><<constant:Inner1>> < (::<constant:<todo sym>>)
+      class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)
         <emptyTree>
 
       end
 
-      class <emptyTree>::<constant:Inner2><<constant:Inner2>> < ()
+      class <emptyTree>::<constant:Inner2><<constant:Inner2>> < (::<constant:<todo sym>>)
         ::<constant:Outer2>::<constant:Inner1>::<constant:A>
 
         ::<constant:Outer2>::<constant:Inner1>
@@ -28,7 +28,7 @@ begin
 
     end
 
-    class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < ()
+    class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < (::<constant:<todo sym>>)
       ::<constant:Outer2>::<constant:C>
 
       ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>::<constant:A>

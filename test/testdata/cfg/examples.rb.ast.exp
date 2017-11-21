@@ -1,12 +1,12 @@
 begin
-  class <emptyTree>::<constant:Integer><<constant:<todo sym>>> < ()
+  class <emptyTree>::<constant:Integer><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     self(<constant:<todo sym>>).standard_method({:o => <emptyTree>::<constant:Integer>}, {:returns => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:Integer>)})
 
     def +<<constant:<todo sym>>>(o)
       <emptyTree>
 
   end
-  class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < ()
+  class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def i_like_ifs<<constant:<todo sym>>>()
       if true
         return 1

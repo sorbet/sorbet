@@ -1,4 +1,4 @@
-class <constant:A> (<constant:Object>)
+class <constant:A> < ::<constant:Object> ()
   method meth ()
 class <constant:Opus> ()
 field $a

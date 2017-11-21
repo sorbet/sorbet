@@ -1,5 +1,5 @@
 begin
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < ()
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
     self(<singleton class:<constant:Parent>>).declare_variables({:@ivar => ::<constant:Integer>, :@ivar2 => ::<constant:Integer>, :@@class_var => ::<constant:String>})
 
     ::<constant:Parent>#@@class_var = "hi"
