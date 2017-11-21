@@ -33,6 +33,8 @@ bool Symbol::derivesFrom(GlobalState &gs, SymbolRef sym) {
         if (a == sym || a.info(gs).derivesFrom(gs, sym))
             return true;
     }
+    if (this->superClass.exists())
+        return sym == this->superClass || this->superClass.info(gs).derivesFrom(gs, sym);
     return false;
 }
 
@@ -88,6 +90,8 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
 
     os << type << " " << name;
     if (myInfo.isClass() || myInfo.isMethod()) {
+        if (myInfo.superClass.exists())
+            os << " < " << myInfo.superClass.info(gs).fullName(gs);
         os << " (";
         bool first = true;
         for (SymbolRef thing : myInfo.argumentsOrMixins) {
@@ -180,6 +184,8 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
         if (result.exists())
             return result;
     }
+    if (this->superClass.exists())
+        return this->superClass.info(gs).findMemberTransitive(gs, name, maxDepth - 1);
     return SymbolRef(0);
 }
 

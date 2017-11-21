@@ -121,12 +121,21 @@ public:
     SymbolRef owner;
     Loc definitionLoc;
     u4 uniqueCounter = 0;
-    /* isClass,   IsArray,  isField, isMethod
-     * IsFromJar, IsFromFile
-     * */
     u4 flags;
+
+    /*
+     * mixins and superclasses: `superClass` is *not* included in the
+     *   `argumentsOrMixins` list. `superClass` may not exist even if
+     *   `isClass()`, which implies that this symbol is either a module or
+     *   defn_BasicObject(). During parsing+naming, `superClass == defn_todo()`
+     *   iff every definition we've seen for this class has had an implicit
+     *   superclass (`class Foo` with no `< Parent`); Once we hit the
+     *   inferencer, those will be rewritten to `defn_object()`.
+     */
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
+    SymbolRef superClass;
+    std::shared_ptr<Type> resultType;
 
     inline std::vector<SymbolRef> &arguments() {
         Error::check(!isClass());
@@ -137,16 +146,11 @@ public:
 
     inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
         Error::check(isClass());
-        ensureCompleted(gs);
         return argumentsOrMixins;
     }
 
-    SymbolRef superClass;
-    std::shared_ptr<Type> resultType;
-
     inline SymbolRef parent(GlobalState &gs) {
         Error::check(isClass());
-        ensureCompleted(gs);
         return superClass;
     }
 
@@ -254,8 +258,6 @@ public:
     std::vector<std::pair<NameRef, SymbolRef>>
         members; // TODO: replace with https://github.com/greg7mdp/sparsepp . Should be only in ClassSymbol
     // optimize for absence
-private:
-    void ensureCompleted(GlobalState &gs);
 };
 
 // CheckSize(Symbol, 88, 8); // This is under too much churn to be worth checking

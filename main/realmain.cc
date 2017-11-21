@@ -135,7 +135,18 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                 if (printNameTreeRaw) {
                     cout << resolved->showRaw(gs) << endl;
                 }
+                namedTree = move(resolved);
+            } catch (...) {
+                console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path().toString());
+            }
+        }
 
+        ruby_typer::namer::Resolver::finalize(gs);
+
+        for (auto &resolved : what) {
+            ruby_typer::core::FileRef f = resolved->loc.file;
+            try {
+                ruby_typer::core::Context context(gs, gs.defn_root());
                 if (printCFG) {
                     cout << "digraph \"" + ruby_typer::File::getFileName(f.file(gs).path().toString()) + "\"{" << endl;
                 }
@@ -148,9 +159,10 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                     cout << "}" << endl << endl;
                 }
             } catch (...) {
-                console_err->error("Exception on file: {} (backtrace is above)", f.file(gs).path().toString());
+                console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path().toString());
             }
         }
+
         if (printNameTable) {
             cout << gs.toString() << endl;
         }

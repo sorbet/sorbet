@@ -172,6 +172,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     // Namer
     auto namedTree = ruby_typer::namer::Namer::run(context, move(desugared));
     auto resolvedTree = ruby_typer::namer::Resolver::run(context, move(namedTree));
+    ruby_typer::namer::Resolver::finalize(context);
 
     expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
