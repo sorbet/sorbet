@@ -1,8 +1,8 @@
 #ifdef __linux__
 #include "common/common.h"
+#include <climits>
+#include <csignal>
 #include <cstdio>
-#include <limits.h>
-#include <signal.h>
 #include <sstream>
 #include <string>
 #include <sys/stat.h>

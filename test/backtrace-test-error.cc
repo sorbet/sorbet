@@ -1,5 +1,5 @@
 #include "common/common.h"
-#include <signal.h>
+#include <csignal>
 
 int main() {
     ruby_typer::Error::raise("oops");

@@ -1,4 +1,4 @@
-#include <signal.h>
+#include <csignal>
 
 int main() {
     raise(SIGSEGV);
