@@ -19,7 +19,7 @@ unsigned int Name::hashNames(vector<NameRef> &lhs, GlobalState &gs) {
            lhs.size();
 }
 
-unsigned int Name::hash(GlobalState &gs) const {
+unsigned int Name::hash(const GlobalState &gs) const {
     // TODO: use https://github.com/Cyan4973/xxHash
     // !!! keep this in sync with GlobalState.enter*
     switch (kind) {

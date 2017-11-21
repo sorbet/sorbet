@@ -140,6 +140,8 @@ struct ConstantName final {
 
 class Name final {
 public:
+    friend GlobalState;
+
     NameKind kind;
 
 private:
@@ -168,7 +170,7 @@ public:
     std::string toString(GlobalState &gs) const;
 
 private:
-    unsigned int hash(GlobalState &gs) const;
+    unsigned int hash(const GlobalState &gs) const;
 
 public:
     static unsigned int hashNames(std::vector<NameRef> &lhs, GlobalState &gs);
