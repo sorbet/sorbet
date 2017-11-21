@@ -97,7 +97,7 @@ Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression>
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
 
 Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store &args)
-    : Expression(loc), recv(move(recv)), fun(move(fun)), args(move(args)) {}
+    : Expression(loc), recv(move(recv)), fun(fun), args(move(args)) {}
 
 ZSuperArgs::ZSuperArgs(core::Loc loc) : Expression(loc) {}
 

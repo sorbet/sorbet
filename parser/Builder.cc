@@ -197,7 +197,7 @@ public:
         } else if (IVar *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
         } else if (Const *c = parser::cast_node<Const>(node.get())) {
-            return make_unique<ConstLhs>(c->loc, move(c->scope), move(c->name));
+            return make_unique<ConstLhs>(c->loc, move(c->scope), c->name);
         } else if (CVar *cv = parser::cast_node<CVar>(node.get())) {
             return make_unique<CVarLhs>(cv->loc, cv->name);
         } else if (GVar *gv = parser::cast_node<GVar>(node.get())) {
