@@ -664,7 +664,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     if (isinf(val)) {
                         val = std::numeric_limits<double>::quiet_NaN();
                         ctx.state.errors.error(floatNode->loc, core::ErrorClass::FloatOutOfRange,
-                                "Unsupported large float literal: {}", floatNode->val);
+                                               "Unsupported large float literal: {}", floatNode->val);
                     }
                 } catch (std::out_of_range &) {
                     val = std::numeric_limits<double>::quiet_NaN();
