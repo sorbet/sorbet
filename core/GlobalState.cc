@@ -618,10 +618,10 @@ unsigned int GlobalState::namesUsed() {
     return names.size();
 }
 
-string GlobalState::toString() {
+string GlobalState::toString(bool showHidden) {
     vector<string> children;
     for (auto element : defn_root().info(*this).members) {
-        if (!element.second.isHiddenFromPrinting()) {
+        if (showHidden || !element.second.isHiddenFromPrinting()) {
             children.push_back(element.second.toString(*this));
         }
     }
