@@ -14,7 +14,7 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs)
 
     core::File &file = source.file(gs);
     Error::check(off <= file.source().to);
-    auto it = std::upper_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
+    auto it = std::lower_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
     if (it == file.line_breaks.begin()) {
         pos.line = 1;
         pos.column = off + 1;
