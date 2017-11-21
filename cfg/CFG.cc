@@ -244,8 +244,7 @@ void CFG::fillInBlockArguments(core::Context ctx) {
     changed = true;
     while (changed) {
         changed = false;
-        for (auto it = this->backwardsTopoSort.begin(); it != this->backwardsTopoSort.end(); ++it) {
-            BasicBlock *bb = *it;
+        for (auto bb : this->backwardsTopoSort) {
             int sz = upper_bounds2[bb->id].size();
             upper_bounds2[bb->id].insert(writes_by_block[bb->id].begin(), writes_by_block[bb->id].end());
             for (BasicBlock *edge : bb->backEdges) {

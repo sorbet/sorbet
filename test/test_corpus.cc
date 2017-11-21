@@ -274,8 +274,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
     map<int, int> seenErrorLines;
     int unknownLocErrorLine = 1;
-    for (int i = 0; i < errors.size(); i++) {
-        auto &error = errors[i];
+    for (auto &error : errors) {
         if (error->loc.is_none()) {
             // The convention is to put `error: Unknown Location Error` at
             // the top of the file for each of these so that they are eaten
