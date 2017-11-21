@@ -138,7 +138,7 @@ void filter_unnecessary(string &out) {
 
 void ruby_typer::Error::print_backtrace() {
     int trace_size = 0;
-    char **messages = (char **)NULL;
+    char **messages = (char **)nullptr;
     string program_name = getProgramName();
 
     trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
@@ -155,6 +155,6 @@ void ruby_typer::Error::print_backtrace() {
 
 string demangle(const char *mangled) {
     int status;
-    unique_ptr<char[], void (*)(void *)> result(abi::__cxa_demangle(mangled, 0, 0, &status), free);
+    unique_ptr<char[], void (*)(void *)> result(abi::__cxa_demangle(mangled, nullptr, nullptr, &status), free);
     return result.get() ? string(result.get()) : "error occurred";
 }

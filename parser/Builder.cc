@@ -1080,7 +1080,7 @@ public:
 
     foreign_ptr to_foreign(unique_ptr<Node> node) {
         if (node == nullptr)
-            return 0;
+            return reinterpret_cast<foreign_ptr>(0);
         foreign_nodes_.emplace_back(move(node));
         return reinterpret_cast<foreign_ptr>(foreign_nodes_.size() - 1);
     }
