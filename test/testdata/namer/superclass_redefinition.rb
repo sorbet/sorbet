@@ -3,5 +3,5 @@ end
 class B
 end
 
-class A < B
+class A < B # error: parents redefined
 end
