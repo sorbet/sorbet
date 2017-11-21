@@ -4544,6 +4544,15 @@ module Kernel
 
   standard_method(
     {
+      _module: Opus::Types.any(String, Symbol),
+      filename: String,
+    },
+    returns: NilClass
+  )
+  def self.autoload(_module, filename); end
+
+  standard_method(
+    {
       name: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.any(String, NilClass)
@@ -5263,6 +5272,15 @@ class Module
     returns: Opus::Types.array_of(Module)
   )
   def ancestors(); end
+
+  standard_method(
+    {
+      _module: Symbol,
+      filename: String,
+    },
+    returns: NilClass
+  )
+  def autoload(_module, filename); end
 
   standard_method(
     {
