@@ -104,7 +104,7 @@ public:
             return tok_loc(begin, end);
         }
         DEBUG_ONLY(Error::check(end == nullptr));
-        if (elts.size() == 0) {
+        if (elts.empty()) {
             return Loc::none(file_);
         }
         return loc_join(elts.front()->loc, elts.back()->loc);
@@ -165,7 +165,7 @@ public:
     }
 
     unique_ptr<Node> args(const token *begin, ruby_typer::parser::NodeVec args, const token *end, bool check_args) {
-        if (begin == nullptr && args.size() == 0 && end == nullptr) {
+        if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
         }
         return make_unique<Args>(collection_loc(begin, args, end), move(args));
@@ -253,7 +253,7 @@ public:
 
     unique_ptr<Node> begin_body(unique_ptr<Node> body, ruby_typer::parser::NodeVec rescue_bodies, const token *else_tok,
                                 unique_ptr<Node> else_, const token *ensure_tok, unique_ptr<Node> ensure) {
-        if (rescue_bodies.size() > 0) {
+        if (!rescue_bodies.empty()) {
             if (else_ == nullptr) {
                 body = make_unique<Rescue>(loc_join(maybe_loc(body), rescue_bodies.back()->loc), move(body),
                                            move(rescue_bodies), nullptr);
@@ -326,7 +326,7 @@ public:
         if (Super *s = parser::cast_node<Super>(method_call.get())) {
             callargs = &s->args;
         }
-        if (callargs != nullptr && callargs->size() > 0) {
+        if (callargs != nullptr && !callargs->empty()) {
             if (BlockPass *bp = parser::cast_node<BlockPass>(callargs->back().get())) {
                 error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
             }
@@ -393,7 +393,7 @@ public:
         Loc loc;
         if (rparen != nullptr) {
             loc = loc_join(start_loc, tok_loc(rparen));
-        } else if (args.size() > 0) {
+        } else if (!args.empty()) {
             loc = loc_join(start_loc, args.back()->loc);
         } else {
             loc = loc_join(start_loc, selector_loc);
@@ -646,7 +646,7 @@ public:
     unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
-        if (args.size() > 0 && parser::cast_node<BlockPass>(args.back().get()) != nullptr) {
+        if (!args.empty() && parser::cast_node<BlockPass>(args.back().get()) != nullptr) {
             error(ruby_parser::dclass::BlockGivenToYield, loc);
         }
         return make_unique<Yield>(loc, move(args));
@@ -1069,7 +1069,7 @@ public:
 
     unique_ptr<Node> undef_method(const token *undef, ruby_typer::parser::NodeVec name_list) {
         Loc loc = tok_loc(undef);
-        if (name_list.size() > 0) {
+        if (!name_list.empty()) {
             loc = loc_join(loc, name_list.back()->loc);
         }
         return make_unique<Undef>(loc, move(name_list));

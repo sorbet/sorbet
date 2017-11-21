@@ -595,7 +595,7 @@ string Assign::toString(core::GlobalState &gs, int tabs) {
 string RescueCase::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "rescue";
-    if (this->exceptions.size() > 0) {
+    if (!this->exceptions.empty()) {
         bool first = true;
         for (auto &exception : this->exceptions) {
             if (first) {

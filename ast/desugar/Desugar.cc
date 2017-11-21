@@ -168,7 +168,7 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     }
 
     auto body = node2TreeImpl(ctx, bodynode);
-    if (destructures.size() > 0) {
+    if (!destructures.empty()) {
         core::Loc bodyLoc = body->loc;
         if (bodyLoc.is_none()) {
             bodyLoc = loc;
@@ -438,7 +438,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Begin *a) {
-                if (a->stmts.size() > 0) {
+                if (!a->stmts.empty()) {
                     InsSeq::STATS_store stats;
                     stats.reserve(a->stmts.size() - 1);
                     auto end = a->stmts.end();
@@ -457,7 +457,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
             },
             [&](parser::Kwbegin *a) {
-                if (a->stmts.size() > 0) {
+                if (!a->stmts.empty()) {
                     InsSeq::STATS_store stats;
                     stats.reserve(a->stmts.size() - 1);
                     auto end = a->stmts.end();
@@ -756,7 +756,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                         //   {a: 'a', **x, remaining}
                         // into
                         //   {a: 'a'}.merge(x).merge(remaining)
-                        if (keys.size() == 0) {
+                        if (keys.empty()) {
                             if (lastMerge != nullptr) {
                                 lastMerge = mkSend1(what->loc, lastMerge, core::Names::merge(),
                                                     node2TreeImpl(ctx, splat->expr));
@@ -779,7 +779,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 };
 
                 unique_ptr<Expression> res;
-                if (keys.size() == 0) {
+                if (keys.empty()) {
                     if (lastMerge != nullptr) {
                         res = move(lastMerge);
                     } else {
@@ -969,7 +969,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 for (auto &c : lhs->exprs) {
                     unique_ptr<Expression> lh = node2TreeImpl(ctx, c);
                     if (ast::Send *snd = cast_tree<ast::Send>(lh.get())) {
-                        Error::check(snd->args.size() == 0);
+                        Error::check(snd->args.empty());
                         unique_ptr<Expression> getElement = mkSend1(what->loc, mkLocal(what->loc, tempName),
                                                                     core::Names::squareBrackets(), mkInt(what->loc, i));
                         snd->args.emplace_back(move(getElement));

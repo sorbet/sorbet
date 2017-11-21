@@ -16,7 +16,7 @@ using namespace std;
 class DiagnosticToError {
 public:
     static void run(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics) {
-        if (diagnostics.size() == 0) {
+        if (diagnostics.empty()) {
             return;
         }
         u4 max_off = file.file(gs).source().to;

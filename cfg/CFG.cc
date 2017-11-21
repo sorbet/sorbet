@@ -46,7 +46,7 @@ void CFG::dealias(core::Context ctx) {
             continue;
         }
         unordered_map<core::LocalVariable, core::LocalVariable> &current = outAliases[bb->id];
-        if (bb->backEdges.size() > 0) {
+        if (!bb->backEdges.empty()) {
             current = outAliases[bb->backEdges[0]->id];
         }
 
