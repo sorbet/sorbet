@@ -329,7 +329,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }
 
-GlobalState::~GlobalState() {}
+GlobalState::~GlobalState() = default;
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 

@@ -1139,7 +1139,7 @@ public:
 };
 
 Builder::Builder(GlobalState &ctx, core::FileRef file) : impl_(new Builder::Impl(ctx, file)) {}
-Builder::~Builder() {}
+Builder::~Builder() = default;
 
 }; // namespace parser
 }; // namespace ruby_typer

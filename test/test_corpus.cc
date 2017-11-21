@@ -43,7 +43,7 @@ string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
 
 class ExpectationTest : public testing::TestWithParam<Expectations> {
 public:
-    ~ExpectationTest() override {}
+    ~ExpectationTest() override = default;
     void SetUp() override {
         exp_ = GetParam();
     }
@@ -80,7 +80,7 @@ public:
 
 class CFG_Collector_and_Typer {
 public:
-    CFG_Collector_and_Typer() {}
+    CFG_Collector_and_Typer() = default;
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
