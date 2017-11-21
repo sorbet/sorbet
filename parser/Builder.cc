@@ -219,7 +219,7 @@ public:
     unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
         NameRef method = gs_.enterNameUTF8(selector->string() + "=");
         Loc loc = loc_join(receiver->loc, tok_loc(selector));
-        if (dot && dot->string() == "&.") {
+        if ((dot != nullptr) && dot->string() == "&.") {
             return make_unique<CSend>(loc, move(receiver), method, ruby_typer::parser::NodeVec());
         }
         return make_unique<Send>(loc, move(receiver), method, ruby_typer::parser::NodeVec());
@@ -406,7 +406,7 @@ public:
             method = gs_.enterNameUTF8(selector->string());
         }
 
-        if (dot && dot->string() == "&.") {
+        if ((dot != nullptr) && dot->string() == "&.") {
             return make_unique<CSend>(loc, move(receiver), method, move(args));
         } else {
             return make_unique<Send>(loc, move(receiver), method, move(args));

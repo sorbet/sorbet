@@ -1,4 +1,4 @@
-Checks:          '-*,modernize-use-nullptr,readability-braces-around-statements'
+Checks:          '-*,modernize-use-nullptr,readability-braces-around-statements,readability-implicit-bool-cast'
 WarningsAsErrors: ''
 AnalyzeTemporaryDtors: false
 FormatStyle:     file

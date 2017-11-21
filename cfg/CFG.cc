@@ -278,7 +278,7 @@ void CFG::fillInBlockArguments(core::Context ctx) {
 
 int CFG::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
     // Error::check(!marked[currentBB]) // graph is cyclic!
-    if ((currentBB->flags & FORWARD_TOPO_SORT_VISITED)) {
+    if ((currentBB->flags & FORWARD_TOPO_SORT_VISITED) != 0) {
         return nextFree;
     } else {
         currentBB->flags |= FORWARD_TOPO_SORT_VISITED;
@@ -298,7 +298,7 @@ int CFG::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *cur
     // Instead we will build this sort the fly during construction of the CFG, but it will make it hard to add new nodes
     // much harder.
 
-    if ((currentBB->flags & BACKWARD_TOPO_SORT_VISITED)) {
+    if ((currentBB->flags & BACKWARD_TOPO_SORT_VISITED) != 0) {
         return nextFree;
     } else {
         currentBB->flags |= BACKWARD_TOPO_SORT_VISITED;

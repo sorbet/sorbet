@@ -78,7 +78,7 @@ void GlobalStateSerializer::Pickler::putU4(const u4 u) {
 }
 
 u4 GlobalStateSerializer::UnPickler::getU4() {
-    if (zeroCounter) {
+    if (zeroCounter != 0u) {
         zeroCounter--;
         return 0;
     }

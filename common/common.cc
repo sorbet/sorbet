@@ -104,7 +104,7 @@ string exec(string cmd) {
     if (!pipe) {
         throw runtime_error("popen() failed!");
     }
-    while (!feof(pipe.get())) {
+    while (feof(pipe.get()) == 0) {
         if (fgets(buffer.data(), 128, pipe.get()) != nullptr) {
             result += buffer.data();
         }
@@ -151,7 +151,7 @@ void ruby_typer::Error::print_backtrace() {
     filter_unnecessary(res);
     fprintf(stderr, "Backtrace:\n%s", res.c_str());
 
-    if (messages) {
+    if (messages != nullptr) {
         free(messages);
     }
 }
@@ -159,5 +159,5 @@ void ruby_typer::Error::print_backtrace() {
 string demangle(const char *mangled) {
     int status;
     unique_ptr<char[], void (*)(void *)> result(abi::__cxa_demangle(mangled, nullptr, nullptr, &status), free);
-    return result.get() ? string(result.get()) : "error occurred";
+    return result.get() != nullptr ? string(result.get()) : "error occurred";
 }

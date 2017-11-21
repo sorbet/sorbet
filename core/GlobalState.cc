@@ -426,7 +426,7 @@ NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
     auto bucketId = hs & mask;
     unsigned int probe_count = 1;
 
-    while (names_by_hash[bucketId].second) {
+    while (names_by_hash[bucketId].second != 0u) {
         auto &bucket = names_by_hash[bucketId];
         if (bucket.first == hs) {
             auto name_id = bucket.second;
@@ -525,7 +525,7 @@ void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsign
     DEBUG_ONLY(Error::check((szFrom & (szFrom - 1)) == 0));
     unsigned int mask = szTo - 1;
     for (unsigned int orig = 0; orig < szFrom; orig++) {
-        if (from[orig].second) {
+        if (from[orig].second != 0u) {
             auto hs = from[orig].first;
             unsigned int probe = 1;
             auto bucketId = hs & mask;

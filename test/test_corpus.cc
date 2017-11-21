@@ -354,7 +354,7 @@ vector<Expectations> listDir(const char *name) {
     struct dirent *entry;
     vector<string> names;
 
-    if (!(dir = opendir(name))) {
+    if ((dir = opendir(name)) == nullptr) {
         return result;
     }
 

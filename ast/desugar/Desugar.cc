@@ -750,7 +750,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                         values.emplace_back(move(value));
                     } else {
                         parser::Kwsplat *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
-                        Error::check(splat);
+                        Error::check(splat != nullptr);
 
                         // Desguar
                         //   {a: 'a', **x, remaining}
@@ -1040,7 +1040,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                                        a->nodeName());
                 result.reset(new NotSupported(what->loc, a->nodeName()));
             });
-        Error::check(result.get());
+        Error::check(result.get() != nullptr);
         return result;
     } catch (...) {
         if (!locReported) {

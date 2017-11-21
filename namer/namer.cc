@@ -153,7 +153,7 @@ public:
 
             if (ast::ShadowArg *sarg = ast::cast_tree<ast::ShadowArg>(arg.get())) {
                 auto id = ast::cast_tree<ast::UnresolvedIdent>(sarg->expr.get());
-                Error::check(id);
+                Error::check(id != nullptr);
                 name = id->name;
                 inShadows = true;
             } else {
