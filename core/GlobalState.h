@@ -189,7 +189,7 @@ private:
 
     void complete(SymbolRef id, Symbol &currentInfo);
 
-    SymbolRef synthesizeClass(UTF8Desc name);
+    SymbolRef synthesizeClass(UTF8Desc name, SymbolRef superclass = core::GlobalState::defn_todo());
 
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 

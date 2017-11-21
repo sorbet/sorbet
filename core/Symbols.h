@@ -126,11 +126,11 @@ public:
     /*
      * mixins and superclasses: `superClass` is *not* included in the
      *   `argumentsOrMixins` list. `superClass` may not exist even if
-     *   `isClass()`, which implies that this symbol is either a module or
-     *   defn_BasicObject(). During parsing+naming, `superClass == defn_todo()`
-     *   iff every definition we've seen for this class has had an implicit
-     *   superclass (`class Foo` with no `< Parent`); Once we hit the
-     *   inferencer, those will be rewritten to `defn_object()`.
+     *   `isClass()`, which implies that this symbol is either a module or one
+     *   of our magic synthetic classes. During parsing+naming, `superClass ==
+     *   defn_todo()` iff every definition we've seen for this class has had an
+     *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
+     *   Resolver::finalize(), these will be rewritten to `defn_object()`.
      */
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
