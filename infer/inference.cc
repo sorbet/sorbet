@@ -108,7 +108,8 @@ public:
     shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops) {
         try {
             core::TypeAndOrigins tp;
-            bool noLoopChecking = dynamic_cast<cfg::Alias *>(bind.value.get()) != nullptr || dynamic_cast<cfg::LoadArg *>(bind.value.get()) != nullptr;
+            bool noLoopChecking = dynamic_cast<cfg::Alias *>(bind.value.get()) != nullptr ||
+                                  dynamic_cast<cfg::LoadArg *>(bind.value.get()) != nullptr;
             typecase(bind.value.get(),
                      [&](cfg::Alias *a) {
                          core::SymbolRef symbol = a->what;
