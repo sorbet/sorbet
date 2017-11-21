@@ -530,9 +530,8 @@ void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsign
 }
 
 void GlobalState::expandNames() {
+    DEBUG_ONLY(sanityCheck());
     Error::check(names.size() == names.capacity());
-    Error::check(names.capacity() * 2 == names_by_hash.capacity());
-    Error::check(names_by_hash.size() == names_by_hash.capacity());
 
     names.reserve(names.size() * 2);
     vector<pair<unsigned int, unsigned int>> new_names_by_hash(names_by_hash.capacity() * 2);
@@ -634,7 +633,17 @@ string GlobalState::toString() {
     return os.str();
 }
 
-void GlobalState::sanityCheck() const {}
+void GlobalState::sanityCheck() const {
+    Error::check((names_by_hash.size() & (names_by_hash.size() - 1)) == 0);
+    Error::check(names.capacity() * 2 == names_by_hash.capacity());
+    Error::check(names_by_hash.size() == names_by_hash.capacity());
+    for (auto &ent : names_by_hash) {
+        if (ent.second == 0)
+            continue;
+        const Name &nm = names[ent.second];
+        Error::check(ent.first == nm.hash(*this));
+    }
+}
 
 } // namespace core
 } // namespace ruby_typer
