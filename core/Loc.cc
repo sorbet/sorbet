@@ -50,7 +50,7 @@ string Loc::toString(core::GlobalState &gs) {
         // add squigly
         buf << endl;
         int p;
-        for (p = 0; p < pos.first.column; p++) {
+        for (p = 1; p < pos.first.column; p++) {
             buf << " ";
         }
         for (; p < pos.second.column; p++) {
