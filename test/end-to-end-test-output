@@ -1,7 +1,7 @@
 test/end-to-end-test-input.rb:3 Stubbing out unknown constant <emptyTree>::<constant:MissingConstant>
     MissingConstant
     ^^^^^^^^^^^^^^^
-    raise arg
+    raise arg # raise is defined by stdlib
     ^^^^^^^^^
 [7002] Argument _ does not match expected type.
 Expected String | Class | Exception
