@@ -1,18 +1,17 @@
-test/end-to-end-test-input.rb:4 Changing type of pinned argument, Integer is not a subtype of NilClass
-      arg: Integer
-       ^^^^
-test/end-to-end-test-input.rb:16 Changing type of pinned argument, Integer is not a subtype of NilClass
+test/end-to-end-test-input.rb:3-4 Stubbing out unknown constant <emptyTree>::<constant:MissingConstant>
+    MissingConstant
+test/end-to-end-test-input.rb:10 Changing type of pinned argument, Integer is not a subtype of NilClass
       arg: Integer
        ^^^^
     foo("foo")
 [7002] Argument arg does not match expected type.
 Expected Integer
-test/end-to-end-test-input.rb:16 Method foo has specified type of argument arg as Integer
+test/end-to-end-test-input.rb:10 Method foo has specified type of argument arg as Integer
       arg: Integer
        ^^^^
 
 Got String("foo") originating from:
-test/end-to-end-test-input.rb:25 
+test/end-to-end-test-input.rb:19 
     foo("foo")
          ^^^^^
 

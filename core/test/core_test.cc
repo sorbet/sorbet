@@ -26,6 +26,7 @@ TEST(ASTTest, TestOffset2Pos) {
                                     {"line 1\nline 2", 11, 2, 5},
                                     {"a long line with no newlines\n", 20, 1, 21},
                                     {"line 1\nline 2\nline3\n", 7, 2, 1},
+                                    {"line 1\nline 2\nline3", 6, 1, 7},
                                     {"line 1\nline 2\nline3", 7, 2, 1}};
     int i = 0;
     for (auto &tc : cases) {

@@ -1,12 +1,6 @@
 class BasicError
-  standard_method(
-    {
-      arg: Integer
-    },
-    returns: String
-  )
-  def basicError(arg)
-    arg
+  def basicError
+    MissingConstant
   end
 end
 
@@ -25,4 +19,3 @@ class ComplexError
     foo("foo")
   end
 end
-
