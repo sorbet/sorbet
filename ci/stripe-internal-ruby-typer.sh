@@ -4,6 +4,7 @@ set -eux
 ./tools/scripts/format_build_files.sh -t
 ./tools/scripts/format_cxx.sh -t
 ./tools/scripts/generate_compdb_targets.sh -t
+./tools/scripts/build_compilation_db.sh
 
 err=0
 
@@ -16,4 +17,8 @@ find bazel-testlogs/ -name '*.xml' | while read -r line; do
     cp "$line" /log/junit/"$(echo "${line#bazel-testlogs/}" | sed s,/,_,g)"
 done
 
-exit "$err"
+if [ "$err" -ne 0 ]; then
+    exit "$err"
+fi
+
+./tools/scripts/lint_cxx.sh

@@ -3,6 +3,8 @@ load("@compdb//:aspects.bzl", "compilation_database")
 
 clang_tool("clang-format")
 
+clang_tool("clang-tidy")
+
 compilation_database(
     name = "compdb",
     testonly = True,

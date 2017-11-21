@@ -1,0 +1,5 @@
+Checks:          '-*,modernize-use-nullptr'
+WarningsAsErrors: ''
+AnalyzeTemporaryDtors: false
+FormatStyle:     file
+CheckOptions: []
