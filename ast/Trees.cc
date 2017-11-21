@@ -174,7 +174,7 @@ string ConstDef::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "rhs = " << rhs->showRaw(gs, tabs + 2) << endl;
+    buf << "rhs = " << rhs->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -263,7 +263,7 @@ string InsSeq::showRaw(core::GlobalState &gs, int tabs) {
     buf << "]," << endl;
 
     printTabs(buf, tabs + 1);
-    buf << "expr = " << expr->showRaw(gs, tabs + 2) << endl;
+    buf << "expr = " << expr->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -314,8 +314,8 @@ string MethodDef::showRaw(core::GlobalState &gs, int tabs) {
     }
     buf << "]" << endl;
     printTabs(buf, tabs + 1);
-    buf << "rhs = " << this->rhs->showRaw(gs, tabs + 2) << endl;
-    printTabs(buf, tabs + 1);
+    buf << "rhs = " << this->rhs->showRaw(gs, tabs + 1) << endl;
+    printTabs(buf, tabs);
     buf << "}";
     return buf.str();
 }
@@ -340,11 +340,11 @@ string If::showRaw(core::GlobalState &gs, int tabs) {
 
     buf << "If{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "cond = " << this->cond->showRaw(gs, tabs + 2) << endl;
+    buf << "cond = " << this->cond->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
-    buf << "thenp = " << this->thenp->showRaw(gs, tabs + 2) << endl;
+    buf << "thenp = " << this->thenp->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
-    buf << "elsep = " << this->elsep->showRaw(gs, tabs + 2) << endl;
+    buf << "elsep = " << this->elsep->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -355,9 +355,9 @@ string Assign::showRaw(core::GlobalState &gs, int tabs) {
 
     buf << "Assign{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "lhs = " << this->lhs->showRaw(gs, tabs + 2) << endl;
+    buf << "lhs = " << this->lhs->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
-    buf << "rhs = " << this->rhs->showRaw(gs, tabs + 2) << endl;
+    buf << "rhs = " << this->rhs->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -379,9 +379,9 @@ string While::showRaw(core::GlobalState &gs, int tabs) {
 
     buf << "While{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "cond = " << this->cond->showRaw(gs, tabs + 2) << endl;
+    buf << "cond = " << this->cond->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
-    buf << "body = " << this->body->showRaw(gs, tabs + 2) << endl;
+    buf << "body = " << this->body->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -408,7 +408,7 @@ string ConstantLit::showRaw(core::GlobalState &gs, int tabs) {
 
     buf << "ConstantLit{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "scope = " << this->scope->showRaw(gs, tabs + 2) << endl;
+    buf << "scope = " << this->scope->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
     buf << "cnst = " << this->cnst.name(gs).toString(gs) << endl;
     printTabs(buf, tabs);
@@ -562,7 +562,7 @@ string NamedArg::showRaw(core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "name = " << this->name.name(gs).toString(gs) << endl;
     printTabs(buf, tabs + 1);
-    buf << "arg = " << this->arg->showRaw(gs, tabs + 2) << endl;
+    buf << "arg = " << this->arg->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -605,13 +605,13 @@ string Send::showRaw(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "recv = " << this->recv->showRaw(gs, tabs + 2) << endl;
+    buf << "recv = " << this->recv->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
     buf << "name = " << this->fun.name(gs).toString(gs) << endl;
     printTabs(buf, tabs + 1);
     buf << "block = ";
     if (this->block) {
-        buf << this->block->showRaw(gs, tabs + 2) << endl;
+        buf << this->block->showRaw(gs, tabs + 1) << endl;
     } else {
         buf << "nullptr" << endl;
     }
@@ -645,9 +645,9 @@ string Hash::showRaw(core::GlobalState &gs, int tabs) {
         printTabs(buf, tabs + 2);
         buf << "[" << endl;
         printTabs(buf, tabs + 3);
-        buf << "key = " << key->showRaw(gs, tabs + 4) << endl;
+        buf << "key = " << key->showRaw(gs, tabs + 3) << endl;
         printTabs(buf, tabs + 3);
-        buf << "value = " << value->showRaw(gs, tabs + 4) << endl;
+        buf << "value = " << value->showRaw(gs, tabs + 3) << endl;
         printTabs(buf, tabs + 2);
         buf << "]" << endl;
 
@@ -734,7 +734,7 @@ string Block::showRaw(core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "]" << endl;
     printTabs(buf, tabs + 1);
-    buf << "body = " << this->body->showRaw(gs, tabs + 2) << endl;
+    buf << "body = " << this->body->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
