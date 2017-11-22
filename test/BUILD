@@ -21,6 +21,8 @@ cc_test(
         "//core",
         "//infer",
         "//namer",
+        "//core/serialize",
+        "//payload/binary",
         "@gtest//:gtest",
         "@gtest//:gtest_main",
     ],

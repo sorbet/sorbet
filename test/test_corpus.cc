@@ -8,6 +8,8 @@
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
+#include "core/serialize/serialize.h"
+#include "payload/binary/binary.h"
 #include <algorithm>
 #include <cstdio>
 #include <dirent.h>
@@ -107,7 +109,8 @@ TEST_P(ExpectationTest, PerPhaseTest) {
     }
 
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
-    ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::GlobalState gs = ruby_typer::core::serialize::GlobalStateSerializer::load(getNameTablePayload, *console);
+    gs.freshNameId = 10000;
     ruby_typer::core::Context context(gs, gs.defn_root());
     gs.errors.keepErrorsInMemory = true;
 
