@@ -131,6 +131,10 @@ unique_ptr<Expression> mkFalse(core::Loc loc) {
     return make_unique<BoolLit>(loc, false);
 }
 
+unique_ptr<Expression> mkConstant(core::Loc loc, unique_ptr<Expression> scope, core::NameRef name) {
+    return make_unique<ConstantLit>(loc, move(scope), name);
+}
+
 pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Context ctx, core::Loc loc,
                                                                        unique_ptr<parser::Node> &argnode,
                                                                        unique_ptr<parser::Node> &bodynode) {
@@ -384,12 +388,12 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::Const *a) {
                 auto scope = node2TreeImpl(ctx, a->scope);
-                unique_ptr<Expression> res = make_unique<ConstantLit>(what->loc, move(scope), a->name);
+                unique_ptr<Expression> res = mkConstant(what->loc, move(scope), a->name);
                 result.swap(res);
             },
             [&](parser::ConstLhs *a) {
                 auto scope = node2TreeImpl(ctx, a->scope);
-                unique_ptr<Expression> res = make_unique<ConstantLit>(what->loc, move(scope), a->name);
+                unique_ptr<Expression> res = mkConstant(what->loc, move(scope), a->name);
                 result.swap(res);
             },
             [&](parser::Cbase *a) {
@@ -756,7 +760,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::IRange *ret) {
                 core::NameRef range_name = core::GlobalState::defn_Range().info(ctx).name;
-                unique_ptr<Expression> range = make_unique<ConstantLit>(what->loc, mkEmptyTree(what->loc), range_name);
+                unique_ptr<Expression> range = mkConstant(what->loc, mkEmptyTree(what->loc), range_name);
                 auto from = node2TreeImpl(ctx, ret->from);
                 auto to = node2TreeImpl(ctx, ret->to);
                 auto send = mkSend2(what->loc, range, core::Names::new_(), from, to);
@@ -773,20 +777,41 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             [&](parser::Regexp *regexpNode) {
                 unique_ptr<Expression> regexp = mkIdent(what->loc, core::GlobalState::defn_Regexp());
                 auto regex = desugarDString(ctx, what->loc, regexpNode->regex);
-                auto optsNode = node2TreeImpl(ctx, regexpNode->opts);
-                auto optString = cast_tree<StringLit>(optsNode.get());
-                Error::check(optString != nullptr);
-                unique_ptr<Expression> send;
-                if (optString->value == core::Names::empty()) {
-                    send = mkSend1(what->loc, regexp, core::Names::new_(), regex);
-                } else {
-                    send = mkSend2(what->loc, regexp, core::Names::new_(), regex, optsNode);
-                }
+                auto opts = node2TreeImpl(ctx, regexpNode->opts);
+                auto send = mkSend2(what->loc, regexp, core::Names::new_(), regex, opts);
                 result.swap(send);
             },
             [&](parser::Regopt *a) {
-                unique_ptr<Expression> res = make_unique<StringLit>(what->loc, a->opts);
-                result.swap(res);
+                unique_ptr<Expression> acc = make_unique<IntLit>(what->loc, 0);
+                for (auto &chr : a->opts) {
+                    core::NameRef name;
+                    switch (chr) {
+                        case 'i':
+                            name = core::Names::IGNORECASE();
+                            break;
+                        case 'x':
+                            name = core::Names::EXTENDED();
+                            break;
+                        case 'm':
+                            name = core::Names::MULTILINE();
+                            break;
+                        case 'n':
+                        case 'e':
+                        case 's':
+                        case 'u':
+                            // Encoding options that should already be handled by the parser
+                            break;
+                        default:
+                            // The parser already yelled about this
+                            break;
+                    }
+                    if (name._id != -1) {
+                        acc =
+                            mkSend1(what->loc, acc, core::Names::orOp(),
+                                    mkConstant(what->loc, mkIdent(what->loc, core::GlobalState::defn_Regexp()), name));
+                    }
+                }
+                result.swap(acc);
             },
             [&](parser::Return *ret) {
                 if (ret->exprs.size() > 1) {

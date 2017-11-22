@@ -159,7 +159,7 @@ NodeDef nodes[] = {
     // regular expression; string interpolation in body is flattened into the array
     {"Regexp", vector<FieldDef>({{"regex", NodeVec}, {"opts", Node}})},
     // opts of regexp
-    {"Regopt", vector<FieldDef>({{"opts", Name}})},
+    {"Regopt", vector<FieldDef>({{"opts", String}})},
     // body of a rescue
     {"Resbody", vector<FieldDef>({{"exception", Node}, {"var", Node}, {"body", Node}})},
     // begin; ..; rescue; end; rescue is an array of Resbody

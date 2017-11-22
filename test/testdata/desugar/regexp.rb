@@ -1,12 +1,17 @@
 def foo
-    /abc/ =~ "abcd"
-    Regexp.new('abc') =~ "abcd"
+    /abc/
+    Regexp.new('abc')
 
-    /abc/ix =~ "abcd"
-    Regexp.new('abc', 'ix') =~ "abcd"
+    /abc/i
+    Regexp.new('abc', Regexp::IGNORECASE)
+
+    /abc/nesuixm
+    Regexp.new('abc', 0 | Regexp::IGNORECASE | Regexp::EXTENDED | Regexp::MULTILINE)
 
     a = "a"
     c = "c"
-    /#{a}b#{c}/ =~ "abcd"
-    Regexp.new(a + 'b' + c) =~ "abcd"
+    /#{a}b#{c}/
+    Regexp.new(a + 'b' + c)
+
+    /abc/a # error: Parse Error: unknown regexp options: a
 end

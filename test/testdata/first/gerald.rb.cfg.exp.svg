@@ -96,8 +96,8 @@
 </g>
 <g id="clust18" class="cluster">
 <title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse</title>
-<polygon fill="none" stroke="#0000ff" points="16623,-8 16623,-3875.5034 25428,-3875.5034 25428,-8 16623,-8"/>
-<text text-anchor="middle" x="21025.5" y="-3860.3034" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse</text>
+<polygon fill="none" stroke="#0000ff" points="16623,-8 16623,-3899.9763 25428,-3899.9763 25428,-8 16623,-8"/>
+<text text-anchor="middle" x="21025.5" y="-3884.7763" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse</text>
 </g>
 <g id="clust19" class="cluster">
 <title>cluster_::&lt;constant:Range&gt;#initialize</title>
@@ -1425,253 +1425,255 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_0 -->
 <g id="node76" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_0</title>
-<polygon fill="none" stroke="#000000" points="21911.01,-3564.0455 22313,-3415.4677 22714.99,-3564.0455 22714.6147,-3804.4494 21911.3853,-3804.4494 21911.01,-3564.0455"/>
-<text text-anchor="middle" x="22313" y="-3738.2915" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;constant:Range&gt;$13)</text>
-<text text-anchor="middle" x="22313" y="-3724.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Regexp&gt;$8 = alias &lt;constant:Regexp&gt; : &lt;class:Regexp&gt;</text>
-<text text-anchor="middle" x="22313" y="-3710.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Range&gt;$13 = alias &lt;constant:Range&gt; : &lt;class:Range&gt;</text>
-<text text-anchor="middle" x="22313" y="-3696.2915" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Diff</text>
-<text text-anchor="middle" x="22313" y="-3682.2915" font-family="Times,serif" font-size="14.00" fill="#000000">diff = load_arg(selfMethodTemp$2#parse, 0) : untyped</text>
-<text text-anchor="middle" x="22313" y="-3668.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = ^diff [^</text>
-<text text-anchor="middle" x="22313" y="-3654.2915" font-family="Times,serif" font-size="14.00" fill="#000000">]*</text>
-<text text-anchor="middle" x="22313" y="-3640.2915" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;^diff [^\n]*\n&quot;)</text>
-<text text-anchor="middle" x="22313" y="-3626.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = m : String(&quot;m&quot;)</text>
-<text text-anchor="middle" x="22313" y="-3612.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = &lt;constant:Regexp&gt;$8.new(statTemp$9, statTemp$10) : Regexp</text>
-<text text-anchor="middle" x="22313" y="-3598.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = diff.split(statTemp$6) : untyped</text>
-<text text-anchor="middle" x="22313" y="-3584.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$14 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="22313" y="-3570.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$15 = &#45;1 : Integer(&#45;1)</text>
-<text text-anchor="middle" x="22313" y="-3556.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = &lt;constant:Range&gt;$13.new(statTemp$14, statTemp$15) : Range</text>
-<text text-anchor="middle" x="22313" y="-3542.2915" font-family="Times,serif" font-size="14.00" fill="#000000">parts = statTemp$4.[](statTemp$11) : untyped</text>
-<text text-anchor="middle" x="22313" y="-3528.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$17 = parts : untyped</text>
-<text text-anchor="middle" x="22313" y="-3514.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$17</text>
+<polygon fill="none" stroke="#000000" points="21905.6139,-3556.4913 22308,-3391.0219 22710.3861,-3556.4913 22710.0105,-3824.2264 21905.9895,-3824.2264 21905.6139,-3556.4913"/>
+<text text-anchor="middle" x="22308" y="-3752.2915" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;constant:Range&gt;$16)</text>
+<text text-anchor="middle" x="22308" y="-3738.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Regexp&gt;$8 = alias &lt;constant:Regexp&gt; : &lt;class:Regexp&gt;</text>
+<text text-anchor="middle" x="22308" y="-3724.2915" font-family="Times,serif" font-size="14.00" fill="#000000">MULTILINE$13 = alias MULTILINE : untyped</text>
+<text text-anchor="middle" x="22308" y="-3710.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Range&gt;$16 = alias &lt;constant:Range&gt; : &lt;class:Range&gt;</text>
+<text text-anchor="middle" x="22308" y="-3696.2915" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Diff</text>
+<text text-anchor="middle" x="22308" y="-3682.2915" font-family="Times,serif" font-size="14.00" fill="#000000">diff = load_arg(selfMethodTemp$2#parse, 0) : untyped</text>
+<text text-anchor="middle" x="22308" y="-3668.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = ^diff [^</text>
+<text text-anchor="middle" x="22308" y="-3654.2915" font-family="Times,serif" font-size="14.00" fill="#000000">]*</text>
+<text text-anchor="middle" x="22308" y="-3640.2915" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;^diff [^\n]*\n&quot;)</text>
+<text text-anchor="middle" x="22308" y="-3626.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = 0 : Integer(0)</text>
+<text text-anchor="middle" x="22308" y="-3612.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = statTemp$11.|(MULTILINE$13) : Integer</text>
+<text text-anchor="middle" x="22308" y="-3598.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = &lt;constant:Regexp&gt;$8.new(statTemp$9, statTemp$10) : Regexp</text>
+<text text-anchor="middle" x="22308" y="-3584.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = diff.split(statTemp$6) : untyped</text>
+<text text-anchor="middle" x="22308" y="-3570.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$17 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="22308" y="-3556.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$18 = &#45;1 : Integer(&#45;1)</text>
+<text text-anchor="middle" x="22308" y="-3542.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$14 = &lt;constant:Range&gt;$16.new(statTemp$17, statTemp$18) : Range</text>
+<text text-anchor="middle" x="22308" y="-3528.2915" font-family="Times,serif" font-size="14.00" fill="#000000">parts = statTemp$4.[](statTemp$14) : untyped</text>
+<text text-anchor="middle" x="22308" y="-3514.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$20 = parts : untyped</text>
+<text text-anchor="middle" x="22308" y="-3500.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$20</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_2 -->
 <g id="node78" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_2</title>
-<ellipse fill="none" stroke="#000000" cx="22168" cy="-3059.9276" rx="129.2916" ry="25.4118"/>
-<text text-anchor="middle" x="22168" y="-3062.7276" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;constant:Range&gt;$13)</text>
-<text text-anchor="middle" x="22168" y="-3048.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="22163" cy="-3059.9276" rx="129.2916" ry="25.4118"/>
+<text text-anchor="middle" x="22163" y="-3062.7276" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;constant:Range&gt;$16)</text>
+<text text-anchor="middle" x="22163" y="-3048.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_2 -->
 <g id="edge90" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_2</title>
-<path fill="none" stroke="#000000" d="M22262.9977,-3433.7364C22231.5943,-3310.1663 22193.94,-3161.9993 22177.0155,-3095.4028"/>
-<polygon fill="#000000" stroke="#000000" points="22180.3366,-3094.261 22174.4813,-3085.4311 22173.5523,-3095.9852 22180.3366,-3094.261"/>
+<path fill="none" stroke="#000000" d="M22252.8715,-3413.5652C22222.6066,-3294.475 22188.0502,-3158.4982 22172.0309,-3095.4634"/>
+<polygon fill="#000000" stroke="#000000" points="22175.3871,-3094.4594 22169.5318,-3085.6296 22168.6027,-3096.1836 22175.3871,-3094.4594"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_3 -->
 <g id="node79" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_3</title>
-<ellipse fill="none" stroke="#000000" cx="22458" cy="-3059.9276" rx="142.641" ry="35.2113"/>
-<text text-anchor="middle" x="22458" y="-3069.7276" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;constant:Range&gt;$13)</text>
-<text text-anchor="middle" x="22458" y="-3055.7276" font-family="Times,serif" font-size="14.00" fill="#000000">parts = NotSupported() : untyped</text>
-<text text-anchor="middle" x="22458" y="-3041.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="22453" cy="-3059.9276" rx="142.641" ry="35.2113"/>
+<text text-anchor="middle" x="22453" y="-3069.7276" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;constant:Range&gt;$16)</text>
+<text text-anchor="middle" x="22453" y="-3055.7276" font-family="Times,serif" font-size="14.00" fill="#000000">parts = NotSupported() : untyped</text>
+<text text-anchor="middle" x="22453" y="-3041.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_3 -->
 <g id="edge91" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_3</title>
-<path fill="none" stroke="#000000" d="M22363.0023,-3433.7364C22392.9349,-3315.9538 22428.5466,-3175.8245 22446.4728,-3105.2861"/>
-<polygon fill="#000000" stroke="#000000" points="22449.9156,-3105.9487 22448.9866,-3095.3947 22443.1313,-3104.2245 22449.9156,-3105.9487"/>
+<path fill="none" stroke="#000000" d="M22363.1285,-3413.5652C22391.9187,-3300.2777 22424.5925,-3171.709 22441.4981,-3105.1866"/>
+<polygon fill="#000000" stroke="#000000" points="22444.9034,-3105.9969 22443.9743,-3095.4428 22438.119,-3104.2727 22444.9034,-3105.9969"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1 -->
 <g id="node77" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1</title>
-<polygon fill="none" stroke="#000000" points="22277.551,-1956.3212 22098.5076,-1956.3212 22052.449,-1884.3212 22231.4924,-1884.3212 22277.551,-1956.3212"/>
-<text text-anchor="middle" x="22165" y="-1923.1212" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="22165" y="-1909.1212" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="22272.551,-1956.3212 22093.5076,-1956.3212 22047.449,-1884.3212 22226.4924,-1884.3212 22272.551,-1956.3212"/>
+<text text-anchor="middle" x="22160" y="-1923.1212" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="22160" y="-1909.1212" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1 -->
 <g id="edge92" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1</title>
-<path fill="none" stroke="#000000" d="M22272.2352,-1947.7684C22286.3886,-1943.0874 22295.7753,-1933.9384 22295.7753,-1920.3212 22295.7753,-1899.222 22273.2395,-1888.8499 22245.3544,-1889.205"/>
-<polygon fill="#000000" stroke="#000000" points="22245.0808,-1885.7148 22235.2961,-1889.778 22245.479,-1892.7035 22245.0808,-1885.7148"/>
+<path fill="none" stroke="#000000" d="M22267.2352,-1947.7684C22281.3886,-1943.0874 22290.7753,-1933.9384 22290.7753,-1920.3212 22290.7753,-1899.222 22268.2395,-1888.8499 22240.3544,-1889.205"/>
+<polygon fill="#000000" stroke="#000000" points="22240.0808,-1885.7148 22230.2961,-1889.778 22240.479,-1892.7035 22240.0808,-1885.7148"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_4 -->
 <g id="node80" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_4</title>
-<ellipse fill="none" stroke="#000000" cx="22313" cy="-2577.0361" rx="185.1829" ry="35.2113"/>
-<text text-anchor="middle" x="22313" y="-2586.8361" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, statTemp$19, &lt;constant:Range&gt;$13)</text>
-<text text-anchor="middle" x="22313" y="-2572.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = parts : untyped</text>
-<text text-anchor="middle" x="22313" y="-2558.8361" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="22308" cy="-2577.0361" rx="185.1829" ry="35.2113"/>
+<text text-anchor="middle" x="22308" y="-2586.8361" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, statTemp$22, &lt;constant:Range&gt;$16)</text>
+<text text-anchor="middle" x="22308" y="-2572.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$22 = parts : untyped</text>
+<text text-anchor="middle" x="22308" y="-2558.8361" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_2&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_4 -->
 <g id="edge93" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_2&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_4</title>
-<path fill="none" stroke="#000000" d="M22175.6935,-3034.3062C22199.0994,-2956.3576 22269.6637,-2721.3584 22299.4742,-2622.0809"/>
-<polygon fill="#000000" stroke="#000000" points="22302.874,-2622.9285 22302.3978,-2612.3444 22296.1697,-2620.9154 22302.874,-2622.9285"/>
+<path fill="none" stroke="#000000" d="M22170.6935,-3034.3062C22194.0994,-2956.3576 22264.6637,-2721.3584 22294.4742,-2622.0809"/>
+<polygon fill="#000000" stroke="#000000" points="22297.874,-2622.9285 22297.3978,-2612.3444 22291.1697,-2620.9154 22297.874,-2622.9285"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_3&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_4 -->
 <g id="edge94" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_3&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_4</title>
-<path fill="none" stroke="#000000" d="M22447.3378,-3024.4194C22421.4394,-2938.1703 22355.2451,-2717.7245 22326.577,-2622.2514"/>
-<polygon fill="#000000" stroke="#000000" points="22329.9059,-2621.1672 22323.6778,-2612.5963 22323.2016,-2623.1804 22329.9059,-2621.1672"/>
+<path fill="none" stroke="#000000" d="M22442.3378,-3024.4194C22416.4394,-2938.1703 22350.2451,-2717.7245 22321.577,-2622.2514"/>
+<polygon fill="#000000" stroke="#000000" points="22324.9059,-2621.1672 22318.6778,-2612.5963 22318.2016,-2623.1804 22324.9059,-2621.1672"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5 -->
 <g id="node81" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5</title>
-<ellipse fill="none" stroke="#000000" cx="22313" cy="-2331.7325" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="22313" y="-2341.5325" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="22313" y="-2327.5325" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="22313" y="-2313.5325" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="22308" cy="-2331.7325" rx="867.653" ry="35.2113"/>
+<text text-anchor="middle" x="22308" y="-2341.5325" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="22308" y="-2327.5325" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="22308" y="-2313.5325" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_4&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5 -->
 <g id="edge95" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_4&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5</title>
-<path fill="none" stroke="#000000" d="M22313,-2541.6288C22313,-2498.2417 22313,-2424.6557 22313,-2377.1441"/>
-<polygon fill="#000000" stroke="#000000" points="22316.5001,-2377.129 22313,-2367.129 22309.5001,-2377.129 22316.5001,-2377.129"/>
+<path fill="none" stroke="#000000" d="M22308,-2541.6288C22308,-2498.2417 22308,-2424.6557 22308,-2377.1441"/>
+<polygon fill="#000000" stroke="#000000" points="22311.5001,-2377.129 22308,-2367.129 22304.5001,-2377.129 22311.5001,-2377.129"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7 -->
 <g id="node82" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7</title>
-<ellipse fill="none" stroke="#000000" cx="20628" cy="-2126.0268" rx="867.653" ry="124.4016"/>
-<text text-anchor="middle" x="20628" y="-2198.8268" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="20628" y="-2184.8268" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="20628" y="-2170.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: part&gt; = load_arg(statTemp$19#map, 0) : untyped</text>
-<text text-anchor="middle" x="20628" y="-2156.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$23 = </text>
-<text text-anchor="middle" x="20628" y="-2142.8268" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;</text>
-<text text-anchor="middle" x="20628" y="-2128.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
-<text text-anchor="middle" x="20628" y="-2114.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: lines&gt; = &lt;block&#45;nested: part&gt;.split(statTemp$23) : untyped</text>
-<text text-anchor="middle" x="20628" y="-2100.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="20628" y="-2086.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: added_lines&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="20628" y="-2072.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: removed_lines&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="20628" y="-2058.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = &lt;block&#45;nested: lines&gt; : untyped</text>
-<text text-anchor="middle" x="20628" y="-2044.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="20623" cy="-2126.0268" rx="867.653" ry="124.4016"/>
+<text text-anchor="middle" x="20623" y="-2198.8268" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="20623" y="-2184.8268" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="20623" y="-2170.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: part&gt; = load_arg(statTemp$22#map, 0) : untyped</text>
+<text text-anchor="middle" x="20623" y="-2156.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$26 = </text>
+<text text-anchor="middle" x="20623" y="-2142.8268" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;</text>
+<text text-anchor="middle" x="20623" y="-2128.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
+<text text-anchor="middle" x="20623" y="-2114.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: lines&gt; = &lt;block&#45;nested: part&gt;.split(statTemp$26) : untyped</text>
+<text text-anchor="middle" x="20623" y="-2100.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="20623" y="-2086.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: added_lines&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="20623" y="-2072.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: removed_lines&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="20623" y="-2058.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$31 = &lt;block&#45;nested: lines&gt; : untyped</text>
+<text text-anchor="middle" x="20623" y="-2044.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7 -->
 <g id="edge96" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7</title>
-<path fill="none" stroke="#000000" d="M22038.0554,-2298.1671C21837.6264,-2273.6986 21557.096,-2239.4513 21298.9909,-2207.9417"/>
-<polygon fill="#000000" stroke="#000000" points="21299.3961,-2204.4653 21289.0457,-2206.7276 21298.5478,-2211.4137 21299.3961,-2204.4653"/>
+<path fill="none" stroke="#000000" d="M22033.0554,-2298.1671C21832.6264,-2273.6986 21552.096,-2239.4513 21293.9909,-2207.9417"/>
+<polygon fill="#000000" stroke="#000000" points="21294.3961,-2204.4653 21284.0457,-2206.7276 21293.5478,-2211.4137 21294.3961,-2204.4653"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_6 -->
 <g id="node83" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_6</title>
-<ellipse fill="none" stroke="#000000" cx="22165" cy="-2126.0268" rx="278.4753" ry="55.3091"/>
-<text text-anchor="middle" x="22165" y="-2149.8268" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
-<text text-anchor="middle" x="22165" y="-2135.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$18 = parts.map() : untyped</text>
-<text text-anchor="middle" x="22165" y="-2121.8268" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$18.compact() : untyped</text>
-<text text-anchor="middle" x="22165" y="-2107.8268" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$105 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="22165" y="-2093.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="22160" cy="-2126.0268" rx="278.4753" ry="55.3091"/>
+<text text-anchor="middle" x="22160" y="-2149.8268" font-family="Times,serif" font-size="14.00" fill="#000000">(parts)</text>
+<text text-anchor="middle" x="22160" y="-2135.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$21 = parts.map() : untyped</text>
+<text text-anchor="middle" x="22160" y="-2121.8268" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$21.compact() : untyped</text>
+<text text-anchor="middle" x="22160" y="-2107.8268" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$108 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="22160" y="-2093.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_6 -->
 <g id="edge97" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_6</title>
-<path fill="none" stroke="#000000" d="M22287.5579,-2296.3704C22266.3637,-2266.9126 22235.655,-2224.2305 22210.2796,-2188.9611"/>
-<polygon fill="#000000" stroke="#000000" points="22212.9685,-2186.7054 22204.2871,-2180.6321 22207.2863,-2190.7936 22212.9685,-2186.7054"/>
+<path fill="none" stroke="#000000" d="M22282.5579,-2296.3704C22261.3637,-2266.9126 22230.655,-2224.2305 22205.2796,-2188.9611"/>
+<polygon fill="#000000" stroke="#000000" points="22207.9685,-2186.7054 22199.2871,-2180.6321 22202.2863,-2190.7936 22207.9685,-2186.7054"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8 -->
 <g id="node84" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8</title>
-<ellipse fill="none" stroke="#000000" cx="20255" cy="-1920.3212" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="20255" y="-1930.1212" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="20255" y="-1916.1212" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="20255" y="-1902.1212" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="20250" cy="-1920.3212" rx="867.653" ry="35.2113"/>
+<text text-anchor="middle" x="20250" y="-1930.1212" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="20250" y="-1916.1212" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="20250" y="-1902.1212" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8 -->
 <g id="edge99" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8</title>
-<path fill="none" stroke="#000000" d="M20409.4059,-2005.4744C20380.221,-1989.3793 20352.1172,-1973.8803 20328.0702,-1960.6187"/>
-<polygon fill="#000000" stroke="#000000" points="20329.5057,-1957.4134 20319.0588,-1955.649 20326.1253,-1963.5431 20329.5057,-1957.4134"/>
+<path fill="none" stroke="#000000" d="M20404.4059,-2005.4744C20375.221,-1989.3793 20347.1172,-1973.8803 20323.0702,-1960.6187"/>
+<polygon fill="#000000" stroke="#000000" points="20324.5057,-1957.4134 20314.0588,-1955.649 20321.1253,-1963.5431 20324.5057,-1957.4134"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_6&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1 -->
 <g id="edge98" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_6&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1</title>
-<path fill="none" stroke="#000000" d="M22165,-2070.6309C22165,-2038.0227 22165,-1997.2636 22165,-1966.4186"/>
-<polygon fill="#000000" stroke="#000000" points="22168.5001,-1966.3643 22165,-1956.3643 22161.5001,-1966.3644 22168.5001,-1966.3643"/>
+<path fill="none" stroke="#000000" d="M22160,-2070.6309C22160,-2038.0227 22160,-1997.2636 22160,-1966.4186"/>
+<polygon fill="#000000" stroke="#000000" points="22163.5001,-1966.3643 22160,-1956.3643 22156.5001,-1966.3644 22163.5001,-1966.3643"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_10 -->
 <g id="node85" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_10</title>
-<ellipse fill="none" stroke="#000000" cx="19368" cy="-1754.2136" rx="867.653" ry="84.7059"/>
-<text text-anchor="middle" x="19368" y="-1799.0136" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="19368" y="-1785.0136" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="19368" y="-1771.0136" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: line&gt; = load_arg(statTemp$28#each, 0) : untyped</text>
-<text text-anchor="middle" x="19368" y="-1757.0136" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$32 = index &#160;: String(&quot;index &quot;)</text>
-<text text-anchor="middle" x="19368" y="-1743.0136" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$33 = @@ : String(&quot;@@&quot;)</text>
-<text text-anchor="middle" x="19368" y="-1729.0136" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$34 = new file mode : String(&quot;new file mode&quot;)</text>
-<text text-anchor="middle" x="19368" y="-1715.0136" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$30 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$32, statTemp$33, statTemp$34) : untyped</text>
-<text text-anchor="middle" x="19368" y="-1701.0136" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$30</text>
+<ellipse fill="none" stroke="#000000" cx="19363" cy="-1754.2136" rx="867.653" ry="84.7059"/>
+<text text-anchor="middle" x="19363" y="-1799.0136" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="19363" y="-1785.0136" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="19363" y="-1771.0136" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: line&gt; = load_arg(statTemp$31#each, 0) : untyped</text>
+<text text-anchor="middle" x="19363" y="-1757.0136" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$35 = index &#160;: String(&quot;index &quot;)</text>
+<text text-anchor="middle" x="19363" y="-1743.0136" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$36 = @@ : String(&quot;@@&quot;)</text>
+<text text-anchor="middle" x="19363" y="-1729.0136" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$37 = new file mode : String(&quot;new file mode&quot;)</text>
+<text text-anchor="middle" x="19363" y="-1715.0136" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$33 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$35, statTemp$36, statTemp$37) : untyped</text>
+<text text-anchor="middle" x="19363" y="-1701.0136" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$33</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_10 -->
 <g id="edge100" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_10</title>
-<path fill="none" stroke="#000000" d="M20070.405,-1885.7523C19985.6945,-1869.8886 19881.5917,-1850.3934 19779.7349,-1831.3188"/>
-<polygon fill="#000000" stroke="#000000" points="19780.3589,-1827.8749 19769.8855,-1829.4743 19779.0704,-1834.7552 19780.3589,-1827.8749"/>
+<path fill="none" stroke="#000000" d="M20065.405,-1885.7523C19980.6945,-1869.8886 19876.5917,-1850.3934 19774.7349,-1831.3188"/>
+<polygon fill="#000000" stroke="#000000" points="19775.3589,-1827.8749 19764.8855,-1829.4743 19774.0704,-1834.7552 19775.3589,-1827.8749"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_9 -->
 <g id="node86" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_9</title>
-<ellipse fill="none" stroke="#000000" cx="21575" cy="-1754.2136" rx="867.653" ry="55.3091"/>
-<text text-anchor="middle" x="21575" y="-1778.0136" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="21575" y="-1764.0136" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="21575" y="-1750.0136" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$27 = &lt;block&#45;nested: lines&gt;.each() : untyped</text>
-<text text-anchor="middle" x="21575" y="-1736.0136" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$93 = &lt;block&#45;nested: b_name&gt;.nil?() : untyped</text>
-<text text-anchor="middle" x="21575" y="-1722.0136" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$93</text>
+<ellipse fill="none" stroke="#000000" cx="21570" cy="-1754.2136" rx="867.653" ry="55.3091"/>
+<text text-anchor="middle" x="21570" y="-1778.0136" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="21570" y="-1764.0136" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="21570" y="-1750.0136" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$30 = &lt;block&#45;nested: lines&gt;.each() : untyped</text>
+<text text-anchor="middle" x="21570" y="-1736.0136" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$96 = &lt;block&#45;nested: b_name&gt;.nil?() : untyped</text>
+<text text-anchor="middle" x="21570" y="-1722.0136" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$96</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_9 -->
 <g id="edge101" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_9</title>
-<path fill="none" stroke="#000000" d="M20522.5192,-1886.6568C20709.5156,-1863.1254 20962.5255,-1831.2868 21173.6118,-1804.7239"/>
-<polygon fill="#000000" stroke="#000000" points="21174.1467,-1808.1843 21183.6315,-1803.463 21173.2727,-1801.2391 21174.1467,-1808.1843"/>
+<path fill="none" stroke="#000000" d="M20517.5192,-1886.6568C20704.5156,-1863.1254 20957.5255,-1831.2868 21168.6118,-1804.7239"/>
+<polygon fill="#000000" stroke="#000000" points="21169.1467,-1808.1843 21178.6315,-1803.463 21168.2727,-1801.2391 21169.1467,-1808.1843"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_11 -->
 <g id="node89" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_11</title>
-<ellipse fill="none" stroke="#000000" cx="20039" cy="-1469.312" rx="867.653" ry="45.011"/>
-<text text-anchor="middle" x="20039" y="-1486.112" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="20039" y="-1472.112" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="20039" y="-1458.112" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$35 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="20039" y="-1444.112" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="20034" cy="-1469.312" rx="867.653" ry="45.011"/>
+<text text-anchor="middle" x="20034" y="-1486.112" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="20034" y="-1472.112" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="20034" y="-1458.112" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$38 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="20034" y="-1444.112" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_10&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_11 -->
 <g id="edge104" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_10&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_11</title>
-<path fill="none" stroke="#000000" d="M19562.9823,-1671.4255C19679.9357,-1621.768 19824.6947,-1560.3044 19923.673,-1518.279"/>
-<polygon fill="#000000" stroke="#000000" points="19925.2694,-1521.4036 19933.1061,-1514.2737 19922.5336,-1514.9604 19925.2694,-1521.4036"/>
+<path fill="none" stroke="#000000" d="M19557.9823,-1671.4255C19674.9357,-1621.768 19819.6947,-1560.3044 19918.673,-1518.279"/>
+<polygon fill="#000000" stroke="#000000" points="19920.2694,-1521.4036 19928.1061,-1514.2737 19917.5336,-1514.9604 19920.2694,-1521.4036"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_12 -->
 <g id="node90" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_12</title>
-<ellipse fill="none" stroke="#000000" cx="18286" cy="-1469.312" rx="867.653" ry="55.3091"/>
-<text text-anchor="middle" x="18286" y="-1493.112" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="18286" y="-1479.112" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="18286" y="-1465.112" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$38 = &#45;&#45;&#45; : String(&quot;&#45;&#45;&#45;&quot;)</text>
-<text text-anchor="middle" x="18286" y="-1451.112" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$36 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$38) : untyped</text>
-<text text-anchor="middle" x="18286" y="-1437.112" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$36</text>
+<ellipse fill="none" stroke="#000000" cx="18281" cy="-1469.312" rx="867.653" ry="55.3091"/>
+<text text-anchor="middle" x="18281" y="-1493.112" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="18281" y="-1479.112" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="18281" y="-1465.112" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$41 = &#45;&#45;&#45; : String(&quot;&#45;&#45;&#45;&quot;)</text>
+<text text-anchor="middle" x="18281" y="-1451.112" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$39 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$41) : untyped</text>
+<text text-anchor="middle" x="18281" y="-1437.112" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$39</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_10&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_12 -->
 <g id="edge105" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_10&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_12</title>
-<path fill="none" stroke="#000000" d="M19065.8835,-1674.6632C18885.8316,-1627.2537 18661.6077,-1568.2133 18499.8581,-1525.623"/>
-<polygon fill="#000000" stroke="#000000" points="18500.3432,-1522.1315 18489.7815,-1522.9697 18498.5607,-1528.9007 18500.3432,-1522.1315"/>
+<path fill="none" stroke="#000000" d="M19060.8835,-1674.6632C18880.8316,-1627.2537 18656.6077,-1568.2133 18494.8581,-1525.623"/>
+<polygon fill="#000000" stroke="#000000" points="18495.3432,-1522.1315 18484.7815,-1522.9697 18493.5607,-1528.9007 18495.3432,-1522.1315"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_37 -->
 <g id="node87" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_37</title>
-<ellipse fill="none" stroke="#000000" cx="21792" cy="-1469.312" rx="867.653" ry="45.011"/>
-<text text-anchor="middle" x="21792" y="-1486.112" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="21792" y="-1472.112" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="21792" y="-1458.112" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$95 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="21792" y="-1444.112" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="21787" cy="-1469.312" rx="867.653" ry="45.011"/>
+<text text-anchor="middle" x="21787" y="-1486.112" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="21787" y="-1472.112" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="21787" y="-1458.112" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$98 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="21787" y="-1444.112" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_9&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_37 -->
 <g id="edge102" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_9&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_37</title>
-<path fill="none" stroke="#000000" d="M21617.0971,-1698.9439C21655.8587,-1648.0533 21712.9921,-1573.0423 21751.3032,-1522.7432"/>
-<polygon fill="#000000" stroke="#000000" points="21754.2452,-1524.6569 21757.5202,-1514.5809 21748.6766,-1520.4154 21754.2452,-1524.6569"/>
+<path fill="none" stroke="#000000" d="M21612.0971,-1698.9439C21650.8587,-1648.0533 21707.9921,-1573.0423 21746.3032,-1522.7432"/>
+<polygon fill="#000000" stroke="#000000" points="21749.2452,-1524.6569 21752.5202,-1514.5809 21743.6766,-1520.4154 21749.2452,-1524.6569"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_38 -->
 <g id="node88" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_38</title>
-<ellipse fill="none" stroke="#000000" cx="23665" cy="-1469.312" rx="987.6481" ry="164.0976"/>
-<text text-anchor="middle" x="23665" y="-1570.112" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<ellipse fill="none" stroke="#000000" cx="23665" cy="-1469.312" rx="992.5476" ry="164.0976"/>
+<text text-anchor="middle" x="23665" y="-1570.112" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="23665" y="-1556.112" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="23665" y="-1542.112" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$92 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="23665" y="-1528.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$96 = &lt;symbol:a_name&gt; : Symbol(:&quot;a_name&quot;)</text>
-<text text-anchor="middle" x="23665" y="-1514.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$98 = &lt;symbol:b_name&gt; : Symbol(:&quot;b_name&quot;)</text>
-<text text-anchor="middle" x="23665" y="-1500.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$100 = &lt;symbol:added_lines&gt; : Symbol(:&quot;added_lines&quot;)</text>
-<text text-anchor="middle" x="23665" y="-1486.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$102 = &lt;symbol:removed_lines&gt; : Symbol(:&quot;removed_lines&quot;)</text>
-<text text-anchor="middle" x="23665" y="-1472.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$104 = alias {} : HashType {</text>
+<text text-anchor="middle" x="23665" y="-1542.112" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$95 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="23665" y="-1528.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$99 = &lt;symbol:a_name&gt; : Symbol(:&quot;a_name&quot;)</text>
+<text text-anchor="middle" x="23665" y="-1514.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$101 = &lt;symbol:b_name&gt; : Symbol(:&quot;b_name&quot;)</text>
+<text text-anchor="middle" x="23665" y="-1500.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$103 = &lt;symbol:added_lines&gt; : Symbol(:&quot;added_lines&quot;)</text>
+<text text-anchor="middle" x="23665" y="-1486.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$105 = &lt;symbol:removed_lines&gt; : Symbol(:&quot;removed_lines&quot;)</text>
+<text text-anchor="middle" x="23665" y="-1472.112" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$107 = alias {} : HashType {</text>
 <text text-anchor="middle" x="23665" y="-1458.112" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
-<text text-anchor="middle" x="23665" y="-1444.112" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$20 = hashTemp$104.&lt;build&#45;hash&gt;(hashTemp$96, &lt;block&#45;nested: b_name&gt;, hashTemp$98, &lt;block&#45;nested: b_name&gt;, hashTemp$100, &lt;block&#45;nested: added_lines&gt;, hashTemp$102, &lt;block&#45;nested: removed_lines&gt;) : HashType {</text>
+<text text-anchor="middle" x="23665" y="-1444.112" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$23 = hashTemp$107.&lt;build&#45;hash&gt;(hashTemp$99, &lt;block&#45;nested: b_name&gt;, hashTemp$101, &lt;block&#45;nested: b_name&gt;, hashTemp$103, &lt;block&#45;nested: added_lines&gt;, hashTemp$105, &lt;block&#45;nested: removed_lines&gt;) : HashType {</text>
 <text text-anchor="middle" x="23665" y="-1430.112" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;Symbol(:&quot;a_name&quot;) =&gt; untyped</text>
 <text text-anchor="middle" x="23665" y="-1416.112" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;Symbol(:&quot;b_name&quot;) =&gt; untyped</text>
 <text text-anchor="middle" x="23665" y="-1402.112" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;Symbol(:&quot;added_lines&quot;) =&gt; untyped</text>
@@ -1682,105 +1684,105 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_9&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_38 -->
 <g id="edge103" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_9&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_38</title>
-<path fill="none" stroke="#000000" d="M22045.1706,-1707.8179C22238.6837,-1687.2817 22464.9055,-1661.4215 22669,-1633.3607 22766.0305,-1620.0201 22868.1657,-1604.6856 22968.552,-1588.8635"/>
-<polygon fill="#000000" stroke="#000000" points="22969.2425,-1592.2979 22978.5744,-1587.2814 22968.1509,-1585.3836 22969.2425,-1592.2979"/>
+<path fill="none" stroke="#000000" d="M22039.4864,-1707.8072C22233.1461,-1687.247 22459.6576,-1661.3722 22664,-1633.3607 22761.4046,-1620.0084 22863.9317,-1604.6779 22964.7145,-1588.867"/>
+<polygon fill="#000000" stroke="#000000" points="22965.4411,-1592.2958 22974.7765,-1587.2859 22964.3544,-1585.3807 22965.4411,-1592.2958"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_37&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5 -->
 <g id="edge140" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_37&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5</title>
-<path fill="none" stroke="#000000" d="M22039.698,-1512.741C22205.2137,-1547.3843 22401.5309,-1601.3268 22452,-1669.3607 22605.8768,-1876.7914 22580.5332,-2026.4581 22452,-2250.4776 22442.7275,-2266.6387 22428.86,-2279.8925 22413.4191,-2290.6575"/>
-<polygon fill="#000000" stroke="#000000" points="22411.1357,-2287.9698 22404.6982,-2296.3846 22414.9782,-2293.8209 22411.1357,-2287.9698"/>
+<path fill="none" stroke="#000000" d="M22034.698,-1512.741C22200.2137,-1547.3843 22396.5309,-1601.3268 22447,-1669.3607 22600.8768,-1876.7914 22575.5332,-2026.4581 22447,-2250.4776 22437.7275,-2266.6387 22423.86,-2279.8925 22408.4191,-2290.6575"/>
+<polygon fill="#000000" stroke="#000000" points="22406.1357,-2287.9698 22399.6982,-2296.3846 22409.9782,-2293.8209 22406.1357,-2287.9698"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_38&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5 -->
 <g id="edge141" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_38&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5</title>
-<path fill="none" stroke="#000000" d="M23454.7549,-1629.7233C23228.6131,-1797.7486 22854.5651,-2062.8291 22507,-2250.4776 22478.5861,-2265.8181 22446.654,-2280.2559 22417.0245,-2292.5842"/>
-<polygon fill="#000000" stroke="#000000" points="22415.4055,-2289.4657 22407.4928,-2296.5113 22418.0721,-2295.938 22415.4055,-2289.4657"/>
+<path fill="none" stroke="#000000" d="M23453.7356,-1629.6403C23226.5244,-1797.5964 22850.7848,-2062.6199 22502,-2250.4776 22473.5708,-2265.7898 22441.6339,-2280.2188 22412.0048,-2292.5478"/>
+<polygon fill="#000000" stroke="#000000" points="22410.3857,-2289.4294 22402.4734,-2296.4753 22413.0527,-2295.9014 22410.3857,-2289.4294"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_11&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8 -->
 <g id="edge106" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_11&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8</title>
-<path fill="none" stroke="#000000" d="M20107.9988,-1514.5367C20155.9133,-1550.2402 20216.1383,-1604.7209 20245,-1669.3607 20274.7497,-1735.9895 20269.8785,-1822.7465 20262.9366,-1874.8458"/>
-<polygon fill="#000000" stroke="#000000" points="20259.4655,-1874.3957 20261.5303,-1884.7873 20266.3965,-1875.3762 20259.4655,-1874.3957"/>
+<path fill="none" stroke="#000000" d="M20102.9988,-1514.5367C20150.9133,-1550.2402 20211.1383,-1604.7209 20240,-1669.3607 20269.7497,-1735.9895 20264.8785,-1822.7465 20257.9366,-1874.8458"/>
+<polygon fill="#000000" stroke="#000000" points="20254.4655,-1874.3957 20256.5303,-1884.7873 20261.3965,-1875.3762 20254.4655,-1874.3957"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_13 -->
 <g id="node91" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_13</title>
-<ellipse fill="none" stroke="#000000" cx="18286" cy="-1184.4104" rx="867.653" ry="84.7059"/>
-<text text-anchor="middle" x="18286" y="-1229.2104" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
-<text text-anchor="middle" x="18286" y="-1215.2104" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="18286" y="-1201.2104" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$43 = 4 : Integer(4)</text>
-<text text-anchor="middle" x="18286" y="-1187.2104" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$44 = &#45;1 : Integer(&#45;1)</text>
-<text text-anchor="middle" x="18286" y="-1173.2104" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$41 = &lt;constant:Range&gt;$13.new(statTemp$43, statTemp$44) : Range</text>
-<text text-anchor="middle" x="18286" y="-1159.2104" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: a_name&gt; = &lt;block&#45;nested: line&gt;.[](statTemp$41) : untyped</text>
-<text text-anchor="middle" x="18286" y="-1145.2104" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$46 = &lt;block&#45;nested: b_name&gt; : untyped</text>
-<text text-anchor="middle" x="18286" y="-1131.2104" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$46</text>
+<ellipse fill="none" stroke="#000000" cx="18281" cy="-1184.4104" rx="867.653" ry="84.7059"/>
+<text text-anchor="middle" x="18281" y="-1229.2104" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
+<text text-anchor="middle" x="18281" y="-1215.2104" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="18281" y="-1201.2104" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$46 = 4 : Integer(4)</text>
+<text text-anchor="middle" x="18281" y="-1187.2104" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$47 = &#45;1 : Integer(&#45;1)</text>
+<text text-anchor="middle" x="18281" y="-1173.2104" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$44 = &lt;constant:Range&gt;$16.new(statTemp$46, statTemp$47) : Range</text>
+<text text-anchor="middle" x="18281" y="-1159.2104" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: a_name&gt; = &lt;block&#45;nested: line&gt;.[](statTemp$44) : untyped</text>
+<text text-anchor="middle" x="18281" y="-1145.2104" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$49 = &lt;block&#45;nested: b_name&gt; : untyped</text>
+<text text-anchor="middle" x="18281" y="-1131.2104" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$49</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_12&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_13 -->
 <g id="edge107" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_12&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_13</title>
-<path fill="none" stroke="#000000" d="M18286,-1414.0423C18286,-1375.9056 18286,-1324.2235 18286,-1279.5464"/>
-<polygon fill="#000000" stroke="#000000" points="18289.5001,-1279.5386 18286,-1269.5386 18282.5001,-1279.5387 18289.5001,-1279.5386"/>
+<path fill="none" stroke="#000000" d="M18281,-1414.0423C18281,-1375.9056 18281,-1324.2235 18281,-1279.5464"/>
+<polygon fill="#000000" stroke="#000000" points="18284.5001,-1279.5386 18281,-1269.5386 18277.5001,-1279.5387 18284.5001,-1279.5386"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_14 -->
 <g id="node92" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_14</title>
 <ellipse fill="none" stroke="#000000" cx="21025" cy="-1184.4104" rx="867.653" ry="55.3091"/>
-<text text-anchor="middle" x="21025" y="-1208.2104" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="21025" y="-1208.2104" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="21025" y="-1194.2104" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="21025" y="-1180.2104" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$56 = +++ : String(&quot;+++&quot;)</text>
-<text text-anchor="middle" x="21025" y="-1166.2104" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$54 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$56) : untyped</text>
-<text text-anchor="middle" x="21025" y="-1152.2104" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$54</text>
+<text text-anchor="middle" x="21025" y="-1180.2104" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$59 = +++ : String(&quot;+++&quot;)</text>
+<text text-anchor="middle" x="21025" y="-1166.2104" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$57 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$59) : untyped</text>
+<text text-anchor="middle" x="21025" y="-1152.2104" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$57</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_12&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_14 -->
 <g id="edge108" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_12&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_14</title>
-<path fill="none" stroke="#000000" d="M18525.9909,-1416.2985C18701.3447,-1379.5404 18945.3437,-1332.4768 19162,-1305.2632 19524.0376,-1259.7887 19927.9348,-1230.9385 20266.8631,-1212.8853"/>
-<polygon fill="#000000" stroke="#000000" points="20267.071,-1216.3793 20276.8715,-1212.3543 20266.7001,-1209.3891 20267.071,-1216.3793"/>
+<path fill="none" stroke="#000000" d="M18520.9894,-1416.2872C18696.3426,-1379.5236 18940.3414,-1332.458 19157,-1305.2632 19520.3085,-1259.661 19925.6582,-1230.7899 20265.6689,-1212.7558"/>
+<polygon fill="#000000" stroke="#000000" points="20265.9078,-1216.2482 20275.7092,-1212.2254 20265.5384,-1209.2579 20265.9078,-1216.2482"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_15 -->
 <g id="node93" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_15</title>
 <ellipse fill="none" stroke="#000000" cx="19272" cy="-978.7048" rx="867.653" ry="55.3091"/>
-<text text-anchor="middle" x="19272" y="-1002.5048" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="19272" y="-1002.5048" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="19272" y="-988.5048" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="19272" y="-974.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$48 = a/ : String(&quot;a/&quot;)</text>
-<text text-anchor="middle" x="19272" y="-960.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$45 = &lt;block&#45;nested: b_name&gt;.start_with?(statTemp$48) : untyped</text>
+<text text-anchor="middle" x="19272" y="-974.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$51 = a/ : String(&quot;a/&quot;)</text>
+<text text-anchor="middle" x="19272" y="-960.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$48 = &lt;block&#45;nested: b_name&gt;.start_with?(statTemp$51) : untyped</text>
 <text text-anchor="middle" x="19272" y="-946.5048" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_13&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_15 -->
 <g id="edge109" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_13&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_15</title>
-<path fill="none" stroke="#000000" d="M18654.5522,-1107.5207C18772.4264,-1082.929 18900.4566,-1056.2185 19009.2124,-1033.5292"/>
-<polygon fill="#000000" stroke="#000000" points="19009.9316,-1036.9546 19019.006,-1031.486 19008.5019,-1030.1021 19009.9316,-1036.9546"/>
+<path fill="none" stroke="#000000" d="M18651.0687,-1107.5938C18769.7033,-1082.9684 18898.6063,-1056.2115 19008.0609,-1033.4916"/>
+<polygon fill="#000000" stroke="#000000" points="19008.8374,-1036.9051 19017.9173,-1031.4457 19007.4146,-1030.0512 19008.8374,-1036.9051"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_16 -->
 <g id="node94" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_16</title>
 <ellipse fill="none" stroke="#000000" cx="17519" cy="-978.7048" rx="867.653" ry="45.011"/>
-<text text-anchor="middle" x="17519" y="-995.5048" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="17519" y="-995.5048" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="17519" y="-981.5048" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="17519" y="-967.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$45 = &lt;block&#45;nested: b_name&gt; : untyped</text>
+<text text-anchor="middle" x="17519" y="-967.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$48 = &lt;block&#45;nested: b_name&gt; : untyped</text>
 <text text-anchor="middle" x="17519" y="-953.5048" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_13&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_16 -->
 <g id="edge110" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_13&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_16</title>
-<path fill="none" stroke="#000000" d="M17988.6345,-1104.6584C17889.1678,-1077.9819 17781.5494,-1049.1192 17694.4583,-1025.7618"/>
-<polygon fill="#000000" stroke="#000000" points="17695.3172,-1022.3686 17684.7519,-1023.1586 17693.5039,-1029.1296 17695.3172,-1022.3686"/>
+<path fill="none" stroke="#000000" d="M17985.3003,-1104.5848C17886.7099,-1077.9698 17780.0867,-1049.1864 17693.7134,-1025.8695"/>
+<polygon fill="#000000" stroke="#000000" points="17694.3855,-1022.4257 17683.8189,-1023.1984 17692.561,-1029.1838 17694.3855,-1022.4257"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_21 -->
 <g id="node95" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_21</title>
 <ellipse fill="none" stroke="#000000" cx="21025" cy="-978.7048" rx="867.653" ry="84.7059"/>
-<text text-anchor="middle" x="21025" y="-1023.5048" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="21025" y="-1023.5048" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="21025" y="-1009.5048" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="21025" y="-995.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$61 = 4 : Integer(4)</text>
-<text text-anchor="middle" x="21025" y="-981.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$62 = &#45;1 : Integer(&#45;1)</text>
-<text text-anchor="middle" x="21025" y="-967.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$59 = &lt;constant:Range&gt;$13.new(statTemp$61, statTemp$62) : Range</text>
-<text text-anchor="middle" x="21025" y="-953.5048" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = &lt;block&#45;nested: line&gt;.[](statTemp$59) : untyped</text>
-<text text-anchor="middle" x="21025" y="-939.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$64 = &lt;block&#45;nested: b_name&gt; : untyped</text>
-<text text-anchor="middle" x="21025" y="-925.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$64</text>
+<text text-anchor="middle" x="21025" y="-995.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$64 = 4 : Integer(4)</text>
+<text text-anchor="middle" x="21025" y="-981.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$65 = &#45;1 : Integer(&#45;1)</text>
+<text text-anchor="middle" x="21025" y="-967.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$62 = &lt;constant:Range&gt;$16.new(statTemp$64, statTemp$65) : Range</text>
+<text text-anchor="middle" x="21025" y="-953.5048" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = &lt;block&#45;nested: line&gt;.[](statTemp$62) : untyped</text>
+<text text-anchor="middle" x="21025" y="-939.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$67 = &lt;block&#45;nested: b_name&gt; : untyped</text>
+<text text-anchor="middle" x="21025" y="-925.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$67</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_14&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_21 -->
 <g id="edge111" class="edge">
@@ -1792,11 +1794,11 @@
 <g id="node96" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_22</title>
 <ellipse fill="none" stroke="#000000" cx="22778" cy="-978.7048" rx="867.653" ry="55.3091"/>
-<text text-anchor="middle" x="22778" y="-1002.5048" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="22778" y="-1002.5048" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="22778" y="-988.5048" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="22778" y="-974.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$74 = + : String(&quot;+&quot;)</text>
-<text text-anchor="middle" x="22778" y="-960.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$72 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$74) : untyped</text>
-<text text-anchor="middle" x="22778" y="-946.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$72</text>
+<text text-anchor="middle" x="22778" y="-974.5048" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$77 = + : String(&quot;+&quot;)</text>
+<text text-anchor="middle" x="22778" y="-960.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$75 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$77) : untyped</text>
+<text text-anchor="middle" x="22778" y="-946.5048" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$75</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_14&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_22 -->
 <g id="edge112" class="edge">
@@ -1808,9 +1810,9 @@
 <g id="node97" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_17</title>
 <ellipse fill="none" stroke="#000000" cx="17519" cy="-802.6976" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="17519" y="-812.4976" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="17519" y="-812.4976" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="17519" y="-798.4976" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="17519" y="-784.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$45</text>
+<text text-anchor="middle" x="17519" y="-784.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$48</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_15&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_17 -->
 <g id="edge113" class="edge">
@@ -1828,10 +1830,10 @@
 <g id="node102" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_23</title>
 <ellipse fill="none" stroke="#000000" cx="19272" cy="-802.6976" rx="867.653" ry="55.3091"/>
-<text text-anchor="middle" x="19272" y="-826.4976" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="19272" y="-826.4976" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="19272" y="-812.4976" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="19272" y="-798.4976" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$66 = b/ : String(&quot;b/&quot;)</text>
-<text text-anchor="middle" x="19272" y="-784.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$63 = &lt;block&#45;nested: b_name&gt;.start_with?(statTemp$66) : untyped</text>
+<text text-anchor="middle" x="19272" y="-798.4976" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$69 = b/ : String(&quot;b/&quot;)</text>
+<text text-anchor="middle" x="19272" y="-784.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$66 = &lt;block&#45;nested: b_name&gt;.start_with?(statTemp$69) : untyped</text>
 <text text-anchor="middle" x="19272" y="-770.4976" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_21&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_23 -->
@@ -1844,9 +1846,9 @@
 <g id="node103" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_24</title>
 <ellipse fill="none" stroke="#000000" cx="21025" cy="-802.6976" rx="867.653" ry="45.011"/>
-<text text-anchor="middle" x="21025" y="-819.4976" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="21025" y="-819.4976" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="21025" y="-805.4976" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="21025" y="-791.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$63 = &lt;block&#45;nested: b_name&gt; : untyped</text>
+<text text-anchor="middle" x="21025" y="-791.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$66 = &lt;block&#45;nested: b_name&gt; : untyped</text>
 <text text-anchor="middle" x="21025" y="-777.4976" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_21&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_24 -->
@@ -1859,13 +1861,13 @@
 <g id="node104" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_29</title>
 <ellipse fill="none" stroke="#000000" cx="22778" cy="-420.9848" rx="867.653" ry="84.7059"/>
-<text text-anchor="middle" x="22778" y="-465.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="22778" y="-465.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="22778" y="-451.7848" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="22778" y="-437.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$80 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="22778" y="-423.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$81 = &#45;1 : Integer(&#45;1)</text>
-<text text-anchor="middle" x="22778" y="-409.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$78 = &lt;constant:Range&gt;$13.new(statTemp$80, statTemp$81) : Range</text>
-<text text-anchor="middle" x="22778" y="-395.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$76 = &lt;block&#45;nested: line&gt;.[](statTemp$78) : untyped</text>
-<text text-anchor="middle" x="22778" y="-381.7848" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$29 = &lt;block&#45;nested: added_lines&gt;.&lt;&lt;(statTemp$76) : untyped</text>
+<text text-anchor="middle" x="22778" y="-437.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$83 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="22778" y="-423.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$84 = &#45;1 : Integer(&#45;1)</text>
+<text text-anchor="middle" x="22778" y="-409.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$81 = &lt;constant:Range&gt;$16.new(statTemp$83, statTemp$84) : Range</text>
+<text text-anchor="middle" x="22778" y="-395.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$79 = &lt;block&#45;nested: line&gt;.[](statTemp$81) : untyped</text>
+<text text-anchor="middle" x="22778" y="-381.7848" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$32 = &lt;block&#45;nested: added_lines&gt;.&lt;&lt;(statTemp$79) : untyped</text>
 <text text-anchor="middle" x="22778" y="-367.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_22&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_29 -->
@@ -1878,11 +1880,11 @@
 <g id="node105" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_30</title>
 <ellipse fill="none" stroke="#000000" cx="22799" cy="-802.6976" rx="867.653" ry="55.3091"/>
-<text text-anchor="middle" x="22799" y="-826.4976" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="22799" y="-826.4976" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="22799" y="-812.4976" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="22799" y="-798.4976" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$84 = &#45; : String(&quot;&#45;&quot;)</text>
-<text text-anchor="middle" x="22799" y="-784.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$82 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$84) : untyped</text>
-<text text-anchor="middle" x="22799" y="-770.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$82</text>
+<text text-anchor="middle" x="22799" y="-798.4976" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$87 = &#45; : String(&quot;&#45;&quot;)</text>
+<text text-anchor="middle" x="22799" y="-784.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$85 = &lt;block&#45;nested: line&gt;.start_with?(statTemp$87) : untyped</text>
+<text text-anchor="middle" x="22799" y="-770.4976" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$85</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_22&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_30 -->
 <g id="edge123" class="edge">
@@ -1894,12 +1896,12 @@
 <g id="node98" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_18</title>
 <ellipse fill="none" stroke="#000000" cx="19272" cy="-626.6905" rx="867.653" ry="74.9067"/>
-<text text-anchor="middle" x="19272" y="-664.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="19272" y="-664.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="19272" y="-650.4905" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="19272" y="-636.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$52 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="19272" y="-622.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$53 = &#45;1 : Integer(&#45;1)</text>
-<text text-anchor="middle" x="19272" y="-608.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$50 = &lt;constant:Range&gt;$13.new(statTemp$52, statTemp$53) : Range</text>
-<text text-anchor="middle" x="19272" y="-594.4905" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: a_name&gt; = &lt;block&#45;nested: b_name&gt;.[](statTemp$50) : untyped</text>
+<text text-anchor="middle" x="19272" y="-636.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$55 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="19272" y="-622.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$56 = &#45;1 : Integer(&#45;1)</text>
+<text text-anchor="middle" x="19272" y="-608.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$53 = &lt;constant:Range&gt;$16.new(statTemp$55, statTemp$56) : Range</text>
+<text text-anchor="middle" x="19272" y="-594.4905" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: a_name&gt; = &lt;block&#45;nested: b_name&gt;.[](statTemp$53) : untyped</text>
 <text text-anchor="middle" x="19272" y="-580.4905" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_17&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_18 -->
@@ -1912,9 +1914,9 @@
 <g id="node99" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_19</title>
 <ellipse fill="none" stroke="#000000" cx="17519" cy="-626.6905" rx="867.653" ry="45.011"/>
-<text text-anchor="middle" x="17519" y="-643.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="17519" y="-643.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="17519" y="-629.4905" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="17519" y="-615.4905" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$29 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="17519" y="-615.4905" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$32 = NotSupported() : untyped</text>
 <text text-anchor="middle" x="17519" y="-601.4905" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_17&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_19 -->
@@ -1927,7 +1929,7 @@
 <g id="node100" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_20</title>
 <ellipse fill="none" stroke="#000000" cx="17519" cy="-420.9848" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="17519" y="-430.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="17519" y="-430.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="17519" y="-416.7848" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="17519" y="-402.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -1947,7 +1949,7 @@
 <g id="node101" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_36</title>
 <ellipse fill="none" stroke="#000000" cx="17519" cy="-51.3553" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="17519" y="-61.1553" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="17519" y="-61.1553" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="17519" y="-47.1553" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="17519" y="-33.1553" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -1960,16 +1962,16 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_36&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8 -->
 <g id="edge139" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_36&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8</title>
-<path fill="none" stroke="#000000" d="M17077.449,-81.7943C16855.0512,-109.7409 16632,-163.1114 16632,-264.7767 16632,-1469.312 16632,-1469.312 16632,-1469.312 16632,-1756.8468 18452.2003,-1863.3583 19512.2747,-1901.0083"/>
-<polygon fill="#000000" stroke="#000000" points="19512.2596,-1904.5099 19522.3771,-1901.3658 19512.5072,-1897.5142 19512.2596,-1904.5099"/>
+<path fill="none" stroke="#000000" d="M17077.449,-81.7943C16855.0512,-109.7409 16632,-163.1114 16632,-264.7767 16632,-1469.312 16632,-1469.312 16632,-1469.312 16632,-1756.4807 18450.0003,-1863.1491 19508.5723,-1900.9186"/>
+<polygon fill="#000000" stroke="#000000" points="19508.5423,-1904.4197 19518.6604,-1901.2773 19508.7911,-1897.4241 19508.5423,-1904.4197"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_25 -->
 <g id="node106" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_25</title>
 <ellipse fill="none" stroke="#000000" cx="21025" cy="-626.6905" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="21025" y="-636.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="21025" y="-636.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="21025" y="-622.4905" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="21025" y="-608.4905" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$63</text>
+<text text-anchor="middle" x="21025" y="-608.4905" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$66</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_23&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_25 -->
 <g id="edge124" class="edge">
@@ -1987,7 +1989,7 @@
 <g id="node111" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_34</title>
 <ellipse fill="none" stroke="#000000" cx="22778" cy="-264.7767" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="22778" y="-274.5767" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="22778" y="-274.5767" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="22778" y="-260.5767" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="22778" y="-246.5767" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -2001,13 +2003,13 @@
 <g id="node112" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_31</title>
 <ellipse fill="none" stroke="#000000" cx="24552" cy="-626.6905" rx="867.653" ry="84.7059"/>
-<text text-anchor="middle" x="24552" y="-671.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="24552" y="-671.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="24552" y="-657.4905" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="24552" y="-643.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$90 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="24552" y="-629.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$91 = &#45;1 : Integer(&#45;1)</text>
-<text text-anchor="middle" x="24552" y="-615.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$88 = &lt;constant:Range&gt;$13.new(statTemp$90, statTemp$91) : Range</text>
-<text text-anchor="middle" x="24552" y="-601.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$86 = &lt;block&#45;nested: line&gt;.[](statTemp$88) : untyped</text>
-<text text-anchor="middle" x="24552" y="-587.4905" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$29 = &lt;block&#45;nested: removed_lines&gt;.&lt;&lt;(statTemp$86) : untyped</text>
+<text text-anchor="middle" x="24552" y="-643.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$93 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="24552" y="-629.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$94 = &#45;1 : Integer(&#45;1)</text>
+<text text-anchor="middle" x="24552" y="-615.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$91 = &lt;constant:Range&gt;$16.new(statTemp$93, statTemp$94) : Range</text>
+<text text-anchor="middle" x="24552" y="-601.4905" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$89 = &lt;block&#45;nested: line&gt;.[](statTemp$91) : untyped</text>
+<text text-anchor="middle" x="24552" y="-587.4905" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$32 = &lt;block&#45;nested: removed_lines&gt;.&lt;&lt;(statTemp$89) : untyped</text>
 <text text-anchor="middle" x="24552" y="-573.4905" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_30&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_31 -->
@@ -2020,9 +2022,9 @@
 <g id="node113" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_32</title>
 <ellipse fill="none" stroke="#000000" cx="22799" cy="-626.6905" rx="867.653" ry="45.011"/>
-<text text-anchor="middle" x="22799" y="-643.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="22799" y="-643.4905" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="22799" y="-629.4905" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="22799" y="-615.4905" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$29 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="22799" y="-615.4905" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$32 = NotSupported() : untyped</text>
 <text text-anchor="middle" x="22799" y="-601.4905" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_30&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_32 -->
@@ -2035,13 +2037,13 @@
 <g id="node107" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_26</title>
 <ellipse fill="none" stroke="#000000" cx="19272" cy="-420.9848" rx="867.653" ry="84.7059"/>
-<text text-anchor="middle" x="19272" y="-465.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="19272" y="-465.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="19272" y="-451.7848" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="19272" y="-437.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$67 = &lt;block&#45;nested: b_name&gt; : untyped</text>
-<text text-anchor="middle" x="19272" y="-423.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$70 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="19272" y="-409.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$71 = &#45;1 : Integer(&#45;1)</text>
-<text text-anchor="middle" x="19272" y="-395.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$68 = &lt;constant:Range&gt;$13.new(statTemp$70, statTemp$71) : Range</text>
-<text text-anchor="middle" x="19272" y="-381.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = statTemp$67.[](statTemp$68) : untyped</text>
+<text text-anchor="middle" x="19272" y="-437.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$70 = &lt;block&#45;nested: b_name&gt; : untyped</text>
+<text text-anchor="middle" x="19272" y="-423.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$73 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="19272" y="-409.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$74 = &#45;1 : Integer(&#45;1)</text>
+<text text-anchor="middle" x="19272" y="-395.7848" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$71 = &lt;constant:Range&gt;$16.new(statTemp$73, statTemp$74) : Range</text>
+<text text-anchor="middle" x="19272" y="-381.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = statTemp$70.[](statTemp$71) : untyped</text>
 <text text-anchor="middle" x="19272" y="-367.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_25&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_26 -->
@@ -2054,9 +2056,9 @@
 <g id="node108" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_27</title>
 <ellipse fill="none" stroke="#000000" cx="21025" cy="-420.9848" rx="867.653" ry="45.011"/>
-<text text-anchor="middle" x="21025" y="-437.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="21025" y="-437.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="21025" y="-423.7848" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="21025" y="-409.7848" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$29 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="21025" y="-409.7848" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$32 = NotSupported() : untyped</text>
 <text text-anchor="middle" x="21025" y="-395.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_25&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_27 -->
@@ -2069,7 +2071,7 @@
 <g id="node109" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_28</title>
 <ellipse fill="none" stroke="#000000" cx="20148" cy="-264.7767" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="20148" y="-274.5767" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="20148" y="-274.5767" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="20148" y="-260.5767" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="20148" y="-246.5767" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -2089,7 +2091,7 @@
 <g id="node110" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_35</title>
 <ellipse fill="none" stroke="#000000" cx="20148" cy="-158.066" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="20148" y="-167.866" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="20148" y="-167.866" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="20148" y="-153.866" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="20148" y="-139.866" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -2115,7 +2117,7 @@
 <g id="node114" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_33</title>
 <ellipse fill="none" stroke="#000000" cx="24531" cy="-420.9848" rx="867.653" ry="35.2113"/>
-<text text-anchor="middle" x="24531" y="-430.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$19, statTemp$28, &lt;constant:Range&gt;$13, ifTemp$45, ifTemp$63)</text>
+<text text-anchor="middle" x="24531" y="-430.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$22, statTemp$31, &lt;constant:Range&gt;$16, ifTemp$48, ifTemp$66)</text>
 <text text-anchor="middle" x="24531" y="-416.7848" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
 <text text-anchor="middle" x="24531" y="-402.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -2168,4 +2170,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 3128689ae516471a33ac243529d368dc4ffde869cc727e5f1b037c8fc5db709e -->
+<!-- ruby-types:sha256: 569b00ca3b99a0a56a8419a7c8c5d589c947c76a0e2e4806c0929b790bd6ce18 -->

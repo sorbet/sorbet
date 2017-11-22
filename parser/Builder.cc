@@ -819,7 +819,7 @@ public:
     }
 
     unique_ptr<Node> regexp_options(const token *regopt) {
-        return make_unique<Regopt>(tok_loc(regopt), gs_.enterNameUTF8(regopt->string()));
+        return make_unique<Regopt>(tok_loc(regopt), regopt->string());
     }
 
     unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> exc_list, const token *assoc,

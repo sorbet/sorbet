@@ -147,7 +147,7 @@ module Opus::CIBot::Gerald
     end
 
     private def parse(diff)
-      parts = diff.split(/^diff [^\n]*\n/m)[
+      parts = diff.split(/^diff [^\n]*\n/m)[ # error: Stubbing out unknown constant
         1..-1]
       parts ||= []
       parts.map do |part|

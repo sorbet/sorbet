@@ -187,7 +187,7 @@ begin
 
       self(<constant:<todo sym>>).private(def parse<<constant:<todo sym>>>(diff)
           begin
-            parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", "m")).[](<emptyTree>::<constant:Range>.new(1, -1))
+            parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", 0.|(::<constant:Regexp>::MULTILINE))).[](<emptyTree>::<constant:Range>.new(1, -1))
             if parts
               parts
             else
