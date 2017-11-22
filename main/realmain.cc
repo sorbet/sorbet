@@ -8,12 +8,12 @@
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
-#include "rbi/payload.h"
+#include "payload/binary/binary.h"
+#include "payload/text/text.h"
 #include "spdlog/spdlog.h"
 #include <algorithm> // find
 #include <ctime>
 #include <cxxopts.hpp>
-#include "main/payload.h"
 #include <iostream>
 #include <memory>
 #include <string>
