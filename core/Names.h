@@ -39,7 +39,7 @@ public:
 
     NameRef() : _id(-1){};
 
-    NameRef(unsigned int id) : _id(id) {}
+    constexpr NameRef(unsigned int id) : _id(id) {}
 
     NameRef(const NameRef &nm) = default;
 

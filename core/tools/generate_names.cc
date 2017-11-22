@@ -55,6 +55,10 @@ NameDef names[] = {
     {"all"},
     {"any"},
     {"nilable"},
+    {"untyped"},
+    {"arrayOf", "array_of"},
+    {"hashOf", "hash_of"},
+    {"noreturn"},
     {"declareVariables", "declare_variables"},
     // end standard_method keywords
 
@@ -89,7 +93,7 @@ NameDef names[] = {
 
 void emit_name_header(ostream &out, NameDef &name) {
     out << "    // \"" << name.val << "\"" << endl;
-    out << "    static inline NameRef " << name.srcName << "() {" << endl;
+    out << "    static inline constexpr NameRef " << name.srcName << "() {" << endl;
     out << "        return NameRef(" << name.id << ");" << endl;
     out << "    }" << endl;
     out << endl;
