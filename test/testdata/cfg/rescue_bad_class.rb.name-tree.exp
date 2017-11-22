@@ -1,0 +1,8 @@
+def foo<foo>()
+  begin
+    <emptyTree>
+  rescue ::<constant:NotAClass> => e
+    <emptyTree>
+  else
+    <emptyTree>
+  end

@@ -77,6 +77,13 @@ Return::Return(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), ex
 
 Yield::Yield(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {}
 
+RescueCase::RescueCase(core::Loc loc, EXCEPTION_store &exceptions, unique_ptr<Expression> var,
+                       unique_ptr<Expression> body)
+    : Expression(loc), exceptions(move(exceptions)), var(move(var)), body(move(body)) {}
+
+Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store &rescueCases, unique_ptr<Expression> else_)
+    : Expression(loc), body(move(body)), rescueCases(move(rescueCases)), else_(move(else_)) {}
+
 Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
     Error::check(symbol.exists());
 }
@@ -583,12 +590,82 @@ string Assign::toString(core::GlobalState &gs, int tabs) {
     return this->lhs->toString(gs, tabs) + " = " + this->rhs->toString(gs, tabs);
 }
 
+string RescueCase::toString(core::GlobalState &gs, int tabs) {
+    stringstream buf;
+    buf << "rescue";
+    if (this->exceptions.size() > 0) {
+        bool first = true;
+        for (auto &exception : this->exceptions) {
+            if (first) {
+                first = false;
+                buf << " ";
+            } else {
+                buf << ", ";
+            }
+            buf << exception->toString(gs, tabs);
+        }
+        buf << " => " << this->var->toString(gs, tabs);
+    }
+    buf << endl;
+    printTabs(buf, tabs);
+    buf << this->body->toString(gs, tabs);
+    return buf.str();
+}
+
+string RescueCase::showRaw(core::GlobalState &gs, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "exceptions = [" << endl;
+    for (auto &a : exceptions) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(gs, tabs + 2) << endl;
+    }
+    printTabs(buf, tabs + 1);
+    buf << "]" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "var = " << this->var->showRaw(gs, tabs + 1) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "body = " << this->body->showRaw(gs, tabs + 1) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
 string Rescue::toString(core::GlobalState &gs, int tabs) {
-    return "Rescue";
+    stringstream buf;
+    buf << this->body->toString(gs, tabs) << endl;
+    for (auto &rescueCase : this->rescueCases) {
+        printTabs(buf, tabs - 1);
+        buf << rescueCase->toString(gs, tabs) << endl;
+    }
+    if (this->else_) {
+        printTabs(buf, tabs - 1);
+        buf << "else" << endl;
+        printTabs(buf, tabs);
+        buf << this->else_->toString(gs, tabs);
+    }
+    return buf.str();
 }
 
 string Rescue::showRaw(core::GlobalState &gs, int tabs) {
-    return "Rescue";
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "body = " << this->body->showRaw(gs, tabs + 1) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "rescueCases = [" << endl;
+    for (auto &a : rescueCases) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(gs, tabs + 2) << endl;
+    }
+    printTabs(buf, tabs + 1);
+    buf << "]" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "else = " << this->else_->showRaw(gs, tabs + 1) << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
 }
 
 string Send::toString(core::GlobalState &gs, int tabs) {
@@ -780,6 +857,9 @@ string NotSupported::showRaw(core::GlobalState &gs, int tabs) {
     return "Not Supported{ why = " + why + " }";
 }
 
+string RescueCase::nodeName() {
+    return "RescueCase";
+}
 string Rescue::nodeName() {
     return "Rescue";
 }

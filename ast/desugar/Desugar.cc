@@ -841,6 +841,37 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     result.swap(res);
                 }
             },
+            [&](parser::Rescue *rescue) {
+                Rescue::RESCUE_CASE_store cases;
+                for (auto &node : rescue->rescue) {
+                    unique_ptr<Expression> rescueCaseExpr = node2TreeImpl(ctx, node);
+                    auto rescueCase = cast_tree<ast::RescueCase>(rescueCaseExpr.get());
+                    DEBUG_ONLY(Error::check(rescueCase != nullptr));
+                    cases.emplace_back(rescueCase);
+                    rescueCaseExpr.release();
+                }
+                unique_ptr<Expression> res = make_unique<Rescue>(what->loc, node2TreeImpl(ctx, rescue->body), cases,
+                                                                 node2TreeImpl(ctx, rescue->else_));
+                result.swap(res);
+            },
+            [&](parser::Resbody *resbody) {
+                RescueCase::EXCEPTION_store exceptions;
+                auto exceptionsExpr = node2TreeImpl(ctx, resbody->exception);
+                if (cast_tree<EmptyTree>(exceptionsExpr.get()) != nullptr) {
+                    // No exceptions captured
+                } else {
+                    auto exceptionsArray = cast_tree<ast::Array>(exceptionsExpr.get());
+                    DEBUG_ONLY(Error::check(exceptionsArray != nullptr));
+
+                    for (auto &elem : exceptionsArray->elems) {
+                        exceptions.emplace_back(move(elem));
+                    }
+                }
+
+                unique_ptr<Expression> res = make_unique<RescueCase>(
+                    what->loc, exceptions, node2TreeImpl(ctx, resbody->var), node2TreeImpl(ctx, resbody->body));
+                result.swap(res);
+            },
             [&](parser::If *a) {
                 auto cond = node2TreeImpl(ctx, a->condition);
                 auto thenp = node2TreeImpl(ctx, a->then_);

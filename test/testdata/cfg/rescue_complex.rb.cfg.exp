@@ -1,0 +1,636 @@
+digraph "rescue_complex.rb"{
+subgraph "cluster_::<constant:Object>#multiple_rescue" {
+    label = "::<constant:Object>#multiple_rescue";
+    color = blue;
+    "bb::<constant:Object>#multiple_rescue_0" [shape = invhouse];
+    "bb::<constant:Object>#multiple_rescue_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#multiple_rescue_0" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#multiple_rescue_0" -> "bb::<constant:Object>#multiple_rescue_2";
+    "bb::<constant:Object>#multiple_rescue_0" -> "bb::<constant:Object>#multiple_rescue_3";
+
+    "bb::<constant:Object>#multiple_rescue_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_1" -> "bb::<constant:Object>#multiple_rescue_1";
+    "bb::<constant:Object>#multiple_rescue_2" [label = "(returnMethodTemp$1)
+statTemp$4 = self : Object
+returnMethodTemp$1 = statTemp$4.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_2" -> "bb::<constant:Object>#multiple_rescue_4";
+    "bb::<constant:Object>#multiple_rescue_3" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#multiple_rescue_3" -> "bb::<constant:Object>#multiple_rescue_5";
+    "bb::<constant:Object>#multiple_rescue_3" -> "bb::<constant:Object>#multiple_rescue_6";
+
+    "bb::<constant:Object>#multiple_rescue_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_4" -> "bb::<constant:Object>#multiple_rescue_1";
+    "bb::<constant:Object>#multiple_rescue_5" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+statTemp$5 = self : Object
+returnMethodTemp$1 = statTemp$5.baz() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_5" -> "bb::<constant:Object>#multiple_rescue_4";
+    "bb::<constant:Object>#multiple_rescue_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#multiple_rescue_6" -> "bb::<constant:Object>#multiple_rescue_7";
+    "bb::<constant:Object>#multiple_rescue_6" -> "bb::<constant:Object>#multiple_rescue_8";
+
+    "bb::<constant:Object>#multiple_rescue_7" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+statTemp$6 = self : Object
+returnMethodTemp$1 = statTemp$6.bar() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_7" -> "bb::<constant:Object>#multiple_rescue_4";
+    "bb::<constant:Object>#multiple_rescue_8" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#multiple_rescue_8" -> "bb::<constant:Object>#multiple_rescue_9";
+    "bb::<constant:Object>#multiple_rescue_8" -> "bb::<constant:Object>#multiple_rescue_4";
+
+    "bb::<constant:Object>#multiple_rescue_9" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_9" -> "bb::<constant:Object>#multiple_rescue_4";
+}
+
+subgraph "cluster_::<constant:Object>#multiple_rescue_classes" {
+    label = "::<constant:Object>#multiple_rescue_classes";
+    color = blue;
+    "bb::<constant:Object>#multiple_rescue_classes_0" [shape = invhouse];
+    "bb::<constant:Object>#multiple_rescue_classes_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#multiple_rescue_classes_0" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#multiple_rescue_classes_0" -> "bb::<constant:Object>#multiple_rescue_classes_2";
+    "bb::<constant:Object>#multiple_rescue_classes_0" -> "bb::<constant:Object>#multiple_rescue_classes_3";
+
+    "bb::<constant:Object>#multiple_rescue_classes_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_classes_1" -> "bb::<constant:Object>#multiple_rescue_classes_1";
+    "bb::<constant:Object>#multiple_rescue_classes_2" [label = "(returnMethodTemp$1)
+statTemp$4 = self : Object
+returnMethodTemp$1 = statTemp$4.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_classes_2" -> "bb::<constant:Object>#multiple_rescue_classes_4";
+    "bb::<constant:Object>#multiple_rescue_classes_3" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#multiple_rescue_classes_3" -> "bb::<constant:Object>#multiple_rescue_classes_5";
+    "bb::<constant:Object>#multiple_rescue_classes_3" -> "bb::<constant:Object>#multiple_rescue_classes_6";
+
+    "bb::<constant:Object>#multiple_rescue_classes_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_classes_4" -> "bb::<constant:Object>#multiple_rescue_classes_1";
+    "bb::<constant:Object>#multiple_rescue_classes_5" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = baz : NilClass
+returnMethodTemp$1 = baz : NilClass
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_classes_5" -> "bb::<constant:Object>#multiple_rescue_classes_4";
+    "bb::<constant:Object>#multiple_rescue_classes_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#multiple_rescue_classes_6" -> "bb::<constant:Object>#multiple_rescue_classes_7";
+    "bb::<constant:Object>#multiple_rescue_classes_6" -> "bb::<constant:Object>#multiple_rescue_classes_4";
+
+    "bb::<constant:Object>#multiple_rescue_classes_7" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#multiple_rescue_classes_7" -> "bb::<constant:Object>#multiple_rescue_classes_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_rescue_ensure" {
+    label = "::<constant:Object>#parse_rescue_ensure";
+    color = blue;
+    "bb::<constant:Object>#parse_rescue_ensure_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_rescue_ensure_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_rescue_ensure_0" [label = "()
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_ensure_0" -> "bb::<constant:Object>#parse_rescue_ensure_1";
+    "bb::<constant:Object>#parse_rescue_ensure_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_ensure_1" -> "bb::<constant:Object>#parse_rescue_ensure_1";
+}
+
+subgraph "cluster_::<constant:Object>#parse_bug_rescue_empty_else" {
+    label = "::<constant:Object>#parse_bug_rescue_empty_else";
+    color = blue;
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_0" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_0" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_2";
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_0" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_3";
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_1" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_1";
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_2" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_2" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_4";
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_3" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_3" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_5";
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_3" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_6";
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$4 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_4" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_1";
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_5" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_5" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_4";
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_6" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_7";
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_6" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_4";
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_7" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_7" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_ruby_bug_12686" {
+    label = "::<constant:Object>#parse_ruby_bug_12686";
+    color = blue;
+    "bb::<constant:Object>#parse_ruby_bug_12686_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_ruby_bug_12686_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_0" [label = "(statTemp$3)
+statTemp$3 = self : Object
+rescueTemp$5"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_0" -> "bb::<constant:Object>#parse_ruby_bug_12686_2";
+    "bb::<constant:Object>#parse_ruby_bug_12686_0" -> "bb::<constant:Object>#parse_ruby_bug_12686_3";
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_1" -> "bb::<constant:Object>#parse_ruby_bug_12686_1";
+    "bb::<constant:Object>#parse_ruby_bug_12686_2" [label = "(statTemp$4, statTemp$3)
+statTemp$6 = self : Object
+statTemp$4 = statTemp$6.g() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_2" -> "bb::<constant:Object>#parse_ruby_bug_12686_4";
+    "bb::<constant:Object>#parse_ruby_bug_12686_3" [label = "(statTemp$3)
+rescueTemp$5"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_3" -> "bb::<constant:Object>#parse_ruby_bug_12686_5";
+    "bb::<constant:Object>#parse_ruby_bug_12686_3" -> "bb::<constant:Object>#parse_ruby_bug_12686_6";
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_4" [label = "(statTemp$4, statTemp$3)
+returnMethodTemp$1 = statTemp$3.f(statTemp$4) : untyped
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_4" -> "bb::<constant:Object>#parse_ruby_bug_12686_1";
+    "bb::<constant:Object>#parse_ruby_bug_12686_5" [label = "(statTemp$4, statTemp$3)
+statTemp$4 = NotSupported() : untyped
+statTemp$4 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_5" -> "bb::<constant:Object>#parse_ruby_bug_12686_4";
+    "bb::<constant:Object>#parse_ruby_bug_12686_6" [label = "(statTemp$3)
+rescueTemp$5"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_6" -> "bb::<constant:Object>#parse_ruby_bug_12686_7";
+    "bb::<constant:Object>#parse_ruby_bug_12686_6" -> "bb::<constant:Object>#parse_ruby_bug_12686_4";
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_7" [label = "(statTemp$4, statTemp$3)
+statTemp$4 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12686_7" -> "bb::<constant:Object>#parse_ruby_bug_12686_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_rescue_mod" {
+    label = "::<constant:Object>#parse_rescue_mod";
+    color = blue;
+    "bb::<constant:Object>#parse_rescue_mod_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_rescue_mod_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_rescue_mod_0" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_rescue_mod_0" -> "bb::<constant:Object>#parse_rescue_mod_2";
+    "bb::<constant:Object>#parse_rescue_mod_0" -> "bb::<constant:Object>#parse_rescue_mod_3";
+
+    "bb::<constant:Object>#parse_rescue_mod_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_mod_1" -> "bb::<constant:Object>#parse_rescue_mod_1";
+    "bb::<constant:Object>#parse_rescue_mod_2" [label = "(returnMethodTemp$1)
+statTemp$4 = self : Object
+returnMethodTemp$1 = statTemp$4.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_mod_2" -> "bb::<constant:Object>#parse_rescue_mod_4";
+    "bb::<constant:Object>#parse_rescue_mod_3" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_rescue_mod_3" -> "bb::<constant:Object>#parse_rescue_mod_5";
+    "bb::<constant:Object>#parse_rescue_mod_3" -> "bb::<constant:Object>#parse_rescue_mod_6";
+
+    "bb::<constant:Object>#parse_rescue_mod_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$6 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_mod_4" -> "bb::<constant:Object>#parse_rescue_mod_1";
+    "bb::<constant:Object>#parse_rescue_mod_5" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+statTemp$5 = self : Object
+returnMethodTemp$1 = statTemp$5.bar() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_mod_5" -> "bb::<constant:Object>#parse_rescue_mod_4";
+    "bb::<constant:Object>#parse_rescue_mod_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_rescue_mod_6" -> "bb::<constant:Object>#parse_rescue_mod_7";
+    "bb::<constant:Object>#parse_rescue_mod_6" -> "bb::<constant:Object>#parse_rescue_mod_4";
+
+    "bb::<constant:Object>#parse_rescue_mod_7" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_mod_7" -> "bb::<constant:Object>#parse_rescue_mod_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_resbody_list_var" {
+    label = "::<constant:Object>#parse_resbody_list_var";
+    color = blue;
+    "bb::<constant:Object>#parse_resbody_list_var_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_resbody_list_var_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_resbody_list_var_0" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_list_var_0" -> "bb::<constant:Object>#parse_resbody_list_var_2";
+    "bb::<constant:Object>#parse_resbody_list_var_0" -> "bb::<constant:Object>#parse_resbody_list_var_3";
+
+    "bb::<constant:Object>#parse_resbody_list_var_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_list_var_1" -> "bb::<constant:Object>#parse_resbody_list_var_1";
+    "bb::<constant:Object>#parse_resbody_list_var_2" [label = "(returnMethodTemp$1)
+statTemp$4 = self : Object
+returnMethodTemp$1 = statTemp$4.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_list_var_2" -> "bb::<constant:Object>#parse_resbody_list_var_4";
+    "bb::<constant:Object>#parse_resbody_list_var_3" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_list_var_3" -> "bb::<constant:Object>#parse_resbody_list_var_5";
+    "bb::<constant:Object>#parse_resbody_list_var_3" -> "bb::<constant:Object>#parse_resbody_list_var_6";
+
+    "bb::<constant:Object>#parse_resbody_list_var_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$6 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_list_var_4" -> "bb::<constant:Object>#parse_resbody_list_var_1";
+    "bb::<constant:Object>#parse_resbody_list_var_5" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = ex : NilClass
+statTemp$5 = self : Object
+returnMethodTemp$1 = statTemp$5.bar() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_list_var_5" -> "bb::<constant:Object>#parse_resbody_list_var_4";
+    "bb::<constant:Object>#parse_resbody_list_var_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_list_var_6" -> "bb::<constant:Object>#parse_resbody_list_var_7";
+    "bb::<constant:Object>#parse_resbody_list_var_6" -> "bb::<constant:Object>#parse_resbody_list_var_4";
+
+    "bb::<constant:Object>#parse_resbody_list_var_7" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_list_var_7" -> "bb::<constant:Object>#parse_resbody_list_var_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_rescue_else_ensure" {
+    label = "::<constant:Object>#parse_rescue_else_ensure";
+    color = blue;
+    "bb::<constant:Object>#parse_rescue_else_ensure_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_rescue_else_ensure_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_rescue_else_ensure_0" [label = "()
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_else_ensure_0" -> "bb::<constant:Object>#parse_rescue_else_ensure_1";
+    "bb::<constant:Object>#parse_rescue_else_ensure_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_else_ensure_1" -> "bb::<constant:Object>#parse_rescue_else_ensure_1";
+}
+
+subgraph "cluster_::<constant:Object>#parse_rescue" {
+    label = "::<constant:Object>#parse_rescue";
+    color = blue;
+    "bb::<constant:Object>#parse_rescue_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_rescue_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_rescue_0" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_rescue_0" -> "bb::<constant:Object>#parse_rescue_2";
+    "bb::<constant:Object>#parse_rescue_0" -> "bb::<constant:Object>#parse_rescue_3";
+
+    "bb::<constant:Object>#parse_rescue_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_1" -> "bb::<constant:Object>#parse_rescue_1";
+    "bb::<constant:Object>#parse_rescue_2" [label = "(returnMethodTemp$1)
+statTemp$4 = self : Object
+returnMethodTemp$1 = statTemp$4.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_2" -> "bb::<constant:Object>#parse_rescue_4";
+    "bb::<constant:Object>#parse_rescue_3" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_rescue_3" -> "bb::<constant:Object>#parse_rescue_5";
+    "bb::<constant:Object>#parse_rescue_3" -> "bb::<constant:Object>#parse_rescue_6";
+
+    "bb::<constant:Object>#parse_rescue_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$6 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_4" -> "bb::<constant:Object>#parse_rescue_1";
+    "bb::<constant:Object>#parse_rescue_5" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+statTemp$5 = self : Object
+returnMethodTemp$1 = statTemp$5.foo() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_5" -> "bb::<constant:Object>#parse_rescue_4";
+    "bb::<constant:Object>#parse_rescue_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_rescue_6" -> "bb::<constant:Object>#parse_rescue_7";
+    "bb::<constant:Object>#parse_rescue_6" -> "bb::<constant:Object>#parse_rescue_4";
+
+    "bb::<constant:Object>#parse_rescue_7" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_7" -> "bb::<constant:Object>#parse_rescue_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_resbody_var" {
+    label = "::<constant:Object>#parse_resbody_var";
+    color = blue;
+    "bb::<constant:Object>#parse_resbody_var_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_resbody_var_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_resbody_var_0" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_var_0" -> "bb::<constant:Object>#parse_resbody_var_2";
+    "bb::<constant:Object>#parse_resbody_var_0" -> "bb::<constant:Object>#parse_resbody_var_3";
+
+    "bb::<constant:Object>#parse_resbody_var_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_1" -> "bb::<constant:Object>#parse_resbody_var_1";
+    "bb::<constant:Object>#parse_resbody_var_2" [label = "(returnMethodTemp$1)
+statTemp$4 = self : Object
+returnMethodTemp$1 = statTemp$4.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_2" -> "bb::<constant:Object>#parse_resbody_var_4";
+    "bb::<constant:Object>#parse_resbody_var_3" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_var_3" -> "bb::<constant:Object>#parse_resbody_var_5";
+    "bb::<constant:Object>#parse_resbody_var_3" -> "bb::<constant:Object>#parse_resbody_var_6";
+
+    "bb::<constant:Object>#parse_resbody_var_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$6 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_4" -> "bb::<constant:Object>#parse_resbody_var_1";
+    "bb::<constant:Object>#parse_resbody_var_5" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = ex : NilClass
+statTemp$5 = self : Object
+returnMethodTemp$1 = statTemp$5.bar() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_5" -> "bb::<constant:Object>#parse_resbody_var_4";
+    "bb::<constant:Object>#parse_resbody_var_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_var_6" -> "bb::<constant:Object>#parse_resbody_var_7";
+    "bb::<constant:Object>#parse_resbody_var_6" -> "bb::<constant:Object>#parse_resbody_var_4";
+
+    "bb::<constant:Object>#parse_resbody_var_7" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_7" -> "bb::<constant:Object>#parse_resbody_var_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_resbody_var_1" {
+    label = "::<constant:Object>#parse_resbody_var_1";
+    color = blue;
+    "bb::<constant:Object>#parse_resbody_var_1_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_resbody_var_1_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_resbody_var_1_0" [label = "(@ex$5)
+@ex$5 = alias @ex : untyped
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_var_1_0" -> "bb::<constant:Object>#parse_resbody_var_1_2";
+    "bb::<constant:Object>#parse_resbody_var_1_0" -> "bb::<constant:Object>#parse_resbody_var_1_3";
+
+    "bb::<constant:Object>#parse_resbody_var_1_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_1_1" -> "bb::<constant:Object>#parse_resbody_var_1_1";
+    "bb::<constant:Object>#parse_resbody_var_1_2" [label = "(returnMethodTemp$1)
+statTemp$4 = self : Object
+returnMethodTemp$1 = statTemp$4.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_1_2" -> "bb::<constant:Object>#parse_resbody_var_1_4";
+    "bb::<constant:Object>#parse_resbody_var_1_3" [label = "(@ex$5)
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_var_1_3" -> "bb::<constant:Object>#parse_resbody_var_1_5";
+    "bb::<constant:Object>#parse_resbody_var_1_3" -> "bb::<constant:Object>#parse_resbody_var_1_6";
+
+    "bb::<constant:Object>#parse_resbody_var_1_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_1_4" -> "bb::<constant:Object>#parse_resbody_var_1_1";
+    "bb::<constant:Object>#parse_resbody_var_1_5" [label = "(returnMethodTemp$1, @ex$5)
+returnMethodTemp$1 = @ex$5 : untyped
+statTemp$6 = self : Object
+returnMethodTemp$1 = statTemp$6.bar() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_1_5" -> "bb::<constant:Object>#parse_resbody_var_1_4";
+    "bb::<constant:Object>#parse_resbody_var_1_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_resbody_var_1_6" -> "bb::<constant:Object>#parse_resbody_var_1_7";
+    "bb::<constant:Object>#parse_resbody_var_1_6" -> "bb::<constant:Object>#parse_resbody_var_1_4";
+
+    "bb::<constant:Object>#parse_resbody_var_1_7" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_resbody_var_1_7" -> "bb::<constant:Object>#parse_resbody_var_1_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_rescue_mod_op_assign" {
+    label = "::<constant:Object>#parse_rescue_mod_op_assign";
+    color = blue;
+    "bb::<constant:Object>#parse_rescue_mod_op_assign_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_rescue_mod_op_assign_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_rescue_mod_op_assign_0" [label = "()
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_mod_op_assign_0" -> "bb::<constant:Object>#parse_rescue_mod_op_assign_1";
+    "bb::<constant:Object>#parse_rescue_mod_op_assign_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_rescue_mod_op_assign_1" -> "bb::<constant:Object>#parse_rescue_mod_op_assign_1";
+}
+
+subgraph "cluster_::<constant:Object>#parse_ruby_bug_12402" {
+    label = "::<constant:Object>#parse_ruby_bug_12402";
+    color = blue;
+    "bb::<constant:Object>#parse_ruby_bug_12402_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_ruby_bug_12402_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_0" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_0" -> "bb::<constant:Object>#parse_ruby_bug_12402_2";
+    "bb::<constant:Object>#parse_ruby_bug_12402_0" -> "bb::<constant:Object>#parse_ruby_bug_12402_3";
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_1" -> "bb::<constant:Object>#parse_ruby_bug_12402_1";
+    "bb::<constant:Object>#parse_ruby_bug_12402_2" [label = "(foo)
+statTemp$4 = self : Object
+statTemp$6 = self : Object
+statTemp$5 = statTemp$6.bar() : untyped
+foo = statTemp$4.raise(statTemp$5) : NilClass
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_2" -> "bb::<constant:Object>#parse_ruby_bug_12402_4";
+    "bb::<constant:Object>#parse_ruby_bug_12402_3" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_3" -> "bb::<constant:Object>#parse_ruby_bug_12402_5";
+    "bb::<constant:Object>#parse_ruby_bug_12402_3" -> "bb::<constant:Object>#parse_ruby_bug_12402_6";
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_4" [label = "(foo)
+returnMethodTemp$7 = return foo : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_4" -> "bb::<constant:Object>#parse_ruby_bug_12402_1";
+    "bb::<constant:Object>#parse_ruby_bug_12402_5" [label = "(foo)
+foo = NotSupported() : untyped
+foo = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_5" -> "bb::<constant:Object>#parse_ruby_bug_12402_4";
+    "bb::<constant:Object>#parse_ruby_bug_12402_6" [label = "()
+rescueTemp$3"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_6" -> "bb::<constant:Object>#parse_ruby_bug_12402_7";
+    "bb::<constant:Object>#parse_ruby_bug_12402_6" -> "bb::<constant:Object>#parse_ruby_bug_12402_4";
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_7" [label = "(foo)
+foo = NotSupported() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_7" -> "bb::<constant:Object>#parse_ruby_bug_12402_4";
+}
+
+subgraph "cluster_::<constant:Object>#parse_ruby_bug_12402_1" {
+    label = "::<constant:Object>#parse_ruby_bug_12402_1";
+    color = blue;
+    "bb::<constant:Object>#parse_ruby_bug_12402_1_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_ruby_bug_12402_1_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_1_0" [label = "()
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_1_0" -> "bb::<constant:Object>#parse_ruby_bug_12402_1_1";
+    "bb::<constant:Object>#parse_ruby_bug_12402_1_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_1_1" -> "bb::<constant:Object>#parse_ruby_bug_12402_1_1";
+}
+
+subgraph "cluster_::<constant:Object>#parse_ruby_bug_12402_2" {
+    label = "::<constant:Object>#parse_ruby_bug_12402_2";
+    color = blue;
+    "bb::<constant:Object>#parse_ruby_bug_12402_2_0" [shape = invhouse];
+    "bb::<constant:Object>#parse_ruby_bug_12402_2_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_2_0" [label = "()
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_2_0" -> "bb::<constant:Object>#parse_ruby_bug_12402_2_1";
+    "bb::<constant:Object>#parse_ruby_bug_12402_2_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#parse_ruby_bug_12402_2_1" -> "bb::<constant:Object>#parse_ruby_bug_12402_2_1";
+}
+
+}
+

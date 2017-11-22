@@ -42,6 +42,7 @@ NameDef names[] = {
     {"blockReturnTemp"},
     {"selfMethodTemp"},
     {"hashTemp"},
+    {"rescueTemp"},
     // end CFG temporaries
 
     {"include"},

@@ -166,14 +166,33 @@ public:
     virtual std::string nodeName();
 };
 
+class RescueCase final : public Expression {
+public:
+    static constexpr int EXPECTED_EXCEPTION_COUNT = 1;
+    typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_EXCEPTION_COUNT> EXCEPTION_store;
+
+    EXCEPTION_store exceptions;
+    std::unique_ptr<Expression> var;
+    std::unique_ptr<Expression> body;
+
+    RescueCase(core::Loc loc, EXCEPTION_store &exceptions, std::unique_ptr<Expression> var,
+               std::unique_ptr<Expression> body);
+    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+};
+
 class Rescue final : public Expression {
 public:
-    std::unique_ptr<Expression> body;
-    core::SymbolRef binder;
-    core::SymbolRef binder_type;
-    std::unique_ptr<Expression> handler;
+    static constexpr int EXPECTED_RESCUE_CASE_COUNT = 1;
+    typedef InlinedVector<std::unique_ptr<RescueCase>, EXPECTED_RESCUE_CASE_COUNT> RESCUE_CASE_store;
 
-    Rescue(core::Loc loc);
+    std::unique_ptr<Expression> body;
+    RESCUE_CASE_store rescueCases;
+    std::unique_ptr<Expression> else_;
+
+    Rescue(core::Loc loc, std::unique_ptr<Expression> body, RESCUE_CASE_store &rescueCases,
+           std::unique_ptr<Expression> else_);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
