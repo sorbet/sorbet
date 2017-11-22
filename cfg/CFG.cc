@@ -739,7 +739,7 @@ string BasicBlock::toString(core::Context ctx) {
         if (exp.tpe) {
             buf << " : " << Strings::escapeCString(exp.tpe->toString(ctx));
         }
-        buf << endl; // intentional! graphviz will do interpolation.
+        buf << endl;
     }
     if (this->bexit.cond.exists()) {
         buf << this->bexit.cond.name.name(ctx).toString(ctx);
