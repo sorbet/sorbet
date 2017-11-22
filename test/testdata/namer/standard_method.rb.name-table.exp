@@ -1,5 +1,5 @@
 class <constant:A> < ::<constant:Object> ()
-  method f (a, b, c, d, e) -> T2
+  method f (a, b, c, d, e, f, g, h) -> T2
     argument a<> -> ArrayType {
           0 = T1
           0 = T2
@@ -8,6 +8,10 @@ class <constant:A> < ::<constant:Object> ()
     argument c<> -> T1 | NilClass
     argument d<> -> T1 | T2
     argument e<> -> untyped
+    argument f<> -> untyped
+    argument g<> -> Array
+    argument h<> -> Hash
+  method noreturn () -> <bottom>
 class <constant:T1> < ::<constant:Object> ()
 class <constant:T2> < ::<constant:Object> ()
 class <singleton class:<constant:A>> (<constant:Class>)
