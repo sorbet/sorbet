@@ -1,14 +1,3 @@
-class Integer
-  standard_method(
-    {
-      o: Integer,
-    },
-    returns: Opus::Types.any(Integer)
-  )
-  def +(o)
-  end
-end
-
 class Examples
   def i_like_ifs()
     if true
