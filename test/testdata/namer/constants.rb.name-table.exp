@@ -2,5 +2,4 @@ class <constant:A> ()
   class <constant:B> ()
     static-field <constant:C> -> untyped
     static-field <constant:D> -> untyped
-class <constant:Opus> ()
 

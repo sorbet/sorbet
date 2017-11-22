@@ -8,6 +8,4 @@ class <constant:Examples> < ::<constant:Object> ()
   method variables ()
   method variables_and_loop ()
   method variables_loop_if ()
-class <constant:Opus> ()
-class <singleton class:<constant:Integer>> (<constant:Class>)
 

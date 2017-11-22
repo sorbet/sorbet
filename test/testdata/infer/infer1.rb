@@ -1,25 +1,3 @@
-class String
-  standard_method(
-    {
-      i: Integer,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
-  )
-  def getbyte(i)
-  end
-end
-
-class Integer
-  standard_method(
-    {
-      o: Integer,
-    },
-    returns: Opus::Types.any(Integer)
-  )
-  def +(o)
-  end
-end
-
 def baz1
   a = "foo"
   b = a.getbyte(a) # error: does not match expected type

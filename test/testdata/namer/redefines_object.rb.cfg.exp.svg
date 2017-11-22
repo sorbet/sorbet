@@ -19,8 +19,8 @@
 <title>bb::&lt;constant:Trigger&gt;#trigger_0</title>
 <polygon fill="none" stroke="#000000" points="16.194,-162.6714 335,-124.0619 653.806,-162.6714 653.5084,-225.1428 16.4916,-225.1428 16.194,-162.6714"/>
 <text text-anchor="middle" x="335" y="-196.7381" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="335" y="-182.7381" font-family="Times,serif" font-size="14.00" fill="#000000">@__fake_logger$2 = alias @__fake_logger : untyped</text>
-<text text-anchor="middle" x="335" y="-168.7381" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return @__fake_logger$2 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="335" y="-182.7381" font-family="Times,serif" font-size="14.00" fill="#000000">@__fake_logger$3 = alias @__fake_logger : untyped</text>
+<text text-anchor="middle" x="335" y="-168.7381" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return @__fake_logger$3 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="335" y="-154.7381" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Trigger&gt;#trigger_1 -->
@@ -44,4 +44,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 00532c74df1b4bcfa488656ecdb9a89f55a54de27e8a42520300d83cc4806a2b -->
+<!-- ruby-types:sha256: fc04152a01b69633ce0025b8ae3466dcac3ff514a8021ec59ff34aadb8d95f4f -->

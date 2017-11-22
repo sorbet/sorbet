@@ -55,8 +55,8 @@ bool SymbolRef::isSynthetic() const {
     return this->_id <= GlobalState::defn_last_synthetic_sym()._id;
 }
 
-bool SymbolRef::isHiddenFromPrinting() const {
-    return isSynthetic() && *this != GlobalState::defn_Opus();
+bool SymbolRef::isHiddenFromPrinting(GlobalState &gs) const {
+    return (isSynthetic() && *this != GlobalState::defn_Opus()) || info(gs).definitionLoc.file.file(gs).isPayload;
 }
 
 void printTabs(ostringstream &to, int count) {
@@ -135,7 +135,7 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
     for (auto pair : members) {
         if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass())
             continue;
-        if (pair.second.isHiddenFromPrinting())
+        if (pair.second.isHiddenFromPrinting(gs))
             continue;
 
         children.push_back(pair.second.toString(gs, tabs + 1));

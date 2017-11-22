@@ -24,11 +24,11 @@
 <title>bb::&lt;constant:Foo&gt;#baz_0</title>
 <polygon fill="none" stroke="#000000" points="16.1318,-462.0798 348,-397.96 679.8682,-462.0798 679.5585,-565.8278 16.4415,-565.8278 16.1318,-462.0798"/>
 <text text-anchor="middle" x="348" y="-528.555" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="348" y="-514.555" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$1 = self : Foo</text>
-<text text-anchor="middle" x="348" y="-500.555" font-family="Times,serif" font-size="14.00" fill="#000000">a = load_arg(selfMethodTemp$1#baz, 0) : untyped</text>
-<text text-anchor="middle" x="348" y="-486.555" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$2 = self : Foo</text>
-<text text-anchor="middle" x="348" y="-472.555" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$2.puts(a) : untyped</text>
-<text text-anchor="middle" x="348" y="-458.555" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="348" y="-514.555" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Foo</text>
+<text text-anchor="middle" x="348" y="-500.555" font-family="Times,serif" font-size="14.00" fill="#000000">a = load_arg(selfMethodTemp$2#baz, 0) : untyped</text>
+<text text-anchor="middle" x="348" y="-486.555" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = self : Foo</text>
+<text text-anchor="middle" x="348" y="-472.555" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$3.puts(a) : untyped</text>
+<text text-anchor="middle" x="348" y="-458.555" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="348" y="-444.555" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#baz_1 -->
@@ -54,17 +54,17 @@
 <g id="node3" class="node">
 <title>bb::&lt;constant:Bar&gt;#baz_0</title>
 <polygon fill="none" stroke="#000000" points="726.4037,-469.6339 990,-422.4056 1253.5963,-469.6339 1253.3502,-546.0509 726.6498,-546.0509 726.4037,-469.6339"/>
-<text text-anchor="middle" x="990" y="-514.555" font-family="Times,serif" font-size="14.00" fill="#000000">(b, statTemp$2)</text>
-<text text-anchor="middle" x="990" y="-500.555" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$1 = self : Bar</text>
-<text text-anchor="middle" x="990" y="-486.555" font-family="Times,serif" font-size="14.00" fill="#000000">b = load_arg(selfMethodTemp$1#baz, 0) : untyped</text>
-<text text-anchor="middle" x="990" y="-472.555" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$2 = self : Bar</text>
+<text text-anchor="middle" x="990" y="-514.555" font-family="Times,serif" font-size="14.00" fill="#000000">(b, statTemp$3)</text>
+<text text-anchor="middle" x="990" y="-500.555" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Bar</text>
+<text text-anchor="middle" x="990" y="-486.555" font-family="Times,serif" font-size="14.00" fill="#000000">b = load_arg(selfMethodTemp$2#baz, 0) : untyped</text>
+<text text-anchor="middle" x="990" y="-472.555" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = self : Bar</text>
 <text text-anchor="middle" x="990" y="-458.555" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#baz_2 -->
 <g id="node5" class="node">
 <title>bb::&lt;constant:Bar&gt;#baz_2</title>
 <ellipse fill="none" stroke="#000000" cx="990" cy="-326.1076" rx="73.7055" ry="35.2113"/>
-<text text-anchor="middle" x="990" y="-335.9076" font-family="Times,serif" font-size="14.00" fill="#000000">(b, statTemp$2)</text>
+<text text-anchor="middle" x="990" y="-335.9076" font-family="Times,serif" font-size="14.00" fill="#000000">(b, statTemp$3)</text>
 <text text-anchor="middle" x="990" y="-321.9076" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
 <text text-anchor="middle" x="990" y="-307.9076" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
@@ -91,11 +91,11 @@
 <g id="node6" class="node">
 <title>bb::&lt;constant:Bar&gt;#baz_4</title>
 <ellipse fill="none" stroke="#000000" cx="990" cy="-189.0538" rx="285.8147" ry="65.1077"/>
-<text text-anchor="middle" x="990" y="-219.8538" font-family="Times,serif" font-size="14.00" fill="#000000">(b, statTemp$2)</text>
+<text text-anchor="middle" x="990" y="-219.8538" font-family="Times,serif" font-size="14.00" fill="#000000">(b, statTemp$3)</text>
 <text text-anchor="middle" x="990" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="990" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: a&gt; = load_arg(statTemp$2#super, 0) : untyped</text>
-<text text-anchor="middle" x="990" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = self : Bar</text>
-<text text-anchor="middle" x="990" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$4 = statTemp$5.puts(&lt;block&#45;nested: a&gt;) : untyped</text>
+<text text-anchor="middle" x="990" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: a&gt; = load_arg(statTemp$3#super, 0) : untyped</text>
+<text text-anchor="middle" x="990" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = self : Bar</text>
+<text text-anchor="middle" x="990" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$5 = statTemp$6.puts(&lt;block&#45;nested: a&gt;) : untyped</text>
 <text text-anchor="middle" x="990" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#baz_2&#45;&gt;bb::&lt;constant:Bar&gt;#baz_4 -->
@@ -108,9 +108,9 @@
 <g id="node7" class="node">
 <title>bb::&lt;constant:Bar&gt;#baz_3</title>
 <ellipse fill="none" stroke="#000000" cx="1562" cy="-189.0538" rx="268.1762" ry="45.011"/>
-<text text-anchor="middle" x="1562" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">(b, statTemp$2)</text>
-<text text-anchor="middle" x="1562" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = statTemp$2.super(b) : untyped</text>
-<text text-anchor="middle" x="1562" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1562" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">(b, statTemp$3)</text>
+<text text-anchor="middle" x="1562" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$3.super(b) : untyped</text>
+<text text-anchor="middle" x="1562" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1562" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#baz_2&#45;&gt;bb::&lt;constant:Bar&gt;#baz_3 -->
@@ -133,4 +133,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: e4edbe97e21922f971128c3bfd0eb0b1316020ce3cc22eaeb2bd7d0e4f6e0056 -->
+<!-- ruby-types:sha256: d61ae7ddc2f8a39f1d32728d34943971823fcb817642f5b95df2ba9d1c7c97f4 -->

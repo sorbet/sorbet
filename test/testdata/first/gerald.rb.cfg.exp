@@ -6,17 +6,19 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_0" [label = "()
-@rule_token$5 = alias @rule_token : untyped
-selfMethodTemp$1 = self : MatchTimeout
-message = load_arg(selfMethodTemp$1#initialize, 0) : untyped
-rule_token = load_arg(selfMethodTemp$1#initialize, 1) : untyped
-statTemp$3 = self : MatchTimeout
-statTemp$2 = statTemp$3.super(message) : untyped
-returnMethodTemp$6 = return rule_token : <bottom>
+@rule_token$6 = alias @rule_token : untyped
+selfMethodTemp$2 = self : MatchTimeout
+message = load_arg(selfMethodTemp$2#initialize, 0) : untyped
+rule_token = load_arg(selfMethodTemp$2#initialize, 1) : untyped
+statTemp$4 = self : MatchTimeout
+statTemp$3 = statTemp$4.super(message) : untyped
+returnMethodTemp$7 = return rule_token : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_1";
 }
 
@@ -27,47 +29,52 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_0" [label = "(invalid_rules)
-<constant:GeraldRule>$7 = alias <constant:GeraldRule> : untyped
-@rules$13 = alias @rules : untyped
-statTemp$8 = <symbol:deleted_at_is_nil> : Symbol(:\"deleted_at_is_nil\")
-statTemp$5 = <constant:GeraldRule>$7.query_by(statTemp$8) : untyped
-hashTemp$10 = alias {} : HashType {\n}
-statTemp$9 = hashTemp$10.<build-hash>() : HashType {\n}
-statTemp$4 = statTemp$5.load_all(statTemp$9) : untyped
-statTemp$11 = NotSupported() : untyped
-assignTemp$0 = statTemp$4.partition(statTemp$11) : untyped
-statTemp$15 = 0 : Integer(0)
-@rules$13 = assignTemp$0.[](statTemp$15) : untyped
-statTemp$18 = 1 : Integer(1)
-invalid_rules = assignTemp$0.[](statTemp$18) : untyped
-statTemp$20 = invalid_rules.empty?() : untyped
-ifTemp$19 = statTemp$20.!() : untyped
-ifTemp$19"];
+<constant:GeraldRule>$8 = alias <constant:GeraldRule> : untyped
+@rules$14 = alias @rules : untyped
+statTemp$9 = <symbol:deleted_at_is_nil> : Symbol(:\"deleted_at_is_nil\")
+statTemp$6 = <constant:GeraldRule>$8.query_by(statTemp$9) : untyped
+hashTemp$11 = alias {} : HashType {\n}
+statTemp$10 = hashTemp$11.<build-hash>() : HashType {\n}
+statTemp$5 = statTemp$6.load_all(statTemp$10) : untyped
+statTemp$12 = NotSupported() : untyped
+assignTemp$10000 = statTemp$5.partition(statTemp$12) : untyped
+statTemp$16 = 0 : Integer(0)
+@rules$14 = assignTemp$10000.[](statTemp$16) : untyped
+statTemp$19 = 1 : Integer(1)
+invalid_rules = assignTemp$10000.[](statTemp$19) : untyped
+statTemp$21 = invalid_rules.empty?() : untyped
+ifTemp$20 = statTemp$21.!() : untyped
+ifTemp$20"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_3";
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_2" [label = "(invalid_rules, returnMethodTemp$20)
-statTemp$25 = NotSupported() : untyped
-statTemp$23 = invalid_rules.map(statTemp$25) : untyped
-statTemp$26 = , : String(\",\")
-invalid_rule_ids = statTemp$23.join(statTemp$26) : untyped
-statTemp$28 = self : Matcher
-statTemp$27 = statTemp$28.log() : untyped
-statTemp$30 = Gerald skipping invalid rules:  : String(\"Gerald skipping invalid rules: \")
-statTemp$29 = statTemp$30.+(invalid_rule_ids) : untyped
-returnMethodTemp$20 = statTemp$27.warn(statTemp$29) : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_2" [label = "(returnMethodTemp$1, invalid_rules)
+statTemp$26 = NotSupported() : untyped
+statTemp$24 = invalid_rules.map(statTemp$26) : untyped
+statTemp$27 = , : String(\",\")
+invalid_rule_ids = statTemp$24.join(statTemp$27) : untyped
+statTemp$29 = self : Matcher
+statTemp$28 = statTemp$29.log() : untyped
+statTemp$31 = Gerald skipping invalid rules:  : String(\"Gerald skipping invalid rules: \")
+statTemp$30 = statTemp$31.+(invalid_rule_ids) : String
+returnMethodTemp$1 = statTemp$28.warn(statTemp$30) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_3" [label = "(returnMethodTemp$20)
-returnMethodTemp$20 = NotSupported() : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_3" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_4" [label = "(returnMethodTemp$20)
-returnMethodTemp$32 = return returnMethodTemp$20 : <bottom>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$33 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_1";
 }
 
@@ -77,77 +84,87 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_0" [label = "(match_context, <constant:MatchTimeBudget>$26, @rules$28)
-<constant:MAX_AFFECTED_FILES>$9 = alias <constant:MAX_AFFECTED_FILES> : untyped
-<constant:MatchTimeBudget>$26 = alias <constant:MatchTimeBudget> : <class:MatchTimeBudget>
-@rules$28 = alias @rules : untyped
-selfMethodTemp$1 = self : Matcher
-match_context = load_arg(selfMethodTemp$1#match, 0) : untyped
-statTemp$6 = match_context.diff() : untyped
-statTemp$5 = statTemp$6.affected_files() : untyped
-statTemp$4 = statTemp$5.count() : untyped
-ifTemp$3 = statTemp$4.>(<constant:MAX_AFFECTED_FILES>$9) : untyped
-ifTemp$3"];
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_0" [label = "(match_context, <constant:MatchTimeBudget>$27, @rules$29)
+<constant:MAX_AFFECTED_FILES>$10 = alias <constant:MAX_AFFECTED_FILES> : untyped
+<constant:MatchTimeBudget>$27 = alias <constant:MatchTimeBudget> : <class:MatchTimeBudget>
+@rules$29 = alias @rules : untyped
+selfMethodTemp$2 = self : Matcher
+match_context = load_arg(selfMethodTemp$2#match, 0) : untyped
+statTemp$7 = match_context.diff() : untyped
+statTemp$6 = statTemp$7.affected_files() : untyped
+statTemp$5 = statTemp$6.count() : untyped
+ifTemp$4 = statTemp$5.>(<constant:MAX_AFFECTED_FILES>$10) : untyped
+ifTemp$4"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_3";
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_2" [label = "(match_context)
-statTemp$12 = self : Matcher
-statTemp$11 = statTemp$12.log() : untyped
-statTemp$16 = Gerald skipping large PR with  : String(\"Gerald skipping large PR with \")
-statTemp$20 = match_context.diff() : untyped
-statTemp$19 = statTemp$20.affected_files() : untyped
-statTemp$18 = statTemp$19.count() : untyped
-statTemp$17 = statTemp$18.to_s() : untyped
-statTemp$15 = statTemp$16.concat(statTemp$17) : untyped
-statTemp$22 =  affected files : String(\" affected files\")
-statTemp$14 = statTemp$15.concat(statTemp$22) : untyped
-statTemp$13 = statTemp$14.to_s() : untyped
-statTemp$10 = statTemp$11.warn(statTemp$13) : untyped
-returnTemp$23 = NotSupported() : untyped
-statTemp$2 = return returnTemp$23 : <bottom>
+statTemp$13 = self : Matcher
+statTemp$12 = statTemp$13.log() : untyped
+statTemp$17 = Gerald skipping large PR with  : String(\"Gerald skipping large PR with \")
+statTemp$21 = match_context.diff() : untyped
+statTemp$20 = statTemp$21.affected_files() : untyped
+statTemp$19 = statTemp$20.count() : untyped
+statTemp$18 = statTemp$19.to_s() : untyped
+statTemp$16 = statTemp$17.concat(statTemp$18) : String
+statTemp$23 =  affected files : String(\" affected files\")
+statTemp$15 = statTemp$16.concat(statTemp$23) : String
+statTemp$14 = statTemp$15.to_s() : String
+statTemp$11 = statTemp$12.warn(statTemp$14) : untyped
+returnTemp$24 = NotSupported() : untyped
+statTemp$3 = return returnTemp$24 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_3" [label = "(match_context, budget, statTemp$27, <constant:MatchTimeBudget>$26, @rules$28)
-statTemp$2 = NotSupported() : untyped
-budget = <constant:MatchTimeBudget>$26.new() : MatchTimeBudget
-statTemp$27 = @rules$28 : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_3" [label = "(match_context, budget, statTemp$28, <constant:MatchTimeBudget>$27, @rules$29)
+statTemp$3 = NotSupported() : untyped
+budget = <constant:MatchTimeBudget>$27.new() : MatchTimeBudget
+statTemp$28 = @rules$29 : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_4" [label = "(match_context, budget, <block-nested: r>, statTemp$27, @rules$28)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_4" [label = "(match_context, budget, <block-nested: r>, statTemp$28, @rules$29)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_6";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_5";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_5" [label = "(@rules$28)
-returnMethodTemp$21 = @rules$28.select() : untyped
-returnMethodTemp$35 = return returnMethodTemp$21 : <bottom>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_5" [label = "(@rules$29)
+returnMethodTemp$1 = @rules$29.select() : untyped
+returnMethodTemp$36 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_6" [label = "(match_context, budget, <block-nested: r>, statTemp$27, @rules$28)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_6" [label = "(match_context, budget, <block-nested: r>, statTemp$28, @rules$29)
 outerLoops: 1
-<block-nested: r> = load_arg(statTemp$27#select, 0) : untyped
+<block-nested: r> = load_arg(statTemp$28#select, 0) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_7";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_7" [label = "(match_context, budget, <block-nested: r>, statTemp$27, @rules$28)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_7" [label = "(match_context, budget, <block-nested: r>, statTemp$28, @rules$29)
 outerLoops: 2
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_7" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_9";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_7" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_8";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_8" [label = "(match_context, budget, <block-nested: r>, statTemp$27, @rules$28)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_8" [label = "(match_context, budget, <block-nested: r>, statTemp$28, @rules$29)
 outerLoops: 1
-blockReturnTemp$29 = budget.time_rule(<block-nested: r>) : untyped
+blockReturnTemp$30 = budget.time_rule(<block-nested: r>) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_8" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_9" [label = "(match_context, budget, <block-nested: r>, statTemp$27, @rules$28)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_9" [label = "(match_context, budget, <block-nested: r>, statTemp$28, @rules$29)
 outerLoops: 2
-blockReturnTemp$32 = <block-nested: r>.matches?(match_context) : untyped
+blockReturnTemp$33 = <block-nested: r>.matches?(match_context) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_9" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_7";
 }
 
@@ -158,28 +175,30 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_0" [label = "()
-@repo$3 = alias @repo : untyped
-@assignee$5 = alias @assignee : untyped
-@gh_user$7 = alias @gh_user : untyped
-@merge_branch$9 = alias @merge_branch : untyped
-@body$11 = alias @body : untyped
-@title$13 = alias @title : untyped
-@diff$15 = alias @diff : untyped
-@openapi_diff$16 = alias @openapi_diff : untyped
-selfMethodTemp$1 = self : MatchContext
-repo = load_arg(selfMethodTemp$1#initialize, 0) : untyped
-assignee = load_arg(selfMethodTemp$1#initialize, 1) : untyped
-gh_user = load_arg(selfMethodTemp$1#initialize, 2) : untyped
-merge_branch = load_arg(selfMethodTemp$1#initialize, 3) : untyped
-body = load_arg(selfMethodTemp$1#initialize, 4) : untyped
-title = load_arg(selfMethodTemp$1#initialize, 5) : untyped
-diff = load_arg(selfMethodTemp$1#initialize, 6) : untyped
-openapi_diff = load_arg(selfMethodTemp$1#initialize, 7) : untyped
-returnMethodTemp$17 = return openapi_diff : <bottom>
+@repo$4 = alias @repo : untyped
+@assignee$6 = alias @assignee : untyped
+@gh_user$8 = alias @gh_user : untyped
+@merge_branch$10 = alias @merge_branch : untyped
+@body$12 = alias @body : untyped
+@title$14 = alias @title : untyped
+@diff$16 = alias @diff : untyped
+@openapi_diff$17 = alias @openapi_diff : untyped
+selfMethodTemp$2 = self : MatchContext
+repo = load_arg(selfMethodTemp$2#initialize, 0) : untyped
+assignee = load_arg(selfMethodTemp$2#initialize, 1) : untyped
+gh_user = load_arg(selfMethodTemp$2#initialize, 2) : untyped
+merge_branch = load_arg(selfMethodTemp$2#initialize, 3) : untyped
+body = load_arg(selfMethodTemp$2#initialize, 4) : untyped
+title = load_arg(selfMethodTemp$2#initialize, 5) : untyped
+diff = load_arg(selfMethodTemp$2#initialize, 6) : untyped
+openapi_diff = load_arg(selfMethodTemp$2#initialize, 7) : untyped
+returnMethodTemp$18 = return openapi_diff : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_1";
 }
 
@@ -190,15 +209,17 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_0" [label = "()
-@repo$4 = alias @repo : untyped
-statTemp$5 = stripe-internal/ : String(\"stripe-internal/\")
-statTemp$2 = @repo$4.start_with?(statTemp$5) : untyped
-returnMethodTemp$24 = statTemp$2.!() : untyped
-returnMethodTemp$6 = return returnMethodTemp$24 : <bottom>
+@repo$5 = alias @repo : untyped
+statTemp$6 = stripe-internal/ : String(\"stripe-internal/\")
+statTemp$3 = @repo$5.start_with?(statTemp$6) : untyped
+returnMethodTemp$1 = statTemp$3.!() : untyped
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_1";
 }
 
@@ -209,14 +230,16 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_0" [label = "()
-@start$2 = alias @start : untyped
-<constant:Time>$4 = alias <constant:Time> : untyped
-@start$2 = <constant:Time>$4.now() : untyped
-returnMethodTemp$5 = return @start$2 : <bottom>
+@start$3 = alias @start : untyped
+<constant:Time>$5 = alias <constant:Time> : <class:Time>
+@start$3 = <constant:Time>$5.now() : Time
+returnMethodTemp$6 = return @start$3 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_1";
 }
 
@@ -226,42 +249,47 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" [label = "(<constant:TOTAL_TIME_MS>$13, <constant:MatchTimeout>$17)
-<constant:Time>$6 = alias <constant:Time> : untyped
-@start$8 = alias @start : untyped
-<constant:TOTAL_TIME_MS>$13 = alias <constant:TOTAL_TIME_MS> : untyped
-<constant:MatchTimeout>$17 = alias <constant:MatchTimeout> : <class:MatchTimeout>
-statTemp$4 = <constant:Time>$6.now() : untyped
-statTemp$3 = statTemp$4.-(@start$8) : untyped
-statTemp$9 = 1000 : Integer(1000)
-dur_ms = statTemp$3.*(statTemp$9) : untyped
-ifTemp$10 = dur_ms.>(<constant:TOTAL_TIME_MS>$13) : untyped
-ifTemp$10"];
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" [label = "(<constant:TOTAL_TIME_MS>$14, <constant:MatchTimeout>$18)
+<constant:Time>$7 = alias <constant:Time> : <class:Time>
+@start$9 = alias @start : untyped
+<constant:TOTAL_TIME_MS>$14 = alias <constant:TOTAL_TIME_MS> : untyped
+<constant:MatchTimeout>$18 = alias <constant:MatchTimeout> : <class:MatchTimeout>
+statTemp$5 = <constant:Time>$7.now() : Time
+statTemp$4 = statTemp$5.-(@start$9) : Float | Time
+statTemp$10 = 1000 : Integer(1000)
+dur_ms = statTemp$4.*(statTemp$10) : untyped
+ifTemp$11 = dur_ms.>(<constant:TOTAL_TIME_MS>$14) : untyped
+ifTemp$11"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_3";
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" [label = "(returnMethodTemp$26, <constant:TOTAL_TIME_MS>$13, <constant:MatchTimeout>$17)
-statTemp$14 = self : MatchTimeBudget
-statTemp$21 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")
-statTemp$22 = <constant:TOTAL_TIME_MS>$13.to_s() : untyped
-statTemp$20 = statTemp$21.concat(statTemp$22) : untyped
-statTemp$24 = ms : String(\"ms\")
-statTemp$19 = statTemp$20.concat(statTemp$24) : untyped
-statTemp$18 = statTemp$19.to_s() : untyped
-statTemp$15 = <constant:MatchTimeout>$17.new(statTemp$18) : MatchTimeout
-returnMethodTemp$26 = statTemp$14.raise(statTemp$15) : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" [label = "(returnMethodTemp$1, <constant:TOTAL_TIME_MS>$14, <constant:MatchTimeout>$18)
+statTemp$15 = self : MatchTimeBudget
+statTemp$22 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")
+statTemp$23 = <constant:TOTAL_TIME_MS>$14.to_s() : untyped
+statTemp$21 = statTemp$22.concat(statTemp$23) : String
+statTemp$25 = ms : String(\"ms\")
+statTemp$20 = statTemp$21.concat(statTemp$25) : String
+statTemp$19 = statTemp$20.to_s() : String
+statTemp$16 = <constant:MatchTimeout>$18.new(statTemp$19) : MatchTimeout
+returnMethodTemp$1 = statTemp$15.raise(statTemp$16) : NilClass
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_3" [label = "(returnMethodTemp$26)
-returnMethodTemp$26 = NotSupported() : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_3" [label = "(returnMethodTemp$1)
+returnMethodTemp$1 = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4" [label = "(returnMethodTemp$26)
-returnMethodTemp$25 = return returnMethodTemp$26 : <bottom>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4" [label = "(returnMethodTemp$1)
+returnMethodTemp$26 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1";
 }
 
@@ -271,61 +299,66 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" [label = "(dur_ms, rule, res, <constant:PER_RULE_MS>$16, <constant:MatchTimeout>$20)
-<constant:Time>$4 = alias <constant:Time> : untyped
-<constant:PER_RULE_MS>$16 = alias <constant:PER_RULE_MS> : untyped
-<constant:MatchTimeout>$20 = alias <constant:MatchTimeout> : <class:MatchTimeout>
-selfMethodTemp$1 = self : MatchTimeBudget
-rule = load_arg(selfMethodTemp$1#time_rule, 0) : untyped
-rule_start = <constant:Time>$4.now() : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" [label = "(dur_ms, rule, res, <constant:PER_RULE_MS>$17, <constant:MatchTimeout>$21)
+<constant:Time>$5 = alias <constant:Time> : <class:Time>
+<constant:PER_RULE_MS>$17 = alias <constant:PER_RULE_MS> : untyped
+<constant:MatchTimeout>$21 = alias <constant:MatchTimeout> : <class:MatchTimeout>
+selfMethodTemp$2 = self : MatchTimeBudget
+rule = load_arg(selfMethodTemp$2#time_rule, 0) : untyped
+rule_start = <constant:Time>$5.now() : Time
 res = NotSupported() : untyped
-statTemp$8 = <constant:Time>$4.now() : untyped
-statTemp$7 = statTemp$8.-(rule_start) : untyped
-statTemp$11 = 1000 : Integer(1000)
-dur_ms = statTemp$7.*(statTemp$11) : untyped
-ifTemp$13 = dur_ms.>(<constant:PER_RULE_MS>$16) : untyped
-ifTemp$13"];
+statTemp$9 = <constant:Time>$5.now() : Time
+statTemp$8 = statTemp$9.-(rule_start) : Float | Time
+statTemp$12 = 1000 : Integer(1000)
+dur_ms = statTemp$8.*(statTemp$12) : untyped
+ifTemp$14 = dur_ms.>(<constant:PER_RULE_MS>$17) : untyped
+ifTemp$14"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_3";
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" [label = "(dur_ms, rule, res, <constant:PER_RULE_MS>$16, <constant:MatchTimeout>$20)
-statTemp$17 = self : MatchTimeBudget
-statTemp$28 = Gerald rule ' : String(\"Gerald rule '\")
-statTemp$30 = rule.token() : untyped
-statTemp$29 = statTemp$30.to_s() : untyped
-statTemp$27 = statTemp$28.concat(statTemp$29) : untyped
-statTemp$32 = ' exceeded per-rule time budget actual= : String(\"' exceeded per-rule time budget actual=\")
-statTemp$26 = statTemp$27.concat(statTemp$32) : untyped
-statTemp$34 = dur_ms.to_i() : untyped
-statTemp$33 = statTemp$34.to_s() : untyped
-statTemp$25 = statTemp$26.concat(statTemp$33) : untyped
-statTemp$36 = ms budget= : String(\"ms budget=\")
-statTemp$24 = statTemp$25.concat(statTemp$36) : untyped
-statTemp$37 = <constant:PER_RULE_MS>$16.to_s() : untyped
-statTemp$23 = statTemp$24.concat(statTemp$37) : untyped
-statTemp$39 = ms : String(\"ms\")
-statTemp$22 = statTemp$23.concat(statTemp$39) : untyped
-statTemp$21 = statTemp$22.to_s() : untyped
-hashTemp$41 = <symbol:rule_token> : Symbol(:\"rule_token\")
-hashTemp$42 = rule.token() : untyped
-hashTemp$44 = alias {} : HashType {\n}
-statTemp$40 = hashTemp$44.<build-hash>(hashTemp$41, hashTemp$42) : HashType {\n  Symbol(:\"rule_token\") => untyped\n}
-statTemp$18 = <constant:MatchTimeout>$20.new(statTemp$21, statTemp$40) : MatchTimeout
-statTemp$12 = statTemp$17.raise(statTemp$18) : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" [label = "(dur_ms, rule, res, <constant:PER_RULE_MS>$17, <constant:MatchTimeout>$21)
+statTemp$18 = self : MatchTimeBudget
+statTemp$29 = Gerald rule ' : String(\"Gerald rule '\")
+statTemp$31 = rule.token() : untyped
+statTemp$30 = statTemp$31.to_s() : untyped
+statTemp$28 = statTemp$29.concat(statTemp$30) : String
+statTemp$33 = ' exceeded per-rule time budget actual= : String(\"' exceeded per-rule time budget actual=\")
+statTemp$27 = statTemp$28.concat(statTemp$33) : String
+statTemp$35 = dur_ms.to_i() : untyped
+statTemp$34 = statTemp$35.to_s() : untyped
+statTemp$26 = statTemp$27.concat(statTemp$34) : String
+statTemp$37 = ms budget= : String(\"ms budget=\")
+statTemp$25 = statTemp$26.concat(statTemp$37) : String
+statTemp$38 = <constant:PER_RULE_MS>$17.to_s() : untyped
+statTemp$24 = statTemp$25.concat(statTemp$38) : String
+statTemp$40 = ms : String(\"ms\")
+statTemp$23 = statTemp$24.concat(statTemp$40) : String
+statTemp$22 = statTemp$23.to_s() : String
+hashTemp$42 = <symbol:rule_token> : Symbol(:\"rule_token\")
+hashTemp$43 = rule.token() : untyped
+hashTemp$45 = alias {} : HashType {\n}
+statTemp$41 = hashTemp$45.<build-hash>(hashTemp$42, hashTemp$43) : HashType {\n  Symbol(:\"rule_token\") => untyped\n}
+statTemp$19 = <constant:MatchTimeout>$21.new(statTemp$22, statTemp$41) : MatchTimeout
+statTemp$13 = statTemp$18.raise(statTemp$19) : NilClass
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_3" [label = "(res)
-statTemp$12 = NotSupported() : untyped
+statTemp$13 = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4" [label = "(res)
-statTemp$46 = self : MatchTimeBudget
-statTemp$45 = statTemp$46.check!() : untyped
-returnMethodTemp$47 = return res : <bottom>
+statTemp$47 = self : MatchTimeBudget
+statTemp$46 = statTemp$47.check!() : untyped
+returnMethodTemp$48 = return res : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1";
 }
 
@@ -336,17 +369,19 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_0" [label = "()
-@raw$3 = alias @raw : untyped
-@parsed$4 = alias @parsed : untyped
-selfMethodTemp$1 = self : Diff
-raw_diff = load_arg(selfMethodTemp$1#initialize, 0) : untyped
-statTemp$5 = self : Diff
-@parsed$4 = statTemp$5.parse(raw_diff) : untyped
-returnMethodTemp$7 = return @parsed$4 : <bottom>
+@raw$4 = alias @raw : untyped
+@parsed$5 = alias @parsed : untyped
+selfMethodTemp$2 = self : Diff
+raw_diff = load_arg(selfMethodTemp$2#initialize, 0) : untyped
+statTemp$6 = self : Diff
+@parsed$5 = statTemp$6.parse(raw_diff) : untyped
+returnMethodTemp$8 = return @parsed$5 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_1";
 }
 
@@ -357,19 +392,21 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_0" [label = "()
-statTemp$4 = self : Diff
-statTemp$3 = statTemp$4.added_files() : untyped
-statTemp$6 = self : Diff
-statTemp$5 = statTemp$6.deleted_files() : untyped
-statTemp$2 = statTemp$3.+(statTemp$5) : untyped
-statTemp$8 = self : Diff
-statTemp$7 = statTemp$8.changed_files() : untyped
-returnMethodTemp$29 = statTemp$2.+(statTemp$7) : untyped
-returnMethodTemp$9 = return returnMethodTemp$29 : <bottom>
+statTemp$5 = self : Diff
+statTemp$4 = statTemp$5.added_files() : untyped
+statTemp$7 = self : Diff
+statTemp$6 = statTemp$7.deleted_files() : untyped
+statTemp$3 = statTemp$4.+(statTemp$6) : untyped
+statTemp$9 = self : Diff
+statTemp$8 = statTemp$9.changed_files() : untyped
+returnMethodTemp$1 = statTemp$3.+(statTemp$8) : untyped
+returnMethodTemp$10 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_1";
 }
 
@@ -379,50 +416,58 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_0" [label = "(statTemp$3, @parsed$4)
-@parsed$4 = alias @parsed : untyped
-statTemp$3 = @parsed$4 : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_0" [label = "(statTemp$4, @parsed$5)
+@parsed$5 = alias @parsed : untyped
+statTemp$4 = @parsed$5 : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_2" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_2" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_4";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_3";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_3" [label = "(statTemp$2, @parsed$4)
-statTemp$2 = @parsed$4.select() : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_3" [label = "(statTemp$3, @parsed$5)
+statTemp$3 = @parsed$5.select() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_5";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_4" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_4" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$3#select, 0) : untyped
-statTemp$8 = <symbol:a_name> : Symbol(:\"a_name\")
-statTemp$6 = <block-nested: part>.[](statTemp$8) : untyped
-statTemp$9 = /dev/null : String(\"/dev/null\")
-blockReturnTemp$5 = statTemp$6.==(statTemp$9) : untyped
+<block-nested: part> = load_arg(statTemp$4#select, 0) : untyped
+statTemp$9 = <symbol:a_name> : Symbol(:\"a_name\")
+statTemp$7 = <block-nested: part>.[](statTemp$9) : untyped
+statTemp$10 = /dev/null : String(\"/dev/null\")
+blockReturnTemp$6 = statTemp$7.==(statTemp$10) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_2";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_5" [label = "(statTemp$2)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_5" [label = "(statTemp$3)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_7";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_6";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_6" [label = "(statTemp$2)
-returnMethodTemp$30 = statTemp$2.map() : untyped
-returnMethodTemp$13 = return returnMethodTemp$30 : <bottom>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_6" [label = "(statTemp$3)
+returnMethodTemp$1 = statTemp$3.map() : untyped
+returnMethodTemp$14 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_7" [label = "(statTemp$2)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_7" [label = "(statTemp$3)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$2#map, 0) : untyped
-statTemp$12 = <symbol:b_name> : Symbol(:\"b_name\")
-blockReturnTemp$10 = <block-nested: part>.[](statTemp$12) : untyped
+<block-nested: part> = load_arg(statTemp$3#map, 0) : untyped
+statTemp$13 = <symbol:b_name> : Symbol(:\"b_name\")
+blockReturnTemp$11 = <block-nested: part>.[](statTemp$13) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_7" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_5";
 }
 
@@ -432,50 +477,58 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_0" [label = "(statTemp$3, @parsed$4)
-@parsed$4 = alias @parsed : untyped
-statTemp$3 = @parsed$4 : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_0" [label = "(statTemp$4, @parsed$5)
+@parsed$5 = alias @parsed : untyped
+statTemp$4 = @parsed$5 : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_2" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_2" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_4";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_3";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_3" [label = "(statTemp$2, @parsed$4)
-statTemp$2 = @parsed$4.select() : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_3" [label = "(statTemp$3, @parsed$5)
+statTemp$3 = @parsed$5.select() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_5";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_4" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_4" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$3#select, 0) : untyped
-statTemp$8 = <symbol:b_name> : Symbol(:\"b_name\")
-statTemp$6 = <block-nested: part>.[](statTemp$8) : untyped
-statTemp$9 = /dev/null : String(\"/dev/null\")
-blockReturnTemp$5 = statTemp$6.==(statTemp$9) : untyped
+<block-nested: part> = load_arg(statTemp$4#select, 0) : untyped
+statTemp$9 = <symbol:b_name> : Symbol(:\"b_name\")
+statTemp$7 = <block-nested: part>.[](statTemp$9) : untyped
+statTemp$10 = /dev/null : String(\"/dev/null\")
+blockReturnTemp$6 = statTemp$7.==(statTemp$10) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_2";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_5" [label = "(statTemp$2)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_5" [label = "(statTemp$3)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_7";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_6";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_6" [label = "(statTemp$2)
-returnMethodTemp$31 = statTemp$2.map() : untyped
-returnMethodTemp$13 = return returnMethodTemp$31 : <bottom>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_6" [label = "(statTemp$3)
+returnMethodTemp$1 = statTemp$3.map() : untyped
+returnMethodTemp$14 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_7" [label = "(statTemp$2)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_7" [label = "(statTemp$3)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$2#map, 0) : untyped
-statTemp$12 = <symbol:a_name> : Symbol(:\"a_name\")
-blockReturnTemp$10 = <block-nested: part>.[](statTemp$12) : untyped
+<block-nested: part> = load_arg(statTemp$3#map, 0) : untyped
+statTemp$13 = <symbol:a_name> : Symbol(:\"a_name\")
+blockReturnTemp$11 = <block-nested: part>.[](statTemp$13) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_7" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_5";
 }
 
@@ -485,51 +538,59 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_0" [label = "(statTemp$3, @parsed$4)
-@parsed$4 = alias @parsed : untyped
-statTemp$3 = @parsed$4 : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_0" [label = "(statTemp$4, @parsed$5)
+@parsed$5 = alias @parsed : untyped
+statTemp$4 = @parsed$5 : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_2" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_2" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_4";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_3";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_3" [label = "(statTemp$2, @parsed$4)
-statTemp$2 = @parsed$4.select() : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_3" [label = "(statTemp$3, @parsed$5)
+statTemp$3 = @parsed$5.select() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_5";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_4" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_4" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$3#select, 0) : untyped
-statTemp$8 = <symbol:a_name> : Symbol(:\"a_name\")
-statTemp$6 = <block-nested: part>.[](statTemp$8) : untyped
-statTemp$11 = <symbol:b_name> : Symbol(:\"b_name\")
-statTemp$9 = <block-nested: part>.[](statTemp$11) : untyped
-blockReturnTemp$5 = statTemp$6.==(statTemp$9) : untyped
+<block-nested: part> = load_arg(statTemp$4#select, 0) : untyped
+statTemp$9 = <symbol:a_name> : Symbol(:\"a_name\")
+statTemp$7 = <block-nested: part>.[](statTemp$9) : untyped
+statTemp$12 = <symbol:b_name> : Symbol(:\"b_name\")
+statTemp$10 = <block-nested: part>.[](statTemp$12) : untyped
+blockReturnTemp$6 = statTemp$7.==(statTemp$10) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_2";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_5" [label = "(statTemp$2)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_5" [label = "(statTemp$3)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_7";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_6";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_6" [label = "(statTemp$2)
-returnMethodTemp$32 = statTemp$2.map() : untyped
-returnMethodTemp$15 = return returnMethodTemp$32 : <bottom>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_6" [label = "(statTemp$3)
+returnMethodTemp$1 = statTemp$3.map() : untyped
+returnMethodTemp$16 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_7" [label = "(statTemp$2)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_7" [label = "(statTemp$3)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$2#map, 0) : untyped
-statTemp$14 = <symbol:b_name> : Symbol(:\"b_name\")
-blockReturnTemp$12 = <block-nested: part>.[](statTemp$14) : untyped
+<block-nested: part> = load_arg(statTemp$3#map, 0) : untyped
+statTemp$15 = <symbol:b_name> : Symbol(:\"b_name\")
+blockReturnTemp$13 = <block-nested: part>.[](statTemp$15) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_7" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_5";
 }
 
@@ -539,32 +600,37 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_0" [label = "(statTemp$3, @parsed$4)
-@parsed$4 = alias @parsed : untyped
-statTemp$3 = @parsed$4 : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_0" [label = "(statTemp$4, @parsed$5)
+@parsed$5 = alias @parsed : untyped
+statTemp$4 = @parsed$5 : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_2" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_2" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_4";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_3";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_3" [label = "(@parsed$4)
-statTemp$2 = @parsed$4.map() : untyped
-returnMethodTemp$33 = statTemp$2.flatten() : untyped
-returnMethodTemp$8 = return returnMethodTemp$33 : <bottom>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_3" [label = "(@parsed$5)
+statTemp$3 = @parsed$5.map() : untyped
+returnMethodTemp$1 = statTemp$3.flatten() : untyped
+returnMethodTemp$9 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_4" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_4" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$3#map, 0) : untyped
-statTemp$7 = <symbol:added_lines> : Symbol(:\"added_lines\")
-blockReturnTemp$5 = <block-nested: part>.[](statTemp$7) : untyped
+<block-nested: part> = load_arg(statTemp$4#map, 0) : untyped
+statTemp$8 = <symbol:added_lines> : Symbol(:\"added_lines\")
+blockReturnTemp$6 = <block-nested: part>.[](statTemp$8) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_2";
 }
 
@@ -574,32 +640,37 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_0" [label = "(statTemp$3, @parsed$4)
-@parsed$4 = alias @parsed : untyped
-statTemp$3 = @parsed$4 : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_0" [label = "(statTemp$4, @parsed$5)
+@parsed$5 = alias @parsed : untyped
+statTemp$4 = @parsed$5 : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_2" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_2" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_4";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_3";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_3" [label = "(@parsed$4)
-statTemp$2 = @parsed$4.map() : untyped
-returnMethodTemp$34 = statTemp$2.flatten() : untyped
-returnMethodTemp$8 = return returnMethodTemp$34 : <bottom>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_3" [label = "(@parsed$5)
+statTemp$3 = @parsed$5.map() : untyped
+returnMethodTemp$1 = statTemp$3.flatten() : untyped
+returnMethodTemp$9 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_4" [label = "(statTemp$3, @parsed$4)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_4" [label = "(statTemp$4, @parsed$5)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$3#map, 0) : untyped
-statTemp$7 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
-blockReturnTemp$5 = <block-nested: part>.[](statTemp$7) : untyped
+<block-nested: part> = load_arg(statTemp$4#map, 0) : untyped
+statTemp$8 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
+blockReturnTemp$6 = <block-nested: part>.[](statTemp$8) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_2";
 }
 
@@ -610,16 +681,18 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_0" [label = "()
-statTemp$3 = self : Diff
-statTemp$2 = statTemp$3.added_lines() : untyped
-statTemp$5 = self : Diff
-statTemp$4 = statTemp$5.removed_lines() : untyped
-returnMethodTemp$35 = statTemp$2.+(statTemp$4) : untyped
-returnMethodTemp$6 = return returnMethodTemp$35 : <bottom>
+statTemp$4 = self : Diff
+statTemp$3 = statTemp$4.added_lines() : untyped
+statTemp$6 = self : Diff
+statTemp$5 = statTemp$6.removed_lines() : untyped
+returnMethodTemp$1 = statTemp$3.+(statTemp$5) : untyped
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_1";
 }
 
@@ -630,15 +703,17 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_0" [label = "()
-<constant:SPEC_PATH>$5 = alias <constant:SPEC_PATH> : untyped
-statTemp$3 = self : Diff
-statTemp$2 = statTemp$3.changed_files() : untyped
-returnMethodTemp$36 = statTemp$2.include?(<constant:SPEC_PATH>$5) : untyped
-returnMethodTemp$6 = return returnMethodTemp$36 : <bottom>
+<constant:SPEC_PATH>$6 = alias <constant:SPEC_PATH> : untyped
+statTemp$4 = self : Diff
+statTemp$3 = statTemp$4.changed_files() : untyped
+returnMethodTemp$1 = statTemp$3.include?(<constant:SPEC_PATH>$6) : untyped
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_1";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_1";
 }
 
@@ -648,266 +723,305 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" [label = "(parts, <constant:Range>$8)
-<constant:Range>$8 = alias <constant:Range> : <class:Range>
-selfMethodTemp$1 = self : Diff
-diff = load_arg(selfMethodTemp$1#parse, 0) : untyped
-statTemp$5 = NotSupported() : untyped
-statTemp$3 = diff.split(statTemp$5) : untyped
-statTemp$9 = 1 : Integer(1)
-statTemp$10 = -1 : Integer(-1)
-statTemp$6 = <constant:Range>$8.new(statTemp$9, statTemp$10) : Range
-parts = statTemp$3.[](statTemp$6) : untyped
-ifTemp$12 = parts : untyped
-ifTemp$12"];
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" [label = "(parts, <constant:Range>$9)
+<constant:Range>$9 = alias <constant:Range> : <class:Range>
+selfMethodTemp$2 = self : Diff
+diff = load_arg(selfMethodTemp$2#parse, 0) : untyped
+statTemp$6 = NotSupported() : untyped
+statTemp$4 = diff.split(statTemp$6) : untyped
+statTemp$10 = 1 : Integer(1)
+statTemp$11 = -1 : Integer(-1)
+statTemp$7 = <constant:Range>$9.new(statTemp$10, statTemp$11) : Range
+parts = statTemp$4.[](statTemp$7) : untyped
+ifTemp$13 = parts : untyped
+ifTemp$13"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3";
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2" [label = "(parts, <constant:Range>$8)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2" [label = "(parts, <constant:Range>$9)
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" [label = "(parts, <constant:Range>$8)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" [label = "(parts, <constant:Range>$9)
 parts = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" [label = "(parts, statTemp$14, <constant:Range>$8)
-statTemp$14 = parts : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" [label = "(parts, statTemp$15, <constant:Range>$9)
+statTemp$15 = parts : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_7";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6";
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6" [label = "(parts)
-statTemp$13 = parts.map() : untyped
-returnMethodTemp$37 = statTemp$13.compact() : untyped
-returnMethodTemp$100 = return returnMethodTemp$37 : <bottom>
+statTemp$14 = parts.map() : untyped
+returnMethodTemp$1 = statTemp$14.compact() : untyped
+returnMethodTemp$101 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_7" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_7" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$14#map, 0) : untyped
-statTemp$18 = 
+<block-nested: part> = load_arg(statTemp$15#map, 0) : untyped
+statTemp$19 = 
  : String(\"\n\")
-<block-nested: lines> = <block-nested: part>.split(statTemp$18) : untyped
+<block-nested: lines> = <block-nested: part>.split(statTemp$19) : untyped
 <block-nested: b_name> = NotSupported() : untyped
 <block-nested: added_lines> = NotSupported() : untyped
 <block-nested: removed_lines> = NotSupported() : untyped
-statTemp$23 = <block-nested: lines> : untyped
+statTemp$24 = <block-nested: lines> : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_7" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
 <block-call>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 1
-statTemp$22 = <block-nested: lines>.each() : untyped
-ifTemp$88 = <block-nested: b_name>.nil?() : untyped
-ifTemp$88"];
+statTemp$23 = <block-nested: lines>.each() : untyped
+ifTemp$89 = <block-nested: b_name>.nil?() : untyped
+ifTemp$89"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_37";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-<block-nested: line> = load_arg(statTemp$23#each, 0) : untyped
-statTemp$27 = index  : String(\"index \")
-statTemp$28 = @@ : String(\"@@\")
-statTemp$29 = new file mode : String(\"new file mode\")
-ifTemp$25 = <block-nested: line>.start_with?(statTemp$27, statTemp$28, statTemp$29) : untyped
-ifTemp$25"];
+<block-nested: line> = load_arg(statTemp$24#each, 0) : untyped
+statTemp$28 = index  : String(\"index \")
+statTemp$29 = @@ : String(\"@@\")
+statTemp$30 = new file mode : String(\"new file mode\")
+ifTemp$26 = <block-nested: line>.start_with?(statTemp$28, statTemp$29, statTemp$30) : untyped
+ifTemp$26"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_11";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_11" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_11" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-returnTemp$30 = NotSupported() : untyped
+returnTemp$31 = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_11" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$33 = --- : String(\"---\")
-ifTemp$31 = <block-nested: line>.start_with?(statTemp$33) : untyped
-ifTemp$31"];
+statTemp$34 = --- : String(\"---\")
+ifTemp$32 = <block-nested: line>.start_with?(statTemp$34) : untyped
+ifTemp$32"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$38 = 4 : Integer(4)
-statTemp$39 = -1 : Integer(-1)
-statTemp$36 = <constant:Range>$8.new(statTemp$38, statTemp$39) : Range
-<block-nested: a_name> = <block-nested: line>.[](statTemp$36) : untyped
-ifTemp$41 = <block-nested: b_name> : untyped
-ifTemp$41"];
+statTemp$39 = 4 : Integer(4)
+statTemp$40 = -1 : Integer(-1)
+statTemp$37 = <constant:Range>$9.new(statTemp$39, statTemp$40) : Range
+<block-nested: a_name> = <block-nested: line>.[](statTemp$37) : untyped
+ifTemp$42 = <block-nested: b_name> : untyped
+ifTemp$42"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$51 = +++ : String(\"+++\")
-ifTemp$49 = <block-nested: line>.start_with?(statTemp$51) : untyped
-ifTemp$49"];
+statTemp$52 = +++ : String(\"+++\")
+ifTemp$50 = <block-nested: line>.start_with?(statTemp$52) : untyped
+ifTemp$50"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$43 = a/ : String(\"a/\")
-ifTemp$40 = <block-nested: b_name>.start_with?(statTemp$43) : untyped
+statTemp$44 = a/ : String(\"a/\")
+ifTemp$41 = <block-nested: b_name>.start_with?(statTemp$44) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-ifTemp$40 = <block-nested: b_name> : untyped
+ifTemp$41 = <block-nested: b_name> : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-ifTemp$40"];
+ifTemp$41"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_19";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$47 = 2 : Integer(2)
-statTemp$48 = -1 : Integer(-1)
-statTemp$45 = <constant:Range>$8.new(statTemp$47, statTemp$48) : Range
-<block-nested: a_name> = <block-nested: b_name>.[](statTemp$45) : untyped
+statTemp$48 = 2 : Integer(2)
+statTemp$49 = -1 : Integer(-1)
+statTemp$46 = <constant:Range>$9.new(statTemp$48, statTemp$49) : Range
+<block-nested: a_name> = <block-nested: b_name>.[](statTemp$46) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_19" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_19" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-blockReturnTemp$24 = NotSupported() : untyped
+blockReturnTemp$25 = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_19" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$56 = 4 : Integer(4)
-statTemp$57 = -1 : Integer(-1)
-statTemp$54 = <constant:Range>$8.new(statTemp$56, statTemp$57) : Range
-<block-nested: b_name> = <block-nested: line>.[](statTemp$54) : untyped
-ifTemp$59 = <block-nested: b_name> : untyped
-ifTemp$59"];
+statTemp$57 = 4 : Integer(4)
+statTemp$58 = -1 : Integer(-1)
+statTemp$55 = <constant:Range>$9.new(statTemp$57, statTemp$58) : Range
+<block-nested: b_name> = <block-nested: line>.[](statTemp$55) : untyped
+ifTemp$60 = <block-nested: b_name> : untyped
+ifTemp$60"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$69 = + : String(\"+\")
-ifTemp$67 = <block-nested: line>.start_with?(statTemp$69) : untyped
-ifTemp$67"];
+statTemp$70 = + : String(\"+\")
+ifTemp$68 = <block-nested: line>.start_with?(statTemp$70) : untyped
+ifTemp$68"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$61 = b/ : String(\"b/\")
-ifTemp$58 = <block-nested: b_name>.start_with?(statTemp$61) : untyped
+statTemp$62 = b/ : String(\"b/\")
+ifTemp$59 = <block-nested: b_name>.start_with?(statTemp$62) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-ifTemp$58 = <block-nested: b_name> : untyped
+ifTemp$59 = <block-nested: b_name> : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-ifTemp$58"];
+ifTemp$59"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_27";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$62 = <block-nested: b_name> : untyped
-statTemp$65 = 2 : Integer(2)
-statTemp$66 = -1 : Integer(-1)
-statTemp$63 = <constant:Range>$8.new(statTemp$65, statTemp$66) : Range
-<block-nested: b_name> = statTemp$62.[](statTemp$63) : untyped
+statTemp$63 = <block-nested: b_name> : untyped
+statTemp$66 = 2 : Integer(2)
+statTemp$67 = -1 : Integer(-1)
+statTemp$64 = <constant:Range>$9.new(statTemp$66, statTemp$67) : Range
+<block-nested: b_name> = statTemp$63.[](statTemp$64) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_27" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_27" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-blockReturnTemp$24 = NotSupported() : untyped
+blockReturnTemp$25 = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_27" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$75 = 1 : Integer(1)
-statTemp$76 = -1 : Integer(-1)
-statTemp$73 = <constant:Range>$8.new(statTemp$75, statTemp$76) : Range
-statTemp$71 = <block-nested: line>.[](statTemp$73) : untyped
-blockReturnTemp$24 = <block-nested: added_lines>.<<(statTemp$71) : untyped
+statTemp$76 = 1 : Integer(1)
+statTemp$77 = -1 : Integer(-1)
+statTemp$74 = <constant:Range>$9.new(statTemp$76, statTemp$77) : Range
+statTemp$72 = <block-nested: line>.[](statTemp$74) : untyped
+blockReturnTemp$25 = <block-nested: added_lines>.<<(statTemp$72) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$79 = - : String(\"-\")
-ifTemp$77 = <block-nested: line>.start_with?(statTemp$79) : untyped
-ifTemp$77"];
+statTemp$80 = - : String(\"-\")
+ifTemp$78 = <block-nested: line>.start_with?(statTemp$80) : untyped
+ifTemp$78"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_32";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-statTemp$85 = 1 : Integer(1)
-statTemp$86 = -1 : Integer(-1)
-statTemp$83 = <constant:Range>$8.new(statTemp$85, statTemp$86) : Range
-statTemp$81 = <block-nested: line>.[](statTemp$83) : untyped
-blockReturnTemp$24 = <block-nested: removed_lines>.<<(statTemp$81) : untyped
+statTemp$86 = 1 : Integer(1)
+statTemp$87 = -1 : Integer(-1)
+statTemp$84 = <constant:Range>$9.new(statTemp$86, statTemp$87) : Range
+statTemp$82 = <block-nested: line>.[](statTemp$84) : untyped
+blockReturnTemp$25 = <block-nested: removed_lines>.<<(statTemp$82) : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_32" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_32" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
-blockReturnTemp$24 = NotSupported() : untyped
+blockReturnTemp$25 = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_32" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 2
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_37" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_37" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 1
-returnTemp$90 = NotSupported() : untyped
+returnTemp$91 = NotSupported() : untyped
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_37" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$14, statTemp$23, <constant:Range>$8, ifTemp$40, ifTemp$58)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
 outerLoops: 1
-statTemp$87 = NotSupported() : untyped
-hashTemp$91 = <symbol:a_name> : Symbol(:\"a_name\")
-hashTemp$93 = <symbol:b_name> : Symbol(:\"b_name\")
-hashTemp$95 = <symbol:added_lines> : Symbol(:\"added_lines\")
-hashTemp$97 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
-hashTemp$99 = alias {} : HashType {\n}
-blockReturnTemp$15 = hashTemp$99.<build-hash>(hashTemp$91, <block-nested: b_name>, hashTemp$93, <block-nested: b_name>, hashTemp$95, <block-nested: added_lines>, hashTemp$97, <block-nested: removed_lines>) : HashType {\n  Symbol(:\"a_name\") => untyped\n  Symbol(:\"b_name\") => untyped\n  Symbol(:\"added_lines\") => untyped\n  Symbol(:\"removed_lines\") => untyped\n}
+statTemp$88 = NotSupported() : untyped
+hashTemp$92 = <symbol:a_name> : Symbol(:\"a_name\")
+hashTemp$94 = <symbol:b_name> : Symbol(:\"b_name\")
+hashTemp$96 = <symbol:added_lines> : Symbol(:\"added_lines\")
+hashTemp$98 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
+hashTemp$100 = alias {} : HashType {\n}
+blockReturnTemp$16 = hashTemp$100.<build-hash>(hashTemp$92, <block-nested: b_name>, hashTemp$94, <block-nested: b_name>, hashTemp$96, <block-nested: added_lines>, hashTemp$98, <block-nested: removed_lines>) : HashType {\n  Symbol(:\"a_name\") => untyped\n  Symbol(:\"b_name\") => untyped\n  Symbol(:\"added_lines\") => untyped\n  Symbol(:\"removed_lines\") => untyped\n}
 <unconditional>"];
+
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5";
 }
 
@@ -918,13 +1032,15 @@ subgraph "cluster_::<constant:Range>#initialize" {
     "bb::<constant:Range>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Range>#initialize_0" [label = "()
-selfMethodTemp$1 = self : Range
-returnMethodTemp$38 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$38 : <bottom>
+selfMethodTemp$5 = self : Range
+returnMethodTemp$4 = NotSupported() : untyped
+returnMethodTemp$6 = return returnMethodTemp$4 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Range>#initialize_0" -> "bb::<constant:Range>#initialize_1";
     "bb::<constant:Range>#initialize_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Range>#initialize_1" -> "bb::<constant:Range>#initialize_1";
 }
 

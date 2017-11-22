@@ -2,5 +2,4 @@ class <constant:A> ()
   class <constant:B> ()
     class <constant:C> < ::<constant:Object> ()
 class <constant:B> ()
-class <constant:Opus> ()
 

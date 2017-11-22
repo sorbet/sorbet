@@ -1,4 +1,3 @@
-class <constant:Opus> ()
 class <constant:Outer1> < ::<constant:Object> ()
 class <constant:Outer2> < ::<constant:Object> ()
   class <constant:C> < ::<constant:Object> ()

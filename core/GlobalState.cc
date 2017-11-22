@@ -601,7 +601,7 @@ FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
 LocalVariable GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     Symbol &info = owner.info(*this);
     Error::check(info.isMethod());
-    int id = info.uniqueCounter++;
+    int id = ++(info.uniqueCounter);
     NameRef tempName = this->freshNameUnique(kind, name, id);
 
     return this->enterLocalSymbol(owner, tempName);
@@ -622,7 +622,7 @@ unsigned int GlobalState::namesUsed() {
 string GlobalState::toString(bool showHidden) {
     vector<string> children;
     for (auto element : defn_root().info(*this).members) {
-        if (showHidden || !element.second.isHiddenFromPrinting()) {
+        if (showHidden || !element.second.isHiddenFromPrinting(*this)) {
             children.push_back(element.second.toString(*this));
         }
     }

@@ -1,18 +1,4 @@
 begin
-  class <emptyTree>::<constant:String><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-    self(<constant:<todo sym>>).standard_method({:i => <emptyTree>::<constant:Integer>}, {:returns => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:Integer>, <emptyTree>::<constant:NilClass>)})
-
-    def getbyte<<constant:<todo sym>>>(i)
-      <emptyTree>
-
-  end
-  class <emptyTree>::<constant:Integer><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-    self(<constant:<todo sym>>).standard_method({:o => <emptyTree>::<constant:Integer>}, {:returns => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:Integer>)})
-
-    def +<<constant:<todo sym>>>(o)
-      <emptyTree>
-
-  end
   def baz1<<constant:<todo sym>>>()
     begin
       a = "foo"

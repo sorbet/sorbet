@@ -1,7 +1,2 @@
-class <constant:Opus> ()
-class <singleton class:<constant:<root>>> (<constant:Class>)
-class <singleton class:<constant:<root>>> (<constant:Class>)
-class <singleton class:<constant:Object>> (<constant:Class>)
-  method a_static_method ()
-method <block>$1 ()
+method <block>$10001 ()
 

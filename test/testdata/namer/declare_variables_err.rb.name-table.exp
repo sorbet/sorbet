@@ -1,7 +1,6 @@
 class <constant:A> < ::<constant:Object> ()
   field @foo -> Integer
   field @llamas -> untyped
-  method <block>$1 ()
-class <constant:Opus> ()
+  method <block>$10001 ()
 class <singleton class:<constant:A>> (<constant:Class>)
 

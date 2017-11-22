@@ -26,7 +26,7 @@
 <title>bb::&lt;constant:Object&gt;#foo_1</title>
 <polygon fill="none" stroke="#000000" points="665.7931,-116 149.12,-116 16.2069,-16 532.88,-16 665.7931,-116"/>
 <text text-anchor="middle" x="341" y="-75.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="341" y="-61.8" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$0</text>
+<text text-anchor="middle" x="341" y="-61.8" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$1</text>
 <text text-anchor="middle" x="341" y="-47.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
@@ -43,4 +43,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 2809e6fb1c69244a4d4a7b758c1c21dc9aed4f60e52ac4ebf46ac8b031d8a58c -->
+<!-- ruby-types:sha256: 4154aafb1be731906752a472962f0a613f38c755ec4807d54d8007f57d0b1d30 -->

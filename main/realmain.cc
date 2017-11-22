@@ -294,6 +294,7 @@ int realmain(int argc, char **argv) {
     options.add_options()("no-typer", "Do not type the CFG");
     options.add_options()("store-state", "Store state into file", cxxopts::value<string>());
     options.add_options()("trace", "Trace phases");
+    options.add_options()("set-freshNameId", "Store state into file", cxxopts::value<int>());
     options.add_options()("error-stats", "Print error statistics");
     options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("p,print", "Print " + print_options, cxxopts::value<vector<string>>(prints));
@@ -365,6 +366,10 @@ int realmain(int argc, char **argv) {
         st.lines++;
         st.bytes += src.size();
         inputFiles.push_back(gs.enterFile(string("-e"), src));
+    }
+
+    if (options.count("set-freshNameId")) {
+        gs.freshNameId = options["set-freshNameId"].as<int>();
     }
 
     typecheck(gs, index(gs, inputFiles, prints, options), prints, options);

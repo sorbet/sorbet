@@ -5,30 +5,35 @@ subgraph "cluster_::<constant:Side>#foo" {
     "bb::<constant:Side>#foo_0" [shape = invhouse];
     "bb::<constant:Side>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Side>#foo_0" [label = "(a, statTemp$3, statTemp$4)
+    "bb::<constant:Side>#foo_0" [label = "(a, statTemp$4, statTemp$5)
 a = 1 : Integer(1)
-statTemp$3 = a : Integer(1)
 statTemp$4 = a : Integer(1)
-ifTemp$6 = true : TrueClass(true)
-ifTemp$6"];
+statTemp$5 = a : Integer(1)
+ifTemp$7 = true : TrueClass(true)
+ifTemp$7"];
+
     "bb::<constant:Side>#foo_0" -> "bb::<constant:Side>#foo_2";
     "bb::<constant:Side>#foo_0" -> "bb::<constant:Side>#foo_3";
 
     "bb::<constant:Side>#foo_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Side>#foo_1" -> "bb::<constant:Side>#foo_1";
-    "bb::<constant:Side>#foo_2" [label = "(a, statTemp$3, statTemp$4)
+    "bb::<constant:Side>#foo_2" [label = "(a, statTemp$4, statTemp$5)
 a = true : TrueClass(true)
 <unconditional>"];
+
     "bb::<constant:Side>#foo_2" -> "bb::<constant:Side>#foo_4";
-    "bb::<constant:Side>#foo_3" [label = "(a, statTemp$3, statTemp$4)
+    "bb::<constant:Side>#foo_3" [label = "(a, statTemp$4, statTemp$5)
 a = 2 : Integer(2)
 <unconditional>"];
+
     "bb::<constant:Side>#foo_3" -> "bb::<constant:Side>#foo_4";
-    "bb::<constant:Side>#foo_4" [label = "(a, statTemp$3, statTemp$4)
-returnMethodTemp$0 = statTemp$3.foo(statTemp$4, a) : untyped
-returnMethodTemp$7 = return returnMethodTemp$0 : <bottom>
+    "bb::<constant:Side>#foo_4" [label = "(a, statTemp$4, statTemp$5)
+returnMethodTemp$1 = statTemp$4.foo(statTemp$5, a) : untyped
+returnMethodTemp$8 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Side>#foo_4" -> "bb::<constant:Side>#foo_1";
 }
 

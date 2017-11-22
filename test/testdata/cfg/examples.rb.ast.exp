@@ -1,55 +1,67 @@
-begin
-  class <emptyTree>::<constant:Integer><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-    self(<constant:<todo sym>>).standard_method({:o => <emptyTree>::<constant:Integer>}, {:returns => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:Integer>)})
+class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+  def i_like_ifs<<constant:<todo sym>>>()
+    if true
+      return 1
+    else
+      return 2
+    end
 
-    def +<<constant:<todo sym>>>(o)
-      <emptyTree>
-
-  end
-  class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-    def i_like_ifs<<constant:<todo sym>>>()
-      if true
-        return 1
-      else
-        return 2
+  def i_like_exps<<constant:<todo sym>>>()
+    if begin
+        true
       end
+      1
+    else
+      2
+    end
 
-    def i_like_exps<<constant:<todo sym>>>()
+  def return_in_one_branch1<<constant:<todo sym>>>()
+    if begin
+        true
+      end
+      return 1
+    else
+      2
+    end
+
+  def return_in_one_branch2<<constant:<todo sym>>>()
+    if begin
+        true
+      end
+      1
+    else
+      return 2
+    end
+
+  def variables<<constant:<todo sym>>>()
+    begin
       if begin
           true
         end
-        1
+        a = 1
       else
-        2
+        a = 2
       end
+      if begin
+          false
+        end
+        b = 1
+      else
+        b = 2
+      end
+      a.+(b)
+    end
 
-    def return_in_one_branch1<<constant:<todo sym>>>()
+  def variables_and_loop<<constant:<todo sym>>>()
+    begin
       if begin
           true
         end
-        return 1
+        a = 1
       else
-        2
+        a = 2
       end
-
-    def return_in_one_branch2<<constant:<todo sym>>>()
-      if begin
-          true
-        end
-        1
-      else
-        return 2
-      end
-
-    def variables<<constant:<todo sym>>>()
-      begin
-        if begin
-            true
-          end
-          a = 1
-        else
-          a = 2
-        end
+      while true
         if begin
             false
           end
@@ -57,52 +69,31 @@ begin
         else
           b = 2
         end
-        a.+(b)
       end
+      b
+    end
 
-    def variables_and_loop<<constant:<todo sym>>>()
-      begin
+  def variables_loop_if<<constant:<todo sym>>>()
+    begin
+      while true
         if begin
-            true
+            false
           end
-          a = 1
+          b = 1
         else
-          a = 2
+          b = 2
         end
-        while true
-          if begin
-              false
-            end
-            b = 1
-          else
-            b = 2
-          end
-        end
-        b
       end
+      b
+    end
 
-    def variables_loop_if<<constant:<todo sym>>>()
-      begin
-        while true
-          if begin
-              false
-            end
-            b = 1
-          else
-            b = 2
-          end
-        end
-        b
+  def take_arguments<<constant:<todo sym>>>(i)
+    if begin
+        false
       end
+      2
+    else
+      i
+    end
 
-    def take_arguments<<constant:<todo sym>>>(i)
-      if begin
-          false
-        end
-        2
-      else
-        i
-      end
-
-  end
 end

@@ -6,15 +6,17 @@ subgraph "cluster_::<constant:Foo>#baz" {
     "bb::<constant:Foo>#baz_1" [shape = parallelogram];
 
     "bb::<constant:Foo>#baz_0" [label = "()
-selfMethodTemp$1 = self : Foo
-a = load_arg(selfMethodTemp$1#baz, 0) : untyped
-statTemp$2 = self : Foo
-returnMethodTemp$1 = statTemp$2.puts(a) : untyped
-returnMethodTemp$4 = return returnMethodTemp$1 : <bottom>
+selfMethodTemp$2 = self : Foo
+a = load_arg(selfMethodTemp$2#baz, 0) : untyped
+statTemp$3 = self : Foo
+returnMethodTemp$1 = statTemp$3.puts(a) : untyped
+returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Foo>#baz_0" -> "bb::<constant:Foo>#baz_1";
     "bb::<constant:Foo>#baz_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Foo>#baz_1" -> "bb::<constant:Foo>#baz_1";
 }
 
@@ -24,32 +26,37 @@ subgraph "cluster_::<constant:Bar>#baz" {
     "bb::<constant:Bar>#baz_0" [shape = invhouse];
     "bb::<constant:Bar>#baz_1" [shape = parallelogram];
 
-    "bb::<constant:Bar>#baz_0" [label = "(b, statTemp$2)
-selfMethodTemp$1 = self : Bar
-b = load_arg(selfMethodTemp$1#baz, 0) : untyped
-statTemp$2 = self : Bar
+    "bb::<constant:Bar>#baz_0" [label = "(b, statTemp$3)
+selfMethodTemp$2 = self : Bar
+b = load_arg(selfMethodTemp$2#baz, 0) : untyped
+statTemp$3 = self : Bar
 <unconditional>"];
+
     "bb::<constant:Bar>#baz_0" -> "bb::<constant:Bar>#baz_2";
     "bb::<constant:Bar>#baz_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Bar>#baz_1" -> "bb::<constant:Bar>#baz_1";
-    "bb::<constant:Bar>#baz_2" [label = "(b, statTemp$2)
+    "bb::<constant:Bar>#baz_2" [label = "(b, statTemp$3)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:Bar>#baz_2" -> "bb::<constant:Bar>#baz_4";
     "bb::<constant:Bar>#baz_2" -> "bb::<constant:Bar>#baz_3";
 
-    "bb::<constant:Bar>#baz_3" [label = "(b, statTemp$2)
-returnMethodTemp$2 = statTemp$2.super(b) : untyped
-returnMethodTemp$7 = return returnMethodTemp$2 : <bottom>
+    "bb::<constant:Bar>#baz_3" [label = "(b, statTemp$3)
+returnMethodTemp$1 = statTemp$3.super(b) : untyped
+returnMethodTemp$8 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Bar>#baz_3" -> "bb::<constant:Bar>#baz_1";
-    "bb::<constant:Bar>#baz_4" [label = "(b, statTemp$2)
+    "bb::<constant:Bar>#baz_4" [label = "(b, statTemp$3)
 outerLoops: 1
-<block-nested: a> = load_arg(statTemp$2#super, 0) : untyped
-statTemp$5 = self : Bar
-blockReturnTemp$4 = statTemp$5.puts(<block-nested: a>) : untyped
+<block-nested: a> = load_arg(statTemp$3#super, 0) : untyped
+statTemp$6 = self : Bar
+blockReturnTemp$5 = statTemp$6.puts(<block-nested: a>) : untyped
 <unconditional>"];
+
     "bb::<constant:Bar>#baz_4" -> "bb::<constant:Bar>#baz_2";
 }
 
