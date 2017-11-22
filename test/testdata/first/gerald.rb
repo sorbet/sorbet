@@ -3,7 +3,7 @@ Opus::AutogenLoader.init(__FILE__) # error: Stubbing out unknown constant
 
 module Opus::CIBot::Gerald
 
-  class MatchTimeout < StandardError # error: Stubbing out unknown constant
+  class MatchTimeout < StandardError
 
     attr_reader :rule_token
 
@@ -24,7 +24,7 @@ module Opus::CIBot::Gerald
                 partition(&:valid?) # error: Unsupported node type BlockPass
       if !invalid_rules.empty?
         invalid_rule_ids = invalid_rules.map(&:token).join(',') # error: Unsupported node type BlockPass
-        log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids) # error: MULTI: both log and invalid_rule_ids
+        log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids) # error: Method log does not exist on Matcher
       end
     end
 
@@ -34,7 +34,7 @@ module Opus::CIBot::Gerald
       # number of commits. I don't think it is worth switching right now, but
       # maybe in the future.
       if match_context.diff.affected_files.count > MAX_AFFECTED_FILES
-        log.warn("Gerald skipping large PR with #{match_context.diff.affected_files.count} affected files") # error: MULTI: both log and diff
+        log.warn("Gerald skipping large PR with #{match_context.diff.affected_files.count} affected files") # error: Method log does not exist on Matcher
         return []
       end
 
@@ -82,23 +82,23 @@ module Opus::CIBot::Gerald
 
     def initialize
       @start =   # error: undeclared variable
-        Time.now # error: Stubbing out unknown constant
+        Time.now
     end
 
     def check!
-      dur_ms = (Time.now - @start) * 1000
+      dur_ms = (Time.now - @start) * 1000 # error: Method * does not exist on Time component of Float | Time
       if dur_ms > TOTAL_TIME_MS
-        raise MatchTimeout.new("Gerald match time budged exceeded #{TOTAL_TIME_MS}ms") # error: MULTI: no concat and no to_s.
+        raise MatchTimeout.new("Gerald match time budged exceeded #{TOTAL_TIME_MS}ms")
       end
     end
 
     def time_rule(rule)
       rule_start = Time.now
       res = yield
-      dur_ms = (Time.now - rule_start) * 1000
+      dur_ms = (Time.now - rule_start) * 1000 # error: Method * does not exist on Time component of Float | Time
       if dur_ms > PER_RULE_MS
-        raise MatchTimeout.new( # error: Method raise does not exist
-          "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms", # error: MULTI: no concat and no to_s.
+        raise MatchTimeout.new(
+          "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms",
           rule_token: rule.token)
       end
       check! # Also check the total time
