@@ -705,8 +705,8 @@ string CFG::toString(core::Context ctx) {
     buf << "    \"bb" << symbolName << "_1\" [shape = parallelogram];" << endl << endl;
     for (int i = 0; i < this->basicBlocks.size(); i++) {
         auto text = this->basicBlocks[i]->toString(ctx);
-        buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" [label = \"" << text << "\"];"
-            << endl << endl;
+        buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" [label = \"" << text << "\"];" << endl
+            << endl;
         buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
             << this->basicBlocks[i]->bexit.thenb->id << "\";" << endl;
         if (this->basicBlocks[i]->bexit.thenb != this->basicBlocks[i]->bexit.elseb) {
