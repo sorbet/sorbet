@@ -90,13 +90,6 @@ NameDef names[] = {
     {"emptyHash", "{}"},
     {"buildHash", "<build-hash>"},
     {"arg0"},
-
-    // Regexp Constants
-    {"IGNORECASE"},
-    {"EXTENDED"},
-    {"MULTILINE"},
-    {"FIXEDENCODING"},
-    {"NOENCODING"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

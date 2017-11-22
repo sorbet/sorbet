@@ -135,6 +135,10 @@ unique_ptr<Expression> mkConstant(core::Loc loc, unique_ptr<Expression> scope, c
     return make_unique<ConstantLit>(loc, move(scope), name);
 }
 
+unique_ptr<Expression> mkInt(core::Loc loc, int64_t val) {
+    return make_unique<IntLit>(loc, val);
+}
+
 pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Context ctx, core::Loc loc,
                                                                        unique_ptr<parser::Node> &argnode,
                                                                        unique_ptr<parser::Node> &bodynode) {
@@ -662,7 +666,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                                            "Unsupported integer literal: {}", integer->val);
                 }
 
-                unique_ptr<Expression> res = make_unique<IntLit>(what->loc, val);
+                unique_ptr<Expression> res = mkInt(what->loc, val);
                 result.swap(res);
             },
             [&](parser::Float *floatNode) {
@@ -782,18 +786,18 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(send);
             },
             [&](parser::Regopt *a) {
-                unique_ptr<Expression> acc = make_unique<IntLit>(what->loc, 0);
+                unique_ptr<Expression> acc = mkInt(what->loc, 0);
                 for (auto &chr : a->opts) {
-                    core::NameRef name;
+                    int flag = 0;
                     switch (chr) {
                         case 'i':
-                            name = core::Names::IGNORECASE();
+                            flag = 1; // Regexp::IGNORECASE
                             break;
                         case 'x':
-                            name = core::Names::EXTENDED();
+                            flag = 2; // Regexp::EXTENDED
                             break;
                         case 'm':
-                            name = core::Names::MULTILINE();
+                            flag = 4; // Regexp::MULILINE
                             break;
                         case 'n':
                         case 'e':
@@ -805,10 +809,8 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                             // The parser already yelled about this
                             break;
                     }
-                    if (name._id != -1) {
-                        acc =
-                            mkSend1(what->loc, acc, core::Names::orOp(),
-                                    mkConstant(what->loc, mkIdent(what->loc, core::GlobalState::defn_Regexp()), name));
+                    if (flag != 0) {
+                        acc = mkSend1(what->loc, acc, core::Names::orOp(), mkInt(what->loc, flag));
                     }
                 }
                 result.swap(acc);
@@ -935,15 +937,14 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     unique_ptr<Expression> lh = node2TreeImpl(ctx, c);
                     if (ast::Send *snd = cast_tree<ast::Send>(lh.get())) {
                         Error::check(snd->args.size() == 0);
-                        unique_ptr<Expression> getElement =
-                            mkSend1(what->loc, mkLocal(what->loc, tempName), core::Names::squareBrackets(),
-                                    make_unique<IntLit>(what->loc, i));
+                        unique_ptr<Expression> getElement = mkSend1(what->loc, mkLocal(what->loc, tempName),
+                                                                    core::Names::squareBrackets(), mkInt(what->loc, i));
                         snd->args.emplace_back(move(getElement));
                         stats.emplace_back(move(lh));
                     } else if (cast_tree<ast::Reference>(lh.get()) != nullptr ||
                                cast_tree<ast::ConstantLit>(lh.get()) != nullptr) {
                         auto access = mkSend1(what->loc, mkLocal(what->loc, tempName), core::Names::squareBrackets(),
-                                              make_unique<IntLit>(what->loc, i));
+                                              mkInt(what->loc, i));
                         unique_ptr<Expression> assign = mkAssign(what->loc, lh, access);
                         stats.emplace_back(move(assign));
                     } else if (ast::NotSupported *snd = cast_tree<ast::NotSupported>(lh.get())) {
