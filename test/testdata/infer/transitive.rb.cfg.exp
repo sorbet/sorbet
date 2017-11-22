@@ -2,25 +2,35 @@ digraph "transitive.rb"{
 subgraph "cluster_::<constant:A>#foo" {
     label = "::<constant:A>#foo";
     color = blue;
-    bb102_0 [shape = invhouse];
-    bb102_1 [shape = parallelogram];
+    "bb::<constant:A>#foo_0" [shape = invhouse];
+    "bb::<constant:A>#foo_1" [shape = parallelogram];
 
-    bb102_0 [label = "()\nreturnMethodTemp$2 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
-    bb102_0 -> bb102_1;
-    bb102_1 [label = "()\n<unconditional>"];
-    bb102_1 -> bb102_1;
+    "bb::<constant:A>#foo_0" [label = "()
+returnMethodTemp$2 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+    "bb::<constant:A>#foo_0" -> "bb::<constant:A>#foo_1";
+    "bb::<constant:A>#foo_1" [label = "()
+<unconditional>"];
+    "bb::<constant:A>#foo_1" -> "bb::<constant:A>#foo_1";
 }
 
 subgraph "cluster_::<constant:Bar>#baz" {
     label = "::<constant:Bar>#baz";
     color = blue;
-    bb105_0 [shape = invhouse];
-    bb105_1 [shape = parallelogram];
+    "bb::<constant:Bar>#baz_0" [shape = invhouse];
+    "bb::<constant:Bar>#baz_1" [shape = parallelogram];
 
-    bb105_0 [label = "()\nselfMethodTemp$1 = self : Bar\nstatTemp$2 = self : Bar\nreturnMethodTemp$3 = statTemp$2.foo() : Integer\nreturnMethodTemp$3 = return returnMethodTemp$3 : <bottom>\n<unconditional>"];
-    bb105_0 -> bb105_1;
-    bb105_1 [label = "()\n<unconditional>"];
-    bb105_1 -> bb105_1;
+    "bb::<constant:Bar>#baz_0" [label = "()
+selfMethodTemp$1 = self : Bar
+statTemp$2 = self : Bar
+returnMethodTemp$3 = statTemp$2.foo() : Integer
+returnMethodTemp$3 = return returnMethodTemp$3 : <bottom>
+<unconditional>"];
+    "bb::<constant:Bar>#baz_0" -> "bb::<constant:Bar>#baz_1";
+    "bb::<constant:Bar>#baz_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Bar>#baz_1" -> "bb::<constant:Bar>#baz_1";
 }
 
 }
