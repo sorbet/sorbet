@@ -1,8 +1,12 @@
+<<<<<<< HEAD
 class <constant:Opus> ()
 class <constant:TestLocals> < ::<constant:Object> ()
+=======
+class <constant:TestLocals> (<constant:Object>)
+>>>>>>> Update name table exp files.
   method method ()
-    method <block>$0 ()
-      method <block>$1 ()
-    method <block>$2 (a)
+    method <block>$10000 ()
+      method <block>$10001 ()
+    method <block>$10002 (a)
       argument a<>
 

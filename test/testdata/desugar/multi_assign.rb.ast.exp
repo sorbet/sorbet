@@ -1,19 +1,19 @@
 begin
   begin
-    assignTemp$0 = self(<constant:<todo sym>>).some_array()
-    <emptyTree>::<constant:A> = assignTemp$0.[](0)
-    <emptyTree>::<constant:B> = assignTemp$0.[](1)
-    <emptyTree>::<constant:C> = assignTemp$0.[](2)
-    assignTemp$0
+    assignTemp$10000 = self(<constant:<todo sym>>).some_array()
+    <emptyTree>::<constant:A> = assignTemp$10000.[](0)
+    <emptyTree>::<constant:B> = assignTemp$10000.[](1)
+    <emptyTree>::<constant:C> = assignTemp$10000.[](2)
+    assignTemp$10000
   end
   class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def some_method<<constant:<todo sym>>>(array)
       begin
-        assignTemp$1 = array
-        a = assignTemp$1.[](0)
-        b = assignTemp$1.[](1)
+        assignTemp$10001 = array
+        a = assignTemp$10001.[](0)
+        b = assignTemp$10001.[](1)
         <Not Supported (Mlhs)>
-        assignTemp$1
+        assignTemp$10001
       end
 
   end

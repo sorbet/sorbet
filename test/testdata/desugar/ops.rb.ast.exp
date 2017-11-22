@@ -1,19 +1,19 @@
 def test_ops<<constant:<todo sym>>>()
   begin
     begin
-      ||$0 = self(<constant:<todo sym>>).a()
-      if ||$0
-        ||$0
+      ||$10000 = self(<constant:<todo sym>>).a()
+      if ||$10000
+        ||$10000
       else
         self(<constant:<todo sym>>).b()
       end
     end
     begin
-      &&$1 = self(<constant:<todo sym>>).c()
-      if &&$1
+      &&$10001 = self(<constant:<todo sym>>).c()
+      if &&$10001
         self(<constant:<todo sym>>).d()
       else
-        &&$1
+        &&$10001
       end
     end
   end

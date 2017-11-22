@@ -1,19 +1,19 @@
 def test_csend<<constant:<todo sym>>>()
   begin
     begin
-      assignTemp$0 = self(<constant:<todo sym>>).foo()
-      if assignTemp$0.nil?()
+      assignTemp$10000 = self(<constant:<todo sym>>).foo()
+      if assignTemp$10000.nil?()
         nil
       else
-        assignTemp$0.bar()
+        assignTemp$10000.bar()
       end
     end
     begin
-      assignTemp$1 = self(<constant:<todo sym>>).foo()
-      if assignTemp$1.nil?()
+      assignTemp$10001 = self(<constant:<todo sym>>).foo()
+      if assignTemp$10001.nil?()
         nil
       else
-        assignTemp$1.bar() do |x|
+        assignTemp$10001.bar() do |x|
           x
         end
       end

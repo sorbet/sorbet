@@ -1,5 +1,4 @@
 class <constant:A> ()
   class <constant:Foo> < ::<constant:Object> ()
   method Foo ()
-class <constant:Opus> ()
 

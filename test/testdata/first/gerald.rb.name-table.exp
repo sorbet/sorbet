@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 class <constant:Opus> ()
   class <constant:AutogenLoader> () -> untyped
   class <constant:CIBot> ()
@@ -95,4 +96,6 @@ class <constant:Opus> ()
 class <singleton class:<constant:<root>>> (<constant:Class>)
 class <singleton class:<constant:<root>>> (<constant:Class>)
 class <singleton class:<constant:Range>> (<constant:Class>)
+=======
+>>>>>>> Update name table exp files.
 

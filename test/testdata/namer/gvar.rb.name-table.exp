@@ -1,6 +1,5 @@
 class <constant:A> < ::<constant:Object> ()
   method meth ()
-class <constant:Opus> ()
 field $a
 field $b
 field $c

@@ -1,7 +1,6 @@
 class <constant:BlockTest> < ::<constant:Object> ()
   method block_pass ()
-    method <block>$0 (x, y)
+    method <block>$10000 (x, y)
       argument x<>
       argument y<>
-class <constant:Opus> ()
 

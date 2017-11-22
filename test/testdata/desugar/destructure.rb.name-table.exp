@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 class <constant:Destructure> < ::<constant:Object> ()
   method f (<destructure>$0, z)
     argument <destructure>$0<>
+=======
+class <constant:Destructure> (<constant:Object>)
+  method f (<destructure>$10000, z)
+    argument <destructure>$10000<>
+>>>>>>> Update name table exp files.
     argument z<>
-    method <block>$4 (<destructure>$2)
-      argument <destructure>$2<>
-class <constant:Opus> ()
+    method <block>$10004 (<destructure>$10002)
+      argument <destructure>$10002<>
 

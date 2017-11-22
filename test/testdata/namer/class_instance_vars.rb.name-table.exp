@@ -6,8 +6,12 @@ class <constant:Child> < ::<constant:Parent> (<constant:Mixin>)
   static-field @@undefined_cvar -> untyped
 class <constant:Mixin> ()
   static-field @@mixin_cvar -> Integer
+<<<<<<< HEAD
 class <constant:Opus> ()
 class <constant:Parent> < ::<constant:Object> ()
+=======
+class <constant:Parent> (<constant:Object>)
+>>>>>>> Update name table exp files.
   field @ivar -> Integer
   field @ivar2 -> Integer
   method hi ()
