@@ -1,23 +1,4 @@
 digraph "examples.rb"{
-subgraph "cluster_::<constant:Integer>#+" {
-    label = "::<constant:Integer>#+";
-    color = blue;
-    "bb::<constant:Integer>#+_0" [shape = invhouse];
-    "bb::<constant:Integer>#+_1" [shape = parallelogram];
-
-    "bb::<constant:Integer>#+_0" [label = "()
-selfMethodTemp$2 = self : Integer
-returnMethodTemp$1 = NotSupported() : untyped
-returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
-<unconditional>"];
-
-    "bb::<constant:Integer>#+_0" -> "bb::<constant:Integer>#+_1";
-    "bb::<constant:Integer>#+_1" [label = "()
-<unconditional>"];
-
-    "bb::<constant:Integer>#+_1" -> "bb::<constant:Integer>#+_1";
-}
-
 subgraph "cluster_::<constant:Examples>#i_like_ifs" {
     label = "::<constant:Examples>#i_like_ifs";
     color = blue;
@@ -195,7 +176,7 @@ b = 2 : Integer(2)
 
     "bb::<constant:Examples>#variables_6" -> "bb::<constant:Examples>#variables_7";
     "bb::<constant:Examples>#variables_7" [label = "(b, a)
-returnMethodTemp$1 = a.+(b) : Integer
+returnMethodTemp$1 = a.+(b) : Integer | Float | Rational | BigDecimal | Complex
 returnMethodTemp$9 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 

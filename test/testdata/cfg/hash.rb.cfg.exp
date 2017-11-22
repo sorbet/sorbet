@@ -1,23 +1,4 @@
 digraph "hash.rb"{
-subgraph "cluster_::<constant:Integer>#+" {
-    label = "::<constant:Integer>#+";
-    color = blue;
-    "bb::<constant:Integer>#+_0" [shape = invhouse];
-    "bb::<constant:Integer>#+_1" [shape = parallelogram];
-
-    "bb::<constant:Integer>#+_0" [label = "()
-selfMethodTemp$2 = self : Integer
-returnMethodTemp$1 = NotSupported() : untyped
-returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
-<unconditional>"];
-
-    "bb::<constant:Integer>#+_0" -> "bb::<constant:Integer>#+_1";
-    "bb::<constant:Integer>#+_1" [label = "()
-<unconditional>"];
-
-    "bb::<constant:Integer>#+_1" -> "bb::<constant:Integer>#+_1";
-}
-
 subgraph "cluster_::<constant:TestHash>#something" {
     label = "::<constant:TestHash>#something";
     color = blue;
@@ -48,7 +29,7 @@ hashTemp$3 = statTemp$5.something() : untyped
 hashTemp$4 = <symbol:bar> : Symbol(:\"bar\")
 statTemp$8 = 1 : Integer(1)
 statTemp$9 = 2 : Integer(2)
-hashTemp$6 = statTemp$8.+(statTemp$9) : Integer
+hashTemp$6 = statTemp$8.+(statTemp$9) : Integer | Float | Rational | BigDecimal | Complex
 hashTemp$7 = 2 : Integer(2)
 hashTemp$10 = alias {} : HashType {\n}
 returnMethodTemp$1 = hashTemp$10.<build-hash>(hashTemp$3, hashTemp$4, hashTemp$6, hashTemp$7) : Hash

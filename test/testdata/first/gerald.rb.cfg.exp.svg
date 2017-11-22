@@ -9,26 +9,6 @@
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 3924.2127)">
 <title>gerald.rb</title>
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-3924.2127 26078,-3924.2127 26078,4 -4,4"/>
-<g id="clust1" class="cluster">
-<title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeout&gt;#initialize</title>
-<polygon fill="none" stroke="#0000ff" points="8,-3015.9276 8,-3777.6118 696,-3777.6118 696,-3015.9276 8,-3015.9276"/>
-<text text-anchor="middle" x="352" y="-3762.4118" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeout&gt;#initialize</text>
-</g>
-<g id="clust2" class="cluster">
-<title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#initialize</title>
-<polygon fill="none" stroke="#0000ff" points="704,-2287.7325 704,-3899.9763 1879,-3899.9763 1879,-2287.7325 704,-2287.7325"/>
-<text text-anchor="middle" x="1291.5" y="-3884.7763" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#initialize</text>
-</g>
-<g id="clust3" class="cluster">
-<title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match</title>
-<polygon fill="none" stroke="#0000ff" points="1887,-1867.0664 1887,-3802.0847 3225,-3802.0847 3225,-1867.0664 1887,-1867.0664"/>
-<text text-anchor="middle" x="2556" y="-3786.8847" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match</text>
-</g>
-<g id="clust4" class="cluster">
-<title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchContext&gt;#initialize</title>
-<polygon fill="none" stroke="#0000ff" points="3233,-3015.9276 3233,-3912.2127 3955,-3912.2127 3955,-3015.9276 3233,-3015.9276"/>
-<text text-anchor="middle" x="3594" y="-3897.0127" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchContext&gt;#initialize</text>
-</g>
 <g id="clust5" class="cluster">
 <title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchContext&gt;#user_stripe_suffix?</title>
 <polygon fill="none" stroke="#0000ff" points="3963,-3015.9276 3963,-3753.1389 4643,-3753.1389 4643,-3015.9276 3963,-3015.9276"/>
@@ -104,6 +84,26 @@
 <polygon fill="none" stroke="#0000ff" points="25386,-3015.9276 25386,-3728.666 26066,-3728.666 26066,-3015.9276 25386,-3015.9276"/>
 <text text-anchor="middle" x="25726" y="-3713.466" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Range&gt;#initialize</text>
 </g>
+<g id="clust1" class="cluster">
+<title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeout&gt;#initialize</title>
+<polygon fill="none" stroke="#0000ff" points="8,-3015.9276 8,-3777.6118 696,-3777.6118 696,-3015.9276 8,-3015.9276"/>
+<text text-anchor="middle" x="352" y="-3762.4118" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeout&gt;#initialize</text>
+</g>
+<g id="clust2" class="cluster">
+<title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#initialize</title>
+<polygon fill="none" stroke="#0000ff" points="704,-2287.7325 704,-3899.9763 1879,-3899.9763 1879,-2287.7325 704,-2287.7325"/>
+<text text-anchor="middle" x="1291.5" y="-3884.7763" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#initialize</text>
+</g>
+<g id="clust3" class="cluster">
+<title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match</title>
+<polygon fill="none" stroke="#0000ff" points="1887,-1867.0664 1887,-3802.0847 3225,-3802.0847 3225,-1867.0664 1887,-1867.0664"/>
+<text text-anchor="middle" x="2556" y="-3786.8847" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match</text>
+</g>
+<g id="clust4" class="cluster">
+<title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchContext&gt;#initialize</title>
+<polygon fill="none" stroke="#0000ff" points="3233,-3015.9276 3233,-3912.2127 3955,-3912.2127 3955,-3015.9276 3233,-3015.9276"/>
+<text text-anchor="middle" x="3594" y="-3897.0127" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchContext&gt;#initialize</text>
+</g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeout&gt;#initialize_0 -->
 <g id="node1" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeout&gt;#initialize_0</title>
@@ -165,7 +165,7 @@
 <g id="node5" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#initialize_2</title>
 <ellipse fill="none" stroke="#000000" cx="1072" cy="-3059.9276" rx="360.0323" ry="114.6026"/>
-<text text-anchor="middle" x="1072" y="-3125.7276" font-family="Times,serif" font-size="14.00" fill="#000000">(invalid_rules, returnMethodTemp$1)</text>
+<text text-anchor="middle" x="1072" y="-3125.7276" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1, invalid_rules)</text>
 <text text-anchor="middle" x="1072" y="-3111.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$26 = NotSupported() : untyped</text>
 <text text-anchor="middle" x="1072" y="-3097.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$24 = invalid_rules.map(statTemp$26) : untyped</text>
 <text text-anchor="middle" x="1072" y="-3083.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$27 = , : String(&quot;,&quot;)</text>
@@ -173,7 +173,7 @@
 <text text-anchor="middle" x="1072" y="-3055.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$29 = self : Matcher</text>
 <text text-anchor="middle" x="1072" y="-3041.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = statTemp$29.log() : untyped</text>
 <text text-anchor="middle" x="1072" y="-3027.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$31 = Gerald skipping invalid rules: &#160;: String(&quot;Gerald skipping invalid rules: &quot;)</text>
-<text text-anchor="middle" x="1072" y="-3013.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$30 = statTemp$31.+(invalid_rule_ids) : untyped</text>
+<text text-anchor="middle" x="1072" y="-3013.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$30 = statTemp$31.+(invalid_rule_ids) : String</text>
 <text text-anchor="middle" x="1072" y="-2999.7276" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$28.warn(statTemp$30) : untyped</text>
 <text text-anchor="middle" x="1072" y="-2985.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -239,18 +239,18 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_0 -->
 <g id="node8" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_0</title>
-<polygon fill="none" stroke="#000000" points="2006.8503,-3586.708 2520,-3488.8051 3033.1497,-3586.708 3032.6707,-3745.1182 2007.3293,-3745.1182 2006.8503,-3586.708"/>
-<text text-anchor="middle" x="2520" y="-3696.2915" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, &lt;constant:MatchTimeBudget&gt;$27, @rules$29)</text>
-<text text-anchor="middle" x="2520" y="-3682.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MAX_AFFECTED_FILES&gt;$10 = alias &lt;constant:MAX_AFFECTED_FILES&gt; : untyped</text>
-<text text-anchor="middle" x="2520" y="-3668.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MatchTimeBudget&gt;$27 = alias &lt;constant:MatchTimeBudget&gt; : &lt;class:MatchTimeBudget&gt;</text>
-<text text-anchor="middle" x="2520" y="-3654.2915" font-family="Times,serif" font-size="14.00" fill="#000000">@rules$29 = alias @rules : untyped</text>
-<text text-anchor="middle" x="2520" y="-3640.2915" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Matcher</text>
-<text text-anchor="middle" x="2520" y="-3626.2915" font-family="Times,serif" font-size="14.00" fill="#000000">match_context = load_arg(selfMethodTemp$2#match, 0) : untyped</text>
-<text text-anchor="middle" x="2520" y="-3612.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = match_context.diff() : untyped</text>
-<text text-anchor="middle" x="2520" y="-3598.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = statTemp$7.affected_files() : untyped</text>
-<text text-anchor="middle" x="2520" y="-3584.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = statTemp$6.count() : untyped</text>
-<text text-anchor="middle" x="2520" y="-3570.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = statTemp$5.&gt;(&lt;constant:MAX_AFFECTED_FILES&gt;$10) : untyped</text>
-<text text-anchor="middle" x="2520" y="-3556.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
+<polygon fill="none" stroke="#000000" points="2033.8503,-3586.708 2547,-3488.8051 3060.1497,-3586.708 3059.6707,-3745.1182 2034.3293,-3745.1182 2033.8503,-3586.708"/>
+<text text-anchor="middle" x="2547" y="-3696.2915" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, &lt;constant:MatchTimeBudget&gt;$27, @rules$29)</text>
+<text text-anchor="middle" x="2547" y="-3682.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MAX_AFFECTED_FILES&gt;$10 = alias &lt;constant:MAX_AFFECTED_FILES&gt; : untyped</text>
+<text text-anchor="middle" x="2547" y="-3668.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MatchTimeBudget&gt;$27 = alias &lt;constant:MatchTimeBudget&gt; : &lt;class:MatchTimeBudget&gt;</text>
+<text text-anchor="middle" x="2547" y="-3654.2915" font-family="Times,serif" font-size="14.00" fill="#000000">@rules$29 = alias @rules : untyped</text>
+<text text-anchor="middle" x="2547" y="-3640.2915" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Matcher</text>
+<text text-anchor="middle" x="2547" y="-3626.2915" font-family="Times,serif" font-size="14.00" fill="#000000">match_context = load_arg(selfMethodTemp$2#match, 0) : untyped</text>
+<text text-anchor="middle" x="2547" y="-3612.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = match_context.diff() : untyped</text>
+<text text-anchor="middle" x="2547" y="-3598.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = statTemp$7.affected_files() : untyped</text>
+<text text-anchor="middle" x="2547" y="-3584.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = statTemp$6.count() : untyped</text>
+<text text-anchor="middle" x="2547" y="-3570.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = statTemp$5.&gt;(&lt;constant:MAX_AFFECTED_FILES&gt;$10) : untyped</text>
+<text text-anchor="middle" x="2547" y="-3556.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_2 -->
 <g id="node10" class="node">
@@ -264,10 +264,10 @@
 <text text-anchor="middle" x="2260" y="-2607.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$20 = statTemp$21.affected_files() : untyped</text>
 <text text-anchor="middle" x="2260" y="-2593.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = statTemp$20.count() : untyped</text>
 <text text-anchor="middle" x="2260" y="-2579.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$18 = statTemp$19.to_s() : untyped</text>
-<text text-anchor="middle" x="2260" y="-2565.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$16 = statTemp$17.concat(statTemp$18) : untyped</text>
+<text text-anchor="middle" x="2260" y="-2565.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$16 = statTemp$17.concat(statTemp$18) : String</text>
 <text text-anchor="middle" x="2260" y="-2551.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$23 = &#160;affected files : String(&quot; affected files&quot;)</text>
-<text text-anchor="middle" x="2260" y="-2537.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$15 = statTemp$16.concat(statTemp$23) : untyped</text>
-<text text-anchor="middle" x="2260" y="-2523.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$14 = statTemp$15.to_s() : untyped</text>
+<text text-anchor="middle" x="2260" y="-2537.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$15 = statTemp$16.concat(statTemp$23) : String</text>
+<text text-anchor="middle" x="2260" y="-2523.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$14 = statTemp$15.to_s() : String</text>
 <text text-anchor="middle" x="2260" y="-2509.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = statTemp$12.warn(statTemp$14) : untyped</text>
 <text text-anchor="middle" x="2260" y="-2495.8361" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$24 = NotSupported() : untyped</text>
 <text text-anchor="middle" x="2260" y="-2481.8361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = return returnTemp$24 : &lt;bottom&gt;</text>
@@ -276,43 +276,43 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_2 -->
 <g id="edge9" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_2</title>
-<path fill="none" stroke="#000000" d="M2483.708,-3495.6256C2470.922,-3447.4538 2456.602,-3392.7414 2444,-3342.7703 2392.8424,-3139.9125 2337.1035,-2905.9877 2300.5368,-2750.6083"/>
-<polygon fill="#000000" stroke="#000000" points="2303.8532,-2749.4212 2298.1562,-2740.4885 2297.0392,-2751.0242 2303.8532,-2749.4212"/>
+<path fill="none" stroke="#000000" d="M2429.4408,-3511.0695C2388.9288,-3462.7015 2347.794,-3403.869 2324,-3342.7703 2249.0954,-3150.4286 2241.3567,-2910.8644 2246.9562,-2751.4243"/>
+<polygon fill="#000000" stroke="#000000" points="2250.4683,-2751.1631 2247.3437,-2741.0395 2243.4731,-2750.902 2250.4683,-2751.1631"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_3 -->
 <g id="node11" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_3</title>
-<ellipse fill="none" stroke="#000000" cx="2806" cy="-3059.9276" rx="353.1401" ry="55.3091"/>
-<text text-anchor="middle" x="2806" y="-3083.7276" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, statTemp$28, &lt;constant:MatchTimeBudget&gt;$27, @rules$29)</text>
-<text text-anchor="middle" x="2806" y="-3069.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="2806" y="-3055.7276" font-family="Times,serif" font-size="14.00" fill="#000000">budget = &lt;constant:MatchTimeBudget&gt;$27.new() : MatchTimeBudget</text>
-<text text-anchor="middle" x="2806" y="-3041.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = @rules$29 : untyped</text>
-<text text-anchor="middle" x="2806" y="-3027.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2686" cy="-3059.9276" rx="353.1401" ry="55.3091"/>
+<text text-anchor="middle" x="2686" y="-3083.7276" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, statTemp$28, &lt;constant:MatchTimeBudget&gt;$27, @rules$29)</text>
+<text text-anchor="middle" x="2686" y="-3069.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="2686" y="-3055.7276" font-family="Times,serif" font-size="14.00" fill="#000000">budget = &lt;constant:MatchTimeBudget&gt;$27.new() : MatchTimeBudget</text>
+<text text-anchor="middle" x="2686" y="-3041.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = @rules$29 : untyped</text>
+<text text-anchor="middle" x="2686" y="-3027.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_3 -->
 <g id="edge10" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_3</title>
-<path fill="none" stroke="#000000" d="M2584.8978,-3501.0217C2643.7726,-3383.5677 2728.1262,-3215.2842 2773.7437,-3124.2782"/>
-<polygon fill="#000000" stroke="#000000" points="2776.9518,-3125.6886 2778.304,-3115.1804 2770.6939,-3122.5518 2776.9518,-3125.6886"/>
+<path fill="none" stroke="#000000" d="M2580.0292,-3494.9141C2608.4698,-3378.1716 2648.2797,-3214.7609 2670.1147,-3125.1334"/>
+<polygon fill="#000000" stroke="#000000" points="2673.5264,-3125.9154 2672.4929,-3115.3711 2666.7253,-3124.2585 2673.5264,-3125.9154"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1 -->
 <g id="node9" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1</title>
-<polygon fill="none" stroke="#000000" points="2274.551,-2162.0268 2095.5076,-2162.0268 2049.449,-2090.0268 2228.4924,-2090.0268 2274.551,-2162.0268"/>
-<text text-anchor="middle" x="2162" y="-2128.8268" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="2162" y="-2114.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="2246.551,-2162.0268 2067.5076,-2162.0268 2021.449,-2090.0268 2200.4924,-2090.0268 2246.551,-2162.0268"/>
+<text text-anchor="middle" x="2134" y="-2128.8268" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="2134" y="-2114.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1 -->
 <g id="edge11" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1</title>
-<path fill="none" stroke="#000000" d="M2223.2128,-2162.0333C2259.1436,-2169.7048 2292.7753,-2157.7026 2292.7753,-2126.0268 2292.7753,-2097.3207 2265.1539,-2084.7722 2233.2319,-2088.3815"/>
-<polygon fill="#000000" stroke="#000000" points="2232.5167,-2084.9519 2223.2128,-2090.0204 2233.6467,-2091.8601 2232.5167,-2084.9519"/>
+<path fill="none" stroke="#000000" d="M2195.2128,-2162.0333C2231.1436,-2169.7048 2264.7753,-2157.7026 2264.7753,-2126.0268 2264.7753,-2097.3207 2237.1539,-2084.7722 2205.2319,-2088.3815"/>
+<polygon fill="#000000" stroke="#000000" points="2204.5167,-2084.9519 2195.2128,-2090.0204 2205.6467,-2091.8601 2204.5167,-2084.9519"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_2&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1 -->
 <g id="edge12" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_2&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1</title>
-<path fill="none" stroke="#000000" d="M2064.2854,-2438.3662C2048.1945,-2419.5474 2034.2164,-2399.0403 2024,-2376.9873 1989.2379,-2301.95 2057.894,-2218.4852 2110.262,-2169.2163"/>
-<polygon fill="#000000" stroke="#000000" points="2112.886,-2171.5572 2117.856,-2162.2003 2108.1358,-2166.4156 2112.886,-2171.5572"/>
+<path fill="none" stroke="#000000" d="M2032.0385,-2448.7972C2010.0558,-2427.6142 1990.8316,-2403.703 1977,-2376.9873 1937.596,-2300.8783 2016.1508,-2217.4332 2075.7046,-2168.506"/>
+<polygon fill="#000000" stroke="#000000" points="2078.0197,-2171.1352 2083.5988,-2162.1284 2073.6206,-2165.6901 2078.0197,-2171.1352"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4 -->
 <g id="node12" class="node">
@@ -325,100 +325,100 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_3&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4 -->
 <g id="edge13" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_3&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4</title>
-<path fill="none" stroke="#000000" d="M2820.2244,-3004.5338C2845.0017,-2908.0439 2895.6085,-2710.9663 2918.4082,-2622.1778"/>
-<polygon fill="#000000" stroke="#000000" points="2921.8201,-2622.9629 2920.9173,-2612.4066 2915.0401,-2621.2219 2921.8201,-2622.9629"/>
+<path fill="none" stroke="#000000" d="M2713.9899,-3004.5338C2762.8936,-2907.7503 2862.9329,-2709.7661 2907.5984,-2621.3703"/>
+<polygon fill="#000000" stroke="#000000" points="2910.7416,-2622.9104 2912.1276,-2612.4066 2904.4938,-2619.7535 2910.7416,-2622.9104"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_6 -->
 <g id="node13" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_6</title>
-<ellipse fill="none" stroke="#000000" cx="2921" cy="-2331.7325" rx="287.295" ry="45.011"/>
-<text text-anchor="middle" x="2921" y="-2348.5325" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, &lt;block&#45;nested: r&gt;, statTemp$28, @rules$29)</text>
-<text text-anchor="middle" x="2921" y="-2334.5325" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="2921" y="-2320.5325" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: r&gt; = load_arg(statTemp$28#select, 0) : untyped</text>
-<text text-anchor="middle" x="2921" y="-2306.5325" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2838" cy="-2331.7325" rx="287.295" ry="45.011"/>
+<text text-anchor="middle" x="2838" y="-2348.5325" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, &lt;block&#45;nested: r&gt;, statTemp$28, @rules$29)</text>
+<text text-anchor="middle" x="2838" y="-2334.5325" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="2838" y="-2320.5325" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: r&gt; = load_arg(statTemp$28#select, 0) : untyped</text>
+<text text-anchor="middle" x="2838" y="-2306.5325" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_6 -->
 <g id="edge14" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_6</title>
-<path fill="none" stroke="#000000" d="M2928.7009,-2541.6288C2927.2179,-2501.2083 2924.7733,-2434.5775 2923.0364,-2387.2378"/>
-<polygon fill="#000000" stroke="#000000" points="2926.5306,-2387.0116 2922.6662,-2377.1467 2919.5353,-2387.2683 2926.5306,-2387.0116"/>
+<path fill="none" stroke="#000000" d="M2916.7207,-2541.6288C2901.4976,-2501.0389 2876.3618,-2434.0183 2858.5941,-2386.6434"/>
+<polygon fill="#000000" stroke="#000000" points="2861.8212,-2385.2808 2855.0324,-2377.1467 2855.267,-2387.7389 2861.8212,-2385.2808"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_5 -->
 <g id="node14" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_5</title>
-<ellipse fill="none" stroke="#000000" cx="2306" cy="-2331.7325" rx="273.0758" ry="45.011"/>
-<text text-anchor="middle" x="2306" y="-2348.5325" font-family="Times,serif" font-size="14.00" fill="#000000">(@rules$29)</text>
-<text text-anchor="middle" x="2306" y="-2334.5325" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = @rules$29.select() : untyped</text>
-<text text-anchor="middle" x="2306" y="-2320.5325" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$36 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="2306" y="-2306.5325" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2259" cy="-2331.7325" rx="273.0758" ry="45.011"/>
+<text text-anchor="middle" x="2259" y="-2348.5325" font-family="Times,serif" font-size="14.00" fill="#000000">(@rules$29)</text>
+<text text-anchor="middle" x="2259" y="-2334.5325" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = @rules$29.select() : untyped</text>
+<text text-anchor="middle" x="2259" y="-2320.5325" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$36 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="2259" y="-2306.5325" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_5 -->
 <g id="edge15" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_5</title>
-<path fill="none" stroke="#000000" d="M2877.2737,-2542.1905C2819.6417,-2505.4695 2723.5421,-2448.1774 2634,-2412.9873 2589.1422,-2395.3582 2539.295,-2380.6757 2492.2808,-2368.8642"/>
-<polygon fill="#000000" stroke="#000000" points="2492.8428,-2365.3976 2482.2943,-2366.3873 2491.1576,-2372.1917 2492.8428,-2365.3976"/>
+<path fill="none" stroke="#000000" d="M2878.2589,-2542.1846C2820.8874,-2505.0449 2724.4631,-2447.0099 2634,-2412.9873 2580.9154,-2393.0225 2521.6633,-2377.3501 2466.2173,-2365.3232"/>
+<polygon fill="#000000" stroke="#000000" points="2466.7844,-2361.8654 2456.2735,-2363.1961 2465.3201,-2368.7105 2466.7844,-2361.8654"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7 -->
 <g id="node15" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7</title>
-<ellipse fill="none" stroke="#000000" cx="2904" cy="-2126.0268" rx="287.295" ry="35.2113"/>
-<text text-anchor="middle" x="2904" y="-2135.8268" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, &lt;block&#45;nested: r&gt;, statTemp$28, @rules$29)</text>
-<text text-anchor="middle" x="2904" y="-2121.8268" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="2904" y="-2107.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2641" cy="-2126.0268" rx="287.295" ry="35.2113"/>
+<text text-anchor="middle" x="2641" y="-2135.8268" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, &lt;block&#45;nested: r&gt;, statTemp$28, @rules$29)</text>
+<text text-anchor="middle" x="2641" y="-2121.8268" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="2641" y="-2107.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_6&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7 -->
 <g id="edge17" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_6&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7</title>
-<path fill="none" stroke="#000000" d="M2917.2482,-2286.3348C2914.4303,-2252.2375 2910.5874,-2205.7361 2907.766,-2171.597"/>
-<polygon fill="#000000" stroke="#000000" points="2911.2373,-2171.1041 2906.9255,-2161.4264 2904.2611,-2171.6807 2911.2373,-2171.1041"/>
+<path fill="none" stroke="#000000" d="M2795.0109,-2286.8437C2761.4353,-2251.7843 2715.0829,-2203.3835 2682.0205,-2168.8601"/>
+<polygon fill="#000000" stroke="#000000" points="2684.2027,-2166.0784 2674.7583,-2161.277 2679.1472,-2170.9201 2684.2027,-2166.0784"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_5&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1 -->
 <g id="edge16" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_5&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_1</title>
-<path fill="none" stroke="#000000" d="M2274.3986,-2286.5895C2250.2807,-2252.1368 2217.2211,-2204.9108 2193.2025,-2170.6"/>
-<polygon fill="#000000" stroke="#000000" points="2195.9039,-2168.3558 2187.3018,-2162.1708 2190.1694,-2172.3702 2195.9039,-2168.3558"/>
+<path fill="none" stroke="#000000" d="M2231.5682,-2286.5895C2210.7212,-2252.2828 2182.178,-2205.3108 2161.351,-2171.0368"/>
+<polygon fill="#000000" stroke="#000000" points="2164.1475,-2168.8991 2155.9634,-2162.1708 2158.1654,-2172.5343 2164.1475,-2168.8991"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_9 -->
 <g id="node16" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_9</title>
-<ellipse fill="none" stroke="#000000" cx="2895" cy="-1920.3212" rx="322.1301" ry="45.011"/>
-<text text-anchor="middle" x="2895" y="-1937.1212" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, &lt;block&#45;nested: r&gt;, statTemp$28, @rules$29)</text>
-<text text-anchor="middle" x="2895" y="-1923.1212" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
-<text text-anchor="middle" x="2895" y="-1909.1212" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$33 = &lt;block&#45;nested: r&gt;.matches?(match_context) : untyped</text>
-<text text-anchor="middle" x="2895" y="-1895.1212" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2293" cy="-1920.3212" rx="322.1301" ry="45.011"/>
+<text text-anchor="middle" x="2293" y="-1937.1212" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, &lt;block&#45;nested: r&gt;, statTemp$28, @rules$29)</text>
+<text text-anchor="middle" x="2293" y="-1923.1212" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 2</text>
+<text text-anchor="middle" x="2293" y="-1909.1212" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$33 = &lt;block&#45;nested: r&gt;.matches?(match_context) : untyped</text>
+<text text-anchor="middle" x="2293" y="-1895.1212" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_9 -->
 <g id="edge18" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_9</title>
-<path fill="none" stroke="#000000" d="M2897.2108,-2090.6648C2894.1449,-2059.0598 2891.822,-2012.2326 2891.3572,-1975.6695"/>
-<polygon fill="#000000" stroke="#000000" points="2894.857,-1975.6215 2891.2763,-1965.6502 2887.8573,-1975.6781 2894.857,-1975.6215"/>
+<path fill="none" stroke="#000000" d="M2577.1557,-2091.3643C2519.0135,-2058.065 2433.0967,-2007.4097 2370.9358,-1969.8588"/>
+<polygon fill="#000000" stroke="#000000" points="2372.6953,-1966.8327 2362.3277,-1964.6504 2369.0716,-1972.8217 2372.6953,-1966.8327"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_8 -->
 <g id="node17" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_8</title>
-<ellipse fill="none" stroke="#000000" cx="2263" cy="-1920.3212" rx="291.6794" ry="45.011"/>
-<text text-anchor="middle" x="2263" y="-1937.1212" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, &lt;block&#45;nested: r&gt;, statTemp$28, @rules$29)</text>
-<text text-anchor="middle" x="2263" y="-1923.1212" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="2263" y="-1909.1212" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$30 = budget.time_rule(&lt;block&#45;nested: r&gt;) : untyped</text>
-<text text-anchor="middle" x="2263" y="-1895.1212" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2925" cy="-1920.3212" rx="291.6794" ry="45.011"/>
+<text text-anchor="middle" x="2925" y="-1937.1212" font-family="Times,serif" font-size="14.00" fill="#000000">(match_context, budget, &lt;block&#45;nested: r&gt;, statTemp$28, @rules$29)</text>
+<text text-anchor="middle" x="2925" y="-1923.1212" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="2925" y="-1909.1212" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$30 = budget.time_rule(&lt;block&#45;nested: r&gt;) : untyped</text>
+<text text-anchor="middle" x="2925" y="-1895.1212" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_8 -->
 <g id="edge19" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_8</title>
-<path fill="none" stroke="#000000" d="M2830.3848,-2091.7645C2770.183,-2064.6817 2682.3468,-2027.2837 2603,-2001.576 2553.3707,-1985.4966 2498.7359,-1971.0541 2448.0528,-1958.9622"/>
-<polygon fill="#000000" stroke="#000000" points="2448.8424,-1955.5524 2438.305,-1956.6537 2447.2293,-1962.364 2448.8424,-1955.5524"/>
+<path fill="none" stroke="#000000" d="M2689.1767,-2091.1317C2734.8431,-2058.0548 2803.9422,-2008.0053 2855.5551,-1970.6213"/>
+<polygon fill="#000000" stroke="#000000" points="2857.6366,-1973.4353 2863.6822,-1964.7346 2853.5303,-1967.7662 2857.6366,-1973.4353"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_9&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7 -->
 <g id="edge21" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_9&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_7</title>
-<path fill="none" stroke="#000000" d="M2902.6901,-1965.6502C2905.5706,-1999.7639 2907.6105,-2046.3224 2907.723,-2080.4873"/>
-<polygon fill="#000000" stroke="#000000" points="2904.2226,-2080.6551 2907.6949,-2090.6648 2911.2226,-2080.6745 2904.2226,-2080.6551"/>
+<path fill="none" stroke="#000000" d="M2372.8353,-1964.1753C2435.3405,-2000.221 2520.9778,-2050.8743 2578.5465,-2085.8701"/>
+<polygon fill="#000000" stroke="#000000" points="2576.8225,-2088.9181 2587.1835,-2091.1317 2580.4644,-2082.94 2576.8225,-2088.9181"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_8&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4 -->
 <g id="edge20" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_8&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Matcher&gt;#match_4</title>
-<path fill="none" stroke="#000000" d="M2311.9804,-1964.9926C2381.0759,-2030.1265 2507.6824,-2157.5092 2588,-2286.4776 2610.9735,-2323.3668 2597.365,-2343.4478 2625,-2376.9873 2684.2278,-2448.8699 2776.0773,-2504.1889 2843.5127,-2538.2491"/>
-<polygon fill="#000000" stroke="#000000" points="2842.3496,-2541.5802 2852.8602,-2542.9135 2845.4752,-2535.3167 2842.3496,-2541.5802"/>
+<path fill="none" stroke="#000000" d="M2961.231,-1965.4009C3011.607,-2031.2801 3100.4017,-2159.8389 3134,-2286.4776 3144.3156,-2325.359 3149.5755,-2339.8986 3134,-2376.9873 3105.5856,-2444.648 3041.8837,-2500.9161 2993.1687,-2536.3628"/>
+<polygon fill="#000000" stroke="#000000" points="2990.9659,-2533.6353 2984.8743,-2542.3038 2995.0421,-2539.3261 2990.9659,-2533.6353"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchContext&gt;#initialize_0 -->
 <g id="node18" class="node">
@@ -502,7 +502,7 @@
 <text text-anchor="middle" x="4966" y="-3661.2915" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="4966" y="-3647.2915" font-family="Times,serif" font-size="14.00" fill="#000000">@start$3 = alias @start : untyped</text>
 <text text-anchor="middle" x="4966" y="-3633.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Time&gt;$5 = alias &lt;constant:Time&gt; : &lt;class:Time&gt;</text>
-<text text-anchor="middle" x="4966" y="-3619.2915" font-family="Times,serif" font-size="14.00" fill="#000000">@start$3 = &lt;constant:Time&gt;$5.now() : untyped</text>
+<text text-anchor="middle" x="4966" y="-3619.2915" font-family="Times,serif" font-size="14.00" fill="#000000">@start$3 = &lt;constant:Time&gt;$5.now() : Time</text>
 <text text-anchor="middle" x="4966" y="-3605.2915" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return @start$3 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="4966" y="-3591.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -534,8 +534,8 @@
 <text text-anchor="middle" x="5930" y="-3668.2915" font-family="Times,serif" font-size="14.00" fill="#000000">@start$9 = alias @start : untyped</text>
 <text text-anchor="middle" x="5930" y="-3654.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:TOTAL_TIME_MS&gt;$14 = alias &lt;constant:TOTAL_TIME_MS&gt; : untyped</text>
 <text text-anchor="middle" x="5930" y="-3640.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MatchTimeout&gt;$18 = alias &lt;constant:MatchTimeout&gt; : &lt;class:MatchTimeout&gt;</text>
-<text text-anchor="middle" x="5930" y="-3626.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = &lt;constant:Time&gt;$7.now() : untyped</text>
-<text text-anchor="middle" x="5930" y="-3612.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = statTemp$5.&#45;(@start$9) : untyped</text>
+<text text-anchor="middle" x="5930" y="-3626.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = &lt;constant:Time&gt;$7.now() : Time</text>
+<text text-anchor="middle" x="5930" y="-3612.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = statTemp$5.&#45;(@start$9) : Float | Time</text>
 <text text-anchor="middle" x="5930" y="-3598.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = 1000 : Integer(1000)</text>
 <text text-anchor="middle" x="5930" y="-3584.2915" font-family="Times,serif" font-size="14.00" fill="#000000">dur_ms = statTemp$4.*(statTemp$10) : untyped</text>
 <text text-anchor="middle" x="5930" y="-3570.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$11 = dur_ms.&gt;(&lt;constant:TOTAL_TIME_MS&gt;$14) : untyped</text>
@@ -549,12 +549,12 @@
 <text text-anchor="middle" x="5711" y="-3111.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$15 = self : MatchTimeBudget</text>
 <text text-anchor="middle" x="5711" y="-3097.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$22 = Gerald match time budged exceeded &#160;: String(&quot;Gerald match time budged exceeded &quot;)</text>
 <text text-anchor="middle" x="5711" y="-3083.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$23 = &lt;constant:TOTAL_TIME_MS&gt;$14.to_s() : untyped</text>
-<text text-anchor="middle" x="5711" y="-3069.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$21 = statTemp$22.concat(statTemp$23) : untyped</text>
+<text text-anchor="middle" x="5711" y="-3069.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$21 = statTemp$22.concat(statTemp$23) : String</text>
 <text text-anchor="middle" x="5711" y="-3055.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$25 = ms : String(&quot;ms&quot;)</text>
-<text text-anchor="middle" x="5711" y="-3041.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$20 = statTemp$21.concat(statTemp$25) : untyped</text>
-<text text-anchor="middle" x="5711" y="-3027.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = statTemp$20.to_s() : untyped</text>
+<text text-anchor="middle" x="5711" y="-3041.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$20 = statTemp$21.concat(statTemp$25) : String</text>
+<text text-anchor="middle" x="5711" y="-3027.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = statTemp$20.to_s() : String</text>
 <text text-anchor="middle" x="5711" y="-3013.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$16 = &lt;constant:MatchTimeout&gt;$18.new(statTemp$19) : MatchTimeout</text>
-<text text-anchor="middle" x="5711" y="-2999.7276" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$15.raise(statTemp$16) : untyped</text>
+<text text-anchor="middle" x="5711" y="-2999.7276" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$15.raise(statTemp$16) : NilClass</text>
 <text text-anchor="middle" x="5711" y="-2985.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#check!_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#check!_2 -->
@@ -626,10 +626,10 @@
 <text text-anchor="middle" x="7202" y="-3675.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MatchTimeout&gt;$21 = alias &lt;constant:MatchTimeout&gt; : &lt;class:MatchTimeout&gt;</text>
 <text text-anchor="middle" x="7202" y="-3661.2915" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : MatchTimeBudget</text>
 <text text-anchor="middle" x="7202" y="-3647.2915" font-family="Times,serif" font-size="14.00" fill="#000000">rule = load_arg(selfMethodTemp$2#time_rule, 0) : untyped</text>
-<text text-anchor="middle" x="7202" y="-3633.2915" font-family="Times,serif" font-size="14.00" fill="#000000">rule_start = &lt;constant:Time&gt;$5.now() : untyped</text>
+<text text-anchor="middle" x="7202" y="-3633.2915" font-family="Times,serif" font-size="14.00" fill="#000000">rule_start = &lt;constant:Time&gt;$5.now() : Time</text>
 <text text-anchor="middle" x="7202" y="-3619.2915" font-family="Times,serif" font-size="14.00" fill="#000000">res = NotSupported() : untyped</text>
-<text text-anchor="middle" x="7202" y="-3605.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = &lt;constant:Time&gt;$5.now() : untyped</text>
-<text text-anchor="middle" x="7202" y="-3591.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$8 = statTemp$9.&#45;(rule_start) : untyped</text>
+<text text-anchor="middle" x="7202" y="-3605.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = &lt;constant:Time&gt;$5.now() : Time</text>
+<text text-anchor="middle" x="7202" y="-3591.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$8 = statTemp$9.&#45;(rule_start) : Float | Time</text>
 <text text-anchor="middle" x="7202" y="-3577.2915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = 1000 : Integer(1000)</text>
 <text text-anchor="middle" x="7202" y="-3563.2915" font-family="Times,serif" font-size="14.00" fill="#000000">dur_ms = statTemp$8.*(statTemp$12) : untyped</text>
 <text text-anchor="middle" x="7202" y="-3549.2915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$14 = dur_ms.&gt;(&lt;constant:PER_RULE_MS&gt;$17) : untyped</text>
@@ -644,19 +644,19 @@
 <text text-anchor="middle" x="7018" y="-3216.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$29 = Gerald rule &#39; : String(&quot;Gerald rule &#39;&quot;)</text>
 <text text-anchor="middle" x="7018" y="-3202.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$31 = rule.token() : untyped</text>
 <text text-anchor="middle" x="7018" y="-3188.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$30 = statTemp$31.to_s() : untyped</text>
-<text text-anchor="middle" x="7018" y="-3174.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = statTemp$29.concat(statTemp$30) : untyped</text>
+<text text-anchor="middle" x="7018" y="-3174.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = statTemp$29.concat(statTemp$30) : String</text>
 <text text-anchor="middle" x="7018" y="-3160.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$33 = &#39; exceeded per&#45;rule time budget actual= : String(&quot;&#39; exceeded per&#45;rule time budget actual=&quot;)</text>
-<text text-anchor="middle" x="7018" y="-3146.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$27 = statTemp$28.concat(statTemp$33) : untyped</text>
+<text text-anchor="middle" x="7018" y="-3146.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$27 = statTemp$28.concat(statTemp$33) : String</text>
 <text text-anchor="middle" x="7018" y="-3132.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$35 = dur_ms.to_i() : untyped</text>
 <text text-anchor="middle" x="7018" y="-3118.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$34 = statTemp$35.to_s() : untyped</text>
-<text text-anchor="middle" x="7018" y="-3104.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$26 = statTemp$27.concat(statTemp$34) : untyped</text>
+<text text-anchor="middle" x="7018" y="-3104.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$26 = statTemp$27.concat(statTemp$34) : String</text>
 <text text-anchor="middle" x="7018" y="-3090.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$37 = ms budget= : String(&quot;ms budget=&quot;)</text>
-<text text-anchor="middle" x="7018" y="-3076.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$25 = statTemp$26.concat(statTemp$37) : untyped</text>
+<text text-anchor="middle" x="7018" y="-3076.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$25 = statTemp$26.concat(statTemp$37) : String</text>
 <text text-anchor="middle" x="7018" y="-3062.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$38 = &lt;constant:PER_RULE_MS&gt;$17.to_s() : untyped</text>
-<text text-anchor="middle" x="7018" y="-3048.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$24 = statTemp$25.concat(statTemp$38) : untyped</text>
+<text text-anchor="middle" x="7018" y="-3048.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$24 = statTemp$25.concat(statTemp$38) : String</text>
 <text text-anchor="middle" x="7018" y="-3034.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$40 = ms : String(&quot;ms&quot;)</text>
-<text text-anchor="middle" x="7018" y="-3020.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$23 = statTemp$24.concat(statTemp$40) : untyped</text>
-<text text-anchor="middle" x="7018" y="-3006.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$22 = statTemp$23.to_s() : untyped</text>
+<text text-anchor="middle" x="7018" y="-3020.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$23 = statTemp$24.concat(statTemp$40) : String</text>
+<text text-anchor="middle" x="7018" y="-3006.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$22 = statTemp$23.to_s() : String</text>
 <text text-anchor="middle" x="7018" y="-2992.7276" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$42 = &lt;symbol:rule_token&gt; : Symbol(:&quot;rule_token&quot;)</text>
 <text text-anchor="middle" x="7018" y="-2978.7276" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$43 = rule.token() : untyped</text>
 <text text-anchor="middle" x="7018" y="-2964.7276" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$45 = alias {} : HashType {</text>
@@ -665,7 +665,7 @@
 <text text-anchor="middle" x="7018" y="-2922.7276" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;Symbol(:&quot;rule_token&quot;) =&gt; untyped</text>
 <text text-anchor="middle" x="7018" y="-2908.7276" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="7018" y="-2894.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = &lt;constant:MatchTimeout&gt;$21.new(statTemp$22, statTemp$41) : MatchTimeout</text>
-<text text-anchor="middle" x="7018" y="-2880.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$13 = statTemp$18.raise(statTemp$19) : untyped</text>
+<text text-anchor="middle" x="7018" y="-2880.7276" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$13 = statTemp$18.raise(statTemp$19) : NilClass</text>
 <text text-anchor="middle" x="7018" y="-2866.7276" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_2 -->
@@ -1516,25 +1516,25 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7 -->
 <g id="node82" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7</title>
-<ellipse fill="none" stroke="#000000" cx="20608" cy="-2126.0268" rx="862.7536" ry="124.4016"/>
-<text text-anchor="middle" x="20608" y="-2198.8268" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$15, statTemp$24, &lt;constant:Range&gt;$9, ifTemp$41, ifTemp$59)</text>
-<text text-anchor="middle" x="20608" y="-2184.8268" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="20608" y="-2170.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: part&gt; = load_arg(statTemp$15#map, 0) : untyped</text>
-<text text-anchor="middle" x="20608" y="-2156.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = </text>
-<text text-anchor="middle" x="20608" y="-2142.8268" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;</text>
-<text text-anchor="middle" x="20608" y="-2128.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
-<text text-anchor="middle" x="20608" y="-2114.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: lines&gt; = &lt;block&#45;nested: part&gt;.split(statTemp$19) : untyped</text>
-<text text-anchor="middle" x="20608" y="-2100.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="20608" y="-2086.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: added_lines&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="20608" y="-2072.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: removed_lines&gt; = NotSupported() : untyped</text>
-<text text-anchor="middle" x="20608" y="-2058.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$24 = &lt;block&#45;nested: lines&gt; : untyped</text>
-<text text-anchor="middle" x="20608" y="-2044.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="20823" cy="-2126.0268" rx="862.7536" ry="124.4016"/>
+<text text-anchor="middle" x="20823" y="-2198.8268" font-family="Times,serif" font-size="14.00" fill="#000000">(parts, &lt;block&#45;nested: lines&gt;, &lt;block&#45;nested: b_name&gt;, &lt;block&#45;nested: added_lines&gt;, &lt;block&#45;nested: removed_lines&gt;, &lt;block&#45;nested: line&gt;, statTemp$15, statTemp$24, &lt;constant:Range&gt;$9, ifTemp$41, ifTemp$59)</text>
+<text text-anchor="middle" x="20823" y="-2184.8268" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="20823" y="-2170.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: part&gt; = load_arg(statTemp$15#map, 0) : untyped</text>
+<text text-anchor="middle" x="20823" y="-2156.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = </text>
+<text text-anchor="middle" x="20823" y="-2142.8268" font-family="Times,serif" font-size="14.00" fill="#000000"> : String(&quot;</text>
+<text text-anchor="middle" x="20823" y="-2128.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&quot;)</text>
+<text text-anchor="middle" x="20823" y="-2114.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: lines&gt; = &lt;block&#45;nested: part&gt;.split(statTemp$19) : untyped</text>
+<text text-anchor="middle" x="20823" y="-2100.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: b_name&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="20823" y="-2086.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: added_lines&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="20823" y="-2072.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: removed_lines&gt; = NotSupported() : untyped</text>
+<text text-anchor="middle" x="20823" y="-2058.8268" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$24 = &lt;block&#45;nested: lines&gt; : untyped</text>
+<text text-anchor="middle" x="20823" y="-2044.8268" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7 -->
 <g id="edge96" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_5&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7</title>
-<path fill="none" stroke="#000000" d="M22010.5239,-2298.1671C21811.1497,-2273.6967 21532.0891,-2239.4459 21275.3457,-2207.9342"/>
-<polygon fill="#000000" stroke="#000000" points="21275.4198,-2204.4171 21265.0678,-2206.6728 21274.567,-2211.365 21275.4198,-2204.4171"/>
+<path fill="none" stroke="#000000" d="M22042.7456,-2297.7644C21880.9886,-2274.9893 21659.9989,-2243.8745 21450.5344,-2214.3823"/>
+<polygon fill="#000000" stroke="#000000" points="21450.9592,-2210.9077 21440.5689,-2212.9792 21449.9832,-2217.8393 21450.9592,-2210.9077"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_6 -->
 <g id="node83" class="node">
@@ -1563,8 +1563,8 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8 -->
 <g id="edge99" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_7&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_8</title>
-<path fill="none" stroke="#000000" d="M20391.75,-2005.4744C20362.8782,-1989.3793 20335.0758,-1973.8803 20311.2867,-1960.6187"/>
-<polygon fill="#000000" stroke="#000000" points="20312.8106,-1957.4612 20302.3719,-1955.649 20309.4021,-1963.5753 20312.8106,-1957.4612"/>
+<path fill="none" stroke="#000000" d="M20496.0008,-2010.846C20442.813,-1992.1114 20391.197,-1973.9304 20348.349,-1958.8378"/>
+<polygon fill="#000000" stroke="#000000" points="20349.3756,-1955.4887 20338.7808,-1955.4675 20347.0499,-1962.0911 20349.3756,-1955.4887"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_6&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#parse_1 -->
 <g id="edge98" class="edge">
@@ -2137,9 +2137,9 @@
 <title>bb::&lt;constant:Range&gt;#initialize_0</title>
 <polygon fill="none" stroke="#000000" points="25394.1318,-3609.3704 25726,-3562.1421 26057.8682,-3609.3704 26057.5585,-3685.7874 25394.4415,-3685.7874 25394.1318,-3609.3704"/>
 <text text-anchor="middle" x="25726" y="-3654.2915" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="25726" y="-3640.2915" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Range</text>
-<text text-anchor="middle" x="25726" y="-3626.2915" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="25726" y="-3612.2915" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="25726" y="-3640.2915" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$5 = self : Range</text>
+<text text-anchor="middle" x="25726" y="-3626.2915" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="25726" y="-3612.2915" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return returnMethodTemp$4 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="25726" y="-3598.2915" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Range&gt;#initialize_1 -->
@@ -2163,4 +2163,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 8a22330d96d3745d186d335dcdec18fef00258f4f1b000baa4c77a7d12af81da -->
+<!-- ruby-types:sha256: 9e43b4db2c3f9e8672997a82ad6258d78351474f48aebb3deb7dafd51560af31 -->

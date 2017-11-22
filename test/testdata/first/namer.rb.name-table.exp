@@ -1,15 +1,8 @@
 class <constant:ANamespace> ()
-<<<<<<< HEAD
   class <constant:ClassInNamespace> < ::<constant:Object> ()
   class <constant:ObviousChild> < ::<constant:Object> ()
 class <constant:Child> < ::<constant:Parent> (<constant:Mixin>)
-  method <block>$2 ()
-=======
-  class <constant:ClassInNamespace> (<constant:Object>)
-  class <constant:ObviousChild> (<constant:Object>)
-class <constant:Child> (<constant:Parent>, <constant:Mixin>)
   method <block>$10002 ()
->>>>>>> Update name table exp files.
 class <constant:Mixin> ()
 class <constant:NormalClass> < ::<constant:Object> ()
   class <constant:InnerClass> < ::<constant:Object> ()

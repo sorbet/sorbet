@@ -1,19 +1,9 @@
-<<<<<<< HEAD
-class <constant:Opus> ()
 class <constant:Outer1> < ::<constant:Object> ()
 class <constant:Outer2> < ::<constant:Object> ()
   class <constant:C> < ::<constant:Object> ()
   class <constant:Inner1> < ::<constant:Object> ()
     class <constant:A> < ::<constant:Object> ()
     class <constant:Inner2> < ::<constant:Object> ()
-=======
-class <constant:Outer1> (<constant:Object>)
-class <constant:Outer2> (<constant:Object>)
-  class <constant:C> (<constant:Object>)
-  class <constant:Inner1> (<constant:Object>)
-    class <constant:A> (<constant:Object>)
-    class <constant:Inner2> (<constant:Object>)
->>>>>>> Update name table exp files.
       class <constant:A> () -> untyped
   class <constant:Other> < ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2> ()
 

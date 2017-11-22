@@ -53,7 +53,7 @@ ifTemp$20"];
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_2" [label = "(invalid_rules, returnMethodTemp$1)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_2" [label = "(returnMethodTemp$1, invalid_rules)
 statTemp$26 = NotSupported() : untyped
 statTemp$24 = invalid_rules.map(statTemp$26) : untyped
 statTemp$27 = , : String(\",\")
@@ -61,7 +61,7 @@ invalid_rule_ids = statTemp$24.join(statTemp$27) : untyped
 statTemp$29 = self : Matcher
 statTemp$28 = statTemp$29.log() : untyped
 statTemp$31 = Gerald skipping invalid rules:  : String(\"Gerald skipping invalid rules: \")
-statTemp$30 = statTemp$31.+(invalid_rule_ids) : untyped
+statTemp$30 = statTemp$31.+(invalid_rule_ids) : String
 returnMethodTemp$1 = statTemp$28.warn(statTemp$30) : untyped
 <unconditional>"];
 
@@ -111,10 +111,10 @@ statTemp$21 = match_context.diff() : untyped
 statTemp$20 = statTemp$21.affected_files() : untyped
 statTemp$19 = statTemp$20.count() : untyped
 statTemp$18 = statTemp$19.to_s() : untyped
-statTemp$16 = statTemp$17.concat(statTemp$18) : untyped
+statTemp$16 = statTemp$17.concat(statTemp$18) : String
 statTemp$23 =  affected files : String(\" affected files\")
-statTemp$15 = statTemp$16.concat(statTemp$23) : untyped
-statTemp$14 = statTemp$15.to_s() : untyped
+statTemp$15 = statTemp$16.concat(statTemp$23) : String
+statTemp$14 = statTemp$15.to_s() : String
 statTemp$11 = statTemp$12.warn(statTemp$14) : untyped
 returnTemp$24 = NotSupported() : untyped
 statTemp$3 = return returnTemp$24 : <bottom>
@@ -232,7 +232,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_0" [label = "()
 @start$3 = alias @start : untyped
 <constant:Time>$5 = alias <constant:Time> : <class:Time>
-@start$3 = <constant:Time>$5.now() : untyped
+@start$3 = <constant:Time>$5.now() : Time
 returnMethodTemp$6 = return @start$3 : <bottom>
 <unconditional>"];
 
@@ -254,8 +254,8 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 @start$9 = alias @start : untyped
 <constant:TOTAL_TIME_MS>$14 = alias <constant:TOTAL_TIME_MS> : untyped
 <constant:MatchTimeout>$18 = alias <constant:MatchTimeout> : <class:MatchTimeout>
-statTemp$5 = <constant:Time>$7.now() : untyped
-statTemp$4 = statTemp$5.-(@start$9) : untyped
+statTemp$5 = <constant:Time>$7.now() : Time
+statTemp$4 = statTemp$5.-(@start$9) : Float | Time
 statTemp$10 = 1000 : Integer(1000)
 dur_ms = statTemp$4.*(statTemp$10) : untyped
 ifTemp$11 = dur_ms.>(<constant:TOTAL_TIME_MS>$14) : untyped
@@ -272,12 +272,12 @@ ifTemp$11"];
 statTemp$15 = self : MatchTimeBudget
 statTemp$22 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")
 statTemp$23 = <constant:TOTAL_TIME_MS>$14.to_s() : untyped
-statTemp$21 = statTemp$22.concat(statTemp$23) : untyped
+statTemp$21 = statTemp$22.concat(statTemp$23) : String
 statTemp$25 = ms : String(\"ms\")
-statTemp$20 = statTemp$21.concat(statTemp$25) : untyped
-statTemp$19 = statTemp$20.to_s() : untyped
+statTemp$20 = statTemp$21.concat(statTemp$25) : String
+statTemp$19 = statTemp$20.to_s() : String
 statTemp$16 = <constant:MatchTimeout>$18.new(statTemp$19) : MatchTimeout
-returnMethodTemp$1 = statTemp$15.raise(statTemp$16) : untyped
+returnMethodTemp$1 = statTemp$15.raise(statTemp$16) : NilClass
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4";
@@ -305,10 +305,10 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 <constant:MatchTimeout>$21 = alias <constant:MatchTimeout> : <class:MatchTimeout>
 selfMethodTemp$2 = self : MatchTimeBudget
 rule = load_arg(selfMethodTemp$2#time_rule, 0) : untyped
-rule_start = <constant:Time>$5.now() : untyped
+rule_start = <constant:Time>$5.now() : Time
 res = NotSupported() : untyped
-statTemp$9 = <constant:Time>$5.now() : untyped
-statTemp$8 = statTemp$9.-(rule_start) : untyped
+statTemp$9 = <constant:Time>$5.now() : Time
+statTemp$8 = statTemp$9.-(rule_start) : Float | Time
 statTemp$12 = 1000 : Integer(1000)
 dur_ms = statTemp$8.*(statTemp$12) : untyped
 ifTemp$14 = dur_ms.>(<constant:PER_RULE_MS>$17) : untyped
@@ -326,25 +326,25 @@ statTemp$18 = self : MatchTimeBudget
 statTemp$29 = Gerald rule ' : String(\"Gerald rule '\")
 statTemp$31 = rule.token() : untyped
 statTemp$30 = statTemp$31.to_s() : untyped
-statTemp$28 = statTemp$29.concat(statTemp$30) : untyped
+statTemp$28 = statTemp$29.concat(statTemp$30) : String
 statTemp$33 = ' exceeded per-rule time budget actual= : String(\"' exceeded per-rule time budget actual=\")
-statTemp$27 = statTemp$28.concat(statTemp$33) : untyped
+statTemp$27 = statTemp$28.concat(statTemp$33) : String
 statTemp$35 = dur_ms.to_i() : untyped
 statTemp$34 = statTemp$35.to_s() : untyped
-statTemp$26 = statTemp$27.concat(statTemp$34) : untyped
+statTemp$26 = statTemp$27.concat(statTemp$34) : String
 statTemp$37 = ms budget= : String(\"ms budget=\")
-statTemp$25 = statTemp$26.concat(statTemp$37) : untyped
+statTemp$25 = statTemp$26.concat(statTemp$37) : String
 statTemp$38 = <constant:PER_RULE_MS>$17.to_s() : untyped
-statTemp$24 = statTemp$25.concat(statTemp$38) : untyped
+statTemp$24 = statTemp$25.concat(statTemp$38) : String
 statTemp$40 = ms : String(\"ms\")
-statTemp$23 = statTemp$24.concat(statTemp$40) : untyped
-statTemp$22 = statTemp$23.to_s() : untyped
+statTemp$23 = statTemp$24.concat(statTemp$40) : String
+statTemp$22 = statTemp$23.to_s() : String
 hashTemp$42 = <symbol:rule_token> : Symbol(:\"rule_token\")
 hashTemp$43 = rule.token() : untyped
 hashTemp$45 = alias {} : HashType {\n}
 statTemp$41 = hashTemp$45.<build-hash>(hashTemp$42, hashTemp$43) : HashType {\n  Symbol(:\"rule_token\") => untyped\n}
 statTemp$19 = <constant:MatchTimeout>$21.new(statTemp$22, statTemp$41) : MatchTimeout
-statTemp$13 = statTemp$18.raise(statTemp$19) : untyped
+statTemp$13 = statTemp$18.raise(statTemp$19) : NilClass
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4";
@@ -1032,9 +1032,9 @@ subgraph "cluster_::<constant:Range>#initialize" {
     "bb::<constant:Range>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Range>#initialize_0" [label = "()
-selfMethodTemp$2 = self : Range
-returnMethodTemp$1 = NotSupported() : untyped
-returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+selfMethodTemp$5 = self : Range
+returnMethodTemp$4 = NotSupported() : untyped
+returnMethodTemp$6 = return returnMethodTemp$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Range>#initialize_0" -> "bb::<constant:Range>#initialize_1";

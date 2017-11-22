@@ -1,6 +1,5 @@
 class <constant:A> (<constant:B>)
 class <constant:B> ()
-class <constant:Opus> ()
 class <singleton class:<constant:A>> (<constant:Class>)
 class <singleton class:<constant:B>> (<constant:Class>)
 

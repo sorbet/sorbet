@@ -1,14 +1,4 @@
 begin
-  class <emptyTree>::<constant:String><<constant:String>> < (::<constant:<todo sym>>)
-    def getbyte<getbyte>(i)
-      <emptyTree>
-
-  end
-  class <emptyTree>::<constant:Integer><<constant:Integer>> < (::<constant:<todo sym>>)
-    def +<+>(o)
-      <emptyTree>
-
-  end
   def baz1<baz1>()
     begin
       a = "foo"

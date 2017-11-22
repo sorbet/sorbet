@@ -295,7 +295,7 @@ r = <constant:C20>$84 : <class:C20>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" [label = "()
 statTemp$85 = self : <class:A>
 statTemp$86 = Bla bla bla : String(\"Bla bla bla\")
-statTemp$3 = statTemp$85.raise(statTemp$86) : untyped
+statTemp$3 = statTemp$85.raise(statTemp$86) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_42";

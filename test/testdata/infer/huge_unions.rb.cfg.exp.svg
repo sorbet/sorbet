@@ -765,269 +765,269 @@
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_47 -->
 <g id="node47" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_47</title>
-<ellipse fill="none" stroke="#000000" cx="2739" cy="-1522.9129" rx="76.8345" ry="25.4118"/>
-<text text-anchor="middle" x="2739" y="-1525.7129" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
-<text text-anchor="middle" x="2739" y="-1511.7129" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2738" cy="-1522.9129" rx="76.8345" ry="25.4118"/>
+<text text-anchor="middle" x="2738" y="-1525.7129" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
+<text text-anchor="middle" x="2738" y="-1511.7129" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_30&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_47 -->
 <g id="edge46" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_30&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_47</title>
-<path fill="none" stroke="#000000" d="M2777.6442,-2790.6969C2766.4732,-2777.2577 2755.3314,-2761.0493 2749,-2744.169 2722.1451,-2672.5706 2739,-2648.8735 2739,-2572.4045 2739,-2572.4045 2739,-2572.4045 2739,-1736.3343 2739,-1673.8259 2739,-1601.0192 2739,-1558.6333"/>
-<polygon fill="#000000" stroke="#000000" points="2742.5001,-1558.5374 2739,-1548.5374 2735.5001,-1558.5375 2742.5001,-1558.5374"/>
+<path fill="none" stroke="#000000" d="M2777.1013,-2790.7812C2765.7533,-2777.3506 2754.4342,-2761.126 2748,-2744.169 2720.8718,-2672.6737 2738,-2648.8735 2738,-2572.4045 2738,-2572.4045 2738,-2572.4045 2738,-1736.3343 2738,-1673.8259 2738,-1601.0192 2738,-1558.6333"/>
+<polygon fill="#000000" stroke="#000000" points="2741.5001,-1558.5374 2738,-1548.5374 2734.5001,-1558.5375 2741.5001,-1558.5374"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_32 -->
 <g id="node48" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_32</title>
-<ellipse fill="none" stroke="#000000" cx="2919" cy="-2698.9141" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="2919" y="-2708.7141" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C16&gt;$68)</text>
-<text text-anchor="middle" x="2919" y="-2694.7141" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C16&gt;$68 : &lt;class:C16&gt;</text>
-<text text-anchor="middle" x="2919" y="-2680.7141" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2918" cy="-2698.9141" rx="160.5268" ry="35.2113"/>
+<text text-anchor="middle" x="2918" y="-2708.7141" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C16&gt;$68)</text>
+<text text-anchor="middle" x="2918" y="-2694.7141" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C16&gt;$68 : &lt;class:C16&gt;</text>
+<text text-anchor="middle" x="2918" y="-2680.7141" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_31&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_32 -->
 <g id="edge47" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_31&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_32</title>
-<path fill="none" stroke="#000000" d="M3259.034,-2784.1345C3204.1245,-2771.7019 3144.0744,-2757.7447 3089,-2744.169 3069.847,-2739.4478 3049.5374,-2734.2283 3029.8739,-2729.0624"/>
-<polygon fill="#000000" stroke="#000000" points="3030.5335,-2725.6167 3019.9716,-2726.4513 3028.7487,-2732.3854 3030.5335,-2725.6167"/>
+<path fill="none" stroke="#000000" d="M3258.5046,-2784.1593C3203.4415,-2771.7273 3143.2248,-2757.7641 3088,-2744.169 3068.8456,-2739.4536 3048.5353,-2734.2369 3028.8716,-2729.0721"/>
+<polygon fill="#000000" stroke="#000000" points="3029.531,-2725.6264 3018.9691,-2726.4614 3027.7464,-2732.3951 3029.531,-2725.6264"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33 -->
 <g id="node49" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33</title>
-<ellipse fill="none" stroke="#000000" cx="3471" cy="-2698.9141" rx="373.0668" ry="45.011"/>
-<text text-anchor="middle" x="3471" y="-2715.7141" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
-<text text-anchor="middle" x="3471" y="-2701.7141" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$71 = 17 : Integer(17)</text>
-<text text-anchor="middle" x="3471" y="-2687.7141" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$69 = invite.===(statTemp$71) : untyped</text>
-<text text-anchor="middle" x="3471" y="-2673.7141" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$69</text>
+<ellipse fill="none" stroke="#000000" cx="3470" cy="-2698.9141" rx="373.0668" ry="45.011"/>
+<text text-anchor="middle" x="3470" y="-2715.7141" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3470" y="-2701.7141" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$71 = 17 : Integer(17)</text>
+<text text-anchor="middle" x="3470" y="-2687.7141" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$69 = invite.===(statTemp$71) : untyped</text>
+<text text-anchor="middle" x="3470" y="-2673.7141" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$69</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_31&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33 -->
 <g id="edge48" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_31&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33</title>
-<path fill="none" stroke="#000000" d="M3455.5968,-2780.1082C3457.1822,-2771.751 3458.8541,-2762.9382 3460.4885,-2754.3227"/>
-<polygon fill="#000000" stroke="#000000" points="3463.9573,-2754.8157 3462.3826,-2744.3385 3457.08,-2753.5109 3463.9573,-2754.8157"/>
+<path fill="none" stroke="#000000" d="M3455.2386,-2780.1082C3456.758,-2771.751 3458.3602,-2762.9382 3459.9265,-2754.3227"/>
+<polygon fill="#000000" stroke="#000000" points="3463.3964,-2754.8033 3461.7417,-2744.3385 3456.5093,-2753.5512 3463.3964,-2754.8033"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_47&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_48 -->
 <g id="edge68" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_47&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_48</title>
-<path fill="none" stroke="#000000" d="M2714.72,-1498.6986C2699.6415,-1483.6608 2680.0959,-1464.1681 2663.7903,-1447.9066"/>
-<polygon fill="#000000" stroke="#000000" points="2666.1064,-1445.2734 2656.5543,-1440.6901 2661.1634,-1450.2298 2666.1064,-1445.2734"/>
+<path fill="none" stroke="#000000" d="M2713.947,-1498.6986C2699.0093,-1483.6608 2679.6464,-1464.1681 2663.4932,-1447.9066"/>
+<polygon fill="#000000" stroke="#000000" points="2665.8553,-1445.3182 2656.3248,-1440.6901 2660.8891,-1450.2514 2665.8553,-1445.3182"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_46 -->
 <g id="node50" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_46</title>
-<ellipse fill="none" stroke="#000000" cx="2857" cy="-1629.6236" rx="76.8345" ry="25.4118"/>
-<text text-anchor="middle" x="2857" y="-1632.4236" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
-<text text-anchor="middle" x="2857" y="-1618.4236" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2854" cy="-1629.6236" rx="76.8345" ry="25.4118"/>
+<text text-anchor="middle" x="2854" y="-1632.4236" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
+<text text-anchor="middle" x="2854" y="-1618.4236" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_32&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_46 -->
 <g id="edge49" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_32&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_46</title>
-<path fill="none" stroke="#000000" d="M2890.9104,-2663.7191C2881.5978,-2650.1087 2872.2718,-2633.9086 2867,-2617.6593 2843.4017,-2544.9225 2857,-2522.3638 2857,-2445.8948 2857,-2445.8948 2857,-2445.8948 2857,-1843.0449 2857,-1780.5365 2857,-1707.7299 2857,-1665.344"/>
-<polygon fill="#000000" stroke="#000000" points="2860.5001,-1665.2481 2857,-1655.2481 2853.5001,-1665.2481 2860.5001,-1665.2481"/>
+<path fill="none" stroke="#000000" d="M2888.8285,-2663.8683C2879.1576,-2650.274 2869.4732,-2634.046 2864,-2617.6593 2839.7746,-2545.129 2854,-2522.3638 2854,-2445.8948 2854,-2445.8948 2854,-2445.8948 2854,-1843.0449 2854,-1780.5365 2854,-1707.7299 2854,-1665.344"/>
+<polygon fill="#000000" stroke="#000000" points="2857.5001,-1665.2481 2854,-1655.2481 2850.5001,-1665.2481 2857.5001,-1665.2481"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_34 -->
 <g id="node51" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_34</title>
-<ellipse fill="none" stroke="#000000" cx="3037" cy="-2572.4045" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="3037" y="-2582.2045" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C17&gt;$72)</text>
-<text text-anchor="middle" x="3037" y="-2568.2045" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C17&gt;$72 : &lt;class:C17&gt;</text>
-<text text-anchor="middle" x="3037" y="-2554.2045" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3034" cy="-2572.4045" rx="160.5268" ry="35.2113"/>
+<text text-anchor="middle" x="3034" y="-2582.2045" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C17&gt;$72)</text>
+<text text-anchor="middle" x="3034" y="-2568.2045" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C17&gt;$72 : &lt;class:C17&gt;</text>
+<text text-anchor="middle" x="3034" y="-2554.2045" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_34 -->
 <g id="edge50" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_34</title>
-<path fill="none" stroke="#000000" d="M3327.3883,-2657.0518C3267.5473,-2639.6083 3199.2666,-2619.7047 3143.9567,-2603.582"/>
-<polygon fill="#000000" stroke="#000000" points="3144.7189,-2600.1586 3134.1389,-2600.7202 3142.7599,-2606.8789 3144.7189,-2600.1586"/>
+<path fill="none" stroke="#000000" d="M3326.029,-2657.1395C3265.776,-2639.6565 3196.9616,-2619.6894 3141.2723,-2603.5306"/>
+<polygon fill="#000000" stroke="#000000" points="3141.9671,-2600.0879 3131.3879,-2600.6625 3140.0164,-2606.8106 3141.9671,-2600.0879"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35 -->
 <g id="node52" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35</title>
-<ellipse fill="none" stroke="#000000" cx="3506" cy="-2572.4045" rx="290.1508" ry="45.011"/>
-<text text-anchor="middle" x="3506" y="-2589.2045" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
-<text text-anchor="middle" x="3506" y="-2575.2045" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$75 = 18 : Integer(18)</text>
-<text text-anchor="middle" x="3506" y="-2561.2045" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$73 = invite.===(statTemp$75) : untyped</text>
-<text text-anchor="middle" x="3506" y="-2547.2045" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$73</text>
+<ellipse fill="none" stroke="#000000" cx="3503" cy="-2572.4045" rx="290.1508" ry="45.011"/>
+<text text-anchor="middle" x="3503" y="-2589.2045" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3503" y="-2575.2045" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$75 = 18 : Integer(18)</text>
+<text text-anchor="middle" x="3503" y="-2561.2045" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$73 = invite.===(statTemp$75) : untyped</text>
+<text text-anchor="middle" x="3503" y="-2547.2045" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$73</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35 -->
 <g id="edge51" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35</title>
-<path fill="none" stroke="#000000" d="M3483.5369,-2653.5986C3485.8742,-2645.1504 3488.3402,-2636.2369 3490.7484,-2627.5321"/>
-<polygon fill="#000000" stroke="#000000" points="3494.1397,-2628.4001 3493.433,-2617.8289 3487.3932,-2626.5335 3494.1397,-2628.4001"/>
+<path fill="none" stroke="#000000" d="M3481.8205,-2653.5986C3484.0242,-2645.1504 3486.3493,-2636.2369 3488.62,-2627.5321"/>
+<polygon fill="#000000" stroke="#000000" points="3492.0136,-2628.3885 3491.1511,-2617.8289 3485.2403,-2626.6216 3492.0136,-2628.3885"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_46&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_47 -->
 <g id="edge67" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_46&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_47</title>
-<path fill="none" stroke="#000000" d="M2830.5185,-1605.6756C2813.633,-1590.4056 2791.5796,-1570.4621 2773.3525,-1553.9788"/>
-<polygon fill="#000000" stroke="#000000" points="2775.566,-1551.2616 2765.8014,-1547.1502 2770.8708,-1556.4535 2775.566,-1551.2616"/>
+<path fill="none" stroke="#000000" d="M2827.6778,-1605.4093C2811.0667,-1590.1284 2789.455,-1570.2474 2771.6098,-1553.8312"/>
+<polygon fill="#000000" stroke="#000000" points="2773.9473,-1551.2258 2764.218,-1547.0314 2769.2081,-1556.3775 2773.9473,-1551.2258"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_45 -->
 <g id="node53" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_45</title>
-<ellipse fill="none" stroke="#000000" cx="2995" cy="-1736.3343" rx="76.8345" ry="25.4118"/>
-<text text-anchor="middle" x="2995" y="-1739.1343" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
-<text text-anchor="middle" x="2995" y="-1725.1343" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="2991" cy="-1736.3343" rx="76.8345" ry="25.4118"/>
+<text text-anchor="middle" x="2991" y="-1739.1343" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
+<text text-anchor="middle" x="2991" y="-1725.1343" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_34&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_45 -->
 <g id="edge52" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_34&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_45</title>
-<path fill="none" stroke="#000000" d="M3020.3058,-2537.1718C3014.4204,-2523.1598 3008.4222,-2506.6968 3005,-2491.1496 2988.5614,-2416.4684 2995,-2395.8542 2995,-2319.3851 2995,-2319.3851 2995,-2319.3851 2995,-1949.7556 2995,-1887.2472 2995,-1814.4406 2995,-1772.0546"/>
-<polygon fill="#000000" stroke="#000000" points="2998.5001,-1771.9587 2995,-1761.9588 2991.5001,-1771.9588 2998.5001,-1771.9587"/>
+<path fill="none" stroke="#000000" d="M3016.7741,-2537.2216C3010.7035,-2523.216 3004.5195,-2506.7445 3001,-2491.1496 2984.1655,-2416.5567 2991,-2395.8542 2991,-2319.3851 2991,-2319.3851 2991,-2319.3851 2991,-1949.7556 2991,-1887.2472 2991,-1814.4406 2991,-1772.0546"/>
+<polygon fill="#000000" stroke="#000000" points="2994.5001,-1771.9587 2991,-1761.9588 2987.5001,-1771.9588 2994.5001,-1771.9587"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_36 -->
 <g id="node54" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_36</title>
-<ellipse fill="none" stroke="#000000" cx="3175" cy="-2445.8948" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="3175" y="-2455.6948" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C18&gt;$76)</text>
-<text text-anchor="middle" x="3175" y="-2441.6948" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C18&gt;$76 : &lt;class:C18&gt;</text>
-<text text-anchor="middle" x="3175" y="-2427.6948" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3171" cy="-2445.8948" rx="160.5268" ry="35.2113"/>
+<text text-anchor="middle" x="3171" y="-2455.6948" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C18&gt;$76)</text>
+<text text-anchor="middle" x="3171" y="-2441.6948" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C18&gt;$76 : &lt;class:C18&gt;</text>
+<text text-anchor="middle" x="3171" y="-2427.6948" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_36 -->
 <g id="edge53" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_36</title>
-<path fill="none" stroke="#000000" d="M3396.2416,-2530.4543C3353.6451,-2514.1737 3305.4706,-2495.7612 3264.9755,-2480.2839"/>
-<polygon fill="#000000" stroke="#000000" points="3265.9817,-2476.9215 3255.3911,-2476.6207 3263.4825,-2483.4602 3265.9817,-2476.9215"/>
+<path fill="none" stroke="#000000" d="M3392.91,-2530.4543C3350.0071,-2514.106 3301.4627,-2495.608 3260.741,-2480.0909"/>
+<polygon fill="#000000" stroke="#000000" points="3261.9646,-2476.8117 3251.3737,-2476.5215 3259.472,-2483.3529 3261.9646,-2476.8117"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37 -->
 <g id="node55" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37</title>
-<ellipse fill="none" stroke="#000000" cx="3561" cy="-2445.8948" rx="206.7349" ry="45.011"/>
-<text text-anchor="middle" x="3561" y="-2462.6948" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
-<text text-anchor="middle" x="3561" y="-2448.6948" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$79 = 19 : Integer(19)</text>
-<text text-anchor="middle" x="3561" y="-2434.6948" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$77 = invite.===(statTemp$79) : untyped</text>
-<text text-anchor="middle" x="3561" y="-2420.6948" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$77</text>
+<ellipse fill="none" stroke="#000000" cx="3557" cy="-2445.8948" rx="206.7349" ry="45.011"/>
+<text text-anchor="middle" x="3557" y="-2462.6948" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3557" y="-2448.6948" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$79 = 19 : Integer(19)</text>
+<text text-anchor="middle" x="3557" y="-2434.6948" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$77 = invite.===(statTemp$79) : untyped</text>
+<text text-anchor="middle" x="3557" y="-2420.6948" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$77</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37 -->
 <g id="edge54" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37</title>
-<path fill="none" stroke="#000000" d="M3525.7009,-2527.0889C3529.4132,-2518.5499 3533.3322,-2509.5355 3537.1553,-2500.7418"/>
-<polygon fill="#000000" stroke="#000000" points="3540.4745,-2501.8855 3541.2518,-2491.3192 3534.0549,-2499.0945 3540.4745,-2501.8855"/>
+<path fill="none" stroke="#000000" d="M3522.3427,-2527.0889C3525.9875,-2518.5499 3529.8353,-2509.5355 3533.5889,-2500.7418"/>
+<polygon fill="#000000" stroke="#000000" points="3536.904,-2501.8904 3537.6108,-2491.3192 3530.466,-2499.1423 3536.904,-2501.8904"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_45&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_46 -->
 <g id="edge66" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_45&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_46</title>
-<path fill="none" stroke="#000000" d="M2964.7153,-1712.9162C2944.4536,-1697.2485 2917.6067,-1676.4886 2895.7843,-1659.6142"/>
-<polygon fill="#000000" stroke="#000000" points="2897.7428,-1656.7042 2887.6909,-1653.3558 2893.4607,-1662.2418 2897.7428,-1656.7042"/>
+<path fill="none" stroke="#000000" d="M2960.5953,-1712.6517C2940.4639,-1696.9712 2913.8959,-1676.2771 2892.3205,-1659.4718"/>
+<polygon fill="#000000" stroke="#000000" points="2894.3597,-1656.6237 2884.3197,-1653.2399 2890.0582,-1662.1462 2894.3597,-1656.6237"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_44 -->
 <g id="node56" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_44</title>
-<ellipse fill="none" stroke="#000000" cx="3133" cy="-1843.0449" rx="76.8345" ry="25.4118"/>
-<text text-anchor="middle" x="3133" y="-1845.8449" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
-<text text-anchor="middle" x="3133" y="-1831.8449" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3129" cy="-1843.0449" rx="76.8345" ry="25.4118"/>
+<text text-anchor="middle" x="3129" y="-1845.8449" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
+<text text-anchor="middle" x="3129" y="-1831.8449" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_36&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_44 -->
 <g id="edge55" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_36&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_44</title>
-<path fill="none" stroke="#000000" d="M3158.2802,-2410.6678C3152.3914,-2396.6565 3146.3976,-2380.1925 3143,-2364.64 3125.742,-2285.6413 3133,-2263.8378 3133,-2182.976 3133,-2182.976 3133,-2182.976 3133,-2056.4663 3133,-1993.9579 3133,-1921.1513 3133,-1878.7653"/>
-<polygon fill="#000000" stroke="#000000" points="3136.5001,-1878.6694 3133,-1868.6695 3129.5001,-1878.6695 3136.5001,-1878.6694"/>
+<path fill="none" stroke="#000000" d="M3154.2802,-2410.6678C3148.3914,-2396.6565 3142.3976,-2380.1925 3139,-2364.64 3121.742,-2285.6413 3129,-2263.8378 3129,-2182.976 3129,-2182.976 3129,-2182.976 3129,-2056.4663 3129,-1993.9579 3129,-1921.1513 3129,-1878.7653"/>
+<polygon fill="#000000" stroke="#000000" points="3132.5001,-1878.6694 3129,-1868.6695 3125.5001,-1878.6695 3132.5001,-1878.6694"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_38 -->
 <g id="node57" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_38</title>
-<ellipse fill="none" stroke="#000000" cx="3313" cy="-2319.3851" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="3313" y="-2329.1851" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C19&gt;$80)</text>
-<text text-anchor="middle" x="3313" y="-2315.1851" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C19&gt;$80 : &lt;class:C19&gt;</text>
-<text text-anchor="middle" x="3313" y="-2301.1851" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3309" cy="-2319.3851" rx="160.5268" ry="35.2113"/>
+<text text-anchor="middle" x="3309" y="-2329.1851" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C19&gt;$80)</text>
+<text text-anchor="middle" x="3309" y="-2315.1851" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C19&gt;$80 : &lt;class:C19&gt;</text>
+<text text-anchor="middle" x="3309" y="-2301.1851" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_38 -->
 <g id="edge56" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_38</title>
-<path fill="none" stroke="#000000" d="M3479.452,-2404.2956C3449.2579,-2388.8929 3415.2445,-2371.5421 3385.8715,-2356.5583"/>
-<polygon fill="#000000" stroke="#000000" points="3387.4124,-2353.4153 3376.914,-2351.9889 3384.2315,-2359.6509 3387.4124,-2353.4153"/>
+<path fill="none" stroke="#000000" d="M3475.452,-2404.2956C3445.2579,-2388.8929 3411.2445,-2371.5421 3381.8715,-2356.5583"/>
+<polygon fill="#000000" stroke="#000000" points="3383.4124,-2353.4153 3372.914,-2351.9889 3380.2315,-2359.6509 3383.4124,-2353.4153"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39 -->
 <g id="node58" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39</title>
-<ellipse fill="none" stroke="#000000" cx="3696" cy="-2319.3851" rx="204.1857" ry="45.011"/>
-<text text-anchor="middle" x="3696" y="-2336.1851" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C20&gt;$84)</text>
-<text text-anchor="middle" x="3696" y="-2322.1851" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$83 = 20 : Integer(20)</text>
-<text text-anchor="middle" x="3696" y="-2308.1851" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$81 = invite.===(statTemp$83) : untyped</text>
-<text text-anchor="middle" x="3696" y="-2294.1851" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$81</text>
+<ellipse fill="none" stroke="#000000" cx="3692" cy="-2319.3851" rx="204.1857" ry="45.011"/>
+<text text-anchor="middle" x="3692" y="-2336.1851" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3692" y="-2322.1851" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$83 = 20 : Integer(20)</text>
+<text text-anchor="middle" x="3692" y="-2308.1851" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$81 = invite.===(statTemp$83) : untyped</text>
+<text text-anchor="middle" x="3692" y="-2294.1851" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$81</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39 -->
 <g id="edge57" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39</title>
-<path fill="none" stroke="#000000" d="M3608.2164,-2401.6479C3618.8424,-2391.6902 3630.2076,-2381.0397 3641.1169,-2370.8165"/>
-<polygon fill="#000000" stroke="#000000" points="3643.6785,-2373.2127 3648.582,-2363.8209 3638.8919,-2368.105 3643.6785,-2373.2127"/>
+<path fill="none" stroke="#000000" d="M3604.2164,-2401.6479C3614.8424,-2391.6902 3626.2076,-2381.0397 3637.1169,-2370.8165"/>
+<polygon fill="#000000" stroke="#000000" points="3639.6785,-2373.2127 3644.582,-2363.8209 3634.8919,-2368.105 3639.6785,-2373.2127"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_44&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_45 -->
 <g id="edge65" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_44&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_45</title>
-<path fill="none" stroke="#000000" d="M3102.7153,-1819.6268C3082.4536,-1803.9592 3055.6067,-1783.1993 3033.7843,-1766.3249"/>
-<polygon fill="#000000" stroke="#000000" points="3035.7428,-1763.4149 3025.6909,-1760.0665 3031.4607,-1768.9525 3035.7428,-1763.4149"/>
+<path fill="none" stroke="#000000" d="M3098.7153,-1819.6268C3078.4536,-1803.9592 3051.6067,-1783.1993 3029.7843,-1766.3249"/>
+<polygon fill="#000000" stroke="#000000" points="3031.7428,-1763.4149 3021.6909,-1760.0665 3027.4607,-1768.9525 3031.7428,-1763.4149"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_43 -->
 <g id="node59" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_43</title>
-<ellipse fill="none" stroke="#000000" cx="3271" cy="-1949.7556" rx="76.8345" ry="25.4118"/>
-<text text-anchor="middle" x="3271" y="-1952.5556" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
-<text text-anchor="middle" x="3271" y="-1938.5556" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3267" cy="-1949.7556" rx="76.8345" ry="25.4118"/>
+<text text-anchor="middle" x="3267" y="-1952.5556" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
+<text text-anchor="middle" x="3267" y="-1938.5556" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_38&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_43 -->
 <g id="edge58" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_38&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_43</title>
-<path fill="none" stroke="#000000" d="M3296.115,-2284.1933C3290.2047,-2270.1866 3284.2394,-2253.7166 3281,-2238.1303 3262.4603,-2148.926 3265.2163,-2040.9183 3268.3666,-1985.8497"/>
-<polygon fill="#000000" stroke="#000000" points="3271.8786,-1985.7581 3268.9957,-1975.5631 3264.8917,-1985.3307 3271.8786,-1985.7581"/>
+<path fill="none" stroke="#000000" d="M3292.115,-2284.1933C3286.2047,-2270.1866 3280.2394,-2253.7166 3277,-2238.1303 3258.4603,-2148.926 3261.2163,-2040.9183 3264.3666,-1985.8497"/>
+<polygon fill="#000000" stroke="#000000" points="3267.8786,-1985.7581 3264.9957,-1975.5631 3260.8917,-1985.3307 3267.8786,-1985.7581"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_40 -->
 <g id="node60" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_40</title>
-<ellipse fill="none" stroke="#000000" cx="3451" cy="-2182.976" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="3451" y="-2192.776" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C20&gt;$84)</text>
-<text text-anchor="middle" x="3451" y="-2178.776" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C20&gt;$84 : &lt;class:C20&gt;</text>
-<text text-anchor="middle" x="3451" y="-2164.776" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3447" cy="-2182.976" rx="160.5268" ry="35.2113"/>
+<text text-anchor="middle" x="3447" y="-2192.776" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3447" y="-2178.776" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C20&gt;$84 : &lt;class:C20&gt;</text>
+<text text-anchor="middle" x="3447" y="-2164.776" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_40 -->
 <g id="edge59" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_40</title>
-<path fill="none" stroke="#000000" d="M3620.1583,-2277.1586C3587.9253,-2259.2121 3550.6251,-2238.4445 3519.266,-2220.9846"/>
-<polygon fill="#000000" stroke="#000000" points="3520.6033,-2217.7233 3510.1637,-2215.9166 3517.1981,-2223.8392 3520.6033,-2217.7233"/>
+<path fill="none" stroke="#000000" d="M3616.1583,-2277.1586C3583.9253,-2259.2121 3546.6251,-2238.4445 3515.266,-2220.9846"/>
+<polygon fill="#000000" stroke="#000000" points="3516.6033,-2217.7233 3506.1637,-2215.9166 3513.1981,-2223.8392 3516.6033,-2217.7233"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_41 -->
 <g id="node61" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_41</title>
-<ellipse fill="none" stroke="#000000" cx="3867" cy="-2182.976" rx="237.4661" ry="55.3091"/>
-<text text-anchor="middle" x="3867" y="-2206.776" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="3867" y="-2192.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$85 = self : &lt;class:A&gt;</text>
-<text text-anchor="middle" x="3867" y="-2178.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$86 = Bla bla bla : String(&quot;Bla bla bla&quot;)</text>
-<text text-anchor="middle" x="3867" y="-2164.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = statTemp$85.raise(statTemp$86) : untyped</text>
-<text text-anchor="middle" x="3867" y="-2150.776" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3865" cy="-2182.976" rx="239.3839" ry="55.3091"/>
+<text text-anchor="middle" x="3865" y="-2206.776" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="3865" y="-2192.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$85 = self : &lt;class:A&gt;</text>
+<text text-anchor="middle" x="3865" y="-2178.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$86 = Bla bla bla : String(&quot;Bla bla bla&quot;)</text>
+<text text-anchor="middle" x="3865" y="-2164.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = statTemp$85.raise(statTemp$86) : NilClass</text>
+<text text-anchor="middle" x="3865" y="-2150.776" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_41 -->
 <g id="edge60" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_41</title>
-<path fill="none" stroke="#000000" d="M3751.0467,-2275.4736C3764.1869,-2264.9914 3778.431,-2253.6287 3792.2907,-2242.5727"/>
-<polygon fill="#000000" stroke="#000000" points="3794.7606,-2245.0796 3800.3954,-2236.1074 3790.3953,-2239.6074 3794.7606,-2245.0796"/>
+<path fill="none" stroke="#000000" d="M3747.6906,-2275.4736C3760.9844,-2264.9914 3775.3951,-2253.6287 3789.4169,-2242.5727"/>
+<polygon fill="#000000" stroke="#000000" points="3791.9309,-2245.0476 3797.6164,-2236.1074 3787.5967,-2239.5508 3791.9309,-2245.0476"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_43&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_44 -->
 <g id="edge64" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_43&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_44</title>
-<path fill="none" stroke="#000000" d="M3240.7153,-1926.3375C3220.4536,-1910.6698 3193.6067,-1889.91 3171.7843,-1873.0355"/>
-<polygon fill="#000000" stroke="#000000" points="3173.7428,-1870.1256 3163.6909,-1866.7772 3169.4607,-1875.6632 3173.7428,-1870.1256"/>
+<path fill="none" stroke="#000000" d="M3236.7153,-1926.3375C3216.4536,-1910.6698 3189.6067,-1889.91 3167.7843,-1873.0355"/>
+<polygon fill="#000000" stroke="#000000" points="3169.7428,-1870.1256 3159.6909,-1866.7772 3165.4607,-1875.6632 3169.7428,-1870.1256"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_42 -->
 <g id="node62" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_42</title>
-<ellipse fill="none" stroke="#000000" cx="3451" cy="-2056.4663" rx="76.8345" ry="25.4118"/>
-<text text-anchor="middle" x="3451" y="-2059.2663" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
-<text text-anchor="middle" x="3451" y="-2045.2663" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3447" cy="-2056.4663" rx="76.8345" ry="25.4118"/>
+<text text-anchor="middle" x="3447" y="-2059.2663" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
+<text text-anchor="middle" x="3447" y="-2045.2663" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_40&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_42 -->
 <g id="edge61" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_40&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_42</title>
-<path fill="none" stroke="#000000" d="M3451,-2147.3993C3451,-2130.2111 3451,-2109.6266 3451,-2092.3928"/>
-<polygon fill="#000000" stroke="#000000" points="3454.5001,-2092.1555 3451,-2082.1555 3447.5001,-2092.1556 3454.5001,-2092.1555"/>
+<path fill="none" stroke="#000000" d="M3447,-2147.3993C3447,-2130.2111 3447,-2109.6266 3447,-2092.3928"/>
+<polygon fill="#000000" stroke="#000000" points="3450.5001,-2092.1555 3447,-2082.1555 3443.5001,-2092.1556 3450.5001,-2092.1555"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_41&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_42 -->
 <g id="edge62" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_41&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_42</title>
-<path fill="none" stroke="#000000" d="M3722.6709,-2139.0841C3652.9369,-2117.8773 3572.6362,-2093.4571 3517.5242,-2076.697"/>
-<polygon fill="#000000" stroke="#000000" points="3518.4631,-2073.3243 3507.8774,-2073.7633 3516.4264,-2080.0215 3518.4631,-2073.3243"/>
+<path fill="none" stroke="#000000" d="M3719.977,-2139.0841C3649.7966,-2117.8436 3568.9649,-2093.3795 3513.5805,-2076.6172"/>
+<polygon fill="#000000" stroke="#000000" points="3514.4727,-2073.2305 3503.8875,-2073.6836 3512.4449,-2079.9304 3514.4727,-2073.2305"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_42&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_43 -->
 <g id="edge63" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_42&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_43</title>
-<path fill="none" stroke="#000000" d="M3413.2661,-2034.0962C3385.4255,-2017.5913 3347.3735,-1995.0327 3317.6283,-1977.3986"/>
-<polygon fill="#000000" stroke="#000000" points="3319.0711,-1974.1852 3308.6842,-1972.0962 3315.5014,-1980.2066 3319.0711,-1974.1852"/>
+<path fill="none" stroke="#000000" d="M3409.2661,-2034.0962C3381.4255,-2017.5913 3343.3735,-1995.0327 3313.6283,-1977.3986"/>
+<polygon fill="#000000" stroke="#000000" points="3315.0711,-1974.1852 3304.6842,-1972.0962 3311.5014,-1980.2066 3315.0711,-1974.1852"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 29c260516705ce1d044d5c03a4fdd904d4cd88336bdadb8fc9a16b77517b83b5 -->
+<!-- ruby-types:sha256: bb47ba5e526fb52994e809f473a9b8502f04821cc94c7236c73f2d5fa0b36891 -->

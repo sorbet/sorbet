@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 class <emptyTree>::<constant:Destructure><<constant:Destructure>> < (::<constant:<todo sym>>)
-  def f<f>(<destructure>$0, z)
-=======
-class <emptyTree>::<constant:Destructure><<constant:Destructure>> < ()
   def f<f>(<destructure>$10000, z)
->>>>>>> Update name table exp files.
     begin
       begin
         assignTemp$10001 = <destructure>$10000

@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-class <constant:Opus> ()
 class <constant:Test> < ::<constant:Object> ()
-=======
-class <constant:Test> (<constant:Object>)
->>>>>>> Update name table exp files.
   method some_method (array)
     argument array<>
 static-field <constant:A> -> untyped
