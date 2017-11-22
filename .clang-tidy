@@ -3,7 +3,7 @@ Checks:          '-*,modernize-use-nullptr,readability-braces-around-statements,
 # not enabling google-readability-redundant-smartptr-get because it also changes it in conditions `foo.get() == nullptr` vs `foo == nullptr`
 # not enabling readability-else-after-return because it is iterative and it break  } else if (..) { into 2 lines.
 # not enabling modernize-use-auto because Nelson didn't like it.
-WarningsAsErrors: ''
+WarningsAsErrors: '*'
 AnalyzeTemporaryDtors: false
 FormatStyle:     file
 CheckOptions: []
