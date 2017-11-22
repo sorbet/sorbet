@@ -8,7 +8,8 @@
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
-#include "rbi/payload.h"
+#include "payload/binary/binary.h"
+#include "payload/text/text.h"
 #include "spdlog/spdlog.h"
 #include <algorithm> // find
 #include <ctime>
@@ -20,8 +21,6 @@
 
 namespace spd = spdlog;
 using namespace std;
-
-extern const ruby_typer::u4 *const getNameTablePayload;
 
 struct stats {
     unsigned int files = 0;
