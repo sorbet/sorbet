@@ -6,14 +6,16 @@ subgraph "cluster_::<constant:Foo>#foo" {
     "bb::<constant:Foo>#foo_1" [shape = parallelogram];
 
     "bb::<constant:Foo>#foo_0" [label = "()
-@ivar$3 = alias @ivar : Integer
-@ivar$3 = 2 : Integer(2)
-@ivar$3 = ss : untyped
-returnMethodTemp$4 = return @ivar$3 : <bottom>
+@ivar$4 = alias @ivar : Integer
+@ivar$4 = 2 : Integer(2)
+@ivar$4 = ss : untyped
+returnMethodTemp$5 = return @ivar$4 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Foo>#foo_0" -> "bb::<constant:Foo>#foo_1";
     "bb::<constant:Foo>#foo_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Foo>#foo_1" -> "bb::<constant:Foo>#foo_1";
 }
 

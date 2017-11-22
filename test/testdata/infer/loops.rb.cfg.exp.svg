@@ -37,8 +37,8 @@
 <ellipse fill="none" stroke="#000000" cx="177" cy="-295.7645" rx="160.6716" ry="45.011"/>
 <text text-anchor="middle" x="177" y="-312.5645" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="177" y="-298.5645" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="177" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$2 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="177" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$2</text>
+<text text-anchor="middle" x="177" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="177" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3</text>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2 -->
 <g id="edge1" class="edge">
@@ -79,8 +79,8 @@
 <title>bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_4</title>
 <ellipse fill="none" stroke="#000000" cx="459" cy="-169.2548" rx="268.1762" ry="45.011"/>
 <text text-anchor="middle" x="459" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="459" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$0 = nil : NilClass</text>
-<text text-anchor="middle" x="459" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$0 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="459" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = nil : NilClass</text>
+<text text-anchor="middle" x="459" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="459" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_4 -->
@@ -115,8 +115,8 @@
 <ellipse fill="none" stroke="#000000" cx="921" cy="-295.7645" rx="170.3105" ry="45.011"/>
 <text text-anchor="middle" x="921" y="-312.5645" font-family="Times,serif" font-size="14.00" fill="#000000">(a)</text>
 <text text-anchor="middle" x="921" y="-298.5645" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="921" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3 = false : FalseClass(false)</text>
-<text text-anchor="middle" x="921" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3</text>
+<text text-anchor="middle" x="921" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4 = false : FalseClass(false)</text>
+<text text-anchor="middle" x="921" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4</text>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2 -->
 <g id="edge7" class="edge">
@@ -158,7 +158,7 @@
 <ellipse fill="none" stroke="#000000" cx="1191" cy="-169.2548" rx="268.1762" ry="45.011"/>
 <text text-anchor="middle" x="1191" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="1191" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = nil : NilClass</text>
-<text text-anchor="middle" x="1191" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1191" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1191" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_4 -->
@@ -193,8 +193,8 @@
 <ellipse fill="none" stroke="#000000" cx="1653" cy="-295.7645" rx="170.3105" ry="45.011"/>
 <text text-anchor="middle" x="1653" y="-312.5645" font-family="Times,serif" font-size="14.00" fill="#000000">(a)</text>
 <text text-anchor="middle" x="1653" y="-298.5645" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="1653" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3 = false : FalseClass(false)</text>
-<text text-anchor="middle" x="1653" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3</text>
+<text text-anchor="middle" x="1653" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4 = false : FalseClass(false)</text>
+<text text-anchor="middle" x="1653" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4</text>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_2 -->
 <g id="edge13" class="edge">
@@ -235,8 +235,8 @@
 <title>bb::&lt;constant:HasLoops&gt;#correct_assignment_4</title>
 <ellipse fill="none" stroke="#000000" cx="1933" cy="-169.2548" rx="268.1762" ry="45.011"/>
 <text text-anchor="middle" x="1933" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1933" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = nil : NilClass</text>
-<text text-anchor="middle" x="1933" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1933" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = nil : NilClass</text>
+<text text-anchor="middle" x="1933" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1933" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_4 -->
@@ -259,4 +259,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: a66ec7f350a390b073768c864ccafd9f1f87e88343df7346800b8e86b4618ffc -->
+<!-- ruby-types:sha256: 71b8950a02be564293c8e9bb4020ee2c1c042be66b512409ebf02609fea731f2 -->

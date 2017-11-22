@@ -59,9 +59,9 @@
 <title>bb::&lt;constant:Integer&gt;#+_0</title>
 <polygon fill="none" stroke="#000000" points="16.1318,-811.8027 348,-764.5744 679.8682,-811.8027 679.5585,-888.2197 16.4415,-888.2197 16.1318,-811.8027"/>
 <text text-anchor="middle" x="348" y="-856.7238" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="348" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$1 = self : Integer</text>
+<text text-anchor="middle" x="348" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Integer</text>
 <text text-anchor="middle" x="348" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="348" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="348" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="348" y="-800.7238" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Integer&gt;#+_1 -->
@@ -88,16 +88,16 @@
 <title>bb::&lt;constant:Examples&gt;#i_like_ifs_0</title>
 <polygon fill="none" stroke="#000000" points="1008.8141,-819.3567 1188,-789.0197 1367.1859,-819.3567 1367.0186,-868.443 1008.9814,-868.443 1008.8141,-819.3567"/>
 <text text-anchor="middle" x="1188" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1188" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="1188" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2</text>
+<text text-anchor="middle" x="1188" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="1188" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#i_like_ifs_2 -->
 <g id="node5" class="node">
 <title>bb::&lt;constant:Examples&gt;#i_like_ifs_2</title>
 <ellipse fill="none" stroke="#000000" cx="942" cy="-683.4945" rx="237.5846" ry="45.011"/>
 <text text-anchor="middle" x="942" y="-700.2945" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="942" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$3 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="942" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = return returnTemp$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="942" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$4 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="942" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return returnTemp$4 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="942" y="-658.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#i_like_ifs_0&#45;&gt;bb::&lt;constant:Examples&gt;#i_like_ifs_2 -->
@@ -111,8 +111,8 @@
 <title>bb::&lt;constant:Examples&gt;#i_like_ifs_3</title>
 <ellipse fill="none" stroke="#000000" cx="1435" cy="-683.4945" rx="237.5846" ry="45.011"/>
 <text text-anchor="middle" x="1435" y="-700.2945" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1435" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$4 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="1435" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = return returnTemp$4 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1435" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$5 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="1435" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return returnTemp$5 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1435" y="-658.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#i_like_ifs_0&#45;&gt;bb::&lt;constant:Examples&gt;#i_like_ifs_3 -->
@@ -125,8 +125,8 @@
 <g id="node4" class="node">
 <title>bb::&lt;constant:Examples&gt;#i_like_ifs_1</title>
 <polygon fill="none" stroke="#000000" points="1503.7931,-602.2397 987.12,-602.2397 854.2069,-502.2397 1370.88,-502.2397 1503.7931,-602.2397"/>
-<text text-anchor="middle" x="1179" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$2)</text>
-<text text-anchor="middle" x="1179" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$2</text>
+<text text-anchor="middle" x="1179" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="1179" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return returnMethodTemp$1</text>
 <text text-anchor="middle" x="1179" y="-534.0397" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#i_like_ifs_1&#45;&gt;bb::&lt;constant:Examples&gt;#i_like_ifs_1 -->
@@ -152,15 +152,15 @@
 <title>bb::&lt;constant:Examples&gt;#i_like_exps_0</title>
 <polygon fill="none" stroke="#000000" points="1848.8141,-819.3567 2028,-789.0197 2207.1859,-819.3567 2207.0186,-868.443 1848.9814,-868.443 1848.8141,-819.3567"/>
 <text text-anchor="middle" x="2028" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="2028" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="2028" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2</text>
+<text text-anchor="middle" x="2028" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="2028" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#i_like_exps_2 -->
 <g id="node9" class="node">
 <title>bb::&lt;constant:Examples&gt;#i_like_exps_2</title>
 <ellipse fill="none" stroke="#000000" cx="1858" cy="-683.4945" rx="160.604" ry="35.2113"/>
-<text text-anchor="middle" x="1858" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$3)</text>
-<text text-anchor="middle" x="1858" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="1858" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="1858" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="1858" y="-665.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#i_like_exps_0&#45;&gt;bb::&lt;constant:Examples&gt;#i_like_exps_2 -->
@@ -173,8 +173,8 @@
 <g id="node10" class="node">
 <title>bb::&lt;constant:Examples&gt;#i_like_exps_3</title>
 <ellipse fill="none" stroke="#000000" cx="2198" cy="-683.4945" rx="160.604" ry="35.2113"/>
-<text text-anchor="middle" x="2198" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$3)</text>
-<text text-anchor="middle" x="2198" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="2198" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="2198" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 2 : Integer(2)</text>
 <text text-anchor="middle" x="2198" y="-665.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#i_like_exps_0&#45;&gt;bb::&lt;constant:Examples&gt;#i_like_exps_3 -->
@@ -200,8 +200,8 @@
 <g id="node11" class="node">
 <title>bb::&lt;constant:Examples&gt;#i_like_exps_4</title>
 <ellipse fill="none" stroke="#000000" cx="2028" cy="-552.2397" rx="268.1762" ry="35.2113"/>
-<text text-anchor="middle" x="2028" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$3)</text>
-<text text-anchor="middle" x="2028" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="2028" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="2028" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="2028" y="-534.0397" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#i_like_exps_2&#45;&gt;bb::&lt;constant:Examples&gt;#i_like_exps_4 -->
@@ -227,16 +227,16 @@
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch1_0</title>
 <polygon fill="none" stroke="#000000" points="2703.8141,-819.3567 2883,-789.0197 3062.1859,-819.3567 3062.0186,-868.443 2703.9814,-868.443 2703.8141,-819.3567"/>
 <text text-anchor="middle" x="2883" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="2883" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="2883" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2</text>
+<text text-anchor="middle" x="2883" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="2883" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch1_2 -->
 <g id="node14" class="node">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch1_2</title>
 <ellipse fill="none" stroke="#000000" cx="2621" cy="-683.4945" rx="237.5846" ry="45.011"/>
 <text text-anchor="middle" x="2621" y="-700.2945" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="2621" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$3 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="2621" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnTemp$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="2621" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$4 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="2621" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return returnTemp$4 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="2621" y="-658.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch1_0&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch1_2 -->
@@ -249,9 +249,9 @@
 <g id="node15" class="node">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch1_3</title>
 <ellipse fill="none" stroke="#000000" cx="3145" cy="-683.4945" rx="268.1762" ry="45.011"/>
-<text text-anchor="middle" x="3145" y="-700.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$4)</text>
-<text text-anchor="middle" x="3145" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="3145" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$4 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="3145" y="-700.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="3145" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="3145" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="3145" y="-658.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch1_0&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch1_3 -->
@@ -290,15 +290,15 @@
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_0</title>
 <polygon fill="none" stroke="#000000" points="3701.8141,-819.3567 3881,-789.0197 4060.1859,-819.3567 4060.0186,-868.443 3701.9814,-868.443 3701.8141,-819.3567"/>
 <text text-anchor="middle" x="3881" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="3881" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="3881" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2</text>
+<text text-anchor="middle" x="3881" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="3881" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_2 -->
 <g id="node18" class="node">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_2</title>
 <ellipse fill="none" stroke="#000000" cx="3791" cy="-683.4945" rx="160.604" ry="35.2113"/>
-<text text-anchor="middle" x="3791" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$5)</text>
-<text text-anchor="middle" x="3791" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="3791" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="3791" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="3791" y="-665.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_0&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_2 -->
@@ -312,8 +312,8 @@
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_3</title>
 <ellipse fill="none" stroke="#000000" cx="4229" cy="-552.2397" rx="237.5846" ry="45.011"/>
 <text text-anchor="middle" x="4229" y="-569.0397" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="4229" y="-555.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$3 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="4229" y="-541.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnTemp$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="4229" y="-555.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$4 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="4229" y="-541.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return returnTemp$4 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="4229" y="-527.0397" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_0&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_3 -->
@@ -339,8 +339,8 @@
 <g id="node20" class="node">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_4</title>
 <ellipse fill="none" stroke="#000000" cx="3705" cy="-552.2397" rx="268.1762" ry="35.2113"/>
-<text text-anchor="middle" x="3705" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$5)</text>
-<text text-anchor="middle" x="3705" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$5 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="3705" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="3705" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="3705" y="-534.0397" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_2&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_4 -->
@@ -366,8 +366,8 @@
 <title>bb::&lt;constant:Examples&gt;#variables_0</title>
 <polygon fill="none" stroke="#000000" points="4527.8141,-819.3567 4707,-789.0197 4886.1859,-819.3567 4886.0186,-868.443 4527.9814,-868.443 4527.8141,-819.3567"/>
 <text text-anchor="middle" x="4707" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="4707" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="4707" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
+<text text-anchor="middle" x="4707" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="4707" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_2 -->
 <g id="node23" class="node">
@@ -415,8 +415,8 @@
 <title>bb::&lt;constant:Examples&gt;#variables_4</title>
 <ellipse fill="none" stroke="#000000" cx="4702" cy="-552.2397" rx="154.4176" ry="35.2113"/>
 <text text-anchor="middle" x="4702" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(a)</text>
-<text text-anchor="middle" x="4702" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5 = false : FalseClass(false)</text>
-<text text-anchor="middle" x="4702" y="-534.0397" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5</text>
+<text text-anchor="middle" x="4702" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$6 = false : FalseClass(false)</text>
+<text text-anchor="middle" x="4702" y="-534.0397" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$6</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_4 -->
 <g id="edge28" class="edge">
@@ -434,7 +434,7 @@
 <g id="node26" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_5</title>
 <ellipse fill="none" stroke="#000000" cx="4642" cy="-420.9848" rx="79.0398" ry="35.2113"/>
-<text text-anchor="middle" x="4642" y="-430.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(a, b)</text>
+<text text-anchor="middle" x="4642" y="-430.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(b, a)</text>
 <text text-anchor="middle" x="4642" y="-416.7848" font-family="Times,serif" font-size="14.00" fill="#000000">b = 1 : Integer(1)</text>
 <text text-anchor="middle" x="4642" y="-402.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -448,7 +448,7 @@
 <g id="node27" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_6</title>
 <ellipse fill="none" stroke="#000000" cx="4818" cy="-420.9848" rx="79.0398" ry="35.2113"/>
-<text text-anchor="middle" x="4818" y="-430.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(a, b)</text>
+<text text-anchor="middle" x="4818" y="-430.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(b, a)</text>
 <text text-anchor="middle" x="4818" y="-416.7848" font-family="Times,serif" font-size="14.00" fill="#000000">b = 2 : Integer(2)</text>
 <text text-anchor="middle" x="4818" y="-402.7848" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -462,9 +462,9 @@
 <g id="node28" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_7</title>
 <ellipse fill="none" stroke="#000000" cx="4759" cy="-294.4752" rx="268.1762" ry="45.011"/>
-<text text-anchor="middle" x="4759" y="-311.2752" font-family="Times,serif" font-size="14.00" fill="#000000">(a, b)</text>
-<text text-anchor="middle" x="4759" y="-297.2752" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = a.+(b) : Integer</text>
-<text text-anchor="middle" x="4759" y="-283.2752" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return returnMethodTemp$6 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="4759" y="-311.2752" font-family="Times,serif" font-size="14.00" fill="#000000">(b, a)</text>
+<text text-anchor="middle" x="4759" y="-297.2752" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = a.+(b) : Integer</text>
+<text text-anchor="middle" x="4759" y="-283.2752" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$9 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="4759" y="-269.2752" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_7 -->
@@ -490,8 +490,8 @@
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_0</title>
 <polygon fill="none" stroke="#000000" points="5343.8141,-819.3567 5523,-789.0197 5702.1859,-819.3567 5702.0186,-868.443 5343.9814,-868.443 5343.8141,-819.3567"/>
 <text text-anchor="middle" x="5523" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="5523" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="5523" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
+<text text-anchor="middle" x="5523" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="5523" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_2 -->
 <g id="node31" class="node">
@@ -559,8 +559,8 @@
 <ellipse fill="none" stroke="#000000" cx="5564" cy="-420.9848" rx="160.6716" ry="45.011"/>
 <text text-anchor="middle" x="5564" y="-437.7848" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="5564" y="-423.7848" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="5564" y="-409.7848" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$5 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="5564" y="-395.7848" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$5</text>
+<text text-anchor="middle" x="5564" y="-409.7848" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$6 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="5564" y="-395.7848" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$6</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_4&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5 -->
 <g id="edge40" class="edge">
@@ -574,8 +574,8 @@
 <ellipse fill="none" stroke="#000000" cx="5205" cy="-294.4752" rx="154.4176" ry="45.011"/>
 <text text-anchor="middle" x="5205" y="-311.2752" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="5205" y="-297.2752" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="5205" y="-283.2752" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$7 = false : FalseClass(false)</text>
-<text text-anchor="middle" x="5205" y="-269.2752" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$7</text>
+<text text-anchor="middle" x="5205" y="-283.2752" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$8 = false : FalseClass(false)</text>
+<text text-anchor="middle" x="5205" y="-269.2752" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$8</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_6 -->
 <g id="edge41" class="edge">
@@ -588,8 +588,8 @@
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_7</title>
 <ellipse fill="none" stroke="#000000" cx="5564" cy="-294.4752" rx="186.6121" ry="45.011"/>
 <text text-anchor="middle" x="5564" y="-311.2752" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
-<text text-anchor="middle" x="5564" y="-297.2752" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = nil : NilClass</text>
-<text text-anchor="middle" x="5564" y="-283.2752" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="5564" y="-297.2752" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = nil : NilClass</text>
+<text text-anchor="middle" x="5564" y="-283.2752" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$9 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="5564" y="-269.2752" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_7 -->
@@ -673,8 +673,8 @@
 <ellipse fill="none" stroke="#000000" cx="6308" cy="-683.4945" rx="160.6716" ry="45.011"/>
 <text text-anchor="middle" x="6308" y="-700.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="6308" y="-686.2945" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="6308" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="6308" y="-658.2945" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3</text>
+<text text-anchor="middle" x="6308" y="-672.2945" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="6308" y="-658.2945" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_2 -->
 <g id="edge49" class="edge">
@@ -701,8 +701,8 @@
 <ellipse fill="none" stroke="#000000" cx="5949" cy="-552.2397" rx="154.4176" ry="45.011"/>
 <text text-anchor="middle" x="5949" y="-569.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
 <text text-anchor="middle" x="5949" y="-555.0397" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="5949" y="-541.0397" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5 = false : FalseClass(false)</text>
-<text text-anchor="middle" x="5949" y="-527.0397" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5</text>
+<text text-anchor="middle" x="5949" y="-541.0397" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$6 = false : FalseClass(false)</text>
+<text text-anchor="middle" x="5949" y="-527.0397" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$6</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_3 -->
 <g id="edge51" class="edge">
@@ -715,8 +715,8 @@
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_4</title>
 <ellipse fill="none" stroke="#000000" cx="6308" cy="-552.2397" rx="186.6121" ry="45.011"/>
 <text text-anchor="middle" x="6308" y="-569.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(b)</text>
-<text text-anchor="middle" x="6308" y="-555.0397" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$2 = nil : NilClass</text>
-<text text-anchor="middle" x="6308" y="-541.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="6308" y="-555.0397" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = nil : NilClass</text>
+<text text-anchor="middle" x="6308" y="-541.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="6308" y="-527.0397" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_4 -->
@@ -792,17 +792,17 @@
 <title>bb::&lt;constant:Examples&gt;#take_arguments_0</title>
 <polygon fill="none" stroke="#000000" points="6538.7928,-811.8027 6860,-764.5744 7181.2072,-811.8027 7180.9074,-888.2197 6539.0926,-888.2197 6538.7928,-811.8027"/>
 <text text-anchor="middle" x="6860" y="-856.7238" font-family="Times,serif" font-size="14.00" fill="#000000">(i)</text>
-<text text-anchor="middle" x="6860" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$1 = self : Examples</text>
-<text text-anchor="middle" x="6860" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">i = load_arg(selfMethodTemp$1#take_arguments, 0) : untyped</text>
-<text text-anchor="middle" x="6860" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2 = false : FalseClass(false)</text>
-<text text-anchor="middle" x="6860" y="-800.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$2</text>
+<text text-anchor="middle" x="6860" y="-842.7238" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Examples</text>
+<text text-anchor="middle" x="6860" y="-828.7238" font-family="Times,serif" font-size="14.00" fill="#000000">i = load_arg(selfMethodTemp$2#take_arguments, 0) : untyped</text>
+<text text-anchor="middle" x="6860" y="-814.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = false : FalseClass(false)</text>
+<text text-anchor="middle" x="6860" y="-800.7238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_2 -->
 <g id="node50" class="node">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_2</title>
 <ellipse fill="none" stroke="#000000" cx="6700" cy="-683.4945" rx="160.604" ry="35.2113"/>
-<text text-anchor="middle" x="6700" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$9)</text>
-<text text-anchor="middle" x="6700" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$9 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="6700" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="6700" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 2 : Integer(2)</text>
 <text text-anchor="middle" x="6700" y="-665.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_0&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_2 -->
@@ -815,8 +815,8 @@
 <g id="node51" class="node">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_3</title>
 <ellipse fill="none" stroke="#000000" cx="7030" cy="-683.4945" rx="150.8435" ry="35.2113"/>
-<text text-anchor="middle" x="7030" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(i, returnMethodTemp$9)</text>
-<text text-anchor="middle" x="7030" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$9 = i : untyped</text>
+<text text-anchor="middle" x="7030" y="-693.2945" font-family="Times,serif" font-size="14.00" fill="#000000">(i, returnMethodTemp$1)</text>
+<text text-anchor="middle" x="7030" y="-679.2945" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = i : untyped</text>
 <text text-anchor="middle" x="7030" y="-665.2945" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_0&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_3 -->
@@ -842,8 +842,8 @@
 <g id="node52" class="node">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_4</title>
 <ellipse fill="none" stroke="#000000" cx="6860" cy="-552.2397" rx="268.1762" ry="35.2113"/>
-<text text-anchor="middle" x="6860" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$9)</text>
-<text text-anchor="middle" x="6860" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$9 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="6860" y="-562.0397" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="6860" y="-548.0397" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="6860" y="-534.0397" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_2&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_4 -->
@@ -866,4 +866,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: f4b3e4c9ba10290b33b0e3db11ee6f231eff38c001ea0fac9ba5072036063801 -->
+<!-- ruby-types:sha256: 6e277bd8731e075ec331da402f7c08be645f7e5fbe2eb24baf6d909f275b5ae5 -->

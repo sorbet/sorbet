@@ -5,319 +5,381 @@ subgraph "cluster_::<singleton class:<constant:A>>#send_beta_invitation" {
     "bb::<singleton class:<constant:A>>#send_beta_invitation_0" [shape = invhouse];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [shape = parallelogram];
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_0" [label = "(invite, <constant:C1>$7, <constant:C2>$11, <constant:C3>$15, <constant:C4>$19, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-<constant:C1>$7 = alias <constant:C1> : <class:C1>
-<constant:C2>$11 = alias <constant:C2> : <class:C2>
-<constant:C3>$15 = alias <constant:C3> : <class:C3>
-<constant:C4>$19 = alias <constant:C4> : <class:C4>
-<constant:C5>$23 = alias <constant:C5> : <class:C5>
-<constant:C6>$27 = alias <constant:C6> : <class:C6>
-<constant:C7>$31 = alias <constant:C7> : <class:C7>
-<constant:C8>$35 = alias <constant:C8> : <class:C8>
-<constant:C9>$39 = alias <constant:C9> : <class:C9>
-<constant:C10>$43 = alias <constant:C10> : <class:C10>
-<constant:C11>$47 = alias <constant:C11> : <class:C11>
-<constant:C12>$51 = alias <constant:C12> : <class:C12>
-<constant:C13>$55 = alias <constant:C13> : <class:C13>
-<constant:C14>$59 = alias <constant:C14> : <class:C14>
-<constant:C15>$63 = alias <constant:C15> : <class:C15>
-<constant:C16>$67 = alias <constant:C16> : <class:C16>
-<constant:C17>$71 = alias <constant:C17> : <class:C17>
-<constant:C18>$75 = alias <constant:C18> : <class:C18>
-<constant:C19>$79 = alias <constant:C19> : <class:C19>
-<constant:C20>$83 = alias <constant:C20> : <class:C20>
-selfMethodTemp$1 = self : <class:A>
-invite = load_arg(selfMethodTemp$1#send_beta_invitation, 0) : untyped
-statTemp$6 = 1 : Integer(1)
-ifTemp$4 = invite.===(statTemp$6) : untyped
-ifTemp$4"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_0" [label = "(invite, <constant:C1>$8, <constant:C2>$12, <constant:C3>$16, <constant:C4>$20, <constant:C5>$24, <constant:C6>$28, <constant:C7>$32, <constant:C8>$36, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+<constant:C1>$8 = alias <constant:C1> : <class:C1>
+<constant:C2>$12 = alias <constant:C2> : <class:C2>
+<constant:C3>$16 = alias <constant:C3> : <class:C3>
+<constant:C4>$20 = alias <constant:C4> : <class:C4>
+<constant:C5>$24 = alias <constant:C5> : <class:C5>
+<constant:C6>$28 = alias <constant:C6> : <class:C6>
+<constant:C7>$32 = alias <constant:C7> : <class:C7>
+<constant:C8>$36 = alias <constant:C8> : <class:C8>
+<constant:C9>$40 = alias <constant:C9> : <class:C9>
+<constant:C10>$44 = alias <constant:C10> : <class:C10>
+<constant:C11>$48 = alias <constant:C11> : <class:C11>
+<constant:C12>$52 = alias <constant:C12> : <class:C12>
+<constant:C13>$56 = alias <constant:C13> : <class:C13>
+<constant:C14>$60 = alias <constant:C14> : <class:C14>
+<constant:C15>$64 = alias <constant:C15> : <class:C15>
+<constant:C16>$68 = alias <constant:C16> : <class:C16>
+<constant:C17>$72 = alias <constant:C17> : <class:C17>
+<constant:C18>$76 = alias <constant:C18> : <class:C18>
+<constant:C19>$80 = alias <constant:C19> : <class:C19>
+<constant:C20>$84 = alias <constant:C20> : <class:C20>
+selfMethodTemp$2 = self : <class:A>
+invite = load_arg(selfMethodTemp$2#send_beta_invitation, 0) : untyped
+statTemp$7 = 1 : Integer(1)
+ifTemp$5 = invite.===(statTemp$7) : untyped
+ifTemp$5"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_0" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_2";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_0" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_3";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [label = "(returnMethodTemp$2)
-returnMethodTemp$88 = return returnMethodTemp$2
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [label = "(returnMethodTemp$1)
+returnMethodTemp$89 = return returnMethodTemp$1
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_1" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_1";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_2" [label = "(r, <constant:C1>$7)
-r = <constant:C1>$7 : <class:C1>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_2" [label = "(r, <constant:C1>$8)
+r = <constant:C1>$8 : <class:C1>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_2" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_3" [label = "(invite, <constant:C2>$11, <constant:C3>$15, <constant:C4>$19, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$10 = 2 : Integer(2)
-ifTemp$8 = invite.===(statTemp$10) : untyped
-ifTemp$8"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_3" [label = "(invite, <constant:C2>$12, <constant:C3>$16, <constant:C4>$20, <constant:C5>$24, <constant:C6>$28, <constant:C7>$32, <constant:C8>$36, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$11 = 2 : Integer(2)
+ifTemp$9 = invite.===(statTemp$11) : untyped
+ifTemp$9"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_3" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_4";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_3" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_5";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_4" [label = "(r, <constant:C2>$11)
-r = <constant:C2>$11 : <class:C2>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_4" [label = "(r, <constant:C2>$12)
+r = <constant:C2>$12 : <class:C2>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_4" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_60";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_5" [label = "(invite, <constant:C3>$15, <constant:C4>$19, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$14 = 3 : Integer(3)
-ifTemp$12 = invite.===(statTemp$14) : untyped
-ifTemp$12"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_5" [label = "(invite, <constant:C3>$16, <constant:C4>$20, <constant:C5>$24, <constant:C6>$28, <constant:C7>$32, <constant:C8>$36, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$15 = 3 : Integer(3)
+ifTemp$13 = invite.===(statTemp$15) : untyped
+ifTemp$13"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_5" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_6";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_5" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_7";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_6" [label = "(r, <constant:C3>$15)
-r = <constant:C3>$15 : <class:C3>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_6" [label = "(r, <constant:C3>$16)
+r = <constant:C3>$16 : <class:C3>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_6" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_59";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_7" [label = "(invite, <constant:C4>$19, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$18 = 4 : Integer(4)
-ifTemp$16 = invite.===(statTemp$18) : untyped
-ifTemp$16"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_7" [label = "(invite, <constant:C4>$20, <constant:C5>$24, <constant:C6>$28, <constant:C7>$32, <constant:C8>$36, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$19 = 4 : Integer(4)
+ifTemp$17 = invite.===(statTemp$19) : untyped
+ifTemp$17"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_7" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_8";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_7" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_9";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_8" [label = "(r, <constant:C4>$19)
-r = <constant:C4>$19 : <class:C4>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_8" [label = "(r, <constant:C4>$20)
+r = <constant:C4>$20 : <class:C4>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_8" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_58";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_9" [label = "(invite, <constant:C5>$23, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$22 = 5 : Integer(5)
-ifTemp$20 = invite.===(statTemp$22) : untyped
-ifTemp$20"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_9" [label = "(invite, <constant:C5>$24, <constant:C6>$28, <constant:C7>$32, <constant:C8>$36, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$23 = 5 : Integer(5)
+ifTemp$21 = invite.===(statTemp$23) : untyped
+ifTemp$21"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_9" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_10";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_9" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_11";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_10" [label = "(r, <constant:C5>$23)
-r = <constant:C5>$23 : <class:C5>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_10" [label = "(r, <constant:C5>$24)
+r = <constant:C5>$24 : <class:C5>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_10" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_57";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_11" [label = "(invite, <constant:C6>$27, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$26 = 6 : Integer(6)
-ifTemp$24 = invite.===(statTemp$26) : untyped
-ifTemp$24"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_11" [label = "(invite, <constant:C6>$28, <constant:C7>$32, <constant:C8>$36, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$27 = 6 : Integer(6)
+ifTemp$25 = invite.===(statTemp$27) : untyped
+ifTemp$25"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_11" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_12";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_11" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_13";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_12" [label = "(r, <constant:C6>$27)
-r = <constant:C6>$27 : <class:C6>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_12" [label = "(r, <constant:C6>$28)
+r = <constant:C6>$28 : <class:C6>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_12" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_56";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_13" [label = "(invite, <constant:C7>$31, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$30 = 7 : Integer(7)
-ifTemp$28 = invite.===(statTemp$30) : untyped
-ifTemp$28"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_13" [label = "(invite, <constant:C7>$32, <constant:C8>$36, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$31 = 7 : Integer(7)
+ifTemp$29 = invite.===(statTemp$31) : untyped
+ifTemp$29"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_13" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_14";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_13" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_15";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_14" [label = "(r, <constant:C7>$31)
-r = <constant:C7>$31 : <class:C7>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_14" [label = "(r, <constant:C7>$32)
+r = <constant:C7>$32 : <class:C7>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_14" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_55";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_15" [label = "(invite, <constant:C8>$35, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$34 = 8 : Integer(8)
-ifTemp$32 = invite.===(statTemp$34) : untyped
-ifTemp$32"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_15" [label = "(invite, <constant:C8>$36, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$35 = 8 : Integer(8)
+ifTemp$33 = invite.===(statTemp$35) : untyped
+ifTemp$33"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_15" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_16";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_15" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_17";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_16" [label = "(r, <constant:C8>$35)
-r = <constant:C8>$35 : <class:C8>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_16" [label = "(r, <constant:C8>$36)
+r = <constant:C8>$36 : <class:C8>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_16" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_54";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_17" [label = "(invite, <constant:C9>$39, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$38 = 9 : Integer(9)
-ifTemp$36 = invite.===(statTemp$38) : untyped
-ifTemp$36"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_17" [label = "(invite, <constant:C9>$40, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$39 = 9 : Integer(9)
+ifTemp$37 = invite.===(statTemp$39) : untyped
+ifTemp$37"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_17" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_18";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_17" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_19";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_18" [label = "(r, <constant:C9>$39)
-r = <constant:C9>$39 : <class:C9>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_18" [label = "(r, <constant:C9>$40)
+r = <constant:C9>$40 : <class:C9>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_18" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_53";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_19" [label = "(invite, <constant:C10>$43, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$42 = 10 : Integer(10)
-ifTemp$40 = invite.===(statTemp$42) : untyped
-ifTemp$40"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_19" [label = "(invite, <constant:C10>$44, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$43 = 10 : Integer(10)
+ifTemp$41 = invite.===(statTemp$43) : untyped
+ifTemp$41"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_19" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_20";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_19" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_21";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_20" [label = "(r, <constant:C10>$43)
-r = <constant:C10>$43 : <class:C10>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_20" [label = "(r, <constant:C10>$44)
+r = <constant:C10>$44 : <class:C10>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_20" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_52";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_21" [label = "(invite, <constant:C11>$47, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$46 = 11 : Integer(11)
-ifTemp$44 = invite.===(statTemp$46) : untyped
-ifTemp$44"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_21" [label = "(invite, <constant:C11>$48, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$47 = 11 : Integer(11)
+ifTemp$45 = invite.===(statTemp$47) : untyped
+ifTemp$45"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_21" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_22";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_21" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_23";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_22" [label = "(r, <constant:C11>$47)
-r = <constant:C11>$47 : <class:C11>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_22" [label = "(r, <constant:C11>$48)
+r = <constant:C11>$48 : <class:C11>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_22" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_51";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_23" [label = "(invite, <constant:C12>$51, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$50 = 12 : Integer(12)
-ifTemp$48 = invite.===(statTemp$50) : untyped
-ifTemp$48"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_23" [label = "(invite, <constant:C12>$52, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$51 = 12 : Integer(12)
+ifTemp$49 = invite.===(statTemp$51) : untyped
+ifTemp$49"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_23" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_24";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_23" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_25";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_24" [label = "(r, <constant:C12>$51)
-r = <constant:C12>$51 : <class:C12>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_24" [label = "(r, <constant:C12>$52)
+r = <constant:C12>$52 : <class:C12>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_24" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_50";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_25" [label = "(invite, <constant:C13>$55, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$54 = 13 : Integer(13)
-ifTemp$52 = invite.===(statTemp$54) : untyped
-ifTemp$52"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_25" [label = "(invite, <constant:C13>$56, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$55 = 13 : Integer(13)
+ifTemp$53 = invite.===(statTemp$55) : untyped
+ifTemp$53"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_25" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_26";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_25" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_27";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_26" [label = "(r, <constant:C13>$55)
-r = <constant:C13>$55 : <class:C13>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_26" [label = "(r, <constant:C13>$56)
+r = <constant:C13>$56 : <class:C13>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_26" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_49";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_27" [label = "(invite, <constant:C14>$59, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$58 = 14 : Integer(14)
-ifTemp$56 = invite.===(statTemp$58) : untyped
-ifTemp$56"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_27" [label = "(invite, <constant:C14>$60, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$59 = 14 : Integer(14)
+ifTemp$57 = invite.===(statTemp$59) : untyped
+ifTemp$57"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_27" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_28";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_27" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_29";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_28" [label = "(r, <constant:C14>$59)
-r = <constant:C14>$59 : <class:C14>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_28" [label = "(r, <constant:C14>$60)
+r = <constant:C14>$60 : <class:C14>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_28" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_48";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_29" [label = "(invite, <constant:C15>$63, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$62 = 15 : Integer(15)
-ifTemp$60 = invite.===(statTemp$62) : untyped
-ifTemp$60"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_29" [label = "(invite, <constant:C15>$64, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$63 = 15 : Integer(15)
+ifTemp$61 = invite.===(statTemp$63) : untyped
+ifTemp$61"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_29" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_30";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_29" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_31";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_30" [label = "(r, <constant:C15>$63)
-r = <constant:C15>$63 : <class:C15>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_30" [label = "(r, <constant:C15>$64)
+r = <constant:C15>$64 : <class:C15>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_30" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_47";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_31" [label = "(invite, <constant:C16>$67, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$66 = 16 : Integer(16)
-ifTemp$64 = invite.===(statTemp$66) : untyped
-ifTemp$64"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_31" [label = "(invite, <constant:C16>$68, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$67 = 16 : Integer(16)
+ifTemp$65 = invite.===(statTemp$67) : untyped
+ifTemp$65"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_31" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_32";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_31" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_33";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_32" [label = "(r, <constant:C16>$67)
-r = <constant:C16>$67 : <class:C16>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_32" [label = "(r, <constant:C16>$68)
+r = <constant:C16>$68 : <class:C16>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_32" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_46";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_33" [label = "(invite, <constant:C17>$71, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$70 = 17 : Integer(17)
-ifTemp$68 = invite.===(statTemp$70) : untyped
-ifTemp$68"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_33" [label = "(invite, <constant:C17>$72, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$71 = 17 : Integer(17)
+ifTemp$69 = invite.===(statTemp$71) : untyped
+ifTemp$69"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_33" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_34";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_33" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_35";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_34" [label = "(r, <constant:C17>$71)
-r = <constant:C17>$71 : <class:C17>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_34" [label = "(r, <constant:C17>$72)
+r = <constant:C17>$72 : <class:C17>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_34" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_45";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_35" [label = "(invite, <constant:C18>$75, <constant:C19>$79, <constant:C20>$83)
-statTemp$74 = 18 : Integer(18)
-ifTemp$72 = invite.===(statTemp$74) : untyped
-ifTemp$72"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_35" [label = "(invite, <constant:C18>$76, <constant:C19>$80, <constant:C20>$84)
+statTemp$75 = 18 : Integer(18)
+ifTemp$73 = invite.===(statTemp$75) : untyped
+ifTemp$73"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_35" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_36";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_35" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_37";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_36" [label = "(r, <constant:C18>$75)
-r = <constant:C18>$75 : <class:C18>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_36" [label = "(r, <constant:C18>$76)
+r = <constant:C18>$76 : <class:C18>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_36" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_44";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_37" [label = "(invite, <constant:C19>$79, <constant:C20>$83)
-statTemp$78 = 19 : Integer(19)
-ifTemp$76 = invite.===(statTemp$78) : untyped
-ifTemp$76"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_37" [label = "(invite, <constant:C19>$80, <constant:C20>$84)
+statTemp$79 = 19 : Integer(19)
+ifTemp$77 = invite.===(statTemp$79) : untyped
+ifTemp$77"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_37" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_38";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_37" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_39";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_38" [label = "(r, <constant:C19>$79)
-r = <constant:C19>$79 : <class:C19>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_38" [label = "(r, <constant:C19>$80)
+r = <constant:C19>$80 : <class:C19>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_38" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_43";
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_39" [label = "(invite, <constant:C20>$83)
-statTemp$82 = 20 : Integer(20)
-ifTemp$80 = invite.===(statTemp$82) : untyped
-ifTemp$80"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_39" [label = "(invite, <constant:C20>$84)
+statTemp$83 = 20 : Integer(20)
+ifTemp$81 = invite.===(statTemp$83) : untyped
+ifTemp$81"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_39" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_40";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_39" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_41";
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_40" [label = "(r, <constant:C20>$83)
-r = <constant:C20>$83 : <class:C20>
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_40" [label = "(r, <constant:C20>$84)
+r = <constant:C20>$84 : <class:C20>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_40" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_42";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" [label = "()
-statTemp$84 = self : <class:A>
-statTemp$85 = Bla bla bla : String(\"Bla bla bla\")
-statTemp$2 = statTemp$84.raise(statTemp$85) : untyped
+statTemp$85 = self : <class:A>
+statTemp$86 = Bla bla bla : String(\"Bla bla bla\")
+statTemp$3 = statTemp$85.raise(statTemp$86) : untyped
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_42";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_42" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_42" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_43";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_43" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_43" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_44";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_44" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_44" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_45";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_45" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_45" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_46";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_46" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_46" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_47";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_47" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_47" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_48";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_48" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_48" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_49";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_49" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_49" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_50";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_50" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_50" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_51";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_51" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_51" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_52";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_52" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_52" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_53";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_53" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_53" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_54";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_54" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_54" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_55";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_55" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_55" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_56";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_56" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_56" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_57";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_57" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_57" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_58";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_58" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_58" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_59";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_59" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_59" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_60";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_60" [label = "(r)
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_60" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61";
     "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [label = "(r)
 s = r : <class:C20> | NilClass | <class:C19> | <class:C18> | <class:C17> | <class:C16> | <class:C15> | <class:C14> | <class:C13> | <class:C12> | <class:C11> | <class:C10> | <class:C9> | <class:C8> | <class:C7> | <class:C6> | <class:C5> | <class:C4> | <class:C3> | <class:C2> | <class:C1>
-returnMethodTemp$2 = return s : <bottom>
+returnMethodTemp$1 = return s : <bottom>
 <unconditional>"];
+
     "bb::<singleton class:<constant:A>>#send_beta_invitation_61" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_1";
 }
 

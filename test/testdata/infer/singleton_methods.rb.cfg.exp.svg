@@ -25,7 +25,7 @@
 <polygon fill="none" stroke="#000000" points="16.1318,-174.9078 348,-136.2983 679.8682,-174.9078 679.5585,-237.3793 16.4415,-237.3793 16.1318,-174.9078"/>
 <text text-anchor="middle" x="348" y="-208.9745" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="348" y="-194.9745" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="348" y="-180.9745" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="348" y="-180.9745" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="348" y="-166.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_1 -->
@@ -52,9 +52,9 @@
 <title>bb::&lt;constant:Bar&gt;#baz_0</title>
 <polygon fill="none" stroke="#000000" points="704.1318,-171.0534 1036,-123.8251 1367.8682,-171.0534 1367.5585,-247.4704 704.4415,-247.4704 704.1318,-171.0534"/>
 <text text-anchor="middle" x="1036" y="-215.9745" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1036" y="-201.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Foo&gt;$3 = alias &lt;constant:Foo&gt; : &lt;class:Foo&gt;</text>
-<text text-anchor="middle" x="1036" y="-187.9745" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = &lt;constant:Foo&gt;$3.bar() : untyped</text>
-<text text-anchor="middle" x="1036" y="-173.9745" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1036" y="-201.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Foo&gt;$4 = alias &lt;constant:Foo&gt; : &lt;class:Foo&gt;</text>
+<text text-anchor="middle" x="1036" y="-187.9745" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = &lt;constant:Foo&gt;$4.bar() : untyped</text>
+<text text-anchor="middle" x="1036" y="-173.9745" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1036" y="-159.9745" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#baz_1 -->
@@ -78,4 +78,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: e9b5dc157169557a83abdd7627df53a3dd3b85ef0c7c09b6274e1bcf1caa6e62 -->
+<!-- ruby-types:sha256: d49f6084a9670abc1d7cd321f856ccf43dbcaae1a7b554887e6df8c37d9afd3e -->

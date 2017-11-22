@@ -5,31 +5,36 @@ subgraph "cluster_::<constant:BlockTest>#block_pass" {
     "bb::<constant:BlockTest>#block_pass_0" [shape = invhouse];
     "bb::<constant:BlockTest>#block_pass_1" [shape = parallelogram];
 
-    "bb::<constant:BlockTest>#block_pass_0" [label = "(statTemp$2, statTemp$3, statTemp$4, statTemp$5)
-statTemp$2 = self : BlockTest
-statTemp$3 = 1 : Integer(1)
-statTemp$4 = 2 : Integer(2)
-statTemp$5 = 3 : Integer(3)
+    "bb::<constant:BlockTest>#block_pass_0" [label = "(statTemp$3, statTemp$4, statTemp$5, statTemp$6)
+statTemp$3 = self : BlockTest
+statTemp$4 = 1 : Integer(1)
+statTemp$5 = 2 : Integer(2)
+statTemp$6 = 3 : Integer(3)
 <unconditional>"];
+
     "bb::<constant:BlockTest>#block_pass_0" -> "bb::<constant:BlockTest>#block_pass_2";
     "bb::<constant:BlockTest>#block_pass_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:BlockTest>#block_pass_1" -> "bb::<constant:BlockTest>#block_pass_1";
-    "bb::<constant:BlockTest>#block_pass_2" [label = "(statTemp$2, statTemp$3, statTemp$4, statTemp$5)
+    "bb::<constant:BlockTest>#block_pass_2" [label = "(statTemp$3, statTemp$4, statTemp$5, statTemp$6)
 outerLoops: 1
 <block-call>"];
+
     "bb::<constant:BlockTest>#block_pass_2" -> "bb::<constant:BlockTest>#block_pass_4";
     "bb::<constant:BlockTest>#block_pass_2" -> "bb::<constant:BlockTest>#block_pass_3";
 
-    "bb::<constant:BlockTest>#block_pass_3" [label = "(statTemp$2, statTemp$3, statTemp$4, statTemp$5)
-returnMethodTemp$1 = statTemp$2.foo(statTemp$3, statTemp$4, statTemp$5) : untyped
-returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
+    "bb::<constant:BlockTest>#block_pass_3" [label = "(statTemp$3, statTemp$4, statTemp$5, statTemp$6)
+returnMethodTemp$1 = statTemp$3.foo(statTemp$4, statTemp$5, statTemp$6) : untyped
+returnMethodTemp$8 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:BlockTest>#block_pass_3" -> "bb::<constant:BlockTest>#block_pass_1";
-    "bb::<constant:BlockTest>#block_pass_4" [label = "(statTemp$2, statTemp$3, statTemp$4, statTemp$5)
+    "bb::<constant:BlockTest>#block_pass_4" [label = "(statTemp$3, statTemp$4, statTemp$5, statTemp$6)
 outerLoops: 1
-<block-nested: x> = load_arg(statTemp$2#foo, 0) : untyped
+<block-nested: x> = load_arg(statTemp$3#foo, 0) : untyped
 <unconditional>"];
+
     "bb::<constant:BlockTest>#block_pass_4" -> "bb::<constant:BlockTest>#block_pass_2";
 }
 

@@ -18,18 +18,18 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:BlockTest&gt;#block_pass_0</title>
 <polygon fill="none" stroke="#000000" points="15.6925,-412.8104 284,-357.3093 552.3075,-412.8104 552.0571,-502.6132 15.9429,-502.6132 15.6925,-412.8104"/>
-<text text-anchor="middle" x="284" y="-468.4313" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$2, statTemp$3, statTemp$4, statTemp$5)</text>
-<text text-anchor="middle" x="284" y="-454.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$2 = self : BlockTest</text>
-<text text-anchor="middle" x="284" y="-440.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="284" y="-426.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="284" y="-412.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = 3 : Integer(3)</text>
+<text text-anchor="middle" x="284" y="-468.4313" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3, statTemp$4, statTemp$5, statTemp$6)</text>
+<text text-anchor="middle" x="284" y="-454.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = self : BlockTest</text>
+<text text-anchor="middle" x="284" y="-440.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="284" y="-426.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="284" y="-412.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = 3 : Integer(3)</text>
 <text text-anchor="middle" x="284" y="-398.4313" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:BlockTest&gt;#block_pass_2 -->
 <g id="node3" class="node">
 <title>bb::&lt;constant:BlockTest&gt;#block_pass_2</title>
 <ellipse fill="none" stroke="#000000" cx="274" cy="-285.865" rx="216.8818" ry="35.2113"/>
-<text text-anchor="middle" x="274" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$2, statTemp$3, statTemp$4, statTemp$5)</text>
+<text text-anchor="middle" x="274" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3, statTemp$4, statTemp$5, statTemp$6)</text>
 <text text-anchor="middle" x="274" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
 <text text-anchor="middle" x="274" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
@@ -56,9 +56,9 @@
 <g id="node4" class="node">
 <title>bb::&lt;constant:BlockTest&gt;#block_pass_4</title>
 <ellipse fill="none" stroke="#000000" cx="265" cy="-169.2548" rx="248.5104" ry="45.011"/>
-<text text-anchor="middle" x="265" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$2, statTemp$3, statTemp$4, statTemp$5)</text>
+<text text-anchor="middle" x="265" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3, statTemp$4, statTemp$5, statTemp$6)</text>
 <text text-anchor="middle" x="265" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="265" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: x&gt; = load_arg(statTemp$2#foo, 0) : untyped</text>
+<text text-anchor="middle" x="265" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: x&gt; = load_arg(statTemp$3#foo, 0) : untyped</text>
 <text text-anchor="middle" x="265" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:BlockTest&gt;#block_pass_2&#45;&gt;bb::&lt;constant:BlockTest&gt;#block_pass_4 -->
@@ -71,9 +71,9 @@
 <g id="node5" class="node">
 <title>bb::&lt;constant:BlockTest&gt;#block_pass_3</title>
 <ellipse fill="none" stroke="#000000" cx="896" cy="-169.2548" rx="364.5395" ry="45.011"/>
-<text text-anchor="middle" x="896" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$2, statTemp$3, statTemp$4, statTemp$5)</text>
-<text text-anchor="middle" x="896" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$2.foo(statTemp$3, statTemp$4, statTemp$5) : untyped</text>
-<text text-anchor="middle" x="896" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="896" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3, statTemp$4, statTemp$5, statTemp$6)</text>
+<text text-anchor="middle" x="896" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$3.foo(statTemp$4, statTemp$5, statTemp$6) : untyped</text>
+<text text-anchor="middle" x="896" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="896" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:BlockTest&gt;#block_pass_2&#45;&gt;bb::&lt;constant:BlockTest&gt;#block_pass_3 -->
@@ -96,4 +96,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 3cea6d7c66f0de5a05f3ce9ebd704ff7020dc5a7f5220fa3852f0aca91191920 -->
+<!-- ruby-types:sha256: cf97df71a55a5a4f44a273eb26efb6ce50db25f9b0241eafb1b9cf175314b717 -->

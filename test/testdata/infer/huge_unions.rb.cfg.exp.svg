@@ -17,56 +17,56 @@
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_0 -->
 <g id="node1" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_0</title>
-<polygon fill="none" stroke="#000000" points="16.1275,-4902.4369 2061,-4677.674 4105.8725,-4902.4369 4103.9639,-5266.1109 18.0361,-5266.1109 16.1275,-4902.4369"/>
-<text text-anchor="middle" x="2061" y="-5173.7539" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C1&gt;$7, &lt;constant:C2&gt;$11, &lt;constant:C3&gt;$15, &lt;constant:C4&gt;$19, &lt;constant:C5&gt;$23, &lt;constant:C6&gt;$27, &lt;constant:C7&gt;$31, &lt;constant:C8&gt;$35, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2061" y="-5159.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C1&gt;$7 = alias &lt;constant:C1&gt; : &lt;class:C1&gt;</text>
-<text text-anchor="middle" x="2061" y="-5145.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C2&gt;$11 = alias &lt;constant:C2&gt; : &lt;class:C2&gt;</text>
-<text text-anchor="middle" x="2061" y="-5131.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C3&gt;$15 = alias &lt;constant:C3&gt; : &lt;class:C3&gt;</text>
-<text text-anchor="middle" x="2061" y="-5117.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C4&gt;$19 = alias &lt;constant:C4&gt; : &lt;class:C4&gt;</text>
-<text text-anchor="middle" x="2061" y="-5103.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C5&gt;$23 = alias &lt;constant:C5&gt; : &lt;class:C5&gt;</text>
-<text text-anchor="middle" x="2061" y="-5089.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C6&gt;$27 = alias &lt;constant:C6&gt; : &lt;class:C6&gt;</text>
-<text text-anchor="middle" x="2061" y="-5075.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C7&gt;$31 = alias &lt;constant:C7&gt; : &lt;class:C7&gt;</text>
-<text text-anchor="middle" x="2061" y="-5061.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C8&gt;$35 = alias &lt;constant:C8&gt; : &lt;class:C8&gt;</text>
-<text text-anchor="middle" x="2061" y="-5047.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C9&gt;$39 = alias &lt;constant:C9&gt; : &lt;class:C9&gt;</text>
-<text text-anchor="middle" x="2061" y="-5033.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C10&gt;$43 = alias &lt;constant:C10&gt; : &lt;class:C10&gt;</text>
-<text text-anchor="middle" x="2061" y="-5019.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C11&gt;$47 = alias &lt;constant:C11&gt; : &lt;class:C11&gt;</text>
-<text text-anchor="middle" x="2061" y="-5005.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C12&gt;$51 = alias &lt;constant:C12&gt; : &lt;class:C12&gt;</text>
-<text text-anchor="middle" x="2061" y="-4991.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C13&gt;$55 = alias &lt;constant:C13&gt; : &lt;class:C13&gt;</text>
-<text text-anchor="middle" x="2061" y="-4977.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C14&gt;$59 = alias &lt;constant:C14&gt; : &lt;class:C14&gt;</text>
-<text text-anchor="middle" x="2061" y="-4963.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C15&gt;$63 = alias &lt;constant:C15&gt; : &lt;class:C15&gt;</text>
-<text text-anchor="middle" x="2061" y="-4949.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C16&gt;$67 = alias &lt;constant:C16&gt; : &lt;class:C16&gt;</text>
-<text text-anchor="middle" x="2061" y="-4935.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C17&gt;$71 = alias &lt;constant:C17&gt; : &lt;class:C17&gt;</text>
-<text text-anchor="middle" x="2061" y="-4921.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C18&gt;$75 = alias &lt;constant:C18&gt; : &lt;class:C18&gt;</text>
-<text text-anchor="middle" x="2061" y="-4907.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C19&gt;$79 = alias &lt;constant:C19&gt; : &lt;class:C19&gt;</text>
-<text text-anchor="middle" x="2061" y="-4893.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C20&gt;$83 = alias &lt;constant:C20&gt; : &lt;class:C20&gt;</text>
-<text text-anchor="middle" x="2061" y="-4879.7539" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$1 = self : &lt;class:A&gt;</text>
-<text text-anchor="middle" x="2061" y="-4865.7539" font-family="Times,serif" font-size="14.00" fill="#000000">invite = load_arg(selfMethodTemp$1#send_beta_invitation, 0) : untyped</text>
-<text text-anchor="middle" x="2061" y="-4851.7539" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="2061" y="-4837.7539" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = invite.===(statTemp$6) : untyped</text>
-<text text-anchor="middle" x="2061" y="-4823.7539" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
+<polygon fill="none" stroke="#000000" points="15.7313,-4902.4369 2061,-4677.674 4106.2687,-4902.4369 4104.3597,-5266.1109 17.6403,-5266.1109 15.7313,-4902.4369"/>
+<text text-anchor="middle" x="2061" y="-5173.7539" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C1&gt;$8, &lt;constant:C2&gt;$12, &lt;constant:C3&gt;$16, &lt;constant:C4&gt;$20, &lt;constant:C5&gt;$24, &lt;constant:C6&gt;$28, &lt;constant:C7&gt;$32, &lt;constant:C8&gt;$36, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2061" y="-5159.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C1&gt;$8 = alias &lt;constant:C1&gt; : &lt;class:C1&gt;</text>
+<text text-anchor="middle" x="2061" y="-5145.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C2&gt;$12 = alias &lt;constant:C2&gt; : &lt;class:C2&gt;</text>
+<text text-anchor="middle" x="2061" y="-5131.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C3&gt;$16 = alias &lt;constant:C3&gt; : &lt;class:C3&gt;</text>
+<text text-anchor="middle" x="2061" y="-5117.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C4&gt;$20 = alias &lt;constant:C4&gt; : &lt;class:C4&gt;</text>
+<text text-anchor="middle" x="2061" y="-5103.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C5&gt;$24 = alias &lt;constant:C5&gt; : &lt;class:C5&gt;</text>
+<text text-anchor="middle" x="2061" y="-5089.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C6&gt;$28 = alias &lt;constant:C6&gt; : &lt;class:C6&gt;</text>
+<text text-anchor="middle" x="2061" y="-5075.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C7&gt;$32 = alias &lt;constant:C7&gt; : &lt;class:C7&gt;</text>
+<text text-anchor="middle" x="2061" y="-5061.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C8&gt;$36 = alias &lt;constant:C8&gt; : &lt;class:C8&gt;</text>
+<text text-anchor="middle" x="2061" y="-5047.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C9&gt;$40 = alias &lt;constant:C9&gt; : &lt;class:C9&gt;</text>
+<text text-anchor="middle" x="2061" y="-5033.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C10&gt;$44 = alias &lt;constant:C10&gt; : &lt;class:C10&gt;</text>
+<text text-anchor="middle" x="2061" y="-5019.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C11&gt;$48 = alias &lt;constant:C11&gt; : &lt;class:C11&gt;</text>
+<text text-anchor="middle" x="2061" y="-5005.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C12&gt;$52 = alias &lt;constant:C12&gt; : &lt;class:C12&gt;</text>
+<text text-anchor="middle" x="2061" y="-4991.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C13&gt;$56 = alias &lt;constant:C13&gt; : &lt;class:C13&gt;</text>
+<text text-anchor="middle" x="2061" y="-4977.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C14&gt;$60 = alias &lt;constant:C14&gt; : &lt;class:C14&gt;</text>
+<text text-anchor="middle" x="2061" y="-4963.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C15&gt;$64 = alias &lt;constant:C15&gt; : &lt;class:C15&gt;</text>
+<text text-anchor="middle" x="2061" y="-4949.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C16&gt;$68 = alias &lt;constant:C16&gt; : &lt;class:C16&gt;</text>
+<text text-anchor="middle" x="2061" y="-4935.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C17&gt;$72 = alias &lt;constant:C17&gt; : &lt;class:C17&gt;</text>
+<text text-anchor="middle" x="2061" y="-4921.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C18&gt;$76 = alias &lt;constant:C18&gt; : &lt;class:C18&gt;</text>
+<text text-anchor="middle" x="2061" y="-4907.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C19&gt;$80 = alias &lt;constant:C19&gt; : &lt;class:C19&gt;</text>
+<text text-anchor="middle" x="2061" y="-4893.7539" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C20&gt;$84 = alias &lt;constant:C20&gt; : &lt;class:C20&gt;</text>
+<text text-anchor="middle" x="2061" y="-4879.7539" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : &lt;class:A&gt;</text>
+<text text-anchor="middle" x="2061" y="-4865.7539" font-family="Times,serif" font-size="14.00" fill="#000000">invite = load_arg(selfMethodTemp$2#send_beta_invitation, 0) : untyped</text>
+<text text-anchor="middle" x="2061" y="-4851.7539" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="2061" y="-4837.7539" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5 = invite.===(statTemp$7) : untyped</text>
+<text text-anchor="middle" x="2061" y="-4823.7539" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_2 -->
 <g id="node3" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_2</title>
 <ellipse fill="none" stroke="#000000" cx="868" cy="-2056.4663" rx="145.828" ry="35.2113"/>
-<text text-anchor="middle" x="868" y="-2066.2663" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C1&gt;$7)</text>
-<text text-anchor="middle" x="868" y="-2052.2663" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C1&gt;$7 : &lt;class:C1&gt;</text>
+<text text-anchor="middle" x="868" y="-2066.2663" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C1&gt;$8)</text>
+<text text-anchor="middle" x="868" y="-2052.2663" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C1&gt;$8 : &lt;class:C1&gt;</text>
 <text text-anchor="middle" x="868" y="-2038.2663" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_0&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_2 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_0&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_2</title>
-<path fill="none" stroke="#000000" d="M1114.2133,-4781.7385C1004.8561,-4739.6836 918.0268,-4692.7193 878,-4641.814 830.7341,-4581.7021 868,-4546.5185 868,-4470.0495 868,-4470.0495 868,-4470.0495 868,-2319.3851 868,-2243.3727 868,-2154.9987 868,-2102.51"/>
+<path fill="none" stroke="#000000" d="M1113.8734,-4781.6077C1004.6762,-4739.5863 917.9853,-4692.6665 878,-4641.814 830.7341,-4581.7021 868,-4546.5185 868,-4470.0495 868,-4470.0495 868,-4470.0495 868,-2319.3851 868,-2243.3727 868,-2154.9987 868,-2102.51"/>
 <polygon fill="#000000" stroke="#000000" points="871.5001,-2102.1883 868,-2092.1883 864.5001,-2102.1884 871.5001,-2102.1883"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_3 -->
 <g id="node4" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_3</title>
-<ellipse fill="none" stroke="#000000" cx="2468" cy="-4596.5592" rx="1581.1594" ry="45.011"/>
-<text text-anchor="middle" x="2468" y="-4613.3592" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C2&gt;$11, &lt;constant:C3&gt;$15, &lt;constant:C4&gt;$19, &lt;constant:C5&gt;$23, &lt;constant:C6&gt;$27, &lt;constant:C7&gt;$31, &lt;constant:C8&gt;$35, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2468" y="-4599.3592" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="2468" y="-4585.3592" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$8 = invite.===(statTemp$10) : untyped</text>
-<text text-anchor="middle" x="2468" y="-4571.3592" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$8</text>
+<ellipse fill="none" stroke="#000000" cx="2468" cy="-4596.5592" rx="1581.3845" ry="45.011"/>
+<text text-anchor="middle" x="2468" y="-4613.3592" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C2&gt;$12, &lt;constant:C3&gt;$16, &lt;constant:C4&gt;$20, &lt;constant:C5&gt;$24, &lt;constant:C6&gt;$28, &lt;constant:C7&gt;$32, &lt;constant:C8&gt;$36, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2468" y="-4599.3592" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="2468" y="-4585.3592" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$9 = invite.===(statTemp$11) : untyped</text>
+<text text-anchor="middle" x="2468" y="-4571.3592" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$9</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_0&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_3 -->
 <g id="edge2" class="edge">
@@ -78,8 +78,8 @@
 <g id="node2" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1</title>
 <polygon fill="none" stroke="#000000" points="1505.8076,-116 977.976,-116 842.1924,-16 1370.024,-16 1505.8076,-116"/>
-<text text-anchor="middle" x="1174" y="-75.8" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$2)</text>
-<text text-anchor="middle" x="1174" y="-61.8" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$88 = return returnMethodTemp$2</text>
+<text text-anchor="middle" x="1174" y="-75.8" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="1174" y="-61.8" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$89 = return returnMethodTemp$1</text>
 <text text-anchor="middle" x="1174" y="-47.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1 -->
@@ -94,7 +94,7 @@
 <ellipse fill="none" stroke="#000000" cx="1174" cy="-197.2548" rx="1157.511" ry="45.011"/>
 <text text-anchor="middle" x="1174" y="-214.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(r)</text>
 <text text-anchor="middle" x="1174" y="-200.0548" font-family="Times,serif" font-size="14.00" fill="#000000">s = r : &lt;class:C20&gt; | NilClass | &lt;class:C19&gt; | &lt;class:C18&gt; | &lt;class:C17&gt; | &lt;class:C16&gt; | &lt;class:C15&gt; | &lt;class:C14&gt; | &lt;class:C13&gt; | &lt;class:C12&gt; | &lt;class:C11&gt; | &lt;class:C10&gt; | &lt;class:C9&gt; | &lt;class:C8&gt; | &lt;class:C7&gt; | &lt;class:C6&gt; | &lt;class:C5&gt; | &lt;class:C4&gt; | &lt;class:C3&gt; | &lt;class:C2&gt; | &lt;class:C1&gt;</text>
-<text text-anchor="middle" x="1174" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = return s : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1174" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return s : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1174" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_2&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_61 -->
@@ -106,9 +106,9 @@
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_4 -->
 <g id="node6" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_4</title>
-<ellipse fill="none" stroke="#000000" cx="1038" cy="-1949.7556" rx="150.5024" ry="35.2113"/>
-<text text-anchor="middle" x="1038" y="-1959.5556" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C2&gt;$11)</text>
-<text text-anchor="middle" x="1038" y="-1945.5556" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C2&gt;$11 : &lt;class:C2&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="1038" cy="-1949.7556" rx="150.7276" ry="35.2113"/>
+<text text-anchor="middle" x="1038" y="-1959.5556" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C2&gt;$12)</text>
+<text text-anchor="middle" x="1038" y="-1945.5556" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C2&gt;$12 : &lt;class:C2&gt;</text>
 <text text-anchor="middle" x="1038" y="-1931.5556" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_3&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_4 -->
@@ -121,10 +121,10 @@
 <g id="node7" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_5</title>
 <ellipse fill="none" stroke="#000000" cx="2560" cy="-4470.0495" rx="1503.3681" ry="45.011"/>
-<text text-anchor="middle" x="2560" y="-4486.8495" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C3&gt;$15, &lt;constant:C4&gt;$19, &lt;constant:C5&gt;$23, &lt;constant:C6&gt;$27, &lt;constant:C7&gt;$31, &lt;constant:C8&gt;$35, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2560" y="-4472.8495" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$14 = 3 : Integer(3)</text>
-<text text-anchor="middle" x="2560" y="-4458.8495" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$12 = invite.===(statTemp$14) : untyped</text>
-<text text-anchor="middle" x="2560" y="-4444.8495" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$12</text>
+<text text-anchor="middle" x="2560" y="-4486.8495" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C3&gt;$16, &lt;constant:C4&gt;$20, &lt;constant:C5&gt;$24, &lt;constant:C6&gt;$28, &lt;constant:C7&gt;$32, &lt;constant:C8&gt;$36, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2560" y="-4472.8495" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$15 = 3 : Integer(3)</text>
+<text text-anchor="middle" x="2560" y="-4458.8495" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$13 = invite.===(statTemp$15) : untyped</text>
+<text text-anchor="middle" x="2560" y="-4444.8495" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$13</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_3&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_5 -->
 <g id="edge6" class="edge">
@@ -155,8 +155,8 @@
 <g id="node9" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_6</title>
 <ellipse fill="none" stroke="#000000" cx="1208" cy="-1843.0449" rx="150.7276" ry="35.2113"/>
-<text text-anchor="middle" x="1208" y="-1852.8449" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C3&gt;$15)</text>
-<text text-anchor="middle" x="1208" y="-1838.8449" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C3&gt;$15 : &lt;class:C3&gt;</text>
+<text text-anchor="middle" x="1208" y="-1852.8449" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C3&gt;$16)</text>
+<text text-anchor="middle" x="1208" y="-1838.8449" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C3&gt;$16 : &lt;class:C3&gt;</text>
 <text text-anchor="middle" x="1208" y="-1824.8449" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_5&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_6 -->
@@ -169,10 +169,10 @@
 <g id="node10" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_7</title>
 <ellipse fill="none" stroke="#000000" cx="2652" cy="-4343.5398" rx="1424.8516" ry="45.011"/>
-<text text-anchor="middle" x="2652" y="-4360.3398" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C4&gt;$19, &lt;constant:C5&gt;$23, &lt;constant:C6&gt;$27, &lt;constant:C7&gt;$31, &lt;constant:C8&gt;$35, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2652" y="-4346.3398" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$18 = 4 : Integer(4)</text>
-<text text-anchor="middle" x="2652" y="-4332.3398" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$16 = invite.===(statTemp$18) : untyped</text>
-<text text-anchor="middle" x="2652" y="-4318.3398" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$16</text>
+<text text-anchor="middle" x="2652" y="-4360.3398" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C4&gt;$20, &lt;constant:C5&gt;$24, &lt;constant:C6&gt;$28, &lt;constant:C7&gt;$32, &lt;constant:C8&gt;$36, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2652" y="-4346.3398" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = 4 : Integer(4)</text>
+<text text-anchor="middle" x="2652" y="-4332.3398" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$17 = invite.===(statTemp$19) : untyped</text>
+<text text-anchor="middle" x="2652" y="-4318.3398" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$17</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_5&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_7 -->
 <g id="edge9" class="edge">
@@ -203,8 +203,8 @@
 <g id="node12" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_8</title>
 <ellipse fill="none" stroke="#000000" cx="1363" cy="-1736.3343" rx="150.7276" ry="35.2113"/>
-<text text-anchor="middle" x="1363" y="-1746.1343" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C4&gt;$19)</text>
-<text text-anchor="middle" x="1363" y="-1732.1343" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C4&gt;$19 : &lt;class:C4&gt;</text>
+<text text-anchor="middle" x="1363" y="-1746.1343" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C4&gt;$20)</text>
+<text text-anchor="middle" x="1363" y="-1732.1343" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C4&gt;$20 : &lt;class:C4&gt;</text>
 <text text-anchor="middle" x="1363" y="-1718.1343" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_7&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_8 -->
@@ -217,10 +217,10 @@
 <g id="node13" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_9</title>
 <ellipse fill="none" stroke="#000000" cx="2744" cy="-4217.0302" rx="1346.8352" ry="45.011"/>
-<text text-anchor="middle" x="2744" y="-4233.8302" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C5&gt;$23, &lt;constant:C6&gt;$27, &lt;constant:C7&gt;$31, &lt;constant:C8&gt;$35, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2744" y="-4219.8302" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$22 = 5 : Integer(5)</text>
-<text text-anchor="middle" x="2744" y="-4205.8302" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$20 = invite.===(statTemp$22) : untyped</text>
-<text text-anchor="middle" x="2744" y="-4191.8302" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$20</text>
+<text text-anchor="middle" x="2744" y="-4233.8302" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C5&gt;$24, &lt;constant:C6&gt;$28, &lt;constant:C7&gt;$32, &lt;constant:C8&gt;$36, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2744" y="-4219.8302" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$23 = 5 : Integer(5)</text>
+<text text-anchor="middle" x="2744" y="-4205.8302" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$21 = invite.===(statTemp$23) : untyped</text>
+<text text-anchor="middle" x="2744" y="-4191.8302" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$21</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_7&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_9 -->
 <g id="edge12" class="edge">
@@ -251,8 +251,8 @@
 <g id="node15" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_10</title>
 <ellipse fill="none" stroke="#000000" cx="1467" cy="-1629.6236" rx="150.7276" ry="35.2113"/>
-<text text-anchor="middle" x="1467" y="-1639.4236" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C5&gt;$23)</text>
-<text text-anchor="middle" x="1467" y="-1625.4236" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C5&gt;$23 : &lt;class:C5&gt;</text>
+<text text-anchor="middle" x="1467" y="-1639.4236" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C5&gt;$24)</text>
+<text text-anchor="middle" x="1467" y="-1625.4236" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C5&gt;$24 : &lt;class:C5&gt;</text>
 <text text-anchor="middle" x="1467" y="-1611.4236" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_9&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_10 -->
@@ -265,10 +265,10 @@
 <g id="node16" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_11</title>
 <ellipse fill="none" stroke="#000000" cx="2820" cy="-4090.5205" rx="1268.3188" ry="45.011"/>
-<text text-anchor="middle" x="2820" y="-4107.3205" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C6&gt;$27, &lt;constant:C7&gt;$31, &lt;constant:C8&gt;$35, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2820" y="-4093.3205" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$26 = 6 : Integer(6)</text>
-<text text-anchor="middle" x="2820" y="-4079.3205" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$24 = invite.===(statTemp$26) : untyped</text>
-<text text-anchor="middle" x="2820" y="-4065.3205" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$24</text>
+<text text-anchor="middle" x="2820" y="-4107.3205" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C6&gt;$28, &lt;constant:C7&gt;$32, &lt;constant:C8&gt;$36, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2820" y="-4093.3205" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$27 = 6 : Integer(6)</text>
+<text text-anchor="middle" x="2820" y="-4079.3205" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$25 = invite.===(statTemp$27) : untyped</text>
+<text text-anchor="middle" x="2820" y="-4065.3205" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$25</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_9&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_11 -->
 <g id="edge15" class="edge">
@@ -299,8 +299,8 @@
 <g id="node18" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_12</title>
 <ellipse fill="none" stroke="#000000" cx="1579" cy="-1522.9129" rx="150.7276" ry="35.2113"/>
-<text text-anchor="middle" x="1579" y="-1532.7129" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C6&gt;$27)</text>
-<text text-anchor="middle" x="1579" y="-1518.7129" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C6&gt;$27 : &lt;class:C6&gt;</text>
+<text text-anchor="middle" x="1579" y="-1532.7129" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C6&gt;$28)</text>
+<text text-anchor="middle" x="1579" y="-1518.7129" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C6&gt;$28 : &lt;class:C6&gt;</text>
 <text text-anchor="middle" x="1579" y="-1504.7129" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_11&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_12 -->
@@ -313,10 +313,10 @@
 <g id="node19" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_13</title>
 <ellipse fill="none" stroke="#000000" cx="2846" cy="-3964.0108" rx="1190.3024" ry="45.011"/>
-<text text-anchor="middle" x="2846" y="-3980.8108" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C7&gt;$31, &lt;constant:C8&gt;$35, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2846" y="-3966.8108" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$30 = 7 : Integer(7)</text>
-<text text-anchor="middle" x="2846" y="-3952.8108" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$28 = invite.===(statTemp$30) : untyped</text>
-<text text-anchor="middle" x="2846" y="-3938.8108" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$28</text>
+<text text-anchor="middle" x="2846" y="-3980.8108" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C7&gt;$32, &lt;constant:C8&gt;$36, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2846" y="-3966.8108" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$31 = 7 : Integer(7)</text>
+<text text-anchor="middle" x="2846" y="-3952.8108" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$29 = invite.===(statTemp$31) : untyped</text>
+<text text-anchor="middle" x="2846" y="-3938.8108" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$29</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_11&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_13 -->
 <g id="edge18" class="edge">
@@ -347,8 +347,8 @@
 <g id="node21" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_14</title>
 <ellipse fill="none" stroke="#000000" cx="1708" cy="-1416.2022" rx="150.7276" ry="35.2113"/>
-<text text-anchor="middle" x="1708" y="-1426.0022" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C7&gt;$31)</text>
-<text text-anchor="middle" x="1708" y="-1412.0022" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C7&gt;$31 : &lt;class:C7&gt;</text>
+<text text-anchor="middle" x="1708" y="-1426.0022" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C7&gt;$32)</text>
+<text text-anchor="middle" x="1708" y="-1412.0022" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C7&gt;$32 : &lt;class:C7&gt;</text>
 <text text-anchor="middle" x="1708" y="-1398.0022" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_13&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_14 -->
@@ -361,10 +361,10 @@
 <g id="node22" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_15</title>
 <ellipse fill="none" stroke="#000000" cx="2880" cy="-3837.5012" rx="1111.7859" ry="45.011"/>
-<text text-anchor="middle" x="2880" y="-3854.3012" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C8&gt;$35, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2880" y="-3840.3012" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$34 = 8 : Integer(8)</text>
-<text text-anchor="middle" x="2880" y="-3826.3012" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$32 = invite.===(statTemp$34) : untyped</text>
-<text text-anchor="middle" x="2880" y="-3812.3012" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$32</text>
+<text text-anchor="middle" x="2880" y="-3854.3012" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C8&gt;$36, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2880" y="-3840.3012" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$35 = 8 : Integer(8)</text>
+<text text-anchor="middle" x="2880" y="-3826.3012" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$33 = invite.===(statTemp$35) : untyped</text>
+<text text-anchor="middle" x="2880" y="-3812.3012" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$33</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_13&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_15 -->
 <g id="edge21" class="edge">
@@ -395,8 +395,8 @@
 <g id="node24" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_16</title>
 <ellipse fill="none" stroke="#000000" cx="1831" cy="-1309.4916" rx="150.7276" ry="35.2113"/>
-<text text-anchor="middle" x="1831" y="-1319.2916" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C8&gt;$35)</text>
-<text text-anchor="middle" x="1831" y="-1305.2916" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C8&gt;$35 : &lt;class:C8&gt;</text>
+<text text-anchor="middle" x="1831" y="-1319.2916" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C8&gt;$36)</text>
+<text text-anchor="middle" x="1831" y="-1305.2916" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C8&gt;$36 : &lt;class:C8&gt;</text>
 <text text-anchor="middle" x="1831" y="-1291.2916" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_15&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_16 -->
@@ -409,10 +409,10 @@
 <g id="node25" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_17</title>
 <ellipse fill="none" stroke="#000000" cx="2931" cy="-3710.9915" rx="1033.7695" ry="45.011"/>
-<text text-anchor="middle" x="2931" y="-3727.7915" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C9&gt;$39, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2931" y="-3713.7915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$38 = 9 : Integer(9)</text>
-<text text-anchor="middle" x="2931" y="-3699.7915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$36 = invite.===(statTemp$38) : untyped</text>
-<text text-anchor="middle" x="2931" y="-3685.7915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$36</text>
+<text text-anchor="middle" x="2931" y="-3727.7915" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C9&gt;$40, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2931" y="-3713.7915" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$39 = 9 : Integer(9)</text>
+<text text-anchor="middle" x="2931" y="-3699.7915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$37 = invite.===(statTemp$39) : untyped</text>
+<text text-anchor="middle" x="2931" y="-3685.7915" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$37</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_15&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_17 -->
 <g id="edge24" class="edge">
@@ -443,8 +443,8 @@
 <g id="node27" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_18</title>
 <ellipse fill="none" stroke="#000000" cx="1993" cy="-1202.7809" rx="150.7276" ry="35.2113"/>
-<text text-anchor="middle" x="1993" y="-1212.5809" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C9&gt;$39)</text>
-<text text-anchor="middle" x="1993" y="-1198.5809" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C9&gt;$39 : &lt;class:C9&gt;</text>
+<text text-anchor="middle" x="1993" y="-1212.5809" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C9&gt;$40)</text>
+<text text-anchor="middle" x="1993" y="-1198.5809" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C9&gt;$40 : &lt;class:C9&gt;</text>
 <text text-anchor="middle" x="1993" y="-1184.5809" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_17&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_18 -->
@@ -457,10 +457,10 @@
 <g id="node28" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_19</title>
 <ellipse fill="none" stroke="#000000" cx="2975" cy="-3584.4818" rx="955.2531" ry="45.011"/>
-<text text-anchor="middle" x="2975" y="-3601.2818" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C10&gt;$43, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="2975" y="-3587.2818" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$42 = 10 : Integer(10)</text>
-<text text-anchor="middle" x="2975" y="-3573.2818" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$40 = invite.===(statTemp$42) : untyped</text>
-<text text-anchor="middle" x="2975" y="-3559.2818" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$40</text>
+<text text-anchor="middle" x="2975" y="-3601.2818" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C10&gt;$44, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="2975" y="-3587.2818" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$43 = 10 : Integer(10)</text>
+<text text-anchor="middle" x="2975" y="-3573.2818" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$41 = invite.===(statTemp$43) : untyped</text>
+<text text-anchor="middle" x="2975" y="-3559.2818" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$41</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_17&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_19 -->
 <g id="edge27" class="edge">
@@ -491,8 +491,8 @@
 <g id="node30" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_20</title>
 <ellipse fill="none" stroke="#000000" cx="2163" cy="-1096.0702" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="2163" y="-1105.8702" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C10&gt;$43)</text>
-<text text-anchor="middle" x="2163" y="-1091.8702" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C10&gt;$43 : &lt;class:C10&gt;</text>
+<text text-anchor="middle" x="2163" y="-1105.8702" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C10&gt;$44)</text>
+<text text-anchor="middle" x="2163" y="-1091.8702" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C10&gt;$44 : &lt;class:C10&gt;</text>
 <text text-anchor="middle" x="2163" y="-1077.8702" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_19&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_20 -->
@@ -505,10 +505,10 @@
 <g id="node31" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_21</title>
 <ellipse fill="none" stroke="#000000" cx="3054" cy="-3457.9721" rx="872.3372" ry="45.011"/>
-<text text-anchor="middle" x="3054" y="-3474.7721" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C11&gt;$47, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3054" y="-3460.7721" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$46 = 11 : Integer(11)</text>
-<text text-anchor="middle" x="3054" y="-3446.7721" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$44 = invite.===(statTemp$46) : untyped</text>
-<text text-anchor="middle" x="3054" y="-3432.7721" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$44</text>
+<text text-anchor="middle" x="3054" y="-3474.7721" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C11&gt;$48, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3054" y="-3460.7721" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$47 = 11 : Integer(11)</text>
+<text text-anchor="middle" x="3054" y="-3446.7721" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$45 = invite.===(statTemp$47) : untyped</text>
+<text text-anchor="middle" x="3054" y="-3432.7721" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$45</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_19&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_21 -->
 <g id="edge30" class="edge">
@@ -539,8 +539,8 @@
 <g id="node33" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_22</title>
 <ellipse fill="none" stroke="#000000" cx="2342" cy="-3331.4625" rx="160.0763" ry="35.2113"/>
-<text text-anchor="middle" x="2342" y="-3341.2625" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C11&gt;$47)</text>
-<text text-anchor="middle" x="2342" y="-3327.2625" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C11&gt;$47 : &lt;class:C11&gt;</text>
+<text text-anchor="middle" x="2342" y="-3341.2625" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C11&gt;$48)</text>
+<text text-anchor="middle" x="2342" y="-3327.2625" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C11&gt;$48 : &lt;class:C11&gt;</text>
 <text text-anchor="middle" x="2342" y="-3313.2625" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_21&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_22 -->
@@ -553,10 +553,10 @@
 <g id="node34" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_23</title>
 <ellipse fill="none" stroke="#000000" cx="3309" cy="-3331.4625" rx="789.1463" ry="45.011"/>
-<text text-anchor="middle" x="3309" y="-3348.2625" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C12&gt;$51, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3309" y="-3334.2625" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$50 = 12 : Integer(12)</text>
-<text text-anchor="middle" x="3309" y="-3320.2625" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$48 = invite.===(statTemp$50) : untyped</text>
-<text text-anchor="middle" x="3309" y="-3306.2625" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$48</text>
+<text text-anchor="middle" x="3309" y="-3348.2625" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C12&gt;$52, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3309" y="-3334.2625" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$51 = 12 : Integer(12)</text>
+<text text-anchor="middle" x="3309" y="-3320.2625" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$49 = invite.===(statTemp$51) : untyped</text>
+<text text-anchor="middle" x="3309" y="-3306.2625" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$49</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_21&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_23 -->
 <g id="edge33" class="edge">
@@ -587,8 +587,8 @@
 <g id="node36" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_24</title>
 <ellipse fill="none" stroke="#000000" cx="2515" cy="-3204.9528" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="2515" y="-3214.7528" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C12&gt;$51)</text>
-<text text-anchor="middle" x="2515" y="-3200.7528" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C12&gt;$51 : &lt;class:C12&gt;</text>
+<text text-anchor="middle" x="2515" y="-3214.7528" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C12&gt;$52)</text>
+<text text-anchor="middle" x="2515" y="-3200.7528" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C12&gt;$52 : &lt;class:C12&gt;</text>
 <text text-anchor="middle" x="2515" y="-3186.7528" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_23&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_24 -->
@@ -601,10 +601,10 @@
 <g id="node37" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_25</title>
 <ellipse fill="none" stroke="#000000" cx="3400" cy="-3204.9528" rx="706.2304" ry="45.011"/>
-<text text-anchor="middle" x="3400" y="-3221.7528" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C13&gt;$55, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3400" y="-3207.7528" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$54 = 13 : Integer(13)</text>
-<text text-anchor="middle" x="3400" y="-3193.7528" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$52 = invite.===(statTemp$54) : untyped</text>
-<text text-anchor="middle" x="3400" y="-3179.7528" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$52</text>
+<text text-anchor="middle" x="3400" y="-3221.7528" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C13&gt;$56, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3400" y="-3207.7528" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$55 = 13 : Integer(13)</text>
+<text text-anchor="middle" x="3400" y="-3193.7528" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$53 = invite.===(statTemp$55) : untyped</text>
+<text text-anchor="middle" x="3400" y="-3179.7528" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$53</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_23&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_25 -->
 <g id="edge36" class="edge">
@@ -635,8 +635,8 @@
 <g id="node39" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_26</title>
 <ellipse fill="none" stroke="#000000" cx="2612" cy="-3078.4431" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="2612" y="-3088.2431" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C13&gt;$55)</text>
-<text text-anchor="middle" x="2612" y="-3074.2431" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C13&gt;$55 : &lt;class:C13&gt;</text>
+<text text-anchor="middle" x="2612" y="-3088.2431" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C13&gt;$56)</text>
+<text text-anchor="middle" x="2612" y="-3074.2431" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C13&gt;$56 : &lt;class:C13&gt;</text>
 <text text-anchor="middle" x="2612" y="-3060.2431" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_25&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_26 -->
@@ -649,10 +649,10 @@
 <g id="node40" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_27</title>
 <ellipse fill="none" stroke="#000000" cx="3414" cy="-3078.4431" rx="622.8144" ry="45.011"/>
-<text text-anchor="middle" x="3414" y="-3095.2431" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C14&gt;$59, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3414" y="-3081.2431" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$58 = 14 : Integer(14)</text>
-<text text-anchor="middle" x="3414" y="-3067.2431" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$56 = invite.===(statTemp$58) : untyped</text>
-<text text-anchor="middle" x="3414" y="-3053.2431" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$56</text>
+<text text-anchor="middle" x="3414" y="-3095.2431" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C14&gt;$60, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3414" y="-3081.2431" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$59 = 14 : Integer(14)</text>
+<text text-anchor="middle" x="3414" y="-3067.2431" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$57 = invite.===(statTemp$59) : untyped</text>
+<text text-anchor="middle" x="3414" y="-3053.2431" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$57</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_25&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_27 -->
 <g id="edge39" class="edge">
@@ -683,8 +683,8 @@
 <g id="node42" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_28</title>
 <ellipse fill="none" stroke="#000000" cx="2711" cy="-2951.9335" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="2711" y="-2961.7335" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C14&gt;$59)</text>
-<text text-anchor="middle" x="2711" y="-2947.7335" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C14&gt;$59 : &lt;class:C14&gt;</text>
+<text text-anchor="middle" x="2711" y="-2961.7335" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C14&gt;$60)</text>
+<text text-anchor="middle" x="2711" y="-2947.7335" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C14&gt;$60 : &lt;class:C14&gt;</text>
 <text text-anchor="middle" x="2711" y="-2933.7335" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_27&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_28 -->
@@ -697,10 +697,10 @@
 <g id="node43" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_29</title>
 <ellipse fill="none" stroke="#000000" cx="3429" cy="-2951.9335" rx="539.8986" ry="45.011"/>
-<text text-anchor="middle" x="3429" y="-2968.7335" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C15&gt;$63, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3429" y="-2954.7335" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$62 = 15 : Integer(15)</text>
-<text text-anchor="middle" x="3429" y="-2940.7335" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$60 = invite.===(statTemp$62) : untyped</text>
-<text text-anchor="middle" x="3429" y="-2926.7335" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$60</text>
+<text text-anchor="middle" x="3429" y="-2968.7335" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C15&gt;$64, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3429" y="-2954.7335" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$63 = 15 : Integer(15)</text>
+<text text-anchor="middle" x="3429" y="-2940.7335" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$61 = invite.===(statTemp$63) : untyped</text>
+<text text-anchor="middle" x="3429" y="-2926.7335" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$61</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_27&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_29 -->
 <g id="edge42" class="edge">
@@ -731,8 +731,8 @@
 <g id="node45" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_30</title>
 <ellipse fill="none" stroke="#000000" cx="2812" cy="-2825.4238" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="2812" y="-2835.2238" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C15&gt;$63)</text>
-<text text-anchor="middle" x="2812" y="-2821.2238" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C15&gt;$63 : &lt;class:C15&gt;</text>
+<text text-anchor="middle" x="2812" y="-2835.2238" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C15&gt;$64)</text>
+<text text-anchor="middle" x="2812" y="-2821.2238" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C15&gt;$64 : &lt;class:C15&gt;</text>
 <text text-anchor="middle" x="2812" y="-2807.2238" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_29&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_30 -->
@@ -745,10 +745,10 @@
 <g id="node46" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_31</title>
 <ellipse fill="none" stroke="#000000" cx="3447" cy="-2825.4238" rx="456.4826" ry="45.011"/>
-<text text-anchor="middle" x="3447" y="-2842.2238" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C16&gt;$67, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3447" y="-2828.2238" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$66 = 16 : Integer(16)</text>
-<text text-anchor="middle" x="3447" y="-2814.2238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$64 = invite.===(statTemp$66) : untyped</text>
-<text text-anchor="middle" x="3447" y="-2800.2238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$64</text>
+<text text-anchor="middle" x="3447" y="-2842.2238" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C16&gt;$68, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3447" y="-2828.2238" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$67 = 16 : Integer(16)</text>
+<text text-anchor="middle" x="3447" y="-2814.2238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$65 = invite.===(statTemp$67) : untyped</text>
+<text text-anchor="middle" x="3447" y="-2800.2238" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$65</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_29&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_31 -->
 <g id="edge45" class="edge">
@@ -779,8 +779,8 @@
 <g id="node48" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_32</title>
 <ellipse fill="none" stroke="#000000" cx="2919" cy="-2698.9141" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="2919" y="-2708.7141" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C16&gt;$67)</text>
-<text text-anchor="middle" x="2919" y="-2694.7141" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C16&gt;$67 : &lt;class:C16&gt;</text>
+<text text-anchor="middle" x="2919" y="-2708.7141" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C16&gt;$68)</text>
+<text text-anchor="middle" x="2919" y="-2694.7141" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C16&gt;$68 : &lt;class:C16&gt;</text>
 <text text-anchor="middle" x="2919" y="-2680.7141" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_31&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_32 -->
@@ -793,10 +793,10 @@
 <g id="node49" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33</title>
 <ellipse fill="none" stroke="#000000" cx="3471" cy="-2698.9141" rx="373.0668" ry="45.011"/>
-<text text-anchor="middle" x="3471" y="-2715.7141" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C17&gt;$71, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3471" y="-2701.7141" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$70 = 17 : Integer(17)</text>
-<text text-anchor="middle" x="3471" y="-2687.7141" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$68 = invite.===(statTemp$70) : untyped</text>
-<text text-anchor="middle" x="3471" y="-2673.7141" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$68</text>
+<text text-anchor="middle" x="3471" y="-2715.7141" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C17&gt;$72, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3471" y="-2701.7141" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$71 = 17 : Integer(17)</text>
+<text text-anchor="middle" x="3471" y="-2687.7141" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$69 = invite.===(statTemp$71) : untyped</text>
+<text text-anchor="middle" x="3471" y="-2673.7141" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$69</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_31&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33 -->
 <g id="edge48" class="edge">
@@ -827,8 +827,8 @@
 <g id="node51" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_34</title>
 <ellipse fill="none" stroke="#000000" cx="3037" cy="-2572.4045" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="3037" y="-2582.2045" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C17&gt;$71)</text>
-<text text-anchor="middle" x="3037" y="-2568.2045" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C17&gt;$71 : &lt;class:C17&gt;</text>
+<text text-anchor="middle" x="3037" y="-2582.2045" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C17&gt;$72)</text>
+<text text-anchor="middle" x="3037" y="-2568.2045" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C17&gt;$72 : &lt;class:C17&gt;</text>
 <text text-anchor="middle" x="3037" y="-2554.2045" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_34 -->
@@ -841,10 +841,10 @@
 <g id="node52" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35</title>
 <ellipse fill="none" stroke="#000000" cx="3506" cy="-2572.4045" rx="290.1508" ry="45.011"/>
-<text text-anchor="middle" x="3506" y="-2589.2045" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C18&gt;$75, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3506" y="-2575.2045" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$74 = 18 : Integer(18)</text>
-<text text-anchor="middle" x="3506" y="-2561.2045" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$72 = invite.===(statTemp$74) : untyped</text>
-<text text-anchor="middle" x="3506" y="-2547.2045" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$72</text>
+<text text-anchor="middle" x="3506" y="-2589.2045" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C18&gt;$76, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3506" y="-2575.2045" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$75 = 18 : Integer(18)</text>
+<text text-anchor="middle" x="3506" y="-2561.2045" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$73 = invite.===(statTemp$75) : untyped</text>
+<text text-anchor="middle" x="3506" y="-2547.2045" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$73</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_33&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35 -->
 <g id="edge51" class="edge">
@@ -875,8 +875,8 @@
 <g id="node54" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_36</title>
 <ellipse fill="none" stroke="#000000" cx="3175" cy="-2445.8948" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="3175" y="-2455.6948" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C18&gt;$75)</text>
-<text text-anchor="middle" x="3175" y="-2441.6948" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C18&gt;$75 : &lt;class:C18&gt;</text>
+<text text-anchor="middle" x="3175" y="-2455.6948" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C18&gt;$76)</text>
+<text text-anchor="middle" x="3175" y="-2441.6948" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C18&gt;$76 : &lt;class:C18&gt;</text>
 <text text-anchor="middle" x="3175" y="-2427.6948" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_36 -->
@@ -889,10 +889,10 @@
 <g id="node55" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37</title>
 <ellipse fill="none" stroke="#000000" cx="3561" cy="-2445.8948" rx="206.7349" ry="45.011"/>
-<text text-anchor="middle" x="3561" y="-2462.6948" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C19&gt;$79, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3561" y="-2448.6948" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$78 = 19 : Integer(19)</text>
-<text text-anchor="middle" x="3561" y="-2434.6948" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$76 = invite.===(statTemp$78) : untyped</text>
-<text text-anchor="middle" x="3561" y="-2420.6948" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$76</text>
+<text text-anchor="middle" x="3561" y="-2462.6948" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C19&gt;$80, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3561" y="-2448.6948" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$79 = 19 : Integer(19)</text>
+<text text-anchor="middle" x="3561" y="-2434.6948" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$77 = invite.===(statTemp$79) : untyped</text>
+<text text-anchor="middle" x="3561" y="-2420.6948" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$77</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_35&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37 -->
 <g id="edge54" class="edge">
@@ -923,8 +923,8 @@
 <g id="node57" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_38</title>
 <ellipse fill="none" stroke="#000000" cx="3313" cy="-2319.3851" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="3313" y="-2329.1851" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C19&gt;$79)</text>
-<text text-anchor="middle" x="3313" y="-2315.1851" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C19&gt;$79 : &lt;class:C19&gt;</text>
+<text text-anchor="middle" x="3313" y="-2329.1851" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C19&gt;$80)</text>
+<text text-anchor="middle" x="3313" y="-2315.1851" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C19&gt;$80 : &lt;class:C19&gt;</text>
 <text text-anchor="middle" x="3313" y="-2301.1851" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_38 -->
@@ -937,10 +937,10 @@
 <g id="node58" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39</title>
 <ellipse fill="none" stroke="#000000" cx="3696" cy="-2319.3851" rx="204.1857" ry="45.011"/>
-<text text-anchor="middle" x="3696" y="-2336.1851" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3696" y="-2322.1851" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$82 = 20 : Integer(20)</text>
-<text text-anchor="middle" x="3696" y="-2308.1851" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$80 = invite.===(statTemp$82) : untyped</text>
-<text text-anchor="middle" x="3696" y="-2294.1851" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$80</text>
+<text text-anchor="middle" x="3696" y="-2336.1851" font-family="Times,serif" font-size="14.00" fill="#000000">(invite, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3696" y="-2322.1851" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$83 = 20 : Integer(20)</text>
+<text text-anchor="middle" x="3696" y="-2308.1851" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$81 = invite.===(statTemp$83) : untyped</text>
+<text text-anchor="middle" x="3696" y="-2294.1851" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$81</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_37&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39 -->
 <g id="edge57" class="edge">
@@ -971,8 +971,8 @@
 <g id="node60" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_40</title>
 <ellipse fill="none" stroke="#000000" cx="3451" cy="-2182.976" rx="160.5268" ry="35.2113"/>
-<text text-anchor="middle" x="3451" y="-2192.776" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C20&gt;$83)</text>
-<text text-anchor="middle" x="3451" y="-2178.776" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C20&gt;$83 : &lt;class:C20&gt;</text>
+<text text-anchor="middle" x="3451" y="-2192.776" font-family="Times,serif" font-size="14.00" fill="#000000">(r, &lt;constant:C20&gt;$84)</text>
+<text text-anchor="middle" x="3451" y="-2178.776" font-family="Times,serif" font-size="14.00" fill="#000000">r = &lt;constant:C20&gt;$84 : &lt;class:C20&gt;</text>
 <text text-anchor="middle" x="3451" y="-2164.776" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_40 -->
@@ -986,9 +986,9 @@
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_41</title>
 <ellipse fill="none" stroke="#000000" cx="3867" cy="-2182.976" rx="237.4661" ry="55.3091"/>
 <text text-anchor="middle" x="3867" y="-2206.776" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="3867" y="-2192.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$84 = self : &lt;class:A&gt;</text>
-<text text-anchor="middle" x="3867" y="-2178.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$85 = Bla bla bla : String(&quot;Bla bla bla&quot;)</text>
-<text text-anchor="middle" x="3867" y="-2164.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$2 = statTemp$84.raise(statTemp$85) : untyped</text>
+<text text-anchor="middle" x="3867" y="-2192.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$85 = self : &lt;class:A&gt;</text>
+<text text-anchor="middle" x="3867" y="-2178.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$86 = Bla bla bla : String(&quot;Bla bla bla&quot;)</text>
+<text text-anchor="middle" x="3867" y="-2164.776" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = statTemp$85.raise(statTemp$86) : untyped</text>
 <text text-anchor="middle" x="3867" y="-2150.776" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_39&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_41 -->
@@ -1030,4 +1030,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 4456cb1a88fc7bebd13b085c0a8f07708b8b41472e457c2a7c55884b31e864ad -->
+<!-- ruby-types:sha256: 29c260516705ce1d044d5c03a4fdd904d4cd88336bdadb8fc9a16b77517b83b5 -->

@@ -7,11 +7,13 @@ subgraph "cluster_::<constant:TestArgs>#any" {
 
     "bb::<constant:TestArgs>#any_0" [label = "()
 returnMethodTemp$1 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$1 : <bottom>
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#any_0" -> "bb::<constant:TestArgs>#any_1";
     "bb::<constant:TestArgs>#any_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#any_1" -> "bb::<constant:TestArgs>#any_1";
 }
 
@@ -22,12 +24,14 @@ subgraph "cluster_::<constant:TestArgs>#a_hash" {
     "bb::<constant:TestArgs>#a_hash_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#a_hash_0" [label = "()
-returnMethodTemp$2 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$2 : <bottom>
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#a_hash_0" -> "bb::<constant:TestArgs>#a_hash_1";
     "bb::<constant:TestArgs>#a_hash_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#a_hash_1" -> "bb::<constant:TestArgs>#a_hash_1";
 }
 
@@ -38,13 +42,15 @@ subgraph "cluster_::<constant:TestArgs>#required" {
     "bb::<constant:TestArgs>#required_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#required_0" [label = "()
-selfMethodTemp$1 = self : TestArgs
-returnMethodTemp$3 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$3 : <bottom>
+selfMethodTemp$2 = self : TestArgs
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#required_0" -> "bb::<constant:TestArgs>#required_1";
     "bb::<constant:TestArgs>#required_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#required_1" -> "bb::<constant:TestArgs>#required_1";
 }
 
@@ -55,23 +61,25 @@ subgraph "cluster_::<constant:TestArgs>#call_required" {
     "bb::<constant:TestArgs>#call_required_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#call_required_0" [label = "()
-statTemp$3 = self : TestArgs
-statTemp$4 = 1 : Integer(1)
-statTemp$2 = statTemp$3.required(statTemp$4) : untyped
-statTemp$6 = self : TestArgs
-statTemp$7 = 1 : Integer(1)
-statTemp$8 = 2 : Integer(2)
-statTemp$5 = statTemp$6.required(statTemp$7, statTemp$8) : untyped
-statTemp$9 = self : TestArgs
-statTemp$10 = 1 : Integer(1)
-statTemp$11 = 2 : Integer(2)
-statTemp$12 = 3 : Integer(3)
-returnMethodTemp$4 = statTemp$9.required(statTemp$10, statTemp$11, statTemp$12) : untyped
-returnMethodTemp$13 = return returnMethodTemp$4 : <bottom>
+statTemp$4 = self : TestArgs
+statTemp$5 = 1 : Integer(1)
+statTemp$3 = statTemp$4.required(statTemp$5) : untyped
+statTemp$7 = self : TestArgs
+statTemp$8 = 1 : Integer(1)
+statTemp$9 = 2 : Integer(2)
+statTemp$6 = statTemp$7.required(statTemp$8, statTemp$9) : untyped
+statTemp$10 = self : TestArgs
+statTemp$11 = 1 : Integer(1)
+statTemp$12 = 2 : Integer(2)
+statTemp$13 = 3 : Integer(3)
+returnMethodTemp$1 = statTemp$10.required(statTemp$11, statTemp$12, statTemp$13) : untyped
+returnMethodTemp$14 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_required_0" -> "bb::<constant:TestArgs>#call_required_1";
     "bb::<constant:TestArgs>#call_required_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_required_1" -> "bb::<constant:TestArgs>#call_required_1";
 }
 
@@ -82,13 +90,15 @@ subgraph "cluster_::<constant:TestArgs>#optional" {
     "bb::<constant:TestArgs>#optional_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#optional_0" [label = "()
-selfMethodTemp$1 = self : TestArgs
-returnMethodTemp$5 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$5 : <bottom>
+selfMethodTemp$2 = self : TestArgs
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#optional_0" -> "bb::<constant:TestArgs>#optional_1";
     "bb::<constant:TestArgs>#optional_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#optional_1" -> "bb::<constant:TestArgs>#optional_1";
 }
 
@@ -99,23 +109,25 @@ subgraph "cluster_::<constant:TestArgs>#call_optional" {
     "bb::<constant:TestArgs>#call_optional_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#call_optional_0" [label = "()
-statTemp$3 = self : TestArgs
-statTemp$4 = 1 : Integer(1)
-statTemp$2 = statTemp$3.optional(statTemp$4) : untyped
-statTemp$6 = self : TestArgs
-statTemp$7 = 1 : Integer(1)
-statTemp$8 = 2 : Integer(2)
-statTemp$5 = statTemp$6.optional(statTemp$7, statTemp$8) : untyped
-statTemp$9 = self : TestArgs
-statTemp$10 = 1 : Integer(1)
-statTemp$11 = 2 : Integer(2)
-statTemp$12 = 3 : Integer(3)
-returnMethodTemp$6 = statTemp$9.optional(statTemp$10, statTemp$11, statTemp$12) : untyped
-returnMethodTemp$13 = return returnMethodTemp$6 : <bottom>
+statTemp$4 = self : TestArgs
+statTemp$5 = 1 : Integer(1)
+statTemp$3 = statTemp$4.optional(statTemp$5) : untyped
+statTemp$7 = self : TestArgs
+statTemp$8 = 1 : Integer(1)
+statTemp$9 = 2 : Integer(2)
+statTemp$6 = statTemp$7.optional(statTemp$8, statTemp$9) : untyped
+statTemp$10 = self : TestArgs
+statTemp$11 = 1 : Integer(1)
+statTemp$12 = 2 : Integer(2)
+statTemp$13 = 3 : Integer(3)
+returnMethodTemp$1 = statTemp$10.optional(statTemp$11, statTemp$12, statTemp$13) : untyped
+returnMethodTemp$14 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_optional_0" -> "bb::<constant:TestArgs>#call_optional_1";
     "bb::<constant:TestArgs>#call_optional_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_optional_1" -> "bb::<constant:TestArgs>#call_optional_1";
 }
 
@@ -126,13 +138,15 @@ subgraph "cluster_::<constant:TestArgs>#kwarg" {
     "bb::<constant:TestArgs>#kwarg_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#kwarg_0" [label = "()
-selfMethodTemp$1 = self : TestArgs
-returnMethodTemp$7 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$7 : <bottom>
+selfMethodTemp$2 = self : TestArgs
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#kwarg_0" -> "bb::<constant:TestArgs>#kwarg_1";
     "bb::<constant:TestArgs>#kwarg_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#kwarg_1" -> "bb::<constant:TestArgs>#kwarg_1";
 }
 
@@ -143,56 +157,58 @@ subgraph "cluster_::<constant:TestArgs>#call_kwarg" {
     "bb::<constant:TestArgs>#call_kwarg_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#call_kwarg_0" [label = "()
-statTemp$3 = self : TestArgs
-statTemp$4 = 1 : Integer(1)
-statTemp$5 = 2 : Integer(2)
-statTemp$2 = statTemp$3.kwarg(statTemp$4, statTemp$5) : NilClass
-statTemp$7 = self : TestArgs
-statTemp$8 = 1 : Integer(1)
-statTemp$6 = statTemp$7.kwarg(statTemp$8) : NilClass
-statTemp$10 = self : TestArgs
-statTemp$11 = 1 : Integer(1)
-hashTemp$13 = <symbol:b> : Symbol(:\"b\")
-hashTemp$14 = 2 : Integer(2)
-hashTemp$15 = alias {} : HashType {\n}
-statTemp$12 = hashTemp$15.<build-hash>(hashTemp$13, hashTemp$14) : HashType {\n  Symbol(:\"b\") => Integer(2)\n}
-statTemp$9 = statTemp$10.kwarg(statTemp$11, statTemp$12) : NilClass
-statTemp$17 = self : TestArgs
-statTemp$18 = 1 : Integer(1)
-hashTemp$20 = <symbol:b> : Symbol(:\"b\")
-hashTemp$21 = 2 : Integer(2)
-hashTemp$22 = <symbol:c> : Symbol(:\"c\")
-hashTemp$23 = 3 : Integer(3)
-hashTemp$24 = alias {} : HashType {\n}
-statTemp$19 = hashTemp$24.<build-hash>(hashTemp$20, hashTemp$21, hashTemp$22, hashTemp$23) : HashType {\n  Symbol(:\"b\") => Integer(2)\n  Symbol(:\"c\") => Integer(3)\n}
-statTemp$16 = statTemp$17.kwarg(statTemp$18, statTemp$19) : NilClass
-statTemp$26 = self : TestArgs
-statTemp$27 = 1 : Integer(1)
-hashTemp$29 = alias {} : HashType {\n}
-statTemp$28 = hashTemp$29.<build-hash>() : HashType {\n}
-statTemp$25 = statTemp$26.kwarg(statTemp$27, statTemp$28) : NilClass
-statTemp$31 = self : TestArgs
-statTemp$32 = 1 : Integer(1)
-hashTemp$34 = <symbol:b> : Symbol(:\"b\")
-hashTemp$35 = hi : String(\"hi\")
-hashTemp$36 = alias {} : HashType {\n}
-statTemp$33 = hashTemp$36.<build-hash>(hashTemp$34, hashTemp$35) : HashType {\n  Symbol(:\"b\") => String(\"hi\")\n}
-statTemp$30 = statTemp$31.kwarg(statTemp$32, statTemp$33) : NilClass
-statTemp$38 = self : TestArgs
-statTemp$39 = 1 : Integer(1)
-statTemp$41 = self : TestArgs
-statTemp$40 = statTemp$41.any() : untyped
-statTemp$37 = statTemp$38.kwarg(statTemp$39, statTemp$40) : NilClass
+statTemp$4 = self : TestArgs
+statTemp$5 = 1 : Integer(1)
+statTemp$6 = 2 : Integer(2)
+statTemp$3 = statTemp$4.kwarg(statTemp$5, statTemp$6) : NilClass
+statTemp$8 = self : TestArgs
+statTemp$9 = 1 : Integer(1)
+statTemp$7 = statTemp$8.kwarg(statTemp$9) : NilClass
+statTemp$11 = self : TestArgs
+statTemp$12 = 1 : Integer(1)
+hashTemp$14 = <symbol:b> : Symbol(:\"b\")
+hashTemp$15 = 2 : Integer(2)
+hashTemp$16 = alias {} : HashType {\n}
+statTemp$13 = hashTemp$16.<build-hash>(hashTemp$14, hashTemp$15) : HashType {\n  Symbol(:\"b\") => Integer(2)\n}
+statTemp$10 = statTemp$11.kwarg(statTemp$12, statTemp$13) : NilClass
+statTemp$18 = self : TestArgs
+statTemp$19 = 1 : Integer(1)
+hashTemp$21 = <symbol:b> : Symbol(:\"b\")
+hashTemp$22 = 2 : Integer(2)
+hashTemp$23 = <symbol:c> : Symbol(:\"c\")
+hashTemp$24 = 3 : Integer(3)
+hashTemp$25 = alias {} : HashType {\n}
+statTemp$20 = hashTemp$25.<build-hash>(hashTemp$21, hashTemp$22, hashTemp$23, hashTemp$24) : HashType {\n  Symbol(:\"b\") => Integer(2)\n  Symbol(:\"c\") => Integer(3)\n}
+statTemp$17 = statTemp$18.kwarg(statTemp$19, statTemp$20) : NilClass
+statTemp$27 = self : TestArgs
+statTemp$28 = 1 : Integer(1)
+hashTemp$30 = alias {} : HashType {\n}
+statTemp$29 = hashTemp$30.<build-hash>() : HashType {\n}
+statTemp$26 = statTemp$27.kwarg(statTemp$28, statTemp$29) : NilClass
+statTemp$32 = self : TestArgs
+statTemp$33 = 1 : Integer(1)
+hashTemp$35 = <symbol:b> : Symbol(:\"b\")
+hashTemp$36 = hi : String(\"hi\")
+hashTemp$37 = alias {} : HashType {\n}
+statTemp$34 = hashTemp$37.<build-hash>(hashTemp$35, hashTemp$36) : HashType {\n  Symbol(:\"b\") => String(\"hi\")\n}
+statTemp$31 = statTemp$32.kwarg(statTemp$33, statTemp$34) : NilClass
+statTemp$39 = self : TestArgs
+statTemp$40 = 1 : Integer(1)
 statTemp$42 = self : TestArgs
-statTemp$43 = 1 : Integer(1)
-statTemp$45 = self : TestArgs
-statTemp$44 = statTemp$45.a_hash() : Hash
-returnMethodTemp$8 = statTemp$42.kwarg(statTemp$43, statTemp$44) : NilClass
-returnMethodTemp$46 = return returnMethodTemp$8 : <bottom>
+statTemp$41 = statTemp$42.any() : untyped
+statTemp$38 = statTemp$39.kwarg(statTemp$40, statTemp$41) : NilClass
+statTemp$43 = self : TestArgs
+statTemp$44 = 1 : Integer(1)
+statTemp$46 = self : TestArgs
+statTemp$45 = statTemp$46.a_hash() : Hash
+returnMethodTemp$1 = statTemp$43.kwarg(statTemp$44, statTemp$45) : NilClass
+returnMethodTemp$47 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_kwarg_0" -> "bb::<constant:TestArgs>#call_kwarg_1";
     "bb::<constant:TestArgs>#call_kwarg_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_kwarg_1" -> "bb::<constant:TestArgs>#call_kwarg_1";
 }
 
@@ -203,13 +219,15 @@ subgraph "cluster_::<constant:TestArgs>#repeated" {
     "bb::<constant:TestArgs>#repeated_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#repeated_0" [label = "()
-selfMethodTemp$1 = self : TestArgs
-returnMethodTemp$9 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$9 : <bottom>
+selfMethodTemp$2 = self : TestArgs
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#repeated_0" -> "bb::<constant:TestArgs>#repeated_1";
     "bb::<constant:TestArgs>#repeated_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#repeated_1" -> "bb::<constant:TestArgs>#repeated_1";
 }
 
@@ -220,26 +238,28 @@ subgraph "cluster_::<constant:TestArgs>#call_repeated" {
     "bb::<constant:TestArgs>#call_repeated_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#call_repeated_0" [label = "()
-statTemp$3 = self : TestArgs
-statTemp$2 = statTemp$3.repeated() : NilClass
-statTemp$5 = self : TestArgs
-statTemp$6 = 1 : Integer(1)
-statTemp$7 = 2 : Integer(2)
-statTemp$8 = 3 : Integer(3)
-statTemp$4 = statTemp$5.repeated(statTemp$6, statTemp$7, statTemp$8) : NilClass
-statTemp$10 = self : TestArgs
-statTemp$11 = 1 : Integer(1)
-statTemp$12 = hi : String(\"hi\")
-statTemp$9 = statTemp$10.repeated(statTemp$11, statTemp$12) : NilClass
-statTemp$13 = self : TestArgs
-statTemp$14 = hi : String(\"hi\")
-statTemp$15 = there : String(\"there\")
-returnMethodTemp$10 = statTemp$13.repeated(statTemp$14, statTemp$15) : NilClass
-returnMethodTemp$16 = return returnMethodTemp$10 : <bottom>
+statTemp$4 = self : TestArgs
+statTemp$3 = statTemp$4.repeated() : NilClass
+statTemp$6 = self : TestArgs
+statTemp$7 = 1 : Integer(1)
+statTemp$8 = 2 : Integer(2)
+statTemp$9 = 3 : Integer(3)
+statTemp$5 = statTemp$6.repeated(statTemp$7, statTemp$8, statTemp$9) : NilClass
+statTemp$11 = self : TestArgs
+statTemp$12 = 1 : Integer(1)
+statTemp$13 = hi : String(\"hi\")
+statTemp$10 = statTemp$11.repeated(statTemp$12, statTemp$13) : NilClass
+statTemp$14 = self : TestArgs
+statTemp$15 = hi : String(\"hi\")
+statTemp$16 = there : String(\"there\")
+returnMethodTemp$1 = statTemp$14.repeated(statTemp$15, statTemp$16) : NilClass
+returnMethodTemp$17 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_repeated_0" -> "bb::<constant:TestArgs>#call_repeated_1";
     "bb::<constant:TestArgs>#call_repeated_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_repeated_1" -> "bb::<constant:TestArgs>#call_repeated_1";
 }
 
@@ -250,13 +270,15 @@ subgraph "cluster_::<constant:TestArgs>#mixed" {
     "bb::<constant:TestArgs>#mixed_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#mixed_0" [label = "()
-selfMethodTemp$1 = self : TestArgs
-returnMethodTemp$11 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$11 : <bottom>
+selfMethodTemp$2 = self : TestArgs
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#mixed_0" -> "bb::<constant:TestArgs>#mixed_1";
     "bb::<constant:TestArgs>#mixed_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#mixed_1" -> "bb::<constant:TestArgs>#mixed_1";
 }
 
@@ -267,54 +289,56 @@ subgraph "cluster_::<constant:TestArgs>#call_mixed" {
     "bb::<constant:TestArgs>#call_mixed_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#call_mixed_0" [label = "()
-statTemp$3 = self : TestArgs
-statTemp$4 = 0 : Integer(0)
-hashTemp$6 = <symbol:u> : Symbol(:\"u\")
-hashTemp$7 = 1 : Integer(1)
-hashTemp$8 = alias {} : HashType {\n}
-statTemp$5 = hashTemp$8.<build-hash>(hashTemp$6, hashTemp$7) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
-statTemp$2 = statTemp$3.mixed(statTemp$4, statTemp$5) : NilClass
-statTemp$10 = self : TestArgs
-statTemp$11 = 0 : Integer(0)
-statTemp$12 = 1 : Integer(1)
-hashTemp$14 = <symbol:u> : Symbol(:\"u\")
-hashTemp$15 = 1 : Integer(1)
-hashTemp$16 = alias {} : HashType {\n}
-statTemp$13 = hashTemp$16.<build-hash>(hashTemp$14, hashTemp$15) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
-statTemp$9 = statTemp$10.mixed(statTemp$11, statTemp$12, statTemp$13) : NilClass
-statTemp$18 = self : TestArgs
-statTemp$19 = 0 : Integer(0)
-statTemp$20 = 1 : Integer(1)
-hashTemp$22 = <symbol:z> : Symbol(:\"z\")
-hashTemp$23 = 1 : Integer(1)
-hashTemp$24 = alias {} : HashType {\n}
-statTemp$21 = hashTemp$24.<build-hash>(hashTemp$22, hashTemp$23) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}
-hashTemp$26 = <symbol:u> : Symbol(:\"u\")
-hashTemp$27 = 1 : Integer(1)
-hashTemp$28 = alias {} : HashType {\n}
-statTemp$25 = hashTemp$28.<build-hash>(hashTemp$26, hashTemp$27) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
-statTemp$17 = statTemp$18.mixed(statTemp$19, statTemp$20, statTemp$21, statTemp$25) : NilClass
-statTemp$29 = self : TestArgs
-statTemp$30 = 0 : Integer(0)
-statTemp$31 = 1 : Integer(1)
-hashTemp$33 = <symbol:z> : Symbol(:\"z\")
-hashTemp$34 = 1 : Integer(1)
-hashTemp$35 = alias {} : HashType {\n}
-statTemp$32 = hashTemp$35.<build-hash>(hashTemp$33, hashTemp$34) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}
-statTemp$36 = hi : String(\"hi\")
-statTemp$37 = there : String(\"there\")
-hashTemp$39 = <symbol:u> : Symbol(:\"u\")
-hashTemp$40 = 1 : Integer(1)
-hashTemp$41 = <symbol:v> : Symbol(:\"v\")
-hashTemp$42 = 0 : Integer(0)
-hashTemp$43 = alias {} : HashType {\n}
-statTemp$38 = hashTemp$43.<build-hash>(hashTemp$39, hashTemp$40, hashTemp$41, hashTemp$42) : HashType {\n  Symbol(:\"u\") => Integer(1)\n  Symbol(:\"v\") => Integer(0)\n}
-returnMethodTemp$12 = statTemp$29.mixed(statTemp$30, statTemp$31, statTemp$32, statTemp$36, statTemp$37, statTemp$38) : NilClass
-returnMethodTemp$44 = return returnMethodTemp$12 : <bottom>
+statTemp$4 = self : TestArgs
+statTemp$5 = 0 : Integer(0)
+hashTemp$7 = <symbol:u> : Symbol(:\"u\")
+hashTemp$8 = 1 : Integer(1)
+hashTemp$9 = alias {} : HashType {\n}
+statTemp$6 = hashTemp$9.<build-hash>(hashTemp$7, hashTemp$8) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
+statTemp$3 = statTemp$4.mixed(statTemp$5, statTemp$6) : NilClass
+statTemp$11 = self : TestArgs
+statTemp$12 = 0 : Integer(0)
+statTemp$13 = 1 : Integer(1)
+hashTemp$15 = <symbol:u> : Symbol(:\"u\")
+hashTemp$16 = 1 : Integer(1)
+hashTemp$17 = alias {} : HashType {\n}
+statTemp$14 = hashTemp$17.<build-hash>(hashTemp$15, hashTemp$16) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
+statTemp$10 = statTemp$11.mixed(statTemp$12, statTemp$13, statTemp$14) : NilClass
+statTemp$19 = self : TestArgs
+statTemp$20 = 0 : Integer(0)
+statTemp$21 = 1 : Integer(1)
+hashTemp$23 = <symbol:z> : Symbol(:\"z\")
+hashTemp$24 = 1 : Integer(1)
+hashTemp$25 = alias {} : HashType {\n}
+statTemp$22 = hashTemp$25.<build-hash>(hashTemp$23, hashTemp$24) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}
+hashTemp$27 = <symbol:u> : Symbol(:\"u\")
+hashTemp$28 = 1 : Integer(1)
+hashTemp$29 = alias {} : HashType {\n}
+statTemp$26 = hashTemp$29.<build-hash>(hashTemp$27, hashTemp$28) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
+statTemp$18 = statTemp$19.mixed(statTemp$20, statTemp$21, statTemp$22, statTemp$26) : NilClass
+statTemp$30 = self : TestArgs
+statTemp$31 = 0 : Integer(0)
+statTemp$32 = 1 : Integer(1)
+hashTemp$34 = <symbol:z> : Symbol(:\"z\")
+hashTemp$35 = 1 : Integer(1)
+hashTemp$36 = alias {} : HashType {\n}
+statTemp$33 = hashTemp$36.<build-hash>(hashTemp$34, hashTemp$35) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}
+statTemp$37 = hi : String(\"hi\")
+statTemp$38 = there : String(\"there\")
+hashTemp$40 = <symbol:u> : Symbol(:\"u\")
+hashTemp$41 = 1 : Integer(1)
+hashTemp$42 = <symbol:v> : Symbol(:\"v\")
+hashTemp$43 = 0 : Integer(0)
+hashTemp$44 = alias {} : HashType {\n}
+statTemp$39 = hashTemp$44.<build-hash>(hashTemp$40, hashTemp$41, hashTemp$42, hashTemp$43) : HashType {\n  Symbol(:\"u\") => Integer(1)\n  Symbol(:\"v\") => Integer(0)\n}
+returnMethodTemp$1 = statTemp$30.mixed(statTemp$31, statTemp$32, statTemp$33, statTemp$37, statTemp$38, statTemp$39) : NilClass
+returnMethodTemp$45 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_mixed_0" -> "bb::<constant:TestArgs>#call_mixed_1";
     "bb::<constant:TestArgs>#call_mixed_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_mixed_1" -> "bb::<constant:TestArgs>#call_mixed_1";
 }
 
@@ -325,13 +349,15 @@ subgraph "cluster_::<constant:TestArgs>#optkw" {
     "bb::<constant:TestArgs>#optkw_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#optkw_0" [label = "()
-selfMethodTemp$1 = self : TestArgs
-returnMethodTemp$13 = NotSupported() : untyped
-returnMethodTemp$2 = return returnMethodTemp$13 : <bottom>
+selfMethodTemp$2 = self : TestArgs
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#optkw_0" -> "bb::<constant:TestArgs>#optkw_1";
     "bb::<constant:TestArgs>#optkw_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#optkw_1" -> "bb::<constant:TestArgs>#optkw_1";
 }
 
@@ -342,22 +368,24 @@ subgraph "cluster_::<constant:TestArgs>#call_optkw" {
     "bb::<constant:TestArgs>#call_optkw_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#call_optkw_0" [label = "()
-statTemp$3 = self : TestArgs
-hashTemp$5 = <symbol:u> : Symbol(:\"u\")
-hashTemp$6 = 1 : Integer(1)
-hashTemp$7 = alias {} : HashType {\n}
-statTemp$4 = hashTemp$7.<build-hash>(hashTemp$5, hashTemp$6) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
-statTemp$2 = statTemp$3.optkw(statTemp$4) : untyped
-statTemp$8 = self : TestArgs
-statTemp$9 = 1 : Integer(1)
-statTemp$10 = 2 : Integer(2)
-statTemp$11 = 3 : Integer(3)
-returnMethodTemp$14 = statTemp$8.optkw(statTemp$9, statTemp$10, statTemp$11) : untyped
-returnMethodTemp$12 = return returnMethodTemp$14 : <bottom>
+statTemp$4 = self : TestArgs
+hashTemp$6 = <symbol:u> : Symbol(:\"u\")
+hashTemp$7 = 1 : Integer(1)
+hashTemp$8 = alias {} : HashType {\n}
+statTemp$5 = hashTemp$8.<build-hash>(hashTemp$6, hashTemp$7) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
+statTemp$3 = statTemp$4.optkw(statTemp$5) : untyped
+statTemp$9 = self : TestArgs
+statTemp$10 = 1 : Integer(1)
+statTemp$11 = 2 : Integer(2)
+statTemp$12 = 3 : Integer(3)
+returnMethodTemp$1 = statTemp$9.optkw(statTemp$10, statTemp$11, statTemp$12) : untyped
+returnMethodTemp$13 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_optkw_0" -> "bb::<constant:TestArgs>#call_optkw_1";
     "bb::<constant:TestArgs>#call_optkw_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:TestArgs>#call_optkw_1" -> "bb::<constant:TestArgs>#call_optkw_1";
 }
 

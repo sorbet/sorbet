@@ -6,12 +6,14 @@ subgraph "cluster_::<constant:Trigger>#trigger" {
     "bb::<constant:Trigger>#trigger_1" [shape = parallelogram];
 
     "bb::<constant:Trigger>#trigger_0" [label = "()
-@__fake_logger$2 = alias @__fake_logger : untyped
-returnMethodTemp$3 = return @__fake_logger$2 : <bottom>
+@__fake_logger$3 = alias @__fake_logger : untyped
+returnMethodTemp$4 = return @__fake_logger$3 : <bottom>
 <unconditional>"];
+
     "bb::<constant:Trigger>#trigger_0" -> "bb::<constant:Trigger>#trigger_1";
     "bb::<constant:Trigger>#trigger_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Trigger>#trigger_1" -> "bb::<constant:Trigger>#trigger_1";
 }
 

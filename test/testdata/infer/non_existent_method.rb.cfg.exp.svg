@@ -19,10 +19,10 @@
 <title>bb::&lt;constant:Foo&gt;#baz_0</title>
 <polygon fill="none" stroke="#000000" points="16.1318,-179.5901 348,-124.089 679.8682,-179.5901 679.5585,-269.3928 16.4415,-269.3928 16.1318,-179.5901"/>
 <text text-anchor="middle" x="348" y="-235.2109" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="348" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = self : Foo</text>
-<text text-anchor="middle" x="348" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">a = statTemp$3.does_not_exist() : untyped</text>
-<text text-anchor="middle" x="348" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$0 = a.bla() : untyped</text>
-<text text-anchor="middle" x="348" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$0 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="348" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = self : Foo</text>
+<text text-anchor="middle" x="348" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">a = statTemp$4.does_not_exist() : untyped</text>
+<text text-anchor="middle" x="348" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = a.bla() : untyped</text>
+<text text-anchor="middle" x="348" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="348" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#baz_1 -->
@@ -46,4 +46,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 0c927b2251feb949e7776fae13411f2f098d3f45518db25ee4e01526709e19a6 -->
+<!-- ruby-types:sha256: 06145e012c4d8efed2ee8d7931815862435f281394a5d02a94acfd7a371d567c -->

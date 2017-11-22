@@ -19,10 +19,10 @@
 <title>bb::&lt;constant:Foo&gt;#foo_0</title>
 <polygon fill="none" stroke="#000000" points="15.9869,-179.5901 283,-124.089 550.0131,-179.5901 549.7639,-269.3928 16.2361,-269.3928 15.9869,-179.5901"/>
 <text text-anchor="middle" x="283" y="-235.2109" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="283" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = alias @ivar : Integer</text>
-<text text-anchor="middle" x="283" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="283" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$3 = ss : untyped</text>
-<text text-anchor="middle" x="283" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return @ivar$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="283" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$4 = alias @ivar : Integer</text>
+<text text-anchor="middle" x="283" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$4 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="283" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@ivar$4 = ss : untyped</text>
+<text text-anchor="middle" x="283" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return @ivar$4 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="283" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#foo_1 -->
@@ -46,4 +46,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 977bfbd328086749f4b583e33e19f3ddeb07adee3f6fc0141263291994ec5e66 -->
+<!-- ruby-types:sha256: a881488c16f089c16ec687269c5a687d8efb63eb65f27475910638b009d24fdd -->

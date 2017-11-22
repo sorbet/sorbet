@@ -34,9 +34,9 @@
 <title>bb::&lt;singleton class:&lt;constant:Foo2&gt;&gt;#new_0</title>
 <polygon fill="none" stroke="#000000" points="16.1318,-256.7085 348,-209.4802 679.8682,-256.7085 679.5585,-333.1255 16.4415,-333.1255 16.1318,-256.7085"/>
 <text text-anchor="middle" x="348" y="-301.6296" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="348" y="-287.6296" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$1 = self : &lt;class:Foo2&gt;</text>
+<text text-anchor="middle" x="348" y="-287.6296" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : &lt;class:Foo2&gt;</text>
 <text text-anchor="middle" x="348" y="-273.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="348" y="-259.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="348" y="-259.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="348" y="-245.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:Foo2&gt;&gt;#new_1 -->
@@ -63,9 +63,9 @@
 <title>bb::&lt;constant:Foo3&gt;#initialize_0</title>
 <polygon fill="none" stroke="#000000" points="704.1318,-256.7085 1036,-209.4802 1367.8682,-256.7085 1367.5585,-333.1255 704.4415,-333.1255 704.1318,-256.7085"/>
 <text text-anchor="middle" x="1036" y="-301.6296" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1036" y="-287.6296" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$1 = self : Foo3</text>
-<text text-anchor="middle" x="1036" y="-273.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="1036" y="-259.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1036" y="-287.6296" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Foo3</text>
+<text text-anchor="middle" x="1036" y="-273.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="1036" y="-259.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1036" y="-245.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Foo3&gt;#initialize_1 -->
@@ -92,16 +92,16 @@
 <title>bb::&lt;constant:Bar&gt;#foo_0</title>
 <polygon fill="none" stroke="#000000" points="1392.0675,-230.3463 1826,-124.1702 2259.9325,-230.3463 2259.5275,-402.1428 1392.4725,-402.1428 1392.0675,-230.3463"/>
 <text text-anchor="middle" x="1826" y="-350.6296" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1826" y="-336.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Foo1&gt;$4 = alias &lt;constant:Foo1&gt; : &lt;class:Foo1&gt;</text>
-<text text-anchor="middle" x="1826" y="-322.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Foo2&gt;$7 = alias &lt;constant:Foo2&gt; : &lt;class:Foo2&gt;</text>
-<text text-anchor="middle" x="1826" y="-308.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Foo3&gt;$10 = alias &lt;constant:Foo3&gt; : &lt;class:Foo3&gt;</text>
-<text text-anchor="middle" x="1826" y="-294.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$2 = &lt;constant:Foo1&gt;$4.new() : Foo1</text>
-<text text-anchor="middle" x="1826" y="-280.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$8 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="1826" y="-266.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = &lt;constant:Foo2&gt;$7.new(statTemp$8) : untyped</text>
-<text text-anchor="middle" x="1826" y="-252.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="1826" y="-238.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="1826" y="-224.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = &lt;constant:Foo3&gt;$10.new(statTemp$11, statTemp$12) : Foo3</text>
-<text text-anchor="middle" x="1826" y="-210.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$13 = return returnMethodTemp$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1826" y="-336.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Foo1&gt;$5 = alias &lt;constant:Foo1&gt; : &lt;class:Foo1&gt;</text>
+<text text-anchor="middle" x="1826" y="-322.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Foo2&gt;$8 = alias &lt;constant:Foo2&gt; : &lt;class:Foo2&gt;</text>
+<text text-anchor="middle" x="1826" y="-308.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Foo3&gt;$11 = alias &lt;constant:Foo3&gt; : &lt;class:Foo3&gt;</text>
+<text text-anchor="middle" x="1826" y="-294.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = &lt;constant:Foo1&gt;$5.new() : Foo1</text>
+<text text-anchor="middle" x="1826" y="-280.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="1826" y="-266.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = &lt;constant:Foo2&gt;$8.new(statTemp$9) : untyped</text>
+<text text-anchor="middle" x="1826" y="-252.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="1826" y="-238.6296" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$13 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="1826" y="-224.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = &lt;constant:Foo3&gt;$11.new(statTemp$12, statTemp$13) : Foo3</text>
+<text text-anchor="middle" x="1826" y="-210.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$14 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1826" y="-196.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#foo_1 -->
@@ -128,10 +128,10 @@
 <title>bb::&lt;constant:InstanceMethod&gt;#test_imethod_new_0</title>
 <polygon fill="none" stroke="#000000" points="2284.1318,-253.0088 2616,-197.5076 2947.8682,-253.0088 2947.5585,-342.8115 2284.4415,-342.8115 2284.1318,-253.0088"/>
 <text text-anchor="middle" x="2616" y="-308.6296" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="2616" y="-294.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Object&gt;$4 = alias &lt;constant:Object&gt; : &lt;class:Object&gt;</text>
-<text text-anchor="middle" x="2616" y="-280.6296" font-family="Times,serif" font-size="14.00" fill="#000000">o = &lt;constant:Object&gt;$4.new() : Object</text>
-<text text-anchor="middle" x="2616" y="-266.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = o.new() : untyped</text>
-<text text-anchor="middle" x="2616" y="-252.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return returnMethodTemp$6 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="2616" y="-294.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Object&gt;$5 = alias &lt;constant:Object&gt; : &lt;class:Object&gt;</text>
+<text text-anchor="middle" x="2616" y="-280.6296" font-family="Times,serif" font-size="14.00" fill="#000000">o = &lt;constant:Object&gt;$5.new() : Object</text>
+<text text-anchor="middle" x="2616" y="-266.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = o.new() : untyped</text>
+<text text-anchor="middle" x="2616" y="-252.6296" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="2616" y="-238.6296" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:InstanceMethod&gt;#test_imethod_new_1 -->
@@ -155,4 +155,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 0e745c303182b7364e13c90d352482862257a4f71ce6a64b0d02371b471d19f7 -->
+<!-- ruby-types:sha256: d31b2c8acc15e51647a84858adbf7498b43e3f28d7258d712f0c2de9fb1860b5 -->

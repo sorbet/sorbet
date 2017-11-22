@@ -17,11 +17,13 @@ a = nan : Float(0.000000)
 a = nan : Float(0.000000)
 a = nan : Float(0.000000)
 a = nan : Float(0.000000)
-returnMethodTemp$12 = return a : <bottom>
+returnMethodTemp$13 = return a : <bottom>
 <unconditional>"];
+
     "bb::<constant:Object>#test_large_float_0" -> "bb::<constant:Object>#test_large_float_1";
     "bb::<constant:Object>#test_large_float_1" [label = "()
 <unconditional>"];
+
     "bb::<constant:Object>#test_large_float_1" -> "bb::<constant:Object>#test_large_float_1";
 }
 

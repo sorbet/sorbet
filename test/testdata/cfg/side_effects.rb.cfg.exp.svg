@@ -18,18 +18,18 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:Side&gt;#foo_0</title>
 <polygon fill="none" stroke="#000000" points="108.8141,-412.8104 288,-357.3093 467.1859,-412.8104 467.0186,-502.6132 108.9814,-502.6132 108.8141,-412.8104"/>
-<text text-anchor="middle" x="288" y="-468.4313" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTemp$3, statTemp$4)</text>
+<text text-anchor="middle" x="288" y="-468.4313" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTemp$4, statTemp$5)</text>
 <text text-anchor="middle" x="288" y="-454.4313" font-family="Times,serif" font-size="14.00" fill="#000000">a = 1 : Integer(1)</text>
-<text text-anchor="middle" x="288" y="-440.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = a : Integer(1)</text>
-<text text-anchor="middle" x="288" y="-426.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = a : Integer(1)</text>
-<text text-anchor="middle" x="288" y="-412.4313" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$6 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="288" y="-398.4313" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$6</text>
+<text text-anchor="middle" x="288" y="-440.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = a : Integer(1)</text>
+<text text-anchor="middle" x="288" y="-426.4313" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = a : Integer(1)</text>
+<text text-anchor="middle" x="288" y="-412.4313" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$7 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="288" y="-398.4313" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$7</text>
 </g>
 <!-- bb::&lt;constant:Side&gt;#foo_2 -->
 <g id="node3" class="node">
 <title>bb::&lt;constant:Side&gt;#foo_2</title>
 <ellipse fill="none" stroke="#000000" cx="154" cy="-285.865" rx="124.0857" ry="35.2113"/>
-<text text-anchor="middle" x="154" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTemp$3, statTemp$4)</text>
+<text text-anchor="middle" x="154" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTemp$4, statTemp$5)</text>
 <text text-anchor="middle" x="154" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">a = true : TrueClass(true)</text>
 <text text-anchor="middle" x="154" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -43,7 +43,7 @@
 <g id="node4" class="node">
 <title>bb::&lt;constant:Side&gt;#foo_3</title>
 <ellipse fill="none" stroke="#000000" cx="421" cy="-285.865" rx="124.0857" ry="35.2113"/>
-<text text-anchor="middle" x="421" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTemp$3, statTemp$4)</text>
+<text text-anchor="middle" x="421" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTemp$4, statTemp$5)</text>
 <text text-anchor="middle" x="421" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">a = 2 : Integer(2)</text>
 <text text-anchor="middle" x="421" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -70,9 +70,9 @@
 <g id="node5" class="node">
 <title>bb::&lt;constant:Side&gt;#foo_4</title>
 <ellipse fill="none" stroke="#000000" cx="288" cy="-169.2548" rx="271.7431" ry="45.011"/>
-<text text-anchor="middle" x="288" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTemp$3, statTemp$4)</text>
-<text text-anchor="middle" x="288" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$0 = statTemp$3.foo(statTemp$4, a) : untyped</text>
-<text text-anchor="middle" x="288" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return returnMethodTemp$0 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="288" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(a, statTemp$4, statTemp$5)</text>
+<text text-anchor="middle" x="288" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$4.foo(statTemp$5, a) : untyped</text>
+<text text-anchor="middle" x="288" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="288" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Side&gt;#foo_2&#45;&gt;bb::&lt;constant:Side&gt;#foo_4 -->
@@ -95,4 +95,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 20d03354f55e15f887fa3931ba2333df5ddbf282998da62483db4b18584ca195 -->
+<!-- ruby-types:sha256: 8feef902b074f5fc1173adcca2955a91accefdb08361f72f02e96b83d5513bc8 -->
