@@ -152,7 +152,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                     cout << "digraph \"" + ruby_typer::File::getFileName(f.file(gs).path().toString()) + "\"{" << endl;
                 }
                 tracer->trace("CFG+Infer: {}", f.file(gs).path().toString());
-                CFG_Collector_and_Typer collector(!opts["no-typer"].as<bool>(), printCFG);
+                CFG_Collector_and_Typer collector(silenceErrors || !opts["no-typer"].as<bool>(), printCFG);
                 result.emplace_back(
                     ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
 
@@ -249,7 +249,8 @@ ruby_typer::core::GlobalState createInitialGlobalState(cxxopts::Options &options
             vector<string> emptyPrintsPayload;
             cxxopts::Options emptyOpts("");
 
-            index(gs, payloadFiles, emptyPrintsPayload, emptyOpts, true); // result is thrown away
+            typecheck(gs, index(gs, payloadFiles, emptyPrintsPayload, emptyOpts, true), emptyPrintsPayload, emptyOpts,
+                      true); // result is thrown away
 
             clock_t end = clock();
             double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
