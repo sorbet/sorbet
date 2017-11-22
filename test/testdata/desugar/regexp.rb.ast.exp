@@ -1,0 +1,15 @@
+def foo<<constant:<todo sym>>>()
+  begin
+    <emptyTree>::<constant:Regexp>.new("abc").=~("abcd")
+    <emptyTree>::<constant:Regexp>.new("abc").=~("abcd")
+    <emptyTree>::<constant:Regexp>.new("abc", "ix").=~("abcd")
+    <emptyTree>::<constant:Regexp>.new("abc", "ix").=~("abcd")
+    a = "a"
+    c = "c"
+    <emptyTree>::<constant:Regexp>.new(begin
+        a
+      end.to_s().concat("b").concat(begin
+          c
+        end.to_s())).=~("abcd")
+    <emptyTree>::<constant:Regexp>.new(a.+("b").+(c)).=~("abcd")
+  end

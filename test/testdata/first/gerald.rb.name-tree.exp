@@ -185,7 +185,7 @@ begin
 
       self(<singleton class:<constant:Diff>>).private(def parse<parse>(diff)
           begin
-            parts = diff.split(<Not Supported (Regexp)>).[](::<constant:Range>.new(1, -1))
+            parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", "m")).[](::<constant:Range>.new(1, -1))
             if parts
               parts
             else

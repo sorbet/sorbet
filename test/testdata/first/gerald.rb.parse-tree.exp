@@ -1402,7 +1402,7 @@ Begin {
                                       }
                                     ]
                                     opts = Regopt {
-                                      opts = "m"
+                                      opts = m
                                     }
                                   }
                                 ]

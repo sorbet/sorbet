@@ -168,6 +168,32 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     return make_pair(move(args), move(body));
 }
 
+unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::NodeVec &nodes) {
+    if (nodes.empty()) {
+        return make_unique<StringLit>(loc, core::Names::empty());
+    }
+    auto it = nodes.begin();
+    auto end = nodes.end();
+    unique_ptr<Expression> res;
+    unique_ptr<Expression> first = node2TreeImpl(ctx, *it);
+    if (cast_tree<StringLit>(first.get()) == nullptr) {
+        res = mkSend0(loc, first, core::Names::to_s());
+    } else {
+        res = move(first);
+    }
+    ++it;
+    for (; it != end; ++it) {
+        auto &stat = *it;
+        unique_ptr<Expression> narg = node2TreeImpl(ctx, stat);
+        if (cast_tree<StringLit>(narg.get()) == nullptr) {
+            narg = mkSend0(loc, narg, core::Names::to_s());
+        }
+        auto n = mkSend1(loc, move(res), core::Names::concat(), move(narg));
+        res.reset(n.release());
+    };
+    return res;
+}
+
 unique_ptr<MethodDef> buildMethod(core::Context ctx, core::Loc loc, core::NameRef name,
                                   unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body) {
     auto argsAndBody = desugarArgsAndBody(ctx, loc, argnode, body);
@@ -341,31 +367,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(self);
             },
             [&](parser::DString *a) {
-                if (a->nodes.empty()) {
-                    unique_ptr<Expression> res = make_unique<StringLit>(a->loc, core::Names::empty());
-                    result.swap(res);
-                    return;
-                }
-                auto it = a->nodes.begin();
-                auto end = a->nodes.end();
-                unique_ptr<Expression> res;
-                unique_ptr<Expression> first = node2TreeImpl(ctx, *it);
-                if (cast_tree<StringLit>(first.get()) == nullptr) {
-                    res = mkSend0(what->loc, first, core::Names::to_s());
-                } else {
-                    res = move(first);
-                }
-                ++it;
-                for (; it != end; ++it) {
-                    auto &stat = *it;
-                    unique_ptr<Expression> narg = node2TreeImpl(ctx, stat);
-                    if (cast_tree<StringLit>(narg.get()) == nullptr) {
-                        narg = mkSend0(what->loc, narg, core::Names::to_s());
-                    }
-                    auto n = mkSend1(what->loc, move(res), core::Names::concat(), move(narg));
-                    res.reset(n.release());
-                };
-
+                unique_ptr<Expression> res = desugarDString(ctx, a->loc, a->nodes);
                 result.swap(res);
             },
             [&](parser::Symbol *a) {
@@ -768,6 +770,25 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto true_ = mkTrue(what->loc);
                 auto send = mkSend3(what->loc, range, core::Names::new_(), from, to, true_);
                 result.swap(send);
+            },
+            [&](parser::Regexp *regexpNode) {
+                unique_ptr<Expression> regexp = mkIdent(what->loc, core::GlobalState::defn_Regexp());
+
+                auto regex = desugarDString(ctx, what->loc, regexpNode->regex);
+                auto optsNode = node2TreeImpl(ctx, regexpNode->opts);
+                auto optString = cast_tree<StringLit>(optsNode.get());
+                Error::check(optString != nullptr);
+                unique_ptr<Expression> send;
+                if (optString->value == core::Names::empty()) {
+                    send = mkSend1(what->loc, regexp, core::Names::new_(), regex);
+                } else {
+                    send = mkSend2(what->loc, regexp, core::Names::new_(), regex, optsNode);
+                }
+                result.swap(send);
+            },
+            [&](parser::Regopt *a) {
+                unique_ptr<Expression> res = make_unique<StringLit>(what->loc, a->opts);
+                result.swap(res);
             },
             [&](parser::Return *ret) {
                 if (ret->exprs.size() > 1) {
