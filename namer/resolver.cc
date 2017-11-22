@@ -139,6 +139,21 @@ private:
                         }
                         break;
                     }
+                    case core::Names::untyped()._id:
+                        result = core::Types::dynamic();
+                        break;
+
+                        /* TODO: array_of and hash_of accept arguments and
+                           should instantiate generics, once we have those. */
+                    case core::Names::arrayOf()._id:
+                        result = make_shared<core::ClassType>(core::GlobalState::defn_Array());
+                        break;
+                    case core::Names::hashOf()._id:
+                        result = make_shared<core::ClassType>(core::GlobalState::defn_Hash());
+                        break;
+                    case core::Names::noreturn()._id:
+                        result = core::Types::bottom();
+                        break;
                     default:
                         ctx.state.errors.error(s->loc, core::ErrorClass::InvalidTypeDeclaration,
                                                "Unsupported type combinator {}", s->fun.toString(ctx));

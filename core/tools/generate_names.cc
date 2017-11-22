@@ -54,6 +54,10 @@ NameDef names[] = {
     {"all"},
     {"any"},
     {"nilable"},
+    {"untyped"},
+    {"arrayOf", "array_of"},
+    {"hashOf", "hash_of"},
+    {"noreturn"},
     {"declareVariables", "declare_variables"},
     // end standard_method keywords
 
