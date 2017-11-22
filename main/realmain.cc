@@ -13,6 +13,7 @@
 #include <algorithm> // find
 #include <ctime>
 #include <cxxopts.hpp>
+#include "main/payload.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -20,8 +21,6 @@
 
 namespace spd = spdlog;
 using namespace std;
-
-extern const ruby_typer::u4 *const getNameTablePayload;
 
 struct stats {
     unsigned int files = 0;

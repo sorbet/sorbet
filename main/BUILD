@@ -12,6 +12,37 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
+        "state-payload",
+    ],
+)
+
+cc_library(
+    name = "state-payload",
+    srcs = [
+        "state-payload.cc",
+    ],
+    hdrs = [
+        "payload.h",
+    ],
+    copts = ["--std=c++14"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//common",
+    ],
+)
+
+cc_library(
+    name = "no-state-payload",
+    srcs = [
+        "no_payload.cc",
+    ],
+    hdrs = [
+        "payload.h",
+    ],
+    copts = ["--std=c++14"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//common",
     ],
 )
 
@@ -19,7 +50,6 @@ cc_binary(
     name = "ruby-typer-orig",
     srcs = [
         "main.cc",
-        "no_payload.cc",
     ],
     copts = ["--std=c++14"],
     linkstatic = select({
@@ -28,6 +58,7 @@ cc_binary(
     }),
     visibility = ["//visibility:public"],
     deps = [
+        "no-state-payload",
         "realmain",
     ],
 )
@@ -65,6 +96,7 @@ genrule(
 cc_library(
     name = "realmain",
     srcs = [
+        "payload.h",
         "realmain.cc",
     ],
     copts = ["--std=c++14"],
@@ -87,9 +119,7 @@ cc_test(
     size = "small",
     srcs = glob([
         "test/*.cc",
-    ]) + [
-        "no_payload.cc",
-    ],
+    ]),
     copts = ["-Iexternal/gtest/include"],
     data = [
         "//rbi:stdlib",
@@ -101,6 +131,7 @@ cc_test(
     }),
     visibility = ["//tools:__pkg__"],
     deps = [
+        "no-state-payload",
         "realmain",
         "@cxxopts//:cxxopts",
         "@gtest//:gtest",
