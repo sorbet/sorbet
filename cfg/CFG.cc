@@ -697,20 +697,21 @@ BasicBlock *CFG::walk(CFGContext cctx, ast::Expression *what, BasicBlock *curren
 
 string CFG::toString(core::Context ctx) {
     stringstream buf;
-    buf << "subgraph \"cluster_" << this->symbol.info(ctx).fullName(ctx) << "\" {" << endl;
-    buf << "    label = \"" << this->symbol.info(ctx).fullName(ctx) << "\";" << endl;
+    string symbolName = this->symbol.info(ctx).fullName(ctx);
+    buf << "subgraph \"cluster_" << symbolName << "\" {" << endl;
+    buf << "    label = \"" << symbolName << "\";" << endl;
     buf << "    color = blue;" << endl;
-    buf << "    bb" << this->symbol._id << "_0 [shape = invhouse];" << endl;
-    buf << "    bb" << this->symbol._id << "_1 [shape = parallelogram];" << endl << endl;
+    buf << "    \"bb" << symbolName << "_0\" [shape = invhouse];" << endl;
+    buf << "    \"bb" << symbolName << "_1\" [shape = parallelogram];" << endl << endl;
     for (int i = 0; i < this->basicBlocks.size(); i++) {
         auto text = this->basicBlocks[i]->toString(ctx);
-        buf << "    bb" << this->symbol._id << "_" << this->basicBlocks[i]->id << " [label = \"" << text << "\"];"
+        buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" [label = \"" << text << "\"];"
             << endl;
-        buf << "    bb" << this->symbol._id << "_" << i << " -> bb" << this->symbol._id << "_"
-            << this->basicBlocks[i]->bexit.thenb->id << ";" << endl;
+        buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
+            << this->basicBlocks[i]->bexit.thenb->id << "\";" << endl;
         if (this->basicBlocks[i]->bexit.thenb != this->basicBlocks[i]->bexit.elseb) {
-            buf << "    bb" << this->symbol._id << "_" << i << " -> bb" << this->symbol._id << "_"
-                << this->basicBlocks[i]->bexit.elseb->id << ";" << endl
+            buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
+                << this->basicBlocks[i]->bexit.elseb->id << "\";" << endl
                 << endl;
         }
     }
