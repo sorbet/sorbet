@@ -122,6 +122,11 @@ public:
     ast::ClassDef *postTransformClassDef(core::Context ctx, ast::ClassDef *klass) {
         scopeStack.pop_back();
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+        if (klass->kind == ast::Class && !klass->symbol.info(ctx).superClass.exists() &&
+            klass->symbol != core::GlobalState::defn_Basic_Object()) {
+            klass->symbol.info(ctx).superClass = core::GlobalState::defn_todo();
+        }
+
         auto toRemove =
             remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Expression> &line) {
                 auto newAncestor = addAncestor(ctx, klass, line);

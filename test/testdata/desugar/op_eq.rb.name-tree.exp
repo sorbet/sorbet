@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:OpEq><<constant:OpEq>> < ()
+class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
   def b<b>()
     <emptyTree>
 

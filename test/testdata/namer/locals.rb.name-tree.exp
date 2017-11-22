@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:TestLocals><<constant:TestLocals>> < ()
+class <emptyTree>::<constant:TestLocals><<constant:TestLocals>> < (::<constant:<todo sym>>)
   def method<method>()
     begin
       a = 1

@@ -1,4 +1,4 @@
-class <constant:BlockTest> (<constant:Object>)
+class <constant:BlockTest> < ::<constant:Object> ()
   method block_pass ()
     method <block>$0 (x, y)
       argument x<>

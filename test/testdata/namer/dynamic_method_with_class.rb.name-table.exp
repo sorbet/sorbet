@@ -1,4 +1,4 @@
-class <constant:F> (<constant:Object>)
+class <constant:F> < ::<constant:Object> ()
   method bar (baz)
     argument baz<>
   method bla ()

@@ -1,10 +1,10 @@
 begin
-  class <emptyTree>::<constant:Integer><<constant:Integer>> < ()
+  class <emptyTree>::<constant:Integer><<constant:Integer>> < (::<constant:<todo sym>>)
     def +<+>(o)
       <emptyTree>
 
   end
-  class <emptyTree>::<constant:Examples><<constant:Examples>> < ()
+  class <emptyTree>::<constant:Examples><<constant:Examples>> < (::<constant:<todo sym>>)
     def i_like_ifs<i_like_ifs>()
       if true
         return 1

@@ -263,41 +263,35 @@ public:
                 ancst.swap(resolved);
         }
         core::Symbol &info = original->symbol.info(ctx);
-        if (original->ancestors.size() > 0) {
-            core::Symbol &info = original->symbol.info(ctx);
-            for (auto &ancst : original->ancestors) {
-                ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
-                if (id == nullptr || !id->symbol.info(ctx).isClass()) {
-                    ctx.state.errors.error(id->loc, core::ErrorClass::DynamicSuperclass,
-                                           "Superclasses and mixins must be statically resolved.");
-                    continue;
-                }
-                if (id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
-                    ctx.state.errors.error(id->loc, core::ErrorClass::CircularDependency,
-                                           "Circular dependency: {} and {} are declared as parents of each other",
-                                           original->symbol.info(ctx).name.toString(ctx),
-                                           id->symbol.info(ctx).name.toString(ctx));
-                } else {
-                    info.argumentsOrMixins.emplace_back(id->symbol);
-                }
-                if (&ancst == &original->ancestors.front()) {
-                    if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_object() ||
-                        info.superClass == id->symbol) {
-                        info.superClass = id->symbol;
-                    } else {
-                        ctx.state.errors.error(id->loc, core::ErrorClass::RedefinitionOfParents,
-                                               "Class parents redefined for class {}",
-                                               original->symbol.info(ctx).name.toString(ctx));
-                    }
-                }
+        for (auto &ancst : original->ancestors) {
+            ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
+            if (id == nullptr || !id->symbol.info(ctx).isClass()) {
+                ctx.state.errors.error(id->loc, core::ErrorClass::DynamicSuperclass,
+                                       "Superclasses and mixins must be statically resolved.");
+                continue;
             }
-        } else if (!info.superClass.exists() && original->symbol != core::GlobalState::defn_Basic_Object() &&
-                   original->symbol != core::GlobalState::defn_Kernel() &&
-                   original->symbol != core::GlobalState::defn_object() &&
-                   !core::GlobalState::defn_object().info(ctx).derivesFrom(ctx, original->symbol) &&
-                   original->kind != ast::ClassDefKind::Module && original->kind) {
-            info.superClass = core::GlobalState::defn_object();
-            info.argumentsOrMixins.emplace_back(core::GlobalState::defn_object());
+            if (id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
+                ctx.state.errors.error(id->loc, core::ErrorClass::CircularDependency,
+                                       "Circular dependency: {} and {} are declared as parents of each other",
+                                       original->symbol.info(ctx).name.toString(ctx),
+                                       id->symbol.info(ctx).name.toString(ctx));
+                continue;
+            }
+
+            if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
+                if (id->symbol == core::GlobalState::defn_todo())
+                    continue;
+                if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_todo() ||
+                    info.superClass == id->symbol) {
+                    info.superClass = id->symbol;
+                } else {
+                    ctx.state.errors.error(id->loc, core::ErrorClass::RedefinitionOfParents,
+                                           "Class parents redefined for class {}",
+                                           original->symbol.info(ctx).name.toString(ctx));
+                }
+            } else {
+                info.argumentsOrMixins.emplace_back(id->symbol);
+            }
         }
 
         unique_ptr<ast::Send> lastStandardMethod;
@@ -379,5 +373,17 @@ unique_ptr<ast::Expression> Resolver::run(core::Context &ctx, unique_ptr<ast::Ex
     tree = ast::TreeMap<ResolveVariablesWalk>::apply(ctx, vars, move(tree));
     return tree;
 }
+
+void Resolver::finalize(core::GlobalState &gs) {
+    for (int i = 1; i < gs.symbolsUsed(); ++i) {
+        auto &info = core::SymbolRef(i).info(gs);
+        if (!info.isClass())
+            continue;
+        if (info.superClass == core::GlobalState::defn_todo()) {
+            info.superClass = core::GlobalState::defn_object();
+        }
+    }
+}
+
 } // namespace namer
 } // namespace ruby_typer

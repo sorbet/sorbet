@@ -17,6 +17,7 @@ private:
 class Resolver final {
 public:
     static unique_ptr<ast::Expression> run(core::Context &ctx, unique_ptr<ast::Expression> tree);
+    static void finalize(core::GlobalState &gs);
 };
 
 } // namespace namer

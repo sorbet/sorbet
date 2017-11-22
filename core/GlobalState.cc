@@ -220,7 +220,7 @@ static UTF8Desc range_DESC{(char *)range, (int)strlen(range)};
 static const char *reserved = "<<RESERVED>>";
 static UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
 
-SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
+SymbolRef GlobalState::synthesizeClass(UTF8Desc name, SymbolRef superclass) {
     NameRef nameId = enterNameConstant(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
@@ -230,6 +230,7 @@ SymbolRef GlobalState::synthesizeClass(UTF8Desc name) {
     Symbol &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
     info.name = nameId;
     info.owner = defn_root();
+    info.superClass = superclass;
     info.flags = 0;
     info.setClass();
 
@@ -255,14 +256,14 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     names[0].raw.utf8.to = 0;
     Names::registerNames(*this);
 
-    SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC);
-    SymbolRef top_id = synthesizeClass(top_DESC); // BasicObject
-    SymbolRef bottom_id = synthesizeClass(bottom_DESC);
-    SymbolRef root_id = synthesizeClass(root_DESC);
+    SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC, 0);
+    SymbolRef top_id = synthesizeClass(top_DESC, 0);
+    SymbolRef bottom_id = synthesizeClass(bottom_DESC, 0);
+    SymbolRef root_id = synthesizeClass(root_DESC, 0);
     SymbolRef nil_id = synthesizeClass(nil_DESC);
-    SymbolRef todo_id = synthesizeClass(todo_DESC);
-    SymbolRef object_id = synthesizeClass(object_DESC);
-    SymbolRef junk_id = synthesizeClass(junk_DESC);
+    SymbolRef todo_id = synthesizeClass(todo_DESC, 0);
+    SymbolRef object_id = synthesizeClass(object_DESC, core::GlobalState::defn_Basic_Object());
+    SymbolRef junk_id = synthesizeClass(junk_DESC, 0);
     SymbolRef integer_id = synthesizeClass(integer_DESC);
     SymbolRef float_id = synthesizeClass(float_DESC);
     SymbolRef string_id = synthesizeClass(string_DESC);
@@ -272,12 +273,12 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef trueClass_id = synthesizeClass(trueClass_DESC);
     SymbolRef falseClass_id = synthesizeClass(falseClass_DESC);
     SymbolRef nilClass_id = synthesizeClass(nilClass_DESC);
-    SymbolRef untyped_id = synthesizeClass(untyped_DESC);
-    SymbolRef opus_id = synthesizeClass(opus_DESC);
+    SymbolRef untyped_id = synthesizeClass(untyped_DESC, 0);
+    SymbolRef opus_id = synthesizeClass(opus_DESC, 0);
     SymbolRef opus_types_id = enterClassSymbol(Loc::none(0), opus_id, enterNameConstant(types_DESC));
-    SymbolRef class_id = synthesizeClass(class_DESC);
-    SymbolRef basicObject_id = synthesizeClass(basicObject_DESC);
-    SymbolRef kernel_id = synthesizeClass(kernel_DESC);
+    SymbolRef class_id = synthesizeClass(class_DESC, 0);
+    SymbolRef basicObject_id = synthesizeClass(basicObject_DESC, 0);
+    SymbolRef kernel_id = synthesizeClass(kernel_DESC, 0);
     SymbolRef emptyHash_id = enterStaticFieldSymbol(Loc::none(0), defn_root(), Names::emptyHash());
     SymbolRef range_id = synthesizeClass(range_DESC);
 

@@ -6,7 +6,7 @@ begin
     <emptyTree>::<constant:C> = assignTemp$0.[](2)
     assignTemp$0
   end
-  class <emptyTree>::<constant:Test><<constant:<todo sym>>> < ()
+  class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def some_method<<constant:<todo sym>>>(array)
       begin
         assignTemp$1 = array

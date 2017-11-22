@@ -1,10 +1,10 @@
 begin
-  class <emptyTree>::<constant:String><<constant:String>> < ()
+  class <emptyTree>::<constant:String><<constant:String>> < (::<constant:<todo sym>>)
     def getbyte<getbyte>(i)
       <emptyTree>
 
   end
-  class <emptyTree>::<constant:Integer><<constant:Integer>> < ()
+  class <emptyTree>::<constant:Integer><<constant:Integer>> < (::<constant:<todo sym>>)
     def +<+>(o)
       <emptyTree>
 

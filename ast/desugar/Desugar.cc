@@ -459,7 +459,9 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     body.emplace_back(node2TreeImpl(ctx, claz->body));
                 }
                 ClassDef::ANCESTORS_store ancestors;
-                if (claz->superclass != nullptr) {
+                if (claz->superclass == nullptr) {
+                    ancestors.emplace_back(make_unique<Ident>(claz->loc, ctx.state.defn_todo()));
+                } else {
                     ancestors.emplace_back(node2TreeImpl(ctx, claz->superclass));
                 }
 

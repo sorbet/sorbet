@@ -1,13 +1,13 @@
-class <constant:Child1> ()
+class <constant:Child1> < ::<constant:Object> ()
   static-field @@class_var -> untyped
-class <constant:Child> (<constant:Parent>, <constant:Mixin>)
+class <constant:Child> < ::<constant:Parent> (<constant:Mixin>)
   field @undefinedivar -> untyped
   method child_method ()
   static-field @@undefined_cvar -> untyped
 class <constant:Mixin> ()
   static-field @@mixin_cvar -> Integer
 class <constant:Opus> ()
-class <constant:Parent> (<constant:Object>)
+class <constant:Parent> < ::<constant:Object> ()
   field @ivar -> Integer
   field @ivar2 -> Integer
   method hi ()

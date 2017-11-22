@@ -1,12 +1,12 @@
 begin
-  class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < ()
+  class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<constant:<todo sym>>)
     def normal_method<normal_method>()
       <emptyTree>
 
     def self.normal_static_method<normal_static_method>()
       <emptyTree>
 
-    class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < ()
+    class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<constant:<todo sym>>)
       <emptyTree>
 
     end
@@ -18,17 +18,17 @@ begin
 
   end
   module <emptyTree>::<constant:ANamespace><<constant:ANamespace>> < ()
-    class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < ()
+    class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<constant:<todo sym>>)
       <emptyTree>
 
     end
 
   end
-  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < ()
+  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < (::<constant:<todo sym>>)
     <emptyTree>
 
   end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < ()
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
     <emptyTree>
 
   end

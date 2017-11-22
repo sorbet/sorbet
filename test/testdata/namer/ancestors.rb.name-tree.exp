@@ -7,7 +7,7 @@ begin
     <emptyTree>
 
   end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:Mixin1>)
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>, ::<constant:Mixin1>)
   end
   class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin2>)
   end
