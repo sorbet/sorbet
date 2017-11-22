@@ -19,14 +19,18 @@ begin
       def initialize<initialize>()
         begin
           begin
-            assignTemp$10000 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
+            assignTemp$10000 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-nested: <block-pass>$10001>|
+              <block-nested: <block-pass>$10001>.valid?()
+            end
             ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTemp$10000.[](0)
             invalid_rules = assignTemp$10000.[](1)
             assignTemp$10000
           end
           if invalid_rules.empty?().!()
             begin
-              invalid_rule_ids = invalid_rules.map(<Not Supported (BlockPass)>).join(",")
+              invalid_rule_ids = invalid_rules.map() do |<block-nested: <block-pass>$10002>|
+                <block-nested: <block-pass>$10002>.token()
+              end.join(",")
               self(<constant:Matcher>).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
             end
           else

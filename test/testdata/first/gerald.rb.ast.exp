@@ -21,14 +21,18 @@ begin
       def initialize<<constant:<todo sym>>>()
         begin
           begin
-            assignTemp$10000 = <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition(<Not Supported (BlockPass)>)
+            assignTemp$10000 = <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-pass>$10001|
+              <block-pass>$10001.valid?()
+            end
             @rules = assignTemp$10000.[](0)
             invalid_rules = assignTemp$10000.[](1)
             assignTemp$10000
           end
           if invalid_rules.empty?().!()
             begin
-              invalid_rule_ids = invalid_rules.map(<Not Supported (BlockPass)>).join(",")
+              invalid_rule_ids = invalid_rules.map() do |<block-pass>$10002|
+                <block-pass>$10002.token()
+              end.join(",")
               self(<constant:<todo sym>>).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
             end
           else

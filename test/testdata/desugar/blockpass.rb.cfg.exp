@@ -1,0 +1,452 @@
+digraph "blockpass.rb"{
+subgraph "cluster_::<constant:HasMeth>#meth" {
+    label = "::<constant:HasMeth>#meth";
+    color = blue;
+    "bb::<constant:HasMeth>#meth_0" [shape = invhouse];
+    "bb::<constant:HasMeth>#meth_1" [shape = parallelogram];
+
+    "bb::<constant:HasMeth>#meth_0" [label = "()
+returnMethodTemp$1 = meth : String(\"meth\")
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:HasMeth>#meth_0" -> "bb::<constant:HasMeth>#meth_1";
+    "bb::<constant:HasMeth>#meth_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:HasMeth>#meth_1" -> "bb::<constant:HasMeth>#meth_1";
+}
+
+subgraph "cluster_::<constant:Object>#returns_lambda" {
+    label = "::<constant:Object>#returns_lambda";
+    color = blue;
+    "bb::<constant:Object>#returns_lambda_0" [shape = invhouse];
+    "bb::<constant:Object>#returns_lambda_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#returns_lambda_0" [label = "(statTemp$3)
+statTemp$3 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#returns_lambda_0" -> "bb::<constant:Object>#returns_lambda_2";
+    "bb::<constant:Object>#returns_lambda_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#returns_lambda_1" -> "bb::<constant:Object>#returns_lambda_1";
+    "bb::<constant:Object>#returns_lambda_2" [label = "(statTemp$3)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#returns_lambda_2" -> "bb::<constant:Object>#returns_lambda_4";
+    "bb::<constant:Object>#returns_lambda_2" -> "bb::<constant:Object>#returns_lambda_3";
+
+    "bb::<constant:Object>#returns_lambda_3" [label = "(statTemp$3)
+returnMethodTemp$1 = statTemp$3.lambda() : untyped
+returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#returns_lambda_3" -> "bb::<constant:Object>#returns_lambda_1";
+    "bb::<constant:Object>#returns_lambda_4" [label = "(statTemp$3)
+outerLoops: 1
+<unconditional>"];
+
+    "bb::<constant:Object>#returns_lambda_4" -> "bb::<constant:Object>#returns_lambda_2";
+}
+
+subgraph "cluster_::<constant:HasToProc>#to_proc" {
+    label = "::<constant:HasToProc>#to_proc";
+    color = blue;
+    "bb::<constant:HasToProc>#to_proc_0" [shape = invhouse];
+    "bb::<constant:HasToProc>#to_proc_1" [shape = parallelogram];
+
+    "bb::<constant:HasToProc>#to_proc_0" [label = "()
+statTemp$3 = self : HasToProc
+returnMethodTemp$1 = statTemp$3.returns_lambda() : untyped
+returnMethodTemp$4 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:HasToProc>#to_proc_0" -> "bb::<constant:HasToProc>#to_proc_1";
+    "bb::<constant:HasToProc>#to_proc_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:HasToProc>#to_proc_1" -> "bb::<constant:HasToProc>#to_proc_1";
+}
+
+subgraph "cluster_::<constant:Object>#calls_arg_with_object" {
+    label = "::<constant:Object>#calls_arg_with_object";
+    color = blue;
+    "bb::<constant:Object>#calls_arg_with_object_0" [shape = invhouse];
+    "bb::<constant:Object>#calls_arg_with_object_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#calls_arg_with_object_0" [label = "()
+selfMethodTemp$2 = self : Object
+arg = load_arg(selfMethodTemp$2#calls_arg_with_object, 0) : untyped
+blk = load_arg(selfMethodTemp$2#calls_arg_with_object, 1) : untyped
+returnMethodTemp$1 = blk.call(arg) : untyped
+returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#calls_arg_with_object_0" -> "bb::<constant:Object>#calls_arg_with_object_1";
+    "bb::<constant:Object>#calls_arg_with_object_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#calls_arg_with_object_1" -> "bb::<constant:Object>#calls_arg_with_object_1";
+}
+
+subgraph "cluster_::<constant:Object>#calls_with_object" {
+    label = "::<constant:Object>#calls_with_object";
+    color = blue;
+    "bb::<constant:Object>#calls_with_object_0" [shape = invhouse];
+    "bb::<constant:Object>#calls_with_object_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#calls_with_object_0" [label = "(blk, statTemp$3, statTemp$4)
+<constant:HasMeth>$6 = alias <constant:HasMeth> : <class:HasMeth>
+selfMethodTemp$2 = self : Object
+blk = load_arg(selfMethodTemp$2#calls_with_object, 0) : untyped
+statTemp$3 = self : Object
+statTemp$4 = <constant:HasMeth>$6.new() : HasMeth
+<unconditional>"];
+
+    "bb::<constant:Object>#calls_with_object_0" -> "bb::<constant:Object>#calls_with_object_2";
+    "bb::<constant:Object>#calls_with_object_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#calls_with_object_1" -> "bb::<constant:Object>#calls_with_object_1";
+    "bb::<constant:Object>#calls_with_object_2" [label = "(blk, statTemp$3, statTemp$4)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#calls_with_object_2" -> "bb::<constant:Object>#calls_with_object_4";
+    "bb::<constant:Object>#calls_with_object_2" -> "bb::<constant:Object>#calls_with_object_3";
+
+    "bb::<constant:Object>#calls_with_object_3" [label = "(statTemp$3, statTemp$4)
+returnMethodTemp$1 = statTemp$3.calls_arg_with_object(statTemp$4) : untyped
+returnMethodTemp$11 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#calls_with_object_3" -> "bb::<constant:Object>#calls_with_object_1";
+    "bb::<constant:Object>#calls_with_object_4" [label = "(blk, statTemp$3, statTemp$4)
+outerLoops: 1
+statTemp$8 = blk.to_proc() : untyped
+statTemp$10 = NotSupported() : untyped
+blockReturnTemp$7 = statTemp$8.call(statTemp$10) : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#calls_with_object_4" -> "bb::<constant:Object>#calls_with_object_2";
+}
+
+subgraph "cluster_::<singleton class:<constant:CallsWithObject>>#calls_with_object" {
+    label = "::<singleton class:<constant:CallsWithObject>>#calls_with_object";
+    color = blue;
+    "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_0" [shape = invhouse];
+    "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_1" [shape = parallelogram];
+
+    "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_0" [label = "()
+<constant:HasMeth>$6 = alias <constant:HasMeth> : <class:HasMeth>
+selfMethodTemp$2 = self : <class:CallsWithObject>
+blk = load_arg(selfMethodTemp$2#calls_with_object, 0) : untyped
+statTemp$4 = <constant:HasMeth>$6.new() : HasMeth
+returnMethodTemp$1 = blk.call(statTemp$4) : untyped
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_0" -> "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_1";
+    "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_1" [label = "()
+<unconditional>"];
+
+    "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_1" -> "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_1";
+}
+
+subgraph "cluster_::<constant:Object>#foo" {
+    label = "::<constant:Object>#foo";
+    color = blue;
+    "bb::<constant:Object>#foo_0" [shape = invhouse];
+    "bb::<constant:Object>#foo_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#foo_0" [label = "(blk, statTemp$4, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+<constant:HasToProc>$42 = alias <constant:HasToProc> : <class:HasToProc>
+<constant:CallsWithObject>$53 = alias <constant:CallsWithObject> : <class:CallsWithObject>
+<constant:nil>$60 = alias <constant:nil> : NilClass
+<constant:HasMeth>$68 = alias <constant:HasMeth> : <class:HasMeth>
+selfMethodTemp$2 = self : Object
+blk = load_arg(selfMethodTemp$2#foo, 0) : untyped
+statTemp$4 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2";
+    "bb::<constant:Object>#foo_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_2" [label = "(blk, statTemp$4, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4";
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3";
+
+    "bb::<constant:Object>#foo_3" [label = "(blk, statTemp$4, statTemp$8, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$3 = statTemp$4.calls_with_object() : untyped
+statTemp$8 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_5";
+    "bb::<constant:Object>#foo_4" [label = "(blk, statTemp$4, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-nested: <block-pass>$10001> = load_arg(statTemp$4#calls_with_object, 0) : untyped
+blockReturnTemp$5 = <block-nested: <block-pass>$10001>.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_2";
+    "bb::<constant:Object>#foo_5" [label = "(blk, statTemp$8, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_5" -> "bb::<constant:Object>#foo_7";
+    "bb::<constant:Object>#foo_5" -> "bb::<constant:Object>#foo_6";
+
+    "bb::<constant:Object>#foo_6" [label = "(blk, statTemp$8, statTemp$14, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$7 = statTemp$8.calls_with_object() : untyped
+statTemp$14 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_6" -> "bb::<constant:Object>#foo_8";
+    "bb::<constant:Object>#foo_7" [label = "(blk, statTemp$8, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+statTemp$11 = <symbol:meth> : Symbol(:\"meth\")
+statTemp$10 = statTemp$11.to_proc() : Proc
+statTemp$12 = NotSupported() : untyped
+blockReturnTemp$9 = statTemp$10.call(statTemp$12) : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_5";
+    "bb::<constant:Object>#foo_8" [label = "(blk, statTemp$14, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_10";
+    "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_9";
+
+    "bb::<constant:Object>#foo_9" [label = "(blk, statTemp$14, statTemp$20, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$13 = statTemp$14.calls_with_object() : untyped
+statTemp$20 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_9" -> "bb::<constant:Object>#foo_11";
+    "bb::<constant:Object>#foo_10" [label = "(blk, statTemp$14, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-nested: x> = load_arg(statTemp$14#calls_with_object, 0) : untyped
+statTemp$17 = <symbol:meth> : Symbol(:\"meth\")
+statTemp$16 = statTemp$17.to_proc() : Proc
+blockReturnTemp$15 = statTemp$16.call(<block-nested: x>) : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_10" -> "bb::<constant:Object>#foo_8";
+    "bb::<constant:Object>#foo_11" [label = "(blk, statTemp$20, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_11" -> "bb::<constant:Object>#foo_13";
+    "bb::<constant:Object>#foo_11" -> "bb::<constant:Object>#foo_12";
+
+    "bb::<constant:Object>#foo_12" [label = "(blk, statTemp$20, statTemp$24, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$19 = statTemp$20.calls_with_object() : untyped
+statTemp$24 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_12" -> "bb::<constant:Object>#foo_14";
+    "bb::<constant:Object>#foo_13" [label = "(blk, statTemp$20, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-nested: x> = load_arg(statTemp$20#calls_with_object, 0) : untyped
+blockReturnTemp$21 = <block-nested: x>.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_13" -> "bb::<constant:Object>#foo_11";
+    "bb::<constant:Object>#foo_14" [label = "(blk, statTemp$24, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_14" -> "bb::<constant:Object>#foo_16";
+    "bb::<constant:Object>#foo_14" -> "bb::<constant:Object>#foo_15";
+
+    "bb::<constant:Object>#foo_15" [label = "(statTemp$24, statTemp$30, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$23 = statTemp$24.calls_with_object() : untyped
+statTemp$30 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_15" -> "bb::<constant:Object>#foo_17";
+    "bb::<constant:Object>#foo_16" [label = "(blk, statTemp$24, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+statTemp$26 = blk.to_proc() : untyped
+statTemp$28 = NotSupported() : untyped
+blockReturnTemp$25 = statTemp$26.call(statTemp$28) : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_16" -> "bb::<constant:Object>#foo_14";
+    "bb::<constant:Object>#foo_17" [label = "(statTemp$30, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_17" -> "bb::<constant:Object>#foo_19";
+    "bb::<constant:Object>#foo_17" -> "bb::<constant:Object>#foo_18";
+
+    "bb::<constant:Object>#foo_18" [label = "(statTemp$30, statTemp$37, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$29 = statTemp$30.calls_with_object() : untyped
+statTemp$37 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_18" -> "bb::<constant:Object>#foo_20";
+    "bb::<constant:Object>#foo_19" [label = "(statTemp$30, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+statTemp$34 = self : Object
+statTemp$33 = statTemp$34.returns_lambda() : untyped
+statTemp$32 = statTemp$33.to_proc() : untyped
+statTemp$35 = NotSupported() : untyped
+blockReturnTemp$31 = statTemp$32.call(statTemp$35) : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_19" -> "bb::<constant:Object>#foo_17";
+    "bb::<constant:Object>#foo_20" [label = "(statTemp$37, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_20" -> "bb::<constant:Object>#foo_22";
+    "bb::<constant:Object>#foo_20" -> "bb::<constant:Object>#foo_21";
+
+    "bb::<constant:Object>#foo_21" [label = "(statTemp$37, <constant:HasToProc>$42, statTemp$45, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$36 = statTemp$37.calls_with_object() : untyped
+statTemp$45 = self : Object
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_21" -> "bb::<constant:Object>#foo_23";
+    "bb::<constant:Object>#foo_22" [label = "(statTemp$37, <constant:HasToProc>$42, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+statTemp$40 = <constant:HasToProc>$42.new() : HasToProc
+statTemp$39 = statTemp$40.to_proc() : untyped
+statTemp$43 = NotSupported() : untyped
+blockReturnTemp$38 = statTemp$39.call(statTemp$43) : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_22" -> "bb::<constant:Object>#foo_20";
+    "bb::<constant:Object>#foo_23" [label = "(<constant:HasToProc>$42, statTemp$45, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_23" -> "bb::<constant:Object>#foo_25";
+    "bb::<constant:Object>#foo_23" -> "bb::<constant:Object>#foo_24";
+
+    "bb::<constant:Object>#foo_24" [label = "(statTemp$45, statTemp$52, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$44 = statTemp$45.calls_with_object() : untyped
+statTemp$52 = <constant:CallsWithObject>$53 : <class:CallsWithObject>
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_24" -> "bb::<constant:Object>#foo_26";
+    "bb::<constant:Object>#foo_25" [label = "(<constant:HasToProc>$42, statTemp$45, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+statTemp$48 = <constant:HasToProc>$42.new() : HasToProc
+statTemp$47 = statTemp$48.to_proc() : untyped
+statTemp$50 = NotSupported() : untyped
+blockReturnTemp$46 = statTemp$47.call(statTemp$50) : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_25" -> "bb::<constant:Object>#foo_23";
+    "bb::<constant:Object>#foo_26" [label = "(statTemp$52, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_26" -> "bb::<constant:Object>#foo_28";
+    "bb::<constant:Object>#foo_26" -> "bb::<constant:Object>#foo_27";
+
+    "bb::<constant:Object>#foo_27" [label = "(statTemp$52, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+statTemp$51 = statTemp$52.calls_with_object() : untyped
+ifTemp$58 = <constant:CallsWithObject>$53.nil?() : TrueClass | FalseClass
+ifTemp$58"];
+
+    "bb::<constant:Object>#foo_27" -> "bb::<constant:Object>#foo_29";
+    "bb::<constant:Object>#foo_27" -> "bb::<constant:Object>#foo_30";
+
+    "bb::<constant:Object>#foo_28" [label = "(statTemp$52, <constant:CallsWithObject>$53, <constant:nil>$60, <constant:HasMeth>$68)
+outerLoops: 1
+<block-nested: <block-pass>$10005> = load_arg(statTemp$52#calls_with_object, 0) : untyped
+blockReturnTemp$54 = <block-nested: <block-pass>$10005>.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_28" -> "bb::<constant:Object>#foo_26";
+    "bb::<constant:Object>#foo_29" [label = "(<constant:nil>$60, <constant:HasMeth>$68)
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_29" -> "bb::<constant:Object>#foo_34";
+    "bb::<constant:Object>#foo_30" [label = "(<constant:CallsWithObject>$53, statTemp$61, <constant:HasMeth>$68)
+statTemp$61 = <constant:CallsWithObject>$53 : <class:CallsWithObject>
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_30" -> "bb::<constant:Object>#foo_31";
+    "bb::<constant:Object>#foo_31" [label = "(statTemp$61, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_31" -> "bb::<constant:Object>#foo_33";
+    "bb::<constant:Object>#foo_31" -> "bb::<constant:Object>#foo_32";
+
+    "bb::<constant:Object>#foo_32" [label = "(statTemp$61, <constant:HasMeth>$68)
+statTemp$56 = statTemp$61.calls_with_object() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_32" -> "bb::<constant:Object>#foo_34";
+    "bb::<constant:Object>#foo_33" [label = "(statTemp$61, <constant:HasMeth>$68)
+outerLoops: 1
+<block-nested: <block-pass>$10007> = load_arg(statTemp$61#calls_with_object, 0) : untyped
+blockReturnTemp$62 = <block-nested: <block-pass>$10007>.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_33" -> "bb::<constant:Object>#foo_31";
+    "bb::<constant:Object>#foo_34" [label = "(statTemp$65, statTemp$66, <constant:HasMeth>$68)
+statTemp$65 = self : Object
+statTemp$66 = <constant:HasMeth>$68.new() : HasMeth
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_34" -> "bb::<constant:Object>#foo_35";
+    "bb::<constant:Object>#foo_35" [label = "(statTemp$65, statTemp$66, <constant:HasMeth>$68)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_35" -> "bb::<constant:Object>#foo_37";
+    "bb::<constant:Object>#foo_35" -> "bb::<constant:Object>#foo_36";
+
+    "bb::<constant:Object>#foo_36" [label = "(statTemp$65, statTemp$66, <constant:HasMeth>$68, statTemp$71, statTemp$72)
+statTemp$64 = statTemp$65.calls_arg_with_object(statTemp$66) : untyped
+statTemp$71 = self : Object
+statTemp$72 = <constant:HasMeth>$68.new() : HasMeth
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_36" -> "bb::<constant:Object>#foo_38";
+    "bb::<constant:Object>#foo_37" [label = "(statTemp$65, statTemp$66, <constant:HasMeth>$68)
+outerLoops: 1
+<block-nested: <block-pass>$10008> = load_arg(statTemp$65#calls_arg_with_object, 0) : untyped
+blockReturnTemp$69 = <block-nested: <block-pass>$10008>.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_37" -> "bb::<constant:Object>#foo_35";
+    "bb::<constant:Object>#foo_38" [label = "(statTemp$71, statTemp$72)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Object>#foo_38" -> "bb::<constant:Object>#foo_40";
+    "bb::<constant:Object>#foo_38" -> "bb::<constant:Object>#foo_39";
+
+    "bb::<constant:Object>#foo_39" [label = "(statTemp$71, statTemp$72)
+returnMethodTemp$1 = statTemp$71.calls_arg_with_object(statTemp$72) : untyped
+returnMethodTemp$76 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_39" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_40" [label = "(statTemp$71, statTemp$72)
+outerLoops: 1
+<block-nested: x> = load_arg(statTemp$71#calls_arg_with_object, 0) : untyped
+blockReturnTemp$74 = <block-nested: x>.meth() : untyped
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_40" -> "bb::<constant:Object>#foo_38";
+}
+
+}
+

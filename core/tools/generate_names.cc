@@ -20,6 +20,7 @@ NameDef names[] = {
     {"andAnd", "&&"},
     {"orOr", "||"},
     {"to_s"},
+    {"to_proc"},
     {"concat"},
     {"intern"},
     {"call"},
@@ -78,12 +79,14 @@ NameDef names[] = {
     {"attachedClass", "<attached class>"},
 
     {"blockTemp", "<block>"},
+    {"blockPassTemp", "<block-pass>"},
     {"new_", "new"},
     {"blockCall", "<block-call>"},
 
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end
     {"destructureArg", "<destructure>"},
+
     {"lambda"},
     {"nil_p", "nil?"},
     {"super"},

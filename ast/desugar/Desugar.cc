@@ -336,6 +336,63 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
             },
             [&](parser::Send *a) {
+                if (!a->args.empty()) {
+                    auto *blockpass = parser::cast_node<parser::BlockPass>(a->args.back().get());
+                    if (blockpass) {
+                        auto loc = blockpass->loc;
+                        unique_ptr<parser::Node> block;
+                        if (auto *symbol = parser::cast_node<parser::Symbol>(blockpass->block.get())) {
+                            // foo(&:sym) -> foo {|blockPassTemp| blockPassTemp.sym}
+                            parser::NodeVec outerSendArgs;
+                            // skip the last arg
+                            for (int i = 0; i < a->args.size() - 1; i++) {
+                                outerSendArgs.emplace_back(move(a->args[i]));
+                            }
+                            auto outerSend =
+                                make_unique<parser::Send>(a->loc, move(a->receiver), a->method, move(outerSendArgs));
+
+                            parser::NodeVec argsVec;
+                            core::NameRef argName =
+                                ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp());
+                            argsVec.push_back(make_unique<parser::Arg>(loc, argName));
+                            auto blockArgs = make_unique<parser::Args>(loc, move(argsVec));
+
+                            parser::NodeVec noArgs;
+                            auto innerSend = make_unique<parser::Send>(
+                                loc, make_unique<parser::LVar>(loc, argName), move(symbol->val), move(noArgs));
+
+                            block = make_unique<parser::Block>(loc, move(outerSend), move(blockArgs), move(innerSend));
+                        } else {
+                            // TODO: foo(a,&b) -> foo {|*blockPassTemp| b.to_proc.call(*blockPassTemp)}
+                            parser::NodeVec outerSendArgs;
+                            // skip the last arg
+                            for (int i = 0; i < a->args.size() - 1; i++) {
+                                outerSendArgs.emplace_back(move(a->args[i]));
+                            }
+                            auto outerSend =
+                                make_unique<parser::Send>(a->loc, move(a->receiver), a->method, move(outerSendArgs));
+
+                            parser::NodeVec argsVec;
+                            core::NameRef argName =
+                                ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp());
+                            argsVec.push_back(make_unique<parser::Restarg>(loc, argName));
+                            auto blockArgs = make_unique<parser::Args>(loc, move(argsVec));
+
+                            parser::NodeVec noArgs;
+                            auto toProc = make_unique<parser::Send>(loc, move(blockpass->block), core::Names::to_proc(), move(noArgs));
+
+                            parser::NodeVec splatArg;
+                            splatArg.push_back(make_unique<parser::Splat>(loc, make_unique<parser::LVar>(loc, argName)));
+                            auto call = make_unique<parser::Send>(loc, move(toProc), core::Names::call(), move(splatArg));
+
+                            block = make_unique<parser::Block>(loc, move(outerSend), move(blockArgs), move(call));
+                        }
+                        auto send = node2TreeImpl(ctx, block);
+                        result.swap(send);
+                        return;
+                    }
+                }
+
                 u4 flags = 0;
                 auto rec = node2TreeImpl(ctx, a->receiver);
                 if (cast_tree<EmptyTree>(rec.get()) != nullptr) {
@@ -1036,6 +1093,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
                 result.swap(res);
             },
+            [&](parser::BlockPass *a) { Error::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *a) {
                 ctx.state.errors.error(what->loc, core::ErrorClass::UnsupportedNode, "Unsupported node type {}",
                                        a->nodeName());
