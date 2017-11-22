@@ -70,7 +70,7 @@ public:
             return recvType.type;
         }
 
-        core::SymbolRef newSymbol = classType->symbol.info(ctx).findMember(core::Names::new_());
+        core::SymbolRef newSymbol = classType->symbol.info(ctx).findMemberTransitive(ctx, core::Names::new_());
         if (newSymbol.exists() && newSymbol.info(ctx).owner != core::GlobalState::defn_Basic_Object()) {
             // custom `new` was defined
             return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
@@ -85,7 +85,7 @@ public:
         auto type = make_shared<core::ClassType>(attachedClass);
 
         // call constructor
-        newSymbol = attachedClass.info(ctx).findMember(core::Names::initialize());
+        newSymbol = attachedClass.info(ctx).findMemberTransitive(ctx, core::Names::initialize());
         if (newSymbol.exists()) {
             auto initializeResult = type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, recvType.type);
         } else {
@@ -108,7 +108,8 @@ public:
     shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops) {
         try {
             core::TypeAndOrigins tp;
-            bool noLoopChecking = dynamic_cast<cfg::Alias *>(bind.value.get()) != nullptr;
+            bool noLoopChecking = dynamic_cast<cfg::Alias *>(bind.value.get()) != nullptr ||
+                                  dynamic_cast<cfg::LoadArg *>(bind.value.get()) != nullptr;
             typecase(bind.value.get(),
                      [&](cfg::Alias *a) {
                          core::SymbolRef symbol = a->what;

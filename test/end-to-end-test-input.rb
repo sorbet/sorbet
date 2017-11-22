@@ -9,10 +9,11 @@ class ComplexError
     {
       arg: Integer
     },
-    returns: Integer
+    returns: NilClass
   )
   def foo(arg)
     arg
+    raise arg # raise is defined by stdlib
   end
 
   def complexError

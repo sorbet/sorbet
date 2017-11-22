@@ -107,7 +107,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     if (isDynamic()) {
         return Types::dynamic();
     }
-    core::SymbolRef method = this->symbol.info(ctx).findMember(fun);
+    core::SymbolRef method = this->symbol.info(ctx).findMemberTransitive(ctx, fun);
 
     if (!method.exists()) {
         string maybeComponent;
@@ -250,7 +250,7 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
     if (isDynamic()) {
         return Types::dynamic();
     }
-    core::SymbolRef method = this->symbol.info(ctx).findMember(name);
+    core::SymbolRef method = this->symbol.info(ctx).findMemberTransitive(ctx, name);
 
     if (method.exists()) {
         core::Symbol &info = method.info(ctx);
