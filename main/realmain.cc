@@ -287,20 +287,26 @@ int realmain(int argc, char **argv) {
 
     std::string print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg]");
 
-    cxxopts::Options options("ruby_typer", "Parse ruby code, desguar it, build control flow graph and print it");
-    options.add_options()("v,verbose", "Verbosity level [0-3]");
-    options.add_options()("h,help", "Show help");
-    options.add_options()("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options()("no-typer", "Do not type the CFG");
-    options.add_options()("store-state", "Store state into file", cxxopts::value<string>());
-    options.add_options()("trace", "Trace phases");
-    options.add_options()("set-freshNameId", "Store state into file", cxxopts::value<int>());
-    options.add_options()("error-stats", "Print error statistics");
-    options.add_options()("q,quiet", "Silence all non-critical errors");
-    options.add_options()("p,print", "Print " + print_options, cxxopts::value<vector<string>>(prints));
-    options.add_options()("e", "Parse an inline ruby fragment", cxxopts::value<string>());
+    cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
+    // Common user options in order of use
+    options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>(files));
+    options.add_options()("q,quiet", "Silence all non-critical errors");
+    options.add_options()("v,verbose", "Verbosity level [0-3]");
+    options.add_options()("h,help", "Show long help");
+
+    // Developer options
+    options.add_options("dev")("p,print", "Print: " + print_options, cxxopts::value<vector<string>>(prints), "type");
+    options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
+    options.add_options("dev")("no-typer", "Do not type the CFG");
+    options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
+    options.add_options("dev")("trace", "Trace phases");
+    options.add_options("dev")("set-freshNameId", "Start freshNameId at value", cxxopts::value<int>(), "int");
+    options.add_options("dev")("error-stats", "Print error statistics");
+
+    // Positional params
     options.parse_positional("files");
+    options.positional_help("<file1.rb> <file2.rb> ...");
 
     try {
         options.parse(argc, argv);
@@ -310,11 +316,11 @@ int realmain(int argc, char **argv) {
     }
 
     if (options["h"].as<bool>()) {
-        console->info("{}", options.help());
+        console->info("{}", options.help({"", "dev"}));
         return 0;
     }
     if (options.count("e") == 0 && files.empty()) {
-        console->info("You must pass either `-e` or at least one ruby file.\n {} \n", options.help());
+        console->info("You must pass either `-e` or at least one ruby file.\n\n{} \n", options.help());
         return 0;
     }
 
