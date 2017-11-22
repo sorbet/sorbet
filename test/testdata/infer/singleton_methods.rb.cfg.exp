@@ -2,25 +2,34 @@ digraph "singleton_methods.rb"{
 subgraph "cluster_::<singleton class:<constant:Foo>>#bar" {
     label = "::<singleton class:<constant:Foo>>#bar";
     color = blue;
-    bb102_0 [shape = invhouse];
-    bb102_1 [shape = parallelogram];
+    "bb::<singleton class:<constant:Foo>>#bar_0" [shape = invhouse];
+    "bb::<singleton class:<constant:Foo>>#bar_1" [shape = parallelogram];
 
-    bb102_0 [label = "()\nreturnMethodTemp$1 = 1 : Integer(1)\nreturnMethodTemp$2 = return returnMethodTemp$1 : <bottom>\n<unconditional>"];
-    bb102_0 -> bb102_1;
-    bb102_1 [label = "()\n<unconditional>"];
-    bb102_1 -> bb102_1;
+    "bb::<singleton class:<constant:Foo>>#bar_0" [label = "()
+returnMethodTemp$1 = 1 : Integer(1)
+returnMethodTemp$2 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+    "bb::<singleton class:<constant:Foo>>#bar_0" -> "bb::<singleton class:<constant:Foo>>#bar_1";
+    "bb::<singleton class:<constant:Foo>>#bar_1" [label = "()
+<unconditional>"];
+    "bb::<singleton class:<constant:Foo>>#bar_1" -> "bb::<singleton class:<constant:Foo>>#bar_1";
 }
 
 subgraph "cluster_::<constant:Bar>#baz" {
     label = "::<constant:Bar>#baz";
     color = blue;
-    bb104_0 [shape = invhouse];
-    bb104_1 [shape = parallelogram];
+    "bb::<constant:Bar>#baz_0" [shape = invhouse];
+    "bb::<constant:Bar>#baz_1" [shape = parallelogram];
 
-    bb104_0 [label = "()\n<constant:Foo>$3 = alias <constant:Foo> : <class:Foo>\nreturnMethodTemp$2 = <constant:Foo>$3.bar() : untyped\nreturnMethodTemp$4 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
-    bb104_0 -> bb104_1;
-    bb104_1 [label = "()\n<unconditional>"];
-    bb104_1 -> bb104_1;
+    "bb::<constant:Bar>#baz_0" [label = "()
+<constant:Foo>$3 = alias <constant:Foo> : <class:Foo>
+returnMethodTemp$2 = <constant:Foo>$3.bar() : untyped
+returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+    "bb::<constant:Bar>#baz_0" -> "bb::<constant:Bar>#baz_1";
+    "bb::<constant:Bar>#baz_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Bar>#baz_1" -> "bb::<constant:Bar>#baz_1";
 }
 
 }

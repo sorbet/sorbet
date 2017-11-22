@@ -14,34 +14,34 @@
 <polygon fill="none" stroke="#0000ff" points="8,-8 8,-265.8761 662,-265.8761 662,-8 8,-8"/>
 <text text-anchor="middle" x="335" y="-250.6761" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Trigger&gt;#trigger</text>
 </g>
-<!-- bb101_0 -->
+<!-- bb::&lt;constant:Trigger&gt;#trigger_0 -->
 <g id="node1" class="node">
-<title>bb101_0</title>
+<title>bb::&lt;constant:Trigger&gt;#trigger_0</title>
 <polygon fill="none" stroke="#000000" points="16.194,-162.6714 335,-124.0619 653.806,-162.6714 653.5084,-225.1428 16.4916,-225.1428 16.194,-162.6714"/>
 <text text-anchor="middle" x="335" y="-196.7381" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="335" y="-182.7381" font-family="Times,serif" font-size="14.00" fill="#000000">@__fake_logger$2 = alias @__fake_logger : untyped</text>
 <text text-anchor="middle" x="335" y="-168.7381" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return @__fake_logger$2 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="335" y="-154.7381" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb101_1 -->
+<!-- bb::&lt;constant:Trigger&gt;#trigger_1 -->
 <g id="node2" class="node">
-<title>bb101_1</title>
+<title>bb::&lt;constant:Trigger&gt;#trigger_1</title>
 <polygon fill="none" stroke="#000000" points="447.551,-88 268.5076,-88 222.449,-16 401.4924,-16 447.551,-88"/>
 <text text-anchor="middle" x="335" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="335" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb101_0&#45;&gt;bb101_1 -->
+<!-- bb::&lt;constant:Trigger&gt;#trigger_0&#45;&gt;bb::&lt;constant:Trigger&gt;#trigger_1 -->
 <g id="edge1" class="edge">
-<title>bb101_0&#45;&gt;bb101_1</title>
+<title>bb::&lt;constant:Trigger&gt;#trigger_0&#45;&gt;bb::&lt;constant:Trigger&gt;#trigger_1</title>
 <path fill="none" stroke="#000000" d="M335,-123.8226C335,-115.3252 335,-106.6402 335,-98.3795"/>
 <polygon fill="#000000" stroke="#000000" points="338.5001,-98.1889 335,-88.1889 331.5001,-98.189 338.5001,-98.1889"/>
 </g>
-<!-- bb101_1&#45;&gt;bb101_1 -->
+<!-- bb::&lt;constant:Trigger&gt;#trigger_1&#45;&gt;bb::&lt;constant:Trigger&gt;#trigger_1 -->
 <g id="edge2" class="edge">
-<title>bb101_1&#45;&gt;bb101_1</title>
+<title>bb::&lt;constant:Trigger&gt;#trigger_1&#45;&gt;bb::&lt;constant:Trigger&gt;#trigger_1</title>
 <path fill="none" stroke="#000000" d="M438.6002,-73.651C454.7589,-70.4143 465.7753,-63.1973 465.7753,-52 465.7753,-36.834 445.5657,-28.9698 419.7418,-28.4075"/>
 <polygon fill="#000000" stroke="#000000" points="419.5501,-24.9097 409.6001,-28.5495 419.6482,-31.909 419.5501,-24.9097"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 7fe7405e85003bbf8816e37a31f41b491299bbdd1894c4b2816fd131d8e59de2 -->
+<!-- ruby-types:sha256: 00532c74df1b4bcfa488656ecdb9a89f55a54de27e8a42520300d83cc4806a2b -->

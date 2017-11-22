@@ -2,25 +2,33 @@ digraph "singleton_of_singleton.rb"{
 subgraph "cluster_::<singleton class:<constant:A>>#foo" {
     label = "::<singleton class:<constant:A>>#foo";
     color = blue;
-    bb102_0 [shape = invhouse];
-    bb102_1 [shape = parallelogram];
+    "bb::<singleton class:<constant:A>>#foo_0" [shape = invhouse];
+    "bb::<singleton class:<constant:A>>#foo_1" [shape = parallelogram];
 
-    bb102_0 [label = "()\nreturnMethodTemp$2 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
-    bb102_0 -> bb102_1;
-    bb102_1 [label = "()\n<unconditional>"];
-    bb102_1 -> bb102_1;
+    "bb::<singleton class:<constant:A>>#foo_0" [label = "()
+returnMethodTemp$2 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+    "bb::<singleton class:<constant:A>>#foo_0" -> "bb::<singleton class:<constant:A>>#foo_1";
+    "bb::<singleton class:<constant:A>>#foo_1" [label = "()
+<unconditional>"];
+    "bb::<singleton class:<constant:A>>#foo_1" -> "bb::<singleton class:<constant:A>>#foo_1";
 }
 
 subgraph "cluster_::<singleton class:<singleton class:<constant:A>>>#bar" {
     label = "::<singleton class:<singleton class:<constant:A>>>#bar";
     color = blue;
-    bb104_0 [shape = invhouse];
-    bb104_1 [shape = parallelogram];
+    "bb::<singleton class:<singleton class:<constant:A>>>#bar_0" [shape = invhouse];
+    "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" [shape = parallelogram];
 
-    bb104_0 [label = "()\nreturnMethodTemp$3 = self : <class:<class:A>>\nreturnMethodTemp$2 = return returnMethodTemp$3 : <bottom>\n<unconditional>"];
-    bb104_0 -> bb104_1;
-    bb104_1 [label = "()\n<unconditional>"];
-    bb104_1 -> bb104_1;
+    "bb::<singleton class:<singleton class:<constant:A>>>#bar_0" [label = "()
+returnMethodTemp$3 = self : <class:<class:A>>
+returnMethodTemp$2 = return returnMethodTemp$3 : <bottom>
+<unconditional>"];
+    "bb::<singleton class:<singleton class:<constant:A>>>#bar_0" -> "bb::<singleton class:<singleton class:<constant:A>>>#bar_1";
+    "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" [label = "()
+<unconditional>"];
+    "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" -> "bb::<singleton class:<singleton class:<constant:A>>>#bar_1";
 }
 
 }

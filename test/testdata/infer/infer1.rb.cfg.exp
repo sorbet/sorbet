@@ -2,153 +2,234 @@ digraph "infer1.rb"{
 subgraph "cluster_::<constant:String>#getbyte" {
     label = "::<constant:String>#getbyte";
     color = blue;
-    bb101_0 [shape = invhouse];
-    bb101_1 [shape = parallelogram];
+    "bb::<constant:String>#getbyte_0" [shape = invhouse];
+    "bb::<constant:String>#getbyte_1" [shape = parallelogram];
 
-    bb101_0 [label = "()\nselfMethodTemp$1 = self : String\nreturnMethodTemp$2 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
-    bb101_0 -> bb101_1;
-    bb101_1 [label = "()\n<unconditional>"];
-    bb101_1 -> bb101_1;
+    "bb::<constant:String>#getbyte_0" [label = "()
+selfMethodTemp$1 = self : String
+returnMethodTemp$2 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+    "bb::<constant:String>#getbyte_0" -> "bb::<constant:String>#getbyte_1";
+    "bb::<constant:String>#getbyte_1" [label = "()
+<unconditional>"];
+    "bb::<constant:String>#getbyte_1" -> "bb::<constant:String>#getbyte_1";
 }
 
 subgraph "cluster_::<constant:Integer>#+" {
     label = "::<constant:Integer>#+";
     color = blue;
-    bb104_0 [shape = invhouse];
-    bb104_1 [shape = parallelogram];
+    "bb::<constant:Integer>#+_0" [shape = invhouse];
+    "bb::<constant:Integer>#+_1" [shape = parallelogram];
 
-    bb104_0 [label = "()\nselfMethodTemp$1 = self : Integer\nreturnMethodTemp$3 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$3 : <bottom>\n<unconditional>"];
-    bb104_0 -> bb104_1;
-    bb104_1 [label = "()\n<unconditional>"];
-    bb104_1 -> bb104_1;
+    "bb::<constant:Integer>#+_0" [label = "()
+selfMethodTemp$1 = self : Integer
+returnMethodTemp$3 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$3 : <bottom>
+<unconditional>"];
+    "bb::<constant:Integer>#+_0" -> "bb::<constant:Integer>#+_1";
+    "bb::<constant:Integer>#+_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Integer>#+_1" -> "bb::<constant:Integer>#+_1";
 }
 
 subgraph "cluster_::<constant:Object>#baz1" {
     label = "::<constant:Object>#baz1";
     color = blue;
-    bb106_0 [shape = invhouse];
-    bb106_1 [shape = parallelogram];
+    "bb::<constant:Object>#baz1_0" [shape = invhouse];
+    "bb::<constant:Object>#baz1_1" [shape = parallelogram];
 
-    bb106_0 [label = "()\na = foo : String(\"foo\")\nb = a.getbyte(a) : Integer | NilClass\nreturnMethodTemp$5 = return b : <bottom>\n<unconditional>"];
-    bb106_0 -> bb106_1;
-    bb106_1 [label = "()\n<unconditional>"];
-    bb106_1 -> bb106_1;
+    "bb::<constant:Object>#baz1_0" [label = "()
+a = foo : String(\"foo\")
+b = a.getbyte(a) : Integer | NilClass
+returnMethodTemp$5 = return b : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#baz1_0" -> "bb::<constant:Object>#baz1_1";
+    "bb::<constant:Object>#baz1_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz1_1" -> "bb::<constant:Object>#baz1_1";
 }
 
 subgraph "cluster_::<constant:Object>#baz2" {
     label = "::<constant:Object>#baz2";
     color = blue;
-    bb107_0 [shape = invhouse];
-    bb107_1 [shape = parallelogram];
+    "bb::<constant:Object>#baz2_0" [shape = invhouse];
+    "bb::<constant:Object>#baz2_1" [shape = parallelogram];
 
-    bb107_0 [label = "()\na = foo : String(\"foo\")\nstatTemp$4 = foo : String(\"foo\")\nb = a.getbyte(statTemp$4) : Integer | NilClass\nreturnMethodTemp$5 = return b : <bottom>\n<unconditional>"];
-    bb107_0 -> bb107_1;
-    bb107_1 [label = "()\n<unconditional>"];
-    bb107_1 -> bb107_1;
+    "bb::<constant:Object>#baz2_0" [label = "()
+a = foo : String(\"foo\")
+statTemp$4 = foo : String(\"foo\")
+b = a.getbyte(statTemp$4) : Integer | NilClass
+returnMethodTemp$5 = return b : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#baz2_0" -> "bb::<constant:Object>#baz2_1";
+    "bb::<constant:Object>#baz2_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz2_1" -> "bb::<constant:Object>#baz2_1";
 }
 
 subgraph "cluster_::<constant:Object>#baz3" {
     label = "::<constant:Object>#baz3";
     color = blue;
-    bb108_0 [shape = invhouse];
-    bb108_1 [shape = parallelogram];
+    "bb::<constant:Object>#baz3_0" [shape = invhouse];
+    "bb::<constant:Object>#baz3_1" [shape = parallelogram];
 
-    bb108_0 [label = "()\nstatTemp$2 = foo : String(\"foo\")\nstatTemp$3 = foo : String(\"foo\")\nb = statTemp$2.getbyte(statTemp$3) : Integer | NilClass\nreturnMethodTemp$4 = return b : <bottom>\n<unconditional>"];
-    bb108_0 -> bb108_1;
-    bb108_1 [label = "()\n<unconditional>"];
-    bb108_1 -> bb108_1;
+    "bb::<constant:Object>#baz3_0" [label = "()
+statTemp$2 = foo : String(\"foo\")
+statTemp$3 = foo : String(\"foo\")
+b = statTemp$2.getbyte(statTemp$3) : Integer | NilClass
+returnMethodTemp$4 = return b : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#baz3_0" -> "bb::<constant:Object>#baz3_1";
+    "bb::<constant:Object>#baz3_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz3_1" -> "bb::<constant:Object>#baz3_1";
 }
 
 subgraph "cluster_::<constant:Object>#baz4" {
     label = "::<constant:Object>#baz4";
     color = blue;
-    bb109_0 [shape = invhouse];
-    bb109_1 [shape = parallelogram];
+    "bb::<constant:Object>#baz4_0" [shape = invhouse];
+    "bb::<constant:Object>#baz4_1" [shape = parallelogram];
 
-    bb109_0 [label = "()\nstatTemp$3 = self : Object\nstatTemp$2 = statTemp$3.a() : untyped\nstatTemp$4 = foo : String(\"foo\")\nb = statTemp$2.getbyte(statTemp$4) : untyped\nreturnMethodTemp$5 = return b : <bottom>\n<unconditional>"];
-    bb109_0 -> bb109_1;
-    bb109_1 [label = "()\n<unconditional>"];
-    bb109_1 -> bb109_1;
+    "bb::<constant:Object>#baz4_0" [label = "()
+statTemp$3 = self : Object
+statTemp$2 = statTemp$3.a() : untyped
+statTemp$4 = foo : String(\"foo\")
+b = statTemp$2.getbyte(statTemp$4) : untyped
+returnMethodTemp$5 = return b : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#baz4_0" -> "bb::<constant:Object>#baz4_1";
+    "bb::<constant:Object>#baz4_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz4_1" -> "bb::<constant:Object>#baz4_1";
 }
 
 subgraph "cluster_::<constant:Object>#baz5" {
     label = "::<constant:Object>#baz5";
     color = blue;
-    bb110_0 [shape = invhouse];
-    bb110_1 [shape = parallelogram];
+    "bb::<constant:Object>#baz5_0" [shape = invhouse];
+    "bb::<constant:Object>#baz5_1" [shape = parallelogram];
 
-    bb110_0 [label = "()\nifTemp$3 = true : TrueClass(true)\nifTemp$3"];
-    bb110_0 -> bb110_2;
-    bb110_0 -> bb110_3;
+    "bb::<constant:Object>#baz5_0" [label = "()
+ifTemp$3 = true : TrueClass(true)
+ifTemp$3"];
+    "bb::<constant:Object>#baz5_0" -> "bb::<constant:Object>#baz5_2";
+    "bb::<constant:Object>#baz5_0" -> "bb::<constant:Object>#baz5_3";
 
-    bb110_1 [label = "()\n<unconditional>"];
-    bb110_1 -> bb110_1;
-    bb110_2 [label = "(b)\nb = 1 : Integer(1)\n<unconditional>"];
-    bb110_2 -> bb110_4;
-    bb110_3 [label = "(b)\nb = foo : String(\"foo\")\n<unconditional>"];
-    bb110_3 -> bb110_4;
-    bb110_4 [label = "(b)\nstatTemp$4 = b : Integer | String\nstatTemp$5 = 1 : Integer(1)\nb = statTemp$4.getbyte(statTemp$5) : untyped\nreturnMethodTemp$6 = return b : <bottom>\n<unconditional>"];
-    bb110_4 -> bb110_1;
+    "bb::<constant:Object>#baz5_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz5_1" -> "bb::<constant:Object>#baz5_1";
+    "bb::<constant:Object>#baz5_2" [label = "(b)
+b = 1 : Integer(1)
+<unconditional>"];
+    "bb::<constant:Object>#baz5_2" -> "bb::<constant:Object>#baz5_4";
+    "bb::<constant:Object>#baz5_3" [label = "(b)
+b = foo : String(\"foo\")
+<unconditional>"];
+    "bb::<constant:Object>#baz5_3" -> "bb::<constant:Object>#baz5_4";
+    "bb::<constant:Object>#baz5_4" [label = "(b)
+statTemp$4 = b : Integer | String
+statTemp$5 = 1 : Integer(1)
+b = statTemp$4.getbyte(statTemp$5) : untyped
+returnMethodTemp$6 = return b : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#baz5_4" -> "bb::<constant:Object>#baz5_1";
 }
 
 subgraph "cluster_::<constant:Object>#baz6" {
     label = "::<constant:Object>#baz6";
     color = blue;
-    bb111_0 [shape = invhouse];
-    bb111_1 [shape = parallelogram];
+    "bb::<constant:Object>#baz6_0" [shape = invhouse];
+    "bb::<constant:Object>#baz6_1" [shape = parallelogram];
 
-    bb111_0 [label = "()\nifTemp$3 = true : TrueClass(true)\nifTemp$3"];
-    bb111_0 -> bb111_2;
-    bb111_0 -> bb111_3;
+    "bb::<constant:Object>#baz6_0" [label = "()
+ifTemp$3 = true : TrueClass(true)
+ifTemp$3"];
+    "bb::<constant:Object>#baz6_0" -> "bb::<constant:Object>#baz6_2";
+    "bb::<constant:Object>#baz6_0" -> "bb::<constant:Object>#baz6_3";
 
-    bb111_1 [label = "()\n<unconditional>"];
-    bb111_1 -> bb111_1;
-    bb111_2 [label = "(b)\nb = 1 : Integer(1)\n<unconditional>"];
-    bb111_2 -> bb111_4;
-    bb111_3 [label = "(b)\nb = foo : String(\"foo\")\n<unconditional>"];
-    bb111_3 -> bb111_4;
-    bb111_4 [label = "(b)\nstatTemp$4 = foo : String(\"foo\")\nstatTemp$5 = b : Integer | String\nb = statTemp$4.getbyte(statTemp$5) : Integer | NilClass\nreturnMethodTemp$6 = return b : <bottom>\n<unconditional>"];
-    bb111_4 -> bb111_1;
+    "bb::<constant:Object>#baz6_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz6_1" -> "bb::<constant:Object>#baz6_1";
+    "bb::<constant:Object>#baz6_2" [label = "(b)
+b = 1 : Integer(1)
+<unconditional>"];
+    "bb::<constant:Object>#baz6_2" -> "bb::<constant:Object>#baz6_4";
+    "bb::<constant:Object>#baz6_3" [label = "(b)
+b = foo : String(\"foo\")
+<unconditional>"];
+    "bb::<constant:Object>#baz6_3" -> "bb::<constant:Object>#baz6_4";
+    "bb::<constant:Object>#baz6_4" [label = "(b)
+statTemp$4 = foo : String(\"foo\")
+statTemp$5 = b : Integer | String
+b = statTemp$4.getbyte(statTemp$5) : Integer | NilClass
+returnMethodTemp$6 = return b : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#baz6_4" -> "bb::<constant:Object>#baz6_1";
 }
 
 subgraph "cluster_::<constant:Object>#baz7" {
     label = "::<constant:Object>#baz7";
     color = blue;
-    bb112_0 [shape = invhouse];
-    bb112_1 [shape = parallelogram];
+    "bb::<constant:Object>#baz7_0" [shape = invhouse];
+    "bb::<constant:Object>#baz7_1" [shape = parallelogram];
 
-    bb112_0 [label = "()\nifTemp$3 = true : TrueClass(true)\nifTemp$3"];
-    bb112_0 -> bb112_2;
-    bb112_0 -> bb112_3;
+    "bb::<constant:Object>#baz7_0" [label = "()
+ifTemp$3 = true : TrueClass(true)
+ifTemp$3"];
+    "bb::<constant:Object>#baz7_0" -> "bb::<constant:Object>#baz7_2";
+    "bb::<constant:Object>#baz7_0" -> "bb::<constant:Object>#baz7_3";
 
-    bb112_1 [label = "()\n<unconditional>"];
-    bb112_1 -> bb112_1;
-    bb112_2 [label = "(b)\nb = 1 : Integer(1)\n<unconditional>"];
-    bb112_2 -> bb112_4;
-    bb112_3 [label = "()\nstatTemp$2 = NotSupported() : untyped\n<unconditional>"];
-    bb112_3 -> bb112_4;
-    bb112_4 [label = "(b)\nstatTemp$4 = foo : String(\"foo\")\nstatTemp$5 = b : Integer | NilClass\nb = statTemp$4.getbyte(statTemp$5) : Integer | NilClass\nreturnMethodTemp$6 = return b : <bottom>\n<unconditional>"];
-    bb112_4 -> bb112_1;
+    "bb::<constant:Object>#baz7_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz7_1" -> "bb::<constant:Object>#baz7_1";
+    "bb::<constant:Object>#baz7_2" [label = "(b)
+b = 1 : Integer(1)
+<unconditional>"];
+    "bb::<constant:Object>#baz7_2" -> "bb::<constant:Object>#baz7_4";
+    "bb::<constant:Object>#baz7_3" [label = "()
+statTemp$2 = NotSupported() : untyped
+<unconditional>"];
+    "bb::<constant:Object>#baz7_3" -> "bb::<constant:Object>#baz7_4";
+    "bb::<constant:Object>#baz7_4" [label = "(b)
+statTemp$4 = foo : String(\"foo\")
+statTemp$5 = b : Integer | NilClass
+b = statTemp$4.getbyte(statTemp$5) : Integer | NilClass
+returnMethodTemp$6 = return b : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#baz7_4" -> "bb::<constant:Object>#baz7_1";
 }
 
 subgraph "cluster_::<constant:Object>#baz8" {
     label = "::<constant:Object>#baz8";
     color = blue;
-    bb113_0 [shape = invhouse];
-    bb113_1 [shape = parallelogram];
+    "bb::<constant:Object>#baz8_0" [shape = invhouse];
+    "bb::<constant:Object>#baz8_1" [shape = parallelogram];
 
-    bb113_0 [label = "()\n<unconditional>"];
-    bb113_0 -> bb113_2;
-    bb113_1 [label = "()\n<unconditional>"];
-    bb113_1 -> bb113_1;
-    bb113_2 [label = "()\nouterLoops: 1\nwhileTemp$2 = true : TrueClass(true)\nwhileTemp$2"];
-    bb113_2 -> bb113_3;
-    bb113_2 -> bb113_4;
+    "bb::<constant:Object>#baz8_0" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz8_0" -> "bb::<constant:Object>#baz8_2";
+    "bb::<constant:Object>#baz8_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#baz8_1" -> "bb::<constant:Object>#baz8_1";
+    "bb::<constant:Object>#baz8_2" [label = "()
+outerLoops: 1
+whileTemp$2 = true : TrueClass(true)
+whileTemp$2"];
+    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_3";
+    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_4";
 
-    bb113_3 [label = "()\nouterLoops: 1\nb = 1 : Integer(1)\n<unconditional>"];
-    bb113_3 -> bb113_2;
-    bb113_4 [label = "()\nreturnMethodTemp$11 = nil : NilClass\nreturnMethodTemp$4 = return returnMethodTemp$11 : <bottom>\n<unconditional>"];
-    bb113_4 -> bb113_1;
+    "bb::<constant:Object>#baz8_3" [label = "()
+outerLoops: 1
+b = 1 : Integer(1)
+<unconditional>"];
+    "bb::<constant:Object>#baz8_3" -> "bb::<constant:Object>#baz8_2";
+    "bb::<constant:Object>#baz8_4" [label = "()
+returnMethodTemp$11 = nil : NilClass
+returnMethodTemp$4 = return returnMethodTemp$11 : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#baz8_4" -> "bb::<constant:Object>#baz8_1";
 }
 
 }
