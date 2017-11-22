@@ -2766,7 +2766,7 @@ module Enumerable
 
   standard_method(
     {
-      initial: BasicObject,
+      initial: Opus::Types.any(BasicObject, Symbol),
       _: Symbol,
     },
     returns: Opus::Types.untyped
@@ -4898,13 +4898,12 @@ class IO
 
   standard_method(
     {
-      other_IO: IO,
-      path: String,
+      other_IO: Opus::Types.any(IO, String),
       mode_str: String,
     },
     returns: IO
   )
-  def reopen(other_IO=_, path=_, mode_str=_); end
+  def reopen(other_IO, mode_str=_); end
 
   standard_method(
     {},
@@ -4924,12 +4923,11 @@ class IO
   standard_method(
     {
       ext_or_ext_int_enc: Opus::Types.any(String, Encoding),
-      ext_enc: Opus::Types.any(String, Encoding),
       int_enc: Opus::Types.any(String, Encoding),
     },
     returns: Opus::Types.untyped
   )
-  def set_encoding(ext_or_ext_int_enc=_, ext_enc=_, int_enc=_); end
+  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
 
   standard_method(
     {},
@@ -5093,6 +5091,7 @@ class IO
   standard_method(
     {
       ext_or_ext_int_enc: String,
+      int_enc: String,
       external_encoding: String,
       internal_encoding: String,
       encoding: String,
@@ -5100,29 +5099,10 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      ext_enc: String,
-      int_enc: String,
     },
     returns: Opus::Types.any([IO, IO], Opus::Types.untyped)
   )
-  def self.pipe(ext_or_ext_int_enc=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, ext_enc=_, int_enc=_); end
-
-  standard_method(
-    {
-      env: Opus::Types.hash_of(keys: String, values: String),
-      cmd: String,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-    },
-    returns: Opus::Types.any(IO, Opus::Types.untyped)
-  )
-  def self.popen(env=_, cmd, mode=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+  def self.pipe(ext_or_ext_int_enc=_, int_enc=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
   standard_method(
     {
@@ -5521,11 +5501,10 @@ class Integer
   standard_method(
     {
       _: Integer,
-      limit: Integer,
     },
     returns: Opus::Types.any(Integer, Enumerator)
   )
-  def downto(_=_, limit=_); end
+  def downto(_); end
 
   standard_method(
     {},
@@ -5837,23 +5816,21 @@ module Kernel
 
   standard_method(
     {
-      start: Integer,
+      start: Opus::Types.any(Integer, Range),
       length: Integer,
-      _: Range,
     },
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
-  def self.caller(start=_, length=_, _=_); end
+  def self.caller(start=_, length=_); end
 
   standard_method(
     {
-      start: Integer,
+      start: Opus::Types.any(Integer, Range),
       length: Integer,
-      _: Range,
     },
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
-  def self.caller_locations(start=_, length=_, _=_); end
+  def self.caller_locations(start=_, length=_); end
 
   standard_method(
     {
@@ -6121,15 +6098,12 @@ class MatchData
 
   standard_method(
     {
-      i: Integer,
-      start: Integer,
+      i: Opus::Types.any(Integer, Range, String, Symbol),
       length: Integer,
-      range: Range,
-      name: Opus::Types.any(String, Symbol),
     },
     returns: Opus::Types.any(String, NilClass, Opus::Types.array_of(String))
   )
-  def [](i=_, start=_, length=_, range=_, name=_); end
+  def [](i, length=_); end
 
   standard_method(
     {
@@ -10804,14 +10778,12 @@ class Symbol
 
   standard_method(
     {
-      idx: Integer,
-      b: Integer,
+      idx: Opus::Types.any(Integer, Range),
       n: Integer,
-      _: Range,
     },
     returns: String
   )
-  def [](idx=_, b=_, n=_, _=_); end
+  def [](idx, n=_); end
 
   standard_method(
     {},
@@ -10905,14 +10877,12 @@ end
 class Time
   standard_method(
     {
-      _: Time,
-      seconds_with_frac: Numeric,
-      seconds: Numeric,
+      _: Opus::Types.any(Time, Numeric),
       microseconds_with_frac: Numeric,
     },
     returns: Time
   )
-  def self.at(_=_, seconds_with_frac=_, seconds=_, microseconds_with_frac=_); end
+  def self.at(_, microseconds_with_frac=_); end
 
   standard_method(
     {
@@ -11300,18 +11270,6 @@ class Time
 end
 
 module URI
-  standard_method(
-    {
-      str: String,
-      enc: Encoding,
-      separator: String,
-      use__charset_: Opus::Types.any(TrueClass, FalseClass),
-      isindex: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of([String, String])
-  )
-  def self.decode_www_form(str, enc=_, separator=_, use__charset_, isindex); end
-
   standard_method(
     {
       str: String,
