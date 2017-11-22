@@ -2,13 +2,16 @@ digraph "next_in_junk.rb"{
 subgraph "cluster_::<constant:Object>#foo" {
     label = "::<constant:Object>#foo";
     color = blue;
-    bb100_0 [shape = invhouse];
-    bb100_1 [shape = parallelogram];
+    "bb::<constant:Object>#foo_0" [shape = invhouse];
+    "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    bb100_0 [label = "()\n<unconditional>"];
-    bb100_0 -> bb100_1;
-    bb100_1 [label = "()\nreturnMethodTemp$3 = return returnMethodTemp$0\n<unconditional>"];
-    bb100_1 -> bb100_1;
+    "bb::<constant:Object>#foo_0" [label = "()
+<unconditional>"];
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_1" [label = "()
+returnMethodTemp$3 = return returnMethodTemp$0
+<unconditional>"];
+    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1";
 }
 
 }

@@ -14,9 +14,9 @@
 <polygon fill="none" stroke="#0000ff" points="8,-8 8,-510.6051 4118,-510.6051 4118,-8 8,-8"/>
 <text text-anchor="middle" x="2063" y="-495.4051" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#test_large_float</text>
 </g>
-<!-- bb100_0 -->
+<!-- bb::&lt;constant:Object&gt;#test_large_float_0 -->
 <g id="node1" class="node">
-<title>bb100_0</title>
+<title>bb::&lt;constant:Object&gt;#test_large_float_0</title>
 <polygon fill="none" stroke="#000000" points="16.0784,-247.265 2063,-124.1972 4109.9216,-247.265 4108.011,-446.3927 17.989,-446.3927 16.0784,-247.265"/>
 <text text-anchor="middle" x="2063" y="-389.1025" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="2063" y="-375.1025" font-family="Times,serif" font-size="14.00" fill="#000000">a = 3.141593 : Float(0.000000)</text>
@@ -33,25 +33,25 @@
 <text text-anchor="middle" x="2063" y="-221.1025" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$12 = return a : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="2063" y="-207.1025" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb100_1 -->
+<!-- bb::&lt;constant:Object&gt;#test_large_float_1 -->
 <g id="node2" class="node">
-<title>bb100_1</title>
+<title>bb::&lt;constant:Object&gt;#test_large_float_1</title>
 <polygon fill="none" stroke="#000000" points="2175.551,-88 1996.5076,-88 1950.449,-16 2129.4924,-16 2175.551,-88"/>
 <text text-anchor="middle" x="2063" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
 <text text-anchor="middle" x="2063" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb100_0&#45;&gt;bb100_1 -->
+<!-- bb::&lt;constant:Object&gt;#test_large_float_0&#45;&gt;bb::&lt;constant:Object&gt;#test_large_float_1 -->
 <g id="edge1" class="edge">
-<title>bb100_0&#45;&gt;bb100_1</title>
+<title>bb::&lt;constant:Object&gt;#test_large_float_0&#45;&gt;bb::&lt;constant:Object&gt;#test_large_float_1</title>
 <path fill="none" stroke="#000000" d="M2063,-124.0621C2063,-114.9077 2063,-106.2185 2063,-98.25"/>
 <polygon fill="#000000" stroke="#000000" points="2066.5001,-98.2112 2063,-88.2112 2059.5001,-98.2113 2066.5001,-98.2112"/>
 </g>
-<!-- bb100_1&#45;&gt;bb100_1 -->
+<!-- bb::&lt;constant:Object&gt;#test_large_float_1&#45;&gt;bb::&lt;constant:Object&gt;#test_large_float_1 -->
 <g id="edge2" class="edge">
-<title>bb100_1&#45;&gt;bb100_1</title>
+<title>bb::&lt;constant:Object&gt;#test_large_float_1&#45;&gt;bb::&lt;constant:Object&gt;#test_large_float_1</title>
 <path fill="none" stroke="#000000" d="M2103.5031,-88.0539C2146.0033,-110.2826 2193.7753,-98.2646 2193.7753,-52 2193.7753,-9.0787 2152.6584,4.3668 2112.7796,-11.6635"/>
 <polygon fill="#000000" stroke="#000000" points="2111.1152,-8.5768 2103.5031,-15.9461 2114.0493,-14.9323 2111.1152,-8.5768"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 636be32c8a784697638fd490779dabd793652b5295b9a8e54c4ee62efde1c27f -->
+<!-- ruby-types:sha256: 96f1ccdada47fc125ab5b51dc67a65e2c077dfe09582eed17b351547f54b27f2 -->

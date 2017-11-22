@@ -2,21 +2,37 @@ digraph "block_in_deadcode.rb"{
 subgraph "cluster_::<constant:Object>#foo" {
     label = "::<constant:Object>#foo";
     color = blue;
-    bb100_0 [shape = invhouse];
-    bb100_1 [shape = parallelogram];
+    "bb::<constant:Object>#foo_0" [shape = invhouse];
+    "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    bb100_0 [label = "(statTemp$2)\nstatTemp$2 = self : Object\n<unconditional>"];
-    bb100_0 -> bb100_2;
-    bb100_1 [label = "()\nstatTemp$6 = self\nstatTemp$8 = self\nblockReturnTemp$7 = statTemp$8.foo()\nblockReturnTemp$3 = statTemp$6.inner()\n<unconditional>"];
-    bb100_1 -> bb100_1;
-    bb100_2 [label = "(statTemp$2)\nouterLoops: 1\n<block-call>"];
-    bb100_2 -> bb100_4;
-    bb100_2 -> bb100_3;
+    "bb::<constant:Object>#foo_0" [label = "(statTemp$2)
+statTemp$2 = self : Object
+<unconditional>"];
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2";
+    "bb::<constant:Object>#foo_1" [label = "()
+statTemp$6 = self
+statTemp$8 = self
+blockReturnTemp$7 = statTemp$8.foo()
+blockReturnTemp$3 = statTemp$6.inner()
+<unconditional>"];
+    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_2" [label = "(statTemp$2)
+outerLoops: 1
+<block-call>"];
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4";
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3";
 
-    bb100_3 [label = "(statTemp$2)\nreturnMethodTemp$2 = statTemp$2.outer() : untyped\nreturnMethodTemp$9 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
-    bb100_3 -> bb100_1;
-    bb100_4 [label = "()\nouterLoops: 1\nreturnTemp$5 = NotSupported() : untyped\nstatTemp$4 = return returnTemp$5 : <bottom>\n<unconditional>"];
-    bb100_4 -> bb100_1;
+    "bb::<constant:Object>#foo_3" [label = "(statTemp$2)
+returnMethodTemp$2 = statTemp$2.outer() : untyped
+returnMethodTemp$9 = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_4" [label = "()
+outerLoops: 1
+returnTemp$5 = NotSupported() : untyped
+statTemp$4 = return returnTemp$5 : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1";
 }
 
 }

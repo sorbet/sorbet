@@ -2,21 +2,38 @@ digraph "next.rb"{
 subgraph "cluster_::<constant:Object>#foo" {
     label = "::<constant:Object>#foo";
     color = blue;
-    bb100_0 [shape = invhouse];
-    bb100_1 [shape = parallelogram];
+    "bb::<constant:Object>#foo_0" [shape = invhouse];
+    "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    bb100_0 [label = "(statTemp$2)\nstatTemp$2 = NotSupported() : untyped\n<unconditional>"];
-    bb100_0 -> bb100_2;
-    bb100_1 [label = "()\nstatTemp$10 = self\nblockReturnTemp$3 = statTemp$10.bad()\n<unconditional>"];
-    bb100_1 -> bb100_1;
-    bb100_2 [label = "(statTemp$2)\nouterLoops: 1\n<block-call>"];
-    bb100_2 -> bb100_4;
-    bb100_2 -> bb100_3;
+    "bb::<constant:Object>#foo_0" [label = "(statTemp$2)
+statTemp$2 = NotSupported() : untyped
+<unconditional>"];
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2";
+    "bb::<constant:Object>#foo_1" [label = "()
+statTemp$10 = self
+blockReturnTemp$3 = statTemp$10.bad()
+<unconditional>"];
+    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_2" [label = "(statTemp$2)
+outerLoops: 1
+<block-call>"];
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4";
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3";
 
-    bb100_3 [label = "(statTemp$2)\nreturnMethodTemp$1 = statTemp$2.map() : untyped\nreturnMethodTemp$11 = return returnMethodTemp$1 : <bottom>\n<unconditional>"];
-    bb100_3 -> bb100_1;
-    bb100_4 [label = "(statTemp$2)\nouterLoops: 1\n<block-nested: x> = load_arg(statTemp$2#map, 0) : untyped\nstatTemp$5 = self : Object\nstatTemp$4 = statTemp$5.good() : untyped\nstatTemp$9 = 1 : Integer(1)\nreturnTemp$7 = <block-nested: x>.+(statTemp$9) : untyped\n<unconditional>"];
-    bb100_4 -> bb100_2;
+    "bb::<constant:Object>#foo_3" [label = "(statTemp$2)
+returnMethodTemp$1 = statTemp$2.map() : untyped
+returnMethodTemp$11 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_4" [label = "(statTemp$2)
+outerLoops: 1
+<block-nested: x> = load_arg(statTemp$2#map, 0) : untyped
+statTemp$5 = self : Object
+statTemp$4 = statTemp$5.good() : untyped
+statTemp$9 = 1 : Integer(1)
+returnTemp$7 = <block-nested: x>.+(statTemp$9) : untyped
+<unconditional>"];
+    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_2";
 }
 
 }

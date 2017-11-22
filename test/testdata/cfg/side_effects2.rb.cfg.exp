@@ -2,33 +2,55 @@ digraph "side_effects2.rb"{
 subgraph "cluster_::<constant:Side>#foo" {
     label = "::<constant:Side>#foo";
     color = blue;
-    bb101_0 [shape = invhouse];
-    bb101_1 [shape = parallelogram];
+    "bb::<constant:Side>#foo_0" [shape = invhouse];
+    "bb::<constant:Side>#foo_1" [shape = parallelogram];
 
-    bb101_0 [label = "(a, statTemp$3, statTemp$4)\na = self : Side\nstatTemp$3 = a : Side\nstatTemp$4 = a : Side\nifTemp$6 = true : TrueClass(true)\nifTemp$6"];
-    bb101_0 -> bb101_2;
-    bb101_0 -> bb101_3;
+    "bb::<constant:Side>#foo_0" [label = "(a, statTemp$3, statTemp$4)
+a = self : Side
+statTemp$3 = a : Side
+statTemp$4 = a : Side
+ifTemp$6 = true : TrueClass(true)
+ifTemp$6"];
+    "bb::<constant:Side>#foo_0" -> "bb::<constant:Side>#foo_2";
+    "bb::<constant:Side>#foo_0" -> "bb::<constant:Side>#foo_3";
 
-    bb101_1 [label = "()\n<unconditional>"];
-    bb101_1 -> bb101_1;
-    bb101_2 [label = "(a, statTemp$3, statTemp$4)\na = true : TrueClass(true)\n<unconditional>"];
-    bb101_2 -> bb101_4;
-    bb101_3 [label = "(a, statTemp$3, statTemp$4)\na = 2 : Integer(2)\n<unconditional>"];
-    bb101_3 -> bb101_4;
-    bb101_4 [label = "(a, statTemp$3, statTemp$4)\nreturnMethodTemp$0 = statTemp$3.bar(statTemp$4, a, a) : untyped\nreturnMethodTemp$8 = return returnMethodTemp$0 : <bottom>\n<unconditional>"];
-    bb101_4 -> bb101_1;
+    "bb::<constant:Side>#foo_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Side>#foo_1" -> "bb::<constant:Side>#foo_1";
+    "bb::<constant:Side>#foo_2" [label = "(a, statTemp$3, statTemp$4)
+a = true : TrueClass(true)
+<unconditional>"];
+    "bb::<constant:Side>#foo_2" -> "bb::<constant:Side>#foo_4";
+    "bb::<constant:Side>#foo_3" [label = "(a, statTemp$3, statTemp$4)
+a = 2 : Integer(2)
+<unconditional>"];
+    "bb::<constant:Side>#foo_3" -> "bb::<constant:Side>#foo_4";
+    "bb::<constant:Side>#foo_4" [label = "(a, statTemp$3, statTemp$4)
+returnMethodTemp$0 = statTemp$3.bar(statTemp$4, a, a) : untyped
+returnMethodTemp$8 = return returnMethodTemp$0 : <bottom>
+<unconditional>"];
+    "bb::<constant:Side>#foo_4" -> "bb::<constant:Side>#foo_1";
 }
 
 subgraph "cluster_::<constant:Side>#bar" {
     label = "::<constant:Side>#bar";
     color = blue;
-    bb102_0 [shape = invhouse];
-    bb102_1 [shape = parallelogram];
+    "bb::<constant:Side>#bar_0" [shape = invhouse];
+    "bb::<constant:Side>#bar_1" [shape = parallelogram];
 
-    bb102_0 [label = "()\nselfMethodTemp$1 = self : Side\na = load_arg(selfMethodTemp$1#bar, 0) : untyped\nb = load_arg(selfMethodTemp$1#bar, 1) : untyped\nc = load_arg(selfMethodTemp$1#bar, 2) : untyped\nstatTemp$2 = self : Side\nreturnMethodTemp$1 = statTemp$2.puts(a, b, c) : untyped\nreturnMethodTemp$6 = return returnMethodTemp$1 : <bottom>\n<unconditional>"];
-    bb102_0 -> bb102_1;
-    bb102_1 [label = "()\n<unconditional>"];
-    bb102_1 -> bb102_1;
+    "bb::<constant:Side>#bar_0" [label = "()
+selfMethodTemp$1 = self : Side
+a = load_arg(selfMethodTemp$1#bar, 0) : untyped
+b = load_arg(selfMethodTemp$1#bar, 1) : untyped
+c = load_arg(selfMethodTemp$1#bar, 2) : untyped
+statTemp$2 = self : Side
+returnMethodTemp$1 = statTemp$2.puts(a, b, c) : untyped
+returnMethodTemp$6 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+    "bb::<constant:Side>#bar_0" -> "bb::<constant:Side>#bar_1";
+    "bb::<constant:Side>#bar_1" [label = "()
+<unconditional>"];
+    "bb::<constant:Side>#bar_1" -> "bb::<constant:Side>#bar_1";
 }
 
 }

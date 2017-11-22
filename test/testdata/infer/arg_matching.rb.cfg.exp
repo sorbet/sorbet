@@ -2,169 +2,363 @@ digraph "arg_matching.rb"{
 subgraph "cluster_::<constant:TestArgs>#any" {
     label = "::<constant:TestArgs>#any";
     color = blue;
-    bb101_0 [shape = invhouse];
-    bb101_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#any_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#any_1" [shape = parallelogram];
 
-    bb101_0 [label = "()\nreturnMethodTemp$1 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$1 : <bottom>\n<unconditional>"];
-    bb101_0 -> bb101_1;
-    bb101_1 [label = "()\n<unconditional>"];
-    bb101_1 -> bb101_1;
+    "bb::<constant:TestArgs>#any_0" [label = "()
+returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#any_0" -> "bb::<constant:TestArgs>#any_1";
+    "bb::<constant:TestArgs>#any_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#any_1" -> "bb::<constant:TestArgs>#any_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#a_hash" {
     label = "::<constant:TestArgs>#a_hash";
     color = blue;
-    bb103_0 [shape = invhouse];
-    bb103_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#a_hash_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#a_hash_1" [shape = parallelogram];
 
-    bb103_0 [label = "()\nreturnMethodTemp$2 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$2 : <bottom>\n<unconditional>"];
-    bb103_0 -> bb103_1;
-    bb103_1 [label = "()\n<unconditional>"];
-    bb103_1 -> bb103_1;
+    "bb::<constant:TestArgs>#a_hash_0" [label = "()
+returnMethodTemp$2 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#a_hash_0" -> "bb::<constant:TestArgs>#a_hash_1";
+    "bb::<constant:TestArgs>#a_hash_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#a_hash_1" -> "bb::<constant:TestArgs>#a_hash_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#required" {
     label = "::<constant:TestArgs>#required";
     color = blue;
-    bb104_0 [shape = invhouse];
-    bb104_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#required_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#required_1" [shape = parallelogram];
 
-    bb104_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$3 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$3 : <bottom>\n<unconditional>"];
-    bb104_0 -> bb104_1;
-    bb104_1 [label = "()\n<unconditional>"];
-    bb104_1 -> bb104_1;
+    "bb::<constant:TestArgs>#required_0" [label = "()
+selfMethodTemp$1 = self : TestArgs
+returnMethodTemp$3 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$3 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#required_0" -> "bb::<constant:TestArgs>#required_1";
+    "bb::<constant:TestArgs>#required_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#required_1" -> "bb::<constant:TestArgs>#required_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_required" {
     label = "::<constant:TestArgs>#call_required";
     color = blue;
-    bb107_0 [shape = invhouse];
-    bb107_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#call_required_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#call_required_1" [shape = parallelogram];
 
-    bb107_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$4 = 1 : Integer(1)\nstatTemp$2 = statTemp$3.required(statTemp$4) : untyped\nstatTemp$6 = self : TestArgs\nstatTemp$7 = 1 : Integer(1)\nstatTemp$8 = 2 : Integer(2)\nstatTemp$5 = statTemp$6.required(statTemp$7, statTemp$8) : untyped\nstatTemp$9 = self : TestArgs\nstatTemp$10 = 1 : Integer(1)\nstatTemp$11 = 2 : Integer(2)\nstatTemp$12 = 3 : Integer(3)\nreturnMethodTemp$4 = statTemp$9.required(statTemp$10, statTemp$11, statTemp$12) : untyped\nreturnMethodTemp$13 = return returnMethodTemp$4 : <bottom>\n<unconditional>"];
-    bb107_0 -> bb107_1;
-    bb107_1 [label = "()\n<unconditional>"];
-    bb107_1 -> bb107_1;
+    "bb::<constant:TestArgs>#call_required_0" [label = "()
+statTemp$3 = self : TestArgs
+statTemp$4 = 1 : Integer(1)
+statTemp$2 = statTemp$3.required(statTemp$4) : untyped
+statTemp$6 = self : TestArgs
+statTemp$7 = 1 : Integer(1)
+statTemp$8 = 2 : Integer(2)
+statTemp$5 = statTemp$6.required(statTemp$7, statTemp$8) : untyped
+statTemp$9 = self : TestArgs
+statTemp$10 = 1 : Integer(1)
+statTemp$11 = 2 : Integer(2)
+statTemp$12 = 3 : Integer(3)
+returnMethodTemp$4 = statTemp$9.required(statTemp$10, statTemp$11, statTemp$12) : untyped
+returnMethodTemp$13 = return returnMethodTemp$4 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_required_0" -> "bb::<constant:TestArgs>#call_required_1";
+    "bb::<constant:TestArgs>#call_required_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_required_1" -> "bb::<constant:TestArgs>#call_required_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#optional" {
     label = "::<constant:TestArgs>#optional";
     color = blue;
-    bb108_0 [shape = invhouse];
-    bb108_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#optional_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#optional_1" [shape = parallelogram];
 
-    bb108_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$5 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$5 : <bottom>\n<unconditional>"];
-    bb108_0 -> bb108_1;
-    bb108_1 [label = "()\n<unconditional>"];
-    bb108_1 -> bb108_1;
+    "bb::<constant:TestArgs>#optional_0" [label = "()
+selfMethodTemp$1 = self : TestArgs
+returnMethodTemp$5 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$5 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#optional_0" -> "bb::<constant:TestArgs>#optional_1";
+    "bb::<constant:TestArgs>#optional_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#optional_1" -> "bb::<constant:TestArgs>#optional_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_optional" {
     label = "::<constant:TestArgs>#call_optional";
     color = blue;
-    bb111_0 [shape = invhouse];
-    bb111_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#call_optional_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#call_optional_1" [shape = parallelogram];
 
-    bb111_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$4 = 1 : Integer(1)\nstatTemp$2 = statTemp$3.optional(statTemp$4) : untyped\nstatTemp$6 = self : TestArgs\nstatTemp$7 = 1 : Integer(1)\nstatTemp$8 = 2 : Integer(2)\nstatTemp$5 = statTemp$6.optional(statTemp$7, statTemp$8) : untyped\nstatTemp$9 = self : TestArgs\nstatTemp$10 = 1 : Integer(1)\nstatTemp$11 = 2 : Integer(2)\nstatTemp$12 = 3 : Integer(3)\nreturnMethodTemp$6 = statTemp$9.optional(statTemp$10, statTemp$11, statTemp$12) : untyped\nreturnMethodTemp$13 = return returnMethodTemp$6 : <bottom>\n<unconditional>"];
-    bb111_0 -> bb111_1;
-    bb111_1 [label = "()\n<unconditional>"];
-    bb111_1 -> bb111_1;
+    "bb::<constant:TestArgs>#call_optional_0" [label = "()
+statTemp$3 = self : TestArgs
+statTemp$4 = 1 : Integer(1)
+statTemp$2 = statTemp$3.optional(statTemp$4) : untyped
+statTemp$6 = self : TestArgs
+statTemp$7 = 1 : Integer(1)
+statTemp$8 = 2 : Integer(2)
+statTemp$5 = statTemp$6.optional(statTemp$7, statTemp$8) : untyped
+statTemp$9 = self : TestArgs
+statTemp$10 = 1 : Integer(1)
+statTemp$11 = 2 : Integer(2)
+statTemp$12 = 3 : Integer(3)
+returnMethodTemp$6 = statTemp$9.optional(statTemp$10, statTemp$11, statTemp$12) : untyped
+returnMethodTemp$13 = return returnMethodTemp$6 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_optional_0" -> "bb::<constant:TestArgs>#call_optional_1";
+    "bb::<constant:TestArgs>#call_optional_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_optional_1" -> "bb::<constant:TestArgs>#call_optional_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#kwarg" {
     label = "::<constant:TestArgs>#kwarg";
     color = blue;
-    bb112_0 [shape = invhouse];
-    bb112_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#kwarg_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#kwarg_1" [shape = parallelogram];
 
-    bb112_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$7 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$7 : <bottom>\n<unconditional>"];
-    bb112_0 -> bb112_1;
-    bb112_1 [label = "()\n<unconditional>"];
-    bb112_1 -> bb112_1;
+    "bb::<constant:TestArgs>#kwarg_0" [label = "()
+selfMethodTemp$1 = self : TestArgs
+returnMethodTemp$7 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$7 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#kwarg_0" -> "bb::<constant:TestArgs>#kwarg_1";
+    "bb::<constant:TestArgs>#kwarg_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#kwarg_1" -> "bb::<constant:TestArgs>#kwarg_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_kwarg" {
     label = "::<constant:TestArgs>#call_kwarg";
     color = blue;
-    bb115_0 [shape = invhouse];
-    bb115_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#call_kwarg_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#call_kwarg_1" [shape = parallelogram];
 
-    bb115_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$4 = 1 : Integer(1)\nstatTemp$5 = 2 : Integer(2)\nstatTemp$2 = statTemp$3.kwarg(statTemp$4, statTemp$5) : NilClass\nstatTemp$7 = self : TestArgs\nstatTemp$8 = 1 : Integer(1)\nstatTemp$6 = statTemp$7.kwarg(statTemp$8) : NilClass\nstatTemp$10 = self : TestArgs\nstatTemp$11 = 1 : Integer(1)\nhashTemp$13 = <symbol:b> : Symbol(:\"b\")\nhashTemp$14 = 2 : Integer(2)\nhashTemp$15 = alias {} : HashType {\n}\nstatTemp$12 = hashTemp$15.<build-hash>(hashTemp$13, hashTemp$14) : HashType {\n  Symbol(:\"b\") => Integer(2)\n}\nstatTemp$9 = statTemp$10.kwarg(statTemp$11, statTemp$12) : NilClass\nstatTemp$17 = self : TestArgs\nstatTemp$18 = 1 : Integer(1)\nhashTemp$20 = <symbol:b> : Symbol(:\"b\")\nhashTemp$21 = 2 : Integer(2)\nhashTemp$22 = <symbol:c> : Symbol(:\"c\")\nhashTemp$23 = 3 : Integer(3)\nhashTemp$24 = alias {} : HashType {\n}\nstatTemp$19 = hashTemp$24.<build-hash>(hashTemp$20, hashTemp$21, hashTemp$22, hashTemp$23) : HashType {\n  Symbol(:\"b\") => Integer(2)\n  Symbol(:\"c\") => Integer(3)\n}\nstatTemp$16 = statTemp$17.kwarg(statTemp$18, statTemp$19) : NilClass\nstatTemp$26 = self : TestArgs\nstatTemp$27 = 1 : Integer(1)\nhashTemp$29 = alias {} : HashType {\n}\nstatTemp$28 = hashTemp$29.<build-hash>() : HashType {\n}\nstatTemp$25 = statTemp$26.kwarg(statTemp$27, statTemp$28) : NilClass\nstatTemp$31 = self : TestArgs\nstatTemp$32 = 1 : Integer(1)\nhashTemp$34 = <symbol:b> : Symbol(:\"b\")\nhashTemp$35 = hi : String(\"hi\")\nhashTemp$36 = alias {} : HashType {\n}\nstatTemp$33 = hashTemp$36.<build-hash>(hashTemp$34, hashTemp$35) : HashType {\n  Symbol(:\"b\") => String(\"hi\")\n}\nstatTemp$30 = statTemp$31.kwarg(statTemp$32, statTemp$33) : NilClass\nstatTemp$38 = self : TestArgs\nstatTemp$39 = 1 : Integer(1)\nstatTemp$41 = self : TestArgs\nstatTemp$40 = statTemp$41.any() : untyped\nstatTemp$37 = statTemp$38.kwarg(statTemp$39, statTemp$40) : NilClass\nstatTemp$42 = self : TestArgs\nstatTemp$43 = 1 : Integer(1)\nstatTemp$45 = self : TestArgs\nstatTemp$44 = statTemp$45.a_hash() : Hash\nreturnMethodTemp$8 = statTemp$42.kwarg(statTemp$43, statTemp$44) : NilClass\nreturnMethodTemp$46 = return returnMethodTemp$8 : <bottom>\n<unconditional>"];
-    bb115_0 -> bb115_1;
-    bb115_1 [label = "()\n<unconditional>"];
-    bb115_1 -> bb115_1;
+    "bb::<constant:TestArgs>#call_kwarg_0" [label = "()
+statTemp$3 = self : TestArgs
+statTemp$4 = 1 : Integer(1)
+statTemp$5 = 2 : Integer(2)
+statTemp$2 = statTemp$3.kwarg(statTemp$4, statTemp$5) : NilClass
+statTemp$7 = self : TestArgs
+statTemp$8 = 1 : Integer(1)
+statTemp$6 = statTemp$7.kwarg(statTemp$8) : NilClass
+statTemp$10 = self : TestArgs
+statTemp$11 = 1 : Integer(1)
+hashTemp$13 = <symbol:b> : Symbol(:\"b\")
+hashTemp$14 = 2 : Integer(2)
+hashTemp$15 = alias {} : HashType {\n}
+statTemp$12 = hashTemp$15.<build-hash>(hashTemp$13, hashTemp$14) : HashType {\n  Symbol(:\"b\") => Integer(2)\n}
+statTemp$9 = statTemp$10.kwarg(statTemp$11, statTemp$12) : NilClass
+statTemp$17 = self : TestArgs
+statTemp$18 = 1 : Integer(1)
+hashTemp$20 = <symbol:b> : Symbol(:\"b\")
+hashTemp$21 = 2 : Integer(2)
+hashTemp$22 = <symbol:c> : Symbol(:\"c\")
+hashTemp$23 = 3 : Integer(3)
+hashTemp$24 = alias {} : HashType {\n}
+statTemp$19 = hashTemp$24.<build-hash>(hashTemp$20, hashTemp$21, hashTemp$22, hashTemp$23) : HashType {\n  Symbol(:\"b\") => Integer(2)\n  Symbol(:\"c\") => Integer(3)\n}
+statTemp$16 = statTemp$17.kwarg(statTemp$18, statTemp$19) : NilClass
+statTemp$26 = self : TestArgs
+statTemp$27 = 1 : Integer(1)
+hashTemp$29 = alias {} : HashType {\n}
+statTemp$28 = hashTemp$29.<build-hash>() : HashType {\n}
+statTemp$25 = statTemp$26.kwarg(statTemp$27, statTemp$28) : NilClass
+statTemp$31 = self : TestArgs
+statTemp$32 = 1 : Integer(1)
+hashTemp$34 = <symbol:b> : Symbol(:\"b\")
+hashTemp$35 = hi : String(\"hi\")
+hashTemp$36 = alias {} : HashType {\n}
+statTemp$33 = hashTemp$36.<build-hash>(hashTemp$34, hashTemp$35) : HashType {\n  Symbol(:\"b\") => String(\"hi\")\n}
+statTemp$30 = statTemp$31.kwarg(statTemp$32, statTemp$33) : NilClass
+statTemp$38 = self : TestArgs
+statTemp$39 = 1 : Integer(1)
+statTemp$41 = self : TestArgs
+statTemp$40 = statTemp$41.any() : untyped
+statTemp$37 = statTemp$38.kwarg(statTemp$39, statTemp$40) : NilClass
+statTemp$42 = self : TestArgs
+statTemp$43 = 1 : Integer(1)
+statTemp$45 = self : TestArgs
+statTemp$44 = statTemp$45.a_hash() : Hash
+returnMethodTemp$8 = statTemp$42.kwarg(statTemp$43, statTemp$44) : NilClass
+returnMethodTemp$46 = return returnMethodTemp$8 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_kwarg_0" -> "bb::<constant:TestArgs>#call_kwarg_1";
+    "bb::<constant:TestArgs>#call_kwarg_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_kwarg_1" -> "bb::<constant:TestArgs>#call_kwarg_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#repeated" {
     label = "::<constant:TestArgs>#repeated";
     color = blue;
-    bb116_0 [shape = invhouse];
-    bb116_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#repeated_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#repeated_1" [shape = parallelogram];
 
-    bb116_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$9 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$9 : <bottom>\n<unconditional>"];
-    bb116_0 -> bb116_1;
-    bb116_1 [label = "()\n<unconditional>"];
-    bb116_1 -> bb116_1;
+    "bb::<constant:TestArgs>#repeated_0" [label = "()
+selfMethodTemp$1 = self : TestArgs
+returnMethodTemp$9 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$9 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#repeated_0" -> "bb::<constant:TestArgs>#repeated_1";
+    "bb::<constant:TestArgs>#repeated_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#repeated_1" -> "bb::<constant:TestArgs>#repeated_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_repeated" {
     label = "::<constant:TestArgs>#call_repeated";
     color = blue;
-    bb118_0 [shape = invhouse];
-    bb118_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#call_repeated_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#call_repeated_1" [shape = parallelogram];
 
-    bb118_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$2 = statTemp$3.repeated() : NilClass\nstatTemp$5 = self : TestArgs\nstatTemp$6 = 1 : Integer(1)\nstatTemp$7 = 2 : Integer(2)\nstatTemp$8 = 3 : Integer(3)\nstatTemp$4 = statTemp$5.repeated(statTemp$6, statTemp$7, statTemp$8) : NilClass\nstatTemp$10 = self : TestArgs\nstatTemp$11 = 1 : Integer(1)\nstatTemp$12 = hi : String(\"hi\")\nstatTemp$9 = statTemp$10.repeated(statTemp$11, statTemp$12) : NilClass\nstatTemp$13 = self : TestArgs\nstatTemp$14 = hi : String(\"hi\")\nstatTemp$15 = there : String(\"there\")\nreturnMethodTemp$10 = statTemp$13.repeated(statTemp$14, statTemp$15) : NilClass\nreturnMethodTemp$16 = return returnMethodTemp$10 : <bottom>\n<unconditional>"];
-    bb118_0 -> bb118_1;
-    bb118_1 [label = "()\n<unconditional>"];
-    bb118_1 -> bb118_1;
+    "bb::<constant:TestArgs>#call_repeated_0" [label = "()
+statTemp$3 = self : TestArgs
+statTemp$2 = statTemp$3.repeated() : NilClass
+statTemp$5 = self : TestArgs
+statTemp$6 = 1 : Integer(1)
+statTemp$7 = 2 : Integer(2)
+statTemp$8 = 3 : Integer(3)
+statTemp$4 = statTemp$5.repeated(statTemp$6, statTemp$7, statTemp$8) : NilClass
+statTemp$10 = self : TestArgs
+statTemp$11 = 1 : Integer(1)
+statTemp$12 = hi : String(\"hi\")
+statTemp$9 = statTemp$10.repeated(statTemp$11, statTemp$12) : NilClass
+statTemp$13 = self : TestArgs
+statTemp$14 = hi : String(\"hi\")
+statTemp$15 = there : String(\"there\")
+returnMethodTemp$10 = statTemp$13.repeated(statTemp$14, statTemp$15) : NilClass
+returnMethodTemp$16 = return returnMethodTemp$10 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_repeated_0" -> "bb::<constant:TestArgs>#call_repeated_1";
+    "bb::<constant:TestArgs>#call_repeated_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_repeated_1" -> "bb::<constant:TestArgs>#call_repeated_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#mixed" {
     label = "::<constant:TestArgs>#mixed";
     color = blue;
-    bb119_0 [shape = invhouse];
-    bb119_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#mixed_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#mixed_1" [shape = parallelogram];
 
-    bb119_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$11 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$11 : <bottom>\n<unconditional>"];
-    bb119_0 -> bb119_1;
-    bb119_1 [label = "()\n<unconditional>"];
-    bb119_1 -> bb119_1;
+    "bb::<constant:TestArgs>#mixed_0" [label = "()
+selfMethodTemp$1 = self : TestArgs
+returnMethodTemp$11 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$11 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#mixed_0" -> "bb::<constant:TestArgs>#mixed_1";
+    "bb::<constant:TestArgs>#mixed_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#mixed_1" -> "bb::<constant:TestArgs>#mixed_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_mixed" {
     label = "::<constant:TestArgs>#call_mixed";
     color = blue;
-    bb126_0 [shape = invhouse];
-    bb126_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#call_mixed_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#call_mixed_1" [shape = parallelogram];
 
-    bb126_0 [label = "()\nstatTemp$3 = self : TestArgs\nstatTemp$4 = 0 : Integer(0)\nhashTemp$6 = <symbol:u> : Symbol(:\"u\")\nhashTemp$7 = 1 : Integer(1)\nhashTemp$8 = alias {} : HashType {\n}\nstatTemp$5 = hashTemp$8.<build-hash>(hashTemp$6, hashTemp$7) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}\nstatTemp$2 = statTemp$3.mixed(statTemp$4, statTemp$5) : NilClass\nstatTemp$10 = self : TestArgs\nstatTemp$11 = 0 : Integer(0)\nstatTemp$12 = 1 : Integer(1)\nhashTemp$14 = <symbol:u> : Symbol(:\"u\")\nhashTemp$15 = 1 : Integer(1)\nhashTemp$16 = alias {} : HashType {\n}\nstatTemp$13 = hashTemp$16.<build-hash>(hashTemp$14, hashTemp$15) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}\nstatTemp$9 = statTemp$10.mixed(statTemp$11, statTemp$12, statTemp$13) : NilClass\nstatTemp$18 = self : TestArgs\nstatTemp$19 = 0 : Integer(0)\nstatTemp$20 = 1 : Integer(1)\nhashTemp$22 = <symbol:z> : Symbol(:\"z\")\nhashTemp$23 = 1 : Integer(1)\nhashTemp$24 = alias {} : HashType {\n}\nstatTemp$21 = hashTemp$24.<build-hash>(hashTemp$22, hashTemp$23) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}\nhashTemp$26 = <symbol:u> : Symbol(:\"u\")\nhashTemp$27 = 1 : Integer(1)\nhashTemp$28 = alias {} : HashType {\n}\nstatTemp$25 = hashTemp$28.<build-hash>(hashTemp$26, hashTemp$27) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}\nstatTemp$17 = statTemp$18.mixed(statTemp$19, statTemp$20, statTemp$21, statTemp$25) : NilClass\nstatTemp$29 = self : TestArgs\nstatTemp$30 = 0 : Integer(0)\nstatTemp$31 = 1 : Integer(1)\nhashTemp$33 = <symbol:z> : Symbol(:\"z\")\nhashTemp$34 = 1 : Integer(1)\nhashTemp$35 = alias {} : HashType {\n}\nstatTemp$32 = hashTemp$35.<build-hash>(hashTemp$33, hashTemp$34) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}\nstatTemp$36 = hi : String(\"hi\")\nstatTemp$37 = there : String(\"there\")\nhashTemp$39 = <symbol:u> : Symbol(:\"u\")\nhashTemp$40 = 1 : Integer(1)\nhashTemp$41 = <symbol:v> : Symbol(:\"v\")\nhashTemp$42 = 0 : Integer(0)\nhashTemp$43 = alias {} : HashType {\n}\nstatTemp$38 = hashTemp$43.<build-hash>(hashTemp$39, hashTemp$40, hashTemp$41, hashTemp$42) : HashType {\n  Symbol(:\"u\") => Integer(1)\n  Symbol(:\"v\") => Integer(0)\n}\nreturnMethodTemp$12 = statTemp$29.mixed(statTemp$30, statTemp$31, statTemp$32, statTemp$36, statTemp$37, statTemp$38) : NilClass\nreturnMethodTemp$44 = return returnMethodTemp$12 : <bottom>\n<unconditional>"];
-    bb126_0 -> bb126_1;
-    bb126_1 [label = "()\n<unconditional>"];
-    bb126_1 -> bb126_1;
+    "bb::<constant:TestArgs>#call_mixed_0" [label = "()
+statTemp$3 = self : TestArgs
+statTemp$4 = 0 : Integer(0)
+hashTemp$6 = <symbol:u> : Symbol(:\"u\")
+hashTemp$7 = 1 : Integer(1)
+hashTemp$8 = alias {} : HashType {\n}
+statTemp$5 = hashTemp$8.<build-hash>(hashTemp$6, hashTemp$7) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
+statTemp$2 = statTemp$3.mixed(statTemp$4, statTemp$5) : NilClass
+statTemp$10 = self : TestArgs
+statTemp$11 = 0 : Integer(0)
+statTemp$12 = 1 : Integer(1)
+hashTemp$14 = <symbol:u> : Symbol(:\"u\")
+hashTemp$15 = 1 : Integer(1)
+hashTemp$16 = alias {} : HashType {\n}
+statTemp$13 = hashTemp$16.<build-hash>(hashTemp$14, hashTemp$15) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
+statTemp$9 = statTemp$10.mixed(statTemp$11, statTemp$12, statTemp$13) : NilClass
+statTemp$18 = self : TestArgs
+statTemp$19 = 0 : Integer(0)
+statTemp$20 = 1 : Integer(1)
+hashTemp$22 = <symbol:z> : Symbol(:\"z\")
+hashTemp$23 = 1 : Integer(1)
+hashTemp$24 = alias {} : HashType {\n}
+statTemp$21 = hashTemp$24.<build-hash>(hashTemp$22, hashTemp$23) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}
+hashTemp$26 = <symbol:u> : Symbol(:\"u\")
+hashTemp$27 = 1 : Integer(1)
+hashTemp$28 = alias {} : HashType {\n}
+statTemp$25 = hashTemp$28.<build-hash>(hashTemp$26, hashTemp$27) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
+statTemp$17 = statTemp$18.mixed(statTemp$19, statTemp$20, statTemp$21, statTemp$25) : NilClass
+statTemp$29 = self : TestArgs
+statTemp$30 = 0 : Integer(0)
+statTemp$31 = 1 : Integer(1)
+hashTemp$33 = <symbol:z> : Symbol(:\"z\")
+hashTemp$34 = 1 : Integer(1)
+hashTemp$35 = alias {} : HashType {\n}
+statTemp$32 = hashTemp$35.<build-hash>(hashTemp$33, hashTemp$34) : HashType {\n  Symbol(:\"z\") => Integer(1)\n}
+statTemp$36 = hi : String(\"hi\")
+statTemp$37 = there : String(\"there\")
+hashTemp$39 = <symbol:u> : Symbol(:\"u\")
+hashTemp$40 = 1 : Integer(1)
+hashTemp$41 = <symbol:v> : Symbol(:\"v\")
+hashTemp$42 = 0 : Integer(0)
+hashTemp$43 = alias {} : HashType {\n}
+statTemp$38 = hashTemp$43.<build-hash>(hashTemp$39, hashTemp$40, hashTemp$41, hashTemp$42) : HashType {\n  Symbol(:\"u\") => Integer(1)\n  Symbol(:\"v\") => Integer(0)\n}
+returnMethodTemp$12 = statTemp$29.mixed(statTemp$30, statTemp$31, statTemp$32, statTemp$36, statTemp$37, statTemp$38) : NilClass
+returnMethodTemp$44 = return returnMethodTemp$12 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_mixed_0" -> "bb::<constant:TestArgs>#call_mixed_1";
+    "bb::<constant:TestArgs>#call_mixed_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_mixed_1" -> "bb::<constant:TestArgs>#call_mixed_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#optkw" {
     label = "::<constant:TestArgs>#optkw";
     color = blue;
-    bb127_0 [shape = invhouse];
-    bb127_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#optkw_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#optkw_1" [shape = parallelogram];
 
-    bb127_0 [label = "()\nselfMethodTemp$1 = self : TestArgs\nreturnMethodTemp$13 = NotSupported() : untyped\nreturnMethodTemp$2 = return returnMethodTemp$13 : <bottom>\n<unconditional>"];
-    bb127_0 -> bb127_1;
-    bb127_1 [label = "()\n<unconditional>"];
-    bb127_1 -> bb127_1;
+    "bb::<constant:TestArgs>#optkw_0" [label = "()
+selfMethodTemp$1 = self : TestArgs
+returnMethodTemp$13 = NotSupported() : untyped
+returnMethodTemp$2 = return returnMethodTemp$13 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#optkw_0" -> "bb::<constant:TestArgs>#optkw_1";
+    "bb::<constant:TestArgs>#optkw_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#optkw_1" -> "bb::<constant:TestArgs>#optkw_1";
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_optkw" {
     label = "::<constant:TestArgs>#call_optkw";
     color = blue;
-    bb131_0 [shape = invhouse];
-    bb131_1 [shape = parallelogram];
+    "bb::<constant:TestArgs>#call_optkw_0" [shape = invhouse];
+    "bb::<constant:TestArgs>#call_optkw_1" [shape = parallelogram];
 
-    bb131_0 [label = "()\nstatTemp$3 = self : TestArgs\nhashTemp$5 = <symbol:u> : Symbol(:\"u\")\nhashTemp$6 = 1 : Integer(1)\nhashTemp$7 = alias {} : HashType {\n}\nstatTemp$4 = hashTemp$7.<build-hash>(hashTemp$5, hashTemp$6) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}\nstatTemp$2 = statTemp$3.optkw(statTemp$4) : untyped\nstatTemp$8 = self : TestArgs\nstatTemp$9 = 1 : Integer(1)\nstatTemp$10 = 2 : Integer(2)\nstatTemp$11 = 3 : Integer(3)\nreturnMethodTemp$14 = statTemp$8.optkw(statTemp$9, statTemp$10, statTemp$11) : untyped\nreturnMethodTemp$12 = return returnMethodTemp$14 : <bottom>\n<unconditional>"];
-    bb131_0 -> bb131_1;
-    bb131_1 [label = "()\n<unconditional>"];
-    bb131_1 -> bb131_1;
+    "bb::<constant:TestArgs>#call_optkw_0" [label = "()
+statTemp$3 = self : TestArgs
+hashTemp$5 = <symbol:u> : Symbol(:\"u\")
+hashTemp$6 = 1 : Integer(1)
+hashTemp$7 = alias {} : HashType {\n}
+statTemp$4 = hashTemp$7.<build-hash>(hashTemp$5, hashTemp$6) : HashType {\n  Symbol(:\"u\") => Integer(1)\n}
+statTemp$2 = statTemp$3.optkw(statTemp$4) : untyped
+statTemp$8 = self : TestArgs
+statTemp$9 = 1 : Integer(1)
+statTemp$10 = 2 : Integer(2)
+statTemp$11 = 3 : Integer(3)
+returnMethodTemp$14 = statTemp$8.optkw(statTemp$9, statTemp$10, statTemp$11) : untyped
+returnMethodTemp$12 = return returnMethodTemp$14 : <bottom>
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_optkw_0" -> "bb::<constant:TestArgs>#call_optkw_1";
+    "bb::<constant:TestArgs>#call_optkw_1" [label = "()
+<unconditional>"];
+    "bb::<constant:TestArgs>#call_optkw_1" -> "bb::<constant:TestArgs>#call_optkw_1";
 }
 
 }
