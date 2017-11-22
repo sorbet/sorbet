@@ -622,7 +622,7 @@ unsigned int GlobalState::namesUsed() {
 string GlobalState::toString(bool showHidden) {
     vector<string> children;
     for (auto element : defn_root().info(*this).members) {
-        if (showHidden || !element.second.isHiddenFromPrinting()) {
+        if (showHidden || !element.second.isHiddenFromPrinting(*this)) {
             children.push_back(element.second.toString(*this));
         }
     }

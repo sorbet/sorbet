@@ -55,7 +55,7 @@ public:
     bool isSynthetic() const;
 
     /** Not printed when showing name table */
-    bool isHiddenFromPrinting() const;
+    bool isHiddenFromPrinting(GlobalState &gs) const;
 
     bool isPrimitive() const;
 

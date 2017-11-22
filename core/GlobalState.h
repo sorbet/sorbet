@@ -172,6 +172,7 @@ public:
         return SymbolRef(MAX_SYNTHETIC_SYMBOLS - 1);
     }
 
+    u2 freshNameId = 0;
 private:
     static constexpr int MAX_SYNTHETIC_SYMBOLS = 100;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
@@ -195,7 +196,6 @@ private:
 
     SymbolRef getTopLevelClassSymbol(NameRef name);
 
-    u2 freshNameId = 0;
 };
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib

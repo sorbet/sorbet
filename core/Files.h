@@ -47,6 +47,7 @@ public:
 
     UTF8Desc path();
     UTF8Desc source();
+    bool isPayload = false;
 
     File(std::string &&path_, std::string &&source_);
 
