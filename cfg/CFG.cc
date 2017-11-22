@@ -730,16 +730,16 @@ string BasicBlock::toString(core::Context ctx) {
         first = false;
         buf << arg.name.name(ctx).toString(ctx);
     }
-    buf << ")\\n";
+    buf << ")" << endl;
     if (this->outerLoops > 0) {
-        buf << "outerLoops: " << this->outerLoops << "\\n";
+        buf << "outerLoops: " << this->outerLoops << endl;
     }
     for (Binding &exp : this->exprs) {
         buf << exp.bind.name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
         if (exp.tpe) {
             buf << " : " << Strings::escapeCString(exp.tpe->toString(ctx));
         }
-        buf << "\\n"; // intentional! graphviz will do interpolation.
+        buf << endl; // intentional! graphviz will do interpolation.
     }
     if (this->bexit.cond.exists()) {
         buf << this->bexit.cond.name.name(ctx).toString(ctx);
