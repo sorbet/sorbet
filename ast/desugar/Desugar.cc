@@ -763,8 +763,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(send);
             },
             [&](parser::ERange *ret) {
-                core::NameRef range_name = core::GlobalState::defn_Range().info(ctx).name;
-                unique_ptr<Expression> range = make_unique<ConstantLit>(what->loc, mkEmptyTree(what->loc), range_name);
+                unique_ptr<Expression> range = mkIdent(what->loc, core::GlobalState::defn_Range());
                 auto from = node2TreeImpl(ctx, ret->from);
                 auto to = node2TreeImpl(ctx, ret->to);
                 auto true_ = mkTrue(what->loc);
@@ -773,7 +772,6 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::Regexp *regexpNode) {
                 unique_ptr<Expression> regexp = mkIdent(what->loc, core::GlobalState::defn_Regexp());
-
                 auto regex = desugarDString(ctx, what->loc, regexpNode->regex);
                 auto optsNode = node2TreeImpl(ctx, regexpNode->opts);
                 auto optString = cast_tree<StringLit>(optsNode.get());
