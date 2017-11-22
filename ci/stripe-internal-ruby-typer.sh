@@ -20,5 +20,3 @@ done
 if [ "$err" -ne 0 ]; then
     exit "$err"
 fi
-
-./tools/scripts/lint_cxx.sh
