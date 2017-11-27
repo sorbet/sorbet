@@ -21,6 +21,7 @@ NameDef names[] = {
     {"orOr", "||"},
     {"to_s"},
     {"concat"},
+    {"intern"},
     {"call"},
     {"bang", "!"},
     {"squareBrackets", "[]"},
