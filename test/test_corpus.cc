@@ -95,7 +95,7 @@ unordered_set<string> knownPasses = {
     "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "infer",
 };
 
-TEST_P(ExpectationTest, PerPhaseTest) {
+TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;

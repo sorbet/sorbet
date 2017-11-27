@@ -9,14 +9,14 @@ using namespace std;
 
 namespace ruby_typer {
 
-TEST(ErrorTest, RawCheck) {
+TEST(ErrorTest, RawCheck) { // NOLINT
     try {
         Error::check(false);
     } catch (...) {
     }
 }
 
-TEST(ErrorTest, ParserCheck) {
+TEST(ErrorTest, ParserCheck) { // NOLINT
     auto console = spdlog::stderr_color_mt("Error Test");
     ruby_typer::core::GlobalState gs(*console);
     ruby_typer::core::Context context(gs, gs.defn_root());
