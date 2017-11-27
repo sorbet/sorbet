@@ -3,6 +3,7 @@
 #include "../ast.h"
 #include "Desugar.h"
 #include "ast/ast.h"
+#include "ast/verifier/verifier.h"
 #include "common/common.h"
 
 namespace ruby_typer {

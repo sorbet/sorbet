@@ -1,5 +1,6 @@
 #include "../ast/ast.h"
 #include "ast/ast.h"
+#include "ast/treemap/treemap.h"
 #include "core/core.h"
 #include "namer/namer.h"
 

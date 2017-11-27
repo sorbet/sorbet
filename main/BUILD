@@ -41,7 +41,9 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast/desugar",
+        "//ast/treemap",
         "//cfg",
+        "//cfg/builder",
         "//core",
         "//core/serialize",
         "//infer",

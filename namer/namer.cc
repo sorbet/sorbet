@@ -3,6 +3,7 @@
 #include "../core/Context.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "ast/treemap/treemap.h"
 #include "core/core.h"
 
 #include <unordered_map>

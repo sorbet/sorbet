@@ -1,5 +1,5 @@
-#include "Verifier.h"
-#include "ast.h"
+#include "verifier.h"
+#include "ast/treemap/treemap.h"
 
 namespace ruby_typer {
 namespace ast {

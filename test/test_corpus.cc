@@ -1,7 +1,9 @@
 #include "../namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
+#include "cfg/builder/builder.h"
 #include "common/common.h"
 #include "core/serialize/serialize.h"
 #include "infer/infer.h"
@@ -83,7 +85,7 @@ public:
     CFG_Collector_and_Typer() = default;
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
-        auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
+        auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
 
         cfgs.push_back(cfg->toString(ctx));

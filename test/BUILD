@@ -17,7 +17,9 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
+        "//ast/treemap",
         "//cfg",
+        "//cfg/builder",
         "//core",
         "//core/serialize",
         "//infer",
@@ -44,6 +46,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast",
+        "//ast/treemap",
         "//common",
         "//core",
         "//parser",
