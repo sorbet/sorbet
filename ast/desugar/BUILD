@@ -11,6 +11,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
+        "//ast/verifier",
         "//core",
         "//parser",
     ],

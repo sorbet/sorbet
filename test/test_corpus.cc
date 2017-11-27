@@ -1,6 +1,7 @@
 #include "../namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "common/common.h"
 #include "core/serialize/serialize.h"

@@ -3,6 +3,7 @@
 #include "../namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
+#include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "core/serialize/serialize.h"
 #include "infer/infer.h"

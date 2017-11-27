@@ -1,4 +1,5 @@
 #include "ast/ast.h"
+#include "ast/treemap/treemap.h"
 #include "common/common.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
