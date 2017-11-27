@@ -1,15 +1,15 @@
 #include "common.h"
 #include "os/os.h"
 #include <array>
+#include <csignal>
 #include <cstdarg>
+#include <cstdio>
 #include <cxxabi.h>
 #include <exception>
 #include <execinfo.h>
 #include <fstream>
 #include <iostream>
 #include <memory>
-#include <signal.h>
-#include <stdio.h>
 #include <vector>
 
 using namespace std;
@@ -56,8 +56,9 @@ string ruby_typer::Strings::escapeCString(string what) {
                 break;
             }
         }
-        if (j == sizeof(escaped))
+        if (j == sizeof(escaped)) {
             buf << c;
+        }
     }
 
     return buf.str();
@@ -100,11 +101,13 @@ string exec(string cmd) {
     array<char, 128> buffer;
     string result;
     shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
-    if (!pipe)
+    if (!pipe) {
         throw runtime_error("popen() failed!");
-    while (!feof(pipe.get())) {
-        if (fgets(buffer.data(), 128, pipe.get()) != nullptr)
+    }
+    while (feof(pipe.get()) == 0) {
+        if (fgets(buffer.data(), 128, pipe.get()) != nullptr) {
             result += buffer.data();
+        }
     }
     return result;
 }
@@ -138,7 +141,7 @@ void filter_unnecessary(string &out) {
 
 void ruby_typer::Error::print_backtrace() {
     int trace_size = 0;
-    char **messages = (char **)NULL;
+    char **messages = (char **)nullptr;
     string program_name = getProgramName();
 
     trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);
@@ -148,13 +151,13 @@ void ruby_typer::Error::print_backtrace() {
     filter_unnecessary(res);
     fprintf(stderr, "Backtrace:\n%s", res.c_str());
 
-    if (messages) {
+    if (messages != nullptr) {
         free(messages);
     }
 }
 
 string demangle(const char *mangled) {
     int status;
-    unique_ptr<char[], void (*)(void *)> result(abi::__cxa_demangle(mangled, 0, 0, &status), free);
-    return result.get() ? string(result.get()) : "error occurred";
+    unique_ptr<char[], void (*)(void *)> result(abi::__cxa_demangle(mangled, nullptr, nullptr, &status), free);
+    return result.get() != nullptr ? string(result.get()) : "error occurred";
 }

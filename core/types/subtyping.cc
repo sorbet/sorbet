@@ -158,8 +158,9 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     ruby_typer::Error::check(g1 != nullptr);
     ruby_typer::Error::check(g2 != nullptr);
 
-    if (g1->kind() > g2->kind()) // force the relation to be symmentric and half the implementation
+    if (g1->kind() > g2->kind()) { // force the relation to be symmentric and half the implementation
         return lubGround(ctx, t2, t1);
+    }
     /** this implementation makes a bet that types are small and very likely to be collapsable.
      * The more complex types we have, the more likely this bet is to be wrong.
      */
@@ -242,8 +243,9 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
     ruby_typer::Error::check(g1 != nullptr);
     ruby_typer::Error::check(g2 != nullptr);
 
-    if (g1->kind() > g2->kind()) // force the relation to be symmentric and half the implementation
+    if (g1->kind() > g2->kind()) { // force the relation to be symmentric and half the implementation
         return glbGround(ctx, t2, t1);
+    }
     /** this implementation makes a bet that types are small and very likely to be collapsable.
      * The more complex types we have, the more likely this bet is to be wrong.
      */
@@ -501,8 +503,9 @@ bool ProxyType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 }
 
 bool ClassType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
-    if (symbol == ctx.state.defn_untyped() || symbol == klass)
+    if (symbol == ctx.state.defn_untyped() || symbol == klass) {
         return true;
+    }
     return symbol.info(ctx).derivesFrom(ctx, klass);
 }
 

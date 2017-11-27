@@ -20,7 +20,7 @@ auto console = spd::stderr_color_mt("infer");
 
 class InferFixture : public ::testing::Test {
 public:
-    void SetUp() {
+    void SetUp() override {
         ctxPtr = make_unique<core::GlobalState>(*console);
     }
     core::Context getCtx() {
@@ -37,7 +37,7 @@ unique_ptr<ast::Expression> getTree(core::GlobalState &cb, string str) {
     return ast::desugar::node2Tree(ctx, ast);
 }
 
-TEST_F(InferFixture, LiteralsSubtyping) {
+TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
     auto ctx = getCtx();
     auto intLit = make_shared<core::Literal>(int64_t(1));
     auto intClass = make_shared<core::ClassType>(core::GlobalState::defn_Integer());
@@ -60,7 +60,7 @@ TEST_F(InferFixture, LiteralsSubtyping) {
     EXPECT_FALSE(core::Types::isSubType(ctx, intClass, intLit));
 }
 
-TEST_F(InferFixture, ClassesSubtyping) {
+TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo < Bar; end");
     namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));
@@ -80,7 +80,7 @@ TEST_F(InferFixture, ClassesSubtyping) {
     ASSERT_FALSE(core::Types::isSubType(ctx, barType, fooType));
 }
 
-TEST_F(InferFixture, ClassesLubs) {
+TEST_F(InferFixture, ClassesLubs) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));
@@ -131,7 +131,7 @@ TEST_F(InferFixture, ClassesLubs) {
     ASSERT_TRUE(core::Types::equiv(ctx, intNfoo1Nfoo2Nbar, intNbar));
 }
 
-TEST_F(InferFixture, ClassesGlbs) {
+TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));

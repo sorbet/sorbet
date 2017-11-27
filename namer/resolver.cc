@@ -50,8 +50,9 @@ private:
 
         } else if (ast::ConstantLit *scope = ast::cast_tree<ast::ConstantLit>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, scope);
-            if (!resolved.exists() || resolved == core::GlobalState::defn_untyped())
+            if (!resolved.exists() || resolved == core::GlobalState::defn_untyped()) {
                 return resolved;
+            }
             c->scope = make_unique<ast::Ident>(c->loc, resolved);
         }
 
@@ -59,9 +60,10 @@ private:
             core::SymbolRef resolved = id->symbol;
             core::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
             if (!result.exists()) {
-                if (resolved.info(ctx).resultType.get() == nullptr || !resolved.info(ctx).resultType->isDynamic())
+                if (resolved.info(ctx).resultType.get() == nullptr || !resolved.info(ctx).resultType->isDynamic()) {
                     ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
                                            c->toString(ctx));
+                }
                 result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
                 result.info(ctx).resultType = core::Types::dynamic();
             }
@@ -77,8 +79,9 @@ private:
     unique_ptr<ast::Expression> maybeResolve(core::Context ctx, ast::Expression *expr) {
         if (ast::ConstantLit *cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
             core::SymbolRef resolved = resolveConstant(ctx, cnst);
-            if (resolved.exists())
+            if (resolved.exists()) {
                 return make_unique<ast::Ident>(expr->loc, resolved);
+            }
         }
         return nullptr;
     }
@@ -266,8 +269,9 @@ private:
                                        "`declare_variables`: variables must start with @ or @@");
             }
 
-            if (var.exists())
+            if (var.exists()) {
                 var.info(ctx).resultType = typ;
+            }
         }
     }
 
@@ -282,8 +286,9 @@ public:
         nesting_ = move(nesting_->parent);
 
         for (auto &ancst : original->ancestors) {
-            if (auto resolved = maybeResolve(ctx, ancst.get()))
+            if (auto resolved = maybeResolve(ctx, ancst.get())) {
                 ancst.swap(resolved);
+            }
         }
         core::Symbol &info = original->symbol.info(ctx);
         for (auto &ancst : original->ancestors) {
@@ -302,8 +307,9 @@ public:
             }
 
             if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
-                if (id->symbol == core::GlobalState::defn_todo())
+                if (id->symbol == core::GlobalState::defn_todo()) {
                     continue;
+                }
                 if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_todo() ||
                     info.superClass == id->symbol) {
                     info.superClass = id->symbol;
@@ -400,8 +406,9 @@ unique_ptr<ast::Expression> Resolver::run(core::Context &ctx, unique_ptr<ast::Ex
 void Resolver::finalize(core::GlobalState &gs) {
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto &info = core::SymbolRef(i).info(gs);
-        if (!info.isClass())
+        if (!info.isClass()) {
             continue;
+        }
         if (info.superClass == core::GlobalState::defn_todo()) {
             info.superClass = core::GlobalState::defn_object();
         }

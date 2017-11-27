@@ -12,7 +12,7 @@ namespace spd = spdlog;
 using ruby_typer::u4;
 using namespace std;
 
-TEST(ParserTest, SimpleParse) {
+TEST(ParserTest, SimpleParse) { // NOLINT
     auto console = spd::stderr_color_mt("parse");
     ruby_typer::core::GlobalState gs(*console);
     ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
@@ -26,7 +26,7 @@ struct DedentTest {
     string out;
 };
 
-TEST(ParserTest, TestDedent) {
+TEST(ParserTest, TestDedent) { // NOLINT
     vector<DedentTest> cases = {
         {2, "    hi", "  hi"},
         {10, "  \t    hi", "  hi"},

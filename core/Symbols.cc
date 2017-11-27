@@ -30,11 +30,13 @@ bool Symbol::isConstructor(GlobalState &gs) const {
 bool Symbol::derivesFrom(GlobalState &gs, SymbolRef sym) {
     // TODO: add baseClassSet
     for (SymbolRef a : argumentsOrMixins) {
-        if (a == sym || a.info(gs).derivesFrom(gs, sym))
+        if (a == sym || a.info(gs).derivesFrom(gs, sym)) {
             return true;
+        }
     }
-    if (this->superClass.exists())
+    if (this->superClass.exists()) {
         return sym == this->superClass || this->superClass.info(gs).derivesFrom(gs, sym);
+    }
     return false;
 }
 
@@ -45,8 +47,9 @@ SymbolRef Symbol::ref(GlobalState &gs) const {
 
 Symbol &SymbolRef::info(GlobalState &gs, bool allowNone) const {
     Error::check(_id < gs.symbols.size());
-    if (!allowNone)
+    if (!allowNone) {
         Error::check(this->exists());
+    }
 
     return gs.symbols[this->_id];
 }
@@ -90,8 +93,9 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
 
     os << type << " " << name;
     if (myInfo.isClass() || myInfo.isMethod()) {
-        if (myInfo.superClass.exists())
+        if (myInfo.superClass.exists()) {
             os << " < " << myInfo.superClass.info(gs).fullName(gs);
+        }
         os << " (";
         bool first = true;
         for (SymbolRef thing : myInfo.argumentsOrMixins) {
@@ -133,10 +137,12 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
     vector<string> children;
     children.reserve(members.size());
     for (auto pair : members) {
-        if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass())
+        if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass()) {
             continue;
-        if (pair.second.isHiddenFromPrinting(gs))
+        }
+        if (pair.second.isHiddenFromPrinting(gs)) {
             continue;
+        }
 
         children.push_back(pair.second.toString(gs, tabs + 1));
     }
@@ -149,8 +155,9 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
 
 SymbolRef Symbol::findMember(NameRef name) {
     for (auto &member : members) {
-        if (member.first == name)
+        if (member.first == name) {
             return member.second;
+        }
     }
     return SymbolRef(0);
 }
@@ -176,39 +183,46 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
     }
 
     SymbolRef result = findMember(name);
-    if (result.exists())
+    if (result.exists()) {
         return result;
+    }
     for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
         Error::check(it->exists());
         result = it->info(gs).findMemberTransitive(gs, name, maxDepth - 1);
-        if (result.exists())
+        if (result.exists()) {
             return result;
+        }
     }
-    if (this->superClass.exists())
+    if (this->superClass.exists()) {
         return this->superClass.info(gs).findMemberTransitive(gs, name, maxDepth - 1);
+    }
     return SymbolRef(0);
 }
 
 string Symbol::fullName(GlobalState &gs) const {
     string owner_str;
-    if (this->owner.exists() && this->owner != gs.defn_root())
+    if (this->owner.exists() && this->owner != gs.defn_root()) {
         owner_str = this->owner.info(gs).fullName(gs);
+    }
 
-    if (this->isClass())
+    if (this->isClass()) {
         return owner_str + "::" + this->name.toString(gs);
-    else
+    } else {
         return owner_str + "#" + this->name.toString(gs);
+    }
 }
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Error::check(this->isClass());
     SymbolRef selfRef = this->ref(gs);
-    if (selfRef == GlobalState::defn_untyped())
+    if (selfRef == GlobalState::defn_untyped()) {
         return GlobalState::defn_untyped();
+    }
 
     SymbolRef singleton = findMember(Names::singletonClass());
-    if (singleton.exists())
+    if (singleton.exists()) {
         return singleton;
+    }
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name);
     singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
@@ -223,8 +237,9 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
 SymbolRef Symbol::attachedClass(GlobalState &gs) {
     Error::check(this->isClass());
-    if (this->ref(gs) == GlobalState::defn_untyped())
+    if (this->ref(gs) == GlobalState::defn_untyped()) {
         return GlobalState::defn_untyped();
+    }
 
     SymbolRef singleton = findMember(Names::attachedClass());
     return singleton;

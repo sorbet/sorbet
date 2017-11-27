@@ -339,11 +339,11 @@ int realmain(int argc, char **argv) {
             break;
     }
 
-    if (options.count("q")) {
+    if (options.count("q") != 0) {
         console->set_level(spd::level::critical);
     }
 
-    if (options.count("trace")) {
+    if (options.count("trace") != 0) {
         tracer->set_level(spd::level::trace);
     } else {
         tracer->set_level(spd::level::off);
@@ -368,7 +368,7 @@ int realmain(int argc, char **argv) {
         inputFiles.push_back(gs.enterFile(fileName, src));
         tracer->trace("{}", fileName);
     }
-    if (options.count("e")) {
+    if (options.count("e") != 0) {
         string src = options["e"].as<string>();
         st.files++;
         st.lines++;
@@ -376,7 +376,7 @@ int realmain(int argc, char **argv) {
         inputFiles.push_back(gs.enterFile(string("-e"), src));
     }
 
-    if (options.count("set-freshNameId")) {
+    if (options.count("set-freshNameId") != 0) {
         gs.freshNameId = options["set-freshNameId"].as<int>();
     }
 
@@ -396,12 +396,12 @@ int realmain(int argc, char **argv) {
     console_err->debug("Total {} files. Done in {} ms, lines: {}, bytes: {}\n", st.files, elapsed_secs, st.lines,
                        st.bytes);
 
-    if (options.count("store-state")) {
+    if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
         ruby_typer::File::write(outfile.c_str(), ruby_typer::core::serialize::GlobalStateSerializer::store(gs));
     }
 
-    if (options.count("error-stats")) {
+    if (options.count("error-stats") != 0) {
         console_err->warn("Statistics of errors:");
         int sum = 0;
         vector<std::string> errors;

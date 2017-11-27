@@ -12,7 +12,7 @@
 
 namespace spd = spdlog;
 
-TEST(DesugarTest, SimpleDesugar) {
+TEST(DesugarTest, SimpleDesugar) { // NOLINT
     auto console = spd::stderr_color_mt("console");
     ruby_typer::core::GlobalState gs(*console);
     auto ast = ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");

@@ -89,7 +89,7 @@ public:
         if (newSymbol.exists()) {
             auto initializeResult = type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, recvType.type);
         } else {
-            if (args.size() > 0) {
+            if (!args.empty()) {
                 ctx.state.errors.error(bind.loc, core::ErrorClass::MethodArgumentCountMismatch,
                                        "Wrong number of arguments for constructor.\n Expected: 0, found: {}",
                                        args.size());
@@ -138,7 +138,7 @@ public:
                          auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                          tp.type = typeAndOrigin.type;
                          tp.origins = typeAndOrigin.origins;
-                         Error::check(tp.origins.size() > 0, "Inferencer did not assign location");
+                         Error::check(!tp.origins.empty(), "Inferencer did not assign location");
                      },
                      [&](cfg::Send *send) {
                          vector<core::TypeAndOrigins> args;
@@ -223,7 +223,7 @@ public:
                          tp.origins.push_back(bind.loc);
                      });
             Error::check(tp.type.get() != nullptr, "Inferencer did not assign type");
-            Error::check(tp.origins.size() > 0, "Inferencer did not assign location");
+            Error::check(!tp.origins.empty(), "Inferencer did not assign location");
 
             core::TypeAndOrigins cur = getTypeAndOrigin(ctx, bind.bind);
 
@@ -255,8 +255,9 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
     vector<bool> visited;
     visited.resize(cfg->basicBlocks.size());
     for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
-        if (bb == cfg->deadBlock())
+        if (bb == cfg->deadBlock()) {
             continue;
+        }
         Environment &current = outEnvironments[bb->id];
         current.vars.reserve(bb->args.size());
         current.types.reserve(bb->args.size());
@@ -265,8 +266,9 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
             current.types.emplace_back();
         }
         for (cfg::BasicBlock *parent : bb->backEdges) {
-            if (!visited[parent->id])
+            if (!visited[parent->id]) {
                 continue;
+            }
             current.mergeWith(ctx, outEnvironments[parent->id]);
         }
         int i = 0;

@@ -10,8 +10,9 @@ vector<int> findLineBreaks(const std::string &s) {
     vector<int> res;
     int i = 0;
     for (auto c : s) {
-        if (c == '\n')
+        if (c == '\n') {
             res.push_back(i);
+        }
         i++;
     }
     return res;

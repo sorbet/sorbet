@@ -723,18 +723,23 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" [shape = invhouse];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" [shape = parallelogram];
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" [label = "(parts, <constant:Range>$9)
-<constant:Range>$9 = alias <constant:Range> : <class:Range>
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" [label = "(parts, <constant:Range>$15)
+<constant:Regexp>$8 = alias <constant:Regexp> : <class:Regexp>
+<constant:Range>$15 = alias <constant:Range> : <class:Range>
 selfMethodTemp$2 = self : Diff
 diff = load_arg(selfMethodTemp$2#parse, 0) : untyped
-statTemp$6 = NotSupported() : untyped
+statTemp$9 = ^diff [^\n]*\n : String(\"^diff [^\\n]*\\n\")
+statTemp$11 = 0 : Integer(0)
+statTemp$12 = 4 : Integer(4)
+statTemp$10 = statTemp$11.|(statTemp$12) : Integer
+statTemp$6 = <constant:Regexp>$8.new(statTemp$9, statTemp$10) : Regexp
 statTemp$4 = diff.split(statTemp$6) : untyped
-statTemp$10 = 1 : Integer(1)
-statTemp$11 = -1 : Integer(-1)
-statTemp$7 = <constant:Range>$9.new(statTemp$10, statTemp$11) : Range
-parts = statTemp$4.[](statTemp$7) : untyped
-ifTemp$13 = parts : untyped
-ifTemp$13"];
+statTemp$16 = 1 : Integer(1)
+statTemp$17 = -1 : Integer(-1)
+statTemp$13 = <constant:Range>$15.new(statTemp$16, statTemp$17) : Range
+parts = statTemp$4.[](statTemp$13) : untyped
+ifTemp$19 = parts : untyped
+ifTemp$19"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3";
@@ -743,21 +748,21 @@ ifTemp$13"];
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2" [label = "(parts, <constant:Range>$9)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2" [label = "(parts, <constant:Range>$15)
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" [label = "(parts, <constant:Range>$9)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" [label = "(parts, <constant:Range>$15)
 parts = NotSupported() : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" [label = "(parts, statTemp$15, <constant:Range>$9)
-statTemp$15 = parts : untyped
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" [label = "(parts, statTemp$21, <constant:Range>$15)
+statTemp$21 = parts : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 1
 <block-call>"];
 
@@ -765,261 +770,261 @@ outerLoops: 1
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6";
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6" [label = "(parts)
-statTemp$14 = parts.map() : untyped
-returnMethodTemp$1 = statTemp$14.compact() : untyped
-returnMethodTemp$101 = return returnMethodTemp$1 : <bottom>
+statTemp$20 = parts.map() : untyped
+returnMethodTemp$1 = statTemp$20.compact() : untyped
+returnMethodTemp$107 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_7" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_7" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 1
-<block-nested: part> = load_arg(statTemp$15#map, 0) : untyped
-statTemp$19 = 
+<block-nested: part> = load_arg(statTemp$21#map, 0) : untyped
+statTemp$25 = 
  : String(\"\n\")
-<block-nested: lines> = <block-nested: part>.split(statTemp$19) : untyped
+<block-nested: lines> = <block-nested: part>.split(statTemp$25) : untyped
 <block-nested: b_name> = NotSupported() : untyped
 <block-nested: added_lines> = NotSupported() : untyped
 <block-nested: removed_lines> = NotSupported() : untyped
-statTemp$24 = <block-nested: lines> : untyped
+statTemp$30 = <block-nested: lines> : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_7" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
 <block-call>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 1
-statTemp$23 = <block-nested: lines>.each() : untyped
-ifTemp$89 = <block-nested: b_name>.nil?() : untyped
-ifTemp$89"];
+statTemp$29 = <block-nested: lines>.each() : untyped
+ifTemp$95 = <block-nested: b_name>.nil?() : untyped
+ifTemp$95"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_37";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_9" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-<block-nested: line> = load_arg(statTemp$24#each, 0) : untyped
-statTemp$28 = index  : String(\"index \")
-statTemp$29 = @@ : String(\"@@\")
-statTemp$30 = new file mode : String(\"new file mode\")
-ifTemp$26 = <block-nested: line>.start_with?(statTemp$28, statTemp$29, statTemp$30) : untyped
-ifTemp$26"];
+<block-nested: line> = load_arg(statTemp$30#each, 0) : untyped
+statTemp$34 = index  : String(\"index \")
+statTemp$35 = @@ : String(\"@@\")
+statTemp$36 = new file mode : String(\"new file mode\")
+ifTemp$32 = <block-nested: line>.start_with?(statTemp$34, statTemp$35, statTemp$36) : untyped
+ifTemp$32"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_11";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_10" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_11" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_11" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-returnTemp$31 = NotSupported() : untyped
+returnTemp$37 = NotSupported() : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_11" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$34 = --- : String(\"---\")
-ifTemp$32 = <block-nested: line>.start_with?(statTemp$34) : untyped
-ifTemp$32"];
+statTemp$40 = --- : String(\"---\")
+ifTemp$38 = <block-nested: line>.start_with?(statTemp$40) : untyped
+ifTemp$38"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_12" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$39 = 4 : Integer(4)
-statTemp$40 = -1 : Integer(-1)
-statTemp$37 = <constant:Range>$9.new(statTemp$39, statTemp$40) : Range
-<block-nested: a_name> = <block-nested: line>.[](statTemp$37) : untyped
-ifTemp$42 = <block-nested: b_name> : untyped
-ifTemp$42"];
+statTemp$45 = 4 : Integer(4)
+statTemp$46 = -1 : Integer(-1)
+statTemp$43 = <constant:Range>$15.new(statTemp$45, statTemp$46) : Range
+<block-nested: a_name> = <block-nested: line>.[](statTemp$43) : untyped
+ifTemp$48 = <block-nested: b_name> : untyped
+ifTemp$48"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$52 = +++ : String(\"+++\")
-ifTemp$50 = <block-nested: line>.start_with?(statTemp$52) : untyped
-ifTemp$50"];
+statTemp$58 = +++ : String(\"+++\")
+ifTemp$56 = <block-nested: line>.start_with?(statTemp$58) : untyped
+ifTemp$56"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_14" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$44 = a/ : String(\"a/\")
-ifTemp$41 = <block-nested: b_name>.start_with?(statTemp$44) : untyped
+statTemp$50 = a/ : String(\"a/\")
+ifTemp$47 = <block-nested: b_name>.start_with?(statTemp$50) : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-ifTemp$41 = <block-nested: b_name> : untyped
+ifTemp$47 = <block-nested: b_name> : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-ifTemp$41"];
+ifTemp$47"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_17" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_19";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$48 = 2 : Integer(2)
-statTemp$49 = -1 : Integer(-1)
-statTemp$46 = <constant:Range>$9.new(statTemp$48, statTemp$49) : Range
-<block-nested: a_name> = <block-nested: b_name>.[](statTemp$46) : untyped
+statTemp$54 = 2 : Integer(2)
+statTemp$55 = -1 : Integer(-1)
+statTemp$52 = <constant:Range>$15.new(statTemp$54, statTemp$55) : Range
+<block-nested: a_name> = <block-nested: b_name>.[](statTemp$52) : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_19" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_19" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-blockReturnTemp$25 = NotSupported() : untyped
+blockReturnTemp$31 = NotSupported() : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_19" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_20" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$57 = 4 : Integer(4)
-statTemp$58 = -1 : Integer(-1)
-statTemp$55 = <constant:Range>$9.new(statTemp$57, statTemp$58) : Range
-<block-nested: b_name> = <block-nested: line>.[](statTemp$55) : untyped
-ifTemp$60 = <block-nested: b_name> : untyped
-ifTemp$60"];
+statTemp$63 = 4 : Integer(4)
+statTemp$64 = -1 : Integer(-1)
+statTemp$61 = <constant:Range>$15.new(statTemp$63, statTemp$64) : Range
+<block-nested: b_name> = <block-nested: line>.[](statTemp$61) : untyped
+ifTemp$66 = <block-nested: b_name> : untyped
+ifTemp$66"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$70 = + : String(\"+\")
-ifTemp$68 = <block-nested: line>.start_with?(statTemp$70) : untyped
-ifTemp$68"];
+statTemp$76 = + : String(\"+\")
+ifTemp$74 = <block-nested: line>.start_with?(statTemp$76) : untyped
+ifTemp$74"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_22" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$62 = b/ : String(\"b/\")
-ifTemp$59 = <block-nested: b_name>.start_with?(statTemp$62) : untyped
+statTemp$68 = b/ : String(\"b/\")
+ifTemp$65 = <block-nested: b_name>.start_with?(statTemp$68) : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-ifTemp$59 = <block-nested: b_name> : untyped
+ifTemp$65 = <block-nested: b_name> : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-ifTemp$59"];
+ifTemp$65"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_25" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_27";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$63 = <block-nested: b_name> : untyped
-statTemp$66 = 2 : Integer(2)
-statTemp$67 = -1 : Integer(-1)
-statTemp$64 = <constant:Range>$9.new(statTemp$66, statTemp$67) : Range
-<block-nested: b_name> = statTemp$63.[](statTemp$64) : untyped
+statTemp$69 = <block-nested: b_name> : untyped
+statTemp$72 = 2 : Integer(2)
+statTemp$73 = -1 : Integer(-1)
+statTemp$70 = <constant:Range>$15.new(statTemp$72, statTemp$73) : Range
+<block-nested: b_name> = statTemp$69.[](statTemp$70) : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_27" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_27" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-blockReturnTemp$25 = NotSupported() : untyped
+blockReturnTemp$31 = NotSupported() : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_27" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_28" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$76 = 1 : Integer(1)
-statTemp$77 = -1 : Integer(-1)
-statTemp$74 = <constant:Range>$9.new(statTemp$76, statTemp$77) : Range
-statTemp$72 = <block-nested: line>.[](statTemp$74) : untyped
-blockReturnTemp$25 = <block-nested: added_lines>.<<(statTemp$72) : untyped
+statTemp$82 = 1 : Integer(1)
+statTemp$83 = -1 : Integer(-1)
+statTemp$80 = <constant:Range>$15.new(statTemp$82, statTemp$83) : Range
+statTemp$78 = <block-nested: line>.[](statTemp$80) : untyped
+blockReturnTemp$31 = <block-nested: added_lines>.<<(statTemp$78) : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$80 = - : String(\"-\")
-ifTemp$78 = <block-nested: line>.start_with?(statTemp$80) : untyped
-ifTemp$78"];
+statTemp$86 = - : String(\"-\")
+ifTemp$84 = <block-nested: line>.start_with?(statTemp$86) : untyped
+ifTemp$84"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_30" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_32";
 
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-statTemp$86 = 1 : Integer(1)
-statTemp$87 = -1 : Integer(-1)
-statTemp$84 = <constant:Range>$9.new(statTemp$86, statTemp$87) : Range
-statTemp$82 = <block-nested: line>.[](statTemp$84) : untyped
-blockReturnTemp$25 = <block-nested: removed_lines>.<<(statTemp$82) : untyped
+statTemp$92 = 1 : Integer(1)
+statTemp$93 = -1 : Integer(-1)
+statTemp$90 = <constant:Range>$15.new(statTemp$92, statTemp$93) : Range
+statTemp$88 = <block-nested: line>.[](statTemp$90) : untyped
+blockReturnTemp$31 = <block-nested: removed_lines>.<<(statTemp$88) : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_32" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_32" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
-blockReturnTemp$25 = NotSupported() : untyped
+blockReturnTemp$31 = NotSupported() : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_32" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_33" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_34" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_35" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 2
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_36" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_37" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_37" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 1
-returnTemp$91 = NotSupported() : untyped
+returnTemp$97 = NotSupported() : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_37" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5";
-    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$15, statTemp$24, <constant:Range>$9, ifTemp$41, ifTemp$59)
+    "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" [label = "(parts, <block-nested: lines>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$21, statTemp$30, <constant:Range>$15, ifTemp$47, ifTemp$65)
 outerLoops: 1
-statTemp$88 = NotSupported() : untyped
-hashTemp$92 = <symbol:a_name> : Symbol(:\"a_name\")
-hashTemp$94 = <symbol:b_name> : Symbol(:\"b_name\")
-hashTemp$96 = <symbol:added_lines> : Symbol(:\"added_lines\")
-hashTemp$98 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
-hashTemp$100 = alias {} : HashType {\n}
-blockReturnTemp$16 = hashTemp$100.<build-hash>(hashTemp$92, <block-nested: b_name>, hashTemp$94, <block-nested: b_name>, hashTemp$96, <block-nested: added_lines>, hashTemp$98, <block-nested: removed_lines>) : HashType {\n  Symbol(:\"a_name\") => untyped\n  Symbol(:\"b_name\") => untyped\n  Symbol(:\"added_lines\") => untyped\n  Symbol(:\"removed_lines\") => untyped\n}
+statTemp$94 = NotSupported() : untyped
+hashTemp$98 = <symbol:a_name> : Symbol(:\"a_name\")
+hashTemp$100 = <symbol:b_name> : Symbol(:\"b_name\")
+hashTemp$102 = <symbol:added_lines> : Symbol(:\"added_lines\")
+hashTemp$104 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
+hashTemp$106 = alias {} : HashType {\n}
+blockReturnTemp$22 = hashTemp$106.<build-hash>(hashTemp$98, <block-nested: b_name>, hashTemp$100, <block-nested: b_name>, hashTemp$102, <block-nested: added_lines>, hashTemp$104, <block-nested: removed_lines>) : HashType {\n  Symbol(:\"a_name\") => untyped\n  Symbol(:\"b_name\") => untyped\n  Symbol(:\"added_lines\") => untyped\n  Symbol(:\"removed_lines\") => untyped\n}
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5";

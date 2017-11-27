@@ -11,7 +11,7 @@ using namespace std;
 namespace ruby_typer {
 using namespace ast;
 
-TEST(HelloTest, GetGreet) {
+TEST(HelloTest, GetGreet) { // NOLINT
     EXPECT_EQ("Hello Bazel", "Hello Bazel");
 }
 
@@ -19,15 +19,15 @@ namespace spd = spdlog;
 
 auto console = spd::stderr_color_mt("console");
 
-TEST(HelloTest, GetSpdlog) {
+TEST(HelloTest, GetSpdlog) { // NOLINT
     console->info("Welcome to spdlog!");
 }
 
-TEST(HelloTest, GetCXXopts) {
+TEST(HelloTest, GetCXXopts) { // NOLINT
     cxxopts::Options options("MyProgram", "One line description of MyProgram");
 }
 
-TEST(PreOrderTreeMap, CountTrees) {
+TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     class Counter {
     public:
         int count = 0;

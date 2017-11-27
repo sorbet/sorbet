@@ -87,10 +87,12 @@ public:
     }
 
     Loc loc_join(Loc begin, Loc end) {
-        if (begin.is_none())
+        if (begin.is_none()) {
             return end;
-        if (end.is_none())
+        }
+        if (end.is_none()) {
             return begin;
+        }
         Error::check(begin.file == end.file);
 
         return Loc{file_, begin.begin_pos, end.end_pos};
@@ -102,8 +104,9 @@ public:
             return tok_loc(begin, end);
         }
         DEBUG_ONLY(Error::check(end == nullptr));
-        if (elts.size() == 0)
+        if (elts.empty()) {
             return Loc::none(file_);
+        }
         return loc_join(elts.front()->loc, elts.back()->loc);
     }
 
@@ -113,8 +116,9 @@ public:
 
     unique_ptr<Node> transform_condition(unique_ptr<Node> cond) {
         if (Begin *b = parser::cast_node<Begin>(cond.get())) {
-            if (b->stmts.size() == 1)
+            if (b->stmts.size() == 1) {
                 b->stmts[0] = transform_condition(move(b->stmts[0]));
+            }
         } else if (And *a = parser::cast_node<And>(cond.get())) {
             a->left = transform_condition(move(a->left));
             a->right = transform_condition(move(a->right));
@@ -161,8 +165,9 @@ public:
     }
 
     unique_ptr<Node> args(const token *begin, ruby_typer::parser::NodeVec args, const token *end, bool check_args) {
-        if (begin == nullptr && args.size() == 0 && end == nullptr)
+        if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
+        }
         return make_unique<Args>(collection_loc(begin, args, end), move(args));
     }
 
@@ -192,7 +197,7 @@ public:
         } else if (IVar *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
         } else if (Const *c = parser::cast_node<Const>(node.get())) {
-            return make_unique<ConstLhs>(c->loc, move(c->scope), move(c->name));
+            return make_unique<ConstLhs>(c->loc, move(c->scope), c->name);
         } else if (CVar *cv = parser::cast_node<CVar>(node.get())) {
             return make_unique<CVarLhs>(cv->loc, cv->name);
         } else if (GVar *gv = parser::cast_node<GVar>(node.get())) {
@@ -214,7 +219,7 @@ public:
     unique_ptr<Node> attr_asgn(unique_ptr<Node> receiver, const token *dot, const token *selector) {
         NameRef method = gs_.enterNameUTF8(selector->string() + "=");
         Loc loc = loc_join(receiver->loc, tok_loc(selector));
-        if (dot && dot->string() == "&.") {
+        if ((dot != nullptr) && dot->string() == "&.") {
             return make_unique<CSend>(loc, move(receiver), method, ruby_typer::parser::NodeVec());
         }
         return make_unique<Send>(loc, move(receiver), method, ruby_typer::parser::NodeVec());
@@ -226,18 +231,21 @@ public:
 
     unique_ptr<Node> begin(const token *begin, unique_ptr<Node> body, const token *end) {
         Loc loc;
-        if (begin != nullptr)
+        if (begin != nullptr) {
             loc = loc_join(tok_loc(begin), tok_loc(end));
-        else
+        } else {
             loc = body->loc;
+        }
 
         if (body == nullptr) {
             return make_unique<Begin>(loc, ruby_typer::parser::NodeVec());
         }
-        if (Begin *b = parser::cast_node<Begin>(body.get()))
+        if (Begin *b = parser::cast_node<Begin>(body.get())) {
             return body;
-        if (Mlhs *m = parser::cast_node<Mlhs>(body.get()))
+        }
+        if (Mlhs *m = parser::cast_node<Mlhs>(body.get())) {
             return body;
+        }
         ruby_typer::parser::NodeVec stmts;
         stmts.push_back(move(body));
         return make_unique<Begin>(loc, move(stmts));
@@ -245,7 +253,7 @@ public:
 
     unique_ptr<Node> begin_body(unique_ptr<Node> body, ruby_typer::parser::NodeVec rescue_bodies, const token *else_tok,
                                 unique_ptr<Node> else_, const token *ensure_tok, unique_ptr<Node> ensure) {
-        if (rescue_bodies.size() > 0) {
+        if (!rescue_bodies.empty()) {
             if (else_ == nullptr) {
                 body = make_unique<Rescue>(loc_join(maybe_loc(body), rescue_bodies.back()->loc), move(body),
                                            move(rescue_bodies), nullptr);
@@ -257,8 +265,9 @@ public:
             // TODO: We're losing the source-level information that there was an
             // `else` here.
             ruby_typer::parser::NodeVec stmts;
-            if (body != nullptr)
+            if (body != nullptr) {
                 stmts.push_back(move(body));
+            }
             stmts.push_back(move(else_));
             body = make_unique<Begin>(collection_loc(stmts), move(stmts));
         }
@@ -317,9 +326,10 @@ public:
         if (Super *s = parser::cast_node<Super>(method_call.get())) {
             callargs = &s->args;
         }
-        if (callargs != nullptr && callargs->size() > 0) {
-            if (BlockPass *bp = parser::cast_node<BlockPass>(callargs->back().get()))
+        if (callargs != nullptr && !callargs->empty()) {
+            if (BlockPass *bp = parser::cast_node<BlockPass>(callargs->back().get())) {
                 error(ruby_parser::dclass::BlockAndBlockarg, bp->loc);
+            }
         }
 
         Node &n = *method_call;
@@ -369,33 +379,38 @@ public:
     unique_ptr<Node> call_method(unique_ptr<Node> receiver, const token *dot, const token *selector,
                                  const token *lparen, ruby_typer::parser::NodeVec args, const token *rparen) {
         Loc selector_loc, start_loc;
-        if (selector != nullptr)
+        if (selector != nullptr) {
             selector_loc = tok_loc(selector);
-        else
+        } else {
             selector_loc = tok_loc(dot);
-        if (receiver == nullptr)
+        }
+        if (receiver == nullptr) {
             start_loc = selector_loc;
-        else
+        } else {
             start_loc = receiver->loc;
+        }
 
         Loc loc;
-        if (rparen != nullptr)
+        if (rparen != nullptr) {
             loc = loc_join(start_loc, tok_loc(rparen));
-        else if (args.size() > 0)
+        } else if (!args.empty()) {
             loc = loc_join(start_loc, args.back()->loc);
-        else
+        } else {
             loc = loc_join(start_loc, selector_loc);
+        }
 
         NameRef method;
-        if (selector == nullptr)
+        if (selector == nullptr) {
             method = core::Names::bang();
-        else
+        } else {
             method = gs_.enterNameUTF8(selector->string());
+        }
 
-        if (dot && dot->string() == "&.")
+        if ((dot != nullptr) && dot->string() == "&.") {
             return make_unique<CSend>(loc, move(receiver), method, move(args));
-        else
+        } else {
             return make_unique<Send>(loc, move(receiver), method, move(args));
+        }
     }
 
     unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, ruby_typer::parser::NodeVec when_bodies,
@@ -427,25 +442,31 @@ public:
                                unique_ptr<Node> if_true, const token *else_, unique_ptr<Node> if_false,
                                const token *end) {
         Loc loc = loc_join(tok_loc(cond_tok), cond->loc);
-        if (then != nullptr)
+        if (then != nullptr) {
             loc = loc_join(loc, tok_loc(then));
-        if (if_true != nullptr)
+        }
+        if (if_true != nullptr) {
             loc = loc_join(loc, if_true->loc);
-        if (else_ != nullptr)
+        }
+        if (else_ != nullptr) {
             loc = loc_join(loc, tok_loc(else_));
-        if (if_false != nullptr)
+        }
+        if (if_false != nullptr) {
             loc = loc_join(loc, if_false->loc);
-        if (end != nullptr)
+        }
+        if (end != nullptr) {
             loc = loc_join(loc, tok_loc(end));
+        }
         return make_unique<If>(loc, transform_condition(move(cond)), move(if_true), move(if_false));
     }
 
     unique_ptr<Node> condition_mod(unique_ptr<Node> if_true, unique_ptr<Node> if_false, unique_ptr<Node> cond) {
         Loc loc = cond->loc;
-        if (if_true != nullptr)
+        if (if_true != nullptr) {
             loc = loc_join(loc, if_true->loc);
-        else
+        } else {
             loc = loc_join(loc, if_false->loc);
+        }
         return make_unique<If>(loc, transform_condition(move(cond)), move(if_true), move(if_false));
     }
 
@@ -472,8 +493,9 @@ public:
     }
 
     unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedent_level) {
-        if (dedent_level == 0)
+        if (dedent_level == 0) {
             return node;
+        }
 
         Dedenter dedenter(dedent_level);
         unique_ptr<Node> result;
@@ -615,15 +637,16 @@ public:
                                    const token *rparen) {
         Loc loc = tok_loc(keyword);
         Loc argloc = collection_loc(lparen, args, rparen);
-        if (!argloc.is_none())
+        if (!argloc.is_none()) {
             loc = loc_join(loc, argloc);
+        }
         return make_unique<Super>(loc, move(args));
     }
 
     unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = loc_join(tok_loc(keyword), collection_loc(lparen, args, rparen));
-        if (args.size() > 0 && parser::cast_node<BlockPass>(args.back().get()) != nullptr) {
+        if (!args.empty() && parser::cast_node<BlockPass>(args.back().get()) != nullptr) {
             error(ruby_parser::dclass::BlockGivenToYield, loc);
         }
         return make_unique<Yield>(loc, move(args));
@@ -719,12 +742,15 @@ public:
 
     unique_ptr<Node> negate(const token *uminus, unique_ptr<Node> numeric) {
         Loc loc = loc_join(tok_loc(uminus), numeric->loc);
-        if (Integer *i = parser::cast_node<Integer>(numeric.get()))
+        if (Integer *i = parser::cast_node<Integer>(numeric.get())) {
             return make_unique<Integer>(loc, "-" + i->val);
-        if (Float *i = parser::cast_node<Float>(numeric.get()))
+        }
+        if (Float *i = parser::cast_node<Float>(numeric.get())) {
             return make_unique<Float>(loc, "-" + i->val);
-        if (Rational *r = parser::cast_node<Rational>(numeric.get()))
+        }
+        if (Rational *r = parser::cast_node<Rational>(numeric.get())) {
             return make_unique<Float>(loc, "-" + r->val);
+        }
         Error::raise("unexpected numeric type: ", numeric->nodeName());
     }
 
@@ -735,10 +761,11 @@ public:
     unique_ptr<Node> not_op(const token *not_, const token *begin, unique_ptr<Node> receiver, const token *end) {
         if (receiver != nullptr) {
             Loc loc;
-            if (end != nullptr)
+            if (end != nullptr) {
                 loc = loc_join(tok_loc(not_), tok_loc(end));
-            else
+            } else {
                 loc = loc_join(tok_loc(not_), receiver->loc);
+            }
             return make_unique<Send>(loc, move(receiver), core::Names::bang(), ruby_typer::parser::NodeVec());
         }
 
@@ -753,13 +780,16 @@ public:
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        if (parser::cast_node<Backref>(lhs.get()) != nullptr || parser::cast_node<NthRef>(lhs.get()) != nullptr)
+        if (parser::cast_node<Backref>(lhs.get()) != nullptr || parser::cast_node<NthRef>(lhs.get()) != nullptr) {
             error(ruby_parser::dclass::BackrefAssignment, lhs->loc);
+        }
 
-        if (op->string() == "&&")
+        if (op->string() == "&&") {
             return make_unique<AndAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
-        if (op->string() == "||")
+        }
+        if (op->string() == "||") {
             return make_unique<OrAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), move(rhs));
+        }
         return make_unique<OpAsgn>(loc_join(lhs->loc, rhs->loc), move(lhs), gs_.enterNameUTF8(op->string()), move(rhs));
     }
 
@@ -825,12 +855,15 @@ public:
     unique_ptr<Node> rescue_body(const token *rescue, unique_ptr<Node> exc_list, const token *assoc,
                                  unique_ptr<Node> exc_var, const token *then, unique_ptr<Node> body) {
         Loc loc = tok_loc(rescue);
-        if (exc_list != nullptr)
+        if (exc_list != nullptr) {
             loc = loc_join(loc, exc_list->loc);
-        if (exc_var != nullptr)
+        }
+        if (exc_var != nullptr) {
             loc = loc_join(loc, exc_var->loc);
-        if (body != nullptr)
+        }
+        if (body != nullptr) {
             loc = loc_join(loc, body->loc);
+        }
         return make_unique<Resbody>(loc, move(exc_list), move(exc_var), move(body));
     }
 
@@ -1023,32 +1056,35 @@ public:
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
         Loc loc = loc_join(tok_loc(oper), receiver->loc);
         NameRef op;
-        if (oper->string() == "+")
+        if (oper->string() == "+") {
             op = core::Names::unaryPlus();
-        else if (oper->string() == "-")
+        } else if (oper->string() == "-") {
             op = core::Names::unaryMinus();
-        else
+        } else {
             op = gs_.enterNameUTF8(oper->string());
+        }
 
         return make_unique<Send>(loc, move(receiver), op, ruby_typer::parser::NodeVec());
     }
 
     unique_ptr<Node> undef_method(const token *undef, ruby_typer::parser::NodeVec name_list) {
         Loc loc = tok_loc(undef);
-        if (name_list.size() > 0)
+        if (!name_list.empty()) {
             loc = loc_join(loc, name_list.back()->loc);
+        }
         return make_unique<Undef>(loc, move(name_list));
     }
 
     unique_ptr<Node> when(const token *when, ruby_typer::parser::NodeVec patterns, const token *then,
                           unique_ptr<Node> body) {
         Loc loc = tok_loc(when);
-        if (body != nullptr)
+        if (body != nullptr) {
             loc = loc_join(loc, body->loc);
-        else if (then != nullptr)
+        } else if (then != nullptr) {
             loc = loc_join(loc, tok_loc(then));
-        else
+        } else {
             loc = loc_join(loc, patterns.back()->loc);
+        }
         return make_unique<When>(loc, move(patterns), move(body));
     }
 
@@ -1071,24 +1107,27 @@ public:
 
     unique_ptr<Node> cast_node(foreign_ptr node) {
         size_t off = reinterpret_cast<size_t>(node);
-        if (off == 0)
+        if (off == 0) {
             return nullptr;
+        }
 
         Error::check(foreign_nodes_[off] != nullptr);
         return move(foreign_nodes_[off]);
     }
 
     foreign_ptr to_foreign(unique_ptr<Node> node) {
-        if (node == nullptr)
-            return 0;
+        if (node == nullptr) {
+            return reinterpret_cast<foreign_ptr>(0);
+        }
         foreign_nodes_.emplace_back(move(node));
         return reinterpret_cast<foreign_ptr>(foreign_nodes_.size() - 1);
     }
 
     ruby_typer::parser::NodeVec convert_node_list(const node_list *cargs) {
         ruby_typer::parser::NodeVec out;
-        if (cargs == nullptr)
+        if (cargs == nullptr) {
             return out;
+        }
 
         node_list *args = const_cast<node_list *>(cargs);
         out.reserve(args->size());
@@ -1100,7 +1139,7 @@ public:
 };
 
 Builder::Builder(GlobalState &ctx, core::FileRef file) : impl_(new Builder::Impl(ctx, file)) {}
-Builder::~Builder() {}
+Builder::~Builder() = default;
 
 }; // namespace parser
 }; // namespace ruby_typer
