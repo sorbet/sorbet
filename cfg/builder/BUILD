@@ -13,6 +13,5 @@ cc_library(
         "//cfg",
         "//common",
         "//core",
-        "//parser",
     ],
 )

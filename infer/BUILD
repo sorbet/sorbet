@@ -12,7 +12,6 @@ cc_library(
     copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
-        "//ast",
         "//cfg",
         "//common",
         "//core",

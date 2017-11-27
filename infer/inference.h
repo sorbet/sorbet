@@ -1,7 +1,6 @@
 #ifndef SRUBY_INFERENCE_H
 #define SRUBY_INFERENCE_H
 
-#include "../ast/ast.h"
 #include "../cfg/CFG.h"
 #include <memory>
 #include <string>
