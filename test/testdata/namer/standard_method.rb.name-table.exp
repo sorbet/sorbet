@@ -12,6 +12,8 @@ class <constant:A> < ::<constant:Object> ()
     argument g<> -> Array
     argument h<> -> Hash
   method noreturn () -> <bottom>
+  method test_kwargs (returns) -> T2
+    argument returns<> -> T1
 class <constant:T1> < ::<constant:Object> ()
 class <constant:T2> < ::<constant:Object> ()
 class <singleton class:<constant:A>> (<constant:Class>)
