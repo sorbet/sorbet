@@ -18,8 +18,9 @@ core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
         auto fnd = aliases.find(what);
         if (fnd != aliases.end()) {
             return fnd->second;
-        } else
+        } else {
             return what;
+        }
     } else {
         return what;
     }
@@ -34,10 +35,11 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
 
     outAliases.resize(cfg.basicBlocks.size());
     for (BasicBlock *bb : cfg.backwardsTopoSort) {
-        if (bb == cfg.deadBlock())
+        if (bb == cfg.deadBlock()) {
             continue;
+        }
         unordered_map<core::LocalVariable, core::LocalVariable> &current = outAliases[bb->id];
-        if (bb->backEdges.size() > 0) {
+        if (!bb->backEdges.empty()) {
             current = outAliases[bb->backEdges[0]->id];
         }
 
@@ -269,7 +271,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG &cfg) {
 
 int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
     // Error::check(!marked[currentBB]) // graph is cyclic!
-    if ((currentBB->flags & CFG::FORWARD_TOPO_SORT_VISITED)) {
+    if ((currentBB->flags & CFG::FORWARD_TOPO_SORT_VISITED) != 0) {
         return nextFree;
     } else {
         currentBB->flags |= CFG::FORWARD_TOPO_SORT_VISITED;
@@ -289,7 +291,7 @@ int CFGBuilder::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlo
     // Instead we will build this sort the fly during construction of the CFG, but it will make it hard to add new nodes
     // much harder.
 
-    if ((currentBB->flags & CFG::BACKWARD_TOPO_SORT_VISITED)) {
+    if ((currentBB->flags & CFG::BACKWARD_TOPO_SORT_VISITED) != 0) {
         return nextFree;
     } else {
         currentBB->flags |= CFG::BACKWARD_TOPO_SORT_VISITED;
