@@ -52,7 +52,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                         ++it;
                     }
                 } else {
-                    it = current.erase(it);
+                    it = current.erase(it); // note: this is correct but to conservative. In particular for loop headers
                 }
             }
         }
