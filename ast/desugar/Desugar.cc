@@ -368,6 +368,36 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
 
                 result.swap(res);
             },
+            [&](parser::DSymbol *a) {
+                if (a->nodes.empty()) {
+                    unique_ptr<Expression> res = make_unique<SymbolLit>(a->loc, core::Names::empty());
+                    result.swap(res);
+                    return;
+                }
+
+                auto it = a->nodes.begin();
+                auto end = a->nodes.end();
+                unique_ptr<Expression> res;
+                unique_ptr<Expression> first = node2TreeImpl(ctx, *it);
+                if (cast_tree<StringLit>(first.get()) == nullptr) {
+                    res = mkSend0(what->loc, first, core::Names::to_s());
+                } else {
+                    res = move(first);
+                }
+                ++it;
+                for (; it != end; ++it) {
+                    auto &stat = *it;
+                    unique_ptr<Expression> narg = node2TreeImpl(ctx, stat);
+                    if (cast_tree<StringLit>(narg.get()) == nullptr) {
+                        narg = mkSend0(what->loc, narg, core::Names::to_s());
+                    }
+                    auto n = mkSend1(what->loc, move(res), core::Names::concat(), move(narg));
+                    res.reset(n.release());
+                };
+                res = mkSend0(what->loc, move(res), core::Names::intern());
+
+                result.swap(res);
+            },
             [&](parser::Symbol *a) {
                 unique_ptr<Expression> res = make_unique<ast::SymbolLit>(what->loc, a->val);
                 result.swap(res);
