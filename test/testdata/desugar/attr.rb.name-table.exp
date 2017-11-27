@@ -1,0 +1,17 @@
+class <constant:TestAttr> < ::<constant:Object> ()
+  field @v1 -> Integer
+  field @v2 -> String
+  field @v3
+  field @v4
+  field @v5
+  method v1 () -> Integer
+  method v2 () -> String
+  method v2= (arg0) -> String
+    argument arg0<> -> String
+  method v3 ()
+  method v4= (arg0) -> untyped
+    argument arg0<> -> untyped
+  method v5= (arg0) -> untyped
+    argument arg0<> -> untyped
+class <singleton class:<constant:TestAttr>> (<constant:Class>)
+
