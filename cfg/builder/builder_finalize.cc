@@ -88,6 +88,9 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 current[bind.bind] = i->what;
             }
         }
+        if (bb->bexit.cond.exists()) {
+            bb->bexit.cond = maybeDealias(ctx, bb->bexit.cond, current);
+        }
     }
 }
 
