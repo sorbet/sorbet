@@ -1,7 +1,5 @@
 begin
   class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
-    self(<singleton class:<constant:Parent>>).declare_variables({:@ivar => ::<constant:Integer>, :@ivar2 => ::<constant:Integer>, :@@class_var => ::<constant:String>})
-
     ::<constant:Parent>#@@class_var = "hi"
 
     def hi<hi>()
@@ -12,8 +10,6 @@ begin
 
   end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
-    self(<singleton class:<constant:Mixin>>).declare_variables({:@@mixin_cvar => ::<constant:Integer>})
-
     ::<constant:Mixin>#@@mixin_cvar
 
   end

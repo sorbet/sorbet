@@ -3,8 +3,6 @@ module <emptyTree>::<constant:A><<constant:A>> < ()
     <emptyTree>
 
   class <emptyTree>::<constant:Foo><<constant:Foo>> < (::<constant:<todo sym>>)
-    <emptyTree>
-
   end
 
 end

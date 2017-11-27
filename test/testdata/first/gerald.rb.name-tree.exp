@@ -14,8 +14,6 @@ begin
     end
 
     class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:<todo sym>>, ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Chalk>::<constant:Log>)
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#<constant:MAX_AFFECTED_FILES> = 100
-
       def initialize<initialize>()
         begin
           begin
@@ -95,10 +93,6 @@ begin
     end
 
     class <emptyTree>::<constant:MatchTimeBudget><<constant:MatchTimeBudget>> < (::<constant:<todo sym>>)
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS> = 10000
-
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS> = 2000
-
       def initialize<initialize>()
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:Time>.now()
 
