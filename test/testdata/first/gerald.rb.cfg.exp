@@ -740,8 +740,7 @@ statTemp$16 = 1 : Integer(1)
 statTemp$17 = -1 : Integer(-1)
 statTemp$13 = <constant:Range>$15.new(statTemp$16, statTemp$17) : Range
 parts = statTemp$4.[](statTemp$13) : untyped
-ifTemp$19 = parts : untyped
-ifTemp$19"];
+parts"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_2";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3";
@@ -841,8 +840,7 @@ statTemp$45 = 4 : Integer(4)
 statTemp$46 = -1 : Integer(-1)
 statTemp$43 = <constant:Range>$15.new(statTemp$45, statTemp$46) : Range
 <block-nested: a_name> = <block-nested: line>.[](statTemp$43) : untyped
-ifTemp$48 = <block-nested: a_name> : untyped
-ifTemp$48"];
+<block-nested: a_name>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_15";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_13" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_16";
@@ -903,8 +901,7 @@ statTemp$63 = 4 : Integer(4)
 statTemp$64 = -1 : Integer(-1)
 statTemp$61 = <constant:Range>$15.new(statTemp$63, statTemp$64) : Range
 <block-nested: b_name> = <block-nested: line>.[](statTemp$61) : untyped
-ifTemp$66 = <block-nested: b_name> : untyped
-ifTemp$66"];
+<block-nested: b_name>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_23";
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_21" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_24";
