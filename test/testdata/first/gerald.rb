@@ -147,7 +147,7 @@ module Opus::CIBot::Gerald
     end
 
     private def parse(diff)
-      parts = diff.split(/^diff [^\n]*\n/m)[ # error: Unsupported node type Regexp
+      parts = diff.split(/^diff [^\n]*\n/m)[
         1..-1]
       parts ||= []
       parts.map do |part|

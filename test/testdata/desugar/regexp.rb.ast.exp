@@ -1,0 +1,18 @@
+def foo<<constant:<todo sym>>>()
+  begin
+    ::<constant:Regexp>.new("abc", 0)
+    <emptyTree>::<constant:Regexp>.new("abc")
+    ::<constant:Regexp>.new("abc", 0.|(1))
+    <emptyTree>::<constant:Regexp>.new("abc", <emptyTree>::<constant:Regexp>::<constant:IGNORECASE>)
+    ::<constant:Regexp>.new("abc", 0.|(1).|(2).|(4))
+    <emptyTree>::<constant:Regexp>.new("abc", 0.|(<emptyTree>::<constant:Regexp>::<constant:IGNORECASE>).|(<emptyTree>::<constant:Regexp>::<constant:EXTENDED>).|(<emptyTree>::<constant:Regexp>::<constant:MULTILINE>))
+    a = "a"
+    c = "c"
+    ::<constant:Regexp>.new(begin
+        a
+      end.to_s().concat("b").concat(begin
+          c
+        end.to_s()), 0)
+    <emptyTree>::<constant:Regexp>.new(a.+("b").+(c))
+    ::<constant:Regexp>.new("abc", 0)
+  end

@@ -131,6 +131,14 @@ unique_ptr<Expression> mkFalse(core::Loc loc) {
     return make_unique<BoolLit>(loc, false);
 }
 
+unique_ptr<Expression> mkConstant(core::Loc loc, unique_ptr<Expression> scope, core::NameRef name) {
+    return make_unique<ConstantLit>(loc, move(scope), name);
+}
+
+unique_ptr<Expression> mkInt(core::Loc loc, int64_t val) {
+    return make_unique<IntLit>(loc, val);
+}
+
 pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Context ctx, core::Loc loc,
                                                                        unique_ptr<parser::Node> &argnode,
                                                                        unique_ptr<parser::Node> &bodynode) {
@@ -166,6 +174,32 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     }
 
     return make_pair(move(args), move(body));
+}
+
+unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::NodeVec &nodes) {
+    if (nodes.empty()) {
+        return make_unique<StringLit>(loc, core::Names::empty());
+    }
+    auto it = nodes.begin();
+    auto end = nodes.end();
+    unique_ptr<Expression> res;
+    unique_ptr<Expression> first = node2TreeImpl(ctx, *it);
+    if (cast_tree<StringLit>(first.get()) == nullptr) {
+        res = mkSend0(loc, first, core::Names::to_s());
+    } else {
+        res = move(first);
+    }
+    ++it;
+    for (; it != end; ++it) {
+        auto &stat = *it;
+        unique_ptr<Expression> narg = node2TreeImpl(ctx, stat);
+        if (cast_tree<StringLit>(narg.get()) == nullptr) {
+            narg = mkSend0(loc, narg, core::Names::to_s());
+        }
+        auto n = mkSend1(loc, move(res), core::Names::concat(), move(narg));
+        res.reset(n.release());
+    };
+    return res;
 }
 
 unique_ptr<MethodDef> buildMethod(core::Context ctx, core::Loc loc, core::NameRef name,
@@ -341,31 +375,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(self);
             },
             [&](parser::DString *a) {
-                if (a->nodes.empty()) {
-                    unique_ptr<Expression> res = make_unique<StringLit>(a->loc, core::Names::empty());
-                    result.swap(res);
-                    return;
-                }
-                auto it = a->nodes.begin();
-                auto end = a->nodes.end();
-                unique_ptr<Expression> res;
-                unique_ptr<Expression> first = node2TreeImpl(ctx, *it);
-                if (cast_tree<StringLit>(first.get()) == nullptr) {
-                    res = mkSend0(what->loc, first, core::Names::to_s());
-                } else {
-                    res = move(first);
-                }
-                ++it;
-                for (; it != end; ++it) {
-                    auto &stat = *it;
-                    unique_ptr<Expression> narg = node2TreeImpl(ctx, stat);
-                    if (cast_tree<StringLit>(narg.get()) == nullptr) {
-                        narg = mkSend0(what->loc, narg, core::Names::to_s());
-                    }
-                    auto n = mkSend1(what->loc, move(res), core::Names::concat(), move(narg));
-                    res.reset(n.release());
-                };
-
+                unique_ptr<Expression> res = desugarDString(ctx, a->loc, a->nodes);
                 result.swap(res);
             },
             [&](parser::DSymbol *a) {
@@ -412,12 +422,12 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::Const *a) {
                 auto scope = node2TreeImpl(ctx, a->scope);
-                unique_ptr<Expression> res = make_unique<ConstantLit>(what->loc, move(scope), a->name);
+                unique_ptr<Expression> res = mkConstant(what->loc, move(scope), a->name);
                 result.swap(res);
             },
             [&](parser::ConstLhs *a) {
                 auto scope = node2TreeImpl(ctx, a->scope);
-                unique_ptr<Expression> res = make_unique<ConstantLit>(what->loc, move(scope), a->name);
+                unique_ptr<Expression> res = mkConstant(what->loc, move(scope), a->name);
                 result.swap(res);
             },
             [&](parser::Cbase *a) {
@@ -686,7 +696,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                                            "Unsupported integer literal: {}", integer->val);
                 }
 
-                unique_ptr<Expression> res = make_unique<IntLit>(what->loc, val);
+                unique_ptr<Expression> res = mkInt(what->loc, val);
                 result.swap(res);
             },
             [&](parser::Float *floatNode) {
@@ -784,20 +794,56 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::IRange *ret) {
                 core::NameRef range_name = core::GlobalState::defn_Range().info(ctx).name;
-                unique_ptr<Expression> range = make_unique<ConstantLit>(what->loc, mkEmptyTree(what->loc), range_name);
+                unique_ptr<Expression> range = mkConstant(what->loc, mkEmptyTree(what->loc), range_name);
                 auto from = node2TreeImpl(ctx, ret->from);
                 auto to = node2TreeImpl(ctx, ret->to);
                 auto send = mkSend2(what->loc, range, core::Names::new_(), from, to);
                 result.swap(send);
             },
             [&](parser::ERange *ret) {
-                core::NameRef range_name = core::GlobalState::defn_Range().info(ctx).name;
-                unique_ptr<Expression> range = make_unique<ConstantLit>(what->loc, mkEmptyTree(what->loc), range_name);
+                unique_ptr<Expression> range = mkIdent(what->loc, core::GlobalState::defn_Range());
                 auto from = node2TreeImpl(ctx, ret->from);
                 auto to = node2TreeImpl(ctx, ret->to);
                 auto true_ = mkTrue(what->loc);
                 auto send = mkSend3(what->loc, range, core::Names::new_(), from, to, true_);
                 result.swap(send);
+            },
+            [&](parser::Regexp *regexpNode) {
+                unique_ptr<Expression> regexp = mkIdent(what->loc, core::GlobalState::defn_Regexp());
+                auto regex = desugarDString(ctx, what->loc, regexpNode->regex);
+                auto opts = node2TreeImpl(ctx, regexpNode->opts);
+                auto send = mkSend2(what->loc, regexp, core::Names::new_(), regex, opts);
+                result.swap(send);
+            },
+            [&](parser::Regopt *a) {
+                unique_ptr<Expression> acc = mkInt(what->loc, 0);
+                for (auto &chr : a->opts) {
+                    int flag = 0;
+                    switch (chr) {
+                        case 'i':
+                            flag = 1; // Regexp::IGNORECASE
+                            break;
+                        case 'x':
+                            flag = 2; // Regexp::EXTENDED
+                            break;
+                        case 'm':
+                            flag = 4; // Regexp::MULILINE
+                            break;
+                        case 'n':
+                        case 'e':
+                        case 's':
+                        case 'u':
+                            // Encoding options that should already be handled by the parser
+                            break;
+                        default:
+                            // The parser already yelled about this
+                            break;
+                    }
+                    if (flag != 0) {
+                        acc = mkSend1(what->loc, acc, core::Names::orOp(), mkInt(what->loc, flag));
+                    }
+                }
+                result.swap(acc);
             },
             [&](parser::Return *ret) {
                 if (ret->exprs.size() > 1) {
@@ -921,15 +967,14 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     unique_ptr<Expression> lh = node2TreeImpl(ctx, c);
                     if (ast::Send *snd = cast_tree<ast::Send>(lh.get())) {
                         Error::check(snd->args.size() == 0);
-                        unique_ptr<Expression> getElement =
-                            mkSend1(what->loc, mkLocal(what->loc, tempName), core::Names::squareBrackets(),
-                                    make_unique<IntLit>(what->loc, i));
+                        unique_ptr<Expression> getElement = mkSend1(what->loc, mkLocal(what->loc, tempName),
+                                                                    core::Names::squareBrackets(), mkInt(what->loc, i));
                         snd->args.emplace_back(move(getElement));
                         stats.emplace_back(move(lh));
                     } else if (cast_tree<ast::Reference>(lh.get()) != nullptr ||
                                cast_tree<ast::ConstantLit>(lh.get()) != nullptr) {
                         auto access = mkSend1(what->loc, mkLocal(what->loc, tempName), core::Names::squareBrackets(),
-                                              make_unique<IntLit>(what->loc, i));
+                                              mkInt(what->loc, i));
                         unique_ptr<Expression> assign = mkAssign(what->loc, lh, access);
                         stats.emplace_back(move(assign));
                     } else if (ast::NotSupported *snd = cast_tree<ast::NotSupported>(lh.get())) {

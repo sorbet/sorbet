@@ -29,9 +29,8 @@ MethodDef{
         ]
       }
       Send{
-        recv = ConstantLit{
-          scope = EmptyTree
-          cnst = <constant:Range>
+        recv = Ident{
+          symbol = <constant:Range>
         }
         name = new
         block = nullptr
