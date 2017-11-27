@@ -305,6 +305,46 @@ private:
         }
     }
 
+    void defineAttr(core::Context ctx, ast::Send *send, bool r, bool w) {
+        for (auto &arg : send->args) {
+            core::NameRef name(0);
+            if (auto *sym = ast::cast_tree<ast::SymbolLit>(arg.get())) {
+                name = sym->name;
+            } else if (auto *str = ast::cast_tree<ast::StringLit>(arg.get())) {
+                name = str->value;
+            } else {
+                ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidAttr,
+                                       "{} argument must be a string or symbol literal", send->fun.toString(ctx));
+                continue;
+            }
+
+            core::NameRef varName = ctx.state.enterNameUTF8("@" + name.toString(ctx));
+            core::SymbolRef sym = ctx.owner.info(ctx).findMemberTransitive(ctx, varName);
+            if (!sym.exists()) {
+                ctx.state.errors.error(arg->loc, core::ErrorClass::UndeclaredVariable,
+                                       "Accessor for undeclared variable `{}'", varName.toString(ctx));
+                sym = ctx.state.enterFieldSymbol(arg->loc, ctx.owner, varName);
+            }
+
+            if (r) {
+                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name);
+                meth.info(ctx).resultType = sym.info(ctx).resultType;
+            }
+            if (w) {
+                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name.addEq(ctx));
+                core::SymbolRef arg0 = ctx.state.enterMethodArgumentSymbol(arg->loc, meth, core::Names::arg0());
+
+                auto ty = sym.info(ctx).resultType;
+                if (ty == nullptr) {
+                    ty = core::Types::dynamic();
+                }
+                arg0.info(ctx).resultType = ty;
+                meth.info(ctx).arguments().push_back(arg0);
+                meth.info(ctx).resultType = ty;
+            }
+        }
+    }
+
     void processClassBody(core::Context ctx, ast::ClassDef *klass) {
         unique_ptr<ast::Expression> lastStandardMethod;
 
@@ -326,6 +366,18 @@ private:
                                  break;
                              case core::Names::declareVariables()._id:
                                  processDeclareVariables(ctx.withOwner(klass->symbol), send);
+                                 break;
+                             case core::Names::attr()._id:
+                             case core::Names::attrReader()._id:
+                                 defineAttr(ctx.withOwner(klass->symbol), send, true, false);
+
+                                 break;
+                             case core::Names::attrWriter()._id:
+                                 defineAttr(ctx.withOwner(klass->symbol), send, false, true);
+                                 break;
+
+                             case core::Names::attrAccessor()._id:
+                                 defineAttr(ctx.withOwner(klass->symbol), send, true, true);
                                  break;
                              default:
                                  swap(mine, stat);

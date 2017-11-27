@@ -66,6 +66,13 @@ NameDef names[] = {
     {"declareVariables", "declare_variables"},
     // end standard_method keywords
 
+    // Ruby DSL methods which we understand
+    {"attr"},
+    {"attrAccessor", "attr_accessor"},
+    {"attrWriter", "attr_writer"},
+    {"attrReader", "attr_reader"},
+    // end DSL methods
+
     // The next two names are used as keys in SymbolInfo::members to store
     // pointers up and down the singleton-class hierarchy. If A's singleton
     // class is B, then A will have a `singletonClass` entry in its members
