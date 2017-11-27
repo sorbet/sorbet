@@ -5,11 +5,11 @@ module Opus::CIBot::Gerald
 
   class MatchTimeout < StandardError
 
-    attr_reader :rule_token
+    attr_reader :rule_token # error: Accessor for undeclared variable
 
     def initialize(message, rule_token: '')
       super(message)
-      @rule_token = rule_token  # error: undeclared variable
+      @rule_token = rule_token
     end
   end
 
@@ -48,24 +48,24 @@ module Opus::CIBot::Gerald
   end
 
   class MatchContext
-    attr_reader :repo
-    attr_reader :assignee
-    attr_reader :gh_user
-    attr_reader :merge_branch
-    attr_reader :body
-    attr_reader :title
-    attr_reader :diff
-    attr_reader :openapi_diff
+    attr_reader :repo           # error: Accessor for undeclared variable
+    attr_reader :assignee       # error: Accessor for undeclared variable
+    attr_reader :gh_user        # error: Accessor for undeclared variable
+    attr_reader :merge_branch   # error: Accessor for undeclared variable
+    attr_reader :body           # error: Accessor for undeclared variable
+    attr_reader :title          # error: Accessor for undeclared variable
+    attr_reader :diff           # error: Accessor for undeclared variable
+    attr_reader :openapi_diff   # error: Accessor for undeclared variable
 
     def initialize(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
-      @repo = repo # error: undeclared variable
-      @assignee = assignee # error: undeclared variable
-      @gh_user = gh_user # error: undeclared variable
-      @merge_branch = merge_branch # error: undeclared variable
-      @body = body # error: undeclared variable
-      @title = title # error: undeclared variable
-      @diff = diff # error: undeclared variable
-      @openapi_diff = openapi_diff # error: undeclared variable
+      @repo = repo
+      @assignee = assignee
+      @gh_user = gh_user
+      @merge_branch = merge_branch
+      @body = body
+      @title = title
+      @diff = diff
+      @openapi_diff = openapi_diff
     end
 
     # Should the name be suffixed with `-stripe`?
@@ -194,4 +194,3 @@ class Range
   )
   def initialize(begin_, end_, exclude_end=_); end
 end
-

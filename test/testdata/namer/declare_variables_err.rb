@@ -1,5 +1,5 @@
 class A
-  A.declare_variables      # error: Malformed `declare_variables'
+  A.declare_variables
 
   declare_variables({}) do # error: Malformed `declare_variables'
   end

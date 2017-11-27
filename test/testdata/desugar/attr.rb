@@ -6,6 +6,6 @@ class TestAttr
 
   attr :v1
   attr_accessor :v2
-  attr_reader :v3
-  attr_writer :v4, :v5
+  attr_reader :v3       # error: undeclared variable
+  attr_writer :v4, :v5  # error: MULTI
 end
