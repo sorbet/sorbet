@@ -3,8 +3,6 @@ begin
   ::<constant:Opus>::<constant:AutogenLoader>.init("__FILE__")
   module <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Gerald><<constant:Gerald>> < ()
     class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::<constant:StandardError>)
-      self(<singleton class:<constant:MatchTimeout>>).attr_reader(:rule_token)
-
       def initialize<initialize>(message, rule_token)
         begin
           self(<constant:MatchTimeout>).super(message)
@@ -59,22 +57,6 @@ begin
     end
 
     class <emptyTree>::<constant:MatchContext><<constant:MatchContext>> < (::<constant:<todo sym>>)
-      self(<singleton class:<constant:MatchContext>>).attr_reader(:repo)
-
-      self(<singleton class:<constant:MatchContext>>).attr_reader(:assignee)
-
-      self(<singleton class:<constant:MatchContext>>).attr_reader(:gh_user)
-
-      self(<singleton class:<constant:MatchContext>>).attr_reader(:merge_branch)
-
-      self(<singleton class:<constant:MatchContext>>).attr_reader(:body)
-
-      self(<singleton class:<constant:MatchContext>>).attr_reader(:title)
-
-      self(<singleton class:<constant:MatchContext>>).attr_reader(:diff)
-
-      self(<singleton class:<constant:MatchContext>>).attr_reader(:openapi_diff)
-
       def initialize<initialize>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
         begin
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo = repo
