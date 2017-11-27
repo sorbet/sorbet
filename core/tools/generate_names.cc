@@ -54,6 +54,7 @@ NameDef names[] = {
     // standard_method keywords
     {"standardMethod", "standard_method"},
     {"returns"},
+    {"checked"},
     {"all"},
     {"any"},
     {"nilable"},

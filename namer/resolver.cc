@@ -232,6 +232,8 @@ private:
                             methoInfo.resultType = getResultType(ctx, value);
                             methoInfo.definitionLoc = value->loc;
                             break;
+                        case core::Names::checked()._id:
+                            break;
                         default:
                             ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
                                                    "Misformed standard_method. Unknown argument name {}",
