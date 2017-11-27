@@ -52,7 +52,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                         ++it;
                     }
                 } else {
-                    ++it;
+                    it = current.erase(it);
                 }
             }
         }
