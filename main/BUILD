@@ -43,6 +43,7 @@ cc_library(
         "//ast/desugar",
         "//ast/treemap",
         "//cfg",
+        "//cfg/builder",
         "//core",
         "//core/serialize",
         "//infer",

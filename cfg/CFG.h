@@ -1,10 +1,7 @@
 #ifndef SRUBY_CFG_H
 #define SRUBY_CFG_H
 
-#include "../ast/Trees.h"
-#include "ast/ast.h"
 #include "core/core.h"
-#include "parser/parser.h"
 #include <memory>
 #include <unordered_map>
 
@@ -195,6 +192,7 @@ public:
 class CFGContext;
 
 class CFG final {
+    friend class CFGBuilder;
     /**
      * CFG owns all the BasicBlocks, and then they have raw unmanaged pointers to and between each other,
      * because they all have lifetime identical with each other and the CFG.
@@ -210,7 +208,6 @@ public:
      */
     std::vector<BasicBlock *> forwardsTopoSort;
     std::vector<BasicBlock *> backwardsTopoSort;
-    static std::unique_ptr<CFG> buildFor(core::Context ctx, ast::MethodDef &md);
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
     }
@@ -227,32 +224,7 @@ public:
 
 private:
     CFG();
-    BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);
     BasicBlock *freshBlock(int outerLoops, BasicBlock *from);
-    void fillInTopoSorts(core::Context ctx);
-    void dealias(core::Context ctx);
-    void fillInBlockArguments(core::Context ctx);
-    int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
-    int topoSortBwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
-};
-
-class CFGContext {
-public:
-    core::Context ctx;
-    CFG &inWhat;
-    core::LocalVariable target;
-    int loops;
-    BasicBlock *scope;
-    std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
-
-    CFGContext withTarget(core::LocalVariable target);
-    CFGContext withScope(BasicBlock *scope);
-
-private:
-    friend std::unique_ptr<CFG> CFG::buildFor(core::Context ctx, ast::MethodDef &md);
-    CFGContext(core::Context ctx, CFG &inWhat, core::LocalVariable target, int loops, BasicBlock *scope,
-               std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), scope(scope), aliases(aliases){};
 };
 
 } // namespace cfg

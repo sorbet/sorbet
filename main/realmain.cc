@@ -5,6 +5,7 @@
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
+#include "cfg/builder/builder.h"
 #include "core/serialize/serialize.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
@@ -37,7 +38,7 @@ public:
     CFG_Collector_and_Typer(bool shouldType, bool printCFGs) : shouldType(shouldType), printCFGs(printCFGs){};
 
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
-        auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
+        auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (shouldType) {
             ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
         }
