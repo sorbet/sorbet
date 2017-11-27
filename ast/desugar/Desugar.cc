@@ -79,10 +79,12 @@ unique_ptr<Expression> mkLocal(core::Loc loc, core::NameRef name) {
 }
 
 unique_ptr<Expression> cpRef(core::Loc loc, Reference &name) {
-    if (UnresolvedIdent *nm = cast_tree<UnresolvedIdent>(&name))
+    if (UnresolvedIdent *nm = cast_tree<UnresolvedIdent>(&name)) {
         return make_unique<UnresolvedIdent>(loc, nm->kind, nm->name);
-    if (Ident *id = cast_tree<Ident>(&name))
+    }
+    if (Ident *id = cast_tree<Ident>(&name)) {
         return make_unique<Ident>(loc, id->symbol);
+    }
     Error::notImplemented();
 }
 
@@ -166,10 +168,11 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     }
 
     auto body = node2TreeImpl(ctx, bodynode);
-    if (destructures.size() > 0) {
+    if (!destructures.empty()) {
         core::Loc bodyLoc = body->loc;
-        if (bodyLoc.is_none())
+        if (bodyLoc.is_none()) {
             bodyLoc = loc;
+        }
         body = make_unique<InsSeq>(loc, destructures, move(body));
     }
 
@@ -435,7 +438,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Begin *a) {
-                if (a->stmts.size() > 0) {
+                if (!a->stmts.empty()) {
                     InsSeq::STATS_store stats;
                     stats.reserve(a->stmts.size() - 1);
                     auto end = a->stmts.end();
@@ -454,7 +457,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
             },
             [&](parser::Kwbegin *a) {
-                if (a->stmts.size() > 0) {
+                if (!a->stmts.empty()) {
                     InsSeq::STATS_store stats;
                     stats.reserve(a->stmts.size() - 1);
                     auto end = a->stmts.end();
@@ -747,13 +750,13 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                         values.emplace_back(move(value));
                     } else {
                         parser::Kwsplat *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
-                        Error::check(splat);
+                        Error::check(splat != nullptr);
 
                         // Desguar
                         //   {a: 'a', **x, remaining}
                         // into
                         //   {a: 'a'}.merge(x).merge(remaining)
-                        if (keys.size() == 0) {
+                        if (keys.empty()) {
                             if (lastMerge != nullptr) {
                                 lastMerge = mkSend1(what->loc, lastMerge, core::Names::merge(),
                                                     node2TreeImpl(ctx, splat->expr));
@@ -776,7 +779,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 };
 
                 unique_ptr<Expression> res;
-                if (keys.size() == 0) {
+                if (keys.empty()) {
                     if (lastMerge != nullptr) {
                         res = move(lastMerge);
                     } else {
@@ -966,7 +969,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 for (auto &c : lhs->exprs) {
                     unique_ptr<Expression> lh = node2TreeImpl(ctx, c);
                     if (ast::Send *snd = cast_tree<ast::Send>(lh.get())) {
-                        Error::check(snd->args.size() == 0);
+                        Error::check(snd->args.empty());
                         unique_ptr<Expression> getElement = mkSend1(what->loc, mkLocal(what->loc, tempName),
                                                                     core::Names::squareBrackets(), mkInt(what->loc, i));
                         snd->args.emplace_back(move(getElement));
@@ -1037,7 +1040,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                                        a->nodeName());
                 result.reset(new NotSupported(what->loc, a->nodeName()));
             });
-        Error::check(result.get());
+        Error::check(result.get() != nullptr);
         return result;
     } catch (...) {
         if (!locReported) {

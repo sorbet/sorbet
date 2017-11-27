@@ -88,8 +88,9 @@ string Reporter::ComplexError::toString(GlobalState &gs) {
     buf << '[' << (int)this->what << "] " << this->formatted << endl;
     bool first = true;
     for (auto &line : this->sections) {
-        if (!first)
+        if (!first) {
             buf << endl;
+        }
         first = false;
         buf << line.toString(gs);
     }

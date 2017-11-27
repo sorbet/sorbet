@@ -329,7 +329,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
 }
 
-GlobalState::~GlobalState() {}
+GlobalState::~GlobalState() = default;
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
@@ -358,10 +358,11 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     info.owner = owner;
     info.definitionLoc = loc;
 
-    if (!reallocate)
+    if (!reallocate) {
         ownerScope.members.push_back(make_pair(name, ret));
-    else
+    } else {
         owner.info(*this, true).members.push_back(make_pair(name, ret));
+    }
     return ret;
 }
 
@@ -425,13 +426,14 @@ NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
     auto bucketId = hs & mask;
     unsigned int probe_count = 1;
 
-    while (names_by_hash[bucketId].second) {
+    while (names_by_hash[bucketId].second != 0u) {
         auto &bucket = names_by_hash[bucketId];
         if (bucket.first == hs) {
             auto name_id = bucket.second;
             auto &nm2 = names[name_id];
-            if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm)
+            if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
                 return name_id;
+            }
         }
         bucketId = (bucketId + probe_count) & mask;
         probe_count++;
@@ -476,8 +478,9 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         auto &bucket = names_by_hash[bucketId];
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
-            if (nm2.kind == CONSTANT && nm2.cnst.original == original)
+            if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
                 return bucket.second;
+            }
         }
         bucketId = (bucketId + probe_count) & mask;
         probe_count++;
@@ -522,7 +525,7 @@ void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsign
     DEBUG_ONLY(Error::check((szFrom & (szFrom - 1)) == 0));
     unsigned int mask = szTo - 1;
     for (unsigned int orig = 0; orig < szFrom; orig++) {
-        if (from[orig].second) {
+        if (from[orig].second != 0u) {
             auto hs = from[orig].first;
             unsigned int probe = 1;
             auto bucketId = hs & mask;
@@ -560,8 +563,9 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
-                nm2.unique.original == original)
+                nm2.unique.original == original) {
                 return bucket.second;
+            }
         }
         bucketId = (bucketId + probe_count) & mask;
         probe_count++;
@@ -644,8 +648,9 @@ void GlobalState::sanityCheck() const {
     Error::check(names.capacity() * 2 == names_by_hash.capacity());
     Error::check(names_by_hash.size() == names_by_hash.capacity());
     for (auto &ent : names_by_hash) {
-        if (ent.second == 0)
+        if (ent.second == 0) {
             continue;
+        }
         const Name &nm = names[ent.second];
         Error::check(ent.first == nm.hash(*this));
     }

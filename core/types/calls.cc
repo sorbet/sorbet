@@ -37,8 +37,9 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
 
 shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-    if (fun != Names::buildHash())
+    if (fun != Names::buildHash()) {
         return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
+    }
     Error::check(args.size() % 2 == 0);
 
     vector<shared_ptr<Literal>> keys;
@@ -126,8 +127,9 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     auto pit = info.arguments().begin();
     auto pend = info.arguments().end();
 
-    if (pit != pend && (pend - 1)->info(ctx).isBlockArgument())
+    if (pit != pend && (pend - 1)->info(ctx).isBlockArgument()) {
         --pend;
+    }
 
     auto ait = args.begin();
     auto aend = args.end();
@@ -135,13 +137,16 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     while (pit != pend && ait != aend) {
         core::Symbol &spec = pit->info(ctx);
         auto &arg = *ait;
-        if (spec.isKeyword())
+        if (spec.isKeyword()) {
             break;
+        }
         if (ait + 1 == aend && hasKwargs && arg.type->derivesFrom(ctx, ctx.state.defn_Hash()) &&
-            (spec.isOptional() || spec.isRepeated()))
+            (spec.isOptional() || spec.isRepeated())) {
             break;
-        if (!spec.isRepeated())
+        }
+        if (!spec.isRepeated()) {
             ++pit;
+        }
         ++ait;
 
         matchArgType(ctx, callLoc, method, arg, spec);
@@ -168,8 +173,9 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         // find keyword arguments and advance `pend` before them; We'll walk
         // `kwit` ahead below
         auto kwit = pit;
-        while (!kwit->info(ctx).isKeyword())
+        while (!kwit->info(ctx).isKeyword()) {
             kwit++;
+        }
         pend = kwit;
 
         if (hashArg.type->isDynamic()) {
@@ -180,8 +186,9 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
 
             while (kwit != info.arguments().end()) {
                 core::Symbol &spec = kwit->info(ctx);
-                if (spec.isRepeated() || spec.isBlockArgument())
+                if (spec.isRepeated() || spec.isBlockArgument()) {
                     break;
+                }
                 ++kwit;
 
                 auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<Literal> lit) {
@@ -202,8 +209,9 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
             }
             for (auto &key : hash->keys) {
                 SymbolRef klass = dynamic_cast<ClassType *>(key->underlying.get())->symbol;
-                if (klass == ctx.state.defn_Symbol() && consumed.find(NameRef(key->value)) != consumed.end())
+                if (klass == ctx.state.defn_Symbol() && consumed.find(NameRef(key->value)) != consumed.end()) {
                     continue;
+                }
                 NameRef arg(key->value);
 
                 ctx.state.errors.error(callLoc, core::ErrorClass::MethodArgumentCountMismatch,
@@ -222,8 +230,9 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         // We have keyword arguments, but we didn't consume a hash at the
         // end. Report an error for each missing required keyword arugment.
         for (auto &spec : info.arguments()) {
-            if (!spec.info(ctx).isKeyword() || spec.info(ctx).isOptional() || spec.info(ctx).isRepeated())
+            if (!spec.info(ctx).isKeyword() || spec.info(ctx).isOptional() || spec.info(ctx).isRepeated()) {
                 continue;
+            }
             missingArg(ctx, callLoc, fun, spec);
         }
     }

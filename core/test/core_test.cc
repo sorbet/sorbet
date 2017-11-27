@@ -17,7 +17,7 @@ struct Offset2PosTest {
     u4 col;
 };
 
-TEST(ASTTest, TestOffset2Pos) {
+TEST(ASTTest, TestOffset2Pos) { // NOLINT
     core::GlobalState gs(*console);
 
     vector<Offset2PosTest> cases = {{"hello", 0, 1, 1},
@@ -41,14 +41,14 @@ TEST(ASTTest, TestOffset2Pos) {
     }
 }
 
-TEST(ASTTest, ErrorReporter) {
+TEST(ASTTest, ErrorReporter) { // NOLINT
     core::GlobalState gs(*console);
     core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
     gs.errors.error(core::Loc{f, 0, 3}, core::ErrorClass::Internal, "Use of metavariable: {}", "foo");
     ASSERT_TRUE(gs.errors.hadCriticalError());
 }
 
-TEST(ASTTest, SymbolRef) {
+TEST(ASTTest, SymbolRef) { // NOLINT
     core::GlobalState gs(*console);
     core::SymbolRef ref = gs.defn_object();
     EXPECT_EQ(ref, ref.info(gs).ref(gs));

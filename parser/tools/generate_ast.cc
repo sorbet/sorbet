@@ -241,11 +241,13 @@ void emit_node_header(ostream &out, NodeDef &node) {
     out << "        : Node(loc)";
     for (auto &arg : node.fields) {
         out << ", " << arg.name << "(";
-        if (arg.type == Node || arg.type == NodeVec)
+        if (arg.type == Node || arg.type == NodeVec) {
             out << "move(";
+        }
         out << arg.name;
-        if (arg.type == Node || arg.type == NodeVec)
+        if (arg.type == Node || arg.type == NodeVec) {
             out << ")";
+        }
         out << ")";
     }
     out << " {}" << endl;

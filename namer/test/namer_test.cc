@@ -18,7 +18,7 @@ auto console = spd::stderr_color_mt("namer");
 
 class NamerFixture : public ::testing::Test {
 public:
-    void SetUp() {
+    void SetUp() override {
         ctxPtr = make_unique<core::GlobalState>(*console);
     }
     core::Context getCtx() {
@@ -42,7 +42,7 @@ unique_ptr<ast::Expression> hello_world(core::GlobalState &gs) {
     return getTree(gs, "def hello_world; end");
 }
 
-TEST_F(NamerFixture, HelloWorld) {
+TEST_F(NamerFixture, HelloWorld) { // NOLINT
     auto ctx = getCtx();
     auto tree = hello_world(ctx);
     namer::Namer::run(ctx, move(tree));
@@ -57,7 +57,7 @@ TEST_F(NamerFixture, HelloWorld) {
     ASSERT_EQ(0, symbol.arguments().size());
 }
 
-TEST_F(NamerFixture, Idempotent) {
+TEST_F(NamerFixture, Idempotent) { // NOLINT
     auto ctx = getCtx();
     auto baseSymbols = ctx.state.symbolsUsed();
     auto baseNames = ctx.state.namesUsed();
@@ -73,7 +73,7 @@ TEST_F(NamerFixture, Idempotent) {
     ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
 }
 
-TEST_F(NamerFixture, NameClass) {
+TEST_F(NamerFixture, NameClass) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Test; class Foo; end; end");
     namer::Namer::run(ctx, move(tree));
@@ -87,7 +87,7 @@ TEST_F(NamerFixture, NameClass) {
     ASSERT_EQ(0, fooInfo.members.size());
 }
 
-TEST_F(NamerFixture, InsideClass) {
+TEST_F(NamerFixture, InsideClass) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Test; class Foo; def bar; end; end; end");
     namer::Namer::run(ctx, move(tree));

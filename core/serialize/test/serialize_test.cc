@@ -8,7 +8,7 @@ namespace ruby_typer {
 namespace core {
 namespace serialize {
 
-TEST(SerializeTest, U4) {
+TEST(SerializeTest, U4) { // NOLINT
     GlobalStateSerializer::Pickler p;
     p.putU4(0);
     p.putU4(1);
@@ -19,7 +19,7 @@ TEST(SerializeTest, U4) {
     EXPECT_EQ(u.getU4(), 4294967295);
 }
 
-TEST(SerializeTest, U8) {
+TEST(SerializeTest, U8) { // NOLINT
     GlobalStateSerializer::Pickler p;
     p.putS8(0);
     p.putS8(1);
@@ -32,7 +32,7 @@ TEST(SerializeTest, U8) {
     EXPECT_EQ(u.getS8(), 9223372036854775807);
 }
 
-TEST(SerializeTest, Strings) {
+TEST(SerializeTest, Strings) { // NOLINT
     GlobalStateSerializer::Pickler p;
     p.putStr("");
     p.putStr("a");

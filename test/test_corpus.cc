@@ -43,11 +43,11 @@ string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
 
 class ExpectationTest : public testing::TestWithParam<Expectations> {
 public:
-    virtual ~ExpectationTest() {}
-    virtual void SetUp() {
+    ~ExpectationTest() override = default;
+    void SetUp() override {
         exp_ = GetParam();
     }
-    virtual void TearDown() {}
+    void TearDown() override {}
 
 protected:
     Expectations exp_;
@@ -71,7 +71,7 @@ extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
 // C++ stream interface
 class TestCout : public stringstream {
 public:
-    ~TestCout() {
+    ~TestCout() override {
         PRINTF("%s", str().c_str());
     }
 };
@@ -80,7 +80,7 @@ public:
 
 class CFG_Collector_and_Typer {
 public:
-    CFG_Collector_and_Typer() {}
+    CFG_Collector_and_Typer() = default;
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         auto cfg = ruby_typer::cfg::CFG::buildFor(ctx.withOwner(m->symbol), *m);
@@ -95,7 +95,7 @@ unordered_set<string> knownPasses = {
     "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "infer",
 };
 
-TEST_P(ExpectationTest, PerPhaseTest) {
+TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.sourceFile;
@@ -274,8 +274,7 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 
     map<int, int> seenErrorLines;
     int unknownLocErrorLine = 1;
-    for (int i = 0; i < errors.size(); i++) {
-        auto &error = errors[i];
+    for (auto &error : errors) {
         if (error->loc.is_none()) {
             // The convention is to put `error: Unknown Location Error` at
             // the top of the file for each of these so that they are eaten
@@ -337,8 +336,9 @@ TEST_P(ExpectationTest, PerPhaseTest) {
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs()), prettyPrintTest);
 
 bool endsWith(const string &a, const string &b) {
-    if (b.size() > a.size())
+    if (b.size() > a.size()) {
         return false;
+    }
     return equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
 }
 
@@ -353,14 +353,15 @@ vector<Expectations> listDir(const char *name) {
     struct dirent *entry;
     vector<string> names;
 
-    if (!(dir = opendir(name))) {
+    if ((dir = opendir(name)) == nullptr) {
         return result;
     }
 
-    while ((entry = readdir(dir)) != NULL) {
+    while ((entry = readdir(dir)) != nullptr) {
         if (entry->d_type == DT_DIR) {
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
                 continue;
+            }
             char path[1024];
             snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
             auto nested = listDir(path);
