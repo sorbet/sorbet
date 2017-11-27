@@ -115,8 +115,6 @@ ShadowArg::ShadowArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc)
 
 BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {}
 
-Nil::Nil(core::Loc loc) : Expression(loc) {}
-
 FloatLit::FloatLit(core::Loc loc, double value) : Expression(loc), value(value) {}
 
 IntLit::IntLit(core::Loc loc, int64_t value) : Expression(loc), value(value) {}
@@ -972,20 +970,10 @@ string EmptyTree::nodeName() {
     return "EmptyTree";
 }
 
-string Nil::toString(core::GlobalState &gs, int tabs) {
-    return "nil";
-}
-
-string Nil::showRaw(core::GlobalState &gs, int tabs) {
-    return nodeName();
-}
 string EmptyTree::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName();
 }
 
-string Nil::nodeName() {
-    return "Nil";
-}
 string RestArg::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }

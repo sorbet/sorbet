@@ -180,10 +180,6 @@ public:
                          tp.type = make_shared<core::Literal>(i->value);
                          tp.origins.push_back(bind.loc);
                      },
-                     [&](cfg::Nil *i) {
-                         tp.type = core::Types::nil();
-                         tp.origins.push_back(bind.loc);
-                     },
                      [&](cfg::Self *i) {
                          tp.type = make_shared<core::ClassType>(i->klass);
                          tp.origins.push_back(bind.loc);
