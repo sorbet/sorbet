@@ -309,6 +309,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                             make_unique<Send>(hash, core::Names::buildHash(), vars));
                 ret = current;
             },
+            [&](ast::EmptyTree *n) { ret = current; },
 
             [&](ast::Expression *n) {
                 current->exprs.emplace_back(cctx.target, n->loc, make_unique<NotSupported>(""));
