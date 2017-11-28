@@ -301,8 +301,7 @@ private:
     Expression *mapIt(Expression *what, core::Context ctx) {
         try {
             // TODO: reorder by frequency
-            if (what == nullptr || cast_tree<EmptyTree>(what) != nullptr || cast_tree<Nil>(what) != nullptr ||
-                cast_tree<ZSuperArgs>(what) != nullptr)
+            if (what == nullptr || cast_tree<EmptyTree>(what) != nullptr || cast_tree<ZSuperArgs>(what) != nullptr)
                 return what;
             if (ClassDef *v = cast_tree<ClassDef>(what)) {
                 if (HAS_MEMBER_preTransformClassDef<FUNC>::value) {

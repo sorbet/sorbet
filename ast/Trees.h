@@ -286,14 +286,6 @@ public:
     virtual std::string nodeName();
 };
 
-class Nil final : public Expression {
-public:
-    Nil(core::Loc loc);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-};
-
 class SymbolLit final : public Expression {
 public:
     core::NameRef name;

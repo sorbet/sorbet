@@ -33,7 +33,7 @@ begin
     self(<constant:<todo sym>>).f(begin
         self(<constant:<todo sym>>).g()
       rescue
-        nil
+        ::<constant:nil>
       else
         <emptyTree>
       end)
@@ -84,7 +84,7 @@ begin
   def parse_ruby_bug_12402<<constant:<todo sym>>>()
     foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
   rescue
-    nil
+    ::<constant:nil>
   else
     <emptyTree>
   def parse_ruby_bug_12402_1<<constant:<todo sym>>>()

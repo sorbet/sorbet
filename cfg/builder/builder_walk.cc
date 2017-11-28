@@ -80,7 +80,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto body = walk(cctx.withTarget(bodySym).withScope(headerBlock), a->body.get(), bodyBlock);
                 unconditionalJump(body, headerBlock, cctx.inWhat);
 
-                continueBlock->exprs.emplace_back(cctx.target, a->loc, make_unique<Nil>());
+                continueBlock->exprs.emplace_back(
+                    cctx.target, a->loc,
+                    make_unique<Ident>(
+                        global2Local(cctx.ctx, core::GlobalState::defn_nil(), cctx.inWhat, cctx.aliases)));
                 ret = continueBlock;
             },
             [&](ast::Return *a) {

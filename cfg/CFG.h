@@ -126,12 +126,6 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class Nil final : public Instruction {
-public:
-    Nil(){};
-    virtual std::string toString(core::Context ctx);
-};
-
 class Self final : public Instruction {
 public:
     core::SymbolRef klass;

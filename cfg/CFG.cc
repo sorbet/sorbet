@@ -155,10 +155,6 @@ string BoolLit::toString(core::Context ctx) {
     }
 }
 
-string Nil::toString(core::Context ctx) {
-    return "nil";
-}
-
 string Self::toString(core::Context ctx) {
     return "self";
 }

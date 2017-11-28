@@ -367,7 +367,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     a->loc, make_unique<parser::LVar>(recvLoc, tempRecv), a->method, move(a->args));
                 auto send = node2TreeImpl(ctx, sendNode);
 
-                unique_ptr<Expression> nil = make_unique<Nil>(a->loc);
+                unique_ptr<Expression> nil = mkIdent(a->loc, core::GlobalState::defn_nil());
                 auto iff = mkIf(a->loc, cond, nil, send);
                 InsSeq::STATS_store stats;
                 stats.emplace_back(move(assgn));
@@ -623,7 +623,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Nil *wl) {
-                unique_ptr<Expression> res = make_unique<Nil>(what->loc);
+                unique_ptr<Expression> res = mkIdent(what->loc, core::GlobalState::defn_nil());
                 result.swap(res);
             },
             [&](parser::IVar *var) {

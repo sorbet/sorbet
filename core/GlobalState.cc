@@ -315,6 +315,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
 
     // Synthesize ::{} = EmptyHash()
     defn_emptyHash().info(*this).resultType = make_unique<HashType>();
+    defn_nil().info(*this).resultType = make_unique<ClassType>(defn_NilClass());
     // Synthesize Hash#build_hash(*vs : Object) => Hash
     SymbolRef buildHash = enterMethodSymbol(Loc::none(0), defn_Hash(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(0), buildHash, Names::arg0());

@@ -31,8 +31,8 @@
 </g>
 <g id="clust5" class="cluster">
 <title>cluster_::&lt;constant:Object&gt;#parse_ruby_bug_12686</title>
-<polygon fill="none" stroke="#0000ff" points="3534,-116 3534,-908.5656 4284,-908.5656 4284,-116 3534,-116"/>
-<text text-anchor="middle" x="3909" y="-893.3656" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#parse_ruby_bug_12686</text>
+<polygon fill="none" stroke="#0000ff" points="3534,-116 3534,-920.8021 4284,-920.8021 4284,-116 3534,-116"/>
+<text text-anchor="middle" x="3909" y="-905.6021" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#parse_ruby_bug_12686</text>
 </g>
 <g id="clust6" class="cluster">
 <title>cluster_::&lt;constant:Object&gt;#parse_rescue_mod</title>
@@ -71,8 +71,8 @@
 </g>
 <g id="clust13" class="cluster">
 <title>cluster_::&lt;constant:Object&gt;#parse_ruby_bug_12402</title>
-<polygon fill="none" stroke="#0000ff" points="10408,-116 10408,-896.3292 11150,-896.3292 11150,-116 10408,-116"/>
-<text text-anchor="middle" x="10779" y="-881.1292" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#parse_ruby_bug_12402</text>
+<polygon fill="none" stroke="#0000ff" points="10408,-116 10408,-908.5656 11150,-908.5656 11150,-116 10408,-116"/>
+<text text-anchor="middle" x="10779" y="-893.3656" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#parse_ruby_bug_12402</text>
 </g>
 <g id="clust14" class="cluster">
 <title>cluster_::&lt;constant:Object&gt;#parse_ruby_bug_12402_1</title>
@@ -534,10 +534,11 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_0 -->
 <g id="node29" class="node">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_0</title>
-<polygon fill="none" stroke="#000000" points="3636.0558,-821.2969 3780,-790.9599 3923.9442,-821.2969 3923.8099,-870.3832 3636.1901,-870.3832 3636.0558,-821.2969"/>
-<text text-anchor="middle" x="3780" y="-844.664" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3)</text>
-<text text-anchor="middle" x="3780" y="-830.664" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = self : Object</text>
-<text text-anchor="middle" x="3780" y="-816.664" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$5</text>
+<polygon fill="none" stroke="#000000" points="3557.6245,-817.5973 3816,-778.9879 4074.3755,-817.5973 4074.1344,-880.0688 3557.8656,-880.0688 3557.6245,-817.5973"/>
+<text text-anchor="middle" x="3816" y="-851.664" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3, &lt;constant:nil&gt;$7)</text>
+<text text-anchor="middle" x="3816" y="-837.664" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:nil&gt;$7 = alias &lt;constant:nil&gt; : NilClass</text>
+<text text-anchor="middle" x="3816" y="-823.664" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = self : Object</text>
+<text text-anchor="middle" x="3816" y="-809.664" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$5</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_2 -->
 <g id="node31" class="node">
@@ -551,21 +552,21 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_0&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_2 -->
 <g id="edge39" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_0&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_2</title>
-<path fill="none" stroke="#000000" d="M3757.3354,-795.4766C3736.169,-756.2519 3706.0808,-693.5863 3694,-634.926 3683.2453,-582.7045 3689.7888,-521.8924 3697.4954,-478.9404"/>
-<polygon fill="#000000" stroke="#000000" points="3700.9623,-479.4416 3699.363,-468.9682 3694.0819,-478.153 3700.9623,-479.4416"/>
+<path fill="none" stroke="#000000" d="M3758.9566,-787.5049C3744.803,-774.0379 3730.4302,-758.7126 3719,-742.926 3687.8691,-699.9301 3679.6148,-686.7224 3668,-634.926 3657.2728,-587.0879 3658.4066,-572.6956 3668,-524.6173 3671.1259,-508.9514 3676.7293,-492.6749 3682.8454,-477.879"/>
+<polygon fill="#000000" stroke="#000000" points="3686.1898,-478.9608 3686.9178,-468.391 3679.7573,-476.1999 3686.1898,-478.9608"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_3 -->
 <g id="node32" class="node">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_3</title>
-<ellipse fill="none" stroke="#000000" cx="3873" cy="-706.926" rx="68.7866" ry="25.4118"/>
-<text text-anchor="middle" x="3873" y="-709.726" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3)</text>
-<text text-anchor="middle" x="3873" y="-695.726" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$5</text>
+<ellipse fill="none" stroke="#000000" cx="3864" cy="-706.926" rx="136.3192" ry="25.4118"/>
+<text text-anchor="middle" x="3864" y="-709.726" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3, &lt;constant:nil&gt;$7)</text>
+<text text-anchor="middle" x="3864" y="-695.726" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$5</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_0&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_3 -->
 <g id="edge40" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_0&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_3</title>
-<path fill="none" stroke="#000000" d="M3807.9031,-796.4784C3821.0532,-778.388 3836.579,-757.0295 3849.1694,-739.7092"/>
-<polygon fill="#000000" stroke="#000000" points="3852.0422,-741.7097 3855.091,-731.5629 3846.3801,-737.5937 3852.0422,-741.7097"/>
+<path fill="none" stroke="#000000" d="M3835.9393,-781.7182C3840.9798,-768.2835 3846.2663,-754.1928 3850.8746,-741.9101"/>
+<polygon fill="#000000" stroke="#000000" points="3854.1714,-743.0865 3854.4072,-732.4943 3847.6175,-740.6275 3854.1714,-743.0865"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_1 -->
 <g id="node30" class="node">
@@ -586,7 +587,7 @@
 <ellipse fill="none" stroke="#000000" cx="3907" cy="-277.2548" rx="268.1762" ry="45.011"/>
 <text text-anchor="middle" x="3907" y="-294.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$4, statTemp$3)</text>
 <text text-anchor="middle" x="3907" y="-280.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$3.f(statTemp$4) : untyped</text>
-<text text-anchor="middle" x="3907" y="-266.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="3907" y="-266.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="3907" y="-252.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_2&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_4 -->
@@ -598,30 +599,30 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_5 -->
 <g id="node34" class="node">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_5</title>
-<ellipse fill="none" stroke="#000000" cx="3873" cy="-579.7716" rx="169.747" ry="45.011"/>
-<text text-anchor="middle" x="3873" y="-596.5716" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$4, statTemp$3)</text>
-<text text-anchor="middle" x="3873" y="-582.5716" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="3873" y="-568.5716" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="3873" y="-554.5716" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3864" cy="-579.7716" rx="187.311" ry="45.011"/>
+<text text-anchor="middle" x="3864" y="-596.5716" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$4, statTemp$3, &lt;constant:nil&gt;$7)</text>
+<text text-anchor="middle" x="3864" y="-582.5716" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="3864" y="-568.5716" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = &lt;constant:nil&gt;$7 : NilClass</text>
+<text text-anchor="middle" x="3864" y="-554.5716" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_3&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_5 -->
 <g id="edge43" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_3&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_5</title>
-<path fill="none" stroke="#000000" d="M3873,-681.1944C3873,-668.0386 3873,-651.4836 3873,-635.5859"/>
-<polygon fill="#000000" stroke="#000000" points="3876.5001,-635.276 3873,-625.2761 3869.5001,-635.2761 3876.5001,-635.276"/>
+<path fill="none" stroke="#000000" d="M3864,-681.1944C3864,-668.0386 3864,-651.4836 3864,-635.5859"/>
+<polygon fill="#000000" stroke="#000000" points="3867.5001,-635.276 3864,-625.2761 3860.5001,-635.2761 3867.5001,-635.276"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_6 -->
 <g id="node35" class="node">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_6</title>
-<ellipse fill="none" stroke="#000000" cx="4130" cy="-579.7716" rx="68.7866" ry="25.4118"/>
-<text text-anchor="middle" x="4130" y="-582.5716" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3)</text>
-<text text-anchor="middle" x="4130" y="-568.5716" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$5</text>
+<ellipse fill="none" stroke="#000000" cx="4138" cy="-579.7716" rx="68.7866" ry="25.4118"/>
+<text text-anchor="middle" x="4138" y="-582.5716" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3)</text>
+<text text-anchor="middle" x="4138" y="-568.5716" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$5</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_3&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_6 -->
 <g id="edge44" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_3&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_6</title>
-<path fill="none" stroke="#000000" d="M3924.5871,-689.7956C3961.1491,-676.795 4010.8226,-657.3654 4052,-634.926 4065.7257,-627.4462 4079.9173,-617.9981 4092.3712,-609.0449"/>
-<polygon fill="#000000" stroke="#000000" points="4094.6872,-611.6871 4100.6885,-602.9558 4090.5522,-606.0389 4094.6872,-611.6871"/>
+<path fill="none" stroke="#000000" d="M3936.7047,-685.3045C3974.4995,-672.8125 4020.8486,-655.4962 4060,-634.926 4073.957,-627.5929 4088.3041,-618.1006 4100.8269,-609.0638"/>
+<polygon fill="#000000" stroke="#000000" points="4103.2022,-611.6613 4109.1779,-602.9125 4099.0507,-606.0252 4103.2022,-611.6613"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_4&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_1 -->
 <g id="edge45" class="edge">
@@ -632,14 +633,14 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_5&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_4 -->
 <g id="edge46" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_5&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_4</title>
-<path fill="none" stroke="#000000" d="M3880.4985,-534.4053C3882.7684,-519.8106 3885.148,-503.5532 3887,-488.6173 3893.5367,-435.9012 3899.0521,-375.5537 3902.6244,-332.8739"/>
-<polygon fill="#000000" stroke="#000000" points="3906.1303,-332.9461 3903.4679,-322.6913 3899.1542,-332.3682 3906.1303,-332.9461"/>
+<path fill="none" stroke="#000000" d="M3876.9623,-534.1592C3880.6801,-519.6955 3884.4208,-503.5755 3887,-488.6173 3896.0263,-436.27 3901.2282,-375.876 3904.051,-333.0852"/>
+<polygon fill="#000000" stroke="#000000" points="3907.5586,-333.0764 3904.7015,-322.874 3900.5727,-332.6312 3907.5586,-333.0764"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_6&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_4 -->
 <g id="edge48" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_6&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_4</title>
-<path fill="none" stroke="#000000" d="M4101.8165,-556.3586C4087.5898,-545.474 4069.6396,-533.0935 4052,-524.6173 3999.8903,-499.5774 3963.9059,-533.1188 3927,-488.6173 3907.9901,-465.695 3905.01,-387.5013 3905.3975,-332.9426"/>
-<polygon fill="#000000" stroke="#000000" points="3908.8997,-332.7477 3905.511,-322.7095 3901.9002,-332.67 3908.8997,-332.7477"/>
+<path fill="none" stroke="#000000" d="M4109.8754,-556.2348C4095.6626,-545.3209 4077.7071,-532.9515 4060,-524.6173 4004.5923,-498.5385 3966.4694,-535.4392 3927,-488.6173 3907.8066,-465.8485 3904.8746,-387.6145 3905.3226,-333.0052"/>
+<polygon fill="#000000" stroke="#000000" points="3908.8252,-332.8043 3905.4479,-322.7623 3901.8257,-332.7187 3908.8252,-332.8043"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_7 -->
 <g id="node36" class="node">
@@ -652,8 +653,8 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_6&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_7 -->
 <g id="edge47" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_6&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_7</title>
-<path fill="none" stroke="#000000" d="M4126.0906,-554.3264C4122.5416,-531.2276 4117.2255,-496.6266 4112.9531,-468.8187"/>
-<polygon fill="#000000" stroke="#000000" points="4116.4095,-468.2675 4111.4314,-458.915 4109.4907,-469.3305 4116.4095,-468.2675"/>
+<path fill="none" stroke="#000000" d="M4132.7874,-554.3264C4128.0555,-531.2276 4120.9673,-496.6266 4115.2708,-468.8187"/>
+<polygon fill="#000000" stroke="#000000" points="4118.6777,-468.0091 4113.2419,-458.915 4111.8201,-469.414 4118.6777,-468.0091"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_7&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12686_4 -->
 <g id="edge49" class="edge">
@@ -1366,9 +1367,10 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_0 -->
 <g id="node81" class="node">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_0</title>
-<polygon fill="none" stroke="#000000" points="10611.6864,-825.1515 10697,-803.4337 10782.3136,-825.1515 10782.234,-860.2917 10611.766,-860.2917 10611.6864,-825.1515"/>
-<text text-anchor="middle" x="10697" y="-837.664" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="10697" y="-823.664" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
+<polygon fill="none" stroke="#000000" points="10466.6245,-821.2969 10725,-790.9599 10983.3755,-821.2969 10983.1344,-870.3832 10466.8656,-870.3832 10466.6245,-821.2969"/>
+<text text-anchor="middle" x="10725" y="-844.664" font-family="Times,serif" font-size="14.00" fill="#000000">(&lt;constant:nil&gt;$7)</text>
+<text text-anchor="middle" x="10725" y="-830.664" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:nil&gt;$7 = alias &lt;constant:nil&gt; : NilClass</text>
+<text text-anchor="middle" x="10725" y="-816.664" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_2 -->
 <g id="node83" class="node">
@@ -1384,21 +1386,21 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_0&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_2 -->
 <g id="edge109" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_0&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_2</title>
-<path fill="none" stroke="#000000" d="M10685.4445,-806.2755C10670.4836,-767.956 10644.8143,-697.5019 10632,-634.926 10622.8694,-590.3388 10618.1266,-539.5667 10615.6629,-498.9608"/>
-<polygon fill="#000000" stroke="#000000" points="10619.1509,-498.6495 10615.0843,-488.8662 10612.1623,-499.0501 10619.1509,-498.6495"/>
+<path fill="none" stroke="#000000" d="M10697.2738,-794.1269C10672.4417,-755.17 10637.6082,-693.8053 10622,-634.926 10610.3309,-590.9064 10607.8542,-539.9446 10608.4028,-499.0921"/>
+<polygon fill="#000000" stroke="#000000" points="10611.9052,-499.0013 10608.6037,-488.934 10604.9066,-498.8628 10611.9052,-499.0013"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_3 -->
 <g id="node84" class="node">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_3</title>
-<ellipse fill="none" stroke="#000000" cx="10778" cy="-706.926" rx="68.7866" ry="25.4118"/>
-<text text-anchor="middle" x="10778" y="-709.726" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="10778" y="-695.726" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
+<ellipse fill="none" stroke="#000000" cx="10775" cy="-706.926" rx="85.3274" ry="25.4118"/>
+<text text-anchor="middle" x="10775" y="-709.726" font-family="Times,serif" font-size="14.00" fill="#000000">(&lt;constant:nil&gt;$7)</text>
+<text text-anchor="middle" x="10775" y="-695.726" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_0&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_3 -->
 <g id="edge110" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_0&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_3</title>
-<path fill="none" stroke="#000000" d="M10714.178,-807.7317C10726.6121,-788.0923 10743.4952,-761.4258 10756.7736,-740.4527"/>
-<polygon fill="#000000" stroke="#000000" points="10759.8281,-742.1712 10762.2202,-731.8499 10753.9138,-738.4267 10759.8281,-742.1712"/>
+<path fill="none" stroke="#000000" d="M10741.5104,-792.6178C10747.9648,-776.1026 10755.2759,-757.3953 10761.4166,-741.6827"/>
+<polygon fill="#000000" stroke="#000000" points="10764.6905,-742.9207 10765.0707,-732.3327 10758.1707,-740.3726 10764.6905,-742.9207"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_1 -->
 <g id="node82" class="node">
@@ -1418,7 +1420,7 @@
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_4</title>
 <ellipse fill="none" stroke="#000000" cx="10839" cy="-277.2548" rx="194.605" ry="35.2113"/>
 <text text-anchor="middle" x="10839" y="-287.0548" font-family="Times,serif" font-size="14.00" fill="#000000">(foo)</text>
-<text text-anchor="middle" x="10839" y="-273.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return foo : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="10839" y="-273.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return foo : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="10839" y="-259.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_2&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_4 -->
@@ -1430,30 +1432,30 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_5 -->
 <g id="node86" class="node">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_5</title>
-<ellipse fill="none" stroke="#000000" cx="10778" cy="-579.7716" rx="136.5471" ry="45.011"/>
-<text text-anchor="middle" x="10778" y="-596.5716" font-family="Times,serif" font-size="14.00" fill="#000000">(foo)</text>
-<text text-anchor="middle" x="10778" y="-582.5716" font-family="Times,serif" font-size="14.00" fill="#000000">foo = NotSupported() : untyped</text>
-<text text-anchor="middle" x="10778" y="-568.5716" font-family="Times,serif" font-size="14.00" fill="#000000">foo = NotSupported() : untyped</text>
-<text text-anchor="middle" x="10778" y="-554.5716" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="10775" cy="-579.7716" rx="144.2027" ry="45.011"/>
+<text text-anchor="middle" x="10775" y="-596.5716" font-family="Times,serif" font-size="14.00" fill="#000000">(foo, &lt;constant:nil&gt;$7)</text>
+<text text-anchor="middle" x="10775" y="-582.5716" font-family="Times,serif" font-size="14.00" fill="#000000">foo = NotSupported() : untyped</text>
+<text text-anchor="middle" x="10775" y="-568.5716" font-family="Times,serif" font-size="14.00" fill="#000000">foo = &lt;constant:nil&gt;$7 : NilClass</text>
+<text text-anchor="middle" x="10775" y="-554.5716" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_3&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_5 -->
 <g id="edge113" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_3&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_5</title>
-<path fill="none" stroke="#000000" d="M10778,-681.1944C10778,-668.0386 10778,-651.4836 10778,-635.5859"/>
-<polygon fill="#000000" stroke="#000000" points="10781.5001,-635.276 10778,-625.2761 10774.5001,-635.2761 10781.5001,-635.276"/>
+<path fill="none" stroke="#000000" d="M10775,-681.1944C10775,-668.0386 10775,-651.4836 10775,-635.5859"/>
+<polygon fill="#000000" stroke="#000000" points="10778.5001,-635.276 10775,-625.2761 10771.5001,-635.2761 10778.5001,-635.276"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_6 -->
 <g id="node87" class="node">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_6</title>
-<ellipse fill="none" stroke="#000000" cx="11002" cy="-579.7716" rx="68.7866" ry="25.4118"/>
-<text text-anchor="middle" x="11002" y="-582.5716" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="11002" y="-568.5716" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
+<ellipse fill="none" stroke="#000000" cx="11006" cy="-579.7716" rx="68.7866" ry="25.4118"/>
+<text text-anchor="middle" x="11006" y="-582.5716" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="11006" y="-568.5716" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_3&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_6 -->
 <g id="edge114" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_3&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_6</title>
-<path fill="none" stroke="#000000" d="M10822.3926,-687.2536C10851.8296,-673.6741 10890.9703,-654.5823 10924,-634.926 10937.2011,-627.0698 10951.0606,-617.6783 10963.3738,-608.891"/>
-<polygon fill="#000000" stroke="#000000" points="10965.568,-611.6236 10971.6241,-602.9302 10961.4686,-605.9495 10965.568,-611.6236"/>
+<path fill="none" stroke="#000000" d="M10824.6973,-686.1941C10855.1882,-672.83 10894.6466,-654.3637 10928,-634.926 10941.3889,-627.1232 10955.3952,-617.6687 10967.7845,-608.8078"/>
+<polygon fill="#000000" stroke="#000000" points="10970.0348,-611.4994 10976.076,-602.7957 10965.9256,-605.8324 10970.0348,-611.4994"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_4&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_1 -->
 <g id="edge115" class="edge">
@@ -1464,14 +1466,14 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_5&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_4 -->
 <g id="edge116" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_5&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_4</title>
-<path fill="none" stroke="#000000" d="M10801.6811,-534.9418C10808.3356,-520.5149 10814.8745,-504.2189 10819,-488.6173 10833.7547,-432.8184 10837.9422,-366.2005 10838.9694,-322.8761"/>
-<polygon fill="#000000" stroke="#000000" points="10842.4729,-322.7182 10839.1632,-312.6537 10835.4742,-322.5855 10842.4729,-322.7182"/>
+<path fill="none" stroke="#000000" d="M10800.4581,-535.112C10807.6015,-520.6932 10814.609,-504.3589 10819,-488.6173 10834.5076,-433.0229 10838.5269,-366.3594 10839.31,-322.9686"/>
+<polygon fill="#000000" stroke="#000000" points="10842.8127,-322.7739 10839.4423,-312.7295 10835.8133,-322.6834 10842.8127,-322.7739"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_6&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_4 -->
 <g id="edge118" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_6&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_4</title>
-<path fill="none" stroke="#000000" d="M10971.0336,-556.6973C10956.9297,-546.4965 10939.8722,-534.5824 10924,-524.6173 10896.0316,-507.0578 10877.0888,-516.2463 10859,-488.6173 10841.7759,-462.309 10838.6271,-377.1769 10838.4425,-323.3204"/>
-<polygon fill="#000000" stroke="#000000" points="10841.9426,-322.9925 10838.4419,-312.9928 10834.9426,-322.9931 10841.9426,-322.9925"/>
+<path fill="none" stroke="#000000" d="M10975.5217,-556.7829C10961.3692,-546.4854 10944.1366,-534.4705 10928,-524.6173 10898.4787,-506.5913 10878.3054,-517.3183 10859,-488.6173 10841.4014,-462.4538 10838.3929,-376.8527 10838.3331,-322.9489"/>
+<polygon fill="#000000" stroke="#000000" points="10841.8338,-322.6259 10838.357,-312.6177 10834.8338,-322.6096 10841.8338,-322.6259"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_7 -->
 <g id="node88" class="node">
@@ -1484,8 +1486,8 @@
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_6&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_7 -->
 <g id="edge117" class="edge">
 <title>bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_6&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_7</title>
-<path fill="none" stroke="#000000" d="M11002.4954,-553.977C11002.9366,-531.0022 11003.5925,-496.8514 11004.1224,-469.2597"/>
-<polygon fill="#000000" stroke="#000000" points="11007.6259,-469.1085 11004.3186,-459.0431 11000.6271,-468.974 11007.6259,-469.1085"/>
+<path fill="none" stroke="#000000" d="M11005.8349,-553.977C11005.6878,-531.0022 11005.4692,-496.8514 11005.2925,-469.2597"/>
+<polygon fill="#000000" stroke="#000000" points="11008.7912,-469.0205 11005.2271,-459.0431 11001.7913,-469.0653 11008.7912,-469.0205"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_7&#45;&gt;bb::&lt;constant:Object&gt;#parse_ruby_bug_12402_4 -->
 <g id="edge119" class="edge">
@@ -1551,4 +1553,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 96f094d23bffe960863309402166ccf8e622f8bce53f42678a05b9055dacb2b3 -->
+<!-- ruby-types:sha256: c0f4ed455340a45b81a82e93571e8e904ae8ee1430fad5c4adf4edca99e69e01 -->
