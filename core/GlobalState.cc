@@ -6,222 +6,89 @@ using namespace std;
 namespace ruby_typer {
 namespace core {
 
-static const char *init = "initialize";
-static UTF8Desc init_DESC{(char *)init, (int)strlen(init)};
+namespace {
+const char *top_str = "<top>";
+UTF8Desc top_DESC{(char *)top_str, (int)strlen(top_str)};
 
-static const char *andAnd = "&&";
-static UTF8Desc andAnd_DESC{(char *)andAnd, (int)strlen(andAnd)};
+const char *bottom_str = "<bottom>";
+UTF8Desc bottom_DESC{(char *)bottom_str, (int)strlen(bottom_str)};
 
-static const char *orOr = "||";
-static UTF8Desc orOr_DESC{(char *)orOr, (int)strlen(orOr)};
+const char *untyped_str = "untyped";
+UTF8Desc untyped_DESC{(char *)untyped_str, (int)strlen(untyped_str)};
 
-static const char *to_s = "to_s";
-static UTF8Desc to_s_DESC{(char *)to_s, (int)strlen(to_s)};
+const char *root_str = "<root>";
+UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
 
-static const char *concat = "concat";
-static UTF8Desc concat_DESC{(char *)concat, (int)strlen(concat)};
+const char *nil_str = "nil";
+UTF8Desc nil_DESC{(char *)nil_str, (int)strlen(nil_str)};
 
-static const char *call = "call";
-static UTF8Desc call_DESC{(char *)call, (int)strlen(call)};
+const char *object_str = "Object";
+UTF8Desc object_DESC{(char *)object_str, (int)strlen(object_str)};
 
-static const char *bang = "!";
-static UTF8Desc bang_DESC{(char *)bang, (int)strlen(bang)};
+const char *junk_str = "<<JUNK>>";
+UTF8Desc junk_DESC{(char *)junk_str, (int)strlen(junk_str)};
 
-static const char *squareBrackets = "[]";
-static UTF8Desc squareBrackets_DESC{(char *)squareBrackets, (int)strlen(squareBrackets)};
+const char *string_str = "String";
+UTF8Desc string_DESC{(char *)string_str, (int)strlen(string_str)};
 
-static const char *squareBracketsEq = "[]=";
-static UTF8Desc squareBracketsEq_DESC{(char *)squareBracketsEq, (int)strlen(squareBracketsEq)};
+const char *integer_str = "Integer";
+UTF8Desc integer_DESC{(char *)integer_str, (int)strlen(integer_str)};
 
-static const char *unaryPlus = "+@";
-static UTF8Desc unaryPlus_DESC{(char *)unaryPlus, (int)strlen(unaryPlus)};
+const char *float_str = "Float";
+UTF8Desc float_DESC{(char *)float_str, (int)strlen(float_str)};
 
-static const char *unaryMinus = "-@";
-static UTF8Desc unaryMinus_DESC{(char *)unaryMinus, (int)strlen(unaryMinus)};
+const char *symbol_str = "Symbol";
+UTF8Desc symbol_DESC{(char *)symbol_str, (int)strlen(symbol_str)};
 
-static const char *star = "*";
-static UTF8Desc star_DESC{(char *)star, (int)strlen(star)};
+const char *array_str = "Array";
+UTF8Desc array_DESC{(char *)array_str, (int)strlen(array_str)};
 
-static const char *starStar = "**";
-static UTF8Desc starStar_DESC{(char *)starStar, (int)strlen(starStar)};
+const char *hash_str = "Hash";
+UTF8Desc hash_DESC{(char *)hash_str, (int)strlen(hash_str)};
 
-static const char *whileTemp = "whileTmp";
-static UTF8Desc whileTemp_DESC{(char *)whileTemp, (int)strlen(whileTemp)};
+const char *trueClass_str = "TrueClass";
+UTF8Desc trueClass_DESC{(char *)trueClass_str, (int)strlen(trueClass_str)};
 
-static const char *ifTemp = "ifTmp";
-static UTF8Desc ifTemp_DESC{(char *)ifTemp, (int)strlen(ifTemp)};
+const char *falseClass_str = "FalseClass";
+UTF8Desc falseClass_DESC{(char *)falseClass_str, (int)strlen(falseClass_str)};
 
-static const char *returnTemp = "returnTmp";
-static UTF8Desc retunTemp_DESC{(char *)returnTemp, (int)strlen(returnTemp)};
+const char *nilClass_str = "NilClass";
+UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
 
-static const char *statTemp = "statTmp";
-static UTF8Desc statTemp_DESC{(char *)statTemp, (int)strlen(statTemp)};
+const char *class_str = "Class";
+UTF8Desc class_DESC{(char *)class_str, (int)strlen(class_str)};
 
-static const char *assignTemp = "assignTmp";
-static UTF8Desc assignTemp_DESC{(char *)assignTemp, (int)strlen(assignTemp)};
+const char *merge = "merge";
+UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
 
-static const char *returnMethodTemp = "<ret>";
-static UTF8Desc returnMethodTemp_DESC{(char *)returnMethodTemp, (int)strlen(returnMethodTemp)};
+const char *todo_str = "<todo sym>";
+UTF8Desc todo_DESC{(char *)todo_str, (int)strlen(todo_str)};
 
-static const char *selfMethodTemp = "<self>";
-static UTF8Desc selfMethodTemp_DESC{(char *)selfMethodTemp, (int)strlen(selfMethodTemp)};
+const char *no_symbol_str = "<none>";
+UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
 
-static const char *singletonClass = "<singleton class>";
-static UTF8Desc singletonClass_DESC{(char *)singletonClass, (int)strlen(singletonClass)};
+const char *opus = "Opus";
+UTF8Desc opus_DESC{(char *)opus, (int)strlen(opus)};
 
-static const char *attachedClass = "<attached class>";
-static UTF8Desc attachedClass_DESC{(char *)attachedClass, (int)strlen(attachedClass)};
+const char *types = "Types";
+UTF8Desc types_DESC{(char *)types, (int)strlen(types)};
 
-static const char *blockReturnTemp = "<blockret>";
-static UTF8Desc blockReturnTemp_DESC{(char *)blockReturnTemp, (int)strlen(blockReturnTemp)};
+const char *basicObject = "BasicObject";
+UTF8Desc basicObject_DESC{(char *)basicObject, (int)strlen(basicObject)};
 
-static const char *blockTemp = "<block>";
-static UTF8Desc blockTemp_DESC{(char *)blockTemp, (int)strlen(blockTemp)};
+const char *kernel = "Kernel";
+UTF8Desc kernel_DESC{(char *)kernel, (int)strlen(kernel)};
 
-static const char *no_symbol_str = "<none>";
-static UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
+const char *range = "Range";
+UTF8Desc range_DESC{(char *)range, (int)strlen(range)};
 
-static const char *top_str = "<top>";
-static UTF8Desc top_DESC{(char *)top_str, (int)strlen(top_str)};
-
-static const char *bottom_str = "<bottom>";
-static UTF8Desc bottom_DESC{(char *)bottom_str, (int)strlen(bottom_str)};
-
-static const char *untyped_str = "untyped";
-static UTF8Desc untyped_DESC{(char *)untyped_str, (int)strlen(untyped_str)};
-
-static const char *root_str = "<root>";
-static UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
-
-static const char *nil_str = "nil";
-static UTF8Desc nil_DESC{(char *)nil_str, (int)strlen(nil_str)};
-
-static const char *new_str = "new";
-static UTF8Desc new_DESC{(char *)new_str, (int)strlen(new_str)};
-
-static const char *destructureArg_str = "<destructure>";
-static UTF8Desc destructureArg_DESC{(char *)destructureArg_str, (int)strlen(destructureArg_str)};
-
-static const char *ampersand_str = "&";
-static UTF8Desc ampersand_DESC{(char *)ampersand_str, (int)strlen(ampersand_str)};
-
-static const char *lambda_str = "lambda";
-static UTF8Desc lambda_DESC{(char *)lambda_str, (int)strlen(lambda_str)};
-
-static const char *nil_p_str = "nil?";
-static UTF8Desc nil_p_DESC{(char *)nil_p_str, (int)strlen(nil_p_str)};
-
-static const char *todo_str = "<todo sym>";
-static UTF8Desc todo_DESC{(char *)todo_str, (int)strlen(todo_str)};
-
-static const char *todo_ivar_str = "<todo ivar sym>";
-static UTF8Desc todo_ivar_DESC{(char *)todo_ivar_str, (int)strlen(todo_ivar_str)};
-
-static const char *todo_cvar_str = "<todo cvar sym>";
-static UTF8Desc todo_cvar_DESC{(char *)todo_cvar_str, (int)strlen(todo_cvar_str)};
-
-static const char *todo_gvar_str = "<todo gvar sym>";
-static UTF8Desc todo_gvar_DESC{(char *)todo_gvar_str, (int)strlen(todo_gvar_str)};
-
-static const char *todo_lvar_str = "<todo lvar sym>";
-static UTF8Desc todo_lvar_DESC{(char *)todo_lvar_str, (int)strlen(todo_lvar_str)};
-
-static const char *object_str = "Object";
-static UTF8Desc object_DESC{(char *)object_str, (int)strlen(object_str)};
-
-static const char *junk_str = "<<JUNK>>";
-static UTF8Desc junk_DESC{(char *)junk_str, (int)strlen(junk_str)};
-
-static const char *block_call_str = "<block-call>";
-static UTF8Desc block_call_DESC{(char *)block_call_str, (int)strlen(block_call_str)};
-
-static const char *include = "include";
-static UTF8Desc include_DESC{(char *)include, (int)strlen(include)};
-
-static const char *currentFile = "__FILE__";
-static UTF8Desc currentFile_DESC{(char *)currentFile, (int)strlen(currentFile)};
-
-static const char *string_str = "String";
-static UTF8Desc string_DESC{(char *)string_str, (int)strlen(string_str)};
-
-static const char *integer_str = "Integer";
-static UTF8Desc integer_DESC{(char *)integer_str, (int)strlen(integer_str)};
-
-static const char *float_str = "Float";
-static UTF8Desc float_DESC{(char *)float_str, (int)strlen(float_str)};
-
-static const char *symbol_str = "Symbol";
-static UTF8Desc symbol_DESC{(char *)symbol_str, (int)strlen(symbol_str)};
-
-static const char *array_str = "Array";
-static UTF8Desc array_DESC{(char *)array_str, (int)strlen(array_str)};
-
-static const char *hash_str = "Hash";
-static UTF8Desc hash_DESC{(char *)hash_str, (int)strlen(hash_str)};
-
-static const char *trueClass_str = "TrueClass";
-static UTF8Desc trueClass_DESC{(char *)trueClass_str, (int)strlen(trueClass_str)};
-
-static const char *falseClass_str = "FalseClass";
-static UTF8Desc falseClass_DESC{(char *)falseClass_str, (int)strlen(falseClass_str)};
-
-static const char *nilClass_str = "NilClass";
-static UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
-
-static const char *class_str = "Class";
-static UTF8Desc class_DESC{(char *)class_str, (int)strlen(class_str)};
-
-static const char *merge = "merge";
-static UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
-
-static const char *standardMethod = "standard_method";
-static UTF8Desc standardMethod_DESC{(char *)standardMethod, (int)strlen(standardMethod)};
-
-static const char *declareVariables = "declare_variables";
-static UTF8Desc declareVariables_DESC{(char *)declareVariables, (int)strlen(declareVariables)};
-
-static const char *returns = "returns";
-static UTF8Desc returns_DESC{(char *)returns, (int)strlen(returns)};
-
-static const char *any = "any";
-static UTF8Desc any_DESC{(char *)any, (int)strlen(any)};
-
-static const char *all = "all";
-static UTF8Desc all_DESC{(char *)all, (int)strlen(all)};
-
-static const char *super = "super";
-static UTF8Desc super_DESC{(char *)super, (int)strlen(super)};
-
-static const char *empty = "";
-static UTF8Desc empty_DESC{(char *)empty, (int)strlen(empty)};
-
-static const char *tripleEq = "===";
-static UTF8Desc tripleEq_DESC{(char *)tripleEq, (int)strlen(tripleEq)};
-
-static const char *nilable = "nilable";
-static UTF8Desc nilable_DESC{(char *)nilable, (int)strlen(nilable)};
-
-static const char *opus = "Opus";
-static UTF8Desc opus_DESC{(char *)opus, (int)strlen(opus)};
-
-static const char *types = "Types";
-static UTF8Desc types_DESC{(char *)types, (int)strlen(types)};
-
-static const char *basicObject = "BasicObject";
-static UTF8Desc basicObject_DESC{(char *)basicObject, (int)strlen(basicObject)};
-
-static const char *kernel = "Kernel";
-static UTF8Desc kernel_DESC{(char *)kernel, (int)strlen(kernel)};
-
-static const char *range = "Range";
-static UTF8Desc range_DESC{(char *)range, (int)strlen(range)};
-
-static const char *regexp = "Regexp";
-static UTF8Desc regexp_DESC{(char *)regexp, (int)strlen(regexp)};
+const char *regexp = "Regexp";
+UTF8Desc regexp_DESC{(char *)regexp, (int)strlen(regexp)};
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
-static const char *reserved = "<<RESERVED>>";
-static UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
+const char *reserved = "<<RESERVED>>";
+UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
+} // namespace
 
 SymbolRef GlobalState::synthesizeClass(UTF8Desc name, SymbolRef superclass) {
     NameRef nameId = enterNameConstant(name);
