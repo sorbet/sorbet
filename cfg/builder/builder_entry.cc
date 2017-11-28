@@ -56,6 +56,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     fillInTopoSorts(ctx, *res);
     dealias(ctx, *res);
     fillInBlockArguments(ctx, *res);
+    simplify(ctx, *res);
+    sanityCheck(ctx, *res);
     return res;
 }
 
