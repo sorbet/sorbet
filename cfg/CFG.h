@@ -194,6 +194,7 @@ class CFG final {
      */
 public:
     core::SymbolRef symbol;
+    int maxBasicBlockId = 0;
     std::vector<std::unique_ptr<BasicBlock>> basicBlocks;
     /** Blocks in topoligical sort. All parent blocks are earlier than child blocks
      *

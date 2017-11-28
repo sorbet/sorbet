@@ -247,9 +247,9 @@ public:
 
 void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
     vector<Environment> outEnvironments;
-    outEnvironments.resize(cfg->basicBlocks.size());
+    outEnvironments.resize(cfg->maxBasicBlockId);
     vector<bool> visited;
-    visited.resize(cfg->basicBlocks.size());
+    visited.resize(cfg->maxBasicBlockId);
     for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
         if (bb == cfg->deadBlock()) {
             continue;

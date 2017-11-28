@@ -19,7 +19,7 @@ BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *from) {
     if (from != nullptr && from == deadBlock()) {
         return from;
     }
-    int id = this->basicBlocks.size();
+    int id = this->maxBasicBlockId++;
     this->basicBlocks.emplace_back(new BasicBlock());
     BasicBlock *r = this->basicBlocks.back().get();
     r->id = id;
