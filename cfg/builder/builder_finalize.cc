@@ -15,18 +15,23 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
         changed = false;
         for (auto it = cfg.basicBlocks.begin(); it != cfg.basicBlocks.end(); /*nothing*/) {
             BasicBlock *bb = it->get();
-            auto * const thenb = bb->bexit.thenb;
-            auto * const elseb = bb->bexit.elseb;
+            auto *const thenb = bb->bexit.thenb;
+            auto *const elseb = bb->bexit.elseb;
             if (bb != cfg.deadBlock() && bb != cfg.entry()) {
                 if (bb->backEdges.empty()) {
-                    thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb), thenb->backEdges.end());
+                    thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                                           thenb->backEdges.end());
                     if (elseb != thenb) {
                         elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                                elseb->backEdges.end());
                     }
                     it = cfg.basicBlocks.erase(it);
-                    cfg.forwardsTopoSort.erase(std::remove(cfg.forwardsTopoSort.begin(), cfg.forwardsTopoSort.end(), bb), cfg.forwardsTopoSort.end());
-                    cfg.backwardsTopoSort.erase(std::remove(cfg.backwardsTopoSort.begin(), cfg.backwardsTopoSort.end(), bb), cfg.backwardsTopoSort.end());
+                    cfg.forwardsTopoSort.erase(
+                        std::remove(cfg.forwardsTopoSort.begin(), cfg.forwardsTopoSort.end(), bb),
+                        cfg.forwardsTopoSort.end());
+                    cfg.backwardsTopoSort.erase(
+                        std::remove(cfg.backwardsTopoSort.begin(), cfg.backwardsTopoSort.end(), bb),
+                        cfg.backwardsTopoSort.end());
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
@@ -46,7 +51,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     sanityCheck(ctx, cfg);
                 } else if (thenb->bexit.cond.name != core::Names::blockCall() && thenb->exprs.empty()) {
                     bb->bexit = thenb->bexit;
-                    thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb), thenb->backEdges.end());
+                    thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                                           thenb->backEdges.end());
                     bb->bexit.thenb->backEdges.push_back(bb);
                     if (bb->bexit.thenb != bb->bexit.elseb) {
                         bb->bexit.elseb->backEdges.push_back(bb);
@@ -55,16 +61,20 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     sanityCheck(ctx, cfg);
                 }
             }
-            if (thenb != cfg.deadBlock() && thenb->exprs.size() == 0 && thenb->bexit.thenb == thenb->bexit.elseb && bb->bexit.thenb != thenb->bexit.thenb) {
+            if (thenb != cfg.deadBlock() && thenb->exprs.size() == 0 && thenb->bexit.thenb == thenb->bexit.elseb &&
+                bb->bexit.thenb != thenb->bexit.thenb) {
                 bb->bexit.thenb = thenb->bexit.thenb;
                 thenb->bexit.thenb->backEdges.push_back(bb);
-                thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb), thenb->backEdges.end());
+                thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                                       thenb->backEdges.end());
                 sanityCheck(ctx, cfg);
             }
-            if (elseb != cfg.deadBlock() && elseb->exprs.size() == 0 && elseb->bexit.thenb == elseb->bexit.elseb && bb->bexit.elseb != elseb->bexit.elseb) {
+            if (elseb != cfg.deadBlock() && elseb->exprs.size() == 0 && elseb->bexit.thenb == elseb->bexit.elseb &&
+                bb->bexit.elseb != elseb->bexit.elseb) {
                 bb->bexit.elseb = elseb->bexit.elseb;
                 elseb->bexit.elseb->backEdges.push_back(bb);
-                elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb), elseb->backEdges.end());
+                elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
+                                       elseb->backEdges.end());
                 sanityCheck(ctx, cfg);
             }
             ++it;
@@ -73,7 +83,6 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 }
 
 void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
-
     for (auto &bb : cfg.basicBlocks) {
         for (auto parent : bb->backEdges) {
             Error::check(parent->bexit.thenb == bb.get() || parent->bexit.elseb == bb.get());
