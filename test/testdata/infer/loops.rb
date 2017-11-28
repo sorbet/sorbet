@@ -8,7 +8,7 @@ class HasLoops
   def incorrect_assignment
     a = "s"
     while(false)
-      a = 1 # error: pinned
+      a = 1 # error: Changing type of pinned argument
     end
   end
 

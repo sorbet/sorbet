@@ -358,8 +358,8 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                             auto blockArgs = make_unique<parser::Args>(loc, move(argsVec));
 
                             parser::NodeVec noArgs;
-                            auto innerSend = make_unique<parser::Send>(
-                                loc, make_unique<parser::LVar>(loc, argName), move(symbol->val), move(noArgs));
+                            auto innerSend = make_unique<parser::Send>(loc, make_unique<parser::LVar>(loc, argName),
+                                                                       move(symbol->val), move(noArgs));
 
                             block = make_unique<parser::Block>(loc, move(outerSend), move(blockArgs), move(innerSend));
                         } else {
@@ -379,11 +379,14 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                             auto blockArgs = make_unique<parser::Args>(loc, move(argsVec));
 
                             parser::NodeVec noArgs;
-                            auto toProc = make_unique<parser::Send>(loc, move(blockpass->block), core::Names::to_proc(), move(noArgs));
+                            auto toProc = make_unique<parser::Send>(loc, move(blockpass->block), core::Names::to_proc(),
+                                                                    move(noArgs));
 
                             parser::NodeVec splatArg;
-                            splatArg.push_back(make_unique<parser::Splat>(loc, make_unique<parser::LVar>(loc, argName)));
-                            auto call = make_unique<parser::Send>(loc, move(toProc), core::Names::call(), move(splatArg));
+                            splatArg.push_back(
+                                make_unique<parser::Splat>(loc, make_unique<parser::LVar>(loc, argName)));
+                            auto call =
+                                make_unique<parser::Send>(loc, move(toProc), core::Names::call(), move(splatArg));
 
                             block = make_unique<parser::Block>(loc, move(outerSend), move(blockArgs), move(call));
                         }

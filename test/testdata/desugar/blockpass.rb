@@ -30,7 +30,7 @@ end
 
 def foo(&blk)
     calls_with_object(&:meth)
-    calls_with_object {|*args| :meth.to_proc.call(*args)} # error: e
+    calls_with_object {|*args| :meth.to_proc.call(*args)} # error: MULTI
     calls_with_object {|x| :meth.to_proc.call(x)} # error: Method call does not exist on Proc
     calls_with_object {|x| x.meth}
     calls_with_object(&blk) # error: Unsupported node type Splat

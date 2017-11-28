@@ -58,9 +58,9 @@ class Examples
 
       while true
         if (false)
-          b = 1 # error: pinned
+          b = 1 # error: Changing type of pinned argument
         else
-          b = 2 # error: pinned
+          b = 2 # error: Changing type of pinned argument
         end
       end
 
@@ -71,9 +71,9 @@ class Examples
     def variables_loop_if()
       while true
         if (false)
-          b = 1 # error: pinned
+          b = 1 # error: Changing type of pinned argument
         else
-          b = 2 # error: pinned
+          b = 2 # error: Changing type of pinned argument
         end
       end
 

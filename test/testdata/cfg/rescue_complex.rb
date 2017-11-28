@@ -49,7 +49,7 @@ def parse_resbody_var()
 end
 
 def parse_resbody_var_1()
-  begin; meth; rescue => @ex; bar; end # error: e
+  begin; meth; rescue => @ex; bar; end # error: MULTI
 end
 
 def parse_rescue_mod_op_assign()
