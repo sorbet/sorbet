@@ -19,4 +19,16 @@ class A
   standard_method({}, returns: Opus::Types.noreturn)
   def noreturn
   end
+
+  standard_method({returns: T1}, returns: T2, checked: false)
+  def test_kwargs(returns)
+  end
+
+  standard_method(types, returns: T1) # error: Expected a hash literal
+  def f1(x)
+  end
+
+  standard_method({x: T1}, "returns" => T1) # error: Keys must be symbol literals
+  def f2(x)
+  end
 end

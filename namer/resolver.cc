@@ -110,13 +110,13 @@ private:
                 auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
                 if (recvi == nullptr) {
                     ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                           "Misformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                                           "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
                     result = core::Types::dynamic();
                     return;
                 }
                 if (recvi->symbol != core::GlobalState::defn_Opus_Types()) {
                     ctx.state.errors.error(recvi->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                           "Misformed type declaration. Unknown argument type type {}",
+                                           "Malformed type declaration. Unknown argument type type {}",
                                            expr->toString(ctx));
                     result = core::Types::dynamic();
                     return;
@@ -177,37 +177,67 @@ private:
         if (ast::cast_tree<ast::Self>(lastStandardMethod->recv.get()) == nullptr ||
             lastStandardMethod->block != nullptr) {
             ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
-                                   "Misformed standard_method " + lastStandardMethod->toString(ctx));
-        } else {
-            for (auto &arg : lastStandardMethod->args) {
-                if (auto *hash = ast::cast_tree<ast::Hash>(arg.get())) {
-                    int i = 0;
-                    for (unique_ptr<ast::Expression> &key : hash->keys) {
-                        unique_ptr<ast::Expression> &value = hash->values[i++];
-                        if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
-                            if (symbolLit->name == core::Names::returns()) {
-                                // fill in return type
-                                methoInfo.resultType = getResultType(ctx, value);
-                                methoInfo.definitionLoc = value->loc;
-                            } else {
-                                auto fnd = find_if(
-                                    methoInfo.arguments().begin(), methoInfo.arguments().end(),
-                                    [&](core::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
-                                if (fnd == methoInfo.arguments().end()) {
-                                    ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                                           "Misformed standard_method. Unknown argument name type {}",
-                                                           key->toString(ctx));
-                                } else {
-                                    core::SymbolRef arg = *fnd;
-                                    arg.info(ctx).resultType = getResultType(ctx, value);
-                                    arg.info(ctx).definitionLoc = key->loc;
-                                }
-                            }
-                        } else {
+                                   "Malformed standard_method " + lastStandardMethod->toString(ctx));
+            return;
+        }
+        if (lastStandardMethod->args.size() != 2) {
+            ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
+                                   "Wrong number of arguments for `standard_method'. Expected (arg_types, options)");
+        }
+        for (auto &arg : lastStandardMethod->args) {
+            if (auto *hash = ast::cast_tree<ast::Hash>(arg.get())) {
+                for (auto &key : hash->keys) {
+                    if (ast::cast_tree<ast::SymbolLit>(key.get()) == nullptr) {
+                        ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidMethodSignature,
+                                               "Malformed standard_method. Keys must be symbol literals.");
+                    }
+                }
+            } else {
+                ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidMethodSignature,
+                                       "Malformed standard_method. Expected a hash literal.");
+            }
+        }
+
+        ast::Hash *hash;
+        if (lastStandardMethod->args.size() >= 1 &&
+            (hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[0].get()))) {
+            int i = 0;
+            for (unique_ptr<ast::Expression> &key : hash->keys) {
+                unique_ptr<ast::Expression> &value = hash->values[i++];
+                if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
+                    auto fnd =
+                        find_if(methoInfo.arguments().begin(), methoInfo.arguments().end(),
+                                [&](core::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
+                    if (fnd == methoInfo.arguments().end()) {
+                        ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
+                                               "Malformed standard_method. Unknown argument name type {}",
+                                               key->toString(ctx));
+                    } else {
+                        core::SymbolRef arg = *fnd;
+                        arg.info(ctx).resultType = getResultType(ctx, value);
+                        arg.info(ctx).definitionLoc = key->loc;
+                    }
+                }
+            }
+        }
+        if (lastStandardMethod->args.size() >= 2 &&
+            (hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[1].get()))) {
+            int i = 0;
+            for (unique_ptr<ast::Expression> &key : hash->keys) {
+                unique_ptr<ast::Expression> &value = hash->values[i++];
+                if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
+                    switch (symbolLit->name._id) {
+                        case core::Names::returns()._id:
+                            // fill in return type
+                            methoInfo.resultType = getResultType(ctx, value);
+                            methoInfo.definitionLoc = value->loc;
+                            break;
+                        case core::Names::checked()._id:
+                            break;
+                        default:
                             ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                                   "Misformed standard_method. Unknown key type {}",
+                                                   "Malformed standard_method. Unknown argument name {}",
                                                    key->toString(ctx));
-                        }
                     }
                 }
             }
