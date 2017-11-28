@@ -4,6 +4,7 @@
 
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
+template class std::unique_ptr<ruby_typer::cfg::BasicBlock>;
 template class std::unique_ptr<ruby_typer::cfg::Instruction>;
 
 using namespace std;
@@ -47,10 +48,10 @@ string CFG::toString(core::Context ctx) {
         buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" [label = \"" << text << "\"];" << endl
             << endl;
         buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
-            << this->basicBlocks[i]->bexit.thenb->id << "\";" << endl;
+            << this->basicBlocks[i]->bexit.thenb->id << "\" [style=\"bold\"];" << endl;
         if (this->basicBlocks[i]->bexit.thenb != this->basicBlocks[i]->bexit.elseb) {
             buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
-                << this->basicBlocks[i]->bexit.elseb->id << "\";" << endl
+                << this->basicBlocks[i]->bexit.elseb->id << "\" [style=\"tapered\"];" << endl
                 << endl;
         }
     }
