@@ -12,11 +12,11 @@ subgraph "cluster_::<constant:Foo>#foo" {
 returnMethodTemp$5 = return @ivar$4 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Foo>#foo_0" -> "bb::<constant:Foo>#foo_1";
+    "bb::<constant:Foo>#foo_0" -> "bb::<constant:Foo>#foo_1" [style="bold"];
     "bb::<constant:Foo>#foo_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Foo>#foo_1" -> "bb::<constant:Foo>#foo_1";
+    "bb::<constant:Foo>#foo_1" -> "bb::<constant:Foo>#foo_1" [style="bold"];
 }
 
 }

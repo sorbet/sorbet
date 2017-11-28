@@ -11,8 +11,8 @@
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-326.8219 1388,-326.8219 1388,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster_::&lt;constant:A&gt;#foo</title>
-<polygon fill="none" stroke="#0000ff" points="8,-8 8,-290.349 688,-290.349 688,-8 8,-8"/>
-<text text-anchor="middle" x="348" y="-275.149" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:A&gt;#foo</text>
+<polygon fill="none" stroke="#0000ff" points="8,-8 8,-278.1126 688,-278.1126 688,-8 8,-8"/>
+<text text-anchor="middle" x="348" y="-262.9126" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:A&gt;#foo</text>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_::&lt;constant:Bar&gt;#baz</title>
@@ -22,11 +22,10 @@
 <!-- bb::&lt;constant:A&gt;#foo_0 -->
 <g id="node1" class="node">
 <title>bb::&lt;constant:A&gt;#foo_0</title>
-<polygon fill="none" stroke="#000000" points="16.1318,-187.1443 348,-148.5348 679.8682,-187.1443 679.5585,-249.6157 16.4415,-249.6157 16.1318,-187.1443"/>
-<text text-anchor="middle" x="348" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="348" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="348" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="348" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="16.1318,-190.8438 348,-160.5068 679.8682,-190.8438 679.5585,-239.9301 16.4415,-239.9301 16.1318,-190.8438"/>
+<text text-anchor="middle" x="348" y="-214.2109" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="348" y="-200.2109" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="348" y="-186.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:A&gt;#foo_1 -->
 <g id="node2" class="node">
@@ -38,14 +37,14 @@
 <!-- bb::&lt;constant:A&gt;#foo_0&#45;&gt;bb::&lt;constant:A&gt;#foo_1 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;constant:A&gt;#foo_0&#45;&gt;bb::&lt;constant:A&gt;#foo_1</title>
-<path fill="none" stroke="#000000" d="M348,-148.5242C348,-132.077 348,-114.2676 348,-98.4776"/>
-<polygon fill="#000000" stroke="#000000" points="351.5001,-98.4275 348,-88.4275 344.5001,-98.4276 351.5001,-98.4275"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M348,-160.3274C348,-140.9516 348,-118.1848 348,-98.5363"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="351.5001,-98.2823 348,-88.2824 344.5001,-98.2824 351.5001,-98.2823"/>
 </g>
 <!-- bb::&lt;constant:A&gt;#foo_1&#45;&gt;bb::&lt;constant:A&gt;#foo_1 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;constant:A&gt;#foo_1&#45;&gt;bb::&lt;constant:A&gt;#foo_1</title>
-<path fill="none" stroke="#000000" d="M453.9589,-77.5041C468.8215,-73.3412 478.7753,-64.8398 478.7753,-52 478.7753,-33.029 457.0458,-23.529 429.8592,-23.5001"/>
-<polygon fill="#000000" stroke="#000000" points="429.4752,-20.0127 419.6263,-23.9179 429.7608,-27.0069 429.4752,-20.0127"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M453.9589,-77.5041C468.8215,-73.3412 478.7753,-64.8398 478.7753,-52 478.7753,-33.029 457.0458,-23.529 429.8592,-23.5001"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="429.4752,-20.0127 419.6263,-23.9179 429.7608,-27.0069 429.4752,-20.0127"/>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#baz_0 -->
 <g id="node3" class="node">
@@ -68,15 +67,15 @@
 <!-- bb::&lt;constant:Bar&gt;#baz_0&#45;&gt;bb::&lt;constant:Bar&gt;#baz_1 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;constant:Bar&gt;#baz_0&#45;&gt;bb::&lt;constant:Bar&gt;#baz_1</title>
-<path fill="none" stroke="#000000" d="M1036,-123.7426C1036,-115.1039 1036,-106.542 1036,-98.5028"/>
-<polygon fill="#000000" stroke="#000000" points="1039.5001,-98.2733 1036,-88.2733 1032.5001,-98.2733 1039.5001,-98.2733"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1036,-123.7426C1036,-115.1039 1036,-106.542 1036,-98.5028"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1039.5001,-98.2733 1036,-88.2733 1032.5001,-98.2733 1039.5001,-98.2733"/>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#baz_1&#45;&gt;bb::&lt;constant:Bar&gt;#baz_1 -->
 <g id="edge4" class="edge">
 <title>bb::&lt;constant:Bar&gt;#baz_1&#45;&gt;bb::&lt;constant:Bar&gt;#baz_1</title>
-<path fill="none" stroke="#000000" d="M1141.9589,-77.5041C1156.8215,-73.3412 1166.7753,-64.8398 1166.7753,-52 1166.7753,-33.029 1145.0458,-23.529 1117.8592,-23.5001"/>
-<polygon fill="#000000" stroke="#000000" points="1117.4752,-20.0127 1107.6263,-23.9179 1117.7608,-27.0069 1117.4752,-20.0127"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1141.9589,-77.5041C1156.8215,-73.3412 1166.7753,-64.8398 1166.7753,-52 1166.7753,-33.029 1145.0458,-23.529 1117.8592,-23.5001"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1117.4752,-20.0127 1107.6263,-23.9179 1117.7608,-27.0069 1117.4752,-20.0127"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 168501f35def026d7592e537a3947a7a1c23ec1fd220651584c7cabb0bccb6db -->
+<!-- ruby-types:sha256: 207115e5e04fc0fba3d8d494862c613297b629dabdbd0d309c08175eda571385 -->

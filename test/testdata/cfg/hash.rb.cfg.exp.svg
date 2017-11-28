@@ -43,14 +43,14 @@
 <!-- bb::&lt;constant:TestHash&gt;#something_0&#45;&gt;bb::&lt;constant:TestHash&gt;#something_1 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;constant:TestHash&gt;#something_0&#45;&gt;bb::&lt;constant:TestHash&gt;#something_1</title>
-<path fill="none" stroke="#000000" d="M348,-328.2829C348,-265.6311 348,-165.3041 348,-106.9007"/>
-<polygon fill="#000000" stroke="#000000" points="351.5001,-106.8514 348,-96.8515 344.5001,-106.8515 351.5001,-106.8514"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M348,-328.2829C348,-265.6311 348,-165.3041 348,-106.9007"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="351.5001,-106.8514 348,-96.8515 344.5001,-106.8515 351.5001,-106.8514"/>
 </g>
 <!-- bb::&lt;constant:TestHash&gt;#something_1&#45;&gt;bb::&lt;constant:TestHash&gt;#something_1 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;constant:TestHash&gt;#something_1&#45;&gt;bb::&lt;constant:TestHash&gt;#something_1</title>
-<path fill="none" stroke="#000000" d="M375.6082,-96.7778C420.6658,-138.3667 478.7753,-126.3008 478.7753,-60.58 478.7753,1.4182 427.0621,15.6676 383.3772,-17.8319"/>
-<polygon fill="#000000" stroke="#000000" points="380.9973,-15.2604 375.6082,-24.3823 385.5095,-20.612 380.9973,-15.2604"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M375.6082,-96.7778C420.6658,-138.3667 478.7753,-126.3008 478.7753,-60.58 478.7753,1.4182 427.0621,15.6676 383.3772,-17.8319"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="380.9973,-15.2604 375.6082,-24.3823 385.5095,-20.612 380.9973,-15.2604"/>
 </g>
 <!-- bb::&lt;constant:TestHash&gt;#test_0 -->
 <g id="node3" class="node">
@@ -80,14 +80,14 @@
 <!-- bb::&lt;constant:TestHash&gt;#test_0&#45;&gt;bb::&lt;constant:TestHash&gt;#test_1 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;constant:TestHash&gt;#test_0&#45;&gt;bb::&lt;constant:TestHash&gt;#test_1</title>
-<path fill="none" stroke="#000000" d="M1286,-218.1733C1286,-177.2074 1286,-136.6062 1286,-106.876"/>
-<polygon fill="#000000" stroke="#000000" points="1289.5001,-106.8307 1286,-96.8307 1282.5001,-106.8307 1289.5001,-106.8307"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1286,-218.1733C1286,-177.2074 1286,-136.6062 1286,-106.876"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1289.5001,-106.8307 1286,-96.8307 1282.5001,-106.8307 1289.5001,-106.8307"/>
 </g>
 <!-- bb::&lt;constant:TestHash&gt;#test_1&#45;&gt;bb::&lt;constant:TestHash&gt;#test_1 -->
 <g id="edge4" class="edge">
 <title>bb::&lt;constant:TestHash&gt;#test_1&#45;&gt;bb::&lt;constant:TestHash&gt;#test_1</title>
-<path fill="none" stroke="#000000" d="M1313.6082,-96.7778C1358.6658,-138.3667 1416.7753,-126.3008 1416.7753,-60.58 1416.7753,1.4182 1365.0621,15.6676 1321.3772,-17.8319"/>
-<polygon fill="#000000" stroke="#000000" points="1318.9973,-15.2604 1313.6082,-24.3823 1323.5095,-20.612 1318.9973,-15.2604"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1313.6082,-96.7778C1358.6658,-138.3667 1416.7753,-126.3008 1416.7753,-60.58 1416.7753,1.4182 1365.0621,15.6676 1321.3772,-17.8319"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1318.9973,-15.2604 1313.6082,-24.3823 1323.5095,-20.612 1318.9973,-15.2604"/>
 </g>
 <!-- bb::&lt;constant:TestHash&gt;#test_shaped_0 -->
 <g id="node5" class="node">
@@ -124,15 +124,15 @@
 <!-- bb::&lt;constant:TestHash&gt;#test_shaped_0&#45;&gt;bb::&lt;constant:TestHash&gt;#test_shaped_1 -->
 <g id="edge5" class="edge">
 <title>bb::&lt;constant:TestHash&gt;#test_shaped_0&#45;&gt;bb::&lt;constant:TestHash&gt;#test_shaped_1</title>
-<path fill="none" stroke="#000000" d="M2787,-132.4243C2787,-123.3334 2787,-114.7979 2787,-107.0065"/>
-<polygon fill="#000000" stroke="#000000" points="2790.5001,-106.8606 2787,-96.8606 2783.5001,-106.8607 2790.5001,-106.8606"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M2787,-132.4243C2787,-123.3334 2787,-114.7979 2787,-107.0065"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="2790.5001,-106.8606 2787,-96.8606 2783.5001,-106.8607 2790.5001,-106.8606"/>
 </g>
 <!-- bb::&lt;constant:TestHash&gt;#test_shaped_1&#45;&gt;bb::&lt;constant:TestHash&gt;#test_shaped_1 -->
 <g id="edge6" class="edge">
 <title>bb::&lt;constant:TestHash&gt;#test_shaped_1&#45;&gt;bb::&lt;constant:TestHash&gt;#test_shaped_1</title>
-<path fill="none" stroke="#000000" d="M2814.6082,-96.7778C2859.6658,-138.3667 2917.7753,-126.3008 2917.7753,-60.58 2917.7753,1.4182 2866.0621,15.6676 2822.3772,-17.8319"/>
-<polygon fill="#000000" stroke="#000000" points="2819.9973,-15.2604 2814.6082,-24.3823 2824.5095,-20.612 2819.9973,-15.2604"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M2814.6082,-96.7778C2859.6658,-138.3667 2917.7753,-126.3008 2917.7753,-60.58 2917.7753,1.4182 2866.0621,15.6676 2822.3772,-17.8319"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="2819.9973,-15.2604 2814.6082,-24.3823 2824.5095,-20.612 2819.9973,-15.2604"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: d874f76d3ac5663ec4e2bf0f5a966d3395a7ba83c04fad8d59c6084a3e1a948c -->
+<!-- ruby-types:sha256: 91d2f424a111306e3430d720e85999a7404630e781b410ba361dc0f09b84657a -->

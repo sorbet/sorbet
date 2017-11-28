@@ -9,20 +9,20 @@ subgraph "cluster_::<constant:Object>#foo" {
 <constant:nil>$11 = alias <constant:nil> : NilClass
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2";
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
     "bb::<constant:Object>#foo_1" [label = "()
 statTemp$10 = self
 statTemp$4 = statTemp$10.bad()
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_2" [label = "(<constant:nil>$11)
 outerLoops: 1
 whileTemp$3 = true : TrueClass(true)
 whileTemp$3"];
 
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3";
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4";
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="bold"];
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="tapered"];
 
     "bb::<constant:Object>#foo_3" [label = "(<constant:nil>$11)
 outerLoops: 1
@@ -32,12 +32,12 @@ statTemp$9 = self : Object
 returnTemp$8 = statTemp$9.value() : untyped
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_2";
+    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_2" [style="bold"];
     "bb::<constant:Object>#foo_4" [label = "(<constant:nil>$11)
 returnMethodTemp$12 = return <constant:nil>$11 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1" [style="bold"];
 }
 
 }

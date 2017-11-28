@@ -11,11 +11,11 @@ b = a.getbyte(a) : Integer | NilClass
 returnMethodTemp$6 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz1_0" -> "bb::<constant:Object>#baz1_1";
+    "bb::<constant:Object>#baz1_0" -> "bb::<constant:Object>#baz1_1" [style="bold"];
     "bb::<constant:Object>#baz1_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz1_1" -> "bb::<constant:Object>#baz1_1";
+    "bb::<constant:Object>#baz1_1" -> "bb::<constant:Object>#baz1_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#baz2" {
@@ -31,11 +31,11 @@ b = a.getbyte(statTemp$5) : Integer | NilClass
 returnMethodTemp$6 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz2_0" -> "bb::<constant:Object>#baz2_1";
+    "bb::<constant:Object>#baz2_0" -> "bb::<constant:Object>#baz2_1" [style="bold"];
     "bb::<constant:Object>#baz2_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz2_1" -> "bb::<constant:Object>#baz2_1";
+    "bb::<constant:Object>#baz2_1" -> "bb::<constant:Object>#baz2_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#baz3" {
@@ -51,11 +51,11 @@ b = statTemp$3.getbyte(statTemp$4) : Integer | NilClass
 returnMethodTemp$5 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz3_0" -> "bb::<constant:Object>#baz3_1";
+    "bb::<constant:Object>#baz3_0" -> "bb::<constant:Object>#baz3_1" [style="bold"];
     "bb::<constant:Object>#baz3_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz3_1" -> "bb::<constant:Object>#baz3_1";
+    "bb::<constant:Object>#baz3_1" -> "bb::<constant:Object>#baz3_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#baz4" {
@@ -72,11 +72,11 @@ b = statTemp$3.getbyte(statTemp$5) : untyped
 returnMethodTemp$6 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz4_0" -> "bb::<constant:Object>#baz4_1";
+    "bb::<constant:Object>#baz4_0" -> "bb::<constant:Object>#baz4_1" [style="bold"];
     "bb::<constant:Object>#baz4_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz4_1" -> "bb::<constant:Object>#baz4_1";
+    "bb::<constant:Object>#baz4_1" -> "bb::<constant:Object>#baz4_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#baz5" {
@@ -89,23 +89,23 @@ subgraph "cluster_::<constant:Object>#baz5" {
 ifTemp$4 = true : TrueClass(true)
 ifTemp$4"];
 
-    "bb::<constant:Object>#baz5_0" -> "bb::<constant:Object>#baz5_2";
-    "bb::<constant:Object>#baz5_0" -> "bb::<constant:Object>#baz5_3";
+    "bb::<constant:Object>#baz5_0" -> "bb::<constant:Object>#baz5_2" [style="bold"];
+    "bb::<constant:Object>#baz5_0" -> "bb::<constant:Object>#baz5_3" [style="tapered"];
 
     "bb::<constant:Object>#baz5_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz5_1" -> "bb::<constant:Object>#baz5_1";
+    "bb::<constant:Object>#baz5_1" -> "bb::<constant:Object>#baz5_1" [style="bold"];
     "bb::<constant:Object>#baz5_2" [label = "(b)
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz5_2" -> "bb::<constant:Object>#baz5_4";
+    "bb::<constant:Object>#baz5_2" -> "bb::<constant:Object>#baz5_4" [style="bold"];
     "bb::<constant:Object>#baz5_3" [label = "(b)
 b = foo : String(\"foo\")
 <unconditional>"];
 
-    "bb::<constant:Object>#baz5_3" -> "bb::<constant:Object>#baz5_4";
+    "bb::<constant:Object>#baz5_3" -> "bb::<constant:Object>#baz5_4" [style="bold"];
     "bb::<constant:Object>#baz5_4" [label = "(b)
 statTemp$5 = b : Integer | String
 statTemp$6 = 1 : Integer(1)
@@ -113,7 +113,7 @@ b = statTemp$5.getbyte(statTemp$6) : untyped
 returnMethodTemp$7 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz5_4" -> "bb::<constant:Object>#baz5_1";
+    "bb::<constant:Object>#baz5_4" -> "bb::<constant:Object>#baz5_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#baz6" {
@@ -126,23 +126,23 @@ subgraph "cluster_::<constant:Object>#baz6" {
 ifTemp$4 = true : TrueClass(true)
 ifTemp$4"];
 
-    "bb::<constant:Object>#baz6_0" -> "bb::<constant:Object>#baz6_2";
-    "bb::<constant:Object>#baz6_0" -> "bb::<constant:Object>#baz6_3";
+    "bb::<constant:Object>#baz6_0" -> "bb::<constant:Object>#baz6_2" [style="bold"];
+    "bb::<constant:Object>#baz6_0" -> "bb::<constant:Object>#baz6_3" [style="tapered"];
 
     "bb::<constant:Object>#baz6_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz6_1" -> "bb::<constant:Object>#baz6_1";
+    "bb::<constant:Object>#baz6_1" -> "bb::<constant:Object>#baz6_1" [style="bold"];
     "bb::<constant:Object>#baz6_2" [label = "(b)
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz6_2" -> "bb::<constant:Object>#baz6_4";
+    "bb::<constant:Object>#baz6_2" -> "bb::<constant:Object>#baz6_4" [style="bold"];
     "bb::<constant:Object>#baz6_3" [label = "(b)
 b = foo : String(\"foo\")
 <unconditional>"];
 
-    "bb::<constant:Object>#baz6_3" -> "bb::<constant:Object>#baz6_4";
+    "bb::<constant:Object>#baz6_3" -> "bb::<constant:Object>#baz6_4" [style="bold"];
     "bb::<constant:Object>#baz6_4" [label = "(b)
 statTemp$5 = foo : String(\"foo\")
 statTemp$6 = b : Integer | String
@@ -150,7 +150,7 @@ b = statTemp$5.getbyte(statTemp$6) : Integer | NilClass
 returnMethodTemp$7 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz6_4" -> "bb::<constant:Object>#baz6_1";
+    "bb::<constant:Object>#baz6_4" -> "bb::<constant:Object>#baz6_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#baz7" {
@@ -163,23 +163,18 @@ subgraph "cluster_::<constant:Object>#baz7" {
 ifTemp$4 = true : TrueClass(true)
 ifTemp$4"];
 
-    "bb::<constant:Object>#baz7_0" -> "bb::<constant:Object>#baz7_2";
-    "bb::<constant:Object>#baz7_0" -> "bb::<constant:Object>#baz7_3";
+    "bb::<constant:Object>#baz7_0" -> "bb::<constant:Object>#baz7_2" [style="bold"];
+    "bb::<constant:Object>#baz7_0" -> "bb::<constant:Object>#baz7_4" [style="tapered"];
 
     "bb::<constant:Object>#baz7_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz7_1" -> "bb::<constant:Object>#baz7_1";
+    "bb::<constant:Object>#baz7_1" -> "bb::<constant:Object>#baz7_1" [style="bold"];
     "bb::<constant:Object>#baz7_2" [label = "(b)
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz7_2" -> "bb::<constant:Object>#baz7_4";
-    "bb::<constant:Object>#baz7_3" [label = "()
-statTemp$3 = NotSupported() : untyped
-<unconditional>"];
-
-    "bb::<constant:Object>#baz7_3" -> "bb::<constant:Object>#baz7_4";
+    "bb::<constant:Object>#baz7_2" -> "bb::<constant:Object>#baz7_4" [style="bold"];
     "bb::<constant:Object>#baz7_4" [label = "(b)
 statTemp$5 = foo : String(\"foo\")
 statTemp$6 = b : Integer | NilClass
@@ -187,7 +182,7 @@ b = statTemp$5.getbyte(statTemp$6) : Integer | NilClass
 returnMethodTemp$7 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz7_4" -> "bb::<constant:Object>#baz7_1";
+    "bb::<constant:Object>#baz7_3" -> "bb::<constant:Object>#baz7_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#baz8" {
@@ -200,30 +195,30 @@ subgraph "cluster_::<constant:Object>#baz8" {
 <constant:nil>$5 = alias <constant:nil> : NilClass
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_0" -> "bb::<constant:Object>#baz8_2";
+    "bb::<constant:Object>#baz8_0" -> "bb::<constant:Object>#baz8_2" [style="bold"];
     "bb::<constant:Object>#baz8_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_1" -> "bb::<constant:Object>#baz8_1";
+    "bb::<constant:Object>#baz8_1" -> "bb::<constant:Object>#baz8_1" [style="bold"];
     "bb::<constant:Object>#baz8_2" [label = "(<constant:nil>$5)
 outerLoops: 1
 whileTemp$3 = true : TrueClass(true)
 whileTemp$3"];
 
-    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_3";
-    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_4";
+    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_3" [style="bold"];
+    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_4" [style="tapered"];
 
     "bb::<constant:Object>#baz8_3" [label = "(<constant:nil>$5)
 outerLoops: 1
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_3" -> "bb::<constant:Object>#baz8_2";
+    "bb::<constant:Object>#baz8_3" -> "bb::<constant:Object>#baz8_2" [style="bold"];
     "bb::<constant:Object>#baz8_4" [label = "(<constant:nil>$5)
 returnMethodTemp$6 = return <constant:nil>$5 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_4" -> "bb::<constant:Object>#baz8_1";
+    "bb::<constant:Object>#baz8_4" -> "bb::<constant:Object>#baz8_1" [style="bold"];
 }
 
 }

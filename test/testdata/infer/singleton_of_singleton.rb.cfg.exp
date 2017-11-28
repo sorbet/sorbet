@@ -10,11 +10,11 @@ returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<singleton class:<constant:A>>#foo_0" -> "bb::<singleton class:<constant:A>>#foo_1";
+    "bb::<singleton class:<constant:A>>#foo_0" -> "bb::<singleton class:<constant:A>>#foo_1" [style="bold"];
     "bb::<singleton class:<constant:A>>#foo_1" [label = "()
 <unconditional>"];
 
-    "bb::<singleton class:<constant:A>>#foo_1" -> "bb::<singleton class:<constant:A>>#foo_1";
+    "bb::<singleton class:<constant:A>>#foo_1" -> "bb::<singleton class:<constant:A>>#foo_1" [style="bold"];
 }
 
 subgraph "cluster_::<singleton class:<singleton class:<constant:A>>>#bar" {
@@ -28,11 +28,11 @@ returnMethodTemp$1 = self : <class:<class:A>>
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<singleton class:<singleton class:<constant:A>>>#bar_0" -> "bb::<singleton class:<singleton class:<constant:A>>>#bar_1";
+    "bb::<singleton class:<singleton class:<constant:A>>>#bar_0" -> "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" [style="bold"];
     "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" [label = "()
 <unconditional>"];
 
-    "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" -> "bb::<singleton class:<singleton class:<constant:A>>>#bar_1";
+    "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" -> "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" [style="bold"];
 }
 
 }

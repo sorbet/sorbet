@@ -10,11 +10,11 @@ subgraph "cluster_::<constant:Trigger>#trigger" {
 returnMethodTemp$4 = return @__fake_logger$3 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Trigger>#trigger_0" -> "bb::<constant:Trigger>#trigger_1";
+    "bb::<constant:Trigger>#trigger_0" -> "bb::<constant:Trigger>#trigger_1" [style="bold"];
     "bb::<constant:Trigger>#trigger_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Trigger>#trigger_1" -> "bb::<constant:Trigger>#trigger_1";
+    "bb::<constant:Trigger>#trigger_1" -> "bb::<constant:Trigger>#trigger_1" [style="bold"];
 }
 
 }

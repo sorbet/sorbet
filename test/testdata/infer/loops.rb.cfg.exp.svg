@@ -44,8 +44,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2</title>
-<path fill="none" stroke="#000000" d="M258.8986,-390.6755C254.373,-378.0047 249.3432,-363.9219 244.5733,-350.5668"/>
-<polygon fill="#000000" stroke="#000000" points="247.8165,-349.2415 241.1569,-341.0014 241.2244,-351.596 247.8165,-349.2415"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M258.8986,-390.6755C254.373,-378.0047 249.3432,-363.9219 244.5733,-350.5668"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="247.8165,-349.2415 241.1569,-341.0014 241.2244,-351.596 247.8165,-349.2415"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_1 -->
 <g id="node2" class="node">
@@ -57,8 +57,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_1&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_1 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_1&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_1</title>
-<path fill="none" stroke="#000000" d="M555.5274,-72.1238C572.2694,-69.2431 583.7753,-62.5352 583.7753,-52 583.7753,-38.2992 564.3157,-31.0712 539.1869,-30.3161"/>
-<polygon fill="#000000" stroke="#000000" points="538.8982,-26.8171 528.9124,-30.3575 538.9265,-33.8171 538.8982,-26.8171"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M555.5274,-72.1238C572.2694,-69.2431 583.7753,-62.5352 583.7753,-52 583.7753,-38.2992 564.3157,-31.0712 539.1869,-30.3161"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="538.8982,-26.8171 528.9124,-30.3575 538.9265,-33.8171 538.8982,-26.8171"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_3 -->
 <g id="node4" class="node">
@@ -72,8 +72,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_3 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_3</title>
-<path fill="none" stroke="#000000" d="M176.2346,-252.5809C165.0609,-241.5419 153.2966,-229.5931 142.4608,-218.2842"/>
-<polygon fill="#000000" stroke="#000000" points="144.9195,-215.7908 135.4896,-210.9609 139.8494,-220.6172 144.9195,-215.7908"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M176.2346,-252.5809C165.0609,-241.5419 153.2966,-229.5931 142.4608,-218.2842"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="144.9195,-215.7908 135.4896,-210.9609 139.8494,-220.6172 144.9195,-215.7908"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_4 -->
 <g id="node5" class="node">
@@ -86,20 +86,20 @@
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_4 -->
 <g id="edge4" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_4</title>
-<path fill="none" stroke="#000000" d="M297.7675,-255.3882C324.8148,-240.3806 355.4408,-223.3872 382.3003,-208.4838"/>
+<polygon fill="#000000" stroke="transparent" points="298.0101,-255.8254 302.0814,-253.5388 306.2007,-251.2252 310.3626,-248.8876 314.5615,-246.5293 318.792,-244.1533 323.0485,-241.7626 327.3256,-239.3603 331.6178,-236.9496 335.9196,-234.5335 340.2254,-232.1152 344.5299,-229.6976 348.8274,-227.2838 353.1126,-224.8771 357.3798,-222.4804 361.6237,-220.0968 365.8388,-217.7294 370.0194,-215.3813 374.1602,-213.0556 378.2557,-210.7554 382.3003,-208.4838 382.3003,-208.4838 378.2324,-210.7135 374.1134,-212.9712 369.9487,-215.2539 365.744,-217.5586 361.5047,-219.8823 357.2364,-222.2218 352.9446,-224.5743 348.6347,-226.9366 344.3125,-229.3057 339.9832,-231.6787 335.6526,-234.0524 331.3261,-236.4239 327.0092,-238.79 322.7075,-241.1479 318.4264,-243.4944 314.1716,-245.8266 309.9485,-248.1414 305.7627,-250.4357 301.6196,-252.7066 297.5249,-254.951 298.0101,-255.8254"/>
 <polygon fill="#000000" stroke="#000000" points="384.2081,-211.4279 391.2541,-203.5156 380.8118,-205.307 384.2081,-211.4279"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_3&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2 -->
 <g id="edge5" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_3&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_2</title>
-<path fill="none" stroke="#000000" d="M145.465,-208.2064C157.0431,-219.5551 169.4936,-232.1347 181.0433,-244.136"/>
-<polygon fill="#000000" stroke="#000000" points="178.6614,-246.7093 188.1023,-251.5176 183.7204,-241.8713 178.6614,-246.7093"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M145.465,-208.2064C157.0431,-219.5551 169.4936,-232.1347 181.0433,-244.136"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="178.6614,-246.7093 188.1023,-251.5176 183.7204,-241.8713 178.6614,-246.7093"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_4&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_1 -->
 <g id="edge6" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_4&#45;&gt;bb::&lt;constant:HasLoops&gt;#variable_only_inside_loop_1</title>
-<path fill="none" stroke="#000000" d="M453,-133.7563C453,-122.5998 453,-110.1125 453,-98.3208"/>
-<polygon fill="#000000" stroke="#000000" points="456.5001,-98.1883 453,-88.1883 449.5001,-98.1884 456.5001,-98.1883"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M453,-133.7563C453,-122.5998 453,-110.1125 453,-98.3208"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="456.5001,-98.1883 453,-88.1883 449.5001,-98.1884 456.5001,-98.1883"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_0 -->
 <g id="node6" class="node">
@@ -122,8 +122,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2 -->
 <g id="edge7" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#incorrect_assignment_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2</title>
-<path fill="none" stroke="#000000" d="M966.8625,-379.5222C963.8538,-370.1411 960.7174,-360.3617 957.6939,-350.9344"/>
-<polygon fill="#000000" stroke="#000000" points="960.9809,-349.7224 954.5941,-341.2691 954.3153,-351.8603 960.9809,-349.7224"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M966.8625,-379.5222C963.8538,-370.1411 960.7174,-360.3617 957.6939,-350.9344"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="960.9809,-349.7224 954.5941,-341.2691 954.3153,-351.8603 960.9809,-349.7224"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_1 -->
 <g id="node7" class="node">
@@ -135,8 +135,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_1&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_1 -->
 <g id="edge8" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#incorrect_assignment_1&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_1</title>
-<path fill="none" stroke="#000000" d="M1284.5274,-72.1238C1301.2694,-69.2431 1312.7753,-62.5352 1312.7753,-52 1312.7753,-38.2992 1293.3157,-31.0712 1268.1869,-30.3161"/>
-<polygon fill="#000000" stroke="#000000" points="1267.8982,-26.8171 1257.9124,-30.3575 1267.9265,-33.8171 1267.8982,-26.8171"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1284.5274,-72.1238C1301.2694,-69.2431 1312.7753,-62.5352 1312.7753,-52 1312.7753,-38.2992 1293.3157,-31.0712 1268.1869,-30.3161"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1267.8982,-26.8171 1257.9124,-30.3575 1267.9265,-33.8171 1267.8982,-26.8171"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_3 -->
 <g id="node9" class="node">
@@ -150,8 +150,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_3 -->
 <g id="edge9" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_3</title>
-<path fill="none" stroke="#000000" d="M892.5973,-252.2271C882.2106,-241.5417 871.3206,-230.0222 861.2425,-219.0668"/>
-<polygon fill="#000000" stroke="#000000" points="863.7402,-216.6116 854.4112,-211.5896 858.5722,-221.3331 863.7402,-216.6116"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M892.5973,-252.2271C882.2106,-241.5417 871.3206,-230.0222 861.2425,-219.0668"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="863.7402,-216.6116 854.4112,-211.5896 858.5722,-221.3331 863.7402,-216.6116"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_4 -->
 <g id="node10" class="node">
@@ -164,20 +164,20 @@
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_4 -->
 <g id="edge10" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_4</title>
-<path fill="none" stroke="#000000" d="M1017.2357,-255.3882C1046.0686,-240.3153 1078.7331,-223.2394 1107.3307,-208.2895"/>
+<polygon fill="#000000" stroke="transparent" points="1017.4673,-255.8313 1021.8088,-253.5345 1026.2017,-251.2104 1030.6401,-248.8623 1035.1182,-246.4932 1039.6299,-244.1063 1044.1694,-241.7047 1048.7307,-239.2915 1053.3081,-236.8699 1057.8955,-234.443 1062.487,-232.0139 1067.0768,-229.5856 1071.6589,-227.1615 1076.2274,-224.7445 1080.7765,-222.3379 1085.3002,-219.9447 1089.7925,-217.568 1094.2476,-215.211 1098.6597,-212.8769 1103.0226,-210.5687 1107.3307,-208.2895 1107.3307,-208.2895 1103.0004,-210.5262 1098.615,-212.7914 1094.1802,-215.082 1089.7021,-217.395 1085.1866,-219.7274 1080.6396,-222.076 1076.0671,-224.4378 1071.475,-226.8097 1066.8693,-229.1887 1062.2558,-231.5716 1057.6406,-233.9555 1053.0296,-236.3372 1048.4286,-238.7137 1043.8437,-241.0818 1039.2808,-243.4387 1034.7459,-245.7811 1030.2448,-248.106 1025.7835,-250.4104 1021.3679,-252.6911 1017.004,-254.9451 1017.4673,-255.8313"/>
 <polygon fill="#000000" stroke="#000000" points="1109.2221,-211.2502 1116.4627,-203.5156 1105.9791,-205.0467 1109.2221,-211.2502"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_3&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2 -->
 <g id="edge11" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#incorrect_assignment_3&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_2</title>
-<path fill="none" stroke="#000000" d="M865.346,-209.657C875.9541,-220.5052 887.2368,-232.3895 897.7469,-243.7711"/>
-<polygon fill="#000000" stroke="#000000" points="895.1879,-246.159 904.5272,-251.1619 900.3461,-241.4269 895.1879,-246.159"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M865.346,-209.657C875.9541,-220.5052 887.2368,-232.3895 897.7469,-243.7711"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="895.1879,-246.159 904.5272,-251.1619 900.3461,-241.4269 895.1879,-246.159"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#incorrect_assignment_4&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_1 -->
 <g id="edge12" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#incorrect_assignment_4&#45;&gt;bb::&lt;constant:HasLoops&gt;#incorrect_assignment_1</title>
-<path fill="none" stroke="#000000" d="M1182,-133.7563C1182,-122.5998 1182,-110.1125 1182,-98.3208"/>
-<polygon fill="#000000" stroke="#000000" points="1185.5001,-98.1883 1182,-88.1883 1178.5001,-98.1884 1185.5001,-98.1883"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1182,-133.7563C1182,-122.5998 1182,-110.1125 1182,-98.3208"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1185.5001,-98.1883 1182,-88.1883 1178.5001,-98.1884 1185.5001,-98.1883"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_0 -->
 <g id="node11" class="node">
@@ -200,8 +200,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_2 -->
 <g id="edge13" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#correct_assignment_0&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_2</title>
-<path fill="none" stroke="#000000" d="M1695.8625,-379.5222C1692.8538,-370.1411 1689.7174,-360.3617 1686.6939,-350.9344"/>
-<polygon fill="#000000" stroke="#000000" points="1689.9809,-349.7224 1683.5941,-341.2691 1683.3153,-351.8603 1689.9809,-349.7224"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1695.8625,-379.5222C1692.8538,-370.1411 1689.7174,-360.3617 1686.6939,-350.9344"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1689.9809,-349.7224 1683.5941,-341.2691 1683.3153,-351.8603 1689.9809,-349.7224"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_1 -->
 <g id="node12" class="node">
@@ -213,8 +213,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_1&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_1 -->
 <g id="edge14" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#correct_assignment_1&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_1</title>
-<path fill="none" stroke="#000000" d="M2013.5274,-72.1238C2030.2694,-69.2431 2041.7753,-62.5352 2041.7753,-52 2041.7753,-38.2992 2022.3157,-31.0712 1997.1869,-30.3161"/>
-<polygon fill="#000000" stroke="#000000" points="1996.8982,-26.8171 1986.9124,-30.3575 1996.9265,-33.8171 1996.8982,-26.8171"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M2013.5274,-72.1238C2030.2694,-69.2431 2041.7753,-62.5352 2041.7753,-52 2041.7753,-38.2992 2022.3157,-31.0712 1997.1869,-30.3161"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1996.8982,-26.8171 1986.9124,-30.3575 1996.9265,-33.8171 1996.8982,-26.8171"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_3 -->
 <g id="node14" class="node">
@@ -228,8 +228,8 @@
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_3 -->
 <g id="edge15" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#correct_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_3</title>
-<path fill="none" stroke="#000000" d="M1621.5973,-252.2271C1611.2106,-241.5417 1600.3206,-230.0222 1590.2425,-219.0668"/>
-<polygon fill="#000000" stroke="#000000" points="1592.7402,-216.6116 1583.4112,-211.5896 1587.5722,-221.3331 1592.7402,-216.6116"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1621.5973,-252.2271C1611.2106,-241.5417 1600.3206,-230.0222 1590.2425,-219.0668"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1592.7402,-216.6116 1583.4112,-211.5896 1587.5722,-221.3331 1592.7402,-216.6116"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_4 -->
 <g id="node15" class="node">
@@ -242,21 +242,21 @@
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_4 -->
 <g id="edge16" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#correct_assignment_2&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_4</title>
-<path fill="none" stroke="#000000" d="M1746.2357,-255.3882C1775.0686,-240.3153 1807.7331,-223.2394 1836.3307,-208.2895"/>
+<polygon fill="#000000" stroke="transparent" points="1746.4673,-255.8313 1750.8088,-253.5345 1755.2017,-251.2104 1759.6401,-248.8623 1764.1182,-246.4932 1768.6299,-244.1063 1773.1694,-241.7047 1777.7307,-239.2915 1782.3081,-236.8699 1786.8955,-234.443 1791.487,-232.0139 1796.0768,-229.5856 1800.6589,-227.1615 1805.2274,-224.7445 1809.7765,-222.3379 1814.3002,-219.9447 1818.7925,-217.568 1823.2476,-215.211 1827.6597,-212.8769 1832.0226,-210.5687 1836.3307,-208.2895 1836.3307,-208.2895 1832.0004,-210.5262 1827.615,-212.7914 1823.1802,-215.082 1818.7021,-217.395 1814.1866,-219.7274 1809.6396,-222.076 1805.0671,-224.4378 1800.475,-226.8097 1795.8693,-229.1887 1791.2558,-231.5716 1786.6406,-233.9555 1782.0296,-236.3372 1777.4286,-238.7137 1772.8437,-241.0818 1768.2808,-243.4387 1763.7459,-245.7811 1759.2448,-248.106 1754.7835,-250.4104 1750.3679,-252.6911 1746.004,-254.9451 1746.4673,-255.8313"/>
 <polygon fill="#000000" stroke="#000000" points="1838.2221,-211.2502 1845.4627,-203.5156 1834.9791,-205.0467 1838.2221,-211.2502"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_3&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_2 -->
 <g id="edge17" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#correct_assignment_3&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_2</title>
-<path fill="none" stroke="#000000" d="M1594.346,-209.657C1604.9541,-220.5052 1616.2368,-232.3895 1626.7469,-243.7711"/>
-<polygon fill="#000000" stroke="#000000" points="1624.1879,-246.159 1633.5272,-251.1619 1629.3461,-241.4269 1624.1879,-246.159"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1594.346,-209.657C1604.9541,-220.5052 1616.2368,-232.3895 1626.7469,-243.7711"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1624.1879,-246.159 1633.5272,-251.1619 1629.3461,-241.4269 1624.1879,-246.159"/>
 </g>
 <!-- bb::&lt;constant:HasLoops&gt;#correct_assignment_4&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_1 -->
 <g id="edge18" class="edge">
 <title>bb::&lt;constant:HasLoops&gt;#correct_assignment_4&#45;&gt;bb::&lt;constant:HasLoops&gt;#correct_assignment_1</title>
-<path fill="none" stroke="#000000" d="M1911,-133.7563C1911,-122.5998 1911,-110.1125 1911,-98.3208"/>
-<polygon fill="#000000" stroke="#000000" points="1914.5001,-98.1883 1911,-88.1883 1907.5001,-98.1884 1914.5001,-98.1883"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1911,-133.7563C1911,-122.5998 1911,-110.1125 1911,-98.3208"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1914.5001,-98.1883 1911,-88.1883 1907.5001,-98.1884 1914.5001,-98.1883"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: addf73d45fd0a4e3d4a4ca34d75d751bdf22a61ec5c2cfe978ab04f27910f047 -->
+<!-- ruby-types:sha256: 0a2c6a92b83e5f829afc176e3dc37a0f64717edc3ea28797189785b81875e76a -->

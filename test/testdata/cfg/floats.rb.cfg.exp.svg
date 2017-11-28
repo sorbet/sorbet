@@ -43,15 +43,15 @@
 <!-- bb::&lt;constant:Object&gt;#test_large_float_0&#45;&gt;bb::&lt;constant:Object&gt;#test_large_float_1 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;constant:Object&gt;#test_large_float_0&#45;&gt;bb::&lt;constant:Object&gt;#test_large_float_1</title>
-<path fill="none" stroke="#000000" d="M2063,-124.0621C2063,-114.9077 2063,-106.2185 2063,-98.25"/>
-<polygon fill="#000000" stroke="#000000" points="2066.5001,-98.2112 2063,-88.2112 2059.5001,-98.2113 2066.5001,-98.2112"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M2063,-124.0621C2063,-114.9077 2063,-106.2185 2063,-98.25"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="2066.5001,-98.2112 2063,-88.2112 2059.5001,-98.2113 2066.5001,-98.2112"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#test_large_float_1&#45;&gt;bb::&lt;constant:Object&gt;#test_large_float_1 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;constant:Object&gt;#test_large_float_1&#45;&gt;bb::&lt;constant:Object&gt;#test_large_float_1</title>
-<path fill="none" stroke="#000000" d="M2103.5031,-88.0539C2146.0033,-110.2826 2193.7753,-98.2646 2193.7753,-52 2193.7753,-9.0787 2152.6584,4.3668 2112.7796,-11.6635"/>
-<polygon fill="#000000" stroke="#000000" points="2111.1152,-8.5768 2103.5031,-15.9461 2114.0493,-14.9323 2111.1152,-8.5768"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M2103.5031,-88.0539C2146.0033,-110.2826 2193.7753,-98.2646 2193.7753,-52 2193.7753,-9.0787 2152.6584,4.3668 2112.7796,-11.6635"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="2111.1152,-8.5768 2103.5031,-15.9461 2114.0493,-14.9323 2111.1152,-8.5768"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 946677c907979cd9aaa3f2e13741f3e654b14d5f229f5512b33e8873ce226d73 -->
+<!-- ruby-types:sha256: 6904218a48b34172918389a35a316753d667ab19bf6c5fceac3abacaf32dd581 -->

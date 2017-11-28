@@ -8,46 +8,45 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [label = "()
 rescueTemp$3"];
 
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2";
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_3";
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_3" [style="tapered"];
 
     "bb::<constant:Object>#foo_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_2" [label = "(returnMethodTemp$1)
 returnMethodTemp$1 = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4";
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="bold"];
     "bb::<constant:Object>#foo_3" [label = "()
 rescueTemp$3"];
 
-    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_5";
-    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_6";
+    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_5" [style="bold"];
+    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_6" [style="tapered"];
 
     "bb::<constant:Object>#foo_4" [label = "(returnMethodTemp$1)
 returnMethodTemp$4 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1";
+    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_5" [label = "(returnMethodTemp$1)
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$1 = 2 : Integer(2)
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_5" -> "bb::<constant:Object>#foo_4";
+    "bb::<constant:Object>#foo_5" -> "bb::<constant:Object>#foo_4" [style="bold"];
     "bb::<constant:Object>#foo_6" [label = "()
 rescueTemp$3"];
 
-    "bb::<constant:Object>#foo_6" -> "bb::<constant:Object>#foo_7";
-    "bb::<constant:Object>#foo_6" -> "bb::<constant:Object>#foo_4";
+    "bb::<constant:Object>#foo_6" -> "bb::<constant:Object>#foo_7" [style="bold"];
+    "bb::<constant:Object>#foo_6" -> "bb::<constant:Object>#foo_4" [style="tapered"];
 
     "bb::<constant:Object>#foo_7" [label = "(returnMethodTemp$1)
 returnMethodTemp$1 = 3 : Integer(3)
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_4";
+    "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_4" [style="bold"];
 }
 
 }
