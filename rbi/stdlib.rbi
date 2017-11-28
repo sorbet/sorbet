@@ -3034,6 +3034,14 @@ class File
 
   standard_method(
     {
+      file: Opus::Types.any(BasicObject, Pathname, IO),
+    },
+    returns: Time
+  )
+  def self.atime(file); end
+
+  standard_method(
+    {
       file: String,
       suffix: String,
     },
@@ -3050,6 +3058,14 @@ class File
     returns: String
   )
   def self.binread(_, _1=_, _2=_); end
+
+  standard_method(
+    {
+      file: Opus::Types.any(BasicObject, Pathname, IO),
+    },
+    returns: Time
+  )
+  def self.birthtime(file); end
 
   standard_method(
     {
@@ -3085,6 +3101,14 @@ class File
     returns: Integer
   )
   def self.chown(owner, group, *files); end
+
+  standard_method(
+    {
+      file: Opus::Types.any(BasicObject, Pathname, IO),
+    },
+    returns: Time
+  )
+  def self.ctime(file); end
 
   standard_method(
     {
@@ -3125,6 +3149,23 @@ class File
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def self.executable_real?(file); end
+
+  standard_method(
+    {
+      file: Opus::Types.any(BasicObject, Pathname, IO),
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def self.exist?(file); end
+
+  standard_method(
+    {
+      file: Opus::Types.any(BasicObject, Pathname),
+      dir: Opus::Types.any(BasicObject, Pathname),
+    },
+    returns: String
+  )
+  def self.expand_path(file, dir=_); end
 
   standard_method(
     {
@@ -3179,6 +3220,14 @@ class File
 
   standard_method(
     {
+      _: Opus::Types.any(BasicObject, Pathname, File, Opus::Types.array_of(String)),
+    },
+    returns: String
+  )
+  def self.join(*_); end
+
+  standard_method(
+    {
       mode: Integer,
       files: String,
     },
@@ -3212,6 +3261,31 @@ class File
     returns: File::Stat
   )
   def self.lstat(file); end
+
+  standard_method(
+    {
+      file: Opus::Types.any(BasicObject, Pathname, IO),
+    },
+    returns: Time
+  )
+  def self.mtime(file); end
+
+  standard_method(
+    {
+      file: Opus::Types.any(String, BasicObject, Pathname),
+      perm: String,
+      opt: Integer,
+      mode: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+    },
+    returns: Opus::Types.any(File, Opus::Types.untyped)
+  )
+  def self.open(file=_, perm=_, opt=_, mode: _, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _); end
 
   standard_method(
     {
@@ -3335,6 +3409,14 @@ class File
     returns: [String, String]
   )
   def self.split(file); end
+
+  standard_method(
+    {
+      file: Opus::Types.any(BasicObject, Pathname),
+    },
+    returns: File::Stat
+  )
+  def self.stat(file); end
 
   standard_method(
     {
@@ -4602,6 +4684,14 @@ class IO
 
   standard_method(
     {
+      _: BasicObject,
+    },
+    returns: Opus::Types.untyped
+  )
+  def <<(_); end
+
+  standard_method(
+    {
       _: Symbol,
       offset: Integer,
       len: Integer,
@@ -4824,6 +4914,14 @@ class IO
 
   standard_method(
     {
+      _: BasicObject,
+    },
+    returns: NilClass
+  )
+  def print(*_); end
+
+  standard_method(
+    {
       format_string: String,
       _: BasicObject,
     },
@@ -4838,6 +4936,14 @@ class IO
     returns: Opus::Types.untyped
   )
   def putc(_); end
+
+  standard_method(
+    {
+      _: BasicObject,
+    },
+    returns: NilClass
+  )
+  def puts(*_); end
 
   standard_method(
     {
@@ -5158,6 +5264,14 @@ class IO
     returns: Integer
   )
   def self.sysopen(path, mode=_, perm=_); end
+
+  standard_method(
+    {
+      _: BasicObject,
+    },
+    returns: Opus::Types.any(IO, NilClass)
+  )
+  def self.try_convert(_); end
 
   standard_method(
     {
@@ -5941,6 +6055,14 @@ module Kernel
     returns: Integer
   )
   def self.putc(_); end
+
+  standard_method(
+    {
+      _: BasicObject,
+    },
+    returns: NilClass
+  )
+  def self.puts(*_); end
 
   standard_method(
     {},
@@ -7059,6 +7181,12 @@ class NilClass
     returns: Float
   )
   def to_f(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.untyped
+  )
+  def to_h(); end
 
   standard_method(
     {},
