@@ -110,13 +110,13 @@ private:
                 auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
                 if (recvi == nullptr) {
                     ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                           "Misformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                                           "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
                     result = core::Types::dynamic();
                     return;
                 }
                 if (recvi->symbol != core::GlobalState::defn_Opus_Types()) {
                     ctx.state.errors.error(recvi->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                           "Misformed type declaration. Unknown argument type type {}",
+                                           "Malformed type declaration. Unknown argument type type {}",
                                            expr->toString(ctx));
                     result = core::Types::dynamic();
                     return;
@@ -236,7 +236,7 @@ private:
                             break;
                         default:
                             ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                                   "Misformed standard_method. Unknown argument name {}",
+                                                   "Malformed standard_method. Unknown argument name {}",
                                                    key->toString(ctx));
                     }
                 }
