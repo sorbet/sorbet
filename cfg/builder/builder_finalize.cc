@@ -52,7 +52,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                         ++it;
                     }
                 } else {
-                    ++it;
+                    it = current.erase(it); // note: this is correct but to conservative. In particular for loop headers
                 }
             }
         }
@@ -87,6 +87,9 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
                 current[bind.bind] = i->what;
             }
+        }
+        if (bb->bexit.cond.exists()) {
+            bb->bexit.cond = maybeDealias(ctx, bb->bexit.cond, current);
         }
     }
 }
