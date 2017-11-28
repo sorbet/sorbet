@@ -2,7 +2,7 @@ class TestArgs
   def any; end
 
   standard_method({}, returns: Hash)
-  def a_hash; end
+  def a_hash; end # error: does not conform to method result type
 
   def required(a, b)
   end

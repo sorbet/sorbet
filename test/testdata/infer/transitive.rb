@@ -4,7 +4,7 @@ class A
     },
     returns: Integer
   )
-  def foo
+  def foo # error: does not conform to method result type
   end
 end
 
