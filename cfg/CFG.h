@@ -152,6 +152,7 @@ public:
     core::LocalVariable cond;
     BasicBlock *thenb;
     BasicBlock *elseb;
+    core::Loc loc;
 };
 
 class Binding final {
