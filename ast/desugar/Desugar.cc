@@ -623,7 +623,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Nil *wl) {
-                unique_ptr<Expression> res =  mkIdent(what->loc, core::GlobalState::defn_nil());
+                unique_ptr<Expression> res = mkIdent(what->loc, core::GlobalState::defn_nil());
                 result.swap(res);
             },
             [&](parser::IVar *var) {
