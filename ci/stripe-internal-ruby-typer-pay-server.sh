@@ -26,4 +26,4 @@ TMP="$(mktemp)"
 # https://github.com/google/sanitizers/issues/764
 find $DIR -name *.rb | sort > $TMP
 
-ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 ./bazel-bin/main/ruby-typer --quiet --error-stats @$TMP
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1 ./bazel-bin/main/ruby-typer --quiet --error-stats --trace @$TMP
