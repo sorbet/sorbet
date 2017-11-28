@@ -28,6 +28,12 @@ class CallsWithObject
     end
 end
 
+class CallsWithObjectChild < CallsWithObject
+    def self.calls_with_object(&blk)
+        super(&blk) # error: Unsupported node type Splat
+    end
+end
+
 def foo(&blk)
     calls_with_object(&:meth)
     calls_with_object {|*args| :meth.to_proc.call(*args)} # error: MULTI
@@ -39,6 +45,7 @@ def foo(&blk)
     calls_with_object {|*args| HasToProc.new.to_proc.call(*args)} # error: Unsupported
     CallsWithObject.calls_with_object(&:meth)
     CallsWithObject&.calls_with_object(&:meth)
+    CallsWithObjectChild.calls_with_object(&:meth)
     calls_arg_with_object(HasMeth.new, &:meth)
     calls_arg_with_object(HasMeth.new) {|x| x.meth}
 end

@@ -180,7 +180,7 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     return make_pair(move(args), move(body));
 }
 
-unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::NodeVec &nodes) {
+unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::NodeVec nodes) {
     if (nodes.empty()) {
         return make_unique<StringLit>(loc, core::Names::empty());
     }
@@ -204,6 +204,45 @@ unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::
         res.reset(n.release());
     };
     return res;
+}
+
+unique_ptr<Expression> desugarBlockPass(core::Context ctx, core::Loc loc, unique_ptr<parser::Node> receiver,
+                                        core::NameRef method, parser::NodeVec args, unique_ptr<parser::Node> block) {
+    unique_ptr<parser::Node> newNode;
+    parser::NodeVec outerSendArgs;
+    // skip the last arg as it is the blockpass
+    for (int i = 0; i < args.size() - 1; i++) {
+        outerSendArgs.emplace_back(move(args[i]));
+    }
+    auto outerSend = make_unique<parser::Send>(loc, move(receiver), method, move(outerSendArgs));
+    parser::NodeVec argsVec;
+    core::NameRef argName = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp());
+
+    if (auto *symbol = parser::cast_node<parser::Symbol>(block.get())) {
+        // receiver.method(args, &:block) -> receiver.method(args) {|blockPassTemp| blockPassTemp.block}
+        argsVec.push_back(make_unique<parser::Arg>(loc, argName));
+        auto blockArgs = make_unique<parser::Args>(loc, move(argsVec));
+
+        parser::NodeVec noArgs;
+        auto innerSend =
+            make_unique<parser::Send>(loc, make_unique<parser::LVar>(loc, argName), move(symbol->val), move(noArgs));
+
+        newNode = make_unique<parser::Block>(loc, move(outerSend), move(blockArgs), move(innerSend));
+    } else {
+        // receiver.method(args, &block) -> receiver.method(args) {|*blockPassTemp| block.to_proc.call(*blockPassTemp)}
+        argsVec.push_back(make_unique<parser::Restarg>(loc, argName));
+        auto blockArgs = make_unique<parser::Args>(loc, move(argsVec));
+
+        parser::NodeVec noArgs;
+        auto toProc = make_unique<parser::Send>(loc, move(block), core::Names::to_proc(), move(noArgs));
+
+        parser::NodeVec splatArg;
+        splatArg.push_back(make_unique<parser::Splat>(loc, make_unique<parser::LVar>(loc, argName)));
+        auto call = make_unique<parser::Send>(loc, move(toProc), core::Names::call(), move(splatArg));
+
+        newNode = make_unique<parser::Block>(loc, move(outerSend), move(blockArgs), move(call));
+    }
+    return node2TreeImpl(ctx, newNode);
 }
 
 unique_ptr<MethodDef> buildMethod(core::Context ctx, core::Loc loc, core::NameRef name,
@@ -337,60 +376,9 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::Send *a) {
                 if (!a->args.empty()) {
-                    auto *blockpass = parser::cast_node<parser::BlockPass>(a->args.back().get());
-                    if (blockpass) {
-                        auto loc = blockpass->loc;
-                        unique_ptr<parser::Node> block;
-                        if (auto *symbol = parser::cast_node<parser::Symbol>(blockpass->block.get())) {
-                            // foo(&:sym) -> foo {|blockPassTemp| blockPassTemp.sym}
-                            parser::NodeVec outerSendArgs;
-                            // skip the last arg
-                            for (int i = 0; i < a->args.size() - 1; i++) {
-                                outerSendArgs.emplace_back(move(a->args[i]));
-                            }
-                            auto outerSend =
-                                make_unique<parser::Send>(a->loc, move(a->receiver), a->method, move(outerSendArgs));
-
-                            parser::NodeVec argsVec;
-                            core::NameRef argName =
-                                ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp());
-                            argsVec.push_back(make_unique<parser::Arg>(loc, argName));
-                            auto blockArgs = make_unique<parser::Args>(loc, move(argsVec));
-
-                            parser::NodeVec noArgs;
-                            auto innerSend = make_unique<parser::Send>(loc, make_unique<parser::LVar>(loc, argName),
-                                                                       move(symbol->val), move(noArgs));
-
-                            block = make_unique<parser::Block>(loc, move(outerSend), move(blockArgs), move(innerSend));
-                        } else {
-                            // TODO: foo(a,&b) -> foo {|*blockPassTemp| b.to_proc.call(*blockPassTemp)}
-                            parser::NodeVec outerSendArgs;
-                            // skip the last arg
-                            for (int i = 0; i < a->args.size() - 1; i++) {
-                                outerSendArgs.emplace_back(move(a->args[i]));
-                            }
-                            auto outerSend =
-                                make_unique<parser::Send>(a->loc, move(a->receiver), a->method, move(outerSendArgs));
-
-                            parser::NodeVec argsVec;
-                            core::NameRef argName =
-                                ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp());
-                            argsVec.push_back(make_unique<parser::Restarg>(loc, argName));
-                            auto blockArgs = make_unique<parser::Args>(loc, move(argsVec));
-
-                            parser::NodeVec noArgs;
-                            auto toProc = make_unique<parser::Send>(loc, move(blockpass->block), core::Names::to_proc(),
-                                                                    move(noArgs));
-
-                            parser::NodeVec splatArg;
-                            splatArg.push_back(
-                                make_unique<parser::Splat>(loc, make_unique<parser::LVar>(loc, argName)));
-                            auto call =
-                                make_unique<parser::Send>(loc, move(toProc), core::Names::call(), move(splatArg));
-
-                            block = make_unique<parser::Block>(loc, move(outerSend), move(blockArgs), move(call));
-                        }
-                        auto send = node2TreeImpl(ctx, block);
+                    if (auto *blockpass = parser::cast_node<parser::BlockPass>(a->args.back().get())) {
+                        auto send = desugarBlockPass(ctx, blockpass->loc, move(a->receiver), a->method, move(a->args),
+                                                     move(blockpass->block));
                         result.swap(send);
                         return;
                     }
@@ -439,7 +427,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(self);
             },
             [&](parser::DString *a) {
-                unique_ptr<Expression> res = desugarDString(ctx, a->loc, a->nodes);
+                unique_ptr<Expression> res = desugarDString(ctx, a->loc, move(a->nodes));
                 result.swap(res);
             },
             [&](parser::DSymbol *a) {
@@ -729,14 +717,24 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Super *super) {
+                auto method = core::Names::super();
+                if (!super->args.empty()) {
+                    if (auto *blockpass = parser::cast_node<parser::BlockPass>(super->args.back().get())) {
+                        auto send = desugarBlockPass(ctx, blockpass->loc, make_unique<parser::Self>(blockpass->loc),
+                                                     method, move(super->args), move(blockpass->block));
+                        result.swap(send);
+                        return;
+                    }
+                }
+
                 Send::ARGS_store args;
                 args.reserve(super->args.size());
                 for (auto &stat : super->args) {
                     args.emplace_back(node2TreeImpl(ctx, stat));
                 };
 
-                unique_ptr<Expression> res = make_unique<Send>(
-                    what->loc, make_unique<Self>(what->loc, ctx.state.defn_todo()), core::Names::super(), args);
+                unique_ptr<Expression> res =
+                    make_unique<Send>(what->loc, make_unique<Self>(what->loc, ctx.state.defn_todo()), method, args);
                 result.swap(res);
             },
             [&](parser::ZSuper *zuper) {
@@ -874,7 +872,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::Regexp *regexpNode) {
                 unique_ptr<Expression> regexp = mkIdent(what->loc, core::GlobalState::defn_Regexp());
-                auto regex = desugarDString(ctx, what->loc, regexpNode->regex);
+                auto regex = desugarDString(ctx, what->loc, move(regexpNode->regex));
                 auto opts = node2TreeImpl(ctx, regexpNode->opts);
                 auto send = mkSend2(what->loc, regexp, core::Names::new_(), regex, opts);
                 result.swap(send);
