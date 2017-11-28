@@ -196,7 +196,8 @@ subgraph "cluster_::<constant:Object>#baz8" {
     "bb::<constant:Object>#baz8_0" [shape = invhouse];
     "bb::<constant:Object>#baz8_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz8_0" [label = "()
+    "bb::<constant:Object>#baz8_0" [label = "(<constant:nil>$5)
+<constant:nil>$5 = alias <constant:nil> : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#baz8_0" -> "bb::<constant:Object>#baz8_2";
@@ -204,7 +205,7 @@ subgraph "cluster_::<constant:Object>#baz8" {
 <unconditional>"];
 
     "bb::<constant:Object>#baz8_1" -> "bb::<constant:Object>#baz8_1";
-    "bb::<constant:Object>#baz8_2" [label = "()
+    "bb::<constant:Object>#baz8_2" [label = "(<constant:nil>$5)
 outerLoops: 1
 whileTemp$3 = true : TrueClass(true)
 whileTemp$3"];
@@ -212,15 +213,14 @@ whileTemp$3"];
     "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_3";
     "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_4";
 
-    "bb::<constant:Object>#baz8_3" [label = "()
+    "bb::<constant:Object>#baz8_3" [label = "(<constant:nil>$5)
 outerLoops: 1
 b = 1 : Integer(1)
 <unconditional>"];
 
     "bb::<constant:Object>#baz8_3" -> "bb::<constant:Object>#baz8_2";
-    "bb::<constant:Object>#baz8_4" [label = "()
-returnMethodTemp$1 = nil : NilClass
-returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
+    "bb::<constant:Object>#baz8_4" [label = "(<constant:nil>$5)
+returnMethodTemp$6 = return <constant:nil>$5 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#baz8_4" -> "bb::<constant:Object>#baz8_1";

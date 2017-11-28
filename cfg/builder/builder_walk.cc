@@ -81,8 +81,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 unconditionalJump(body, headerBlock, cctx.inWhat);
 
                 continueBlock->exprs.emplace_back(
-                        cctx.target, a->loc,
-                        make_unique<Ident>(global2Local(cctx.ctx, core::GlobalState::defn_nil(), cctx.inWhat, cctx.aliases)));
+                    cctx.target, a->loc,
+                    make_unique<Ident>(
+                        global2Local(cctx.ctx, core::GlobalState::defn_nil(), cctx.inWhat, cctx.aliases)));
                 ret = continueBlock;
             },
             [&](ast::Return *a) {

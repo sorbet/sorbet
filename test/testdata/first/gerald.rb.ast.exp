@@ -197,7 +197,7 @@ begin
               begin
                 lines = part.split("
 ")
-                a_name = b_name = nil
+                a_name = b_name = ::<constant:nil>
                 added_lines = []
                 removed_lines = []
                 lines.each() do |line|

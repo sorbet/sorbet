@@ -5,7 +5,8 @@ subgraph "cluster_::<constant:HasLoops>#variable_only_inside_loop" {
     "bb::<constant:HasLoops>#variable_only_inside_loop_0" [shape = invhouse];
     "bb::<constant:HasLoops>#variable_only_inside_loop_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#variable_only_inside_loop_0" [label = "()
+    "bb::<constant:HasLoops>#variable_only_inside_loop_0" [label = "(<constant:nil>$5)
+<constant:nil>$5 = alias <constant:nil> : NilClass
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_0" -> "bb::<constant:HasLoops>#variable_only_inside_loop_2";
@@ -13,7 +14,7 @@ subgraph "cluster_::<constant:HasLoops>#variable_only_inside_loop" {
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_1" -> "bb::<constant:HasLoops>#variable_only_inside_loop_1";
-    "bb::<constant:HasLoops>#variable_only_inside_loop_2" [label = "()
+    "bb::<constant:HasLoops>#variable_only_inside_loop_2" [label = "(<constant:nil>$5)
 outerLoops: 1
 whileTemp$3 = true : TrueClass(true)
 whileTemp$3"];
@@ -21,15 +22,14 @@ whileTemp$3"];
     "bb::<constant:HasLoops>#variable_only_inside_loop_2" -> "bb::<constant:HasLoops>#variable_only_inside_loop_3";
     "bb::<constant:HasLoops>#variable_only_inside_loop_2" -> "bb::<constant:HasLoops>#variable_only_inside_loop_4";
 
-    "bb::<constant:HasLoops>#variable_only_inside_loop_3" [label = "()
+    "bb::<constant:HasLoops>#variable_only_inside_loop_3" [label = "(<constant:nil>$5)
 outerLoops: 1
 a = 1 : Integer(1)
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_3" -> "bb::<constant:HasLoops>#variable_only_inside_loop_2";
-    "bb::<constant:HasLoops>#variable_only_inside_loop_4" [label = "()
-returnMethodTemp$1 = nil : NilClass
-returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
+    "bb::<constant:HasLoops>#variable_only_inside_loop_4" [label = "(<constant:nil>$5)
+returnMethodTemp$6 = return <constant:nil>$5 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_4" -> "bb::<constant:HasLoops>#variable_only_inside_loop_1";
@@ -41,7 +41,8 @@ subgraph "cluster_::<constant:HasLoops>#incorrect_assignment" {
     "bb::<constant:HasLoops>#incorrect_assignment_0" [shape = invhouse];
     "bb::<constant:HasLoops>#incorrect_assignment_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#incorrect_assignment_0" [label = "(a)
+    "bb::<constant:HasLoops>#incorrect_assignment_0" [label = "(a, <constant:nil>$6)
+<constant:nil>$6 = alias <constant:nil> : NilClass
 a = s : String(\"s\")
 <unconditional>"];
 
@@ -50,7 +51,7 @@ a = s : String(\"s\")
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_1" -> "bb::<constant:HasLoops>#incorrect_assignment_1";
-    "bb::<constant:HasLoops>#incorrect_assignment_2" [label = "(a)
+    "bb::<constant:HasLoops>#incorrect_assignment_2" [label = "(a, <constant:nil>$6)
 outerLoops: 1
 whileTemp$4 = false : FalseClass(false)
 whileTemp$4"];
@@ -58,15 +59,14 @@ whileTemp$4"];
     "bb::<constant:HasLoops>#incorrect_assignment_2" -> "bb::<constant:HasLoops>#incorrect_assignment_3";
     "bb::<constant:HasLoops>#incorrect_assignment_2" -> "bb::<constant:HasLoops>#incorrect_assignment_4";
 
-    "bb::<constant:HasLoops>#incorrect_assignment_3" [label = "(a)
+    "bb::<constant:HasLoops>#incorrect_assignment_3" [label = "(a, <constant:nil>$6)
 outerLoops: 1
 a = 1 : untyped
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_3" -> "bb::<constant:HasLoops>#incorrect_assignment_2";
-    "bb::<constant:HasLoops>#incorrect_assignment_4" [label = "()
-returnMethodTemp$1 = nil : NilClass
-returnMethodTemp$6 = return returnMethodTemp$1 : <bottom>
+    "bb::<constant:HasLoops>#incorrect_assignment_4" [label = "(<constant:nil>$6)
+returnMethodTemp$7 = return <constant:nil>$6 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_4" -> "bb::<constant:HasLoops>#incorrect_assignment_1";
@@ -78,7 +78,8 @@ subgraph "cluster_::<constant:HasLoops>#correct_assignment" {
     "bb::<constant:HasLoops>#correct_assignment_0" [shape = invhouse];
     "bb::<constant:HasLoops>#correct_assignment_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#correct_assignment_0" [label = "(a)
+    "bb::<constant:HasLoops>#correct_assignment_0" [label = "(a, <constant:nil>$6)
+<constant:nil>$6 = alias <constant:nil> : NilClass
 a = s : String(\"s\")
 <unconditional>"];
 
@@ -87,7 +88,7 @@ a = s : String(\"s\")
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_1" -> "bb::<constant:HasLoops>#correct_assignment_1";
-    "bb::<constant:HasLoops>#correct_assignment_2" [label = "(a)
+    "bb::<constant:HasLoops>#correct_assignment_2" [label = "(a, <constant:nil>$6)
 outerLoops: 1
 whileTemp$4 = false : FalseClass(false)
 whileTemp$4"];
@@ -95,15 +96,14 @@ whileTemp$4"];
     "bb::<constant:HasLoops>#correct_assignment_2" -> "bb::<constant:HasLoops>#correct_assignment_3";
     "bb::<constant:HasLoops>#correct_assignment_2" -> "bb::<constant:HasLoops>#correct_assignment_4";
 
-    "bb::<constant:HasLoops>#correct_assignment_3" [label = "(a)
+    "bb::<constant:HasLoops>#correct_assignment_3" [label = "(a, <constant:nil>$6)
 outerLoops: 1
 a = a : String(\"a\")
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_3" -> "bb::<constant:HasLoops>#correct_assignment_2";
-    "bb::<constant:HasLoops>#correct_assignment_4" [label = "()
-returnMethodTemp$1 = nil : NilClass
-returnMethodTemp$6 = return returnMethodTemp$1 : <bottom>
+    "bb::<constant:HasLoops>#correct_assignment_4" [label = "(<constant:nil>$6)
+returnMethodTemp$7 = return <constant:nil>$6 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_4" -> "bb::<constant:HasLoops>#correct_assignment_1";

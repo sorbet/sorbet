@@ -195,7 +195,7 @@ begin
               begin
                 <block-nested: lines> = <block-nested: part>.split("
 ")
-                <block-nested: a_name> = <block-nested: b_name> = nil
+                <block-nested: a_name> = <block-nested: b_name> = ::<constant:nil>
                 <block-nested: added_lines> = []
                 <block-nested: removed_lines> = []
                 <block-nested: lines>.each() do |<block-nested: line>|

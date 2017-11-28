@@ -3,7 +3,7 @@ def test_csend<<constant:<todo sym>>>()
     begin
       assignTemp$10000 = self(<constant:<todo sym>>).foo()
       if assignTemp$10000.nil?()
-        nil
+        ::<constant:nil>
       else
         assignTemp$10000.bar()
       end
@@ -11,7 +11,7 @@ def test_csend<<constant:<todo sym>>>()
     begin
       assignTemp$10001 = self(<constant:<todo sym>>).foo()
       if assignTemp$10001.nil?()
-        nil
+        ::<constant:nil>
       else
         assignTemp$10001.bar() do |x|
           x
