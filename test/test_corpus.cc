@@ -94,7 +94,7 @@ public:
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "infer",
+    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg",
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
