@@ -440,7 +440,7 @@ void Resolver::finalize(core::GlobalState &gs) {
             continue;
         }
         if (info.superClass == core::GlobalState::defn_todo()) {
-            info.superClass = core::GlobalState::defn_object();
+            info.superClass = core::GlobalState::defn_Object();
         }
     }
 }

@@ -128,7 +128,7 @@ public:
         scopeStack.pop_back();
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         if (klass->kind == ast::Class && !klass->symbol.info(ctx).superClass.exists() &&
-            klass->symbol != core::GlobalState::defn_Basic_Object()) {
+            klass->symbol != core::GlobalState::defn_BasicObject()) {
             klass->symbol.info(ctx).superClass = core::GlobalState::defn_todo();
         }
 
@@ -192,7 +192,7 @@ public:
         core::SymbolRef owner = ctx.enclosingClass();
         if (owner == core::GlobalState::noSymbol()) {
             // Root methods end up going on object
-            owner = core::GlobalState::defn_object();
+            owner = core::GlobalState::defn_Object();
         }
 
         if (method->isSelf) {
@@ -218,7 +218,7 @@ public:
         core::SymbolRef owner = ctx.owner;
         if (owner == core::GlobalState::noSymbol()) {
             // Root methods end up going on object
-            owner = core::GlobalState::defn_object();
+            owner = core::GlobalState::defn_Object();
         }
         blk->symbol = ctx.state.enterMethodSymbol(
             blk->loc, owner, ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp()));

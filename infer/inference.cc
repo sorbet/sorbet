@@ -71,7 +71,7 @@ public:
         }
 
         core::SymbolRef newSymbol = classType->symbol.info(ctx).findMemberTransitive(ctx, core::Names::new_());
-        if (newSymbol.exists() && newSymbol.info(ctx).owner != core::GlobalState::defn_Basic_Object()) {
+        if (newSymbol.exists() && newSymbol.info(ctx).owner != core::GlobalState::defn_BasicObject()) {
             // custom `new` was defined
             return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
         }

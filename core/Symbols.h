@@ -130,7 +130,7 @@ public:
      *   of our magic synthetic classes. During parsing+naming, `superClass ==
      *   defn_todo()` iff every definition we've seen for this class has had an
      *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
-     *   Resolver::finalize(), these will be rewritten to `defn_object()`.
+     *   Resolver::finalize(), these will be rewritten to `defn_Object()`.
      */
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
