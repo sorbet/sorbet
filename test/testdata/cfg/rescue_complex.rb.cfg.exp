@@ -129,7 +129,7 @@ rescueTemp$3"];
 returnMethodTemp$4 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#parse_bug_rescue_empty_else_2" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_1" [style="bold"];
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_4" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#parse_ruby_bug_12686" {

@@ -211,34 +211,34 @@ outerLoops: 1
 whileTemp$6 = true : TrueClass(true)
 whileTemp$6"];
 
-    "bb::<constant:Examples>#variables_and_loop_4" -> "bb::<constant:Examples>#variables_and_loop_6" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_4" -> "bb::<constant:Examples>#variables_and_loop_7" [style="tapered"];
+    "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_6" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_7" [style="tapered"];
 
     "bb::<constant:Examples>#variables_and_loop_6" [label = "(b, <constant:nil>$9)
 outerLoops: 1
 ifTemp$8 = false : FalseClass(false)
 ifTemp$8"];
 
-    "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_8" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_9" [style="tapered"];
+    "bb::<constant:Examples>#variables_and_loop_6" -> "bb::<constant:Examples>#variables_and_loop_8" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_6" -> "bb::<constant:Examples>#variables_and_loop_9" [style="tapered"];
 
     "bb::<constant:Examples>#variables_and_loop_7" [label = "(b, <constant:nil>$9)
 returnMethodTemp$10 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Examples>#variables_and_loop_6" -> "bb::<constant:Examples>#variables_and_loop_1" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_7" -> "bb::<constant:Examples>#variables_and_loop_1" [style="bold"];
     "bb::<constant:Examples>#variables_and_loop_8" [label = "(b, <constant:nil>$9)
 outerLoops: 1
 b = 1 : untyped
 <unconditional>"];
 
-    "bb::<constant:Examples>#variables_and_loop_7" -> "bb::<constant:Examples>#variables_and_loop_5" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_8" -> "bb::<constant:Examples>#variables_and_loop_5" [style="bold"];
     "bb::<constant:Examples>#variables_and_loop_9" [label = "(b, <constant:nil>$9)
 outerLoops: 1
 b = 2 : untyped
 <unconditional>"];
 
-    "bb::<constant:Examples>#variables_and_loop_8" -> "bb::<constant:Examples>#variables_and_loop_5" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_9" -> "bb::<constant:Examples>#variables_and_loop_5" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Examples>#variables_loop_if" {

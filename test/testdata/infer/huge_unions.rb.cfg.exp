@@ -304,7 +304,7 @@ s = r : <class:C1> | <class:C2> | <class:C3> | <class:C4> | <class:C5> | <class:
 returnMethodTemp$1 = return s : <bottom>
 <unconditional>"];
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_42" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [style="bold"];
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_61" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [style="bold"];
 }
 
 }

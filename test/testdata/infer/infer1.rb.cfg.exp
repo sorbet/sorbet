@@ -182,7 +182,7 @@ b = statTemp$5.getbyte(statTemp$6) : Integer | NilClass
 returnMethodTemp$7 = return b : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz7_3" -> "bb::<constant:Object>#baz7_1" [style="bold"];
+    "bb::<constant:Object>#baz7_4" -> "bb::<constant:Object>#baz7_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#baz8" {
