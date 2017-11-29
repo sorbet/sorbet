@@ -375,6 +375,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 args.reserve(a->args.size());
                 for (auto &stat : a->args) {
                     if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
+                        Error::check(block == nullptr);
                         block = move(bp->block);
                     } else {
                         args.emplace_back(node2TreeImpl(ctx, stat));
@@ -710,6 +711,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 args.reserve(super->args.size());
                 for (auto &stat : super->args) {
                     if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
+                        Error::check(block == nullptr);
                         block = move(bp->block);
                     } else {
                         args.emplace_back(node2TreeImpl(ctx, stat));
