@@ -20,6 +20,10 @@ class A
   def noreturn
   end
 
+  standard_method(returns: T1)
+  def no_params
+  end
+
   standard_method({returns: T1}, returns: T2, checked: false)
   def test_kwargs(returns)
   end
