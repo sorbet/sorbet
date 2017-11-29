@@ -1,0 +1,34 @@
+digraph "uaf1.rb"{
+subgraph "cluster_::<constant:A>#initialize" {
+    label = "::<constant:A>#initialize";
+    color = blue;
+    "bb::<constant:A>#initialize_0" [shape = invhouse];
+    "bb::<constant:A>#initialize_1" [shape = parallelogram];
+
+    "bb::<constant:A>#initialize_0" [label = "(statTemp$3)
+statTemp$4 = self : A
+statTemp$3 = statTemp$4.spec_list() : untyped
+<unconditional>"];
+
+    "bb::<constant:A>#initialize_0" -> "bb::<constant:A>#initialize_2" [style="bold"];
+    "bb::<constant:A>#initialize_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:A>#initialize_1" -> "bb::<constant:A>#initialize_1" [style="bold"];
+    "bb::<constant:A>#initialize_2" [label = "(statTemp$3)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:A>#initialize_2" -> "bb::<constant:A>#initialize_2" [style="bold"];
+    "bb::<constant:A>#initialize_2" -> "bb::<constant:A>#initialize_3" [style="tapered"];
+
+    "bb::<constant:A>#initialize_3" [label = "(statTemp$3)
+returnMethodTemp$1 = statTemp$3.map() : untyped
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:A>#initialize_3" -> "bb::<constant:A>#initialize_1" [style="bold"];
+}
+
+}
+
