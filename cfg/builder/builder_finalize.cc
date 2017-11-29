@@ -19,7 +19,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
             auto *const thenb = bb->bexit.thenb;
             auto *const elseb = bb->bexit.elseb;
             if (bb != cfg.deadBlock() && bb != cfg.entry()) {
-                if (bb->backEdges.empty()) {
+                if (bb->backEdges.empty()) { // remove non reachable
                     thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                            thenb->backEdges.end());
                     if (elseb != thenb) {
@@ -38,7 +38,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     continue;
                 }
             }
-            if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) {
+            if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed togather
                 if (thenb->backEdges.size() == 1) {
                     bb->exprs.insert(bb->exprs.end(), std::make_move_iterator(thenb->exprs.begin()),
                                      std::make_move_iterator(thenb->exprs.begin()));
@@ -52,6 +52,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     sanityCheck(ctx, cfg);
                     continue;
                 } else if (thenb->bexit.cond.name != core::Names::blockCall() && thenb->exprs.empty()) {
+                    // Don't remove block headers
                     bb->bexit = thenb->bexit;
                     thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                            thenb->backEdges.end());
@@ -66,6 +67,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
             }
             if (thenb != cfg.deadBlock() && thenb->exprs.size() == 0 && thenb->bexit.thenb == thenb->bexit.elseb &&
                 bb->bexit.thenb != thenb->bexit.thenb) {
+                // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
                 thenb->bexit.thenb->backEdges.push_back(bb);
                 thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
@@ -75,6 +77,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
             }
             if (elseb != cfg.deadBlock() && elseb->exprs.size() == 0 && elseb->bexit.thenb == elseb->bexit.elseb &&
                 bb->bexit.elseb != elseb->bexit.elseb) {
+                // shortcut else
                 sanityCheck(ctx, cfg);
                 bb->bexit.elseb = elseb->bexit.elseb;
                 bb->bexit.elseb->backEdges.push_back(bb);
