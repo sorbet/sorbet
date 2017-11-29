@@ -1,0 +1,5 @@
+class <constant:A> ()
+  class <constant:C1> < ::<constant:Object> ()
+  class <singleton class:<constant:C1>> (<constant:Class>)
+  static-field <constant:C2> -> <class:C1>
+
