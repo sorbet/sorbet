@@ -162,14 +162,14 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     MethodDef::ARGS_store args;
     args.emplace_back(move(arg));
 
-    unique_ptr<Expression> methodDef(new MethodDef(loc, methodSym, name, args, move(rhs), false));
+    unique_ptr<Expression> methodDef(new MethodDef(loc, methodSym, name, move(args), move(rhs), false));
     auto emptyTree = unique_ptr<Expression>(new EmptyTree(loc));
     auto cnst = unique_ptr<Expression>(new ConstantLit(loc, move(emptyTree), name));
 
     ClassDef::RHS_store classrhs;
     classrhs.emplace_back(move(methodDef));
-    ClassDef::ANCESTORS_store parents;
-    unique_ptr<Expression> tree(new ClassDef(loc, classSym, move(cnst), parents, classrhs, ClassDefKind::Class));
+    unique_ptr<Expression> tree(
+        new ClassDef(loc, classSym, move(cnst), ClassDef::ANCESTORS_store(), move(classrhs), ClassDefKind::Class));
     Counter c;
 
     auto r = TreeMap<Counter>::apply(ctx, c, move(tree));

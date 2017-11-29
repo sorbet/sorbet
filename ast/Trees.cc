@@ -48,11 +48,11 @@ Expression::Expression(core::Loc loc) : loc(loc) {}
 
 Reference::Reference(core::Loc loc) : Expression(loc) {}
 
-ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store &ancestors,
-                   RHS_store &rhs, ClassDefKind kind)
+ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store ancestors,
+                   RHS_store rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {}
 
-MethodDef::MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store &args,
+MethodDef::MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
                      unique_ptr<Expression> rhs, bool isSelf)
     : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {}
 
@@ -77,11 +77,11 @@ Return::Return(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), ex
 
 Yield::Yield(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {}
 
-RescueCase::RescueCase(core::Loc loc, EXCEPTION_store &exceptions, unique_ptr<Expression> var,
+RescueCase::RescueCase(core::Loc loc, EXCEPTION_store exceptions, unique_ptr<Expression> var,
                        unique_ptr<Expression> body)
     : Expression(loc), exceptions(move(exceptions)), var(move(var)), body(move(body)) {}
 
-Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store &rescueCases, unique_ptr<Expression> else_)
+Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store rescueCases, unique_ptr<Expression> else_)
     : Expression(loc), body(move(body)), rescueCases(move(rescueCases)), else_(move(else_)) {}
 
 Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
@@ -96,7 +96,7 @@ UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name
 Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {}
 
-Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store &args,
+Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store args,
            unique_ptr<Block> block)
     : Expression(loc), recv(move(recv)), fun(fun), args(move(args)), block(move(block)) {}
 
@@ -131,19 +131,19 @@ HashSplat::HashSplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc
 
 Self::Self(core::Loc loc, core::SymbolRef claz) : Expression(loc), claz(claz) {}
 
-Block::Block(core::Loc loc, MethodDef::ARGS_store &args, unique_ptr<Expression> body)
+Block::Block(core::Loc loc, MethodDef::ARGS_store args, unique_ptr<Expression> body)
     : Expression(loc), args(move(args)), body(move(body)){};
 
 NotSupported::NotSupported(core::Loc loc, const string &why) : Expression(loc), why(why) {}
 
 SymbolLit::SymbolLit(core::Loc loc, core::NameRef name) : Expression(loc), name(name) {}
 
-Hash::Hash(core::Loc loc, ENTRY_store &keys, ENTRY_store &values)
+Hash::Hash(core::Loc loc, ENTRY_store keys, ENTRY_store values)
     : Expression(loc), keys(move(keys)), values(move(values)) {}
 
-Array::Array(core::Loc loc, ENTRY_store &elems) : Expression(loc), elems(move(elems)) {}
+Array::Array(core::Loc loc, ENTRY_store elems) : Expression(loc), elems(move(elems)) {}
 
-InsSeq::InsSeq(core::Loc loc, STATS_store &stats, unique_ptr<Expression> expr)
+InsSeq::InsSeq(core::Loc loc, STATS_store stats, unique_ptr<Expression> expr)
     : Expression(loc), stats(move(stats)), expr(move(expr)) {}
 
 EmptyTree::EmptyTree(core::Loc loc) : Expression(loc) {}
