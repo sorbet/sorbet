@@ -300,6 +300,7 @@ int realmain(int argc, char **argv) {
     // Developer options
     options.add_options("dev")("p,print", "Print: " + print_options, cxxopts::value<vector<string>>(prints), "type");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
+    options.add_options("dev")("allow-untyped", "Allow calls to untyped code (both inside the files and out)");
     options.add_options("dev")("no-typer", "Do not type the CFG");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
     options.add_options("dev")("trace", "Trace phases");
@@ -350,6 +351,11 @@ int realmain(int argc, char **argv) {
     }
 
     ruby_typer::core::GlobalState gs = createInitialGlobalState(options);
+
+    if (options.count("allow-untyped") != 0) {
+        gs.errors.allowUntyped = true;
+    }
+
     stats st;
     clock_t begin = clock();
     vector<ruby_typer::core::FileRef> inputFiles;
