@@ -198,7 +198,7 @@ unique_ptr<Block> node2Proc(core::Context ctx, unique_ptr<parser::Node> node) {
         args.emplace_back(mkLocal(loc, temp));
         unique_ptr<Expression> recv = mkLocal(loc, temp);
         unique_ptr<Expression> body = mkSend0(loc, move(recv), sym->name);
-        return make_unique<Block>(expr->loc, move(args), move(body));
+        return make_unique<Block>(loc, move(args), move(body));
     }
 
     // &foo => {|*args| foo.to_proc.call(*args) }

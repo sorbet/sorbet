@@ -1,5 +1,6 @@
 class A
   A.declare_variables
+  declare_variables        # error: Wrong number of arguments
 
   declare_variables({}) do # error: Malformed `declare_variables'
   end
