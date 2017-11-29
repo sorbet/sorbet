@@ -105,6 +105,7 @@ public:
     }
 
     bool keepErrorsInMemory = false;
+    bool allowUntyped = false;
     std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> getAndEmptyErrors();
 
     std::vector<std::pair<int, int>> errorHistogram;

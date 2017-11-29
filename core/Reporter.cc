@@ -8,7 +8,22 @@ namespace core {
 using namespace std;
 
 void Reporter::_error(unique_ptr<BasicError> error) {
-    bool isCriticalError = (error->what == ErrorClass::Internal);
+    bool isCriticalError = false;
+    switch (error->what) {
+        case ErrorClass::Internal:
+            isCriticalError = true;
+            break;
+        case ErrorClass::StubConstant:
+        case ErrorClass::UndeclaredVariable:
+        case ErrorClass::UnknownMethod:
+            if (allowUntyped) {
+                return;
+            }
+        default:
+            // something stupid to not be empty
+            isCriticalError = false;
+    }
+
     if (isCriticalError) {
         hadCriticalError_ = true;
     }
