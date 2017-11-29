@@ -1,11 +1,7 @@
 begin
   module <emptyTree>::<constant:A><<constant:A>> < ()
-    ::<constant:A>::<constant:B>#<constant:C> = 1
-
     module <emptyTree>::<constant:B><<constant:B>> < ()
       ::<constant:A>::<constant:B>#<constant:C>
-
-      ::<constant:A>::<constant:B>#<constant:D> = 1
 
     end
 

@@ -66,6 +66,13 @@ NameDef names[] = {
     {"declareVariables", "declare_variables"},
     // end standard_method keywords
 
+    // Ruby DSL methods which we understand
+    {"attr"},
+    {"attrAccessor", "attr_accessor"},
+    {"attrWriter", "attr_writer"},
+    {"attrReader", "attr_reader"},
+    // end DSL methods
+
     // The next two names are used as keys in SymbolInfo::members to store
     // pointers up and down the singleton-class hierarchy. If A's singleton
     // class is B, then A will have a `singletonClass` entry in its members
@@ -95,6 +102,10 @@ NameDef names[] = {
     {"emptyHash", "{}"},
     {"buildHash", "<build-hash>"},
     {"arg0"},
+
+    // Synthetic method created on a singleton class to hold initialization code
+    // within the body of a `class` or `module` declaration.
+    {"staticInit", "<static-init>"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

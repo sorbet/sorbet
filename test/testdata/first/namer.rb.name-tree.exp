@@ -7,38 +7,24 @@ begin
       <emptyTree>
 
     class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<constant:<todo sym>>)
-      <emptyTree>
-
     end
 
     module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()
-      <emptyTree>
-
     end
 
   end
   module <emptyTree>::<constant:ANamespace><<constant:ANamespace>> < ()
     class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<constant:<todo sym>>)
-      <emptyTree>
-
     end
 
   end
   class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < (::<constant:<todo sym>>)
-    <emptyTree>
-
   end
   class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
-    <emptyTree>
-
   end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
-    <emptyTree>
-
   end
   module <emptyTree>::<constant:OtherMixin><<constant:OtherMixin>> < ()
-    <emptyTree>
-
   end
   class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
     self(<singleton class:<constant:Child>>).include(::<constant:Mixin>, ::<constant:Mixin>)

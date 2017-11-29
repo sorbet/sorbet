@@ -172,8 +172,8 @@ private:
         return result;
     }
 
-    void fillInInfoFromStandardMethod(core::Context ctx, core::Symbol &methoInfo,
-                                      unique_ptr<ast::Send> &lastStandardMethod, int argsSize) {
+    void fillInInfoFromStandardMethod(core::Context ctx, core::Symbol &methoInfo, ast::Send *lastStandardMethod,
+                                      int argsSize) {
         if (ast::cast_tree<ast::Self>(lastStandardMethod->recv.get()) == nullptr ||
             lastStandardMethod->block != nullptr) {
             ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
@@ -245,7 +245,7 @@ private:
     }
 
     void processDeclareVariables(core::Context ctx, ast::Send *send) {
-        if (ast::cast_tree<ast::Self>(send->recv.get()) == nullptr || send->block != nullptr) {
+        if (send->block != nullptr) {
             ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
                                    "Malformed `declare_variables'");
             return;
@@ -305,6 +305,120 @@ private:
         }
     }
 
+    void defineAttr(core::Context ctx, ast::Send *send, bool r, bool w) {
+        for (auto &arg : send->args) {
+            core::NameRef name(0);
+            if (auto *sym = ast::cast_tree<ast::SymbolLit>(arg.get())) {
+                name = sym->name;
+            } else if (auto *str = ast::cast_tree<ast::StringLit>(arg.get())) {
+                name = str->value;
+            } else {
+                ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidAttr,
+                                       "{} argument must be a string or symbol literal", send->fun.toString(ctx));
+                continue;
+            }
+
+            core::NameRef varName = ctx.state.enterNameUTF8("@" + name.toString(ctx));
+            core::SymbolRef sym = ctx.owner.info(ctx).findMemberTransitive(ctx, varName);
+            if (!sym.exists()) {
+                ctx.state.errors.error(arg->loc, core::ErrorClass::UndeclaredVariable,
+                                       "Accessor for undeclared variable `{}'", varName.toString(ctx));
+                sym = ctx.state.enterFieldSymbol(arg->loc, ctx.owner, varName);
+            }
+
+            if (r) {
+                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name);
+                meth.info(ctx).resultType = sym.info(ctx).resultType;
+            }
+            if (w) {
+                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name.addEq(ctx));
+                core::SymbolRef arg0 = ctx.state.enterMethodArgumentSymbol(arg->loc, meth, core::Names::arg0());
+
+                auto ty = sym.info(ctx).resultType;
+                if (ty == nullptr) {
+                    ty = core::Types::dynamic();
+                }
+                arg0.info(ctx).resultType = ty;
+                meth.info(ctx).arguments().push_back(arg0);
+                meth.info(ctx).resultType = ty;
+            }
+        }
+    }
+
+    void processClassBody(core::Context ctx, ast::ClassDef *klass) {
+        unique_ptr<ast::Expression> lastStandardMethod;
+
+        for (auto &stat : klass->rhs) {
+            typecase(stat.get(),
+
+                     [&](ast::Send *send) {
+                         // Take ownership of the statement inside this block
+                         unique_ptr<ast::Expression> mine;
+                         swap(mine, stat);
+
+                         if (ast::cast_tree<ast::Self>(send->recv.get()) == nullptr) {
+                             swap(mine, stat);
+                             return;
+                         }
+                         switch (send->fun._id) {
+                             case core::Names::standardMethod()._id:
+                                 swap(lastStandardMethod, mine);
+                                 break;
+                             case core::Names::declareVariables()._id:
+                                 processDeclareVariables(ctx.withOwner(klass->symbol), send);
+                                 break;
+                             case core::Names::attr()._id:
+                             case core::Names::attrReader()._id:
+                                 defineAttr(ctx.withOwner(klass->symbol), send, true, false);
+
+                                 break;
+                             case core::Names::attrWriter()._id:
+                                 defineAttr(ctx.withOwner(klass->symbol), send, false, true);
+                                 break;
+
+                             case core::Names::attrAccessor()._id:
+                                 defineAttr(ctx.withOwner(klass->symbol), send, true, true);
+                                 break;
+                             default:
+                                 swap(mine, stat);
+                                 return;
+                         }
+                         stat.reset(nullptr);
+                     },
+
+                     [&](ast::MethodDef *mdef) {
+                         if (lastStandardMethod) {
+                             core::Symbol &methoInfo = mdef->symbol.info(ctx);
+                             fillInInfoFromStandardMethod(ctx, methoInfo,
+                                                          ast::cast_tree<ast::Send>(lastStandardMethod.get()),
+                                                          mdef->args.size());
+                             lastStandardMethod.reset(nullptr);
+                         }
+
+                     },
+                     [&](ast::ClassDef *cdef) {
+                         // Leave in place
+                     },
+
+                     [&](ast::Assign *assgn) {
+                         if (ast::Ident *id = ast::cast_tree<ast::Ident>(assgn->lhs.get())) {
+                             if (id->symbol.info(ctx).name.name(ctx).kind == core::CONSTANT) {
+                                 stat.reset(nullptr);
+                             }
+                         }
+                     },
+
+                     [&](ast::EmptyTree *e) { stat.reset(nullptr); },
+
+                     [&](ast::Expression *e) {});
+        }
+
+        auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
+                                  [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
+
+        klass->rhs.erase(toRemove, klass->rhs.end());
+    }
+
 public:
     ResolveWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
 
@@ -353,28 +467,7 @@ public:
             }
         }
 
-        unique_ptr<ast::Send> lastStandardMethod;
-        for (auto &stat : original->rhs) {
-            if (auto send = ast::cast_tree<ast::Send>(stat.get())) {
-                if (send->fun == core::Names::standardMethod()) {
-                    lastStandardMethod.reset(send);
-                    stat.release();
-                } else if (send->fun == core::Names::declareVariables()) {
-                    processDeclareVariables(ctx.withOwner(original->symbol), send);
-                }
-            } else if (auto mdef = ast::cast_tree<ast::MethodDef>(stat.get())) {
-                if (lastStandardMethod) {
-                    core::Symbol &methoInfo = mdef->symbol.info(ctx);
-                    fillInInfoFromStandardMethod(ctx, methoInfo, lastStandardMethod, mdef->args.size());
-                    lastStandardMethod.reset(nullptr);
-                }
-            }
-        }
-
-        auto toRemove = remove_if(original->rhs.begin(), original->rhs.end(),
-                                  [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
-
-        original->rhs.erase(toRemove, original->rhs.end());
+        processClassBody(ctx, original);
 
         return original;
     }
