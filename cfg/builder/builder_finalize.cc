@@ -10,6 +10,7 @@ namespace ruby_typer {
 namespace cfg {
 
 void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
+    sanityCheck(ctx, cfg);
     bool changed = true;
     while (changed) {
         changed = false;
@@ -49,6 +50,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     }
                     changed = true;
                     sanityCheck(ctx, cfg);
+                    continue;
                 } else if (thenb->bexit.cond.name != core::Names::blockCall() && thenb->exprs.empty()) {
                     bb->bexit = thenb->bexit;
                     thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
@@ -59,6 +61,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     }
                     changed = true;
                     sanityCheck(ctx, cfg);
+                    continue;
                 }
             }
             if (thenb != cfg.deadBlock() && thenb->exprs.size() == 0 && thenb->bexit.thenb == thenb->bexit.elseb &&
@@ -68,14 +71,17 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                        thenb->backEdges.end());
                 sanityCheck(ctx, cfg);
+                continue;
             }
             if (elseb != cfg.deadBlock() && elseb->exprs.size() == 0 && elseb->bexit.thenb == elseb->bexit.elseb &&
                 bb->bexit.elseb != elseb->bexit.elseb) {
+                sanityCheck(ctx, cfg);
                 bb->bexit.elseb = elseb->bexit.elseb;
-                elseb->bexit.elseb->backEdges.push_back(bb);
+                bb->bexit.elseb->backEdges.push_back(bb);
                 elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                        elseb->backEdges.end());
                 sanityCheck(ctx, cfg);
+                continue;
             }
             ++it;
         }
