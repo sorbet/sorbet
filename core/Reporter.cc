@@ -88,7 +88,9 @@ string Reporter::ErrorLine::toString(GlobalState &gs) {
 
 string Reporter::ErrorSection::toString(GlobalState &gs) {
     stringstream buf;
-    buf << this->header << endl;
+    if (!this->header.empty()) {
+        buf << this->header << endl;
+    }
     for (auto &line : this->messages) {
         buf << line.toString(gs) << endl;
     }

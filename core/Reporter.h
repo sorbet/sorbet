@@ -88,6 +88,8 @@ public:
             : BasicError(loc, what, header), sections(sections) {}
         ComplexError(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections)
             : BasicError(loc, what, header), sections(sections) {}
+        ComplexError(Loc loc, ErrorClass what, std::string header, ErrorLine other_line)
+            : BasicError(loc, what, header), sections({ErrorSection("", {other_line})}) {}
     };
 
     void _error(std::unique_ptr<BasicError> error);

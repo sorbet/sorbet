@@ -371,6 +371,13 @@ private:
                          }
                          switch (send->fun._id) {
                              case core::Names::standardMethod()._id:
+                                 if (lastStandardMethod) {
+                                     ctx.state.errors.error(core::Reporter::ComplexError(
+                                         lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
+                                         "Unused standard_method. No method def before next standard_method.",
+                                         core::Reporter::ErrorLine(mine->loc,
+                                                                   "Next standard_method that is used instead.")));
+                                 }
                                  swap(lastStandardMethod, mine);
                                  break;
                              case core::Names::declareVariables()._id:
@@ -420,6 +427,11 @@ private:
                      [&](ast::EmptyTree *e) { stat.reset(nullptr); },
 
                      [&](ast::Expression *e) {});
+        }
+
+        if (lastStandardMethod) {
+            ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
+                                   "Malformed standard_method. No method def following it.");
         }
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
