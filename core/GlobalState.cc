@@ -132,7 +132,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef root_id = synthesizeClass(root_DESC, 0);
     SymbolRef nil_id = synthesizeClass(nil_DESC);
     SymbolRef todo_id = synthesizeClass(todo_DESC, 0);
-    SymbolRef object_id = synthesizeClass(object_DESC, core::GlobalState::defn_Basic_Object());
+    SymbolRef object_id = synthesizeClass(object_DESC, core::GlobalState::defn_BasicObject());
     SymbolRef junk_id = synthesizeClass(junk_DESC, 0);
     SymbolRef integer_id = synthesizeClass(integer_DESC);
     SymbolRef float_id = synthesizeClass(float_DESC);
@@ -159,7 +159,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(root_id == defn_root());
     Error::check(nil_id == defn_nil());
     Error::check(todo_id == defn_todo());
-    Error::check(object_id == defn_object());
+    Error::check(object_id == defn_Object());
     Error::check(junk_id == defn_junk());
     Error::check(integer_id == defn_Integer());
     Error::check(float_id == defn_Float());
@@ -174,7 +174,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(opus_id == defn_Opus());
     Error::check(opus_types_id == defn_Opus_Types());
     Error::check(class_id == defn_Class());
-    Error::check(basicObject_id == defn_Basic_Object());
+    Error::check(basicObject_id == defn_BasicObject());
     Error::check(kernel_id == defn_Kernel());
     Error::check(emptyHash_id == defn_emptyHash());
     Error::check(range_id == defn_Range());
@@ -187,7 +187,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef buildHash = enterMethodSymbol(Loc::none(0), defn_Hash(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(0), buildHash, Names::arg0());
     arg.info(*this).setRepeated();
-    arg.info(*this).resultType = make_unique<ClassType>(defn_object());
+    arg.info(*this).resultType = make_unique<ClassType>(defn_Object());
     buildHash.info(*this).resultType = make_unique<ClassType>(defn_Hash());
 
     while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {

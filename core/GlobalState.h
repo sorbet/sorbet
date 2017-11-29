@@ -91,7 +91,7 @@ public:
         return SymbolRef(5);
     }
 
-    static constexpr SymbolRef defn_object() {
+    static constexpr SymbolRef defn_Object() {
         return SymbolRef(6);
     }
 
@@ -151,7 +151,7 @@ public:
         return SymbolRef(20);
     }
 
-    static constexpr SymbolRef defn_Basic_Object() {
+    static constexpr SymbolRef defn_BasicObject() {
         return SymbolRef(21);
     }
 
