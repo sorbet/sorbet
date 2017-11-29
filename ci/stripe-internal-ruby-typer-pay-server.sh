@@ -33,4 +33,4 @@ fi
 # Make sure we don't crash on all of pay-server
 TMP="$(mktemp)"
 find $DIR -name *.rb | sort > "$TMP"
-LSAN_OPTIONS=verbosity=1:log_threads=1 ./bazel-bin/main/ruby-typer --quiet --error-stats @"$TMP"
+LSAN_OPTIONS=verbosity=1:log_threads=1 ./bazel-bin/main/ruby-typer --quiet --error-stats --typed=always @"$TMP"
