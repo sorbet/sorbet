@@ -324,7 +324,7 @@ public:
         for (auto &ancst : original->ancestors) {
             ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
             if (id == nullptr || !id->symbol.info(ctx).isClass()) {
-                ctx.state.errors.error(id->loc, core::ErrorClass::DynamicSuperclass,
+                ctx.state.errors.error(ancst->loc, core::ErrorClass::DynamicSuperclass,
                                        "Superclasses and mixins must be statically resolved.");
                 continue;
             }

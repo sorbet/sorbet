@@ -4,6 +4,7 @@
 
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
+template class std::unique_ptr<ruby_typer::cfg::BasicBlock>;
 template class std::unique_ptr<ruby_typer::cfg::Instruction>;
 
 using namespace std;
@@ -18,7 +19,7 @@ BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *from) {
     if (from != nullptr && from == deadBlock()) {
         return from;
     }
-    int id = this->basicBlocks.size();
+    int id = this->maxBasicBlockId++;
     this->basicBlocks.emplace_back(new BasicBlock());
     BasicBlock *r = this->basicBlocks.back().get();
     r->id = id;
@@ -46,11 +47,11 @@ string CFG::toString(core::Context ctx) {
         auto text = this->basicBlocks[i]->toString(ctx);
         buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" [label = \"" << text << "\"];" << endl
             << endl;
-        buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
-            << this->basicBlocks[i]->bexit.thenb->id << "\";" << endl;
+        buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" -> \"bb" << symbolName << "_"
+            << this->basicBlocks[i]->bexit.thenb->id << "\" [style=\"bold\"];" << endl;
         if (this->basicBlocks[i]->bexit.thenb != this->basicBlocks[i]->bexit.elseb) {
-            buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
-                << this->basicBlocks[i]->bexit.elseb->id << "\";" << endl
+            buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" -> \"bb" << symbolName << "_"
+                << this->basicBlocks[i]->bexit.elseb->id << "\" [style=\"tapered\"];" << endl
                 << endl;
         }
     }

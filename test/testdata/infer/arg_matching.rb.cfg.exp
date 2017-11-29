@@ -6,15 +6,14 @@ subgraph "cluster_::<constant:TestArgs>#any" {
     "bb::<constant:TestArgs>#any_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#any_0" [label = "()
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#any_0" -> "bb::<constant:TestArgs>#any_1";
+    "bb::<constant:TestArgs>#any_0" -> "bb::<constant:TestArgs>#any_1" [style="bold"];
     "bb::<constant:TestArgs>#any_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#any_1" -> "bb::<constant:TestArgs>#any_1";
+    "bb::<constant:TestArgs>#any_1" -> "bb::<constant:TestArgs>#any_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#a_hash" {
@@ -24,15 +23,14 @@ subgraph "cluster_::<constant:TestArgs>#a_hash" {
     "bb::<constant:TestArgs>#a_hash_1" [shape = parallelogram];
 
     "bb::<constant:TestArgs>#a_hash_0" [label = "()
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#a_hash_0" -> "bb::<constant:TestArgs>#a_hash_1";
+    "bb::<constant:TestArgs>#a_hash_0" -> "bb::<constant:TestArgs>#a_hash_1" [style="bold"];
     "bb::<constant:TestArgs>#a_hash_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#a_hash_1" -> "bb::<constant:TestArgs>#a_hash_1";
+    "bb::<constant:TestArgs>#a_hash_1" -> "bb::<constant:TestArgs>#a_hash_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#required" {
@@ -43,15 +41,14 @@ subgraph "cluster_::<constant:TestArgs>#required" {
 
     "bb::<constant:TestArgs>#required_0" [label = "()
 selfMethodTemp$2 = self : TestArgs
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#required_0" -> "bb::<constant:TestArgs>#required_1";
+    "bb::<constant:TestArgs>#required_0" -> "bb::<constant:TestArgs>#required_1" [style="bold"];
     "bb::<constant:TestArgs>#required_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#required_1" -> "bb::<constant:TestArgs>#required_1";
+    "bb::<constant:TestArgs>#required_1" -> "bb::<constant:TestArgs>#required_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_required" {
@@ -76,11 +73,11 @@ returnMethodTemp$1 = statTemp$10.required(statTemp$11, statTemp$12, statTemp$13)
 returnMethodTemp$14 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_required_0" -> "bb::<constant:TestArgs>#call_required_1";
+    "bb::<constant:TestArgs>#call_required_0" -> "bb::<constant:TestArgs>#call_required_1" [style="bold"];
     "bb::<constant:TestArgs>#call_required_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_required_1" -> "bb::<constant:TestArgs>#call_required_1";
+    "bb::<constant:TestArgs>#call_required_1" -> "bb::<constant:TestArgs>#call_required_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#optional" {
@@ -91,15 +88,14 @@ subgraph "cluster_::<constant:TestArgs>#optional" {
 
     "bb::<constant:TestArgs>#optional_0" [label = "()
 selfMethodTemp$2 = self : TestArgs
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#optional_0" -> "bb::<constant:TestArgs>#optional_1";
+    "bb::<constant:TestArgs>#optional_0" -> "bb::<constant:TestArgs>#optional_1" [style="bold"];
     "bb::<constant:TestArgs>#optional_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#optional_1" -> "bb::<constant:TestArgs>#optional_1";
+    "bb::<constant:TestArgs>#optional_1" -> "bb::<constant:TestArgs>#optional_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_optional" {
@@ -124,11 +120,11 @@ returnMethodTemp$1 = statTemp$10.optional(statTemp$11, statTemp$12, statTemp$13)
 returnMethodTemp$14 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_optional_0" -> "bb::<constant:TestArgs>#call_optional_1";
+    "bb::<constant:TestArgs>#call_optional_0" -> "bb::<constant:TestArgs>#call_optional_1" [style="bold"];
     "bb::<constant:TestArgs>#call_optional_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_optional_1" -> "bb::<constant:TestArgs>#call_optional_1";
+    "bb::<constant:TestArgs>#call_optional_1" -> "bb::<constant:TestArgs>#call_optional_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#kwarg" {
@@ -139,15 +135,14 @@ subgraph "cluster_::<constant:TestArgs>#kwarg" {
 
     "bb::<constant:TestArgs>#kwarg_0" [label = "()
 selfMethodTemp$2 = self : TestArgs
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#kwarg_0" -> "bb::<constant:TestArgs>#kwarg_1";
+    "bb::<constant:TestArgs>#kwarg_0" -> "bb::<constant:TestArgs>#kwarg_1" [style="bold"];
     "bb::<constant:TestArgs>#kwarg_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#kwarg_1" -> "bb::<constant:TestArgs>#kwarg_1";
+    "bb::<constant:TestArgs>#kwarg_1" -> "bb::<constant:TestArgs>#kwarg_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_kwarg" {
@@ -205,11 +200,11 @@ returnMethodTemp$1 = statTemp$43.kwarg(statTemp$44, statTemp$45) : NilClass
 returnMethodTemp$47 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_kwarg_0" -> "bb::<constant:TestArgs>#call_kwarg_1";
+    "bb::<constant:TestArgs>#call_kwarg_0" -> "bb::<constant:TestArgs>#call_kwarg_1" [style="bold"];
     "bb::<constant:TestArgs>#call_kwarg_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_kwarg_1" -> "bb::<constant:TestArgs>#call_kwarg_1";
+    "bb::<constant:TestArgs>#call_kwarg_1" -> "bb::<constant:TestArgs>#call_kwarg_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#repeated" {
@@ -220,15 +215,14 @@ subgraph "cluster_::<constant:TestArgs>#repeated" {
 
     "bb::<constant:TestArgs>#repeated_0" [label = "()
 selfMethodTemp$2 = self : TestArgs
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#repeated_0" -> "bb::<constant:TestArgs>#repeated_1";
+    "bb::<constant:TestArgs>#repeated_0" -> "bb::<constant:TestArgs>#repeated_1" [style="bold"];
     "bb::<constant:TestArgs>#repeated_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#repeated_1" -> "bb::<constant:TestArgs>#repeated_1";
+    "bb::<constant:TestArgs>#repeated_1" -> "bb::<constant:TestArgs>#repeated_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_repeated" {
@@ -256,11 +250,11 @@ returnMethodTemp$1 = statTemp$14.repeated(statTemp$15, statTemp$16) : NilClass
 returnMethodTemp$17 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_repeated_0" -> "bb::<constant:TestArgs>#call_repeated_1";
+    "bb::<constant:TestArgs>#call_repeated_0" -> "bb::<constant:TestArgs>#call_repeated_1" [style="bold"];
     "bb::<constant:TestArgs>#call_repeated_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_repeated_1" -> "bb::<constant:TestArgs>#call_repeated_1";
+    "bb::<constant:TestArgs>#call_repeated_1" -> "bb::<constant:TestArgs>#call_repeated_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#mixed" {
@@ -271,15 +265,14 @@ subgraph "cluster_::<constant:TestArgs>#mixed" {
 
     "bb::<constant:TestArgs>#mixed_0" [label = "()
 selfMethodTemp$2 = self : TestArgs
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#mixed_0" -> "bb::<constant:TestArgs>#mixed_1";
+    "bb::<constant:TestArgs>#mixed_0" -> "bb::<constant:TestArgs>#mixed_1" [style="bold"];
     "bb::<constant:TestArgs>#mixed_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#mixed_1" -> "bb::<constant:TestArgs>#mixed_1";
+    "bb::<constant:TestArgs>#mixed_1" -> "bb::<constant:TestArgs>#mixed_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_mixed" {
@@ -335,11 +328,11 @@ returnMethodTemp$1 = statTemp$30.mixed(statTemp$31, statTemp$32, statTemp$33, st
 returnMethodTemp$45 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_mixed_0" -> "bb::<constant:TestArgs>#call_mixed_1";
+    "bb::<constant:TestArgs>#call_mixed_0" -> "bb::<constant:TestArgs>#call_mixed_1" [style="bold"];
     "bb::<constant:TestArgs>#call_mixed_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_mixed_1" -> "bb::<constant:TestArgs>#call_mixed_1";
+    "bb::<constant:TestArgs>#call_mixed_1" -> "bb::<constant:TestArgs>#call_mixed_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#optkw" {
@@ -350,15 +343,14 @@ subgraph "cluster_::<constant:TestArgs>#optkw" {
 
     "bb::<constant:TestArgs>#optkw_0" [label = "()
 selfMethodTemp$2 = self : TestArgs
-returnMethodTemp$1 = NotSupported() : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#optkw_0" -> "bb::<constant:TestArgs>#optkw_1";
+    "bb::<constant:TestArgs>#optkw_0" -> "bb::<constant:TestArgs>#optkw_1" [style="bold"];
     "bb::<constant:TestArgs>#optkw_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#optkw_1" -> "bb::<constant:TestArgs>#optkw_1";
+    "bb::<constant:TestArgs>#optkw_1" -> "bb::<constant:TestArgs>#optkw_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestArgs>#call_optkw" {
@@ -382,11 +374,11 @@ returnMethodTemp$1 = statTemp$9.optkw(statTemp$10, statTemp$11, statTemp$12) : u
 returnMethodTemp$13 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_optkw_0" -> "bb::<constant:TestArgs>#call_optkw_1";
+    "bb::<constant:TestArgs>#call_optkw_0" -> "bb::<constant:TestArgs>#call_optkw_1" [style="bold"];
     "bb::<constant:TestArgs>#call_optkw_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestArgs>#call_optkw_1" -> "bb::<constant:TestArgs>#call_optkw_1";
+    "bb::<constant:TestArgs>#call_optkw_1" -> "bb::<constant:TestArgs>#call_optkw_1" [style="bold"];
 }
 
 }

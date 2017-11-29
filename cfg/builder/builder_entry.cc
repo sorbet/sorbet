@@ -8,7 +8,7 @@ using namespace std;
 namespace ruby_typer {
 namespace cfg {
 
-void jumpToDead(BasicBlock *from, CFG &inWhat);
+void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
 
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
@@ -36,7 +36,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
 
     cont->exprs.emplace_back(retSym1, md.loc, make_unique<Return>(retSym)); // dead assign.
-    jumpToDead(cont, *res.get());
+    jumpToDead(cont, *res.get(), md.loc);
 
     std::vector<Binding> aliasesPrefix;
     for (auto kv : aliases) {
@@ -56,6 +56,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     fillInTopoSorts(ctx, *res);
     dealias(ctx, *res);
     fillInBlockArguments(ctx, *res);
+    simplify(ctx, *res);
+    sanityCheck(ctx, *res);
     return res;
 }
 

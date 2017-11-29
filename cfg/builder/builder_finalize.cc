@@ -1,6 +1,6 @@
 #include "builder.h"
 
-#include <algorithm> // sort
+#include <algorithm> // sort, remove
 #include <climits>   // INT_MAX
 #include <unordered_map>
 #include <unordered_set>
@@ -8,6 +8,103 @@ using namespace std;
 
 namespace ruby_typer {
 namespace cfg {
+
+void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
+    sanityCheck(ctx, cfg);
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        for (auto it = cfg.basicBlocks.begin(); it != cfg.basicBlocks.end(); /*nothing*/) {
+            BasicBlock *bb = it->get();
+            auto *const thenb = bb->bexit.thenb;
+            auto *const elseb = bb->bexit.elseb;
+            if (bb != cfg.deadBlock() && bb != cfg.entry()) {
+                if (bb->backEdges.empty()) { // remove non reachable
+                    thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                                           thenb->backEdges.end());
+                    if (elseb != thenb) {
+                        elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
+                                               elseb->backEdges.end());
+                    }
+                    it = cfg.basicBlocks.erase(it);
+                    cfg.forwardsTopoSort.erase(
+                        std::remove(cfg.forwardsTopoSort.begin(), cfg.forwardsTopoSort.end(), bb),
+                        cfg.forwardsTopoSort.end());
+                    cfg.backwardsTopoSort.erase(
+                        std::remove(cfg.backwardsTopoSort.begin(), cfg.backwardsTopoSort.end(), bb),
+                        cfg.backwardsTopoSort.end());
+                    changed = true;
+                    sanityCheck(ctx, cfg);
+                    continue;
+                }
+            }
+            if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed togather
+                if (thenb->backEdges.size() == 1) {
+                    bb->exprs.insert(bb->exprs.end(), std::make_move_iterator(thenb->exprs.begin()),
+                                     std::make_move_iterator(thenb->exprs.begin()));
+                    thenb->backEdges.clear();
+                    bb->bexit = thenb->bexit;
+                    bb->bexit.thenb->backEdges.push_back(bb);
+                    if (bb->bexit.thenb != bb->bexit.elseb) {
+                        bb->bexit.elseb->backEdges.push_back(bb);
+                    }
+                    changed = true;
+                    sanityCheck(ctx, cfg);
+                    continue;
+                } else if (thenb->bexit.cond.name != core::Names::blockCall() && thenb->exprs.empty()) {
+                    // Don't remove block headers
+                    bb->bexit = thenb->bexit;
+                    thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                                           thenb->backEdges.end());
+                    bb->bexit.thenb->backEdges.push_back(bb);
+                    if (bb->bexit.thenb != bb->bexit.elseb) {
+                        bb->bexit.elseb->backEdges.push_back(bb);
+                    }
+                    changed = true;
+                    sanityCheck(ctx, cfg);
+                    continue;
+                }
+            }
+            if (thenb != cfg.deadBlock() && thenb->exprs.size() == 0 && thenb->bexit.thenb == thenb->bexit.elseb &&
+                bb->bexit.thenb != thenb->bexit.thenb) {
+                // shortcut then
+                bb->bexit.thenb = thenb->bexit.thenb;
+                thenb->bexit.thenb->backEdges.push_back(bb);
+                thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                                       thenb->backEdges.end());
+                sanityCheck(ctx, cfg);
+                continue;
+            }
+            if (elseb != cfg.deadBlock() && elseb->exprs.size() == 0 && elseb->bexit.thenb == elseb->bexit.elseb &&
+                bb->bexit.elseb != elseb->bexit.elseb) {
+                // shortcut else
+                sanityCheck(ctx, cfg);
+                bb->bexit.elseb = elseb->bexit.elseb;
+                bb->bexit.elseb->backEdges.push_back(bb);
+                elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
+                                       elseb->backEdges.end());
+                sanityCheck(ctx, cfg);
+                continue;
+            }
+            ++it;
+        }
+    }
+}
+
+void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
+    for (auto &bb : cfg.basicBlocks) {
+        for (auto parent : bb->backEdges) {
+            Error::check(parent->bexit.thenb == bb.get() || parent->bexit.elseb == bb.get());
+        }
+        if (bb.get() == cfg.deadBlock()) {
+            continue;
+        }
+        auto thenFnd = std::find(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get());
+        auto elseFnd = std::find(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get());
+        Error::check(thenFnd != bb->bexit.thenb->backEdges.end());
+        Error::check(elseFnd != bb->bexit.elseb->backEdges.end());
+    }
+}
 
 core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
                                  unordered_map<core::LocalVariable, core::LocalVariable> &aliases) {

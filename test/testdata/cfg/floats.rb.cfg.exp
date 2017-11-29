@@ -20,11 +20,11 @@ a = nan : Float(0.000000)
 returnMethodTemp$13 = return a : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#test_large_float_0" -> "bb::<constant:Object>#test_large_float_1";
+    "bb::<constant:Object>#test_large_float_0" -> "bb::<constant:Object>#test_large_float_1" [style="bold"];
     "bb::<constant:Object>#test_large_float_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:Object>#test_large_float_1" -> "bb::<constant:Object>#test_large_float_1";
+    "bb::<constant:Object>#test_large_float_1" -> "bb::<constant:Object>#test_large_float_1" [style="bold"];
 }
 
 }

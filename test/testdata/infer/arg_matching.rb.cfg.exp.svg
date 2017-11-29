@@ -11,18 +11,18 @@
 <polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-1882.8406 12078,-1882.8406 12078,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#any</title>
-<polygon fill="none" stroke="#0000ff" points="8,-120.1177 8,-1124.4172 688,-1124.4172 688,-120.1177 8,-120.1177"/>
-<text text-anchor="middle" x="348" y="-1109.2172" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#any</text>
+<polygon fill="none" stroke="#0000ff" points="8,-120.1177 8,-1112.1808 688,-1112.1808 688,-120.1177 8,-120.1177"/>
+<text text-anchor="middle" x="348" y="-1096.9808" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#any</text>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#a_hash</title>
-<polygon fill="none" stroke="#0000ff" points="696,-120.1177 696,-1124.4172 1376,-1124.4172 1376,-120.1177 696,-120.1177"/>
-<text text-anchor="middle" x="1036" y="-1109.2172" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#a_hash</text>
+<polygon fill="none" stroke="#0000ff" points="696,-120.1177 696,-1112.1808 1376,-1112.1808 1376,-120.1177 696,-120.1177"/>
+<text text-anchor="middle" x="1036" y="-1096.9808" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#a_hash</text>
 </g>
 <g id="clust3" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#required</title>
-<polygon fill="none" stroke="#0000ff" points="1384,-120.1177 1384,-1136.6536 2064,-1136.6536 2064,-120.1177 1384,-120.1177"/>
-<text text-anchor="middle" x="1724" y="-1121.4536" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#required</text>
+<polygon fill="none" stroke="#0000ff" points="1384,-120.1177 1384,-1124.4172 2064,-1124.4172 2064,-120.1177 1384,-120.1177"/>
+<text text-anchor="middle" x="1724" y="-1109.2172" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#required</text>
 </g>
 <g id="clust4" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#call_required</title>
@@ -31,8 +31,8 @@
 </g>
 <g id="clust5" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#optional</title>
-<polygon fill="none" stroke="#0000ff" points="3094,-120.1177 3094,-1136.6536 3774,-1136.6536 3774,-120.1177 3094,-120.1177"/>
-<text text-anchor="middle" x="3434" y="-1121.4536" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#optional</text>
+<polygon fill="none" stroke="#0000ff" points="3094,-120.1177 3094,-1124.4172 3774,-1124.4172 3774,-120.1177 3094,-120.1177"/>
+<text text-anchor="middle" x="3434" y="-1109.2172" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#optional</text>
 </g>
 <g id="clust6" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#call_optional</title>
@@ -41,8 +41,8 @@
 </g>
 <g id="clust7" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#kwarg</title>
-<polygon fill="none" stroke="#0000ff" points="4802,-120.1177 4802,-1136.6536 5482,-1136.6536 5482,-120.1177 4802,-120.1177"/>
-<text text-anchor="middle" x="5142" y="-1121.4536" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#kwarg</text>
+<polygon fill="none" stroke="#0000ff" points="4802,-120.1177 4802,-1124.4172 5482,-1124.4172 5482,-120.1177 4802,-120.1177"/>
+<text text-anchor="middle" x="5142" y="-1109.2172" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#kwarg</text>
 </g>
 <g id="clust8" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#call_kwarg</title>
@@ -51,8 +51,8 @@
 </g>
 <g id="clust9" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#repeated</title>
-<polygon fill="none" stroke="#0000ff" points="6704,-120.1177 6704,-1136.6536 7384,-1136.6536 7384,-120.1177 6704,-120.1177"/>
-<text text-anchor="middle" x="7044" y="-1121.4536" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#repeated</text>
+<polygon fill="none" stroke="#0000ff" points="6704,-120.1177 6704,-1124.4172 7384,-1124.4172 7384,-120.1177 6704,-120.1177"/>
+<text text-anchor="middle" x="7044" y="-1109.2172" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#repeated</text>
 </g>
 <g id="clust10" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#call_repeated</title>
@@ -61,8 +61,8 @@
 </g>
 <g id="clust11" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#mixed</title>
-<polygon fill="none" stroke="#0000ff" points="8284,-120.1177 8284,-1136.6536 8964,-1136.6536 8964,-120.1177 8284,-120.1177"/>
-<text text-anchor="middle" x="8624" y="-1121.4536" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#mixed</text>
+<polygon fill="none" stroke="#0000ff" points="8284,-120.1177 8284,-1124.4172 8964,-1124.4172 8964,-120.1177 8284,-120.1177"/>
+<text text-anchor="middle" x="8624" y="-1109.2172" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#mixed</text>
 </g>
 <g id="clust12" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#call_mixed</title>
@@ -71,8 +71,8 @@
 </g>
 <g id="clust13" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#optkw</title>
-<polygon fill="none" stroke="#0000ff" points="10396,-120.1177 10396,-1136.6536 11076,-1136.6536 11076,-120.1177 10396,-120.1177"/>
-<text text-anchor="middle" x="10736" y="-1121.4536" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#optkw</text>
+<polygon fill="none" stroke="#0000ff" points="10396,-120.1177 10396,-1124.4172 11076,-1124.4172 11076,-120.1177 10396,-120.1177"/>
+<text text-anchor="middle" x="10736" y="-1109.2172" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:TestArgs&gt;#optkw</text>
 </g>
 <g id="clust14" class="cluster">
 <title>cluster_::&lt;constant:TestArgs&gt;#call_optkw</title>
@@ -82,11 +82,10 @@
 <!-- bb::&lt;constant:TestArgs&gt;#any_0 -->
 <g id="node1" class="node">
 <title>bb::&lt;constant:TestArgs&gt;#any_0</title>
-<polygon fill="none" stroke="#000000" points="16.1318,-1021.2125 348,-982.603 679.8682,-1021.2125 679.5585,-1083.6839 16.4415,-1083.6839 16.1318,-1021.2125"/>
-<text text-anchor="middle" x="348" y="-1055.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="348" y="-1041.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="348" y="-1027.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="348" y="-1013.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="16.1318,-1024.912 348,-994.575 679.8682,-1024.912 679.5585,-1073.9983 16.4415,-1073.9983 16.1318,-1024.912"/>
+<text text-anchor="middle" x="348" y="-1048.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="348" y="-1034.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="348" y="-1020.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#any_1 -->
 <g id="node2" class="node">
@@ -98,23 +97,22 @@
 <!-- bb::&lt;constant:TestArgs&gt;#any_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#any_1 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#any_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#any_1</title>
-<path fill="none" stroke="#000000" d="M348,-982.4538C348,-821.4181 348,-359.3062 348,-210.7275"/>
-<polygon fill="#000000" stroke="#000000" points="351.5001,-210.5801 348,-200.5802 344.5001,-210.5802 351.5001,-210.5801"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M348,-994.5202C348,-845.8885 348,-362.9122 348,-210.5853"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="351.5001,-210.1982 348,-200.1983 344.5001,-210.1983 351.5001,-210.1982"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#any_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#any_1 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#any_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#any_1</title>
-<path fill="none" stroke="#000000" d="M356.0853,-200.2755C401.5092,-381.8676 478.7753,-369.815 478.7753,-164.1177 478.7753,37.7629 404.3499,53.1182 358.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="355.1989,-117.4023 356.0853,-127.96 361.9762,-119.1539 355.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M356.0853,-200.2755C401.5092,-381.8676 478.7753,-369.815 478.7753,-164.1177 478.7753,37.7629 404.3499,53.1182 358.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="355.1989,-117.4023 356.0853,-127.96 361.9762,-119.1539 355.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#a_hash_0 -->
 <g id="node3" class="node">
 <title>bb::&lt;constant:TestArgs&gt;#a_hash_0</title>
-<polygon fill="none" stroke="#000000" points="704.1318,-1021.2125 1036,-982.603 1367.8682,-1021.2125 1367.5585,-1083.6839 704.4415,-1083.6839 704.1318,-1021.2125"/>
-<text text-anchor="middle" x="1036" y="-1055.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1036" y="-1041.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="1036" y="-1027.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="1036" y="-1013.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="704.1318,-1024.912 1036,-994.575 1367.8682,-1024.912 1367.5585,-1073.9983 704.4415,-1073.9983 704.1318,-1024.912"/>
+<text text-anchor="middle" x="1036" y="-1048.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1036" y="-1034.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1036" y="-1020.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#a_hash_1 -->
 <g id="node4" class="node">
@@ -126,24 +124,23 @@
 <!-- bb::&lt;constant:TestArgs&gt;#a_hash_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#a_hash_1 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#a_hash_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#a_hash_1</title>
-<path fill="none" stroke="#000000" d="M1036,-982.4538C1036,-821.4181 1036,-359.3062 1036,-210.7275"/>
-<polygon fill="#000000" stroke="#000000" points="1039.5001,-210.5801 1036,-200.5802 1032.5001,-210.5802 1039.5001,-210.5801"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1036,-994.5202C1036,-845.8885 1036,-362.9122 1036,-210.5853"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1039.5001,-210.1982 1036,-200.1983 1032.5001,-210.1983 1039.5001,-210.1982"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#a_hash_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#a_hash_1 -->
 <g id="edge4" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#a_hash_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#a_hash_1</title>
-<path fill="none" stroke="#000000" d="M1044.0853,-200.2755C1089.5092,-381.8676 1166.7753,-369.815 1166.7753,-164.1177 1166.7753,37.7629 1092.3499,53.1182 1046.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="1043.1989,-117.4023 1044.0853,-127.96 1049.9762,-119.1539 1043.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1044.0853,-200.2755C1089.5092,-381.8676 1166.7753,-369.815 1166.7753,-164.1177 1166.7753,37.7629 1092.3499,53.1182 1046.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1043.1989,-117.4023 1044.0853,-127.96 1049.9762,-119.1539 1043.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#required_0 -->
 <g id="node5" class="node">
 <title>bb::&lt;constant:TestArgs&gt;#required_0</title>
-<polygon fill="none" stroke="#000000" points="1392.1318,-1017.358 1724,-970.1297 2055.8682,-1017.358 2055.5585,-1093.775 1392.4415,-1093.775 1392.1318,-1017.358"/>
-<text text-anchor="middle" x="1724" y="-1062.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="1724" y="-1048.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
-<text text-anchor="middle" x="1724" y="-1034.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="1724" y="-1020.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="1724" y="-1006.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="1392.1318,-1021.2125 1724,-982.603 2055.8682,-1021.2125 2055.5585,-1083.6839 1392.4415,-1083.6839 1392.1318,-1021.2125"/>
+<text text-anchor="middle" x="1724" y="-1055.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1724" y="-1041.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
+<text text-anchor="middle" x="1724" y="-1027.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1724" y="-1013.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#required_1 -->
 <g id="node6" class="node">
@@ -155,14 +152,14 @@
 <!-- bb::&lt;constant:TestArgs&gt;#required_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#required_1 -->
 <g id="edge5" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#required_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#required_1</title>
-<path fill="none" stroke="#000000" d="M1724,-970.2337C1724,-799.2778 1724,-356.0054 1724,-210.8734"/>
-<polygon fill="#000000" stroke="#000000" points="1727.5001,-210.5467 1724,-200.5467 1720.5001,-210.5467 1727.5001,-210.5467"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1724,-982.4538C1724,-821.4181 1724,-359.3062 1724,-210.7275"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1727.5001,-210.5801 1724,-200.5802 1720.5001,-210.5802 1727.5001,-210.5801"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#required_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#required_1 -->
 <g id="edge6" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#required_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#required_1</title>
-<path fill="none" stroke="#000000" d="M1732.0853,-200.2755C1777.5092,-381.8676 1854.7753,-369.815 1854.7753,-164.1177 1854.7753,37.7629 1780.3499,53.1182 1734.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="1731.1989,-117.4023 1732.0853,-127.96 1737.9762,-119.1539 1731.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1732.0853,-200.2755C1777.5092,-381.8676 1854.7753,-369.815 1854.7753,-164.1177 1854.7753,37.7629 1780.3499,53.1182 1734.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1731.1989,-117.4023 1732.0853,-127.96 1737.9762,-119.1539 1731.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_required_0 -->
 <g id="node7" class="node">
@@ -194,24 +191,23 @@
 <!-- bb::&lt;constant:TestArgs&gt;#call_required_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_required_1 -->
 <g id="edge7" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_required_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_required_1</title>
-<path fill="none" stroke="#000000" d="M2579,-847.6773C2579,-641.8416 2579,-327.816 2579,-210.4783"/>
-<polygon fill="#000000" stroke="#000000" points="2582.5001,-210.4 2579,-200.4 2575.5001,-210.4001 2582.5001,-210.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M2579,-847.6773C2579,-641.8416 2579,-327.816 2579,-210.4783"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="2582.5001,-210.4 2579,-200.4 2575.5001,-210.4001 2582.5001,-210.4"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_required_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_required_1 -->
 <g id="edge8" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_required_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_required_1</title>
-<path fill="none" stroke="#000000" d="M2587.0853,-200.2755C2632.5092,-381.8676 2709.7753,-369.815 2709.7753,-164.1177 2709.7753,37.7629 2635.3499,53.1182 2589.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="2586.1989,-117.4023 2587.0853,-127.96 2592.9762,-119.1539 2586.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M2587.0853,-200.2755C2632.5092,-381.8676 2709.7753,-369.815 2709.7753,-164.1177 2709.7753,37.7629 2635.3499,53.1182 2589.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="2586.1989,-117.4023 2587.0853,-127.96 2592.9762,-119.1539 2586.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#optional_0 -->
 <g id="node9" class="node">
 <title>bb::&lt;constant:TestArgs&gt;#optional_0</title>
-<polygon fill="none" stroke="#000000" points="3102.1318,-1017.358 3434,-970.1297 3765.8682,-1017.358 3765.5585,-1093.775 3102.4415,-1093.775 3102.1318,-1017.358"/>
-<text text-anchor="middle" x="3434" y="-1062.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="3434" y="-1048.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
-<text text-anchor="middle" x="3434" y="-1034.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="3434" y="-1020.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="3434" y="-1006.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="3102.1318,-1021.2125 3434,-982.603 3765.8682,-1021.2125 3765.5585,-1083.6839 3102.4415,-1083.6839 3102.1318,-1021.2125"/>
+<text text-anchor="middle" x="3434" y="-1055.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="3434" y="-1041.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
+<text text-anchor="middle" x="3434" y="-1027.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="3434" y="-1013.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#optional_1 -->
 <g id="node10" class="node">
@@ -223,14 +219,14 @@
 <!-- bb::&lt;constant:TestArgs&gt;#optional_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#optional_1 -->
 <g id="edge9" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#optional_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#optional_1</title>
-<path fill="none" stroke="#000000" d="M3434,-970.2337C3434,-799.2778 3434,-356.0054 3434,-210.8734"/>
-<polygon fill="#000000" stroke="#000000" points="3437.5001,-210.5467 3434,-200.5467 3430.5001,-210.5467 3437.5001,-210.5467"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M3434,-982.4538C3434,-821.4181 3434,-359.3062 3434,-210.7275"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3437.5001,-210.5801 3434,-200.5802 3430.5001,-210.5802 3437.5001,-210.5801"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#optional_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#optional_1 -->
 <g id="edge10" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#optional_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#optional_1</title>
-<path fill="none" stroke="#000000" d="M3442.0853,-200.2755C3487.5092,-381.8676 3564.7753,-369.815 3564.7753,-164.1177 3564.7753,37.7629 3490.3499,53.1182 3444.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="3441.1989,-117.4023 3442.0853,-127.96 3447.9762,-119.1539 3441.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M3442.0853,-200.2755C3487.5092,-381.8676 3564.7753,-369.815 3564.7753,-164.1177 3564.7753,37.7629 3490.3499,53.1182 3444.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3441.1989,-117.4023 3442.0853,-127.96 3447.9762,-119.1539 3441.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_optional_0 -->
 <g id="node11" class="node">
@@ -262,24 +258,23 @@
 <!-- bb::&lt;constant:TestArgs&gt;#call_optional_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_optional_1 -->
 <g id="edge11" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_optional_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_optional_1</title>
-<path fill="none" stroke="#000000" d="M4288,-847.6773C4288,-641.8416 4288,-327.816 4288,-210.4783"/>
-<polygon fill="#000000" stroke="#000000" points="4291.5001,-210.4 4288,-200.4 4284.5001,-210.4001 4291.5001,-210.4"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M4288,-847.6773C4288,-641.8416 4288,-327.816 4288,-210.4783"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="4291.5001,-210.4 4288,-200.4 4284.5001,-210.4001 4291.5001,-210.4"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_optional_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_optional_1 -->
 <g id="edge12" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_optional_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_optional_1</title>
-<path fill="none" stroke="#000000" d="M4296.0853,-200.2755C4341.5092,-381.8676 4418.7753,-369.815 4418.7753,-164.1177 4418.7753,37.7629 4344.3499,53.1182 4298.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="4295.1989,-117.4023 4296.0853,-127.96 4301.9762,-119.1539 4295.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M4296.0853,-200.2755C4341.5092,-381.8676 4418.7753,-369.815 4418.7753,-164.1177 4418.7753,37.7629 4344.3499,53.1182 4298.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="4295.1989,-117.4023 4296.0853,-127.96 4301.9762,-119.1539 4295.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#kwarg_0 -->
 <g id="node13" class="node">
 <title>bb::&lt;constant:TestArgs&gt;#kwarg_0</title>
-<polygon fill="none" stroke="#000000" points="4810.1318,-1017.358 5142,-970.1297 5473.8682,-1017.358 5473.5585,-1093.775 4810.4415,-1093.775 4810.1318,-1017.358"/>
-<text text-anchor="middle" x="5142" y="-1062.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="5142" y="-1048.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
-<text text-anchor="middle" x="5142" y="-1034.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="5142" y="-1020.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="5142" y="-1006.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="4810.1318,-1021.2125 5142,-982.603 5473.8682,-1021.2125 5473.5585,-1083.6839 4810.4415,-1083.6839 4810.1318,-1021.2125"/>
+<text text-anchor="middle" x="5142" y="-1055.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="5142" y="-1041.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
+<text text-anchor="middle" x="5142" y="-1027.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="5142" y="-1013.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#kwarg_1 -->
 <g id="node14" class="node">
@@ -291,14 +286,14 @@
 <!-- bb::&lt;constant:TestArgs&gt;#kwarg_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#kwarg_1 -->
 <g id="edge13" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#kwarg_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#kwarg_1</title>
-<path fill="none" stroke="#000000" d="M5142,-970.2337C5142,-799.2778 5142,-356.0054 5142,-210.8734"/>
-<polygon fill="#000000" stroke="#000000" points="5145.5001,-210.5467 5142,-200.5467 5138.5001,-210.5467 5145.5001,-210.5467"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M5142,-982.4538C5142,-821.4181 5142,-359.3062 5142,-210.7275"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="5145.5001,-210.5801 5142,-200.5802 5138.5001,-210.5802 5145.5001,-210.5801"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#kwarg_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#kwarg_1 -->
 <g id="edge14" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#kwarg_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#kwarg_1</title>
-<path fill="none" stroke="#000000" d="M5150.0853,-200.2755C5195.5092,-381.8676 5272.7753,-369.815 5272.7753,-164.1177 5272.7753,37.7629 5198.3499,53.1182 5152.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="5149.1989,-117.4023 5150.0853,-127.96 5155.9762,-119.1539 5149.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M5150.0853,-200.2755C5195.5092,-381.8676 5272.7753,-369.815 5272.7753,-164.1177 5272.7753,37.7629 5198.3499,53.1182 5152.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="5149.1989,-117.4023 5150.0853,-127.96 5155.9762,-119.1539 5149.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_kwarg_0 -->
 <g id="node15" class="node">
@@ -375,24 +370,23 @@
 <!-- bb::&lt;constant:TestArgs&gt;#call_kwarg_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_kwarg_1 -->
 <g id="edge15" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_kwarg_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_kwarg_1</title>
-<path fill="none" stroke="#000000" d="M6093,-296.9144C6093,-262.3161 6093,-232.767 6093,-210.3878"/>
-<polygon fill="#000000" stroke="#000000" points="6096.5001,-210.3031 6093,-200.3031 6089.5001,-210.3032 6096.5001,-210.3031"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M6093,-296.9144C6093,-262.3161 6093,-232.767 6093,-210.3878"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="6096.5001,-210.3031 6093,-200.3031 6089.5001,-210.3032 6096.5001,-210.3031"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_kwarg_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_kwarg_1 -->
 <g id="edge16" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_kwarg_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_kwarg_1</title>
-<path fill="none" stroke="#000000" d="M6101.0853,-200.2755C6146.5092,-381.8676 6223.7753,-369.815 6223.7753,-164.1177 6223.7753,37.7629 6149.3499,53.1182 6103.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="6100.1989,-117.4023 6101.0853,-127.96 6106.9762,-119.1539 6100.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M6101.0853,-200.2755C6146.5092,-381.8676 6223.7753,-369.815 6223.7753,-164.1177 6223.7753,37.7629 6149.3499,53.1182 6103.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="6100.1989,-117.4023 6101.0853,-127.96 6106.9762,-119.1539 6100.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#repeated_0 -->
 <g id="node17" class="node">
 <title>bb::&lt;constant:TestArgs&gt;#repeated_0</title>
-<polygon fill="none" stroke="#000000" points="6712.1318,-1017.358 7044,-970.1297 7375.8682,-1017.358 7375.5585,-1093.775 6712.4415,-1093.775 6712.1318,-1017.358"/>
-<text text-anchor="middle" x="7044" y="-1062.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="7044" y="-1048.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
-<text text-anchor="middle" x="7044" y="-1034.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="7044" y="-1020.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="7044" y="-1006.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="6712.1318,-1021.2125 7044,-982.603 7375.8682,-1021.2125 7375.5585,-1083.6839 6712.4415,-1083.6839 6712.1318,-1021.2125"/>
+<text text-anchor="middle" x="7044" y="-1055.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="7044" y="-1041.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
+<text text-anchor="middle" x="7044" y="-1027.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="7044" y="-1013.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#repeated_1 -->
 <g id="node18" class="node">
@@ -404,14 +398,14 @@
 <!-- bb::&lt;constant:TestArgs&gt;#repeated_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#repeated_1 -->
 <g id="edge17" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#repeated_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#repeated_1</title>
-<path fill="none" stroke="#000000" d="M7044,-970.2337C7044,-799.2778 7044,-356.0054 7044,-210.8734"/>
-<polygon fill="#000000" stroke="#000000" points="7047.5001,-210.5467 7044,-200.5467 7040.5001,-210.5467 7047.5001,-210.5467"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M7044,-982.4538C7044,-821.4181 7044,-359.3062 7044,-210.7275"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="7047.5001,-210.5801 7044,-200.5802 7040.5001,-210.5802 7047.5001,-210.5801"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#repeated_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#repeated_1 -->
 <g id="edge18" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#repeated_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#repeated_1</title>
-<path fill="none" stroke="#000000" d="M7052.0853,-200.2755C7097.5092,-381.8676 7174.7753,-369.815 7174.7753,-164.1177 7174.7753,37.7629 7100.3499,53.1182 7054.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="7051.1989,-117.4023 7052.0853,-127.96 7057.9762,-119.1539 7051.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M7052.0853,-200.2755C7097.5092,-381.8676 7174.7753,-369.815 7174.7753,-164.1177 7174.7753,37.7629 7100.3499,53.1182 7054.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="7051.1989,-117.4023 7052.0853,-127.96 7057.9762,-119.1539 7051.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_repeated_0 -->
 <g id="node19" class="node">
@@ -446,24 +440,23 @@
 <!-- bb::&lt;constant:TestArgs&gt;#call_repeated_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_repeated_1 -->
 <g id="edge19" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_repeated_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_repeated_1</title>
-<path fill="none" stroke="#000000" d="M7834,-811.0335C7834,-606.1372 7834,-320.6893 7834,-210.2704"/>
-<polygon fill="#000000" stroke="#000000" points="7837.5001,-210.1397 7834,-200.1397 7830.5001,-210.1398 7837.5001,-210.1397"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M7834,-811.0335C7834,-606.1372 7834,-320.6893 7834,-210.2704"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="7837.5001,-210.1397 7834,-200.1397 7830.5001,-210.1398 7837.5001,-210.1397"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_repeated_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_repeated_1 -->
 <g id="edge20" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_repeated_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_repeated_1</title>
-<path fill="none" stroke="#000000" d="M7842.0853,-200.2755C7887.5092,-381.8676 7964.7753,-369.815 7964.7753,-164.1177 7964.7753,37.7629 7890.3499,53.1182 7844.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="7841.1989,-117.4023 7842.0853,-127.96 7847.9762,-119.1539 7841.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M7842.0853,-200.2755C7887.5092,-381.8676 7964.7753,-369.815 7964.7753,-164.1177 7964.7753,37.7629 7890.3499,53.1182 7844.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="7841.1989,-117.4023 7842.0853,-127.96 7847.9762,-119.1539 7841.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#mixed_0 -->
 <g id="node21" class="node">
 <title>bb::&lt;constant:TestArgs&gt;#mixed_0</title>
-<polygon fill="none" stroke="#000000" points="8292.1318,-1017.358 8624,-970.1297 8955.8682,-1017.358 8955.5585,-1093.775 8292.4415,-1093.775 8292.1318,-1017.358"/>
-<text text-anchor="middle" x="8624" y="-1062.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="8624" y="-1048.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
-<text text-anchor="middle" x="8624" y="-1034.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="8624" y="-1020.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="8624" y="-1006.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="8292.1318,-1021.2125 8624,-982.603 8955.8682,-1021.2125 8955.5585,-1083.6839 8292.4415,-1083.6839 8292.1318,-1021.2125"/>
+<text text-anchor="middle" x="8624" y="-1055.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="8624" y="-1041.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
+<text text-anchor="middle" x="8624" y="-1027.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="8624" y="-1013.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#mixed_1 -->
 <g id="node22" class="node">
@@ -475,14 +468,14 @@
 <!-- bb::&lt;constant:TestArgs&gt;#mixed_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#mixed_1 -->
 <g id="edge21" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#mixed_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#mixed_1</title>
-<path fill="none" stroke="#000000" d="M8624,-970.2337C8624,-799.2778 8624,-356.0054 8624,-210.8734"/>
-<polygon fill="#000000" stroke="#000000" points="8627.5001,-210.5467 8624,-200.5467 8620.5001,-210.5467 8627.5001,-210.5467"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M8624,-982.4538C8624,-821.4181 8624,-359.3062 8624,-210.7275"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="8627.5001,-210.5801 8624,-200.5802 8620.5001,-210.5802 8627.5001,-210.5801"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#mixed_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#mixed_1 -->
 <g id="edge22" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#mixed_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#mixed_1</title>
-<path fill="none" stroke="#000000" d="M8632.0853,-200.2755C8677.5092,-381.8676 8754.7753,-369.815 8754.7753,-164.1177 8754.7753,37.7629 8680.3499,53.1182 8634.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="8631.1989,-117.4023 8632.0853,-127.96 8637.9762,-119.1539 8631.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M8632.0853,-200.2755C8677.5092,-381.8676 8754.7753,-369.815 8754.7753,-164.1177 8754.7753,37.7629 8680.3499,53.1182 8634.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="8631.1989,-117.4023 8632.0853,-127.96 8637.9762,-119.1539 8631.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_mixed_0 -->
 <g id="node23" class="node">
@@ -564,24 +557,23 @@
 <!-- bb::&lt;constant:TestArgs&gt;#call_mixed_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_mixed_1 -->
 <g id="edge23" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_mixed_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_mixed_1</title>
-<path fill="none" stroke="#000000" d="M9680,-236.0419C9680,-226.6666 9680,-218.063 9680,-210.3193"/>
-<polygon fill="#000000" stroke="#000000" points="9683.5001,-210.3009 9680,-200.301 9676.5001,-210.301 9683.5001,-210.3009"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M9680,-236.0419C9680,-226.6666 9680,-218.063 9680,-210.3193"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="9683.5001,-210.3009 9680,-200.301 9676.5001,-210.301 9683.5001,-210.3009"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_mixed_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_mixed_1 -->
 <g id="edge24" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_mixed_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_mixed_1</title>
-<path fill="none" stroke="#000000" d="M9688.0853,-200.2755C9733.5092,-381.8676 9810.7753,-369.815 9810.7753,-164.1177 9810.7753,37.7629 9736.3499,53.1182 9690.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="9687.1989,-117.4023 9688.0853,-127.96 9693.9762,-119.1539 9687.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M9688.0853,-200.2755C9733.5092,-381.8676 9810.7753,-369.815 9810.7753,-164.1177 9810.7753,37.7629 9736.3499,53.1182 9690.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="9687.1989,-117.4023 9688.0853,-127.96 9693.9762,-119.1539 9687.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#optkw_0 -->
 <g id="node25" class="node">
 <title>bb::&lt;constant:TestArgs&gt;#optkw_0</title>
-<polygon fill="none" stroke="#000000" points="10404.1318,-1017.358 10736,-970.1297 11067.8682,-1017.358 11067.5585,-1093.775 10404.4415,-1093.775 10404.1318,-1017.358"/>
-<text text-anchor="middle" x="10736" y="-1062.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
-<text text-anchor="middle" x="10736" y="-1048.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
-<text text-anchor="middle" x="10736" y="-1034.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = NotSupported() : untyped</text>
-<text text-anchor="middle" x="10736" y="-1020.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="10736" y="-1006.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="10404.1318,-1021.2125 10736,-982.603 11067.8682,-1021.2125 11067.5585,-1083.6839 10404.4415,-1083.6839 10404.1318,-1021.2125"/>
+<text text-anchor="middle" x="10736" y="-1055.2791" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="10736" y="-1041.2791" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : TestArgs</text>
+<text text-anchor="middle" x="10736" y="-1027.2791" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="10736" y="-1013.2791" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#optkw_1 -->
 <g id="node26" class="node">
@@ -593,14 +585,14 @@
 <!-- bb::&lt;constant:TestArgs&gt;#optkw_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#optkw_1 -->
 <g id="edge25" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#optkw_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#optkw_1</title>
-<path fill="none" stroke="#000000" d="M10736,-970.2337C10736,-799.2778 10736,-356.0054 10736,-210.8734"/>
-<polygon fill="#000000" stroke="#000000" points="10739.5001,-210.5467 10736,-200.5467 10732.5001,-210.5467 10739.5001,-210.5467"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M10736,-982.4538C10736,-821.4181 10736,-359.3062 10736,-210.7275"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="10739.5001,-210.5801 10736,-200.5802 10732.5001,-210.5802 10739.5001,-210.5801"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#optkw_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#optkw_1 -->
 <g id="edge26" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#optkw_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#optkw_1</title>
-<path fill="none" stroke="#000000" d="M10744.0853,-200.2755C10789.5092,-381.8676 10866.7753,-369.815 10866.7753,-164.1177 10866.7753,37.7629 10792.3499,53.1182 10746.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="10743.1989,-117.4023 10744.0853,-127.96 10749.9762,-119.1539 10743.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M10744.0853,-200.2755C10789.5092,-381.8676 10866.7753,-369.815 10866.7753,-164.1177 10866.7753,37.7629 10792.3499,53.1182 10746.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="10743.1989,-117.4023 10744.0853,-127.96 10749.9762,-119.1539 10743.1989,-117.4023"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_optkw_0 -->
 <g id="node27" class="node">
@@ -634,15 +626,15 @@
 <!-- bb::&lt;constant:TestArgs&gt;#call_optkw_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_optkw_1 -->
 <g id="edge27" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_optkw_0&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_optkw_1</title>
-<path fill="none" stroke="#000000" d="M11575,-823.4664C11575,-617.7699 11575,-322.7041 11575,-210.1347"/>
-<polygon fill="#000000" stroke="#000000" points="11578.5001,-210.1338 11575,-200.1338 11571.5001,-210.1338 11578.5001,-210.1338"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M11575,-823.4664C11575,-617.7699 11575,-322.7041 11575,-210.1347"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="11578.5001,-210.1338 11575,-200.1338 11571.5001,-210.1338 11578.5001,-210.1338"/>
 </g>
 <!-- bb::&lt;constant:TestArgs&gt;#call_optkw_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_optkw_1 -->
 <g id="edge28" class="edge">
 <title>bb::&lt;constant:TestArgs&gt;#call_optkw_1&#45;&gt;bb::&lt;constant:TestArgs&gt;#call_optkw_1</title>
-<path fill="none" stroke="#000000" d="M11583.0853,-200.2755C11628.5092,-381.8676 11705.7753,-369.815 11705.7753,-164.1177 11705.7753,37.7629 11631.3499,53.1182 11585.646,-118.0519"/>
-<polygon fill="#000000" stroke="#000000" points="11582.1989,-117.4023 11583.0853,-127.96 11588.9762,-119.1539 11582.1989,-117.4023"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M11583.0853,-200.2755C11628.5092,-381.8676 11705.7753,-369.815 11705.7753,-164.1177 11705.7753,37.7629 11631.3499,53.1182 11585.646,-118.0519"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="11582.1989,-117.4023 11583.0853,-127.96 11588.9762,-119.1539 11582.1989,-117.4023"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 70d85d3e35122efac4a626803c1f5f0819de8f5c8fefb163c1559459a89e2743 -->
+<!-- ruby-types:sha256: 324bdf896c9505d532d3f412dba1d2196e0215e75d39bbac4a70bc0e67fe9b52 -->

@@ -14,6 +14,8 @@ private:
     static BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);
     static void fillInTopoSorts(core::Context ctx, CFG &cfg);
     static void dealias(core::Context ctx, CFG &cfg);
+    static void simplify(core::Context ctx, CFG &cfg);
+    static void sanityCheck(core::Context ctx, CFG &cfg);
     static void fillInBlockArguments(core::Context ctx, CFG &cfg);
     static int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
     static int topoSortBwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);

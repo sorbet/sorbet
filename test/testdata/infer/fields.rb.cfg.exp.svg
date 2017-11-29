@@ -35,15 +35,15 @@
 <!-- bb::&lt;constant:Foo&gt;#foo_0&#45;&gt;bb::&lt;constant:Foo&gt;#foo_1 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;constant:Foo&gt;#foo_0&#45;&gt;bb::&lt;constant:Foo&gt;#foo_1</title>
-<path fill="none" stroke="#000000" d="M283,-123.7426C283,-115.1039 283,-106.542 283,-98.5028"/>
-<polygon fill="#000000" stroke="#000000" points="286.5001,-98.2733 283,-88.2733 279.5001,-98.2733 286.5001,-98.2733"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M283,-123.7426C283,-115.1039 283,-106.542 283,-98.5028"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="286.5001,-98.2733 283,-88.2733 279.5001,-98.2733 286.5001,-98.2733"/>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#foo_1&#45;&gt;bb::&lt;constant:Foo&gt;#foo_1 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;constant:Foo&gt;#foo_1&#45;&gt;bb::&lt;constant:Foo&gt;#foo_1</title>
-<path fill="none" stroke="#000000" d="M388.9589,-77.5041C403.8215,-73.3412 413.7753,-64.8398 413.7753,-52 413.7753,-33.029 392.0458,-23.529 364.8592,-23.5001"/>
-<polygon fill="#000000" stroke="#000000" points="364.4752,-20.0127 354.6263,-23.9179 364.7608,-27.0069 364.4752,-20.0127"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M388.9589,-77.5041C403.8215,-73.3412 413.7753,-64.8398 413.7753,-52 413.7753,-33.029 392.0458,-23.529 364.8592,-23.5001"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="364.4752,-20.0127 354.6263,-23.9179 364.7608,-27.0069 364.4752,-20.0127"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: a881488c16f089c16ec687269c5a687d8efb63eb65f27475910638b009d24fdd -->
+<!-- ruby-types:sha256: 8009c1cbd4d96493d1fa630177418f29b0c3a37569641808d34cd752bca72b17 -->

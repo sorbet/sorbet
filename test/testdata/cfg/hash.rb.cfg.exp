@@ -10,11 +10,11 @@ returnMethodTemp$1 = 17 : Integer(17)
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestHash>#something_0" -> "bb::<constant:TestHash>#something_1";
+    "bb::<constant:TestHash>#something_0" -> "bb::<constant:TestHash>#something_1" [style="bold"];
     "bb::<constant:TestHash>#something_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestHash>#something_1" -> "bb::<constant:TestHash>#something_1";
+    "bb::<constant:TestHash>#something_1" -> "bb::<constant:TestHash>#something_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestHash>#test" {
@@ -36,11 +36,11 @@ returnMethodTemp$1 = hashTemp$10.<build-hash>(hashTemp$3, hashTemp$4, hashTemp$6
 returnMethodTemp$11 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestHash>#test_0" -> "bb::<constant:TestHash>#test_1";
+    "bb::<constant:TestHash>#test_0" -> "bb::<constant:TestHash>#test_1" [style="bold"];
     "bb::<constant:TestHash>#test_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestHash>#test_1" -> "bb::<constant:TestHash>#test_1";
+    "bb::<constant:TestHash>#test_1" -> "bb::<constant:TestHash>#test_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:TestHash>#test_shaped" {
@@ -64,11 +64,11 @@ returnMethodTemp$1 = hashTemp$12.<build-hash>(hashTemp$3, hashTemp$4, hashTemp$5
 returnMethodTemp$13 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:TestHash>#test_shaped_0" -> "bb::<constant:TestHash>#test_shaped_1";
+    "bb::<constant:TestHash>#test_shaped_0" -> "bb::<constant:TestHash>#test_shaped_1" [style="bold"];
     "bb::<constant:TestHash>#test_shaped_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:TestHash>#test_shaped_1" -> "bb::<constant:TestHash>#test_shaped_1";
+    "bb::<constant:TestHash>#test_shaped_1" -> "bb::<constant:TestHash>#test_shaped_1" [style="bold"];
 }
 
 }

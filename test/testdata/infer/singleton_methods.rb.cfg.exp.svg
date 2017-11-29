@@ -38,14 +38,14 @@
 <!-- bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_0&#45;&gt;bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_1 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_0&#45;&gt;bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_1</title>
-<path fill="none" stroke="#000000" d="M348,-135.9678C348,-123.4788 348,-110.3772 348,-98.3363"/>
-<polygon fill="#000000" stroke="#000000" points="351.5001,-98.0699 348,-88.07 344.5001,-98.07 351.5001,-98.0699"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M348,-135.9678C348,-123.4788 348,-110.3772 348,-98.3363"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="351.5001,-98.0699 348,-88.07 344.5001,-98.07 351.5001,-98.0699"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_1&#45;&gt;bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_1 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_1&#45;&gt;bb::&lt;singleton class:&lt;constant:Foo&gt;&gt;#bar_1</title>
-<path fill="none" stroke="#000000" d="M452.9202,-75.7502C468.3559,-72.0163 478.7753,-64.0996 478.7753,-52 478.7753,-34.7702 457.6473,-26.0223 430.9927,-25.7563"/>
-<polygon fill="#000000" stroke="#000000" points="430.8478,-22.2589 420.9514,-26.042 431.047,-29.256 430.8478,-22.2589"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M452.9202,-75.7502C468.3559,-72.0163 478.7753,-64.0996 478.7753,-52 478.7753,-34.7702 457.6473,-26.0223 430.9927,-25.7563"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="430.8478,-22.2589 420.9514,-26.042 431.047,-29.256 430.8478,-22.2589"/>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#baz_0 -->
 <g id="node3" class="node">
@@ -67,15 +67,15 @@
 <!-- bb::&lt;constant:Bar&gt;#baz_0&#45;&gt;bb::&lt;constant:Bar&gt;#baz_1 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;constant:Bar&gt;#baz_0&#45;&gt;bb::&lt;constant:Bar&gt;#baz_1</title>
-<path fill="none" stroke="#000000" d="M1036,-123.7298C1036,-115.1295 1036,-106.4963 1036,-98.3484"/>
-<polygon fill="#000000" stroke="#000000" points="1039.5001,-98.3263 1036,-88.3263 1032.5001,-98.3264 1039.5001,-98.3263"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1036,-123.7298C1036,-115.1295 1036,-106.4963 1036,-98.3484"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1039.5001,-98.3263 1036,-88.3263 1032.5001,-98.3264 1039.5001,-98.3263"/>
 </g>
 <!-- bb::&lt;constant:Bar&gt;#baz_1&#45;&gt;bb::&lt;constant:Bar&gt;#baz_1 -->
 <g id="edge4" class="edge">
 <title>bb::&lt;constant:Bar&gt;#baz_1&#45;&gt;bb::&lt;constant:Bar&gt;#baz_1</title>
-<path fill="none" stroke="#000000" d="M1140.9202,-75.7502C1156.3559,-72.0163 1166.7753,-64.0996 1166.7753,-52 1166.7753,-34.7702 1145.6473,-26.0223 1118.9927,-25.7563"/>
-<polygon fill="#000000" stroke="#000000" points="1118.8478,-22.2589 1108.9514,-26.042 1119.047,-29.256 1118.8478,-22.2589"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1140.9202,-75.7502C1156.3559,-72.0163 1166.7753,-64.0996 1166.7753,-52 1166.7753,-34.7702 1145.6473,-26.0223 1118.9927,-25.7563"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1118.8478,-22.2589 1108.9514,-26.042 1119.047,-29.256 1118.8478,-22.2589"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: d49f6084a9670abc1d7cd321f856ccf43dbcaae1a7b554887e6df8c37d9afd3e -->
+<!-- ruby-types:sha256: cd9696659791ac791411ee8a038f899e3eb68b9aa79c0405b826003863dd1f77 -->
