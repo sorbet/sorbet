@@ -1,3 +1,4 @@
+# @typed
 def foo
   while true
     good # error: Method good does not exist on Object

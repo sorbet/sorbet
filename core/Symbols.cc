@@ -59,7 +59,8 @@ bool SymbolRef::isSynthetic() const {
 }
 
 bool SymbolRef::isHiddenFromPrinting(GlobalState &gs) const {
-    return (isSynthetic() && *this != GlobalState::defn_Opus()) || info(gs).definitionLoc.file.file(gs).isPayload;
+    return (isSynthetic() && *this != GlobalState::defn_Opus()) ||
+           info(gs).definitionLoc.file.file(gs).source_type == File::Payload;
 }
 
 void printTabs(ostringstream &to, int count) {

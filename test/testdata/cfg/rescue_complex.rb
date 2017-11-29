@@ -1,3 +1,4 @@
+# @typed
 def multiple_rescue()
   begin
       meth # error: Method meth does not exist on Object

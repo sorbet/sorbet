@@ -1,3 +1,4 @@
+# @typed
 class HasMeth
     def meth
         'meth'

@@ -1,3 +1,4 @@
+# @typed
 
 class Object 
 end

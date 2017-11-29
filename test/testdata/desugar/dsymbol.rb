@@ -1,3 +1,4 @@
+# @typed
 :foo
 :"foo"
 :""

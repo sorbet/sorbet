@@ -1,3 +1,4 @@
+# @typed
 class Side
   def foo
     a = 1

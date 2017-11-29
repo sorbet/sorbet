@@ -1,3 +1,4 @@
+# @typed
 def foo
     begin
         1

@@ -1,3 +1,4 @@
+# @typed
 def baz1
   a = "foo"
   b = a.getbyte(a) # error: does not match expected type

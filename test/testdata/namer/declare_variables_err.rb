@@ -1,3 +1,4 @@
+# @typed
 class A
   A.declare_variables
 

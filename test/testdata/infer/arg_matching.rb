@@ -1,3 +1,4 @@
+# @typed
 class TestArgs
   def any; end
 

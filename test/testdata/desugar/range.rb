@@ -1,3 +1,4 @@
+# @typed
 def foo
     1..2
     Range.new(1, 2)

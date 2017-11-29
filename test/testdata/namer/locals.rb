@@ -1,3 +1,4 @@
+# @typed
 class TestLocals
   def method
     a = 1

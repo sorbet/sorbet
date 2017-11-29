@@ -1,3 +1,4 @@
+# @typed
 class NormalClass
   def normal_method
   end

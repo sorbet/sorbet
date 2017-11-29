@@ -18,8 +18,8 @@ vector<int> findLineBreaks(const std::string &s) {
     return res;
 }
 
-File::File(std::string &&path_, std::string &&source_)
-    : path_(path_), source_(source_), line_breaks(findLineBreaks(this->source_)) {}
+File::File(std::string &&path_, std::string &&source_, Type source_type)
+    : source_type(source_type), path_(path_), source_(source_), line_breaks(findLineBreaks(this->source_)) {}
 
 File &FileRef::file(GlobalState &gs) const {
     return gs.files[_id];

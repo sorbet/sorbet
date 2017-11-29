@@ -110,8 +110,7 @@ void GlobalStateSerializer::pickle(Pickler &p, File &what) {
 File GlobalStateSerializer::unpickleFile(UnPickler &p) {
     std::string path = p.getStr();
     std::string source = p.getStr();
-    File to(move(path), move(source));
-    to.isPayload = true;
+    File to(move(path), move(source), File::Payload);
     return to;
 }
 

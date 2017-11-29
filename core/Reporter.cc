@@ -9,19 +9,26 @@ using namespace std;
 
 void Reporter::_error(unique_ptr<BasicError> error) {
     bool isCriticalError = false;
+    File::Type source_type = File::Typed;
+    if (error->loc.file.exists()) {
+        source_type = error->loc.file.file(gs_).source_type;
+    }
+
     switch (error->what) {
         case ErrorClass::Internal:
             isCriticalError = true;
             break;
-        case ErrorClass::StubConstant:
-        case ErrorClass::UndeclaredVariable:
-        case ErrorClass::UnknownMethod:
-            if (allowUntyped) {
-                return;
-            }
+        case ErrorClass::ParserError:
+        case ErrorClass::InvalidMethodSignature:
+        case ErrorClass::InvalidTypeDeclaration:
+        case ErrorClass::InvalidDeclareVariables:
+        case ErrorClass::DuplicateVariableDeclaration:
+            // These are always shown, even for untyped source
+            break;
+
         default:
-            // something stupid to not be empty
-            isCriticalError = false;
+            if (source_type == File::Untyped)
+                return;
     }
 
     if (isCriticalError) {

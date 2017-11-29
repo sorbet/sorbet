@@ -1,3 +1,4 @@
+# @typed
 def foo
     /abc/
     Regexp.new('abc')

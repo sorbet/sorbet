@@ -1,3 +1,4 @@
+# @typed
 class A
   standard_method(
     {

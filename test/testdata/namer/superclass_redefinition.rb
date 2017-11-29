@@ -1,3 +1,4 @@
+# @typed
 class A < Object
 end
 class B

@@ -1,3 +1,4 @@
+# @typed
 class Foo
   def bar()
    s = if (true)
