@@ -325,7 +325,8 @@ public:
     // null if no block passed
     std::unique_ptr<Block> block;
 
-    Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store &args);
+    Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store &args,
+         std::unique_ptr<Block> block = nullptr);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

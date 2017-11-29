@@ -19,7 +19,7 @@ def calls_arg_with_object(arg, &blk)
 end
 
 def calls_with_object(&blk)
-    calls_arg_with_object(HasMeth.new, &blk) # error: Unsupported node type Splat
+    calls_arg_with_object(HasMeth.new, &blk)
 end
 
 class CallsWithObject
@@ -30,7 +30,7 @@ end
 
 class CallsWithObjectChild < CallsWithObject
     def self.calls_with_object(&blk)
-        super(&blk) # error: Unsupported node type Splat
+        super(&blk)
     end
 end
 
@@ -39,9 +39,9 @@ def foo(&blk)
     calls_with_object {|*args| :meth.to_proc.call(*args)} # error: MULTI
     calls_with_object {|x| :meth.to_proc.call(x)} # error: Method call does not exist on Proc
     calls_with_object {|x| x.meth}
-    calls_with_object(&blk) # error: Unsupported node type Splat
-    calls_with_object(&returns_lambda) # error: Unsupported node type Splat
-    calls_with_object(&HasToProc.new) # error: Unsupported node type Splat
+    calls_with_object(&blk)
+    calls_with_object(&returns_lambda)
+    calls_with_object(&HasToProc.new)
     calls_with_object {|*args| HasToProc.new.to_proc.call(*args)} # error: Unsupported
     CallsWithObject.calls_with_object(&:meth)
     CallsWithObject&.calls_with_object(&:meth)
