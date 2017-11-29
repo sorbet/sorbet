@@ -17,6 +17,12 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include <type_traits>
 #include <typeinfo>
 
+#ifndef NDEBUG
+// So you can use `cout` when debugging. Not included in production as it is a
+// performance hit.
+#include <iostream>
+#endif
+
 namespace ruby_typer {
 
 template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
