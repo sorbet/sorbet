@@ -1,0 +1,86 @@
+begin
+  class <emptyTree>::<constant:HasMeth><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    def meth<<constant:<todo sym>>>()
+      "meth"
+
+  end
+  def returns_lambda<<constant:<todo sym>>>()
+    self(<constant:<todo sym>>).lambda() do |x|
+      "returns_lambda"
+    end
+  class <emptyTree>::<constant:HasToProc><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    def to_proc<<constant:<todo sym>>>()
+      self(<constant:<todo sym>>).returns_lambda()
+
+  end
+  def calls_arg_with_object<<constant:<todo sym>>>(arg, &blk)
+    blk.call(arg)
+  def calls_with_object<<constant:<todo sym>>>(&blk)
+    self(<constant:<todo sym>>).calls_arg_with_object(<emptyTree>::<constant:HasMeth>.new()) do |*<block-pass>$10000|
+      blk.to_proc().call(<Not Supported (Splat)>)
+    end
+  class <emptyTree>::<constant:CallsWithObject><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    def self.calls_with_object<<constant:<todo sym>>>(&blk)
+      blk.call(<emptyTree>::<constant:HasMeth>.new())
+
+  end
+  class <emptyTree>::<constant:CallsWithObjectChild><<constant:<todo sym>>> < (<emptyTree>::<constant:CallsWithObject>)
+    def self.calls_with_object<<constant:<todo sym>>>(&blk)
+      self(<constant:<todo sym>>).super() do |*<block-pass>$10001|
+        blk.to_proc().call(<Not Supported (Splat)>)
+      end
+
+  end
+  def foo<<constant:<todo sym>>>(&blk)
+    begin
+      self(<constant:<todo sym>>).calls_with_object() do |<block-pass>$10002|
+        <block-pass>$10002.meth()
+      end
+      self(<constant:<todo sym>>).calls_with_object() do |*args|
+        :meth.to_proc().call(<Not Supported (Splat)>)
+      end
+      self(<constant:<todo sym>>).calls_with_object() do |x|
+        :meth.to_proc().call(x)
+      end
+      self(<constant:<todo sym>>).calls_with_object() do |x|
+        x.meth()
+      end
+      self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$10003|
+        blk.to_proc().call(<Not Supported (Splat)>)
+      end
+      self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$10004|
+        self(<constant:<todo sym>>).returns_lambda().to_proc().call(<Not Supported (Splat)>)
+      end
+      self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$10005|
+        <emptyTree>::<constant:HasToProc>.new().to_proc().call(<Not Supported (Splat)>)
+      end
+      self(<constant:<todo sym>>).calls_with_object() do |*args|
+        <emptyTree>::<constant:HasToProc>.new().to_proc().call(<Not Supported (Splat)>)
+      end
+      <emptyTree>::<constant:CallsWithObject>.calls_with_object() do |<block-pass>$10006|
+        <block-pass>$10006.meth()
+      end
+      begin
+        assignTemp$10007 = <emptyTree>::<constant:CallsWithObject>
+        if assignTemp$10007.nil?()
+          ::<constant:nil>
+        else
+          assignTemp$10007.calls_with_object() do |<block-pass>$10008|
+            <block-pass>$10008.meth()
+          end
+        end
+      end
+      <emptyTree>::<constant:CallsWithObjectChild>.calls_with_object() do |<block-pass>$10009|
+        <block-pass>$10009.meth()
+      end
+      self(<constant:<todo sym>>).calls_arg_with_object(<emptyTree>::<constant:HasMeth>.new()) do |<block-pass>$10010|
+        <block-pass>$10010.meth()
+      end
+      self(<constant:<todo sym>>).calls_arg_with_object(<emptyTree>::<constant:HasMeth>.new()) do |x|
+        x.meth()
+      end
+    end
+  self(<constant:<todo sym>>).foo() do |x|
+    "foo"
+  end
+end

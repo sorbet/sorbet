@@ -269,7 +269,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     while (getline(ss, line, '\n')) {
         smatch matches;
         if (regex_search(line, matches, errorRegex)) {
-            expectedErrors[linenum] = matches[1].str();
+            string match = matches[1].str();
+            int len = match.size();
+            if (len < 10 && match.find("MULTI") == string::npos) {
+                ADD_FAILURE_AT(inputPath.c_str(), linenum)
+                    << "Too short of a error message at " << len
+                    << " characters. Use MULTI or write something longer than: " << match;
+            }
+            expectedErrors[linenum] = match;
         }
         linenum += 1;
     }

@@ -21,9 +21,9 @@ module Opus::CIBot::Gerald
     def initialize
       @rules, invalid_rules =  # error: undeclared variable
               Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).  # error: Stubbing out unknown constant
-                partition(&:valid?) # error: Unsupported node type BlockPass
+                partition(&:valid?)
       if !invalid_rules.empty?
-        invalid_rule_ids = invalid_rules.map(&:token).join(',') # error: Unsupported node type BlockPass
+        invalid_rule_ids = invalid_rules.map(&:token).join(',')
         log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids) # error: Method log does not exist on Matcher
       end
     end
