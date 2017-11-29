@@ -85,7 +85,21 @@ string Reporter::ComplexError::toString(GlobalState &gs) {
     if (!this->loc.is_none()) {
         buf << this->loc.toString(gs) << endl;
     }
-    buf << '[' << (int)this->what << "] " << this->formatted << endl;
+    buf << '[' << (int)this->what << "] ";
+    if (loc.is_none()) {
+        buf << "???: " << this->formatted << endl;
+
+    } else {
+        auto pos = loc.position(gs);
+        buf << loc.file.file(gs).path() << ":";
+        buf << pos.first.line;
+        if (pos.second.line != pos.first.line) {
+            buf << "-";
+            buf << pos.second.line;
+        }
+        buf << " " << formatted << endl;
+    }
+
     bool first = true;
     for (auto &line : this->sections) {
         if (!first) {

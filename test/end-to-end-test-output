@@ -3,7 +3,7 @@ test/end-to-end-test-input.rb:3 Stubbing out unknown constant <emptyTree>::<cons
     ^^^^^^^^^^^^^^^
     raise arg # raise is defined by stdlib
     ^^^^^^^^^
-[7002] Argument _ does not match expected type.
+[7002] test/end-to-end-test-input.rb:16 Argument _ does not match expected type.
 Expected String | Class | Exception
 rbi/stdlib.rbi:6372 Method raise has specified type of argument _ as String | Class | Exception
       _: Opus::Types.any(String, Class, Exception),
@@ -16,7 +16,7 @@ test/end-to-end-test-input.rb:10
 
     foo("foo")
     ^^^^^^^^^^
-[7002] Argument arg does not match expected type.
+[7002] test/end-to-end-test-input.rb:20 Argument arg does not match expected type.
 Expected Integer
 test/end-to-end-test-input.rb:10 Method foo has specified type of argument arg as Integer
       arg: Integer
