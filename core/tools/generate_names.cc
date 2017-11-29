@@ -20,6 +20,8 @@ NameDef names[] = {
     {"andAnd", "&&"},
     {"orOr", "||"},
     {"to_s"},
+    {"to_a"},
+    {"to_hash"},
     {"to_proc"},
     {"concat"},
     {"intern"},
@@ -101,6 +103,7 @@ NameDef names[] = {
 
     {"emptyHash", "{}"},
     {"buildHash", "<build-hash>"},
+    {"splat", "<splat>"},
     {"arg0"},
 
     // Synthetic method created on a singleton class to hold initialization code

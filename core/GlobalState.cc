@@ -85,6 +85,10 @@ UTF8Desc range_DESC{(char *)range, (int)strlen(range)};
 const char *regexp = "Regexp";
 UTF8Desc regexp_DESC{(char *)regexp, (int)strlen(regexp)};
 
+// A magic non user-creatable class with methods to keep state between passes
+const char *magic = "<Magic>";
+UTF8Desc magic_DESC{(char *)magic, (int)strlen(magic)};
+
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved = "<<RESERVED>>";
 UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
@@ -152,6 +156,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef emptyHash_id = enterStaticFieldSymbol(Loc::none(0), defn_root(), Names::emptyHash());
     SymbolRef range_id = synthesizeClass(range_DESC);
     SymbolRef regexp_id = synthesizeClass(regexp_DESC);
+    SymbolRef magic_id = synthesizeClass(magic_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -179,17 +184,25 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(emptyHash_id == defn_emptyHash());
     Error::check(range_id == defn_Range());
     Error::check(regexp_id == defn_Regexp());
+    Error::check(magic_id == defn_Magic());
 
     // Synthesize ::{} = EmptyHash()
     defn_emptyHash().info(*this).resultType = make_unique<HashType>();
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = make_unique<ClassType>(defn_NilClass());
     // Synthesize Hash#build_hash(*vs : Object) => Hash
-    SymbolRef buildHash = enterMethodSymbol(Loc::none(0), defn_Hash(), Names::buildHash());
-    SymbolRef arg = enterMethodArgumentSymbol(Loc::none(0), buildHash, Names::arg0());
+    SymbolRef method = enterMethodSymbol(Loc::none(0), defn_Hash(), Names::buildHash());
+    SymbolRef arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
     arg.info(*this).setRepeated();
     arg.info(*this).resultType = make_unique<ClassType>(defn_Object());
-    buildHash.info(*this).resultType = make_unique<ClassType>(defn_Hash());
+    method.info(*this).arguments().push_back(arg);
+    method.info(*this).resultType = make_unique<ClassType>(defn_Hash());
+    // Synthesize <Magic>.<splat>(a: Array) => Untyped
+    method = enterMethodSymbol(Loc::none(0), defn_Magic().info(*this).singletonClass(*this), Names::splat());
+    arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
+    arg.info(*this).resultType = make_unique<ClassType>(defn_Array());
+    method.info(*this).arguments().push_back(arg);
+    method.info(*this).resultType = make_unique<ClassType>(defn_untyped());
 
     while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
         synthesizeClass(reserved_DESC);
