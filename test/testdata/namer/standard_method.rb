@@ -35,4 +35,6 @@ class A
   standard_method({x: T1}, "returns" => T1) # error: Keys must be symbol literals
   def f2(x)
   end
+
+  standard_method({z: T1}, returns: T1) # error: Malformed standard_method. No method def following it
 end

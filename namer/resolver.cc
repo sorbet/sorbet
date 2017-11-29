@@ -422,6 +422,11 @@ private:
                      [&](ast::Expression *e) {});
         }
 
+        if (lastStandardMethod) {
+            ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
+                                   "Malformed standard_method. No method def following it");
+        }
+
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
                                   [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
 
