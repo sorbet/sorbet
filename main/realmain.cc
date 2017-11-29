@@ -38,6 +38,9 @@ public:
     CFG_Collector_and_Typer(bool shouldType, bool printCFGs) : shouldType(shouldType), printCFGs(printCFGs){};
 
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
+        if (m->loc.file.file(ctx).source_type == ruby_typer::core::File::Untyped)
+            return m;
+
         auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (shouldType) {
             ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
