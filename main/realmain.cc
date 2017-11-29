@@ -156,7 +156,8 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                     cout << "digraph \"" + ruby_typer::File::getFileName(f.file(gs).path().toString()) + "\"{" << endl;
                 }
                 tracer->trace("CFG+Infer: {}", f.file(gs).path().toString());
-                CFG_Collector_and_Typer collector(silenceErrors || !opts["no-typer"].as<bool>(), printCFG);
+                bool doType = opts["typed"].as<string>() != "never";
+                CFG_Collector_and_Typer collector(doType, printCFG);
                 result.emplace_back(
                     ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
 
@@ -303,7 +304,8 @@ int realmain(int argc, char **argv) {
     // Developer options
     options.add_options("dev")("p,print", "Print: " + print_options, cxxopts::value<vector<string>>(prints), "type");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("no-typer", "Do not type the CFG");
+    options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
+                               cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
     options.add_options("dev")("trace", "Trace phases");
     options.add_options("dev")("set-freshNameId", "Start freshNameId at value", cxxopts::value<int>(), "int");
@@ -352,6 +354,8 @@ int realmain(int argc, char **argv) {
         tracer->set_level(spd::level::off);
     }
 
+    bool forceTyped = options["typed"].as<string>() == "always";
+
     ruby_typer::core::GlobalState gs = createInitialGlobalState(options);
 
     stats st;
@@ -378,6 +382,11 @@ int realmain(int argc, char **argv) {
         st.lines++;
         st.bytes += src.size();
         inputFiles.push_back(gs.enterFile(string("-e"), src));
+    }
+    if (forceTyped) {
+        for (auto &f : inputFiles) {
+            f.file(gs).source_type = ruby_typer::core::File::Typed;
+        }
     }
 
     if (options.count("set-freshNameId") != 0) {
