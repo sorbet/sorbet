@@ -313,7 +313,7 @@ int realmain(int argc, char **argv) {
 
     try {
         options.parse(argc, argv);
-    } catch (cxxopts::option_not_exists_exception e) {
+    } catch (cxxopts::OptionParseException &e) {
         console->info("{}\n\n{}", e.what(), options.help());
         return 0;
     }
