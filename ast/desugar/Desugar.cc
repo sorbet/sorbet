@@ -91,6 +91,11 @@ unique_ptr<Expression> mkInsSeq(core::Loc loc, InsSeq::STATS_store stats, unique
     return make_unique<InsSeq>(loc, move(stats), move(expr));
 }
 
+unique_ptr<Expression> mkSplat(core::Loc loc, unique_ptr<Expression> arg) {
+    auto to_a = mkSend0(loc, move(arg), core::Names::to_a());
+    return mkSend1(loc, mkIdent(loc, core::GlobalState::defn_Magic()), core::Names::splat(), move(to_a));
+}
+
 unique_ptr<Expression> mkInsSeq1(core::Loc loc, unique_ptr<Expression> stat, unique_ptr<Expression> expr) {
     InsSeq::STATS_store stats;
     stats.emplace_back(move(stat));
@@ -207,8 +212,7 @@ unique_ptr<Block> node2Proc(core::Context ctx, unique_ptr<parser::Node> node) {
     unique_ptr<Expression> rest =
         make_unique<RestArg>(loc, unique_ptr<Reference>(cast_tree<Reference>(mkLocal(loc, temp).release())));
     args.emplace_back(move(rest));
-    unique_ptr<Expression> body =
-        mkSend1(loc, move(proc), core::Names::call(), make_unique<NotSupported>(loc, "Splat"));
+    unique_ptr<Expression> body = mkSend1(loc, move(proc), core::Names::call(), mkSplat(loc, mkLocal(loc, temp)));
     return make_unique<Block>(loc, move(args), move(body));
 }
 
@@ -746,11 +750,49 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             [&](parser::Array *array) {
                 Array::ENTRY_store elems;
                 elems.reserve(array->elts.size());
+                unique_ptr<Expression> lastMerge;
                 for (auto &stat : array->elts) {
-                    elems.emplace_back(node2TreeImpl(ctx, stat));
+                    if (auto splat = parser::cast_node<parser::Splat>(stat.get())) {
+                        // Desguar
+                        //   [a, **x, remaining}
+                        // into
+                        //   a.concat(x.to_a).concat(remaining)
+                        auto var = mkSend0(what->loc, node2TreeImpl(ctx, splat->var), core::Names::to_a());
+                        if (elems.empty()) {
+                            if (lastMerge != nullptr) {
+                                lastMerge = mkSend1(what->loc, move(lastMerge), core::Names::concat(), move(var));
+                            } else {
+                                lastMerge = move(var);
+                            }
+                        } else {
+                            unique_ptr<Expression> current = make_unique<Array>(what->loc, move(elems));
+                            elems.clear();
+                            if (lastMerge != nullptr) {
+                                lastMerge = mkSend1(what->loc, move(lastMerge), core::Names::concat(), move(current));
+                            } else {
+                                lastMerge = move(current);
+                            }
+                            lastMerge = mkSend1(what->loc, move(lastMerge), core::Names::concat(), move(var));
+                        }
+                    } else {
+                        elems.emplace_back(node2TreeImpl(ctx, stat));
+                    }
                 };
 
-                unique_ptr<Expression> res = make_unique<Array>(what->loc, move(elems));
+                unique_ptr<Expression> res;
+                if (elems.empty()) {
+                    if (lastMerge != nullptr) {
+                        res = move(lastMerge);
+                    } else {
+                        // Empty array
+                        res = make_unique<Array>(what->loc, move(elems));
+                    }
+                } else {
+                    res = make_unique<Array>(what->loc, move(elems));
+                    if (lastMerge != nullptr) {
+                        res = mkSend1(what->loc, move(lastMerge), core::Names::concat(), move(res));
+                    }
+                }
                 result.swap(res);
             },
             [&](parser::Hash *hash) {
@@ -774,13 +816,14 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                         // Desguar
                         //   {a: 'a', **x, remaining}
                         // into
-                        //   {a: 'a'}.merge(x).merge(remaining)
+                        //   {a: 'a'}.merge(x.to_h).merge(remaining)
+                        auto expr = mkSend0(what->loc, node2TreeImpl(ctx, splat->expr), core::Names::to_hash());
                         if (keys.empty()) {
                             if (lastMerge != nullptr) {
-                                lastMerge = mkSend1(what->loc, move(lastMerge), core::Names::merge(),
-                                                    node2TreeImpl(ctx, splat->expr));
+                                lastMerge = mkSend1(what->loc, move(lastMerge), core::Names::merge(), move(expr));
+
                             } else {
-                                lastMerge = node2TreeImpl(ctx, splat->expr);
+                                lastMerge = move(expr);
                             }
                         } else {
                             unique_ptr<Expression> current = make_unique<Hash>(what->loc, move(keys), move(values));
@@ -791,8 +834,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                             } else {
                                 lastMerge = move(current);
                             }
-                            lastMerge = mkSend1(what->loc, move(lastMerge), core::Names::merge(),
-                                                node2TreeImpl(ctx, splat->expr));
+                            lastMerge = mkSend1(what->loc, move(lastMerge), core::Names::merge(), move(expr));
                         }
                     }
                 };
@@ -957,13 +999,19 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto exceptionsExpr = node2TreeImpl(ctx, resbody->exception);
                 if (cast_tree<EmptyTree>(exceptionsExpr.get()) != nullptr) {
                     // No exceptions captured
-                } else {
-                    auto exceptionsArray = cast_tree<ast::Array>(exceptionsExpr.get());
+                } else if (auto exceptionsArray = cast_tree<ast::Array>(exceptionsExpr.get())) {
                     DEBUG_ONLY(Error::check(exceptionsArray != nullptr));
 
                     for (auto &elem : exceptionsArray->elems) {
                         exceptions.emplace_back(move(elem));
                     }
+                } else if (auto exceptionsSend = cast_tree<ast::Send>(exceptionsExpr.get())) {
+                    Error::check(exceptionsSend->fun == core::Names::splat() ||
+                                 exceptionsSend->fun == core::Names::to_a() ||
+                                 exceptionsSend->fun == core::Names::concat());
+                    exceptions.emplace_back(move(exceptionsExpr));
+                } else {
+                    Error::raise("Bad inner node type");
                 }
 
                 unique_ptr<Expression> res = make_unique<RescueCase>(
@@ -1052,6 +1100,10 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 if (assign != nullptr) {
                     res = mkInsSeq1(c->loc, move(assign), move(res));
                 }
+                result.swap(res);
+            },
+            [&](parser::Splat *splat) {
+                auto res = mkSplat(what->loc, node2TreeImpl(ctx, splat->var));
                 result.swap(res);
             },
             [&](parser::BlockPass *a) { Error::raise("Send should have already handled the BlockPass"); },

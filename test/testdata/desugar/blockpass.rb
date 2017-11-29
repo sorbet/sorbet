@@ -36,13 +36,13 @@ end
 
 def foo(&blk)
     calls_with_object(&:meth)
-    calls_with_object {|*args| :meth.to_proc.call(*args)} # error: MULTI
+    calls_with_object {|*args| :meth.to_proc.call(*args)} # error: Method call does not exist on Proc
     calls_with_object {|x| :meth.to_proc.call(x)} # error: Method call does not exist on Proc
     calls_with_object {|x| x.meth}
     calls_with_object(&blk)
     calls_with_object(&returns_lambda)
     calls_with_object(&HasToProc.new)
-    calls_with_object {|*args| HasToProc.new.to_proc.call(*args)} # error: Unsupported
+    calls_with_object {|*args| HasToProc.new.to_proc.call(*args)}
     CallsWithObject.calls_with_object(&:meth)
     CallsWithObject&.calls_with_object(&:meth)
     CallsWithObjectChild.calls_with_object(&:meth)
