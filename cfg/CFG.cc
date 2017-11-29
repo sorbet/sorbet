@@ -47,10 +47,10 @@ string CFG::toString(core::Context ctx) {
         auto text = this->basicBlocks[i]->toString(ctx);
         buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" [label = \"" << text << "\"];" << endl
             << endl;
-        buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
+        buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" -> \"bb" << symbolName << "_"
             << this->basicBlocks[i]->bexit.thenb->id << "\" [style=\"bold\"];" << endl;
         if (this->basicBlocks[i]->bexit.thenb != this->basicBlocks[i]->bexit.elseb) {
-            buf << "    \"bb" << symbolName << "_" << i << "\" -> \"bb" << symbolName << "_"
+            buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" -> \"bb" << symbolName << "_"
                 << this->basicBlocks[i]->bexit.elseb->id << "\" [style=\"tapered\"];" << endl
                 << endl;
         }
