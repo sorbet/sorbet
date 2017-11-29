@@ -180,27 +180,36 @@ private:
                                    "Malformed standard_method " + lastStandardMethod->toString(ctx));
             return;
         }
-        if (lastStandardMethod->args.size() != 2) {
+        if (lastStandardMethod->args.empty()) {
+            ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
+                                   "No arguments passed to `standard_method'. Expected (arg_types, options)");
+            return;
+        }
+        if (lastStandardMethod->args.size() > 2) {
             ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
                                    "Wrong number of arguments for `standard_method'. Expected (arg_types, options)");
+            return;
         }
+        // Both args must be Hash<Symbol>
         for (auto &arg : lastStandardMethod->args) {
             if (auto *hash = ast::cast_tree<ast::Hash>(arg.get())) {
                 for (auto &key : hash->keys) {
                     if (ast::cast_tree<ast::SymbolLit>(key.get()) == nullptr) {
                         ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidMethodSignature,
                                                "Malformed standard_method. Keys must be symbol literals.");
+                        return;
                     }
                 }
             } else {
                 ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidMethodSignature,
                                        "Malformed standard_method. Expected a hash literal.");
+                return;
             }
         }
 
-        ast::Hash *hash;
-        if (lastStandardMethod->args.size() >= 1 &&
-            (hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[0].get()))) {
+        ast::Hash *hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[0].get());
+        Error::check(hash);
+        if (lastStandardMethod->args.size() == 2) {
             int i = 0;
             for (unique_ptr<ast::Expression> &key : hash->keys) {
                 unique_ptr<ast::Expression> &value = hash->values[i++];
@@ -219,26 +228,26 @@ private:
                     }
                 }
             }
+            // We consumed the first hash, leave the next one for options
+            hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[1].get());
         }
-        if (lastStandardMethod->args.size() >= 2 &&
-            (hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[1].get()))) {
-            int i = 0;
-            for (unique_ptr<ast::Expression> &key : hash->keys) {
-                unique_ptr<ast::Expression> &value = hash->values[i++];
-                if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
-                    switch (symbolLit->name._id) {
-                        case core::Names::returns()._id:
-                            // fill in return type
-                            methoInfo.resultType = getResultType(ctx, value);
-                            methoInfo.definitionLoc = value->loc;
-                            break;
-                        case core::Names::checked()._id:
-                            break;
-                        default:
-                            ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                                   "Malformed standard_method. Unknown argument name {}",
-                                                   key->toString(ctx));
-                    }
+
+        int i = 0;
+        for (unique_ptr<ast::Expression> &key : hash->keys) {
+            unique_ptr<ast::Expression> &value = hash->values[i++];
+            if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
+                switch (symbolLit->name._id) {
+                    case core::Names::returns()._id:
+                        // fill in return type
+                        methoInfo.resultType = getResultType(ctx, value);
+                        methoInfo.definitionLoc = value->loc;
+                        break;
+                    case core::Names::checked()._id:
+                        break;
+                    default:
+                        ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
+                                               "Malformed standard_method. Unknown argument name {}",
+                                               key->toString(ctx));
                 }
             }
         }
