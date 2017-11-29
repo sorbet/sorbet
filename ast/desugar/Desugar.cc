@@ -16,45 +16,30 @@ namespace {
 
 unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node> &what);
 
-unique_ptr<Expression> mkSend(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun, Send::ARGS_store &args,
+unique_ptr<Expression> mkSend(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store args,
                               u4 flags = 0, unique_ptr<Block> blk = nullptr) {
     auto send = make_unique<Send>(loc, move(recv), fun, args, move(blk));
     send->flags = flags;
     return move(send);
 }
-unique_ptr<Expression> mkSend(core::Loc loc, unique_ptr<Expression> &&recv, core::NameRef fun, Send::ARGS_store &args,
-                              u4 flags = 0) {
-    return mkSend(loc, recv, fun, args, flags);
-}
 
-unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun,
-                               unique_ptr<Expression> &arg1) {
+unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun,
+                               unique_ptr<Expression> arg1) {
     Send::ARGS_store nargs;
     nargs.emplace_back(move(arg1));
     return make_unique<Send>(loc, move(recv), fun, nargs);
 }
 
-unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> &&recv, core::NameRef fun,
-                               unique_ptr<Expression> &&arg1) {
-    return mkSend1(loc, recv, fun, arg1);
-}
-
-unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun,
-                               unique_ptr<Expression> &&arg1) {
-    return mkSend1(loc, recv, fun, arg1);
-}
-
-unique_ptr<Expression> mkSend2(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun,
-                               unique_ptr<Expression> &arg1, unique_ptr<Expression> &arg2) {
+unique_ptr<Expression> mkSend2(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun,
+                               unique_ptr<Expression> arg1, unique_ptr<Expression> arg2) {
     Send::ARGS_store nargs;
     nargs.emplace_back(move(arg1));
     nargs.emplace_back(move(arg2));
     return make_unique<Send>(loc, move(recv), fun, nargs);
 }
 
-unique_ptr<Expression> mkSend3(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun,
-                               unique_ptr<Expression> &arg1, unique_ptr<Expression> &arg2,
-                               unique_ptr<Expression> &arg3) {
+unique_ptr<Expression> mkSend3(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun,
+                               unique_ptr<Expression> arg1, unique_ptr<Expression> arg2, unique_ptr<Expression> arg3) {
     Send::ARGS_store nargs;
     nargs.emplace_back(move(arg1));
     nargs.emplace_back(move(arg2));
@@ -62,13 +47,9 @@ unique_ptr<Expression> mkSend3(core::Loc loc, unique_ptr<Expression> &recv, core
     return make_unique<Send>(loc, move(recv), fun, nargs);
 }
 
-unique_ptr<Expression> mkSend0(core::Loc loc, unique_ptr<Expression> &recv, core::NameRef fun) {
+unique_ptr<Expression> mkSend0(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun) {
     Send::ARGS_store nargs;
     return make_unique<Send>(loc, move(recv), fun, nargs);
-}
-
-unique_ptr<Expression> mkSend0(core::Loc loc, unique_ptr<Expression> &&recv, core::NameRef fun) {
-    return mkSend0(loc, recv, fun);
 }
 
 unique_ptr<Expression> mkIdent(core::Loc loc, core::SymbolRef symbol) {
@@ -89,38 +70,28 @@ unique_ptr<Expression> cpRef(core::Loc loc, Reference &name) {
     Error::notImplemented();
 }
 
-unique_ptr<Expression> mkAssign(core::Loc loc, unique_ptr<Expression> &lhs, unique_ptr<Expression> &rhs) {
+unique_ptr<Expression> mkAssign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs) {
     return make_unique<Assign>(loc, move(lhs), move(rhs));
 }
 
-unique_ptr<Expression> mkAssign(core::Loc loc, core::NameRef name, unique_ptr<Expression> &rhs) {
-    auto id = mkLocal(loc, name);
-    return mkAssign(loc, id, rhs);
+unique_ptr<Expression> mkAssign(core::Loc loc, core::NameRef name, unique_ptr<Expression> rhs) {
+    return mkAssign(loc, mkLocal(loc, name), move(rhs));
 }
 
-unique_ptr<Expression> mkAssign(core::Loc loc, core::NameRef name, unique_ptr<Expression> &&rhs) {
-    return mkAssign(loc, name, rhs);
-}
-
-unique_ptr<Expression> mkIf(core::Loc loc, unique_ptr<Expression> &cond, unique_ptr<Expression> &thenp,
-                            unique_ptr<Expression> &elsep) {
+unique_ptr<Expression> mkIf(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp,
+                            unique_ptr<Expression> elsep) {
     return make_unique<If>(loc, move(cond), move(thenp), move(elsep));
-}
-
-unique_ptr<Expression> mkIf(core::Loc loc, unique_ptr<Expression> &&cond, unique_ptr<Expression> &&thenp,
-                            unique_ptr<Expression> &&elsep) {
-    return mkIf(loc, cond, thenp, elsep);
 }
 
 unique_ptr<Expression> mkEmptyTree(core::Loc loc) {
     return make_unique<EmptyTree>(loc);
 }
 
-unique_ptr<Expression> mkInsSeq(core::Loc loc, InsSeq::STATS_store &stats, unique_ptr<Expression> &&expr) {
+unique_ptr<Expression> mkInsSeq(core::Loc loc, InsSeq::STATS_store stats, unique_ptr<Expression> expr) {
     return make_unique<InsSeq>(loc, stats, move(expr));
 }
 
-unique_ptr<Expression> mkInsSeq1(core::Loc loc, unique_ptr<Expression> stat, unique_ptr<Expression> &&expr) {
+unique_ptr<Expression> mkInsSeq1(core::Loc loc, unique_ptr<Expression> stat, unique_ptr<Expression> expr) {
     InsSeq::STATS_store stats;
     stats.emplace_back(move(stat));
     return make_unique<InsSeq>(loc, stats, move(expr));
@@ -189,7 +160,7 @@ unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::
     unique_ptr<Expression> res;
     unique_ptr<Expression> first = node2TreeImpl(ctx, *it);
     if (cast_tree<StringLit>(first.get()) == nullptr) {
-        res = mkSend0(loc, first, core::Names::to_s());
+        res = mkSend0(loc, move(first), core::Names::to_s());
     } else {
         res = move(first);
     }

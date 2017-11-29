@@ -66,8 +66,8 @@ public:
     ANCESTORS_store ancestors;
     ClassDefKind kind;
 
-    ClassDef(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<Expression> name, ANCESTORS_store &ancestors,
-             RHS_store &rhs, ClassDefKind kind);
+    ClassDef(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<Expression> name, ANCESTORS_store ancestors,
+             RHS_store rhs, ClassDefKind kind);
 
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
@@ -86,7 +86,7 @@ public:
     core::NameRef name;
     bool isSelf;
 
-    MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store &args,
+    MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
               std::unique_ptr<Expression> rhs, bool isSelf);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
@@ -175,7 +175,7 @@ public:
     std::unique_ptr<Expression> var;
     std::unique_ptr<Expression> body;
 
-    RescueCase(core::Loc loc, EXCEPTION_store &exceptions, std::unique_ptr<Expression> var,
+    RescueCase(core::Loc loc, EXCEPTION_store exceptions, std::unique_ptr<Expression> var,
                std::unique_ptr<Expression> body);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
@@ -191,7 +191,7 @@ public:
     RESCUE_CASE_store rescueCases;
     std::unique_ptr<Expression> else_;
 
-    Rescue(core::Loc loc, std::unique_ptr<Expression> body, RESCUE_CASE_store &rescueCases,
+    Rescue(core::Loc loc, std::unique_ptr<Expression> body, RESCUE_CASE_store rescueCases,
            std::unique_ptr<Expression> else_);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
@@ -325,7 +325,7 @@ public:
     // null if no block passed
     std::unique_ptr<Block> block;
 
-    Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store &args,
+    Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
          std::unique_ptr<Block> block = nullptr);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
@@ -351,7 +351,7 @@ public:
     ENTRY_store keys;
     ENTRY_store values;
 
-    Hash(core::Loc loc, ENTRY_store &keys, ENTRY_store &values);
+    Hash(core::Loc loc, ENTRY_store keys, ENTRY_store values);
 
     virtual std::string toString(core::GlobalState &gs, int tabs);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
@@ -365,7 +365,7 @@ public:
 
     ENTRY_store elems;
 
-    Array(core::Loc loc, ENTRY_store &elems);
+    Array(core::Loc loc, ENTRY_store elems);
 
     virtual std::string toString(core::GlobalState &gs, int tabs);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
@@ -469,7 +469,7 @@ public:
     std::unique_ptr<Expression> body;
     core::SymbolRef symbol;
 
-    Block(core::Loc loc, MethodDef::ARGS_store &args, std::unique_ptr<Expression> body);
+    Block(core::Loc loc, MethodDef::ARGS_store args, std::unique_ptr<Expression> body);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -483,7 +483,7 @@ public:
 
     std::unique_ptr<Expression> expr;
 
-    InsSeq(core::Loc loc, STATS_store &stats, std::unique_ptr<Expression> expr);
+    InsSeq(core::Loc loc, STATS_store stats, std::unique_ptr<Expression> expr);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
