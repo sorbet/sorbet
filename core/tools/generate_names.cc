@@ -75,6 +75,10 @@ NameDef names[] = {
     {"attrAccessor", "attr_accessor"},
     {"attrWriter", "attr_writer"},
     {"attrReader", "attr_reader"},
+    {"private_", "private"},
+    {"protected_", "protected"},
+    {"public_", "public"},
+    {"privateClassMethod", "private_class_method"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store

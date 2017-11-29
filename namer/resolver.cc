@@ -421,6 +421,16 @@ private:
     void processClassBody(core::Context ctx, ast::ClassDef *klass) {
         unique_ptr<ast::Expression> lastStandardMethod;
 
+        auto handleMDef = [&](ast::MethodDef *mdef) {
+            if (!lastStandardMethod) {
+                return;
+            }
+            core::Symbol &methoInfo = mdef->symbol.info(ctx);
+            fillInInfoFromStandardMethod(ctx, methoInfo, ast::cast_tree<ast::Send>(lastStandardMethod.get()),
+                                         mdef->args.size());
+            lastStandardMethod.reset(nullptr);
+        };
+
         for (auto &stat : klass->rhs) {
             typecase(stat.get(),
 
@@ -450,15 +460,22 @@ private:
                              case core::Names::attr()._id:
                              case core::Names::attrReader()._id:
                                  defineAttr(ctx.withOwner(klass->symbol), send, true, false);
-
                                  break;
                              case core::Names::attrWriter()._id:
                                  defineAttr(ctx.withOwner(klass->symbol), send, false, true);
                                  break;
-
                              case core::Names::attrAccessor()._id:
                                  defineAttr(ctx.withOwner(klass->symbol), send, true, true);
                                  break;
+                             case core::Names::private_()._id:
+                             case core::Names::protected_()._id:
+                             case core::Names::public_()._id:
+                             case core::Names::privateClassMethod()._id:
+                                 if (send->args.size() == 1) {
+                                     if (ast::MethodDef *mdef = ast::cast_tree<ast::MethodDef>(send->args[0].get())) {
+                                         handleMDef(mdef);
+                                     }
+                                 }
                              default:
                                  swap(mine, stat);
                                  return;
@@ -466,16 +483,7 @@ private:
                          stat.reset(nullptr);
                      },
 
-                     [&](ast::MethodDef *mdef) {
-                         if (lastStandardMethod) {
-                             core::Symbol &methoInfo = mdef->symbol.info(ctx);
-                             fillInInfoFromStandardMethod(ctx, methoInfo,
-                                                          ast::cast_tree<ast::Send>(lastStandardMethod.get()),
-                                                          mdef->args.size());
-                             lastStandardMethod.reset(nullptr);
-                         }
-
-                     },
+                     [&](ast::MethodDef *mdef) { handleMDef(mdef); },
                      [&](ast::ClassDef *cdef) {
                          // Leave in place
                      },
