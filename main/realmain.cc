@@ -313,9 +313,9 @@ int realmain(int argc, char **argv) {
 
     try {
         options.parse(argc, argv);
-    } catch (cxxopts::option_not_exists_exception e) {
+    } catch (cxxopts::OptionParseException &e) {
         console->info("{}\n\n{}", e.what(), options.help());
-        return 0;
+        return 1;
     }
 
     if (options["h"].as<bool>()) {
@@ -324,7 +324,7 @@ int realmain(int argc, char **argv) {
     }
     if (options.count("e") == 0 && files.empty()) {
         console->info("You must pass either `-e` or at least one ruby file.\n\n{} \n", options.help());
-        return 0;
+        return 1;
     }
 
     switch (options.count("v")) {
