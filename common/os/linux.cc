@@ -40,4 +40,8 @@ string getProgramName() {
     return res;
 }
 
+bool stopInDebugger() {
+    return false;
+}
+
 #endif
