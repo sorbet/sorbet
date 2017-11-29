@@ -284,7 +284,7 @@ public:
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
         cnst.info(ctx).resultType = core::Types::dynamic();
 
-        return asgn;
+        return new ast::Assign(asgn->loc, make_unique<ast::Ident>(lhs->loc, cnst), move(asgn->rhs));
     }
 
 private:

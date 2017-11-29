@@ -491,6 +491,18 @@ public:
         return new ast::Ident(c->loc, resolved);
     }
 
+    ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
+        auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
+        if (id == nullptr || !id->symbol.info(ctx).isStaticField())
+            return asgn;
+        auto *rhs = ast::cast_tree<ast::Ident>(asgn->rhs.get());
+        if (rhs == nullptr || !rhs->symbol.info(ctx).isClass())
+            return asgn;
+
+        id->symbol.info(ctx).resultType = make_unique<core::ClassType>(rhs->symbol.info(ctx).singletonClass(ctx));
+        return asgn;
+    }
+
     unique_ptr<Nesting> nesting_;
 };
 
