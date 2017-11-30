@@ -159,20 +159,16 @@ public:
         return SymbolRef(22);
     }
 
-    static constexpr SymbolRef defn_emptyHash() {
+    static constexpr SymbolRef defn_Range() {
         return SymbolRef(23);
     }
 
-    static constexpr SymbolRef defn_Range() {
+    static constexpr SymbolRef defn_Regexp() {
         return SymbolRef(24);
     }
 
-    static constexpr SymbolRef defn_Regexp() {
-        return SymbolRef(25);
-    }
-
     static constexpr SymbolRef defn_Magic() {
-        return SymbolRef(26);
+        return SymbolRef(25);
     }
 
     // Keep as last and update to match the last entry

@@ -115,6 +115,10 @@ string HashType::typeName() {
     return "HashType";
 }
 
+string MagicType::typeName() {
+    return "MagicType";
+}
+
 string AndType::typeName() {
     return "AndType";
 }
@@ -165,6 +169,12 @@ string HashType::toString(core::Context ctx, int tabs) {
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
+}
+
+MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Magic())) {}
+
+string MagicType::toString(core::Context ctx, int tabs) {
+    return underlying->toString(ctx, tabs);
 }
 
 int ClassType::kind() {

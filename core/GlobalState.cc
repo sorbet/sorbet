@@ -153,7 +153,6 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef class_id = synthesizeClass(class_DESC, 0);
     SymbolRef basicObject_id = synthesizeClass(basicObject_DESC, 0);
     SymbolRef kernel_id = synthesizeClass(kernel_DESC, 0);
-    SymbolRef emptyHash_id = enterStaticFieldSymbol(Loc::none(0), defn_root(), Names::emptyHash());
     SymbolRef range_id = synthesizeClass(range_DESC);
     SymbolRef regexp_id = synthesizeClass(regexp_DESC);
     SymbolRef magic_id = synthesizeClass(magic_DESC);
@@ -181,24 +180,26 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(class_id == defn_Class());
     Error::check(basicObject_id == defn_BasicObject());
     Error::check(kernel_id == defn_Kernel());
-    Error::check(emptyHash_id == defn_emptyHash());
     Error::check(range_id == defn_Range());
     Error::check(regexp_id == defn_Regexp());
     Error::check(magic_id == defn_Magic());
 
-    // Synthesize ::{} = EmptyHash()
-    defn_emptyHash().info(*this).resultType = make_unique<HashType>();
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = make_unique<ClassType>(defn_NilClass());
-    // Synthesize Hash#build_hash(*vs : Object) => Hash
-    SymbolRef method = enterMethodSymbol(Loc::none(0), defn_Hash(), Names::buildHash());
+
+    // <Magic> has a special Type
+    defn_Magic().info(*this).resultType = make_shared<MagicType>();
+
+    // Synthesize <Magic>#build_hash(*vs : Object) => Hash
+    SymbolRef method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
     arg.info(*this).setRepeated();
     arg.info(*this).resultType = make_unique<ClassType>(defn_Object());
     method.info(*this).arguments().push_back(arg);
     method.info(*this).resultType = make_unique<ClassType>(defn_Hash());
-    // Synthesize <Magic>.<splat>(a: Array) => Untyped
-    method = enterMethodSymbol(Loc::none(0), defn_Magic().info(*this).singletonClass(*this), Names::splat());
+
+    // Synthesize <Magic>#<splat>(a: Array) => Untyped
+    method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
     arg.info(*this).resultType = make_unique<ClassType>(defn_Array());
     method.info(*this).arguments().push_back(arg);

@@ -37,9 +37,15 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
 
 shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+    return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
+}
+
+shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     if (fun != Names::buildHash()) {
         return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
     }
+
     Error::check(args.size() % 2 == 0);
 
     vector<shared_ptr<LiteralType>> keys;

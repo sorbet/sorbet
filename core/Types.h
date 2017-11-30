@@ -187,6 +187,19 @@ public:
     virtual std::string toString(core::Context ctx, int tabs = 0);
     virtual std::string typeName();
 };
+
+// MagicType is the type of the built-in core::GlobalState::defn_Magic()
+// object. Its `dispatchCall` knows how to handle a number of special methods
+// that are used when building CFGs to desugar features that can't be described
+// purely within our existing type system and IR.
+class MagicType final : public ProxyType {
+public:
+    MagicType();
+    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string typeName();
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
+};
 } // namespace core
 } // namespace ruby_typer
 #endif // SRUBY_TYPES_H

@@ -189,6 +189,8 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
         for (auto &el : hash->values) {
             pickle(p, el.get());
         }
+    } else if (auto *hash = dynamic_cast<MagicType *>(what)) {
+        p.putU4(7);
     } else {
         Error::notImplemented();
     }
@@ -245,6 +247,8 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
             result->underlying = underlying;
             return result;
         }
+        case 7:
+            return std::make_shared<MagicType>();
         default:
             Error::notImplemented();
     }
