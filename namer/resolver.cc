@@ -151,8 +151,7 @@ private:
                 }
                 if (recvi->symbol != core::GlobalState::defn_Opus_Types()) {
                     ctx.state.errors.error(recvi->loc, core::ErrorClass::InvalidTypeDeclaration,
-                                           "Malformed type declaration. Unknown argument type type {}",
-                                           expr->toString(ctx));
+                                           "Malformed type declaration. Unknown argument type {}", expr->toString(ctx));
                     result = core::Types::dynamic();
                     return;
                 }
