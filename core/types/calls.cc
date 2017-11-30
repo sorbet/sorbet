@@ -36,7 +36,7 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
 }
 
 shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                        vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
 }
 
