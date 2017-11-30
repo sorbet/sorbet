@@ -116,12 +116,11 @@ public:
         static constexpr int ARGUMENT_BLOCK = 0x0080;
 
         // Method flags
-        static constexpr int METHOD_PUBLIC = 0x400;
-        static constexpr int METHOD_PROTECTED = 0x200;
-        static constexpr int METHOD_PRIVATE = 0x100;
+        static constexpr int METHOD_PROTECTED = 0x400;
+        static constexpr int METHOD_PRIVATE = 0x200;
 
         static constexpr int ARGUMENT_MASK = 0x0f80;
-        static constexpr int METHOD_MASK = 0x4700;
+        static constexpr int METHOD_MASK = 0x4600;
     };
 
     SymbolRef owner;
@@ -204,7 +203,7 @@ public:
 
     inline bool isPublic() const {
         DEBUG_ONLY(Error::check(isMethod()));
-        return (flags & Symbol::Flags::METHOD_PUBLIC) != 0;
+        return !isProtected() && !isPrivate();
     }
 
     inline bool isProtected() const {
@@ -264,7 +263,8 @@ public:
 
     inline void setPublic() {
         DEBUG_ONLY(Error::check(isMethod()));
-        flags |= Symbol::Flags::METHOD_PUBLIC;
+        flags &= ~Symbol::Flags::METHOD_PRIVATE;
+        flags &= ~Symbol::Flags::METHOD_PROTECTED;
     }
 
     inline void setProtected() {

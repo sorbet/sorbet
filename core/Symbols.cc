@@ -94,6 +94,13 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
 
     os << type << " " << name;
     if (myInfo.isClass() || myInfo.isMethod()) {
+        if (myInfo.isMethod()) {
+            if (myInfo.isPrivate()) {
+                os << " : private";
+            } else if (myInfo.isProtected()) {
+                os << " : protected";
+            }
+        }
         if (myInfo.superClass.exists()) {
             os << " < " << myInfo.superClass.info(gs).fullName(gs);
         }

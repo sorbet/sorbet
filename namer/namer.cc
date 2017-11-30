@@ -200,9 +200,7 @@ public:
                 default:
                     return original;
             }
-            // I'm going to return this, so my parent will take ownership of it
-            original->args[0].release();
-            return mdef;
+            return original->args[0].release();
         }
         return original;
     }

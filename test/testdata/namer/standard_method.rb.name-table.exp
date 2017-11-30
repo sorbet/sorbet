@@ -25,9 +25,9 @@ class <constant:A> < ::<constant:Object> ()
     argument h<> -> FalseClass(false) | Integer(1) | Float(3.140000) | String("foo") | Symbol(:"bar")
   method no_params () -> T1
   method noreturn () -> <bottom>
-  method private (x) -> T1
+  method private : private (x) -> T1
     argument x<> -> T1
-  method protected (x) -> T1
+  method protected : protected (x) -> T1
     argument x<> -> T1
   method public (x) -> T1
     argument x<> -> T1
@@ -36,7 +36,7 @@ class <constant:A> < ::<constant:Object> ()
 class <constant:T1> < ::<constant:Object> ()
 class <constant:T2> < ::<constant:Object> ()
 class <singleton class:<constant:A>> (<constant:Class>)
-  method static (x) -> T1
+  method static : private (x) -> T1
     argument x<> -> T1
 class <singleton class:<constant:T1>> (<constant:Class>)
 
