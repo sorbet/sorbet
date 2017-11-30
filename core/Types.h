@@ -154,13 +154,13 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 };
 
-class Literal final : public ProxyType {
+class LiteralType final : public ProxyType {
 public:
     int64_t value;
-    Literal(int64_t val);
-    Literal(double val);
-    Literal(core::SymbolRef klass, core::NameRef val);
-    Literal(bool val);
+    LiteralType(int64_t val);
+    LiteralType(double val);
+    LiteralType(core::SymbolRef klass, core::NameRef val);
+    LiteralType(bool val);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);
     virtual std::string typeName();
@@ -168,10 +168,10 @@ public:
 
 class HashType final : public ProxyType {
 public:
-    std::vector<std::shared_ptr<Literal>> keys; // TODO: store sorted by whatever
+    std::vector<std::shared_ptr<LiteralType>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
     HashType();
-    HashType(std::vector<std::shared_ptr<Literal>> &keys, std::vector<std::shared_ptr<Type>> &values);
+    HashType(std::vector<std::shared_ptr<LiteralType>> &keys, std::vector<std::shared_ptr<Type>> &values);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);
     virtual std::string typeName();

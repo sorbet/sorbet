@@ -164,7 +164,7 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
         p.putU4(2);
         pickle(p, o->left.get());
         pickle(p, o->right.get());
-    } else if (auto *c = dynamic_cast<Literal *>(what)) {
+    } else if (auto *c = dynamic_cast<LiteralType *>(what)) {
         p.putU4(3);
         pickle(p, c->underlying.get());
         p.putS8(c->value);
@@ -206,7 +206,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
         case 2:
             return std::make_shared<OrType>(unpickleType(p), unpickleType(p));
         case 3: {
-            std::shared_ptr<Literal> result = std::make_shared<Literal>(true);
+            std::shared_ptr<LiteralType> result = std::make_shared<LiteralType>(true);
             result->underlying = unpickleType(p);
             result->value = p.getS8();
             return result;
@@ -228,13 +228,13 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
         case 6: {
             auto underlying = unpickleType(p);
             int sz = p.getU4();
-            std::vector<std::shared_ptr<Literal>> keys;
+            std::vector<std::shared_ptr<LiteralType>> keys;
             std::vector<std::shared_ptr<Type>> values;
             keys.reserve(sz);
             values.reserve(sz);
             for (int i = 0; i < sz; i++) {
                 auto key = unpickleType(p);
-                if (auto *lit = dynamic_cast<Literal *>(key.get())) {
+                if (auto *lit = dynamic_cast<LiteralType *>(key.get())) {
                     keys.emplace_back(lit);
                     key.reset();
                 }

@@ -42,17 +42,17 @@ shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, co
     }
     Error::check(args.size() % 2 == 0);
 
-    vector<shared_ptr<Literal>> keys;
+    vector<shared_ptr<LiteralType>> keys;
     vector<shared_ptr<Type>> values;
     for (int i = 0; i < args.size(); i += 2) {
-        auto *key = dynamic_cast<Literal *>(args[i].type.get());
+        auto *key = dynamic_cast<LiteralType *>(args[i].type.get());
         if (key == nullptr) {
             return make_unique<ClassType>(ctx.state.defn_Hash());
         }
 
-        // HACK(nelhage): clone the Literal by hand, since there's no way to go
-        // from shared_ptr<Type> to shared_ptr<Literal>
-        auto lit = make_unique<Literal>(key->value);
+        // HACK(nelhage): clone the LiteralType by hand, since there's no way to go
+        // from shared_ptr<Type> to shared_ptr<LiteralType>
+        auto lit = make_unique<LiteralType>(key->value);
         lit->underlying = key->underlying;
 
         keys.push_back(move(lit));
@@ -191,7 +191,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 }
                 ++kwit;
 
-                auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<Literal> lit) {
+                auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<LiteralType> lit) {
                     return dynamic_cast<ClassType *>(lit->underlying.get())->symbol == ctx.state.defn_Symbol() &&
                            lit->value == spec.name._id;
                 });
