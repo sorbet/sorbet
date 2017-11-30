@@ -163,75 +163,75 @@ begin
       def changed_openapi?<changed_openapi?>()
         self(<constant:Diff>).changed_files().include?(::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
 
-      self(<singleton class:<constant:Diff>>).private(def parse<parse>(diff)
-          begin
-            parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", 0.|(4))).[](::<constant:Range>.new(1, -1))
-            if parts
-              parts
-            else
-              parts = []
-            end
-            parts.map() do |<block-nested: part>|
-              begin
-                <block-nested: lines> = <block-nested: part>.split("
+      def parse<parse>(diff)
+        begin
+          parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", 0.|(4))).[](::<constant:Range>.new(1, -1))
+          if parts
+            parts
+          else
+            parts = []
+          end
+          parts.map() do |<block-nested: part>|
+            begin
+              <block-nested: lines> = <block-nested: part>.split("
 ")
-                <block-nested: a_name> = <block-nested: b_name> = ::<constant:nil>
-                <block-nested: added_lines> = []
-                <block-nested: removed_lines> = []
-                <block-nested: lines>.each() do |<block-nested: line>|
-                  if <block-nested: line>.start_with?("index ", "@@", "new file mode")
-                    next(<emptyTree>)
+              <block-nested: a_name> = <block-nested: b_name> = ::<constant:nil>
+              <block-nested: added_lines> = []
+              <block-nested: removed_lines> = []
+              <block-nested: lines>.each() do |<block-nested: line>|
+                if <block-nested: line>.start_with?("index ", "@@", "new file mode")
+                  next(<emptyTree>)
+                else
+                  if <block-nested: line>.start_with?("---")
+                    begin
+                      <block-nested: a_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
+                      if if <block-nested: a_name>
+                          <block-nested: a_name>.start_with?("a/")
+                        else
+                          <block-nested: a_name>
+                        end
+                        <block-nested: a_name> = <block-nested: a_name>.[](::<constant:Range>.new(2, -1))
+                      else
+                        <emptyTree>
+                      end
+                    end
                   else
-                    if <block-nested: line>.start_with?("---")
+                    if <block-nested: line>.start_with?("+++")
                       begin
-                        <block-nested: a_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
-                        if if <block-nested: a_name>
-                            <block-nested: a_name>.start_with?("a/")
+                        <block-nested: b_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
+                        if if <block-nested: b_name>
+                            <block-nested: b_name>.start_with?("b/")
                           else
-                            <block-nested: a_name>
+                            <block-nested: b_name>
                           end
-                          <block-nested: a_name> = <block-nested: a_name>.[](::<constant:Range>.new(2, -1))
+                          <block-nested: b_name> = <block-nested: b_name>.[](::<constant:Range>.new(2, -1))
                         else
                           <emptyTree>
                         end
                       end
                     else
-                      if <block-nested: line>.start_with?("+++")
-                        begin
-                          <block-nested: b_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
-                          if if <block-nested: b_name>
-                              <block-nested: b_name>.start_with?("b/")
-                            else
-                              <block-nested: b_name>
-                            end
-                            <block-nested: b_name> = <block-nested: b_name>.[](::<constant:Range>.new(2, -1))
-                          else
-                            <emptyTree>
-                          end
-                        end
+                      if <block-nested: line>.start_with?("+")
+                        <block-nested: added_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
                       else
-                        if <block-nested: line>.start_with?("+")
-                          <block-nested: added_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
+                        if <block-nested: line>.start_with?("-")
+                          <block-nested: removed_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
                         else
-                          if <block-nested: line>.start_with?("-")
-                            <block-nested: removed_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
-                          else
-                            <emptyTree>
-                          end
+                          <emptyTree>
                         end
                       end
                     end
                   end
                 end
-                if <block-nested: a_name>.nil?()
-                  next(<emptyTree>)
-                else
-                  <emptyTree>
-                end
-                {:a_name => <block-nested: a_name>, :b_name => <block-nested: b_name>, :added_lines => <block-nested: added_lines>, :removed_lines => <block-nested: removed_lines>}
               end
-            end.compact()
-          end)
+              if <block-nested: a_name>.nil?()
+                next(<emptyTree>)
+              else
+                <emptyTree>
+              end
+              {:a_name => <block-nested: a_name>, :b_name => <block-nested: b_name>, :added_lines => <block-nested: added_lines>, :removed_lines => <block-nested: removed_lines>}
+            end
+          end.compact()
+        end
 
     end
 

@@ -48,6 +48,26 @@ class A
   def f2(x)
   end
 
+  standard_method({x: T1}, returns: T1)
+  private def private(x)
+      T1.new
+  end
+
+  standard_method({x: T1}, returns: T1)
+  protected def protected(x)
+      T1.new
+  end
+
+  standard_method({x: T1}, returns: T1)
+  public def public(x)
+      T1.new
+  end
+
+  standard_method({x: T1}, returns: T1)
+  private_class_method def self.static(x)
+      T1.new
+  end
+
   standard_method({y: T1}, returns: T1) # error: Unused standard_method. No method def before next standard_method.
   standard_method({y: T1}, returns: T1)
   def f3(y)

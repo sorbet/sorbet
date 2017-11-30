@@ -172,7 +172,7 @@ public:
         }
     }
 
-    ast::Send *preTransformSend(core::Context ctx, ast::Send *original) {
+    ast::Expression *postTransformSend(core::Context ctx, ast::Send *original) {
         if (original->args.size() == 1 && ast::cast_tree<ast::ZSuperArgs>(original->args[0].get()) != nullptr) {
             original->args.clear();
             core::SymbolRef method = ctx.enclosingMethod();
@@ -183,6 +183,24 @@ public:
             } else {
                 ctx.state.errors.error(original->loc, core::ErrorClass::SelfOutsideClass, "super outside of method");
             }
+        }
+        ast::MethodDef *mdef;
+        if (original->args.size() == 1 && (mdef = ast::cast_tree<ast::MethodDef>(original->args[0].get())) != nullptr) {
+            switch (original->fun._id) {
+                case core::Names::private_()._id:
+                case core::Names::privateClassMethod()._id:
+                    mdef->symbol.info(ctx).setPrivate();
+                    break;
+                case core::Names::protected_()._id:
+                    mdef->symbol.info(ctx).setProtected();
+                    break;
+                case core::Names::public_()._id:
+                    mdef->symbol.info(ctx).setPublic();
+                    break;
+                default:
+                    return original;
+            }
+            return original->args[0].release();
         }
         return original;
     }
