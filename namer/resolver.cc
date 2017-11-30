@@ -206,6 +206,30 @@ private:
                         }
                         break;
                     }
+                    case core::Names::interface()._id: {
+                        if (s->args.size() != 1) {
+                            ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                                   "Opus::Types.interface requires a single argument");
+                            result = core::Types::dynamic();
+                            break;
+                        }
+                        auto id = ast::cast_tree<ast::Ident>(s->args[0].get());
+                        if (id == nullptr) {
+                            ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                                   "Opus::Types.interface requires a class name as an argument");
+                            result = core::Types::dynamic();
+                            break;
+                        }
+                        auto sym = dealiasSym(ctx, id->symbol);
+                        if (sym.info(ctx).isClass()) {
+                            result = make_shared<core::ClassType>(sym);
+                        } else {
+                            ctx.state.errors.error(id->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                                   "Malformed type declaration. Not a class.");
+                            result = core::Types::dynamic();
+                        }
+                        break;
+                    }
                     case core::Names::untyped()._id:
                         result = core::Types::dynamic();
                         break;
