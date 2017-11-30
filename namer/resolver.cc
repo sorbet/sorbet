@@ -221,13 +221,13 @@ private:
                             break;
                         }
                         auto sym = dealiasSym(ctx, id->symbol);
-                        if (sym.info(ctx).isClass()) {
-                            result = make_shared<core::ClassType>(sym);
-                        } else {
+                        if (!sym.info(ctx).isClass()) {
                             ctx.state.errors.error(id->loc, core::ErrorClass::InvalidTypeDeclaration,
                                                    "Malformed type declaration. Not a class.");
                             result = core::Types::dynamic();
+                            break;
                         }
+                        result = make_shared<core::ClassType>(sym);
                         break;
                     }
                     case core::Names::untyped()._id:
