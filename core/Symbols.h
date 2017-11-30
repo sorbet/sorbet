@@ -115,7 +115,13 @@ public:
         static constexpr int ARGUMENT_REPEATED = 0x100;
         static constexpr int ARGUMENT_BLOCK = 0x0080;
 
+        // Method flags
+        static constexpr int METHOD_PUBLIC = 0x400;
+        static constexpr int METHOD_PROTECTED = 0x200;
+        static constexpr int METHOD_PRIVATE = 0x100;
+
         static constexpr int ARGUMENT_MASK = 0x0f80;
+        static constexpr int METHOD_MASK = 0x4700;
     };
 
     SymbolRef owner;
@@ -196,6 +202,21 @@ public:
         return (flags & Symbol::Flags::ARGUMENT_BLOCK) != 0;
     }
 
+    inline bool isPublic() const {
+        DEBUG_ONLY(Error::check(isMethod()));
+        return (flags & Symbol::Flags::METHOD_PUBLIC) != 0;
+    }
+
+    inline bool isProtected() const {
+        DEBUG_ONLY(Error::check(isMethod()));
+        return (flags & Symbol::Flags::METHOD_PROTECTED) != 0;
+    }
+
+    inline bool isPrivate() const {
+        DEBUG_ONLY(Error::check(isMethod()));
+        return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
+    }
+
     inline bool isBlockSymbol(GlobalState &gs) const {
         core::Name &nm = name.name(gs);
         return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
@@ -239,6 +260,21 @@ public:
     inline void setBlockArgument() {
         DEBUG_ONLY(Error::check(isMethodArgument()));
         flags |= Symbol::Flags::ARGUMENT_BLOCK;
+    }
+
+    inline void setPublic() {
+        DEBUG_ONLY(Error::check(isMethod()));
+        flags |= Symbol::Flags::METHOD_PUBLIC;
+    }
+
+    inline void setProtected() {
+        DEBUG_ONLY(Error::check(isMethod()));
+        flags |= Symbol::Flags::METHOD_PROTECTED;
+    }
+
+    inline void setPrivate() {
+        DEBUG_ONLY(Error::check(isMethod()));
+        flags |= Symbol::Flags::METHOD_PRIVATE;
     }
 
     SymbolRef findMember(NameRef name);
