@@ -102,7 +102,6 @@ NameDef names[] = {
     {"super"},
     {"empty", ""},
 
-    {"emptyHash", "{}"},
     {"buildHash", "<build-hash>"},
     {"splat", "<splat>"},
     {"arg0"},

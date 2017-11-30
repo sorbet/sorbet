@@ -33,7 +33,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 @rules$15 = alias @rules : untyped
 statTemp$9 = <symbol:deleted_at_is_nil> : Symbol(:\"deleted_at_is_nil\")
 statTemp$6 = <constant:GeraldRule>$8.query_by(statTemp$9) : untyped
-hashTemp$11 = alias {} : HashType {\n}
+hashTemp$11 = alias <constant:<Magic>> : <Magic>
 statTemp$10 = hashTemp$11.<build-hash>() : HashType {\n}
 statTemp$5 = statTemp$6.load_all(statTemp$10) : untyped
 <unconditional>"];
@@ -367,7 +367,7 @@ statTemp$23 = statTemp$24.concat(statTemp$40) : String
 statTemp$22 = statTemp$23.to_s() : String
 hashTemp$42 = <symbol:rule_token> : Symbol(:\"rule_token\")
 hashTemp$43 = rule.token() : untyped
-hashTemp$45 = alias {} : HashType {\n}
+hashTemp$45 = alias <constant:<Magic>> : <Magic>
 statTemp$41 = hashTemp$45.<build-hash>(hashTemp$42, hashTemp$43) : HashType {\n  Symbol(:\"rule_token\") => untyped\n}
 statTemp$19 = <constant:MatchTimeout>$21.new(statTemp$22, statTemp$41) : MatchTimeout
 statTemp$13 = statTemp$18.raise(statTemp$19) : NilClass
@@ -973,7 +973,7 @@ hashTemp$99 = <symbol:a_name> : Symbol(:\"a_name\")
 hashTemp$101 = <symbol:b_name> : Symbol(:\"b_name\")
 hashTemp$103 = <symbol:added_lines> : Symbol(:\"added_lines\")
 hashTemp$105 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
-hashTemp$107 = alias {} : HashType {\n}
+hashTemp$107 = alias <constant:<Magic>> : <Magic>
 blockReturnTemp$22 = hashTemp$107.<build-hash>(hashTemp$99, <block-nested: a_name>, hashTemp$101, <block-nested: b_name>, hashTemp$103, <block-nested: added_lines>, hashTemp$105, <block-nested: removed_lines>) : HashType {\n  Symbol(:\"a_name\") => NilClass\n  Symbol(:\"b_name\") => NilClass\n  Symbol(:\"added_lines\") => untyped\n  Symbol(:\"removed_lines\") => untyped\n}
 <unconditional>"];
 
