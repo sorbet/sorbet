@@ -150,6 +150,13 @@ private:
                     return;
                 }
                 if (recvi->symbol != core::GlobalState::defn_Opus_Types()) {
+                    // TODO(pay-server) remove this block
+                    {
+                        if (recvi->symbol == core::GlobalState::defn_Magic() && s->fun == core::Names::splat()) {
+                            result = core::Types::bottom();
+                            return;
+                        }
+                    }
                     ctx.state.errors.error(recvi->loc, core::ErrorClass::InvalidTypeDeclaration,
                                            "Malformed type declaration. Unknown argument type {}", expr->toString(ctx));
                     result = core::Types::dynamic();
