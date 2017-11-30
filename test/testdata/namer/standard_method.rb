@@ -48,6 +48,10 @@ class A
   def f2(x)
   end
 
+  standard_method({x: T1}, returns: T1) # error: Malformed standard_method. Unknown argument name :x
+  def f3
+  end
+
   standard_method({x: T1}, returns: T1)
   private def private(x)
       T1.new
