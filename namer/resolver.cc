@@ -311,7 +311,7 @@ private:
                                 [&](core::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
                     if (fnd == methoInfo.arguments().end()) {
                         ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                               "Malformed standard_method. Unknown argument name type {}",
+                                               "Malformed standard_method. Unknown argument name {}",
                                                key->toString(ctx));
                     } else {
                         core::SymbolRef arg = *fnd;
