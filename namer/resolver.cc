@@ -100,6 +100,26 @@ private:
         return sym;
     }
 
+    shared_ptr<core::Type> getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
+        shared_ptr<core::Type> result;
+        typecase(expr.get(), [&](ast::IntLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
+                 [&](ast::FloatLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
+                 [&](ast::BoolLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
+                 [&](ast::StringLit *lit) {
+                     result = make_shared<core::LiteralType>(core::GlobalState::defn_String(), lit->value);
+                 },
+                 [&](ast::SymbolLit *lit) {
+                     result = make_shared<core::LiteralType>(core::GlobalState::defn_Symbol(), lit->name);
+                 },
+                 [&](ast::Expression *expr) {
+                     ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                            "Unsupported type literal");
+                     result = core::Types::dynamic();
+                 });
+        Error::check(result.get() != nullptr);
+        return result;
+    }
+
     shared_ptr<core::Type> getResultType(core::Context ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
         typecase(
@@ -154,6 +174,35 @@ private:
                         int i = 1;
                         while (i < s->args.size()) {
                             result = make_shared<core::OrType>(result, getResultType(ctx, s->args[i]));
+                            i++;
+                        }
+                        break;
+                    }
+                    case core::Names::enum_()._id: {
+                        if (s->args.size() != 1) {
+                            ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                                   "enum only takes a single argument");
+                            result = core::Types::dynamic();
+                            break;
+                        }
+                        auto arr = ast::cast_tree<ast::Array>(s->args[0].get());
+                        if (!arr) {
+                            ctx.state.errors.error(
+                                expr->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                "enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
+                            result = core::Types::dynamic();
+                            break;
+                        }
+                        if (arr->elems.empty()) {
+                            ctx.state.errors.error(expr->loc, core::ErrorClass::InvalidTypeDeclaration,
+                                                   "enum([]) is invalid");
+                            result = core::Types::dynamic();
+                            break;
+                        }
+                        result = getResultLiteral(ctx, arr->elems[0]);
+                        int i = 1;
+                        while (i < arr->elems.size()) {
+                            result = make_shared<core::OrType>(result, getResultLiteral(ctx, arr->elems[i]));
                             i++;
                         }
                         break;
