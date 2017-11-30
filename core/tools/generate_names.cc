@@ -67,6 +67,7 @@ NameDef names[] = {
     {"arrayOf", "array_of"},
     {"hashOf", "hash_of"},
     {"noreturn"},
+    {"interface"},
     {"declareVariables", "declare_variables"},
     // end standard_method keywords
 
