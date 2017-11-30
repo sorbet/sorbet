@@ -1,0 +1,8 @@
+class <constant:A> ()
+  class <constant:C1> < ::<constant:Object> ()
+  class <singleton class:<constant:C1>> (<constant:Class>)
+  method f (x) -> NilClass
+    argument x<> -> C1
+  static-field <constant:C2> -> <class:C1>
+class <singleton class:<constant:A>> (<constant:Class>)
+

@@ -86,6 +86,20 @@ private:
         return nullptr;
     }
 
+    core::SymbolRef dealiasSym(core::Context ctx, core::SymbolRef sym) {
+        while (sym.info(ctx).isStaticField()) {
+            auto *ct = dynamic_cast<core::ClassType *>(sym.info(ctx).resultType.get());
+            if (ct == nullptr)
+                break;
+            auto klass = ct->symbol.info(ctx).attachedClass(ctx);
+            if (!klass.exists())
+                break;
+
+            sym = klass;
+        }
+        return sym;
+    }
+
     shared_ptr<core::Type> getResultType(core::Context ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
         typecase(
@@ -98,8 +112,9 @@ private:
                 result = make_shared<core::ArrayType>(elems);
             },
             [&](ast::Ident *i) {
-                if (i->symbol.info(ctx).isClass()) {
-                    result = make_shared<core::ClassType>(i->symbol);
+                auto sym = dealiasSym(ctx, i->symbol);
+                if (sym.info(ctx).isClass()) {
+                    result = make_shared<core::ClassType>(sym);
                 } else {
                     ctx.state.errors.error(i->loc, core::ErrorClass::InvalidTypeDeclaration,
                                            "Malformed type declaration. Not a class type {}", i->toString(ctx));
@@ -503,8 +518,20 @@ public:
         return new ast::Ident(c->loc, resolved);
     }
 
+    ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
+        auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
+        if (id == nullptr || !id->symbol.info(ctx).isStaticField())
+            return asgn;
+        auto *rhs = ast::cast_tree<ast::Ident>(asgn->rhs.get());
+        if (rhs == nullptr || !rhs->symbol.info(ctx).isClass())
+            return asgn;
+
+        id->symbol.info(ctx).resultType = make_unique<core::ClassType>(rhs->symbol.info(ctx).singletonClass(ctx));
+        return asgn;
+    }
+
     unique_ptr<Nesting> nesting_;
-};
+}; // namespace namer
 
 class ResolveVariablesWalk {
 public:
