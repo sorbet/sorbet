@@ -60,7 +60,7 @@ ruby_typer::core::LiteralType::LiteralType(int64_t val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Integer())), value(val) {}
 
 ruby_typer::core::LiteralType::LiteralType(double val)
-    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<u4 *>(&val)) {}
+    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<u8 *>(&val)) {}
 
 ruby_typer::core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
     : ProxyType(make_shared<ClassType>(klass)), value(val._id) {
