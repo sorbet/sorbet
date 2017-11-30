@@ -34,7 +34,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 statTemp$9 = <symbol:deleted_at_is_nil> : Symbol(:\"deleted_at_is_nil\")
 statTemp$6 = <constant:GeraldRule>$8.query_by(statTemp$9) : untyped
 hashTemp$11 = alias <constant:<Magic>> : <Magic>
-statTemp$10 = hashTemp$11.<build-hash>() : HashType {\n}
+statTemp$10 = hashTemp$11.<build-hash>() : ShapeType {\n}
 statTemp$5 = statTemp$6.load_all(statTemp$10) : untyped
 <unconditional>"];
 
@@ -147,7 +147,7 @@ statTemp$15 = statTemp$16.concat(statTemp$23) : String
 statTemp$14 = statTemp$15.to_s() : String
 statTemp$11 = statTemp$12.warn(statTemp$14) : untyped
 arrayTemp$25 = alias <constant:<Magic>> : <Magic>
-returnTemp$24 = arrayTemp$25.<build-array>() : ArrayType {\n}
+returnTemp$24 = arrayTemp$25.<build-array>() : TupleType {\n}
 statTemp$3 = return returnTemp$24 : <bottom>
 <unconditional>"];
 
@@ -369,7 +369,7 @@ statTemp$22 = statTemp$23.to_s() : String
 hashTemp$42 = <symbol:rule_token> : Symbol(:\"rule_token\")
 hashTemp$43 = rule.token() : untyped
 hashTemp$45 = alias <constant:<Magic>> : <Magic>
-statTemp$41 = hashTemp$45.<build-hash>(hashTemp$42, hashTemp$43) : HashType {\n  Symbol(:\"rule_token\") => untyped\n}
+statTemp$41 = hashTemp$45.<build-hash>(hashTemp$42, hashTemp$43) : ShapeType {\n  Symbol(:\"rule_token\") => untyped\n}
 statTemp$19 = <constant:MatchTimeout>$21.new(statTemp$22, statTemp$41) : MatchTimeout
 statTemp$13 = statTemp$18.raise(statTemp$19) : NilClass
 <unconditional>"];
@@ -772,7 +772,7 @@ parts"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" [label = "(parts, <constant:Range>$15, <constant:nil>$28)
 arrayTemp$20 = alias <constant:<Magic>> : <Magic>
-parts = arrayTemp$20.<build-array>() : ArrayType {\n}
+parts = arrayTemp$20.<build-array>() : TupleType {\n}
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" [style="bold"];
@@ -804,9 +804,9 @@ statTemp$26 =
 <block-nested: b_name> = <constant:nil>$28 : NilClass
 <block-nested: a_name> = <constant:nil>$28 : NilClass
 arrayTemp$30 = alias <constant:<Magic>> : <Magic>
-<block-nested: added_lines> = arrayTemp$30.<build-array>() : ArrayType {\n}
+<block-nested: added_lines> = arrayTemp$30.<build-array>() : TupleType {\n}
 arrayTemp$32 = alias <constant:<Magic>> : <Magic>
-<block-nested: removed_lines> = arrayTemp$32.<build-array>() : ArrayType {\n}
+<block-nested: removed_lines> = arrayTemp$32.<build-array>() : TupleType {\n}
 statTemp$34 = <block-nested: lines> : untyped
 <unconditional>"];
 
@@ -978,7 +978,7 @@ hashTemp$104 = <symbol:b_name> : Symbol(:\"b_name\")
 hashTemp$106 = <symbol:added_lines> : Symbol(:\"added_lines\")
 hashTemp$108 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
 hashTemp$110 = alias <constant:<Magic>> : <Magic>
-blockReturnTemp$23 = hashTemp$110.<build-hash>(hashTemp$102, <block-nested: a_name>, hashTemp$104, <block-nested: b_name>, hashTemp$106, <block-nested: added_lines>, hashTemp$108, <block-nested: removed_lines>) : HashType {\n  Symbol(:\"a_name\") => NilClass\n  Symbol(:\"b_name\") => NilClass\n  Symbol(:\"added_lines\") => ArrayType {\n    }\n  Symbol(:\"removed_lines\") => ArrayType {\n    }\n}
+blockReturnTemp$23 = hashTemp$110.<build-hash>(hashTemp$102, <block-nested: a_name>, hashTemp$104, <block-nested: b_name>, hashTemp$106, <block-nested: added_lines>, hashTemp$108, <block-nested: removed_lines>) : ShapeType {\n  Symbol(:\"a_name\") => NilClass\n  Symbol(:\"b_name\") => NilClass\n  Symbol(:\"added_lines\") => TupleType {\n    }\n  Symbol(:\"removed_lines\") => TupleType {\n    }\n}
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" [style="bold"];

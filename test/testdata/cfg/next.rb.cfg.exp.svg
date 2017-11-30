@@ -21,7 +21,7 @@
 <text text-anchor="middle" x="378" y="-656.0383" font-family="Times,serif" font-size="14.00" fill="#000000">(statTemp$3)</text>
 <text text-anchor="middle" x="378" y="-641.0383" font-family="Times,serif" font-size="14.00" fill="#000000">arrayTemp$4 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="378" y="-626.0383" font-family="Times,serif" font-size="14.00" fill="#000000">arrayTemp$5 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
-<text text-anchor="middle" x="378" y="-611.0383" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = arrayTemp$5.&lt;build&#45;array&gt;(arrayTemp$4) : ArrayType {</text>
+<text text-anchor="middle" x="378" y="-611.0383" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = arrayTemp$5.&lt;build&#45;array&gt;(arrayTemp$4) : TupleType {</text>
 <text text-anchor="middle" x="378" y="-596.0383" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;0 = Integer(1)</text>
 <text text-anchor="middle" x="378" y="-581.0383" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="378" y="-566.0383" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
@@ -103,4 +103,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 9bcc54c27820a63420ec7f410cb82ee87a63ed7559c74b2bcbe2901c69701129 -->
+<!-- ruby-types:sha256: 085519022895d82d1ca0acacdddac4aa0c45a19043aa3efaa647649cf03f5873 -->

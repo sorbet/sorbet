@@ -28,7 +28,7 @@
 <ellipse fill="none" stroke="#000000" cx="236" cy="-370.0696" rx="219.8205" ry="58.8803"/>
 <text text-anchor="middle" x="236" y="-396.3696" font-family="Times,serif" font-size="14.00" fill="#000000">(s)</text>
 <text text-anchor="middle" x="236" y="-381.3696" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$5 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
-<text text-anchor="middle" x="236" y="-366.3696" font-family="Times,serif" font-size="14.00" fill="#000000">s = hashTemp$5.&lt;build&#45;hash&gt;() : HashType {</text>
+<text text-anchor="middle" x="236" y="-366.3696" font-family="Times,serif" font-size="14.00" fill="#000000">s = hashTemp$5.&lt;build&#45;hash&gt;() : ShapeType {</text>
 <text text-anchor="middle" x="236" y="-351.3696" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="236" y="-336.3696" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -44,7 +44,7 @@
 <ellipse fill="none" stroke="#000000" cx="694" cy="-370.0696" rx="219.8205" ry="58.8803"/>
 <text text-anchor="middle" x="694" y="-396.3696" font-family="Times,serif" font-size="14.00" fill="#000000">(s)</text>
 <text text-anchor="middle" x="694" y="-381.3696" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$6 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
-<text text-anchor="middle" x="694" y="-366.3696" font-family="Times,serif" font-size="14.00" fill="#000000">s = hashTemp$6.&lt;build&#45;hash&gt;() : HashType {</text>
+<text text-anchor="middle" x="694" y="-366.3696" font-family="Times,serif" font-size="14.00" fill="#000000">s = hashTemp$6.&lt;build&#45;hash&gt;() : ShapeType {</text>
 <text text-anchor="middle" x="694" y="-351.3696" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="694" y="-336.3696" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -73,7 +73,7 @@
 <title>bb::&lt;constant:Foo&gt;#bar_4</title>
 <ellipse fill="none" stroke="#000000" cx="456" cy="-216.6899" rx="183.6957" ry="58.8803"/>
 <text text-anchor="middle" x="456" y="-242.9899" font-family="Times,serif" font-size="14.00" fill="#000000">(s)</text>
-<text text-anchor="middle" x="456" y="-227.9899" font-family="Times,serif" font-size="14.00" fill="#000000">r = s : HashType {</text>
+<text text-anchor="middle" x="456" y="-227.9899" font-family="Times,serif" font-size="14.00" fill="#000000">r = s : ShapeType {</text>
 <text text-anchor="middle" x="456" y="-212.9899" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="456" y="-197.9899" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return r : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="456" y="-182.9899" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
@@ -98,4 +98,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 865ca0fca71288ca89ffc4d499f1eefabd470f9b7db4193eca09e3bcd870a977 -->
+<!-- ruby-types:sha256: 38aec8654ef325b66b753a923f4cdff4a73bb8204cbeab38f9431cfab247cd95 -->

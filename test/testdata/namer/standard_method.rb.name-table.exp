@@ -12,7 +12,7 @@ class <constant:A> < ::<constant:Object> ()
   method f3 (y) -> T1
     argument y<> -> T1
   method good (a, b, c, d, e, f, g, h) -> T2
-    argument a<> -> ArrayType {
+    argument a<> -> TupleType {
           0 = T1
           1 = T2
         }

@@ -8,7 +8,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [label = "(statTemp$3)
 arrayTemp$4 = 1 : Integer(1)
 arrayTemp$5 = alias <constant:<Magic>> : <Magic>
-statTemp$3 = arrayTemp$5.<build-array>(arrayTemp$4) : ArrayType {\n  0 = Integer(1)\n}
+statTemp$3 = arrayTemp$5.<build-array>(arrayTemp$4) : TupleType {\n  0 = Integer(1)\n}
 <unconditional>"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];

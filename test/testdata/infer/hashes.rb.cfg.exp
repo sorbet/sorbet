@@ -19,18 +19,18 @@ returnMethodTemp$9 = return returnMethodTemp$1
     "bb::<constant:Foo>#bar_1" -> "bb::<constant:Foo>#bar_1" [style="bold"];
     "bb::<constant:Foo>#bar_2" [label = "(s)
 hashTemp$5 = alias <constant:<Magic>> : <Magic>
-s = hashTemp$5.<build-hash>() : HashType {\n}
+s = hashTemp$5.<build-hash>() : ShapeType {\n}
 <unconditional>"];
 
     "bb::<constant:Foo>#bar_2" -> "bb::<constant:Foo>#bar_4" [style="bold"];
     "bb::<constant:Foo>#bar_3" [label = "(s)
 hashTemp$6 = alias <constant:<Magic>> : <Magic>
-s = hashTemp$6.<build-hash>() : HashType {\n}
+s = hashTemp$6.<build-hash>() : ShapeType {\n}
 <unconditional>"];
 
     "bb::<constant:Foo>#bar_3" -> "bb::<constant:Foo>#bar_4" [style="bold"];
     "bb::<constant:Foo>#bar_4" [label = "(s)
-r = s : HashType {\n}
+r = s : ShapeType {\n}
 returnMethodTemp$1 = return r : <bottom>
 <unconditional>"];
 
