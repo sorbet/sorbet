@@ -145,7 +145,7 @@ string ArrayType::toString(core::Context ctx, int tabs) {
     int i = 0;
     for (auto &el : this->elems) {
         printTabs(buf, tabs + 1);
-        buf << i << " = " << el->toString(ctx, tabs + 2) << endl;
+        buf << i++ << " = " << el->toString(ctx, tabs + 2) << endl;
     }
     printTabs(buf, tabs);
     buf << "}";
