@@ -42,29 +42,39 @@ shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, co
 
 shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-    if (fun != Names::buildHash()) {
-        return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
-    }
+    switch (fun._id) {
+        case Names::buildHash()._id: {
+            Error::check(args.size() % 2 == 0);
 
-    Error::check(args.size() % 2 == 0);
+            vector<shared_ptr<LiteralType>> keys;
+            vector<shared_ptr<Type>> values;
+            for (int i = 0; i < args.size(); i += 2) {
+                auto *key = dynamic_cast<LiteralType *>(args[i].type.get());
+                if (key == nullptr) {
+                    return make_unique<ClassType>(ctx.state.defn_Hash());
+                }
 
-    vector<shared_ptr<LiteralType>> keys;
-    vector<shared_ptr<Type>> values;
-    for (int i = 0; i < args.size(); i += 2) {
-        auto *key = dynamic_cast<LiteralType *>(args[i].type.get());
-        if (key == nullptr) {
-            return make_unique<ClassType>(ctx.state.defn_Hash());
+                // HACK(nelhage): clone the LiteralType by hand, since there's no way to go
+                // from shared_ptr<Type> to shared_ptr<LiteralType>
+                auto lit = make_unique<LiteralType>(key->value);
+                lit->underlying = key->underlying;
+
+                keys.push_back(move(lit));
+                values.push_back(args[i + 1].type);
+            }
+            return make_unique<HashType>(keys, values);
         }
 
-        // HACK(nelhage): clone the LiteralType by hand, since there's no way to go
-        // from shared_ptr<Type> to shared_ptr<LiteralType>
-        auto lit = make_unique<LiteralType>(key->value);
-        lit->underlying = key->underlying;
-
-        keys.push_back(move(lit));
-        values.push_back(args[i + 1].type);
+        case Names::buildArray()._id: {
+            vector<shared_ptr<Type>> elems;
+            for (auto &elem : args) {
+                elems.push_back(elem.type);
+            }
+            return make_unique<ArrayType>(elems);
+        }
+        default:
+            return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
     }
-    return make_unique<HashType>(keys, values);
 }
 
 namespace {

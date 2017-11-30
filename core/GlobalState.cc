@@ -198,6 +198,14 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     method.info(*this).arguments().push_back(arg);
     method.info(*this).resultType = make_unique<ClassType>(defn_Hash());
 
+    // Synthesize <Magic>#build_array(*vs : Object) => Array
+    method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::buildArray());
+    arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
+    arg.info(*this).setRepeated();
+    arg.info(*this).resultType = make_unique<ClassType>(defn_Object());
+    method.info(*this).arguments().push_back(arg);
+    method.info(*this).resultType = make_unique<ClassType>(defn_Array());
+
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
