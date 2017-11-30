@@ -302,13 +302,30 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     vars.push_back(keyTmp);
                     vars.push_back(valTmp);
                 }
-                core::LocalVariable hash =
+                core::LocalVariable magic =
                     cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
-                current->exprs.emplace_back(hash, h->loc, make_unique<Alias>(cctx.ctx.state.defn_emptyHash()));
+                current->exprs.emplace_back(magic, h->loc, make_unique<Alias>(cctx.ctx.state.defn_Magic()));
                 current->exprs.emplace_back(cctx.target, h->loc,
-                                            make_unique<Send>(hash, core::Names::buildHash(), vars));
+                                            make_unique<Send>(magic, core::Names::buildHash(), vars));
                 ret = current;
             },
+
+            [&](ast::Array *a) {
+                vector<core::LocalVariable> vars;
+                for (auto &elem : a->elems) {
+                    core::LocalVariable tmp = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG,
+                                                                          core::Names::arrayTemp(), cctx.inWhat.symbol);
+                    current = walk(cctx.withTarget(tmp), elem.get(), current);
+                    vars.push_back(tmp);
+                }
+                core::LocalVariable magic = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG,
+                                                                        core::Names::arrayTemp(), cctx.inWhat.symbol);
+                current->exprs.emplace_back(magic, a->loc, make_unique<Alias>(cctx.ctx.state.defn_Magic()));
+                current->exprs.emplace_back(cctx.target, a->loc,
+                                            make_unique<Send>(magic, core::Names::buildArray(), vars));
+                ret = current;
+            },
+
             [&](ast::EmptyTree *n) { ret = current; },
 
             [&](ast::Expression *n) {

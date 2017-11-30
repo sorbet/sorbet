@@ -47,6 +47,7 @@ NameDef names[] = {
     {"blockReturnTemp"},
     {"selfMethodTemp"},
     {"hashTemp"},
+    {"arrayTemp"},
     {"rescueTemp"},
     // end CFG temporaries
 
@@ -102,8 +103,8 @@ NameDef names[] = {
     {"super"},
     {"empty", ""},
 
-    {"emptyHash", "{}"},
     {"buildHash", "<build-hash>"},
+    {"buildArray", "<build-array>"},
     {"splat", "<splat>"},
     {"arg0"},
 

@@ -104,15 +104,19 @@ string LiteralType::toString(core::Context ctx, int tabs) {
     return this->underlying->toString(ctx, tabs) + "(" + value + ")";
 }
 
-ruby_typer::core::ArrayType::ArrayType(vector<shared_ptr<Type>> &elements)
+ruby_typer::core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Array())), elems(move(elements)) {}
 
-string ArrayType::typeName() {
-    return "ArrayType";
+string TupleType::typeName() {
+    return "TupleType";
 }
 
-string HashType::typeName() {
-    return "HashType";
+string ShapeType::typeName() {
+    return "ShapeType";
+}
+
+string MagicType::typeName() {
+    return "MagicType";
 }
 
 string AndType::typeName() {
@@ -135,27 +139,27 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
-string ArrayType::toString(core::Context ctx, int tabs) {
+string TupleType::toString(core::Context ctx, int tabs) {
     stringstream buf;
-    buf << "ArrayType {" << endl;
+    buf << "TupleType {" << endl;
     int i = 0;
     for (auto &el : this->elems) {
         printTabs(buf, tabs + 1);
-        buf << i << " = " << el->toString(ctx, tabs + 2) << endl;
+        buf << i++ << " = " << el->toString(ctx, tabs + 2) << endl;
     }
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
 }
 
-ruby_typer::core::HashType::HashType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())) {}
+ruby_typer::core::ShapeType::ShapeType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())) {}
 
-ruby_typer::core::HashType::HashType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
+ruby_typer::core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())), keys(move(keys)), values(move(values)) {}
 
-string HashType::toString(core::Context ctx, int tabs) {
+string ShapeType::toString(core::Context ctx, int tabs) {
     stringstream buf;
-    buf << "HashType {" << endl;
+    buf << "ShapeType {" << endl;
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
         printTabs(buf, tabs + 1);
@@ -165,6 +169,12 @@ string HashType::toString(core::Context ctx, int tabs) {
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
+}
+
+MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Magic())) {}
+
+string MagicType::toString(core::Context ctx, int tabs) {
+    return underlying->toString(ctx, tabs);
 }
 
 int ClassType::kind() {

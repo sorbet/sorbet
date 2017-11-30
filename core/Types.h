@@ -166,12 +166,12 @@ public:
     virtual std::string typeName();
 };
 
-class HashType final : public ProxyType {
+class ShapeType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<LiteralType>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
-    HashType();
-    HashType(std::vector<std::shared_ptr<LiteralType>> &keys, std::vector<std::shared_ptr<Type>> &values);
+    ShapeType();
+    ShapeType(std::vector<std::shared_ptr<LiteralType>> &keys, std::vector<std::shared_ptr<Type>> &values);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);
     virtual std::string typeName();
@@ -179,13 +179,26 @@ public:
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
 };
 
-class ArrayType final : public ProxyType {
+class TupleType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<Type>> elems;
-    ArrayType(std::vector<std::shared_ptr<Type>> &elems);
+    TupleType(std::vector<std::shared_ptr<Type>> &elems);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);
     virtual std::string typeName();
+};
+
+// MagicType is the type of the built-in core::GlobalState::defn_Magic()
+// object. Its `dispatchCall` knows how to handle a number of special methods
+// that are used when building CFGs to desugar features that can't be described
+// purely within our existing type system and IR.
+class MagicType final : public ProxyType {
+public:
+    MagicType();
+    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string typeName();
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
 };
 } // namespace core
 } // namespace ruby_typer

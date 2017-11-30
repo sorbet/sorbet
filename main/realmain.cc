@@ -241,6 +241,34 @@ public:
     }
 };
 
+std::string print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg]");
+
+cxxopts::Options buildOptions() {
+    cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
+
+    // Common user options in order of use
+    options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
+    options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
+    options.add_options()("q,quiet", "Silence all non-critical errors");
+    options.add_options()("v,verbose", "Verbosity level [0-3]");
+    options.add_options()("h,help", "Show long help");
+
+    // Developer options
+    options.add_options("dev")("p,print", "Print: " + print_options, cxxopts::value<vector<string>>(), "type");
+    options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
+    options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
+                               cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
+    options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
+    options.add_options("dev")("trace", "Trace phases");
+    options.add_options("dev")("set-freshNameId", "Start freshNameId at value", cxxopts::value<int>(), "int");
+    options.add_options("dev")("error-stats", "Print error statistics");
+
+    // Positional params
+    options.parse_positional("files");
+    options.positional_help("<file1.rb> <file2.rb> ...");
+    return options;
+}
+
 ruby_typer::core::GlobalState createInitialGlobalState(cxxopts::Options &options) {
     if (!options["no-stdlib"].as<bool>()) {
         const ruby_typer::u4 *const nameTablePayload = getNameTablePayload;
@@ -252,7 +280,7 @@ ruby_typer::core::GlobalState createInitialGlobalState(cxxopts::Options &options
                 payloadFiles.push_back(gs.enterFile(p.first, p.second));
             }
             vector<string> emptyPrintsPayload;
-            cxxopts::Options emptyOpts("");
+            cxxopts::Options emptyOpts = buildOptions();
 
             typecheck(gs, index(gs, payloadFiles, emptyPrintsPayload, emptyOpts, true), emptyPrintsPayload, emptyOpts,
                       true); // result is thrown away
@@ -276,8 +304,6 @@ ruby_typer::core::GlobalState createInitialGlobalState(cxxopts::Options &options
 }
 
 int realmain(int argc, char **argv) {
-    vector<string> files;
-    vector<string> prints;
     //    spd::set_async_mode(1024);
     auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_st>();
     color_sink->set_color(spd::level::info, color_sink->white);
@@ -291,29 +317,7 @@ int realmain(int argc, char **argv) {
     console_err->set_pattern("%v");
     FileFlatMapper flatMapper(argc, argv);
 
-    std::string print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg]");
-
-    cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
-    // Common user options in order of use
-    options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
-    options.add_options()("files", "Input files", cxxopts::value<vector<string>>(files));
-    options.add_options()("q,quiet", "Silence all non-critical errors");
-    options.add_options()("v,verbose", "Verbosity level [0-3]");
-    options.add_options()("h,help", "Show long help");
-
-    // Developer options
-    options.add_options("dev")("p,print", "Print: " + print_options, cxxopts::value<vector<string>>(prints), "type");
-    options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
-                               cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
-    options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
-    options.add_options("dev")("trace", "Trace phases");
-    options.add_options("dev")("set-freshNameId", "Start freshNameId at value", cxxopts::value<int>(), "int");
-    options.add_options("dev")("error-stats", "Print error statistics");
-
-    // Positional params
-    options.parse_positional("files");
-    options.positional_help("<file1.rb> <file2.rb> ...");
+    cxxopts::Options options = buildOptions();
 
     try {
         options.parse(argc, argv);
@@ -321,6 +325,9 @@ int realmain(int argc, char **argv) {
         console->info("{}\n\n{}", e.what(), options.help());
         return 1;
     }
+
+    vector<string> files = options["files"].as<vector<string>>();
+    vector<string> prints = options["print"].as<vector<string>>();
 
     if (options["h"].as<bool>()) {
         console->info("{}", options.help({"", "dev"}));

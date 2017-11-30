@@ -171,14 +171,14 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
         p.putU4(4);
         pickle(p, a->left.get());
         pickle(p, a->right.get());
-    } else if (auto *arr = dynamic_cast<ArrayType *>(what)) {
+    } else if (auto *arr = dynamic_cast<TupleType *>(what)) {
         p.putU4(5);
         pickle(p, arr->underlying.get());
         p.putU4(arr->elems.size());
         for (auto &el : arr->elems) {
             pickle(p, el.get());
         }
-    } else if (auto *hash = dynamic_cast<HashType *>(what)) {
+    } else if (auto *hash = dynamic_cast<ShapeType *>(what)) {
         p.putU4(6);
         pickle(p, hash->underlying.get());
         p.putU4(hash->keys.size());
@@ -189,6 +189,8 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
         for (auto &el : hash->values) {
             pickle(p, el.get());
         }
+    } else if (auto *hash = dynamic_cast<MagicType *>(what)) {
+        p.putU4(7);
     } else {
         Error::notImplemented();
     }
@@ -220,7 +222,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
             for (int i = 0; i < sz; i++) {
                 elems.emplace_back(unpickleType(p));
             }
-            auto result = std::make_shared<ArrayType>(elems);
+            auto result = std::make_shared<TupleType>(elems);
             result->underlying = underlying;
             return result;
         }
@@ -241,10 +243,12 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
             for (int i = 0; i < sz; i++) {
                 values.emplace_back(unpickleType(p));
             }
-            auto result = std::make_shared<HashType>(keys, values);
+            auto result = std::make_shared<ShapeType>(keys, values);
             result->underlying = underlying;
             return result;
         }
+        case 7:
+            return std::make_shared<MagicType>();
         default:
             Error::notImplemented();
     }
