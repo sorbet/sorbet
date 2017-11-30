@@ -14,7 +14,7 @@ class <constant:A> < ::<constant:Object> ()
   method good (a, b, c, d, e, f, g, h) -> T2
     argument a<> -> ArrayType {
           0 = T1
-          0 = T2
+          1 = T2
         }
     argument b<> -> T1
     argument c<> -> T1 | NilClass
