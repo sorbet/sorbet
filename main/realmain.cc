@@ -326,10 +326,8 @@ int realmain(int argc, char **argv) {
         return 1;
     }
 
-    vector<string> files;
-    vector<string> prints;
-    files = options["files"].as<vector<string>>();
-    prints = options["print"].as<vector<string>>();
+    vector<string> files = options["files"].as<vector<string>>();
+    vector<string> prints = options["print"].as<vector<string>>();
 
     if (options["h"].as<bool>()) {
         console->info("{}", options.help({"", "dev"}));
