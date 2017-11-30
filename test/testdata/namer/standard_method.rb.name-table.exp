@@ -2,7 +2,7 @@ class <constant:A> < ::<constant:Object> ()
   method bad (a, b, c, d, e) -> T2
     argument a<> -> untyped
     argument b<> -> untyped
-    argument c<> -> untyped
+    argument c<> -> <bottom>
     argument d<> -> untyped
     argument e<> -> untyped
   method f1 (x)
