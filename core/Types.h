@@ -166,12 +166,12 @@ public:
     virtual std::string typeName();
 };
 
-class HashType final : public ProxyType {
+class ShapeType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<LiteralType>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
-    HashType();
-    HashType(std::vector<std::shared_ptr<LiteralType>> &keys, std::vector<std::shared_ptr<Type>> &values);
+    ShapeType();
+    ShapeType(std::vector<std::shared_ptr<LiteralType>> &keys, std::vector<std::shared_ptr<Type>> &values);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);
     virtual std::string typeName();
@@ -179,10 +179,10 @@ public:
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
 };
 
-class ArrayType final : public ProxyType {
+class TupleType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<Type>> elems;
-    ArrayType(std::vector<std::shared_ptr<Type>> &elems);
+    TupleType(std::vector<std::shared_ptr<Type>> &elems);
 
     virtual std::string toString(core::Context ctx, int tabs = 0);
     virtual std::string typeName();

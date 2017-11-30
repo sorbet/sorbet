@@ -35,7 +35,7 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
     return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
-shared_ptr<Type> HashType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
+shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
     return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
 }
@@ -62,7 +62,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 keys.push_back(move(lit));
                 values.push_back(args[i + 1].type);
             }
-            return make_unique<HashType>(keys, values);
+            return make_unique<ShapeType>(keys, values);
         }
 
         case Names::buildArray()._id: {
@@ -70,7 +70,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
             for (auto &elem : args) {
                 elems.push_back(elem.type);
             }
-            return make_unique<ArrayType>(elems);
+            return make_unique<TupleType>(elems);
         }
         default:
             return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
@@ -197,7 +197,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         if (hashArg.type->isDynamic()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
-        } else if (HashType *hash = dynamic_cast<HashType *>(hashArg.type.get())) {
+        } else if (ShapeType *hash = dynamic_cast<ShapeType *>(hashArg.type.get())) {
             --aend;
 
             while (kwit != info.arguments().end()) {

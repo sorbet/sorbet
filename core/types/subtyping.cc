@@ -43,8 +43,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
             shared_ptr<ruby_typer::core::Type> result;
             ruby_typer::typecase(
                 p1,
-                [&](ArrayType *a1) { // Warning: this implements COVARIANT arrays
-                    if (ArrayType *a2 = dynamic_cast<ArrayType *>(p2)) {
+                [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                    if (TupleType *a2 = dynamic_cast<TupleType *>(p2)) {
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                             vector<shared_ptr<ruby_typer::core::Type>> elemLubs;
                             int i = 0;
@@ -52,7 +52,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
                                 elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
                                 ++i;
                             }
-                            result = make_shared<ArrayType>(elemLubs);
+                            result = make_shared<TupleType>(elemLubs);
                         } else {
                             result = make_shared<ClassType>(core::GlobalState::defn_Array());
                         }
@@ -60,8 +60,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
                         result = lubGround(ctx, p1->underlying, p2->underlying);
                     }
                 },
-                [&](HashType *h1) { // Warning: this implements COVARIANT hashes
-                    if (HashType *h2 = dynamic_cast<HashType *>(p2)) {
+                [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                    if (ShapeType *h2 = dynamic_cast<ShapeType *>(p2)) {
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = 0;
@@ -83,7 +83,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
                                 }
                                 ++i;
                             }
-                            result = make_shared<HashType>(keys, valueLubs);
+                            result = make_shared<ShapeType>(keys, valueLubs);
                         } else {
                             result = make_shared<ClassType>(core::GlobalState::defn_Hash());
                         }
@@ -437,8 +437,8 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
             bool result;
             // TODO: simply compare as memory regions
             ruby_typer::typecase(p1,
-                                 [&](ArrayType *a1) { // Warning: this implements COVARIANT arrays
-                                     ArrayType *a2 = dynamic_cast<ArrayType *>(p2);
+                                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                                     TupleType *a2 = dynamic_cast<TupleType *>(p2);
                                      result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
                                      if (result) {
                                          int i = 0;
@@ -451,8 +451,8 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
                                          }
                                      }
                                  },
-                                 [&](HashType *h1) { // Warning: this implements COVARIANT hashes
-                                     HashType *h2 = dynamic_cast<HashType *>(p2);
+                                 [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                                     ShapeType *h2 = dynamic_cast<ShapeType *>(p2);
                                      result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
                                      if (!result) {
                                          return;

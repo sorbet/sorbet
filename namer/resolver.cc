@@ -129,7 +129,7 @@ private:
                 for (auto &el : arr->elems) {
                     elems.emplace_back(getResultType(ctx, el));
                 }
-                result = make_shared<core::ArrayType>(elems);
+                result = make_shared<core::TupleType>(elems);
             },
             [&](ast::Ident *i) {
                 auto sym = dealiasSym(ctx, i->symbol);
