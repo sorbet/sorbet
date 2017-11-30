@@ -28,8 +28,9 @@ class A
       d: Opus::Types.enum([]), # error: enum([]) is invalid
       e: Opus::Types.enum([meth]), # error: Unsupported type literal
       f: Opus::Types.interface(0), # error: requires a class name
+      g: Opus::Types.any(*[1,2]),
     }, returns: T2)
-  def bad(a, b, c, d, e, f)
+  def bad(a, b, c, d, e, f, g)
   end
 
   standard_method({}, returns: Opus::Types.noreturn)

@@ -1,11 +1,12 @@
 class <constant:A> < ::<constant:Object> ()
-  method bad (a, b, c, d, e, f) -> T2
+  method bad (a, b, c, d, e, f, g) -> T2
     argument a<> -> untyped
     argument b<> -> untyped
     argument c<> -> <bottom>
     argument d<> -> untyped
     argument e<> -> untyped
     argument f<> -> untyped
+    argument g<> -> <bottom>
   method f1 (x)
     argument x<>
   method f2 (x)
