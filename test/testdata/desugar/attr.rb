@@ -1,3 +1,4 @@
+# @typed
 class TestAttr
   declare_variables(
     :@v1 => Integer,

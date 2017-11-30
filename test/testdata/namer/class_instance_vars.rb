@@ -1,3 +1,4 @@
+# @typed
 class Parent
   declare_variables(
     :@ivar => Integer,

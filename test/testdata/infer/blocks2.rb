@@ -1,3 +1,4 @@
+# @typed
 class Foo
   def bar()
     yield(1);

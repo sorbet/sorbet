@@ -1,3 +1,4 @@
+# @typed
 class Foo
   def baz(a)
     puts a # error: does not exist

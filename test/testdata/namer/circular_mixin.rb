@@ -1,3 +1,4 @@
+# @typed
 module A; end
 module B; end
 module A;

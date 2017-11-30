@@ -1,3 +1,4 @@
+# @typed
 class MyException < Exception
 end
 

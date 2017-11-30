@@ -1,3 +1,4 @@
+# @typed
 module A
   def Foo()
   end

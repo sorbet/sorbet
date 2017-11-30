@@ -1,3 +1,4 @@
+# @typed
 class MyClass
   def foo=(arg)
   end

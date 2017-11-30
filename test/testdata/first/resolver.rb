@@ -1,3 +1,4 @@
+# @typed
 class Outer1
 end
 

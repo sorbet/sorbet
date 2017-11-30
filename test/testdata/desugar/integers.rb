@@ -1,3 +1,4 @@
+# @typed
 def test_large_int
   [
     9223372036854775807,

@@ -1,3 +1,4 @@
+# @typed
 class ControlFlow
 
   standard_method({a: Opus::Types.any(Integer, NilClass)}, returns: Integer)

@@ -1,3 +1,4 @@
+# @typed
 module B
 end
 

@@ -1,1 +1,2 @@
+# @typed
 __FILE__

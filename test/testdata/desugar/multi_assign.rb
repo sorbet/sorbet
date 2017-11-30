@@ -1,3 +1,4 @@
+# @typed
 A, B, C = some_array
 
 class Test

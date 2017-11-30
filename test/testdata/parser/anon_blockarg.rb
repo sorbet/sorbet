@@ -1,2 +1,3 @@
+# @typed
 def foo(&)
 end

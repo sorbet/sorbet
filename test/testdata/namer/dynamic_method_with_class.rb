@@ -1,3 +1,4 @@
+# @typed
 class F
   def foo
     yield

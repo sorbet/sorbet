@@ -1,3 +1,4 @@
+# @typed
 class Foo
   declare_variables(
     :@ivar => Integer

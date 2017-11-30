@@ -485,7 +485,13 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
 FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
     auto idx = files.size();
-    files.emplace_back(path.toString(), source.toString());
+    std::string sigil("# @typed");
+    File::Type source_type = File::Untyped;
+    if (search(source.from, source.from + source.to, sigil.begin(), sigil.end()) != source.from + source.to) {
+        source_type = File::Typed;
+    }
+
+    files.emplace_back(path.toString(), source.toString(), source_type);
     return FileRef(idx);
 }
 

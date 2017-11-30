@@ -1,3 +1,4 @@
+# @typed
 class A
   A.declare_variables
   declare_variables        # error: Wrong number of arguments

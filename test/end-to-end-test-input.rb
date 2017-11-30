@@ -1,3 +1,4 @@
+# @typed
 class BasicError
   def basicError
     MissingConstant

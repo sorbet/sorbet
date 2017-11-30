@@ -1,3 +1,4 @@
+# @typed
 class A
   def self.foo
     def self.bar

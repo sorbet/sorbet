@@ -1,3 +1,5 @@
+# @typed
+# @typed
 class Examples
   def i_like_ifs()
     if true

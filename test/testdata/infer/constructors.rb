@@ -1,3 +1,4 @@
+# @typed
 class Foo1
 end
 

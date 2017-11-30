@@ -1,3 +1,4 @@
+# @typed
 class Test
   def test_case
     case a

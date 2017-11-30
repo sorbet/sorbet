@@ -987,8 +987,8 @@ subgraph "cluster_::<constant:Range>#initialize" {
     "bb::<constant:Range>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Range>#initialize_0" [label = "()
-selfMethodTemp$5 = self : Range
-returnMethodTemp$6 = return returnMethodTemp$4 : <bottom>
+selfMethodTemp$2 = self : Range
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Range>#initialize_0" -> "bb::<constant:Range>#initialize_1" [style="bold"];

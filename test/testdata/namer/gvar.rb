@@ -1,3 +1,4 @@
+# @typed
 $a = 1
 
 class A

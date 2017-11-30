@@ -1,3 +1,4 @@
+# @typed
 foobar do
   # TODO(nelhage): We should figure out where these should *actually*
   # live, but for now just make sure we don't crash.

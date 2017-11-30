@@ -119,7 +119,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // Parser
     auto src = ruby_typer::File::read(inputPath.c_str());
-    auto ast = ruby_typer::parser::Parser::run(gs, inputPath, src);
+    auto file = gs.enterFile(inputPath, src);
+    auto ast = ruby_typer::parser::Parser::run(gs, file);
     {
         auto newErrors = gs.errors.getAndEmptyErrors();
         errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
@@ -225,6 +226,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     if (expectation != test.expectations.end()) {
         auto checker = test.folder + expectation->second;
         SCOPED_TRACE(checker);
+
+        if (file.file(context).source_type != ruby_typer::core::File::Typed) {
+            ADD_FAILURE_AT(inputPath.c_str(), 1)
+                << "Missing `@typed` pragma. Sources with .cfg.exp expectations must specify @typed.";
+        }
 
         auto exp = ruby_typer::File::read(checker.c_str());
 
