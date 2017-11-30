@@ -21,7 +21,7 @@ class A
     {
       a: unsupported, # error: Unknown type syntax
       b: Opus::Types.enum, # error: enum only takes a single argument
-      c: Opus::Types.enum(1), # error: enum must be passed a literal array
+      c: Opus::Types.enum(1),
       d: Opus::Types.enum([]), # error: enum([]) is invalid
       e: Opus::Types.enum([meth]), # error: Unsupported type literal
     }, returns: T2)

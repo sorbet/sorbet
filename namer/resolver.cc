@@ -187,6 +187,11 @@ private:
                         }
                         auto arr = ast::cast_tree<ast::Array>(s->args[0].get());
                         if (!arr) {
+                            // TODO(pay-server) unsilence this error and support enums from pay-server
+                            {
+                                result = core::Types::bottom();
+                                break;
+                            }
                             ctx.state.errors.error(
                                 expr->loc, core::ErrorClass::InvalidTypeDeclaration,
                                 "enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
