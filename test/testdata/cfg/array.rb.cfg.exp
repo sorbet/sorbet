@@ -1,0 +1,70 @@
+digraph "array.rb"{
+subgraph "cluster_::<constant:TestArray>#an_int" {
+    label = "::<constant:TestArray>#an_int";
+    color = blue;
+    "bb::<constant:TestArray>#an_int_0" [shape = invhouse];
+    "bb::<constant:TestArray>#an_int_1" [shape = parallelogram];
+
+    "bb::<constant:TestArray>#an_int_0" [label = "()
+returnMethodTemp$1 = 0 : Integer(0)
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:TestArray>#an_int_0" -> "bb::<constant:TestArray>#an_int_1" [style="bold"];
+    "bb::<constant:TestArray>#an_int_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:TestArray>#an_int_1" -> "bb::<constant:TestArray>#an_int_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:TestArray>#a_string" {
+    label = "::<constant:TestArray>#a_string";
+    color = blue;
+    "bb::<constant:TestArray>#a_string_0" [shape = invhouse];
+    "bb::<constant:TestArray>#a_string_1" [shape = parallelogram];
+
+    "bb::<constant:TestArray>#a_string_0" [label = "()
+returnMethodTemp$1 = str : String(\"str\")
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:TestArray>#a_string_0" -> "bb::<constant:TestArray>#a_string_1" [style="bold"];
+    "bb::<constant:TestArray>#a_string_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:TestArray>#a_string_1" -> "bb::<constant:TestArray>#a_string_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:TestArray>#test_arrays" {
+    label = "::<constant:TestArray>#test_arrays";
+    color = blue;
+    "bb::<constant:TestArray>#test_arrays_0" [shape = invhouse];
+    "bb::<constant:TestArray>#test_arrays_1" [shape = parallelogram];
+
+    "bb::<constant:TestArray>#test_arrays_0" [label = "()
+arrayTemp$4 = alias <constant:<Magic>> : <Magic>
+statTemp$3 = arrayTemp$4.<build-array>() : ArrayType {\n}
+arrayTemp$6 = 1 : Integer(1)
+arrayTemp$7 = 2 : Integer(2)
+arrayTemp$8 = alias <constant:<Magic>> : <Magic>
+statTemp$5 = arrayTemp$8.<build-array>(arrayTemp$6, arrayTemp$7) : ArrayType {\n  0 = Integer(1)\n  1 = Integer(2)\n}
+statTemp$10 = self : TestArray
+arrayTemp$9 = statTemp$10.an_int() : Integer
+statTemp$12 = self : TestArray
+arrayTemp$11 = statTemp$12.a_string() : String
+arrayTemp$14 = alias <constant:<Magic>> : <Magic>
+arrayTemp$13 = arrayTemp$14.<build-array>() : ArrayType {\n}
+arrayTemp$15 = alias <constant:<Magic>> : <Magic>
+returnMethodTemp$1 = arrayTemp$15.<build-array>(arrayTemp$9, arrayTemp$11, arrayTemp$13) : ArrayType {\n  0 = Integer\n  1 = String\n  2 = ArrayType {\n    }\n}
+returnMethodTemp$16 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:TestArray>#test_arrays_0" -> "bb::<constant:TestArray>#test_arrays_1" [style="bold"];
+    "bb::<constant:TestArray>#test_arrays_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:TestArray>#test_arrays_1" -> "bb::<constant:TestArray>#test_arrays_1" [style="bold"];
+}
+
+}
+
