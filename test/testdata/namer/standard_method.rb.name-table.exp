@@ -1,5 +1,17 @@
 class <constant:A> < ::<constant:Object> ()
-  method f (a, b, c, d, e, f, g, h) -> T2
+  method bad (a, b, c, d, e) -> T2
+    argument a<> -> untyped
+    argument b<> -> untyped
+    argument c<> -> untyped
+    argument d<> -> untyped
+    argument e<> -> untyped
+  method f1 (x)
+    argument x<>
+  method f2 (x)
+    argument x<>
+  method f3 (y) -> T1
+    argument y<> -> T1
+  method good (a, b, c, d, e, f, g, h) -> T2
     argument a<> -> ArrayType {
           0 = T1
           0 = T2
@@ -8,15 +20,9 @@ class <constant:A> < ::<constant:Object> ()
     argument c<> -> T1 | NilClass
     argument d<> -> T1 | T2
     argument e<> -> untyped
-    argument f<> -> untyped
-    argument g<> -> Array
-    argument h<> -> Hash
-  method f1 (x)
-    argument x<>
-  method f2 (x)
-    argument x<>
-  method f3 (y) -> T1
-    argument y<> -> T1
+    argument f<> -> Array
+    argument g<> -> Hash
+    argument h<> -> FalseClass(false) | Integer(1) | Float(3.140000) | String("foo") | Symbol(:"bar")
   method no_params () -> T1
   method noreturn () -> <bottom>
   method test_kwargs (returns) -> T2

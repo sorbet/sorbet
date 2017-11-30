@@ -60,6 +60,7 @@ NameDef names[] = {
     {"checked"},
     {"all"},
     {"any"},
+    {"enum_", "enum"},
     {"nilable"},
     {"untyped"},
     {"arrayOf", "array_of"},

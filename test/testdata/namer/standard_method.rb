@@ -9,12 +9,23 @@ class A
       b: T1,
       c: Opus::Types.nilable(T1),
       d: Opus::Types.any(T1, T2),
-      e: unsupported, # error: Unknown type syntax
-      f: Opus::Types.untyped,
-      g: Opus::Types.array_of(T1),
-      h: Opus::Types.hash_of(keys: T1, values: T2),
+      e: Opus::Types.untyped,
+      f: Opus::Types.array_of(T1),
+      g: Opus::Types.hash_of(keys: T1, values: T2),
+      h: Opus::Types.enum([false, 1, 3.14, "foo", :bar]),
     }, returns: T2)
-  def f(a, b, c, d, e, f, g, h)
+  def good(a, b, c, d, e, f, g, h)
+  end
+
+  standard_method(
+    {
+      a: unsupported, # error: Unknown type syntax
+      b: Opus::Types.enum, # error: enum only takes a single argument
+      c: Opus::Types.enum(1), # error: enum must be passed a literal array
+      d: Opus::Types.enum([]), # error: enum([]) is invalid
+      e: Opus::Types.enum([meth]), # error: Unsupported type literal
+    }, returns: T2)
+  def bad(a, b, c, d, e)
   end
 
   standard_method({}, returns: Opus::Types.noreturn)
