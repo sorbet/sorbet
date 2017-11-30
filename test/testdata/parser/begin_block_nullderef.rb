@@ -1,3 +1,3 @@
 # @typed
-def s()else # error: else without rescue is useless
+def s()else
 n # error: syntax error

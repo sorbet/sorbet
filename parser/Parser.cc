@@ -25,11 +25,8 @@ public:
             std::string level = "unknown";
             switch (diag.level()) {
                 case ruby_parser::dlevel::NOTE:
-                    level = "Note";
-                    break;
                 case ruby_parser::dlevel::WARNING:
-                    level = "Warning";
-                    break;
+                    continue;
                 case ruby_parser::dlevel::ERROR:
                     level = "Error";
                     break;
