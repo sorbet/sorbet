@@ -99,7 +99,7 @@ public:
     }
 
     shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
-        if (auto *a = dynamic_cast<core::Literal *>(tp.get())) {
+        if (auto *a = dynamic_cast<core::LiteralType *>(tp.get())) {
             return a->underlying;
         }
         return tp;
@@ -161,23 +161,23 @@ public:
                          tp.origins.push_back(bind.loc);
                      },
                      [&](cfg::FloatLit *i) {
-                         tp.type = make_shared<core::Literal>(i->value);
+                         tp.type = make_shared<core::LiteralType>(i->value);
                          tp.origins.push_back(bind.loc);
                      },
                      [&](cfg::IntLit *i) {
-                         tp.type = make_shared<core::Literal>(i->value);
+                         tp.type = make_shared<core::LiteralType>(i->value);
                          tp.origins.push_back(bind.loc);
                      },
                      [&](cfg::StringLit *i) {
-                         tp.type = make_shared<core::Literal>(ctx.state.defn_String(), i->value);
+                         tp.type = make_shared<core::LiteralType>(ctx.state.defn_String(), i->value);
                          tp.origins.push_back(bind.loc);
                      },
                      [&](cfg::SymbolLit *i) {
-                         tp.type = make_shared<core::Literal>(ctx.state.defn_Symbol(), i->value);
+                         tp.type = make_shared<core::LiteralType>(ctx.state.defn_Symbol(), i->value);
                          tp.origins.push_back(bind.loc);
                      },
                      [&](cfg::BoolLit *i) {
-                         tp.type = make_shared<core::Literal>(i->value);
+                         tp.type = make_shared<core::LiteralType>(i->value);
                          tp.origins.push_back(bind.loc);
                      },
                      [&](cfg::Self *i) {

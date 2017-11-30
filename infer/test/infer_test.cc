@@ -39,13 +39,13 @@ unique_ptr<ast::Expression> getTree(core::GlobalState &cb, string str) {
 
 TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
     auto ctx = getCtx();
-    auto intLit = make_shared<core::Literal>(int64_t(1));
+    auto intLit = make_shared<core::LiteralType>(int64_t(1));
     auto intClass = make_shared<core::ClassType>(core::GlobalState::defn_Integer());
-    auto floatLit = make_shared<core::Literal>(1.0f);
+    auto floatLit = make_shared<core::LiteralType>(1.0f);
     auto floatClass = make_shared<core::ClassType>(core::GlobalState::defn_Float());
-    auto trueLit = make_shared<core::Literal>(true);
+    auto trueLit = make_shared<core::LiteralType>(true);
     auto trueClass = make_shared<core::ClassType>(core::GlobalState::defn_TrueClass());
-    auto stringLit = make_shared<core::Literal>(core::GlobalState::defn_String(), core::Names::assignTemp());
+    auto stringLit = make_shared<core::LiteralType>(core::GlobalState::defn_String(), core::Names::assignTemp());
     auto stringClass = make_shared<core::ClassType>(core::GlobalState::defn_String());
     EXPECT_TRUE(core::Types::isSubType(ctx, intLit, intClass));
     EXPECT_TRUE(core::Types::isSubType(ctx, floatLit, floatClass));

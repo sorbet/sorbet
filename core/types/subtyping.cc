@@ -65,7 +65,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = 0;
-                            vector<shared_ptr<ruby_typer::core::Literal>> keys;
+                            vector<shared_ptr<ruby_typer::core::LiteralType>> keys;
                             vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
                             for (auto &el2 : h2->keys) {
                                 ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
@@ -91,8 +91,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
                         result = lubGround(ctx, p1->underlying, p2->underlying);
                     }
                 },
-                [&](Literal *l1) {
-                    if (Literal *l2 = dynamic_cast<Literal *>(p2)) {
+                [&](LiteralType *l1) {
+                    if (LiteralType *l2 = dynamic_cast<LiteralType *>(p2)) {
                         ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
                         ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
                         Error::check(u1 != nullptr && u2 != nullptr);
@@ -475,8 +475,8 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
                                          ++i;
                                      }
                                  },
-                                 [&](Literal *l1) {
-                                     Literal *l2 = dynamic_cast<Literal *>(p2);
+                                 [&](LiteralType *l1) {
+                                     LiteralType *l2 = dynamic_cast<LiteralType *>(p2);
                                      ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
                                      ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
                                      Error::check(u1 != nullptr && u2 != nullptr);

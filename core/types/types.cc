@@ -56,27 +56,27 @@ bool Type::isDynamic() {
 }
 
 // TODO: somehow reuse existing references instead of allocating new ones.
-ruby_typer::core::Literal::Literal(int64_t val)
+ruby_typer::core::LiteralType::LiteralType(int64_t val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Integer())), value(val) {}
 
-ruby_typer::core::Literal::Literal(double val)
+ruby_typer::core::LiteralType::LiteralType(double val)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<u4 *>(&val)) {}
 
-ruby_typer::core::Literal::Literal(core::SymbolRef klass, core::NameRef val)
+ruby_typer::core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
     : ProxyType(make_shared<ClassType>(klass)), value(val._id) {
     Error::check(klass == core::GlobalState::defn_String() || klass == core::GlobalState::defn_Symbol());
 }
 
-ruby_typer::core::Literal::Literal(bool val)
+ruby_typer::core::LiteralType::LiteralType(bool val)
     : ProxyType(
           make_shared<ClassType>(val ? core::GlobalState::defn_TrueClass() : core::GlobalState::defn_FalseClass())),
       value(val ? 1 : 0) {}
 
-string Literal::typeName() {
-    return "Literal";
+string LiteralType::typeName() {
+    return "LiteralType";
 }
 
-string Literal::toString(core::Context ctx, int tabs) {
+string LiteralType::toString(core::Context ctx, int tabs) {
     string value;
     SymbolRef undSymbol = dynamic_cast<ClassType *>(this->underlying.get())->symbol;
     switch (undSymbol._id) {
@@ -150,7 +150,7 @@ string ArrayType::toString(core::Context ctx, int tabs) {
 
 ruby_typer::core::HashType::HashType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())) {}
 
-ruby_typer::core::HashType::HashType(vector<shared_ptr<Literal>> &keys, vector<shared_ptr<Type>> &values)
+ruby_typer::core::HashType::HashType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
     : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())), keys(move(keys)), values(move(values)) {}
 
 string HashType::toString(core::Context ctx, int tabs) {
