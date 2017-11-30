@@ -1,6 +1,7 @@
 # @typed
 class T1; end
 class T2; end
+A1 = T1
 
 class A
   standard_method(
@@ -13,8 +14,10 @@ class A
       f: Opus::Types.array_of(T1),
       g: Opus::Types.hash_of(keys: T1, values: T2),
       h: Opus::Types.enum([false, 1, 3.14, "foo", :bar]),
+      i: Opus::Types.interface(T1),
+      j: Opus::Types.interface(A1),
     }, returns: T2)
-  def good(a, b, c, d, e, f, g, h)
+  def good(a, b, c, d, e, f, g, h, i, j)
   end
 
   standard_method(
@@ -24,8 +27,9 @@ class A
       c: Opus::Types.enum(1), # error: enum must be passed a literal array
       d: Opus::Types.enum([]), # error: enum([]) is invalid
       e: Opus::Types.enum([meth]), # error: Unsupported type literal
+      f: Opus::Types.interface(0), # error: requires a class name
     }, returns: T2)
-  def bad(a, b, c, d, e)
+  def bad(a, b, c, d, e, f)
   end
 
   standard_method({}, returns: Opus::Types.noreturn)

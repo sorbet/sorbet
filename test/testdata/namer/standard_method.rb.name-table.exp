@@ -1,17 +1,18 @@
 class <constant:A> < ::<constant:Object> ()
-  method bad (a, b, c, d, e) -> T2
+  method bad (a, b, c, d, e, f) -> T2
     argument a<> -> untyped
     argument b<> -> untyped
     argument c<> -> untyped
     argument d<> -> untyped
     argument e<> -> untyped
+    argument f<> -> untyped
   method f1 (x)
     argument x<>
   method f2 (x)
     argument x<>
   method f3 (y) -> T1
     argument y<> -> T1
-  method good (a, b, c, d, e, f, g, h) -> T2
+  method good (a, b, c, d, e, f, g, h, i, j) -> T2
     argument a<> -> TupleType {
           0 = T1
           1 = T2
@@ -23,6 +24,8 @@ class <constant:A> < ::<constant:Object> ()
     argument f<> -> Array
     argument g<> -> Hash
     argument h<> -> FalseClass(false) | Integer(1) | Float(3.140000) | String("foo") | Symbol(:"bar")
+    argument i<> -> T1
+    argument j<> -> T1
   method no_params () -> T1
   method noreturn () -> <bottom>
   method private : private (x) -> T1
@@ -39,4 +42,5 @@ class <singleton class:<constant:A>> (<constant:Class>)
   method static : private (x) -> T1
     argument x<> -> T1
 class <singleton class:<constant:T1>> (<constant:Class>)
+static-field <constant:A1> -> <class:T1>
 
