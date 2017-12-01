@@ -24,3 +24,5 @@ for src in "${rb_src[@]}"; do
 done
 
 ./tools/scripts/dot2svg.sh
+
+bazel-bin/main/ruby-typer test/end-to-end-test-input.rb > test/end-to-end-test-output 2>&1

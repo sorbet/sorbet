@@ -49,7 +49,7 @@ a = load_arg(selfMethodTemp$2#bar, 0) : untyped
 b = load_arg(selfMethodTemp$2#bar, 1) : untyped
 c = load_arg(selfMethodTemp$2#bar, 2) : untyped
 statTemp$3 = self : Side
-returnMethodTemp$1 = statTemp$3.puts(a, b, c) : untyped
+returnMethodTemp$1 = statTemp$3.puts(a, b, c) : NilClass
 returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 

@@ -6015,6 +6015,14 @@ end
 module Kernel
   standard_method(
     {
+      x: Object,
+    },
+    returns: Opus::Types.array_of(Opus::Types.untyped)
+  )
+  def self.Array(x); end
+
+  standard_method(
+    {
       x: Opus::Types.any(Numeric, String),
       y: Numeric,
     },
@@ -6032,7 +6040,7 @@ module Kernel
 
   standard_method(
     {
-      x: NilClass,
+      x: Object,
     },
     returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
   )
@@ -6049,12 +6057,20 @@ module Kernel
 
   standard_method(
     {
-      x: Opus::Types.any(Numeric, String),
+      x: Opus::Types.any(Numeric, Object),
       y: Numeric,
     },
     returns: Rational
   )
   def self.Rational(x, y=_); end
+
+  standard_method(
+    {
+      x: Object,
+    },
+    returns: String
+  )
+  def self.String(x); end
 
   standard_method(
     {},
@@ -6246,6 +6262,12 @@ module Kernel
   def self.printf(_=_, _1=_, *_2); end
 
   standard_method(
+    {},
+    returns: Proc
+  )
+  def self.proc(); end
+
+  standard_method(
     {
       _: Integer,
     },
@@ -6365,12 +6387,6 @@ module Kernel
 
   standard_method(
     {},
-    returns: Proc
-  )
-  def proc(); end
-
-  standard_method(
-    {},
     returns: Opus::Types.untyped
   )
   def clone(); end
@@ -6396,12 +6412,330 @@ module Kernel
 
   standard_method(
     {
+      x: Object,
+    },
+    returns: Opus::Types.array_of(Opus::Types.untyped)
+  )
+  def Array(x); end
+
+  standard_method(
+    {
+      x: Opus::Types.any(Numeric, String),
+      y: Numeric,
+    },
+    returns: Complex
+  )
+  def Complex(x, y=_); end
+
+  standard_method(
+    {
+      x: Numeric,
+    },
+    returns: Float
+  )
+  def Float(x); end
+
+  standard_method(
+    {
+      x: Object,
+    },
+    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  )
+  def Hash(x); end
+
+  standard_method(
+    {
+      arg: Opus::Types.any(Numeric, String),
+      base: Integer,
+    },
+    returns: Integer
+  )
+  def Integer(arg, base=_); end
+
+  standard_method(
+    {
+      x: Opus::Types.any(Numeric, Object),
+      y: Numeric,
+    },
+    returns: Rational
+  )
+  def Rational(x, y=_); end
+
+  standard_method(
+    {
+      x: Object,
+    },
+    returns: String
+  )
+  def String(x); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(Symbol, NilClass)
+  )
+  def __callee__(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(String, NilClass)
+  )
+  def __dir__(); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.any(Symbol, NilClass)
+  )
+  def __method__(); end
+
+  standard_method(
+    {
+      _: String,
+    },
+    returns: String
+  )
+  def `(_); end
+
+  standard_method(
+    {
+      msg: String,
+    },
+    returns: NilClass
+  )
+  def abort(msg=_); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def at_exit(); end
+
+  standard_method(
+    {
+      _module: Opus::Types.any(String, Symbol),
+      filename: String,
+    },
+    returns: NilClass
+  )
+  def autoload(_module, filename); end
+
+  standard_method(
+    {
+      name: Opus::Types.any(Symbol, String),
+    },
+    returns: Opus::Types.any(String, NilClass)
+  )
+  def autoload?(name); end
+
+  standard_method(
+    {},
+    returns: Binding
+  )
+  def binding(); end
+
+  standard_method(
+    {
+      status: Opus::Types.any(Integer, TrueClass, FalseClass),
+    },
+    returns: NilClass
+  )
+  def exit(status=_); end
+
+  standard_method(
+    {
+      status: Opus::Types.any(Integer, TrueClass, FalseClass),
+    },
+    returns: NilClass
+  )
+  def exit!(status); end
+
+  standard_method(
+    {
+      _: Opus::Types.any(String, Class),
+      _1: Opus::Types.any(Opus::Types.array_of(String), String),
+      _2: Opus::Types.array_of(String),
+    },
+    returns: NilClass
+  )
+  def fail(_=_, _1=_, _2=_); end
+
+  standard_method(
+    {
+      format: String,
+      args: BasicObject,
+    },
+    returns: String
+  )
+  def format(format, *args); end
+
+  standard_method(
+    {
+      _: String,
+      _1: Integer,
+    },
+    returns: String
+  )
+  def gets(_=_, _1=_); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.array_of(Symbol)
+  )
+  def global_variables(); end
+
+  standard_method(
+    {
+      filename: String,
+      _: Opus::Types.any(TrueClass, FalseClass),
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def load(filename, _=_); end
+
+  standard_method(
+    {
+      name: String,
+      rest: Opus::Types.any(String, Integer),
+      block: String,
+    },
+    returns: Opus::Types.any(IO, NilClass)
+  )
+  def open(name, rest=_, block=_); end
+
+  standard_method(
+    {
+      _: IO,
+      _1: String,
+      _2: BasicObject,
+    },
+    returns: NilClass
+  )
+  def printf(_=_, _1=_, *_2); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def proc(); end
+
+  standard_method(
+    {
+      _: Integer,
+    },
+    returns: Integer
+  )
+  def putc(_); end
+
+  standard_method(
+    {
+      _: BasicObject,
+    },
+    returns: NilClass
+  )
+  def puts(*_); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def raise(); end
+
+  standard_method(
+    {
+      _: String,
+      _1: Integer,
+    },
+    returns: String
+  )
+  def readline(_=_, _1=_); end
+
+  standard_method(
+    {
+      _: String,
+      _1: Integer,
+    },
+    returns: Opus::Types.array_of(String)
+  )
+  def readlines(_=_, _1=_); end
+
+  standard_method(
+    {
+      path: String,
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def require(path); end
+
+  standard_method(
+    {
+      feature: String,
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass)
+  )
+  def require_relative(feature); end
+
+  standard_method(
+    {
+      read: Opus::Types.array_of(IO),
+      write: Opus::Types.array_of(IO),
+      error: Opus::Types.array_of(IO),
+      timeout: Integer,
+    },
+    returns: Opus::Types.array_of(String)
+  )
+  def select(read, write=_, error=_, timeout=_); end
+
+  standard_method(
+    {
+      duration: Numeric,
+    },
+    returns: Integer
+  )
+  def sleep(duration); end
+
+  standard_method(
+    {
       format: String,
       args: BasicObject,
     },
     returns: String
   )
   def self.sprintf(format, *args); end
+
+  standard_method(
+    {
+      format: String,
+      args: BasicObject,
+    },
+    returns: String
+  )
+  def sprintf(format, *args); end
+
+  standard_method(
+    {
+      num: Integer,
+      args: BasicObject,
+    },
+    returns: Opus::Types.untyped
+  )
+  def syscall(num, *args); end
+
+  standard_method(
+    {
+      cmd: String,
+      file1: String,
+      file2: String,
+    },
+    returns: Opus::Types.any(TrueClass, FalseClass, Time)
+  )
+  def test(cmd, file1, file2=_); end
+
+  standard_method(
+    {
+      msg: String,
+    },
+    returns: NilClass
+  )
+  def warn(*msg); end
 end
 
 module Marshal
