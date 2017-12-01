@@ -138,7 +138,7 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
         os << ">";
     }
     if (myInfo.resultType) {
-        os << " -> " << myInfo.resultType->toString(Context(gs, gs.defn_root()), tabs + 2);
+        os << " -> " << myInfo.resultType->toString(Context(gs, gs.defn_root()), tabs);
     }
     os << endl;
 
