@@ -1,0 +1,25 @@
+digraph "date.rb"{
+subgraph "cluster_::<constant:A>#foo" {
+    label = "::<constant:A>#foo";
+    color = blue;
+    "bb::<constant:A>#foo_0" [shape = invhouse];
+    "bb::<constant:A>#foo_1" [shape = parallelogram];
+
+    "bb::<constant:A>#foo_0" [label = "()
+selfMethodTemp$2 = self : A
+t = load_arg(selfMethodTemp$2#foo, 0) : Time
+statTemp$4 = t.to_datetime() : DateTime
+statTemp$3 = statTemp$4.to_date() : Date
+returnMethodTemp$1 = statTemp$3.to_time() : Time
+returnMethodTemp$6 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:A>#foo_0" -> "bb::<constant:A>#foo_1" [style="bold"];
+    "bb::<constant:A>#foo_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:A>#foo_1" -> "bb::<constant:A>#foo_1" [style="bold"];
+}
+
+}
+
