@@ -152,7 +152,7 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
             continue;
         }
 
-        children.push_back(pair.second.toString(gs, tabs + 1));
+        children.push_back(pair.second.toString(gs, tabs + 1, showHidden));
     }
     sort(children.begin(), children.end());
     for (auto row : children) {
