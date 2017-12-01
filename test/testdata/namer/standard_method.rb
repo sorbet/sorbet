@@ -82,5 +82,20 @@ class A
   def f3(y)
   end
 
+  abstract_method(returns: T1)
+  def test_abstract; end
+
+  implementation_method(returns: T1)
+  def test_implementation; end
+
+  override_method(returns: T1)
+  def test_override; end
+
+  overridable_method(returns: T1)
+  def test_overridable; end
+
+  overridable_implementation_method(returns: T1)
+  def test_overridable_implementation; end
+
   standard_method({z: T1}, returns: T1) # error: Malformed standard_method. No method def following it.
 end
