@@ -24,11 +24,11 @@ cc_library(
 
 genrule(
     name = "generate_payload_cc",
-    srcs = ["//rbi:stdlib"],
+    srcs = ["//rbi"],
     outs = [
         "text.cc",
         "text.h",
     ],
-    cmd = "$(location :generate_payload) $(location text.h) $(location text.cc) $(locations //rbi:stdlib)",
+    cmd = "$(location :generate_payload) $(location text.h) $(location text.cc) $(locations //rbi)",
     tools = [":generate_payload"],
 )

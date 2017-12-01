@@ -63,7 +63,7 @@ cc_test(
     ]),
     copts = ["-Iexternal/gtest/include"],
     data = [
-        "//rbi:stdlib",
+        "//rbi",
         "//test:gerald",
     ],
     linkstatic = select({
