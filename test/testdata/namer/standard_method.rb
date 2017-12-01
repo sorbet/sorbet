@@ -77,7 +77,7 @@ class A
       T1.new
   end
 
-  standard_method({y: T1}, returns: T1) # error: Unused standard_method. No method def before next standard_method.
+  standard_method({y: T1}, returns: T1) # error: Unused type annotation. No method def before next annotation
   standard_method({y: T1}, returns: T1)
   def f3(y)
   end
