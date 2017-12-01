@@ -7,3 +7,7 @@ end
 module B
   include A # error: Circular dependency
 end
+
+module A
+  include A # error: Circular dependency
+end

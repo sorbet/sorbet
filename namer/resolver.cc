@@ -572,7 +572,7 @@ public:
                                        "Superclasses and mixins must be statically resolved.");
                 continue;
             }
-            if (id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
+            if (id->symbol == original->symbol || id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
                 ctx.state.errors.error(id->loc, core::ErrorClass::CircularDependency,
                                        "Circular dependency: {} and {} are declared as parents of each other",
                                        original->symbol.info(ctx).name.toString(ctx),
