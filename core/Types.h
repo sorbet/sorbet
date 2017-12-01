@@ -200,6 +200,20 @@ public:
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
 };
+
+class AliasType final : public Type {
+public:
+    AliasType(SymbolRef other);
+    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string typeName();
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+
+    SymbolRef symbol;
+};
+
 } // namespace core
 } // namespace ruby_typer
 #endif // SRUBY_TYPES_H

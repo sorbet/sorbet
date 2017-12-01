@@ -161,10 +161,10 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
     return os.str();
 }
 
-SymbolRef Symbol::findMember(NameRef name) {
+SymbolRef Symbol::findMember(GlobalState &gs, NameRef name) {
     for (auto &member : members) {
         if (member.first == name) {
-            return member.second;
+            return member.second.info(gs).dealias(gs);
         }
     }
     return SymbolRef(0);
@@ -190,7 +190,7 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
         Error::raise("findMemberTransitive hit a loop why resolving ");
     }
 
-    SymbolRef result = findMember(name);
+    SymbolRef result = findMember(gs, name);
     if (result.exists()) {
         return result;
     }
@@ -227,7 +227,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
         return GlobalState::defn_untyped();
     }
 
-    SymbolRef singleton = findMember(Names::singletonClass());
+    SymbolRef singleton = findMember(gs, Names::singletonClass());
     if (singleton.exists()) {
         return singleton;
     }
@@ -249,8 +249,15 @@ SymbolRef Symbol::attachedClass(GlobalState &gs) {
         return GlobalState::defn_untyped();
     }
 
-    SymbolRef singleton = findMember(Names::attachedClass());
+    SymbolRef singleton = findMember(gs, Names::attachedClass());
     return singleton;
+}
+
+SymbolRef Symbol::dealias(GlobalState &gs) {
+    if (auto alias = dynamic_cast<AliasType *>(resultType.get())) {
+        return alias->symbol.info(gs).dealias(gs);
+    }
+    return this->ref(gs);
 }
 
 LocalVariable::LocalVariable(NameRef name) : name(name) {}

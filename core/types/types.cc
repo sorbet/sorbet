@@ -119,6 +119,10 @@ string MagicType::typeName() {
     return "MagicType";
 }
 
+string AliasType::typeName() {
+    return "AliasType";
+}
+
 string AndType::typeName() {
     return "AndType";
 }
@@ -177,12 +181,12 @@ string MagicType::toString(core::Context ctx, int tabs) {
     return underlying->toString(ctx, tabs);
 }
 
-int ClassType::kind() {
-    return 1;
-}
+AliasType::AliasType(core::SymbolRef other) : symbol(other) {}
 
-int AndType::kind() {
-    return 2;
+string AliasType::toString(core::Context ctx, int tabs) {
+    stringstream buf;
+    buf << "AliasType { symbol = " << this->symbol.info(ctx).fullName(ctx) << " }";
+    return buf.str();
 }
 
 string AndType::toString(core::Context ctx, int tabs) {
@@ -191,12 +195,20 @@ string AndType::toString(core::Context ctx, int tabs) {
     return buf.str();
 }
 
-int OrType::kind() {
-    return 3;
-}
-
 string OrType::toString(core::Context ctx, int tabs) {
     stringstream buf;
     buf << this->left->toString(ctx, tabs + 2) << " | " << this->right->toString(ctx, tabs + 2);
     return buf.str();
+}
+
+int ClassType::kind() {
+    return 1;
+}
+
+int AndType::kind() {
+    return 2;
+}
+
+int OrType::kind() {
+    return 3;
 }

@@ -27,6 +27,9 @@ enum class ErrorClass {
     DynamicMethodDefinition = 4006,
     SelfOutsideClass = 4007,
     CircularDependency = 4008,
+    DynamicDSLInvocation = 4009,
+    MethodNotFound = 4010,
+    InvalidAlias = 4011,
 
     DynamicConstant = 5001, // Resolver Errors
     StubConstant = 5002,

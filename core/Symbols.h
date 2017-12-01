@@ -277,7 +277,7 @@ public:
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
 
-    SymbolRef findMember(NameRef name);
+    SymbolRef findMember(GlobalState &gs, NameRef name);
     SymbolRef findMemberTransitive(GlobalState &gs, NameRef name, int MaxDepth = 100);
 
     std::string fullName(GlobalState &gs) const;
@@ -288,6 +288,8 @@ public:
 
     // Returns attached class or noSymbol if it does not exist
     SymbolRef attachedClass(GlobalState &gs);
+
+    SymbolRef dealias(GlobalState &gs);
 
     NameRef name; // todo: move out? it should not matter but it's important for
     // name resolution

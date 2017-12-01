@@ -1107,6 +1107,12 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::BlockPass *a) { Error::raise("Send should have already handled the BlockPass"); },
+            [&](parser::Alias *a) {
+                auto self = make_unique<Self>(a->loc, ctx.state.defn_todo());
+                auto res = mkSend2(a->loc, move(self), core::Names::aliasMethod(), node2TreeImpl(ctx, a->from),
+                                   node2TreeImpl(ctx, a->to));
+                result.swap(res);
+            },
             [&](parser::Node *a) {
                 ctx.state.errors.error(what->loc, core::ErrorClass::UnsupportedNode, "Unsupported node type {}",
                                        a->nodeName());

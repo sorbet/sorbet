@@ -1,0 +1,6 @@
+class <constant:M> ()
+  method f ()
+  method f_alias () -> AliasType { symbol = ::<constant:M>#f }
+  method f_alias_1 () -> AliasType { symbol = ::<constant:M>#f }
+class <singleton class:<constant:M>> (<constant:Class>)
+

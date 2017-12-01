@@ -15,7 +15,6 @@ for src in "${rb_src[@]}"; do
 
     cur_sha=$(shasum -a 256 "$src" | cut -f1 -d ' ')
     if [ "$orig_sha" = "$cur_sha" ]; then
-        echo "Not regenerating $out..."
         continue
     fi
     (

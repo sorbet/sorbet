@@ -516,3 +516,7 @@ bool OrType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 bool AndType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return left->derivesFrom(ctx, klass) || right->derivesFrom(ctx, klass);
 }
+
+bool AliasType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+    Error::raise("AliasType::derivesFrom");
+}

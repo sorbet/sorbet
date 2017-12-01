@@ -75,6 +75,7 @@ class NameInserter {
 
     struct LocalFrame {
         unordered_map<core::NameRef, core::LocalVariable> locals;
+        bool moduleFunctionActive;
     };
 
     vector<LocalFrame> scopeStack;
@@ -115,6 +116,25 @@ class NameInserter {
         }
         // TODO check that send->block is empty
         return move(send->args[0]);
+    }
+
+    void aliasMethod(core::Context ctx, core::SymbolRef owner, core::NameRef newName, core::SymbolRef method) {
+        core::SymbolRef alias = ctx.state.enterMethodSymbol(method.info(ctx).definitionLoc, owner, newName);
+        alias.info(ctx).resultType = make_shared<core::AliasType>(method);
+    }
+
+    void aliasModuleFunction(core::Context ctx, core::SymbolRef method) {
+        core::SymbolRef owner = method.info(ctx).owner;
+        aliasMethod(ctx, owner.info(ctx).singletonClass(ctx), method.info(ctx).name, method);
+    }
+
+    core::SymbolRef methodOwner(core::Context ctx) {
+        core::SymbolRef owner = ctx.enclosingClass();
+        if (owner == core::GlobalState::noSymbol()) {
+            // Root methods end up going on object
+            owner = core::GlobalState::defn_Object();
+        }
+        return owner;
     }
 
 public:
@@ -197,21 +217,77 @@ public:
                 case core::Names::public_()._id:
                     mdef->symbol.info(ctx).setPublic();
                     break;
+                case core::Names::moduleFunction()._id:
+                    aliasModuleFunction(ctx, mdef->symbol);
+                    break;
                 default:
                     return original;
             }
             return original->args[0].release();
         }
+        if (ast::cast_tree<ast::Self>(original->recv.get()) != nullptr) {
+            switch (original->fun._id) {
+                case core::Names::moduleFunction()._id: {
+                    if (original->args.empty()) {
+                        scopeStack.back().moduleFunctionActive = true;
+                        break;
+                    }
+                    for (auto &arg : original->args) {
+                        auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
+                        if (sym == nullptr) {
+                            ctx.state.errors.error(arg->loc, core::ErrorClass::DynamicDSLInvocation,
+                                                   "Unsupported argument to {}: arguments must be symbol literals",
+                                                   original->fun.toString(ctx));
+                            continue;
+                        }
+                        core::SymbolRef meth = methodOwner(ctx).info(ctx).findMember(ctx, sym->name);
+                        if (!meth.exists()) {
+                            ctx.state.errors.error(arg->loc, core::ErrorClass::MethodNotFound, "{}: no such method: {}",
+                                                   original->fun.toString(ctx), sym->name.toString(ctx));
+                            continue;
+                        }
+                        aliasModuleFunction(ctx, meth);
+                    }
+                    break;
+                }
+                case core::Names::aliasMethod()._id: {
+                    vector<core::NameRef> args;
+                    for (auto &arg : original->args) {
+                        auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
+                        if (sym == nullptr) {
+                            ctx.state.errors.error(arg->loc, core::ErrorClass::DynamicDSLInvocation,
+                                                   "Unsupported argument to {}: arguments must be symbol literals",
+                                                   original->fun.toString(ctx));
+                            continue;
+                        }
+                        args.push_back(sym->name);
+                    }
+                    if (original->args.size() != 2) {
+                        ctx.state.errors.error(original->loc, core::ErrorClass::InvalidAlias,
+                                               "Wrong number of arguments to {}; Expected 2",
+                                               original->fun.toString(ctx));
+                        break;
+                    }
+                    if (args.size() != 2)
+                        break;
+                    core::SymbolRef meth = methodOwner(ctx).info(ctx).findMember(ctx, args[1]);
+                    if (!meth.exists()) {
+                        ctx.state.errors.error(original->args[1]->loc, core::ErrorClass::MethodNotFound,
+                                               "{}: no such method: {}", original->fun.toString(ctx),
+                                               args[1].toString(ctx));
+                        break;
+                    }
+                    aliasMethod(ctx, methodOwner(ctx), args[0], meth);
+                }
+            }
+        }
+
         return original;
     }
 
     ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
         scopeStack.emplace_back();
-        core::SymbolRef owner = ctx.enclosingClass();
-        if (owner == core::GlobalState::noSymbol()) {
-            // Root methods end up going on object
-            owner = core::GlobalState::defn_Object();
-        }
+        core::SymbolRef owner = methodOwner(ctx);
 
         if (method->isSelf) {
             if (owner.info(ctx).isClass()) {
@@ -229,6 +305,9 @@ public:
 
     ast::MethodDef *postTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
         scopeStack.pop_back();
+        if (scopeStack.back().moduleFunctionActive) {
+            aliasModuleFunction(ctx, method->symbol);
+        }
         return method;
     }
 
@@ -275,7 +354,7 @@ public:
             }
             case ast::UnresolvedIdent::Global: {
                 core::Symbol &root = ctx.state.defn_root().info(ctx);
-                core::SymbolRef sym = root.findMember(nm->name);
+                core::SymbolRef sym = root.findMember(ctx, nm->name);
                 if (!sym.exists()) {
                     sym = ctx.state.enterFieldSymbol(nm->loc, ctx.state.defn_root(), nm->name);
                 }
@@ -309,7 +388,7 @@ private:
     NameInserter() {
         scopeStack.emplace_back();
     }
-};
+}; // namespace namer
 
 unique_ptr<ast::Expression> Namer::run(core::Context &ctx, unique_ptr<ast::Expression> tree) {
     NameInserter nameInserter;

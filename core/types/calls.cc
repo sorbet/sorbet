@@ -293,3 +293,12 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
         return Types::dynamic();
     }
 }
+
+std::shared_ptr<Type> AliasType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
+    Error::raise("AliasType::dispatchCall");
+}
+
+std::shared_ptr<Type> AliasType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+    Error::raise("AliasType::getCallArgumentType");
+}

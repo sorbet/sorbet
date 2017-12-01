@@ -137,7 +137,6 @@ toolchain {
     compiler_flag:  "-fno-omit-frame-pointer"
 
     linker_flag: "-Wl,--gc-sections"
-    linker_flag: "-lpthread"
   }
   linking_mode_flags { mode: DYNAMIC }
 }

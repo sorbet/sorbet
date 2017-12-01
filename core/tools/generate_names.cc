@@ -80,6 +80,8 @@ NameDef names[] = {
     {"protected_", "protected"},
     {"public_", "public"},
     {"privateClassMethod", "private_class_method"},
+    {"moduleFunction", "module_function"},
+    {"aliasMethod", "alias_method"},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store

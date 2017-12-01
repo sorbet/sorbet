@@ -28,7 +28,7 @@ private:
     core::SymbolRef resolveLhs(core::Context ctx, core::NameRef name) {
         Nesting *scope = nesting_.get();
         while (scope != nullptr) {
-            auto lookup = scope->scope.info(ctx).findMember(name);
+            auto lookup = scope->scope.info(ctx).findMember(ctx, name);
             if (lookup.exists()) {
                 return lookup;
             }
@@ -58,7 +58,7 @@ private:
 
         if (ast::Ident *id = ast::cast_tree<ast::Ident>(c->scope.get())) {
             core::SymbolRef resolved = id->symbol;
-            core::SymbolRef result = resolved.info(ctx).findMember(c->cnst);
+            core::SymbolRef result = resolved.info(ctx).findMember(ctx, c->cnst);
             if (!result.exists()) {
                 if (resolved.info(ctx).resultType.get() == nullptr || !resolved.info(ctx).resultType->isDynamic()) {
                     ctx.state.errors.error(c->loc, core::ErrorClass::StubConstant, "Stubbing out unknown constant {}",
@@ -386,7 +386,7 @@ private:
             auto str = sym->name.toString(ctx);
             if (str.substr(0, 2) == "@@") {
                 core::Symbol &info = ctx.owner.info(ctx);
-                var = info.findMember(sym->name);
+                var = info.findMember(ctx, sym->name);
                 if (var.exists()) {
                     ctx.state.errors.error(key->loc, core::ErrorClass::DuplicateVariableDeclaration,
                                            "Redeclaring variable `{}'", str);
@@ -395,7 +395,7 @@ private:
                 }
             } else if (str.substr(0, 1) == "@") {
                 core::Symbol &info = ctx.owner.info(ctx);
-                var = info.findMember(sym->name);
+                var = info.findMember(ctx, sym->name);
                 if (var.exists()) {
                     ctx.state.errors.error(key->loc, core::ErrorClass::DuplicateVariableDeclaration,
                                            "Redeclaring variable `{}'", str);

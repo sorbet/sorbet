@@ -1,0 +1,15 @@
+class <constant:C> < ::<constant:Object> (<constant:M>)
+  method test_calls ()
+class <constant:M> ()
+  method f (x) -> Integer
+    argument x<> -> Integer
+  method g (s) -> Symbol
+    argument s<> -> Symbol
+  method h (s) -> String
+    argument s<> -> String
+class <singleton class:<constant:C>> (<constant:Class>)
+class <singleton class:<constant:M>> (<constant:Class>)
+  method f () -> AliasType { symbol = ::<constant:M>#f }
+  method g () -> AliasType { symbol = ::<constant:M>#g }
+  method h () -> AliasType { symbol = ::<constant:M>#h }
+
