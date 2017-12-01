@@ -15,9 +15,9 @@ class <constant:A> < ::<constant:Object> ()
     argument y<> -> T1
   method good (a, b, c, d, e, f, g, h, i, j) -> T2
     argument a<> -> TupleType {
-          0 = T1
-          1 = T2
-        }
+      0 = T1
+      1 = T2
+    }
     argument b<> -> T1
     argument c<> -> T1 | NilClass
     argument d<> -> T1 | T2
