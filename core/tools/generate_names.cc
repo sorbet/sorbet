@@ -55,8 +55,14 @@ NameDef names[] = {
     {"currentFile", "__FILE__"},
     {"merge"},
 
-    // standard_method keywords
+    // Opus::Types keywords
     {"standardMethod", "standard_method"},
+    {"abstractMethod", "abstract_method"},
+    {"implementationMethod", "implementation_method"},
+    {"overrideMethod", "override_method"},
+    {"overridableMethod", "overridable_method"},
+    {"overridableImplementationMethod", "overridable_implementation_method"},
+
     {"returns"},
     {"checked"},
     {"all"},

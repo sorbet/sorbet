@@ -276,17 +276,20 @@ private:
         if (ast::cast_tree<ast::Self>(lastStandardMethod->recv.get()) == nullptr ||
             lastStandardMethod->block != nullptr) {
             ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
-                                   "Malformed standard_method " + lastStandardMethod->toString(ctx));
+                                   "Malformed {}: {} ", lastStandardMethod->fun.toString(ctx),
+                                   lastStandardMethod->toString(ctx));
             return;
         }
         if (lastStandardMethod->args.empty()) {
             ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
-                                   "No arguments passed to `standard_method'. Expected (arg_types, options)");
+                                   "No arguments passed to `{}'. Expected (arg_types, options)",
+                                   lastStandardMethod->fun.toString(ctx));
             return;
         }
         if (lastStandardMethod->args.size() > 2) {
             ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
-                                   "Wrong number of arguments for `standard_method'. Expected (arg_types, options)");
+                                   "Wrong number of arguments for `{}'. Expected (arg_types, options)",
+                                   lastStandardMethod->fun.toString(ctx));
             return;
         }
         // Both args must be Hash<Symbol>
@@ -295,13 +298,14 @@ private:
                 for (auto &key : hash->keys) {
                     if (ast::cast_tree<ast::SymbolLit>(key.get()) == nullptr) {
                         ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidMethodSignature,
-                                               "Malformed standard_method. Keys must be symbol literals.");
+                                               "Malformed {}. Keys must be symbol literals.",
+                                               lastStandardMethod->fun.toString(ctx));
                         return;
                     }
                 }
             } else {
                 ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidMethodSignature,
-                                       "Malformed standard_method. Expected a hash literal.");
+                                       "Malformed {}. Expected a hash literal.", lastStandardMethod->fun.toString(ctx));
                 return;
             }
         }
@@ -318,8 +322,8 @@ private:
                                 [&](core::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
                     if (fnd == methoInfo.arguments().end()) {
                         ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                               "Malformed standard_method. Unknown argument name {}",
-                                               key->toString(ctx));
+                                               "Malformed {}. Unknown argument name {}",
+                                               lastStandardMethod->fun.toString(ctx), key->toString(ctx));
                     } else {
                         core::SymbolRef arg = *fnd;
                         arg.info(ctx).resultType = getResultType(ctx, value);
@@ -345,8 +349,8 @@ private:
                         break;
                     default:
                         ctx.state.errors.error(key->loc, core::ErrorClass::InvalidMethodSignature,
-                                               "Malformed standard_method. Unknown argument name {}",
-                                               key->toString(ctx));
+                                               "Malformed {}. Unknown argument name {}",
+                                               lastStandardMethod->fun.toString(ctx), key->toString(ctx));
                 }
             }
         }
@@ -470,12 +474,17 @@ private:
                          }
                          switch (send->fun._id) {
                              case core::Names::standardMethod()._id:
+                             case core::Names::abstractMethod()._id:
+                             case core::Names::implementationMethod()._id:
+                             case core::Names::overrideMethod()._id:
+                             case core::Names::overridableMethod()._id:
+                             case core::Names::overridableImplementationMethod()._id:
                                  if (lastStandardMethod) {
                                      ctx.state.errors.error(core::Reporter::ComplexError(
                                          lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
-                                         "Unused standard_method. No method def before next standard_method.",
+                                         "Unused type annotation. No method def before next annotation.",
                                          core::Reporter::ErrorLine(mine->loc,
-                                                                   "Next standard_method that is used instead.")));
+                                                                   "Type annotation that will be used instead.")));
                                  }
                                  swap(lastStandardMethod, mine);
                                  break;
@@ -530,7 +539,8 @@ private:
 
         if (lastStandardMethod) {
             ctx.state.errors.error(lastStandardMethod->loc, core::ErrorClass::InvalidMethodSignature,
-                                   "Malformed standard_method. No method def following it.");
+                                   "Malformed {}. No method def following it.",
+                                   ast::cast_tree<ast::Send>(lastStandardMethod.get())->fun.toString(ctx));
         }
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
