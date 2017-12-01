@@ -187,7 +187,7 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
             i++;
         }
 
-        Error::raise("findMemberTransitive hit a loop why resolving ");
+        Error::raise("findMemberTransitive hit a loop while resolving ");
     }
 
     SymbolRef result = findMember(gs, name);
