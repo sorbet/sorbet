@@ -19,7 +19,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//core",
-        "@parser//:parser",
+        "@parser",
     ],
 )
 
@@ -72,7 +72,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":parser",
-        "@gtest//:gtest",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )

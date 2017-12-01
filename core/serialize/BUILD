@@ -20,7 +20,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         ":serialize",
-        "@gtest//:gtest",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )
