@@ -323,7 +323,7 @@ int realmain(int argc, char **argv) {
     try {
         options.parse(argc, argv);
     } catch (cxxopts::OptionParseException &e) {
-        console->info("{}\n\n{}", e.what(), options.help());
+        console->info("{}\n\n{}", e.what(), options.help({"", "dev"}));
         return 1;
     }
 
