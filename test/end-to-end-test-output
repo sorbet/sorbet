@@ -5,7 +5,7 @@ test/end-to-end-test-input.rb:4 Stubbing out unknown constant <emptyTree>::<cons
     ^^^^^^^^^
 [7002] test/end-to-end-test-input.rb:17 Argument _ does not match expected type.
 Expected String | Class | Exception
-rbi/stdlib.rbi:6372 Method raise has specified type of argument _ as String | Class | Exception
+rbi/stdlib.rbi:6380 Method raise has specified type of argument _ as String | Class | Exception
       _: Opus::Types.any(String, Class, Exception),
       ^^
 

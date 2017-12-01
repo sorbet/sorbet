@@ -3103,6 +3103,14 @@ class Exception
   def exception(_=_); end
 
   standard_method(
+    {
+      _: String,
+    },
+    returns: Object
+  )
+  def initialize(_=_); end
+
+  standard_method(
     {},
     returns: String
   )
