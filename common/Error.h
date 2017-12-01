@@ -1,6 +1,7 @@
 #ifndef SRUBY_ERRO_H
 #define SRUBY_ERRO_H
 
+#include "os/os.h"
 #include <cstdio>
 namespace ruby_typer {
 class SRubyException {
@@ -81,7 +82,7 @@ template <typename... TArgs>[[noreturn]] void Error::raise(const TArgs &... args
         fprintf(stderr, "Error::raise() (sadly without a message)\n");
     }
     print_backtrace();
-
+    stopInDebugger();
     throw SRubyException(message.str());
 }
 } // namespace ruby_typer
