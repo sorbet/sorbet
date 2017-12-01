@@ -390,6 +390,11 @@ int realmain(int argc, char **argv) {
         st.lines++;
         st.bytes += src.size();
         inputFiles.push_back(gs.enterFile(string("-e"), src));
+        if (options["typed"].as<string>() == "never") {
+            console->error("`-e` implies `--typed always` and you passed `--typed never`");
+            return 1;
+        }
+        forceTyped = true;
     }
     if (forceTyped) {
         for (auto &f : inputFiles) {
