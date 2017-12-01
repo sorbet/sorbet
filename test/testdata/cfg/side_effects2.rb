@@ -6,6 +6,6 @@ class Side
     end
 
     def bar(a, b, c)
-        puts a, b, c # error: Method puts does not exist on Side
+        puts a, b, c
     end
 end

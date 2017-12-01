@@ -6,7 +6,7 @@ class Foo
 
   def baz()
     bar() do |r|
-      puts r # error: does not exist
+      puts r
     end
   end
 end
