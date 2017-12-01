@@ -69,7 +69,7 @@ public:
         return !_id;
     }
 
-    std::string toString(GlobalState &gs, int tabs = 0) const;
+    std::string toString(GlobalState &gs, int tabs = 0, bool showHidden = false) const;
 
     u4 _id;
 };

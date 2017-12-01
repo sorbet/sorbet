@@ -71,7 +71,7 @@ void printTabs(ostringstream &to, int count) {
     }
 }
 
-string SymbolRef::toString(GlobalState &gs, int tabs) const {
+string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
     ostringstream os;
     Symbol &myInfo = info(gs, true);
     string name = myInfo.name.toString(gs);
@@ -148,7 +148,7 @@ string SymbolRef::toString(GlobalState &gs, int tabs) const {
         if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass()) {
             continue;
         }
-        if (pair.second.isHiddenFromPrinting(gs)) {
+        if (!showHidden && pair.second.isHiddenFromPrinting(gs)) {
             continue;
         }
 

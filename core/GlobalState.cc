@@ -529,7 +529,7 @@ string GlobalState::toString(bool showHidden) {
     vector<string> children;
     for (auto element : defn_root().info(*this).members) {
         if (showHidden || !element.second.isHiddenFromPrinting(*this)) {
-            children.push_back(element.second.toString(*this));
+            children.push_back(element.second.toString(*this, 0, showHidden));
         }
     }
     sort(children.begin(), children.end());
