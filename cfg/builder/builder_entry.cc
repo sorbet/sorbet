@@ -47,6 +47,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             aliasesPrefix.emplace_back(local, md.symbol.info(ctx).definitionLoc, make_unique<Alias>(global));
         }
     }
+    histogramInc("CFGBuilder::aliases", aliasesPrefix.size());
+    auto basicBlockCreated = res->basicBlocks.size();
+    histogramInc("CFGBuilder::basicBlocksCreated", basicBlockCreated);
     std::sort(aliasesPrefix.begin(), aliasesPrefix.end(),
               [](const Binding &l, const Binding &r) -> bool { return l.bind.name._id < r.bind.name._id; });
 
@@ -57,6 +60,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     dealias(ctx, *res);
     fillInBlockArguments(ctx, *res);
     simplify(ctx, *res);
+    histogramInc("CFGBuilder::basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
     sanityCheck(ctx, *res);
     return res;
 }

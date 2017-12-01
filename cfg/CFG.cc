@@ -92,30 +92,43 @@ string BasicBlock::toString(core::Context ctx) {
 Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(move(value)) {}
 
-Return::Return(core::LocalVariable what) : what(what) {}
+Return::Return(core::LocalVariable what) : what(what) {
+    categoryCounterInc("CFG", "Return");
+}
 
 string Return::toString(core::Context ctx) {
     return "return " + this->what.name.name(ctx).toString(ctx);
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args)
-    : recv(recv), fun(fun), args(move(args)) {}
+    : recv(recv), fun(fun), args(move(args)) {
+    categoryCounterInc("CFG", "Send");
+    histogramInc("CFG::Send::args", this->args.size());
+}
 
-FloatLit::FloatLit(double value) : value(value) {}
+FloatLit::FloatLit(double value) : value(value) {
+    categoryCounterInc("CFG", "FloatLit");
+}
 
 string FloatLit::toString(core::Context ctx) {
     return to_string(this->value);
 }
 
-IntLit::IntLit(int64_t value) : value(value) {}
+IntLit::IntLit(int64_t value) : value(value) {
+    categoryCounterInc("CFG", "IntLit");
+}
 
 string IntLit::toString(core::Context ctx) {
     return to_string(this->value);
 }
 
-Ident::Ident(core::LocalVariable what) : what(what) {}
+Ident::Ident(core::LocalVariable what) : what(what) {
+    categoryCounterInc("CFG", "Ident");
+}
 
-Alias::Alias(core::SymbolRef what) : what(what) {}
+Alias::Alias(core::SymbolRef what) : what(what) {
+    categoryCounterInc("CFG", "Alias");
+}
 
 string Ident::toString(core::Context ctx) {
     return this->what.name.name(ctx).toString(ctx);

@@ -82,7 +82,9 @@ class StringLit final : public Instruction {
 public:
     core::NameRef value;
 
-    StringLit(core::NameRef value) : value(value){};
+    StringLit(core::NameRef value) : value(value) {
+        categoryCounterInc("CFG", "StringLit");
+    };
     virtual std::string toString(core::Context ctx);
 };
 
@@ -90,7 +92,9 @@ class SymbolLit final : public Instruction {
 public:
     core::NameRef value;
 
-    SymbolLit(core::NameRef value) : value(value){};
+    SymbolLit(core::NameRef value) : value(value) {
+        categoryCounterInc("CFG", "SymbolLit");
+    };
     virtual std::string toString(core::Context ctx);
 };
 
@@ -98,7 +102,9 @@ class NotSupported final : public Instruction {
 public:
     std::string why;
 
-    NotSupported(std::string why) : why(why){};
+    NotSupported(std::string why) : why(why) {
+        categoryCounterInc("CFG", "NotSupported");
+    };
     virtual std::string toString(core::Context ctx);
 };
 
@@ -106,7 +112,9 @@ class BoolLit final : public Instruction {
 public:
     bool value;
 
-    BoolLit(bool value) : value(value){};
+    BoolLit(bool value) : value(value) {
+        categoryCounterInc("CFG", "BoolLit");
+    };
     virtual std::string toString(core::Context ctx);
 };
 
@@ -114,7 +122,9 @@ class ArraySplat final : public Instruction {
 public:
     core::NameRef arg;
 
-    ArraySplat(core::NameRef arg) : arg(arg){};
+    ArraySplat(core::NameRef arg) : arg(arg) {
+        categoryCounterInc("CFG", "ArraySplat");
+    };
     virtual std::string toString(core::Context ctx);
 };
 
@@ -122,7 +132,9 @@ class HashSplat final : public Instruction {
 public:
     core::NameRef arg;
 
-    HashSplat(core::NameRef arg) : arg(arg){};
+    HashSplat(core::NameRef arg) : arg(arg) {
+        categoryCounterInc("CFG", "HashSplat");
+    };
     virtual std::string toString(core::Context ctx);
 };
 
@@ -130,7 +142,9 @@ class Self final : public Instruction {
 public:
     core::SymbolRef klass;
 
-    Self(core::SymbolRef klass) : klass(klass){};
+    Self(core::SymbolRef klass) : klass(klass) {
+        categoryCounterInc("CFG", "Self");
+    };
     virtual std::string toString(core::Context ctx);
 };
 
@@ -140,8 +154,9 @@ public:
     core::NameRef method;
     u4 arg;
 
-    LoadArg(core::LocalVariable receiver, core::NameRef method, u4 arg)
-        : receiver(receiver), method(method), arg(arg){};
+    LoadArg(core::LocalVariable receiver, core::NameRef method, u4 arg) : receiver(receiver), method(method), arg(arg) {
+        categoryCounterInc("CFG", "LoadArg");
+    };
     virtual std::string toString(core::Context ctx);
 };
 
@@ -180,7 +195,9 @@ public:
     BlockExit bexit;
     std::vector<BasicBlock *> backEdges;
 
-    BasicBlock(){};
+    BasicBlock() {
+        counterInc("BasicBlocks");
+    };
     std::string toString(core::Context ctx);
 };
 

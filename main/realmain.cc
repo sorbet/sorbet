@@ -262,6 +262,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("trace", "Trace phases");
     options.add_options("dev")("set-freshNameId", "Start freshNameId at value", cxxopts::value<int>(), "int");
     options.add_options("dev")("error-stats", "Print error statistics");
+    options.add_options("dev")("counters", "Print internal counters");
 
     // Positional params
     options.parse_positional("files");
@@ -434,6 +435,10 @@ int realmain(int argc, char **argv) {
             console_err->warn("{}", l);
         }
         console_err->warn("Total: {}", sum);
+    }
+
+    if (options.count("counters") != 0) {
+        console_err->warn("\n" + ruby_typer::getCounterStatistics());
     }
 
     return gs.errors.hadCriticalError() ? 10 : 0;

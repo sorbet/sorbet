@@ -10,35 +10,44 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> &t1,
                                                                 shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
+        categoryCounterInc("lub", "ref-eq");
         return t1;
     }
 
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
         if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
+            categoryCounterInc("lub", "<untyped");
             return t1;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
+            categoryCounterInc("lub", "<bottom");
             return t2;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
+            categoryCounterInc("lub", "<top");
             return t1;
         }
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
         if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
+            categoryCounterInc("lub", "untyped>");
             return t2;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
+            categoryCounterInc("lub", "bottom>");
             return t1;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
+            categoryCounterInc("lub", "top>");
             return t2;
         }
     }
 
     if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
+        categoryCounterInc("lub", "<proxy");
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+            categoryCounterInc("lub", "proxy>");
             // both are proxy
             shared_ptr<ruby_typer::core::Type> result;
             ruby_typer::typecase(
@@ -118,6 +127,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
             return lubGround(ctx, und, t2);
         }
     } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+        categoryCounterInc("lub", "proxy>");
         // only 2nd is proxy
         shared_ptr<Type> &und = p2->underlying;
         return lubGround(ctx, t1, und);
@@ -132,23 +142,30 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr
     Error::check(o1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
+        categoryCounterInc("lubDistributeOr::outcome", "t1");
         return t1;
     }
     shared_ptr<ruby_typer::core::Type> n2 = Types::lub(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
+        categoryCounterInc("lubDistributeOr::outcome", "n2'");
         return n2;
     }
     if (n2.get() == o1->right.get()) {
+        categoryCounterInc("lubDistributeOr::outcome", "t1'");
         return t1;
     }
     if (n2.get() == t2.get()) {
+        categoryCounterInc("lubDistributeOr::outcome", "n1'");
         return n1;
     }
     if (Types::isSubType(ctx, n1, n2)) {
+        categoryCounterInc("lubDistributeOr::outcome", "n2''");
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
+        categoryCounterInc("lubDistributeOr::outcome", "n1'''");
         return n1;
     }
+    categoryCounterInc("lubDistributeOr::outcome", "worst");
     return make_shared<OrType>(t1, t2); // order matters for perf
 }
 
@@ -165,6 +182,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
      * The more complex types we have, the more likely this bet is to be wrong.
      */
     if (t1.get() == t2.get()) {
+        categoryCounterInc("lub", "ref-eq2");
         return t1;
     }
 
@@ -179,35 +197,46 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     shared_ptr<ruby_typer::core::Type> result;
 
     if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
+        categoryCounterInc("lub", "or>");
         return lubDistributeOr(ctx, t2, t1);
     } else if (dynamic_cast<OrType *>(t1.get()) != nullptr) {
+        categoryCounterInc("lub", "<or");
         Error::raise("should not happen");
     } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
+        categoryCounterInc("lub", "and>");
         bool collapseInLeft = Types::isSubType(ctx, t1, a2->left);
         bool collapseInRight = Types::isSubType(ctx, t1, a2->right);
         if (collapseInLeft) {
             if (collapseInRight) {
+                categoryCounterInc("lub::and>collapsed", "fully");
                 return t2;
             }
+            categoryCounterInc("lub::and>collapsed", "right");
             return make_shared<AndType>(t1, a2->right);
         } else if (collapseInRight) {
+            categoryCounterInc("lub::and>collapsed", "left");
             return make_shared<AndType>(t1, a2->left);
         } else {
+            categoryCounterInc("lub::and>collapsed", "none");
             return make_shared<AndType>(t1, t2);
         }
     }
     // 1 :-)
     ClassType *c1 = dynamic_cast<ClassType *>(t1.get());
     ClassType *c2 = dynamic_cast<ClassType *>(t2.get());
+    categoryCounterInc("lub", "<class>");
     Error::check(c1 != nullptr && c2 != nullptr);
 
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
+        categoryCounterInc("lub::<class>::collapsed", "yes");
         return t2;
     } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
+        categoryCounterInc("lub::<class>::collapsed", "yes");
         return t1;
     } else {
+        categoryCounterInc("lub::<class>::collapsed", "no");
         return make_shared<OrType>(t1, t2);
     }
 }
@@ -217,23 +246,31 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
     Error::check(t1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
+        categoryCounterInc("glbDistributeAnd::outcome", "t1");
         return t1;
     }
     shared_ptr<ruby_typer::core::Type> n2 = Types::glb(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
+        categoryCounterInc("glbDistributeAnd::outcome", "n2'");
         return n2;
     }
     if (n2.get() == a1->right.get()) {
+        categoryCounterInc("glbDistributeAnd::outcome", "t1'");
         return t1;
     }
     if (n2.get() == t2.get()) {
+        categoryCounterInc("glbDistributeAnd::outcome", "n1'");
         return n1;
     }
     if (Types::isSubType(ctx, n1, n2)) {
+        categoryCounterInc("glbDistributeAnd::outcome", "n2''");
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
+        categoryCounterInc("glbDistributeAnd::outcome", "n1'''");
         return n1;
     }
+
+    categoryCounterInc("glbDistributeAnd::outcome", "worst");
     return make_shared<AndType>(t1, t2);
 }
 
@@ -250,6 +287,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
      * The more complex types we have, the more likely this bet is to be wrong.
      */
     if (t1.get() == t2.get()) {
+        categoryCounterInc("glb", "ref-eq2");
         return t1;
     }
 
@@ -264,21 +302,27 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
     shared_ptr<ruby_typer::core::Type> result;
 
     if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4, 5
+        categoryCounterInc("glb", "<and");
         return glbDistributeAnd(ctx, t1, t2);
     } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2
+        categoryCounterInc("glb", "and>");
         return glbDistributeAnd(ctx, t2, t1);
     } else if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
+        categoryCounterInc("glb", "or>");
         bool collapseInLeft = Types::isSubType(ctx, t1, o2->left);
         bool collapseInRight = Types::isSubType(ctx, t1, o2->right);
+        categoryCounterInc("glb::or>collapsed", ">");
         if (collapseInLeft || collapseInRight) {
             return t2;
         } else if (auto *o1 = dynamic_cast<OrType *>(t1.get())) { // 6
             bool collapseInLeft1 = Types::isSubType(ctx, t2, o1->left);
             bool collapseInRight1 = Types::isSubType(ctx, t1, o1->right);
             if (collapseInLeft1 || collapseInRight1) {
+                categoryCounterInc("glb::or>collapsed", "<");
                 return t1;
             }
         } else {
+            categoryCounterInc("glb::or>collapsed", "no");
             return make_shared<AndType>(t1, t2);
         }
     }
@@ -286,14 +330,18 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
     ClassType *c1 = dynamic_cast<ClassType *>(t1.get());
     ClassType *c2 = dynamic_cast<ClassType *>(t2.get());
     Error::check(c1 != nullptr && c2 != nullptr);
+    categoryCounterInc("glb", "<class>");
 
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
+        categoryCounterInc("glb::<class>::collapsed", "yes");
         return t1;
     } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
+        categoryCounterInc("glb::<class>::collapsed", "yes");
         return t2;
     } else {
+        categoryCounterInc("glb::<class>::collapsed", "no");
         return make_shared<AndType>(t1, t2);
     }
 }
@@ -301,29 +349,36 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> &t1,
                                                                 shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
+        categoryCounterInc("glb", "ref-eq");
         return t1;
     }
 
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
         if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
+            categoryCounterInc("lub", "<untyped");
             return t1;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
+            categoryCounterInc("lub", "<bottom");
             return t1;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
+            categoryCounterInc("lub", "<top");
             return t2;
         }
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
         if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
+            categoryCounterInc("lub", "untyped>");
             return t2;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
+            categoryCounterInc("lub", "bottom>");
             return t2;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
+            categoryCounterInc("lub", "top>");
             return t1;
         }
     }
