@@ -32,7 +32,7 @@ cc_test(
         "namer",
         "//ast/desugar",
         "//parser",
-        "@gtest//:gtest",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )

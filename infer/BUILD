@@ -35,7 +35,7 @@ cc_test(
         "//ast/desugar",
         "//cfg",
         "//namer",
-        "@gtest//:gtest",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )

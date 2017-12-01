@@ -35,7 +35,7 @@ cc_test(
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast/desugar",
-        "@gtest//:gtest",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )

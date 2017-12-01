@@ -25,7 +25,7 @@ cc_test(
         "//infer",
         "//namer",
         "//payload/binary",
-        "@gtest//:gtest",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )
@@ -50,8 +50,8 @@ cc_test(
         "//common",
         "//core",
         "//parser",
-        "@cxxopts//:cxxopts",
-        "@gtest//:gtest",
+        "@cxxopts",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )
@@ -72,7 +72,7 @@ cc_test(
         "//common",
         "//core",
         "//parser",
-        "@gtest//:gtest",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )

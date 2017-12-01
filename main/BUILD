@@ -51,7 +51,7 @@ cc_library(
         "//parser",
         "//payload/binary:some",
         "//payload/text",
-        "@cxxopts//:cxxopts",
+        "@cxxopts",
     ],
 )
 
@@ -74,8 +74,8 @@ cc_test(
     deps = [
         "realmain",
         "//payload/binary:empty",
-        "@cxxopts//:cxxopts",
-        "@gtest//:gtest",
+        "@cxxopts",
+        "@gtest",
         "@gtest//:gtest_main",
     ],
 )
