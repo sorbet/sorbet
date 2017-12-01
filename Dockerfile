@@ -18,7 +18,8 @@ ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
 # buildifier, so don't install it here, just do the fetch to save a
 # little time.
 RUN mkdir -p "$GOPATH" && \
-  go get -d -u github.com/bazelbuild/buildifier/buildifier
+  go get -d -u github.com/bazelbuild/buildifier/buildifier && \
+  go get -u github.com/stripe/veneur/cmd/veneur-emit
 
 WORKDIR /src
 
