@@ -1,4 +1,14 @@
 begin
+  def meth<<constant:<todo sym>>>()
+    0
+  def foo<<constant:<todo sym>>>()
+    1
+  def bar<<constant:<todo sym>>>()
+    2
+  def baz<<constant:<todo sym>>>()
+    3
+  def take_arg<<constant:<todo sym>>>(x)
+    x
   def multiple_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
@@ -30,8 +40,8 @@ begin
       <emptyTree>
     end
   def parse_ruby_bug_12686<<constant:<todo sym>>>()
-    self(<constant:<todo sym>>).f(begin
-        self(<constant:<todo sym>>).g()
+    self(<constant:<todo sym>>).take_arg(begin
+        self(<constant:<todo sym>>).bar()
       rescue
         ::<constant:nil>
       else

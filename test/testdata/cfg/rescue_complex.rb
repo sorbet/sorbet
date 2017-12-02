@@ -1,17 +1,23 @@
 # @typed
+def meth; 0; end
+def foo; 1; end
+def bar; 2; end
+def baz; 3; end
+def take_arg(x); x; end
+
 def multiple_rescue()
   begin
-      meth # error: Method meth does not exist on Object
+      meth
   rescue
-      baz # error: Method baz does not exist on Object
+      baz
   rescue
-      bar # error: Method bar does not exist on Object
+      bar
   end
 end
 
 def multiple_rescue_classes()
   begin
-      meth # error: Method meth does not exist on Object
+      meth
   rescue Foo, Bar => baz # error: Stubbing out unknown constant
       baz
   end
@@ -26,15 +32,15 @@ def parse_bug_rescue_empty_else()
 end
 
 def parse_ruby_bug_12686()
-  f (g rescue nil) # error: does not exist on Object
+  take_arg (bar rescue nil)
 end
 
 def parse_rescue_mod()
-  meth rescue bar # error: does not exist on Object
+  meth rescue bar
 end
 
 def parse_resbody_list_var()
-  begin; meth; rescue foo => ex; bar; end # error: does not exist on Object
+  begin; meth; rescue foo => ex; bar; end
 end
 
 def parse_rescue_else_ensure()
@@ -42,29 +48,29 @@ def parse_rescue_else_ensure()
 end
 
 def parse_rescue()
-  begin; meth; rescue; foo; end # error: does not exist on Object
+  begin; meth; rescue; foo; end
 end
 
 def parse_resbody_var()
-  begin; meth; rescue => ex; bar; end # error: does not exist on Object
+  begin; meth; rescue => ex; bar; end
 end
 
 def parse_resbody_var_1()
-  begin; meth; rescue => @ex; bar; end # error: MULTI
+  begin; meth; rescue => @ex; bar; end # error: Use of undeclared variable `@ex'
 end
 
 def parse_rescue_mod_op_assign()
-  foo += meth rescue bar # error: MULTI
+  foo += meth rescue bar # error: Method + does not exist on NilClass
 end
 
 def parse_ruby_bug_12402()
-  foo = raise(bar) rescue nil # error: does not exist on Object
+  foo = raise(bar) rescue nil
 end
 
 def parse_ruby_bug_12402_1()
-  foo += raise(bar) rescue nil # error: MULTI
+  foo += raise(bar) rescue nil # error: Method + does not exist on NilClass
 end
 
 def parse_ruby_bug_12402_2()
-  foo[0] += raise(bar) rescue nil # error: MULTI
+  foo[0] += raise(bar) rescue nil
 end
