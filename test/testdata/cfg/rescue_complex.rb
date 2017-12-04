@@ -54,7 +54,7 @@ def parse_resbody_var_1()
 end
 
 def parse_rescue_mod_op_assign()
-  foo += meth rescue bar # error: Unsupported node type OpAsgn
+  foo += meth rescue bar # error: MULTI
 end
 
 def parse_ruby_bug_12402()
@@ -62,9 +62,9 @@ def parse_ruby_bug_12402()
 end
 
 def parse_ruby_bug_12402_1()
-  foo += raise(bar) rescue nil # error: Unsupported node type OpAsgn
+  foo += raise(bar) rescue nil # error: MULTI
 end
 
 def parse_ruby_bug_12402_2()
-  foo[0] += raise(bar) rescue nil # error: Unsupported node type OpAsgn
+  foo[0] += raise(bar) rescue nil # error: MULTI
 end

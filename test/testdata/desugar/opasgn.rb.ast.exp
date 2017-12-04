@@ -1,0 +1,16 @@
+def foo<<constant:<todo sym>>>()
+  begin
+    a = a.+(a)
+    begin
+      []$10000 = a.[](self(<constant:<todo sym>>).b()).[](self(<constant:<todo sym>>).c())
+      []$10001 = self(<constant:<todo sym>>).d()
+      []$10002 = self(<constant:<todo sym>>).e()
+      []$10000.[]=([]$10001, []$10002, []$10000.[]([]$10001, []$10002).+(3))
+    end
+    begin
+      []$10003 = a.b().c()
+      []$10004 = self(<constant:<todo sym>>).d().e()
+      []$10003.[]=([]$10004, []$10003.[]([]$10004).+(4))
+    end
+    a.b().c().[]=(a.b().c().[](self(<constant:<todo sym>>).d().e()).+(4))
+  end

@@ -80,7 +80,11 @@ begin
       <emptyTree>
     end
   def parse_rescue_mod_op_assign<<constant:<todo sym>>>()
-    <Not Supported (OpAsgn)>
+    foo = foo.+(self(<constant:<todo sym>>).meth()
+    rescue
+      self(<constant:<todo sym>>).bar()
+    else
+      <emptyTree>)
   def parse_ruby_bug_12402<<constant:<todo sym>>>()
     foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
   rescue
@@ -88,7 +92,19 @@ begin
   else
     <emptyTree>
   def parse_ruby_bug_12402_1<<constant:<todo sym>>>()
-    <Not Supported (OpAsgn)>
+    foo = foo.+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
+    rescue
+      ::<constant:nil>
+    else
+      <emptyTree>)
   def parse_ruby_bug_12402_2<<constant:<todo sym>>>()
-    <Not Supported (OpAsgn)>
+    begin
+      []$10000 = self(<constant:<todo sym>>).foo()
+      []$10001 = 0
+      []$10000.[]=([]$10001, []$10000.[]([]$10001).+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
+        rescue
+          ::<constant:nil>
+        else
+          <emptyTree>))
+    end
 end

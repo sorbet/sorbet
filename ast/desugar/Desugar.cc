@@ -340,6 +340,39 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     Error::notImplemented();
                 }
             },
+            [&](parser::OpAsgn *a) {
+                auto recv = node2TreeImpl(ctx, a->left);
+                auto rhs = node2TreeImpl(ctx, a->right);
+                if (auto s = cast_tree<Send>(recv.get())) {
+                    InsSeq::STATS_store stats;
+                    core::NameRef tempRecv = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
+                    stats.emplace_back(mkAssign(what->loc, tempRecv, move(s->recv)));
+                    Send::ARGS_store readArgs;
+                    Send::ARGS_store assgnArgs;
+                    for (auto &arg : s->args) {
+                        core::Loc loc = arg->loc;
+                        core::NameRef name = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun);
+                        stats.emplace_back(mkAssign(loc, name, move(arg)));
+                        readArgs.emplace_back(mkLocal(loc, name));
+                        assgnArgs.emplace_back(mkLocal(loc, name));
+                    }
+                    auto prevValue = mkSend(what->loc, mkLocal(what->loc, tempRecv), s->fun, move(readArgs), s->flags);
+                    auto newValue = mkSend1(what->loc, move(prevValue), a->op, move(rhs));
+                    assgnArgs.emplace_back(move(newValue));
+
+                    auto res =
+                        mkSend(what->loc, mkLocal(what->loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
+                    auto wrapped = mkInsSeq(what->loc, move(stats), move(res));
+                    result.swap(wrapped);
+                } else if (auto i = cast_tree<Reference>(recv.get())) {
+                    auto lhs = cpRef(what->loc, *i);
+                    auto send = mkSend1(what->loc, move(recv), a->op, move(rhs));
+                    auto res = mkAssign(what->loc, move(lhs), move(send));
+                    result.swap(res);
+                } else {
+                    Error::notImplemented();
+                }
+            },
             [&](parser::Send *a) {
                 u4 flags = 0;
                 auto rec = node2TreeImpl(ctx, a->receiver);
