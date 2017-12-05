@@ -11,8 +11,8 @@ class <constant:Parent> < ::<constant:Object> ()
   field @ivar2 -> Integer
   method hi ()
   static-field @@class_var -> String
-class <singleton class:<constant:Child>> (<constant:Class>)
-class <singleton class:<constant:Mixin>> (<constant:Class>)
-class <singleton class:<constant:Parent>> (<constant:Class>)
+class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> ()
+class <singleton class:<constant:Mixin>> < ::<constant:Module> ()
+class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
 static-field <constant:Alias> -> <class:Parent>
 

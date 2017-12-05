@@ -1,5 +1,5 @@
 class <constant:A> (<constant:B>)
 class <constant:B> ()
-class <singleton class:<constant:A>> (<constant:Class>)
-class <singleton class:<constant:B>> (<constant:Class>)
+class <singleton class:<constant:A>> < ::<constant:Module> ()
+class <singleton class:<constant:B>> < ::<constant:Module> ()
 

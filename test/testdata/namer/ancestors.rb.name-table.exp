@@ -2,6 +2,6 @@ class <constant:Child> < ::<constant:Parent> (<constant:Mixin2>)
 class <constant:Mixin1> ()
 class <constant:Mixin2> ()
 class <constant:Parent> < ::<constant:Object> (<constant:Mixin1>)
-class <singleton class:<constant:Child>> (<constant:Class>)
-class <singleton class:<constant:Parent>> (<constant:Class>)
+class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> ()
+class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
 

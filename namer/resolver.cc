@@ -671,10 +671,22 @@ unique_ptr<ast::Expression> Resolver::run(core::Context &ctx, unique_ptr<ast::Ex
 void Resolver::finalize(core::GlobalState &gs) {
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto &info = core::SymbolRef(i).info(gs);
-        if (!info.isClass()) {
+        if (!info.isClass() || info.superClass != core::GlobalState::defn_todo()) {
             continue;
         }
-        if (info.superClass == core::GlobalState::defn_todo()) {
+
+        auto attached = info.attachedClass(gs);
+        bool isSingleton = attached.exists() && attached != core::GlobalState::defn_untyped();
+        if (isSingleton) {
+            if (attached == core::GlobalState::defn_BasicObject()) {
+                info.superClass = core::GlobalState::defn_Class();
+            } else if (!attached.info(gs).superClass.exists()) {
+                info.superClass = core::GlobalState::defn_Module();
+            } else {
+                Error::check(attached.info(gs).superClass != core::GlobalState::defn_todo());
+                info.superClass = attached.info(gs).superClass.info(gs).singletonClass(gs);
+            }
+        } else {
             info.superClass = core::GlobalState::defn_Object();
         }
     }
