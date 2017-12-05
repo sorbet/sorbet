@@ -1,5 +1,6 @@
 #include "GlobalState.h"
 #include "Types.h"
+#include <regex>
 
 using namespace std;
 
@@ -494,9 +495,9 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
 FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
     auto idx = files.size();
-    std::string sigil("# @typed");
     File::Type source_type = File::Untyped;
-    if (search(source.from, source.from + source.to, sigil.begin(), sigil.end()) != source.from + source.to) {
+    regex sigil("^\\s*#\\s*@typed\\s*\n");
+    if (regex_search(source.from, source.from + source.to, sigil)) {
         source_type = File::Typed;
     }
 
