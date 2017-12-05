@@ -237,7 +237,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Symbol &singletonInfo = singleton.info(gs);
 
     singletonInfo.members.push_back(make_pair(Names::attachedClass(), selfRef));
-    singletonInfo.argumentsOrMixins.push_back(gs.defn_Class());
+    singletonInfo.superClass = core::GlobalState::defn_todo();
 
     selfRef.info(gs).members.push_back(make_pair(Names::singletonClass(), singleton));
     return singleton;

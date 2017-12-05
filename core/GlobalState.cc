@@ -59,6 +59,9 @@ UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
 const char *class_str = "Class";
 UTF8Desc class_DESC{(char *)class_str, (int)strlen(class_str)};
 
+const char *module_str = "Module";
+UTF8Desc module_DESC{(char *)module_str, (int)strlen(module_str)};
+
 const char *merge = "merge";
 UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
 
@@ -157,6 +160,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef range_id = synthesizeClass(range_DESC);
     SymbolRef regexp_id = synthesizeClass(regexp_DESC);
     SymbolRef magic_id = synthesizeClass(magic_DESC);
+    SymbolRef module_id = synthesizeClass(module_DESC);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -184,6 +188,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(range_id == defn_Range());
     Error::check(regexp_id == defn_Regexp());
     Error::check(magic_id == defn_Magic());
+    Error::check(module_id == defn_Module());
 
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = make_unique<ClassType>(defn_NilClass());

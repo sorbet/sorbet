@@ -13,5 +13,5 @@ class <constant:TestAttr> < ::<constant:Object> ()
     argument arg0<> -> untyped
   method v5= (arg0) -> untyped
     argument arg0<> -> untyped
-class <singleton class:<constant:TestAttr>> (<constant:Class>)
+class <singleton class:<constant:TestAttr>> < ::<singleton class:<constant:Object>> ()
 
