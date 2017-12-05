@@ -591,9 +591,8 @@ public:
 
     unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, ruby_typer::parser::NodeVec indexes,
                                 const token *rbrack) {
-        ruby_typer::parser::NodeVec args;
         return make_unique<Send>(loc_join(receiver->loc, tok_loc(rbrack)), move(receiver),
-                                 core::Names::squareBracketsEq(), move(args));
+                                 core::Names::squareBracketsEq(), move(indexes));
     }
 
     unique_ptr<Node> integer(const token *tok) {

@@ -1,0 +1,45 @@
+DefMethod {
+  name = test_brackets
+  args = NULL
+  body = Begin {
+    stmts = [
+      Send {
+        receiver = Send {
+          receiver = NULL
+          method = a
+          args = [
+          ]
+        }
+        method = []=
+        args = [
+          Integer {
+            val = "0"
+          }
+          Integer {
+            val = "1"
+          }
+        ]
+      }
+      Send {
+        receiver = Send {
+          receiver = NULL
+          method = a
+          args = [
+          ]
+        }
+        method = []=
+        args = [
+          Integer {
+            val = "1"
+          }
+          Integer {
+            val = "2"
+          }
+          Integer {
+            val = "3"
+          }
+        ]
+      }
+    ]
+  }
+}

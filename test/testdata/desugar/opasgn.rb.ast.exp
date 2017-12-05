@@ -12,5 +12,5 @@ def foo<<constant:<todo sym>>>()
       []$10004 = self(<constant:<todo sym>>).d().e()
       []$10003.[]=([]$10004, []$10003.[]([]$10004).+(4))
     end
-    a.b().c().[]=(a.b().c().[](self(<constant:<todo sym>>).d().e()).+(4))
+    a.b().c().[]=(self(<constant:<todo sym>>).d().e(), a.b().c().[](self(<constant:<todo sym>>).d().e()).+(4))
   end
