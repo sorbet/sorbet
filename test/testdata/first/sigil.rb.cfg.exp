@@ -1,0 +1,23 @@
+digraph "sigil.rb"{
+subgraph "cluster_::<constant:Object>#foo" {
+    label = "::<constant:Object>#foo";
+    color = blue;
+    "bb::<constant:Object>#foo_0" [shape = invhouse];
+    "bb::<constant:Object>#foo_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#foo_0" [label = "()
+statTemp$3 = 3 : String(\"3\")
+statTemp$4 = 3 : Integer(3)
+returnMethodTemp$1 = statTemp$3.+(statTemp$4) : String
+returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_1" [style="bold"];
+    "bb::<constant:Object>#foo_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
+}
+
+}
+
