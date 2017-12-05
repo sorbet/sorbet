@@ -51,6 +51,7 @@ TIMEFILE2=$(mktemp)
 # https://github.com/google/sanitizers/issues/764
 ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1  /usr/bin/time -v -o "$TIMEFILE2" ./scripts/ruby-types/typecheck --quiet --error-stats --typed=always
 
+
 cat "$TIMEFILE2"
 
 TIME2="$(cat $TIMEFILE2 |grep User |cut -d ' ' -f 4)"

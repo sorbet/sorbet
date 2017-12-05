@@ -68,15 +68,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         typecase(
             what,
             [&](ast::While *a) {
-                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current);
+                auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, a->cond->loc, current);
                 unconditionalJump(current, headerBlock, cctx.inWhat, a->loc);
 
                 core::LocalVariable condSym = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG,
                                                                           core::Names::whileTemp(), cctx.inWhat.symbol);
                 auto headerEnd = walk(cctx.withTarget(condSym).withScope(headerBlock), a->cond.get(), headerBlock);
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, headerEnd);
-                auto continueBlock = cctx.inWhat.freshBlock(cctx.loops, headerEnd);
-                conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, cctx.inWhat, a->body->loc);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, a->body->loc, headerEnd);
+                auto continueBlock = cctx.inWhat.freshBlock(cctx.loops, a->loc, headerEnd);
+                conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, cctx.inWhat, a->cond->loc);
                 // finishHeader
                 core::LocalVariable bodySym =
                     cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), cctx.inWhat.symbol);
@@ -103,8 +103,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::ifTemp(), cctx.inWhat.symbol);
                 Error::check(ifSym.exists());
                 auto cont = walk(cctx.withTarget(ifSym), a->cond.get(), current);
-                auto thenBlock = cctx.inWhat.freshBlock(cctx.loops, cont);
-                auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, cont);
+                auto thenBlock = cctx.inWhat.freshBlock(cctx.loops, a->thenp->loc, cont);
+                auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, a->elsep->loc, cont);
                 conditionalJump(cont, ifSym, thenBlock, elseBlock, cctx.inWhat, a->cond->loc);
 
                 auto thenEnd = walk(cctx, a->thenp.get(), thenBlock);
@@ -115,7 +115,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     } else if (thenEnd == cctx.inWhat.deadBlock()) {
                         ret = thenEnd;
                     } else {
-                        ret = cctx.inWhat.freshBlock(cctx.loops, thenEnd); // could be elseEnd
+                        ret = cctx.inWhat.freshBlock(cctx.loops, a->loc, thenEnd); // could be elseEnd
                         unconditionalJump(thenEnd, ret, cctx.inWhat, a->loc);
                         unconditionalJump(elseEnd, ret, cctx.inWhat, a->loc);
                     }
@@ -201,9 +201,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 }
 
                 if (s->block != nullptr) {
-                    auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, current);
-                    auto postBlock = cctx.inWhat.freshBlock(cctx.loops, headerBlock);
-                    auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, headerBlock);
+                    auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1, s->block->loc, current);
+                    auto postBlock = cctx.inWhat.freshBlock(cctx.loops, s->loc, headerBlock);
+                    auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, s->block->loc, headerBlock);
                     core::SymbolRef sym = s->block->symbol;
                     core::Symbol &info = sym.info(cctx.ctx);
 
@@ -262,17 +262,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::UniqueNameKind::CFG, core::Names::rescueTemp(), cctx.inWhat.symbol);
                 ret = current;
 
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, current);
-                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, current);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, a->body->loc, current);
+                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, a->body->loc, current);
                 conditionalJump(current, unanalyzableCondition, bodyBlock, rescueHandlersBlock, cctx.inWhat, a->loc);
                 bodyBlock = walk(cctx, a->body.get(), bodyBlock);
 
-                ret = cctx.inWhat.freshBlock(cctx.loops, bodyBlock);
+                ret = cctx.inWhat.freshBlock(cctx.loops, a->loc, bodyBlock);
                 unconditionalJump(bodyBlock, ret, cctx.inWhat, a->loc);
 
                 for (auto &rescueCase : a->rescueCases) {
-                    bodyBlock = cctx.inWhat.freshBlock(cctx.loops, rescueHandlersBlock);
-                    auto newRescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, rescueHandlersBlock);
+                    bodyBlock = cctx.inWhat.freshBlock(cctx.loops, rescueCase->body->loc, rescueHandlersBlock);
+                    auto newRescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, a->loc, rescueHandlersBlock);
                     conditionalJump(rescueHandlersBlock, unanalyzableCondition, bodyBlock, newRescueHandlersBlock,
                                     cctx.inWhat, rescueCase->loc);
                     rescueHandlersBlock = newRescueHandlersBlock;
@@ -284,7 +284,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     unconditionalJump(bodyBlock, ret, cctx.inWhat, a->loc);
                 }
 
-                bodyBlock = cctx.inWhat.freshBlock(cctx.loops, rescueHandlersBlock);
+                bodyBlock = cctx.inWhat.freshBlock(cctx.loops, a->loc, rescueHandlersBlock);
                 conditionalJump(rescueHandlersBlock, unanalyzableCondition, bodyBlock, ret, cctx.inWhat, a->loc);
                 bodyBlock = walk(cctx, a->else_.get(), bodyBlock);
                 unconditionalJump(bodyBlock, ret, cctx.inWhat, a->loc);

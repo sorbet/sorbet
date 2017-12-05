@@ -48,6 +48,7 @@ enum class ErrorClass {
     UnknownMethod = 7003,
     MethodArgumentCountMismatch = 7004,
     ReturnTypeMismatch = 7005,
+    DeadBranchInferencer = 7006,
 };
 
 class Reporter final {

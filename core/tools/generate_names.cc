@@ -116,6 +116,7 @@ NameDef names[] = {
     {"super"},
     {"empty", ""},
 
+    {"emptyHash", "{}"},
     {"buildHash", "<build-hash>"},
     {"buildArray", "<build-array>"},
     {"splat", "<splat>"},
@@ -124,6 +125,9 @@ NameDef names[] = {
     // Synthetic method created on a singleton class to hold initialization code
     // within the body of a `class` or `module` declaration.
     {"staticInit", "<static-init>"},
+    {"is_a_p", "is_a?"},
+    {"kind_of", "kind_of?"},
+    {"eqeq", "=="},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

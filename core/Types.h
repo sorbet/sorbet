@@ -63,6 +63,20 @@ public:
     static std::shared_ptr<Type> bottom();
     static std::shared_ptr<Type> nil();
     static std::shared_ptr<Type> dynamic();
+    static std::shared_ptr<Type> trueClass();
+    static std::shared_ptr<Type> falseClass();
+    static std::shared_ptr<Type> Integer();
+    static std::shared_ptr<Type> String();
+    static std::shared_ptr<Type> Symbol();
+    static std::shared_ptr<Type> Float();
+    static std::shared_ptr<Type> arrayClass();
+    static std::shared_ptr<Type> hashClass();
+    static std::shared_ptr<Type> falsyTypes();
+    static std::shared_ptr<Type> dropSubtypesOf(core::Context ctx, std::shared_ptr<Type> from, core::SymbolRef klass);
+    static std::shared_ptr<Type> approximateSubtract(core::Context ctx, std::shared_ptr<Type> from,
+                                                     std::shared_ptr<Type> what);
+    static bool canBeTruthy(core::Context ctx, std::shared_ptr<Type> what);
+    static bool canBeFalsy(core::Context ctx, std::shared_ptr<Type> what);
 };
 
 class TypeAndOrigins final {
@@ -90,6 +104,7 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) = 0;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) = 0;
     bool isDynamic();
+    bool isBottom();
 };
 
 class GroundType : public Type {

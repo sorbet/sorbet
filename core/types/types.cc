@@ -10,19 +10,119 @@ template class std::shared_ptr<ruby_typer::core::Type>;
 template class std::vector<core::Loc>;
 
 shared_ptr<Type> Types::top() {
-    return make_shared<ClassType>(core::GlobalState::defn_top());
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_top());
+    return res;
 }
 
 shared_ptr<Type> Types::bottom() {
-    return make_shared<ClassType>(core::GlobalState::defn_bottom());
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_bottom());
+    return res;
 }
 
 shared_ptr<Type> Types::nil() {
-    return make_shared<ClassType>(core::GlobalState::defn_NilClass());
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_NilClass());
+    return res;
 }
 
 shared_ptr<Type> Types::dynamic() {
-    return make_shared<ClassType>(core::GlobalState::defn_untyped());
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_untyped());
+    return res;
+}
+std::shared_ptr<Type> Types::trueClass() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_TrueClass());
+    return res;
+}
+
+std::shared_ptr<Type> Types::falseClass() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_FalseClass());
+    return res;
+}
+
+std::shared_ptr<Type> Types::Integer() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_Integer());
+    return res;
+}
+
+std::shared_ptr<Type> Types::Float() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_Float());
+    return res;
+}
+
+std::shared_ptr<Type> Types::arrayClass() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_Array());
+    return res;
+}
+
+std::shared_ptr<Type> Types::hashClass() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_Hash());
+    return res;
+}
+std::shared_ptr<Type> Types::String() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_String());
+    return res;
+}
+
+std::shared_ptr<Type> Types::Symbol() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_Symbol());
+    return res;
+}
+
+std::shared_ptr<Type> Types::falsyTypes() {
+    static auto res = make_shared<core::OrType>(Types::nil(), Types::falseClass());
+    return res;
+}
+
+std::shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, std::shared_ptr<Type> from, core::SymbolRef klass) {
+    std::shared_ptr<Type> result;
+    typecase(from.get(),
+             [&](OrType *o) {
+                 if (o->left->derivesFrom(ctx, klass))
+                     result = Types::dropSubtypesOf(ctx, o->right, klass);
+                 else if (o->right->derivesFrom(ctx, klass))
+                     result = Types::dropSubtypesOf(ctx, o->left, klass);
+                 else {
+                     result = from;
+                 }
+             },
+             [&](AndType *a) {
+                 if (a->left->derivesFrom(ctx, klass) || a->right->derivesFrom(ctx, klass)) {
+                     result = Types::bottom();
+                 } else {
+                     result = from;
+                 }
+             },
+             [&](ClassType *c) {
+                 if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
+                     result = Types::bottom();
+                 } else {
+                     result = from;
+                 }
+             },
+             [&](Type *) { result = from; });
+    return result;
+}
+
+bool Types::canBeTruthy(core::Context ctx, std::shared_ptr<Type> what) {
+    auto truthyPart = Types::dropSubtypesOf(ctx, Types::dropSubtypesOf(ctx, what, GlobalState::defn_NilClass()),
+                                            GlobalState::defn_FalseClass());
+    return !truthyPart->isBottom(); // check if truthyPart is empty
+}
+
+bool Types::canBeFalsy(core::Context ctx, std::shared_ptr<Type> what) {
+    return Types::isSubType(ctx, Types::falseClass(), what) ||
+           Types::isSubType(ctx, Types::nil(),
+                            what); // check if inhabited by falsy values
+}
+
+std::shared_ptr<Type> Types::approximateSubtract(core::Context ctx, std::shared_ptr<Type> from,
+                                                 std::shared_ptr<Type> what) {
+    std::shared_ptr<Type> result;
+    typecase(what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(ctx, from, c->symbol); },
+             [&](OrType *o) {
+                 result = Types::approximateSubtract(ctx, Types::approximateSubtract(ctx, from, o->left), o->right);
+             },
+             [&](Type *) { result = from; });
+    return result;
 }
 
 ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {}
@@ -55,22 +155,23 @@ bool Type::isDynamic() {
     return t != nullptr && t->symbol == core::GlobalState::defn_untyped();
 }
 
-// TODO: somehow reuse existing references instead of allocating new ones.
-ruby_typer::core::LiteralType::LiteralType(int64_t val)
-    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Integer())), value(val) {}
+bool Type::isBottom() {
+    auto *t = dynamic_cast<ClassType *>(this);
+    return t != nullptr && t->symbol == core::GlobalState::defn_bottom();
+}
+
+ruby_typer::core::LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {}
 
 ruby_typer::core::LiteralType::LiteralType(double val)
-    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Float())), value(*reinterpret_cast<u8 *>(&val)) {}
+    : ProxyType(Types::Float()), value(*reinterpret_cast<u8 *>(&val)) {}
 
 ruby_typer::core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
-    : ProxyType(make_shared<ClassType>(klass)), value(val._id) {
+    : ProxyType(klass == core::GlobalState::defn_String() ? Types::String() : Types::Symbol()), value(val._id) {
     Error::check(klass == core::GlobalState::defn_String() || klass == core::GlobalState::defn_Symbol());
 }
 
 ruby_typer::core::LiteralType::LiteralType(bool val)
-    : ProxyType(
-          make_shared<ClassType>(val ? core::GlobalState::defn_TrueClass() : core::GlobalState::defn_FalseClass())),
-      value(val ? 1 : 0) {}
+    : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {}
 
 string LiteralType::typeName() {
     return "LiteralType";
@@ -105,7 +206,7 @@ string LiteralType::toString(core::Context ctx, int tabs) {
 }
 
 ruby_typer::core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
-    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Array())), elems(move(elements)) {}
+    : ProxyType(Types::arrayClass()), elems(move(elements)) {}
 
 string TupleType::typeName() {
     return "TupleType";
@@ -156,10 +257,10 @@ string TupleType::toString(core::Context ctx, int tabs) {
     return buf.str();
 }
 
-ruby_typer::core::ShapeType::ShapeType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())) {}
+ruby_typer::core::ShapeType::ShapeType() : ProxyType(Types::hashClass()) {}
 
 ruby_typer::core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
-    : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Hash())), keys(move(keys)), values(move(values)) {}
+    : ProxyType(Types::hashClass()), keys(move(keys)), values(move(values)) {}
 
 string ShapeType::toString(core::Context ctx, int tabs) {
     stringstream buf;
@@ -191,13 +292,47 @@ string AliasType::toString(core::Context ctx, int tabs) {
 
 string AndType::toString(core::Context ctx, int tabs) {
     stringstream buf;
-    buf << this->left->toString(ctx, tabs + 2) << " && " << this->right->toString(ctx, tabs + 2);
+    bool leftBrace = dynamic_cast<OrType *>(this->left.get()) != nullptr;
+    bool rightBrace = dynamic_cast<OrType *>(this->right.get()) != nullptr;
+
+    if (leftBrace) {
+        buf << "(";
+    }
+    buf << this->left->toString(ctx, tabs + 2);
+    if (leftBrace) {
+        buf << ")";
+    }
+    buf << " & ";
+    if (rightBrace) {
+        buf << "(";
+    }
+    buf << this->right->toString(ctx, tabs + 2);
+    if (rightBrace) {
+        buf << ")";
+    }
     return buf.str();
 }
 
 string OrType::toString(core::Context ctx, int tabs) {
     stringstream buf;
-    buf << this->left->toString(ctx, tabs + 2) << " | " << this->right->toString(ctx, tabs + 2);
+    bool leftBrace = dynamic_cast<AndType *>(this->left.get()) != nullptr;
+    bool rightBrace = dynamic_cast<AndType *>(this->right.get()) != nullptr;
+
+    if (leftBrace) {
+        buf << "(";
+    }
+    buf << this->left->toString(ctx, tabs + 2);
+    if (leftBrace) {
+        buf << ")";
+    }
+    buf << " | ";
+    if (rightBrace) {
+        buf << "(";
+    }
+    buf << this->right->toString(ctx, tabs + 2);
+    if (rightBrace) {
+        buf << ")";
+    }
     return buf.str();
 }
 

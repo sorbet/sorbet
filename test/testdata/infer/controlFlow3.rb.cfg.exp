@@ -1,0 +1,76 @@
+digraph "controlFlow3.rb"{
+subgraph "cluster_::<constant:Test>#normalize_params" {
+    label = "::<constant:Test>#normalize_params";
+    color = blue;
+    "bb::<constant:Test>#normalize_params_0" [shape = invhouse];
+    "bb::<constant:Test>#normalize_params_1" [shape = parallelogram];
+
+    "bb::<constant:Test>#normalize_params_0" [label = "(v, <constant:Array>$14)
+<constant:Hash>$6 = alias <constant:Hash> : <class:Hash>
+<constant:Array>$14 = alias <constant:Array> : <class:Array>
+selfMethodTemp$2 = self : Test
+v = load_arg(selfMethodTemp$2#normalize_params, 0) : untyped
+ifTemp$3 = v.is_a?(<constant:Hash>$6) : untyped
+ifTemp$3"];
+
+    "bb::<constant:Test>#normalize_params_0" -> "bb::<constant:Test>#normalize_params_2" [style="bold"];
+    "bb::<constant:Test>#normalize_params_0" -> "bb::<constant:Test>#normalize_params_3" [style="tapered"];
+
+    "bb::<constant:Test>#normalize_params_1" [label = "()
+<unconditional>"];
+
+    "bb::<constant:Test>#normalize_params_1" -> "bb::<constant:Test>#normalize_params_1" [style="bold"];
+    "bb::<constant:Test>#normalize_params_2" [label = "(v, returnMethodTemp$1)
+statTemp$8 = self : Test
+statTemp$9 = v.to_a() : Array
+statTemp$7 = statTemp$8.normalize_params(statTemp$9) : untyped
+returnMethodTemp$1 = statTemp$7.sort() : untyped
+<unconditional>"];
+
+    "bb::<constant:Test>#normalize_params_2" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
+    "bb::<constant:Test>#normalize_params_3" [label = "(v, <constant:Array>$14)
+ifTemp$11 = v.is_a?(<constant:Array>$14) : untyped
+ifTemp$11"];
+
+    "bb::<constant:Test>#normalize_params_3" -> "bb::<constant:Test>#normalize_params_4" [style="bold"];
+    "bb::<constant:Test>#normalize_params_3" -> "bb::<constant:Test>#normalize_params_5" [style="tapered"];
+
+    "bb::<constant:Test>#normalize_params_4" [label = "(v, statTemp$15)
+statTemp$15 = v : Array
+<unconditional>"];
+
+    "bb::<constant:Test>#normalize_params_4" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];
+    "bb::<constant:Test>#normalize_params_5" [label = "(v, returnMethodTemp$1)
+returnMethodTemp$1 = v : untyped
+<unconditional>"];
+
+    "bb::<constant:Test>#normalize_params_5" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
+    "bb::<constant:Test>#normalize_params_6" [label = "(statTemp$15)
+outerLoops: 1
+<block-call>"];
+
+    "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_8" [style="bold"];
+    "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_7" [style="tapered"];
+
+    "bb::<constant:Test>#normalize_params_7" [label = "(returnMethodTemp$1, statTemp$15)
+returnMethodTemp$1 = statTemp$15.map() : Array | Enumerator
+<unconditional>"];
+
+    "bb::<constant:Test>#normalize_params_7" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
+    "bb::<constant:Test>#normalize_params_8" [label = "(statTemp$15)
+outerLoops: 1
+<block-nested: e> = load_arg(statTemp$15#map, 0) : untyped
+statTemp$17 = self : Test
+blockReturnTemp$16 = statTemp$17.normalize_params(<block-nested: e>) : untyped
+<unconditional>"];
+
+    "bb::<constant:Test>#normalize_params_8" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];
+    "bb::<constant:Test>#normalize_params_10" [label = "(returnMethodTemp$1)
+returnMethodTemp$19 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Test>#normalize_params_10" -> "bb::<constant:Test>#normalize_params_1" [style="bold"];
+}
+
+}
+

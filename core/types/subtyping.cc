@@ -251,22 +251,22 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
     }
     shared_ptr<ruby_typer::core::Type> n2 = Types::glb(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
-        categoryCounterInc("glbDistributeAnd::outcome", "n2'");
+        categoryCounterInc("glbDistributeAnd::outcome", "Zn2");
         return n2;
     }
     if (n2.get() == a1->right.get()) {
-        categoryCounterInc("glbDistributeAnd::outcome", "t1'");
+        categoryCounterInc("glbDistributeAnd::outcome", "Zt1");
         return t1;
     }
     if (n2.get() == t2.get()) {
-        categoryCounterInc("glbDistributeAnd::outcome", "n1'");
+        categoryCounterInc("glbDistributeAnd::outcome", "Zn1");
         return n1;
     }
     if (Types::isSubType(ctx, n1, n2)) {
-        categoryCounterInc("glbDistributeAnd::outcome", "n2''");
+        categoryCounterInc("glbDistributeAnd::outcome", "ZZn2");
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
-        categoryCounterInc("glbDistributeAnd::outcome", "n1'''");
+        categoryCounterInc("glbDistributeAnd::outcome", "ZZZn1");
         return n1;
     }
 
@@ -308,21 +308,57 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
         categoryCounterInc("glb", "and>");
         return glbDistributeAnd(ctx, t2, t1);
     } else if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
-        categoryCounterInc("glb", "or>");
-        bool collapseInLeft = Types::isSubType(ctx, t1, o2->left);
-        bool collapseInRight = Types::isSubType(ctx, t1, o2->right);
-        categoryCounterInc("glb::or>collapsed", ">");
-        if (collapseInLeft || collapseInRight) {
+        bool collapseInLeft = Types::isSubType(ctx, t1, t2);
+        if (collapseInLeft) {
+            categoryCounterInc("glb", "Zor");
+            return t1;
+        }
+
+        bool collapseInRight = Types::isSubType(ctx, t2, t1);
+        if (collapseInRight) {
+            categoryCounterInc("glb", "ZZor");
             return t2;
-        } else if (auto *o1 = dynamic_cast<OrType *>(t1.get())) { // 6
-            bool collapseInLeft1 = Types::isSubType(ctx, t2, o1->left);
-            bool collapseInRight1 = Types::isSubType(ctx, t1, o1->right);
-            if (collapseInLeft1 || collapseInRight1) {
-                categoryCounterInc("glb::or>collapsed", "<");
-                return t1;
+        }
+
+        if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) {
+            auto lft = Types::glb(ctx, t1, o2->left);
+            if (Types::isSubType(ctx, lft, o2->right)) {
+                categoryCounterInc("glb", "ZZZorClass");
+                return lft;
             }
+            auto rght = Types::glb(ctx, t1, o2->right);
+            if (Types::isSubType(ctx, rght, o2->left)) {
+                categoryCounterInc("glb", "ZZZZorClass");
+                return rght;
+            }
+        }
+
+        if (auto *o1 = dynamic_cast<OrType *>(t1.get())) { // 6
+            // try hard to collapse
+            bool subt11 = Types::isSubType(ctx, o1->left, o2->left) || Types::isSubType(ctx, o1->left, o2->right);
+            if (!subt11) { // left is not in right, we can drop it
+                categoryCounterInc("glb", "ZorOr");
+                return Types::glb(ctx, o1->right, t2);
+            }
+            bool subt12 = Types::isSubType(ctx, o1->right, o2->left) || Types::isSubType(ctx, o1->right, o2->right);
+            if (!subt12) {
+                categoryCounterInc("glb", "ZZorOr");
+                return Types::glb(ctx, o1->left, t2);
+            }
+            bool subt21 = Types::isSubType(ctx, o2->left, o1->left) || Types::isSubType(ctx, o2->left, o1->right);
+            if (!subt21) {
+                categoryCounterInc("glb", "ZZZorOr");
+                return Types::glb(ctx, o2->right, t1);
+            }
+            bool subt22 = Types::isSubType(ctx, o2->right, o1->left) || Types::isSubType(ctx, o2->right, o1->right);
+            if (!subt22) {
+                categoryCounterInc("glb", "ZZZZorOr");
+                return Types::glb(ctx, o2->left, t1);
+            }
+            categoryCounterInc("glb", "ZZZZZorWorst");
+            return make_shared<AndType>(t1, t2);
         } else {
-            categoryCounterInc("glb::or>collapsed", "no");
+            categoryCounterInc("glb::orcollapsed", "no");
             return make_shared<AndType>(t1, t2);
         }
     }
@@ -341,7 +377,11 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
         categoryCounterInc("glb::<class>::collapsed", "yes");
         return t2;
     } else {
-        categoryCounterInc("glb::<class>::collapsed", "no");
+        if (sym1.info(ctx).isClass() && sym2.info(ctx).isClass()) {
+            categoryCounterInc("glb.class.collapsed", "bottom");
+            return Types::bottom();
+        }
+        categoryCounterInc("glb.class.ollapsed", "no");
         return make_shared<AndType>(t1, t2);
     }
 }
@@ -385,10 +425,87 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ct
 
     if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
         if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
-            Error::notImplemented();
-            // Users can't write it yet. Not clear what this means.
-            // Should we return bottom early?
-            // what is an intersection between [1] and [:foo]?
+            if (typeid(*p1) != typeid(*p2)) {
+                return Types::bottom();
+            }
+            shared_ptr<ruby_typer::core::Type> result;
+            ruby_typer::typecase(
+                p1,
+                [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                    TupleType *a2 = dynamic_cast<TupleType *>(p2);
+                    Error::check(a2);
+                    if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
+                        vector<shared_ptr<ruby_typer::core::Type>> elemGlbs;
+                        int i = 0;
+                        for (auto &el2 : a2->elems) {
+                            auto glbe = glb(ctx, a1->elems[i], el2);
+                            if (glbe->isBottom()) {
+                                result = Types::bottom();
+                                return;
+                            }
+                            elemGlbs.emplace_back(glbe);
+                            ++i;
+                        }
+                        result = make_shared<TupleType>(elemGlbs);
+                    } else {
+                        result = Types::bottom();
+                    }
+
+                },
+                [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                    ShapeType *h2 = dynamic_cast<ShapeType *>(p2);
+                    Error::check(h2);
+                    if (h2->keys.size() == h1->keys.size()) {
+                        // have enough keys.
+                        int i = 0;
+                        vector<shared_ptr<ruby_typer::core::LiteralType>> keys;
+                        vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
+                        for (auto &el2 : h2->keys) {
+                            ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
+                            Error::check(u2 != nullptr);
+                            auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                                ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
+                                return candidate->value == el2->value && u1 == u2; // from lambda
+                            });
+                            if (fnd != h1->keys.end()) {
+                                keys.emplace_back(el2);
+                                auto glbe = glb(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
+                                if (glbe->isBottom()) {
+                                    result = Types::bottom();
+                                    return;
+                                }
+                                valueLubs.emplace_back(glbe);
+                            } else {
+                                result = Types::bottom();
+                                return;
+                            }
+                            ++i;
+                        }
+                        result = make_shared<ShapeType>(keys, valueLubs);
+                    } else {
+                        result = Types::bottom();
+                    }
+
+                },
+                [&](LiteralType *l1) {
+                    LiteralType *l2 = dynamic_cast<LiteralType *>(p2);
+                    Error::check(l2);
+                    ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
+                    ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
+                    Error::check(u1 != nullptr && u2 != nullptr);
+                    if (u1->symbol == u2->symbol) {
+                        if (l1->value == l2->value) {
+                            result = t1;
+                        } else {
+                            result = Types::bottom();
+                        }
+                    } else {
+                        result = Types::bottom();
+                    }
+
+                });
+            Error::check(result.get() != nullptr);
+            return result;
         } else {
             // only 1st is proxy
             return t1;

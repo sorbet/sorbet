@@ -162,10 +162,10 @@ module Opus::CIBot::Gerald
             next
           elsif line.start_with?('---')
             a_name = line[4..-1]
-            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/')
+            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: MULTI the underlying error is pinning error, but multiple other errors are reported
           elsif line.start_with?('+++')
             b_name = line[4..-1]
-            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/')
+            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: MULTI the underlying error is pinning error, but multiple other errors are reported
           elsif line.start_with?('+')
             added_lines << line[1..-1]
           elsif line.start_with?('-')

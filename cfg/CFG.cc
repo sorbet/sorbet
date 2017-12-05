@@ -14,8 +14,9 @@ namespace cfg {
 
 int CFG::FORWARD_TOPO_SORT_VISITED = 1 << 0;
 int CFG::BACKWARD_TOPO_SORT_VISITED = 1 << 1;
+int CFG::LOOP_HEADER = 1 << 2;
 
-BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *from) {
+BasicBlock *CFG::freshBlock(int outerLoops, core::Loc loc, BasicBlock *from) {
     if (from != nullptr && from == deadBlock()) {
         return from;
     }
@@ -23,13 +24,14 @@ BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *from) {
     this->basicBlocks.emplace_back(new BasicBlock());
     BasicBlock *r = this->basicBlocks.back().get();
     r->id = id;
+    r->loc = loc;
     r->outerLoops = outerLoops;
     return r;
 }
 
 CFG::CFG() {
-    freshBlock(0, nullptr); // entry;
-    freshBlock(0, nullptr); // dead code;
+    freshBlock(0, core::Loc::none(0), nullptr); // entry;
+    freshBlock(0, core::Loc::none(0), nullptr); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond = core::NameRef(0);

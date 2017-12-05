@@ -194,10 +194,11 @@ public:
     std::vector<Binding> exprs;
     BlockExit bexit;
     std::vector<BasicBlock *> backEdges;
-
+    core::Loc loc;
     BasicBlock() {
         counterInc("BasicBlocks");
     };
+
     std::string toString(core::Context ctx);
 };
 
@@ -233,11 +234,13 @@ public:
 
     static int FORWARD_TOPO_SORT_VISITED;
     static int BACKWARD_TOPO_SORT_VISITED;
+    static int LOOP_HEADER;
     std::unordered_map<core::LocalVariable, int> minLoops;
+    std::unordered_map<core::LocalVariable, int> maxLoopWrite;
 
 private:
     CFG();
-    BasicBlock *freshBlock(int outerLoops, BasicBlock *from);
+    BasicBlock *freshBlock(int outerLoops, core::Loc loc, BasicBlock *from);
 };
 
 } // namespace cfg

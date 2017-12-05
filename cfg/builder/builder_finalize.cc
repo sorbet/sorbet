@@ -92,6 +92,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 }
 
 void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
+    if (!debug_mode)
+        return;
     for (auto &bb : cfg.basicBlocks) {
         for (auto parent : bb->backEdges) {
             Error::check(parent->bexit.thenb == bb.get() || parent->bexit.elseb == bb.get());
@@ -191,6 +193,17 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
     }
 }
 
+void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
+    for (unique_ptr<BasicBlock> &bb : cfg.basicBlocks) {
+        for (auto *parent : bb->backEdges) {
+            if (parent->outerLoops < bb->outerLoops) {
+                bb->flags |= CFG::LOOP_HEADER;
+                continue;
+            }
+        }
+    }
+}
+
 void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG &cfg) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
@@ -244,11 +257,16 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG &cfg) {
     for (auto &pair : writes) {
         core::LocalVariable what = pair.first;
         unordered_set<BasicBlock *> &where = pair.second;
-        auto fnd = cfg.minLoops.insert({what, INT_MAX});
-        int &min = (*(fnd.first)).second;
+        auto fndMn = cfg.minLoops.insert({what, INT_MAX});
+        auto fndMx = cfg.maxLoopWrite.insert({what, 0});
+        int &min = (*(fndMn.first)).second;
+        int &max = (*(fndMx.first)).second;
         for (BasicBlock *bb : where) {
             if (min > bb->outerLoops) {
                 min = bb->outerLoops;
+            }
+            if (max < bb->outerLoops) {
+                max = bb->outerLoops;
             }
         }
     }

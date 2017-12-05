@@ -42,9 +42,11 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     for (auto kv : aliases) {
         core::SymbolRef global = kv.first;
         core::LocalVariable local = kv.second;
-        res->minLoops[local] = -1;
-        if (!global.info(ctx).isMethodArgument()) {
+        if (global.info(ctx).isMethodArgument()) {
+            res->minLoops[local] = 0; // method arguments are pinned only in loops
+        } else {
             aliasesPrefix.emplace_back(local, md.symbol.info(ctx).definitionLoc, make_unique<Alias>(global));
+            res->minLoops[local] = -1; // globals are pinned always
         }
     }
     histogramInc("CFGBuilder::aliases", aliasesPrefix.size());
@@ -61,6 +63,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     fillInBlockArguments(ctx, *res);
     simplify(ctx, *res);
     histogramInc("CFGBuilder::basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
+    markLoopHeaders(ctx, *res);
     sanityCheck(ctx, *res);
     return res;
 }
