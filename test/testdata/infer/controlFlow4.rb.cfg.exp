@@ -5,10 +5,11 @@ subgraph "cluster_::<constant:ModuleMethods>#instrumented_request" {
     "bb::<constant:ModuleMethods>#instrumented_request_0" [shape = invhouse];
     "bb::<constant:ModuleMethods>#instrumented_request_1" [shape = parallelogram];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_0" [label = "(final_attempt, foo)
+    "bb::<constant:ModuleMethods>#instrumented_request_0" [label = "(final_attempt, foo, rescueTemp$4)
 selfMethodTemp$2 = self : ModuleMethods
 final_attempt = load_arg(selfMethodTemp$2#instrumented_request, 0) : untyped
 foo = load_arg(selfMethodTemp$2#instrumented_request, 1) : untyped
+rescueTemp$4 = NotSupported() : untyped
 rescueTemp$4"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_0" -> "bb::<constant:ModuleMethods>#instrumented_request_4" [style="bold"];
@@ -18,7 +19,7 @@ rescueTemp$4"];
 <unconditional>"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_1" -> "bb::<constant:ModuleMethods>#instrumented_request_1" [style="bold"];
-    "bb::<constant:ModuleMethods>#instrumented_request_3" [label = "(final_attempt, foo)
+    "bb::<constant:ModuleMethods>#instrumented_request_3" [label = "(final_attempt, foo, rescueTemp$4)
 rescueTemp$4"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_3" -> "bb::<constant:ModuleMethods>#instrumented_request_5" [style="bold"];

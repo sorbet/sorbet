@@ -16,8 +16,8 @@
 </g>
 <g id="clust2" class="cluster">
 <title>cluster_::&lt;constant:Object&gt;#foo</title>
-<polygon fill="none" stroke="#0000ff" points="696,-8 696,-614.659 1746,-614.659 1746,-8 696,-8"/>
-<text text-anchor="middle" x="1221" y="-599.459" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#foo</text>
+<polygon fill="none" stroke="#0000ff" points="696,-8 696,-626.8954 1746,-626.8954 1746,-8 696,-8"/>
+<text text-anchor="middle" x="1221" y="-611.6954" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Object&gt;#foo</text>
 </g>
 <!-- bb::&lt;constant:MyClass&gt;#foo=_0 -->
 <g id="node1" class="node">
@@ -50,10 +50,11 @@
 <!-- bb::&lt;constant:Object&gt;#foo_0 -->
 <g id="node3" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_0</title>
-<polygon fill="none" stroke="#000000" points="803.0369,-527.3903 1165,-497.0532 1526.9631,-527.3903 1526.6253,-576.4766 803.3747,-576.4766 803.0369,-527.3903"/>
-<text text-anchor="middle" x="1165" y="-550.7574" font-family="Times,serif" font-size="14.00" fill="#000000">(&lt;constant:MyClass&gt;$8)</text>
-<text text-anchor="middle" x="1165" y="-536.7574" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MyClass&gt;$8 = alias &lt;constant:MyClass&gt; : &lt;class:MyClass&gt;</text>
-<text text-anchor="middle" x="1165" y="-522.7574" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
+<polygon fill="none" stroke="#000000" points="803.0369,-523.6907 1165,-485.0812 1526.9631,-523.6907 1526.6253,-586.1622 803.3747,-586.1622 803.0369,-523.6907"/>
+<text text-anchor="middle" x="1165" y="-557.7574" font-family="Times,serif" font-size="14.00" fill="#000000">(rescueTemp$3, &lt;constant:MyClass&gt;$8)</text>
+<text text-anchor="middle" x="1165" y="-543.7574" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MyClass&gt;$8 = alias &lt;constant:MyClass&gt; : &lt;class:MyClass&gt;</text>
+<text text-anchor="middle" x="1165" y="-529.7574" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3 = NotSupported() : untyped</text>
+<text text-anchor="middle" x="1165" y="-515.7574" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_2 -->
 <g id="node5" class="node">
@@ -68,21 +69,21 @@
 <!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_2 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_2</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M1133.8875,-499.4047C1103.3732,-458.6509 1056.4427,-395.9724 1021.3069,-349.0463"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1023.9071,-346.6794 1015.1118,-340.7723 1018.3037,-350.8749 1023.9071,-346.6794"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1116.6322,-490.1045C1104.9013,-477.0428 1092.6729,-462.7843 1082,-449.0193 1057.4567,-417.3655 1032.6101,-380.2575 1012.9466,-349.4351"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1015.8554,-347.4867 1007.5425,-340.9181 1009.9448,-351.237 1015.8554,-347.4867"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_3 -->
 <g id="node6" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_3</title>
-<ellipse fill="none" stroke="#000000" cx="1263" cy="-413.0193" rx="109.8343" ry="25.4118"/>
-<text text-anchor="middle" x="1263" y="-415.8193" font-family="Times,serif" font-size="14.00" fill="#000000">(&lt;constant:MyClass&gt;$8)</text>
+<ellipse fill="none" stroke="#000000" cx="1263" cy="-413.0193" rx="172.3927" ry="25.4118"/>
+<text text-anchor="middle" x="1263" y="-415.8193" font-family="Times,serif" font-size="14.00" fill="#000000">(rescueTemp$3, &lt;constant:MyClass&gt;$8)</text>
 <text text-anchor="middle" x="1263" y="-401.8193" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_3 -->
 <g id="edge4" class="edge">
 <title>bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_3</title>
-<polygon fill="#000000" stroke="transparent" points="1197.2147,-499.7236 1199.1793,-497.1187 1201.1685,-494.4811 1203.179,-491.8152 1205.2075,-489.1255 1207.2507,-486.4163 1209.3052,-483.6921 1211.3677,-480.9574 1213.4348,-478.2165 1215.5031,-475.4739 1217.5695,-472.7341 1219.6304,-470.0014 1221.6825,-467.2803 1223.7226,-464.5752 1225.7473,-461.8906 1227.7532,-459.2309 1229.7369,-456.6005 1231.6953,-454.0038 1233.6248,-451.4453 1235.5222,-448.9295 1237.3841,-446.4606 1237.3841,-446.4606 1235.4854,-448.9013 1233.5505,-451.3884 1231.5828,-453.9177 1229.5858,-456.4847 1227.5628,-459.0851 1225.5173,-461.7145 1223.4526,-464.3684 1221.3722,-467.0426 1219.2795,-469.7326 1217.1779,-472.4341 1215.0707,-475.1427 1212.9615,-477.8539 1210.8535,-480.5635 1208.7503,-483.267 1206.6552,-485.9601 1204.5716,-488.6384 1202.503,-491.2974 1200.4527,-493.9329 1198.4242,-496.5404 1196.4209,-499.1155 1197.2147,-499.7236"/>
-<polygon fill="#000000" stroke="#000000" points="1240.3084,-448.3986 1243.6109,-438.3316 1234.7514,-444.1419 1240.3084,-448.3986"/>
+<polygon fill="#000000" stroke="transparent" points="1204.9748,-489.5929 1206.6065,-487.421 1208.2462,-485.2385 1209.8923,-483.0476 1211.5428,-480.8507 1213.1962,-478.6499 1214.8508,-476.4477 1216.5047,-474.2462 1218.1564,-472.0478 1219.804,-469.8548 1221.4459,-467.6694 1223.0803,-465.494 1224.7055,-463.3308 1226.3198,-461.182 1227.9215,-459.0501 1229.5089,-456.9373 1231.0802,-454.8459 1232.6337,-452.7781 1234.1677,-450.7363 1235.6805,-448.7227 1237.1704,-446.7396 1237.1704,-446.7396 1235.6438,-448.6945 1234.0937,-450.6796 1232.5218,-452.6924 1230.93,-454.7308 1229.32,-456.7926 1227.6935,-458.8755 1226.0523,-460.9771 1224.3982,-463.0953 1222.7329,-465.2278 1221.0582,-467.3724 1219.3758,-469.5268 1217.6876,-471.6887 1215.9952,-473.8559 1214.3004,-476.0261 1212.6051,-478.1971 1210.9109,-480.3666 1209.2196,-482.5324 1207.533,-484.6922 1205.8529,-486.8438 1204.1809,-488.9848 1204.9748,-489.5929"/>
+<polygon fill="#000000" stroke="#000000" points="1240.1582,-448.5947 1243.4607,-438.5277 1234.6011,-444.338 1240.1582,-448.5947"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_1 -->
 <g id="node4" class="node">
@@ -130,8 +131,8 @@
 <!-- bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_5 -->
 <g id="edge7" class="edge">
 <title>bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_5</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M1308.3036,-389.6973C1335.1514,-375.8762 1370.3747,-357.7434 1403.8607,-340.505"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1405.4999,-343.5977 1412.789,-335.9087 1402.296,-337.374 1405.4999,-343.5977"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1310.6241,-388.5027C1337.1488,-374.8479 1371.2976,-357.2683 1403.813,-340.5295"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1405.6439,-343.5236 1412.933,-335.8346 1402.4399,-337.2999 1405.6439,-343.5236"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_4&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
 <g id="edge9" class="edge">
@@ -147,4 +148,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: e68de75f972bc211d1db5f751d7abc943913c99c0345f9fe912d9f12e9a2c5f4 -->
+<!-- ruby-types:sha256: 2df5ce68668b1a7185ca4edb0c52c4901ed10654eb82aa90a331c43fa668c8e1 -->

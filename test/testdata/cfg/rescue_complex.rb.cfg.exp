@@ -96,7 +96,8 @@ subgraph "cluster_::<constant:Object>#multiple_rescue" {
     "bb::<constant:Object>#multiple_rescue_0" [shape = invhouse];
     "bb::<constant:Object>#multiple_rescue_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#multiple_rescue_0" [label = "()
+    "bb::<constant:Object>#multiple_rescue_0" [label = "(rescueTemp$3)
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#multiple_rescue_0" -> "bb::<constant:Object>#multiple_rescue_2" [style="bold"];
@@ -112,7 +113,7 @@ returnMethodTemp$1 = statTemp$4.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#multiple_rescue_2" -> "bb::<constant:Object>#multiple_rescue_4" [style="bold"];
-    "bb::<constant:Object>#multiple_rescue_3" [label = "()
+    "bb::<constant:Object>#multiple_rescue_3" [label = "(rescueTemp$3)
 rescueTemp$3"];
 
     "bb::<constant:Object>#multiple_rescue_3" -> "bb::<constant:Object>#multiple_rescue_5" [style="bold"];
@@ -129,7 +130,7 @@ returnMethodTemp$1 = statTemp$5.baz() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#multiple_rescue_5" -> "bb::<constant:Object>#multiple_rescue_4" [style="bold"];
-    "bb::<constant:Object>#multiple_rescue_6" [label = "()
+    "bb::<constant:Object>#multiple_rescue_6" [label = "(rescueTemp$3)
 rescueTemp$3"];
 
     "bb::<constant:Object>#multiple_rescue_6" -> "bb::<constant:Object>#multiple_rescue_7" [style="bold"];
@@ -149,7 +150,8 @@ subgraph "cluster_::<constant:Object>#multiple_rescue_classes" {
     "bb::<constant:Object>#multiple_rescue_classes_0" [shape = invhouse];
     "bb::<constant:Object>#multiple_rescue_classes_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#multiple_rescue_classes_0" [label = "()
+    "bb::<constant:Object>#multiple_rescue_classes_0" [label = "(rescueTemp$3)
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#multiple_rescue_classes_0" -> "bb::<constant:Object>#multiple_rescue_classes_2" [style="bold"];
@@ -165,7 +167,7 @@ returnMethodTemp$1 = statTemp$4.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#multiple_rescue_classes_2" -> "bb::<constant:Object>#multiple_rescue_classes_4" [style="bold"];
-    "bb::<constant:Object>#multiple_rescue_classes_3" [label = "()
+    "bb::<constant:Object>#multiple_rescue_classes_3" [label = "(rescueTemp$3)
 rescueTemp$3"];
 
     "bb::<constant:Object>#multiple_rescue_classes_3" -> "bb::<constant:Object>#multiple_rescue_classes_5" [style="bold"];
@@ -208,7 +210,8 @@ subgraph "cluster_::<constant:Object>#parse_bug_rescue_empty_else" {
     "bb::<constant:Object>#parse_bug_rescue_empty_else_0" [shape = invhouse];
     "bb::<constant:Object>#parse_bug_rescue_empty_else_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_bug_rescue_empty_else_0" [label = "()
+    "bb::<constant:Object>#parse_bug_rescue_empty_else_0" [label = "(rescueTemp$3)
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_bug_rescue_empty_else_0" -> "bb::<constant:Object>#parse_bug_rescue_empty_else_4" [style="bold"];
@@ -229,9 +232,10 @@ subgraph "cluster_::<constant:Object>#parse_ruby_bug_12686" {
     "bb::<constant:Object>#parse_ruby_bug_12686_0" [shape = invhouse];
     "bb::<constant:Object>#parse_ruby_bug_12686_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_ruby_bug_12686_0" [label = "(statTemp$3, <constant:nil>$7)
+    "bb::<constant:Object>#parse_ruby_bug_12686_0" [label = "(statTemp$3, rescueTemp$5, <constant:nil>$7)
 <constant:nil>$7 = alias <constant:nil> : NilClass
 statTemp$3 = self : Object
+rescueTemp$5 = NotSupported() : untyped
 rescueTemp$5"];
 
     "bb::<constant:Object>#parse_ruby_bug_12686_0" -> "bb::<constant:Object>#parse_ruby_bug_12686_2" [style="bold"];
@@ -247,7 +251,7 @@ statTemp$4 = statTemp$6.bar() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#parse_ruby_bug_12686_2" -> "bb::<constant:Object>#parse_ruby_bug_12686_4" [style="bold"];
-    "bb::<constant:Object>#parse_ruby_bug_12686_3" [label = "(statTemp$3, <constant:nil>$7)
+    "bb::<constant:Object>#parse_ruby_bug_12686_3" [label = "(statTemp$3, rescueTemp$5, <constant:nil>$7)
 rescueTemp$5"];
 
     "bb::<constant:Object>#parse_ruby_bug_12686_3" -> "bb::<constant:Object>#parse_ruby_bug_12686_5" [style="bold"];
@@ -272,7 +276,8 @@ subgraph "cluster_::<constant:Object>#parse_rescue_mod" {
     "bb::<constant:Object>#parse_rescue_mod_0" [shape = invhouse];
     "bb::<constant:Object>#parse_rescue_mod_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_rescue_mod_0" [label = "()
+    "bb::<constant:Object>#parse_rescue_mod_0" [label = "(rescueTemp$3)
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_rescue_mod_0" -> "bb::<constant:Object>#parse_rescue_mod_2" [style="bold"];
@@ -288,7 +293,7 @@ returnMethodTemp$1 = statTemp$4.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#parse_rescue_mod_2" -> "bb::<constant:Object>#parse_rescue_mod_4" [style="bold"];
-    "bb::<constant:Object>#parse_rescue_mod_3" [label = "()
+    "bb::<constant:Object>#parse_rescue_mod_3" [label = "(rescueTemp$3)
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_rescue_mod_3" -> "bb::<constant:Object>#parse_rescue_mod_5" [style="bold"];
@@ -313,7 +318,8 @@ subgraph "cluster_::<constant:Object>#parse_resbody_list_var" {
     "bb::<constant:Object>#parse_resbody_list_var_0" [shape = invhouse];
     "bb::<constant:Object>#parse_resbody_list_var_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_resbody_list_var_0" [label = "()
+    "bb::<constant:Object>#parse_resbody_list_var_0" [label = "(rescueTemp$3)
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_resbody_list_var_0" -> "bb::<constant:Object>#parse_resbody_list_var_2" [style="bold"];
@@ -329,7 +335,7 @@ returnMethodTemp$1 = statTemp$4.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#parse_resbody_list_var_2" -> "bb::<constant:Object>#parse_resbody_list_var_4" [style="bold"];
-    "bb::<constant:Object>#parse_resbody_list_var_3" [label = "()
+    "bb::<constant:Object>#parse_resbody_list_var_3" [label = "(rescueTemp$3)
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_resbody_list_var_3" -> "bb::<constant:Object>#parse_resbody_list_var_5" [style="bold"];
@@ -373,7 +379,8 @@ subgraph "cluster_::<constant:Object>#parse_rescue" {
     "bb::<constant:Object>#parse_rescue_0" [shape = invhouse];
     "bb::<constant:Object>#parse_rescue_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_rescue_0" [label = "()
+    "bb::<constant:Object>#parse_rescue_0" [label = "(rescueTemp$3)
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_rescue_0" -> "bb::<constant:Object>#parse_rescue_2" [style="bold"];
@@ -389,7 +396,7 @@ returnMethodTemp$1 = statTemp$4.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#parse_rescue_2" -> "bb::<constant:Object>#parse_rescue_4" [style="bold"];
-    "bb::<constant:Object>#parse_rescue_3" [label = "()
+    "bb::<constant:Object>#parse_rescue_3" [label = "(rescueTemp$3)
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_rescue_3" -> "bb::<constant:Object>#parse_rescue_5" [style="bold"];
@@ -414,7 +421,8 @@ subgraph "cluster_::<constant:Object>#parse_resbody_var" {
     "bb::<constant:Object>#parse_resbody_var_0" [shape = invhouse];
     "bb::<constant:Object>#parse_resbody_var_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_resbody_var_0" [label = "()
+    "bb::<constant:Object>#parse_resbody_var_0" [label = "(rescueTemp$3)
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_resbody_var_0" -> "bb::<constant:Object>#parse_resbody_var_2" [style="bold"];
@@ -430,7 +438,7 @@ returnMethodTemp$1 = statTemp$4.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#parse_resbody_var_2" -> "bb::<constant:Object>#parse_resbody_var_4" [style="bold"];
-    "bb::<constant:Object>#parse_resbody_var_3" [label = "()
+    "bb::<constant:Object>#parse_resbody_var_3" [label = "(rescueTemp$3)
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_resbody_var_3" -> "bb::<constant:Object>#parse_resbody_var_5" [style="bold"];
@@ -456,8 +464,9 @@ subgraph "cluster_::<constant:Object>#parse_resbody_var_1" {
     "bb::<constant:Object>#parse_resbody_var_1_0" [shape = invhouse];
     "bb::<constant:Object>#parse_resbody_var_1_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_resbody_var_1_0" [label = "(@ex$5)
+    "bb::<constant:Object>#parse_resbody_var_1_0" [label = "(rescueTemp$3, @ex$5)
 @ex$5 = alias @ex : untyped
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_resbody_var_1_0" -> "bb::<constant:Object>#parse_resbody_var_1_2" [style="bold"];
@@ -473,7 +482,7 @@ returnMethodTemp$1 = statTemp$4.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#parse_resbody_var_1_2" -> "bb::<constant:Object>#parse_resbody_var_1_4" [style="bold"];
-    "bb::<constant:Object>#parse_resbody_var_1_3" [label = "(@ex$5)
+    "bb::<constant:Object>#parse_resbody_var_1_3" [label = "(rescueTemp$3, @ex$5)
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_resbody_var_1_3" -> "bb::<constant:Object>#parse_resbody_var_1_5" [style="bold"];
@@ -499,8 +508,9 @@ subgraph "cluster_::<constant:Object>#parse_rescue_mod_op_assign" {
     "bb::<constant:Object>#parse_rescue_mod_op_assign_0" [shape = invhouse];
     "bb::<constant:Object>#parse_rescue_mod_op_assign_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_rescue_mod_op_assign_0" [label = "(statTemp$3)
+    "bb::<constant:Object>#parse_rescue_mod_op_assign_0" [label = "(statTemp$3, rescueTemp$5)
 statTemp$3 = foo : NilClass
+rescueTemp$5 = NotSupported() : untyped
 rescueTemp$5"];
 
     "bb::<constant:Object>#parse_rescue_mod_op_assign_0" -> "bb::<constant:Object>#parse_rescue_mod_op_assign_2" [style="bold"];
@@ -516,7 +526,7 @@ statTemp$4 = statTemp$6.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#parse_rescue_mod_op_assign_2" -> "bb::<constant:Object>#parse_rescue_mod_op_assign_4" [style="bold"];
-    "bb::<constant:Object>#parse_rescue_mod_op_assign_3" [label = "(statTemp$3)
+    "bb::<constant:Object>#parse_rescue_mod_op_assign_3" [label = "(statTemp$3, rescueTemp$5)
 rescueTemp$5"];
 
     "bb::<constant:Object>#parse_rescue_mod_op_assign_3" -> "bb::<constant:Object>#parse_rescue_mod_op_assign_5" [style="bold"];
@@ -542,8 +552,9 @@ subgraph "cluster_::<constant:Object>#parse_ruby_bug_12402" {
     "bb::<constant:Object>#parse_ruby_bug_12402_0" [shape = invhouse];
     "bb::<constant:Object>#parse_ruby_bug_12402_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_ruby_bug_12402_0" [label = "(<constant:nil>$7)
+    "bb::<constant:Object>#parse_ruby_bug_12402_0" [label = "(rescueTemp$3, <constant:nil>$7)
 <constant:nil>$7 = alias <constant:nil> : NilClass
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_0" -> "bb::<constant:Object>#parse_ruby_bug_12402_2" [style="bold"];
@@ -561,7 +572,7 @@ foo = statTemp$4.raise(statTemp$5) : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_2" -> "bb::<constant:Object>#parse_ruby_bug_12402_4" [style="bold"];
-    "bb::<constant:Object>#parse_ruby_bug_12402_3" [label = "(<constant:nil>$7)
+    "bb::<constant:Object>#parse_ruby_bug_12402_3" [label = "(rescueTemp$3, <constant:nil>$7)
 rescueTemp$3"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_3" -> "bb::<constant:Object>#parse_ruby_bug_12402_5" [style="bold"];
@@ -585,9 +596,10 @@ subgraph "cluster_::<constant:Object>#parse_ruby_bug_12402_1" {
     "bb::<constant:Object>#parse_ruby_bug_12402_1_0" [shape = invhouse];
     "bb::<constant:Object>#parse_ruby_bug_12402_1_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_ruby_bug_12402_1_0" [label = "(statTemp$3, <constant:nil>$9)
+    "bb::<constant:Object>#parse_ruby_bug_12402_1_0" [label = "(statTemp$3, rescueTemp$5, <constant:nil>$9)
 <constant:nil>$9 = alias <constant:nil> : NilClass
 statTemp$3 = foo : NilClass
+rescueTemp$5 = NotSupported() : untyped
 rescueTemp$5"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_1_0" -> "bb::<constant:Object>#parse_ruby_bug_12402_1_2" [style="bold"];
@@ -605,7 +617,7 @@ statTemp$4 = statTemp$6.raise(statTemp$7) : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_1_2" -> "bb::<constant:Object>#parse_ruby_bug_12402_1_4" [style="bold"];
-    "bb::<constant:Object>#parse_ruby_bug_12402_1_3" [label = "(statTemp$3, <constant:nil>$9)
+    "bb::<constant:Object>#parse_ruby_bug_12402_1_3" [label = "(statTemp$3, rescueTemp$5, <constant:nil>$9)
 rescueTemp$5"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_1_3" -> "bb::<constant:Object>#parse_ruby_bug_12402_1_5" [style="bold"];
@@ -630,12 +642,13 @@ subgraph "cluster_::<constant:Object>#parse_ruby_bug_12402_2" {
     "bb::<constant:Object>#parse_ruby_bug_12402_2_0" [shape = invhouse];
     "bb::<constant:Object>#parse_ruby_bug_12402_2_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#parse_ruby_bug_12402_2_0" [label = "([]$10000, []$10001, statTemp$9, <constant:nil>$17)
+    "bb::<constant:Object>#parse_ruby_bug_12402_2_0" [label = "([]$10000, []$10001, statTemp$9, rescueTemp$13, <constant:nil>$17)
 <constant:nil>$17 = alias <constant:nil> : NilClass
 statTemp$4 = self : Object
 []$10000 = statTemp$4.foo() : untyped
 []$10001 = 0 : Integer(0)
 statTemp$9 = []$10000.[]([]$10001) : untyped
+rescueTemp$13 = NotSupported() : untyped
 rescueTemp$13"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_2_0" -> "bb::<constant:Object>#parse_ruby_bug_12402_2_2" [style="bold"];
@@ -653,7 +666,7 @@ statTemp$12 = statTemp$14.raise(statTemp$15) : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_2_2" -> "bb::<constant:Object>#parse_ruby_bug_12402_2_4" [style="bold"];
-    "bb::<constant:Object>#parse_ruby_bug_12402_2_3" [label = "([]$10000, []$10001, statTemp$9, <constant:nil>$17)
+    "bb::<constant:Object>#parse_ruby_bug_12402_2_3" [label = "([]$10000, []$10001, statTemp$9, rescueTemp$13, <constant:nil>$17)
 rescueTemp$13"];
 
     "bb::<constant:Object>#parse_ruby_bug_12402_2_3" -> "bb::<constant:Object>#parse_ruby_bug_12402_2_5" [style="bold"];
