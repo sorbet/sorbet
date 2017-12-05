@@ -94,7 +94,7 @@ public:
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg",
+    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "infer",
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
@@ -247,6 +247,22 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         ifstream svgFile(checker + ".svg");
         EXPECT_TRUE(svgFile.good());
+        auto newErrors = gs.errors.getAndEmptyErrors();
+        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                      std::make_move_iterator(newErrors.end()));
+    }
+
+    expectation = test.expectations.find("infer");
+    if (expectation != test.expectations.end()) {
+        auto checker = test.folder + expectation->second;
+        SCOPED_TRACE(checker);
+
+        if (file.file(context).source_type != ruby_typer::core::File::Typed) {
+            ADD_FAILURE_AT(inputPath.c_str(), 1)
+                << "Missing `@typed` pragma. Sources with .infer.exp expectations must specify @typed.";
+        }
+        auto exp = ruby_typer::File::read(checker.c_str());
+        EXPECT_EQ(exp, "") << ".infer.exp files must be empty";
         auto newErrors = gs.errors.getAndEmptyErrors();
         errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                       std::make_move_iterator(newErrors.end()));
