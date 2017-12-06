@@ -105,6 +105,13 @@ public:
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) = 0;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) = 0;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) = 0;
+    virtual void _sanityCheck(core::Context ctx) = 0;
+    void sanityCheck(core::Context ctx) {
+        if (!debug_mode)
+            return;
+        _sanityCheck(ctx);
+    }
+
     bool isDynamic();
     bool isBottom();
 };
@@ -121,54 +128,60 @@ public:
     ProxyType(std::shared_ptr<Type> underlying);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
-    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+                                               std::vector<TypeAndOrigins> &args,
+                                               std::shared_ptr<Type> fullType) override;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) override;
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) override;
+
+    void _sanityCheck(core::Context ctx) override;
 };
 
 class ClassType final : public GroundType {
 public:
     core::SymbolRef symbol;
     ClassType(core::SymbolRef symbol);
-    virtual int kind();
+    virtual int kind() final;
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
-    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+    void _sanityCheck(core::Context ctx) final;
 };
 
 class OrType final : public GroundType {
 public:
     std::shared_ptr<Type> left;
     std::shared_ptr<Type> right;
-    virtual int kind();
+    virtual int kind() final;
     OrType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
-    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+    void _sanityCheck(core::Context ctx) final;
 };
 
 class AndType final : public GroundType {
 public:
     std::shared_ptr<Type> left;
     std::shared_ptr<Type> right;
-    virtual int kind();
+    virtual int kind() final;
     AndType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
 
-    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+    void _sanityCheck(core::Context ctx) final;
 };
 
 class LiteralType final : public ProxyType {
@@ -193,7 +206,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+    void _sanityCheck(core::Context ctx) final;
 };
 
 class TupleType final : public ProxyType {
@@ -203,6 +217,7 @@ public:
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
+    void _sanityCheck(core::Context ctx) final;
 };
 
 // MagicType is the type of the built-in core::GlobalState::defn_Magic()
@@ -215,7 +230,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+    void _sanityCheck(core::Context ctx) final;
 };
 
 class AliasType final : public Type {
@@ -224,11 +240,12 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
-    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
 
     SymbolRef symbol;
+    void _sanityCheck(core::Context ctx) final;
 };
 
 } // namespace core

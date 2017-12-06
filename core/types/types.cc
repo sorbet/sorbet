@@ -136,7 +136,9 @@ std::shared_ptr<Type> Types::approximateSubtract(core::Context ctx, std::shared_
     return result;
 }
 
-ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {}
+ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {
+    Error::check(symbol.exists());
+}
 
 namespace {
 string classNameToString(GlobalState &gs, core::NameRef nm) {
@@ -160,6 +162,10 @@ string ruby_typer::core::ClassType::typeName() {
 }
 
 ruby_typer::core::ProxyType::ProxyType(shared_ptr<ruby_typer::core::Type> underlying) : underlying(move(underlying)) {}
+
+void ProxyType::_sanityCheck(core::Context ctx) {
+    this->underlying->sanityCheck(ctx);
+}
 
 bool Type::isDynamic() {
     auto *t = dynamic_cast<ClassType *>(this);
@@ -268,6 +274,10 @@ string TupleType::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+void TupleType::_sanityCheck(core::Context ctx) {
+    ProxyType::_sanityCheck(ctx);
+}
+
 ruby_typer::core::ShapeType::ShapeType() : ProxyType(Types::hashClass()) {}
 
 ruby_typer::core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
@@ -287,10 +297,25 @@ string ShapeType::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+void ShapeType::_sanityCheck(core::Context ctx) {
+    ProxyType::_sanityCheck(ctx);
+    Error::check(this->values.size() == this->keys.size());
+    for (auto &v : this->keys) {
+        v->_sanityCheck(ctx);
+    }
+    for (auto &e : this->values) {
+        e->_sanityCheck(ctx);
+    }
+}
+
 MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Magic())) {}
 
 string MagicType::toString(GlobalState &gs, int tabs) {
     return underlying->toString(gs, tabs);
+}
+
+void MagicType::_sanityCheck(core::Context ctx) {
+    ProxyType::_sanityCheck(ctx);
 }
 
 AliasType::AliasType(core::SymbolRef other) : symbol(other) {}
@@ -349,6 +374,10 @@ string OrType::toString(GlobalState &gs, int tabs) {
 
 int ClassType::kind() {
     return 1;
+}
+
+void ClassType::_sanityCheck(core::Context ctx) {
+    Error::check(this->symbol.exists());
 }
 
 int AndType::kind() {

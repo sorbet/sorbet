@@ -721,6 +721,24 @@ bool AndType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return left->derivesFrom(ctx, klass) || right->derivesFrom(ctx, klass);
 }
 
+void AndType::_sanityCheck(core::Context ctx) {
+    left->_sanityCheck(ctx);
+    right->_sanityCheck(ctx);
+    Error::check(!left->isDynamic());
+    Error::check(!right->isDynamic());
+}
+
+void OrType::_sanityCheck(core::Context ctx) {
+    left->_sanityCheck(ctx);
+    right->_sanityCheck(ctx);
+    Error::check(!left->isDynamic());
+    Error::check(!right->isDynamic());
+}
+
 bool AliasType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     Error::raise("AliasType::derivesFrom");
+}
+
+void AliasType::_sanityCheck(core::Context ctx) {
+    Error::check(this->symbol.exists());
 }

@@ -225,10 +225,11 @@ public:
             if (klass.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {
                 auto *s = dynamic_cast<core::ClassType *>(klass.type.get());
                 Error::check(s);
-                whoKnows.truthy.yesTypeTests.emplace_back(
-                    send->recv, make_shared<core::ClassType>(s->symbol.info(ctx).attachedClass(ctx)));
-                whoKnows.falsy.noTypeTests.emplace_back(
-                    send->recv, make_shared<core::ClassType>(s->symbol.info(ctx).attachedClass(ctx)));
+                core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
+                if (attachedClass.exists()) {
+                    whoKnows.truthy.yesTypeTests.emplace_back(send->recv, make_shared<core::ClassType>(attachedClass));
+                    whoKnows.falsy.noTypeTests.emplace_back(send->recv, make_shared<core::ClassType>(attachedClass));
+                }
                 whoKnows.sanityCheck();
             }
         } else if (send->fun == core::Names::eqeq()) {
@@ -336,6 +337,7 @@ public:
             auto &thisTO = types[i];
             if (thisTO.type.get() != nullptr) {
                 thisTO.type = core::Types::lub(ctx, thisTO.type, otherTO.type);
+                thisTO.type->sanityCheck(ctx);
             } else {
                 types[i].type = otherTO.type;
             }
@@ -713,6 +715,8 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
             if (uninitialized.type.get() == nullptr) {
                 uninitialized.type = core::Types::nil();
                 uninitialized.origins.push_back(ctx.owner.info(ctx).definitionLoc);
+            } else {
+                uninitialized.type->sanityCheck(ctx);
             }
             i++;
         }
@@ -729,6 +733,7 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
         for (cfg::Binding &bind : bb->exprs) {
             current.ensureGoodAssignTarget(ctx, bind.bind);
             bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind]);
+            bind.tpe->sanityCheck(ctx);
         }
         current.ensureGoodCondition(ctx, bb->bexit.cond);
     }
