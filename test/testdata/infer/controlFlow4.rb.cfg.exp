@@ -52,7 +52,7 @@ err = e : NilClass
     "bb::<constant:ModuleMethods>#instrumented_request_9" -> "bb::<constant:ModuleMethods>#instrumented_request_12" [style="tapered"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_11" [label = "(is_successful, ||$10000, ifTemp$7)
-ifTemp$7 = ||$10000 : TrueClass
+ifTemp$7 = ||$10000 : untyped
 ifTemp$7"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_11" -> "bb::<constant:ModuleMethods>#instrumented_request_17" [style="bold"];

@@ -74,6 +74,10 @@ std::shared_ptr<Type> Types::falsyTypes() {
 
 std::shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, std::shared_ptr<Type> from, core::SymbolRef klass) {
     std::shared_ptr<Type> result;
+
+    if (from->isDynamic())
+        return from;
+
     typecase(from.get(),
              [&](OrType *o) {
                  if (o->left->derivesFrom(ctx, klass))

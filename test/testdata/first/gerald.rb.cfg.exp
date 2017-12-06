@@ -777,7 +777,7 @@ parts = arrayTemp$20.<build-array>() : TupleType {\n}
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" [label = "(parts, statTemp$22, <constant:Range>$15, <constant:nil>$28)
-statTemp$22 = parts : TupleType {\n}
+statTemp$22 = parts : untyped
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" [style="bold"];
@@ -789,7 +789,7 @@ outerLoops: 1
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6" [style="tapered"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6" [label = "(statTemp$22)
-statTemp$21 = statTemp$22.map() : Array | Enumerator
+statTemp$21 = statTemp$22.map() : untyped
 returnMethodTemp$1 = statTemp$21.compact() : untyped
 returnMethodTemp$111 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
@@ -887,7 +887,7 @@ ifTemp$51"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_18" [label = "(<block-nested: a_name>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$22, statTemp$34, <constant:Range>$15, <constant:nil>$28, ifTemp$51, ifTemp$69)
 outerLoops: 2
-statTemp$55 = <block-nested: a_name> : <bottom>
+statTemp$55 = <block-nested: a_name> : untyped
 statTemp$58 = 2 : Integer(2)
 statTemp$59 = -1 : Integer(-1)
 statTemp$56 = <constant:Range>$15.new(statTemp$58, statTemp$59) : Range
@@ -934,7 +934,7 @@ ifTemp$69"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_26" [label = "(<block-nested: a_name>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$22, statTemp$34, <constant:Range>$15, <constant:nil>$28, ifTemp$51, ifTemp$69)
 outerLoops: 2
-statTemp$73 = <block-nested: b_name> : <bottom>
+statTemp$73 = <block-nested: b_name> : untyped
 statTemp$76 = 2 : Integer(2)
 statTemp$77 = -1 : Integer(-1)
 statTemp$74 = <constant:Range>$15.new(statTemp$76, statTemp$77) : Range

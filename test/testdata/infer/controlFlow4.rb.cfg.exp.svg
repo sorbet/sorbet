@@ -124,7 +124,7 @@
 <title>bb::&lt;constant:ModuleMethods&gt;#instrumented_request_11</title>
 <ellipse fill="none" stroke="#000000" cx="204" cy="-586.1981" rx="152.1057" ry="35.2113"/>
 <text text-anchor="middle" x="204" y="-595.9981" font-family="Times,serif" font-size="14.00" fill="#000000">(is_successful, ||$10000, ifTemp$7)</text>
-<text text-anchor="middle" x="204" y="-581.9981" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$7 = ||$10000 : TrueClass</text>
+<text text-anchor="middle" x="204" y="-581.9981" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$7 = ||$10000 : untyped</text>
 <text text-anchor="middle" x="204" y="-567.9981" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$7</text>
 </g>
 <!-- bb::&lt;constant:ModuleMethods&gt;#instrumented_request_8&#45;&gt;bb::&lt;constant:ModuleMethods&gt;#instrumented_request_11 -->
@@ -272,4 +272,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: d28d601bdca64e26fc0da94f9b88cb77edafc225ccbc10e1b24df9ec75b2f6c4 -->
+<!-- ruby-types:sha256: c0f2c5d73806969fc7aae78a1721a3b2b116ffc227effaabd1389ad1473dcc9f -->
