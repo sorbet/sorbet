@@ -1,5 +1,5 @@
 # @typed
-module M
+module Funcs
   standard_method({x: Integer}, returns: Integer)
   def f(x); x; end
 
@@ -15,15 +15,15 @@ module M
 end
 
 class C
-  include M
+  include Funcs
 
   def test_calls
     f(0)
-    M.f(0)
+    Funcs.f(0)
     g(:f)
-    M.g(:f)
+    Funcs.g(:f)
     h("hello")
-    M.h("world")
+    Funcs.h("world")
 
     # Classes don't inherit the `module_function`s as static methods
     C.f # error: Method f does not exist
