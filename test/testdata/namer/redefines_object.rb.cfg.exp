@@ -5,13 +5,13 @@ subgraph "cluster_::<constant:Trigger>#trigger" {
     "bb::<constant:Trigger>#trigger_0" [shape = invhouse];
     "bb::<constant:Trigger>#trigger_1" [shape = parallelogram];
 
-    "bb::<constant:Trigger>#trigger_0" [label = "()
+    "bb::<constant:Trigger>#trigger_0" [label = "block[id=0]()
 @__fake_logger$3 = alias @__fake_logger : untyped
 returnMethodTemp$4 = return @__fake_logger$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Trigger>#trigger_0" -> "bb::<constant:Trigger>#trigger_1" [style="bold"];
-    "bb::<constant:Trigger>#trigger_1" [label = "()
+    "bb::<constant:Trigger>#trigger_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:Trigger>#trigger_1" -> "bb::<constant:Trigger>#trigger_1" [style="bold"];

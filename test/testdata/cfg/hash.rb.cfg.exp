@@ -5,13 +5,13 @@ subgraph "cluster_::<constant:TestHash>#something" {
     "bb::<constant:TestHash>#something_0" [shape = invhouse];
     "bb::<constant:TestHash>#something_1" [shape = parallelogram];
 
-    "bb::<constant:TestHash>#something_0" [label = "()
+    "bb::<constant:TestHash>#something_0" [label = "block[id=0]()
 returnMethodTemp$1 = 17 : Integer(17)
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestHash>#something_0" -> "bb::<constant:TestHash>#something_1" [style="bold"];
-    "bb::<constant:TestHash>#something_1" [label = "()
+    "bb::<constant:TestHash>#something_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:TestHash>#something_1" -> "bb::<constant:TestHash>#something_1" [style="bold"];
@@ -23,7 +23,7 @@ subgraph "cluster_::<constant:TestHash>#test" {
     "bb::<constant:TestHash>#test_0" [shape = invhouse];
     "bb::<constant:TestHash>#test_1" [shape = parallelogram];
 
-    "bb::<constant:TestHash>#test_0" [label = "()
+    "bb::<constant:TestHash>#test_0" [label = "block[id=0]()
 statTemp$5 = self : TestHash
 hashTemp$3 = statTemp$5.something() : untyped
 hashTemp$4 = <symbol:bar> : Symbol(:\"bar\")
@@ -37,7 +37,7 @@ returnMethodTemp$11 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestHash>#test_0" -> "bb::<constant:TestHash>#test_1" [style="bold"];
-    "bb::<constant:TestHash>#test_1" [label = "()
+    "bb::<constant:TestHash>#test_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:TestHash>#test_1" -> "bb::<constant:TestHash>#test_1" [style="bold"];
@@ -49,7 +49,7 @@ subgraph "cluster_::<constant:TestHash>#test_shaped" {
     "bb::<constant:TestHash>#test_shaped_0" [shape = invhouse];
     "bb::<constant:TestHash>#test_shaped_1" [shape = parallelogram];
 
-    "bb::<constant:TestHash>#test_shaped_0" [label = "()
+    "bb::<constant:TestHash>#test_shaped_0" [label = "block[id=0]()
 hashTemp$3 = 1 : Integer(1)
 hashTemp$4 = 2 : Integer(2)
 hashTemp$5 = 2 : Integer(2)
@@ -65,7 +65,7 @@ returnMethodTemp$13 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestHash>#test_shaped_0" -> "bb::<constant:TestHash>#test_shaped_1" [style="bold"];
-    "bb::<constant:TestHash>#test_shaped_1" [label = "()
+    "bb::<constant:TestHash>#test_shaped_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:TestHash>#test_shaped_1" -> "bb::<constant:TestHash>#test_shaped_1" [style="bold"];

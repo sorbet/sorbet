@@ -33,7 +33,7 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:Funcs&gt;#f_0</title>
 <polygon fill="none" stroke="#000000" points="16.0382,-400.7754 259,-350.6174 501.9618,-400.7754 501.735,-481.9327 16.265,-481.9327 16.0382,-400.7754"/>
-<text text-anchor="middle" x="259" y="-449.5067" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="259" y="-449.5067" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="259" y="-434.5067" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Funcs</text>
 <text text-anchor="middle" x="259" y="-419.5067" font-family="Times,serif" font-size="14.00" fill="#000000">x = load_arg(selfMethodTemp$2#f, 0) : Integer</text>
 <text text-anchor="middle" x="259" y="-404.5067" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return x : &lt;bottom&gt;</text>
@@ -43,7 +43,7 @@
 <g id="node2" class="node">
 <title>bb::&lt;constant:Funcs&gt;#f_1</title>
 <polygon fill="none" stroke="#000000" points="369.8652,-104.8944 193.5035,-104.8944 148.1348,-28.8944 324.4965,-28.8944 369.8652,-104.8944"/>
-<text text-anchor="middle" x="259" y="-70.6944" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="259" y="-70.6944" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="259" y="-55.6944" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Funcs&gt;#f_0&#45;&gt;bb::&lt;constant:Funcs&gt;#f_1 -->
@@ -62,7 +62,7 @@
 <g id="node3" class="node">
 <title>bb::&lt;constant:Funcs&gt;#g_0</title>
 <polygon fill="none" stroke="#000000" points="525.5496,-400.7754 774,-350.6174 1022.4504,-400.7754 1022.2185,-481.9327 525.7815,-481.9327 525.5496,-400.7754"/>
-<text text-anchor="middle" x="774" y="-449.5067" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="774" y="-449.5067" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="774" y="-434.5067" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Funcs</text>
 <text text-anchor="middle" x="774" y="-419.5067" font-family="Times,serif" font-size="14.00" fill="#000000">s = load_arg(selfMethodTemp$2#g, 0) : Symbol</text>
 <text text-anchor="middle" x="774" y="-404.5067" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return s : &lt;bottom&gt;</text>
@@ -72,7 +72,7 @@
 <g id="node4" class="node">
 <title>bb::&lt;constant:Funcs&gt;#g_1</title>
 <polygon fill="none" stroke="#000000" points="884.8652,-104.8944 708.5035,-104.8944 663.1348,-28.8944 839.4965,-28.8944 884.8652,-104.8944"/>
-<text text-anchor="middle" x="774" y="-70.6944" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="774" y="-70.6944" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="774" y="-55.6944" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Funcs&gt;#g_0&#45;&gt;bb::&lt;constant:Funcs&gt;#g_1 -->
@@ -91,7 +91,7 @@
 <g id="node5" class="node">
 <title>bb::&lt;constant:Funcs&gt;#h_0</title>
 <polygon fill="none" stroke="#000000" points="1045.5304,-400.7754 1285,-350.6174 1524.4696,-400.7754 1524.246,-481.9327 1045.754,-481.9327 1045.5304,-400.7754"/>
-<text text-anchor="middle" x="1285" y="-449.5067" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1285" y="-449.5067" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="1285" y="-434.5067" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Funcs</text>
 <text text-anchor="middle" x="1285" y="-419.5067" font-family="Times,serif" font-size="14.00" fill="#000000">s = load_arg(selfMethodTemp$2#h, 0) : String</text>
 <text text-anchor="middle" x="1285" y="-404.5067" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return s : &lt;bottom&gt;</text>
@@ -101,7 +101,7 @@
 <g id="node6" class="node">
 <title>bb::&lt;constant:Funcs&gt;#h_1</title>
 <polygon fill="none" stroke="#000000" points="1395.8652,-104.8944 1219.5035,-104.8944 1174.1348,-28.8944 1350.4965,-28.8944 1395.8652,-104.8944"/>
-<text text-anchor="middle" x="1285" y="-70.6944" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1285" y="-70.6944" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="1285" y="-55.6944" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Funcs&gt;#h_0&#45;&gt;bb::&lt;constant:Funcs&gt;#h_1 -->
@@ -120,7 +120,7 @@
 <g id="node7" class="node">
 <title>bb::&lt;constant:C&gt;#test_calls_0</title>
 <polygon fill="none" stroke="#000000" points="1548.4913,-336.0254 1883,-141.0819 2217.5087,-336.0254 2217.1965,-651.4505 1548.8035,-651.4505 1548.4913,-336.0254"/>
-<text text-anchor="middle" x="1883" y="-569.5067" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1883" y="-569.5067" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="1883" y="-554.5067" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Funcs&gt;$8 = alias &lt;constant:Funcs&gt; : &lt;class:Funcs&gt;</text>
 <text text-anchor="middle" x="1883" y="-539.5067" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:C&gt;$23 = alias &lt;constant:C&gt; : &lt;class:C&gt;</text>
 <text text-anchor="middle" x="1883" y="-524.5067" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = self : C</text>
@@ -146,7 +146,7 @@
 <g id="node8" class="node">
 <title>bb::&lt;constant:C&gt;#test_calls_1</title>
 <polygon fill="none" stroke="#000000" points="1993.8652,-104.8944 1817.5035,-104.8944 1772.1348,-28.8944 1948.4965,-28.8944 1993.8652,-104.8944"/>
-<text text-anchor="middle" x="1883" y="-70.6944" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1883" y="-70.6944" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="1883" y="-55.6944" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:C&gt;#test_calls_0&#45;&gt;bb::&lt;constant:C&gt;#test_calls_1 -->
@@ -163,4 +163,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: ee19f72977ddf9e2cbb6d4ae5bb86eeff2d32227151310e9808e18b9bb938c0d -->
+<!-- ruby-types:sha256: 1801236975615095dfed74b9df39d7749b624584e94c1bec6d829782edafb813 -->

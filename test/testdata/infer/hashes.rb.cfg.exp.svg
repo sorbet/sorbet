@@ -18,7 +18,7 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:Foo&gt;#bar_0</title>
 <polygon fill="none" stroke="#000000" points="287.643,-496.8226 465,-464.9351 642.357,-496.8226 642.1915,-548.4177 287.8085,-548.4177 287.643,-496.8226"/>
-<text text-anchor="middle" x="465" y="-522.3831" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="465" y="-522.3831" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="465" y="-507.3831" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = true : TrueClass(true)</text>
 <text text-anchor="middle" x="465" y="-492.3831" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
 </g>
@@ -26,7 +26,7 @@
 <g id="node3" class="node">
 <title>bb::&lt;constant:Foo&gt;#bar_2</title>
 <ellipse fill="none" stroke="#000000" cx="236" cy="-370.0696" rx="219.8205" ry="58.8803"/>
-<text text-anchor="middle" x="236" y="-396.3696" font-family="Times,serif" font-size="14.00" fill="#000000">(s)</text>
+<text text-anchor="middle" x="236" y="-396.3696" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](s)</text>
 <text text-anchor="middle" x="236" y="-381.3696" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$5 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
 <text text-anchor="middle" x="236" y="-366.3696" font-family="Times,serif" font-size="14.00" fill="#000000">s = hashTemp$5.&lt;build&#45;hash&gt;() : ShapeType {</text>
 <text text-anchor="middle" x="236" y="-351.3696" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
@@ -42,7 +42,7 @@
 <g id="node4" class="node">
 <title>bb::&lt;constant:Foo&gt;#bar_3</title>
 <ellipse fill="none" stroke="#000000" cx="694" cy="-370.0696" rx="219.8205" ry="58.8803"/>
-<text text-anchor="middle" x="694" y="-396.3696" font-family="Times,serif" font-size="14.00" fill="#000000">(s)</text>
+<text text-anchor="middle" x="694" y="-396.3696" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](s)</text>
 <text text-anchor="middle" x="694" y="-381.3696" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$6 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
 <text text-anchor="middle" x="694" y="-366.3696" font-family="Times,serif" font-size="14.00" fill="#000000">s = hashTemp$6.&lt;build&#45;hash&gt;() : ShapeType {</text>
 <text text-anchor="middle" x="694" y="-351.3696" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
@@ -58,7 +58,7 @@
 <g id="node2" class="node">
 <title>bb::&lt;constant:Foo&gt;#bar_1</title>
 <polygon fill="none" stroke="#000000" points="777.287,-122 266.1913,-122 134.713,-16 645.8087,-16 777.287,-122"/>
-<text text-anchor="middle" x="456" y="-80.3" font-family="Times,serif" font-size="14.00" fill="#000000">(returnMethodTemp$1)</text>
+<text text-anchor="middle" x="456" y="-80.3" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1](returnMethodTemp$1)</text>
 <text text-anchor="middle" x="456" y="-65.3" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$9 = return returnMethodTemp$1</text>
 <text text-anchor="middle" x="456" y="-50.3" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -72,7 +72,7 @@
 <g id="node5" class="node">
 <title>bb::&lt;constant:Foo&gt;#bar_4</title>
 <ellipse fill="none" stroke="#000000" cx="456" cy="-216.6899" rx="183.6957" ry="58.8803"/>
-<text text-anchor="middle" x="456" y="-242.9899" font-family="Times,serif" font-size="14.00" fill="#000000">(s)</text>
+<text text-anchor="middle" x="456" y="-242.9899" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](s)</text>
 <text text-anchor="middle" x="456" y="-227.9899" font-family="Times,serif" font-size="14.00" fill="#000000">r = s : ShapeType {</text>
 <text text-anchor="middle" x="456" y="-212.9899" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="456" y="-197.9899" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return r : &lt;bottom&gt;</text>
@@ -98,4 +98,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 38aec8654ef325b66b753a923f4cdff4a73bb8204cbeab38f9431cfab247cd95 -->
+<!-- ruby-types:sha256: 0de5efbae342199f8a709ac36429eae72b92f3154884142856a832560d904ae1 -->

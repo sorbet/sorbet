@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Object>#test_large_float" {
     "bb::<constant:Object>#test_large_float_0" [shape = invhouse];
     "bb::<constant:Object>#test_large_float_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#test_large_float_0" [label = "()
+    "bb::<constant:Object>#test_large_float_0" [label = "block[id=0]()
 a = 3.141593 : Float(3.141593)
 a = 0.000001 : Float(0.000001)
 a = -0.000001 : Float(-0.000001)
@@ -21,7 +21,7 @@ returnMethodTemp$13 = return a : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#test_large_float_0" -> "bb::<constant:Object>#test_large_float_1" [style="bold"];
-    "bb::<constant:Object>#test_large_float_1" [label = "()
+    "bb::<constant:Object>#test_large_float_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:Object>#test_large_float_1" -> "bb::<constant:Object>#test_large_float_1" [style="bold"];

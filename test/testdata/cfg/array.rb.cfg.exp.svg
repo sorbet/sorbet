@@ -28,7 +28,7 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:TestArray&gt;#an_int_0</title>
 <polygon fill="none" stroke="#000000" points="16.4798,-498.284 346,-457.2614 675.5202,-498.284 675.2126,-564.6599 16.7874,-564.6599 16.4798,-498.284"/>
-<text text-anchor="middle" x="346" y="-535.4298" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="346" y="-535.4298" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="346" y="-520.4298" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 0 : Integer(0)</text>
 <text text-anchor="middle" x="346" y="-505.4298" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="346" y="-490.4298" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
@@ -37,7 +37,7 @@
 <g id="node2" class="node">
 <title>bb::&lt;constant:TestArray&gt;#an_int_1</title>
 <polygon fill="none" stroke="#000000" points="456.8652,-119.6546 280.5035,-119.6546 235.1348,-43.6546 411.4965,-43.6546 456.8652,-119.6546"/>
-<text text-anchor="middle" x="346" y="-85.4546" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="346" y="-85.4546" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="346" y="-70.4546" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArray&gt;#an_int_0&#45;&gt;bb::&lt;constant:TestArray&gt;#an_int_1 -->
@@ -56,7 +56,7 @@
 <g id="node3" class="node">
 <title>bb::&lt;constant:TestArray&gt;#a_string_0</title>
 <polygon fill="none" stroke="#000000" points="700.4798,-498.284 1030,-457.2614 1359.5202,-498.284 1359.2126,-564.6599 700.7874,-564.6599 700.4798,-498.284"/>
-<text text-anchor="middle" x="1030" y="-535.4298" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1030" y="-535.4298" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="1030" y="-520.4298" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = str : String(&quot;str&quot;)</text>
 <text text-anchor="middle" x="1030" y="-505.4298" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1030" y="-490.4298" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
@@ -65,7 +65,7 @@
 <g id="node4" class="node">
 <title>bb::&lt;constant:TestArray&gt;#a_string_1</title>
 <polygon fill="none" stroke="#000000" points="1140.8652,-119.6546 964.5035,-119.6546 919.1348,-43.6546 1095.4965,-43.6546 1140.8652,-119.6546"/>
-<text text-anchor="middle" x="1030" y="-85.4546" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1030" y="-85.4546" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="1030" y="-70.4546" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArray&gt;#a_string_0&#45;&gt;bb::&lt;constant:TestArray&gt;#a_string_1 -->
@@ -84,7 +84,7 @@
 <g id="node5" class="node">
 <title>bb::&lt;constant:TestArray&gt;#test_arrays_0</title>
 <polygon fill="none" stroke="#000000" points="1384.014,-405.09 1955,-155.6794 2525.986,-405.09 2525.453,-808.6449 1384.547,-808.6449 1384.014,-405.09"/>
-<text text-anchor="middle" x="1955" y="-707.9298" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1955" y="-707.9298" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="1955" y="-692.9298" font-family="Times,serif" font-size="14.00" fill="#000000">arrayTemp$4 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
 <text text-anchor="middle" x="1955" y="-677.9298" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = arrayTemp$4.&lt;build&#45;array&gt;() : TupleType {</text>
 <text text-anchor="middle" x="1955" y="-662.9298" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
@@ -116,7 +116,7 @@
 <g id="node6" class="node">
 <title>bb::&lt;constant:TestArray&gt;#test_arrays_1</title>
 <polygon fill="none" stroke="#000000" points="2065.8652,-119.6546 1889.5035,-119.6546 1844.1348,-43.6546 2020.4965,-43.6546 2065.8652,-119.6546"/>
-<text text-anchor="middle" x="1955" y="-85.4546" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1955" y="-85.4546" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="1955" y="-70.4546" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestArray&gt;#test_arrays_0&#45;&gt;bb::&lt;constant:TestArray&gt;#test_arrays_1 -->
@@ -133,4 +133,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 7fc3a2be6d1f76c0a93da57c333da4ee0eae151b785bb91a613a22aa0014d035 -->
+<!-- ruby-types:sha256: 84ee30a7e84ad1a9e61d17857f21de4e80bf06c1bcb32b58d3261511ac00f1bd -->

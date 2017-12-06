@@ -122,7 +122,7 @@ public:
 
     string toString(core::Context ctx) {
         stringstream buf;
-        buf << "dead :" << isDead << endl;
+        buf << "dead=" << isDead << endl;
         int i = 0;
         for (auto var : vars) {
             buf << var.name.toString(ctx) << ": " << types[i].type->toString(ctx, 0) << endl;

@@ -28,7 +28,7 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:TestHash&gt;#something_0</title>
 <polygon fill="none" stroke="#000000" points="16.4798,-373.8482 346,-332.8256 675.5202,-373.8482 675.2126,-440.2241 16.7874,-440.2241 16.4798,-373.8482"/>
-<text text-anchor="middle" x="346" y="-410.994" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="346" y="-410.994" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="346" y="-395.994" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 17 : Integer(17)</text>
 <text text-anchor="middle" x="346" y="-380.994" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="346" y="-365.994" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
@@ -37,7 +37,7 @@
 <g id="node2" class="node">
 <title>bb::&lt;constant:TestHash&gt;#something_1</title>
 <polygon fill="none" stroke="#000000" points="456.8652,-100.1027 280.5035,-100.1027 235.1348,-24.1027 411.4965,-24.1027 456.8652,-100.1027"/>
-<text text-anchor="middle" x="346" y="-65.9027" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="346" y="-65.9027" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="346" y="-50.9027" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestHash&gt;#something_0&#45;&gt;bb::&lt;constant:TestHash&gt;#something_1 -->
@@ -56,7 +56,7 @@
 <g id="node3" class="node">
 <title>bb::&lt;constant:TestHash&gt;#test_0</title>
 <polygon fill="none" stroke="#000000" points="700.2777,-341.4732 1277,-228.0578 1853.7223,-341.4732 1853.184,-524.9831 700.816,-524.9831 700.2777,-341.4732"/>
-<text text-anchor="middle" x="1277" y="-470.994" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1277" y="-470.994" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="1277" y="-455.994" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = self : TestHash</text>
 <text text-anchor="middle" x="1277" y="-440.994" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$3 = statTemp$5.something() : untyped</text>
 <text text-anchor="middle" x="1277" y="-425.994" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$4 = &lt;symbol:bar&gt; : Symbol(:&quot;bar&quot;)</text>
@@ -73,7 +73,7 @@
 <g id="node4" class="node">
 <title>bb::&lt;constant:TestHash&gt;#test_1</title>
 <polygon fill="none" stroke="#000000" points="1387.8652,-100.1027 1211.5035,-100.1027 1166.1348,-24.1027 1342.4965,-24.1027 1387.8652,-100.1027"/>
-<text text-anchor="middle" x="1277" y="-65.9027" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="1277" y="-65.9027" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="1277" y="-50.9027" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestHash&gt;#test_0&#45;&gt;bb::&lt;constant:TestHash&gt;#test_1 -->
@@ -92,7 +92,7 @@
 <g id="node5" class="node">
 <title>bb::&lt;constant:TestHash&gt;#test_shaped_0</title>
 <polygon fill="none" stroke="#000000" points="1877.9784,-313.0292 2771,-136.0112 3664.0216,-313.0292 3663.188,-599.4503 1878.812,-599.4503 1877.9784,-313.0292"/>
-<text text-anchor="middle" x="2771" y="-523.494" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="2771" y="-523.494" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="2771" y="-508.494" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$3 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="2771" y="-493.494" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$4 = 2 : Integer(2)</text>
 <text text-anchor="middle" x="2771" y="-478.494" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$5 = 2 : Integer(2)</text>
@@ -116,7 +116,7 @@
 <g id="node6" class="node">
 <title>bb::&lt;constant:TestHash&gt;#test_shaped_1</title>
 <polygon fill="none" stroke="#000000" points="2881.8652,-100.1027 2705.5035,-100.1027 2660.1348,-24.1027 2836.4965,-24.1027 2881.8652,-100.1027"/>
-<text text-anchor="middle" x="2771" y="-65.9027" font-family="Times,serif" font-size="14.00" fill="#000000">()</text>
+<text text-anchor="middle" x="2771" y="-65.9027" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="2771" y="-50.9027" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestHash&gt;#test_shaped_0&#45;&gt;bb::&lt;constant:TestHash&gt;#test_shaped_1 -->
@@ -133,4 +133,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 99ebad5cb7d1923dd4a682beacaeecaa1a1245702e5ed33afc0f2cdf44788675 -->
+<!-- ruby-types:sha256: a94a561a2a712a9fe9134afd04ee4ff6238a9de2bc72659c8b0fa301506e5cd6 -->

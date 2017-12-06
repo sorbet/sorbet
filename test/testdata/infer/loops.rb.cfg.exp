@@ -5,16 +5,16 @@ subgraph "cluster_::<constant:HasLoops>#variable_only_inside_loop" {
     "bb::<constant:HasLoops>#variable_only_inside_loop_0" [shape = invhouse];
     "bb::<constant:HasLoops>#variable_only_inside_loop_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#variable_only_inside_loop_0" [label = "(<constant:nil>$5)
+    "bb::<constant:HasLoops>#variable_only_inside_loop_0" [label = "block[id=0](<constant:nil>$5)
 <constant:nil>$5 = alias <constant:nil> : NilClass
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_0" -> "bb::<constant:HasLoops>#variable_only_inside_loop_2" [style="bold"];
-    "bb::<constant:HasLoops>#variable_only_inside_loop_1" [label = "()
+    "bb::<constant:HasLoops>#variable_only_inside_loop_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_1" -> "bb::<constant:HasLoops>#variable_only_inside_loop_1" [style="bold"];
-    "bb::<constant:HasLoops>#variable_only_inside_loop_2" [label = "(<constant:nil>$5)
+    "bb::<constant:HasLoops>#variable_only_inside_loop_2" [label = "block[id=2](<constant:nil>$5)
 outerLoops: 1
 whileTemp$3 = true : TrueClass(true)
 whileTemp$3"];
@@ -22,13 +22,13 @@ whileTemp$3"];
     "bb::<constant:HasLoops>#variable_only_inside_loop_2" -> "bb::<constant:HasLoops>#variable_only_inside_loop_3" [style="bold"];
     "bb::<constant:HasLoops>#variable_only_inside_loop_2" -> "bb::<constant:HasLoops>#variable_only_inside_loop_4" [style="tapered"];
 
-    "bb::<constant:HasLoops>#variable_only_inside_loop_3" [label = "(<constant:nil>$5)
+    "bb::<constant:HasLoops>#variable_only_inside_loop_3" [label = "block[id=3](<constant:nil>$5)
 outerLoops: 1
 a = 1 : Integer(1)
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_3" -> "bb::<constant:HasLoops>#variable_only_inside_loop_2" [style="bold"];
-    "bb::<constant:HasLoops>#variable_only_inside_loop_4" [label = "(<constant:nil>$5)
+    "bb::<constant:HasLoops>#variable_only_inside_loop_4" [label = "block[id=4](<constant:nil>$5)
 returnMethodTemp$6 = return <constant:nil>$5 : <bottom>
 <unconditional>"];
 
@@ -41,17 +41,17 @@ subgraph "cluster_::<constant:HasLoops>#incorrect_assignment" {
     "bb::<constant:HasLoops>#incorrect_assignment_0" [shape = invhouse];
     "bb::<constant:HasLoops>#incorrect_assignment_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#incorrect_assignment_0" [label = "(a, <constant:nil>$6)
+    "bb::<constant:HasLoops>#incorrect_assignment_0" [label = "block[id=0](a, <constant:nil>$6)
 <constant:nil>$6 = alias <constant:nil> : NilClass
 a = s : String(\"s\")
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_0" -> "bb::<constant:HasLoops>#incorrect_assignment_2" [style="bold"];
-    "bb::<constant:HasLoops>#incorrect_assignment_1" [label = "()
+    "bb::<constant:HasLoops>#incorrect_assignment_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_1" -> "bb::<constant:HasLoops>#incorrect_assignment_1" [style="bold"];
-    "bb::<constant:HasLoops>#incorrect_assignment_2" [label = "(a, <constant:nil>$6)
+    "bb::<constant:HasLoops>#incorrect_assignment_2" [label = "block[id=2](a, <constant:nil>$6)
 outerLoops: 1
 whileTemp$4 = false : FalseClass(false)
 whileTemp$4"];
@@ -59,13 +59,13 @@ whileTemp$4"];
     "bb::<constant:HasLoops>#incorrect_assignment_2" -> "bb::<constant:HasLoops>#incorrect_assignment_3" [style="bold"];
     "bb::<constant:HasLoops>#incorrect_assignment_2" -> "bb::<constant:HasLoops>#incorrect_assignment_4" [style="tapered"];
 
-    "bb::<constant:HasLoops>#incorrect_assignment_3" [label = "(a, <constant:nil>$6)
+    "bb::<constant:HasLoops>#incorrect_assignment_3" [label = "block[id=3](a, <constant:nil>$6)
 outerLoops: 1
 a = 1 : untyped
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_3" -> "bb::<constant:HasLoops>#incorrect_assignment_2" [style="bold"];
-    "bb::<constant:HasLoops>#incorrect_assignment_4" [label = "(<constant:nil>$6)
+    "bb::<constant:HasLoops>#incorrect_assignment_4" [label = "block[id=4](<constant:nil>$6)
 returnMethodTemp$7 = return <constant:nil>$6 : <bottom>
 <unconditional>"];
 
@@ -78,17 +78,17 @@ subgraph "cluster_::<constant:HasLoops>#correct_assignment" {
     "bb::<constant:HasLoops>#correct_assignment_0" [shape = invhouse];
     "bb::<constant:HasLoops>#correct_assignment_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#correct_assignment_0" [label = "(a, <constant:nil>$6)
+    "bb::<constant:HasLoops>#correct_assignment_0" [label = "block[id=0](a, <constant:nil>$6)
 <constant:nil>$6 = alias <constant:nil> : NilClass
 a = s : String(\"s\")
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_0" -> "bb::<constant:HasLoops>#correct_assignment_2" [style="bold"];
-    "bb::<constant:HasLoops>#correct_assignment_1" [label = "()
+    "bb::<constant:HasLoops>#correct_assignment_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_1" -> "bb::<constant:HasLoops>#correct_assignment_1" [style="bold"];
-    "bb::<constant:HasLoops>#correct_assignment_2" [label = "(a, <constant:nil>$6)
+    "bb::<constant:HasLoops>#correct_assignment_2" [label = "block[id=2](a, <constant:nil>$6)
 outerLoops: 1
 whileTemp$4 = false : FalseClass(false)
 whileTemp$4"];
@@ -96,13 +96,13 @@ whileTemp$4"];
     "bb::<constant:HasLoops>#correct_assignment_2" -> "bb::<constant:HasLoops>#correct_assignment_3" [style="bold"];
     "bb::<constant:HasLoops>#correct_assignment_2" -> "bb::<constant:HasLoops>#correct_assignment_4" [style="tapered"];
 
-    "bb::<constant:HasLoops>#correct_assignment_3" [label = "(a, <constant:nil>$6)
+    "bb::<constant:HasLoops>#correct_assignment_3" [label = "block[id=3](a, <constant:nil>$6)
 outerLoops: 1
 a = a : String(\"a\")
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_3" -> "bb::<constant:HasLoops>#correct_assignment_2" [style="bold"];
-    "bb::<constant:HasLoops>#correct_assignment_4" [label = "(<constant:nil>$6)
+    "bb::<constant:HasLoops>#correct_assignment_4" [label = "block[id=4](<constant:nil>$6)
 returnMethodTemp$7 = return <constant:nil>$6 : <bottom>
 <unconditional>"];
 

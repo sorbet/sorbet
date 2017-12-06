@@ -63,7 +63,7 @@ string CFG::toString(core::Context ctx) {
 
 string BasicBlock::toString(core::Context ctx) {
     stringstream buf;
-    buf << "(";
+    buf << "block[id=" << this->id << "](";
     bool first = true;
     for (core::LocalVariable arg : this->args) {
         if (!first) {
