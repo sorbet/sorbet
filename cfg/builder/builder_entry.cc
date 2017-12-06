@@ -78,12 +78,16 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
     auto &target1 = cfg.forwardsTopoSort;
     target1.resize(cfg.basicBlocks.size());
     int count = topoSortFwd(target1, 0, cfg.entry());
-    Error::check(count == cfg.basicBlocks.size());
+    Error::check(count == cfg.basicBlocks.size(),
+                 "Some block was unreachable from the top. Total blocks: ", cfg.basicBlocks.size(),
+                 ", Reachable blocks: ", count);
 
     auto &target2 = cfg.backwardsTopoSort;
     target2.resize(cfg.basicBlocks.size());
     count = topoSortBwd(target2, 0, cfg.deadBlock());
-    Error::check(count == cfg.basicBlocks.size());
+    Error::check(count == cfg.basicBlocks.size(),
+                 "Some block was unreachble from the bottom. Total blocks: ", cfg.basicBlocks.size(),
+                 ", Reachable blocks: ", count);
     return;
 }
 

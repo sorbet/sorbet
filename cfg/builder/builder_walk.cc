@@ -258,37 +258,83 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             },
 
             [&](ast::Rescue *a) {
-                core::LocalVariable unanalyzableCondition = cctx.ctx.state.newTemporary(
-                    core::UniqueNameKind::CFG, core::Names::rescueTemp(), cctx.inWhat.symbol);
-                current->exprs.emplace_back(unanalyzableCondition, what->loc, make_unique<NotSupported>(""));
-                ret = current;
+                auto unanalyzableCondition = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG,
+                                                                         core::Names::rescueTemp(), cctx.inWhat.symbol);
+                current->exprs.emplace_back(unanalyzableCondition, what->loc, make_unique<Unanalyzable>());
 
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, a->body->loc, current);
                 auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, a->body->loc, current);
-                conditionalJump(current, unanalyzableCondition, bodyBlock, rescueHandlersBlock, cctx.inWhat, a->loc);
-                bodyBlock = walk(cctx, a->body.get(), bodyBlock);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, a->body->loc, current);
+                conditionalJump(current, unanalyzableCondition, rescueHandlersBlock, bodyBlock, cctx.inWhat, a->loc);
 
-                ret = cctx.inWhat.freshBlock(cctx.loops, a->loc, bodyBlock);
-                unconditionalJump(bodyBlock, ret, cctx.inWhat, a->loc);
+                bodyBlock = walk(cctx, a->body.get(), bodyBlock);
+                auto elseBody = cctx.inWhat.freshBlock(cctx.loops, a->loc, bodyBlock);
+                unconditionalJump(bodyBlock, elseBody, cctx.inWhat, a->loc);
+
+                elseBody = walk(cctx, a->else_.get(), elseBody);
+                ret = cctx.inWhat.freshBlock(cctx.loops, a->loc, elseBody);
+                unconditionalJump(elseBody, ret, cctx.inWhat, a->loc);
 
                 for (auto &rescueCase : a->rescueCases) {
-                    bodyBlock = cctx.inWhat.freshBlock(cctx.loops, rescueCase->body->loc, rescueHandlersBlock);
-                    auto newRescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, a->loc, rescueHandlersBlock);
-                    conditionalJump(rescueHandlersBlock, unanalyzableCondition, bodyBlock, newRescueHandlersBlock,
-                                    cctx.inWhat, rescueCase->loc);
-                    rescueHandlersBlock = newRescueHandlersBlock;
+                    auto caseBody = cctx.inWhat.freshBlock(cctx.loops, a->body->loc, rescueHandlersBlock);
+                    auto &exceptions = rescueCase->exceptions;
+                    auto added = false;
+                    if (exceptions.empty()) {
+                        // rescue without a class catches StandardError
+                        exceptions.emplace_back(
+                            make_unique<ast::Ident>(rescueCase->var->loc, cctx.ctx.state.defn_StandardError()));
+                        added = true;
+                    }
+                    for (auto &ex : exceptions) {
+                        auto loc = ex->loc;
+                        auto exceptionClass = cctx.ctx.state.newTemporary(
+                            core::UniqueNameKind::CFG, core::Names::rescueTemp(), cctx.inWhat.symbol);
+                        rescueHandlersBlock = walk(cctx.withTarget(exceptionClass), ex.get(), rescueHandlersBlock);
 
-                    // TODO somehow make the result of this an OR type of all the rescueCase->exceptions
-                    // TODO if rescueCase->var is a ast::Send, pass in something of type rescueCase->exceptions
-                    bodyBlock = walk(cctx, rescueCase->var.get(), bodyBlock);
-                    bodyBlock = walk(cctx, rescueCase->body.get(), bodyBlock);
-                    unconditionalJump(bodyBlock, ret, cctx.inWhat, a->loc);
+                        auto isaCheck = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG,
+                                                                    core::Names::rescueTemp(), cctx.inWhat.symbol);
+                        std::vector<core::LocalVariable> args;
+                        args.emplace_back(exceptionClass);
+
+                        rescueHandlersBlock->exprs.emplace_back(
+                            isaCheck, loc, make_unique<Send>(unanalyzableCondition, core::Names::is_a_p(), args));
+
+                        auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, loc, rescueHandlersBlock);
+                        conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
+                        rescueHandlersBlock = otherHandlerBlock;
+                    }
+                    if (added) {
+                        exceptions.pop_back();
+                    }
+
+                    if (auto *send = ast::cast_tree<ast::EmptyTree>(rescueCase->var.get())) {
+                        // Nothing to do
+                    } else if (auto *send = ast::cast_tree<ast::Send>(rescueCase->var.get())) {
+                        Error::check(send->args.empty());
+                        auto junk = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::rescueTemp(),
+                                                                cctx.inWhat.symbol);
+                        send->args.emplace_back(make_unique<ast::Local>(rescueCase->var->loc, unanalyzableCondition));
+                        caseBody = walk(cctx.withTarget(junk), send, caseBody);
+                    } else if (auto *local = ast::cast_tree<ast::Local>(rescueCase->var.get())) {
+                        caseBody->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
+                                                     make_unique<Ident>(unanalyzableCondition));
+                    } else if (auto *ident = ast::cast_tree<ast::Ident>(rescueCase->var.get())) {
+                        auto lhs = global2Local(cctx.ctx, ident->symbol, cctx.inWhat, cctx.aliases);
+                        caseBody->exprs.emplace_back(lhs, a->loc, make_unique<Ident>(unanalyzableCondition));
+                    } else {
+                        Error::raise("Invalid rescue var type");
+                    }
+
+                    caseBody = walk(cctx, rescueCase->body.get(), caseBody);
+                    if (ret == cctx.inWhat.deadBlock()) {
+                        // If the main body -> else -> ret path is dead, we need
+                        // to have a path out of the exception handlers
+                        ret = cctx.inWhat.freshBlock(cctx.loops, a->loc, caseBody);
+                    }
+                    unconditionalJump(caseBody, ret, cctx.inWhat, a->loc);
                 }
 
-                bodyBlock = cctx.inWhat.freshBlock(cctx.loops, a->loc, rescueHandlersBlock);
-                conditionalJump(rescueHandlersBlock, unanalyzableCondition, bodyBlock, ret, cctx.inWhat, a->loc);
-                bodyBlock = walk(cctx, a->else_.get(), bodyBlock);
-                unconditionalJump(bodyBlock, ret, cctx.inWhat, a->loc);
+                // None of the handlers were taken
+                jumpToDead(rescueHandlersBlock, cctx.inWhat, a->loc);
             },
 
             [&](ast::Hash *h) {

@@ -5,38 +5,41 @@ subgraph "cluster_::<constant:ModuleMethods>#instrumented_request" {
     "bb::<constant:ModuleMethods>#instrumented_request_0" [shape = invhouse];
     "bb::<constant:ModuleMethods>#instrumented_request_1" [shape = parallelogram];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_0" [label = "block[id=0](final_attempt, foo, rescueTemp$4)
+    "bb::<constant:ModuleMethods>#instrumented_request_0" [label = "block[id=0](final_attempt, foo, rescueTemp$4, <constant:StandardError>$6)
+<constant:StandardError>$6 = alias <constant:StandardError> : <class:StandardError>
 selfMethodTemp$2 = self : ModuleMethods
 final_attempt = load_arg(selfMethodTemp$2#instrumented_request, 0) : untyped
 foo = load_arg(selfMethodTemp$2#instrumented_request, 1) : untyped
-rescueTemp$4 = NotSupported() : untyped
+rescueTemp$4 = <unanalyzable> : untyped
 rescueTemp$4"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_0" -> "bb::<constant:ModuleMethods>#instrumented_request_4" [style="bold"];
-    "bb::<constant:ModuleMethods>#instrumented_request_0" -> "bb::<constant:ModuleMethods>#instrumented_request_3" [style="tapered"];
+    "bb::<constant:ModuleMethods>#instrumented_request_0" -> "bb::<constant:ModuleMethods>#instrumented_request_2" [style="bold"];
+    "bb::<constant:ModuleMethods>#instrumented_request_0" -> "bb::<constant:ModuleMethods>#instrumented_request_5" [style="tapered"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_1" -> "bb::<constant:ModuleMethods>#instrumented_request_1" [style="bold"];
-    "bb::<constant:ModuleMethods>#instrumented_request_3" [label = "block[id=3](final_attempt, foo, rescueTemp$4)
-rescueTemp$4"];
+    "bb::<constant:ModuleMethods>#instrumented_request_2" [label = "block[id=2](final_attempt, foo, rescueTemp$4, <constant:StandardError>$6)
+rescueTemp$7 = rescueTemp$4.is_a?(<constant:StandardError>$6) : untyped
+rescueTemp$7"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_3" -> "bb::<constant:ModuleMethods>#instrumented_request_5" [style="bold"];
-    "bb::<constant:ModuleMethods>#instrumented_request_3" -> "bb::<constant:ModuleMethods>#instrumented_request_4" [style="tapered"];
+    "bb::<constant:ModuleMethods>#instrumented_request_2" -> "bb::<constant:ModuleMethods>#instrumented_request_6" [style="bold"];
+    "bb::<constant:ModuleMethods>#instrumented_request_2" -> "bb::<constant:ModuleMethods>#instrumented_request_1" [style="tapered"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_4" [label = "block[id=4](final_attempt, foo, err, is_successful)
+    "bb::<constant:ModuleMethods>#instrumented_request_5" [label = "block[id=5](final_attempt, foo, err, is_successful)
 is_successful = err.nil?() : TrueClass | FalseClass
 is_successful"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_4" -> "bb::<constant:ModuleMethods>#instrumented_request_8" [style="bold"];
-    "bb::<constant:ModuleMethods>#instrumented_request_4" -> "bb::<constant:ModuleMethods>#instrumented_request_9" [style="tapered"];
+    "bb::<constant:ModuleMethods>#instrumented_request_5" -> "bb::<constant:ModuleMethods>#instrumented_request_8" [style="bold"];
+    "bb::<constant:ModuleMethods>#instrumented_request_5" -> "bb::<constant:ModuleMethods>#instrumented_request_9" [style="tapered"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_5" [label = "block[id=5](final_attempt, foo, err)
-err = e : NilClass
+    "bb::<constant:ModuleMethods>#instrumented_request_6" [label = "block[id=6](final_attempt, foo, err, rescueTemp$4)
+e = rescueTemp$4 : StandardError
+err = e : StandardError
 <unconditional>"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_5" -> "bb::<constant:ModuleMethods>#instrumented_request_4" [style="bold"];
+    "bb::<constant:ModuleMethods>#instrumented_request_6" -> "bb::<constant:ModuleMethods>#instrumented_request_5" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_8" [label = "block[id=8](foo, err, is_successful, ||$10000)
 ||$10000 = is_successful : TrueClass
 ||$10000"];
@@ -51,9 +54,9 @@ err = e : NilClass
     "bb::<constant:ModuleMethods>#instrumented_request_9" -> "bb::<constant:ModuleMethods>#instrumented_request_11" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_9" -> "bb::<constant:ModuleMethods>#instrumented_request_12" [style="tapered"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_11" [label = "block[id=11](is_successful, ||$10000, ifTemp$7)
-ifTemp$7 = ||$10000 : untyped
-ifTemp$7"];
+    "bb::<constant:ModuleMethods>#instrumented_request_11" [label = "block[id=11](is_successful, ||$10000, ifTemp$10)
+ifTemp$10 = ||$10000 : untyped
+ifTemp$10"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_11" -> "bb::<constant:ModuleMethods>#instrumented_request_17" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_11" -> "bb::<constant:ModuleMethods>#instrumented_request_22" [style="tapered"];
@@ -64,23 +67,23 @@ err"];
     "bb::<constant:ModuleMethods>#instrumented_request_12" -> "bb::<constant:ModuleMethods>#instrumented_request_13" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_12" -> "bb::<constant:ModuleMethods>#instrumented_request_14" [style="tapered"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_13" [label = "block[id=13](foo, is_successful, ifTemp$7)
-ifTemp$7 = foo : untyped
-ifTemp$7"];
+    "bb::<constant:ModuleMethods>#instrumented_request_13" [label = "block[id=13](foo, is_successful, ifTemp$10)
+ifTemp$10 = foo : untyped
+ifTemp$10"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_13" -> "bb::<constant:ModuleMethods>#instrumented_request_17" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_13" -> "bb::<constant:ModuleMethods>#instrumented_request_22" [style="tapered"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_14" [label = "block[id=14](err, is_successful, ifTemp$7)
-ifTemp$7 = err : NilClass
-ifTemp$7"];
+    "bb::<constant:ModuleMethods>#instrumented_request_14" [label = "block[id=14](err, is_successful, ifTemp$10)
+ifTemp$10 = err : NilClass
+ifTemp$10"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_14" -> "bb::<constant:ModuleMethods>#instrumented_request_17" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_14" -> "bb::<constant:ModuleMethods>#instrumented_request_22" [style="tapered"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_17" [label = "block[id=17](is_successful)
-ifTemp$12 = is_successful.!() : TrueClass | FalseClass
-ifTemp$12"];
+ifTemp$15 = is_successful.!() : TrueClass | FalseClass
+ifTemp$15"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_17" -> "bb::<constant:ModuleMethods>#instrumented_request_19" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_17" -> "bb::<constant:ModuleMethods>#instrumented_request_22" [style="tapered"];
@@ -91,7 +94,7 @@ returnMethodTemp$1 = 1 : Integer(1)
 
     "bb::<constant:ModuleMethods>#instrumented_request_19" -> "bb::<constant:ModuleMethods>#instrumented_request_22" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_22" [label = "block[id=22](returnMethodTemp$1)
-returnMethodTemp$14 = return returnMethodTemp$1 : <bottom>
+returnMethodTemp$17 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_22" -> "bb::<constant:ModuleMethods>#instrumented_request_1" [style="bold"];

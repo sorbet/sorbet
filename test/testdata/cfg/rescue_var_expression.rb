@@ -7,7 +7,7 @@ end
 def foo
     begin
         raise "boop"
-    rescue Exception => MyClass.new.foo # error: Not enough arguments provided for method foo=
+    rescue Exception => MyClass.new.foo
         3
     end
 end

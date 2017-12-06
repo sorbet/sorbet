@@ -98,7 +98,15 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class NotSupported final : public Instruction {
+class Unanalyzable : public Instruction {
+public:
+    Unanalyzable() {
+        categoryCounterInc("CFG", "Unanalyzable");
+    };
+    virtual std::string toString(core::Context ctx);
+};
+
+class NotSupported final : public Unanalyzable {
 public:
     std::string why;
 

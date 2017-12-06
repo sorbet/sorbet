@@ -12,9 +12,9 @@ begin
   def multiple_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue
+    rescue => <emptyTree>
       self(<constant:<todo sym>>).baz()
-    rescue
+    rescue => <emptyTree>
       self(<constant:<todo sym>>).bar()
     else
       <emptyTree>
@@ -42,14 +42,14 @@ begin
   def parse_ruby_bug_12686<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).take_arg(begin
         self(<constant:<todo sym>>).bar()
-      rescue
+      rescue => <emptyTree>
         ::<constant:nil>
       else
         <emptyTree>
       end)
   def parse_rescue_mod<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).meth()
-  rescue
+  rescue => <emptyTree>
     self(<constant:<todo sym>>).bar()
   else
     <emptyTree>
@@ -68,7 +68,7 @@ begin
   def parse_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue
+    rescue => <emptyTree>
       self(<constant:<todo sym>>).foo()
     else
       <emptyTree>
@@ -76,7 +76,7 @@ begin
   def parse_resbody_var<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue
+    rescue => ex
       self(<constant:<todo sym>>).bar()
     else
       <emptyTree>
@@ -84,26 +84,26 @@ begin
   def parse_resbody_var_1<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue
+    rescue => @ex
       self(<constant:<todo sym>>).bar()
     else
       <emptyTree>
     end
   def parse_rescue_mod_op_assign<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).meth()
-    rescue
+    rescue => <emptyTree>
       self(<constant:<todo sym>>).bar()
     else
       <emptyTree>)
   def parse_ruby_bug_12402<<constant:<todo sym>>>()
     foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-  rescue
+  rescue => <emptyTree>
     ::<constant:nil>
   else
     <emptyTree>
   def parse_ruby_bug_12402_1<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-    rescue
+    rescue => <emptyTree>
       ::<constant:nil>
     else
       <emptyTree>)
@@ -112,7 +112,7 @@ begin
       []$10000 = self(<constant:<todo sym>>).foo()
       []$10001 = 0
       []$10000.[]=([]$10001, []$10000.[]([]$10001).+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-        rescue
+        rescue => <emptyTree>
           ::<constant:nil>
         else
           <emptyTree>))

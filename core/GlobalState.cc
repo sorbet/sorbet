@@ -60,6 +60,8 @@ const char *range_str = "Range";
 
 const char *regexp_str = "Regexp";
 
+const char *standardError_str = "StandardError";
+
 // A magic non user-creatable class with methods to keep state between passes
 const char *magic_str = "<Magic>";
 
@@ -134,6 +136,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef regexp_id = synthesizeClass(regexp_str);
     SymbolRef magic_id = synthesizeClass(magic_str);
     SymbolRef module_id = synthesizeClass(module_str);
+    SymbolRef standardError_id = synthesizeClass(standardError_str);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -162,6 +165,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(regexp_id == defn_Regexp());
     Error::check(magic_id == defn_Magic());
     Error::check(module_id == defn_Module());
+    Error::check(standardError_id == defn_StandardError());
 
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = make_unique<ClassType>(defn_NilClass());

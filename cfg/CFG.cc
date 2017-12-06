@@ -193,6 +193,10 @@ string LoadArg::toString(core::Context ctx) {
     return buf.str();
 }
 
+string Unanalyzable::toString(core::Context ctx) {
+    return "<unanalyzable>";
+}
+
 string NotSupported::toString(core::Context ctx) {
     return "NotSupported(" + why + ")";
 }

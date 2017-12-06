@@ -681,19 +681,17 @@ string Assign::toString(core::GlobalState &gs, int tabs) {
 string RescueCase::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "rescue";
-    if (!this->exceptions.empty()) {
-        bool first = true;
-        for (auto &exception : this->exceptions) {
-            if (first) {
-                first = false;
-                buf << " ";
-            } else {
-                buf << ", ";
-            }
-            buf << exception->toString(gs, tabs);
+    bool first = true;
+    for (auto &exception : this->exceptions) {
+        if (first) {
+            first = false;
+            buf << " ";
+        } else {
+            buf << ", ";
         }
-        buf << " => " << this->var->toString(gs, tabs);
+        buf << exception->toString(gs, tabs);
     }
+    buf << " => " << this->var->toString(gs, tabs);
     buf << endl;
     printTabs(buf, tabs);
     buf << this->body->toString(gs, tabs);

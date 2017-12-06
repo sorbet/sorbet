@@ -517,7 +517,7 @@ public:
                          tp.type = make_shared<core::ClassType>(i->klass);
                          tp.origins.push_back(bind.loc);
                      },
-                     [&](cfg::NotSupported *i) {
+                     [&](cfg::Unanalyzable *i) {
                          tp.type = core::Types::dynamic();
                          tp.origins.push_back(bind.loc);
                      },

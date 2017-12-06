@@ -96,7 +96,9 @@ std::shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, std::shared_ptr<T
                  }
              },
              [&](ClassType *c) {
-                 if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
+                 if (c->isDynamic()) {
+                     result = from;
+                 } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
                      result = Types::bottom();
                  } else {
                      result = from;
@@ -107,12 +109,16 @@ std::shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, std::shared_ptr<T
 }
 
 bool Types::canBeTruthy(core::Context ctx, std::shared_ptr<Type> what) {
+    if (what->isDynamic())
+        return true;
     auto truthyPart = Types::dropSubtypesOf(ctx, Types::dropSubtypesOf(ctx, what, GlobalState::defn_NilClass()),
                                             GlobalState::defn_FalseClass());
     return !truthyPart->isBottom(); // check if truthyPart is empty
 }
 
 bool Types::canBeFalsy(core::Context ctx, std::shared_ptr<Type> what) {
+    if (what->isDynamic())
+        return true;
     return Types::isSubType(ctx, Types::falseClass(), what) ||
            Types::isSubType(ctx, Types::nil(),
                             what); // check if inhabited by falsy values
