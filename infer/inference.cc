@@ -261,7 +261,9 @@ public:
     }
 
     /* Create an Environment out of this one that holds if final condition in this environment was isTrue */
-    Environment withCond(core::Context ctx, bool isTrue) { // todo: copying environments here is slow. And commonly this
+    Environment
+    withCond(core::Context ctx, bool isTrue,
+             const vector<core::LocalVariable> &filter) { // todo: copying environments here is slow. And commonly this
         // returns a simple copy. Add an external fast path
         if (!bb->bexit.cond.exists() || bb->bexit.cond.name == core::Names::blockCall()) {
             return *this; // copy
@@ -294,6 +296,9 @@ public:
         auto &knowledgeToChoose = isTrue ? thisKnowledge.truthy : thisKnowledge.falsy;
 
         for (auto &typeTested : knowledgeToChoose.yesTypeTests) {
+            if (find(filter.begin(), filter.end(), typeTested.first) == filter.end()) {
+                continue;
+            }
             core::TypeAndOrigins tp = copy.getTypeAndOrigin(ctx, typeTested.first);
             if (tp.type->isDynamic()) { // this is actually incorrect, as it may be some more exact type, but this rule
                 // makes it easier to migrate code
@@ -308,6 +313,9 @@ public:
         }
 
         for (auto &typeTested : knowledgeToChoose.noTypeTests) {
+            if (find(filter.begin(), filter.end(), typeTested.first) == filter.end()) {
+                continue;
+            }
             core::TypeAndOrigins tp = copy.getTypeAndOrigin(ctx, typeTested.first);
             if (!tp.type->isDynamic()) {
                 tp.type = core::Types::approximateSubtract(ctx, tp.type, typeTested.second);
@@ -658,7 +666,7 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
-            auto envAsSeenFromBranch = outEnvironments[parent->id].withCond(ctx, isTrueBranch); // copy
+            auto envAsSeenFromBranch = outEnvironments[parent->id].withCond(ctx, isTrueBranch, current.vars); // copy
             current.populateFrom(ctx, envAsSeenFromBranch);
         } else {
             current.isDead = (bb != cfg->entry());
@@ -667,7 +675,8 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
                     continue;
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
-                auto envAsSeenFromBranch = outEnvironments[parent->id].withCond(ctx, isTrueBranch); // copy
+                auto envAsSeenFromBranch =
+                    outEnvironments[parent->id].withCond(ctx, isTrueBranch, current.vars); // copy
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
                     current.mergeWith(ctx, envAsSeenFromBranch, parent->bexit.loc, *cfg.get(), *bb);

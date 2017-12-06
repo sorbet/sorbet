@@ -39,7 +39,7 @@ class ControlFlow
   standard_method({a: Opus::Types.any(Integer, NilClass)}, returns: Integer)
   def orZero3(a)
       if (a && 1 == 2)
-         return a # error: This code is unreachable
+         return 1
       else
          return 0
       end
@@ -51,7 +51,7 @@ class ControlFlow
       if (b)
          return 0
       else
-         return a # error: This code is unreachable
+         return 1
       end
   end
 
