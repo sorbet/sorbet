@@ -1,5 +1,5 @@
 # @typed
-module M
+module Alias
   def f
   end
 

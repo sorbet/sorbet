@@ -27,6 +27,9 @@ class NameInserter {
         }
 
         auto newOwner = squashNames(ctx, owner, constLit->scope);
+        core::SymbolRef existing = newOwner.info(ctx).findMember(ctx, constLit->cnst);
+        if (existing.exists())
+            return existing;
         return ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
     }
 

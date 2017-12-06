@@ -191,6 +191,9 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
         }
     } else if (auto *hash = dynamic_cast<MagicType *>(what)) {
         p.putU4(7);
+    } else if (auto *alias = dynamic_cast<AliasType *>(what)) {
+        p.putU4(8);
+        p.putU4(alias->symbol._id);
     } else {
         Error::notImplemented();
     }
@@ -249,6 +252,8 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
         }
         case 7:
             return std::make_shared<MagicType>();
+        case 8:
+            return std::make_shared<AliasType>(SymbolRef(p.getU4()));
         default:
             Error::notImplemented();
     }

@@ -1,59 +1,59 @@
 digraph "module_function.rb"{
-subgraph "cluster_::<constant:M>#f" {
-    label = "::<constant:M>#f";
+subgraph "cluster_::<constant:Funcs>#f" {
+    label = "::<constant:Funcs>#f";
     color = blue;
-    "bb::<constant:M>#f_0" [shape = invhouse];
-    "bb::<constant:M>#f_1" [shape = parallelogram];
+    "bb::<constant:Funcs>#f_0" [shape = invhouse];
+    "bb::<constant:Funcs>#f_1" [shape = parallelogram];
 
-    "bb::<constant:M>#f_0" [label = "()
-selfMethodTemp$2 = self : M
+    "bb::<constant:Funcs>#f_0" [label = "()
+selfMethodTemp$2 = self : Funcs
 x = load_arg(selfMethodTemp$2#f, 0) : Integer
 returnMethodTemp$3 = return x : <bottom>
 <unconditional>"];
 
-    "bb::<constant:M>#f_0" -> "bb::<constant:M>#f_1" [style="bold"];
-    "bb::<constant:M>#f_1" [label = "()
+    "bb::<constant:Funcs>#f_0" -> "bb::<constant:Funcs>#f_1" [style="bold"];
+    "bb::<constant:Funcs>#f_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:M>#f_1" -> "bb::<constant:M>#f_1" [style="bold"];
+    "bb::<constant:Funcs>#f_1" -> "bb::<constant:Funcs>#f_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:M>#g" {
-    label = "::<constant:M>#g";
+subgraph "cluster_::<constant:Funcs>#g" {
+    label = "::<constant:Funcs>#g";
     color = blue;
-    "bb::<constant:M>#g_0" [shape = invhouse];
-    "bb::<constant:M>#g_1" [shape = parallelogram];
+    "bb::<constant:Funcs>#g_0" [shape = invhouse];
+    "bb::<constant:Funcs>#g_1" [shape = parallelogram];
 
-    "bb::<constant:M>#g_0" [label = "()
-selfMethodTemp$2 = self : M
+    "bb::<constant:Funcs>#g_0" [label = "()
+selfMethodTemp$2 = self : Funcs
 s = load_arg(selfMethodTemp$2#g, 0) : Symbol
 returnMethodTemp$3 = return s : <bottom>
 <unconditional>"];
 
-    "bb::<constant:M>#g_0" -> "bb::<constant:M>#g_1" [style="bold"];
-    "bb::<constant:M>#g_1" [label = "()
+    "bb::<constant:Funcs>#g_0" -> "bb::<constant:Funcs>#g_1" [style="bold"];
+    "bb::<constant:Funcs>#g_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:M>#g_1" -> "bb::<constant:M>#g_1" [style="bold"];
+    "bb::<constant:Funcs>#g_1" -> "bb::<constant:Funcs>#g_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:M>#h" {
-    label = "::<constant:M>#h";
+subgraph "cluster_::<constant:Funcs>#h" {
+    label = "::<constant:Funcs>#h";
     color = blue;
-    "bb::<constant:M>#h_0" [shape = invhouse];
-    "bb::<constant:M>#h_1" [shape = parallelogram];
+    "bb::<constant:Funcs>#h_0" [shape = invhouse];
+    "bb::<constant:Funcs>#h_1" [shape = parallelogram];
 
-    "bb::<constant:M>#h_0" [label = "()
-selfMethodTemp$2 = self : M
+    "bb::<constant:Funcs>#h_0" [label = "()
+selfMethodTemp$2 = self : Funcs
 s = load_arg(selfMethodTemp$2#h, 0) : String
 returnMethodTemp$3 = return s : <bottom>
 <unconditional>"];
 
-    "bb::<constant:M>#h_0" -> "bb::<constant:M>#h_1" [style="bold"];
-    "bb::<constant:M>#h_1" [label = "()
+    "bb::<constant:Funcs>#h_0" -> "bb::<constant:Funcs>#h_1" [style="bold"];
+    "bb::<constant:Funcs>#h_1" [label = "()
 <unconditional>"];
 
-    "bb::<constant:M>#h_1" -> "bb::<constant:M>#h_1" [style="bold"];
+    "bb::<constant:Funcs>#h_1" -> "bb::<constant:Funcs>#h_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:C>#test_calls" {
@@ -63,23 +63,23 @@ subgraph "cluster_::<constant:C>#test_calls" {
     "bb::<constant:C>#test_calls_1" [shape = parallelogram];
 
     "bb::<constant:C>#test_calls_0" [label = "()
-<constant:M>$8 = alias <constant:M> : <class:M>
+<constant:Funcs>$8 = alias <constant:Funcs> : <class:Funcs>
 <constant:C>$23 = alias <constant:C> : <class:C>
 statTemp$4 = self : C
 statTemp$5 = 0 : Integer(0)
 statTemp$3 = statTemp$4.f(statTemp$5) : Integer
 statTemp$9 = 0 : Integer(0)
-statTemp$6 = <constant:M>$8.f(statTemp$9) : Integer
+statTemp$6 = <constant:Funcs>$8.f(statTemp$9) : Integer
 statTemp$11 = self : C
 statTemp$12 = <symbol:f> : Symbol(:\"f\")
 statTemp$10 = statTemp$11.g(statTemp$12) : Symbol
 statTemp$15 = <symbol:f> : Symbol(:\"f\")
-statTemp$13 = <constant:M>$8.g(statTemp$15) : Symbol
+statTemp$13 = <constant:Funcs>$8.g(statTemp$15) : Symbol
 statTemp$17 = self : C
 statTemp$18 = hello : String(\"hello\")
 statTemp$16 = statTemp$17.h(statTemp$18) : String
 statTemp$21 = world : String(\"world\")
-statTemp$19 = <constant:M>$8.h(statTemp$21) : String
+statTemp$19 = <constant:Funcs>$8.h(statTemp$21) : String
 returnMethodTemp$1 = <constant:C>$23.f() : untyped
 returnMethodTemp$24 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];

@@ -93,6 +93,15 @@ UTF8Desc regexp_DESC{(char *)regexp, (int)strlen(regexp)};
 const char *magic = "<Magic>";
 UTF8Desc magic_DESC{(char *)magic, (int)strlen(magic)};
 
+const char *DB = "DB";
+UTF8Desc DB_DESC{(char *)DB, (int)strlen(DB)};
+
+const char *model = "Model";
+UTF8Desc model_DESC{(char *)model, (int)strlen(model)};
+
+const char *m = "M";
+UTF8Desc m_DESC{(char *)m, (int)strlen(m)};
+
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved = "<<RESERVED>>";
 UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
@@ -218,6 +227,16 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     arg.info(*this).resultType = make_unique<ClassType>(defn_Array());
     method.info(*this).arguments().push_back(arg);
     method.info(*this).resultType = make_unique<ClassType>(defn_untyped());
+
+    // TODO(pay-server) Synthesize ::M = ::Opus::DB::Model
+    //
+    // This is a hack to handle that specific alias in pay-server; More-general
+    // handling will require substantial additional sophistication in the
+    // namer+resolver.
+    SymbolRef db = enterClassSymbol(Loc::none(0), defn_Opus(), enterNameConstant(DB_DESC));
+    SymbolRef model = enterClassSymbol(Loc::none(0), db, enterNameConstant(model_DESC));
+    SymbolRef m = enterStaticFieldSymbol(Loc::none(0), defn_root(), enterNameConstant(m_DESC));
+    m.info(*this).resultType = make_unique<AliasType>(model);
 
     while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
         synthesizeClass(reserved_DESC);
