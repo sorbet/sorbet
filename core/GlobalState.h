@@ -16,7 +16,6 @@ class Name;
 class NameRef;
 class Symbol;
 class SymbolRef;
-struct UTF8Desc;
 
 namespace serialize {
 class GlobalStateSerializer;
@@ -48,14 +47,14 @@ public:
 
     LocalVariable newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
 
-    NameRef enterNameUTF8(UTF8Desc nm);
+    NameRef enterNameUTF8(absl::string_view nm);
 
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num = 0);
 
     NameRef enterNameConstant(NameRef original);
-    NameRef enterNameConstant(UTF8Desc original);
+    NameRef enterNameConstant(absl::string_view original);
 
-    FileRef enterFile(UTF8Desc path, UTF8Desc source);
+    FileRef enterFile(absl::string_view path, absl::string_view source);
 
     unsigned int namesUsed();
 
@@ -185,7 +184,7 @@ private:
     static constexpr int MAX_SYNTHETIC_SYMBOLS = 100;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::unique_ptr<std::vector<char>>> strings;
-    UTF8Desc enterString(UTF8Desc nm);
+    absl::string_view enterString(absl::string_view nm);
     u2 strings_last_page_used = STRINGS_PAGE_SIZE;
     std::vector<Name> names;
     std::vector<Symbol> symbols;
@@ -198,7 +197,7 @@ private:
 
     void complete(SymbolRef id, Symbol &currentInfo);
 
-    SymbolRef synthesizeClass(UTF8Desc name, SymbolRef superclass = core::GlobalState::defn_todo());
+    SymbolRef synthesizeClass(absl::string_view name, SymbolRef superclass = core::GlobalState::defn_todo());
 
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 

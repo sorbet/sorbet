@@ -38,7 +38,7 @@ unsigned int Name::hash(const GlobalState &gs) const {
 string Name::toString(GlobalState &gs) const {
     switch (this->kind) {
         case UTF8:
-            return raw.utf8.toString();
+            return string(raw.utf8.begin(), raw.utf8.end());
         case UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
                 return "<singleton class:" + this->unique.original.name(gs).toString(gs) + ">";
@@ -71,7 +71,7 @@ bool NameRef::isBlockClashSafe(GlobalState &gs) const {
 NameRef NameRef::addEq(GlobalState &gs) const {
     Name &name = this->name(gs);
     Error::check(name.kind == UTF8);
-    string nameEq = name.raw.utf8.toString() + "=";
+    string nameEq = string(name.raw.utf8.begin(), name.raw.utf8.end()) + "=";
     return gs.enterNameUTF8(nameEq);
 }
 

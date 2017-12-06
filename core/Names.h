@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/string_view.h"
+
 namespace ruby_typer {
 namespace core {
 class GlobalState;
@@ -77,41 +79,8 @@ public:
 
 CheckSize(NameRef, 4, 4);
 
-struct UTF8Desc final {
-    const char *from;
-    int to;
-
-    friend std::ostream &operator<<(std::ostream &os, const UTF8Desc &dt) {
-        os.write(dt.from, dt.to);
-        return os;
-    }
-
-    UTF8Desc(const char *from, int to) : from(from), to(to) {}
-    UTF8Desc(const std::string &str) : from(str.c_str()), to(str.size()) {}
-
-    inline bool operator==(const UTF8Desc &rhs) const {
-        return (to == rhs.to) && ((from == rhs.from) || !strncmp(from, rhs.from, to));
-    }
-
-    inline bool operator!=(const UTF8Desc &rhs) const {
-        return !this->operator==(rhs);
-    }
-
-    inline bool operator!=(const char *rhs) const {
-        return !this->operator==(rhs);
-    }
-
-    inline bool operator==(const char *rhs) const {
-        return rhs && (strlen(rhs) == to) && !strncmp(from, rhs, to);
-    }
-
-    std::string toString() const {
-        return std::string(from, to);
-    }
-};
-
 struct RawName final {
-    UTF8Desc utf8;
+    absl::string_view utf8;
 };
 CheckSize(RawName, 16, 8);
 

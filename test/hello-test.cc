@@ -149,10 +149,9 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     ruby_typer::core::GlobalState cb(*console);
     ruby_typer::core::Context ctx(cb, cb.defn_root());
     static const char *foo_str = "Foo";
-    static core::UTF8Desc foo_DESC{(char *)foo_str, (int)strlen(foo_str)};
     ruby_typer::core::Loc loc(0, 42, 91);
 
-    auto name = ctx.state.enterNameUTF8(foo_DESC);
+    auto name = ctx.state.enterNameUTF8(foo_str);
     auto classSym = ctx.state.enterClassSymbol(loc, ruby_typer::core::GlobalState::defn_root(), name);
     auto methodSym = ctx.state.enterMethodSymbol(loc, classSym, name);
     auto empty = vector<core::SymbolRef>();

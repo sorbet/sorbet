@@ -25,11 +25,11 @@ File &FileRef::file(GlobalState &gs) const {
     return gs.files[_id];
 }
 
-UTF8Desc File::path() {
+absl::string_view File::path() {
     return this->path_;
 }
 
-UTF8Desc File::source() {
+absl::string_view File::source() {
     return this->source_;
 }
 } // namespace core

@@ -9,105 +9,71 @@ namespace core {
 
 namespace {
 const char *top_str = "<top>";
-UTF8Desc top_DESC{(char *)top_str, (int)strlen(top_str)};
 
 const char *bottom_str = "<bottom>";
-UTF8Desc bottom_DESC{(char *)bottom_str, (int)strlen(bottom_str)};
 
 const char *untyped_str = "untyped";
-UTF8Desc untyped_DESC{(char *)untyped_str, (int)strlen(untyped_str)};
 
 const char *root_str = "<root>";
-UTF8Desc root_DESC{(char *)root_str, (int)strlen(root_str)};
 
 const char *nil_str = "nil";
-UTF8Desc nil_DESC{(char *)nil_str, (int)strlen(nil_str)};
 
 const char *object_str = "Object";
-UTF8Desc object_DESC{(char *)object_str, (int)strlen(object_str)};
 
 const char *junk_str = "<<JUNK>>";
-UTF8Desc junk_DESC{(char *)junk_str, (int)strlen(junk_str)};
 
 const char *string_str = "String";
-UTF8Desc string_DESC{(char *)string_str, (int)strlen(string_str)};
 
 const char *integer_str = "Integer";
-UTF8Desc integer_DESC{(char *)integer_str, (int)strlen(integer_str)};
 
 const char *float_str = "Float";
-UTF8Desc float_DESC{(char *)float_str, (int)strlen(float_str)};
 
 const char *symbol_str = "Symbol";
-UTF8Desc symbol_DESC{(char *)symbol_str, (int)strlen(symbol_str)};
 
 const char *array_str = "Array";
-UTF8Desc array_DESC{(char *)array_str, (int)strlen(array_str)};
 
 const char *hash_str = "Hash";
-UTF8Desc hash_DESC{(char *)hash_str, (int)strlen(hash_str)};
 
 const char *trueClass_str = "TrueClass";
-UTF8Desc trueClass_DESC{(char *)trueClass_str, (int)strlen(trueClass_str)};
 
 const char *falseClass_str = "FalseClass";
-UTF8Desc falseClass_DESC{(char *)falseClass_str, (int)strlen(falseClass_str)};
 
 const char *nilClass_str = "NilClass";
-UTF8Desc nilClass_DESC{(char *)nilClass_str, (int)strlen(nilClass_str)};
 
 const char *class_str = "Class";
-UTF8Desc class_DESC{(char *)class_str, (int)strlen(class_str)};
 
 const char *module_str = "Module";
-UTF8Desc module_DESC{(char *)module_str, (int)strlen(module_str)};
-
-const char *merge = "merge";
-UTF8Desc merge_DESC{(char *)merge, (int)strlen(merge)};
 
 const char *todo_str = "<todo sym>";
-UTF8Desc todo_DESC{(char *)todo_str, (int)strlen(todo_str)};
 
 const char *no_symbol_str = "<none>";
-UTF8Desc no_symbol_DESC{(char *)no_symbol_str, (int)strlen(no_symbol_str)};
 
-const char *opus = "Opus";
-UTF8Desc opus_DESC{(char *)opus, (int)strlen(opus)};
+const char *opus_str = "Opus";
 
-const char *types = "Types";
-UTF8Desc types_DESC{(char *)types, (int)strlen(types)};
+const char *types_str = "Types";
 
-const char *basicObject = "BasicObject";
-UTF8Desc basicObject_DESC{(char *)basicObject, (int)strlen(basicObject)};
+const char *basicObject_str = "BasicObject";
 
-const char *kernel = "Kernel";
-UTF8Desc kernel_DESC{(char *)kernel, (int)strlen(kernel)};
+const char *kernel_str = "Kernel";
 
-const char *range = "Range";
-UTF8Desc range_DESC{(char *)range, (int)strlen(range)};
+const char *range_str = "Range";
 
-const char *regexp = "Regexp";
-UTF8Desc regexp_DESC{(char *)regexp, (int)strlen(regexp)};
+const char *regexp_str = "Regexp";
 
 // A magic non user-creatable class with methods to keep state between passes
-const char *magic = "<Magic>";
-UTF8Desc magic_DESC{(char *)magic, (int)strlen(magic)};
+const char *magic_str = "<Magic>";
 
-const char *DB = "DB";
-UTF8Desc DB_DESC{(char *)DB, (int)strlen(DB)};
+const char *DB_str = "DB";
 
-const char *model = "Model";
-UTF8Desc model_DESC{(char *)model, (int)strlen(model)};
+const char *model_str = "Model";
 
-const char *m = "M";
-UTF8Desc m_DESC{(char *)m, (int)strlen(m)};
+const char *m_str = "M";
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
-const char *reserved = "<<RESERVED>>";
-UTF8Desc reserved_DESC{(char *)reserved, (int)strlen(reserved)};
+const char *reserved_str = "<<RESERVED>>";
 } // namespace
 
-SymbolRef GlobalState::synthesizeClass(UTF8Desc name, SymbolRef superclass) {
+SymbolRef GlobalState::synthesizeClass(absl::string_view name, SymbolRef superclass) {
     NameRef nameId = enterNameConstant(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
@@ -139,37 +105,35 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
 
     names.emplace_back(); // first name is used in hashes to indicate empty cell
     names[0].kind = NameKind::UTF8;
-    names[0].raw.utf8.from = nullptr;
-    names[0].raw.utf8.to = 0;
     Names::registerNames(*this);
 
-    SymbolRef no_symbol_id = synthesizeClass(no_symbol_DESC, 0);
-    SymbolRef top_id = synthesizeClass(top_DESC, 0);
-    SymbolRef bottom_id = synthesizeClass(bottom_DESC, 0);
-    SymbolRef root_id = synthesizeClass(root_DESC, 0);
-    SymbolRef nil_id = synthesizeClass(nil_DESC);
-    SymbolRef todo_id = synthesizeClass(todo_DESC, 0);
-    SymbolRef object_id = synthesizeClass(object_DESC, core::GlobalState::defn_BasicObject());
-    SymbolRef junk_id = synthesizeClass(junk_DESC, 0);
-    SymbolRef integer_id = synthesizeClass(integer_DESC);
-    SymbolRef float_id = synthesizeClass(float_DESC);
-    SymbolRef string_id = synthesizeClass(string_DESC);
-    SymbolRef symbol_id = synthesizeClass(symbol_DESC);
-    SymbolRef array_id = synthesizeClass(array_DESC);
-    SymbolRef hash_id = synthesizeClass(hash_DESC);
-    SymbolRef trueClass_id = synthesizeClass(trueClass_DESC);
-    SymbolRef falseClass_id = synthesizeClass(falseClass_DESC);
-    SymbolRef nilClass_id = synthesizeClass(nilClass_DESC);
-    SymbolRef untyped_id = synthesizeClass(untyped_DESC, 0);
-    SymbolRef opus_id = synthesizeClass(opus_DESC, 0);
-    SymbolRef opus_types_id = enterClassSymbol(Loc::none(0), opus_id, enterNameConstant(types_DESC));
-    SymbolRef class_id = synthesizeClass(class_DESC, 0);
-    SymbolRef basicObject_id = synthesizeClass(basicObject_DESC, 0);
-    SymbolRef kernel_id = synthesizeClass(kernel_DESC, 0);
-    SymbolRef range_id = synthesizeClass(range_DESC);
-    SymbolRef regexp_id = synthesizeClass(regexp_DESC);
-    SymbolRef magic_id = synthesizeClass(magic_DESC);
-    SymbolRef module_id = synthesizeClass(module_DESC);
+    SymbolRef no_symbol_id = synthesizeClass(no_symbol_str, 0);
+    SymbolRef top_id = synthesizeClass(top_str, 0);
+    SymbolRef bottom_id = synthesizeClass(bottom_str, 0);
+    SymbolRef root_id = synthesizeClass(root_str, 0);
+    SymbolRef nil_id = synthesizeClass(nil_str);
+    SymbolRef todo_id = synthesizeClass(todo_str, 0);
+    SymbolRef object_id = synthesizeClass(object_str, core::GlobalState::defn_BasicObject());
+    SymbolRef junk_id = synthesizeClass(junk_str, 0);
+    SymbolRef integer_id = synthesizeClass(integer_str);
+    SymbolRef float_id = synthesizeClass(float_str);
+    SymbolRef string_id = synthesizeClass(string_str);
+    SymbolRef symbol_id = synthesizeClass(symbol_str);
+    SymbolRef array_id = synthesizeClass(array_str);
+    SymbolRef hash_id = synthesizeClass(hash_str);
+    SymbolRef trueClass_id = synthesizeClass(trueClass_str);
+    SymbolRef falseClass_id = synthesizeClass(falseClass_str);
+    SymbolRef nilClass_id = synthesizeClass(nilClass_str);
+    SymbolRef untyped_id = synthesizeClass(untyped_str, 0);
+    SymbolRef opus_id = synthesizeClass(opus_str, 0);
+    SymbolRef opus_types_id = enterClassSymbol(Loc::none(0), opus_id, enterNameConstant(types_str));
+    SymbolRef class_id = synthesizeClass(class_str, 0);
+    SymbolRef basicObject_id = synthesizeClass(basicObject_str, 0);
+    SymbolRef kernel_id = synthesizeClass(kernel_str, 0);
+    SymbolRef range_id = synthesizeClass(range_str);
+    SymbolRef regexp_id = synthesizeClass(regexp_str);
+    SymbolRef magic_id = synthesizeClass(magic_str);
+    SymbolRef module_id = synthesizeClass(module_str);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -233,13 +197,13 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     // This is a hack to handle that specific alias in pay-server; More-general
     // handling will require substantial additional sophistication in the
     // namer+resolver.
-    SymbolRef db = enterClassSymbol(Loc::none(0), defn_Opus(), enterNameConstant(DB_DESC));
-    SymbolRef model = enterClassSymbol(Loc::none(0), db, enterNameConstant(model_DESC));
-    SymbolRef m = enterStaticFieldSymbol(Loc::none(0), defn_root(), enterNameConstant(m_DESC));
+    SymbolRef db = enterClassSymbol(Loc::none(0), defn_Opus(), enterNameConstant(DB_str));
+    SymbolRef model = enterClassSymbol(Loc::none(0), db, enterNameConstant(model_str));
+    SymbolRef m = enterStaticFieldSymbol(Loc::none(0), defn_root(), enterNameConstant(m_str));
     m.info(*this).resultType = make_unique<AliasType>(model);
 
     while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
-        synthesizeClass(reserved_DESC);
+        synthesizeClass(reserved_str);
     }
 
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
@@ -312,16 +276,16 @@ LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
     return r;
 }
 
-UTF8Desc GlobalState::enterString(UTF8Desc nm) {
+absl::string_view GlobalState::enterString(absl::string_view nm) {
     char *from = nullptr;
-    if (nm.to > GlobalState::STRINGS_PAGE_SIZE) {
-        strings.push_back(make_unique<vector<char>>(nm.to));
+    if (nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
+        strings.push_back(make_unique<vector<char>>(nm.size()));
         from = strings.back()->data();
         if (strings.size() > 1) {
             swap(*(strings.end() - 1), *(strings.end() - 2));
         }
     } else {
-        if (strings_last_page_used + nm.to > GlobalState::STRINGS_PAGE_SIZE) {
+        if (strings_last_page_used + nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
             strings.push_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
             // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
             strings_last_page_used = 0;
@@ -329,13 +293,12 @@ UTF8Desc GlobalState::enterString(UTF8Desc nm) {
         from = strings.back()->data() + strings_last_page_used;
     }
 
-    memcpy(from, nm.from, nm.to);
-    strings_last_page_used += nm.to;
-    UTF8Desc res(from, nm.to);
-    return res;
+    memcpy(from, nm.data(), nm.size());
+    strings_last_page_used += nm.size();
+    return absl::string_view(from, nm.size());
 }
 
-NameRef GlobalState::enterNameUTF8(UTF8Desc nm) {
+NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
     const auto hs = _hash(nm);
     unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
@@ -430,7 +393,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     return idx;
 }
 
-NameRef GlobalState::enterNameConstant(UTF8Desc original) {
+NameRef GlobalState::enterNameConstant(absl::string_view original) {
     return enterNameConstant(enterNameUTF8(original));
 }
 
@@ -517,15 +480,15 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return idx;
 }
 
-FileRef GlobalState::enterFile(UTF8Desc path, UTF8Desc source) {
+FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
     auto idx = files.size();
     File::Type source_type = File::Untyped;
     regex sigil("^\\s*#\\s*@typed\\s*\n");
-    if (regex_search(source.from, source.from + source.to, sigil)) {
+    if (regex_search(source.begin(), source.end(), sigil)) {
         source_type = File::Typed;
     }
 
-    files.emplace_back(path.toString(), source.toString(), source_type);
+    files.emplace_back(string(path.begin(), path.end()), string(source.begin(), source.end()), source_type);
     return FileRef(idx);
 }
 

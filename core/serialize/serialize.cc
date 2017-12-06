@@ -6,7 +6,7 @@ namespace serialize {
 
 const u4 VERSION = 1;
 
-void GlobalStateSerializer::Pickler::putStr(const std::string s) {
+void GlobalStateSerializer::Pickler::putStr(const absl::string_view s) {
     putU4(s.size());
     constexpr int step = (sizeof(u4) / sizeof(u1));
     int end = (s.size() / step) * step;
@@ -103,8 +103,8 @@ int64_t GlobalStateSerializer::UnPickler::getS8() {
 }
 
 void GlobalStateSerializer::pickle(Pickler &p, File &what) {
-    p.putStr(what.path().toString());
-    p.putStr(what.source().toString());
+    p.putStr(what.path());
+    p.putStr(what.source());
 }
 
 File GlobalStateSerializer::unpickleFile(UnPickler &p) {
@@ -118,7 +118,7 @@ void GlobalStateSerializer::pickle(Pickler &p, Name &what) {
     p.putU4(what.kind);
     switch (what.kind) {
         case NameKind::UTF8:
-            p.putStr(what.raw.utf8.toString());
+            p.putStr(what.raw.utf8);
             break;
         case NameKind::UNIQUE:
             p.putU4(what.unique.uniqueNameKind);

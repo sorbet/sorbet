@@ -235,7 +235,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto exp = ruby_typer::File::read(checker.c_str());
 
         stringstream got;
-        got << "digraph \"" + ruby_typer::File::getFileName(inputPath) + "\"{" << endl;
+        got << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
         for (auto &cfg : collector.cfgs) {
             got << cfg << endl << endl;
         }

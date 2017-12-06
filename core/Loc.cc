@@ -13,7 +13,7 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs)
     Loc::Detail pos;
 
     core::File &file = source.file(gs);
-    Error::check(off <= file.source().to);
+    Error::check(off <= file.source().size());
     auto it = std::lower_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
     if (it == file.line_breaks.begin()) {
         pos.line = 1;
@@ -34,17 +34,17 @@ pair<Loc::Detail, Loc::Detail> Loc::position(core::GlobalState &gs) {
 
 string Loc::toString(core::GlobalState &gs) {
     stringstream buf;
-    UTF8Desc source = this->file.file(gs).source();
+    absl::string_view source = this->file.file(gs).source();
     auto pos = this->position(gs);
-    auto endstart = make_reverse_iterator(source.from + this->begin_pos);
-    auto beginstart = make_reverse_iterator(source.from);
+    auto endstart = make_reverse_iterator(source.begin() + this->begin_pos);
+    auto beginstart = make_reverse_iterator(source.begin());
     auto start = find(endstart, beginstart, '\n');
 
-    auto end = find(source.from + this->end_pos, source.from + source.to, '\n');
+    auto end = find(source.begin() + this->end_pos, source.end(), '\n');
 
     auto offset1 = beginstart - start;
-    auto offset2 = end - source.from;
-    string outline(source.from + (offset1), source.from + (offset2));
+    auto offset2 = end - source.begin();
+    string outline(source.begin() + (offset1), source.begin() + (offset2));
     buf << outline;
     if (pos.second.line == pos.first.line) {
         // add squigly

@@ -20,12 +20,12 @@ inline unsigned int _hash_mix_constant(NameKind nk, unsigned int id) {
     return id * HASH_MULT2 + _NameKind2Id_CONSTANT(nk);
 }
 
-inline unsigned int _hash(UTF8Desc utf8) {
+inline unsigned int _hash(absl::string_view utf8) {
     // TODO: replace with http://www.sanmayce.com/Fastest_Hash/, see https://www.strchr.com/hash_functions
     // and https://github.com/rurban/smhasher
-    auto *end = utf8.from + utf8.to;
+    auto end = utf8.end();
     unsigned int res = 0;
-    auto it = utf8.from;
+    auto it = utf8.begin();
 #pragma clang loop unroll(enable)
     for (; it != end; it++) {
         res = mix(res, *it - '!'); // "!" is the first printable letter in ASCII.

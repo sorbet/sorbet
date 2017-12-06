@@ -29,8 +29,7 @@ private:
     unique_ptr<core::GlobalState> ctxPtr;
 };
 
-static const char *testClass = "Test";
-static core::UTF8Desc testClass_DESC{(char *)testClass, (int)strlen(testClass)};
+static const char *testClass_str = "Test";
 
 unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
     auto ast = parser::Parser::run(gs, "<test>", str);
@@ -78,7 +77,7 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
     auto tree = getTree(ctx, "class Test; class Foo; end; end");
     namer::Namer::run(ctx, move(tree));
     auto &rootScope =
-        core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_DESC)).info(ctx);
+        core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).info(ctx);
 
     ASSERT_EQ(1, rootScope.members.size());
     auto fooPair = rootScope.members[0];
@@ -92,7 +91,7 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
     auto tree = getTree(ctx, "class Test; class Foo; def bar; end; end; end");
     namer::Namer::run(ctx, move(tree));
     auto &rootScope =
-        core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_DESC)).info(ctx);
+        core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).info(ctx);
 
     ASSERT_EQ(1, rootScope.members.size());
     auto fooSym = rootScope.members[0].second;

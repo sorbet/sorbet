@@ -14,7 +14,6 @@ using ruby_parser::self_ptr;
 using ruby_parser::token;
 
 using ruby_typer::core::GlobalState;
-using ruby_typer::core::UTF8Desc;
 using std::make_unique;
 using std::string;
 using std::type_info;
@@ -56,7 +55,7 @@ string Dedenter::dedent(const string &str) {
 class Builder::Impl {
 public:
     Impl(GlobalState &gs, core::FileRef file) : gs_(gs), file_(file) {
-        this->max_off_ = file.file(gs).source().to;
+        this->max_off_ = file.file(gs).source().size();
         foreign_nodes_.emplace_back();
     }
 

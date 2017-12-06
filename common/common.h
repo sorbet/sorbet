@@ -9,6 +9,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 #endif
 
 #include "absl/container/inlined_vector.h"
+#include "absl/strings/string_view.h"
 #include <cstring>
 #include <functional>
 #include <ostream>
@@ -111,7 +112,7 @@ class File final {
 public:
     static std::string read(const char *filename);
     static void write(const char *filename, const std::vector<ruby_typer::u4> &data);
-    static std::string getFileName(const std::string path);
+    static absl::string_view getFileName(const absl::string_view path);
 };
 
 class Strings final {

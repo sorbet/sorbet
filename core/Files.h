@@ -2,6 +2,7 @@
 #define SRUBY_AST_FILES_H
 
 #include "Names.h"
+#include "absl/strings/string_view.h"
 #include <string>
 
 namespace ruby_typer {
@@ -51,8 +52,8 @@ public:
 
     friend class GlobalState;
 
-    UTF8Desc path();
-    UTF8Desc source();
+    absl::string_view path();
+    absl::string_view source();
     Type source_type;
 
     File(std::string &&path_, std::string &&source_, Type sourcetype);

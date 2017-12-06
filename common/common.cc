@@ -64,7 +64,7 @@ string ruby_typer::Strings::escapeCString(string what) {
     return buf.str();
 }
 
-std::string ruby_typer::File::getFileName(const std::string path) {
+absl::string_view ruby_typer::File::getFileName(const absl::string_view path) {
     std::size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);
 }

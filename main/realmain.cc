@@ -12,6 +12,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
+#include "spdlog/fmt/ostr.h"
 #include "spdlog/spdlog.h"
 #include <algorithm> // find
 #include <ctime>
@@ -80,14 +81,14 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     try {
         for (auto f : frs) {
             try {
-                tracer->trace("Parsing: {}", f.file(gs).path().toString());
+                tracer->trace("Parsing: {}", f.file(gs).path());
                 auto nodes = ruby_typer::parser::Parser::run(gs, f);
                 if (printParseTree) {
                     cout << nodes->toString(gs, 0) << endl;
                 }
 
                 ruby_typer::core::Context context(gs, gs.defn_root());
-                tracer->trace("Desugaring: {}", f.file(gs).path().toString());
+                tracer->trace("Desugaring: {}", f.file(gs).path());
                 auto ast = ruby_typer::ast::desugar::node2Tree(context, nodes);
                 if (printDesugared) {
                     cout << ast->toString(gs, 0) << endl;
@@ -97,10 +98,10 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
                     cout << ast->showRaw(gs) << endl;
                 }
                 nodes = nullptr; // free up space early
-                tracer->trace("Naming: {}", f.file(gs).path().toString());
+                tracer->trace("Naming: {}", f.file(gs).path());
                 result.emplace_back(ruby_typer::namer::Namer::run(context, move(ast)));
             } catch (...) {
-                console_err->error("Exception on file: {} (backtrace is above)", f.file(gs).path().toString());
+                console_err->error("Exception on file: {} (backtrace is above)", f.file(gs).path());
             }
         }
     } catch (...) {
@@ -132,7 +133,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
             ruby_typer::core::FileRef f = namedTree->loc.file;
             try {
                 ruby_typer::core::Context context(gs, gs.defn_root());
-                tracer->trace("Resolving: {}", f.file(gs).path().toString());
+                tracer->trace("Resolving: {}", f.file(gs).path());
                 auto resolved = ruby_typer::namer::Resolver::run(context, move(namedTree));
                 if (printNameTree) {
                     cout << resolved->toString(gs, 0) << endl;
@@ -142,7 +143,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                 }
                 namedTree = move(resolved);
             } catch (...) {
-                console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path().toString());
+                console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
             }
         }
 
@@ -153,9 +154,9 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
             try {
                 ruby_typer::core::Context context(gs, gs.defn_root());
                 if (printCFG) {
-                    cout << "digraph \"" + ruby_typer::File::getFileName(f.file(gs).path().toString()) + "\"{" << endl;
+                    cout << "digraph \"" << ruby_typer::File::getFileName(f.file(gs).path()) << "\"{" << endl;
                 }
-                tracer->trace("CFG+Infer: {}", f.file(gs).path().toString());
+                tracer->trace("CFG+Infer: {}", f.file(gs).path());
                 bool doType = opts["typed"].as<string>() != "never";
                 CFG_Collector_and_Typer collector(doType, printCFG);
                 result.emplace_back(
@@ -165,7 +166,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                     cout << "}" << endl << endl;
                 }
             } catch (...) {
-                console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path().toString());
+                console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
             }
         }
 

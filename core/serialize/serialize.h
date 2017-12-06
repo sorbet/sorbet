@@ -14,7 +14,7 @@ public:
         void putU4(const u4 u);
         void put4U1(u1 v1, u1 v2, u1 v3, u1 v4);
         void putS8(const int64_t i);
-        void putStr(const std::string s);
+        void putStr(const absl::string_view s);
         Pickler() = default;
     };
     class UnPickler {
