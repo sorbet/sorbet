@@ -5,8 +5,9 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "(<constant:MyException>$7)
+    "bb::<constant:Object>#foo_0" [label = "(rescueTemp$3, <constant:MyException>$7)
 <constant:MyException>$7 = alias <constant:MyException> : <class:MyException>
+rescueTemp$3 = NotSupported() : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
@@ -23,7 +24,7 @@ returnMethodTemp$1 = statTemp$4.raise(statTemp$5) : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="bold"];
-    "bb::<constant:Object>#foo_3" [label = "()
+    "bb::<constant:Object>#foo_3" [label = "(rescueTemp$3)
 rescueTemp$3"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_5" [style="bold"];

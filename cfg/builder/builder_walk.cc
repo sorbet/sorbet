@@ -260,6 +260,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Rescue *a) {
                 core::LocalVariable unanalyzableCondition = cctx.ctx.state.newTemporary(
                     core::UniqueNameKind::CFG, core::Names::rescueTemp(), cctx.inWhat.symbol);
+                current->exprs.emplace_back(unanalyzableCondition, what->loc, make_unique<NotSupported>(""));
                 ret = current;
 
                 auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, a->body->loc, current);
