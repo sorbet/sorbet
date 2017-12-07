@@ -39,19 +39,14 @@ template <typename Base, typename T> bool typecaseHelper(Base *base, std::functi
     }
 }
 
-template <typename Base> void typecase(Base *b) {
-    ruby_typer::Error::check(false, "not handled case: ", demangle(typeid(b).name()));
-}
+template <typename Base, typename... Subclasses> void typecase(Base *base, Subclasses &&... funcs) {
+    bool done = false;
 
-template <typename Base, typename FirstSubclass, typename... RestOfSubclasses>
-void typecase(Base *base, FirstSubclass &&first, RestOfSubclasses &&... rest) {
-    using Signature = get_signature<FirstSubclass>;
-    using Function = std::function<Signature>;
+    bool UNUSED(dummy[sizeof...(Subclasses)]) = {
+        (done = done || typecaseHelper(base, std::function<get_signature<Subclasses>>(funcs)))...};
 
-    if (typecaseHelper(base, (Function)first)) {
-        return;
-    } else {
-        typecase(base, rest...);
+    if (!done) {
+        ruby_typer::Error::check(false, "not handled case: ", demangle(typeid(base).name()));
     }
 }
 } // namespace ruby_typer
