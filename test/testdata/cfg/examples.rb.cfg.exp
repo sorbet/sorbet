@@ -115,6 +115,7 @@ ifTemp$3"];
     "bb::<constant:Examples>#return_in_one_branch2_1" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch2_2" [label = "block[id=2](returnMethodTemp$1)
 returnMethodTemp$1 = 1 : Integer(1)
+returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Examples>#return_in_one_branch2_2" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
