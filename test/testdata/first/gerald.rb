@@ -1,3 +1,4 @@
+# error: unreachable
 # @typed
 require_relative '../../../extn'
 Opus::AutogenLoader.init(__FILE__) # error: Stubbing out unknown constant

@@ -2,7 +2,7 @@ begin
   def foo<<constant:<todo sym>>>()
     begin
       1
-    rescue => <emptyTree>
+    rescue => rescueTemp$10000
       2
     else
       3

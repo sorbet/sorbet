@@ -313,7 +313,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             int line = unknownLocErrorLine++;
             auto expectedError = expectedErrors.find(line);
             if (expectedError == expectedErrors.end()) {
-                ADD_FAILURE_AT(inputPath.c_str(), line) << "Unknown location error thrown but not annotated.";
+                ADD_FAILURE_AT(inputPath.c_str(), line) << "Unknown location error thrown but not annotated." << endl
+                                                        << "Reported error: " << error->formatted;
             } else if (error->formatted.find(expectedError->second) == string::npos) {
                 ADD_FAILURE_AT(inputPath.c_str(), line) << "Error string mismatch." << endl
                                                         << " Expectation: " << expectedError->second << endl

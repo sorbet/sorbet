@@ -1046,8 +1046,37 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     Error::raise("Bad inner node type");
                 }
 
-                unique_ptr<Expression> res = make_unique<RescueCase>(
-                    what->loc, move(exceptions), node2TreeImpl(ctx, resbody->var), node2TreeImpl(ctx, resbody->body));
+                auto varExpr = node2TreeImpl(ctx, resbody->var);
+                auto body = node2TreeImpl(ctx, resbody->body);
+
+                auto varLoc = varExpr->loc;
+                core::NameRef var(0);
+                if (auto *id = cast_tree<UnresolvedIdent>(varExpr.get())) {
+                    if (id->kind == UnresolvedIdent::Local) {
+                        var = id->name;
+                        varExpr.reset(nullptr);
+                    }
+                }
+
+                if (!var.exists()) {
+                    var = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::rescueTemp());
+                }
+
+                if (cast_tree<EmptyTree>(varExpr.get()) != nullptr) {
+                    varLoc = resbody->loc;
+                } else if (varExpr != nullptr) {
+                    unique_ptr<Expression> assign;
+                    if (auto *s = cast_tree<ast::Send>(varExpr.get())) {
+                        s->args.emplace_back(mkLocal(varLoc, var));
+                        assign = move(varExpr);
+                    } else {
+                        assign = mkAssign(varLoc, move(varExpr), mkLocal(varLoc, var));
+                    }
+                    body = mkInsSeq1(varLoc, move(assign), move(body));
+                }
+
+                unique_ptr<Expression> res =
+                    make_unique<RescueCase>(what->loc, move(exceptions), mkLocal(varLoc, var), move(body));
                 result.swap(res);
             },
             [&](parser::If *if_) {
