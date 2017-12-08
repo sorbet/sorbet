@@ -13,7 +13,10 @@ InsSeq{
             RescueCase{
               exceptions = [
               ]
-              var = EmptyTree
+              var = UnresolvedIdent{
+                kind = Local
+                name = rescueTemp$10000
+              }
               body = IntLit{ value = 2 }
             }
           ]

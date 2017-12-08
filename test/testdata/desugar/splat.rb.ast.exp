@@ -46,14 +46,14 @@ begin
       end
       begin
         self(<constant:<todo sym>>).raise("a")
-      rescue <emptyTree>::<constant:Rescueable>.new().to_a() => <emptyTree>
+      rescue <emptyTree>::<constant:Rescueable>.new().to_a() => rescueTemp$10001
         <emptyTree>
       else
         <emptyTree>
       end
       begin
         self(<constant:<todo sym>>).raise("a")
-      rescue [<emptyTree>::<constant:Array>].concat(<emptyTree>::<constant:Rescueable>.new().to_a()).concat([<emptyTree>::<constant:Float>]) => <emptyTree>
+      rescue [<emptyTree>::<constant:Array>].concat(<emptyTree>::<constant:Rescueable>.new().to_a()).concat([<emptyTree>::<constant:Float>]) => rescueTemp$10002
         <emptyTree>
       else
         <emptyTree>

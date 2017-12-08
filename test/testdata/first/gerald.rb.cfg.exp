@@ -973,12 +973,12 @@ blockReturnTemp$35 = <block-nested: removed_lines>.<<(statTemp$92) : Array
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" [label = "block[id=38](<block-nested: a_name>, <block-nested: b_name>, <block-nested: added_lines>, <block-nested: removed_lines>, <block-nested: line>, statTemp$22, statTemp$34, <constant:Range>$15, <constant:nil>$28, ifTemp$51, ifTemp$69)
 outerLoops: 1
-hashTemp$102 = <symbol:a_name> : Symbol(:\"a_name\")
-hashTemp$104 = <symbol:b_name> : Symbol(:\"b_name\")
-hashTemp$106 = <symbol:added_lines> : Symbol(:\"added_lines\")
-hashTemp$108 = <symbol:removed_lines> : Symbol(:\"removed_lines\")
-hashTemp$110 = alias <constant:<Magic>> : <Magic>
-blockReturnTemp$23 = hashTemp$110.<build-hash>(hashTemp$102, <block-nested: a_name>, hashTemp$104, <block-nested: b_name>, hashTemp$106, <block-nested: added_lines>, hashTemp$108, <block-nested: removed_lines>) : ShapeType {\n  Symbol(:\"a_name\") => NilClass\n  Symbol(:\"b_name\") => NilClass\n  Symbol(:\"added_lines\") => TupleType {\n    }\n  Symbol(:\"removed_lines\") => TupleType {\n    }\n}
+hashTemp$102 = <symbol:a_name>
+hashTemp$104 = <symbol:b_name>
+hashTemp$106 = <symbol:added_lines>
+hashTemp$108 = <symbol:removed_lines>
+hashTemp$110 = alias <constant:<Magic>>
+blockReturnTemp$23 = hashTemp$110.<build-hash>(hashTemp$102, <block-nested: a_name>, hashTemp$104, <block-nested: b_name>, hashTemp$106, <block-nested: added_lines>, hashTemp$108, <block-nested: removed_lines>)
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_38" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_5" [style="bold"];

@@ -33,7 +33,7 @@ statTemp$3 = return returnTemp$5 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_4" [label = "block[id=4]()
+    "bb::<constant:Object>#foo_4" [label = "block[id=4](rescueTemp$4)
 returnTemp$9 = 2 : Integer(2)
 statTemp$3 = return returnTemp$9 : <bottom>
 <unconditional>"];

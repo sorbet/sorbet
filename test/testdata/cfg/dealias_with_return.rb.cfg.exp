@@ -31,7 +31,7 @@ statTemp$3 = return returnTemp$5 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#a_3" -> "bb::<constant:Object>#a_1" [style="bold"];
-    "bb::<constant:Object>#a_4" [label = "block[id=4](a)
+    "bb::<constant:Object>#a_4" [label = "block[id=4](a, rescueTemp$4)
 a = 2 : Integer(2)
 statTemp$10 = 3 : Integer(3)
 returnMethodTemp$1 = a.+(statTemp$10) : Integer | Float | Rational | BigDecimal | Complex

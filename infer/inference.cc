@@ -211,6 +211,10 @@ public:
             whoKnows.falsy.noTypeTests.emplace_back(send->recv, core::Types::falsyTypes());
 
             whoKnows.sanityCheck();
+        } else if (send->fun == core::Names::nil_p()) {
+            whoKnows.truthy.yesTypeTests.emplace_back(send->recv, core::Types::nil());
+            whoKnows.falsy.noTypeTests.emplace_back(send->recv, core::Types::nil());
+            whoKnows.sanityCheck();
         }
 
         if (send->args.empty()) {
@@ -238,10 +242,6 @@ public:
             Error::check(tp2.type.get());
             whoKnows.truthy.yesTypeTests.emplace_back(send->recv, tp1.type);
             whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], tp2.type);
-            whoKnows.sanityCheck();
-        } else if (send->fun == core::Names::nil_p()) {
-            whoKnows.truthy.yesTypeTests.emplace_back(send->recv, core::Types::nil());
-            whoKnows.falsy.noTypeTests.emplace_back(send->recv, core::Types::nil());
             whoKnows.sanityCheck();
         }
     }

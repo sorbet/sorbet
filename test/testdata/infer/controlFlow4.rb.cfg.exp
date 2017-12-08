@@ -75,7 +75,7 @@ ifTemp$10"];
     "bb::<constant:ModuleMethods>#instrumented_request_13" -> "bb::<constant:ModuleMethods>#instrumented_request_22" [style="tapered"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_14" [label = "block[id=14](err, is_successful, ifTemp$10)
-ifTemp$10 = err : NilClass
+ifTemp$10 = err : <bottom>
 ifTemp$10"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_14" -> "bb::<constant:ModuleMethods>#instrumented_request_17" [style="bold"];

@@ -173,6 +173,9 @@ public:
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_EXCEPTION_COUNT> EXCEPTION_store;
 
     EXCEPTION_store exceptions;
+
+    // If present, var is always an UnresolvedIdent[kind=Local] up until the
+    // namer, at which point it is a Local.
     std::unique_ptr<Expression> var;
     std::unique_ptr<Expression> body;
 

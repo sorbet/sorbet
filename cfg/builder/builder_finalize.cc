@@ -72,6 +72,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 thenb->bexit.thenb->backEdges.push_back(bb);
                 thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                        thenb->backEdges.end());
+                changed = true;
                 sanityCheck(ctx, cfg);
                 continue;
             }
@@ -83,6 +84,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.elseb->backEdges.push_back(bb);
                 elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                        elseb->backEdges.end());
+                changed = true;
                 sanityCheck(ctx, cfg);
                 continue;
             }

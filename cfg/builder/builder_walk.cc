@@ -306,23 +306,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         exceptions.pop_back();
                     }
 
-                    if (auto *send = ast::cast_tree<ast::EmptyTree>(rescueCase->var.get())) {
-                        // Nothing to do
-                    } else if (auto *send = ast::cast_tree<ast::Send>(rescueCase->var.get())) {
-                        Error::check(send->args.empty());
-                        auto junk = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::rescueTemp(),
-                                                                cctx.inWhat.symbol);
-                        send->args.emplace_back(make_unique<ast::Local>(rescueCase->var->loc, unanalyzableCondition));
-                        caseBody = walk(cctx.withTarget(junk), send, caseBody);
-                    } else if (auto *local = ast::cast_tree<ast::Local>(rescueCase->var.get())) {
-                        caseBody->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
-                                                     make_unique<Ident>(unanalyzableCondition));
-                    } else if (auto *ident = ast::cast_tree<ast::Ident>(rescueCase->var.get())) {
-                        auto lhs = global2Local(cctx.ctx, ident->symbol, cctx.inWhat, cctx.aliases);
-                        caseBody->exprs.emplace_back(lhs, a->loc, make_unique<Ident>(unanalyzableCondition));
-                    } else {
-                        Error::raise("Invalid rescue var type");
-                    }
+                    auto *local = ast::cast_tree<ast::Local>(rescueCase->var.get());
+                    Error::check(local != nullptr);
+                    caseBody->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
+                                                 make_unique<Ident>(unanalyzableCondition));
 
                     caseBody = walk(cctx, rescueCase->body.get(), caseBody);
                     if (ret == cctx.inWhat.deadBlock()) {
