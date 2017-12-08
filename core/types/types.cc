@@ -138,20 +138,20 @@ std::shared_ptr<Type> Types::approximateSubtract(core::Context ctx, std::shared_
 ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {}
 
 namespace {
-string classNameToString(core::Context ctx, core::NameRef nm) {
-    core::Name &name = nm.name(ctx);
+string classNameToString(GlobalState &gs, core::NameRef nm) {
+    core::Name &name = nm.name(gs);
     if (name.kind == core::CONSTANT) {
-        return name.cnst.original.toString(ctx);
+        return name.cnst.original.toString(gs);
     } else {
         Error::check(name.kind == core::UNIQUE);
         Error::check(name.unique.uniqueNameKind == core::Singleton);
-        return "<class:" + classNameToString(ctx, name.unique.original) + ">";
+        return "<class:" + classNameToString(gs, name.unique.original) + ">";
     }
 }
 }; // namespace
 
-string ruby_typer::core::ClassType::toString(ruby_typer::core::Context ctx, int tabs) {
-    return classNameToString(ctx, this->symbol.info(ctx).name);
+string ruby_typer::core::ClassType::toString(GlobalState &gs, int tabs) {
+    return classNameToString(gs, this->symbol.info(gs).name);
 }
 
 string ruby_typer::core::ClassType::typeName() {
@@ -187,15 +187,15 @@ string LiteralType::typeName() {
     return "LiteralType";
 }
 
-string LiteralType::toString(core::Context ctx, int tabs) {
+string LiteralType::toString(GlobalState &gs, int tabs) {
     string value;
     SymbolRef undSymbol = dynamic_cast<ClassType *>(this->underlying.get())->symbol;
     switch (undSymbol._id) {
         case GlobalState::defn_String()._id:
-            value = "\"" + NameRef(this->value).toString(ctx) + "\"";
+            value = "\"" + NameRef(this->value).toString(gs) + "\"";
             break;
         case GlobalState::defn_Symbol()._id:
-            value = ":\"" + NameRef(this->value).toString(ctx) + "\"";
+            value = ":\"" + NameRef(this->value).toString(gs) + "\"";
             break;
         case GlobalState::defn_Integer()._id:
             value = to_string(this->value);
@@ -212,7 +212,7 @@ string LiteralType::toString(core::Context ctx, int tabs) {
         default:
             Error::raise("should not be reachable");
     }
-    return this->underlying->toString(ctx, tabs) + "(" + value + ")";
+    return this->underlying->toString(gs, tabs) + "(" + value + ")";
 }
 
 ruby_typer::core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
@@ -254,13 +254,13 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
-string TupleType::toString(core::Context ctx, int tabs) {
+string TupleType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "TupleType {" << endl;
     int i = 0;
     for (auto &el : this->elems) {
         printTabs(buf, tabs + 1);
-        buf << i++ << " = " << el->toString(ctx, tabs + 2) << endl;
+        buf << i++ << " = " << el->toString(gs, tabs + 2) << endl;
     }
     printTabs(buf, tabs);
     buf << "}";
@@ -272,13 +272,13 @@ ruby_typer::core::ShapeType::ShapeType() : ProxyType(Types::hashClass()) {}
 ruby_typer::core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
     : ProxyType(Types::hashClass()), keys(move(keys)), values(move(values)) {}
 
-string ShapeType::toString(core::Context ctx, int tabs) {
+string ShapeType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "ShapeType {" << endl;
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
         printTabs(buf, tabs + 1);
-        buf << el->toString(ctx, tabs + 2) << " => " << (*valueIterator)->toString(ctx, tabs + 2) << endl;
+        buf << el->toString(gs, tabs + 2) << " => " << (*valueIterator)->toString(gs, tabs + 2) << endl;
         ++valueIterator;
     }
     printTabs(buf, tabs);
@@ -288,19 +288,19 @@ string ShapeType::toString(core::Context ctx, int tabs) {
 
 MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Magic())) {}
 
-string MagicType::toString(core::Context ctx, int tabs) {
-    return underlying->toString(ctx, tabs);
+string MagicType::toString(GlobalState &gs, int tabs) {
+    return underlying->toString(gs, tabs);
 }
 
 AliasType::AliasType(core::SymbolRef other) : symbol(other) {}
 
-string AliasType::toString(core::Context ctx, int tabs) {
+string AliasType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "AliasType { symbol = " << this->symbol.info(ctx).fullName(ctx) << " }";
+    buf << "AliasType { symbol = " << this->symbol.info(gs).fullName(gs) << " }";
     return buf.str();
 }
 
-string AndType::toString(core::Context ctx, int tabs) {
+string AndType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
     bool leftBrace = dynamic_cast<OrType *>(this->left.get()) != nullptr;
     bool rightBrace = dynamic_cast<OrType *>(this->right.get()) != nullptr;
@@ -308,7 +308,7 @@ string AndType::toString(core::Context ctx, int tabs) {
     if (leftBrace) {
         buf << "(";
     }
-    buf << this->left->toString(ctx, tabs + 2);
+    buf << this->left->toString(gs, tabs + 2);
     if (leftBrace) {
         buf << ")";
     }
@@ -316,14 +316,14 @@ string AndType::toString(core::Context ctx, int tabs) {
     if (rightBrace) {
         buf << "(";
     }
-    buf << this->right->toString(ctx, tabs + 2);
+    buf << this->right->toString(gs, tabs + 2);
     if (rightBrace) {
         buf << ")";
     }
     return buf.str();
 }
 
-string OrType::toString(core::Context ctx, int tabs) {
+string OrType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
     bool leftBrace = dynamic_cast<AndType *>(this->left.get()) != nullptr;
     bool rightBrace = dynamic_cast<AndType *>(this->right.get()) != nullptr;
@@ -331,7 +331,7 @@ string OrType::toString(core::Context ctx, int tabs) {
     if (leftBrace) {
         buf << "(";
     }
-    buf << this->left->toString(ctx, tabs + 2);
+    buf << this->left->toString(gs, tabs + 2);
     if (leftBrace) {
         buf << ")";
     }
@@ -339,7 +339,7 @@ string OrType::toString(core::Context ctx, int tabs) {
     if (rightBrace) {
         buf << "(";
     }
-    buf << this->right->toString(ctx, tabs + 2);
+    buf << this->right->toString(gs, tabs + 2);
     if (rightBrace) {
         buf << ")";
     }

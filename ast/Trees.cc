@@ -142,6 +142,11 @@ Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::
     histogramInc("Send::args", this->args.size());
 }
 
+Cast::Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, bool assertType)
+    : Expression(loc), type(ty), arg(move(arg)), assertType(assertType) {
+    categoryCounterInc("Trees", "Cast");
+}
+
 ZSuperArgs::ZSuperArgs(core::Loc loc) : Expression(loc) {
     categoryCounterInc("Trees", "ZSuper");
 }
@@ -793,6 +798,33 @@ string Send::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+string Cast::toString(core::GlobalState &gs, int tabs) {
+    stringstream buf;
+    if (this->assertType) {
+        buf << "Opus::Types.assert_type!";
+    } else {
+        buf << "Opus::Types.cast";
+    }
+    buf << "(" << this->arg->toString(gs, tabs) << ", " << this->type->toString(gs, tabs) << ")";
+
+    return buf.str();
+}
+
+string Cast::showRaw(core::GlobalState &gs, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << endl;
+    printTabs(buf, tabs + 2);
+    buf << "assertType = " << this->assertType << "," << endl;
+    printTabs(buf, tabs + 2);
+    buf << "arg = " << this->arg->showRaw(gs, tabs + 2) << endl;
+    printTabs(buf, tabs + 2);
+    buf << "type = " << this->type->toString(gs) << "," << endl;
+    printTabs(buf, tabs);
+    buf << "}" << endl;
+
+    return buf.str();
+}
+
 string ZSuperArgs::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ }";
 }
@@ -995,6 +1027,10 @@ string Assign::nodeName() {
 
 string Send::nodeName() {
     return "Send";
+}
+
+string Cast::nodeName() {
+    return "Cast";
 }
 
 string ZSuperArgs::nodeName() {

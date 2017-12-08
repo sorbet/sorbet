@@ -49,6 +49,7 @@ NameDef names[] = {
     {"hashTemp"},
     {"arrayTemp"},
     {"rescueTemp"},
+    {"castTemp"},
     // end CFG temporaries
 
     {"include"},
@@ -75,7 +76,10 @@ NameDef names[] = {
     {"noreturn"},
     {"interface"},
     {"declareVariables", "declare_variables"},
-    // end standard_method keywords
+
+    {"assertType", "assert_type!"},
+    {"cast"},
+    // end Opus::Types keywords
 
     // Ruby DSL methods which we understand
     {"attr"},

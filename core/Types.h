@@ -97,7 +97,7 @@ public:
     Type() = default;
     Type(const Type &obj) = delete;
     virtual ~Type() = default;
-    virtual std::string toString(core::Context ctx, int tabs = 0) = 0;
+    virtual std::string toString(GlobalState &gs, int tabs = 0) = 0;
     virtual std::string typeName() = 0;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) = 0;
@@ -130,7 +130,7 @@ public:
     ClassType(core::SymbolRef symbol);
     virtual int kind();
 
-    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
@@ -145,7 +145,7 @@ public:
     virtual int kind();
     OrType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
-    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
@@ -160,7 +160,7 @@ public:
     virtual int kind();
     AndType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
-    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
@@ -177,7 +177,7 @@ public:
     LiteralType(core::SymbolRef klass, core::NameRef val);
     LiteralType(bool val);
 
-    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
 };
 
@@ -188,7 +188,7 @@ public:
     ShapeType();
     ShapeType(std::vector<std::shared_ptr<LiteralType>> &keys, std::vector<std::shared_ptr<Type>> &values);
 
-    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
@@ -199,7 +199,7 @@ public:
     std::vector<std::shared_ptr<Type>> elems;
     TupleType(std::vector<std::shared_ptr<Type>> &elems);
 
-    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
 };
 
@@ -210,7 +210,7 @@ public:
 class MagicType final : public ProxyType {
 public:
     MagicType();
-    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);
@@ -219,7 +219,7 @@ public:
 class AliasType final : public Type {
 public:
     AliasType(SymbolRef other);
-    virtual std::string toString(core::Context ctx, int tabs = 0);
+    virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType);

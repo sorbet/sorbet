@@ -201,5 +201,15 @@ string NotSupported::toString(core::Context ctx) {
     return "NotSupported(" + why + ")";
 }
 
+string Cast::toString(core::Context ctx) {
+    stringstream buf;
+    buf << "cast(";
+    buf << this->value.name.toString(ctx);
+    buf << ", ";
+    buf << this->type->toString(ctx);
+    buf << ");";
+    return buf.str();
+}
+
 } // namespace cfg
 } // namespace ruby_typer

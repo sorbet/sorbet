@@ -373,6 +373,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
 
+            [&](ast::Cast *c) {
+                core::LocalVariable tmp =
+                    cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::castTemp(), cctx.inWhat.symbol);
+                current = walk(cctx.withTarget(tmp), c->arg.get(), current);
+                current->exprs.emplace_back(cctx.target, c->loc, make_unique<Cast>(tmp, c->type, c->assertType));
+                ret = current;
+            },
+
             [&](ast::EmptyTree *n) { ret = current; },
 
             [&](ast::Expression *n) {

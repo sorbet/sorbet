@@ -443,114 +443,139 @@ public:
             core::TypeAndOrigins tp;
             bool noLoopChecking = dynamic_cast<cfg::Alias *>(bind.value.get()) != nullptr ||
                                   dynamic_cast<cfg::LoadArg *>(bind.value.get()) != nullptr;
-            typecase(bind.value.get(),
-                     [&](cfg::Alias *a) {
-                         core::SymbolRef symbol = a->what;
-                         core::Symbol &info = symbol.info(ctx);
-                         if (info.isClass()) {
-                             if (info.resultType.get() == nullptr) {
-                                 core::SymbolRef sym = info.singletonClass(ctx);
-                                 tp.type = make_shared<core::ClassType>(sym);
-                             } else {
-                                 tp.type = info.resultType;
-                             }
-                             tp.origins.push_back(symbol.info(ctx).definitionLoc);
-                         } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
-                             if (info.resultType.get() != nullptr) {
-                                 tp.type = info.resultType;
-                                 tp.origins.push_back(info.definitionLoc);
-                             } else {
-                                 tp.origins.push_back(core::Loc::none(0));
-                                 tp.type = core::Types::dynamic();
-                             }
-                         } else {
-                             Error::notImplemented();
-                         }
-                     },
-                     [&](cfg::Ident *i) {
-                         auto typeAndOrigin = getTypeAndOrigin(ctx, i->what, true);
-                         tp.type = typeAndOrigin.type;
-                         tp.origins = typeAndOrigin.origins;
-                         Error::check(!tp.origins.empty(), "Inferencer did not assign location");
-                     },
-                     [&](cfg::Send *send) {
-                         vector<core::TypeAndOrigins> args;
+            typecase(
+                bind.value.get(),
+                [&](cfg::Alias *a) {
+                    core::SymbolRef symbol = a->what;
+                    core::Symbol &info = symbol.info(ctx);
+                    if (info.isClass()) {
+                        if (info.resultType.get() == nullptr) {
+                            core::SymbolRef sym = info.singletonClass(ctx);
+                            tp.type = make_shared<core::ClassType>(sym);
+                        } else {
+                            tp.type = info.resultType;
+                        }
+                        tp.origins.push_back(symbol.info(ctx).definitionLoc);
+                    } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
+                        if (info.resultType.get() != nullptr) {
+                            tp.type = info.resultType;
+                            tp.origins.push_back(info.definitionLoc);
+                        } else {
+                            tp.origins.push_back(core::Loc::none(0));
+                            tp.type = core::Types::dynamic();
+                        }
+                    } else {
+                        Error::notImplemented();
+                    }
+                },
+                [&](cfg::Ident *i) {
+                    auto typeAndOrigin = getTypeAndOrigin(ctx, i->what, true);
+                    tp.type = typeAndOrigin.type;
+                    tp.origins = typeAndOrigin.origins;
+                    Error::check(!tp.origins.empty(), "Inferencer did not assign location");
+                },
+                [&](cfg::Send *send) {
+                    vector<core::TypeAndOrigins> args;
 
-                         args.reserve(send->args.size());
-                         for (core::LocalVariable arg : send->args) {
-                             args.emplace_back(getTypeAndOrigin(ctx, arg));
-                         }
+                    args.reserve(send->args.size());
+                    for (core::LocalVariable arg : send->args) {
+                        args.emplace_back(getTypeAndOrigin(ctx, arg));
+                    }
 
-                         auto recvType = getTypeAndOrigin(ctx, send->recv);
-                         if (send->fun == core::Names::new_()) {
-                             tp.type = dispatchNew(ctx, recvType, send, args, bind);
-                         } else if (send->fun == core::Names::super()) {
-                             // TODO
-                             tp.type = core::Types::dynamic();
-                             tp.origins.push_back(bind.loc);
-                         } else {
-                             tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
-                         }
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::FloatLit *i) {
-                         tp.type = make_shared<core::LiteralType>(i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::IntLit *i) {
-                         tp.type = make_shared<core::LiteralType>(i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::StringLit *i) {
-                         tp.type = make_shared<core::LiteralType>(ctx.state.defn_String(), i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::SymbolLit *i) {
-                         tp.type = make_shared<core::LiteralType>(ctx.state.defn_Symbol(), i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::BoolLit *i) {
-                         tp.type = make_shared<core::LiteralType>(i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::Self *i) {
-                         tp.type = make_shared<core::ClassType>(i->klass);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::Unanalyzable *i) {
-                         tp.type = core::Types::dynamic();
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::Return *i) {
-                         auto expectedType = ctx.owner.info(ctx).resultType;
-                         if (!expectedType) {
-                             expectedType = core::Types::dynamic();
-                         }
-                         auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
-                         if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
-                             ctx.state.errors.error(core::Reporter::ComplexError(
-                                 bind.loc, core::ErrorClass::ReturnTypeMismatch,
-                                 "Returning value that does not conform to method result type",
-                                 {core::Reporter::ErrorSection(
-                                      "Expected " + expectedType->toString(ctx),
-                                      {
-                                          core::Reporter::ErrorLine::from(ctx.owner.info(ctx).definitionLoc,
-                                                                          "Method {} has return type is defined as {}",
-                                                                          ctx.owner.info(ctx).name.toString(ctx),
-                                                                          expectedType->toString(ctx)),
-                                      }),
-                                  core::Reporter::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) +
-                                                                   " originating from:",
-                                                               typeAndOrigin.origins2Explanations(ctx))}));
-                         }
-                         tp.type = core::Types::bottom();
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::LoadArg *i) {
-                         /* read type from info filled by define_method */
-                         tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
-                         tp.origins.push_back(bind.loc);
-                     });
+                    auto recvType = getTypeAndOrigin(ctx, send->recv);
+                    if (send->fun == core::Names::new_()) {
+                        tp.type = dispatchNew(ctx, recvType, send, args, bind);
+                    } else if (send->fun == core::Names::super()) {
+                        // TODO
+                        tp.type = core::Types::dynamic();
+                        tp.origins.push_back(bind.loc);
+                    } else {
+                        tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+                    }
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::FloatLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::IntLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::StringLit *i) {
+                    tp.type = make_shared<core::LiteralType>(ctx.state.defn_String(), i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::SymbolLit *i) {
+                    tp.type = make_shared<core::LiteralType>(ctx.state.defn_Symbol(), i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::BoolLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Self *i) {
+                    tp.type = make_shared<core::ClassType>(i->klass);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Unanalyzable *i) {
+                    tp.type = core::Types::dynamic();
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Return *i) {
+                    auto expectedType = ctx.owner.info(ctx).resultType;
+                    if (!expectedType) {
+                        expectedType = core::Types::dynamic();
+                    }
+                    auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
+                    if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
+                        ctx.state.errors.error(core::Reporter::ComplexError(
+                            bind.loc, core::ErrorClass::ReturnTypeMismatch,
+                            "Returning value that does not conform to method result type",
+                            {core::Reporter::ErrorSection(
+                                 "Expected " + expectedType->toString(ctx),
+                                 {
+                                     core::Reporter::ErrorLine::from(ctx.owner.info(ctx).definitionLoc,
+                                                                     "Method {} has return type is defined as {}",
+                                                                     ctx.owner.info(ctx).name.toString(ctx),
+                                                                     expectedType->toString(ctx)),
+                                 }),
+                             core::Reporter::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) +
+                                                              " originating from:",
+                                                          typeAndOrigin.origins2Explanations(ctx))}));
+                    }
+                    tp.type = core::Types::bottom();
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::LoadArg *i) {
+                    /* read type from info filled by define_method */
+                    tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Cast *c) {
+                    tp.type = c->type;
+                    tp.origins.push_back(bind.loc);
+
+                    if (c->assertType) {
+                        auto ty = getTypeAndOrigin(ctx, c->value);
+                        if (ty.type->isDynamic()) {
+                            ctx.state.errors.error(core::Reporter::ComplexError(
+                                bind.loc, core::ErrorClass::CastTypeMismatch,
+                                "The typechecker was unable to infer the type of the argument to "
+                                "assert_type!.",
+                                {core::Reporter::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)),
+                                 core::Reporter::ErrorSection("You may need to add additional `standard_method` "
+                                                              "annotations.")}));
+                        } else if (!core::Types::isSubType(ctx, ty.type, c->type)) {
+                            ctx.state.errors.error(core::Reporter::ComplexError(
+                                bind.loc, core::ErrorClass::CastTypeMismatch,
+                                "assert_type!: argument does not have asserted type",
+                                {core::Reporter::ErrorSection("Expected " + c->type->toString(ctx), {}),
+                                 core::Reporter::ErrorSection("Got " + ty.type->toString(ctx) + " originating from:",
+                                                              ty.origins2Explanations(ctx))}));
+                        }
+                    }
+                });
             Error::check(tp.type.get() != nullptr, "Inferencer did not assign type");
             Error::check(!tp.origins.empty(), "Inferencer did not assign location");
 

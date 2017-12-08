@@ -235,6 +235,8 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG &cfg) {
                 reads[v->value].insert(bb.get());
             } else if (auto *v = dynamic_cast<LoadArg *>(bind.value.get())) {
                 reads[v->receiver].insert(bb.get());
+            } else if (auto *v = dynamic_cast<Cast *>(bind.value.get())) {
+                reads[v->value].insert(bb.get());
             }
         }
         if (bb->bexit.cond.exists()) {

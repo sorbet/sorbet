@@ -624,6 +624,34 @@ public:
         return asgn;
     }
 
+    ast::Expression *postTransformSend(core::Context ctx, ast::Send *send) {
+        auto *id = ast::cast_tree<ast::Ident>(send->recv.get());
+        if (!id)
+            return send;
+        if (id->symbol != core::GlobalState::defn_Opus_Types())
+            return send;
+        bool checked = false;
+        switch (send->fun._id) {
+            case core::Names::assertType()._id:
+                checked = true;
+                /* fallthrough */
+            case core::Names::cast()._id: {
+                if (send->args.size() < 2) {
+                    ctx.state.errors.error(send->loc, core::ErrorClass::InvalidCast,
+                                           "Not enough arguments to {}: got {}, expected 2", send->fun.toString(ctx),
+                                           send->args.size());
+                    return send;
+                }
+
+                auto expr = move(send->args[0]);
+                auto type = getResultType(ctx, send->args[1]);
+                return new ast::Cast(send->loc, type, move(expr), checked);
+            }
+            default:
+                return send;
+        }
+    }
+
     unique_ptr<Nesting> nesting_;
 }; // namespace namer
 

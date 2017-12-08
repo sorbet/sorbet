@@ -1,0 +1,63 @@
+digraph "casts.rb"{
+subgraph "cluster_::<constant:TestCasts>#untyped" {
+    label = "::<constant:TestCasts>#untyped";
+    color = blue;
+    "bb::<constant:TestCasts>#untyped_0" [shape = invhouse];
+    "bb::<constant:TestCasts>#untyped_1" [shape = parallelogram];
+
+    "bb::<constant:TestCasts>#untyped_0" [label = "block[id=0]()
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:TestCasts>#untyped_0" -> "bb::<constant:TestCasts>#untyped_1" [style="bold"];
+    "bb::<constant:TestCasts>#untyped_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:TestCasts>#untyped_1" -> "bb::<constant:TestCasts>#untyped_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:TestCasts>#test_casts" {
+    label = "::<constant:TestCasts>#test_casts";
+    color = blue;
+    "bb::<constant:TestCasts>#test_casts_0" [shape = invhouse];
+    "bb::<constant:TestCasts>#test_casts_1" [shape = parallelogram];
+
+    "bb::<constant:TestCasts>#test_casts_0" [label = "block[id=0]()
+statTemp$5 = self : TestCasts
+castTemp$4 = statTemp$5.untyped() : untyped
+t = cast(castTemp$4, Integer); : Integer
+statTemp$8 = 4 : Integer(4)
+statTemp$6 = t.+(statTemp$8) : Integer | Float | Rational | BigDecimal | Complex
+castTemp$10 = hi : String(\"hi\")
+t1 = cast(castTemp$10, Integer); : Integer
+statTemp$13 = 1 : Integer(1)
+statTemp$11 = t1.+(statTemp$13) : Integer | Float | Rational | BigDecimal | Complex
+statTemp$16 = self : TestCasts
+castTemp$15 = statTemp$16.untyped() : untyped
+s = cast(castTemp$15, String); : String
+statTemp$19 = hi : String(\"hi\")
+statTemp$17 = s.+(statTemp$19) : String
+castTemp$21 = 6 : Integer(6)
+s = cast(castTemp$21, String); : String
+statTemp$24 = hi : String(\"hi\")
+statTemp$22 = s.+(statTemp$24) : String
+statTemp$27 = 3 : Integer(3)
+statTemp$25 = s.+(statTemp$27) : String
+castTemp$29 = 6 : Integer(6)
+s = cast(castTemp$29, untyped); : untyped
+statTemp$32 = hi : String(\"hi\")
+statTemp$30 = s.+(statTemp$32) : untyped
+statTemp$34 = 3 : Integer(3)
+returnMethodTemp$1 = s.+(statTemp$34) : untyped
+returnMethodTemp$35 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:TestCasts>#test_casts_0" -> "bb::<constant:TestCasts>#test_casts_1" [style="bold"];
+    "bb::<constant:TestCasts>#test_casts_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:TestCasts>#test_casts_1" -> "bb::<constant:TestCasts>#test_casts_1" [style="bold"];
+}
+
+}
+

@@ -5,6 +5,7 @@
 #include "../core/Symbols.h"
 #include "core/Context.h"
 #include "core/Symbols.h"
+#include "core/Types.h"
 #include <memory>
 #include <vector>
 
@@ -327,6 +328,18 @@ public:
 
     Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
          std::unique_ptr<Block> block = nullptr);
+    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+};
+
+class Cast final : public Expression {
+public:
+    std::shared_ptr<core::Type> type;
+    std::unique_ptr<Expression> arg;
+    bool assertType;
+
+    Cast(core::Loc loc, std::shared_ptr<core::Type> type, std::unique_ptr<Expression> arg, bool assertType);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

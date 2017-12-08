@@ -168,6 +168,18 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
+class Cast final : public Instruction {
+public:
+    core::LocalVariable value;
+    std::shared_ptr<core::Type> type;
+    bool assertType;
+
+    Cast(core::LocalVariable value, std::shared_ptr<core::Type> type, bool assertType)
+        : value(value), type(type), assertType(assertType) {}
+
+    virtual std::string toString(core::Context ctx);
+};
+
 class BasicBlock;
 
 class BlockExit final {

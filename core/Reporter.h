@@ -40,6 +40,7 @@ enum class ErrorClass {
     UndeclaredVariable = 5007,
     DynamicSuperclass = 5008,
     InvalidAttr = 5009,
+    InvalidCast = 5010,
 
     NoNextScope = 6001, // CFG Errors
 
@@ -49,6 +50,7 @@ enum class ErrorClass {
     MethodArgumentCountMismatch = 7004,
     ReturnTypeMismatch = 7005,
     DeadBranchInferencer = 7006,
+    CastTypeMismatch = 7007,
 };
 
 class Reporter final {
@@ -80,6 +82,7 @@ public:
     struct ErrorSection {
         std::string header;
         std::vector<ErrorLine> messages;
+        ErrorSection(std::string header) : header(header) {}
         ErrorSection(std::string header, std::initializer_list<ErrorLine> messages)
             : header(header), messages(messages) {}
         ErrorSection(std::string header, std::vector<ErrorLine> messages) : header(header), messages(messages) {}

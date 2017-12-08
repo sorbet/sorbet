@@ -145,6 +145,7 @@ GENERATE_HAS_MEMBER(preTransformLocal);
 GENERATE_HAS_MEMBER(preTransformIntLit);
 GENERATE_HAS_MEMBER(preTransformConstantLit);
 GENERATE_HAS_MEMBER(preTransformSelf);
+GENERATE_HAS_MEMBER(preTransformCast);
 
 GENERATE_HAS_MEMBER(postTransformClassDef);
 GENERATE_HAS_MEMBER(postTransformMethodDef);
@@ -175,6 +176,7 @@ GENERATE_HAS_MEMBER(postTransformHashSplat);
 GENERATE_HAS_MEMBER(postTransformSelf);
 GENERATE_HAS_MEMBER(postTransformBlock);
 GENERATE_HAS_MEMBER(postTransformInsSeq);
+GENERATE_HAS_MEMBER(postTransformCast);
 
 #define GENERATE_POSTPONE_PRECLASS(X)                                          \
                                                                                \
@@ -244,6 +246,7 @@ GENERATE_POSTPONE_PRECLASS(ArraySplat);
 GENERATE_POSTPONE_PRECLASS(HashSplat);
 GENERATE_POSTPONE_PRECLASS(Block);
 GENERATE_POSTPONE_PRECLASS(InsSeq);
+GENERATE_POSTPONE_PRECLASS(Cast);
 
 GENERATE_POSTPONE_POSTCLASS(ClassDef);
 GENERATE_POSTPONE_POSTCLASS(MethodDef);
@@ -274,6 +277,7 @@ GENERATE_POSTPONE_POSTCLASS(HashSplat);
 GENERATE_POSTPONE_POSTCLASS(Self);
 GENERATE_POSTPONE_POSTCLASS(Block);
 GENERATE_POSTPONE_POSTCLASS(InsSeq);
+GENERATE_POSTPONE_POSTCLASS(Cast);
 
 /**
  * Given a tree transformer FUNC transform a tree.
@@ -800,6 +804,22 @@ private:
                     return PostPonePostTransform_Local<FUNC, HAS_MEMBER_postTransformLocal<FUNC>::value>::call(ctx, v,
                                                                                                                func);
                 }
+                return v;
+            } else if (Cast *v = cast_tree<Cast>(what)) {
+                if (HAS_MEMBER_preTransformCast<FUNC>::value) {
+                    v = PostPonePreTransform_Cast<FUNC, HAS_MEMBER_preTransformCast<FUNC>::value>::call(ctx, v, func);
+                }
+                auto oarg = v->arg.get();
+                auto narg = mapIt(oarg, ctx);
+                if (oarg != narg) {
+                    v->arg.reset(narg);
+                }
+
+                if (HAS_MEMBER_postTransformCast<FUNC>::value) {
+                    return PostPonePostTransform_Cast<FUNC, HAS_MEMBER_postTransformCast<FUNC>::value>::call(ctx, v,
+                                                                                                             func);
+                }
+
                 return v;
             } else if (NotSupported *v = cast_tree<NotSupported>(what)) {
                 return what;
