@@ -487,7 +487,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
     auto idx = files.size();
     File::Type source_type = File::Untyped;
-    regex sigil("^\\s*#\\s*@typed\\s*\n");
+    regex sigil("(^|\\n)\\s*#\\s*@typed\\s*\n");
     if (regex_search(source.begin(), source.end(), sigil)) {
         source_type = File::Typed;
     }
