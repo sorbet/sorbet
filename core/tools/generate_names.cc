@@ -36,6 +36,7 @@ NameDef names[] = {
     {"ampersand", "&"},
     {"tripleEq", "==="},
     {"orOp", "|"},
+    {"slice"},
 
     // used in CFG for temporaries
     {"whileTemp"},

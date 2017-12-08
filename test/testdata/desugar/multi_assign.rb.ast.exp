@@ -9,11 +9,45 @@ begin
   class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def some_method<<constant:<todo sym>>>(array)
       begin
-        assignTemp$10001 = array
-        a = assignTemp$10001.[](0)
-        b = assignTemp$10001.[](1)
-        <Not Supported (Mlhs)>
-        assignTemp$10001
+        begin
+          assignTemp$10001 = array
+          a = assignTemp$10001.[](0)
+          b = assignTemp$10001.[](1)
+          begin
+            assignTemp$10002 = assignTemp$10001.[](2)
+            c = assignTemp$10002.[](0)
+            d = assignTemp$10002.[](1)
+            assignTemp$10002
+          end
+          assignTemp$10001
+        end
+        begin
+          assignTemp$10003 = array
+          a.[]=(b, assignTemp$10003.[](0))
+          c = assignTemp$10003.[](1)
+          assignTemp$10003
+        end
+        begin
+          assignTemp$10004 = array
+          a = assignTemp$10004.[](0)
+          b = assignTemp$10004.slice(::<constant:Range>.new(1, -1, false))
+          assignTemp$10004
+        end
+        begin
+          assignTemp$10005 = array
+          a = assignTemp$10005.slice(::<constant:Range>.new(0, -1, true))
+          b = assignTemp$10005.[](-1)
+          assignTemp$10005
+        end
+        begin
+          assignTemp$10006 = array
+          a = assignTemp$10006.[](0)
+          b = assignTemp$10006.[](1)
+          c = assignTemp$10006.slice(::<constant:Range>.new(2, -2, true))
+          d = assignTemp$10006.[](-2)
+          e = assignTemp$10006.[](-1)
+          assignTemp$10006
+        end
       end
 
   end

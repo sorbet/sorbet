@@ -15,12 +15,12 @@ begin
       def initialize<initialize>()
         begin
           begin
-            assignTemp$10000 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-nested: <block-pass>$10001>|
-              <block-nested: <block-pass>$10001>.valid?()
+            assignTemp$10001 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-nested: <block-pass>$10000>|
+              <block-nested: <block-pass>$10000>.valid?()
             end
-            ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTemp$10000.[](0)
-            invalid_rules = assignTemp$10000.[](1)
-            assignTemp$10000
+            ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTemp$10001.[](0)
+            invalid_rules = assignTemp$10001.[](1)
+            assignTemp$10001
           end
           if invalid_rules.empty?().!()
             begin

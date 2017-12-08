@@ -71,6 +71,11 @@ unique_ptr<Expression> cpRef(core::Loc loc, Reference &name) {
 }
 
 unique_ptr<Expression> mkAssign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs) {
+    if (auto *s = cast_tree<ast::Send>(lhs.get())) {
+        s->args.emplace_back(move(rhs));
+        return lhs;
+    }
+
     return make_unique<Assign>(loc, move(lhs), move(rhs));
 }
 
@@ -214,6 +219,62 @@ unique_ptr<Block> node2Proc(core::Context ctx, unique_ptr<parser::Node> node) {
     args.emplace_back(move(rest));
     unique_ptr<Expression> body = mkSend1(loc, move(proc), core::Names::call(), mkSplat(loc, mkLocal(loc, temp)));
     return make_unique<Block>(loc, move(args), move(body));
+}
+
+// Desugar a multi-assignment
+//
+// TODO(nelhage): Known incompletenesses:
+//
+//  - If the array is too small, and there are elements after a splat, we read
+//    from the back of the array instead of padding with nil.
+//
+//     e.g. in `*b,c = x`, we assign `c = x[-1]`, even if x has only a single
+//     element
+//  - If `rhs` is not an array, we index into it anyways, instead of
+//    `nil`-padding.
+unique_ptr<Expression> desugarMlhs(core::Context ctx, core::Loc loc, parser::Mlhs *lhs, unique_ptr<Expression> rhs) {
+    InsSeq::STATS_store stats;
+
+    core::NameRef tempName = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp());
+    stats.emplace_back(mkAssign(loc, tempName, move(rhs)));
+
+    int i = 0;
+    bool didSplat = false;
+
+    for (auto &c : lhs->exprs) {
+        if (auto *splat = parser::cast_node<parser::SplatLhs>(c.get())) {
+            Error::check(!didSplat);
+            didSplat = true;
+
+            unique_ptr<Expression> lh = node2TreeImpl(ctx, splat->var);
+
+            int left = i;
+            int right = lhs->exprs.size() - left - 1;
+            auto exclusive = mkTrue(lh->loc);
+            if (right == 0) {
+                right = 1;
+                exclusive = mkFalse(lh->loc);
+            }
+            auto index = mkSend3(lh->loc, make_unique<Ident>(lh->loc, core::GlobalState::defn_Range()),
+                                 core::Names::new_(), mkInt(lh->loc, left), mkInt(lh->loc, -right), move(exclusive));
+            stats.emplace_back(
+                mkAssign(lh->loc, move(lh), mkSend1(loc, mkLocal(loc, tempName), core::Names::slice(), move(index))));
+            i = -right;
+        } else {
+            auto val = mkSend1(loc, mkLocal(loc, tempName), core::Names::squareBrackets(), mkInt(loc, i));
+
+            if (auto *mlhs = parser::cast_node<parser::Mlhs>(c.get())) {
+                stats.emplace_back(desugarMlhs(ctx, mlhs->loc, mlhs, move(val)));
+            } else {
+                unique_ptr<Expression> lh = node2TreeImpl(ctx, c);
+                stats.emplace_back(mkAssign(lh->loc, move(lh), move(val)));
+            }
+
+            i++;
+        }
+    }
+
+    return mkInsSeq(loc, move(stats), mkLocal(loc, tempName));
 }
 
 bool locReported = false;
@@ -1065,14 +1126,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 if (cast_tree<EmptyTree>(varExpr.get()) != nullptr) {
                     varLoc = resbody->loc;
                 } else if (varExpr != nullptr) {
-                    unique_ptr<Expression> assign;
-                    if (auto *s = cast_tree<ast::Send>(varExpr.get())) {
-                        s->args.emplace_back(mkLocal(varLoc, var));
-                        assign = move(varExpr);
-                    } else {
-                        assign = mkAssign(varLoc, move(varExpr), mkLocal(varLoc, var));
-                    }
-                    body = mkInsSeq1(varLoc, move(assign), move(body));
+                    body = mkInsSeq1(varLoc, mkAssign(varLoc, move(varExpr), mkLocal(varLoc, var)), move(body));
                 }
 
                 unique_ptr<Expression> res =
@@ -1089,33 +1143,9 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             [&](parser::Masgn *masgn) {
                 parser::Mlhs *lhs = parser::cast_node<parser::Mlhs>(masgn->lhs.get());
                 Error::check(lhs != nullptr);
-                core::NameRef tempName =
-                    ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp());
-                InsSeq::STATS_store stats;
-                stats.emplace_back(mkAssign(what->loc, tempName, node2TreeImpl(ctx, masgn->rhs)));
-                int i = 0;
-                for (auto &c : lhs->exprs) {
-                    unique_ptr<Expression> lh = node2TreeImpl(ctx, c);
-                    if (ast::Send *snd = cast_tree<ast::Send>(lh.get())) {
-                        Error::check(snd->args.empty());
-                        unique_ptr<Expression> getElement = mkSend1(what->loc, mkLocal(what->loc, tempName),
-                                                                    core::Names::squareBrackets(), mkInt(what->loc, i));
-                        snd->args.emplace_back(move(getElement));
-                        stats.emplace_back(move(lh));
-                    } else if (cast_tree<ast::Reference>(lh.get()) != nullptr ||
-                               cast_tree<ast::ConstantLit>(lh.get()) != nullptr) {
-                        auto access = mkSend1(what->loc, mkLocal(what->loc, tempName), core::Names::squareBrackets(),
-                                              mkInt(what->loc, i));
-                        unique_ptr<Expression> assign = mkAssign(what->loc, move(lh), move(access));
-                        stats.emplace_back(move(assign));
-                    } else if (ast::NotSupported *snd = cast_tree<ast::NotSupported>(lh.get())) {
-                        stats.emplace_back(move(lh));
-                    } else {
-                        Error::notImplemented();
-                    }
-                    i++;
-                }
-                unique_ptr<Expression> res = mkInsSeq(what->loc, move(stats), mkLocal(what->loc, tempName));
+
+                auto res = desugarMlhs(ctx, masgn->loc, lhs, node2TreeImpl(ctx, masgn->rhs));
+
                 result.swap(res);
             },
             [&](parser::True *t) {

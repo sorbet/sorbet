@@ -3,6 +3,10 @@ A, B, C = some_array
 
 class Test
   def some_method(array)
-    a, b, (c, d) = array  # error: Unsupported node
+    a, b, (c, d) = array
+    a[b], c = array
+    a, *b = array
+    *a, b = array
+    a, b, *c, d, e = array
   end
 end
