@@ -65,6 +65,7 @@ static bool removeOption(vector<string> &prints, string option) {
 shared_ptr<spd::logger> console_err;
 shared_ptr<spd::logger> tracer;
 shared_ptr<spd::logger> console;
+int returnCode = 0;
 
 vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalState &gs,
                                                       std::vector<ruby_typer::core::FileRef> frs,
@@ -220,7 +221,8 @@ public:
                     }
                 } catch (ruby_typer::FileNotFoundException e) {
                     console_err->error("File Not Found: {}", argv[i]);
-                    throw;
+                    returnCode = 11;
+                    continue;
                 }
             } else {
                 int length = strlen(argv[i]);
@@ -377,7 +379,8 @@ int realmain(int argc, char **argv) {
             src = ruby_typer::File::read(fileName.c_str());
         } catch (ruby_typer::FileNotFoundException e) {
             console->error("File Not Found: {}", fileName);
-            return 1;
+            returnCode = 11;
+            continue;
         }
         st.bytes += src.size();
         st.lines += count(src.begin(), src.end(), '\n');
@@ -447,5 +450,5 @@ int realmain(int argc, char **argv) {
         console_err->warn("\n" + ruby_typer::getCounterStatistics());
     }
 
-    return gs.errors.hadCriticalError() ? 10 : 0;
+    return gs.errors.hadCriticalError() ? 10 : returnCode;
 };
