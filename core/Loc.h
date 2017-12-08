@@ -33,7 +33,7 @@ public:
     };
 
     std::pair<Detail, Detail> position(core::GlobalState &gs);
-    std::string toString(core::GlobalState &gs);
+    std::string toString(core::GlobalState &gs, int tabs = 0);
 
     bool operator==(const Loc &rhs) const;
 

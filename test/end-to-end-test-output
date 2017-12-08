@@ -1,29 +1,29 @@
-test/end-to-end-test-input.rb:4 Stubbing out unknown constant <emptyTree>::<constant:MissingConstant>
+test/end-to-end-test-input.rb:4 Stubbing out unknown constant <emptyTree>::<constant:MissingConstant> [5002]
     MissingConstant
     ^^^^^^^^^^^^^^^
+test/end-to-end-test-input.rb:17 Argument _ does not match expected type. [7002]
     raise arg # raise is defined by stdlib
     ^^^^^^^^^
-[7002] test/end-to-end-test-input.rb:17 Argument _ does not match expected type.
-Expected String | Class | Exception
-rbi/stdlib.rbi:6396 Method raise has specified type of argument _ as String | Class | Exception
+  Expected String | Class | Exception
+    rbi/stdlib.rbi:6396 Method raise has specified type of argument _ as String | Class | Exception
       _: Opus::Types.any(String, Class, Exception),
       ^^
 
-Got Integer originating from:
-test/end-to-end-test-input.rb:11 
+  Got Integer originating from:
+    test/end-to-end-test-input.rb:11 
       arg: Integer
       ^^^^
 
+test/end-to-end-test-input.rb:21 Argument arg does not match expected type. [7002]
     foo("foo")
     ^^^^^^^^^^
-[7002] test/end-to-end-test-input.rb:21 Argument arg does not match expected type.
-Expected Integer
-test/end-to-end-test-input.rb:11 Method foo has specified type of argument arg as Integer
+  Expected Integer
+    test/end-to-end-test-input.rb:11 Method foo has specified type of argument arg as Integer
       arg: Integer
       ^^^^
 
-Got String("foo") originating from:
-test/end-to-end-test-input.rb:21 
+  Got String("foo") originating from:
+    test/end-to-end-test-input.rb:21 
     foo("foo")
         ^^^^^
 

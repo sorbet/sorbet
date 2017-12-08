@@ -48,11 +48,10 @@ void Reporter::_error(unique_ptr<BasicError> error) {
     gs_.logger.log(isCriticalError ? spdlog::level::critical : spdlog::level::err, "{}", error->toString(gs_));
 }
 
-string Reporter::BasicError::toString(GlobalState &gs) {
+string Reporter::BasicError::filePosToString(GlobalState &gs, Loc loc) {
     stringstream buf;
     if (loc.is_none()) {
-        buf << "???:"
-            << " " << formatted;
+        buf << "???:";
     } else {
         auto pos = loc.position(gs);
         buf << loc.file.file(gs).path() << ":";
@@ -61,7 +60,14 @@ string Reporter::BasicError::toString(GlobalState &gs) {
             buf << "-";
             buf << pos.second.line;
         }
-        buf << " " << formatted << endl;
+    }
+    return buf.str();
+}
+
+string Reporter::BasicError::toString(GlobalState &gs) {
+    stringstream buf;
+    buf << filePosToString(gs, loc) << " " << formatted << " [" << (int)what << "]" << endl;
+    if (!loc.is_none()) {
         buf << loc.toString(gs);
     }
     return buf.str();
@@ -75,62 +81,37 @@ vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> Reporter::getAndEmpty
 
 string Reporter::ErrorLine::toString(GlobalState &gs) {
     stringstream buf;
-    if (loc.is_none()) {
-        buf << "???:"
-            << " " << formattedMessage;
-    } else {
-        auto pos = loc.position(gs);
-        buf << loc.file.file(gs).path() << ":";
-        buf << pos.first.line;
-        if (pos.second.line != pos.first.line) {
-            buf << "-";
-            buf << pos.second.line;
-        }
-        buf << " " << formattedMessage << endl;
+    string indent = "  ";
+    buf << indent << BasicError::filePosToString(gs, loc) << " " << formattedMessage << endl;
+    if (!loc.is_none()) {
         buf << loc.toString(gs);
     }
-
     return buf.str();
 }
 
 string Reporter::ErrorSection::toString(GlobalState &gs) {
     stringstream buf;
+    string indent = "  ";
     if (!this->header.empty()) {
-        buf << this->header << endl;
+        buf << indent << this->header << endl;
     }
     for (auto &line : this->messages) {
-        buf << line.toString(gs) << endl;
+        buf << indent << line.toString(gs) << endl;
     }
     return buf.str();
 }
 
 string Reporter::ComplexError::toString(GlobalState &gs) {
     stringstream buf;
-    if (!this->loc.is_none()) {
-        buf << this->loc.toString(gs) << endl;
-    }
-    buf << '[' << (int)this->what << "] ";
-    if (loc.is_none()) {
-        buf << "???: " << this->formatted << endl;
-
-    } else {
-        auto pos = loc.position(gs);
-        buf << loc.file.file(gs).path() << ":";
-        buf << pos.first.line;
-        if (pos.second.line != pos.first.line) {
-            buf << "-";
-            buf << pos.second.line;
-        }
-        buf << " " << formatted << endl;
-    }
+    buf << BasicError::toString(gs) << endl;
 
     bool first = true;
-    for (auto &line : this->sections) {
+    for (auto &section : this->sections) {
         if (!first) {
             buf << endl;
         }
         first = false;
-        buf << line.toString(gs);
+        buf << section.toString(gs);
     }
     return buf.str();
 }

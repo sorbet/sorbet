@@ -62,6 +62,7 @@ public:
         BasicError(Loc loc, ErrorClass what, std::string formatted) : loc(loc), what(what), formatted(formatted) {}
         virtual std::string toString(GlobalState &gs);
         virtual ~BasicError() = default;
+        static std::string filePosToString(GlobalState &gs, Loc loc);
     };
 
     struct ErrorLine {

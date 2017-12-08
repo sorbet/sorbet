@@ -32,7 +32,15 @@ pair<Loc::Detail, Loc::Detail> Loc::position(core::GlobalState &gs) {
     return make_pair(begin, end);
 }
 
-string Loc::toString(core::GlobalState &gs) {
+void printTabs(stringstream &to, int count) {
+    int i = 0;
+    while (i < count) {
+        to << "  ";
+        i++;
+    }
+}
+
+string Loc::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     absl::string_view source = this->file.file(gs).source();
     auto pos = this->position(gs);
@@ -45,10 +53,12 @@ string Loc::toString(core::GlobalState &gs) {
     auto offset1 = beginstart - start;
     auto offset2 = end - source.begin();
     string outline(source.begin() + (offset1), source.begin() + (offset2));
+    printTabs(buf, tabs);
     buf << outline;
     if (pos.second.line == pos.first.line) {
         // add squigly
         buf << endl;
+        printTabs(buf, tabs);
         int p;
         for (p = 1; p < pos.first.column; p++) {
             buf << " ";
