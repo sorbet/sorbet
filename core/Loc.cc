@@ -9,6 +9,18 @@ namespace core {
 
 using namespace std;
 
+Loc Loc::join(Loc other) {
+    if (this->is_none()) {
+        return other;
+    }
+    if (other.is_none()) {
+        return *this;
+    }
+    Error::check(this->file == other.file);
+
+    return Loc{this->file, min(this->begin_pos, other.begin_pos), max(this->end_pos, other.end_pos)};
+}
+
 Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs) {
     Loc::Detail pos;
 

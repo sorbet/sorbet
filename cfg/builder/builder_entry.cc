@@ -35,8 +35,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     core::LocalVariable retSym1 =
         ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
 
-    cont->exprs.emplace_back(retSym1, md.loc, make_unique<Return>(retSym)); // dead assign.
-    jumpToDead(cont, *res.get(), md.loc);
+    auto rvLoc = cont->exprs.empty() ? md.loc : cont->exprs.back().loc;
+    cont->exprs.emplace_back(retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
+    jumpToDead(cont, *res.get(), rvLoc);
 
     std::vector<Binding> aliasesPrefix;
     for (auto kv : aliases) {

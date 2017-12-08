@@ -214,12 +214,12 @@ public:
     std::vector<Binding> exprs;
     BlockExit bexit;
     std::vector<BasicBlock *> backEdges;
-    core::Loc loc;
     BasicBlock() {
         counterInc("BasicBlocks");
     };
 
     std::string toString(core::Context ctx);
+    core::Loc loc();
 };
 
 class CFGContext;
@@ -260,7 +260,7 @@ public:
 
 private:
     CFG();
-    BasicBlock *freshBlock(int outerLoops, core::Loc loc, BasicBlock *from);
+    BasicBlock *freshBlock(int outerLoops, BasicBlock *from);
 };
 
 } // namespace cfg

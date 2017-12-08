@@ -20,6 +20,8 @@ public:
         return begin_pos == (u4)-1 && end_pos == (u4)-1;
     }
 
+    Loc join(Loc other);
+
     Loc() : file(0), begin_pos(-1), end_pos(-1){};
     Loc(FileRef file, u4 begin, u4 end) : file(file), begin_pos(begin), end_pos(end){};
 

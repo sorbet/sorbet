@@ -722,7 +722,7 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
         visited[bb->id] = true;
         if (current.isDead) {
             // this block is unreachable.
-            ctx.state.errors.error(bb->loc, core::ErrorClass::DeadBranchInferencer, "This code is unreachable");
+            ctx.state.errors.error(bb->loc(), core::ErrorClass::DeadBranchInferencer, "This code is unreachable");
             continue;
         }
 
