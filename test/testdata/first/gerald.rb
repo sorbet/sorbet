@@ -1,4 +1,3 @@
-# error: unreachable
 # @typed
 require_relative '../../../extn'
 Opus::AutogenLoader.init(__FILE__) # error: Stubbing out unknown constant
@@ -174,7 +173,7 @@ module Opus::CIBot::Gerald
           end
         end
         next if a_name.nil?
-        {
+        { # error: unreachable
           a_name: a_name,
           b_name: b_name,
           added_lines: added_lines,
