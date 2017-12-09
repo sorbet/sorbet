@@ -149,7 +149,6 @@ public:
 
     ast::ClassDef *postTransformClassDef(core::Context ctx, ast::ClassDef *klass) {
         scopeStack.pop_back();
-        klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         if (klass->kind == ast::Class && !klass->symbol.info(ctx).superClass.exists() &&
             klass->symbol != core::GlobalState::defn_BasicObject()) {
             klass->symbol.info(ctx).superClass = core::GlobalState::defn_todo();
