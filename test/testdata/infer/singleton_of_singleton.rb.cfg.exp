@@ -6,7 +6,7 @@ subgraph "cluster_::<singleton class:<constant:A>>#foo" {
     "bb::<singleton class:<constant:A>>#foo_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:A>>#foo_0" [label = "block[id=0]()
-returnMethodTemp$1 = NotSupported() : untyped
+returnMethodTemp$1 = NotSupported(ruby_typer::ast::MethodDef) : untyped
 returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 

@@ -333,7 +333,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 selfMethodTemp$2 = self : MatchTimeBudget
 rule = load_arg(selfMethodTemp$2#time_rule, 0) : untyped
 rule_start = <constant:Time>$5.now() : Time
-res = NotSupported() : untyped
+res = NotSupported(ruby_typer::ast::Yield) : untyped
 statTemp$9 = <constant:Time>$5.now() : Time
 statTemp$8 = statTemp$9.-(rule_start) : Float | Time
 statTemp$12 = 1000 : Integer(1000)

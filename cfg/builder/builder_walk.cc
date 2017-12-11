@@ -376,8 +376,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::EmptyTree *n) { ret = current; },
 
+            [&](ast::NotSupported *n) {
+                current->exprs.emplace_back(cctx.target, n->loc, make_unique<NotSupported>(n->toString(cctx.ctx, 0)));
+                ret = current;
+            },
+
             [&](ast::Expression *n) {
-                current->exprs.emplace_back(cctx.target, n->loc, make_unique<NotSupported>(""));
+                current->exprs.emplace_back(cctx.target, n->loc,
+                                            make_unique<NotSupported>(demangle(typeid(*n).name())));
                 ret = current;
             });
 
