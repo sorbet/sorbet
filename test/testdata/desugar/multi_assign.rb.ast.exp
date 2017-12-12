@@ -48,6 +48,11 @@ begin
           e = assignTemp$10006.[](-1)
           assignTemp$10006
         end
+        begin
+          assignTemp$10007 = array
+          a = assignTemp$10007.[](0)
+          assignTemp$10007
+        end
       end
 
   end

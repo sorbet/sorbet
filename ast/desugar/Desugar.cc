@@ -250,15 +250,18 @@ unique_ptr<Expression> desugarMlhs(core::Context ctx, core::Loc loc, parser::Mlh
 
             int left = i;
             int right = lhs->exprs.size() - left - 1;
-            auto exclusive = mkTrue(lh->loc);
-            if (right == 0) {
-                right = 1;
-                exclusive = mkFalse(lh->loc);
+            if (cast_tree<EmptyTree>(lh.get()) == nullptr) {
+                auto exclusive = mkTrue(lh->loc);
+                if (right == 0) {
+                    right = 1;
+                    exclusive = mkFalse(lh->loc);
+                }
+                auto index =
+                    mkSend3(lh->loc, make_unique<Ident>(lh->loc, core::GlobalState::defn_Range()), core::Names::new_(),
+                            mkInt(lh->loc, left), mkInt(lh->loc, -right), move(exclusive));
+                stats.emplace_back(mkAssign(lh->loc, move(lh),
+                                            mkSend1(loc, mkLocal(loc, tempName), core::Names::slice(), move(index))));
             }
-            auto index = mkSend3(lh->loc, make_unique<Ident>(lh->loc, core::GlobalState::defn_Range()),
-                                 core::Names::new_(), mkInt(lh->loc, left), mkInt(lh->loc, -right), move(exclusive));
-            stats.emplace_back(
-                mkAssign(lh->loc, move(lh), mkSend1(loc, mkLocal(loc, tempName), core::Names::slice(), move(index))));
             i = -right;
         } else {
             auto val = mkSend1(loc, mkLocal(loc, tempName), core::Names::squareBrackets(), mkInt(loc, i));

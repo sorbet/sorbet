@@ -8,5 +8,6 @@ class Test
     a, *b = array
     *a, b = array
     a, b, *c, d, e = array
+    a, * = array
   end
 end
