@@ -23,6 +23,7 @@ public:
     inline static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
         return glb(ctx, t1, t2);
     }
+    static std::shared_ptr<Type> _glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
 
     /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
     static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
@@ -35,6 +36,7 @@ public:
     inline static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
         return lub(ctx, t1, t2);
     }
+    static std::shared_ptr<Type> _lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
 
     /** is every instance of  t1 an  instance of t2? */
     static bool isSubType(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);

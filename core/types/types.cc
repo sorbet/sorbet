@@ -105,6 +105,7 @@ std::shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, std::shared_ptr<T
                  }
              },
              [&](Type *) { result = from; });
+    DEBUG_ONLY(Error::check(Types::isSubType(ctx, result, from)));
     return result;
 }
 

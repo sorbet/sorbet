@@ -9,6 +9,18 @@ using namespace std;
 shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2);
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> &t1,
                                                                 shared_ptr<Type> &t2) {
+    auto ret = _lub(ctx, t1, t2);
+    DEBUG_ONLY(Error::check(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a subtype of " +
+                                                                t1->toString(ctx) + " was lubbing with " +
+                                                                t2->toString(ctx)));
+    DEBUG_ONLY(Error::check(Types::isSubType(ctx, t2, ret), ret->toString(ctx) + " is not a subtype of " +
+                                                                t2->toString(ctx) + " was lubbing with " +
+                                                                t1->toString(ctx)));
+    return ret;
+}
+
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context ctx, shared_ptr<Type> &t1,
+                                                                 shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("lub", "ref-eq");
         return t1;
@@ -385,9 +397,20 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
         return make_shared<AndType>(t1, t2);
     }
 }
-
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> &t1,
                                                                 shared_ptr<Type> &t2) {
+    auto ret = _glb(ctx, t1, t2);
+    DEBUG_ONLY(Error::check(Types::isSubType(ctx, ret, t1), ret->toString(ctx) + " is not a supertype of " +
+                                                                t1->toString(ctx) + " was glbbing with " +
+                                                                t2->toString(ctx)));
+    DEBUG_ONLY(Error::check(Types::isSubType(ctx, ret, t2), ret->toString(ctx) + " is not a supertype of " +
+                                                                t2->toString(ctx) + " was glbbing with " +
+                                                                t1->toString(ctx)));
+    return ret;
+}
+
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context ctx, shared_ptr<Type> &t1,
+                                                                 shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("glb", "ref-eq");
         return t1;
@@ -395,30 +418,30 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ct
 
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
         if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
-            categoryCounterInc("lub", "<untyped");
+            categoryCounterInc("glb", "<untyped");
             return t1;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
-            categoryCounterInc("lub", "<bottom");
+            categoryCounterInc("glb", "<bottom");
             return t1;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
-            categoryCounterInc("lub", "<top");
+            categoryCounterInc("glb", "<top");
             return t2;
         }
     }
 
     if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
         if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
-            categoryCounterInc("lub", "untyped>");
+            categoryCounterInc("glb", "untyped>");
             return t2;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
-            categoryCounterInc("lub", "bottom>");
+            categoryCounterInc("glb", "bottom>");
             return t2;
         }
         if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
-            categoryCounterInc("lub", "top>");
+            categoryCounterInc("glb", "top>");
             return t1;
         }
     }
@@ -508,10 +531,19 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ct
             return result;
         } else {
             // only 1st is proxy
-            return t1;
+            if (Types::isSubType(ctx, t1, t2)) {
+                return t1;
+            } else {
+                return Types::bottom();
+            }
         }
     } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
-        return t2;
+        // only 1st is proxy
+        if (Types::isSubType(ctx, t2, t1)) {
+            return t2;
+        } else {
+            return Types::bottom();
+        }
     } else {
         // none is proxy
         return glbGround(ctx, t1, t2);
