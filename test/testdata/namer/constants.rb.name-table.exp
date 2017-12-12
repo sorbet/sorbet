@@ -1,5 +1,5 @@
 class <constant:A> ()
   class <constant:B> ()
-    static-field <constant:C> -> untyped
-    static-field <constant:D> -> untyped
+    static-field <constant:C> -> Integer
+    static-field <constant:D> -> Integer
 

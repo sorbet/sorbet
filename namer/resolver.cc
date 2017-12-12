@@ -549,6 +549,32 @@ private:
         klass->rhs.erase(toRemove, klass->rhs.end());
     }
 
+    // Resolve the type of the rhs of a constant declaration. This logic is
+    // extremely simplistic; We only handle simple literals, and explicit casts.
+    //
+    // We don't handle array or hash literals, because intuiting the element
+    // type (once we have generics) will be nontrivial.
+    shared_ptr<core::Type> resolveConstantType(core::Context ctx, unique_ptr<ast::Expression> &expr) {
+        shared_ptr<core::Type> result;
+        typecase(expr.get(), [&](ast::SymbolLit *) { result = core::Types::Symbol(); },
+                 [&](ast::FloatLit *) { result = core::Types::Float(); },
+                 [&](ast::IntLit *) { result = core::Types::Integer(); },
+                 [&](ast::StringLit *) { result = core::Types::String(); },
+                 [&](ast::BoolLit *) {
+                     result = make_shared<core::OrType>(core::Types::trueClass(), core::Types::falseClass());
+                 },
+                 [&](ast::Cast *cast) {
+                     if (cast->assertType) {
+                         ctx.state.errors.error(
+                             cast->loc, core::ErrorClass::ConstantAssertType,
+                             "Use cast() instead of assert_type!() to specify the type of constants.");
+                     }
+                     result = cast->type;
+                 },
+                 [&](ast::Expression *) { result = core::Types::dynamic(); });
+        return result;
+    }
+
 public:
     ResolveWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
 
@@ -616,6 +642,9 @@ public:
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
         if (id == nullptr || !id->symbol.info(ctx).isStaticField())
             return asgn;
+
+        id->symbol.info(ctx).resultType = resolveConstantType(ctx, asgn->rhs);
+
         auto *rhs = ast::cast_tree<ast::Ident>(asgn->rhs.get());
         if (rhs == nullptr || !rhs->symbol.info(ctx).isClass())
             return asgn;

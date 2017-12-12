@@ -51,6 +51,7 @@ enum class ErrorClass {
     ReturnTypeMismatch = 7005,
     DeadBranchInferencer = 7006,
     CastTypeMismatch = 7007,
+    ConstantAssertType = 7008,
 };
 
 class Reporter final {

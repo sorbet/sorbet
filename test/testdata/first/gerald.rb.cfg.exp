@@ -115,7 +115,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_0" [label = "block[id=0](match_context, <constant:MatchTimeBudget>$28, @rules$30)
-<constant:MAX_AFFECTED_FILES>$10 = alias <constant:MAX_AFFECTED_FILES> : untyped
+<constant:MAX_AFFECTED_FILES>$10 = alias <constant:MAX_AFFECTED_FILES> : Integer
 <constant:MatchTimeBudget>$28 = alias <constant:MatchTimeBudget> : <class:MatchTimeBudget>
 @rules$30 = alias @rules : untyped
 selfMethodTemp$2 = self : Matcher
@@ -284,7 +284,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" [label = "block[id=0](<constant:TOTAL_TIME_MS>$14, <constant:MatchTimeout>$18)
 <constant:Time>$7 = alias <constant:Time> : <class:Time>
 @start$9 = alias @start : untyped
-<constant:TOTAL_TIME_MS>$14 = alias <constant:TOTAL_TIME_MS> : untyped
+<constant:TOTAL_TIME_MS>$14 = alias <constant:TOTAL_TIME_MS> : Integer
 <constant:MatchTimeout>$18 = alias <constant:MatchTimeout> : <class:MatchTimeout>
 statTemp$5 = <constant:Time>$7.now() : Time
 statTemp$4 = statTemp$5.-(@start$9) : Float | Time
@@ -303,7 +303,7 @@ ifTemp$11"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" [label = "block[id=2](returnMethodTemp$1, <constant:TOTAL_TIME_MS>$14, <constant:MatchTimeout>$18)
 statTemp$15 = self : MatchTimeBudget
 statTemp$22 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")
-statTemp$23 = <constant:TOTAL_TIME_MS>$14.to_s() : untyped
+statTemp$23 = <constant:TOTAL_TIME_MS>$14.to_s() : String
 statTemp$21 = statTemp$22.concat(statTemp$23) : String
 statTemp$25 = ms : String(\"ms\")
 statTemp$20 = statTemp$21.concat(statTemp$25) : String
@@ -328,7 +328,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" [label = "block[id=0](dur_ms, rule, res, <constant:PER_RULE_MS>$17, <constant:MatchTimeout>$21)
 <constant:Time>$5 = alias <constant:Time> : <class:Time>
-<constant:PER_RULE_MS>$17 = alias <constant:PER_RULE_MS> : untyped
+<constant:PER_RULE_MS>$17 = alias <constant:PER_RULE_MS> : Integer
 <constant:MatchTimeout>$21 = alias <constant:MatchTimeout> : <class:MatchTimeout>
 selfMethodTemp$2 = self : MatchTimeBudget
 rule = load_arg(selfMethodTemp$2#time_rule, 0) : untyped
@@ -361,7 +361,7 @@ statTemp$34 = statTemp$35.to_s() : untyped
 statTemp$26 = statTemp$27.concat(statTemp$34) : String
 statTemp$37 = ms budget= : String(\"ms budget=\")
 statTemp$25 = statTemp$26.concat(statTemp$37) : String
-statTemp$38 = <constant:PER_RULE_MS>$17.to_s() : untyped
+statTemp$38 = <constant:PER_RULE_MS>$17.to_s() : String
 statTemp$24 = statTemp$25.concat(statTemp$38) : String
 statTemp$40 = ms : String(\"ms\")
 statTemp$23 = statTemp$24.concat(statTemp$40) : String

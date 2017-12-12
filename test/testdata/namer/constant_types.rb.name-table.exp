@@ -1,0 +1,9 @@
+class <constant:Constants> ()
+  static-field <constant:A> -> Integer
+  static-field <constant:B> -> String
+  static-field <constant:C> -> Symbol
+  static-field <constant:D> -> Float
+  static-field <constant:E> -> Array
+  static-field <constant:F> -> Array
+class <singleton class:<constant:Constants>> < ::<constant:Module> ()
+
