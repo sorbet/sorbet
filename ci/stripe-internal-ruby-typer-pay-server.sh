@@ -42,7 +42,7 @@ fi
 
 cd -
 # Make sure we don't crash on all of pay-server with ASAN on
-bazel build main:ruby-typer -c opt
+bazel build main:ruby-typer -c opt --config=ci
 cd -
 
 TIMEFILE2=$(mktemp)

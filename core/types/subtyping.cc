@@ -11,6 +11,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> &t1,
                                                                 shared_ptr<Type> &t2) {
     auto ret = _lub(ctx, t1, t2);
+    ret->sanityCheck(ctx);
     DEBUG_ONLY(Error::check(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a subtype of " +
                                                                 t1->toString(ctx) + " was lubbing with " +
                                                                 t2->toString(ctx)));
@@ -391,16 +392,17 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
         return t2;
     } else {
         if (sym1.info(ctx).isClass() && sym2.info(ctx).isClass()) {
-            categoryCounterInc("glb.class.collapsed", "bottom");
+            categoryCounterInc("glb::<class>::collapsed", "bottom");
             return Types::bottom();
         }
-        categoryCounterInc("glb.class.ollapsed", "no");
+        categoryCounterInc("glb::<class>::collapsed", "no");
         return AndType::make_shared(t1, t2);
     }
 }
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> &t1,
                                                                 shared_ptr<Type> &t2) {
     auto ret = _glb(ctx, t1, t2);
+    ret->sanityCheck(ctx);
     DEBUG_ONLY(Error::check(Types::isSubType(ctx, ret, t1), ret->toString(ctx) + " is not a supertype of " +
                                                                 t1->toString(ctx) + " was glbbing with " +
                                                                 t2->toString(ctx)));

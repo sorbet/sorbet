@@ -18,7 +18,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include <type_traits>
 #include <typeinfo>
 
-#ifndef NDEBUG
+#if !defined(NDEBUG)
 // So you can use `cout` when debugging. Not included in production as it is a
 // performance hit.
 #include <iostream>
@@ -30,7 +30,7 @@ template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
 // Uncomment to make vectors debuggable
 // template <class T, size_t N> using InlinedVector = std::vector<T>;
 
-#ifdef NDEBUG
+#if defined(NDEBUG) && !defined(FORCE_DEBUG)
 constexpr bool debug_mode = false;
 #else
 constexpr bool debug_mode = true;
