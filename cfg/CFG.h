@@ -188,6 +188,7 @@ public:
     BasicBlock *thenb;
     BasicBlock *elseb;
     core::Loc loc;
+    BlockExit() : thenb(nullptr), elseb(nullptr){};
 };
 
 class Binding final {
