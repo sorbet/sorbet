@@ -28,6 +28,10 @@ public:
         return !(rhs == *this);
     }
 
+    bool operator<(const FileRef &rhs) const {
+        return _id < rhs._id;
+    }
+
     inline int id() const {
         return _id;
     }

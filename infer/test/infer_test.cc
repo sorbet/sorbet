@@ -31,10 +31,14 @@ private:
     unique_ptr<core::GlobalState> ctxPtr;
 };
 
-unique_ptr<ast::Expression> getTree(core::GlobalState &cb, string str) {
+void processSource(core::GlobalState &cb, string str) {
     auto ast = parser::Parser::run(cb, "<test>", str);
     ruby_typer::core::Context ctx(cb, cb.defn_root());
-    return ast::desugar::node2Tree(ctx, ast);
+    auto tree = ast::desugar::node2Tree(ctx, ast);
+    tree = namer::Namer::run(ctx, move(tree));
+    vector<unique_ptr<ast::Expression>> trees;
+    trees.emplace_back(move(tree));
+    namer::Resolver::run(ctx, move(trees));
 }
 
 TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
@@ -62,8 +66,7 @@ TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
 
 TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
     auto ctx = getCtx();
-    auto tree = getTree(ctx, "class Bar; end; class Foo < Bar; end");
-    namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));
+    processSource(ctx, "class Bar; end; class Foo < Bar; end");
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 2];
@@ -82,8 +85,7 @@ TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
 
 TEST_F(InferFixture, ClassesLubs) { // NOLINT
     auto ctx = getCtx();
-    auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));
+    processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 3];
@@ -133,8 +135,7 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
 
 TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     auto ctx = getCtx();
-    auto tree = getTree(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    namer::Resolver::run(ctx, namer::Namer::run(ctx, move(tree)));
+    processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 3];

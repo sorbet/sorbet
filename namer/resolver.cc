@@ -23,7 +23,7 @@ struct Nesting {
     Nesting(Nesting &&rhs) = delete;
 };
 
-class ResolveWalk {
+class ResolveConstantsWalk {
 private:
     core::SymbolRef resolveLhs(core::Context ctx, core::NameRef name) {
         Nesting *scope = nesting_.get();
@@ -86,18 +86,184 @@ private:
         return nullptr;
     }
 
-    core::SymbolRef dealiasSym(core::Context ctx, core::SymbolRef sym) {
-        while (sym.info(ctx).isStaticField()) {
-            auto *ct = dynamic_cast<core::ClassType *>(sym.info(ctx).resultType.get());
-            if (ct == nullptr)
-                break;
-            auto klass = ct->symbol.info(ctx).attachedClass(ctx);
-            if (!klass.exists())
-                break;
+public:
+    ResolveConstantsWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
 
-            sym = klass;
+    ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *original) {
+        nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
+        return original;
+    }
+    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
+        nesting_ = move(nesting_->parent);
+
+        for (auto &ancst : original->ancestors) {
+            if (auto resolved = maybeResolve(ctx, ancst.get())) {
+                ancst.swap(resolved);
+            }
         }
-        return sym;
+        core::Symbol &info = original->symbol.info(ctx);
+        for (auto &ancst : original->ancestors) {
+            ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
+            if (id == nullptr || !id->symbol.info(ctx).isClass()) {
+                ctx.state.errors.error(ancst->loc, core::ErrorClass::DynamicSuperclass,
+                                       "Superclasses and mixins must be statically resolved.");
+                continue;
+            }
+            if (id->symbol == original->symbol || id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
+                ctx.state.errors.error(id->loc, core::ErrorClass::CircularDependency,
+                                       "Circular dependency: {} and {} are declared as parents of each other",
+                                       original->symbol.info(ctx).name.toString(ctx),
+                                       id->symbol.info(ctx).name.toString(ctx));
+                continue;
+            }
+
+            if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
+                if (id->symbol == core::GlobalState::defn_todo()) {
+                    continue;
+                }
+                if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_todo() ||
+                    info.superClass == id->symbol) {
+                    info.superClass = id->symbol;
+                } else {
+                    ctx.state.errors.error(id->loc, core::ErrorClass::RedefinitionOfParents,
+                                           "Class parents redefined for class {}",
+                                           original->symbol.info(ctx).name.toString(ctx));
+                }
+            } else {
+                info.argumentsOrMixins.emplace_back(id->symbol);
+            }
+        }
+
+        return original;
+    }
+
+    ast::Expression *postTransformConstantLit(core::Context ctx, ast::ConstantLit *c) {
+        core::SymbolRef resolved = resolveConstant(ctx, c);
+        if (!resolved.exists()) {
+            string str = c->toString(ctx);
+            resolved = resolveConstant(ctx, c);
+            return c;
+        }
+        return new ast::Ident(c->loc, resolved);
+    }
+
+    ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
+        auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
+        if (id == nullptr || !id->symbol.info(ctx).isStaticField())
+            return asgn;
+
+        auto *rhs = ast::cast_tree<ast::Ident>(asgn->rhs.get());
+        if (rhs == nullptr || !rhs->symbol.info(ctx).isClass())
+            return asgn;
+
+        id->symbol.info(ctx).resultType = make_unique<core::ClassType>(rhs->symbol.info(ctx).singletonClass(ctx));
+        return asgn;
+    }
+
+    unique_ptr<Nesting> nesting_;
+};
+
+class ResolveSignaturesWalk {
+private:
+    void processDeclareVariables(core::Context ctx, ast::Send *send) {
+        if (send->block != nullptr) {
+            ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
+                                   "Malformed `declare_variables'");
+            return;
+        }
+
+        if (send->args.size() != 1) {
+            ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
+                                   "Wrong number of arguments to `declare_variables'");
+            return;
+        }
+        auto hash = ast::cast_tree<ast::Hash>(send->args.front().get());
+        if (hash == nullptr) {
+            ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
+                                   "Malformed `declare_variables': Argument must be a hash");
+            return;
+        }
+        for (int i = 0; i < hash->keys.size(); ++i) {
+            auto &key = hash->keys[i];
+            auto &value = hash->values[i];
+            auto sym = ast::cast_tree<ast::SymbolLit>(key.get());
+            if (sym == nullptr) {
+                ctx.state.errors.error(key->loc, core::ErrorClass::InvalidDeclareVariables,
+                                       "`declare_variables': variable names must be symbols");
+                continue;
+            }
+
+            auto typ = getResultType(ctx, value);
+            core::SymbolRef var;
+
+            auto str = sym->name.toString(ctx);
+            if (str.substr(0, 2) == "@@") {
+                core::Symbol &info = ctx.owner.info(ctx);
+                var = info.findMember(ctx, sym->name);
+                if (var.exists()) {
+                    ctx.state.errors.error(key->loc, core::ErrorClass::DuplicateVariableDeclaration,
+                                           "Redeclaring variable `{}'", str);
+                } else {
+                    var = ctx.state.enterStaticFieldSymbol(sym->loc, ctx.owner, sym->name);
+                }
+            } else if (str.substr(0, 1) == "@") {
+                core::Symbol &info = ctx.owner.info(ctx);
+                var = info.findMember(ctx, sym->name);
+                if (var.exists()) {
+                    ctx.state.errors.error(key->loc, core::ErrorClass::DuplicateVariableDeclaration,
+                                           "Redeclaring variable `{}'", str);
+                } else {
+                    var = ctx.state.enterFieldSymbol(sym->loc, ctx.owner, sym->name);
+                }
+            } else {
+                ctx.state.errors.error(key->loc, core::ErrorClass::InvalidDeclareVariables,
+                                       "`declare_variables`: variables must start with @ or @@");
+            }
+
+            if (var.exists()) {
+                var.info(ctx).resultType = typ;
+            }
+        }
+    }
+
+    void defineAttr(core::Context ctx, ast::Send *send, bool r, bool w) {
+        for (auto &arg : send->args) {
+            core::NameRef name(0);
+            if (auto *sym = ast::cast_tree<ast::SymbolLit>(arg.get())) {
+                name = sym->name;
+            } else if (auto *str = ast::cast_tree<ast::StringLit>(arg.get())) {
+                name = str->value;
+            } else {
+                ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidAttr,
+                                       "{} argument must be a string or symbol literal", send->fun.toString(ctx));
+                continue;
+            }
+
+            core::NameRef varName = ctx.state.enterNameUTF8("@" + name.toString(ctx));
+            core::SymbolRef sym = ctx.owner.info(ctx).findMemberTransitive(ctx, varName);
+            if (!sym.exists()) {
+                ctx.state.errors.error(arg->loc, core::ErrorClass::UndeclaredVariable,
+                                       "Accessor for undeclared variable `{}'", varName.toString(ctx));
+                sym = ctx.state.enterFieldSymbol(arg->loc, ctx.owner, varName);
+            }
+
+            if (r) {
+                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name);
+                meth.info(ctx).resultType = sym.info(ctx).resultType;
+            }
+            if (w) {
+                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name.addEq(ctx));
+                core::SymbolRef arg0 = ctx.state.enterMethodArgumentSymbol(arg->loc, meth, core::Names::arg0());
+
+                auto ty = sym.info(ctx).resultType;
+                if (ty == nullptr) {
+                    ty = core::Types::dynamic();
+                }
+                arg0.info(ctx).resultType = ty;
+                meth.info(ctx).arguments().push_back(arg0);
+                meth.info(ctx).resultType = ty;
+            }
+        }
     }
 
     shared_ptr<core::Type> getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
@@ -356,107 +522,6 @@ private:
         }
     }
 
-    void processDeclareVariables(core::Context ctx, ast::Send *send) {
-        if (send->block != nullptr) {
-            ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
-                                   "Malformed `declare_variables'");
-            return;
-        }
-
-        if (send->args.size() != 1) {
-            ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
-                                   "Wrong number of arguments to `declare_variables'");
-            return;
-        }
-        auto hash = ast::cast_tree<ast::Hash>(send->args.front().get());
-        if (hash == nullptr) {
-            ctx.state.errors.error(send->loc, core::ErrorClass::InvalidDeclareVariables,
-                                   "Malformed `declare_variables': Argument must be a hash");
-            return;
-        }
-        for (int i = 0; i < hash->keys.size(); ++i) {
-            auto &key = hash->keys[i];
-            auto &value = hash->values[i];
-            auto sym = ast::cast_tree<ast::SymbolLit>(key.get());
-            if (sym == nullptr) {
-                ctx.state.errors.error(key->loc, core::ErrorClass::InvalidDeclareVariables,
-                                       "`declare_variables': variable names must be symbols");
-                continue;
-            }
-
-            auto typ = getResultType(ctx, value);
-            core::SymbolRef var;
-
-            auto str = sym->name.toString(ctx);
-            if (str.substr(0, 2) == "@@") {
-                core::Symbol &info = ctx.owner.info(ctx);
-                var = info.findMember(ctx, sym->name);
-                if (var.exists()) {
-                    ctx.state.errors.error(key->loc, core::ErrorClass::DuplicateVariableDeclaration,
-                                           "Redeclaring variable `{}'", str);
-                } else {
-                    var = ctx.state.enterStaticFieldSymbol(sym->loc, ctx.owner, sym->name);
-                }
-            } else if (str.substr(0, 1) == "@") {
-                core::Symbol &info = ctx.owner.info(ctx);
-                var = info.findMember(ctx, sym->name);
-                if (var.exists()) {
-                    ctx.state.errors.error(key->loc, core::ErrorClass::DuplicateVariableDeclaration,
-                                           "Redeclaring variable `{}'", str);
-                } else {
-                    var = ctx.state.enterFieldSymbol(sym->loc, ctx.owner, sym->name);
-                }
-            } else {
-                ctx.state.errors.error(key->loc, core::ErrorClass::InvalidDeclareVariables,
-                                       "`declare_variables`: variables must start with @ or @@");
-            }
-
-            if (var.exists()) {
-                var.info(ctx).resultType = typ;
-            }
-        }
-    }
-
-    void defineAttr(core::Context ctx, ast::Send *send, bool r, bool w) {
-        for (auto &arg : send->args) {
-            core::NameRef name(0);
-            if (auto *sym = ast::cast_tree<ast::SymbolLit>(arg.get())) {
-                name = sym->name;
-            } else if (auto *str = ast::cast_tree<ast::StringLit>(arg.get())) {
-                name = str->value;
-            } else {
-                ctx.state.errors.error(arg->loc, core::ErrorClass::InvalidAttr,
-                                       "{} argument must be a string or symbol literal", send->fun.toString(ctx));
-                continue;
-            }
-
-            core::NameRef varName = ctx.state.enterNameUTF8("@" + name.toString(ctx));
-            core::SymbolRef sym = ctx.owner.info(ctx).findMemberTransitive(ctx, varName);
-            if (!sym.exists()) {
-                ctx.state.errors.error(arg->loc, core::ErrorClass::UndeclaredVariable,
-                                       "Accessor for undeclared variable `{}'", varName.toString(ctx));
-                sym = ctx.state.enterFieldSymbol(arg->loc, ctx.owner, varName);
-            }
-
-            if (r) {
-                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name);
-                meth.info(ctx).resultType = sym.info(ctx).resultType;
-            }
-            if (w) {
-                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name.addEq(ctx));
-                core::SymbolRef arg0 = ctx.state.enterMethodArgumentSymbol(arg->loc, meth, core::Names::arg0());
-
-                auto ty = sym.info(ctx).resultType;
-                if (ty == nullptr) {
-                    ty = core::Types::dynamic();
-                }
-                arg0.info(ctx).resultType = ty;
-                meth.info(ctx).arguments().push_back(arg0);
-                meth.info(ctx).resultType = ty;
-            }
-        }
-    }
-
     void processClassBody(core::Context ctx, ast::ClassDef *klass) {
         unique_ptr<ast::Expression> lastStandardMethod;
 
@@ -549,6 +614,20 @@ private:
         klass->rhs.erase(toRemove, klass->rhs.end());
     }
 
+    core::SymbolRef dealiasSym(core::Context ctx, core::SymbolRef sym) {
+        while (sym.info(ctx).isStaticField()) {
+            auto *ct = dynamic_cast<core::ClassType *>(sym.info(ctx).resultType.get());
+            if (ct == nullptr)
+                break;
+            auto klass = ct->symbol.info(ctx).attachedClass(ctx);
+            if (!klass.exists())
+                break;
+
+            sym = klass;
+        }
+        return sym;
+    }
+
     // Resolve the type of the rhs of a constant declaration. This logic is
     // extremely simplistic; We only handle simple literals, and explicit casts.
     //
@@ -576,81 +655,24 @@ private:
     }
 
 public:
-    ResolveWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
-
-    ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *original) {
-        nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
-        return original;
-    }
-    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
-        nesting_ = move(nesting_->parent);
-
-        for (auto &ancst : original->ancestors) {
-            if (auto resolved = maybeResolve(ctx, ancst.get())) {
-                ancst.swap(resolved);
-            }
-        }
-        core::Symbol &info = original->symbol.info(ctx);
-        for (auto &ancst : original->ancestors) {
-            ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
-            if (id == nullptr || !id->symbol.info(ctx).isClass()) {
-                ctx.state.errors.error(ancst->loc, core::ErrorClass::DynamicSuperclass,
-                                       "Superclasses and mixins must be statically resolved.");
-                continue;
-            }
-            if (id->symbol == original->symbol || id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
-                ctx.state.errors.error(id->loc, core::ErrorClass::CircularDependency,
-                                       "Circular dependency: {} and {} are declared as parents of each other",
-                                       original->symbol.info(ctx).name.toString(ctx),
-                                       id->symbol.info(ctx).name.toString(ctx));
-                continue;
-            }
-
-            if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
-                if (id->symbol == core::GlobalState::defn_todo()) {
-                    continue;
-                }
-                if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_todo() ||
-                    info.superClass == id->symbol) {
-                    info.superClass = id->symbol;
-                } else {
-                    ctx.state.errors.error(id->loc, core::ErrorClass::RedefinitionOfParents,
-                                           "Class parents redefined for class {}",
-                                           original->symbol.info(ctx).name.toString(ctx));
-                }
-            } else {
-                info.argumentsOrMixins.emplace_back(id->symbol);
-            }
-        }
-
-        processClassBody(ctx, original);
-
-        return original;
-    }
-
-    ast::Expression *postTransformConstantLit(core::Context ctx, ast::ConstantLit *c) {
-        core::SymbolRef resolved = resolveConstant(ctx, c);
-        if (!resolved.exists()) {
-            string str = c->toString(ctx);
-            resolved = resolveConstant(ctx, c);
-            return c;
-        }
-        return new ast::Ident(c->loc, resolved);
-    }
-
     ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
-        if (id == nullptr || !id->symbol.info(ctx).isStaticField())
+        if (id == nullptr || !id->symbol.info(ctx).isStaticField()) {
             return asgn;
+        }
+
+        if (id->symbol.info(ctx).resultType != nullptr) {
+            return asgn;
+        }
 
         id->symbol.info(ctx).resultType = resolveConstantType(ctx, asgn->rhs);
 
-        auto *rhs = ast::cast_tree<ast::Ident>(asgn->rhs.get());
-        if (rhs == nullptr || !rhs->symbol.info(ctx).isClass())
-            return asgn;
-
-        id->symbol.info(ctx).resultType = make_unique<core::ClassType>(rhs->symbol.info(ctx).singletonClass(ctx));
         return asgn;
+    }
+
+    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
+        processClassBody(ctx, original);
+        return original;
     }
 
     ast::Expression *postTransformSend(core::Context ctx, ast::Send *send) {
@@ -680,9 +702,7 @@ public:
                 return send;
         }
     }
-
-    unique_ptr<Nesting> nesting_;
-}; // namespace namer
+};
 
 class ResolveVariablesWalk {
 public:
@@ -717,15 +737,8 @@ public:
     };
 };
 
-unique_ptr<ast::Expression> Resolver::run(core::Context &ctx, unique_ptr<ast::Expression> tree) {
-    ResolveWalk walk(ctx);
-    tree = ast::TreeMap<ResolveWalk>::apply(ctx, walk, move(tree));
-    ResolveVariablesWalk vars;
-    tree = ast::TreeMap<ResolveVariablesWalk>::apply(ctx, vars, move(tree));
-    return tree;
-}
-
-void Resolver::finalize(core::GlobalState &gs) {
+namespace {
+void finalizeResolution(core::GlobalState &gs) {
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto &info = core::SymbolRef(i).info(gs);
         if (!info.isClass() || info.superClass != core::GlobalState::defn_todo()) {
@@ -748,6 +761,26 @@ void Resolver::finalize(core::GlobalState &gs) {
         }
     }
 }
+}; // namespace
+
+std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context &ctx,
+                                                            std::vector<std::unique_ptr<ast::Expression>> trees) {
+    ResolveConstantsWalk constants(ctx);
+    for (auto &tree : trees) {
+        tree = ast::TreeMap<ResolveConstantsWalk>::apply(ctx, constants, move(tree));
+    }
+    ResolveSignaturesWalk sigs;
+    ResolveVariablesWalk vars;
+
+    for (auto &tree : trees) {
+        tree = ast::TreeMap<ResolveSignaturesWalk>::apply(ctx, sigs, move(tree));
+        tree = ast::TreeMap<ResolveVariablesWalk>::apply(ctx, vars, move(tree));
+    }
+
+    finalizeResolution(ctx);
+
+    return trees;
+} // namespace namer
 
 } // namespace namer
 } // namespace ruby_typer

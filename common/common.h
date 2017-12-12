@@ -113,6 +113,7 @@ public:
     static std::string read(const char *filename);
     static void write(const char *filename, const std::vector<ruby_typer::u4> &data);
     static absl::string_view getFileName(const absl::string_view path);
+    static absl::string_view getExtension(const absl::string_view path);
 };
 
 class Strings final {

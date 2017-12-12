@@ -7,8 +7,8 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     data = glob([
         "testdata/**/*.rb",
-        "testdata/**/*.rb.*.exp",
-        "testdata/**/*.rb.*.exp.svg",
+        "testdata/**/*.exp",
+        "testdata/**/*.exp.svg",
     ]),
     linkstatic = select({
         "//tools/config:fastbuild": 0,

@@ -69,6 +69,13 @@ absl::string_view ruby_typer::File::getFileName(const absl::string_view path) {
     return path.substr(found + 1);
 }
 
+absl::string_view ruby_typer::File::getExtension(const absl::string_view path) {
+    std::size_t found = path.find_last_of(".");
+    if (found == absl::string_view::npos)
+        return absl::string_view();
+    return path.substr(found + 1);
+}
+
 string strprintf(const char *format, va_list vlist) {
     char *buf = nullptr;
     int ret = vasprintf(&buf, format, vlist);

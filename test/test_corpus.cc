@@ -30,15 +30,19 @@ using namespace std;
 
 struct Expectations {
     string folder;
-    string sourceFile;
+    string basename;
+    vector<string> sourceFiles;
     unordered_map<string, string> expectations;
 };
 
 vector<Expectations> getInputs();
 
 string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
-    string res = arg.param.folder + arg.param.sourceFile;
-    res.erase(res.size() - strlen(".rb"), strlen(".rb"));
+    string res = arg.param.folder + arg.param.basename;
+    auto ext = ruby_typer::File::getExtension(res);
+    if (ext == "rb") {
+        res.erase(res.end() - ext.size() - 1, res.end());
+    }
     replace(res.begin(), res.end(), '/', '_');
     return res;
 }
@@ -100,7 +104,7 @@ unordered_set<string> knownPasses = {
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
     Expectations test = GetParam();
-    auto inputPath = test.folder + test.sourceFile;
+    auto inputPath = test.folder + test.basename;
     SCOPED_TRACE(inputPath);
 
     for (auto &exp : test.expectations) {
@@ -118,209 +122,190 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     gs.errors.keepErrorsInMemory = true;
 
     // Parser
-    auto src = ruby_typer::File::read(inputPath.c_str());
-    auto file = gs.enterFile(inputPath, src);
-    auto ast = ruby_typer::parser::Parser::run(gs, file);
-    {
+    vector<ruby_typer::core::FileRef> files;
+    for (auto &srcPath : test.sourceFiles) {
+        auto path = test.folder + srcPath;
+        auto src = ruby_typer::File::read(path.c_str());
+        files.push_back(gs.enterFile(path, src));
+    }
+    vector<unique_ptr<ruby_typer::ast::Expression>> trees;
+    map<string, string> got;
+
+    for (auto file : files) {
+        auto ast = ruby_typer::parser::Parser::run(gs, file);
+        {
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
+        auto expectation = test.expectations.find("parse-tree");
+        if (expectation != test.expectations.end()) {
+            got["parse-tree"].append(ast->toString(gs)).append("\n");
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
+        // Desugarer
+        auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
+
+        expectation = test.expectations.find("ast");
+        if (expectation != test.expectations.end()) {
+            got["ast"].append(desugared->toString(gs)).append("\n");
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("ast-raw");
+        if (expectation != test.expectations.end()) {
+            got["ast-raw"].append(desugared->showRaw(gs)).append("\n");
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
+        // Namer
+        auto namedTree = ruby_typer::namer::Namer::run(context, move(desugared));
+        trees.emplace_back(move(namedTree));
+    }
+
+    trees = ruby_typer::namer::Resolver::run(context, move(trees));
+
+    auto expectation = test.expectations.find("name-table");
+    if (expectation != test.expectations.end()) {
+        got["name-table"] = gs.toString() + "\n";
         auto newErrors = gs.errors.getAndEmptyErrors();
         errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                       std::make_move_iterator(newErrors.end()));
     }
 
-    auto expectation = test.expectations.find("parse-tree");
-    if (expectation != test.expectations.end()) {
+    for (auto &resolvedTree : trees) {
+        expectation = test.expectations.find("name-tree");
+        if (expectation != test.expectations.end()) {
+            got["name-tree"].append(resolvedTree->toString(gs)).append("\n");
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("name-tree-raw");
+        if (expectation != test.expectations.end()) {
+            got["name-tree-raw"].append(resolvedTree->showRaw(gs));
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+    }
+
+    for (auto &resolvedTree : trees) {
+        auto file = resolvedTree->loc.file;
+        // CFG
+        CFG_Collector_and_Typer collector;
+        auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
+
+        expectation = test.expectations.find("cfg");
+        if (expectation != test.expectations.end()) {
+            if (file.file(context).source_type != ruby_typer::core::File::Typed) {
+                auto path = file.file(context).path();
+                ADD_FAILURE_AT(path.begin(), 1)
+                    << "Missing `@typed` pragma. Sources with .cfg.exp expectations must specify @typed.";
+            }
+
+            stringstream dot;
+            dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
+            for (auto &cfg : collector.cfgs) {
+                dot << cfg << endl << endl;
+            }
+            dot << "}" << endl << endl;
+            got["cfg"].append(dot.str());
+
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("infer");
+        if (expectation != test.expectations.end()) {
+            auto checker = test.folder + expectation->second;
+            SCOPED_TRACE(checker);
+
+            if (file.file(context).source_type != ruby_typer::core::File::Typed) {
+                auto path = file.file(context).path();
+                ADD_FAILURE_AT(path.begin(), 1)
+                    << "Missing `@typed` pragma. Sources with .cfg.exp expectations must specify @typed.";
+            }
+            got["infer"] = "";
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+    }
+
+    for (auto &gotPhase : got) {
+        auto expectation = test.expectations.find(gotPhase.first);
+        ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
         auto checker = test.folder + expectation->second;
-        SCOPED_TRACE(checker);
-
-        auto exp = ruby_typer::File::read(checker.c_str());
-
-        EXPECT_EQ(exp, ast->toString(gs) + "\n");
-        if (exp == ast->toString(gs) + "\n") {
-            TEST_COUT << "parse-tree OK" << endl;
+        auto expect = ruby_typer::File::read(checker.c_str());
+        EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
+        if (expect == gotPhase.second) {
+            TEST_COUT << gotPhase.first << " ok" << endl;
         }
-        auto newErrors = gs.errors.getAndEmptyErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
-    }
-
-    // Desugarer
-    auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
-
-    expectation = test.expectations.find("ast");
-    if (expectation != test.expectations.end()) {
-        auto checker = test.folder + expectation->second;
-        auto exp = ruby_typer::File::read(checker.c_str());
-        SCOPED_TRACE(checker);
-
-        EXPECT_EQ(exp, desugared->toString(gs) + "\n");
-        if (exp == desugared->toString(gs) + "\n") {
-            TEST_COUT << "ast OK" << endl;
-        }
-        auto newErrors = gs.errors.getAndEmptyErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
-    }
-
-    expectation = test.expectations.find("ast-raw");
-    if (expectation != test.expectations.end()) {
-        auto checker = test.folder + expectation->second;
-        auto exp = ruby_typer::File::read(checker.c_str());
-        SCOPED_TRACE(checker);
-
-        EXPECT_EQ(exp, desugared->showRaw(gs) + "\n");
-        if (exp == desugared->showRaw(gs) + "\n") {
-            TEST_COUT << "ast-raw OK" << endl;
-        }
-        auto newErrors = gs.errors.getAndEmptyErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
-    }
-
-    // Namer
-    auto namedTree = ruby_typer::namer::Namer::run(context, move(desugared));
-    auto resolvedTree = ruby_typer::namer::Resolver::run(context, move(namedTree));
-    ruby_typer::namer::Resolver::finalize(context);
-
-    expectation = test.expectations.find("name-table");
-    if (expectation != test.expectations.end()) {
-        auto newErrors = gs.errors.getAndEmptyErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
-    }
-
-    expectation = test.expectations.find("name-tree");
-    if (expectation != test.expectations.end()) {
-        auto checker = test.folder + expectation->second;
-        auto exp = ruby_typer::File::read(checker.c_str());
-        SCOPED_TRACE(checker);
-
-        EXPECT_EQ(exp, resolvedTree->toString(gs) + "\n");
-        if (exp == resolvedTree->toString(gs) + "\n") {
-            TEST_COUT << "name-tree OK" << endl;
-        }
-        auto newErrors = gs.errors.getAndEmptyErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
-    }
-
-    expectation = test.expectations.find("name-tree-raw");
-    if (expectation != test.expectations.end()) {
-        auto checker = test.folder + expectation->second;
-        auto exp = ruby_typer::File::read(checker.c_str());
-        SCOPED_TRACE(checker);
-
-        EXPECT_EQ(exp, resolvedTree->showRaw(gs) + "\n");
-        if (exp == resolvedTree->showRaw(gs) + "\n") {
-            TEST_COUT << "name-tree-raw OK" << endl;
-        }
-        auto newErrors = gs.errors.getAndEmptyErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
-    }
-
-    // CFG
-    CFG_Collector_and_Typer collector;
-    auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
-
-    expectation = test.expectations.find("cfg");
-    if (expectation != test.expectations.end()) {
-        auto checker = test.folder + expectation->second;
-        SCOPED_TRACE(checker);
-
-        if (file.file(context).source_type != ruby_typer::core::File::Typed) {
-            ADD_FAILURE_AT(inputPath.c_str(), 1)
-                << "Missing `@typed` pragma. Sources with .cfg.exp expectations must specify @typed.";
-        }
-
-        auto exp = ruby_typer::File::read(checker.c_str());
-
-        stringstream got;
-        got << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
-        for (auto &cfg : collector.cfgs) {
-            got << cfg << endl << endl;
-        }
-        got << "}" << endl;
-        EXPECT_EQ(exp, got.str() + "\n");
-        if (exp == got.str() + "\n") {
-            TEST_COUT << "cfg+infer OK" << endl;
-        }
-
-        ifstream svgFile(checker + ".svg");
-        EXPECT_TRUE(svgFile.good());
-        auto newErrors = gs.errors.getAndEmptyErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
-    }
-
-    expectation = test.expectations.find("infer");
-    if (expectation != test.expectations.end()) {
-        auto checker = test.folder + expectation->second;
-        SCOPED_TRACE(checker);
-
-        if (file.file(context).source_type != ruby_typer::core::File::Typed) {
-            ADD_FAILURE_AT(inputPath.c_str(), 1)
-                << "Missing `@typed` pragma. Sources with .infer.exp expectations must specify @typed.";
-        }
-        auto exp = ruby_typer::File::read(checker.c_str());
-        EXPECT_EQ(exp, "") << ".infer.exp files must be empty";
-        auto newErrors = gs.errors.getAndEmptyErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
     }
 
     expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
-        auto checker = test.folder + expectation->second;
-        auto exp = ruby_typer::File::read(checker.c_str());
-        SCOPED_TRACE(checker);
-
-        EXPECT_EQ(exp, gs.toString() + "\n");
-        if (exp == gs.toString() + "\n") {
-            TEST_COUT << "name-table OK" << endl;
-        }
+        string table = gs.toString() + "\n";
+        EXPECT_EQ(got["name-table"], table) << " name-table should not be mutated by CFG+inference";
     }
 
     // Check warnings and errors
 
-    map<int, string> expectedErrors;
-    string line;
-    stringstream ss(src);
-    int linenum = 1;
+    map<pair<ruby_typer::core::FileRef, int>, string> expectedErrors;
     regex errorRegex("# error: ?(.*)");
 
-    while (getline(ss, line, '\n')) {
-        smatch matches;
-        if (regex_search(line, matches, errorRegex)) {
-            string match = matches[1].str();
-            int len = match.size();
-            if (len < 10 && match.find("MULTI") == string::npos) {
-                ADD_FAILURE_AT(inputPath.c_str(), linenum)
-                    << "Too short of a error message at " << len
-                    << " characters. Use MULTI or write something longer than: " << match;
+    for (auto file : files) {
+        string src(file.file(gs).source().begin(), file.file(gs).source().end());
+        stringstream ss(src);
+        string line;
+        int linenum = 1;
+
+        while (getline(ss, line, '\n')) {
+            smatch matches;
+            if (regex_search(line, matches, errorRegex)) {
+                string match = matches[1].str();
+                int len = match.size();
+                if (len < 10 && match.find("MULTI") == string::npos) {
+                    ADD_FAILURE_AT(file.file(gs).path().data(), linenum)
+                        << "Too short of a error message at " << len
+                        << " characters. Use MULTI or write something longer than: " << match;
+                }
+                expectedErrors[make_pair(file, linenum)] = match;
             }
-            expectedErrors[linenum] = match;
+            linenum += 1;
         }
-        linenum += 1;
     }
 
-    map<int, int> seenErrorLines;
+    map<pair<ruby_typer::core::FileRef, int>, int> seenErrorLines;
     int unknownLocErrorLine = 1;
     for (auto &error : errors) {
+        auto filePath = error->loc.file.file(gs).path();
         if (error->loc.is_none()) {
             // The convention is to put `error: Unknown Location Error` at
             // the top of the file for each of these so that they are eaten
             // first when reporting mismatched errors.
             int line = unknownLocErrorLine++;
-            auto expectedError = expectedErrors.find(line);
+            auto expectedError = expectedErrors.find(make_pair(files.front(), line));
             if (expectedError == expectedErrors.end()) {
-                ADD_FAILURE_AT(inputPath.c_str(), line) << "Unknown location error thrown but not annotated." << endl
-                                                        << "Reported error: " << error->formatted;
+                ADD_FAILURE_AT(filePath.data(), line) << "Unknown location error thrown but not annotated." << endl
+                                                      << "Reported error: " << error->formatted;
             } else if (error->formatted.find(expectedError->second) == string::npos) {
-                ADD_FAILURE_AT(inputPath.c_str(), line) << "Error string mismatch." << endl
-                                                        << " Expectation: " << expectedError->second << endl
-                                                        << " Reported error: " << error->formatted;
+                ADD_FAILURE_AT(filePath.data(), line) << "Error string mismatch." << endl
+                                                      << " Expectation: " << expectedError->second << endl
+                                                      << " Reported error: " << error->formatted;
             } else {
-                seenErrorLines[line]++;
+                seenErrorLines[make_pair(files.front(), line)]++;
             }
             continue;
         }
@@ -328,37 +313,38 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto pos = error->loc.position(gs);
         bool found = false;
         for (int i = pos.first.line; i <= pos.second.line; i++) {
-            auto expectedError = expectedErrors.find(i);
+            auto expectedError = expectedErrors.find(make_pair(error->loc.file, i));
             if (expectedError != expectedErrors.end()) {
                 bool isMultipleErrors =
                     expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
                 if (expectedError->second.empty()) {
-                    ADD_FAILURE_AT(inputPath.c_str(), i) << "Error occurred, but no expected text found. Please put (a "
-                                                            "substring of) the expected error after `# error:` "
-                                                         << endl
-                                                         << "The message was: '" << error->formatted << "'";
+                    ADD_FAILURE_AT(filePath.data(), i) << "Error occurred, but no expected text found. Please put (a "
+                                                          "substring of) the expected error after `# error:` "
+                                                       << endl
+                                                       << "The message was: '" << error->formatted << "'";
                 } else if (error->formatted.find(expectedError->second) == string::npos && !isMultipleErrors) {
-                    ADD_FAILURE_AT(inputPath.c_str(), i) << "Error string mismatch." << endl
-                                                         << " Expectation: " << expectedError->second << endl
-                                                         << " Reported error: " << error->formatted;
+                    ADD_FAILURE_AT(filePath.data(), i) << "Error string mismatch." << endl
+                                                       << " Expectation: " << expectedError->second << endl
+                                                       << " Reported error: " << error->formatted;
                 } else {
                     found = true;
-                    seenErrorLines[i]++;
+                    seenErrorLines[make_pair(error->loc.file, i)]++;
                     continue;
                 }
             }
         }
         if (!found) {
-            ADD_FAILURE_AT(inputPath.c_str(), pos.first.line) << "Unexpected error:\n " << error->toString(gs);
+            ADD_FAILURE_AT(filePath.data(), pos.first.line) << "Unexpected error:\n " << error->toString(gs);
         }
     }
 
     for (auto &error : expectedErrors) {
+        auto filePath = error.first.first.file(gs).path();
         if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
-            ADD_FAILURE_AT(inputPath.c_str(), error.first) << "Expected error did not happen.";
+            ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected error did not happen.";
         }
         if (error.second.find("MULTI") != string::npos && seenErrorLines[error.first] == 1) {
-            ADD_FAILURE_AT(inputPath.c_str(), error.first) << "Expected multiple errors, but only saw one.";
+            ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected multiple errors, but only saw one.";
         }
     }
 
@@ -376,6 +362,33 @@ bool endsWith(const string &a, const string &b) {
 
 static bool startsWith(const string &str, const string &prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.c_str(), prefix.size());
+}
+
+bool compareNames(const string &left, const string &right) {
+    auto lsplit = left.find("__");
+    if (lsplit == string::npos) {
+        lsplit = left.find(".");
+    }
+    auto rsplit = right.find("__");
+    if (rsplit == string::npos) {
+        rsplit = right.find(".");
+    }
+    absl::string_view lbase(left.data(), lsplit == string::npos ? left.size() : lsplit);
+    absl::string_view rbase(right.data(), rsplit == string::npos ? right.size() : rsplit);
+    if (lbase != rbase) {
+        return left < right;
+    }
+
+    // If the base names match, compare by reverse order on extension, so that
+    // .exp comes after .rb.
+    auto lext = ruby_typer::File::getExtension(left);
+    auto rext = ruby_typer::File::getExtension(right);
+    if (lext != rext) {
+        return rext < lext;
+    }
+
+    // Sort multi-part tests
+    return left < right;
 }
 
 // substrantially modified from https://stackoverflow.com/a/8438663
@@ -402,23 +415,32 @@ vector<Expectations> listDir(const char *name) {
             names.emplace_back(entry->d_name);
         }
     }
-    sort(names.begin(), names.end());
+    sort(names.begin(), names.end(), compareNames);
 
     Expectations current;
     for (auto &s : names) {
         if (endsWith(s, ".rb")) {
-            if (!current.sourceFile.empty()) {
-                result.push_back(current);
-
-                current.sourceFile.clear();
-                current.expectations.clear();
+            auto basename = s;
+            auto split = s.find("__");
+            if (split != string::npos) {
+                basename = s.substr(0, split);
+                if (basename == current.basename) {
+                    current.sourceFiles.push_back(s);
+                    continue;
+                }
             }
-            current.sourceFile = s;
+
+            if (!current.basename.empty()) {
+                result.push_back(current);
+                current = Expectations();
+            }
+            current.basename = basename;
+            current.sourceFiles.push_back(s);
             current.folder = name;
             current.folder += "/";
         } else if (endsWith(s, ".exp")) {
-            if (startsWith(s, current.sourceFile)) {
-                auto kind_start = s.c_str() + current.sourceFile.size() + 1;
+            if (startsWith(s, current.basename)) {
+                auto kind_start = s.c_str() + current.basename.size() + 1;
                 auto kind_end = s.c_str() + s.size() - strlen(".exp");
                 string kind(kind_start, kind_end - kind_start);
                 current.expectations[kind] = s;
@@ -426,11 +448,9 @@ vector<Expectations> listDir(const char *name) {
         } else {
         }
     }
-    if (!current.sourceFile.empty()) {
+    if (!current.basename.empty()) {
         result.push_back(current);
-
-        current.sourceFile.clear();
-        current.expectations.clear();
+        current = Expectations();
     }
 
     closedir(dir);

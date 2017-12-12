@@ -130,25 +130,22 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
     bool printCFG = removeOption(prints, "cfg");
 
     try {
-        for (auto &namedTree : what) {
-            ruby_typer::core::FileRef f = namedTree->loc.file;
-            try {
-                ruby_typer::core::Context context(gs, gs.defn_root());
-                tracer->trace("Resolving: {}", f.file(gs).path());
-                auto resolved = ruby_typer::namer::Resolver::run(context, move(namedTree));
-                if (printNameTree) {
-                    cout << resolved->toString(gs, 0) << endl;
-                }
-                if (printNameTreeRaw) {
-                    cout << resolved->showRaw(gs) << endl;
-                }
-                namedTree = move(resolved);
-            } catch (...) {
-                console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
-            }
+        try {
+            tracer->trace("Resolving (global pass)...");
+            ruby_typer::core::Context context(gs, gs.defn_root());
+            what = ruby_typer::namer::Resolver::run(context, move(what));
+        } catch (...) {
+            console_err->error("Exception resolving (backtrace is above)");
         }
 
-        ruby_typer::namer::Resolver::finalize(gs);
+        for (auto &resolved : what) {
+            if (printNameTree) {
+                cout << resolved->toString(gs, 0) << endl;
+            }
+            if (printNameTreeRaw) {
+                cout << resolved->showRaw(gs) << endl;
+            }
+        }
 
         for (auto &resolved : what) {
             ruby_typer::core::FileRef f = resolved->loc.file;

@@ -9,18 +9,32 @@ rb_src=("$@")
 
 if [ -z "${rb_src[*]}" ]; then
     rb_src=(
-        $(find ./test/testdata/ -name '*.rb')
+        $(find ./test/testdata/ -name '*.rb' | sort)
     )
 fi
 
-for src in "${rb_src[@]}"; do
-    for pass in "${passes[@]}" ; do
-        candidate="$src.$pass.exp"
-        if [ -e "$candidate" ]; then
-            echo "bazel-bin/main/ruby-typer --print $pass --set-freshNameId=10000 $src > $candidate"
-            bazel-bin/main/ruby-typer --print "$pass" --set-freshNameId=10000 "$src" > "$candidate"
-        fi
-    done
+basename=
+srcs=()
+
+for this_src in "${rb_src[@]}" DUMMY; do
+    this_base=${this_src%__*}
+    if [ "$this_base" = "$basename" ]; then
+        srcs=("${srcs[@]}" "$this_src")
+        continue
+    fi
+
+    if [ "$basename" ]; then
+        for pass in "${passes[@]}" ; do
+            candidate="$basename.$pass.exp"
+            if [ -e "$candidate" ]; then
+                echo "bazel-bin/main/ruby-typer --print $pass --set-freshNameId=10000 ${srcs[@]} > $candidate"
+                bazel-bin/main/ruby-typer --print "$pass" --set-freshNameId=10000 "${srcs[@]}" > "$candidate" 2>/dev/null
+            fi
+        done
+    fi
+
+    basename="$this_base"
+    srcs=("$this_src")
 done
 
 ./tools/scripts/dot2svg.sh
