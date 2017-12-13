@@ -332,13 +332,13 @@ private:
                 }
                 switch (s->fun._id) {
                     case core::Names::nilable()._id:
-                        result = make_shared<core::OrType>(getResultType(ctx, s->args[0]), core::Types::nil());
+                        result = core::Types::buildOr(ctx, getResultType(ctx, s->args[0]), core::Types::nil());
                         break;
                     case core::Names::all()._id: {
                         result = getResultType(ctx, s->args[0]);
                         int i = 1;
                         while (i < s->args.size()) {
-                            result = make_shared<core::AndType>(result, getResultType(ctx, s->args[i]));
+                            result = core::Types::buildAnd(ctx, result, getResultType(ctx, s->args[i]));
                             i++;
                         }
                         break;
@@ -347,7 +347,7 @@ private:
                         result = getResultType(ctx, s->args[0]);
                         int i = 1;
                         while (i < s->args.size()) {
-                            result = make_shared<core::OrType>(result, getResultType(ctx, s->args[i]));
+                            result = core::Types::buildOr(ctx, result, getResultType(ctx, s->args[i]));
                             i++;
                         }
                         break;
@@ -381,7 +381,7 @@ private:
                         result = getResultLiteral(ctx, arr->elems[0]);
                         int i = 1;
                         while (i < arr->elems.size()) {
-                            result = make_shared<core::OrType>(result, getResultLiteral(ctx, arr->elems[i]));
+                            result = core::Types::buildOr(ctx, result, getResultLiteral(ctx, arr->elems[i]));
                             i++;
                         }
                         break;
@@ -643,8 +643,12 @@ private:
                  [&](ast::FloatLit *) { result = core::Types::Float(); },
                  [&](ast::IntLit *) { result = core::Types::Integer(); },
                  [&](ast::StringLit *) { result = core::Types::String(); },
-                 [&](ast::BoolLit *) {
-                     result = make_shared<core::OrType>(core::Types::trueClass(), core::Types::falseClass());
+                 [&](ast::BoolLit *b) {
+                     if (b->value) {
+                         result = core::Types::trueClass();
+                     } else {
+                         result = core::Types::falseClass();
+                     }
                  },
                  [&](ast::Cast *cast) {
                      if (cast->assertType) {

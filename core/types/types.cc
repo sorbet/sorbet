@@ -68,7 +68,7 @@ std::shared_ptr<Type> Types::Symbol() {
 }
 
 std::shared_ptr<Type> Types::falsyTypes() {
-    static auto res = make_shared<core::OrType>(Types::nil(), Types::falseClass());
+    static auto res = OrType::make_shared(Types::nil(), Types::falseClass());
     return res;
 }
 
@@ -271,7 +271,7 @@ string TupleType::toString(GlobalState &gs, int tabs) {
     int i = 0;
     for (auto &el : this->elems) {
         printTabs(buf, tabs + 1);
-        buf << i++ << " = " << el->toString(gs, tabs + 2) << endl;
+        buf << i++ << " = " << el->toString(gs, tabs + 3) << endl;
     }
     printTabs(buf, tabs);
     buf << "}";
@@ -374,6 +374,24 @@ string OrType::toString(GlobalState &gs, int tabs) {
         buf << ")";
     }
     return buf.str();
+}
+
+void AndType::_sanityCheck(core::Context ctx) {
+    left->_sanityCheck(ctx);
+    right->_sanityCheck(ctx);
+    Error::check(dynamic_cast<ProxyType *>(left.get()) == nullptr);
+    Error::check(dynamic_cast<ProxyType *>(right.get()) == nullptr);
+    Error::check(!left->isDynamic());
+    Error::check(!right->isDynamic());
+}
+
+void OrType::_sanityCheck(core::Context ctx) {
+    left->_sanityCheck(ctx);
+    right->_sanityCheck(ctx);
+    Error::check(dynamic_cast<ProxyType *>(left.get()) == nullptr);
+    Error::check(dynamic_cast<ProxyType *>(right.get()) == nullptr);
+    Error::check(!left->isDynamic());
+    Error::check(!right->isDynamic());
 }
 
 int ClassType::kind() {

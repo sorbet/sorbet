@@ -3,6 +3,8 @@
 #include <sstream>
 #include <unordered_set>
 
+#include "absl/strings/str_split.h"
+
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
 template class std::unique_ptr<ruby_typer::cfg::BasicBlock>;
@@ -88,7 +90,18 @@ string CFG::toString(core::Context ctx) {
     buf << "    \"bb" << symbolName << "_1\" [shape = parallelogram];" << endl << endl;
     for (auto &basicBlock : this->basicBlocks) {
         auto text = basicBlock->toString(ctx);
-        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [label = \"" << text << "\"];" << endl << endl;
+        auto lines = absl::StrSplit(text, "\n");
+        stringstream escaped;
+        bool first = true;
+        for (auto &line : lines) {
+            if (!first) {
+                escaped << endl;
+            }
+            first = false;
+            escaped << Strings::escapeCString(line);
+        }
+        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [label = \"" << escaped.str() << "\"];" << endl
+            << endl;
         buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
             << basicBlock->bexit.thenb->id << "\" [style=\"bold\"];" << endl;
         if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
@@ -119,7 +132,7 @@ string BasicBlock::toString(core::Context ctx) {
     for (Binding &exp : this->exprs) {
         buf << exp.bind.name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
         if (exp.tpe) {
-            buf << " : " << Strings::escapeCString(exp.tpe->toString(ctx));
+            buf << " : " << exp.tpe->toString(ctx);
         }
         buf << endl;
     }

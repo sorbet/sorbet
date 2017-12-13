@@ -208,7 +208,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
         case 1:
             return std::make_shared<ClassType>(p.getU4());
         case 2:
-            return std::make_shared<OrType>(unpickleType(p), unpickleType(p));
+            return OrType::make_shared(unpickleType(p), unpickleType(p));
         case 3: {
             std::shared_ptr<LiteralType> result = std::make_shared<LiteralType>(true);
             result->underlying = unpickleType(p);
@@ -216,7 +216,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
             return result;
         }
         case 4:
-            return std::make_shared<AndType>(unpickleType(p), unpickleType(p));
+            return AndType::make_shared(unpickleType(p), unpickleType(p));
         case 5: {
             auto underlying = unpickleType(p);
             int sz = p.getU4();

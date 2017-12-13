@@ -60,7 +60,12 @@ hashTemp$9 = <symbol:baz> : Symbol(:\"baz\")
 statTemp$11 = self : TestHash
 hashTemp$10 = statTemp$11.something() : untyped
 hashTemp$12 = alias <constant:<Magic>> : <Magic>
-returnMethodTemp$1 = hashTemp$12.<build-hash>(hashTemp$3, hashTemp$4, hashTemp$5, hashTemp$6, hashTemp$7, hashTemp$8, hashTemp$9, hashTemp$10) : ShapeType {\n  Integer(1) => Integer(2)\n  Integer(2) => Integer(3)\n  Symbol(:\"foo\") => Symbol(:\"bar\")\n  Symbol(:\"baz\") => untyped\n}
+returnMethodTemp$1 = hashTemp$12.<build-hash>(hashTemp$3, hashTemp$4, hashTemp$5, hashTemp$6, hashTemp$7, hashTemp$8, hashTemp$9, hashTemp$10) : ShapeType {
+  Integer(1) => Integer(2)
+  Integer(2) => Integer(3)
+  Symbol(:\"foo\") => Symbol(:\"bar\")
+  Symbol(:\"baz\") => untyped
+}
 returnMethodTemp$13 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 

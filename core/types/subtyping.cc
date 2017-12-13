@@ -2,8 +2,9 @@
 #include "core/Types.h"
 #include <algorithm> // find_if
 
-using namespace ruby_typer;
-using namespace ruby_typer::core;
+namespace ruby_typer {
+namespace core {
+
 using namespace std;
 
 shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2);
@@ -178,7 +179,7 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr
         return n1;
     }
     categoryCounterInc("lubDistributeOr::outcome", "worst");
-    return make_shared<OrType>(t1, t2); // order matters for perf
+    return OrType::make_shared(t1, t2); // order matters for perf
 }
 
 shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
@@ -224,13 +225,13 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
                 return t2;
             }
             categoryCounterInc("lub::and>collapsed", "right");
-            return make_shared<AndType>(t1, a2->right);
+            return AndType::make_shared(t1, a2->right);
         } else if (collapseInRight) {
             categoryCounterInc("lub::and>collapsed", "left");
-            return make_shared<AndType>(t1, a2->left);
+            return AndType::make_shared(t1, a2->left);
         } else {
             categoryCounterInc("lub::and>collapsed", "none");
-            return make_shared<AndType>(t1, t2);
+            return AndType::make_shared(t1, t2);
         }
     }
     // 1 :-)
@@ -249,7 +250,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
         return t1;
     } else {
         categoryCounterInc("lub::<class>::collapsed", "no");
-        return make_shared<OrType>(t1, t2);
+        return OrType::make_shared(t1, t2);
     }
 }
 
@@ -283,7 +284,7 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
     }
 
     categoryCounterInc("glbDistributeAnd::outcome", "worst");
-    return make_shared<AndType>(t1, t2);
+    return AndType::make_shared(t1, t2);
 }
 
 shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
@@ -368,10 +369,10 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
                 return Types::glb(ctx, o2->left, t1);
             }
             categoryCounterInc("glb", "ZZZZZorWorst");
-            return make_shared<AndType>(t1, t2);
+            return AndType::make_shared(t1, t2);
         } else {
             categoryCounterInc("glb::orcollapsed", "no");
-            return make_shared<AndType>(t1, t2);
+            return AndType::make_shared(t1, t2);
         }
     }
     // 1 :-)
@@ -394,7 +395,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
             return Types::bottom();
         }
         categoryCounterInc("glb.class.ollapsed", "no");
-        return make_shared<AndType>(t1, t2);
+        return AndType::make_shared(t1, t2);
     }
 }
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> &t1,
@@ -718,20 +719,6 @@ bool AndType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return left->derivesFrom(ctx, klass) || right->derivesFrom(ctx, klass);
 }
 
-void AndType::_sanityCheck(core::Context ctx) {
-    left->_sanityCheck(ctx);
-    right->_sanityCheck(ctx);
-    Error::check(!left->isDynamic());
-    Error::check(!right->isDynamic());
-}
-
-void OrType::_sanityCheck(core::Context ctx) {
-    left->_sanityCheck(ctx);
-    right->_sanityCheck(ctx);
-    Error::check(!left->isDynamic());
-    Error::check(!right->isDynamic());
-}
-
 bool AliasType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     Error::raise("AliasType::derivesFrom");
 }
@@ -739,3 +726,6 @@ bool AliasType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 void AliasType::_sanityCheck(core::Context ctx) {
     Error::check(this->symbol.exists());
 }
+
+} // namespace core
+} // namespace ruby_typer

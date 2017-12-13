@@ -61,6 +61,14 @@ public:
         return equiv(ctx, t1, t2);
     }
 
+    static inline std::shared_ptr<Type> buildOr(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2) {
+        return lub(ctx, t1, t2);
+    }
+    static inline std::shared_ptr<Type> buildAnd(core::Context ctx, std::shared_ptr<Type> t1,
+                                                 std::shared_ptr<Type> t2) {
+        return glb(ctx, t1, t2);
+    }
+
     static std::shared_ptr<Type> top();
     static std::shared_ptr<Type> bottom();
     static std::shared_ptr<Type> nil();
@@ -156,7 +164,6 @@ public:
     std::shared_ptr<Type> left;
     std::shared_ptr<Type> right;
     virtual int kind() final;
-    OrType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
@@ -165,6 +172,29 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
+
+private:
+    /*
+     * We hide the constructor. Use Types::buildOr instead.
+     */
+    OrType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
+
+    /*
+     * These implementation methods are allowed to directly instantiate
+     * `OrType`. Because `make_shared<OrType>` is not compatible with private
+     * constructors + friend declarations (it's `shared_ptr` calling the
+     * constructor, so the friend declaration doesn't work), we provide the
+     * `make_shared` helper here.
+     */
+    friend std::shared_ptr<Type> Types::falsyTypes();
+    friend class ruby_typer::core::serialize::GlobalStateSerializer;
+    friend std::shared_ptr<Type> lubDistributeOr(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    friend std::shared_ptr<Type> lubGround(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+
+    static inline std::shared_ptr<Type> make_shared(std::shared_ptr<Type> left, std::shared_ptr<Type> right) {
+        std::shared_ptr<Type> res(new OrType(left, right));
+        return res;
+    }
 };
 
 class AndType final : public GroundType {
@@ -172,16 +202,29 @@ public:
     std::shared_ptr<Type> left;
     std::shared_ptr<Type> right;
     virtual int kind() final;
-    AndType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
-    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+    virtual std::shared_ptr<Type> dispatchCall(Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
 
-    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
+
+private:
+    // See the comments on OrType()
+    AndType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
+
+    friend class ruby_typer::core::serialize::GlobalStateSerializer;
+    friend std::shared_ptr<Type> lubGround(Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    friend std::shared_ptr<Type> glbGround(Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+
+    static inline std::shared_ptr<Type> make_shared(std::shared_ptr<Type> left, std::shared_ptr<Type> right) {
+        std::shared_ptr<Type> res(new AndType(left, right));
+        return res;
+    }
 };
 
 class LiteralType final : public ProxyType {

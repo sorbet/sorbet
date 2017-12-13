@@ -24,7 +24,7 @@ class <constant:A> < ::<constant:Object> ()
     argument e<> -> untyped
     argument f<> -> Array
     argument g<> -> Hash
-    argument h<> -> FalseClass(false) | Integer(1) | Float(3.140000) | String("foo") | Symbol(:"bar")
+    argument h<> -> FalseClass | Integer | Float | String | Symbol
     argument i<> -> T1
     argument j<> -> T1
   method no_params () -> T1

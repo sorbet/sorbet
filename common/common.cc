@@ -42,7 +42,7 @@ void ruby_typer::File::write(const char *filename, const vector<ruby_typer::u4> 
     return;
 }
 
-string ruby_typer::Strings::escapeCString(string what) {
+string ruby_typer::Strings::escapeCString(absl::string_view what) {
     char escaped[] = {'\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '\"'};
     char non_escaped[] = {'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '\"'};
     static_assert(sizeof(escaped) == sizeof(non_escaped), "???");

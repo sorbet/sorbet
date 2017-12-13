@@ -34,7 +34,8 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 statTemp$9 = <symbol:deleted_at_is_nil> : Symbol(:\"deleted_at_is_nil\")
 statTemp$6 = <constant:GeraldRule>$8.query_by(statTemp$9) : untyped
 hashTemp$11 = alias <constant:<Magic>> : <Magic>
-statTemp$10 = hashTemp$11.<build-hash>() : ShapeType {\n}
+statTemp$10 = hashTemp$11.<build-hash>() : ShapeType {
+}
 statTemp$5 = statTemp$6.load_all(statTemp$10) : untyped
 <unconditional>"];
 
@@ -147,7 +148,8 @@ statTemp$15 = statTemp$16.concat(statTemp$23) : String
 statTemp$14 = statTemp$15.to_s() : String
 statTemp$11 = statTemp$12.warn(statTemp$14) : untyped
 arrayTemp$25 = alias <constant:<Magic>> : <Magic>
-returnTemp$24 = arrayTemp$25.<build-array>() : TupleType {\n}
+returnTemp$24 = arrayTemp$25.<build-array>() : TupleType {
+}
 statTemp$3 = return returnTemp$24 : <bottom>
 <unconditional>"];
 
@@ -369,7 +371,9 @@ statTemp$22 = statTemp$23.to_s() : String
 hashTemp$42 = <symbol:rule_token> : Symbol(:\"rule_token\")
 hashTemp$43 = rule.token() : untyped
 hashTemp$45 = alias <constant:<Magic>> : <Magic>
-statTemp$41 = hashTemp$45.<build-hash>(hashTemp$42, hashTemp$43) : ShapeType {\n  Symbol(:\"rule_token\") => untyped\n}
+statTemp$41 = hashTemp$45.<build-hash>(hashTemp$42, hashTemp$43) : ShapeType {
+  Symbol(:\"rule_token\") => untyped
+}
 statTemp$19 = <constant:MatchTimeout>$21.new(statTemp$22, statTemp$41) : MatchTimeout
 statTemp$13 = statTemp$18.raise(statTemp$19) : NilClass
 <unconditional>"];
@@ -751,7 +755,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 <constant:nil>$28 = alias <constant:nil> : NilClass
 selfMethodTemp$2 = self : Diff
 diff = load_arg(selfMethodTemp$2#parse, 0) : untyped
-statTemp$9 = ^diff [^\n]*\n : String(\"^diff [^\\n]*\\n\")
+statTemp$9 = ^diff [^\\n]*\\n : String(\"^diff [^\\n]*\\n\")
 statTemp$11 = 0 : Integer(0)
 statTemp$12 = 4 : Integer(4)
 statTemp$10 = statTemp$11.|(statTemp$12) : Integer
@@ -772,7 +776,8 @@ parts"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" [label = "block[id=3](parts, <constant:Range>$15, <constant:nil>$28)
 arrayTemp$20 = alias <constant:<Magic>> : <Magic>
-parts = arrayTemp$20.<build-array>() : TupleType {\n}
+parts = arrayTemp$20.<build-array>() : TupleType {
+}
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_4" [style="bold"];
@@ -799,14 +804,17 @@ returnMethodTemp$111 = return returnMethodTemp$1 : <bottom>
 outerLoops: 1
 <block-nested: part> = load_arg(statTemp$22#map, 0) : untyped
 statTemp$26 = 
- : String(\"\n\")
+ : String(\"
+\")
 <block-nested: lines> = <block-nested: part>.split(statTemp$26) : untyped
 <block-nested: b_name> = <constant:nil>$28 : NilClass
 <block-nested: a_name> = <constant:nil>$28 : NilClass
 arrayTemp$30 = alias <constant:<Magic>> : <Magic>
-<block-nested: added_lines> = arrayTemp$30.<build-array>() : TupleType {\n}
+<block-nested: added_lines> = arrayTemp$30.<build-array>() : TupleType {
+}
 arrayTemp$32 = alias <constant:<Magic>> : <Magic>
-<block-nested: removed_lines> = arrayTemp$32.<build-array>() : TupleType {\n}
+<block-nested: removed_lines> = arrayTemp$32.<build-array>() : TupleType {
+}
 statTemp$34 = <block-nested: lines> : untyped
 <unconditional>"];
 
