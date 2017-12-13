@@ -550,61 +550,9 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
     }
 }
 
-bool isSubTypeGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
-    auto *g1 = dynamic_cast<GroundType *>(t1.get());
-    auto *g2 = dynamic_cast<GroundType *>(t2.get());
-
-    ruby_typer::Error::check(g1 != nullptr);
-    ruby_typer::Error::check(g2 != nullptr);
-    if (t1.get() == t2.get()) {
-        return true;
-    }
-
-    // Prereq: t1.kind <= t2.kind
-    // pairs to cover: 1  (Class, Class)
-    //                 2  (Class, And)
-    //                 3  (Class, Or)
-    //                 4  (And, Class)
-    //                 5  (And, And)
-    //                 6  (And, Or)
-    //                 7 (Or, Class)
-    //                 8 (Or, And)
-    //                 9 (Or, Or)
-
-    // Note: order of cases here matters!
-    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 7, 8, 9
-        // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
-    }
-
-    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5
-        // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
-    }
-
-    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
-        // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
-    }
-
-    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4
-        // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
-    }
-
-    if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) { // 1
-        if (auto *c2 = dynamic_cast<ClassType *>(t2.get())) {
-            return c1->symbol == c2->symbol || c1->symbol.info(ctx).derivesFrom(ctx, c2->symbol);
-        }
-    }
-    Error::raise("should never ber reachable");
-}
-
-bool ruby_typer::core::Types::equiv(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
-    return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
-}
-
-bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+// "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
+// be proxies over class types, this means "class or class-like"
+bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -647,7 +595,7 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
                                      if (result) {
                                          int i = 0;
                                          for (auto &el2 : a2->elems) {
-                                             result = isSubType(ctx, a1->elems[i], el2);
+                                             result = Types::isSubType(ctx, a1->elems[i], el2);
                                              if (!result) {
                                                  break;
                                              }
@@ -671,8 +619,9 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
                                                  ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
                                                  return candidate->value == el2->value && u1 == u2; // from lambda
                                              });
-                                         result = fnd != h1->keys.end() &&
-                                                  isSubType(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
+                                         result =
+                                             fnd != h1->keys.end() &&
+                                             Types::isSubType(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
                                          if (!result) {
                                              return;
                                          }
@@ -691,15 +640,63 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
         } else {
             // only 1st is proxy
             shared_ptr<Type> &und = p1->underlying;
-            return isSubTypeGround(ctx, und, t2);
+            return isSubTypeSingle(ctx, und, t2);
         }
     } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
         // non-proxies are never subtypes of proxies.
         return false;
     } else {
-        // none is proxy
-        return isSubTypeGround(ctx, t1, t2);
+        if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) {
+            if (auto *c2 = dynamic_cast<ClassType *>(t2.get())) {
+                return c1->symbol == c2->symbol || c1->symbol.info(ctx).derivesFrom(ctx, c2->symbol);
+            }
+        }
+        Error::raise("isSubType(", t1->typeName(), ", ", t2->typeName(), "): unreachable");
     }
+}
+
+bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+    if (t1.get() == t2.get()) {
+        return true;
+    }
+
+    // pairs to cover: 1  (_, _)
+    //                 2  (_, And)
+    //                 3  (_, Or)
+    //                 4  (And, _)
+    //                 5  (And, And)
+    //                 6  (And, Or)
+    //                 7 (Or, _)
+    //                 8 (Or, And)
+    //                 9 (Or, Or)
+    // _ wildcards are ClassType or ProxyType(ClassType)
+
+    // Note: order of cases here matters!
+    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 7, 8, 9
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
+    }
+
+    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
+    }
+
+    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
+    }
+
+    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4
+        // this will be incorrect if\when we have Type members
+        return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
+    }
+
+    return isSubTypeSingle(ctx, t1, t2); // 1
+}
+
+bool ruby_typer::core::Types::equiv(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+    return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 
 bool ProxyType::derivesFrom(core::Context ctx, core::SymbolRef klass) {

@@ -167,6 +167,7 @@ string ruby_typer::core::ClassType::typeName() {
 ruby_typer::core::ProxyType::ProxyType(shared_ptr<ruby_typer::core::Type> underlying) : underlying(move(underlying)) {}
 
 void ProxyType::_sanityCheck(core::Context ctx) {
+    Error::check(dynamic_cast<ClassType *>(this->underlying.get()) != nullptr);
     this->underlying->sanityCheck(ctx);
 }
 
