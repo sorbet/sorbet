@@ -59,13 +59,18 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
                         make_move_iterator(aliasesPrefix.end()));
 
+    res->sanityCheck(ctx);
     fillInTopoSorts(ctx, *res);
     dealias(ctx, *res);
-    fillInBlockArguments(ctx, *res);
+    CFG::ReadsAndWrites RnW = res->findAllReadsAndWrites();
+    computeMinMaxLoops(ctx, RnW, *res);
+    removeDeadAssigns(ctx, RnW, *res);
+    fillInBlockArguments(ctx, RnW, *res);
     simplify(ctx, *res);
     histogramInc("CFGBuilder::basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
     markLoopHeaders(ctx, *res);
     sanityCheck(ctx, *res);
+    res->sanityCheck(ctx);
     return res;
 }
 
