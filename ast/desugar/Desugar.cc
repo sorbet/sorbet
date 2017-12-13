@@ -774,6 +774,11 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Instance, var->name);
                 result.swap(res);
             },
+            [&](parser::NthRef *var) {
+                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(what->loc, UnresolvedIdent::Global,
+                                                                          ctx.state.enterNameUTF8(to_string(var->ref)));
+                result.swap(res);
+            },
             [&](parser::Assign *asgn) {
                 auto lhs = node2TreeImpl(ctx, asgn->lhs);
                 auto rhs = node2TreeImpl(ctx, asgn->rhs);

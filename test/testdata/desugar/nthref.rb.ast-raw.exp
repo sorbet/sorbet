@@ -1,0 +1,12 @@
+InsSeq{
+  stats = [
+    UnresolvedIdent{
+      kind = Global
+      name = 1
+    }
+  ],
+  expr = UnresolvedIdent{
+    kind = Global
+    name = 314159
+  }
+}

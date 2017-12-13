@@ -1,0 +1,10 @@
+Begin {
+  stmts = [
+    NthRef {
+      ref = 1
+    }
+    NthRef {
+      ref = 314159
+    }
+  ]
+}
