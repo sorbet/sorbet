@@ -1214,6 +1214,8 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Defined *defined) {
+                // TODO: if defined->value isn't defined, with this
+                // implementation we will still raise an undefined error
                 auto res =
                     mkSend1(what->loc, mkSelf(what->loc), core::Names::defined_p(), node2TreeImpl(ctx, defined->value));
                 result.swap(res);
