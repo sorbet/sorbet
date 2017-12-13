@@ -206,82 +206,13 @@ void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
         }
     }
 }
-
-void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG &cfg) {
-    // Dmitry's algorithm for adding basic block arguments
-    // I don't remember this version being described in any book.
-    //
-    // Compute two upper bounds:
-    //  - one by accumulating all reads on the reverse graph
-    //  - one by accumulating all writes on direct graph
-    //
-    //  every node gets the intersection between two sets suggested by those overestimations.
-    //
-    // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
-    // making this quadratic in anything will be bad.
-    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> reads;
-    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> writes;
-
-    for (unique_ptr<BasicBlock> &bb : cfg.basicBlocks) {
-        for (Binding &bind : bb->exprs) {
-            writes[bind.bind].insert(bb.get());
-            if (auto *v = dynamic_cast<Ident *>(bind.value.get())) {
-                reads[v->what].insert(bb.get());
-            } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
-                reads[v->recv].insert(bb.get());
-                for (auto arg : v->args) {
-                    reads[arg].insert(bb.get());
-                }
-            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
-                reads[v->what].insert(bb.get());
-            } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
-                reads[v->value].insert(bb.get());
-            } else if (auto *v = dynamic_cast<LoadArg *>(bind.value.get())) {
-                reads[v->receiver].insert(bb.get());
-            } else if (auto *v = dynamic_cast<Cast *>(bind.value.get())) {
-                reads[v->value].insert(bb.get());
-            }
-        }
-        if (bb->bexit.cond.exists()) {
-            reads[bb->bexit.cond].insert(bb.get());
-        }
-    }
-
-    for (auto &pair : reads) {
-        core::LocalVariable what = pair.first;
-        unordered_set<BasicBlock *> &where = pair.second;
-        auto fnd = cfg.minLoops.insert({what, INT_MAX});
-        int &min = (*(fnd.first)).second;
-        for (BasicBlock *bb : where) {
-            if (min > bb->outerLoops) {
-                min = bb->outerLoops;
-            }
-        }
-    }
-
-    for (auto &pair : writes) {
-        core::LocalVariable what = pair.first;
-        unordered_set<BasicBlock *> &where = pair.second;
-        auto fndMn = cfg.minLoops.insert({what, INT_MAX});
-        auto fndMx = cfg.maxLoopWrite.insert({what, 0});
-        int &min = (*(fndMn.first)).second;
-        int &max = (*(fndMx.first)).second;
-        for (BasicBlock *bb : where) {
-            if (min > bb->outerLoops) {
-                min = bb->outerLoops;
-            }
-            if (max < bb->outerLoops) {
-                max = bb->outerLoops;
-            }
-        }
-    }
-
+void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
             Binding &bind = *expIt;
-            auto fnd = reads.find(bind.bind);
-            if (fnd == reads.end()) {
+            auto fnd = RnW.reads.find(bind.bind);
+            if (fnd == RnW.reads.end()) {
                 // This should be !New && !Send && !Return, but I prefer to list explicitly in case we start adding
                 // nodes.
                 if (dynamic_cast<Ident *>(bind.value.get()) != nullptr ||
@@ -304,12 +235,57 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG &cfg) {
             }
         }
     }
+}
+
+void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+    for (auto &pair : RnW.reads) {
+        core::LocalVariable what = pair.first;
+        const unordered_set<BasicBlock *> &where = pair.second;
+        auto fnd = cfg.minLoops.insert({what, INT_MAX});
+        int &min = (*(fnd.first)).second;
+        for (const BasicBlock *bb : where) {
+            if (min > bb->outerLoops) {
+                min = bb->outerLoops;
+            }
+        }
+    }
+
+    for (auto &pair : RnW.writes) {
+        core::LocalVariable what = pair.first;
+        const unordered_set<BasicBlock *> &where = pair.second;
+        auto fndMn = cfg.minLoops.insert({what, INT_MAX}); // note: this will NOT overrwite existing value
+        auto fndMx = cfg.maxLoopWrite.insert({what, 0});
+        int &min = (*(fndMn.first)).second;
+        int &max = (*(fndMx.first)).second;
+        for (const BasicBlock *bb : where) {
+            if (min > bb->outerLoops) {
+                min = bb->outerLoops;
+            }
+            if (max < bb->outerLoops) {
+                max = bb->outerLoops;
+            }
+        }
+    }
+}
+
+void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &RnW, CFG &cfg) {
+    // Dmitry's algorithm for adding basic block arguments
+    // I don't remember this version being described in any book.
+    //
+    // Compute two upper bounds:
+    //  - one by accumulating all reads on the reverse graph
+    //  - one by accumulating all writes on direct graph
+    //
+    //  every node gets the intersection between two sets suggested by those overestimations.
+    //
+    // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
+    // making this quadratic in anything will be bad.
 
     vector<unordered_set<core::LocalVariable>> reads_by_block(cfg.basicBlocks.size());
     vector<unordered_set<core::LocalVariable>> writes_by_block(cfg.basicBlocks.size());
 
-    for (auto &rds : reads) {
-        auto &wts = writes[rds.first];
+    for (auto &rds : RnW.reads) {
+        auto &wts = RnW.writes[rds.first];
         histogramInc("CFGBuilder::readsPerBlock", rds.second.size());
         if (rds.second.size() == 1 && wts.size() == 1 && *(rds.second.begin()) == *(wts.begin())) {
             wts.clear();
@@ -319,9 +295,9 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG &cfg) {
         }
     }
 
-    for (auto &wts : writes) {
+    for (auto &wts : RnW.writes) {
         histogramInc("CFGBuilder::writesPerBlock", wts.second.size());
-        auto &rds = reads[wts.first];
+        auto &rds = RnW.reads[wts.first];
         if (rds.empty()) {
             wts.second.clear();
         }

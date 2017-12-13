@@ -1,6 +1,7 @@
 #include "CFG.h"
 #include <algorithm>
 #include <sstream>
+#include <unordered_set>
 
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
@@ -34,6 +35,47 @@ CFG::CFG() {
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
     deadBlock()->bexit.cond = core::NameRef(0);
+}
+
+CFG::ReadsAndWrites CFG::findAllReadsAndWrites() {
+    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> reads;
+    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> writes;
+    for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
+        for (Binding &bind : bb->exprs) {
+            writes[bind.bind].insert(bb.get());
+            if (auto *v = dynamic_cast<Ident *>(bind.value.get())) {
+                reads[v->what].insert(bb.get());
+            } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
+                reads[v->recv].insert(bb.get());
+                for (auto arg : v->args) {
+                    reads[arg].insert(bb.get());
+                }
+            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
+                reads[v->what].insert(bb.get());
+            } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
+                reads[v->value].insert(bb.get());
+            } else if (auto *v = dynamic_cast<LoadArg *>(bind.value.get())) {
+                reads[v->receiver].insert(bb.get());
+            } else if (auto *v = dynamic_cast<Cast *>(bind.value.get())) {
+                reads[v->value].insert(bb.get());
+            }
+        }
+        if (bb->bexit.cond.exists()) {
+            reads[bb->bexit.cond].insert(bb.get());
+        }
+    }
+    return CFG::ReadsAndWrites{move(reads), move(writes)};
+}
+
+void CFG::sanityCheck(core::Context ctx) {
+    // check that synthetic variable that is read is ever written to.
+    ReadsAndWrites RnW = CFG::findAllReadsAndWrites();
+    for (auto &el : RnW.reads) {
+        core::Name &nm = el.first.name.name(ctx);
+        if (nm.kind != core::NameKind::UNIQUE || nm.unique.uniqueNameKind != core::UniqueNameKind::CFG)
+            continue;
+        //        Error::check(writes.find(el.first) != writes.end());
+    }
 }
 
 string CFG::toString(core::Context ctx) {

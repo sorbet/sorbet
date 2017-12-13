@@ -4,6 +4,7 @@
 #include "core/core.h"
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace ruby_typer {
 namespace cfg {
@@ -258,6 +259,14 @@ public:
     static int LOOP_HEADER;
     std::unordered_map<core::LocalVariable, int> minLoops;
     std::unordered_map<core::LocalVariable, int> maxLoopWrite;
+
+    void sanityCheck(core::Context ctx);
+
+    struct ReadsAndWrites {
+        std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> reads;
+        std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> writes;
+    };
+    ReadsAndWrites findAllReadsAndWrites();
 
 private:
     CFG();
