@@ -92,6 +92,10 @@ unique_ptr<Expression> mkEmptyTree(core::Loc loc) {
     return make_unique<EmptyTree>(loc);
 }
 
+unique_ptr<Expression> mkSelf(core::Loc loc) {
+    return make_unique<Self>(loc, core::GlobalState::defn_todo());
+}
+
 unique_ptr<Expression> mkInsSeq(core::Loc loc, InsSeq::STATS_store stats, unique_ptr<Expression> expr) {
     return make_unique<InsSeq>(loc, move(stats), move(expr));
 }
@@ -441,7 +445,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 u4 flags = 0;
                 auto rec = node2TreeImpl(ctx, send->receiver);
                 if (cast_tree<EmptyTree>(rec.get()) != nullptr) {
-                    rec = make_unique<Self>(what->loc, ctx.state.defn_todo());
+                    rec = mkSelf(what->loc);
                     flags |= Send::PRIVATE_OK;
                 }
                 Send::ARGS_store args;
@@ -483,7 +487,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Self *self) {
-                unique_ptr<Expression> res = make_unique<Self>(what->loc, ctx.state.defn_todo());
+                unique_ptr<Expression> res = mkSelf(what->loc);
                 result.swap(res);
             },
             [&](parser::DString *dstring) {
@@ -792,16 +796,15 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 };
 
                 unique_ptr<Expression> res =
-                    make_unique<Send>(what->loc, make_unique<Self>(what->loc, ctx.state.defn_todo()), method,
-                                      move(args), node2Proc(ctx, move(block)));
+                    make_unique<Send>(what->loc, mkSelf(what->loc), method, move(args), node2Proc(ctx, move(block)));
 
                 result.swap(res);
             },
             [&](parser::ZSuper *zuper) {
                 Send::ARGS_store args;
                 args.emplace_back(make_unique<ZSuperArgs>(zuper->loc));
-                unique_ptr<Expression> res = make_unique<Send>(
-                    what->loc, make_unique<Self>(what->loc, ctx.state.defn_todo()), core::Names::super(), move(args));
+                unique_ptr<Expression> res =
+                    make_unique<Send>(what->loc, mkSelf(what->loc), core::Names::super(), move(args));
                 result.swap(res);
             },
             [&](parser::Integer *integer) {
@@ -1200,13 +1203,18 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto res = mkSplat(what->loc, node2TreeImpl(ctx, splat->var));
                 result.swap(res);
             },
-            [&](parser::BlockPass *blockPass) { Error::raise("Send should have already handled the BlockPass"); },
             [&](parser::Alias *alias) {
-                auto self = make_unique<Self>(alias->loc, ctx.state.defn_todo());
-                auto res = mkSend2(alias->loc, move(self), core::Names::aliasMethod(), node2TreeImpl(ctx, alias->from),
-                                   node2TreeImpl(ctx, alias->to));
+                auto res = mkSend2(alias->loc, mkSelf(what->loc), core::Names::aliasMethod(),
+                                   node2TreeImpl(ctx, alias->from), node2TreeImpl(ctx, alias->to));
                 result.swap(res);
             },
+            [&](parser::Defined *defined) {
+                auto res =
+                    mkSend1(what->loc, mkSelf(what->loc), core::Names::defined_p(), node2TreeImpl(ctx, defined->value));
+                result.swap(res);
+            },
+
+            [&](parser::BlockPass *blockPass) { Error::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) {
                 ctx.state.errors.error(what->loc, core::ErrorClass::UnsupportedNode, "Unsupported node type {}",
                                        node->nodeName());

@@ -37,6 +37,7 @@ NameDef names[] = {
     {"tripleEq", "==="},
     {"orOp", "|"},
     {"slice"},
+    {"defined_p", "defined?"},
 
     // used in CFG for temporaries
     {"whileTemp"},
