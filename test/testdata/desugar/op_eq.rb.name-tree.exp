@@ -1,15 +1,19 @@
 class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
   def b<b>()
     <emptyTree>
+  end
 
   def b=<b=>(_)
     <emptyTree>
+  end
 
   def y<y>()
     <emptyTree>
+  end
 
   def z<z>()
     <emptyTree>
+  end
 
   def example<example>(a)
     begin
@@ -64,5 +68,5 @@ class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
         end
       end
     end
-
+  end
 end

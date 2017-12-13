@@ -10,7 +10,7 @@ begin
           self(<constant:<todo sym>>).super(message)
           @rule_token = rule_token
         end
-
+      end
     end
 
     class <emptyTree>::<constant:Matcher><<constant:<todo sym>>> < (::<constant:<todo sym>>)
@@ -39,6 +39,7 @@ begin
             <emptyTree>
           end
         end
+      end
 
       def match<<constant:<todo sym>>>(match_context)
         begin
@@ -59,7 +60,7 @@ begin
             end
           end
         end
-
+      end
     end
 
     class <emptyTree>::<constant:MatchContext><<constant:<todo sym>>> < (::<constant:<todo sym>>)
@@ -90,10 +91,11 @@ begin
           @diff = diff
           @openapi_diff = openapi_diff
         end
+      end
 
       def user_stripe_suffix?<<constant:<todo sym>>>()
         @repo.start_with?("stripe-internal/").!()
-
+      end
     end
 
     class <emptyTree>::<constant:MatchTimeBudget><<constant:<todo sym>>> < (::<constant:<todo sym>>)
@@ -103,6 +105,7 @@ begin
 
       def initialize<<constant:<todo sym>>>()
         @start = <emptyTree>::<constant:Time>.now()
+      end
 
       def check!<<constant:<todo sym>>>()
         begin
@@ -117,6 +120,7 @@ begin
             <emptyTree>
           end
         end
+      end
 
       def time_rule<<constant:<todo sym>>>(rule)
         begin
@@ -139,7 +143,7 @@ begin
           self(<constant:<todo sym>>).check!()
           res
         end
-
+      end
     end
 
     class <emptyTree>::<constant:Diff><<constant:<todo sym>>> < (::<constant:<todo sym>>)
@@ -148,9 +152,11 @@ begin
           @raw = raw_diff
           @parsed = self(<constant:<todo sym>>).parse(raw_diff)
         end
+      end
 
       def affected_files<<constant:<todo sym>>>()
         self(<constant:<todo sym>>).added_files().+(self(<constant:<todo sym>>).deleted_files()).+(self(<constant:<todo sym>>).changed_files())
+      end
 
       def added_files<<constant:<todo sym>>>()
         @parsed.select() do |part|
@@ -158,6 +164,7 @@ begin
         end.map() do |part|
           part.[](:b_name)
         end
+      end
 
       def deleted_files<<constant:<todo sym>>>()
         @parsed.select() do |part|
@@ -165,6 +172,7 @@ begin
         end.map() do |part|
           part.[](:a_name)
         end
+      end
 
       def changed_files<<constant:<todo sym>>>()
         @parsed.select() do |part|
@@ -172,22 +180,27 @@ begin
         end.map() do |part|
           part.[](:b_name)
         end
+      end
 
       def added_lines<<constant:<todo sym>>>()
         @parsed.map() do |part|
           part.[](:added_lines)
         end.flatten()
+      end
 
       def removed_lines<<constant:<todo sym>>>()
         @parsed.map() do |part|
           part.[](:removed_lines)
         end.flatten()
+      end
 
       def changed_lines<<constant:<todo sym>>>()
         self(<constant:<todo sym>>).added_lines().+(self(<constant:<todo sym>>).removed_lines())
+      end
 
       def changed_openapi?<<constant:<todo sym>>>()
         self(<constant:<todo sym>>).changed_files().include?(<emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
+      end
 
       self(<constant:<todo sym>>).private(def parse<<constant:<todo sym>>>(diff)
           begin
@@ -257,16 +270,15 @@ begin
                 {:a_name => a_name, :b_name => b_name, :added_lines => added_lines, :removed_lines => removed_lines}
               end
             end.compact()
-          end)
-
+          end
+        end)
     end
-
   end
   class <emptyTree>::<constant:Range><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     self(<constant:<todo sym>>).standard_method({:begin_ => <emptyTree>::<constant:Integer>, :end_ => <emptyTree>::<constant:Integer>, :exclude_end => <emptyTree>::<constant:Opus>::<constant:Types>.any(<emptyTree>::<constant:TrueClass>, <emptyTree>::<constant:FalseClass>)}, {:returns => <emptyTree>::<constant:Object>})
 
     def initialize<<constant:<todo sym>>>(begin_, end_, exclude_end = self(<constant:<todo sym>>)._())
       <emptyTree>
-
+    end
   end
 end

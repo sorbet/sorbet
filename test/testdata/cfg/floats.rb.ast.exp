@@ -12,3 +12,4 @@ def test_large_float<<constant:<todo sym>>>()
     a = nan
     a = nan
   end
+end

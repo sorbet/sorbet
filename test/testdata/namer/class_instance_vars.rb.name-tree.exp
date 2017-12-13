@@ -7,11 +7,10 @@ begin
         ::<constant:Parent>#@ivar = 1
         ::<constant:Parent>#@ivar2
       end
-
+    end
   end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
     ::<constant:Mixin>#@@mixin_cvar
-
   end
   class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
     ::<constant:Parent>#@@class_var
@@ -27,11 +26,10 @@ begin
         ::<constant:Parent>#@ivar2
         ::<constant:Child>#@undefinedivar
       end
-
+    end
   end
   #<constant:Alias> = ::<constant:Parent>
   class <emptyTree>::<constant:Child1><<constant:Child1>> < (#<constant:Alias>)
     ::<constant:Child1>#@@class_var
-
   end
 end

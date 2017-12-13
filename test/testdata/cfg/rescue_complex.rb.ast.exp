@@ -1,14 +1,19 @@
 begin
   def meth<<constant:<todo sym>>>()
     0
+  end
   def foo<<constant:<todo sym>>>()
     1
+  end
   def bar<<constant:<todo sym>>>()
     2
+  end
   def baz<<constant:<todo sym>>>()
     3
+  end
   def take_arg<<constant:<todo sym>>>(x)
     x
+  end
   def multiple_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
@@ -19,6 +24,7 @@ begin
     else
       <emptyTree>
     end
+  end
   def multiple_rescue_classes<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
@@ -27,10 +33,12 @@ begin
     else
       <emptyTree>
     end
+  end
   def parse_rescue_ensure<<constant:<todo sym>>>()
     begin
       <Not Supported (Ensure)>
     end
+  end
   def parse_bug_rescue_empty_else<<constant:<todo sym>>>()
     begin
       <emptyTree>
@@ -39,6 +47,7 @@ begin
     else
       <emptyTree>
     end
+  end
   def parse_ruby_bug_12686<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).take_arg(begin
         self(<constant:<todo sym>>).bar()
@@ -47,12 +56,14 @@ begin
       else
         <emptyTree>
       end)
+  end
   def parse_rescue_mod<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).meth()
   rescue => rescueTemp$10004
     self(<constant:<todo sym>>).bar()
   else
     <emptyTree>
+  end
   def parse_resbody_list_var<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
@@ -61,10 +72,12 @@ begin
     else
       <emptyTree>
     end
+  end
   def parse_rescue_else_ensure<<constant:<todo sym>>>()
     begin
       <Not Supported (Ensure)>
     end
+  end
   def parse_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
@@ -73,6 +86,7 @@ begin
     else
       <emptyTree>
     end
+  end
   def parse_resbody_var<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
@@ -81,6 +95,7 @@ begin
     else
       <emptyTree>
     end
+  end
   def parse_resbody_var_1<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
@@ -92,24 +107,28 @@ begin
     else
       <emptyTree>
     end
+  end
   def parse_rescue_mod_op_assign<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).meth()
     rescue => rescueTemp$10007
       self(<constant:<todo sym>>).bar()
     else
       <emptyTree>)
+  end
   def parse_ruby_bug_12402<<constant:<todo sym>>>()
     foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
   rescue => rescueTemp$10008
     ::<constant:nil>
   else
     <emptyTree>
+  end
   def parse_ruby_bug_12402_1<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
     rescue => rescueTemp$10009
       ::<constant:nil>
     else
       <emptyTree>)
+  end
   def parse_ruby_bug_12402_2<<constant:<todo sym>>>()
     begin
       []$10011 = self(<constant:<todo sym>>).foo()
@@ -120,4 +139,5 @@ begin
         else
           <emptyTree>))
     end
+  end
 end

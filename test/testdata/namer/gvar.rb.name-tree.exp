@@ -7,6 +7,6 @@ begin
 
     def meth<meth>()
       [#$a, #$b, #$c]
-
+    end
   end
 end

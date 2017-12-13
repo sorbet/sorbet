@@ -5,6 +5,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
     else
       return 2
     end
+  end
 
   def i_like_exps<<constant:<todo sym>>>()
     if begin
@@ -14,6 +15,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
     else
       2
     end
+  end
 
   def return_in_one_branch1<<constant:<todo sym>>>()
     if begin
@@ -23,6 +25,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
     else
       2
     end
+  end
 
   def return_in_one_branch2<<constant:<todo sym>>>()
     if begin
@@ -32,6 +35,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
     else
       return 2
     end
+  end
 
   def variables<<constant:<todo sym>>>()
     begin
@@ -51,6 +55,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
       end
       a.+(b)
     end
+  end
 
   def variables_and_loop<<constant:<todo sym>>>()
     begin
@@ -72,6 +77,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
       end
       b
     end
+  end
 
   def variables_loop_if<<constant:<todo sym>>>()
     begin
@@ -86,6 +92,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
       end
       b
     end
+  end
 
   def take_arguments<<constant:<todo sym>>>(i)
     if begin
@@ -95,5 +102,5 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
     else
       i
     end
-
+  end
 end

@@ -1,20 +1,21 @@
 begin
   def bar<<constant:<todo sym>>>(a)
     a
+  end
   class <emptyTree>::<constant:Splatable><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def to_a<<constant:<todo sym>>>()
       [1]
-
+    end
   end
   class <emptyTree>::<constant:Rescueable><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def to_a<<constant:<todo sym>>>()
       [<emptyTree>::<constant:String>, <emptyTree>::<constant:RuntimeError>]
-
+    end
   end
   class <emptyTree>::<constant:Parent><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def foo<<constant:<todo sym>>>(a, b)
       [b, a]
-
+    end
   end
   class <emptyTree>::<constant:Child><<constant:<todo sym>>> < (<emptyTree>::<constant:Parent>)
     def foo<<constant:<todo sym>>>()
@@ -22,7 +23,7 @@ begin
         a = [1, 2]
         self(<constant:<todo sym>>).super(::<constant:<Magic>>.<splat>(a.to_a()))
       end
-
+    end
   end
   def foo<<constant:<todo sym>>>()
     begin
@@ -59,5 +60,6 @@ begin
         <emptyTree>
       end
     end
+  end
   self(<constant:<todo sym>>).foo()
 end

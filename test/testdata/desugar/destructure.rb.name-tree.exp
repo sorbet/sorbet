@@ -22,5 +22,5 @@ class <emptyTree>::<constant:Destructure><<constant:Destructure>> < (::<constant
         end
       end
     end
-
+  end
 end

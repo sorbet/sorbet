@@ -1,10 +1,6 @@
 begin
-  module <emptyTree>::<constant:Mixin1><<constant:Mixin1>> < ()
-  end
-  module <emptyTree>::<constant:Mixin2><<constant:Mixin2>> < ()
-  end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>, ::<constant:Mixin1>)
-  end
-  class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin2>)
-  end
+  module <emptyTree>::<constant:Mixin1><<constant:Mixin1>> < ()  end
+  module <emptyTree>::<constant:Mixin2><<constant:Mixin2>> < ()  end
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>, ::<constant:Mixin1>)  end
+  class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin2>)  end
 end

@@ -31,5 +31,5 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<constant:<todo s
         end
       end
     end
-
+  end
 end

@@ -17,5 +17,5 @@ class <emptyTree>::<constant:TestLocals><<constant:TestLocals>> < (::<constant:<
         <block-nested: a>.+(<block-nested: b>)
       end
     end
-
+  end
 end

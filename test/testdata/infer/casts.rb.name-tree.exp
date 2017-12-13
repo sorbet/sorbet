@@ -1,6 +1,7 @@
 class <emptyTree>::<constant:TestCasts><<constant:TestCasts>> < (::<constant:<todo sym>>)
   def untyped<untyped>()
     <emptyTree>
+  end
 
   def test_casts<test_casts>()
     begin
@@ -17,5 +18,5 @@ class <emptyTree>::<constant:TestCasts><<constant:TestCasts>> < (::<constant:<to
       s.+("hi")
       s.+(3)
     end
-
+  end
 end

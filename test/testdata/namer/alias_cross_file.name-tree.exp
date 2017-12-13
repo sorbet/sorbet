@@ -1,10 +1,9 @@
 class <emptyTree>::<constant:TestSig><<constant:TestSig>> < (::<constant:<todo sym>>)
   def test_resolve<test_resolve>()
     <emptyTree>
-
+  end
 end
 begin
-  class <emptyTree>::<constant:T1><<constant:T1>> < (::<constant:<todo sym>>)
-  end
+  class <emptyTree>::<constant:T1><<constant:T1>> < (::<constant:<todo sym>>)  end
   #<constant:T2> = ::<constant:T1>
 end

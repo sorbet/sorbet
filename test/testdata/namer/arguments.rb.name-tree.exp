@@ -7,5 +7,5 @@ class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)
         [<block-nested: a>, <block-nested: b>, <block-nested: c>, <block-nested: d>, <block-nested: e>, <block-nested: f>, <block-nested: g>, <block-nested: h>]
       end
     end
-
+  end
 end

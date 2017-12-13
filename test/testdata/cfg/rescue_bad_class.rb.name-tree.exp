@@ -6,3 +6,4 @@ def foo<foo>()
   else
     <emptyTree>
   end
+end

@@ -288,12 +288,12 @@ string ClassDef::toString(core::GlobalState &gs, int tabs) {
     buf << name->toString(gs, tabs) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs) << "> < ";
     printArgs(gs, buf, this->ancestors, tabs);
 
-    buf << endl;
-
     for (auto &a : this->rhs) {
+        buf << endl;
         printTabs(buf, tabs + 1);
-        buf << a->toString(gs, tabs + 1) << endl << endl;
+        buf << a->toString(gs, tabs + 1) << endl;
     }
+
     printTabs(buf, tabs);
     buf << "end";
     return buf.str();
@@ -388,7 +388,9 @@ string MethodDef::toString(core::GlobalState &gs, int tabs) {
     }
     buf << ")" << endl;
     printTabs(buf, tabs + 1);
-    buf << this->rhs->toString(gs, tabs + 1);
+    buf << this->rhs->toString(gs, tabs + 1) << endl;
+    printTabs(buf, tabs);
+    buf << "end";
     return buf.str();
 }
 

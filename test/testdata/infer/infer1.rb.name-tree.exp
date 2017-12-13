@@ -4,15 +4,19 @@ begin
       a = "foo"
       b = a.getbyte(a)
     end
+  end
   def baz2<baz2>()
     begin
       a = "foo"
       b = a.getbyte("foo")
     end
+  end
   def baz3<baz3>()
     b = "foo".getbyte("foo")
+  end
   def baz4<baz4>()
     b = self(<constant:Object>).a().getbyte("foo")
+  end
   def baz5<baz5>()
     begin
       if begin
@@ -24,6 +28,7 @@ begin
       end
       b = b.getbyte(1)
     end
+  end
   def baz6<baz6>()
     begin
       if begin
@@ -35,6 +40,7 @@ begin
       end
       b = "foo".getbyte(b)
     end
+  end
   def baz7<baz7>()
     begin
       if begin
@@ -46,10 +52,12 @@ begin
       end
       b = "foo".getbyte(b)
     end
+  end
   def baz8<baz8>()
     while begin
         true
       end
       b = 1
     end
+  end
 end

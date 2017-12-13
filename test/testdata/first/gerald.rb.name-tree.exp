@@ -8,7 +8,7 @@ begin
           self(<constant:MatchTimeout>).super(message)
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#@rule_token = rule_token
         end
-
+      end
     end
 
     class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:<todo sym>>, ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Chalk>::<constant:Log>)
@@ -33,6 +33,7 @@ begin
             <emptyTree>
           end
         end
+      end
 
       def match<match>(match_context)
         begin
@@ -53,7 +54,7 @@ begin
             end
           end
         end
-
+      end
     end
 
     class <emptyTree>::<constant:MatchContext><<constant:MatchContext>> < (::<constant:<todo sym>>)
@@ -68,15 +69,17 @@ begin
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@diff = diff
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@openapi_diff = openapi_diff
         end
+      end
 
       def user_stripe_suffix?<user_stripe_suffix?>()
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo.start_with?("stripe-internal/").!()
-
+      end
     end
 
     class <emptyTree>::<constant:MatchTimeBudget><<constant:MatchTimeBudget>> < (::<constant:<todo sym>>)
       def initialize<initialize>()
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:Time>.now()
+      end
 
       def check!<check!>()
         begin
@@ -91,6 +94,7 @@ begin
             <emptyTree>
           end
         end
+      end
 
       def time_rule<time_rule>(rule)
         begin
@@ -113,7 +117,7 @@ begin
           self(<constant:MatchTimeBudget>).check!()
           res
         end
-
+      end
     end
 
     class <emptyTree>::<constant:Diff><<constant:Diff>> < (::<constant:<todo sym>>)
@@ -122,9 +126,11 @@ begin
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@raw = raw_diff
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed = self(<constant:Diff>).parse(raw_diff)
         end
+      end
 
       def affected_files<affected_files>()
         self(<constant:Diff>).added_files().+(self(<constant:Diff>).deleted_files()).+(self(<constant:Diff>).changed_files())
+      end
 
       def added_files<added_files>()
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
@@ -132,6 +138,7 @@ begin
         end.map() do |<block-nested: part>|
           <block-nested: part>.[](:b_name)
         end
+      end
 
       def deleted_files<deleted_files>()
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
@@ -139,6 +146,7 @@ begin
         end.map() do |<block-nested: part>|
           <block-nested: part>.[](:a_name)
         end
+      end
 
       def changed_files<changed_files>()
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
@@ -146,22 +154,27 @@ begin
         end.map() do |<block-nested: part>|
           <block-nested: part>.[](:b_name)
         end
+      end
 
       def added_lines<added_lines>()
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |<block-nested: part>|
           <block-nested: part>.[](:added_lines)
         end.flatten()
+      end
 
       def removed_lines<removed_lines>()
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |<block-nested: part>|
           <block-nested: part>.[](:removed_lines)
         end.flatten()
+      end
 
       def changed_lines<changed_lines>()
         self(<constant:Diff>).added_lines().+(self(<constant:Diff>).removed_lines())
+      end
 
       def changed_openapi?<changed_openapi?>()
         self(<constant:Diff>).changed_files().include?(::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
+      end
 
       def parse<parse>(diff)
         begin
@@ -232,13 +245,12 @@ begin
             end
           end.compact()
         end
-
+      end
     end
-
   end
   class <emptyTree>::<constant:Range><<constant:Range>> < (::<constant:<todo sym>>)
     def initialize<initialize>(begin_, end_, exclude_end)
       <emptyTree>
-
+    end
   end
 end

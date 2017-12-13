@@ -2,30 +2,23 @@ begin
   class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<constant:<todo sym>>)
     def normal_method<normal_method>()
       <emptyTree>
+    end
 
     def self.normal_static_method<normal_static_method>()
       <emptyTree>
-
-    class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<constant:<todo sym>>)
     end
 
-    module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()
-    end
+    class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<constant:<todo sym>>)    end
 
+    module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()    end
   end
   module <emptyTree>::<constant:ANamespace><<constant:ANamespace>> < ()
-    class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<constant:<todo sym>>)
-    end
-
+    class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<constant:<todo sym>>)    end
   end
-  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < (::<constant:<todo sym>>)
-  end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
-  end
-  module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
-  end
-  module <emptyTree>::<constant:OtherMixin><<constant:OtherMixin>> < ()
-  end
+  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)  end
+  module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()  end
+  module <emptyTree>::<constant:OtherMixin><<constant:OtherMixin>> < ()  end
   class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
     self(<singleton class:<constant:Child>>).include(::<constant:Mixin>, ::<constant:Mixin>)
 
@@ -36,6 +29,5 @@ begin
     end
 
     self(<singleton class:<constant:Child>>).whatever().include(::<constant:OtherMixin>)
-
   end
 end

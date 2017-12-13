@@ -2,34 +2,37 @@ begin
   class <emptyTree>::<constant:HasMeth><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def meth<<constant:<todo sym>>>()
       "meth"
-
+    end
   end
   def returns_lambda<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).lambda() do |x|
       "returns_lambda"
     end
+  end
   class <emptyTree>::<constant:HasToProc><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def to_proc<<constant:<todo sym>>>()
       self(<constant:<todo sym>>).returns_lambda()
-
+    end
   end
   def calls_arg_with_object<<constant:<todo sym>>>(arg, &blk)
     blk.call(arg)
+  end
   def calls_with_object<<constant:<todo sym>>>(&blk)
     self(<constant:<todo sym>>).calls_arg_with_object(<emptyTree>::<constant:HasMeth>.new()) do |*<block-pass>$10000|
       blk.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$10000.to_a()))
     end
+  end
   class <emptyTree>::<constant:CallsWithObject><<constant:<todo sym>>> < (::<constant:<todo sym>>)
     def self.calls_with_object<<constant:<todo sym>>>(&blk)
       blk.call(<emptyTree>::<constant:HasMeth>.new())
-
+    end
   end
   class <emptyTree>::<constant:CallsWithObjectChild><<constant:<todo sym>>> < (<emptyTree>::<constant:CallsWithObject>)
     def self.calls_with_object<<constant:<todo sym>>>(&blk)
       self(<constant:<todo sym>>).super() do |*<block-pass>$10001|
         blk.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$10001.to_a()))
       end
-
+    end
   end
   def foo<<constant:<todo sym>>>(&blk)
     begin
@@ -80,6 +83,7 @@ begin
         x.meth()
       end
     end
+  end
   self(<constant:<todo sym>>).foo() do |x|
     "foo"
   end

@@ -16,3 +16,4 @@ def foo<<constant:<todo sym>>>()
     <emptyTree>::<constant:Regexp>.new(a.+("b").+(c))
     ::<constant:Regexp>.new("abc", 0)
   end
+end

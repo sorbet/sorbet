@@ -7,5 +7,6 @@ begin
     else
       3
     end
+  end
   self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).foo())
 end
