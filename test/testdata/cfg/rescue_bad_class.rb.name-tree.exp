@@ -3,7 +3,5 @@ def foo<foo>()
     <emptyTree>
   rescue ::<constant:NotAClass> => e
     <emptyTree>
-  else
-    <emptyTree>
   end
 end

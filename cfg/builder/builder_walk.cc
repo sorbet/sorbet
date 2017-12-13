@@ -277,8 +277,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 unconditionalJump(bodyBlock, elseBody, cctx.inWhat, a->loc);
 
                 elseBody = walk(cctx, a->else_.get(), elseBody);
-                ret = cctx.inWhat.freshBlock(cctx.loops, elseBody);
-                unconditionalJump(elseBody, ret, cctx.inWhat, a->loc);
+                auto ensureBody = cctx.inWhat.freshBlock(cctx.loops, elseBody);
+                unconditionalJump(elseBody, ensureBody, cctx.inWhat, a->loc);
+
+                auto throwAway = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::rescueTemp(),
+                                                             cctx.inWhat.symbol);
+                ensureBody = walk(cctx.withTarget(throwAway), a->ensure.get(), ensureBody);
+                ret = cctx.inWhat.freshBlock(cctx.loops, ensureBody);
+                unconditionalJump(ensureBody, ret, cctx.inWhat, a->loc);
 
                 for (auto &rescueCase : a->rescueCases) {
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops, rescueHandlersBlock);
@@ -319,11 +325,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     caseBody = walk(cctx, rescueCase->body.get(), caseBody);
                     if (ret == cctx.inWhat.deadBlock()) {
-                        // If the main body -> else -> ret path is dead, we need
+                        // If the main body -> else -> ensure -> ret path is dead, we need
                         // to have a path out of the exception handlers
                         ret = cctx.inWhat.freshBlock(cctx.loops, caseBody);
+                        ensureBody = ret;
                     }
-                    unconditionalJump(caseBody, ret, cctx.inWhat, a->loc);
+                    unconditionalJump(caseBody, ensureBody, cctx.inWhat, a->loc);
                 }
 
                 // None of the handlers were taken

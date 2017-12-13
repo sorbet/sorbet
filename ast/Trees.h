@@ -194,9 +194,10 @@ public:
     std::unique_ptr<Expression> body;
     RESCUE_CASE_store rescueCases;
     std::unique_ptr<Expression> else_;
+    std::unique_ptr<Expression> ensure;
 
     Rescue(core::Loc loc, std::unique_ptr<Expression> body, RESCUE_CASE_store rescueCases,
-           std::unique_ptr<Expression> else_);
+           std::unique_ptr<Expression> else_, std::unique_ptr<Expression> ensure);
     virtual std::string toString(core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

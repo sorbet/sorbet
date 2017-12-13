@@ -46,7 +46,7 @@ template <typename Base, typename... Subclasses> void typecase(Base *base, Subcl
         (done = done || typecaseHelper(base, std::function<get_signature<Subclasses>>(funcs)))...};
 
     if (!done) {
-        ruby_typer::Error::check(false, "not handled case: ", demangle(typeid(base).name()));
+        ruby_typer::Error::check(false, "not handled typecase case: ", demangle(typeid(*base).name()));
     }
 }
 } // namespace ruby_typer

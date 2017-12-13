@@ -1,0 +1,65 @@
+digraph "ensure_without_rescue.rb"{
+subgraph "cluster_::<constant:Object>#main" {
+    label = "::<constant:Object>#main";
+    color = blue;
+    "bb::<constant:Object>#main_0" [shape = invhouse];
+    "bb::<constant:Object>#main_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#main_0" [label = "block[id=0]()
+rescueTemp$3 = <unanalyzable> : untyped
+rescueTemp$3"];
+
+    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_1" [style="bold"];
+    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_3" [style="tapered"];
+
+    "bb::<constant:Object>#main_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
+    "bb::<constant:Object>#main_3" [label = "block[id=3](returnMethodTemp$1)
+statTemp$4 = self : Object
+returnMethodTemp$1 = statTemp$4.a() : untyped
+statTemp$6 = self : Object
+rescueTemp$5 = statTemp$6.b() : untyped
+returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:Object>#a" {
+    label = "::<constant:Object>#a";
+    color = blue;
+    "bb::<constant:Object>#a_0" [shape = invhouse];
+    "bb::<constant:Object>#a_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#a_0" [label = "block[id=0]()
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#a_0" -> "bb::<constant:Object>#a_1" [style="bold"];
+    "bb::<constant:Object>#a_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Object>#a_1" -> "bb::<constant:Object>#a_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:Object>#b" {
+    label = "::<constant:Object>#b";
+    color = blue;
+    "bb::<constant:Object>#b_0" [shape = invhouse];
+    "bb::<constant:Object>#b_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#b_0" [label = "block[id=0]()
+returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#b_0" -> "bb::<constant:Object>#b_1" [style="bold"];
+    "bb::<constant:Object>#b_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Object>#b_1" -> "bb::<constant:Object>#b_1" [style="bold"];
+}
+
+}
+

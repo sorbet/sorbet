@@ -18,8 +18,8 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:Object&gt;#a_0</title>
 <polygon fill="none" stroke="#000000" points="101.7411,-395.8917 541,-357.2822 980.2589,-395.8917 979.8489,-458.3632 102.1511,-458.3632 101.7411,-395.8917"/>
-<text text-anchor="middle" x="541" y="-429.9584" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](rescueTemp$3, &lt;constant:StandardError&gt;$6)</text>
-<text text-anchor="middle" x="541" y="-415.9584" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:StandardError&gt;$6 = alias &lt;constant:StandardError&gt; : &lt;class:StandardError&gt;</text>
+<text text-anchor="middle" x="541" y="-429.9584" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](rescueTemp$3, &lt;constant:StandardError&gt;$7)</text>
+<text text-anchor="middle" x="541" y="-415.9584" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:StandardError&gt;$7 = alias &lt;constant:StandardError&gt; : &lt;class:StandardError&gt;</text>
 <text text-anchor="middle" x="541" y="-401.9584" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3 = &lt;unanalyzable&gt; : untyped</text>
 <text text-anchor="middle" x="541" y="-387.9584" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
 </g>
@@ -27,9 +27,9 @@
 <g id="node3" class="node">
 <title>bb::&lt;constant:Object&gt;#a_2</title>
 <ellipse fill="none" stroke="#000000" cx="335" cy="-285.865" rx="318.7786" ry="35.2113"/>
-<text text-anchor="middle" x="335" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](rescueTemp$3, &lt;constant:StandardError&gt;$6)</text>
-<text text-anchor="middle" x="335" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$7 = rescueTemp$3.is_a?(&lt;constant:StandardError&gt;$6) : untyped</text>
-<text text-anchor="middle" x="335" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$7</text>
+<text text-anchor="middle" x="335" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](rescueTemp$3, &lt;constant:StandardError&gt;$7)</text>
+<text text-anchor="middle" x="335" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$8 = rescueTemp$3.is_a?(&lt;constant:StandardError&gt;$7) : untyped</text>
+<text text-anchor="middle" x="335" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$8</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#a_0&#45;&gt;bb::&lt;constant:Object&gt;#a_2 -->
 <g id="edge1" class="edge">
@@ -76,7 +76,7 @@
 <title>bb::&lt;constant:Object&gt;#a_6</title>
 <ellipse fill="none" stroke="#000000" cx="304" cy="-169.2548" rx="268.1762" ry="35.2113"/>
 <text text-anchor="middle" x="304" y="-179.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=6]()</text>
-<text text-anchor="middle" x="304" y="-165.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="304" y="-165.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$9 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="304" y="-151.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#a_2&#45;&gt;bb::&lt;constant:Object&gt;#a_6 -->
@@ -99,4 +99,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 5007fcd9d2023c39d5be2b0c4a769deabd779c65c1f6de36ac4f118a22026ffb -->
+<!-- ruby-types:sha256: 02bc6d92762ccb715fc2fd687d61bf80b9486232426fe6b3b0b49464024aaffb -->

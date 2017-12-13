@@ -2,13 +2,19 @@ InsSeq{
   stats = [
     MethodDef{
       self = 0
-      name = foo<<constant:<todo sym>>>
+      name = main<<constant:<todo sym>>>
       args = []
       rhs = InsSeq{
         stats = [
         ],
         expr = Rescue{
-          body = IntLit{ value = 1 }
+          body = Send{
+            recv = Self{ claz = ::<constant:<todo sym>> }
+            name = a
+            block = nullptr
+            args = [
+            ]
+          }
           rescueCases = [
             RescueCase{
               exceptions = [
@@ -17,12 +23,55 @@ InsSeq{
                 kind = Local
                 name = rescueTemp$10000
               }
-              body = IntLit{ value = 2 }
+              body = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = b
+                block = nullptr
+                args = [
+                ]
+              }
             }
           ]
-          else = IntLit{ value = 3 }
+          else = Send{
+            recv = Self{ claz = ::<constant:<todo sym>> }
+            name = c
+            block = nullptr
+            args = [
+            ]
+          }
+          ensure = Send{
+            recv = Self{ claz = ::<constant:<todo sym>> }
+            name = d
+            block = nullptr
+            args = [
+            ]
+          }
         }
       }
+    }
+    MethodDef{
+      self = 0
+      name = a<<constant:<todo sym>>>
+      args = []
+      rhs = EmptyTree
+    }
+    MethodDef{
+      self = 0
+      name = b<<constant:<todo sym>>>
+      args = []
+      rhs = EmptyTree
+    }
+    MethodDef{
+      self = 0
+      name = c<<constant:<todo sym>>>
+      args = []
+      rhs = EmptyTree
+    }
+    MethodDef{
+      self = 0
+      name = d<<constant:<todo sym>>>
+      args = []
+      rhs = EmptyTree
     }
   ],
   expr = Send{

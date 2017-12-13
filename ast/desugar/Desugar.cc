@@ -1095,8 +1095,9 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     cases.emplace_back(rescueCase);
                     rescueCaseExpr.release();
                 }
-                unique_ptr<Expression> res = make_unique<Rescue>(what->loc, node2TreeImpl(ctx, rescue->body),
-                                                                 move(cases), node2TreeImpl(ctx, rescue->else_));
+                unique_ptr<Expression> res =
+                    make_unique<Rescue>(what->loc, node2TreeImpl(ctx, rescue->body), move(cases),
+                                        node2TreeImpl(ctx, rescue->else_), mkEmptyTree(what->loc));
                 result.swap(res);
             },
             [&](parser::Resbody *resbody) {
@@ -1144,6 +1145,20 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 unique_ptr<Expression> res =
                     make_unique<RescueCase>(what->loc, move(exceptions), mkLocal(varLoc, var), move(body));
                 result.swap(res);
+            },
+            [&](parser::Ensure *ensure) {
+                auto bodyExpr = node2TreeImpl(ctx, ensure->body);
+                auto ensureExpr = node2TreeImpl(ctx, ensure->ensure);
+                auto rescue = cast_tree<ast::Rescue>(bodyExpr.get());
+                if (rescue) {
+                    rescue->ensure = move(ensureExpr);
+                    result.swap(bodyExpr);
+                } else {
+                    Rescue::RESCUE_CASE_store cases;
+                    unique_ptr<Expression> res = make_unique<Rescue>(what->loc, move(bodyExpr), move(cases),
+                                                                     mkEmptyTree(what->loc), move(ensureExpr));
+                    result.swap(res);
+                }
             },
             [&](parser::If *if_) {
                 auto cond = node2TreeImpl(ctx, if_->condition);

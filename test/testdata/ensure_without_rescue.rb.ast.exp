@@ -1,0 +1,16 @@
+begin
+  def main<<constant:<todo sym>>>()
+    begin
+      self(<constant:<todo sym>>).a()
+    ensure
+      self(<constant:<todo sym>>).b()
+    end
+  end
+  def a<<constant:<todo sym>>>()
+    <emptyTree>
+  end
+  def b<<constant:<todo sym>>>()
+    <emptyTree>
+  end
+  self(<constant:<todo sym>>).main()
+end

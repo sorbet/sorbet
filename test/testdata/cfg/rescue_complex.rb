@@ -24,7 +24,7 @@ def multiple_rescue_classes()
 end
 
 def parse_rescue_ensure()
-  begin; meth; rescue; baz; ensure; bar; end # error: Unsupported node type Ensure
+  begin; meth; rescue; baz; ensure; bar; end
 end
 
 def parse_bug_rescue_empty_else()
@@ -44,7 +44,7 @@ def parse_resbody_list_var()
 end
 
 def parse_rescue_else_ensure()
-  begin; meth; rescue; baz; else foo; ensure; bar end # error: Unsupported node type Ensure
+  begin; meth; rescue; baz; else foo; ensure; bar end
 end
 
 def parse_rescue()

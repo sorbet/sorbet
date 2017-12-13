@@ -107,8 +107,9 @@ RescueCase::RescueCase(core::Loc loc, EXCEPTION_store exceptions, unique_ptr<Exp
     histogramInc("RescueCase::exceptions", this->exceptions.size());
 }
 
-Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store rescueCases, unique_ptr<Expression> else_)
-    : Expression(loc), body(move(body)), rescueCases(move(rescueCases)), else_(move(else_)) {
+Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store rescueCases, unique_ptr<Expression> else_,
+               unique_ptr<Expression> ensure)
+    : Expression(loc), body(move(body)), rescueCases(move(rescueCases)), else_(move(else_)), ensure(move(ensure)) {
     categoryCounterInc("Trees", "Rescue");
     histogramInc("Rescue::rescueCases", this->rescueCases.size());
 }
@@ -727,16 +728,25 @@ string RescueCase::showRaw(core::GlobalState &gs, int tabs) {
 
 string Rescue::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << this->body->toString(gs, tabs) << endl;
+    buf << this->body->toString(gs, tabs);
     for (auto &rescueCase : this->rescueCases) {
+        buf << endl;
         printTabs(buf, tabs - 1);
-        buf << rescueCase->toString(gs, tabs) << endl;
+        buf << rescueCase->toString(gs, tabs);
     }
-    if (this->else_) {
+    if (dynamic_cast<EmptyTree *>(this->else_.get()) == nullptr) {
+        buf << endl;
         printTabs(buf, tabs - 1);
         buf << "else" << endl;
         printTabs(buf, tabs);
         buf << this->else_->toString(gs, tabs);
+    }
+    if (dynamic_cast<EmptyTree *>(this->ensure.get()) == nullptr) {
+        buf << endl;
+        printTabs(buf, tabs - 1);
+        buf << "ensure" << endl;
+        printTabs(buf, tabs);
+        buf << this->ensure->toString(gs, tabs);
     }
     return buf.str();
 }
@@ -756,6 +766,8 @@ string Rescue::showRaw(core::GlobalState &gs, int tabs) {
     buf << "]" << endl;
     printTabs(buf, tabs + 1);
     buf << "else = " << this->else_->showRaw(gs, tabs + 1) << endl;
+    printTabs(buf, tabs + 1);
+    buf << "ensure = " << this->ensure->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();

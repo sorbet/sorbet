@@ -2,18 +2,12 @@
 def main
     begin
         a
-    rescue
-        b
-    else
-        c
     ensure
-        d
+        b
     end
 end
 
 def a; end
 def b; end
-def c; end
-def d; end
 
-puts foo()
+main

@@ -540,6 +540,12 @@ private:
                     v->else_.reset(nexpr);
                 }
 
+                oexpr = v->ensure.get();
+                nexpr = mapIt(oexpr, ctx);
+                if (oexpr != nexpr) {
+                    v->ensure.reset(nexpr);
+                }
+
                 if (HAS_MEMBER_postTransformRescue<FUNC>::value) {
                     return PostPonePostTransform_Rescue<FUNC, HAS_MEMBER_postTransformRescue<FUNC>::value>::call(ctx, v,
                                                                                                                  func);
