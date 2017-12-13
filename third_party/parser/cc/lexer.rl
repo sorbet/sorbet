@@ -523,6 +523,22 @@ void lexer::emit_num(const std::string& num) {
   }
 }
 
+std::string lexer::convert_base(const std::string& num, int num_base) {
+    long int result;
+    if (num_base == 10) {
+        return num;
+    }
+    try {
+        // This doesn't match Ruby's parsing but it is better than not handling it
+        result = std::stol(num, NULL, num_base);
+    } catch (std::out_of_range &) {
+        result = 0;
+    } catch (std::invalid_argument &) {
+        result = 0;
+    }
+    return std::to_string(result);
+}
+
 diagnostic::range lexer::range(const char *start, const char *end) {
   size_t token_start = (size_t)(start - source_buffer.data());
   size_t token_end = (size_t)(end - source_buffer.data());
@@ -2337,10 +2353,10 @@ void lexer::set_state_expr_value() {
         }
 
         if (version == ruby_version::RUBY_18 || version == ruby_version::RUBY_19 || version == ruby_version::RUBY_20) {
-          emit(token_type::tINTEGER, digits, ts, num_suffix_s);
+          emit(token_type::tINTEGER, convert_base(digits, num_base), ts, num_suffix_s);
           p = num_suffix_s - 1;
         } else {
-          emit_num(digits);
+          emit_num(convert_base(digits, num_base));
         }
         fbreak;
       };

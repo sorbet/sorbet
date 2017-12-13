@@ -110,6 +110,7 @@ namespace ruby_parser {
     void emit_do(bool do_block = false);
     void emit_table(const token_table_entry* table);
     void emit_num(const std::string& num);
+    std::string convert_base(const std::string& num, int num_base);
     diagnostic::range range(const char *start, const char *end);
     void diagnostic_(dlevel level, dclass type, const std::string &data = "");
     void diagnostic_(dlevel level, dclass type, diagnostic::range &&range, const std::string &data = "");
