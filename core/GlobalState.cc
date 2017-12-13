@@ -533,8 +533,9 @@ string GlobalState::toString(bool showHidden) {
 }
 
 void GlobalState::sanityCheck() const {
-    if (!debug_mode)
+    if (!debug_mode) {
         return;
+    }
     Error::check((names_by_hash.size() & (names_by_hash.size() - 1)) == 0);
     Error::check(names.capacity() * 2 == names_by_hash.capacity());
     Error::check(names_by_hash.size() == names_by_hash.capacity());

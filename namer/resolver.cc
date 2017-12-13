@@ -149,12 +149,14 @@ public:
 
     ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
-        if (id == nullptr || !id->symbol.info(ctx).isStaticField())
+        if (id == nullptr || !id->symbol.info(ctx).isStaticField()) {
             return asgn;
+        }
 
         auto *rhs = ast::cast_tree<ast::Ident>(asgn->rhs.get());
-        if (rhs == nullptr || !rhs->symbol.info(ctx).isClass())
+        if (rhs == nullptr || !rhs->symbol.info(ctx).isClass()) {
             return asgn;
+        }
 
         id->symbol.info(ctx).resultType = make_unique<core::ClassType>(rhs->symbol.info(ctx).singletonClass(ctx));
         return asgn;
@@ -358,7 +360,7 @@ private:
                             break;
                         }
                         auto arr = ast::cast_tree<ast::Array>(s->args[0].get());
-                        if (!arr) {
+                        if (arr == nullptr) {
                             // TODO(pay-server) unsilence this error and support enums from pay-server
                             {
                                 result = core::Types::bottom();
@@ -477,7 +479,7 @@ private:
         }
 
         ast::Hash *hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[0].get());
-        Error::check(hash);
+        Error::check(hash != nullptr);
         if (lastStandardMethod->args.size() == 2) {
             int i = 0;
             for (unique_ptr<ast::Expression> &key : hash->keys) {
@@ -617,11 +619,13 @@ private:
     core::SymbolRef dealiasSym(core::Context ctx, core::SymbolRef sym) {
         while (sym.info(ctx).isStaticField()) {
             auto *ct = dynamic_cast<core::ClassType *>(sym.info(ctx).resultType.get());
-            if (ct == nullptr)
+            if (ct == nullptr) {
                 break;
+            }
             auto klass = ct->symbol.info(ctx).attachedClass(ctx);
-            if (!klass.exists())
+            if (!klass.exists()) {
                 break;
+            }
 
             sym = klass;
         }
@@ -677,10 +681,12 @@ public:
 
     ast::Expression *postTransformSend(core::Context ctx, ast::Send *send) {
         auto *id = ast::cast_tree<ast::Ident>(send->recv.get());
-        if (!id)
+        if (id == nullptr) {
             return send;
-        if (id->symbol != core::GlobalState::defn_Opus_Types())
+        }
+        if (id->symbol != core::GlobalState::defn_Opus_Types()) {
             return send;
+        }
         bool checked = false;
         switch (send->fun._id) {
             case core::Names::assertType()._id:
@@ -702,7 +708,7 @@ public:
                 return send;
         }
     }
-};
+}; // namespace namer
 
 class ResolveVariablesWalk {
 public:

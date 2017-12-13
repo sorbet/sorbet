@@ -28,8 +28,9 @@ class NameInserter {
 
         auto newOwner = squashNames(ctx, owner, constLit->scope);
         core::SymbolRef existing = newOwner.info(ctx).findMember(ctx, constLit->cnst);
-        if (existing.exists())
+        if (existing.exists()) {
             return existing;
+        }
         return ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
     }
 
@@ -270,8 +271,9 @@ public:
                                                original->fun.toString(ctx));
                         break;
                     }
-                    if (args.size() != 2)
+                    if (args.size() != 2) {
                         break;
+                    }
                     core::SymbolRef meth = methodOwner(ctx).info(ctx).findMember(ctx, args[1]);
                     if (!meth.exists()) {
                         ctx.state.errors.error(original->args[1]->loc, core::ErrorClass::MethodNotFound,

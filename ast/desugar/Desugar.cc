@@ -27,7 +27,7 @@ unique_ptr<Expression> mkSend1(core::Loc loc, unique_ptr<Expression> recv, core:
                                unique_ptr<Expression> arg1) {
     Send::ARGS_store nargs;
     nargs.emplace_back(move(arg1));
-    return make_unique<Send>(loc, move(recv), move(fun), move(nargs));
+    return make_unique<Send>(loc, move(recv), fun, move(nargs));
 }
 
 unique_ptr<Expression> mkSend2(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun,
@@ -35,7 +35,7 @@ unique_ptr<Expression> mkSend2(core::Loc loc, unique_ptr<Expression> recv, core:
     Send::ARGS_store nargs;
     nargs.emplace_back(move(arg1));
     nargs.emplace_back(move(arg2));
-    return make_unique<Send>(loc, move(recv), move(fun), move(nargs));
+    return make_unique<Send>(loc, move(recv), fun, move(nargs));
 }
 
 unique_ptr<Expression> mkSend3(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun,
@@ -44,12 +44,12 @@ unique_ptr<Expression> mkSend3(core::Loc loc, unique_ptr<Expression> recv, core:
     nargs.emplace_back(move(arg1));
     nargs.emplace_back(move(arg2));
     nargs.emplace_back(move(arg3));
-    return make_unique<Send>(loc, move(recv), move(fun), move(nargs));
+    return make_unique<Send>(loc, move(recv), fun, move(nargs));
 }
 
 unique_ptr<Expression> mkSend0(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun) {
     Send::ARGS_store nargs;
-    return make_unique<Send>(loc, move(recv), move(fun), move(nargs));
+    return make_unique<Send>(loc, move(recv), fun, move(nargs));
 }
 
 unique_ptr<Expression> mkIdent(core::Loc loc, core::SymbolRef symbol) {
@@ -199,8 +199,9 @@ unique_ptr<MethodDef> buildMethod(core::Context ctx, core::Loc loc, core::NameRe
 }
 
 unique_ptr<Block> node2Proc(core::Context ctx, unique_ptr<parser::Node> node) {
-    if (node == nullptr)
+    if (node == nullptr) {
         return nullptr;
+    }
 
     auto expr = node2TreeImpl(ctx, node);
     core::Loc loc = expr->loc;

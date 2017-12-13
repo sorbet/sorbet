@@ -27,8 +27,9 @@ void Reporter::_error(unique_ptr<BasicError> error) {
             break;
 
         default:
-            if (source_type == File::Untyped)
+            if (source_type == File::Untyped) {
                 return;
+            }
     }
 
     if (isCriticalError) {

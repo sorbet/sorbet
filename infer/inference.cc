@@ -53,13 +53,14 @@ struct KnowledgeFact {
      */
     KnowledgeFact under(core::Context ctx, Environment env, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock &forBlock);
     void sanityCheck() {
-        if (!debug_mode)
+        if (!debug_mode) {
             return;
+        }
         for (auto &a : yesTypeTests) {
-            Error::check(a.second.get());
+            Error::check(a.second.get() != nullptr);
         }
         for (auto &a : noTypeTests) {
-            Error::check(a.second.get());
+            Error::check(a.second.get() != nullptr);
         }
     }
 
@@ -87,11 +88,13 @@ public:
 
     string toString(core::Context ctx) {
         stringstream buf;
-        if (!truthy.noTypeTests.empty() || !truthy.yesTypeTests.empty())
+        if (!truthy.noTypeTests.empty() || !truthy.yesTypeTests.empty()) {
             buf << "  Being truthy entails:" << endl;
+        }
         buf << truthy.toString(ctx);
-        if (!falsy.noTypeTests.empty() || !falsy.yesTypeTests.empty())
+        if (!falsy.noTypeTests.empty() || !falsy.yesTypeTests.empty()) {
             buf << "  Being falsy entails:" << endl;
+        }
         buf << falsy.toString(ctx);
         return buf.str();
     }
@@ -99,8 +102,9 @@ public:
     static TestedKnowledge empty; // optimization
 
     void sanityCheck() {
-        if (!debug_mode)
+        if (!debug_mode) {
             return;
+        }
         truthy.sanityCheck();
         falsy.sanityCheck();
         Error::check(TestedKnowledge::empty.falsy.yesTypeTests.empty());
@@ -224,7 +228,7 @@ public:
             core::TypeAndOrigins klass = getTypeAndOrigin(ctx, send->args[0]);
             if (klass.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {
                 auto *s = dynamic_cast<core::ClassType *>(klass.type.get());
-                Error::check(s);
+                Error::check(s != nullptr);
                 core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
                 if (attachedClass.exists()) {
                     whoKnows.truthy.yesTypeTests.emplace_back(send->recv, make_shared<core::ClassType>(attachedClass));
@@ -239,8 +243,8 @@ public:
                 return;
             }
 
-            Error::check(tp1.type.get());
-            Error::check(tp2.type.get());
+            Error::check(tp1.type.get() != nullptr);
+            Error::check(tp2.type.get() != nullptr);
             whoKnows.truthy.yesTypeTests.emplace_back(send->recv, tp1.type);
             whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], tp2.type);
             whoKnows.sanityCheck();
@@ -632,7 +636,7 @@ KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc
                            [&](auto const &e) -> bool { return e.first == local; });
         if (fnd == copy.yesTypeTests.end()) {
             // add info from env to knowledge
-            Error::check(env.types[i].type.get());
+            Error::check(env.types[i].type.get() != nullptr);
             // This is intentionally disabled to dumb the inference down.
             // It was intended to handle code snippets such as
             //

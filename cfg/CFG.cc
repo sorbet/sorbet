@@ -44,15 +44,14 @@ string CFG::toString(core::Context ctx) {
     buf << "    color = blue;" << endl;
     buf << "    \"bb" << symbolName << "_0\" [shape = invhouse];" << endl;
     buf << "    \"bb" << symbolName << "_1\" [shape = parallelogram];" << endl << endl;
-    for (int i = 0; i < this->basicBlocks.size(); i++) {
-        auto text = this->basicBlocks[i]->toString(ctx);
-        buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" [label = \"" << text << "\"];" << endl
-            << endl;
-        buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" -> \"bb" << symbolName << "_"
-            << this->basicBlocks[i]->bexit.thenb->id << "\" [style=\"bold\"];" << endl;
-        if (this->basicBlocks[i]->bexit.thenb != this->basicBlocks[i]->bexit.elseb) {
-            buf << "    \"bb" << symbolName << "_" << this->basicBlocks[i]->id << "\" -> \"bb" << symbolName << "_"
-                << this->basicBlocks[i]->bexit.elseb->id << "\" [style=\"tapered\"];" << endl
+    for (auto &basicBlock : this->basicBlocks) {
+        auto text = basicBlock->toString(ctx);
+        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [label = \"" << text << "\"];" << endl << endl;
+        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
+            << basicBlock->bexit.thenb->id << "\" [style=\"bold\"];" << endl;
+        if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
+            buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
+                << basicBlock->bexit.elseb->id << "\" [style=\"tapered\"];" << endl
                 << endl;
         }
     }

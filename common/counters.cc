@@ -14,8 +14,9 @@ typedef unsigned long CounterType;
 unordered_map<string, CounterType> counters;
 
 void ruby_typer::counterInc(ConstExprStr counter) {
-    if (!debug_mode)
+    if (!debug_mode) {
         return;
+    }
     string key(counter.str, counter.size);
     counters[key]++;
 }
@@ -23,8 +24,9 @@ void ruby_typer::counterInc(ConstExprStr counter) {
 unordered_map<string, unordered_map<string, CounterType>> counters_by_category;
 
 void ruby_typer::categoryCounterInc(ConstExprStr category, ConstExprStr counter) {
-    if (!debug_mode)
+    if (!debug_mode) {
         return;
+    }
 
     string categoryKey(category.str, category.size);
     string key(counter.str, counter.size);
@@ -34,8 +36,9 @@ void ruby_typer::categoryCounterInc(ConstExprStr category, ConstExprStr counter)
 unordered_map<string, map<int, CounterType>> histograms;
 
 void ruby_typer::histogramInc(ConstExprStr histogram, int value) {
-    if (!debug_mode)
+    if (!debug_mode) {
         return;
+    }
     string key(histogram.str, histogram.size);
     histograms[key][value]++;
 }
@@ -56,8 +59,9 @@ string padOrLimit(string s, int l) {
 }
 
 string ruby_typer::getCounterStatistics() {
-    if (!debug_mode)
+    if (!debug_mode) {
         return "Statistics collection is not available in production build. Use debug build.";
+    }
     stringstream buf;
 
     buf << "Counters: " << endl;

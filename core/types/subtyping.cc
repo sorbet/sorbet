@@ -456,7 +456,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                 p1,
                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
                     TupleType *a2 = dynamic_cast<TupleType *>(p2);
-                    Error::check(a2);
+                    Error::check(a2 != nullptr);
                     if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                         vector<shared_ptr<ruby_typer::core::Type>> elemGlbs;
                         int i = 0;
@@ -477,7 +477,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                 },
                 [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
                     ShapeType *h2 = dynamic_cast<ShapeType *>(p2);
-                    Error::check(h2);
+                    Error::check(h2 != nullptr);
                     if (h2->keys.size() == h1->keys.size()) {
                         // have enough keys.
                         int i = 0;
@@ -512,7 +512,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                 },
                 [&](LiteralType *l1) {
                     LiteralType *l2 = dynamic_cast<LiteralType *>(p2);
-                    Error::check(l2);
+                    Error::check(l2 != nullptr);
                     ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
                     ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
                     Error::check(u1 != nullptr && u2 != nullptr);

@@ -65,7 +65,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     continue;
                 }
             }
-            if (thenb != cfg.deadBlock() && thenb->exprs.size() == 0 && thenb->bexit.thenb == thenb->bexit.elseb &&
+            if (thenb != cfg.deadBlock() && thenb->exprs.empty() && thenb->bexit.thenb == thenb->bexit.elseb &&
                 bb->bexit.thenb != thenb->bexit.thenb) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
@@ -76,7 +76,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 sanityCheck(ctx, cfg);
                 continue;
             }
-            if (elseb != cfg.deadBlock() && elseb->exprs.size() == 0 && elseb->bexit.thenb == elseb->bexit.elseb &&
+            if (elseb != cfg.deadBlock() && elseb->exprs.empty() && elseb->bexit.thenb == elseb->bexit.elseb &&
                 bb->bexit.elseb != elseb->bexit.elseb) {
                 // shortcut else
                 sanityCheck(ctx, cfg);
@@ -94,8 +94,9 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
 }
 
 void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
-    if (!debug_mode)
+    if (!debug_mode) {
         return;
+    }
     for (auto &bb : cfg.basicBlocks) {
         for (auto parent : bb->backEdges) {
             Error::check(parent->bexit.thenb == bb.get() || parent->bexit.elseb == bb.get());

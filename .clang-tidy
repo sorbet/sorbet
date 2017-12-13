@@ -1,5 +1,23 @@
-Checks:          '-*,modernize-use-nullptr,readability-braces-around-statements,readability-implicit-bool-cast,modernize-loop-convert,hicpp-use-override,hicpp-use-equals-default,modernize-deprecated-headers,readability-container-size-empty,misc-move-const-arg'
+# NOTE(nelhage): See https://reviews.llvm.org/D30567 for some context
+# on why this list is formatted so oddly. This seems to be the best
+# way to format the check list in a readable way.
+#
+# Despite the conclusion of that issue, clang's yaml parser doesn't
+# support flow literals with `>`, so we fall back on the first
+# mentioned solution.
 
+Checks: '
+  ,-*,
+  ,hicpp-use-equals-default,
+  ,hicpp-use-override,
+  ,misc-move-const-arg,
+  ,modernize-deprecated-headers,
+  ,modernize-loop-convert,
+  ,modernize-use-nullptr,
+  ,readability-braces-around-statements,
+  ,readability-container-size-empty,
+  ,readability-implicit-bool-cast,
+'
 # not enabling google-readability-redundant-smartptr-get because it also changes it in conditions `foo.get() == nullptr` vs `foo == nullptr`
 # not enabling readability-else-after-return because it is iterative and it break  } else if (..) { into 2 lines.
 # not enabling modernize-use-auto because Nelson didn't like it.
