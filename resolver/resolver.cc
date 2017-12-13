@@ -286,6 +286,7 @@ private:
                      result = core::Types::dynamic();
                  });
         Error::check(result.get() != nullptr);
+        result->sanityCheck(ctx);
         return result;
     }
 
@@ -438,6 +439,7 @@ private:
                 result = core::Types::dynamic();
             });
         Error::check(result.get() != nullptr);
+        result->sanityCheck(ctx);
         return result;
     }
 
