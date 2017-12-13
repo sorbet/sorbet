@@ -1,4 +1,4 @@
-FROM dockerregistry.local.corp.stripe.com/stripe/ubuntu-16.04:latest
+FROM 030465607062.dkr.ecr.us-west-2.amazonaws.com/stripe/build/ubuntu-16.04:latest
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get update && apt-get install -y openjdk-8-jdk zip
 RUN update-java-alternatives -s java-1.8.0-openjdk-amd64
