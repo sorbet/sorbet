@@ -25,6 +25,9 @@ public:
     MethodDef *preTransformMethodDef(core::Context ctx, MethodDef *original);
     Expression *postTransformMethodDef(core::Context ctx, MethodDef *original);
 
+    ConstDef *preTransformConstDef(core::Context ctx, ConstDef *original);
+    Expression *postTransformConstDef(core::Context ctx, ConstDef *original);
+
     If *preTransformIf(core::Context ctx, If *original);
     Expression *postTransformIf(core::Context ctx, If *original);
 

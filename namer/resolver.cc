@@ -763,6 +763,37 @@ void finalizeResolution(core::GlobalState &gs) {
 }
 }; // namespace
 
+class ResolveSanityCheckWalk {
+public:
+    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
+        Error::check(original->symbol != core::GlobalState::defn_todo());
+        return original;
+    }
+    ast::Expression *postTransformMethodDef(core::Context ctx, ast::MethodDef *original) {
+        Error::check(original->symbol != core::GlobalState::defn_todo());
+        return original;
+    }
+    ast::Expression *postTransformConstDef(core::Context ctx, ast::ConstDef *original) {
+        Error::check(original->symbol != core::GlobalState::defn_todo());
+        return original;
+    }
+    ast::Expression *postTransformIdent(core::Context ctx, ast::Ident *original) {
+        Error::check(original->symbol != core::GlobalState::defn_todo());
+        return original;
+    }
+    ast::Expression *postTransformUnresolvedIdent(core::Context ctx, ast::UnresolvedIdent *original) {
+        Error::raise("These should have all been removed");
+    }
+    ast::Expression *postTransformSelf(core::Context ctx, ast::Self *original) {
+        Error::check(original->claz != core::GlobalState::defn_todo());
+        return original;
+    }
+    ast::Expression *postTransformBlock(core::Context ctx, ast::Block *original) {
+        Error::check(original->symbol != core::GlobalState::defn_todo());
+        return original;
+    }
+};
+
 std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context &ctx,
                                                             std::vector<std::unique_ptr<ast::Expression>> trees) {
     ResolveConstantsWalk constants(ctx);
@@ -778,6 +809,13 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context &ctx,
     }
 
     finalizeResolution(ctx);
+
+    if (debug_mode) {
+        ResolveSanityCheckWalk sanity;
+        for (auto &tree : trees) {
+            tree = ast::TreeMap<ResolveSanityCheckWalk>::apply(ctx, sanity, move(tree));
+        }
+    }
 
     return trees;
 } // namespace namer
