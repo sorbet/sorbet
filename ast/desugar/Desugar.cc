@@ -296,7 +296,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
         }
         auto loc = what->loc;
         if (loc.is_none()) {
-            DEBUG_ONLY(Error::check(false, "parse-tree node has no location: ", what->toString(ctx)));
+            DEBUG_ONLY(Error::raise("parse-tree node has no location: ", what->toString(ctx)));
         }
         unique_ptr<Expression> result;
         typecase(

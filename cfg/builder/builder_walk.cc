@@ -178,7 +178,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     // TODO(nelhage): Once namer is complete this should be a
                     // fatal error
                     // lhs = cctx.ctx.state.defn_todo();
-                    Error::check(false, "should never be reached");
+                    Error::raise("should never be reached");
                 }
                 auto rhsCont = walk(cctx.withTarget(lhs), a->rhs.get(), current);
                 rhsCont->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(lhs));
@@ -224,7 +224,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                             cctx.aliases[info.argumentsOrMixins[i]] = argLoc;
                             bodyBlock->exprs.emplace_back(argLoc, arg->loc, make_unique<LoadArg>(recv, s->fun, i));
                         } else {
-                            Error::check(false, "Should have been removed by namer");
+                            Error::raise("Should have been removed by namer");
                         }
                     }
 
