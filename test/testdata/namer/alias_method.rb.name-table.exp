@@ -1,4 +1,4 @@
-class <constant:Alias> ()
+class <constant:Alias> (<constant:BasicObject>)
   method f ()
   method f_alias () -> AliasType { symbol = ::<constant:Alias>#f }
   method f_alias_1 () -> AliasType { symbol = ::<constant:Alias>#f }

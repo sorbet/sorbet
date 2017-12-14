@@ -6387,6 +6387,12 @@ module Kernel
 
   standard_method(
     {},
+    returns: String
+  )
+  def to_s(); end
+
+  standard_method(
+    {},
     returns: Opus::Types.untyped
   )
   def clone(); end
@@ -8311,12 +8317,6 @@ class Object
     returns: Enumerator
   )
   def to_enum(method=_, *args); end
-
-  standard_method(
-    {},
-    returns: String
-  )
-  def to_s(); end
 
   standard_method(
     {},

@@ -5,7 +5,7 @@ test/end-to-end-test-input.rb:17 Argument _ does not match expected type. [7002]
     raise arg # raise is defined by stdlib
     ^^^^^^^^^
   Expected String | Class | Exception
-    rbi/stdlib.rbi:6396 Method raise has specified type of argument _ as String | Class | Exception
+    rbi/stdlib.rbi:6402 Method raise has specified type of argument _ as String | Class | Exception
       _: Opus::Types.any(String, Class, Exception),
       ^^
 

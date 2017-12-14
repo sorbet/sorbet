@@ -1,4 +1,4 @@
-class <constant:A> ()
+class <constant:A> (<constant:BasicObject>)
   class <constant:Foo> < ::<constant:Object> ()
   method Foo ()
 

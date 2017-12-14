@@ -4,7 +4,7 @@ class <constant:Child> < ::<constant:Parent> (<constant:Mixin>)
   field @undefinedivar -> untyped
   method child_method ()
   static-field @@undefined_cvar -> untyped
-class <constant:Mixin> ()
+class <constant:Mixin> (<constant:BasicObject>)
   static-field @@mixin_cvar -> Integer
 class <constant:Parent> < ::<constant:Object> ()
   field @ivar -> Integer

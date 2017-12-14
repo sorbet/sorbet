@@ -1,5 +1,5 @@
-class <constant:A> ()
-  class <constant:B> ()
+class <constant:A> (<constant:BasicObject>)
+  class <constant:B> (<constant:BasicObject>)
     static-field <constant:C> -> Integer
     static-field <constant:D> -> Integer
 

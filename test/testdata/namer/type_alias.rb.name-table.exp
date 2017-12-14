@@ -1,4 +1,4 @@
-class <constant:A> ()
+class <constant:A> (<constant:BasicObject>)
   class <constant:C1> < ::<constant:Object> ()
   class <singleton class:<constant:C1>> < ::<singleton class:<constant:Object>> ()
   method f (x) -> NilClass

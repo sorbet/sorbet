@@ -1,5 +1,5 @@
-class <constant:A> ()
+class <constant:A> (<constant:BasicObject>)
   class <constant:B> ()
     class <constant:C> < ::<constant:Object> ()
-class <constant:B> ()
+class <constant:B> (<constant:BasicObject>)
 

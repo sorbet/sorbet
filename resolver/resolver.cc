@@ -103,6 +103,9 @@ public:
             }
         }
         core::Symbol &info = original->symbol.info(ctx);
+        if (original->kind == ast::Module && info.mixins(ctx).empty()) {
+            info.mixins(ctx).emplace_back(core::GlobalState::defn_BasicObject());
+        }
         for (auto &ancst : original->ancestors) {
             ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
             if (id == nullptr || !id->symbol.info(ctx).isClass()) {
