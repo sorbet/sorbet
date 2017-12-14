@@ -176,7 +176,8 @@ unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::
     unique_ptr<Expression> res;
     unique_ptr<Expression> first = node2TreeImpl(ctx, *it);
     if (cast_tree<StringLit>(first.get()) == nullptr) {
-        res = mkSend0(loc, move(first), core::Names::to_s());
+        auto pieceLoc = first->loc;
+        res = mkSend0(pieceLoc, move(first), core::Names::to_s());
     } else {
         res = move(first);
     }
@@ -185,7 +186,8 @@ unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::
         auto &stat = *it;
         unique_ptr<Expression> narg = node2TreeImpl(ctx, stat);
         if (cast_tree<StringLit>(narg.get()) == nullptr) {
-            narg = mkSend0(loc, move(narg), core::Names::to_s());
+            auto pieceLoc = narg->loc;
+            narg = mkSend0(pieceLoc, move(narg), core::Names::to_s());
         }
         auto n = mkSend1(loc, move(res), core::Names::concat(), move(narg));
         res.reset(n.release());
