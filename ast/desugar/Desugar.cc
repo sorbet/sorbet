@@ -58,7 +58,7 @@ unique_ptr<Expression> mkIdent(core::Loc loc, core::SymbolRef symbol) {
     return make_unique<Ident>(loc, symbol);
 }
 
-unique_ptr<Expression> mkLocal(core::Loc loc, core::NameRef name) {
+unique_ptr<Reference> mkLocal(core::Loc loc, core::NameRef name) {
     return make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, name);
 }
 
@@ -110,7 +110,7 @@ unique_ptr<Expression> mkSplat(core::Loc loc, unique_ptr<Expression> arg) {
 unique_ptr<Expression> mkInsSeq1(core::Loc loc, unique_ptr<Expression> stat, unique_ptr<Expression> expr) {
     InsSeq::STATS_store stats;
     stats.emplace_back(move(stat));
-    return make_unique<InsSeq>(loc, move(stats), move(expr));
+    return mkInsSeq(loc, move(stats), move(expr));
 }
 
 unique_ptr<Expression> mkTrue(core::Loc loc) {
@@ -141,7 +141,7 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
             if (parser::Mlhs *lhs = parser::cast_node<parser::Mlhs>(arg.get())) {
                 core::NameRef temporary =
                     ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::destructureArg());
-                args.emplace_back(make_unique<UnresolvedIdent>(arg->loc, UnresolvedIdent::Local, temporary));
+                args.emplace_back(mkLocal(arg->loc, temporary));
                 unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
                 unique_ptr<parser::Node> destructure = make_unique<parser::Masgn>(arg->loc, move(arg), move(lvarNode));
                 destructures.emplace_back(node2TreeImpl(ctx, destructure));
@@ -161,7 +161,7 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
         if (bodyLoc.is_none()) {
             bodyLoc = loc;
         }
-        body = make_unique<InsSeq>(loc, move(destructures), move(body));
+        body = mkInsSeq(loc, move(destructures), move(body));
     }
 
     return make_pair(move(args), move(body));
@@ -221,8 +221,7 @@ unique_ptr<Block> node2Proc(core::Context ctx, unique_ptr<parser::Node> node) {
     // &foo => {|*args| foo.to_proc.call(*args) }
     auto proc = mkSend0(loc, move(expr), core::Names::to_proc());
     MethodDef::ARGS_store args;
-    unique_ptr<Expression> rest =
-        make_unique<RestArg>(loc, unique_ptr<Reference>(cast_tree<Reference>(mkLocal(loc, temp).release())));
+    unique_ptr<Expression> rest = make_unique<RestArg>(loc, mkLocal(loc, temp));
     args.emplace_back(move(rest));
     unique_ptr<Expression> body = mkSend1(loc, move(proc), core::Names::call(), mkSplat(loc, mkLocal(loc, temp)));
     return make_unique<Block>(loc, move(args), move(body));
@@ -292,7 +291,7 @@ bool locReported = false;
 unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node> &what) {
     try {
         if (what.get() == nullptr) {
-            return make_unique<EmptyTree>(core::Loc::none(0));
+            return mkEmptyTree(core::Loc::none(0));
         }
         auto loc = what->loc;
         if (loc.is_none()) {
@@ -628,46 +627,38 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Arg *arg) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, arg->name);
+                unique_ptr<Expression> res = mkLocal(loc, arg->name);
                 result.swap(res);
             },
             [&](parser::Restarg *arg) {
-                unique_ptr<Expression> res =
-                    make_unique<RestArg>(loc, make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, arg->name));
+                unique_ptr<Expression> res = make_unique<RestArg>(loc, mkLocal(loc, arg->name));
                 result.swap(res);
             },
             [&](parser::Kwrestarg *arg) {
-                unique_ptr<Expression> res = make_unique<RestArg>(
-                    loc,
-                    make_unique<KeywordArg>(loc, make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, arg->name)));
+                unique_ptr<Expression> res =
+                    make_unique<RestArg>(loc, make_unique<KeywordArg>(loc, mkLocal(loc, arg->name)));
                 result.swap(res);
             },
             [&](parser::Kwarg *arg) {
-                unique_ptr<Expression> res =
-                    make_unique<KeywordArg>(loc, make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, arg->name));
+                unique_ptr<Expression> res = make_unique<KeywordArg>(loc, mkLocal(loc, arg->name));
                 result.swap(res);
             },
             [&](parser::Blockarg *arg) {
-                unique_ptr<Expression> res =
-                    make_unique<BlockArg>(loc, make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, arg->name));
+                unique_ptr<Expression> res = make_unique<BlockArg>(loc, mkLocal(loc, arg->name));
                 result.swap(res);
             },
             [&](parser::Kwoptarg *arg) {
                 unique_ptr<Expression> res = make_unique<OptionalArg>(
-                    loc,
-                    make_unique<KeywordArg>(loc, make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, arg->name)),
-                    node2TreeImpl(ctx, arg->default_));
+                    loc, make_unique<KeywordArg>(loc, mkLocal(loc, arg->name)), node2TreeImpl(ctx, arg->default_));
                 result.swap(res);
             },
             [&](parser::Optarg *arg) {
                 unique_ptr<Expression> res =
-                    make_unique<OptionalArg>(loc, make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, arg->name),
-                                             node2TreeImpl(ctx, arg->default_));
+                    make_unique<OptionalArg>(loc, mkLocal(loc, arg->name), node2TreeImpl(ctx, arg->default_));
                 result.swap(res);
             },
             [&](parser::Shadowarg *arg) {
-                unique_ptr<Expression> res =
-                    make_unique<ShadowArg>(loc, make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, arg->name));
+                unique_ptr<Expression> res = make_unique<ShadowArg>(loc, mkLocal(loc, arg->name));
                 result.swap(res);
             },
             [&](parser::DefMethod *method) {
@@ -679,7 +670,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 if (self == nullptr) {
                     ctx.state.errors.error(loc, core::errors::Desugar::InvalidSingletonDef,
                                            "`def EXPRESSION.method' is only supported for `def self.method'");
-                    unique_ptr<Expression> res = make_unique<EmptyTree>(loc);
+                    unique_ptr<Expression> res = mkEmptyTree(loc);
                     result.swap(res);
                     return;
                 }
@@ -743,7 +734,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::LVar *var) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, var->name);
+                unique_ptr<Expression> res = mkLocal(loc, var->name);
                 result.swap(res);
             },
             [&](parser::GVar *var) {
@@ -755,7 +746,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::LVarLhs *var) {
-                unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, var->name);
+                unique_ptr<Expression> res = mkLocal(loc, var->name);
                 result.swap(res);
             },
             [&](parser::GVarLhs *var) {
@@ -797,14 +788,13 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 };
 
                 unique_ptr<Expression> res =
-                    make_unique<Send>(loc, mkSelf(loc), method, move(args), node2Proc(ctx, move(block)));
+                    mkSend(loc, mkSelf(loc), method, move(args), 0, node2Proc(ctx, move(block)));
 
                 result.swap(res);
             },
             [&](parser::ZSuper *zuper) {
-                Send::ARGS_store args;
-                args.emplace_back(make_unique<ZSuperArgs>(loc));
-                unique_ptr<Expression> res = make_unique<Send>(loc, mkSelf(loc), core::Names::super(), move(args));
+                unique_ptr<Expression> res =
+                    mkSend1(loc, mkSelf(loc), core::Names::super(), make_unique<ZSuperArgs>(zuper->loc));
                 result.swap(res);
             },
             [&](parser::Integer *integer) {
@@ -1203,10 +1193,12 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                         if (cond == nullptr) {
                             cond.swap(test);
                         } else {
-                            cond = make_unique<If>(test->loc, move(test), mkTrue(test->loc), move(cond));
+                            auto true_ = mkTrue(test->loc);
+                            auto loc = test->loc;
+                            cond = mkIf(loc, move(test), move(true_), move(cond));
                         }
                     }
-                    res = make_unique<If>(when->loc, move(cond), node2TreeImpl(ctx, when->body), move(res));
+                    res = mkIf(when->loc, move(cond), node2TreeImpl(ctx, when->body), move(res));
                 }
                 if (assign != nullptr) {
                     res = mkInsSeq1(loc, move(assign), move(res));
