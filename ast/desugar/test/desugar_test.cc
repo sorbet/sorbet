@@ -1,4 +1,3 @@
-#include "../Desugar.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"

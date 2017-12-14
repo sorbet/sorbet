@@ -1,139 +1,152 @@
 #include "common/common.h"
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
 using namespace std;
 
+enum Phase {
+    Core = (1 << 0),
+    Parser = (1 << 1),
+    Desugar = (1 << 2),
+    Namer = (1 << 3),
+    Resolver = (1 << 4),
+    CFG = (1 << 5),
+    Infer = (1 << 6),
+};
+
+const map<string, int> phaseNames = {
+    {"core", Core},         {"parser", Parser}, {"desugar", Desugar}, {"namer", Namer},
+    {"resolver", Resolver}, {"cfg", CFG},       {"infer", Infer},
+};
+
 struct NameDef {
     int id;
     string srcName;
     string val;
+    int phases;
 
-    NameDef(const char *srcName, const char *val) : srcName(srcName), val(val) {}
-    NameDef(const char *srcName) : srcName(srcName), val(srcName) {}
+    NameDef(const char *srcName, const char *val, int phases) : srcName(srcName), val(val), phases(phases) {}
+    NameDef(const char *srcName, int phases) : srcName(srcName), val(srcName), phases(phases) {}
 };
 
 NameDef names[] = {
-    {"initialize"},
-    {"andAnd", "&&"},
-    {"orOr", "||"},
-    {"to_s"},
-    {"to_a"},
-    {"to_hash"},
-    {"to_proc"},
-    {"concat"},
-    {"intern"},
-    {"call"},
-    {"bang", "!"},
-    {"squareBrackets", "[]"},
-    {"squareBracketsEq", "[]="},
-    {"unaryPlus", "@+"},
-    {"unaryMinus", "@-"},
-    {"star", "*"},
-    {"starStar", "**"},
-    {"ampersand", "&"},
-    {"tripleEq", "==="},
-    {"orOp", "|"},
-    {"slice"},
-    {"defined_p", "defined?"},
+    {"initialize", Infer},
+    {"andAnd", "&&", Desugar},
+    {"orOr", "||", Desugar},
+    {"to_s", Desugar},
+    {"to_a", Desugar},
+    {"to_hash", Desugar},
+    {"to_proc", Desugar},
+    {"concat", Desugar},
+    {"intern", Desugar},
+    {"call", Desugar},
+    {"bang", "!", Desugar | Infer | Parser},
+    {"squareBrackets", "[]", Desugar | Parser},
+    {"squareBracketsEq", "[]=", Parser},
+    {"unaryPlus", "@+", Parser},
+    {"unaryMinus", "@-", Parser},
+    {"star", "*", Parser},
+    {"starStar", "**", Parser},
+    {"ampersand", "&", Parser},
+    {"tripleEq", "===", Desugar},
+    {"orOp", "|", Desugar},
+    {"slice", Desugar},
+    {"defined_p", "defined?", Desugar},
 
     // used in CFG for temporaries
-    {"whileTemp"},
-    {"ifTemp"},
-    {"returnTemp"},
-    {"statTemp"},
-    {"assignTemp"},
-    {"returnMethodTemp"},
-    {"blockReturnTemp"},
-    {"selfMethodTemp"},
-    {"hashTemp"},
-    {"arrayTemp"},
-    {"rescueTemp"},
-    {"castTemp"},
+    {"whileTemp", CFG},
+    {"ifTemp", CFG},
+    {"returnTemp", CFG},
+    {"statTemp", CFG},
+    {"assignTemp", Desugar | Infer},
+    {"returnMethodTemp", CFG},
+    {"blockReturnTemp", CFG},
+    {"selfMethodTemp", CFG},
+    {"hashTemp", CFG},
+    {"arrayTemp", CFG},
+    {"rescueTemp", Desugar | CFG},
+    {"castTemp", Resolver | CFG},
     // end CFG temporaries
 
-    {"include"},
-    {"currentFile", "__FILE__"},
-    {"merge"},
+    {"include", Namer | Resolver},
+    {"currentFile", "__FILE__", Desugar},
+    {"merge", Desugar},
 
     // Opus::Types keywords
-    {"standardMethod", "standard_method"},
-    {"abstractMethod", "abstract_method"},
-    {"implementationMethod", "implementation_method"},
-    {"overrideMethod", "override_method"},
-    {"overridableMethod", "overridable_method"},
-    {"overridableImplementationMethod", "overridable_implementation_method"},
+    {"standardMethod", "standard_method", Resolver},
+    {"abstractMethod", "abstract_method", Resolver},
+    {"implementationMethod", "implementation_method", Resolver},
+    {"overrideMethod", "override_method", Resolver},
+    {"overridableMethod", "overridable_method", Resolver},
+    {"overridableImplementationMethod", "overridable_implementation_method", Resolver},
 
-    {"returns"},
-    {"checked"},
-    {"all"},
-    {"any"},
-    {"enum_", "enum"},
-    {"nilable"},
-    {"untyped"},
-    {"arrayOf", "array_of"},
-    {"hashOf", "hash_of"},
-    {"noreturn"},
-    {"interface"},
-    {"declareVariables", "declare_variables"},
+    {"returns", Resolver},
+    {"checked", Resolver},
+    {"all", Resolver},
+    {"any", Resolver},
+    {"enum_", "enum", Resolver},
+    {"nilable", Resolver | Desugar | Infer},
+    {"untyped", Resolver},
+    {"arrayOf", "array_of", Resolver},
+    {"hashOf", "hash_of", Resolver},
+    {"noreturn", Resolver},
+    {"interface", Resolver},
+    {"declareVariables", "declare_variables", Resolver},
 
-    {"assertType", "assert_type!"},
-    {"cast"},
+    {"assertType", "assert_type!", Resolver},
+    {"cast", Resolver},
     // end Opus::Types keywords
 
     // Ruby DSL methods which we understand
-    {"attr"},
-    {"attrAccessor", "attr_accessor"},
-    {"attrWriter", "attr_writer"},
-    {"attrReader", "attr_reader"},
-    {"private_", "private"},
-    {"protected_", "protected"},
-    {"public_", "public"},
-    {"privateClassMethod", "private_class_method"},
-    {"moduleFunction", "module_function"},
-    {"aliasMethod", "alias_method"},
+    {"attr", Resolver},
+    {"attrAccessor", "attr_accessor", Resolver},
+    {"attrWriter", "attr_writer", Resolver},
+    {"attrReader", "attr_reader", Resolver},
+    {"private_", "private", Namer | Resolver},
+    {"protected_", "protected", Namer | Resolver},
+    {"public_", "public", Namer | Resolver},
+    {"privateClassMethod", "private_class_method", Namer | Resolver},
+    {"moduleFunction", "module_function", Namer | Resolver},
+    {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
     // end DSL methods
 
     // The next two names are used as keys in SymbolInfo::members to store
     // pointers up and down the singleton-class hierarchy. If A's singleton
-    // class is B, then A will have a `singletonClass` entry in its members
-    // table which references B, and B will have an `attachedClass` entry
+    // class is B, then A will have a `singletonClass` entry in its membe|CFG|Infer|Corers
+    // table which references B, and B will have an `attachedClass` ent|Corery
     // pointing at A.
     //
     // The "attached class" terminology is borrowed from MRI, which refers
     // to the unique instance attached to a singleton class as the "attached
     // object"
-    {"singletonClass", "<singleton class>"},
-    {"attachedClass", "<attached class>"},
+    {"singletonClass", "<singleton class>", Core},
+    {"attachedClass", "<attached class>", Core},
 
-    {"blockTemp", "<block>"},
-    {"blockPassTemp", "<block-pass>"},
-    {"new_", "new"},
-    {"blockCall", "<block-call>"},
+    {"blockTemp", "<block>", Core | Namer | Resolver},
+    {"blockPassTemp", "<block-pass>", Desugar},
+    {"new_", "new", Desugar | Infer},
+    {"blockCall", "<block-call>", CFG | Infer},
 
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end
-    {"destructureArg", "<destructure>"},
+    {"destructureArg", "<destructure>", Desugar},
 
-    {"lambda"},
-    {"nil_p", "nil?"},
-    {"super"},
-    {"empty", ""},
+    {"lambda", Parser},
+    {"nil_p", "nil?", Desugar | Infer},
+    {"super", Desugar | Infer},
+    {"empty", "", Desugar},
 
-    {"emptyHash", "{}"},
-    {"buildHash", "<build-hash>"},
-    {"buildArray", "<build-array>"},
-    {"splat", "<splat>"},
-    {"arg0"},
+    {"buildHash", "<build-hash>", CFG | Core},
+    {"buildArray", "<build-array>", CFG | Core},
+    {"splat", "<splat>", Desugar | Core | Resolver},
+    {"arg0", Core | Resolver},
 
-    // Synthetic method created on a singleton class to hold initialization code
-    // within the body of a `class` or `module` declaration.
-    {"staticInit", "<static-init>"},
-    {"is_a_p", "is_a?"},
-    {"kind_of", "kind_of?"},
-    {"eqeq", "=="},
+    {"is_a_p", "is_a?", Infer | CFG},
+    {"kind_of", "kind_of?", Infer},
+    {"eqeq", "==", Infer},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
@@ -160,7 +173,8 @@ void emit_register(ostream &out) {
     }
     out << endl;
     for (auto &name : names) {
-        out << "    DEBUG_ONLY(Error::check(" << name.srcName << "_id == Names::" << name.srcName << "()));" << endl;
+        out << "    DEBUG_ONLY(Error::check(" << name.srcName << "_id == " << name.id
+            << ")); /* Names::" << name.srcName << "() */" << endl;
     }
     out << endl;
     out << "}" << endl;
@@ -172,7 +186,7 @@ int main(int argc, char **argv) {
         name.id = i++;
     }
 
-    // emit headef file
+    // emit header file
     {
         ofstream header(argv[1], ios::trunc);
         if (!header.good()) {
@@ -180,18 +194,12 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        header << "class Names final {" << endl;
-        header << "    friend class GlobalState;" << endl;
-        header << "    static void registerNames(GlobalState &gs);" << endl;
-        header << "public:" << endl;
-
-        for (auto &name : names) {
-            emit_name_header(header, name);
-        }
-
+        header << "namespace Names {" << endl;
+        header << "    void registerNames(GlobalState &gs);" << endl;
         header << "};" << endl;
     }
 
+    // emit initialization .cc file
     {
         ofstream classfile(argv[2], ios::trunc);
         if (!classfile.good()) {
@@ -212,6 +220,43 @@ int main(int argc, char **argv) {
 
         classfile << "}" << endl;
         classfile << "}" << endl;
+    }
+
+    // Emit per-phase name definitions
+    for (int i = 3; i < argc; i++) {
+        string arg = argv[i];
+        auto eq = arg.find('=');
+        if (arg.substr(0, 2) != "--" || eq == string::npos) {
+            cerr << "bad arg: " << arg << endl;
+            return 1;
+        }
+        auto phase = arg.substr(2, eq - 2);
+        auto path = arg.substr(eq + 1);
+        auto it = phaseNames.find(phase);
+        if (it == phaseNames.end()) {
+            cerr << "unknown phase: " << phase << endl;
+            return 1;
+        }
+
+        ofstream header(path, ios::trunc);
+        if (!header.good()) {
+            cerr << "unable to open " << path << endl;
+            return 1;
+        }
+
+        header << "#include \"core/Names.h\"" << endl << endl;
+        header << "namespace ruby_typer {" << endl;
+        header << "namespace core {" << endl;
+        header << "namespace Names {" << endl;
+
+        for (auto &name : names) {
+            if ((name.phases & it->second) != 0) {
+                emit_name_header(header, name);
+            }
+        }
+        header << "};" << endl;
+        header << "};" << endl;
+        header << "};" << endl;
     }
     return 0;
 }

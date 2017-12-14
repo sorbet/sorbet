@@ -1,6 +1,7 @@
 #include "parser.h"
-#include "../core/Loc.h"
 #include "Builder.h"
+#include "core/Loc.h"
+#include "core/errors/parser.h"
 #include "ruby_parser/driver.hh"
 #include <algorithm>
 
@@ -40,7 +41,7 @@ public:
             msg.append(dclass_strings[(int)diag.error_class()]);
             Loc loc(file, min((u4)(diag.location().begin_pos - 1), max_off),
                     min((u4)(diag.location().end_pos - 1), max_off));
-            gs.errors.error(loc, core::ErrorClass::ParserError, msg, level, diag.data());
+            gs.errors.error(loc, core::errors::Parser::ParserError, msg, level, diag.data());
         }
     }
 };

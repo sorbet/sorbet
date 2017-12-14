@@ -1,4 +1,7 @@
 #include "builder.h"
+#include "core/Names/cfg.h"
+#include "core/errors/cfg.h"
+#include "core/errors/internal.h"
 
 #include <unordered_map>
 
@@ -253,7 +256,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto afterNext = walk(cctx.withTarget(nextSym), a->expr.get(), current);
 
                 if (cctx.scope == nullptr) {
-                    cctx.ctx.state.errors.error(a->loc, core::ErrorClass::NoNextScope, "No `do` block around `next`");
+                    cctx.ctx.state.errors.error(a->loc, core::errors::CFG::NoNextScope, "No `do` block around `next`");
                     // I guess just keep going into deadcode?
                     unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
                 } else {
@@ -400,7 +403,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         Error::check(ret != nullptr);
         return ret;
     } catch (...) {
-        cctx.ctx.state.errors.error(what->loc, core::ErrorClass::Internal,
+        cctx.ctx.state.errors.error(what->loc, core::errors::Internal::InternalError,
                                     "Failed to convert tree to CFG (backtrace is above )");
         throw;
     }

@@ -30,6 +30,7 @@ compilation_database(
         "//payload/text:text",
         "//payload/binary:some",
         "//infer:infer_test",
+        "//resolver:resolver",
         "//namer:namer",
         "//infer:infer",
         "//core/serialize:serialize_test",

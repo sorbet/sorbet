@@ -9,49 +9,21 @@
 namespace ruby_typer {
 namespace core {
 
-enum class ErrorClass {
-    Internal = 1001, // Internal Compiler Error
+class ErrorClass {
+public:
+    u2 code;
 
-    ParserError = 2001, // Parser Errors
+    constexpr ErrorClass(u2 code) : code(code){};
+    ErrorClass(const ErrorClass &rhs) = default;
+    ErrorClass &operator=(const ErrorClass &rhs) = default;
 
-    InvalidSingletonDef = 3001, // Desugarer Errors
-    IntegerOutOfRange = 3002,
-    UnsupportedNode = 3003,
-    FloatOutOfRange = 3004,
+    bool operator==(const ErrorClass &rhs) const {
+        return code == rhs.code;
+    }
 
-    IncludeMutipleParam = 4001, // Namer Errors
-    IncludeNotConstant = 4002,
-    IncludePassedBlock = 4003,
-    DynamicConstantDefinition = 4004,
-    RedefinitionOfParents = 4005,
-    DynamicMethodDefinition = 4006,
-    SelfOutsideClass = 4007,
-    CircularDependency = 4008,
-    DynamicDSLInvocation = 4009,
-    MethodNotFound = 4010,
-    InvalidAlias = 4011,
-
-    DynamicConstant = 5001, // Resolver Errors
-    StubConstant = 5002,
-    InvalidMethodSignature = 5003,
-    InvalidTypeDeclaration = 5004,
-    InvalidDeclareVariables = 5005,
-    DuplicateVariableDeclaration = 5006,
-    UndeclaredVariable = 5007,
-    DynamicSuperclass = 5008,
-    InvalidAttr = 5009,
-    InvalidCast = 5010,
-
-    NoNextScope = 6001, // CFG Errors
-
-    PinnedVariableMismatch = 7001, // Inferencer Errors
-    MethodArgumentMismatch = 7002,
-    UnknownMethod = 7003,
-    MethodArgumentCountMismatch = 7004,
-    ReturnTypeMismatch = 7005,
-    DeadBranchInferencer = 7006,
-    CastTypeMismatch = 7007,
-    ConstantAssertType = 7008,
+    bool operator!=(const ErrorClass &rhs) const {
+        return !(*this == rhs);
+    }
 };
 
 class Reporter final {

@@ -1,4 +1,4 @@
-#include "../serialize.h"
+#include "core/serialize/serialize.h"
 #include "gtest/gtest.h"
 
 namespace spd = spdlog;

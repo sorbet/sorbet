@@ -1,8 +1,7 @@
 #ifndef SRUBY_TREES_H
 #define SRUBY_TREES_H
 
-#include "../common/common.h"
-#include "../core/Symbols.h"
+#include "common/common.h"
 #include "core/Context.h"
 #include "core/Symbols.h"
 #include "core/Types.h"

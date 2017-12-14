@@ -10,17 +10,10 @@ class Namer final {
 public:
     static std::unique_ptr<ast::Expression> run(core::Context &ctx, std::unique_ptr<ast::Expression> tree);
 
-private:
-    Namer() = default;
-};
-
-class Resolver final {
-public:
-    static std::vector<std::unique_ptr<ast::Expression>> run(core::Context &ctx,
-                                                             std::vector<std::unique_ptr<ast::Expression>> trees);
+    Namer() = delete;
 };
 
 } // namespace namer
-}; // namespace ruby_typer
+} // namespace ruby_typer
 
 #endif

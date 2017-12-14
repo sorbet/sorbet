@@ -1,6 +1,7 @@
 #include "Symbols.h"
 #include "Context.h"
 #include "Types.h"
+#include "core/Names/core.h"
 #include <sstream>
 #include <string>
 
@@ -258,6 +259,11 @@ SymbolRef Symbol::dealias(GlobalState &gs) {
         return alias->symbol.info(gs).dealias(gs);
     }
     return this->ref(gs);
+}
+
+bool Symbol::isBlockSymbol(GlobalState &gs) const {
+    core::Name &nm = name.name(gs);
+    return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
 }
 
 LocalVariable::LocalVariable(NameRef name) : name(name) {}

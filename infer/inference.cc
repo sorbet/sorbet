@@ -1,7 +1,10 @@
 #include "inference.h"
-#include "../cfg/CFG.h"
-#include "../core/Context.h"
-#include "../core/Symbols.h"
+#include "cfg/CFG.h"
+#include "core/Context.h"
+#include "core/Names/infer.h"
+#include "core/Symbols.h"
+#include "core/errors/infer.h"
+#include "core/errors/internal.h"
 #include <algorithm> // find, remove_if
 #include <unordered_map>
 
@@ -429,7 +432,7 @@ public:
             auto initializeResult = type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, recvType.type);
         } else {
             if (!args.empty()) {
-                ctx.state.errors.error(bind.loc, core::ErrorClass::MethodArgumentCountMismatch,
+                ctx.state.errors.error(bind.loc, core::errors::Infer::MethodArgumentCountMismatch,
                                        "Wrong number of arguments for constructor.\n Expected: 0, found: {}",
                                        args.size());
             }
@@ -536,7 +539,7 @@ public:
                     auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                     if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
                         ctx.state.errors.error(core::Reporter::ComplexError(
-                            bind.loc, core::ErrorClass::ReturnTypeMismatch,
+                            bind.loc, core::errors::Infer::ReturnTypeMismatch,
                             "Returning value that does not conform to method result type",
                             {core::Reporter::ErrorSection(
                                  "Expected " + expectedType->toString(ctx),
@@ -566,7 +569,7 @@ public:
                         auto ty = getTypeAndOrigin(ctx, c->value);
                         if (ty.type->isDynamic()) {
                             ctx.state.errors.error(core::Reporter::ComplexError(
-                                bind.loc, core::ErrorClass::CastTypeMismatch,
+                                bind.loc, core::errors::Infer::CastTypeMismatch,
                                 "The typechecker was unable to infer the type of the argument to "
                                 "assert_type!.",
                                 {core::Reporter::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)),
@@ -574,7 +577,7 @@ public:
                                                               "annotations.")}));
                         } else if (!core::Types::isSubType(ctx, ty.type, c->type)) {
                             ctx.state.errors.error(core::Reporter::ComplexError(
-                                bind.loc, core::ErrorClass::CastTypeMismatch,
+                                bind.loc, core::errors::Infer::CastTypeMismatch,
                                 "assert_type!: argument does not have asserted type",
                                 {core::Reporter::ErrorSection("Expected " + c->type->toString(ctx), {}),
                                  core::Reporter::ErrorSection("Got " + ty.type->toString(ctx) + " originating from:",
@@ -597,7 +600,7 @@ public:
                 setTypeAndOrigin(bind.bind, tp);
             } else {
                 if (!core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {
-                    ctx.state.errors.error(bind.loc, core::ErrorClass::PinnedVariableMismatch,
+                    ctx.state.errors.error(bind.loc, core::errors::Infer::PinnedVariableMismatch,
                                            "Changing type of pinned argument, {} is not a subtype of {}",
                                            tp.type->toString(ctx), cur.type->toString(ctx));
                     tp.type = core::Types::dynamic();
@@ -613,7 +616,8 @@ public:
 
             return tp.type;
         } catch (...) {
-            ctx.state.errors.error(bind.loc, core::ErrorClass::Internal, "Failed to type (backtrace is above)");
+            ctx.state.errors.error(bind.loc, core::errors::Internal::InternalError,
+                                   "Failed to type (backtrace is above)");
             throw;
         }
     }
@@ -662,7 +666,7 @@ KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc
             bool saneCondition = core::Types::isSubType(ctx, typeAndOrigin.type, second);
             if (!saneCondition) {
                 ctx.state.errors.error(core::Reporter::ComplexError(
-                    loc, core::ErrorClass::DeadBranchInferencer,
+                    loc, core::errors::Infer::DeadBranchInferencer,
                     "This branch is unreachable. It has conflicting type requirements. This has to be a " +
                         second->toString(ctx),
                     {core::Reporter::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
@@ -730,7 +734,7 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
         visited[bb->id] = true;
         if (current.isDead) {
             // this block is unreachable.
-            ctx.state.errors.error(bb->loc(), core::ErrorClass::DeadBranchInferencer, "This code is unreachable");
+            ctx.state.errors.error(bb->loc(), core::errors::Infer::DeadBranchInferencer, "This code is unreachable");
             continue;
         }
 

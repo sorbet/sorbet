@@ -1,4 +1,3 @@
-#include "../namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
@@ -10,6 +9,7 @@
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
+#include "resolver/resolver.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <algorithm>
@@ -171,7 +171,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         trees.emplace_back(move(namedTree));
     }
 
-    trees = ruby_typer::namer::Resolver::run(context, move(trees));
+    trees = ruby_typer::resolver::Resolver::run(context, move(trees));
 
     auto expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {

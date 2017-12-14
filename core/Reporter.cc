@@ -1,4 +1,5 @@
 #include "Context.h"
+#include "core/errors/errors.h"
 #include "spdlog/fmt/ostr.h"
 #include <algorithm>
 
@@ -14,15 +15,15 @@ void Reporter::_error(unique_ptr<BasicError> error) {
         source_type = error->loc.file.file(gs_).source_type;
     }
 
-    switch (error->what) {
-        case ErrorClass::Internal:
+    switch (error->what.code) {
+        case errors::Internal::InternalError.code:
             isCriticalError = true;
             break;
-        case ErrorClass::ParserError:
-        case ErrorClass::InvalidMethodSignature:
-        case ErrorClass::InvalidTypeDeclaration:
-        case ErrorClass::InvalidDeclareVariables:
-        case ErrorClass::DuplicateVariableDeclaration:
+        case errors::Parser::ParserError.code:
+        case errors::Resolver::InvalidMethodSignature.code:
+        case errors::Resolver::InvalidTypeDeclaration.code:
+        case errors::Resolver::InvalidDeclareVariables.code:
+        case errors::Resolver::DuplicateVariableDeclaration.code:
             // These are always shown, even for untyped source
             break;
 
@@ -36,11 +37,11 @@ void Reporter::_error(unique_ptr<BasicError> error) {
         hadCriticalError_ = true;
     }
     auto f = find_if(this->errorHistogram.begin(), this->errorHistogram.end(),
-                     [&](auto &el) -> bool { return el.first == (int)error->what; });
+                     [&](auto &el) -> bool { return el.first == error->what.code; });
     if (f != this->errorHistogram.end()) {
         (*f).second++;
     } else {
-        this->errorHistogram.push_back(std::make_pair((int)error->what, 1));
+        this->errorHistogram.push_back(std::make_pair((int)error->what.code, 1));
     }
     if (keepErrorsInMemory) {
         errors.emplace_back(move(error));
@@ -67,7 +68,7 @@ string Reporter::BasicError::filePosToString(GlobalState &gs, Loc loc) {
 
 string Reporter::BasicError::toString(GlobalState &gs) {
     stringstream buf;
-    buf << filePosToString(gs, loc) << " " << formatted << " [" << (int)what << "]" << endl;
+    buf << filePosToString(gs, loc) << " " << formatted << " [" << what.code << "]" << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs);
     }

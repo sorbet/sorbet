@@ -1,7 +1,7 @@
-#include "../namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
+#include "namer/namer.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <fstream>

@@ -1,4 +1,5 @@
 #include "builder.h"
+#include "core/Names/cfg.h"
 
 #include <algorithm> // sort, remove
 #include <climits>   // INT_MAX

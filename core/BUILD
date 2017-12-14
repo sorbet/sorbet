@@ -1,3 +1,15 @@
+NAME_PHASES = [
+    "core",
+    "parser",
+    "desugar",
+    "namer",
+    "resolver",
+    "cfg",
+    "infer",
+]
+
+NAME_HEADERS = ["Names/%s.h" % (phase,) for phase in NAME_PHASES]
+
 cc_library(
     name = "core",
     srcs = glob(
@@ -18,7 +30,7 @@ cc_library(
     ],
     hdrs = [
         "core.h",
-    ],
+    ] + glob(["errors/*.h"]) + NAME_HEADERS,
     copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
@@ -60,7 +72,8 @@ genrule(
     outs = [
         "Names_gen.h",
         "Names_gen.cc",
-    ],
-    cmd = "$(location :generate_names) $(location Names_gen.h) $(location Names_gen.cc)",
+    ] + NAME_HEADERS,
+    cmd = "$(location :generate_names) $(location Names_gen.h) $(location Names_gen.cc) " +
+          " ".join(["--%s=$(location %s)" % e for e in zip(NAME_PHASES, NAME_HEADERS)]),
     tools = [":generate_names"],
 )

@@ -3,6 +3,7 @@
 
 #include "ast/Trees.h"
 #include "core/Context.h"
+#include "core/errors/internal.h"
 #include "memory"
 #include <type_traits> // To use 'std::integral_constant'.
 #include <typeinfo>
@@ -838,7 +839,7 @@ private:
         } catch (...) {
             if (!locReported) {
                 locReported = true;
-                ctx.state.errors.error(what->loc, core::ErrorClass::Internal,
+                ctx.state.errors.error(what->loc, core::errors::Internal::InternalError,
                                        "Failed to process tree (backtrace is above)");
             }
             throw;

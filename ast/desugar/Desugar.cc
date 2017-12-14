@@ -1,10 +1,12 @@
 #include <algorithm>
 
-#include "../ast.h"
 #include "Desugar.h"
 #include "ast/ast.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
+#include "core/Names/desugar.h"
+#include "core/errors/desugar.h"
+#include "core/errors/internal.h"
 
 namespace ruby_typer {
 namespace ast {
@@ -678,7 +680,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             [&](parser::DefS *method) {
                 parser::Self *self = parser::cast_node<parser::Self>(method->singleton.get());
                 if (self == nullptr) {
-                    ctx.state.errors.error(method->loc, core::ErrorClass::InvalidSingletonDef,
+                    ctx.state.errors.error(method->loc, core::errors::Desugar::InvalidSingletonDef,
                                            "`def EXPRESSION.method' is only supported for `def self.method'");
                     unique_ptr<Expression> res = make_unique<EmptyTree>(what->loc);
                     result.swap(res);
@@ -819,11 +821,11 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     val = stol(integer->val);
                 } catch (std::out_of_range &) {
                     val = 0;
-                    ctx.state.errors.error(integer->loc, core::ErrorClass::IntegerOutOfRange,
+                    ctx.state.errors.error(integer->loc, core::errors::Desugar::IntegerOutOfRange,
                                            "Unsupported large integer literal: {}", integer->val);
                 } catch (std::invalid_argument &) {
                     val = 0;
-                    ctx.state.errors.error(integer->loc, core::ErrorClass::IntegerOutOfRange,
+                    ctx.state.errors.error(integer->loc, core::errors::Desugar::IntegerOutOfRange,
                                            "Unsupported integer literal: {}", integer->val);
                 }
 
@@ -836,16 +838,16 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     val = stod(floatNode->val);
                     if (isinf(val)) {
                         val = std::numeric_limits<double>::quiet_NaN();
-                        ctx.state.errors.error(floatNode->loc, core::ErrorClass::FloatOutOfRange,
+                        ctx.state.errors.error(floatNode->loc, core::errors::Desugar::FloatOutOfRange,
                                                "Unsupported large float literal: {}", floatNode->val);
                     }
                 } catch (std::out_of_range &) {
                     val = std::numeric_limits<double>::quiet_NaN();
-                    ctx.state.errors.error(floatNode->loc, core::ErrorClass::FloatOutOfRange,
+                    ctx.state.errors.error(floatNode->loc, core::errors::Desugar::FloatOutOfRange,
                                            "Unsupported large float literal: {}", floatNode->val);
                 } catch (std::invalid_argument &) {
                     val = std::numeric_limits<double>::quiet_NaN();
-                    ctx.state.errors.error(floatNode->loc, core::ErrorClass::FloatOutOfRange,
+                    ctx.state.errors.error(floatNode->loc, core::errors::Desugar::FloatOutOfRange,
                                            "Unsupported float literal: {}", floatNode->val);
                 }
 
@@ -1239,7 +1241,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
 
             [&](parser::BlockPass *blockPass) { Error::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) {
-                ctx.state.errors.error(what->loc, core::ErrorClass::UnsupportedNode, "Unsupported node type {}",
+                ctx.state.errors.error(what->loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
                                        node->nodeName());
                 result.reset(new NotSupported(what->loc, node->nodeName()));
             });
@@ -1248,7 +1250,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
     } catch (...) {
         if (!locReported) {
             locReported = true;
-            ctx.state.errors.error(what->loc, core::ErrorClass::Internal,
+            ctx.state.errors.error(what->loc, core::errors::Internal::InternalError,
                                    "Failed to process tree (backtrace is above)");
         }
         throw;

@@ -1,17 +1,16 @@
-#include "../ast/ast.h"
-#include "../core/Files.h"
-#include "../namer/namer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "core/Files.h"
 #include "core/serialize/serialize.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
+#include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 #include "spdlog/spdlog.h"
 #include <algorithm> // find
@@ -134,7 +133,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
         try {
             tracer->trace("Resolving (global pass)...");
             ruby_typer::core::Context context(gs, gs.defn_root());
-            what = ruby_typer::namer::Resolver::run(context, move(what));
+            what = ruby_typer::resolver::Resolver::run(context, move(what));
         } catch (...) {
             console_err->error("Exception resolving (backtrace is above)");
         }

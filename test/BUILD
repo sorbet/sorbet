@@ -25,6 +25,7 @@ cc_test(
         "//infer",
         "//namer",
         "//payload/binary",
+        "//resolver",
         "@gtest",
         "@gtest//:gtest_main",
     ],

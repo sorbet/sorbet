@@ -1,5 +1,5 @@
-#include "../Context.h"
 #include "core/core.h"
+#include "core/errors/internal.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 
@@ -44,7 +44,7 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
 TEST(ASTTest, ErrorReporter) { // NOLINT
     core::GlobalState gs(*console);
     core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
-    gs.errors.error(core::Loc{f, 0, 3}, core::ErrorClass::Internal, "Use of metavariable: {}", "foo");
+    gs.errors.error(core::Loc{f, 0, 3}, core::errors::Internal::InternalError, "Use of metavariable: {}", "foo");
     ASSERT_TRUE(gs.errors.hadCriticalError());
 }
 

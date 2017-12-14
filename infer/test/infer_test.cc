@@ -1,9 +1,10 @@
-#include "../../namer/namer.h"
-#include "../infer.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
+#include "core/Names/infer.h"
+#include "infer/infer.h"
 #include "namer/namer.h"
+#include "resolver/resolver.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <fstream>
@@ -38,7 +39,7 @@ void processSource(core::GlobalState &cb, string str) {
     tree = namer::Namer::run(ctx, move(tree));
     vector<unique_ptr<ast::Expression>> trees;
     trees.emplace_back(move(tree));
-    namer::Resolver::run(ctx, move(trees));
+    resolver::Resolver::run(ctx, move(trees));
 }
 
 TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT

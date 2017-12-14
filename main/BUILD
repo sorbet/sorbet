@@ -51,6 +51,7 @@ cc_library(
         "//parser",
         "//payload/binary:some",
         "//payload/text",
+        "//resolver",
         "@cxxopts",
     ],
 )
