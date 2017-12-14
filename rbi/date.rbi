@@ -17,19 +17,19 @@ class Date::Infinity
   standard_method({}, returns: Date::Infinity)
   def abs(); end
 
-  standard_method({}, returns: Boolean)
+  standard_method({}, returns: Opus::Types.any(TrueClass, FalseClass))
   def zero?(); end
 
-  standard_method({}, returns: Boolean)
+  standard_method({}, returns: Opus::Types.any(TrueClass, FalseClass))
   def finite?(); end
 
-  standard_method({}, returns: Boolean)
+  standard_method({}, returns: Opus::Types.any(TrueClass, FalseClass))
   def infinite?(); end
 
-  standard_method({}, returns: Boolean)
+  standard_method({}, returns: Opus::Types.any(TrueClass, FalseClass))
   def nan?(); end
 
-  standard_method({}, returns: Boolean)
+  standard_method({}, returns: Opus::Types.any(TrueClass, FalseClass))
   def d(); end
 end
 
@@ -322,7 +322,7 @@ class Date
   standard_method(
     {
       _: String,
-      comp: Boolean
+      comp: Opus::Types.any(TrueClass, FalseClass)
     },
     returns: Hash
   )
