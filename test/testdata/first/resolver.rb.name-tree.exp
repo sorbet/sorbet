@@ -1,28 +1,36 @@
 begin
+  <emptyTree>
   class <emptyTree>::<constant:Outer1><<constant:Outer1>> < (::<constant:<todo sym>>)  end
   class <emptyTree>::<constant:Outer2><<constant:Outer2>> < (::<constant:<todo sym>>)
-    class <emptyTree>::<constant:C><<constant:C>> < (::<constant:<todo sym>>)    end
+    <emptyTree>
 
-    class <emptyTree>::<constant:Inner1><<constant:Inner1>> < (::<constant:<todo sym>>)
-      class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)      end
+    <emptyTree>
 
-      class <emptyTree>::<constant:Inner2><<constant:Inner2>> < (::<constant:<todo sym>>)
-        ::<constant:Outer2>::<constant:Inner1>::<constant:A>
+    <emptyTree>
 
-        ::<constant:Outer2>::<constant:Inner1>
-
-        ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>
-
-        ::<constant:Outer1>
-      end
-    end
-
-    class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < (::<constant:<todo sym>>)
-      ::<constant:Outer2>::<constant:C>
-
-      ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>::<constant:A>
-    end
-
-    class <emptyTree>::<constant:Other><<constant:Other>> < (::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>)    end
+    <emptyTree>
   end
+  class <emptyTree>::<constant:C><<constant:C>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:Inner1><<constant:Inner1>> < (::<constant:<todo sym>>)
+    <emptyTree>
+
+    <emptyTree>
+  end
+  class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:Inner2><<constant:Inner2>> < (::<constant:<todo sym>>)
+    ::<constant:Outer2>::<constant:Inner1>::<constant:A>
+
+    ::<constant:Outer2>::<constant:Inner1>
+
+    ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>
+
+    ::<constant:Outer1>
+  end
+  class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < (::<constant:<todo sym>>)
+    ::<constant:Outer2>::<constant:C>
+
+    ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>::<constant:A>
+  end
+  class <emptyTree>::<constant:Other><<constant:Other>> < (::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>)  end
+  <emptyTree>
 end

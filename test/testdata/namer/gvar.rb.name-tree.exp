@@ -9,4 +9,5 @@ begin
       [#$a, #$b, #$c]
     end
   end
+  <emptyTree>
 end

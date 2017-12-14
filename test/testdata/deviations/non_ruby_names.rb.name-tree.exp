@@ -1,6 +1,9 @@
 begin
+  <emptyTree>
   module <emptyTree>::<constant:B><<constant:B>> < ()  end
   module <emptyTree>::<constant:A><<constant:A>> < ()
-    class <emptyTree>::<constant:B>::<constant:C><<constant:C>> < (::<constant:<todo sym>>)    end
+    <emptyTree>
   end
+  class <emptyTree>::<constant:B>::<constant:C><<constant:C>> < (::<constant:<todo sym>>)  end
+  <emptyTree>
 end

@@ -721,6 +721,67 @@ public:
     }
 }; // namespace namer
 
+class FlattenClassDefsWalk {
+public:
+    vector<unique_ptr<ast::ClassDef>> classes;
+    vector<core::SymbolRef> order;
+
+    ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
+        order.emplace_back(classDef->symbol);
+        return classDef;
+    }
+
+    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
+        classes.emplace_back(make_unique<ast::ClassDef>(classDef->loc, classDef->symbol, move(classDef->name),
+                                                        move(classDef->ancestors), move(classDef->rhs),
+                                                        classDef->kind));
+        return new ast::EmptyTree(classDef->loc);
+    };
+
+    std::unique_ptr<ast::Expression> addClasses(core::Context &ctx, std::unique_ptr<ast::Expression> tree) {
+        if (classes.empty()) {
+            return tree;
+        }
+        if (classes.size() == 1 && ast::cast_tree<ast::EmptyTree>(tree.get())) {
+            // It was only 1 class to begin with, put it back
+            return move(classes[0]);
+        }
+
+        auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
+        if (insSeq == nullptr) {
+            ast::InsSeq::STATS_store stats;
+            tree = make_unique<ast::InsSeq>(tree->loc, move(stats), move(tree));
+            return addClasses(ctx, move(tree));
+        }
+
+        for (auto &clas : sortedClasses()) {
+            Error::check(!!clas);
+            insSeq->stats.emplace_back(move(clas));
+        }
+        return tree;
+    }
+
+private:
+    vector<unique_ptr<ast::ClassDef>> sortedClasses() {
+        vector<unique_ptr<ast::ClassDef>> ret;
+        Error::check(order.size() == classes.size());
+
+        for (auto symbol : order) {
+            for (auto it = classes.begin(); it != classes.end(); ++it) {
+                auto &classDef = *it;
+                if (classDef->symbol == symbol) {
+                    ret.emplace_back(move(classDef));
+                    classes.erase(it);
+                    break;
+                }
+            }
+        }
+        order.clear();
+        Error::check(classes.size() == 0);
+        return ret;
+    };
+};
+
 class ResolveVariablesWalk {
 public:
     ast::Expression *postTransformUnresolvedIdent(core::Context ctx, ast::UnresolvedIdent *id) {
@@ -823,6 +884,11 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context &ctx,
     for (auto &tree : trees) {
         tree = ast::TreeMap<ResolveSignaturesWalk>::apply(ctx, sigs, move(tree));
         tree = ast::TreeMap<ResolveVariablesWalk>::apply(ctx, vars, move(tree));
+
+        // declared in here since it holds onto state
+        FlattenClassDefsWalk flatten;
+        tree = ast::TreeMap<FlattenClassDefsWalk>::apply(ctx, flatten, move(tree));
+        tree = flatten.addClasses(ctx, move(tree));
     }
 
     finalizeResolution(ctx);

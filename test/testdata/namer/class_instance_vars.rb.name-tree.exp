@@ -1,4 +1,8 @@
 begin
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  #<constant:Alias> = ::<constant:Parent>
   class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
     ::<constant:Parent>#@@class_var = "hi"
 
@@ -28,8 +32,8 @@ begin
       end
     end
   end
-  #<constant:Alias> = ::<constant:Parent>
   class <emptyTree>::<constant:Child1><<constant:Child1>> < (#<constant:Alias>)
     ::<constant:Child1>#@@class_var
   end
+  <emptyTree>
 end

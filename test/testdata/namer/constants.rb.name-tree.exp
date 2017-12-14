@@ -1,10 +1,12 @@
 begin
-  module <emptyTree>::<constant:A><<constant:A>> < ()
-    module <emptyTree>::<constant:B><<constant:B>> < ()
-      ::<constant:A>::<constant:B>#<constant:C>
-    end
-  end
+  <emptyTree>
   ::<constant:A>::<constant:B>#<constant:C>
   ::<constant:A>::<constant:B>#<constant:D>
+  module <emptyTree>::<constant:A><<constant:A>> < ()
+    <emptyTree>
+  end
+  module <emptyTree>::<constant:B><<constant:B>> < ()
+    ::<constant:A>::<constant:B>#<constant:C>
+  end
   ::<constant:A>
 end

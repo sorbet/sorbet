@@ -1,250 +1,256 @@
 begin
   self(<singleton class:<constant:<root>>>).require_relative("../../../extn")
   ::<constant:Opus>::<constant:AutogenLoader>.init("__FILE__")
+  <emptyTree>
   module <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Gerald><<constant:Gerald>> < ()
-    class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::<constant:StandardError>)
-      def initialize<initialize>(message, rule_token)
-        begin
-          self(<constant:MatchTimeout>).super(message)
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#@rule_token = rule_token
-        end
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+  end
+  class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::<constant:StandardError>)
+    def initialize<initialize>(message, rule_token)
+      begin
+        self(<constant:MatchTimeout>).super(message)
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#@rule_token = rule_token
       end
     end
-
-    class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:<todo sym>>, ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Chalk>::<constant:Log>)
-      def initialize<initialize>()
+  end
+  class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:<todo sym>>, ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Chalk>::<constant:Log>)
+    def initialize<initialize>()
+      begin
         begin
+          assignTemp$10001 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-nested: <block-pass>$10000>|
+            <block-nested: <block-pass>$10000>.valid?()
+          end
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTemp$10001.[](0)
+          invalid_rules = assignTemp$10001.[](1)
+          assignTemp$10001
+        end
+        if invalid_rules.empty?().!()
           begin
-            assignTemp$10001 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-nested: <block-pass>$10000>|
-              <block-nested: <block-pass>$10000>.valid?()
-            end
-            ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTemp$10001.[](0)
-            invalid_rules = assignTemp$10001.[](1)
-            assignTemp$10001
+            invalid_rule_ids = invalid_rules.map() do |<block-nested: <block-pass>$10002>|
+              <block-nested: <block-pass>$10002>.token()
+            end.join(",")
+            self(<constant:Matcher>).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
           end
-          if invalid_rules.empty?().!()
-            begin
-              invalid_rule_ids = invalid_rules.map() do |<block-nested: <block-pass>$10002>|
-                <block-nested: <block-pass>$10002>.token()
-              end.join(",")
-              self(<constant:Matcher>).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
-            end
-          else
-            <emptyTree>
-          end
-        end
-      end
-
-      def match<match>(match_context)
-        begin
-          if match_context.diff().affected_files().count().>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#<constant:MAX_AFFECTED_FILES>)
-            begin
-              self(<constant:Matcher>).log().warn("Gerald skipping large PR with ".concat(begin
-                    match_context.diff().affected_files().count()
-                  end.to_s()).concat(" affected files").to_s())
-              return []
-            end
-          else
-            <emptyTree>
-          end
-          budget = ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>.new()
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules.select() do |<block-nested: r>|
-            budget.time_rule(<block-nested: r>) do ||
-              <block-nested: r>.matches?(match_context)
-            end
-          end
+        else
+          <emptyTree>
         end
       end
     end
 
-    class <emptyTree>::<constant:MatchContext><<constant:MatchContext>> < (::<constant:<todo sym>>)
-      def initialize<initialize>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
-        begin
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo = repo
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@assignee = assignee
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@gh_user = gh_user
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@merge_branch = merge_branch
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@body = body
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@title = title
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@diff = diff
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@openapi_diff = openapi_diff
+    def match<match>(match_context)
+      begin
+        if match_context.diff().affected_files().count().>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#<constant:MAX_AFFECTED_FILES>)
+          begin
+            self(<constant:Matcher>).log().warn("Gerald skipping large PR with ".concat(begin
+                  match_context.diff().affected_files().count()
+                end.to_s()).concat(" affected files").to_s())
+            return []
+          end
+        else
+          <emptyTree>
+        end
+        budget = ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>.new()
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules.select() do |<block-nested: r>|
+          budget.time_rule(<block-nested: r>) do ||
+            <block-nested: r>.matches?(match_context)
+          end
         end
       end
-
-      def user_stripe_suffix?<user_stripe_suffix?>()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo.start_with?("stripe-internal/").!()
+    end
+  end
+  class <emptyTree>::<constant:MatchContext><<constant:MatchContext>> < (::<constant:<todo sym>>)
+    def initialize<initialize>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
+      begin
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo = repo
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@assignee = assignee
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@gh_user = gh_user
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@merge_branch = merge_branch
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@body = body
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@title = title
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@diff = diff
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@openapi_diff = openapi_diff
       end
     end
 
-    class <emptyTree>::<constant:MatchTimeBudget><<constant:MatchTimeBudget>> < (::<constant:<todo sym>>)
-      def initialize<initialize>()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:Time>.now()
-      end
+    def user_stripe_suffix?<user_stripe_suffix?>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo.start_with?("stripe-internal/").!()
+    end
+  end
+  class <emptyTree>::<constant:MatchTimeBudget><<constant:MatchTimeBudget>> < (::<constant:<todo sym>>)
+    def initialize<initialize>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:Time>.now()
+    end
 
-      def check!<check!>()
-        begin
-          dur_ms = begin
-            ::<constant:Time>.now().-(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start)
-          end.*(1000)
-          if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>)
-            self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald match time budged exceeded ".concat(begin
-                    ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>
-                  end.to_s()).concat("ms").to_s()))
-          else
-            <emptyTree>
-          end
-        end
-      end
-
-      def time_rule<time_rule>(rule)
-        begin
-          rule_start = ::<constant:Time>.now()
-          res = yield(<emptyTree>)
-          dur_ms = begin
-            ::<constant:Time>.now().-(rule_start)
-          end.*(1000)
-          if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>)
-            self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald rule '".concat(begin
-                    rule.token()
-                  end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
-                    dur_ms.to_i()
-                  end.to_s()).concat("ms budget=").concat(begin
-                    ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>
-                  end.to_s()).concat("ms").to_s(), {:rule_token => rule.token()}))
-          else
-            <emptyTree>
-          end
-          self(<constant:MatchTimeBudget>).check!()
-          res
+    def check!<check!>()
+      begin
+        dur_ms = begin
+          ::<constant:Time>.now().-(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start)
+        end.*(1000)
+        if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>)
+          self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald match time budged exceeded ".concat(begin
+                  ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>
+                end.to_s()).concat("ms").to_s()))
+        else
+          <emptyTree>
         end
       end
     end
 
-    class <emptyTree>::<constant:Diff><<constant:Diff>> < (::<constant:<todo sym>>)
-      def initialize<initialize>(raw_diff)
-        begin
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@raw = raw_diff
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed = self(<constant:Diff>).parse(raw_diff)
+    def time_rule<time_rule>(rule)
+      begin
+        rule_start = ::<constant:Time>.now()
+        res = yield(<emptyTree>)
+        dur_ms = begin
+          ::<constant:Time>.now().-(rule_start)
+        end.*(1000)
+        if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>)
+          self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald rule '".concat(begin
+                  rule.token()
+                end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
+                  dur_ms.to_i()
+                end.to_s()).concat("ms budget=").concat(begin
+                  ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>
+                end.to_s()).concat("ms").to_s(), {:rule_token => rule.token()}))
+        else
+          <emptyTree>
         end
+        self(<constant:MatchTimeBudget>).check!()
+        res
       end
-
-      def affected_files<affected_files>()
-        self(<constant:Diff>).added_files().+(self(<constant:Diff>).deleted_files()).+(self(<constant:Diff>).changed_files())
+    end
+  end
+  class <emptyTree>::<constant:Diff><<constant:Diff>> < (::<constant:<todo sym>>)
+    def initialize<initialize>(raw_diff)
+      begin
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@raw = raw_diff
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed = self(<constant:Diff>).parse(raw_diff)
       end
+    end
 
-      def added_files<added_files>()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
-          <block-nested: part>.[](:a_name).==("/dev/null")
-        end.map() do |<block-nested: part>|
-          <block-nested: part>.[](:b_name)
+    def affected_files<affected_files>()
+      self(<constant:Diff>).added_files().+(self(<constant:Diff>).deleted_files()).+(self(<constant:Diff>).changed_files())
+    end
+
+    def added_files<added_files>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
+        <block-nested: part>.[](:a_name).==("/dev/null")
+      end.map() do |<block-nested: part>|
+        <block-nested: part>.[](:b_name)
+      end
+    end
+
+    def deleted_files<deleted_files>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
+        <block-nested: part>.[](:b_name).==("/dev/null")
+      end.map() do |<block-nested: part>|
+        <block-nested: part>.[](:a_name)
+      end
+    end
+
+    def changed_files<changed_files>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
+        <block-nested: part>.[](:a_name).==(<block-nested: part>.[](:b_name))
+      end.map() do |<block-nested: part>|
+        <block-nested: part>.[](:b_name)
+      end
+    end
+
+    def added_lines<added_lines>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |<block-nested: part>|
+        <block-nested: part>.[](:added_lines)
+      end.flatten()
+    end
+
+    def removed_lines<removed_lines>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |<block-nested: part>|
+        <block-nested: part>.[](:removed_lines)
+      end.flatten()
+    end
+
+    def changed_lines<changed_lines>()
+      self(<constant:Diff>).added_lines().+(self(<constant:Diff>).removed_lines())
+    end
+
+    def changed_openapi?<changed_openapi?>()
+      self(<constant:Diff>).changed_files().include?(::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
+    end
+
+    def parse<parse>(diff)
+      begin
+        parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", 0.|(4))).[](::<constant:Range>.new(1, -1))
+        if parts
+          parts
+        else
+          parts = []
         end
-      end
-
-      def deleted_files<deleted_files>()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
-          <block-nested: part>.[](:b_name).==("/dev/null")
-        end.map() do |<block-nested: part>|
-          <block-nested: part>.[](:a_name)
-        end
-      end
-
-      def changed_files<changed_files>()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |<block-nested: part>|
-          <block-nested: part>.[](:a_name).==(<block-nested: part>.[](:b_name))
-        end.map() do |<block-nested: part>|
-          <block-nested: part>.[](:b_name)
-        end
-      end
-
-      def added_lines<added_lines>()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |<block-nested: part>|
-          <block-nested: part>.[](:added_lines)
-        end.flatten()
-      end
-
-      def removed_lines<removed_lines>()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |<block-nested: part>|
-          <block-nested: part>.[](:removed_lines)
-        end.flatten()
-      end
-
-      def changed_lines<changed_lines>()
-        self(<constant:Diff>).added_lines().+(self(<constant:Diff>).removed_lines())
-      end
-
-      def changed_openapi?<changed_openapi?>()
-        self(<constant:Diff>).changed_files().include?(::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
-      end
-
-      def parse<parse>(diff)
-        begin
-          parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", 0.|(4))).[](::<constant:Range>.new(1, -1))
-          if parts
-            parts
-          else
-            parts = []
-          end
-          parts.map() do |<block-nested: part>|
-            begin
-              <block-nested: lines> = <block-nested: part>.split("
+        parts.map() do |<block-nested: part>|
+          begin
+            <block-nested: lines> = <block-nested: part>.split("
 ")
-              <block-nested: a_name> = <block-nested: b_name> = ::<constant:nil>
-              <block-nested: added_lines> = []
-              <block-nested: removed_lines> = []
-              <block-nested: lines>.each() do |<block-nested: line>|
-                if <block-nested: line>.start_with?("index ", "@@", "new file mode")
-                  next(<emptyTree>)
+            <block-nested: a_name> = <block-nested: b_name> = ::<constant:nil>
+            <block-nested: added_lines> = []
+            <block-nested: removed_lines> = []
+            <block-nested: lines>.each() do |<block-nested: line>|
+              if <block-nested: line>.start_with?("index ", "@@", "new file mode")
+                next(<emptyTree>)
+              else
+                if <block-nested: line>.start_with?("---")
+                  begin
+                    <block-nested: a_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
+                    if if <block-nested: a_name>
+                        <block-nested: a_name>.start_with?("a/")
+                      else
+                        <block-nested: a_name>
+                      end
+                      <block-nested: a_name> = <block-nested: a_name>.[](::<constant:Range>.new(2, -1))
+                    else
+                      <emptyTree>
+                    end
+                  end
                 else
-                  if <block-nested: line>.start_with?("---")
+                  if <block-nested: line>.start_with?("+++")
                     begin
-                      <block-nested: a_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
-                      if if <block-nested: a_name>
-                          <block-nested: a_name>.start_with?("a/")
+                      <block-nested: b_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
+                      if if <block-nested: b_name>
+                          <block-nested: b_name>.start_with?("b/")
                         else
-                          <block-nested: a_name>
+                          <block-nested: b_name>
                         end
-                        <block-nested: a_name> = <block-nested: a_name>.[](::<constant:Range>.new(2, -1))
+                        <block-nested: b_name> = <block-nested: b_name>.[](::<constant:Range>.new(2, -1))
                       else
                         <emptyTree>
                       end
                     end
                   else
-                    if <block-nested: line>.start_with?("+++")
-                      begin
-                        <block-nested: b_name> = <block-nested: line>.[](::<constant:Range>.new(4, -1))
-                        if if <block-nested: b_name>
-                            <block-nested: b_name>.start_with?("b/")
-                          else
-                            <block-nested: b_name>
-                          end
-                          <block-nested: b_name> = <block-nested: b_name>.[](::<constant:Range>.new(2, -1))
-                        else
-                          <emptyTree>
-                        end
-                      end
+                    if <block-nested: line>.start_with?("+")
+                      <block-nested: added_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
                     else
-                      if <block-nested: line>.start_with?("+")
-                        <block-nested: added_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
+                      if <block-nested: line>.start_with?("-")
+                        <block-nested: removed_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
                       else
-                        if <block-nested: line>.start_with?("-")
-                          <block-nested: removed_lines>.<<(<block-nested: line>.[](::<constant:Range>.new(1, -1)))
-                        else
-                          <emptyTree>
-                        end
+                        <emptyTree>
                       end
                     end
                   end
                 end
               end
-              if <block-nested: a_name>.nil?()
-                next(<emptyTree>)
-              else
-                <emptyTree>
-              end
-              {:a_name => <block-nested: a_name>, :b_name => <block-nested: b_name>, :added_lines => <block-nested: added_lines>, :removed_lines => <block-nested: removed_lines>}
             end
-          end.compact()
-        end
+            if <block-nested: a_name>.nil?()
+              next(<emptyTree>)
+            else
+              <emptyTree>
+            end
+            {:a_name => <block-nested: a_name>, :b_name => <block-nested: b_name>, :added_lines => <block-nested: added_lines>, :removed_lines => <block-nested: removed_lines>}
+          end
+        end.compact()
       end
     end
   end
@@ -253,4 +259,5 @@ begin
       <emptyTree>
     end
   end
+  <emptyTree>
 end

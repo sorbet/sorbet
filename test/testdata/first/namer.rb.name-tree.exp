@@ -1,4 +1,10 @@
 begin
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
   class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<constant:<todo sym>>)
     def normal_method<normal_method>()
       <emptyTree>
@@ -8,13 +14,16 @@ begin
       <emptyTree>
     end
 
-    class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<constant:<todo sym>>)    end
+    <emptyTree>
 
-    module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()    end
+    <emptyTree>
   end
+  class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<constant:<todo sym>>)  end
+  module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()  end
   module <emptyTree>::<constant:ANamespace><<constant:ANamespace>> < ()
-    class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<constant:<todo sym>>)    end
+    <emptyTree>
   end
+  class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<constant:<todo sym>>)  end
   class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < (::<constant:<todo sym>>)  end
   class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)  end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()  end
@@ -30,4 +39,5 @@ begin
 
     self(<singleton class:<constant:Child>>).whatever().include(::<constant:OtherMixin>)
   end
+  <emptyTree>
 end

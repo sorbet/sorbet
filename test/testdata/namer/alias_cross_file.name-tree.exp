@@ -4,6 +4,7 @@ class <emptyTree>::<constant:TestSig><<constant:TestSig>> < (::<constant:<todo s
   end
 end
 begin
+  <emptyTree>
   class <emptyTree>::<constant:T1><<constant:T1>> < (::<constant:<todo sym>>)  end
   #<constant:T2> = ::<constant:T1>
 end

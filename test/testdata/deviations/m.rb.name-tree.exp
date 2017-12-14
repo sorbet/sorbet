@@ -1,5 +1,6 @@
 begin
-  class <emptyTree>::<constant:M>::<constant:MyModel><<constant:MyModel>> < (::<constant:<todo sym>>)  end
+  <emptyTree>
   ::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:MyModel>
+  class <emptyTree>::<constant:M>::<constant:MyModel><<constant:MyModel>> < (::<constant:<todo sym>>)  end
   #<constant:M> = ::<constant:Opus>::<constant:DB>::<constant:Model>
 end
