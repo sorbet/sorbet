@@ -77,7 +77,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                             }
                             result = make_shared<TupleType>(elemLubs);
                         } else {
-                            result = make_shared<ClassType>(core::GlobalState::defn_Array());
+                            result = core::Types::arrayClass();
                         }
                     } else {
                         result = lubGround(ctx, p1->underlying, p2->underlying);
@@ -101,14 +101,14 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                                     keys.emplace_back(el2);
                                     valueLubs.emplace_back(lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
                                 } else {
-                                    result = make_shared<ClassType>(core::GlobalState::defn_Hash());
+                                    result = core::Types::hashClass();
                                     return;
                                 }
                                 ++i;
                             }
                             result = make_shared<ShapeType>(keys, valueLubs);
                         } else {
-                            result = make_shared<ClassType>(core::GlobalState::defn_Hash());
+                            result = core::Types::hashClass();
                         }
                     } else {
                         result = lubGround(ctx, p1->underlying, p2->underlying);

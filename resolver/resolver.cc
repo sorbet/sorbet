@@ -422,10 +422,10 @@ private:
                         /* TODO: array_of and hash_of accept arguments and
                            should instantiate generics, once we have those. */
                     case core::Names::arrayOf()._id:
-                        result = make_shared<core::ClassType>(core::GlobalState::defn_Array());
+                        result = core::Types::arrayClass();
                         break;
                     case core::Names::hashOf()._id:
-                        result = make_shared<core::ClassType>(core::GlobalState::defn_Hash());
+                        result = core::Types::hashClass();
                         break;
                     case core::Names::noreturn()._id:
                         result = core::Types::bottom();

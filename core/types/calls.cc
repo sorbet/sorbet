@@ -58,7 +58,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
             for (int i = 0; i < args.size(); i += 2) {
                 auto *key = dynamic_cast<LiteralType *>(args[i].type.get());
                 if (key == nullptr) {
-                    return make_unique<ClassType>(ctx.state.defn_Hash());
+                    return core::Types::hashClass();
                 }
 
                 // HACK(nelhage): clone the LiteralType by hand, since there's no way to go

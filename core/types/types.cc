@@ -67,6 +67,11 @@ std::shared_ptr<Type> Types::Symbol() {
     return res;
 }
 
+std::shared_ptr<Type> Types::Object() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_Object());
+    return res;
+}
+
 std::shared_ptr<Type> Types::falsyTypes() {
     static auto res = OrType::make_shared(Types::nil(), Types::falseClass());
     return res;

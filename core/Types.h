@@ -79,6 +79,7 @@ public:
     static std::shared_ptr<Type> String();
     static std::shared_ptr<Type> Symbol();
     static std::shared_ptr<Type> Float();
+    static std::shared_ptr<Type> Object();
     static std::shared_ptr<Type> arrayClass();
     static std::shared_ptr<Type> hashClass();
     static std::shared_ptr<Type> falsyTypes();

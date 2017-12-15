@@ -169,7 +169,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(standardError_id == defn_StandardError());
 
     // Synthesize nil = NilClass()
-    defn_nil().info(*this).resultType = make_unique<ClassType>(defn_NilClass());
+    defn_nil().info(*this).resultType = core::Types::nil();
 
     // <Magic> has a special Type
     defn_Magic().info(*this).resultType = make_shared<MagicType>();
@@ -178,24 +178,24 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
     arg.info(*this).setRepeated();
-    arg.info(*this).resultType = make_unique<ClassType>(defn_Object());
+    arg.info(*this).resultType = core::Types::Object();
     method.info(*this).arguments().push_back(arg);
-    method.info(*this).resultType = make_unique<ClassType>(defn_Hash());
+    method.info(*this).resultType = core::Types::hashClass();
 
     // Synthesize <Magic>#build_array(*vs : Object) => Array
     method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::buildArray());
     arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
     arg.info(*this).setRepeated();
-    arg.info(*this).resultType = make_unique<ClassType>(defn_Object());
+    arg.info(*this).resultType = core::Types::Object();
     method.info(*this).arguments().push_back(arg);
-    method.info(*this).resultType = make_unique<ClassType>(defn_Array());
+    method.info(*this).resultType = core::Types::arrayClass();
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
-    arg.info(*this).resultType = make_unique<ClassType>(defn_Array());
+    arg.info(*this).resultType = core::Types::arrayClass();
     method.info(*this).arguments().push_back(arg);
-    method.info(*this).resultType = make_unique<ClassType>(defn_untyped());
+    method.info(*this).resultType = core::Types::dynamic();
 
     // TODO(pay-server) Synthesize ::M = ::Opus::DB::Model
     //
