@@ -1,0 +1,6 @@
+class <constant:C> < ::<constant:Object> ()
+  method <block>$10001 (x)
+    argument x<>
+  static-field <constant:L> -> untyped
+class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
+

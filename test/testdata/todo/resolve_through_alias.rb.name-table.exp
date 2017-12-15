@@ -1,0 +1,7 @@
+class <constant:A> < ::<constant:Object> ()
+  static-field <constant:N> -> <class:NS>
+    class <constant:Inner> () -> untyped
+class <constant:NS> (<constant:BasicObject>)
+  class <constant:Inner> (<constant:BasicObject>)
+class <singleton class:<constant:NS>> < ::<constant:Module> ()
+

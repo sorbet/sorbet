@@ -256,10 +256,13 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
 }
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    bool isBlock = name.name(*this).kind == NameKind::UNIQUE && name.name(*this).unique.original == Names::blockTemp();
+    Error::check(isBlock || owner.info(*this).isClass());
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    Error::check(owner.info(*this).isClass());
     return enterSymbol(loc, owner, name, Symbol::Flags::FIELD);
 }
 
@@ -268,6 +271,7 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef 
 }
 
 SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    Error::check(owner.info(*this).isMethod());
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD_ARGUMENT);
 }
 

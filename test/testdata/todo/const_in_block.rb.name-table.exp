@@ -1,0 +1,6 @@
+class <constant:Test> < ::<constant:Object> ()
+  method <block>$10001 ()
+    class <constant:A> < ::<constant:Object> ()
+    static-field <constant:B> -> Integer
+class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> ()
+
