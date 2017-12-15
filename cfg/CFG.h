@@ -84,7 +84,7 @@ public:
     core::NameRef value;
 
     StringLit(core::NameRef value) : value(value) {
-        categoryCounterInc("CFG", "StringLit");
+        categoryCounterInc("cfg", "stringlit");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -94,7 +94,7 @@ public:
     core::NameRef value;
 
     SymbolLit(core::NameRef value) : value(value) {
-        categoryCounterInc("CFG", "SymbolLit");
+        categoryCounterInc("cfg", "symbollit");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -112,7 +112,7 @@ public:
     std::string why;
 
     NotSupported(std::string why) : why(why) {
-        categoryCounterInc("CFG", "NotSupported");
+        categoryCounterInc("cfg", "notsupported");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -122,7 +122,7 @@ public:
     bool value;
 
     BoolLit(bool value) : value(value) {
-        categoryCounterInc("CFG", "BoolLit");
+        categoryCounterInc("cfg", "boollit");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -132,7 +132,7 @@ public:
     core::NameRef arg;
 
     ArraySplat(core::NameRef arg) : arg(arg) {
-        categoryCounterInc("CFG", "ArraySplat");
+        categoryCounterInc("cfg", "arraysplat");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -142,7 +142,7 @@ public:
     core::NameRef arg;
 
     HashSplat(core::NameRef arg) : arg(arg) {
-        categoryCounterInc("CFG", "HashSplat");
+        categoryCounterInc("cfg", "hashsplat");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -152,7 +152,7 @@ public:
     core::SymbolRef klass;
 
     Self(core::SymbolRef klass) : klass(klass) {
-        categoryCounterInc("CFG", "Self");
+        categoryCounterInc("cfg", "self");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -164,7 +164,7 @@ public:
     u4 arg;
 
     LoadArg(core::LocalVariable receiver, core::NameRef method, u4 arg) : receiver(receiver), method(method), arg(arg) {
-        categoryCounterInc("CFG", "LoadArg");
+        categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -217,7 +217,7 @@ public:
     BlockExit bexit;
     std::vector<BasicBlock *> backEdges;
     BasicBlock() {
-        counterInc("BasicBlocks");
+        counterInc("basicblocks");
     };
 
     std::string toString(core::Context ctx);

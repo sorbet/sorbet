@@ -158,7 +158,7 @@ Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction
     : bind(bind), loc(loc), value(move(value)) {}
 
 Return::Return(core::LocalVariable what) : what(what) {
-    categoryCounterInc("CFG", "Return");
+    categoryCounterInc("cfg", "return");
 }
 
 string Return::toString(core::Context ctx) {
@@ -167,12 +167,12 @@ string Return::toString(core::Context ctx) {
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args)
     : recv(recv), fun(fun), args(move(args)) {
-    categoryCounterInc("CFG", "Send");
-    histogramInc("CFG::Send::args", this->args.size());
+    categoryCounterInc("cfg", "send");
+    histogramInc("cfg.send.args", this->args.size());
 }
 
 FloatLit::FloatLit(double value) : value(value) {
-    categoryCounterInc("CFG", "FloatLit");
+    categoryCounterInc("cfg", "floatlit");
 }
 
 string FloatLit::toString(core::Context ctx) {
@@ -180,7 +180,7 @@ string FloatLit::toString(core::Context ctx) {
 }
 
 IntLit::IntLit(int64_t value) : value(value) {
-    categoryCounterInc("CFG", "IntLit");
+    categoryCounterInc("cfg", "intlit");
 }
 
 string IntLit::toString(core::Context ctx) {
@@ -188,11 +188,11 @@ string IntLit::toString(core::Context ctx) {
 }
 
 Ident::Ident(core::LocalVariable what) : what(what) {
-    categoryCounterInc("CFG", "Ident");
+    categoryCounterInc("cfg", "ident");
 }
 
 Alias::Alias(core::SymbolRef what) : what(what) {
-    categoryCounterInc("CFG", "Alias");
+    categoryCounterInc("cfg", "alias");
 }
 
 string Ident::toString(core::Context ctx) {

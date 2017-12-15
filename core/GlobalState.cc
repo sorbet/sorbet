@@ -227,10 +227,13 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     Symbol &ownerScope = owner.info(*this, true);
     auto from = ownerScope.members.begin();
     auto to = ownerScope.members.end();
+    histogramInc("symbol_enter_by_name", ownerScope.members.size());
+
     while (from != to) {
         auto &el = *from;
         if (el.first == name) {
             Error::check((from->second.info(*this).flags & flags) == flags);
+            counterInc("symbols.hit");
             return from->second;
         }
         from++;
@@ -245,6 +248,19 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     info.flags = flags;
     info.owner = owner;
     info.definitionLoc = loc;
+    if (info.isBlockSymbol(*this)) {
+        categoryCounterInc("symbols", "block");
+    } else if (info.isClass()) {
+        categoryCounterInc("symbols", "class");
+    } else if (info.isMethod()) {
+        categoryCounterInc("symbols", "method");
+    } else if (info.isField()) {
+        categoryCounterInc("symbols", "field");
+    } else if (info.isStaticField()) {
+        categoryCounterInc("symbols", "static_field");
+    } else if (info.isMethodArgument()) {
+        categoryCounterInc("symbols", "argument");
+    }
 
     if (!reallocate) {
         ownerScope.members.push_back(make_pair(name, ret));
@@ -281,6 +297,7 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
 LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
     // THIS IS NOT TRUE. Top level code is still a thing
     // Error::check(owner.info(*this).isMethod());
+    categoryCounterInc("symbols", "local");
     if (owner.info(*this).isBlockSymbol(*this) && !name.isBlockClashSafe(*this)) {
         name = freshNameUnique(UniqueNameKind::NestedScope, name, owner._id);
     }
@@ -305,6 +322,7 @@ absl::string_view GlobalState::enterString(absl::string_view nm) {
         from = strings.back()->data() + strings_last_page_used;
     }
 
+    counterInc("strings");
     memcpy(from, nm.data(), nm.size());
     strings_last_page_used += nm.size();
     return absl::string_view(from, nm.size());
@@ -323,6 +341,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
             auto name_id = bucket.second;
             auto &nm2 = names[name_id];
             if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
+                counterInc("names.utf8.hit");
                 return name_id;
             }
         }
@@ -351,6 +370,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
 
     names[idx].kind = NameKind::UTF8;
     names[idx].raw.utf8 = enterString(nm);
+    categoryCounterInc("names", "utf8");
 
     return idx;
 }
@@ -370,6 +390,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
             if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
+                counterInc("names.constant.hit");
                 return bucket.second;
             }
         }
@@ -402,6 +423,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     names[idx].kind = CONSTANT;
     names[idx].cnst.original = original;
+    categoryCounterInc("names", "constant");
     return idx;
 }
 
@@ -455,6 +477,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
             auto &nm2 = names[bucket.second];
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
+                counterInc("names.unique.hit");
                 return bucket.second;
             }
         }
@@ -489,6 +512,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     names[idx].unique.num = num;
     names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
+    categoryCounterInc("names", "unique");
     return idx;
 }
 

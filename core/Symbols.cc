@@ -163,6 +163,7 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
 }
 
 SymbolRef Symbol::findMember(GlobalState &gs, NameRef name) {
+    histogramInc("find_member_scope_size", members.size());
     for (auto &member : members) {
         if (member.first == name) {
             return member.second.info(gs).dealias(gs);
@@ -237,6 +238,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
     Symbol &singletonInfo = singleton.info(gs);
 
+    counterInc("singleton_classes");
     singletonInfo.members.push_back(make_pair(Names::attachedClass(), selfRef));
     singletonInfo.superClass = core::GlobalState::defn_todo();
 

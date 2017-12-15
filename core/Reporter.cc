@@ -81,6 +81,14 @@ vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> Reporter::getAndEmpty
     return result;
 }
 
+int Reporter::totalErrors() {
+    int sum = 0;
+    for (const auto &e : this->errorHistogram) {
+        sum += e.second;
+    }
+    return sum;
+}
+
 string Reporter::ErrorLine::toString(GlobalState &gs) {
     stringstream buf;
     string indent = "  ";

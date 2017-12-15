@@ -676,6 +676,8 @@ KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc
 }
 
 void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
+    counterInc("infer.methods_typechecked");
+    const int startErrorCount = ctx.state.errors.totalErrors();
     vector<Environment> outEnvironments;
     outEnvironments.resize(cfg->maxBasicBlockId);
     for (int i = 0; i < cfg->basicBlocks.size(); i++) {
@@ -740,5 +742,15 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
             bind.tpe->sanityCheck(ctx);
         }
         current.ensureGoodCondition(ctx, bb->bexit.cond);
+        histogramInc("infer.environment.size", current.vars.size());
+        for (auto &k : current.knowledge) {
+            histogramInc("infer.knowledge.truthy.yes.size", k.truthy.yesTypeTests.size());
+            histogramInc("infer.knowledge.truthy.no.size", k.truthy.noTypeTests.size());
+            histogramInc("infer.knowledge.falsy.yes.size", k.falsy.yesTypeTests.size());
+            histogramInc("infer.knowledge.falsy.no.size", k.falsy.noTypeTests.size());
+        }
+    }
+    if (startErrorCount == ctx.state.errors.totalErrors()) {
+        counterInc("infer.methods_typechecked.no_errors");
     }
 }

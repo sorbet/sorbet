@@ -19,5 +19,6 @@ cc_library(
         "@com_google_absl//absl/container:inlined_vector",
         "@com_google_absl//absl/strings",
         "@spdlog",
+        "@statsd",
     ],
 )

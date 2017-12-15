@@ -11,7 +11,7 @@ using namespace std;
 
 shared_ptr<Type> ProxyType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-    categoryCounterInc("dispatchCall", "ProxyType");
+    categoryCounterInc("dispatch_call", "proxytype");
     return underlying->dispatchCall(ctx, name, callLoc, args, fullType);
 }
 
@@ -21,7 +21,7 @@ shared_ptr<Type> ProxyType::getCallArgumentType(core::Context ctx, core::NameRef
 
 shared_ptr<Type> OrType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                       vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-    categoryCounterInc("dispatchCall", "OrType");
+    categoryCounterInc("dispatch_call", "ortype");
     return Types::lub(ctx, left->dispatchCall(ctx, name, callLoc, args, fullType),
                       right->dispatchCall(ctx, name, callLoc, args, fullType));
 }
@@ -32,7 +32,7 @@ shared_ptr<Type> OrType::getCallArgumentType(core::Context ctx, core::NameRef na
 
 shared_ptr<Type> AndType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                        vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-    categoryCounterInc("dispatchCall", "AndType");
+    categoryCounterInc("dispatch_call", "andtype");
     Error::notImplemented();
 }
 
@@ -42,13 +42,13 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
 
 shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-    categoryCounterInc("dispatchCall", "ShapeType");
+    categoryCounterInc("dispatch_call", "shapetype");
     return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
 }
 
 shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-    categoryCounterInc("dispatchCall", "MagicType");
+    categoryCounterInc("dispatch_call", "magictype");
     switch (fun._id) {
         case Names::buildHash()._id: {
             Error::check(args.size() % 2 == 0);
@@ -128,7 +128,7 @@ void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
 //    (with a subtype check on the key type, once we have generics)
 shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
-    categoryCounterInc("dispatchCall", "ClassType");
+    categoryCounterInc("dispatch_call", "classtype");
     if (isDynamic()) {
         return Types::dynamic();
     }
