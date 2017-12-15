@@ -1,4 +1,4 @@
-class <constant:Examples> < ::<constant:Object> ()
+class <constant:Examples> < ::<constant:Object> () -> <class:Examples>
   method i_like_exps ()
   method i_like_ifs ()
   method return_in_one_branch1 ()
@@ -8,4 +8,5 @@ class <constant:Examples> < ::<constant:Object> ()
   method variables ()
   method variables_and_loop ()
   method variables_loop_if ()
+class <singleton class:<constant:Examples>> < ::<singleton class:<constant:Object>> ()
 

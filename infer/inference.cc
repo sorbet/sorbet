@@ -458,12 +458,8 @@ public:
                     core::SymbolRef symbol = a->what;
                     core::Symbol &info = symbol.info(ctx);
                     if (info.isClass()) {
-                        if (info.resultType.get() == nullptr) {
-                            core::SymbolRef sym = info.singletonClass(ctx);
-                            tp.type = make_shared<core::ClassType>(sym);
-                        } else {
-                            tp.type = info.resultType;
-                        }
+                        Error::check(info.resultType.get(), "Type should have been filled in by the namer");
+                        tp.type = info.resultType;
                         tp.origins.push_back(symbol.info(ctx).definitionLoc);
                     } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
                         if (info.resultType.get() != nullptr) {

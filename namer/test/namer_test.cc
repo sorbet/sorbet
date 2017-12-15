@@ -79,11 +79,11 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
     auto &rootScope =
         core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).info(ctx);
 
-    ASSERT_EQ(1, rootScope.members.size());
-    auto fooPair = rootScope.members[0];
+    ASSERT_EQ(3, rootScope.members.size());
+    auto fooPair = rootScope.members[1];
     ASSERT_EQ("<constant:Foo>", fooPair.first.name(ctx).toString(ctx));
     auto &fooInfo = fooPair.second.info(ctx);
-    ASSERT_EQ(0, fooInfo.members.size());
+    ASSERT_EQ(1, fooInfo.members.size());
 }
 
 TEST_F(NamerFixture, InsideClass) { // NOLINT
@@ -93,12 +93,12 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
     auto &rootScope =
         core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).info(ctx);
 
-    ASSERT_EQ(1, rootScope.members.size());
-    auto fooSym = rootScope.members[0].second;
+    ASSERT_EQ(3, rootScope.members.size());
+    auto fooSym = rootScope.members[1].second;
     auto &fooInfo = fooSym.info(ctx);
-    ASSERT_EQ(1, fooInfo.members.size());
+    ASSERT_EQ(2, fooInfo.members.size());
 
-    auto barPair = fooInfo.members[0];
+    auto barPair = fooInfo.members[1];
     ASSERT_EQ("bar", barPair.first.name(ctx).toString(ctx));
     ASSERT_EQ(fooSym, barPair.second.info(ctx).owner);
 }

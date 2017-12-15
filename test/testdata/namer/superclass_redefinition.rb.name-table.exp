@@ -1,3 +1,5 @@
-class <constant:A> < ::<constant:Object> ()
-class <constant:B> < ::<constant:Object> ()
+class <constant:A> < ::<constant:Object> () -> <class:A>
+class <constant:B> < ::<constant:Object> () -> <class:B>
+class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
+class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> ()
 

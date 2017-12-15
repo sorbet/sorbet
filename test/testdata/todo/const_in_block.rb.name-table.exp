@@ -1,6 +1,7 @@
-class <constant:Test> < ::<constant:Object> ()
+class <constant:Test> < ::<constant:Object> () -> <class:Test>
   method <block>$10001 ()
-    class <constant:A> < ::<constant:Object> ()
+    class <constant:A> < ::<constant:Object> () -> <class:A>
+    class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
     static-field <constant:B> -> Integer
 class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> ()
 

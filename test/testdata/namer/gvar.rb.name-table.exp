@@ -1,5 +1,6 @@
-class <constant:A> < ::<constant:Object> ()
+class <constant:A> < ::<constant:Object> () -> <class:A>
   method meth ()
+class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
 field $a
 field $b
 field $c
