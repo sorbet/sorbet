@@ -152,7 +152,8 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     } else if (argnode.get() == nullptr) {
         // do nothing
     } else {
-        Error::notImplemented();
+        auto node = argnode.get();
+        Error::raise("not implemented: ", demangle(typeid(*node).name()));
     }
 
     auto body = node2TreeImpl(ctx, bodynode);
@@ -797,6 +798,31 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             [&](parser::ZSuper *zuper) {
                 unique_ptr<Expression> res =
                     mkSend1(loc, mkSelf(loc), core::Names::super(), make_unique<ZSuperArgs>(zuper->loc));
+                result.swap(res);
+            },
+            [&](parser::For *for_) {
+                auto temp = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp());
+
+                auto mlhsNode = move(for_->vars);
+                auto mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get());
+                if (mlhs == nullptr) {
+                    parser::NodeVec vars;
+                    vars.emplace_back(move(mlhsNode));
+                    mlhsNode = make_unique<parser::Mlhs>(loc, move(vars));
+                    mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get());
+                }
+
+                InsSeq::STATS_store stats;
+                stats.emplace_back(desugarMlhs(ctx, mlhsNode->loc, mlhs, mkLocal(loc, temp)));
+                auto body = make_unique<InsSeq>(loc, move(stats), node2TreeImpl(ctx, for_->body));
+
+                MethodDef::ARGS_store blockArgs;
+                blockArgs.emplace_back(make_unique<RestArg>(loc, mkLocal(loc, temp)));
+                auto block = make_unique<Block>(what->loc, move(blockArgs), move(body));
+
+                Send::ARGS_store noargs;
+                auto res = mkSend(what->loc, node2TreeImpl(ctx, for_->expr), core::Names::each(), move(noargs), 0,
+                                  move(block));
                 result.swap(res);
             },
             [&](parser::Integer *integer) {

@@ -55,6 +55,7 @@ NameDef names[] = {
     {"orOp", "|", Desugar},
     {"slice", Desugar},
     {"defined_p", "defined?", Desugar},
+    {"each", Desugar},
 
     // used in CFG for temporaries
     {"whileTemp", CFG},
@@ -127,6 +128,7 @@ NameDef names[] = {
 
     {"blockTemp", "<block>", Core | Namer | Resolver},
     {"blockPassTemp", "<block-pass>", Desugar},
+    {"forTemp", Desugar},
     {"new_", "new", Desugar | Infer},
     {"blockCall", "<block-call>", CFG | Infer},
 
