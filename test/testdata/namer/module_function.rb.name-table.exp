@@ -1,6 +1,6 @@
-class <constant:C> < ::<constant:Object> (<constant:Funcs>)
+class <constant:C> < ::<constant:Object> (<constant:Funcs>) -> <class:C>
   method test_calls ()
-class <constant:Funcs> (<constant:BasicObject>)
+class <constant:Funcs> (<constant:BasicObject>) -> <class:Funcs>
   method f (x) -> Integer
     argument x<> -> Integer
   method g (s) -> Symbol

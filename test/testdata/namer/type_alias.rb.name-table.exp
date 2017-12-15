@@ -1,5 +1,5 @@
-class <constant:A> (<constant:BasicObject>)
-  class <constant:C1> < ::<constant:Object> ()
+class <constant:A> (<constant:BasicObject>) -> <class:A>
+  class <constant:C1> < ::<constant:Object> () -> <class:C1>
   class <singleton class:<constant:C1>> < ::<singleton class:<constant:Object>> ()
   method f (x) -> NilClass
     argument x<> -> C1

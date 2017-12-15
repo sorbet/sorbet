@@ -1,3 +1,4 @@
-class <constant:Foo> < ::<constant:Object> ()
+class <constant:Foo> < ::<constant:Object> () -> <class:Foo>
   static-field <constant:BAR> -> Integer
+class <singleton class:<constant:Foo>> < ::<singleton class:<constant:Object>> ()
 

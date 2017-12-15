@@ -1,6 +1,3 @@
 class <constant:A> < ::<constant:Object> () -> <class:A>
-  field @foo -> Integer
-  field @llamas -> untyped
-  method <block>$10001 ()
 class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
 

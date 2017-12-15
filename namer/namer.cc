@@ -32,7 +32,9 @@ class NameInserter {
         if (existing.exists()) {
             return existing;
         }
-        return ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
+        auto sym = ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
+        sym.info(ctx).resultType = make_unique<core::ClassType>(sym.info(ctx).singletonClass(ctx));
+        return sym;
     }
 
     core::SymbolRef arg2Symbol(core::Context ctx, ast::Expression *arg) {
@@ -166,6 +168,7 @@ public:
                 return false;
             });
         klass->symbol.info(ctx).definitionLoc = klass->loc;
+        klass->symbol.info(ctx).resultType = make_unique<core::ClassType>(klass->symbol.info(ctx).singletonClass(ctx));
         klass->rhs.erase(toRemove, klass->rhs.end());
         return klass;
     }

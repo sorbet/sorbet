@@ -171,6 +171,9 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = core::Types::nil();
 
+    // Synthesize untyped = dynamic()
+    defn_untyped().info(*this).resultType = core::Types::dynamic();
+
     // <Magic> has a special Type
     defn_Magic().info(*this).resultType = make_shared<MagicType>();
 

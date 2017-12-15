@@ -1,7 +1,8 @@
-class <constant:Destructure> < ::<constant:Object> ()
+class <constant:Destructure> < ::<constant:Object> () -> <class:Destructure>
   method f (<destructure>$10000, z)
     argument <destructure>$10000<>
     argument z<>
-    method <block>$10004 (<destructure>$10002)
+    method <block>$10005 (<destructure>$10002)
       argument <destructure>$10002<>
+class <singleton class:<constant:Destructure>> < ::<singleton class:<constant:Object>> ()
 

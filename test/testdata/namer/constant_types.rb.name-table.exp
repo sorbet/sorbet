@@ -1,4 +1,4 @@
-class <constant:Constants> (<constant:BasicObject>)
+class <constant:Constants> (<constant:BasicObject>) -> <class:Constants>
   static-field <constant:A> -> Integer
   static-field <constant:B> -> String
   static-field <constant:C> -> Symbol
