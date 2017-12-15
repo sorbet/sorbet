@@ -1,0 +1,111 @@
+begin
+  class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    def self.each<<constant:<todo sym>>>()
+      begin
+        yield([1, 2, 3, 4, 5])
+        yield([6, 7, 8, 9, 0])
+      end
+    end
+  end
+  class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    def self.e=<<constant:<todo sym>>>(e)
+      @e = e
+    end
+
+    def self.e<<constant:<todo sym>>>()
+      @e
+    end
+  end
+  class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    def self.main<<constant:<todo sym>>>()
+      begin
+        <emptyTree>::<constant:A>.each() do |*forTemp$10000|
+          begin
+            begin
+              assignTemp$10001 = forTemp$10000
+              a = assignTemp$10001.[](0)
+              assignTemp$10001
+            end
+            self(<constant:<todo sym>>).puts(a.inspect())
+          end
+        end
+        <emptyTree>::<constant:A>.each() do |*forTemp|
+          begin
+            begin
+              assignTemp$10002 = forTemp.to_a()
+              a = assignTemp$10002.[](0)
+              assignTemp$10002
+            end
+            self(<constant:<todo sym>>).puts(a.inspect())
+          end
+        end
+        <emptyTree>::<constant:A>.each() do |*forTemp$10003|
+          begin
+            begin
+              assignTemp$10004 = forTemp$10003
+              a = assignTemp$10004.[](0)
+              b = assignTemp$10004.[](1)
+              assignTemp$10004
+            end
+            begin
+              self(<constant:<todo sym>>).puts(a.inspect())
+              self(<constant:<todo sym>>).puts(b.inspect())
+            end
+          end
+        end
+        <emptyTree>::<constant:A>.each() do |*forTemp|
+          begin
+            begin
+              assignTemp$10005 = forTemp.to_a()
+              a = assignTemp$10005.[](0)
+              b = assignTemp$10005.[](1)
+              assignTemp$10005
+            end
+            self(<constant:<todo sym>>).puts(a.inspect())
+            self(<constant:<todo sym>>).puts(b.inspect())
+          end
+        end
+        self(<constant:<todo sym>>).puts("main")
+        <emptyTree>::<constant:A>.each() do |*forTemp$10006|
+          begin
+            begin
+              assignTemp$10007 = forTemp$10006
+              @a = assignTemp$10007.[](0)
+              @@b = assignTemp$10007.[](1)
+              $c = assignTemp$10007.[](2)
+              d = assignTemp$10007.[](3)
+              <emptyTree>::<constant:E>.e=(assignTemp$10007.[](4))
+              assignTemp$10007
+            end
+            begin
+              self(<constant:<todo sym>>).puts(@a.inspect())
+              self(<constant:<todo sym>>).puts(@@b.inspect())
+              self(<constant:<todo sym>>).puts($c.inspect())
+              self(<constant:<todo sym>>).puts(d.inspect())
+              self(<constant:<todo sym>>).puts(<emptyTree>::<constant:E>.e().inspect())
+            end
+          end
+        end
+        <emptyTree>::<constant:A>.each() do |*forTemp|
+          begin
+            begin
+              assignTemp$10008 = forTemp.to_a()
+              @a = assignTemp$10008.[](0)
+              @@b = assignTemp$10008.[](1)
+              $c = assignTemp$10008.[](2)
+              d = assignTemp$10008.[](3)
+              <emptyTree>::<constant:E>.e=(assignTemp$10008.[](4))
+              assignTemp$10008
+            end
+            self(<constant:<todo sym>>).puts(@a.inspect())
+            self(<constant:<todo sym>>).puts(@@b.inspect())
+            self(<constant:<todo sym>>).puts($c.inspect())
+            self(<constant:<todo sym>>).puts(d.inspect())
+            self(<constant:<todo sym>>).puts(<emptyTree>::<constant:E>.e().inspect())
+          end
+        end
+      end
+    end
+  end
+  <emptyTree>::<constant:Main>.main()
+end
