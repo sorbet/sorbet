@@ -1283,6 +1283,11 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto res = mkInt(loc, pos.first.line);
                 result.swap(res);
             },
+            [&](parser::XString *xstring) {
+                auto res =
+                    mkSend1(loc, mkSelf(loc), core::Names::backtick(), desugarDString(ctx, loc, move(xstring->nodes)));
+                result.swap(res);
+            },
 
             [&](parser::BlockPass *blockPass) { Error::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) {

@@ -1,0 +1,6 @@
+begin
+  self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).`("echo hi"))
+  self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).`(begin
+        "echo"
+      end.to_s().concat(" hi")))
+end

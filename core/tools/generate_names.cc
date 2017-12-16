@@ -53,6 +53,7 @@ NameDef names[] = {
     {"ampersand", "&", Parser},
     {"tripleEq", "===", Desugar},
     {"orOp", "|", Desugar},
+    {"backtick", "`", Desugar},
     {"slice", Desugar},
     {"defined_p", "defined?", Desugar},
     {"each", Desugar},
