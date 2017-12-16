@@ -1,0 +1,4 @@
+self(<constant:<todo sym>>).puts("
+".concat(begin
+      2
+    end.to_s()).to_s())

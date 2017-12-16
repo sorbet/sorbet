@@ -1277,6 +1277,12 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto res = mkSend1(loc, mkSelf(loc), core::Names::defined_p(), node2TreeImpl(ctx, defined->value));
                 result.swap(res);
             },
+            [&](parser::LineLiteral *line) {
+                auto pos = loc.position(ctx);
+                Error::check(pos.first.line == pos.second.line);
+                auto res = mkInt(loc, pos.first.line);
+                result.swap(res);
+            },
 
             [&](parser::BlockPass *blockPass) { Error::raise("Send should have already handled the BlockPass"); },
             [&](parser::Node *node) {
