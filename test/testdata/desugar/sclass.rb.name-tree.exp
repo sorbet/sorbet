@@ -1,0 +1,92 @@
+begin
+  def declare_variables<declare_variables>(a)
+    <emptyTree>
+  end
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  #$c = ::<constant:Object>.new()
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  def main<main>()
+    begin
+      self(<constant:Object>).puts(::<constant:A>.a())
+      self(<constant:Object>).puts(::<constant:B>.b())
+      self(<constant:Object>).puts(#$c.c())
+      self(<constant:Object>).puts(::<constant:D>.singleton_class().d())
+      self(<constant:Object>).puts(::<constant:E>.e())
+      self(<constant:Object>).puts(::<constant:F>.f=(91))
+      self(<constant:Object>).puts(::<constant:G>.new().wrapper())
+      self(<constant:Object>).puts(::<constant:untyped>.h())
+    end
+  end
+  class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:B><<constant:B>> < (::<constant:<todo sym>>)
+    <emptyTree>
+  end
+  class <singleton class><<singleton class:<constant:B>>> < ()
+    def b<b>()
+      "b"
+    end
+  end
+  class <emptyTree>::<constant:D><<constant:D>> < (::<constant:<todo sym>>)
+    <emptyTree>
+  end
+  class <singleton class><<singleton class:<constant:D>>> < ()
+    <emptyTree>
+  end
+  class <singleton class><<singleton class:<singleton class:<constant:D>>>> < ()
+    def d<d>()
+      "d"
+    end
+  end
+  class <emptyTree>::<constant:E><<constant:E>> < (::<constant:<todo sym>>)
+    <emptyTree>
+
+    self(<singleton class:<constant:E>>).wrapper()
+  end
+  class <singleton class><<singleton class:<constant:E>>> < ()
+    def wrapper<wrapper>()
+      def e<e>()
+        "e"
+      end
+    end
+  end
+  class <emptyTree>::<constant:F><<constant:F>> < (::<constant:<todo sym>>)
+    <emptyTree>
+  end
+  class <singleton class><<singleton class:<constant:F>>> < ()  end
+  class <emptyTree>::<constant:G><<constant:G>> < (::<constant:<todo sym>>)
+    def wrapper<wrapper>()
+      begin
+        <emptyTree>
+        self(<constant:G>).inner()
+      end
+    end
+
+    def self.g<g>()
+      "g"
+    end
+  end
+  class <singleton class><<singleton class:<constant:G>>> < ()
+    def inner<inner>()
+      self(<singleton class:<constant:G>>).singleton_class().g()
+    end
+  end
+  class <emptyTree>::<constant:H><<constant:H>> < (::<constant:<todo sym>>)
+    <emptyTree>
+  end
+  class <singleton class><<singleton class:<constant:H>>> < ()
+    <emptyTree>
+  end
+  class <emptyTree>::<constant:H2><<constant:H2>> < (::<constant:<todo sym>>)
+    def self.h<h>()
+      "h"
+    end
+  end
+  self(<singleton class:<constant:<root>>>).main()
+end

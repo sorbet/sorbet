@@ -123,7 +123,7 @@ NameDef names[] = {
     // The "attached class" terminology is borrowed from MRI, which refers
     // to the unique instance attached to a singleton class as the "attached
     // object"
-    {"singletonClass", "<singleton class>", Core},
+    {"singletonClass", "<singleton class>", Core | Desugar | Namer},
     {"attachedClass", "<attached class>", Core},
 
     {"blockTemp", "<block>", Core | Namer | Resolver},

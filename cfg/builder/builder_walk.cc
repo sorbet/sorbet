@@ -391,6 +391,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
 
+            [&](ast::ClassDef *c) { Error::raise("Should have been removed by FlattenClassDefsWalk"); },
+
             [&](ast::Expression *n) {
                 current->exprs.emplace_back(cctx.target, n->loc,
                                             make_unique<NotSupported>(demangle(typeid(*n).name())));

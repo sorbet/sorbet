@@ -682,6 +682,35 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 unique_ptr<Expression> res(meth.release());
                 result.swap(res);
             },
+            [&](parser::SClass *sclass) {
+                // This will be a nested ClassDef which we leave in the tree
+                // which will get the symbol of `class.singleton_class`
+                parser::Self *self = parser::cast_node<parser::Self>(sclass->expr.get());
+                if (self == nullptr) {
+                    ctx.state.errors.error(sclass->loc, core::errors::Desugar::InvalidSingletonDef,
+                                           "`class << EXPRESSION' is only supported for `class << self'");
+                    unique_ptr<Expression> res = make_unique<EmptyTree>(what->loc);
+                    result.swap(res);
+                    return;
+                }
+
+                ClassDef::RHS_store body;
+                if (auto *begin = parser::cast_node<parser::Begin>(sclass->body.get())) {
+                    body.reserve(begin->stmts.size());
+                    for (auto &stat : begin->stmts) {
+                        body.emplace_back(node2TreeImpl(ctx, stat));
+                    };
+                } else {
+                    body.emplace_back(node2TreeImpl(ctx, sclass->body));
+                }
+                ClassDef::ANCESTORS_store emptyAncestors;
+                unique_ptr<Expression> res =
+                    make_unique<ClassDef>(what->loc, ctx.state.defn_todo(),
+                                          make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Class,
+                                                                       core::Names::singletonClass()),
+                                          move(emptyAncestors), move(body), ClassDefKind::Class);
+                result.swap(res);
+            },
             [&](parser::Block *block) {
                 auto recv = node2TreeImpl(ctx, block->send);
                 Send *send;

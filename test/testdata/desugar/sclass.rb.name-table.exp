@@ -1,0 +1,36 @@
+class <constant:A> < ::<constant:Object> () -> <class:A>
+class <constant:B> < ::<constant:Object> () -> <class:B>
+class <constant:D> < ::<constant:Object> () -> <class:D>
+class <constant:E> < ::<constant:Object> () -> <class:E>
+class <constant:F> < ::<constant:Object> () -> <class:F>
+class <constant:G> < ::<constant:Object> () -> <class:G>
+  method wrapper ()
+class <constant:H> < ::<constant:Object> () -> <class:H>
+class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
+class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () -> <class:<class:B>>
+  method b ()
+class <singleton class:<constant:D>> < ::<singleton class:<constant:Object>> () -> <class:<class:D>>
+class <singleton class:<constant:E>> < ::<singleton class:<constant:Object>> () -> <class:<class:E>>
+  method e ()
+  method wrapper ()
+class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () -> <class:<class:F>>
+  field @f -> Integer
+  method f= (arg0) -> Integer
+    argument arg0<> -> Integer
+class <singleton class:<constant:G>> < ::<singleton class:<constant:Object>> () -> <class:<class:G>>
+  method g ()
+  method inner ()
+class <singleton class:<constant:H>> < ::<singleton class:<constant:Object>> () -> <class:<class:H>>
+  class <constant:H2> < ::<constant:Object> () -> <class:H2>
+  class <singleton class:<constant:H2>> < ::<singleton class:<constant:Object>> ()
+    method h ()
+class <singleton class:<singleton class:<constant:B>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
+class <singleton class:<singleton class:<constant:D>>> < ::<singleton class:<singleton class:<constant:Object>>> () -> <class:<class:<class:D>>>
+  method d ()
+class <singleton class:<singleton class:<constant:E>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
+class <singleton class:<singleton class:<constant:F>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
+class <singleton class:<singleton class:<constant:G>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
+class <singleton class:<singleton class:<constant:H>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
+class <singleton class:<singleton class:<singleton class:<constant:D>>>> < ::<singleton class:<singleton class:<singleton class:<constant:Object>>>> ()
+field $c
+
