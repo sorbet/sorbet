@@ -359,8 +359,12 @@ int realmain(int argc, char **argv) {
         tracer->set_level(spd::level::off);
     }
 
-    bool forceTyped = options["typed"].as<string>() == "always";
+    string typed = options["typed"].as<string>();
+    if (typed != "auto" && typed != "never" && typed != "always") {
+        console->error("Invalid valud for `--typed`: {}", typed);
+    }
 
+    bool forceTyped = typed == "always";
     ruby_typer::core::GlobalState gs = createInitialGlobalState(options);
 
     clock_t begin = clock();
@@ -387,7 +391,7 @@ int realmain(int argc, char **argv) {
         ruby_typer::counterInc("types.input.lines");
         ruby_typer::counterInc("types.input.files");
         inputFiles.push_back(gs.enterFile(string("-e"), src));
-        if (options["typed"].as<string>() == "never") {
+        if (typed == "never") {
             console->error("`-e` implies `--typed always` and you passed `--typed never`");
             return 1;
         }
