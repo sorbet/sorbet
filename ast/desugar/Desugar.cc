@@ -833,25 +833,25 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto temp = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp());
 
                 auto mlhsNode = move(for_->vars);
-                auto mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get());
-                if (mlhs == nullptr) {
+                if (parser::cast_node<parser::Mlhs>(mlhsNode.get()) == nullptr) {
                     parser::NodeVec vars;
                     vars.emplace_back(move(mlhsNode));
                     mlhsNode = make_unique<parser::Mlhs>(loc, move(vars));
-                    mlhs = parser::cast_node<parser::Mlhs>(mlhsNode.get());
                 }
+                unique_ptr<parser::Node> masgn =
+                    make_unique<parser::Masgn>(loc, move(mlhsNode), make_unique<parser::LVar>(loc, temp));
 
                 InsSeq::STATS_store stats;
-                stats.emplace_back(desugarMlhs(ctx, mlhsNode->loc, mlhs, mkLocal(loc, temp)));
+                stats.emplace_back(node2TreeImpl(ctx, masgn));
                 auto body = make_unique<InsSeq>(loc, move(stats), node2TreeImpl(ctx, for_->body));
 
                 MethodDef::ARGS_store blockArgs;
                 blockArgs.emplace_back(make_unique<RestArg>(loc, mkLocal(loc, temp)));
-                auto block = make_unique<Block>(what->loc, move(blockArgs), move(body));
+                auto block = make_unique<Block>(loc, move(blockArgs), move(body));
 
                 Send::ARGS_store noargs;
-                auto res = mkSend(what->loc, node2TreeImpl(ctx, for_->expr), core::Names::each(), move(noargs), 0,
-                                  move(block));
+                auto res =
+                    mkSend(loc, node2TreeImpl(ctx, for_->expr), core::Names::each(), move(noargs), 0, move(block));
                 result.swap(res);
             },
             [&](parser::Integer *integer) {
