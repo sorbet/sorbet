@@ -40,8 +40,10 @@ if [ "$GIT_BRANCH" == "master" ] || [ "$GIT_BRANCH" == "dp-datadog" ]; then
 fi
 
 
+
+# Run 2: Make sure we don't crash on all of pay-server with ASAN on
+
 cd -
-# Make sure we don't crash on all of pay-server with ASAN on
 bazel build main:ruby-typer -c opt --config=ci
 cd -
 
@@ -49,14 +51,11 @@ TIMEFILE2=$(mktemp)
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
-ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1  /usr/bin/time -v -o "$TIMEFILE2" ./scripts/ruby-types/typecheck --quiet --error-stats --typed=always
-
+ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1  /usr/bin/time -v -o "$TIMEFILE2" ./scripts/ruby-types/typecheck --quiet --typed=always --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters
 
 cat "$TIMEFILE2"
 
 TIME2="$(cat $TIMEFILE2 |grep User |cut -d ' ' -f 4)"
-
 if [ "$GIT_BRANCH" == "master" ] || [ "$GIT_BRANCH" == "dp-datadog" ]; then
   veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$TIME2"s -name ruby_typer.payserver.full_run.seconds
 fi
-

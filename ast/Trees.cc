@@ -51,96 +51,96 @@ Reference::Reference(core::Loc loc) : Expression(loc) {}
 ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store ancestors,
                    RHS_store rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {
-    categoryCounterInc("Trees", "ClassDef");
-    histogramInc("ClassDef::Kind", (int)kind);
-    histogramInc("ClassDef::ancestors", this->ancestors.size());
+    categoryCounterInc("trees", "classdef");
+    histogramInc("trees.classdef.kind", (int)kind);
+    histogramInc("trees.classdef.ancestors", this->ancestors.size());
 }
 
 MethodDef::MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
                      unique_ptr<Expression> rhs, bool isSelf)
     : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {
-    categoryCounterInc("Trees", "MethodDef");
-    histogramInc("MethodDef::args", this->args.size());
+    categoryCounterInc("trees", "methoddef");
+    histogramInc("trees.methodDef.args", this->args.size());
 }
 
 Declaration::Declaration(core::Loc loc, core::SymbolRef symbol) : Expression(loc), symbol(symbol) {}
 
 ConstDef::ConstDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> rhs)
     : Declaration(loc, symbol), rhs(move(rhs)) {
-    categoryCounterInc("Trees", "ConstDef");
+    categoryCounterInc("trees", "constdef");
 }
 
 If::If(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : Expression(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {
-    categoryCounterInc("Trees", "If");
+    categoryCounterInc("trees", "if");
 }
 
 While::While(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> body)
     : Expression(loc), cond(move(cond)), body(move(body)) {
-    categoryCounterInc("Trees", "While");
+    categoryCounterInc("trees", "while");
 }
 
 Break::Break(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
-    categoryCounterInc("Trees", "Break");
+    categoryCounterInc("trees", "break");
 }
 
 Next::Next(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
-    categoryCounterInc("Trees", "Next");
+    categoryCounterInc("trees", "next");
 }
 
 BoolLit::BoolLit(core::Loc loc, bool value) : Expression(loc), value(value) {
-    categoryCounterInc("Trees", "BoolLit");
+    categoryCounterInc("trees", "boollit");
 }
 
 Return::Return(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
-    categoryCounterInc("Trees", "Return");
+    categoryCounterInc("trees", "return");
 }
 
 Yield::Yield(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
-    categoryCounterInc("Trees", "Yield");
+    categoryCounterInc("trees", "yield");
 }
 
 RescueCase::RescueCase(core::Loc loc, EXCEPTION_store exceptions, unique_ptr<Expression> var,
                        unique_ptr<Expression> body)
     : Expression(loc), exceptions(move(exceptions)), var(move(var)), body(move(body)) {
-    categoryCounterInc("Trees", "RescueCase");
-    histogramInc("RescueCase::exceptions", this->exceptions.size());
+    categoryCounterInc("trees", "rescuecase");
+    histogramInc("trees.rescueCase.exceptions", this->exceptions.size());
 }
 
 Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store rescueCases, unique_ptr<Expression> else_,
                unique_ptr<Expression> ensure)
     : Expression(loc), body(move(body)), rescueCases(move(rescueCases)), else_(move(else_)), ensure(move(ensure)) {
-    categoryCounterInc("Trees", "Rescue");
-    histogramInc("Rescue::rescueCases", this->rescueCases.size());
+    categoryCounterInc("trees", "rescue");
+    histogramInc("trees.rescue.rescuecases", this->rescueCases.size());
 }
 
 Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
     Error::check(symbol.exists());
-    categoryCounterInc("Trees", "Ident");
+    categoryCounterInc("trees", "ident");
 }
 
 Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Expression(loc), localVariable(localVariable1) {
-    categoryCounterInc("Trees", "Local");
+    categoryCounterInc("trees", "local");
 }
 
 UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name)
     : Reference(loc), kind(kind), name(name) {
-    categoryCounterInc("Trees", "UnresolvedIdent");
+    categoryCounterInc("trees", "unresolvedident");
 }
 
 Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {
-    categoryCounterInc("Trees", "Assign");
+    categoryCounterInc("trees", "assign");
 }
 
 Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store args,
            unique_ptr<Block> block)
     : Expression(loc), recv(move(recv)), fun(fun), args(move(args)), block(move(block)) {
-    categoryCounterInc("Trees", "Send");
+    categoryCounterInc("trees", "send");
     if (block) {
-        counterInc("Send::withBlock");
+        counterInc("trees.send.with_block");
     }
-    histogramInc("Send::args", this->args.size());
+    histogramInc("trees.send.args", this->args.size());
 }
 
 Cast::Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, bool assertType)
@@ -149,96 +149,96 @@ Cast::Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expres
 }
 
 ZSuperArgs::ZSuperArgs(core::Loc loc) : Expression(loc) {
-    categoryCounterInc("Trees", "ZSuper");
+    categoryCounterInc("trees", "zsuper");
 }
 
 NamedArg::NamedArg(core::Loc loc, core::NameRef name, unique_ptr<Expression> arg)
     : Expression(loc), name(name), arg(move(arg)) {
-    categoryCounterInc("Trees", "NamedArg");
+    categoryCounterInc("trees", "namedarg");
 }
 
 RestArg::RestArg(core::Loc loc, unique_ptr<Reference> arg) : Reference(loc), expr(move(arg)) {
-    categoryCounterInc("Trees", "RestArg");
+    categoryCounterInc("trees", "restarg");
 }
 
 KeywordArg::KeywordArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {
-    categoryCounterInc("Trees", "KeywordArg");
+    categoryCounterInc("trees", "keywordarg");
 }
 
 OptionalArg::OptionalArg(core::Loc loc, unique_ptr<Reference> expr, unique_ptr<Expression> default_)
     : Reference(loc), expr(move(expr)), default_(move(default_)) {
-    categoryCounterInc("Trees", "OptionalArg");
+    categoryCounterInc("trees", "optionalarg");
 }
 
 ShadowArg::ShadowArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {
-    categoryCounterInc("Trees", "ShadowArg");
+    categoryCounterInc("trees", "shadowarg");
 }
 
 BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {
-    categoryCounterInc("Trees", "BlockArg");
+    categoryCounterInc("trees", "blockarg");
 }
 
 FloatLit::FloatLit(core::Loc loc, double value) : Expression(loc), value(value) {
-    categoryCounterInc("Trees", "FloatLit");
+    categoryCounterInc("trees", "floatlit");
 }
 
 IntLit::IntLit(core::Loc loc, int64_t value) : Expression(loc), value(value) {
-    categoryCounterInc("Trees", "IntLit");
+    categoryCounterInc("trees", "intlit");
 }
 
 StringLit::StringLit(core::Loc loc, core::NameRef value) : Expression(loc), value(value) {
-    categoryCounterInc("Trees", "StringLit");
+    categoryCounterInc("trees", "stringlit");
 }
 
 ConstantLit::ConstantLit(core::Loc loc, unique_ptr<Expression> scope, core::NameRef cnst)
     : Expression(loc), cnst(cnst), scope(move(scope)) {
-    categoryCounterInc("Trees", "ConstantLit");
+    categoryCounterInc("trees", "constantlit");
 }
 
 ArraySplat::ArraySplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {
-    categoryCounterInc("Trees", "ArraySplat");
+    categoryCounterInc("trees", "arraysplat");
 }
 
 HashSplat::HashSplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {
-    categoryCounterInc("Trees", "HashSplat");
+    categoryCounterInc("trees", "hashsplat");
 }
 
 Self::Self(core::Loc loc, core::SymbolRef claz) : Expression(loc), claz(claz) {
-    categoryCounterInc("Trees", "Self");
+    categoryCounterInc("trees", "self");
 }
 
 Block::Block(core::Loc loc, MethodDef::ARGS_store args, unique_ptr<Expression> body)
     : Expression(loc), args(move(args)), body(move(body)) {
-    categoryCounterInc("Trees", "Block");
+    categoryCounterInc("trees", "block");
 };
 
 NotSupported::NotSupported(core::Loc loc, const string &why) : Expression(loc), why(why) {
-    categoryCounterInc("Trees", "NotSupported");
+    categoryCounterInc("trees", "notsupported");
 }
 
 SymbolLit::SymbolLit(core::Loc loc, core::NameRef name) : Expression(loc), name(name) {
-    categoryCounterInc("Trees", "SymbolLit");
+    categoryCounterInc("trees", "symbollit");
 }
 
 Hash::Hash(core::Loc loc, ENTRY_store keys, ENTRY_store values)
     : Expression(loc), keys(move(keys)), values(move(values)) {
-    categoryCounterInc("Trees", "Hash");
-    histogramInc("Hash::entries", this->keys.size());
+    categoryCounterInc("trees", "hash");
+    histogramInc("trees.hash.entries", this->keys.size());
 }
 
 Array::Array(core::Loc loc, ENTRY_store elems) : Expression(loc), elems(move(elems)) {
-    categoryCounterInc("Trees", "Hash");
-    histogramInc("Array::elems", this->elems.size());
+    categoryCounterInc("trees", "array");
+    histogramInc("trees.array.elems", this->elems.size());
 }
 
 InsSeq::InsSeq(core::Loc loc, STATS_store stats, unique_ptr<Expression> expr)
     : Expression(loc), stats(move(stats)), expr(move(expr)) {
-    categoryCounterInc("Trees", "Hash");
-    histogramInc("InsSeq::stats", this->stats.size());
+    categoryCounterInc("trees", "insseq");
+    histogramInc("trees.insseq.stats", this->stats.size());
 }
 
 EmptyTree::EmptyTree(core::Loc loc) : Expression(loc) {
-    categoryCounterInc("Trees", "EmptyTree");
+    categoryCounterInc("trees", "emptytree");
 }
 
 template <class T> void printElems(core::GlobalState &gs, stringstream &buf, T &args, int tabs) {

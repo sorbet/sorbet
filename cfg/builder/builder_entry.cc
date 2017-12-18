@@ -51,9 +51,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             res->minLoops[local] = -1; // globals are pinned always
         }
     }
-    histogramInc("CFGBuilder::aliases", aliasesPrefix.size());
+    histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
     auto basicBlockCreated = res->basicBlocks.size();
-    histogramInc("CFGBuilder::basicBlocksCreated", basicBlockCreated);
+    histogramInc("cfgbuilder.basicBlocksCreated", basicBlockCreated);
     std::sort(aliasesPrefix.begin(), aliasesPrefix.end(),
               [](const Binding &l, const Binding &r) -> bool { return l.bind.name._id < r.bind.name._id; });
 
@@ -68,7 +68,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     removeDeadAssigns(ctx, RnW, *res);
     fillInBlockArguments(ctx, RnW, *res);
     simplify(ctx, *res);
-    histogramInc("CFGBuilder::basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
+    histogramInc("cfgbuilder.basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
     markLoopHeaders(ctx, *res);
     sanityCheck(ctx, *res);
     res->sanityCheck(ctx);

@@ -1,4 +1,7 @@
 #include "counters.h"
+extern "C" {
+#include "statsd-client.h"
+}
 #include <algorithm>
 #include <cmath>
 #include <iomanip> // setw
@@ -7,40 +10,53 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 using namespace std;
 
 typedef unsigned long CounterType;
 
 unordered_map<string, CounterType> counters;
 
-void ruby_typer::counterInc(ConstExprStr counter) {
+void ruby_typer::counterAdd(ConstExprStr counter, unsigned int value) {
     if (!debug_mode) {
         return;
     }
     string key(counter.str, counter.size);
-    counters[key]++;
+    counters[key] += value;
+}
+
+void ruby_typer::counterInc(ConstExprStr counter) {
+    counterAdd(counter, 1);
 }
 
 unordered_map<string, unordered_map<string, CounterType>> counters_by_category;
 
 void ruby_typer::categoryCounterInc(ConstExprStr category, ConstExprStr counter) {
+    categoryCounterAdd(category, counter, 1);
+}
+
+void ruby_typer::categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value) {
     if (!debug_mode) {
         return;
     }
 
     string categoryKey(category.str, category.size);
     string key(counter.str, counter.size);
-    counters_by_category[categoryKey][key]++;
+    counters_by_category[categoryKey][key] += value;
 }
 
 unordered_map<string, map<int, CounterType>> histograms;
 
-void ruby_typer::histogramInc(ConstExprStr histogram, int value) {
+void ruby_typer::histogramInc(ConstExprStr histogram, int key) {
+    histogramAdd(histogram, key, 1);
+}
+
+void ruby_typer::histogramAdd(ConstExprStr histogram, int key, unsigned int value) {
     if (!debug_mode) {
         return;
     }
-    string key(histogram.str, histogram.size);
-    histograms[key][value]++;
+    string skey(histogram.str, histogram.size);
+    histograms[skey][key] += value;
 }
 
 const int MAX_WIDTH = 100;
@@ -66,7 +82,6 @@ string ruby_typer::getCounterStatistics() {
 
     buf << "Counters: " << endl;
     for (auto &cat : counters_by_category) {
-        buf << " " << cat.first << endl;
         CounterType sum = 0;
         std::vector<pair<CounterType, string>> sorted;
         for (auto &e : cat.second) {
@@ -74,6 +89,8 @@ string ruby_typer::getCounterStatistics() {
             sorted.emplace_back(e.second, e.first);
         }
         sort(sorted.begin(), sorted.end(), [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
+
+        buf << " " << cat.first << "    Total: " << sum << endl;
 
         for (auto &e : sorted) {
             string number = padOrLimit(to_string(e.first), 6);
@@ -87,11 +104,12 @@ string ruby_typer::getCounterStatistics() {
 
     buf << "\nHistograms: " << endl;
     for (auto &hist : histograms) {
-        buf << " " << hist.first << endl;
         CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
         }
+        buf << " " << hist.first << "    Total: " << sum << endl;
+
         CounterType header = 0;
         auto it = hist.second.begin();
         while (it != hist.second.end() && (header + it->second) * 1.0 / sum < HIST_CUTOFF) {
@@ -126,13 +144,72 @@ string ruby_typer::getCounterStatistics() {
     }
 
     buf << "\nOther:\n";
-    for (auto &e : counters) {
-        string number = to_string(e.second);
-        if (number.size() < 6) {
-            number = padOrLimit(number, 6);
+    {
+        vector<pair<string, string>> sortedOther;
+        for (auto &e : counters) {
+            string number = to_string(e.second);
+            if (number.size() < 6) {
+                number = padOrLimit(number, 6);
+            }
+            string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + " :" + number + "\n";
+            sortedOther.emplace_back(e.first, line);
         }
-        buf << "  " << padOrLimit(e.first, PAD_LIMIT - 4) << " :" << number << endl;
+        sort(sortedOther.begin(), sortedOther.end(),
+             [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
+        for (auto &e : sortedOther) {
+            buf << e.second;
+        }
+    }
+    return buf.str();
+}
+
+class StatsdClientWrapper {
+    statsd_link *link;
+
+public:
+    StatsdClientWrapper(string host, int port, string prefix)
+        : link(statsd_init_with_namespace(host.c_str(), port, prefix.c_str())) {}
+
+    ~StatsdClientWrapper() {
+        statsd_finalize(link);
     }
 
-    return buf.str();
+    void gauge(string name, size_t value) {
+        statsd_gauge(link, const_cast<char *>(name.c_str()), value);
+    }
+    void timing(string name, size_t ms) {
+        statsd_timing(link, const_cast<char *>(name.c_str()), ms);
+    }
+};
+
+bool ruby_typer::submitCountersToStatsd(std::string host, int port, std::string prefix) {
+    StatsdClientWrapper statsd(host, port, prefix);
+    if (!debug_mode)
+        return false;
+
+    for (auto &cat : counters_by_category) {
+        CounterType sum = 0;
+        for (auto &e : cat.second) {
+            sum += e.second;
+            statsd.gauge(cat.first + "." + e.first, e.second);
+        }
+
+        statsd.gauge(cat.first + ".total", sum);
+    }
+
+    for (auto &hist : histograms) {
+        CounterType sum = 0;
+        for (auto &e : hist.second) {
+            sum += e.second;
+            statsd.gauge(hist.first + "." + to_string(e.first), e.second);
+        }
+
+        statsd.gauge(hist.first + ".total", sum);
+    }
+
+    for (auto &e : counters) {
+        statsd.gauge(e.first, e.second);
+    }
+
+    return true;
 }

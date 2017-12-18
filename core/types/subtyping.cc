@@ -156,30 +156,30 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr
     Error::check(o1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
-        categoryCounterInc("lubDistributeOr::outcome", "t1");
+        categoryCounterInc("lub_distribute_or.outcome", "t1");
         return t1;
     }
     shared_ptr<ruby_typer::core::Type> n2 = Types::lub(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
-        categoryCounterInc("lubDistributeOr::outcome", "n2'");
+        categoryCounterInc("lub_distribute_or.outcome", "n2'");
         return n2;
     }
     if (n2.get() == o1->right.get()) {
-        categoryCounterInc("lubDistributeOr::outcome", "t1'");
+        categoryCounterInc("lub_distribute_or.outcome", "t1'");
         return t1;
     }
     if (n2.get() == t2.get()) {
-        categoryCounterInc("lubDistributeOr::outcome", "n1'");
+        categoryCounterInc("lub_distribute_or.outcome", "n1'");
         return n1;
     }
     if (Types::isSubType(ctx, n1, n2)) {
-        categoryCounterInc("lubDistributeOr::outcome", "n2''");
+        categoryCounterInc("lub_distribute_or.outcome", "n2''");
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
-        categoryCounterInc("lubDistributeOr::outcome", "n1'''");
+        categoryCounterInc("lub_distribute_or.outcome", "n1'''");
         return n1;
     }
-    categoryCounterInc("lubDistributeOr::outcome", "worst");
+    categoryCounterInc("lub_distribute_or.outcome", "worst");
     return OrType::make_shared(t1, t2); // order matters for perf
 }
 
@@ -222,16 +222,16 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
         bool collapseInRight = Types::isSubType(ctx, t1, a2->right);
         if (collapseInLeft) {
             if (collapseInRight) {
-                categoryCounterInc("lub::and>collapsed", "fully");
+                categoryCounterInc("lub.and>collapsed", "fully");
                 return t2;
             }
-            categoryCounterInc("lub::and>collapsed", "right");
+            categoryCounterInc("lub.and>collapsed", "right");
             return AndType::make_shared(t1, a2->right);
         } else if (collapseInRight) {
-            categoryCounterInc("lub::and>collapsed", "left");
+            categoryCounterInc("lub.and>collapsed", "left");
             return AndType::make_shared(t1, a2->left);
         } else {
-            categoryCounterInc("lub::and>collapsed", "none");
+            categoryCounterInc("lub.and>collapsed", "none");
             return AndType::make_shared(t1, t2);
         }
     }
@@ -244,13 +244,13 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
-        categoryCounterInc("lub::<class>::collapsed", "yes");
+        categoryCounterInc("lub.<class>.collapsed", "yes");
         return t2;
     } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
-        categoryCounterInc("lub::<class>::collapsed", "yes");
+        categoryCounterInc("lub.<class>.collapsed", "yes");
         return t1;
     } else {
-        categoryCounterInc("lub::<class>::collapsed", "no");
+        categoryCounterInc("lub.class>.collapsed", "no");
         return OrType::make_shared(t1, t2);
     }
 }
@@ -260,31 +260,31 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
     Error::check(t1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
-        categoryCounterInc("glbDistributeAnd::outcome", "t1");
+        categoryCounterInc("lub_distribute_or.outcome", "t1");
         return t1;
     }
     shared_ptr<ruby_typer::core::Type> n2 = Types::glb(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
-        categoryCounterInc("glbDistributeAnd::outcome", "Zn2");
+        categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
         return n2;
     }
     if (n2.get() == a1->right.get()) {
-        categoryCounterInc("glbDistributeAnd::outcome", "Zt1");
+        categoryCounterInc("glbDistributeAnd.outcome", "Zt1");
         return t1;
     }
     if (n2.get() == t2.get()) {
-        categoryCounterInc("glbDistributeAnd::outcome", "Zn1");
+        categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
         return n1;
     }
     if (Types::isSubType(ctx, n1, n2)) {
-        categoryCounterInc("glbDistributeAnd::outcome", "ZZn2");
+        categoryCounterInc("glbDistributeAnd.outcome", "ZZn2");
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
-        categoryCounterInc("glbDistributeAnd::outcome", "ZZZn1");
+        categoryCounterInc("glbDistributeAnd.outcome", "ZZZn1");
         return n1;
     }
 
-    categoryCounterInc("glbDistributeAnd::outcome", "worst");
+    categoryCounterInc("glbDistributeAnd.outcome", "worst");
     return AndType::make_shared(t1, t2);
 }
 
@@ -372,7 +372,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
             categoryCounterInc("glb", "ZZZZZorWorst");
             return AndType::make_shared(t1, t2);
         } else {
-            categoryCounterInc("glb::orcollapsed", "no");
+            categoryCounterInc("glb.orcollapsed", "no");
             return AndType::make_shared(t1, t2);
         }
     }
@@ -385,17 +385,17 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
-        categoryCounterInc("glb::<class>::collapsed", "yes");
+        categoryCounterInc("glb.<class>.collapsed", "yes");
         return t1;
     } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
-        categoryCounterInc("glb::<class>::collapsed", "yes");
+        categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
         if (sym1.info(ctx).isClass() && sym2.info(ctx).isClass()) {
-            categoryCounterInc("glb::<class>::collapsed", "bottom");
+            categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
-        categoryCounterInc("glb::<class>::collapsed", "no");
+        categoryCounterInc("glb.<class>.collapsed", "no");
         return AndType::make_shared(t1, t2);
     }
 }
@@ -722,7 +722,7 @@ bool AndType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 }
 
 bool AliasType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
-    Error::raise("AliasType::derivesFrom");
+    Error::raise("AliasType.derivesfrom");
 }
 
 void AliasType::_sanityCheck(core::Context ctx) {

@@ -21,6 +21,13 @@ def externals():
     )
 
     new_git_repository(
+            name="statsd",
+            remote="https://github.com/romanbsd/statsd-c-client",
+            commit="93c9df3831ac543a7ebed1684528d63de7575e05",
+            build_file="//:statsd.BUILD",
+        )
+
+    new_git_repository(
         name="cxxopts",
         remote="https://github.com/jarro2783/cxxopts.git",
         commit="0b7686949d01f6475cc13ba0693725aefb76fc0c",

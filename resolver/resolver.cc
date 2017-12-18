@@ -586,6 +586,7 @@ private:
 
                      [&](ast::MethodDef *mdef) {
                          if (lastStandardMethod) {
+                             counterInc("types.standard_method.count");
                              core::Symbol &methoInfo = mdef->symbol.info(ctx);
                              fillInInfoFromStandardMethod(ctx, methoInfo,
                                                           ast::cast_tree<ast::Send>(lastStandardMethod.get()),

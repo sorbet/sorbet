@@ -24,12 +24,6 @@
 namespace spd = spdlog;
 using namespace std;
 
-struct stats {
-    unsigned int files = 0;
-    unsigned int lines = 0;
-    unsigned long bytes = 0;
-};
-
 class CFG_Collector_and_Typer {
     bool shouldType;
     bool printCFGs;
@@ -261,8 +255,11 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
     options.add_options("dev")("trace", "Trace phases");
     options.add_options("dev")("set-freshNameId", "Start freshNameId at value", cxxopts::value<int>(), "int");
-    options.add_options("dev")("error-stats", "Print error statistics");
     options.add_options("dev")("counters", "Print internal counters");
+    options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
+    options.add_options("dev")("statsd-prefix", "StatsD prefix", cxxopts::value<string>(), "prefix");
+    options.add_options("dev")("statsd-port", "StatsD sever port", cxxopts::value<int>()->default_value("8200"),
+                               "port");
 
     // Positional params
     options.parse_positional("files");
@@ -366,7 +363,6 @@ int realmain(int argc, char **argv) {
 
     ruby_typer::core::GlobalState gs = createInitialGlobalState(options);
 
-    stats st;
     clock_t begin = clock();
     vector<ruby_typer::core::FileRef> inputFiles;
     tracer->trace("Files: ");
@@ -379,17 +375,17 @@ int realmain(int argc, char **argv) {
             returnCode = 11;
             continue;
         }
-        st.bytes += src.size();
-        st.lines += count(src.begin(), src.end(), '\n');
-        st.files++;
+        ruby_typer::counterAdd("types.input.bytes", src.size());
+        ruby_typer::counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
+        ruby_typer::counterInc("types.input.files");
         inputFiles.push_back(gs.enterFile(fileName, src));
         tracer->trace("{}", fileName);
     }
     if (options.count("e") != 0) {
         string src = options["e"].as<string>();
-        st.files++;
-        st.lines++;
-        st.bytes += src.size();
+        ruby_typer::counterAdd("types.input.bytes", src.size());
+        ruby_typer::counterInc("types.input.lines");
+        ruby_typer::counterInc("types.input.files");
         inputFiles.push_back(gs.enterFile(string("-e"), src));
         if (options["typed"].as<string>() == "never") {
             console->error("`-e` implies `--typed always` and you passed `--typed never`");
@@ -420,31 +416,23 @@ int realmain(int argc, char **argv) {
 
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
 
-    console_err->debug("Total {} files. Done in {} ms, lines: {}, bytes: {}\n", st.files, elapsed_secs, st.lines,
-                       st.bytes);
+    console_err->debug("Done in {} ms\n", elapsed_secs);
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
         ruby_typer::File::write(outfile.c_str(), ruby_typer::core::serialize::GlobalStateSerializer::store(gs));
     }
 
-    if (options.count("error-stats") != 0) {
-        console_err->warn("Statistics of errors:");
-        int sum = 0;
-        vector<std::string> errors;
+    if (options.count("counters") != 0) {
         for (auto e : gs.errors.errorHistogram) {
-            errors.push_back(to_string(e.first) + " : " + to_string(e.second));
-            sum += e.second;
+            ruby_typer::categoryCounterAdd("error", to_string(e.first), e.second);
         }
-        sort(errors.begin(), errors.end());
-        for (auto &l : errors) {
-            console_err->warn("{}", l);
-        }
-        console_err->warn("Total: {}", sum);
+        console_err->warn("\n" + ruby_typer::getCounterStatistics());
     }
 
-    if (options.count("counters") != 0) {
-        console_err->warn("\n" + ruby_typer::getCounterStatistics());
+    if (options.count("statsd-host") != 0) {
+        ruby_typer::submitCountersToStatsd(options["statsd-host"].as<string>(), options["statsd-port"].as<int>(),
+                                           options["statsd-prefix"].as<string>() + ".counters");
     }
 
     return gs.errors.hadCriticalError() ? 10 : returnCode;
