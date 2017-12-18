@@ -37,6 +37,8 @@ public:
 
     Expression *postTransformBreak(core::Context ctx, Break *original);
 
+    Expression *postTransformRetry(core::Context ctx, Retry *original);
+
     Expression *postTransformNext(core::Context ctx, Next *original);
 
     Return *preTransformReturn(core::Context ctx, Return *original);
@@ -124,6 +126,7 @@ GENERATE_HAS_MEMBER(preTransformConstDef);
 GENERATE_HAS_MEMBER(preTransformIf);
 GENERATE_HAS_MEMBER(preTransformWhile);
 GENERATE_HAS_MEMBER(preTransformBreak);
+GENERATE_HAS_MEMBER(preTransformRetry);
 GENERATE_HAS_MEMBER(preTransformNext);
 GENERATE_HAS_MEMBER(preTransformReturn);
 GENERATE_HAS_MEMBER(preTransformYield);
@@ -157,6 +160,7 @@ GENERATE_HAS_MEMBER(postTransformConstDef);
 GENERATE_HAS_MEMBER(postTransformIf);
 GENERATE_HAS_MEMBER(postTransformWhile);
 GENERATE_HAS_MEMBER(postTransformBreak);
+GENERATE_HAS_MEMBER(postTransformRetry);
 GENERATE_HAS_MEMBER(postTransformNext);
 GENERATE_HAS_MEMBER(postTransformReturn);
 GENERATE_HAS_MEMBER(postTransformYield);
@@ -236,6 +240,7 @@ GENERATE_POSTPONE_PRECLASS(ConstDef);
 GENERATE_POSTPONE_PRECLASS(If);
 GENERATE_POSTPONE_PRECLASS(While);
 GENERATE_POSTPONE_PRECLASS(Break);
+GENERATE_POSTPONE_PRECLASS(Retry);
 GENERATE_POSTPONE_PRECLASS(Next);
 GENERATE_POSTPONE_PRECLASS(Return);
 GENERATE_POSTPONE_PRECLASS(Yield);
@@ -258,6 +263,7 @@ GENERATE_POSTPONE_POSTCLASS(ConstDef);
 GENERATE_POSTPONE_POSTCLASS(If);
 GENERATE_POSTPONE_POSTCLASS(While);
 GENERATE_POSTPONE_POSTCLASS(Break);
+GENERATE_POSTPONE_POSTCLASS(Retry);
 GENERATE_POSTPONE_POSTCLASS(Next);
 GENERATE_POSTPONE_POSTCLASS(Return);
 GENERATE_POSTPONE_POSTCLASS(Yield);
@@ -423,6 +429,12 @@ private:
 
                 if (HAS_MEMBER_postTransformBreak<FUNC>::value) {
                     return PostPonePostTransform_Break<FUNC, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(ctx, v,
+                                                                                                               func);
+                }
+                return v;
+            } else if (Retry *v = cast_tree<Retry>(what)) {
+                if (HAS_MEMBER_postTransformRetry<FUNC>::value) {
+                    return PostPonePostTransform_Retry<FUNC, HAS_MEMBER_postTransformRetry<FUNC>::value>::call(ctx, v,
                                                                                                                func);
                 }
                 return v;

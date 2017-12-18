@@ -32,7 +32,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         aliases[argSym] = arg;
         i++;
     }
-    auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, aliases), md.rhs.get(), entry);
+    auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, aliases), md.rhs.get(), entry);
     core::LocalVariable retSym1 =
         ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
 
@@ -110,5 +110,6 @@ CFGContext CFGContext::withScope(BasicBlock *scope) {
     ret.loops += 1;
     return ret;
 }
+
 } // namespace cfg
 } // namespace ruby_typer

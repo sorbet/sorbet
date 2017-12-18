@@ -266,14 +266,30 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = cctx.inWhat.deadBlock();
             },
 
+            [&](ast::Retry *a) {
+                if (cctx.rescueScope == nullptr) {
+                    cctx.ctx.state.errors.error(a->loc, core::errors::CFG::NoNextScope,
+                                                "No `begin` block around `retry`");
+                    // I guess just keep going into deadcode?
+                    unconditionalJump(current, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
+                } else {
+                    unconditionalJump(current, cctx.rescueScope, cctx.inWhat, a->loc);
+                }
+                ret = cctx.inWhat.deadBlock();
+            },
+
             [&](ast::Rescue *a) {
+                auto rescueStartBlock = cctx.inWhat.freshBlock(cctx.loops, current);
                 auto unanalyzableCondition = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG,
                                                                          core::Names::rescueTemp(), cctx.inWhat.symbol);
-                current->exprs.emplace_back(unanalyzableCondition, what->loc, make_unique<Unanalyzable>());
+                rescueStartBlock->exprs.emplace_back(unanalyzableCondition, what->loc, make_unique<Unanalyzable>());
+                unconditionalJump(current, rescueStartBlock, cctx.inWhat, a->loc);
+                cctx.rescueScope = rescueStartBlock;
 
-                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, current);
-                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, current);
-                conditionalJump(current, unanalyzableCondition, rescueHandlersBlock, bodyBlock, cctx.inWhat, a->loc);
+                auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops, rescueStartBlock);
+                auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops, rescueStartBlock);
+                conditionalJump(rescueStartBlock, unanalyzableCondition, rescueHandlersBlock, bodyBlock, cctx.inWhat,
+                                a->loc);
 
                 bodyBlock = walk(cctx, a->body.get(), bodyBlock);
                 auto elseBody = cctx.inWhat.freshBlock(cctx.loops, bodyBlock);

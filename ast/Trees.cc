@@ -84,6 +84,10 @@ Break::Break(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr
     categoryCounterInc("trees", "break");
 }
 
+Retry::Retry(core::Loc loc) : Expression(loc) {
+    categoryCounterInc("trees", "retry");
+}
+
 Next::Next(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
     categoryCounterInc("trees", "next");
 }
@@ -614,6 +618,10 @@ string Break::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
+string Retry::showRaw(core::GlobalState &gs, int tabs) {
+    return nodeName() + "{}";
+}
+
 string Return::toString(core::GlobalState &gs, int tabs) {
     return "return " + this->expr->toString(gs, tabs + 1);
 }
@@ -636,6 +644,10 @@ string Self::toString(core::GlobalState &gs, int tabs) {
 
 string Break::toString(core::GlobalState &gs, int tabs) {
     return "break(" + this->expr->toString(gs, tabs + 1) + ")";
+}
+
+string Retry::toString(core::GlobalState &gs, int tabs) {
+    return "retry";
 }
 
 string IntLit::toString(core::GlobalState &gs, int tabs) {
@@ -1029,6 +1041,9 @@ string Return::nodeName() {
 }
 string Break::nodeName() {
     return "Break";
+}
+string Retry::nodeName() {
+    return "Retry";
 }
 
 string SymbolLit::nodeName() {

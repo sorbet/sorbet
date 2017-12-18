@@ -18,37 +18,37 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_0</title>
 <polygon fill="none" stroke="#000000" points="15.7411,-479.8917 455,-441.2822 894.2589,-479.8917 893.8489,-542.3632 16.1511,-542.3632 15.7411,-479.8917"/>
-<text text-anchor="middle" x="455" y="-513.9584" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](rescueTemp$4, &lt;constant:StandardError&gt;$8)</text>
+<text text-anchor="middle" x="455" y="-513.9584" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](&lt;constant:StandardError&gt;$8)</text>
 <text text-anchor="middle" x="455" y="-499.9584" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:StandardError&gt;$8 = alias &lt;constant:StandardError&gt; : &lt;class:StandardError&gt;</text>
 <text text-anchor="middle" x="455" y="-485.9584" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$4 = &lt;unanalyzable&gt; : untyped</text>
 <text text-anchor="middle" x="455" y="-471.9584" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$4</text>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_2 -->
+<!-- bb::&lt;constant:Object&gt;#foo_3 -->
 <g id="node3" class="node">
-<title>bb::&lt;constant:Object&gt;#foo_2</title>
+<title>bb::&lt;constant:Object&gt;#foo_3</title>
 <ellipse fill="none" stroke="#000000" cx="335" cy="-369.865" rx="318.7786" ry="35.2113"/>
-<text text-anchor="middle" x="335" y="-379.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](rescueTemp$4, &lt;constant:StandardError&gt;$8)</text>
+<text text-anchor="middle" x="335" y="-379.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](rescueTemp$4, &lt;constant:StandardError&gt;$8)</text>
 <text text-anchor="middle" x="335" y="-365.665" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$9 = rescueTemp$4.is_a?(&lt;constant:StandardError&gt;$8) : untyped</text>
 <text text-anchor="middle" x="335" y="-351.665" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$9</text>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_2 -->
+<!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_3 -->
 <g id="edge1" class="edge">
-<title>bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_2</title>
+<title>bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_3</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M406.1914,-445.3833C395.9574,-434.5272 385.2729,-423.1934 375.3867,-412.7064"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="377.7533,-410.1144 368.347,-405.2388 372.6598,-414.9161 377.7533,-410.1144"/>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_3 -->
+<!-- bb::&lt;constant:Object&gt;#foo_4 -->
 <g id="node4" class="node">
-<title>bb::&lt;constant:Object&gt;#foo_3</title>
+<title>bb::&lt;constant:Object&gt;#foo_4</title>
 <ellipse fill="none" stroke="#000000" cx="697" cy="-253.2548" rx="196.7136" ry="45.011"/>
-<text text-anchor="middle" x="697" y="-270.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3]()</text>
+<text text-anchor="middle" x="697" y="-270.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4]()</text>
 <text text-anchor="middle" x="697" y="-256.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$5 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="697" y="-242.0548" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = return returnTemp$5 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="697" y="-228.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_3 -->
+<!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_4 -->
 <g id="edge2" class="edge">
-<title>bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_3</title>
+<title>bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_4</title>
 <polygon fill="#000000" stroke="transparent" points="601.039,-454.4073 604.5505,-452.495 608.0402,-450.5285 611.5019,-448.5088 614.9328,-446.4353 618.3298,-444.3072 621.69,-442.124 625.0105,-439.8849 628.2884,-437.5894 631.5206,-435.2367 634.7042,-432.8262 637.8363,-430.3573 640.9139,-427.8293 643.934,-425.2415 646.8937,-422.5934 649.7901,-419.8841 652.6202,-417.1132 655.381,-414.2799 658.0696,-411.3836 660.683,-408.4237 663.2193,-405.3982 666.4096,-401.2851 669.4033,-397.0166 672.2055,-392.6076 674.8223,-388.0715 677.2599,-383.4218 679.5245,-378.672 681.6221,-373.8353 683.5589,-368.9253 685.341,-363.9553 686.9745,-358.9387 688.4654,-353.8889 689.8199,-348.8193 691.044,-343.7433 692.1438,-338.6743 693.1252,-333.6256 693.9945,-328.6108 694.7575,-323.6431 695.4203,-318.736 695.989,-313.9029 696.4695,-309.1572 696.4695,-309.1572 695.963,-313.9 695.368,-318.7292 694.6785,-323.6315 693.8886,-328.5932 692.9923,-333.6008 691.9839,-338.6409 690.8572,-343.7 689.6066,-348.7645 688.2259,-353.8208 686.7094,-358.8556 685.0511,-363.8552 683.2452,-368.8062 681.2857,-373.695 679.167,-378.5081 676.883,-383.232 674.428,-387.8531 671.7962,-392.3581 668.9818,-396.7333 665.9789,-400.9655 662.7807,-405.0425 660.2396,-408.0401 657.6201,-410.9744 654.9261,-413.8449 652.1606,-416.6521 649.3264,-419.3969 646.4265,-422.0798 643.4638,-424.7016 640.4412,-427.2628 637.3617,-429.7643 634.2282,-432.2067 631.0436,-434.5906 627.8108,-436.9167 624.5328,-439.1857 621.2125,-441.3983 617.8528,-443.5551 614.4567,-445.6568 611.027,-447.7041 607.5668,-449.6977 604.0788,-451.6381 600.5631,-453.5278 601.039,-454.4073"/>
 <polygon fill="#000000" stroke="#000000" points="699.9876,-309.068 697.2911,-298.8221 693.0096,-308.5133 699.9876,-309.068"/>
 </g>
@@ -68,39 +68,39 @@
 <path fill="none" stroke="#000000" stroke-width="2" d="M634.9196,-120.1244C672.7886,-115.6691 697.9038,-106.9609 697.9038,-94 697.9038,-77.0439 654.919,-67.3665 596.6275,-64.9679"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="596.4739,-61.4609 586.3625,-64.6246 596.2399,-68.457 596.4739,-61.4609"/>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_2&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
+<!-- bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
 <g id="edge5" class="edge">
-<title>bb::&lt;constant:Object&gt;#foo_2&#45;&gt;bb::&lt;constant:Object&gt;#foo_1</title>
+<title>bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_1</title>
 <polygon fill="#000000" stroke="transparent" points="160.8083,-339.7268 154.547,-338.0932 148.3834,-336.4144 142.3285,-334.6898 136.396,-332.9192 130.5996,-331.1027 124.9527,-329.2401 119.4692,-327.3312 114.1625,-325.3762 109.0464,-323.3748 104.1345,-321.327 99.4404,-319.2329 94.9778,-317.0924 90.7604,-314.9056 86.8019,-312.6726 83.1159,-310.3934 79.7162,-308.0684 76.6164,-305.6978 73.8301,-303.2821 71.3707,-300.8218 69.2485,-298.3142 65.7763,-293.5959 62.6953,-288.9645 60.0033,-284.4123 57.6953,-279.928 55.7663,-275.5004 54.2115,-271.1182 53.0258,-266.77 52.2044,-262.444 51.7426,-258.1287 51.6355,-253.8124 51.8789,-249.4832 52.4682,-245.1298 53.3992,-240.7406 54.6675,-236.3042 56.2688,-231.8097 58.1987,-227.2458 60.4528,-222.6016 63.0265,-217.866 65.9153,-213.0281 69.1147,-208.0767 71.2865,-204.913 73.5281,-201.8077 75.8375,-198.7605 78.2132,-195.7709 80.6532,-192.8384 83.1558,-189.9623 85.7193,-187.1422 88.342,-184.3775 91.022,-181.6676 93.7576,-179.0121 96.5472,-176.4103 99.3888,-173.8618 102.2807,-171.3659 105.2213,-168.9222 108.2087,-166.5301 111.2412,-164.1891 114.317,-161.8986 117.4344,-159.658 120.5916,-157.4669 123.7868,-155.3246 123.7868,-155.3246 120.5838,-157.4554 117.4184,-159.6353 114.2925,-161.865 111.2078,-164.1449 108.166,-166.4757 105.1689,-168.8578 102.2183,-171.2919 99.3159,-173.7786 96.4634,-176.3184 93.6626,-178.9118 90.9153,-181.5595 88.2232,-184.262 85.5881,-187.0199 83.0117,-189.8337 80.4958,-192.704 78.0422,-195.6314 75.6526,-198.6164 73.3288,-201.6597 71.0725,-204.7617 68.8853,-207.9233 65.6632,-212.8708 62.7509,-217.7082 60.1533,-222.4469 57.875,-227.0982 55.9208,-231.6735 54.2954,-236.1842 53.0037,-240.6414 52.0506,-245.0566 51.441,-249.4406 51.1799,-253.8044 51.2722,-258.1588 51.7225,-262.5146 52.5355,-266.8822 53.7157,-271.2726 55.2673,-275.6963 57.1948,-280.1644 59.5024,-284.6878 62.1944,-289.2777 65.2751,-293.9453 68.7515,-298.7051 70.8956,-301.2573 73.3815,-303.762 76.1922,-306.2167 79.3141,-308.622 82.7336,-310.9787 86.4372,-313.2873 90.4113,-315.5481 94.6425,-317.7614 99.1173,-319.9277 103.8223,-322.047 108.7439,-324.1197 113.8687,-326.1457 119.183,-328.1255 124.6735,-330.0589 130.3266,-331.9463 136.1287,-333.7876 142.0663,-335.583 148.1258,-337.3325 154.2937,-339.0364 160.5541,-340.694 160.8083,-339.7268"/>
 <polygon fill="#000000" stroke="#000000" points="125.8418,-158.1671 132.4505,-149.886 122.1201,-152.2384 125.8418,-158.1671"/>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_4 -->
+<!-- bb::&lt;constant:Object&gt;#foo_5 -->
 <g id="node5" class="node">
-<title>bb::&lt;constant:Object&gt;#foo_4</title>
+<title>bb::&lt;constant:Object&gt;#foo_5</title>
 <ellipse fill="none" stroke="#000000" cx="280" cy="-253.2548" rx="201.6131" ry="45.011"/>
-<text text-anchor="middle" x="280" y="-270.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](rescueTemp$4)</text>
+<text text-anchor="middle" x="280" y="-270.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=5](rescueTemp$4)</text>
 <text text-anchor="middle" x="280" y="-256.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$10 = 2 : Integer(2)</text>
 <text text-anchor="middle" x="280" y="-242.0548" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = return returnTemp$10 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="280" y="-228.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_2&#45;&gt;bb::&lt;constant:Object&gt;#foo_4 -->
+<!-- bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_5 -->
 <g id="edge4" class="edge">
-<title>bb::&lt;constant:Object&gt;#foo_2&#45;&gt;bb::&lt;constant:Object&gt;#foo_4</title>
+<title>bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_5</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M318.1993,-334.2445C314.2604,-325.8931 309.9744,-316.8061 305.7441,-307.8371"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="308.8042,-306.1203 301.3727,-298.5689 302.4731,-309.1064 308.8042,-306.1203"/>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
+<!-- bb::&lt;constant:Object&gt;#foo_4&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
 <g id="edge6" class="edge">
-<title>bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_1</title>
+<title>bb::&lt;constant:Object&gt;#foo_4&#45;&gt;bb::&lt;constant:Object&gt;#foo_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M608.0296,-212.6561C583.5349,-201.4787 556.053,-188.9382 528.3739,-176.3078"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="529.5341,-172.9901 518.9835,-172.0228 526.6281,-179.3584 529.5341,-172.9901"/>
 </g>
-<!-- bb::&lt;constant:Object&gt;#foo_4&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
+<!-- bb::&lt;constant:Object&gt;#foo_5&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
 <g id="edge7" class="edge">
-<title>bb::&lt;constant:Object&gt;#foo_4&#45;&gt;bb::&lt;constant:Object&gt;#foo_1</title>
+<title>bb::&lt;constant:Object&gt;#foo_5&#45;&gt;bb::&lt;constant:Object&gt;#foo_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M299.3042,-208.0448C302.8969,-199.6306 306.7608,-190.5815 310.6841,-181.3932"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="313.9113,-182.7479 314.6194,-172.1768 307.4736,-179.999 313.9113,-182.7479"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: b6337b1eed1fe42cad2e43f4715961e23b3ae0253ab21d9b27a20bc8906aaff6 -->
+<!-- ruby-types:sha256: 21ddabd1bf478ba4b60366a4932c41aa5103c419bf6a8fea58f10f6f4bf7396d -->
