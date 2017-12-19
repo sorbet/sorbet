@@ -39,9 +39,9 @@ begin
     end
   end
   "x"
-  1.+(<Not Supported (Complex)>)
+  1.+(::<constant:Kernel>.<constant:Complex>("4"))
   0.500000
-  <Not Supported (Complex)>
+  ::<constant:Kernel>.<constant:Complex>("1.5")
   def self.classmeth<<constant:<todo sym>>>()
     <emptyTree>
   end
@@ -113,7 +113,7 @@ begin
   <Not Supported (Preexe)>
   <Not Supported (Postexe)>
   <Not Supported (Rational)>
-  <Not Supported (Complex)>
+  ::<constant:Kernel>.<constant:Complex>("5")
   begin
     <emptyTree>
   rescue <emptyTree>::<constant:E> => x

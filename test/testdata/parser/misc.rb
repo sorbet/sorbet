@@ -37,11 +37,11 @@ end
 ?x
 
 # numeric types
-1+4i # error: Unsupported node type Complex
+1+4i
 
 0.5
 
-1.5i # error: Unsupported node type Complex
+1.5i
 
 # singleton class sugar
 def self.classmeth; end
@@ -110,7 +110,7 @@ END{bar} # error: Unsupported node type Postexe
 
 # rationals
 4r # error: Unsupported node type Rational
-5ri # error: Unsupported node type Complex
+5ri
 
 # rescue, resbody
 begin
