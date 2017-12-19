@@ -1109,6 +1109,10 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     result.swap(res);
                 }
             },
+            [&](parser::Retry *ret) {
+                unique_ptr<Expression> res = make_unique<Retry>(loc);
+                result.swap(res);
+            },
             [&](parser::Yield *ret) {
                 if (ret->exprs.size() > 1) {
                     Array::ENTRY_store elems;

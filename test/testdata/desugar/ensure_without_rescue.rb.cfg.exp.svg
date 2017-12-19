@@ -45,11 +45,11 @@
 <path fill="none" stroke="#000000" stroke-width="2" d="M146.8944,-326.7354C95.2122,-312.9927 44.0479,-294.7617 28.9014,-273.9066 -10.2503,-219.9988 -8.9052,-178.8596 28.9014,-124 41.4745,-105.7557 87.5849,-88.0012 131.1099,-74.6875"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="132.3518,-77.9692 140.9254,-71.7447 130.3414,-71.2641 132.3518,-77.9692"/>
 </g>
-<!-- bb::&lt;constant:Object&gt;#main_3 -->
+<!-- bb::&lt;constant:Object&gt;#main_4 -->
 <g id="node3" class="node">
-<title>bb::&lt;constant:Object&gt;#main_3</title>
+<title>bb::&lt;constant:Object&gt;#main_4</title>
 <ellipse fill="none" stroke="#000000" cx="305.9014" cy="-198.9533" rx="268.1762" ry="74.9067"/>
-<text text-anchor="middle" x="305.9014" y="-236.7533" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](returnMethodTemp$1)</text>
+<text text-anchor="middle" x="305.9014" y="-236.7533" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$1)</text>
 <text text-anchor="middle" x="305.9014" y="-222.7533" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = self : Object</text>
 <text text-anchor="middle" x="305.9014" y="-208.7533" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$4.a() : untyped</text>
 <text text-anchor="middle" x="305.9014" y="-194.7533" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = self : Object</text>
@@ -57,9 +57,9 @@
 <text text-anchor="middle" x="305.9014" y="-166.7533" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="305.9014" y="-152.7533" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
-<!-- bb::&lt;constant:Object&gt;#main_0&#45;&gt;bb::&lt;constant:Object&gt;#main_3 -->
+<!-- bb::&lt;constant:Object&gt;#main_0&#45;&gt;bb::&lt;constant:Object&gt;#main_4 -->
 <g id="edge2" class="edge">
-<title>bb::&lt;constant:Object&gt;#main_0&#45;&gt;bb::&lt;constant:Object&gt;#main_3</title>
+<title>bb::&lt;constant:Object&gt;#main_0&#45;&gt;bb::&lt;constant:Object&gt;#main_4</title>
 <polygon fill="#000000" stroke="transparent" points="283.3048,-310.6295 283.5434,-309.3595 283.7838,-308.0797 284.026,-306.7905 284.2699,-305.4924 284.5154,-304.1857 284.7624,-302.8707 285.0109,-301.5481 285.2608,-300.218 285.5119,-298.881 285.7643,-297.5373 286.0179,-296.1876 286.2726,-294.832 286.5282,-293.471 286.7849,-292.1051 287.0423,-290.7346 287.3006,-289.36 287.5595,-287.9815 287.8191,-286.5997 288.0793,-285.2149 288.3399,-283.8275 288.3399,-283.8275 288.0286,-285.2044 287.7178,-286.5787 287.4077,-287.9501 287.0984,-289.3181 286.79,-290.6824 286.4824,-292.0425 286.1759,-293.3981 285.8705,-294.7488 285.5663,-296.0941 285.2634,-297.4337 284.9619,-298.7672 284.6619,-300.0941 284.3634,-301.4141 284.0666,-302.7268 283.7716,-304.0317 283.4783,-305.3286 283.187,-306.6169 282.8977,-307.8964 282.6106,-309.1665 282.3256,-310.4269 283.3048,-310.6295"/>
 <polygon fill="#000000" stroke="#000000" points="291.8181,-284.2909 290.417,-273.7892 284.9633,-282.8725 291.8181,-284.2909"/>
 </g>
@@ -69,9 +69,9 @@
 <path fill="none" stroke="#000000" stroke-width="2" d="M323.3429,-76.6344C338.4914,-72.6871 348.6767,-64.4756 348.6767,-52 348.6767,-33.9048 327.249,-24.7805 300.3282,-24.627"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="300.0644,-21.1339 290.1909,-24.9763 300.3056,-28.1297 300.0644,-21.1339"/>
 </g>
-<!-- bb::&lt;constant:Object&gt;#main_3&#45;&gt;bb::&lt;constant:Object&gt;#main_1 -->
+<!-- bb::&lt;constant:Object&gt;#main_4&#45;&gt;bb::&lt;constant:Object&gt;#main_1 -->
 <g id="edge4" class="edge">
-<title>bb::&lt;constant:Object&gt;#main_3&#45;&gt;bb::&lt;constant:Object&gt;#main_1</title>
+<title>bb::&lt;constant:Object&gt;#main_4&#45;&gt;bb::&lt;constant:Object&gt;#main_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M261.3858,-124.6156C255.6946,-115.1118 250.015,-105.6272 244.7277,-96.7979"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="247.7258,-94.9918 239.5854,-88.2106 241.7203,-98.5882 247.7258,-94.9918"/>
 </g>
@@ -131,4 +131,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 9eb04cc75ff1300c8ac1241e0d4e385801aeaca690edc2568f2806d224f903b7 -->
+<!-- ruby-types:sha256: 0abdb6ad5d27ed8fdb48abe17330abad9791f3a46c5dcc6daa51c92a9633cc23 -->

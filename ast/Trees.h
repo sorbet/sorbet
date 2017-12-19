@@ -136,6 +136,14 @@ public:
     virtual std::string nodeName();
 };
 
+class Retry final : public Expression {
+public:
+    Retry(core::Loc loc);
+    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+};
+
 class Next final : public Expression {
 public:
     std::unique_ptr<Expression> expr;
@@ -528,7 +536,7 @@ public:
  *
  *  [] - prototype only
  *
- *                 / Control Flow <- while, if, for, break, next, return, rescue, case
+ *                 / Control Flow <- while, if, for, break, next, retry, return, rescue, case
  * Pre-CFG-Node <-
  *                 \ Instruction <- assign, send, [new], ident, named_arg, hash, array, literals(symbols, ints, floats,
  * strings, constants, nil), constants(resolver will desugar it into literals), array_splat(*), hash_splat(**), self,

@@ -10,13 +10,13 @@ rescueTemp$3 = <unanalyzable> : untyped
 rescueTemp$3"];
 
     "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_3" [style="tapered"];
+    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_4" [style="tapered"];
 
     "bb::<constant:Object>#main_1" [label = "block[id=1]()
 <unconditional>"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_3" [label = "block[id=3](returnMethodTemp$1)
+    "bb::<constant:Object>#main_4" [label = "block[id=4](returnMethodTemp$1)
 statTemp$4 = self : Object
 returnMethodTemp$1 = statTemp$4.a() : untyped
 statTemp$6 = self : Object
@@ -24,7 +24,7 @@ rescueTemp$5 = statTemp$6.b() : untyped
 returnMethodTemp$7 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_1" [style="bold"];
+    "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#a" {

@@ -31,6 +31,7 @@ public:
     core::LocalVariable target;
     int loops;
     BasicBlock *scope;
+    BasicBlock *rescueScope;
     std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
 
     CFGContext withTarget(core::LocalVariable target);
@@ -39,8 +40,9 @@ public:
 private:
     friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md);
     CFGContext(core::Context ctx, CFG &inWhat, core::LocalVariable target, int loops, BasicBlock *scope,
-               std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases)
-        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), scope(scope), aliases(aliases){};
+               BasicBlock *rescueScope, std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases)
+        : ctx(ctx), inWhat(inWhat), target(target), loops(loops), scope(scope), rescueScope(rescueScope),
+          aliases(aliases){};
 };
 } // namespace cfg
 } // namespace ruby_typer
