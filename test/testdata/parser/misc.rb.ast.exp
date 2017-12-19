@@ -110,8 +110,8 @@ begin
     <emptyTree>
   end
   {x => y, "foo".intern() => 1}
-  <Not Supported (Preexe)>
-  <Not Supported (Postexe)>
+  <emptyTree>
+  <emptyTree>
   ::<constant:Kernel>.<constant:Rational>("4")
   ::<constant:Kernel>.<constant:Complex>("5")
   begin
@@ -133,7 +133,7 @@ begin
   else
     7
   end
-  <Not Supported (Undef)>
+  <emptyTree>
   ["a", "b"]
   ["a", "b"]
   self(<constant:<todo sym>>).`("true")

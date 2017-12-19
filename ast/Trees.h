@@ -521,17 +521,6 @@ public:
     virtual std::string nodeName();
 };
 
-class NotSupported final : public Expression {
-    std::string why;
-
-public:
-    NotSupported(core::Loc loc, const std::string &why);
-
-    virtual std::string toString(core::GlobalState &gs, int tabs);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-};
-
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *
  *  [] - prototype only

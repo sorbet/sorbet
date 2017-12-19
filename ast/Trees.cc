@@ -216,10 +216,6 @@ Block::Block(core::Loc loc, MethodDef::ARGS_store args, unique_ptr<Expression> b
     categoryCounterInc("trees", "block");
 };
 
-NotSupported::NotSupported(core::Loc loc, const string &why) : Expression(loc), why(why) {
-    categoryCounterInc("trees", "notsupported");
-}
-
 SymbolLit::SymbolLit(core::Loc loc, core::NameRef name) : Expression(loc), name(name) {
     categoryCounterInc("trees", "symbollit");
 }
@@ -970,10 +966,6 @@ string SymbolLit::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ name = " + this->name.name(gs).toString(gs) + " }";
 }
 
-string NotSupported::toString(core::GlobalState &gs, int tabs) {
-    return nodeName();
-}
-
 string RestArg::toString(core::GlobalState &gs, int tabs) {
     return "*" + this->expr->toString(gs, tabs);
 }
@@ -992,14 +984,6 @@ string ShadowArg::toString(core::GlobalState &gs, int tabs) {
 
 string BlockArg::toString(core::GlobalState &gs, int tabs) {
     return "&" + this->expr->toString(gs, tabs);
-}
-
-string NotSupported::nodeName() {
-    return "<Not Supported (" + why + ")>";
-}
-
-string NotSupported::showRaw(core::GlobalState &gs, int tabs) {
-    return "Not Supported{ why = " + why + " }";
 }
 
 string RescueCase::nodeName() {

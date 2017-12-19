@@ -843,8 +843,6 @@ private:
                 }
 
                 return v;
-            } else if (NotSupported *v = cast_tree<NotSupported>(what)) {
-                return what;
             } else {
                 Error::raise("should never happen. Forgot to add new tree kind? ", demangle(typeid(*what).name()));
             }

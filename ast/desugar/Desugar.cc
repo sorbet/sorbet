@@ -1306,13 +1306,27 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     mkSend1(loc, mkSelf(loc), core::Names::backtick(), desugarDString(ctx, loc, move(xstring->nodes)));
                 result.swap(res);
             },
+            [&](parser::Preexe *preexe) {
+                ctx.state.errors.error(loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
+                                       preexe->nodeName());
+                unique_ptr<Expression> res = mkEmptyTree(loc);
+                result.swap(res);
+            },
+            [&](parser::Postexe *postexe) {
+                ctx.state.errors.error(loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
+                                       postexe->nodeName());
+                unique_ptr<Expression> res = mkEmptyTree(loc);
+                result.swap(res);
+            },
+            [&](parser::Undef *undef) {
+                ctx.state.errors.error(loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
+                                       undef->nodeName());
+                unique_ptr<Expression> res = mkEmptyTree(loc);
+                result.swap(res);
+            },
 
             [&](parser::BlockPass *blockPass) { Error::raise("Send should have already handled the BlockPass"); },
-            [&](parser::Node *node) {
-                ctx.state.errors.error(loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
-                                       node->nodeName());
-                result.reset(new NotSupported(loc, node->nodeName()));
-            });
+            [&](parser::Node *node) { Error::raise("Unimplemented Parser Node: ", node->nodeName()); });
         Error::check(result.get() != nullptr);
         return result;
     } catch (...) {
