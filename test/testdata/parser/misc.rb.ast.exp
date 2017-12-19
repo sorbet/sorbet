@@ -1,0 +1,152 @@
+begin
+  self(<constant:<todo sym>>).alias_method(:foo, :bar)
+  @iv = 1
+  @@cv = 1
+  $gv = 1
+  begin
+    assignTemp$10002 = [::<constant:nil>, ::<constant:nil>]
+    self(<constant:<todo sym>>).x().var=(assignTemp$10002.[](0))
+    y = assignTemp$10002.[](1)
+    assignTemp$10002
+  end
+  begin
+    assignTemp$10003 = self(<constant:<todo sym>>).zaaaz()
+    baaaar = assignTemp$10003.[](0)
+    naaar = assignTemp$10003.[](1)
+    assignTemp$10003
+  end
+  xaaaaz = [self(<constant:<todo sym>>).yayayaya(), self(<constant:<todo sym>>).tutututu()]
+  <emptyTree>
+  begin
+    ::<constant:nil>
+  end
+  begin
+    self(<constant:<todo sym>>).a()
+    self(<constant:<todo sym>>).b()
+  end
+  def foo<<constant:<todo sym>>>(&x)
+    <emptyTree>
+  end
+  self(<constant:<todo sym>>).lambda() do ||
+    <emptyTree>
+  end
+  begin
+    assignTemp$10004 = self(<constant:<todo sym>>).x()
+    if assignTemp$10004.===(y)
+      1
+    else
+      self(<constant:<todo sym>>).z()
+    end
+  end
+  "x"
+  1.+(<Not Supported (Complex)>)
+  0.500000
+  <Not Supported (Complex)>
+  def self.classmeth<<constant:<todo sym>>>()
+    <emptyTree>
+  end
+  class <singleton class><<constant:<todo sym>>> < ()
+    <emptyTree>
+  end
+  begin
+    ||$10005 = true
+    if ||$10005
+      ||$10005
+    else
+      false
+    end
+  end
+  self(<constant:<todo sym>>).arr().each() do |*forTemp$10006|
+    begin
+      begin
+        assignTemp$10007 = forTemp$10006
+        x = assignTemp$10007.[](0)
+        assignTemp$10007
+      end
+      <emptyTree>
+    end
+  end
+  while 0.!=(1)
+    <emptyTree>
+  end
+  x.[]=(1, 0)
+  break(<emptyTree>)
+  break(1)
+  break([1, 2])
+  next(<emptyTree>)
+  next(1)
+  next([1, 2])
+  self(<constant:<todo sym>>).defined?(<emptyTree>::<constant:X>)
+  self(<constant:<todo sym>>).super(ZSuperArgs)
+  def foo<<constant:<todo sym>>>(x:, y: = 1, *z:)
+    <emptyTree>
+  end
+  x.to_hash()
+  86
+  while true
+    ::<constant:nil>
+  end
+  while true
+    ::<constant:nil>
+  end
+  while true.!()
+    ::<constant:nil>
+  end
+  while true.!()
+    ::<constant:nil>
+  end
+  begin
+    assignTemp$10008 = 1
+    a = assignTemp$10008.[](0)
+    begin
+      assignTemp$10009 = assignTemp$10008.[](1)
+      x = assignTemp$10009.[](0)
+      assignTemp$10009
+    end
+    assignTemp$10008
+  end
+  4
+  def foo<<constant:<todo sym>>>(x = 1, *y)
+    <emptyTree>
+  end
+  {x => y, "foo".intern() => 1}
+  <Not Supported (Preexe)>
+  <Not Supported (Postexe)>
+  <Not Supported (Rational)>
+  <Not Supported (Complex)>
+  begin
+    <emptyTree>
+  rescue <emptyTree>::<constant:E> => x
+    ::<constant:nil>
+  end
+  begin
+    assignTemp$10010 = y.to_a()
+    x = assignTemp$10010.slice(::<constant:Range>.new(0, -1, false))
+    assignTemp$10010
+  end
+  "foo".concat(begin
+      self(<constant:<todo sym>>).bar()
+    end.to_s()).intern()
+  [:sym]
+  if x
+    1
+  else
+    7
+  end
+  <Not Supported (Undef)>
+  ["a", "b"]
+  ["a", "b"]
+  self(<constant:<todo sym>>).`("true")
+  self(<constant:<todo sym>>).proc() do |x|
+    <emptyTree>
+  end
+  break(self(<constant:<todo sym>>).foo(1) do ||
+      <emptyTree>
+    end)
+  def foo<<constant:<todo sym>>>(**$10000)
+    <emptyTree>
+  end
+  def foo<<constant:<todo sym>>>(***$10001:)
+    <emptyTree>
+  end
+end

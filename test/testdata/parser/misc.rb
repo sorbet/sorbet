@@ -37,11 +37,11 @@ end
 ?x
 
 # numeric types
-1+4i
+1+4i # error: Unsupported node type Complex
 
 0.5
 
-1.5i
+1.5i # error: Unsupported node type Complex
 
 # singleton class sugar
 def self.classmeth; end
@@ -105,12 +105,12 @@ def foo(x=1, *y); end
 # pair and pair_quoted
 {x => y, "foo": 1}
 
-BEGIN{foo}
-END{bar}
+BEGIN{foo} # error: Unsupported node type Preexe
+END{bar} # error: Unsupported node type Postexe
 
 # rationals
-4r
-5ri
+4r # error: Unsupported node type Rational
+5ri # error: Unsupported node type Complex
 
 # rescue, resbody
 begin
@@ -129,7 +129,7 @@ end
 # ternary
 x ? 1 : 7
 
-undef x, y
+undef x, y # error: Unsupported node type Undef
 
 # words
 %w{a b}
