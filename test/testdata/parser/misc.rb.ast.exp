@@ -112,7 +112,7 @@ begin
   {x => y, "foo".intern() => 1}
   <Not Supported (Preexe)>
   <Not Supported (Postexe)>
-  <Not Supported (Rational)>
+  ::<constant:Kernel>.<constant:Rational>("4")
   ::<constant:Kernel>.<constant:Complex>("5")
   begin
     <emptyTree>

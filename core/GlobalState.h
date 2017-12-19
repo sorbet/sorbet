@@ -182,6 +182,10 @@ public:
         return SymbolRef(28);
     }
 
+    static constexpr SymbolRef defn_Rational() {
+        return SymbolRef(29);
+    }
+
     // Keep as last and update to match the last entry
     static constexpr SymbolRef defn_last_synthetic_sym() {
         return SymbolRef(MAX_SYNTHETIC_SYMBOLS - 1);

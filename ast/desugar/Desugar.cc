@@ -900,6 +900,13 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto send = mkSend1(loc, move(kernel), complex_name, make_unique<StringLit>(loc, value));
                 result.swap(send);
             },
+            [&](parser::Rational *complex) {
+                auto kernel = mkIdent(loc, core::GlobalState::defn_Kernel());
+                core::NameRef complex_name = core::GlobalState::defn_Rational().info(ctx).name;
+                core::NameRef value = ctx.state.enterNameUTF8(complex->val);
+                auto send = mkSend1(loc, move(kernel), complex_name, make_unique<StringLit>(loc, value));
+                result.swap(send);
+            },
             [&](parser::Array *array) {
                 Array::ENTRY_store elems;
                 elems.reserve(array->elts.size());

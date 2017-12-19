@@ -65,6 +65,8 @@ const char *standardError_str = "StandardError";
 
 const char *complex_str = "Complex";
 
+const char *rational_str = "Rational";
+
 // A magic non user-creatable class with methods to keep state between passes
 const char *magic_str = "<Magic>";
 
@@ -141,6 +143,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef module_id = synthesizeClass(module_str);
     SymbolRef standardError_id = synthesizeClass(standardError_str);
     SymbolRef complex_id = synthesizeClass(complex_str);
+    SymbolRef rational_id = synthesizeClass(rational_str);
 
     Error::check(no_symbol_id == noSymbol());
     Error::check(top_id == defn_top());
@@ -171,6 +174,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     Error::check(module_id == defn_Module());
     Error::check(standardError_id == defn_StandardError());
     Error::check(complex_id == defn_Complex());
+    Error::check(rational_id == defn_Rational());
 
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = core::Types::nil();

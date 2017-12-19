@@ -109,7 +109,7 @@ BEGIN{foo} # error: Unsupported node type Preexe
 END{bar} # error: Unsupported node type Postexe
 
 # rationals
-4r # error: Unsupported node type Rational
+4r
 5ri
 
 # rescue, resbody
