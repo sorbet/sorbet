@@ -1,7 +1,7 @@
 #include "builder.h"
 #include "core/Names/cfg.h"
 
-#include <algorithm> // sort, remove
+#include <algorithm> // sort, remove, unique
 #include <climits>   // INT_MAX
 #include <unordered_map>
 #include <unordered_set>
@@ -37,6 +37,10 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
+                } else {
+                    sort(bb->backEdges.begin(), bb->backEdges.end(),
+                         [](const BasicBlock *bb1, const BasicBlock *bb2) -> bool { return bb1->id < bb2->id; });
+                    bb->backEdges.erase(unique(bb->backEdges.begin(), bb->backEdges.end()), bb->backEdges.end());
                 }
             }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed togather
