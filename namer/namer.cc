@@ -325,10 +325,14 @@ public:
         fillInArgs(ctx.withOwner(method->symbol), method->args);
         method->symbol.info(ctx).definitionLoc = method->loc;
 
+        pushEnclosingArgs(move(method->args));
+
         return method;
     }
 
     ast::MethodDef *postTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
+        method->args = popEnclosingArgs();
+        Error::check(method->args.size() == method->symbol.info(ctx).arguments().size());
         scopeStack.pop_back();
         if (scopeStack.back().moduleFunctionActive) {
             aliasModuleFunction(ctx, method->symbol);
@@ -360,10 +364,13 @@ public:
         // them in `frame.locals`
         fillInArgs(ctx.withOwner(blk->symbol), blk->args);
 
+        pushEnclosingArgs(move(blk->args));
+
         return blk;
     }
 
     ast::Block *postTransformBlock(core::Context ctx, ast::Block *blk) {
+        blk->args = popEnclosingArgs();
         scopeStack.pop_back();
         return blk;
     }
@@ -410,9 +417,54 @@ public:
         return new ast::Assign(asgn->loc, make_unique<ast::Ident>(lhs->loc, cnst), move(asgn->rhs));
     }
 
+    ast::Expression *postTransformYield(core::Context ctx, ast::Yield *yield) {
+        auto method = ctx.enclosingMethod();
+        core::SymbolRef blockArg;
+        for (auto arg : method.info(ctx).arguments()) {
+            if (arg.info(ctx).isBlockArgument()) {
+                blockArg = arg;
+                break;
+            }
+        }
+        if (!blockArg) {
+            auto name = core::Names::blkArg();
+            blockArg = ctx.state.enterMethodArgumentSymbol(yield->loc, method, name);
+            blockArg.info(ctx).setBlockArgument();
+            method.info(ctx).argumentsOrMixins.push_back(blockArg);
+
+            // Also put it in the MethodDef since we rely on that being correct for blocks
+            core::LocalVariable local = ctx.state.enterLocalSymbol(ctx.owner, name);
+            scopeStack.back().locals[name] = local;
+            auto localExpr = make_unique<ast::Local>(yield->loc, local);
+            peekEnclosingArgs().emplace_back(move(localExpr));
+        }
+
+        auto name = blockArg.info(ctx).name;
+        core::LocalVariable local = ctx.state.enterLocalSymbol(ctx.owner, name);
+        scopeStack.back().locals[name] = local;
+        auto recv = make_unique<ast::Local>(yield->loc, local);
+        ast::Send::ARGS_store nargs;
+        nargs.emplace_back(move(yield->expr));
+
+        return new ast::Send(yield->loc, move(recv), core::Names::call(), move(nargs));
+    }
+
 private:
     NameInserter() {
         scopeStack.emplace_back();
+    }
+
+    vector<ast::MethodDef::ARGS_store> enclosingArgsStack;
+    void pushEnclosingArgs(ast::MethodDef::ARGS_store arg) {
+        enclosingArgsStack.emplace_back(move(arg));
+    }
+    ast::MethodDef::ARGS_store popEnclosingArgs() {
+        auto ret = move(enclosingArgsStack.back());
+        enclosingArgsStack.pop_back();
+        return ret;
+    }
+    ast::MethodDef::ARGS_store &peekEnclosingArgs() {
+        return enclosingArgsStack.back();
     }
 }; // namespace namer
 

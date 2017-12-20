@@ -1,0 +1,24 @@
+class <constant:Main> < ::<constant:Object> () -> <class:Main>
+  method blockpass (blk)
+    argument blk<block>
+  method blockyield ()
+    method <block>$10005 (i, <blk>)
+      argument <blk><block>
+      argument i<>
+  method main ()
+    method <block>$10006 (x)
+      argument x<>
+    method <block>$10007 (<block-pass>$10000)
+      argument <block-pass>$10000<repeated>
+    method <block>$10008 (<block-pass>$10001)
+      argument <block-pass>$10001<repeated>
+    method <block>$10009 (<block-pass>$10002)
+      argument <block-pass>$10002<repeated>
+    method <block>$10010 (<block-pass>$10003)
+      argument <block-pass>$10003<repeated>
+  method mixed (blk)
+    argument blk<block>
+  method yielder (<blk>)
+    argument <blk><block>
+class <singleton class:<constant:Main>> < ::<singleton class:<constant:Object>> ()
+

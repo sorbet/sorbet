@@ -46,8 +46,8 @@
 </g>
 <g id="clust8" class="cluster">
 <title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule</title>
-<polygon fill="none" stroke="#0000ff" points="6780,-1860.8898 6780,-3451.5493 7764,-3451.5493 7764,-1860.8898 6780,-1860.8898"/>
-<text text-anchor="middle" x="7272" y="-3436.3493" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule</text>
+<polygon fill="none" stroke="#0000ff" points="6780,-1860.8898 6780,-3463.7858 7764,-3463.7858 7764,-1860.8898 6780,-1860.8898"/>
+<text text-anchor="middle" x="7272" y="-3448.5858" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule</text>
 </g>
 <g id="clust9" class="cluster">
 <title>cluster_::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:Diff&gt;#initialize</title>
@@ -685,74 +685,75 @@
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_0 -->
 <g id="node33" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_0</title>
-<polygon fill="none" stroke="#000000" points="6788.4891,-3188.2092 7272,-3065.1415 7755.5109,-3188.2092 7755.0596,-3387.337 6788.9404,-3387.337 6788.4891,-3188.2092"/>
-<text text-anchor="middle" x="7272" y="-3330.0468" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](dur_ms, rule, res, &lt;constant:PER_RULE_MS&gt;$17, &lt;constant:MatchTimeout&gt;$21)</text>
-<text text-anchor="middle" x="7272" y="-3316.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Time&gt;$5 = alias &lt;constant:Time&gt; : &lt;class:Time&gt;</text>
-<text text-anchor="middle" x="7272" y="-3302.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:PER_RULE_MS&gt;$17 = alias &lt;constant:PER_RULE_MS&gt; : Integer</text>
-<text text-anchor="middle" x="7272" y="-3288.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MatchTimeout&gt;$21 = alias &lt;constant:MatchTimeout&gt; : &lt;class:MatchTimeout&gt;</text>
-<text text-anchor="middle" x="7272" y="-3274.0468" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : MatchTimeBudget</text>
-<text text-anchor="middle" x="7272" y="-3260.0468" font-family="Times,serif" font-size="14.00" fill="#000000">rule = load_arg(selfMethodTemp$2#time_rule, 0) : untyped</text>
-<text text-anchor="middle" x="7272" y="-3246.0468" font-family="Times,serif" font-size="14.00" fill="#000000">rule_start = &lt;constant:Time&gt;$5.now() : Time</text>
-<text text-anchor="middle" x="7272" y="-3232.0468" font-family="Times,serif" font-size="14.00" fill="#000000">res = NotSupported(ruby_typer::ast::Yield) : untyped</text>
-<text text-anchor="middle" x="7272" y="-3218.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = &lt;constant:Time&gt;$5.now() : Time</text>
-<text text-anchor="middle" x="7272" y="-3204.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$8 = statTemp$9.&#45;(rule_start) : Float | Time</text>
-<text text-anchor="middle" x="7272" y="-3190.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = 1000 : Integer(1000)</text>
-<text text-anchor="middle" x="7272" y="-3176.0468" font-family="Times,serif" font-size="14.00" fill="#000000">dur_ms = statTemp$8.*(statTemp$12) : untyped</text>
-<text text-anchor="middle" x="7272" y="-3162.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$14 = dur_ms.&gt;(&lt;constant:PER_RULE_MS&gt;$17) : untyped</text>
-<text text-anchor="middle" x="7272" y="-3148.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$14</text>
+<polygon fill="none" stroke="#000000" points="6788.4891,-3184.3549 7272,-3052.6688 7755.5109,-3184.3549 7755.0596,-3397.4276 6788.9404,-3397.4276 6788.4891,-3184.3549"/>
+<text text-anchor="middle" x="7272" y="-3337.0468" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](dur_ms, rule, res, &lt;constant:PER_RULE_MS&gt;$19, &lt;constant:MatchTimeout&gt;$23)</text>
+<text text-anchor="middle" x="7272" y="-3323.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Time&gt;$5 = alias &lt;constant:Time&gt; : &lt;class:Time&gt;</text>
+<text text-anchor="middle" x="7272" y="-3309.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:PER_RULE_MS&gt;$19 = alias &lt;constant:PER_RULE_MS&gt; : Integer</text>
+<text text-anchor="middle" x="7272" y="-3295.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MatchTimeout&gt;$23 = alias &lt;constant:MatchTimeout&gt; : &lt;class:MatchTimeout&gt;</text>
+<text text-anchor="middle" x="7272" y="-3281.0468" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : MatchTimeBudget</text>
+<text text-anchor="middle" x="7272" y="-3267.0468" font-family="Times,serif" font-size="14.00" fill="#000000">rule = load_arg(selfMethodTemp$2#time_rule, 0) : untyped</text>
+<text text-anchor="middle" x="7272" y="-3253.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;blk&gt; = load_arg(selfMethodTemp$2#time_rule, 1) : untyped</text>
+<text text-anchor="middle" x="7272" y="-3239.0468" font-family="Times,serif" font-size="14.00" fill="#000000">rule_start = &lt;constant:Time&gt;$5.now() : Time</text>
+<text text-anchor="middle" x="7272" y="-3225.0468" font-family="Times,serif" font-size="14.00" fill="#000000">res = &lt;blk&gt;.call(statTemp$8) : untyped</text>
+<text text-anchor="middle" x="7272" y="-3211.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = &lt;constant:Time&gt;$5.now() : Time</text>
+<text text-anchor="middle" x="7272" y="-3197.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = statTemp$11.&#45;(rule_start) : Float | Time</text>
+<text text-anchor="middle" x="7272" y="-3183.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$14 = 1000 : Integer(1000)</text>
+<text text-anchor="middle" x="7272" y="-3169.0468" font-family="Times,serif" font-size="14.00" fill="#000000">dur_ms = statTemp$10.*(statTemp$14) : untyped</text>
+<text text-anchor="middle" x="7272" y="-3155.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$16 = dur_ms.&gt;(&lt;constant:PER_RULE_MS&gt;$19) : untyped</text>
+<text text-anchor="middle" x="7272" y="-3141.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$16</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_2 -->
 <g id="node35" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_2</title>
 <ellipse fill="none" stroke="#000000" cx="7245" cy="-2682.5823" rx="431.2961" ry="272.8864"/>
-<text text-anchor="middle" x="7245" y="-2860.3823" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](dur_ms, rule, res, &lt;constant:PER_RULE_MS&gt;$17, &lt;constant:MatchTimeout&gt;$21)</text>
-<text text-anchor="middle" x="7245" y="-2846.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$18 = self : MatchTimeBudget</text>
-<text text-anchor="middle" x="7245" y="-2832.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$29 = Gerald rule &#39; : String(&quot;Gerald rule &#39;&quot;)</text>
-<text text-anchor="middle" x="7245" y="-2818.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$31 = rule.token() : untyped</text>
-<text text-anchor="middle" x="7245" y="-2804.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$30 = statTemp$31.to_s() : untyped</text>
-<text text-anchor="middle" x="7245" y="-2790.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = statTemp$29.concat(statTemp$30) : String</text>
-<text text-anchor="middle" x="7245" y="-2776.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$33 = &#39; exceeded per&#45;rule time budget actual= : String(&quot;&#39; exceeded per&#45;rule time budget actual=&quot;)</text>
-<text text-anchor="middle" x="7245" y="-2762.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$27 = statTemp$28.concat(statTemp$33) : String</text>
-<text text-anchor="middle" x="7245" y="-2748.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$35 = dur_ms.to_i() : untyped</text>
-<text text-anchor="middle" x="7245" y="-2734.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$34 = statTemp$35.to_s() : untyped</text>
-<text text-anchor="middle" x="7245" y="-2720.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$26 = statTemp$27.concat(statTemp$34) : String</text>
-<text text-anchor="middle" x="7245" y="-2706.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$37 = ms budget= : String(&quot;ms budget=&quot;)</text>
-<text text-anchor="middle" x="7245" y="-2692.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$25 = statTemp$26.concat(statTemp$37) : String</text>
-<text text-anchor="middle" x="7245" y="-2678.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$38 = &lt;constant:PER_RULE_MS&gt;$17.to_s() : String</text>
-<text text-anchor="middle" x="7245" y="-2664.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$24 = statTemp$25.concat(statTemp$38) : String</text>
-<text text-anchor="middle" x="7245" y="-2650.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$40 = ms : String(&quot;ms&quot;)</text>
-<text text-anchor="middle" x="7245" y="-2636.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$23 = statTemp$24.concat(statTemp$40) : String</text>
-<text text-anchor="middle" x="7245" y="-2622.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$22 = statTemp$23.to_s() : String</text>
-<text text-anchor="middle" x="7245" y="-2608.3823" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$42 = &lt;symbol:rule_token&gt; : Symbol(:&quot;rule_token&quot;)</text>
-<text text-anchor="middle" x="7245" y="-2594.3823" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$43 = rule.token() : untyped</text>
-<text text-anchor="middle" x="7245" y="-2580.3823" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$45 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
-<text text-anchor="middle" x="7245" y="-2566.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$41 = hashTemp$45.&lt;build&#45;hash&gt;(hashTemp$42, hashTemp$43) : ShapeType {</text>
+<text text-anchor="middle" x="7245" y="-2860.3823" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](dur_ms, rule, res, &lt;constant:PER_RULE_MS&gt;$19, &lt;constant:MatchTimeout&gt;$23)</text>
+<text text-anchor="middle" x="7245" y="-2846.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$20 = self : MatchTimeBudget</text>
+<text text-anchor="middle" x="7245" y="-2832.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$31 = Gerald rule &#39; : String(&quot;Gerald rule &#39;&quot;)</text>
+<text text-anchor="middle" x="7245" y="-2818.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$33 = rule.token() : untyped</text>
+<text text-anchor="middle" x="7245" y="-2804.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$32 = statTemp$33.to_s() : untyped</text>
+<text text-anchor="middle" x="7245" y="-2790.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$30 = statTemp$31.concat(statTemp$32) : String</text>
+<text text-anchor="middle" x="7245" y="-2776.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$35 = &#39; exceeded per&#45;rule time budget actual= : String(&quot;&#39; exceeded per&#45;rule time budget actual=&quot;)</text>
+<text text-anchor="middle" x="7245" y="-2762.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$29 = statTemp$30.concat(statTemp$35) : String</text>
+<text text-anchor="middle" x="7245" y="-2748.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$37 = dur_ms.to_i() : untyped</text>
+<text text-anchor="middle" x="7245" y="-2734.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$36 = statTemp$37.to_s() : untyped</text>
+<text text-anchor="middle" x="7245" y="-2720.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = statTemp$29.concat(statTemp$36) : String</text>
+<text text-anchor="middle" x="7245" y="-2706.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$39 = ms budget= : String(&quot;ms budget=&quot;)</text>
+<text text-anchor="middle" x="7245" y="-2692.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$27 = statTemp$28.concat(statTemp$39) : String</text>
+<text text-anchor="middle" x="7245" y="-2678.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$40 = &lt;constant:PER_RULE_MS&gt;$19.to_s() : String</text>
+<text text-anchor="middle" x="7245" y="-2664.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$26 = statTemp$27.concat(statTemp$40) : String</text>
+<text text-anchor="middle" x="7245" y="-2650.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$42 = ms : String(&quot;ms&quot;)</text>
+<text text-anchor="middle" x="7245" y="-2636.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$25 = statTemp$26.concat(statTemp$42) : String</text>
+<text text-anchor="middle" x="7245" y="-2622.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$24 = statTemp$25.to_s() : String</text>
+<text text-anchor="middle" x="7245" y="-2608.3823" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$44 = &lt;symbol:rule_token&gt; : Symbol(:&quot;rule_token&quot;)</text>
+<text text-anchor="middle" x="7245" y="-2594.3823" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$45 = rule.token() : untyped</text>
+<text text-anchor="middle" x="7245" y="-2580.3823" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$47 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
+<text text-anchor="middle" x="7245" y="-2566.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$43 = hashTemp$47.&lt;build&#45;hash&gt;(hashTemp$44, hashTemp$45) : ShapeType {</text>
 <text text-anchor="middle" x="7245" y="-2552.3823" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;Symbol(:&quot;rule_token&quot;) =&gt; untyped</text>
 <text text-anchor="middle" x="7245" y="-2538.3823" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
-<text text-anchor="middle" x="7245" y="-2524.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = &lt;constant:MatchTimeout&gt;$21.new(statTemp$22, statTemp$41) : MatchTimeout</text>
-<text text-anchor="middle" x="7245" y="-2510.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$13 = statTemp$18.raise(statTemp$19) : NilClass</text>
+<text text-anchor="middle" x="7245" y="-2524.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$21 = &lt;constant:MatchTimeout&gt;$23.new(statTemp$24, statTemp$43) : MatchTimeout</text>
+<text text-anchor="middle" x="7245" y="-2510.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$15 = statTemp$20.raise(statTemp$21) : NilClass</text>
 <text text-anchor="middle" x="7245" y="-2496.3823" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_2 -->
 <g id="edge40" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_2</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M7263.5126,-3067.0031C7261.9576,-3034.7132 7260.2992,-3000.2759 7258.638,-2965.7808"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="7262.1232,-2965.3859 7258.1461,-2955.5658 7255.1313,-2965.7226 7262.1232,-2965.3859"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M7262.9343,-3054.9939C7261.551,-3026.2697 7260.0978,-2996.0944 7258.6425,-2965.8734"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="7262.126,-2965.4448 7258.1489,-2955.6248 7255.1341,-2965.7816 7262.126,-2965.4448"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_4 -->
 <g id="node36" class="node">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_4</title>
 <ellipse fill="none" stroke="#000000" cx="7401" cy="-2189.7913" rx="198.7545" ry="55.3091"/>
 <text text-anchor="middle" x="7401" y="-2213.5913" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](res)</text>
-<text text-anchor="middle" x="7401" y="-2199.5913" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$47 = self : MatchTimeBudget</text>
-<text text-anchor="middle" x="7401" y="-2185.5913" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$46 = statTemp$47.check!() : untyped</text>
-<text text-anchor="middle" x="7401" y="-2171.5913" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$48 = return res : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="7401" y="-2199.5913" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$49 = self : MatchTimeBudget</text>
+<text text-anchor="middle" x="7401" y="-2185.5913" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$48 = statTemp$49.check!() : untyped</text>
+<text text-anchor="middle" x="7401" y="-2171.5913" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$50 = return res : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="7401" y="-2157.5913" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_4 -->
 <g id="edge41" class="edge">
 <title>bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_0&#45;&gt;bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_4</title>
-<polygon fill="#000000" stroke="transparent" points="7518.3324,-3128.094 7528.2516,-3121.3895 7538.1155,-3114.4856 7547.903,-3107.3837 7557.5962,-3100.0832 7567.1774,-3092.5834 7576.6288,-3084.8836 7585.9326,-3076.9831 7595.071,-3068.8813 7604.0261,-3060.5774 7612.7801,-3052.0708 7621.3153,-3043.3608 7629.6139,-3034.4466 7637.6579,-3025.3277 7645.4296,-3016.0033 7652.9111,-3006.4728 7660.0847,-2996.7354 7666.9324,-2986.7905 7673.4365,-2976.6374 7679.5791,-2966.2755 7685.3416,-2955.7052 7701.2936,-2924.167 7715.4922,-2894.0055 7727.9503,-2865.0641 7738.6797,-2837.1877 7747.6925,-2810.2212 7755.0005,-2784.0094 7760.6156,-2758.3974 7764.5499,-2733.2305 7766.8152,-2708.3539 7767.4237,-2683.6131 7766.3877,-2658.8533 7763.7195,-2633.9199 7759.4315,-2608.6579 7753.5362,-2582.9124 7746.0461,-2556.5281 7736.9735,-2529.3498 7726.3307,-2501.222 7714.1299,-2471.9895 7700.3835,-2441.4968 7685.103,-2409.5876 7679.3773,-2398.632 7673.1157,-2387.944 7666.3556,-2377.5252 7659.1338,-2367.3767 7651.4869,-2357.4992 7643.4519,-2347.8939 7635.0654,-2338.5616 7626.3642,-2329.5032 7617.385,-2320.7198 7608.1646,-2312.2122 7598.7398,-2303.9814 7589.1472,-2296.0283 7579.4236,-2288.354 7569.6058,-2280.9594 7559.7305,-2273.8454 7549.8344,-2267.0131 7539.9542,-2260.4634 7530.1268,-2254.1972 7520.3889,-2248.2156 7510.7771,-2242.5196 7510.7771,-2242.5196 7520.3834,-2248.2246 7530.1155,-2254.2153 7539.9367,-2260.4904 7549.81,-2267.049 7559.6989,-2273.8901 7569.5665,-2281.0126 7579.3761,-2288.4155 7589.0909,-2296.0978 7598.6742,-2304.0583 7608.0892,-2312.2961 7617.2991,-2320.8101 7626.2672,-2329.5993 7634.9567,-2338.6625 7643.3308,-2347.9988 7651.3529,-2357.607 7658.9862,-2367.4861 7666.1939,-2377.635 7672.9394,-2388.0526 7679.1858,-2398.7379 7684.897,-2409.6906 7700.1443,-2441.6078 7713.8591,-2472.1069 7726.0286,-2501.342 7736.6405,-2529.4681 7745.6826,-2556.6401 7753.1427,-2583.013 7759.0087,-2608.7419 7763.2686,-2633.982 7765.9102,-2658.8886 7766.9216,-2683.6172 7766.2907,-2708.3234 7764.0052,-2733.1629 7760.0527,-2758.2915 7754.4207,-2783.8648 7747.0968,-2810.0384 7738.0683,-2836.9677 7727.3227,-2864.8081 7714.8474,-2893.7146 7700.6298,-2923.8426 7684.6584,-2955.3459 7678.8983,-2965.8879 7672.7602,-2976.2201 7666.2613,-2986.3442 7659.4192,-2996.2608 7652.2517,-3005.9708 7644.7767,-3015.4746 7637.0117,-3024.7731 7628.9747,-3033.8668 7620.6833,-3042.7565 7612.1553,-3051.4428 7603.4086,-3059.9263 7594.4608,-3068.2077 7585.3298,-3076.2877 7576.0333,-3084.1669 7566.5892,-3091.846 7557.0152,-3099.3257 7547.329,-3106.6066 7537.5486,-3113.6893 7527.6917,-3120.5746 7517.7728,-3127.2652 7518.3324,-3128.094"/>
+<polygon fill="#000000" stroke="transparent" points="7526.9898,-3122.2612 7536.43,-3115.6887 7545.8063,-3108.933 7555.1,-3101.9958 7564.2953,-3094.8765 7573.3769,-3087.5743 7582.3291,-3080.0889 7591.1363,-3072.4195 7599.7829,-3064.5655 7608.2535,-3056.5265 7616.5323,-3048.3016 7624.6038,-3039.8904 7632.4524,-3031.2923 7640.0625,-3022.5066 7647.4186,-3013.5328 7654.505,-3004.3703 7661.3061,-2995.0184 7667.8063,-2985.4766 7673.9901,-2975.7443 7679.8417,-2965.8209 7685.3451,-2955.7069 7701.2969,-2924.1686 7715.4954,-2894.0069 7727.9534,-2865.0654 7738.6827,-2837.1888 7747.6954,-2810.2221 7755.0033,-2784.0101 7760.6184,-2758.3979 7764.5526,-2733.2308 7766.8178,-2708.3541 7767.4262,-2683.6131 7766.3901,-2658.8532 7763.7217,-2633.9196 7759.4336,-2608.6575 7753.5382,-2582.9119 7746.0479,-2556.5275 7736.9751,-2529.3492 7726.3322,-2501.2215 7714.1313,-2471.9889 7700.3847,-2441.4962 7685.1041,-2409.5871 7679.3782,-2398.6315 7673.1166,-2387.9434 7666.3564,-2377.5247 7659.1345,-2367.3761 7651.4876,-2357.4987 7643.4525,-2347.8934 7635.0659,-2338.5611 7626.3647,-2329.5028 7617.3854,-2320.7193 7608.165,-2312.2117 7598.7401,-2303.981 7589.1475,-2296.028 7579.4238,-2288.3537 7569.606,-2280.9591 7559.7306,-2273.8452 7549.8345,-2267.0129 7539.9543,-2260.4632 7530.1269,-2254.1971 7520.3889,-2248.2156 7510.7771,-2242.5196 7510.7771,-2242.5196 7520.3834,-2248.2247 7530.1155,-2254.2153 7539.9366,-2260.4905 7549.8099,-2267.0492 7559.6987,-2273.8904 7569.5663,-2281.0129 7579.3759,-2288.4159 7589.0907,-2296.0981 7598.6739,-2304.0587 7608.0888,-2312.2966 7617.2986,-2320.8106 7626.2667,-2329.5998 7634.9561,-2338.663 7643.3302,-2347.9993 7651.3523,-2357.6075 7658.9855,-2367.4866 7666.1931,-2377.6355 7672.9385,-2388.0532 7679.1849,-2398.7385 7684.8959,-2409.6911 7700.1431,-2441.6084 7713.8578,-2472.1075 7726.0271,-2501.3426 7736.6389,-2529.4687 7745.6808,-2556.6406 7753.1408,-2583.0135 7759.0066,-2608.7423 7763.2663,-2633.9823 7765.9078,-2658.8888 7766.9191,-2683.6172 7766.2881,-2708.3232 7764.0025,-2733.1626 7760.0499,-2758.291 7754.4179,-2783.8641 7747.0939,-2810.0375 7738.0653,-2836.9666 7727.3196,-2864.8068 7714.8442,-2893.7132 7700.6266,-2923.841 7684.6549,-2955.3442 7679.154,-2965.4308 7673.3067,-2975.3254 7667.1278,-2985.0296 7660.633,-2994.5441 7653.8377,-3003.8693 7646.7575,-3013.0059 7639.4079,-3021.9544 7631.8044,-3030.7156 7623.9626,-3039.2898 7615.8981,-3047.6778 7607.6263,-3055.88 7599.1629,-3063.8971 7590.5233,-3071.7296 7581.7232,-3079.3782 7572.7781,-3086.8433 7563.7035,-3094.1256 7554.515,-3101.2257 7545.2282,-3108.144 7535.8587,-3114.8813 7526.4188,-3121.4403 7526.9898,-3122.2612"/>
 <polygon fill="#000000" stroke="#000000" points="7512.3015,-2239.3591 7501.8858,-2237.4186 7508.8181,-2245.4308 7512.3015,-2239.3591"/>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_1 -->
@@ -2000,4 +2001,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 34918481745f0c457109083a6c39e0454cb2fb2ca6253dded773b7649a687973 -->
+<!-- ruby-types:sha256: 1322cb96a60aa2da8b9bfff9f9a700bb387ea431a6acfcd57fc444d8293a8554 -->

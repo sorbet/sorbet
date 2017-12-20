@@ -117,10 +117,10 @@ begin
       end
     end
 
-    def time_rule<time_rule>(rule)
+    def time_rule<time_rule>(rule, <blk>)
       begin
         rule_start = ::<constant:Time>.now()
-        res = yield(<emptyTree>)
+        res = <blk>.call(<emptyTree>)
         dur_ms = begin
           ::<constant:Time>.now().-(rule_start)
         end.*(1000)

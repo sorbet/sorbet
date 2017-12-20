@@ -993,7 +993,7 @@ string Rescue::nodeName() {
     return "Rescue";
 }
 string Yield::nodeName() {
-    return "Next";
+    return "Yield";
 }
 string Next::nodeName() {
     return "Next";

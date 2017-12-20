@@ -6,9 +6,37 @@ subgraph "cluster_::<singleton class:<constant:A>>#each" {
     "bb::<singleton class:<constant:A>>#each_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:A>>#each_0" [label = "block[id=0]()
-statTemp$3 = NotSupported(ruby_typer::ast::Yield) : untyped
-returnMethodTemp$1 = NotSupported(ruby_typer::ast::Yield) : untyped
-returnMethodTemp$4 = return returnMethodTemp$1 : <bottom>
+selfMethodTemp$2 = self : <class:A>
+<blk> = load_arg(selfMethodTemp$2#each, 0) : untyped
+arrayTemp$6 = 1 : Integer(1)
+arrayTemp$7 = 2 : Integer(2)
+arrayTemp$8 = 3 : Integer(3)
+arrayTemp$9 = 4 : Integer(4)
+arrayTemp$10 = 5 : Integer(5)
+arrayTemp$11 = alias <constant:<Magic>> : <Magic>
+statTemp$5 = arrayTemp$11.<build-array>(arrayTemp$6, arrayTemp$7, arrayTemp$8, arrayTemp$9, arrayTemp$10) : TupleType {
+  0 = Integer(1)
+  1 = Integer(2)
+  2 = Integer(3)
+  3 = Integer(4)
+  4 = Integer(5)
+}
+statTemp$3 = <blk>.call(statTemp$5) : untyped
+arrayTemp$14 = 6 : Integer(6)
+arrayTemp$15 = 7 : Integer(7)
+arrayTemp$16 = 8 : Integer(8)
+arrayTemp$17 = 9 : Integer(9)
+arrayTemp$18 = 0 : Integer(0)
+arrayTemp$19 = alias <constant:<Magic>> : <Magic>
+statTemp$13 = arrayTemp$19.<build-array>(arrayTemp$14, arrayTemp$15, arrayTemp$16, arrayTemp$17, arrayTemp$18) : TupleType {
+  0 = Integer(6)
+  1 = Integer(7)
+  2 = Integer(8)
+  3 = Integer(9)
+  4 = Integer(0)
+}
+returnMethodTemp$1 = <blk>.call(statTemp$13) : untyped
+returnMethodTemp$20 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#each_0" -> "bb::<singleton class:<constant:A>>#each_1" [style="bold"];

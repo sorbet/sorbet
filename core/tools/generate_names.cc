@@ -42,7 +42,7 @@ NameDef names[] = {
     {"to_proc", Desugar},
     {"concat", Desugar},
     {"intern", Desugar},
-    {"call", Desugar},
+    {"call", Desugar | Namer},
     {"bang", "!", Desugar | Infer | Parser},
     {"squareBrackets", "[]", Desugar | Parser},
     {"squareBracketsEq", "[]=", Parser},
@@ -132,6 +132,7 @@ NameDef names[] = {
     {"forTemp", Desugar},
     {"new_", "new", Desugar | Infer},
     {"blockCall", "<block-call>", CFG | Infer},
+    {"blkArg", "<blk>", Namer},
 
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end

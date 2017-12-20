@@ -1,0 +1,65 @@
+begin
+  <emptyTree>
+  class <emptyTree>::<constant:Main><<constant:Main>> < (::<constant:<todo sym>>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def yielder<yielder>(<blk>)
+      begin
+        a = <blk>.call(1)
+        <blk>.call(a)
+      end
+    end
+
+    def blockpass<blockpass>(blk)
+      begin
+        a = blk.call(1)
+        blk.call(a)
+      end
+    end
+
+    def mixed<mixed>(blk)
+      begin
+        a = blk.call(1)
+        blk.call(a)
+      end
+    end
+
+    def blockyield<blockyield>()
+      self(<constant:Main>).yielder() do |<block-nested: i>, <block-nested: <blk>>|
+        <block-nested: <blk>>.call(<block-nested: i>)
+      end
+    end
+
+    def main<main>()
+      begin
+        l = self(<constant:Main>).lambda() do |<block-nested: x>|
+          begin
+            self(<constant:Main>).puts(<block-nested: x>)
+            3
+          end
+        end
+        self(<constant:Main>).yielder() do |<block-nested: <block-pass>$10000>|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$10000>.to_a()))
+        end
+        self(<constant:Main>).blockpass() do |<block-nested: <block-pass>$10001>|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$10001>.to_a()))
+        end
+        self(<constant:Main>).mixed() do |<block-nested: <block-pass>$10002>|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$10002>.to_a()))
+        end
+        self(<constant:Main>).blockyield() do |<block-nested: <block-pass>$10003>|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$10003>.to_a()))
+        end
+      end
+    end
+  end
+  ::<constant:Main>.new().main()
+end
