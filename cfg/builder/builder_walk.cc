@@ -13,7 +13,7 @@ namespace cfg {
 void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                      core::Loc loc) {
     if (from != inWhat.deadBlock()) {
-        Error::check(!from->bexit.cond.exists());
+        Error::check(!from->bexit.isCondSet());
         Error::check(from->bexit.thenb == nullptr);
         Error::check(from->bexit.elseb == nullptr);
         from->bexit.cond = cond;
@@ -27,7 +27,7 @@ void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *the
 
 void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::Loc loc) {
     if (from != inWhat.deadBlock()) {
-        Error::check(!from->bexit.cond.exists());
+        Error::check(!from->bexit.isCondSet());
         Error::check(from->bexit.thenb == nullptr);
         Error::check(from->bexit.elseb == nullptr);
         from->bexit.cond = core::NameRef(0);
@@ -41,7 +41,7 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::Loc 
 void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
     auto *db = inWhat.deadBlock();
     if (from != db) {
-        Error::check(!from->bexit.cond.exists());
+        Error::check(!from->bexit.isCondSet());
         Error::check(from->bexit.thenb == nullptr);
         Error::check(from->bexit.elseb == nullptr);
         from->bexit.cond = core::NameRef(0);
@@ -70,7 +70,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
      * for some code snippets. */
-    Error::check(!current->bexit.cond.exists());
+    Error::check(!current->bexit.isCondSet() || current == cctx.inWhat.deadBlock(),
+                 "current block has already been finalized!");
 
     try {
         BasicBlock *ret = nullptr;

@@ -76,6 +76,10 @@ void CFG::sanityCheck(core::Context ctx) {
     if (!debug_mode)
         return;
 
+    for (auto &bb : this->basicBlocks) {
+        Error::check(bb->bexit.isCondSet(), "Block exit condition left unset for block " + bb->toString(ctx));
+    }
+
     // check that synthetic variable that is read is ever written to.
     ReadsAndWrites RnW = CFG::findAllReadsAndWrites();
     for (auto &el : RnW.reads) {

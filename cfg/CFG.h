@@ -2,6 +2,7 @@
 #define SRUBY_CFG_H
 
 #include "core/core.h"
+#include <climits>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
@@ -189,7 +190,10 @@ public:
     BasicBlock *thenb;
     BasicBlock *elseb;
     core::Loc loc;
-    BlockExit() : thenb(nullptr), elseb(nullptr){};
+    bool isCondSet() {
+        return cond.name.id() != INT_MAX;
+    }
+    BlockExit() : cond(INT_MAX), thenb(nullptr), elseb(nullptr){};
 };
 
 class Binding final {
