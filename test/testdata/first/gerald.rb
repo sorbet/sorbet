@@ -183,15 +183,3 @@ module Opus::CIBot::Gerald
     end
   end
 end
-
-class Range
-  standard_method(
-    {
-      begin_: Integer,
-      end_: Integer,
-      exclude_end: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Object
-  )
-  def initialize(begin_, end_, exclude_end=_); end
-end

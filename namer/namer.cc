@@ -310,6 +310,17 @@ public:
         }
         Error::check(owner.info(ctx).isClass());
 
+        auto sym = owner.info(ctx).findMember(ctx, method->name);
+        if (sym.exists()) {
+            ctx.state.errors.error(core::Reporter::ComplexError(
+                method->loc, core::errors::Namer::RedefinitionOfMethod,
+                method->name.toString(ctx) + ": Method redefined",
+                core::Reporter::ErrorLine::from(sym.info(ctx).definitionLoc, "Original definition")));
+            method->symbol = sym;
+            // TODO Check that the previous args match the new ones instead of
+            // just wiping the original ones
+            sym.info(ctx).arguments().clear();
+        }
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
         fillInArgs(ctx.withOwner(method->symbol), method->args);
         method->symbol.info(ctx).definitionLoc = method->loc;
@@ -322,6 +333,8 @@ public:
         if (scopeStack.back().moduleFunctionActive) {
             aliasModuleFunction(ctx, method->symbol);
         }
+        Error::check(method->args.size() == method->symbol.info(ctx).arguments().size(), method->name.toString(ctx),
+                     ": ", method->args.size(), " != ", method->symbol.info(ctx).arguments().size());
         return method;
     }
 

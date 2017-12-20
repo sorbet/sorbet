@@ -1,7 +1,6 @@
 begin
   self(<singleton class:<constant:<root>>>).require_relative("../../../extn")
   ::<constant:Opus>::<constant:AutogenLoader>.init("__FILE__")
-  <emptyTree>
   module <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Gerald><<constant:Gerald>> < ()
     <emptyTree>
 
@@ -252,11 +251,6 @@ begin
           end
         end.compact()
       end
-    end
-  end
-  class <emptyTree>::<constant:Range><<constant:Range>> < (::<constant:<todo sym>>)
-    def initialize<initialize>(begin_, end_, exclude_end)
-      <emptyTree>
     end
   end
   <emptyTree>

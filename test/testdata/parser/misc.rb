@@ -2,7 +2,7 @@
 # contains miscellaneous syntactic features in order of implementation
 # in our parser.
 
-alias foo bar
+alias afoo bar
 
 # various LHSs
 @iv = 1
@@ -21,7 +21,7 @@ begin; nil; end
 begin; a; b; end
 
 # block argument
-def foo(&x); end
+def bfoo(&x); end
 
 # lambda
 lambda {}
@@ -78,7 +78,7 @@ defined?(X)
 super
 
 # kwargs
-def foo(x:,y:1,**z); end
+def kwfoo(x:,y:1,**z); end
 
 # kwsplat
 {**x}
@@ -100,7 +100,7 @@ a, ((x,)) = 1
 $4
 
 # optarg, restarg
-def foo(x=1, *y); end
+def optfoo(x=1, *y); end
 
 # pair and pair_quoted
 {x => y, "foo": 1}
@@ -142,9 +142,9 @@ undef x, y # error: Unsupported node type Undef
 proc{|;x|}
 
 # Whacky parsing edge case around keyword break and blocks
-break foo 1 do end
+break cfoo 1 do end
 
 
 # bare * args
-def foo(*); end
-def foo(**); end
+def sfoo(*); end
+def ssfoo(**); end

@@ -2,7 +2,7 @@ Begin {
   stmts = [
     Alias {
       from = Symbol {
-        val = foo
+        val = afoo
       }
       to = Symbol {
         val = bar
@@ -126,7 +126,7 @@ Begin {
       ]
     }
     DefMethod {
-      name = foo
+      name = bfoo
       args = Args {
         args = [
           Blockarg {
@@ -305,7 +305,7 @@ Begin {
     ZSuper {
     }
     DefMethod {
-      name = foo
+      name = kwfoo
       args = Args {
         args = [
           Kwarg {
@@ -382,7 +382,7 @@ Begin {
       ref = 4
     }
     DefMethod {
-      name = foo
+      name = optfoo
       args = Args {
         args = [
           Optarg {
@@ -590,7 +590,7 @@ Begin {
         Block {
           send = Send {
             receiver = NULL
-            method = foo
+            method = cfoo
             args = [
               Integer {
                 val = "1"
@@ -603,7 +603,7 @@ Begin {
       ]
     }
     DefMethod {
-      name = foo
+      name = sfoo
       args = Args {
         args = [
           Restarg {
@@ -614,7 +614,7 @@ Begin {
       body = NULL
     }
     DefMethod {
-      name = foo
+      name = ssfoo
       args = Args {
         args = [
           Kwrestarg {

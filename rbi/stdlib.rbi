@@ -784,15 +784,6 @@ class Array
 
   standard_method(
     {
-      _: Opus::Types.any(Range, Integer),
-      _1: Integer,
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Opus::Types.untyped)
-  )
-  def slice(_, _1=_); end
-
-  standard_method(
-    {
       _: Opus::Types.any(Integer, Range),
       _1: Opus::Types.any(BasicObject, Integer),
       _2: BasicObject,
@@ -6284,12 +6275,6 @@ module Kernel
   def self.puts(*_); end
 
   standard_method(
-    {},
-    returns: NilClass
-  )
-  def self.raise(); end
-
-  standard_method(
     {
       max: Opus::Types.any(Integer, Range),
     },
@@ -6386,6 +6371,16 @@ module Kernel
   def self.warn(*msg); end
 
   standard_method(
+    {
+      _: Opus::Types.any(String, Class, Exception),
+      _1: String,
+      _2: Opus::Types.array_of(String),
+    },
+    returns: NilClass
+  )
+  def self.raise(_=_, _1=_, _2=_); end
+
+  standard_method(
     {},
     returns: String
   )
@@ -6396,16 +6391,6 @@ module Kernel
     returns: Opus::Types.untyped
   )
   def clone(); end
-
-  standard_method(
-    {
-      _: Opus::Types.any(String, Class, Exception),
-      _1: String,
-      _2: Opus::Types.array_of(String),
-    },
-    returns: NilClass
-  )
-  def raise(_=_, _1=_, _2=_); end
 
   standard_method(
     {
@@ -6640,12 +6625,6 @@ module Kernel
   def puts(*_); end
 
   standard_method(
-    {},
-    returns: NilClass
-  )
-  def raise(); end
-
-  standard_method(
     {
       _: String,
       _1: Integer,
@@ -6742,6 +6721,16 @@ module Kernel
     returns: NilClass
   )
   def warn(*msg); end
+
+  standard_method(
+    {
+      _: Opus::Types.any(String, Class, Exception),
+      _1: String,
+      _2: Opus::Types.array_of(String),
+    },
+    returns: NilClass
+  )
+  def raise(_=_, _1=_, _2=_); end
 end
 
 module Marshal

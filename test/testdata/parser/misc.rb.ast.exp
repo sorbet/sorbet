@@ -1,5 +1,5 @@
 begin
-  self(<constant:<todo sym>>).alias_method(:foo, :bar)
+  self(<constant:<todo sym>>).alias_method(:afoo, :bar)
   @iv = 1
   @@cv = 1
   $gv = 1
@@ -24,7 +24,7 @@ begin
     self(<constant:<todo sym>>).a()
     self(<constant:<todo sym>>).b()
   end
-  def foo<<constant:<todo sym>>>(&x)
+  def bfoo<<constant:<todo sym>>>(&x)
     <emptyTree>
   end
   self(<constant:<todo sym>>).lambda() do ||
@@ -78,7 +78,7 @@ begin
   next([1, 2])
   self(<constant:<todo sym>>).defined?(<emptyTree>::<constant:X>)
   self(<constant:<todo sym>>).super(ZSuperArgs)
-  def foo<<constant:<todo sym>>>(x:, y: = 1, *z:)
+  def kwfoo<<constant:<todo sym>>>(x:, y: = 1, *z:)
     <emptyTree>
   end
   x.to_hash()
@@ -106,7 +106,7 @@ begin
     assignTemp$10008
   end
   4
-  def foo<<constant:<todo sym>>>(x = 1, *y)
+  def optfoo<<constant:<todo sym>>>(x = 1, *y)
     <emptyTree>
   end
   {x => y, "foo".intern() => 1}
@@ -140,13 +140,13 @@ begin
   self(<constant:<todo sym>>).proc() do |x|
     <emptyTree>
   end
-  break(self(<constant:<todo sym>>).foo(1) do ||
+  break(self(<constant:<todo sym>>).cfoo(1) do ||
       <emptyTree>
     end)
-  def foo<<constant:<todo sym>>>(**$10000)
+  def sfoo<<constant:<todo sym>>>(**$10000)
     <emptyTree>
   end
-  def foo<<constant:<todo sym>>>(***$10001:)
+  def ssfoo<<constant:<todo sym>>>(***$10001:)
     <emptyTree>
   end
 end

@@ -11,7 +11,8 @@ class <constant:A> < ::<constant:Object> () -> <class:A>
     argument x<>
   method f2 (x)
     argument x<>
-  method f3 (y) -> T1
+  method f3 () -> T1
+  method f4 (y) -> T1
     argument y<> -> T1
   method good (a, b, c, d, e, f, g, h, i, j) -> T2
     argument a<> -> TupleType {

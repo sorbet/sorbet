@@ -79,7 +79,7 @@ class A
 
   standard_method({y: T1}, returns: T1) # error: Unused type annotation. No method def before next annotation
   standard_method({y: T1}, returns: T1)
-  def f3(y)
+  def f4(y)
   end
 
   abstract_method(returns: T1)
