@@ -26,7 +26,7 @@
 </g>
 <g id="clust4" class="cluster">
 <title>cluster_::&lt;constant:Examples&gt;#return_in_one_branch2</title>
-<polygon fill="none" stroke="#0000ff" points="2741,-383.0193 2741,-781.4051 3787,-781.4051 3787,-383.0193 2741,-383.0193"/>
+<polygon fill="none" stroke="#0000ff" points="2741,-251.7645 2741,-781.4051 3787,-781.4051 3787,-251.7645 2741,-251.7645"/>
 <text text-anchor="middle" x="3264" y="-766.2051" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Examples&gt;#return_in_one_branch2</text>
 </g>
 <g id="clust5" class="cluster">
@@ -254,68 +254,81 @@
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_0 -->
 <g id="node14" class="node">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_0</title>
-<polygon fill="none" stroke="#000000" points="3099.8141,-694.1364 3279,-663.7994 3458.1859,-694.1364 3458.0186,-743.2227 3099.9814,-743.2227 3099.8141,-694.1364"/>
-<text text-anchor="middle" x="3279" y="-717.5035" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="3279" y="-703.5035" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="3279" y="-689.5035" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
+<polygon fill="none" stroke="#000000" points="3013.8141,-694.1364 3193,-663.7994 3372.1859,-694.1364 3372.0186,-743.2227 3013.9814,-743.2227 3013.8141,-694.1364"/>
+<text text-anchor="middle" x="3193" y="-717.5035" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
+<text text-anchor="middle" x="3193" y="-703.5035" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="3193" y="-689.5035" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_2 -->
 <g id="node16" class="node">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_2</title>
-<ellipse fill="none" stroke="#000000" cx="3017" cy="-558.2742" rx="268.1762" ry="45.011"/>
-<text text-anchor="middle" x="3017" y="-575.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](returnMethodTemp$1)</text>
-<text text-anchor="middle" x="3017" y="-561.0742" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="3017" y="-547.0742" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="3017" y="-533.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3103" cy="-558.2742" rx="160.604" ry="35.2113"/>
+<text text-anchor="middle" x="3103" y="-568.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](returnMethodTemp$1)</text>
+<text text-anchor="middle" x="3103" y="-554.0742" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="3103" y="-540.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_0&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_2 -->
 <g id="edge17" class="edge">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_0&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_2</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M3219.5481,-673.7957C3184.8844,-654.0255 3140.5794,-628.7566 3102.2503,-606.8959"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3103.5757,-603.6226 3093.1552,-601.7086 3100.1077,-609.7032 3103.5757,-603.6226"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M3168.8817,-667.6592C3156.6716,-647.3865 3141.8261,-622.7381 3129.3205,-601.9748"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3132.2764,-600.0987 3124.1188,-593.3382 3126.28,-603.7103 3132.2764,-600.0987"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_3 -->
 <g id="node17" class="node">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_3</title>
-<ellipse fill="none" stroke="#000000" cx="3541" cy="-558.2742" rx="237.5846" ry="45.011"/>
-<text text-anchor="middle" x="3541" y="-575.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3]()</text>
-<text text-anchor="middle" x="3541" y="-561.0742" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$4 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="3541" y="-547.0742" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return returnTemp$4 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="3541" y="-533.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="3541" cy="-427.0193" rx="237.5846" ry="45.011"/>
+<text text-anchor="middle" x="3541" y="-443.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3]()</text>
+<text text-anchor="middle" x="3541" y="-429.8193" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$4 = 2 : Integer(2)</text>
+<text text-anchor="middle" x="3541" y="-415.8193" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = return returnTemp$4 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="3541" y="-401.8193" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_0&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_3 -->
 <g id="edge18" class="edge">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_0&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_3</title>
-<polygon fill="#000000" stroke="transparent" points="3338.6996,-674.23 3343.9799,-671.1926 3349.3938,-668.0782 3354.9296,-664.8938 3360.5754,-661.6462 3366.3193,-658.342 3372.1496,-654.9882 3378.0544,-651.5916 3384.0218,-648.1589 3390.0401,-644.6969 3396.0973,-641.2126 3402.1818,-637.7125 3408.2816,-634.2037 3414.3849,-630.6928 3420.48,-627.1867 3426.5548,-623.6922 3432.5977,-620.2161 3438.5968,-616.7652 3444.5403,-613.3463 3450.4163,-609.9661 3456.213,-606.6316 3456.213,-606.6316 3450.3919,-609.9233 3444.4911,-613.26 3438.5226,-616.635 3432.4982,-620.0415 3426.4298,-623.473 3420.3293,-626.9226 3414.2086,-630.3836 3408.0795,-633.8494 3401.954,-637.3131 3395.8439,-640.7682 3389.7611,-644.2078 3383.7174,-647.6253 3377.7248,-651.0138 3371.7952,-654.3668 3365.9403,-657.6775 3360.1722,-660.9392 3354.5026,-664.1452 3348.9435,-667.2886 3343.5067,-670.3629 3338.2041,-673.3614 3338.6996,-674.23"/>
-<polygon fill="#000000" stroke="#000000" points="3458.3789,-609.4257 3465.3314,-601.4311 3454.9109,-603.3451 3458.3789,-609.4257"/>
+<polygon fill="#000000" stroke="transparent" points="3238.4521,-671.6859 3247.9828,-663.9733 3258.1733,-655.7267 3268.9569,-647.0001 3280.267,-637.8476 3292.0367,-628.323 3304.1994,-618.4804 3316.6884,-608.3738 3329.437,-598.0571 3342.3785,-587.5844 3355.4461,-577.0095 3368.5732,-566.3865 3381.693,-555.7694 3394.7389,-545.2122 3407.6441,-534.7688 3420.3419,-524.4931 3432.7657,-514.4393 3444.8487,-504.6613 3456.5241,-495.213 3467.7254,-486.1485 3478.3858,-477.5217 3478.3858,-477.5217 3467.6975,-486.1139 3456.4669,-495.1421 3444.7609,-504.5525 3432.6463,-514.2913 3420.1901,-524.3048 3407.459,-534.5393 3394.52,-544.9408 3381.44,-555.4558 3368.2859,-566.0303 3355.1244,-576.6107 3342.0226,-587.1431 3329.0473,-597.5739 3316.2653,-607.8493 3303.7436,-617.9154 3291.5491,-627.7185 3279.7486,-637.2048 3268.4089,-646.3207 3257.5971,-655.0123 3247.3799,-663.2258 3237.8243,-670.9075 3238.4521,-671.6859"/>
+<polygon fill="#000000" stroke="#000000" points="3480.6154,-480.22 3486.2017,-471.2176 3476.2207,-474.7714 3480.6154,-480.22"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_1 -->
 <g id="node15" class="node">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_1</title>
-<polygon fill="none" stroke="#000000" points="3391.551,-463.0193 3212.5076,-463.0193 3166.449,-391.0193 3345.4924,-391.0193 3391.551,-463.0193"/>
-<text text-anchor="middle" x="3279" y="-429.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
-<text text-anchor="middle" x="3279" y="-415.8193" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="3391.551,-331.7645 3212.5076,-331.7645 3166.449,-259.7645 3345.4924,-259.7645 3391.551,-331.7645"/>
+<text text-anchor="middle" x="3279" y="-298.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
+<text text-anchor="middle" x="3279" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_1&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_1 -->
 <g id="edge19" class="edge">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_1&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_1</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M3382.8661,-449.3022C3398.8796,-445.9362 3409.7753,-438.5086 3409.7753,-427.0193 3409.7753,-411.3156 3389.4201,-403.1998 3363.463,-402.6719"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3363.2116,-399.1755 3353.2711,-402.8411 3363.3279,-406.1745 3363.2116,-399.1755"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M3382.6002,-317.4155C3398.7589,-314.1788 3409.7753,-306.9618 3409.7753,-295.7645 3409.7753,-280.5985 3389.5657,-272.7343 3363.7418,-272.172"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3363.5501,-268.6742 3353.6001,-272.314 3363.6482,-275.6735 3363.5501,-268.6742"/>
 </g>
-<!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_2&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_1 -->
+<!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_4 -->
+<g id="node18" class="node">
+<title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_4</title>
+<ellipse fill="none" stroke="#000000" cx="3017" cy="-427.0193" rx="268.1762" ry="35.2113"/>
+<text text-anchor="middle" x="3017" y="-436.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$1)</text>
+<text text-anchor="middle" x="3017" y="-422.8193" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="3017" y="-408.8193" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+</g>
+<!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_2&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_4 -->
 <g id="edge20" class="edge">
-<title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_2&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_1</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M3102.7886,-515.2964C3134.7088,-499.3053 3170.711,-481.2692 3201.8142,-465.6873"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3203.5001,-468.7574 3210.8732,-461.149 3200.3647,-462.4989 3203.5001,-468.7574"/>
+<title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_2&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_4</title>
+<path fill="none" stroke="#000000" stroke-width="2" d="M3079.9536,-523.1003C3069.4461,-507.0635 3056.8961,-487.9095 3045.7762,-470.9382"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3048.5182,-468.7366 3040.11,-462.2903 3042.663,-472.573 3048.5182,-468.7366"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_3&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_1 -->
 <g id="edge21" class="edge">
 <title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_3&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_1</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M3456.2979,-515.8407C3425.5417,-500.4327 3390.8781,-483.0672 3360.4123,-467.8047"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3361.6096,-464.4899 3351.1011,-463.14 3358.4742,-470.7484 3361.6096,-464.4899"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M3456.2979,-384.5859C3425.5417,-369.1779 3390.8781,-351.8124 3360.4123,-336.5498"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3361.6096,-333.2351 3351.1011,-331.8852 3358.4742,-339.4936 3361.6096,-333.2351"/>
+</g>
+<!-- bb::&lt;constant:Examples&gt;#return_in_one_branch2_4&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_1 -->
+<g id="edge22" class="edge">
+<title>bb::&lt;constant:Examples&gt;#return_in_one_branch2_4&#45;&gt;bb::&lt;constant:Examples&gt;#return_in_one_branch2_1</title>
+<path fill="none" stroke="#000000" stroke-width="2" d="M3085.4952,-392.7051C3121.1372,-374.8495 3164.8422,-352.9544 3201.6926,-334.4934"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="3203.5314,-337.4869 3210.9046,-329.8785 3200.396,-331.2283 3203.5314,-337.4869"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_0 -->
-<g id="node18" class="node">
+<g id="node19" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_0</title>
 <polygon fill="none" stroke="#000000" points="3839.8141,-694.1364 4019,-663.7994 4198.1859,-694.1364 4198.0186,-743.2227 3839.9814,-743.2227 3839.8141,-694.1364"/>
 <text text-anchor="middle" x="4019" y="-717.5035" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
@@ -323,7 +336,7 @@
 <text text-anchor="middle" x="4019" y="-689.5035" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_2 -->
-<g id="node20" class="node">
+<g id="node21" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_2</title>
 <ellipse fill="none" stroke="#000000" cx="3921" cy="-558.2742" rx="78.428" ry="35.2113"/>
 <text text-anchor="middle" x="3921" y="-568.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](a)</text>
@@ -331,13 +344,13 @@
 <text text-anchor="middle" x="3921" y="-540.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_2 -->
-<g id="edge22" class="edge">
+<g id="edge23" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_2</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M3992.9951,-668.0515C3979.439,-647.3814 3962.8463,-622.0809 3949.008,-600.9804"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="3951.871,-598.9638 3943.4601,-592.5211 3946.0175,-602.8027 3951.871,-598.9638"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_3 -->
-<g id="node21" class="node">
+<g id="node22" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_3</title>
 <ellipse fill="none" stroke="#000000" cx="4096" cy="-558.2742" rx="78.428" ry="35.2113"/>
 <text text-anchor="middle" x="4096" y="-568.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](a)</text>
@@ -345,26 +358,26 @@
 <text text-anchor="middle" x="4096" y="-540.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_3 -->
-<g id="edge23" class="edge">
+<g id="edge24" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_3</title>
 <polygon fill="#000000" stroke="transparent" points="4040.2818,-667.4948 4041.8294,-664.4402 4043.4062,-661.3282 4045.0091,-658.1645 4046.635,-654.9554 4048.281,-651.7067 4049.944,-648.4245 4051.621,-645.1147 4053.3088,-641.7834 4055.0045,-638.4366 4056.7051,-635.0802 4058.4074,-631.7203 4060.1085,-628.3629 4061.8054,-625.0139 4063.4948,-621.6793 4065.174,-618.3652 4066.8397,-615.0776 4068.489,-611.8224 4070.1188,-608.6057 4071.7261,-605.4334 4073.3078,-602.3116 4073.3078,-602.3116 4071.6835,-605.4115 4070.033,-608.5615 4068.3593,-611.7556 4066.6656,-614.9879 4064.9551,-618.2524 4063.2307,-621.5432 4061.4958,-624.8543 4059.7533,-628.1798 4058.0064,-631.5137 4056.2582,-634.85 4054.5119,-638.1828 4052.7705,-641.5061 4051.0372,-644.8139 4049.3152,-648.1004 4047.6074,-651.3596 4045.9171,-654.5855 4044.2474,-657.7721 4042.6014,-660.9134 4040.9821,-664.0037 4039.3928,-667.0367 4040.2818,-667.4948"/>
 <polygon fill="#000000" stroke="#000000" points="4076.555,-603.6509 4078.0244,-593.1584 4070.3325,-600.4444 4076.555,-603.6509"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_1 -->
-<g id="node19" class="node">
+<g id="node20" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_1</title>
 <polygon fill="none" stroke="#000000" points="4249.551,-88 4070.5076,-88 4024.449,-16 4203.4924,-16 4249.551,-88"/>
 <text text-anchor="middle" x="4137" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="4137" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_1&#45;&gt;bb::&lt;constant:Examples&gt;#variables_1 -->
-<g id="edge24" class="edge">
+<g id="edge25" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_1&#45;&gt;bb::&lt;constant:Examples&gt;#variables_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4239.5274,-72.1238C4256.2694,-69.2431 4267.7753,-62.5352 4267.7753,-52 4267.7753,-38.2992 4248.3157,-31.0712 4223.1869,-30.3161"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4222.8982,-26.8171 4212.9124,-30.3575 4222.9265,-33.8171 4222.8982,-26.8171"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_4 -->
-<g id="node22" class="node">
+<g id="node23" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_4</title>
 <ellipse fill="none" stroke="#000000" cx="4062" cy="-427.0193" rx="154.4176" ry="35.2113"/>
 <text text-anchor="middle" x="4062" y="-436.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](a)</text>
@@ -372,19 +385,19 @@
 <text text-anchor="middle" x="4062" y="-408.8193" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$6</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_4 -->
-<g id="edge25" class="edge">
+<g id="edge26" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_4</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M3955.4925,-526.1656C3974.1442,-508.8031 3997.3921,-487.1618 4017.4052,-468.532"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4019.9659,-470.9301 4024.9006,-461.5546 4015.1963,-465.8064 4019.9659,-470.9301"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_3&#45;&gt;bb::&lt;constant:Examples&gt;#variables_4 -->
-<g id="edge26" class="edge">
+<g id="edge27" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_3&#45;&gt;bb::&lt;constant:Examples&gt;#variables_4</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4086.8886,-523.1003C4082.8814,-507.6307 4078.1228,-489.2604 4073.8451,-472.7467"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4077.1507,-471.5499 4071.2549,-462.7471 4070.3744,-473.3053 4077.1507,-471.5499"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_5 -->
-<g id="node23" class="node">
+<g id="node24" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_5</title>
 <ellipse fill="none" stroke="#000000" cx="3995" cy="-295.7645" rx="79.0398" ry="35.2113"/>
 <text text-anchor="middle" x="3995" y="-305.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=5](b, a)</text>
@@ -392,13 +405,13 @@
 <text text-anchor="middle" x="3995" y="-277.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_4&#45;&gt;bb::&lt;constant:Examples&gt;#variables_5 -->
-<g id="edge27" class="edge">
+<g id="edge28" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_4&#45;&gt;bb::&lt;constant:Examples&gt;#variables_5</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4044.0452,-391.8454C4035.8688,-375.8277 4026.105,-356.7 4017.4495,-339.7436"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4020.4359,-337.8958 4012.772,-330.5803 4014.2012,-341.0784 4020.4359,-337.8958"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_6 -->
-<g id="node24" class="node">
+<g id="node25" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_6</title>
 <ellipse fill="none" stroke="#000000" cx="4171" cy="-295.7645" rx="79.0398" ry="35.2113"/>
 <text text-anchor="middle" x="4171" y="-305.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=6](b, a)</text>
@@ -406,13 +419,13 @@
 <text text-anchor="middle" x="4171" y="-277.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_4&#45;&gt;bb::&lt;constant:Examples&gt;#variables_6 -->
-<g id="edge28" class="edge">
+<g id="edge29" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_4&#45;&gt;bb::&lt;constant:Examples&gt;#variables_6</title>
 <polygon fill="#000000" stroke="transparent" points="4091.3085,-392.5095 4093.4287,-389.9199 4095.5891,-387.2814 4097.7856,-384.5987 4100.0143,-381.8766 4102.2713,-379.12 4104.5526,-376.3336 4106.8544,-373.5223 4109.1728,-370.6908 4111.5037,-367.8439 4113.8433,-364.9865 4116.1876,-362.1232 4118.5327,-359.259 4120.8747,-356.3985 4123.2097,-353.5467 4125.5337,-350.7083 4127.8428,-347.8881 4130.133,-345.0909 4132.4005,-342.3214 4134.6414,-339.5846 4136.8516,-336.8851 4136.8516,-336.8851 4134.604,-339.5536 4132.3253,-342.259 4130.0195,-344.9966 4127.6906,-347.7617 4125.3425,-350.5495 4122.9792,-353.3554 4120.6048,-356.1744 4118.2233,-359.002 4115.8385,-361.8333 4113.4546,-364.6637 4111.0755,-367.4883 4108.7052,-370.3025 4106.3477,-373.1015 4104.007,-375.8806 4101.6871,-378.6349 4099.392,-381.3599 4097.1257,-384.0507 4094.8921,-386.7025 4092.6952,-389.3108 4090.5392,-391.8706 4091.3085,-392.5095"/>
 <polygon fill="#000000" stroke="#000000" points="4139.749,-338.8745 4143.4452,-328.9453 4134.3638,-334.4023 4139.749,-338.8745"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_7 -->
-<g id="node25" class="node">
+<g id="node26" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_7</title>
 <ellipse fill="none" stroke="#000000" cx="4137" cy="-169.2548" rx="334.1054" ry="45.011"/>
 <text text-anchor="middle" x="4137" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=7](b, a)</text>
@@ -421,25 +434,25 @@
 <text text-anchor="middle" x="4137" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_7 -->
-<g id="edge29" class="edge">
+<g id="edge30" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_7</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4030.4663,-264.1671C4045.2124,-251.0296 4062.7137,-235.4375 4079.2257,-220.7267"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4081.5909,-223.3071 4086.7293,-214.0417 4076.9344,-218.0805 4081.5909,-223.3071"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_6&#45;&gt;bb::&lt;constant:Examples&gt;#variables_7 -->
-<g id="edge30" class="edge">
+<g id="edge31" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_6&#45;&gt;bb::&lt;constant:Examples&gt;#variables_7</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4161.5291,-260.5245C4158.5213,-249.3327 4155.1193,-236.6746 4151.8279,-224.4275"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4155.1971,-223.4783 4149.2215,-214.7295 4148.4369,-225.2952 4155.1971,-223.4783"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_7&#45;&gt;bb::&lt;constant:Examples&gt;#variables_1 -->
-<g id="edge31" class="edge">
+<g id="edge32" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_7&#45;&gt;bb::&lt;constant:Examples&gt;#variables_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4137,-123.9211C4137,-115.4909 4137,-106.6737 4137,-98.2175"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4140.5001,-98.132 4137,-88.1321 4133.5001,-98.1321 4140.5001,-98.132"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_0 -->
-<g id="node26" class="node">
+<g id="node27" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_0</title>
 <polygon fill="none" stroke="#000000" points="4586.6245,-690.4368 4845,-651.8273 5103.3755,-690.4368 5103.1344,-752.9083 4586.8656,-752.9083 4586.6245,-690.4368"/>
 <text text-anchor="middle" x="4845" y="-724.5035" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](&lt;constant:nil&gt;$9)</text>
@@ -448,7 +461,7 @@
 <text text-anchor="middle" x="4845" y="-682.5035" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_2 -->
-<g id="node28" class="node">
+<g id="node29" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_2</title>
 <ellipse fill="none" stroke="#000000" cx="4740" cy="-558.2742" rx="141.1537" ry="35.2113"/>
 <text text-anchor="middle" x="4740" y="-568.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](a, &lt;constant:nil&gt;$9)</text>
@@ -456,13 +469,13 @@
 <text text-anchor="middle" x="4740" y="-540.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_2 -->
-<g id="edge32" class="edge">
+<g id="edge33" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_2</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4809.4518,-657.1135C4796.772,-639.0684 4782.6143,-618.9201 4770.4061,-601.5463"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4773.1977,-599.4313 4764.5847,-593.2615 4767.4703,-603.4558 4773.1977,-599.4313"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_3 -->
-<g id="node29" class="node">
+<g id="node30" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_3</title>
 <ellipse fill="none" stroke="#000000" cx="5041" cy="-558.2742" rx="141.1537" ry="35.2113"/>
 <text text-anchor="middle" x="5041" y="-568.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](a, &lt;constant:nil&gt;$9)</text>
@@ -470,26 +483,26 @@
 <text text-anchor="middle" x="5041" y="-540.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_3 -->
-<g id="edge33" class="edge">
+<g id="edge34" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_3</title>
 <polygon fill="#000000" stroke="transparent" points="4906.781,-661.2307 4910.7622,-658.165 4914.7982,-655.0571 4918.8819,-651.9123 4923.0065,-648.7361 4927.1648,-645.534 4931.3499,-642.3112 4935.5547,-639.0733 4939.7721,-635.8257 4943.9952,-632.5736 4948.2169,-629.3227 4952.4302,-626.0782 4956.6281,-622.8456 4960.8035,-619.6302 4964.9494,-616.4376 4969.0589,-613.2731 4973.1248,-610.1421 4977.1402,-607.05 4981.098,-604.0023 4984.9912,-601.0043 4988.8127,-598.0615 4988.8127,-598.0615 4984.9629,-600.9672 4981.041,-603.9275 4977.0539,-606.9369 4973.0089,-609.99 4968.9129,-613.0816 4964.7731,-616.2063 4960.5965,-619.3587 4956.3902,-622.5336 4952.1613,-625.7255 4947.9168,-628.9291 4943.6639,-632.1392 4939.4096,-635.3502 4935.161,-638.557 4930.9252,-641.7542 4926.7092,-644.9363 4922.5202,-648.0982 4918.3651,-651.2344 4914.2511,-654.3395 4910.1853,-657.4084 4906.1747,-660.4355 4906.781,-661.2307"/>
 <polygon fill="#000000" stroke="#000000" points="4991.0049,-600.7914 4996.8353,-591.9451 4986.7608,-595.2247 4991.0049,-600.7914"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_1 -->
-<g id="node27" class="node">
+<g id="node28" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_1</title>
 <polygon fill="none" stroke="#000000" points="4720.551,-205.2548 4541.5076,-205.2548 4495.449,-133.2548 4674.4924,-133.2548 4720.551,-205.2548"/>
 <text text-anchor="middle" x="4608" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="4608" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_1&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_1 -->
-<g id="edge34" class="edge">
+<g id="edge35" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_1&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4710.5274,-189.3786C4727.2694,-186.4979 4738.7753,-179.79 4738.7753,-169.2548 4738.7753,-155.554 4719.3157,-148.326 4694.1869,-147.5709"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4693.8982,-144.0719 4683.9124,-147.6124 4693.9265,-151.0719 4693.8982,-144.0719"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_5 -->
-<g id="node30" class="node">
+<g id="node31" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_5</title>
 <ellipse fill="none" stroke="#000000" cx="4969" cy="-427.0193" rx="160.6716" ry="45.011"/>
 <text text-anchor="middle" x="4969" y="-443.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=5](b, &lt;constant:nil&gt;$9)</text>
@@ -498,19 +511,19 @@
 <text text-anchor="middle" x="4969" y="-401.8193" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$6</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5 -->
-<g id="edge35" class="edge">
+<g id="edge36" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4796.6068,-525.8291C4824.4535,-509.8684 4858.4998,-490.3542 4888.9586,-472.8963"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4890.9288,-475.8012 4897.8643,-467.7918 4887.4479,-469.7281 4890.9288,-475.8012"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_3&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5 -->
-<g id="edge36" class="edge">
+<g id="edge37" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_3&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5021.7053,-523.1003C5014.6663,-510.2683 5006.5324,-495.4404 4998.7932,-481.3319"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5001.658,-479.2769 4993.7799,-472.1927 4995.5207,-482.6435 5001.658,-479.2769"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_6 -->
-<g id="node31" class="node">
+<g id="node32" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_6</title>
 <ellipse fill="none" stroke="#000000" cx="5071" cy="-295.7645" rx="154.4176" ry="45.011"/>
 <text text-anchor="middle" x="5071" y="-312.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=6](b, &lt;constant:nil&gt;$9)</text>
@@ -519,13 +532,13 @@
 <text text-anchor="middle" x="5071" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$8</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_6 -->
-<g id="edge37" class="edge">
+<g id="edge38" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_6</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5003.5325,-382.5824C5012.0898,-371.5709 5021.34,-359.6676 5030.1666,-348.3094"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5033.1305,-350.1994 5036.503,-340.1556 5027.6032,-345.9041 5033.1305,-350.1994"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_7 -->
-<g id="node32" class="node">
+<g id="node33" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_7</title>
 <ellipse fill="none" stroke="#000000" cx="4687" cy="-295.7645" rx="191.5116" ry="35.2113"/>
 <text text-anchor="middle" x="4687" y="-305.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=7](b, &lt;constant:nil&gt;$9)</text>
@@ -533,13 +546,13 @@
 <text text-anchor="middle" x="4687" y="-277.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_7 -->
-<g id="edge38" class="edge">
+<g id="edge39" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_7</title>
 <polygon fill="#000000" stroke="transparent" points="4885.7463,-387.718 4880.0743,-385.1044 4874.3143,-382.4502 4868.4764,-379.7601 4862.5707,-377.0388 4856.6074,-374.291 4850.5965,-371.5212 4844.5482,-368.7342 4838.4726,-365.9346 4832.3797,-363.127 4826.2799,-360.3162 4820.183,-357.5068 4814.0993,-354.7035 4808.0388,-351.9109 4802.0117,-349.1336 4796.0282,-346.3764 4790.0982,-343.6439 4784.2319,-340.9408 4778.4395,-338.2717 4772.731,-335.6413 4767.1166,-333.0542 4767.1166,-333.0542 4772.711,-335.6842 4778.3992,-338.3582 4784.171,-341.0716 4790.0164,-343.8196 4795.9253,-346.5974 4801.8876,-349.4003 4807.8933,-352.2236 4813.9322,-355.0626 4819.9942,-357.9124 4826.0694,-360.7684 4832.1476,-363.6258 4838.2187,-366.4799 4844.2727,-369.3259 4850.2995,-372.1592 4856.289,-374.9749 4862.2312,-377.7683 4868.1158,-380.5348 4873.933,-383.2694 4879.6725,-385.9676 4885.3243,-388.6246 4885.7463,-387.718"/>
 <polygon fill="#000000" stroke="#000000" points="4768.4035,-329.7926 4757.8605,-328.746 4765.4496,-336.1389 4768.4035,-329.7926"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_8 -->
-<g id="node33" class="node">
+<g id="node34" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_8</title>
 <ellipse fill="none" stroke="#000000" cx="4899" cy="-169.2548" rx="141.7654" ry="45.011"/>
 <text text-anchor="middle" x="4899" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=8](b, &lt;constant:nil&gt;$9)</text>
@@ -548,13 +561,13 @@
 <text text-anchor="middle" x="4899" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_6&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_8 -->
-<g id="edge39" class="edge">
+<g id="edge40" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_6&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_8</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5013.7265,-253.6386C4997.8318,-241.9477 4980.4579,-229.1689 4964.1488,-217.1732"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4965.8601,-214.0871 4955.7307,-210.9815 4961.7126,-219.7261 4965.8601,-214.0871"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_9 -->
-<g id="node34" class="node">
+<g id="node35" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_9</title>
 <ellipse fill="none" stroke="#000000" cx="5201" cy="-169.2548" rx="141.7654" ry="45.011"/>
 <text text-anchor="middle" x="5201" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=9](b, &lt;constant:nil&gt;$9)</text>
@@ -563,31 +576,31 @@
 <text text-anchor="middle" x="5201" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_6&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_9 -->
-<g id="edge40" class="edge">
+<g id="edge41" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_6&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_9</title>
 <polygon fill="#000000" stroke="transparent" points="5116.0873,-252.5854 5117.7032,-250.979 5119.3305,-249.3614 5120.9681,-247.7334 5122.6151,-246.0961 5124.2704,-244.4506 5125.9329,-242.7979 5127.6017,-241.139 5129.2757,-239.4749 5130.9539,-237.8066 5132.6353,-236.1351 5134.3188,-234.4616 5136.0034,-232.7869 5137.6881,-231.1122 5139.3718,-229.4383 5141.0536,-227.7665 5142.7324,-226.0976 5144.4071,-224.4328 5146.0768,-222.7729 5147.7404,-221.1191 5149.397,-219.4724 5149.397,-219.4724 5147.7058,-221.0835 5146.0073,-222.7015 5144.3027,-224.3254 5142.5928,-225.9542 5140.8789,-227.587 5139.1619,-229.2227 5137.4429,-230.8602 5135.723,-232.4987 5134.0031,-234.1372 5132.2843,-235.7745 5130.5678,-237.4098 5128.8544,-239.0419 5127.1454,-240.6701 5125.4416,-242.2931 5123.7443,-243.91 5122.0544,-245.5199 5120.3729,-247.1217 5118.701,-248.7145 5117.0396,-250.2971 5115.3899,-251.8687 5116.0873,-252.5854"/>
 <polygon fill="#000000" stroke="#000000" points="5151.8936,-221.9265 5156.6193,-212.444 5147.0117,-216.9099 5151.8936,-221.9265"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_7&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_1 -->
-<g id="edge41" class="edge">
+<g id="edge42" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_7&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4664.9941,-260.5245C4656.0635,-246.2232 4645.6378,-229.5276 4636.1629,-214.3546"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4638.9781,-212.2548 4630.7126,-205.6266 4633.0407,-215.9625 4638.9781,-212.2548"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_8&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5 -->
-<g id="edge42" class="edge">
+<g id="edge43" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_8&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M4894.6069,-214.6966C4892.7739,-250.1067 4893.7302,-299.9816 4908,-341.0193 4911.9924,-352.5007 4918.0181,-363.8124 4924.7536,-374.2697"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="4922.0474,-376.5159 4930.5493,-382.838 4927.8455,-372.594 4922.0474,-376.5159"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_and_loop_9&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5 -->
-<g id="edge43" class="edge">
+<g id="edge44" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_and_loop_9&#45;&gt;bb::&lt;constant:Examples&gt;#variables_and_loop_5</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5226.8838,-213.8906C5244.7402,-251.1856 5260.8685,-304.0518 5234,-341.0193 5217.8369,-363.2577 5163.777,-382.7035 5108.6628,-397.4518"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5107.5165,-394.1341 5098.732,-400.0572 5109.2928,-400.9049 5107.5165,-394.1341"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_0 -->
-<g id="node35" class="node">
+<g id="node36" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_0</title>
 <polygon fill="none" stroke="#000000" points="5587.6245,-694.1364 5846,-663.7994 6104.3755,-694.1364 6104.1344,-743.2227 5587.8656,-743.2227 5587.6245,-694.1364"/>
 <text text-anchor="middle" x="5846" y="-717.5035" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](&lt;constant:nil&gt;$7)</text>
@@ -595,7 +608,7 @@
 <text text-anchor="middle" x="5846" y="-689.5035" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_2 -->
-<g id="node37" class="node">
+<g id="node38" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_2</title>
 <ellipse fill="none" stroke="#000000" cx="5846" cy="-558.2742" rx="160.6716" ry="45.011"/>
 <text text-anchor="middle" x="5846" y="-575.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](b, &lt;constant:nil&gt;$7)</text>
@@ -604,26 +617,26 @@
 <text text-anchor="middle" x="5846" y="-533.0742" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_2 -->
-<g id="edge44" class="edge">
+<g id="edge45" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_0&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_2</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5846,-663.678C5846,-647.9935 5846,-630.1251 5846,-613.613"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5849.5001,-613.5388 5846,-603.5388 5842.5001,-613.5388 5849.5001,-613.5388"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_1 -->
-<g id="node36" class="node">
+<g id="node37" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_1</title>
 <polygon fill="none" stroke="#000000" points="5592.551,-331.7645 5413.5076,-331.7645 5367.449,-259.7645 5546.4924,-259.7645 5592.551,-331.7645"/>
 <text text-anchor="middle" x="5480" y="-298.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="5480" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_1&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_1 -->
-<g id="edge45" class="edge">
+<g id="edge46" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_1&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5583.6002,-317.4155C5599.7589,-314.1788 5610.7753,-306.9618 5610.7753,-295.7645 5610.7753,-280.5985 5590.5657,-272.7343 5564.7418,-272.172"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5564.5501,-268.6742 5554.6001,-272.314 5564.6482,-275.6735 5564.5501,-268.6742"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_3 -->
-<g id="node38" class="node">
+<g id="node39" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_3</title>
 <ellipse fill="none" stroke="#000000" cx="5933" cy="-427.0193" rx="154.4176" ry="45.011"/>
 <text text-anchor="middle" x="5933" y="-443.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](b, &lt;constant:nil&gt;$7)</text>
@@ -632,13 +645,13 @@
 <text text-anchor="middle" x="5933" y="-401.8193" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$6</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_3 -->
-<g id="edge46" class="edge">
+<g id="edge47" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_3</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5875.6971,-513.4708C5882.8363,-502.7001 5890.5288,-491.0946 5897.8884,-479.9914"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5900.8291,-481.8897 5903.4367,-471.6208 5894.9945,-478.0223 5900.8291,-481.8897"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_4 -->
-<g id="node39" class="node">
+<g id="node40" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_4</title>
 <ellipse fill="none" stroke="#000000" cx="5554" cy="-427.0193" rx="186.6121" ry="35.2113"/>
 <text text-anchor="middle" x="5554" y="-436.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](b, &lt;constant:nil&gt;$7)</text>
@@ -646,13 +659,13 @@
 <text text-anchor="middle" x="5554" y="-408.8193" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_4 -->
-<g id="edge47" class="edge">
+<g id="edge48" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_2&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_4</title>
 <polygon fill="#000000" stroke="transparent" points="5760.5684,-519.3242 5754.6184,-516.6759 5748.5732,-513.9851 5742.4438,-511.2569 5736.241,-508.496 5729.9759,-505.7074 5723.6594,-502.8959 5717.3025,-500.0665 5710.9162,-497.2239 5704.5113,-494.373 5698.0989,-491.5189 5691.69,-488.6662 5685.2954,-485.82 5678.9262,-482.985 5672.5933,-480.1662 5666.3077,-477.3685 5660.0803,-474.5967 5653.9221,-471.8557 5647.8441,-469.1503 5641.8573,-466.4855 5635.9725,-463.8662 5635.9725,-463.8662 5641.8379,-466.5286 5647.8051,-469.2372 5653.8631,-471.9871 5660.001,-474.7731 5666.2079,-477.5906 5672.4728,-480.4343 5678.7848,-483.2995 5685.1331,-486.181 5691.5066,-489.0741 5697.8945,-491.9737 5704.2858,-494.8748 5710.6696,-497.7725 5717.0349,-500.6618 5723.3709,-503.5378 5729.6666,-506.3956 5735.9111,-509.23 5742.0934,-512.0363 5748.2027,-514.8094 5754.228,-517.5444 5760.1584,-520.2363 5760.5684,-519.3242"/>
 <polygon fill="#000000" stroke="#000000" points="5637.3486,-460.6475 5626.7927,-459.7398 5634.4786,-467.0321 5637.3486,-460.6475"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_5 -->
-<g id="node40" class="node">
+<g id="node41" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_5</title>
 <ellipse fill="none" stroke="#000000" cx="5771" cy="-295.7645" rx="141.7654" ry="45.011"/>
 <text text-anchor="middle" x="5771" y="-312.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=5](b, &lt;constant:nil&gt;$7)</text>
@@ -661,13 +674,13 @@
 <text text-anchor="middle" x="5771" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_3&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_5 -->
-<g id="edge48" class="edge">
+<g id="edge49" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_3&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_5</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5880.4032,-384.4047C5864.6034,-371.6033 5847.1526,-357.4645 5830.9165,-344.3097"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5833.0294,-341.517 5823.0562,-337.9412 5828.6227,-346.9559 5833.0294,-341.517"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_6 -->
-<g id="node41" class="node">
+<g id="node42" class="node">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_6</title>
 <ellipse fill="none" stroke="#000000" cx="6073" cy="-295.7645" rx="141.7654" ry="45.011"/>
 <text text-anchor="middle" x="6073" y="-312.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=6](b, &lt;constant:nil&gt;$7)</text>
@@ -676,31 +689,31 @@
 <text text-anchor="middle" x="6073" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_3&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_6 -->
-<g id="edge49" class="edge">
+<g id="edge50" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_3&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_6</title>
 <polygon fill="#000000" stroke="transparent" points="5979.5712,-384.0426 5981.5194,-382.1831 5983.4845,-380.3073 5985.4651,-378.4169 5987.4594,-376.5132 5989.466,-374.5979 5991.4832,-372.6725 5993.5095,-370.7384 5995.5433,-368.7971 5997.5829,-366.8503 5999.6269,-364.8993 6001.6736,-362.9457 6003.7214,-360.9911 6005.7688,-359.0369 6007.8141,-357.0846 6009.8558,-355.1357 6011.8923,-353.1919 6013.9221,-351.2545 6015.9434,-349.3251 6017.9548,-347.4052 6019.9547,-345.4963 6019.9547,-345.4963 6017.921,-347.369 6015.8755,-349.2526 6013.8199,-351.1455 6011.7558,-353.0462 6009.6848,-354.9533 6007.6085,-356.8653 6005.5285,-358.7806 6003.4465,-360.6978 6001.364,-362.6155 5999.2826,-364.5321 5997.204,-366.4461 5995.1298,-368.3562 5993.0616,-370.2607 5991.001,-372.1582 5988.9496,-374.0472 5986.9091,-375.9262 5984.8809,-377.7938 5982.8668,-379.6485 5980.8684,-381.4887 5978.8873,-383.3131 5979.5712,-384.0426"/>
 <polygon fill="#000000" stroke="#000000" points="6022.3951,-348.006 6027.2965,-338.6131 6017.6074,-342.8993 6022.3951,-348.006"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_4&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_1 -->
-<g id="edge50" class="edge">
+<g id="edge51" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_4&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5534.1694,-391.8454C5525.3555,-376.2121 5514.8714,-357.6163 5505.4853,-340.9682"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5508.3614,-338.9428 5500.4014,-331.9507 5502.2637,-342.3806 5508.3614,-338.9428"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_2 -->
-<g id="edge51" class="edge">
+<g id="edge52" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_5&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_2</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M5761.6555,-341.053C5755.9677,-378.796 5752.725,-433.2607 5770,-477.0193 5774.224,-487.7191 5780.5958,-497.838 5787.8875,-507.0673"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5785.3894,-509.535 5794.5012,-514.9411 5790.7494,-505.0328 5785.3894,-509.535"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#variables_loop_if_6&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_2 -->
-<g id="edge52" class="edge">
+<g id="edge53" class="edge">
 <title>bb::&lt;constant:Examples&gt;#variables_loop_if_6&#45;&gt;bb::&lt;constant:Examples&gt;#variables_loop_if_2</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M6094.8723,-340.7227C6110.6474,-380.3076 6124.6178,-437.6266 6096,-477.0193 6081.4461,-497.0529 6034.3102,-514.7025 5984.8297,-528.3895"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="5983.6498,-525.0828 5974.9113,-531.0736 5985.4784,-531.8398 5983.6498,-525.0828"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_0 -->
-<g id="node42" class="node">
+<g id="node43" class="node">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_0</title>
 <polygon fill="none" stroke="#000000" points="6246.7928,-686.5824 6568,-639.3541 6889.2072,-686.5824 6888.9074,-762.9994 6247.0926,-762.9994 6246.7928,-686.5824"/>
 <text text-anchor="middle" x="6568" y="-731.5035" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](i)</text>
@@ -710,7 +723,7 @@
 <text text-anchor="middle" x="6568" y="-675.5035" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$3</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_2 -->
-<g id="node44" class="node">
+<g id="node45" class="node">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_2</title>
 <ellipse fill="none" stroke="#000000" cx="6400" cy="-558.2742" rx="160.604" ry="35.2113"/>
 <text text-anchor="middle" x="6400" y="-568.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](returnMethodTemp$1)</text>
@@ -718,13 +731,13 @@
 <text text-anchor="middle" x="6400" y="-540.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_0&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_2 -->
-<g id="edge53" class="edge">
+<g id="edge54" class="edge">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_0&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_2</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M6501.602,-648.6451C6483.1497,-632.2325 6463.511,-614.7647 6446.4674,-599.6051"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="6448.6309,-596.8452 6438.8327,-592.8143 6443.9786,-602.0756 6448.6309,-596.8452"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_3 -->
-<g id="node45" class="node">
+<g id="node46" class="node">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_3</title>
 <ellipse fill="none" stroke="#000000" cx="6738" cy="-558.2742" rx="159.317" ry="35.2113"/>
 <text text-anchor="middle" x="6738" y="-568.0742" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](i, returnMethodTemp$1)</text>
@@ -732,26 +745,26 @@
 <text text-anchor="middle" x="6738" y="-540.0742" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_0&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_3 -->
-<g id="edge54" class="edge">
+<g id="edge55" class="edge">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_0&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_3</title>
 <polygon fill="#000000" stroke="transparent" points="6635.0307,-649.4495 6637.8544,-646.9339 6640.6941,-644.4042 6643.5467,-641.863 6646.4092,-639.3128 6649.2788,-636.7565 6652.1524,-634.1965 6655.0272,-631.6355 6657.9,-629.0762 6660.7681,-626.5211 6663.6284,-623.973 6666.478,-621.4345 6669.3138,-618.9081 6672.1331,-616.3966 6674.9327,-613.9025 6677.7097,-611.4285 6680.4613,-608.9773 6683.1844,-606.5514 6685.876,-604.1535 6688.5333,-601.7863 6691.1532,-599.4524 6691.1532,-599.4524 6688.5024,-601.7513 6685.8139,-604.0829 6683.0906,-606.4448 6680.3355,-608.8342 6677.5516,-611.2486 6674.7419,-613.6854 6671.9093,-616.142 6669.0569,-618.6158 6666.1877,-621.1042 6663.3046,-623.6046 6660.4107,-626.1145 6657.5089,-628.6311 6654.6022,-631.152 6651.6936,-633.6745 6648.7862,-636.1961 6645.8829,-638.714 6642.9866,-641.2259 6640.1005,-643.7289 6637.2275,-646.2206 6634.3705,-648.6984 6635.0307,-649.4495"/>
 <polygon fill="#000000" stroke="#000000" points="6693.7601,-601.8208 6698.9602,-592.59 6689.1386,-596.5632 6693.7601,-601.8208"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_1 -->
-<g id="node43" class="node">
+<g id="node44" class="node">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_1</title>
 <polygon fill="none" stroke="#000000" points="6680.551,-331.7645 6501.5076,-331.7645 6455.449,-259.7645 6634.4924,-259.7645 6680.551,-331.7645"/>
 <text text-anchor="middle" x="6568" y="-298.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
 <text text-anchor="middle" x="6568" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_1&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_1 -->
-<g id="edge55" class="edge">
+<g id="edge56" class="edge">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_1&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M6671.6002,-317.4155C6687.7589,-314.1788 6698.7753,-306.9618 6698.7753,-295.7645 6698.7753,-280.5985 6678.5657,-272.7343 6652.7418,-272.172"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="6652.5501,-268.6742 6642.6001,-272.314 6652.6482,-275.6735 6652.5501,-268.6742"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_4 -->
-<g id="node46" class="node">
+<g id="node47" class="node">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_4</title>
 <ellipse fill="none" stroke="#000000" cx="6568" cy="-427.0193" rx="268.1762" ry="35.2113"/>
 <text text-anchor="middle" x="6568" y="-436.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$1)</text>
@@ -759,23 +772,23 @@
 <text text-anchor="middle" x="6568" y="-408.8193" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_2&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_4 -->
-<g id="edge56" class="edge">
+<g id="edge57" class="edge">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_2&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_4</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M6443.7015,-524.1311C6465.6174,-507.0087 6492.3297,-486.1389 6515.3666,-468.1407"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="6517.6225,-470.8198 6523.3479,-461.9051 6513.3129,-465.3037 6517.6225,-470.8198"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_3&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_4 -->
-<g id="edge57" class="edge">
+<g id="edge58" class="edge">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_3&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_4</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M6693.7783,-524.1311C6671.6014,-507.0087 6644.5711,-486.1389 6621.26,-468.1407"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="6623.238,-465.2461 6613.1837,-461.9051 6618.96,-470.7868 6623.238,-465.2461"/>
 </g>
 <!-- bb::&lt;constant:Examples&gt;#take_arguments_4&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_1 -->
-<g id="edge58" class="edge">
+<g id="edge59" class="edge">
 <title>bb::&lt;constant:Examples&gt;#take_arguments_4&#45;&gt;bb::&lt;constant:Examples&gt;#take_arguments_1</title>
 <path fill="none" stroke="#000000" stroke-width="2" d="M6568,-391.4999C6568,-376.3038 6568,-358.358 6568,-342.1348"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="2" points="6571.5001,-341.7688 6568,-331.7688 6564.5001,-341.7688 6571.5001,-341.7688"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 5c69b2f88fb1fa906b2240e6267b5abd834cfb6959bfb8d7268e45b24450c6e4 -->
+<!-- ruby-types:sha256: 6a2680ab3cca9d6c7e87a99e592a1bbef3512dc0d3aca55fa244c823707760e4 -->

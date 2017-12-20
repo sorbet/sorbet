@@ -27,6 +27,9 @@ BasicBlock *CFG::freshBlock(int outerLoops, BasicBlock *from) {
     this->basicBlocks.emplace_back(new BasicBlock());
     BasicBlock *r = this->basicBlocks.back().get();
     r->id = id;
+    if (from != nullptr) {
+        r->backEdges.push_back(from);
+    }
     r->outerLoops = outerLoops;
     return r;
 }
@@ -70,6 +73,9 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites() {
 }
 
 void CFG::sanityCheck(core::Context ctx) {
+    if (!debug_mode)
+        return;
+
     // check that synthetic variable that is read is ever written to.
     ReadsAndWrites RnW = CFG::findAllReadsAndWrites();
     for (auto &el : RnW.reads) {

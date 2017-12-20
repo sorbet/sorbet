@@ -115,16 +115,20 @@ ifTemp$3"];
     "bb::<constant:Examples>#return_in_one_branch2_1" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch2_2" [label = "block[id=2](returnMethodTemp$1)
 returnMethodTemp$1 = 1 : Integer(1)
-returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Examples>#return_in_one_branch2_2" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
+    "bb::<constant:Examples>#return_in_one_branch2_2" -> "bb::<constant:Examples>#return_in_one_branch2_4" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch2_3" [label = "block[id=3]()
 returnTemp$4 = 2 : Integer(2)
 returnMethodTemp$1 = return returnTemp$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Examples>#return_in_one_branch2_3" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
+    "bb::<constant:Examples>#return_in_one_branch2_4" [label = "block[id=4](returnMethodTemp$1)
+returnMethodTemp$5 = return returnMethodTemp$1 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Examples>#return_in_one_branch2_4" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Examples>#variables" {

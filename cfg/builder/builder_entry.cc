@@ -59,8 +59,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 
     entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
                         make_move_iterator(aliasesPrefix.end()));
-
     res->sanityCheck(ctx);
+    sanityCheck(ctx, *res);
     fillInTopoSorts(ctx, *res);
     dealias(ctx, *res);
     CFG::ReadsAndWrites RnW = res->findAllReadsAndWrites();

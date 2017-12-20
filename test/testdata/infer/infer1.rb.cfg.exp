@@ -177,7 +177,7 @@ b = 1 : Integer(1)
     "bb::<constant:Object>#baz7_2" -> "bb::<constant:Object>#baz7_4" [style="bold"];
     "bb::<constant:Object>#baz7_4" [label = "block[id=4](b)
 statTemp$5 = foo : String(\"foo\")
-statTemp$6 = b : Integer | NilClass
+statTemp$6 = b : NilClass | Integer
 b = statTemp$5.getbyte(statTemp$6) : Integer | NilClass
 returnMethodTemp$7 = return b : <bottom>
 <unconditional>"];
