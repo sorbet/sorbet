@@ -32,7 +32,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         aliases[argSym] = arg;
         i++;
     }
-    auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, aliases), md.rhs.get(), entry);
+    auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, nullptr, aliases), md.rhs.get(), entry);
     core::LocalVariable retSym1 =
         ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
 
@@ -104,9 +104,10 @@ CFGContext CFGContext::withTarget(core::LocalVariable target) {
     return ret;
 }
 
-CFGContext CFGContext::withScope(BasicBlock *scope) {
+CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope) {
     auto ret = CFGContext(*this);
-    ret.scope = scope;
+    ret.nextScope = nextScope;
+    ret.breakScope = breakScope;
     ret.loops += 1;
     return ret;
 }

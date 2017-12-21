@@ -1,0 +1,24 @@
+digraph "break_in_while.rb"{
+subgraph "cluster_::<constant:Object>#foo" {
+    label = "::<constant:Object>#foo";
+    color = blue;
+    "bb::<constant:Object>#foo_0" [shape = invhouse];
+    "bb::<constant:Object>#foo_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:nil>$9)
+<constant:nil>$9 = alias <constant:nil> : NilClass
+whileTemp$3 = true : untyped
+returnMethodTemp$10 = return <constant:nil>$9 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_1" [style="bold"];
+    "bb::<constant:Object>#foo_1" [label = "block[id=1]()
+statTemp$8 = self
+statTemp$4 = statTemp$8.dead()
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
+}
+
+}
+

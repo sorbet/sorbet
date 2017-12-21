@@ -83,7 +83,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 core::LocalVariable condSym = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG,
                                                                           core::Names::whileTemp(), cctx.inWhat.symbol);
-                auto headerEnd = walk(cctx.withTarget(condSym).withScope(headerBlock), a->cond.get(), headerBlock);
+                auto headerEnd = walk(cctx.withTarget(condSym), a->cond.get(), headerBlock);
                 auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, headerEnd);
                 auto continueBlock = cctx.inWhat.freshBlock(cctx.loops, headerEnd);
                 conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, cctx.inWhat, a->cond->loc);
@@ -91,7 +91,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 core::LocalVariable bodySym =
                     cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::statTemp(), cctx.inWhat.symbol);
 
-                auto body = walk(cctx.withTarget(bodySym).withScope(headerBlock), a->body.get(), bodyBlock);
+                auto body =
+                    walk(cctx.withTarget(bodySym).withLoopScope(headerBlock, continueBlock), a->body.get(), bodyBlock);
                 unconditionalJump(body, headerBlock, cctx.inWhat, a->loc);
 
                 continueBlock->exprs.emplace_back(
@@ -237,8 +238,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     // TODO: handle block arguments somehow??
                     core::LocalVariable blockrv = cctx.ctx.state.newTemporary(
                         core::UniqueNameKind::CFG, core::Names::blockReturnTemp(), cctx.inWhat.symbol);
-                    auto blockLast =
-                        walk(cctx.withTarget(blockrv).withScope(headerBlock), s->block->body.get(), bodyBlock);
+                    auto blockLast = walk(cctx.withTarget(blockrv).withLoopScope(headerBlock, postBlock),
+                                          s->block->body.get(), bodyBlock);
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s->loc);
 
@@ -252,18 +253,33 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); },
 
             [&](ast::Next *a) {
-                core::LocalVariable nextSym = cctx.ctx.state.newTemporary(
+                core::LocalVariable exprSym = cctx.ctx.state.newTemporary(
                     core::UniqueNameKind::CFG, core::Names::returnTemp(), cctx.inWhat.symbol);
-                auto afterNext = walk(cctx.withTarget(nextSym), a->expr.get(), current);
+                auto afterNext = walk(cctx.withTarget(exprSym), a->expr.get(), current);
 
-                if (cctx.scope == nullptr) {
+                if (cctx.nextScope == nullptr) {
                     cctx.ctx.state.errors.error(a->loc, core::errors::CFG::NoNextScope, "No `do` block around `next`");
                     // I guess just keep going into deadcode?
                     unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
                 } else {
-                    unconditionalJump(afterNext, cctx.scope, cctx.inWhat, a->loc);
+                    unconditionalJump(afterNext, cctx.nextScope, cctx.inWhat, a->loc);
                 }
 
+                ret = cctx.inWhat.deadBlock();
+            },
+
+            [&](ast::Break *a) {
+                core::LocalVariable exprSym = cctx.ctx.state.newTemporary(
+                    core::UniqueNameKind::CFG, core::Names::returnTemp(), cctx.inWhat.symbol);
+                auto afterBreak = walk(cctx.withTarget(exprSym), a->expr.get(), current);
+
+                if (cctx.breakScope == nullptr) {
+                    cctx.ctx.state.errors.error(a->loc, core::errors::CFG::NoNextScope, "No `do` block around `break`");
+                    // I guess just keep going into deadcode?
+                    unconditionalJump(afterBreak, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
+                } else {
+                    unconditionalJump(afterBreak, cctx.breakScope, cctx.inWhat, a->loc);
+                }
                 ret = cctx.inWhat.deadBlock();
             },
 
@@ -406,13 +422,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::ClassDef *c) { Error::raise("Should have been removed by FlattenWalk"); },
             [&](ast::MethodDef *c) { Error::raise("Should have been removed by FlattenWalk"); },
 
-            [&](ast::Expression *n) {
-                current->exprs.emplace_back(cctx.target, n->loc,
-                                            make_unique<NotSupported>(demangle(typeid(*n).name())));
-                ret = current;
-            });
+            [&](ast::Expression *n) { Error::raise("Unimplemented AST Node: ", n->nodeName()); });
 
-        /*[&](ast::Break *a) {}, */
         // For, Rescue,
         // Symbol, NamedArg, Array,
         Error::check(ret != nullptr);
