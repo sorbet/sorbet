@@ -1,4 +1,20 @@
 class <emptyTree>::<constant:Examples><<constant:Examples>> < (::<constant:<todo sym>>)
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
   def i_like_ifs<i_like_ifs>()
     if true
       return 1

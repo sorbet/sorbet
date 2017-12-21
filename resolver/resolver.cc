@@ -722,30 +722,51 @@ public:
     }
 }; // namespace namer
 
-class FlattenClassDefsWalk {
+class FlattenWalk {
 public:
-    vector<unique_ptr<ast::ClassDef>> classes;
-    vector<core::SymbolRef> order;
+    FlattenWalk() {
+        newMethodSet();
+    }
+    ~FlattenWalk() {
+        Error::check(methodsStack.empty());
+        Error::check(classes.empty());
+        Error::check(classOrder.empty());
+    }
 
     ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
-        order.emplace_back(classDef->symbol);
+        newMethodSet();
+        classOrder.emplace_back(classDef->symbol);
         return classDef;
     }
 
     ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
+        classDef->rhs = addMethods(ctx, move(classDef->rhs));
         classes.emplace_back(make_unique<ast::ClassDef>(classDef->loc, classDef->symbol, move(classDef->name),
                                                         move(classDef->ancestors), move(classDef->rhs),
                                                         classDef->kind));
         return new ast::EmptyTree(classDef->loc);
     };
 
+    ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *methodDef) {
+        curMethodSet().order.emplace_back(methodDef->symbol);
+        return methodDef;
+    }
+
+    ast::Expression *postTransformMethodDef(core::Context ctx, ast::MethodDef *methodDef) {
+        curMethodSet().methods.emplace_back(make_unique<ast::MethodDef>(methodDef->loc, methodDef->symbol,
+                                                                        move(methodDef->name), move(methodDef->args),
+                                                                        move(methodDef->rhs), methodDef->isSelf));
+        return new ast::EmptyTree(methodDef->loc);
+    };
+
     std::unique_ptr<ast::Expression> addClasses(core::Context &ctx, std::unique_ptr<ast::Expression> tree) {
         if (classes.empty()) {
+            Error::check(sortedClasses().size() == 0);
             return tree;
         }
         if (classes.size() == 1 && ast::cast_tree<ast::EmptyTree>(tree.get())) {
             // It was only 1 class to begin with, put it back
-            return move(classes[0]);
+            return move(sortedClasses()[0]);
         }
 
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
@@ -762,12 +783,38 @@ public:
         return tree;
     }
 
+    std::unique_ptr<ast::Expression> addMethods(core::Context &ctx, std::unique_ptr<ast::Expression> tree) {
+        auto &methods = curMethodSet().methods;
+        if (methods.empty()) {
+            Error::check(popCurMethodDefs().size() == 0);
+            return tree;
+        }
+        if (methods.size() == 1 && ast::cast_tree<ast::EmptyTree>(tree.get())) {
+            // It was only 1 method to begin with, put it back
+            unique_ptr<ast::Expression> methodDef = move(popCurMethodDefs()[0]);
+            return methodDef;
+        }
+
+        auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
+        if (insSeq == nullptr) {
+            ast::InsSeq::STATS_store stats;
+            tree = make_unique<ast::InsSeq>(tree->loc, move(stats), move(tree));
+            return addMethods(ctx, move(tree));
+        }
+
+        for (auto &method : popCurMethodDefs()) {
+            Error::check(!!method);
+            insSeq->stats.emplace_back(move(method));
+        }
+        return tree;
+    }
+
 private:
     vector<unique_ptr<ast::ClassDef>> sortedClasses() {
         vector<unique_ptr<ast::ClassDef>> ret;
-        Error::check(order.size() == classes.size());
+        Error::check(classOrder.size() == classes.size());
 
-        for (auto symbol : order) {
+        for (auto symbol : classOrder) {
             for (auto it = classes.begin(); it != classes.end(); ++it) {
                 auto &classDef = *it;
                 if (classDef->symbol == symbol) {
@@ -777,10 +824,75 @@ private:
                 }
             }
         }
-        order.clear();
+        classOrder.clear();
         Error::check(classes.size() == 0);
         return ret;
+    }
+
+    ast::ClassDef::RHS_store addMethods(core::Context &ctx, ast::ClassDef::RHS_store rhs) {
+        if (curMethodSet().methods.size() == 1 && rhs.size() == 1 && ast::cast_tree<ast::EmptyTree>(rhs[0].get())) {
+            // It was only 1 method to begin with, put it back
+            rhs.pop_back();
+            rhs.emplace_back(move(popCurMethodDefs()[0]));
+            return rhs;
+        }
+        for (auto &method : popCurMethodDefs()) {
+            Error::check(!!method);
+            rhs.emplace_back(move(method));
+        }
+        return rhs;
+    }
+
+    vector<unique_ptr<ast::MethodDef>> popCurMethodDefs() {
+        vector<unique_ptr<ast::MethodDef>> ret;
+        auto &methodStack = curMethodSet();
+        methodStack.sanityCheck();
+        auto &order = methodStack.order;
+        auto &methods = methodStack.methods;
+
+        for (auto symbol : order) {
+            for (auto it = methods.begin(); it != methods.end(); ++it) {
+                auto &methodDef = *it;
+                if (methodDef->symbol == symbol) {
+                    ret.emplace_back(move(methodDef));
+                    methods.erase(it);
+                    break;
+                }
+            }
+        }
+        order.clear();
+        Error::check(methods.size() == 0);
+        popCurMethodSet();
+        return ret;
     };
+
+    struct Methods {
+        vector<unique_ptr<ast::MethodDef>> methods;
+        vector<core::SymbolRef> order;
+        void sanityCheck() {
+            if (!debug_mode) {
+                return;
+            }
+            Error::check(order.size() == methods.size(), order.size(), " != ", methods.size());
+        }
+        Methods() {}
+    };
+    void newMethodSet() {
+        Methods methods;
+        methodsStack.emplace_back(move(methods));
+    }
+    Methods &curMethodSet() {
+        Error::check(methodsStack.size() > 0);
+        return methodsStack.back();
+    }
+    void popCurMethodSet() {
+        Error::check(methodsStack.size() > 0);
+        methodsStack.pop_back();
+    }
+
+    vector<Methods> methodsStack;
+    vector<unique_ptr<ast::ClassDef>> classes;
+    vector<core::SymbolRef> classOrder;
 };
 
 class ResolveVariablesWalk {
@@ -887,9 +999,10 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context &ctx,
         tree = ast::TreeMap<ResolveVariablesWalk>::apply(ctx, vars, move(tree));
 
         // declared in here since it holds onto state
-        FlattenClassDefsWalk flatten;
-        tree = ast::TreeMap<FlattenClassDefsWalk>::apply(ctx, flatten, move(tree));
+        FlattenWalk flatten;
+        tree = ast::TreeMap<FlattenWalk>::apply(ctx, flatten, move(tree));
         tree = flatten.addClasses(ctx, move(tree));
+        tree = flatten.addMethods(ctx, move(tree));
     }
 
     finalizeResolution(ctx);

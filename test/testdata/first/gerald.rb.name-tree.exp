@@ -21,6 +21,10 @@ begin
     end
   end
   class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:<todo sym>>, ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Chalk>::<constant:Log>)
+    <emptyTree>
+
+    <emptyTree>
+
     def initialize<initialize>()
       begin
         begin
@@ -66,6 +70,10 @@ begin
     end
   end
   class <emptyTree>::<constant:MatchContext><<constant:MatchContext>> < (::<constant:<todo sym>>)
+    <emptyTree>
+
+    <emptyTree>
+
     def initialize<initialize>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
       begin
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo = repo
@@ -84,6 +92,12 @@ begin
     end
   end
   class <emptyTree>::<constant:MatchTimeBudget><<constant:MatchTimeBudget>> < (::<constant:<todo sym>>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def initialize<initialize>()
       ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:Time>.now()
     end
@@ -127,6 +141,26 @@ begin
     end
   end
   class <emptyTree>::<constant:Diff><<constant:Diff>> < (::<constant:<todo sym>>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def initialize<initialize>(raw_diff)
       begin
         ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@raw = raw_diff

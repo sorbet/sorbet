@@ -403,7 +403,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::EmptyTree *n) { ret = current; },
 
-            [&](ast::ClassDef *c) { Error::raise("Should have been removed by FlattenClassDefsWalk"); },
+            [&](ast::ClassDef *c) { Error::raise("Should have been removed by FlattenWalk"); },
+            [&](ast::MethodDef *c) { Error::raise("Should have been removed by FlattenWalk"); },
 
             [&](ast::Expression *n) {
                 current->exprs.emplace_back(cctx.target, n->loc,

@@ -1,4 +1,11 @@
 begin
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
+  <emptyTree>
   def baz1<baz1>()
     begin
       a = "foo"
@@ -60,4 +67,5 @@ begin
       b = 1
     end
   end
+  <emptyTree>
 end

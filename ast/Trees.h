@@ -52,7 +52,6 @@ public:
     }
 
     static constexpr int EXPECTED_RHS_COUNT = 4;
-
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT> RHS_store;
 
     RHS_store rhs;

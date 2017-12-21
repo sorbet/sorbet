@@ -1,8 +1,10 @@
 begin
+  <emptyTree>
   def foo<foo>(a)
     <emptyTree>
   end
   def foo<foo>(a, b)
     <emptyTree>
   end
+  <emptyTree>
 end

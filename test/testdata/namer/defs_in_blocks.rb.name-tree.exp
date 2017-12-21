@@ -1,12 +1,17 @@
-self(<singleton class:<constant:<root>>>).foobar() do ||
-  begin
-    def a_method<a_method>()
+begin
+  def a_method<a_method>()
+    <emptyTree>
+  end
+  def a_method_with_param<a_method_with_param>(a)
+    <emptyTree>
+  end
+  def self.a_static_method<a_static_method>()
+    <emptyTree>
+  end
+  self(<singleton class:<constant:<root>>>).foobar() do ||
+    begin
       <emptyTree>
-    end
-    def a_method_with_param<a_method_with_param>(a)
       <emptyTree>
-    end
-    def self.a_static_method<a_static_method>()
       <emptyTree>
     end
   end

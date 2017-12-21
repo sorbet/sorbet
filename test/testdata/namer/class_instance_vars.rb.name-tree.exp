@@ -6,6 +6,8 @@ begin
   class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
     ::<constant:Parent>#@@class_var = "hi"
 
+    <emptyTree>
+
     def hi<hi>()
       begin
         ::<constant:Parent>#@ivar = 1
@@ -22,6 +24,8 @@ begin
     ::<constant:Mixin>#@@mixin_cvar
 
     ::<constant:Child>#@@undefined_cvar
+
+    <emptyTree>
 
     def child_method<child_method>()
       begin
