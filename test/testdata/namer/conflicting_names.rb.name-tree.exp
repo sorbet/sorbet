@@ -1,10 +1,12 @@
 begin
   module <emptyTree>::<constant:A><<constant:A>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
     def Foo<Foo>()
       <emptyTree>
     end
-
-    <emptyTree>
   end
   class <emptyTree>::<constant:Foo><<constant:Foo>> < (::<constant:<todo sym>>)  end
   <emptyTree>

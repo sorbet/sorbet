@@ -1,4 +1,8 @@
 class <emptyTree>::<constant:TestCasts><<constant:TestCasts>> < (::<constant:<todo sym>>)
+  <emptyTree>
+
+  <emptyTree>
+
   def untyped<untyped>()
     <emptyTree>
   end

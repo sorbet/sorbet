@@ -1,7 +1,5 @@
 begin
-  def declare_variables<declare_variables>(a)
-    <emptyTree>
-  end
+  <emptyTree>
   <emptyTree>
   <emptyTree>
   <emptyTree>
@@ -12,18 +10,7 @@ begin
   <emptyTree>
   <emptyTree>
   <emptyTree>
-  def main<main>()
-    begin
-      self(<constant:Object>).puts(::<constant:A>.a())
-      self(<constant:Object>).puts(::<constant:B>.b())
-      self(<constant:Object>).puts(#$c.c())
-      self(<constant:Object>).puts(::<constant:D>.singleton_class().d())
-      self(<constant:Object>).puts(::<constant:E>.e())
-      self(<constant:Object>).puts(::<constant:F>.f=(91))
-      self(<constant:Object>).puts(::<constant:G>.new().wrapper())
-      self(<constant:Object>).puts(::<constant:untyped>.h())
-    end
-  end
+  <emptyTree>
   class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)  end
   class <emptyTree>::<constant:B><<constant:B>> < (::<constant:<todo sym>>)
     <emptyTree>
@@ -50,10 +37,14 @@ begin
     self(<singleton class:<constant:E>>).wrapper()
   end
   class <singleton class><<singleton class:<constant:E>>> < ()
+    <emptyTree>
+
     def wrapper<wrapper>()
-      def e<e>()
-        "e"
-      end
+      <emptyTree>
+    end
+
+    def e<e>()
+      "e"
     end
   end
   class <emptyTree>::<constant:F><<constant:F>> < (::<constant:<todo sym>>)
@@ -61,6 +52,10 @@ begin
   end
   class <singleton class><<singleton class:<constant:F>>> < ()  end
   class <emptyTree>::<constant:G><<constant:G>> < (::<constant:<todo sym>>)
+    <emptyTree>
+
+    <emptyTree>
+
     def wrapper<wrapper>()
       begin
         <emptyTree>
@@ -86,6 +81,21 @@ begin
   class <emptyTree>::<constant:H2><<constant:H2>> < (::<constant:<todo sym>>)
     def self.h<h>()
       "h"
+    end
+  end
+  def declare_variables<declare_variables>(a)
+    <emptyTree>
+  end
+  def main<main>()
+    begin
+      self(<constant:Object>).puts(::<constant:A>.a())
+      self(<constant:Object>).puts(::<constant:B>.b())
+      self(<constant:Object>).puts(#$c.c())
+      self(<constant:Object>).puts(::<constant:D>.singleton_class().d())
+      self(<constant:Object>).puts(::<constant:E>.e())
+      self(<constant:Object>).puts(::<constant:F>.f=(91))
+      self(<constant:Object>).puts(::<constant:G>.new().wrapper())
+      self(<constant:Object>).puts(::<constant:untyped>.h())
     end
   end
   self(<singleton class:<constant:<root>>>).main()

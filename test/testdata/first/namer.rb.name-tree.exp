@@ -6,6 +6,14 @@ begin
   <emptyTree>
   <emptyTree>
   class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<constant:<todo sym>>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def normal_method<normal_method>()
       <emptyTree>
     end
@@ -13,10 +21,6 @@ begin
     def self.normal_static_method<normal_static_method>()
       <emptyTree>
     end
-
-    <emptyTree>
-
-    <emptyTree>
   end
   class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<constant:<todo sym>>)  end
   module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()  end

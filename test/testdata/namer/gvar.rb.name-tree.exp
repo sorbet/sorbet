@@ -5,6 +5,8 @@ begin
 
     #$a
 
+    <emptyTree>
+
     def meth<meth>()
       [#$a, #$b, #$c]
     end
