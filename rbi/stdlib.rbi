@@ -631,16 +631,19 @@ class RubyVM::InstructionSequence < Object
 end
 class SecurityError < Exception
 end
+class Set < Object
+  include Enumerable
+end
 module Signal
 end
 module SingleForwardable
+end
+class SortedSet < Set
 end
 class String < Object
   include Comparable
 end
 class StringIO < Data
-  include IO::generic_writable
-  include IO::generic_readable
   include Enumerable
 end
 class Symbol < Object
@@ -2696,6 +2699,12 @@ module Enumerable
   def collect(); end
 
   standard_method(
+    {},
+    returns: Opus::Types.array_of(Opus::Types.untyped)
+  )
+  def collect_concat(); end
+
+  standard_method(
     {
       _: BasicObject,
     },
@@ -2927,6 +2936,12 @@ module Enumerable
     returns: Opus::Types.any(BasicObject, NilClass, Enumerator)
   )
   def find(ifnone=_); end
+
+  standard_method(
+    {},
+    returns: Opus::Types.array_of(Opus::Types.untyped)
+  )
+  def flat_map(); end
 
   standard_method(
     {},
