@@ -524,11 +524,40 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return idx;
 }
 
+bool fileIsTyped(absl::string_view source) {
+    static regex sigil("^\\s*#\\s*@typed\\s*$");
+    size_t off = 0;
+    // std::regex appears to be ludicrously slow, to the point where running
+    // this regex is as slow as running the entirety of the remainder of our
+    // pipeline.
+    //
+    // Help it out by manually scanning for the `@typed` literal, and then
+    // running the regex only over the single line.
+    while (true) {
+        off = source.find("@typed", off);
+        if (off == absl::string_view::npos) {
+            return false;
+        }
+
+        size_t line_start = source.rfind('\n', off);
+        if (line_start == absl::string_view::npos) {
+            line_start = 0;
+        }
+        size_t line_end = source.find('\n', off);
+        if (line_end == absl::string_view::npos) {
+            line_end = source.size();
+        }
+        if (regex_search(source.data() + line_start, source.data() + line_end, sigil)) {
+            return true;
+        }
+        off = line_end;
+    }
+}
+
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
     auto idx = files.size();
     File::Type source_type = File::Untyped;
-    regex sigil("(^|\\n)\\s*#\\s*@typed\\s*\n");
-    if (regex_search(source.begin(), source.end(), sigil)) {
+    if (fileIsTyped(source)) {
         source_type = File::Typed;
     }
 
