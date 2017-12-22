@@ -528,10 +528,9 @@ public:
                             {core::Reporter::ErrorSection(
                                  "Expected " + expectedType->toString(ctx),
                                  {
-                                     core::Reporter::ErrorLine::from(ctx.owner.info(ctx).definitionLoc,
-                                                                     "Method {} has return type is defined as {}",
-                                                                     ctx.owner.info(ctx).name.toString(ctx),
-                                                                     expectedType->toString(ctx)),
+                                     core::Reporter::ErrorLine::from(
+                                         ctx.owner.info(ctx).definitionLoc, "Method `{}` has return type `{}`",
+                                         ctx.owner.info(ctx).name.toString(ctx), expectedType->toString(ctx)),
                                  }),
                              core::Reporter::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) +
                                                               " originating from:",
