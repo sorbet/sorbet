@@ -51,7 +51,11 @@ TIMEFILE2=$(mktemp)
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
-ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1  /usr/bin/time -v -o "$TIMEFILE2" ./scripts/ruby-types/typecheck --quiet --typed=always --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters
+env ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-4.0/bin/llvm-symbolizer \
+    ASAN_OPTIONS=detect_leaks=0 \
+    LSAN_OPTIONS=verbosity=1:log_threads=1 \
+    /usr/bin/time -v -o "$TIMEFILE2" \
+    ./scripts/ruby-types/typecheck --quiet --typed=always --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters
 
 cat "$TIMEFILE2"
 

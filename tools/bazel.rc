@@ -39,7 +39,9 @@ build:dbg --cxxopt=-fno-pie
 
 # CI uses a funny build, with debug code enabled but compiled with optimizations.
 build:ci --copt=-DFORCE_DEBUG
+build:ci --copt=-g3
 build:ci --cxxopt=-DFORCE_DEBUG
+build:ci --cxxopt=-g3
 
 # LTO build. Much longer compilation time. Smaller size and better perf.
 build:lto --copt=-flto=thin
