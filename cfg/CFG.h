@@ -22,6 +22,13 @@ public:
     Instruction() = default;
 };
 
+template <class To> To *cast_instruction(Instruction *what) {
+    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Instruction *&, To *>::value,
+                  "Ill Formed To, has to be a subclass of Instruction");
+    return fast_cast<Instruction, To>(what);
+}
+
 class Ident final : public Instruction {
 public:
     core::LocalVariable what;
@@ -103,7 +110,7 @@ public:
 class Unanalyzable : public Instruction {
 public:
     Unanalyzable() {
-        categoryCounterInc("CFG", "Unanalyzable");
+        categoryCounterInc("cfg", "Unanalyzable");
     };
     virtual std::string toString(core::Context ctx);
 };

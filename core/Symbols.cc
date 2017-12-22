@@ -257,7 +257,7 @@ SymbolRef Symbol::attachedClass(GlobalState &gs) {
 }
 
 SymbolRef Symbol::dealias(GlobalState &gs) {
-    if (auto alias = dynamic_cast<AliasType *>(resultType.get())) {
+    if (auto alias = cast_type<AliasType>(resultType.get())) {
         return alias->symbol.info(gs).dealias(gs);
     }
     return this->ref(gs);

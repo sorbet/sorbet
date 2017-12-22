@@ -93,13 +93,16 @@ public:
 class TypeAndOrigins final {
 public:
     std::shared_ptr<core::Type> type;
-    std::vector<core::Loc> origins; // todo: use tiny vector
+    InlinedVector<core::Loc, 2> origins;
     std::vector<core::Reporter::ErrorLine> origins2Explanations(core::Context ctx) {
         std::vector<core::Reporter::ErrorLine> result;
         for (auto o : origins) {
             result.emplace_back(o, "");
         }
         return result;
+    }
+    ~TypeAndOrigins() {
+        histogramInc("TypeAndOrigins.origins.size", origins.size());
     }
 };
 
@@ -124,6 +127,12 @@ public:
     bool isDynamic();
     bool isBottom();
 };
+
+template <class To> To *cast_type(Type *what) {
+    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Type *&, To *>::value, "Ill Formed To, has to be a subclass of Type");
+    return fast_cast<Type, To>(what);
+}
 
 class GroundType : public Type {
 public:

@@ -28,7 +28,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
         return t1;
     }
 
-    if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+    if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
             categoryCounterInc("lub", "<untyped");
             return t1;
@@ -43,7 +43,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
         }
     }
 
-    if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+    if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
             categoryCounterInc("lub", "untyped>");
             return t2;
@@ -58,16 +58,16 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
         }
     }
 
-    if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
+    if (ProxyType *p1 = cast_type<ProxyType>(t1.get())) {
         categoryCounterInc("lub", "<proxy");
-        if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+        if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
             categoryCounterInc("lub", "proxy>");
             // both are proxy
             shared_ptr<ruby_typer::core::Type> result;
             ruby_typer::typecase(
                 p1,
                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                    if (TupleType *a2 = dynamic_cast<TupleType *>(p2)) {
+                    if (TupleType *a2 = cast_type<TupleType>(p2)) {
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                             vector<shared_ptr<ruby_typer::core::Type>> elemLubs;
                             int i = 0;
@@ -84,17 +84,17 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                     }
                 },
                 [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                    if (ShapeType *h2 = dynamic_cast<ShapeType *>(p2)) {
+                    if (ShapeType *h2 = cast_type<ShapeType>(p2)) {
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = 0;
                             vector<shared_ptr<ruby_typer::core::LiteralType>> keys;
                             vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
                             for (auto &el2 : h2->keys) {
-                                ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
+                                ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
                                 Error::check(u2 != nullptr);
                                 auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
-                                    ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
+                                    ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
                                     return candidate->value == el2->value && u1 == u2; // from lambda
                                 });
                                 if (fnd != h1->keys.end()) {
@@ -115,9 +115,9 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                     }
                 },
                 [&](LiteralType *l1) {
-                    if (LiteralType *l2 = dynamic_cast<LiteralType *>(p2)) {
-                        ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
-                        ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
+                    if (LiteralType *l2 = cast_type<LiteralType>(p2)) {
+                        ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
+                        ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
                         Error::check(u1 != nullptr && u2 != nullptr);
                         if (u1->symbol == u2->symbol) {
                             if (l1->value == l2->value) {
@@ -140,7 +140,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
             shared_ptr<Type> &und = p1->underlying;
             return lubGround(ctx, und, t2);
         }
-    } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+    } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
         categoryCounterInc("lub", "proxy>");
         // only 2nd is proxy
         shared_ptr<Type> &und = p2->underlying;
@@ -152,7 +152,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
 }
 
 shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    OrType *o1 = dynamic_cast<OrType *>(t1.get());
+    OrType *o1 = cast_type<OrType>(t1.get());
     Error::check(o1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
@@ -184,8 +184,8 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr
 }
 
 shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
-    auto *g1 = dynamic_cast<GroundType *>(t1.get());
-    auto *g2 = dynamic_cast<GroundType *>(t2.get());
+    auto *g1 = cast_type<GroundType>(t1.get());
+    auto *g2 = cast_type<GroundType>(t2.get());
     ruby_typer::Error::check(g1 != nullptr);
     ruby_typer::Error::check(g2 != nullptr);
 
@@ -210,13 +210,13 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
 
     shared_ptr<ruby_typer::core::Type> result;
 
-    if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
+    if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(ctx, t2, t1);
-    } else if (dynamic_cast<OrType *>(t1.get()) != nullptr) {
+    } else if (cast_type<OrType>(t1.get()) != nullptr) {
         categoryCounterInc("lub", "<or");
         Error::raise("should not happen");
-    } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
+    } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 4
         categoryCounterInc("lub", "and>");
         bool collapseInLeft = Types::isSubType(ctx, t1, a2->left);
         bool collapseInRight = Types::isSubType(ctx, t1, a2->right);
@@ -236,8 +236,8 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
         }
     }
     // 1 :-)
-    ClassType *c1 = dynamic_cast<ClassType *>(t1.get());
-    ClassType *c2 = dynamic_cast<ClassType *>(t2.get());
+    ClassType *c1 = cast_type<ClassType>(t1.get());
+    ClassType *c2 = cast_type<ClassType>(t2.get());
     categoryCounterInc("lub", "<class>");
     Error::check(c1 != nullptr && c2 != nullptr);
 
@@ -256,7 +256,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
 }
 
 shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    AndType *a1 = dynamic_cast<AndType *>(t1.get());
+    AndType *a1 = cast_type<AndType>(t1.get());
     Error::check(t1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
@@ -289,8 +289,8 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
 }
 
 shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
-    auto *g1 = dynamic_cast<GroundType *>(t1.get());
-    auto *g2 = dynamic_cast<GroundType *>(t2.get());
+    auto *g1 = cast_type<GroundType>(t1.get());
+    auto *g2 = cast_type<GroundType>(t2.get());
     ruby_typer::Error::check(g1 != nullptr);
     ruby_typer::Error::check(g2 != nullptr);
 
@@ -315,13 +315,13 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
 
     shared_ptr<ruby_typer::core::Type> result;
 
-    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4, 5
+    if (auto *a1 = cast_type<AndType>(t1.get())) { // 4, 5
         categoryCounterInc("glb", "<and");
         return glbDistributeAnd(ctx, t1, t2);
-    } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2
+    } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2
         categoryCounterInc("glb", "and>");
         return glbDistributeAnd(ctx, t2, t1);
-    } else if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
+    } else if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 6
         bool collapseInLeft = Types::isSubType(ctx, t1, t2);
         if (collapseInLeft) {
             categoryCounterInc("glb", "Zor");
@@ -334,7 +334,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
             return t2;
         }
 
-        if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) {
+        if (auto *c1 = cast_type<ClassType>(t1.get())) {
             auto lft = Types::glb(ctx, t1, o2->left);
             if (Types::isSubType(ctx, lft, o2->right)) {
                 categoryCounterInc("glb", "ZZZorClass");
@@ -347,7 +347,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
             }
         }
 
-        if (auto *o1 = dynamic_cast<OrType *>(t1.get())) { // 6
+        if (auto *o1 = cast_type<OrType>(t1.get())) { // 6
             // try hard to collapse
             bool subt11 = Types::isSubType(ctx, o1->left, o2->left) || Types::isSubType(ctx, o1->left, o2->right);
             if (!subt11) { // left is not in right, we can drop it
@@ -377,8 +377,8 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
         }
     }
     // 1 :-)
-    ClassType *c1 = dynamic_cast<ClassType *>(t1.get());
-    ClassType *c2 = dynamic_cast<ClassType *>(t2.get());
+    ClassType *c1 = cast_type<ClassType>(t1.get());
+    ClassType *c2 = cast_type<ClassType>(t2.get());
     Error::check(c1 != nullptr && c2 != nullptr);
     categoryCounterInc("glb", "<class>");
 
@@ -419,7 +419,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
         return t1;
     }
 
-    if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+    if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
             categoryCounterInc("glb", "<untyped");
             return t1;
@@ -434,7 +434,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
         }
     }
 
-    if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+    if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
             categoryCounterInc("glb", "untyped>");
             return t2;
@@ -449,8 +449,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
         }
     }
 
-    if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
-        if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+    if (ProxyType *p1 = cast_type<ProxyType>(t1.get())) {
+        if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
             if (typeid(*p1) != typeid(*p2)) {
                 return Types::bottom();
             }
@@ -458,7 +458,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
             ruby_typer::typecase(
                 p1,
                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                    TupleType *a2 = dynamic_cast<TupleType *>(p2);
+                    TupleType *a2 = cast_type<TupleType>(p2);
                     Error::check(a2 != nullptr);
                     if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                         vector<shared_ptr<ruby_typer::core::Type>> elemGlbs;
@@ -479,7 +479,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
 
                 },
                 [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                    ShapeType *h2 = dynamic_cast<ShapeType *>(p2);
+                    ShapeType *h2 = cast_type<ShapeType>(p2);
                     Error::check(h2 != nullptr);
                     if (h2->keys.size() == h1->keys.size()) {
                         // have enough keys.
@@ -487,10 +487,10 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                         vector<shared_ptr<ruby_typer::core::LiteralType>> keys;
                         vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
                         for (auto &el2 : h2->keys) {
-                            ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
+                            ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
                             Error::check(u2 != nullptr);
                             auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
-                                ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
+                                ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
                                 return candidate->value == el2->value && u1 == u2; // from lambda
                             });
                             if (fnd != h1->keys.end()) {
@@ -514,10 +514,10 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
 
                 },
                 [&](LiteralType *l1) {
-                    LiteralType *l2 = dynamic_cast<LiteralType *>(p2);
+                    LiteralType *l2 = cast_type<LiteralType>(p2);
                     Error::check(l2 != nullptr);
-                    ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
-                    ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
+                    ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
+                    ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
                     Error::check(u1 != nullptr && u2 != nullptr);
                     if (u1->symbol == u2->symbol) {
                         if (l1->value == l2->value) {
@@ -540,7 +540,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                 return Types::bottom();
             }
         }
-    } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+    } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
         // only 1st is proxy
         if (Types::isSubType(ctx, t2, t1)) {
             return t2;
@@ -559,7 +559,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
     if (t1.get() == t2.get()) {
         return true;
     }
-    if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+    if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
             return true;
         }
@@ -567,7 +567,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
             return true;
         }
         if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
-            if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+            if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
                 return mayBeSpecial2->symbol == core::GlobalState::defn_top();
             } else {
                 return false;
@@ -575,7 +575,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
         }
     }
 
-    if (ClassType *mayBeSpecial2 = dynamic_cast<ClassType *>(t2.get())) {
+    if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
             return true;
         }
@@ -587,13 +587,13 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
         }
     }
 
-    if (ProxyType *p1 = dynamic_cast<ProxyType *>(t1.get())) {
-        if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+    if (ProxyType *p1 = cast_type<ProxyType>(t1.get())) {
+        if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
             bool result;
             // TODO: simply compare as memory regions
             ruby_typer::typecase(p1,
                                  [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                                     TupleType *a2 = dynamic_cast<TupleType *>(p2);
+                                     TupleType *a2 = cast_type<TupleType>(p2);
                                      result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
                                      if (result) {
                                          int i = 0;
@@ -607,7 +607,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                                      }
                                  },
                                  [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                                     ShapeType *h2 = dynamic_cast<ShapeType *>(p2);
+                                     ShapeType *h2 = cast_type<ShapeType>(p2);
                                      result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
                                      if (!result) {
                                          return;
@@ -615,11 +615,11 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                                      // have enough keys.
                                      int i = 0;
                                      for (auto &el2 : h2->keys) {
-                                         ClassType *u2 = dynamic_cast<ClassType *>(el2->underlying.get());
+                                         ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
                                          Error::check(u2 != nullptr);
                                          auto fnd =
                                              find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
-                                                 ClassType *u1 = dynamic_cast<ClassType *>(candidate->underlying.get());
+                                                 ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
                                                  return candidate->value == el2->value && u1 == u2; // from lambda
                                              });
                                          result =
@@ -632,9 +632,9 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                                      }
                                  },
                                  [&](LiteralType *l1) {
-                                     LiteralType *l2 = dynamic_cast<LiteralType *>(p2);
-                                     ClassType *u1 = dynamic_cast<ClassType *>(l1->underlying.get());
-                                     ClassType *u2 = dynamic_cast<ClassType *>(l2->underlying.get());
+                                     LiteralType *l2 = cast_type<LiteralType>(p2);
+                                     ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
+                                     ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
                                      Error::check(u1 != nullptr && u2 != nullptr);
                                      result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
                                  });
@@ -645,12 +645,12 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
             shared_ptr<Type> &und = p1->underlying;
             return isSubTypeSingle(ctx, und, t2);
         }
-    } else if (ProxyType *p2 = dynamic_cast<ProxyType *>(t2.get())) {
+    } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
         // non-proxies are never subtypes of proxies.
         return false;
     } else {
-        if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) {
-            if (auto *c2 = dynamic_cast<ClassType *>(t2.get())) {
+        if (auto *c1 = cast_type<ClassType>(t1.get())) {
+            if (auto *c2 = cast_type<ClassType>(t2.get())) {
                 return c1->symbol == c2->symbol || c1->symbol.info(ctx).derivesFrom(ctx, c2->symbol);
             }
         }
@@ -675,22 +675,22 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
     // _ wildcards are ClassType or ProxyType(ClassType)
 
     // Note: order of cases here matters!
-    if (auto *a1 = dynamic_cast<OrType *>(t1.get())) { // 7, 8, 9
+    if (auto *a1 = cast_type<OrType>(t1.get())) { // 7, 8, 9
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
     }
 
-    if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 5
+    if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 5
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
     }
 
-    if (auto *a2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
+    if (auto *a2 = cast_type<OrType>(t2.get())) { // 3, 6
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
     }
 
-    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4
+    if (auto *a1 = cast_type<AndType>(t1.get())) { // 4
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
     }

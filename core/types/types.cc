@@ -174,17 +174,17 @@ string ruby_typer::core::ClassType::typeName() {
 ruby_typer::core::ProxyType::ProxyType(shared_ptr<ruby_typer::core::Type> underlying) : underlying(move(underlying)) {}
 
 void ProxyType::_sanityCheck(core::Context ctx) {
-    Error::check(dynamic_cast<ClassType *>(this->underlying.get()) != nullptr);
+    Error::check(cast_type<ClassType>(this->underlying.get()) != nullptr);
     this->underlying->sanityCheck(ctx);
 }
 
 bool Type::isDynamic() {
-    auto *t = dynamic_cast<ClassType *>(this);
+    auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == core::GlobalState::defn_untyped();
 }
 
 bool Type::isBottom() {
-    auto *t = dynamic_cast<ClassType *>(this);
+    auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == core::GlobalState::defn_bottom();
 }
 
@@ -207,7 +207,7 @@ string LiteralType::typeName() {
 
 string LiteralType::toString(GlobalState &gs, int tabs) {
     string value;
-    SymbolRef undSymbol = dynamic_cast<ClassType *>(this->underlying.get())->symbol;
+    SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
     switch (undSymbol._id) {
         case GlobalState::defn_String()._id:
             value = "\"" + NameRef(this->value).toString(gs) + "\"";
@@ -339,8 +339,8 @@ string AliasType::toString(GlobalState &gs, int tabs) {
 
 string AndType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
-    bool leftBrace = dynamic_cast<OrType *>(this->left.get()) != nullptr;
-    bool rightBrace = dynamic_cast<OrType *>(this->right.get()) != nullptr;
+    bool leftBrace = cast_type<OrType>(this->left.get()) != nullptr;
+    bool rightBrace = cast_type<OrType>(this->right.get()) != nullptr;
 
     if (leftBrace) {
         buf << "(";
@@ -362,8 +362,8 @@ string AndType::toString(GlobalState &gs, int tabs) {
 
 string OrType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
-    bool leftBrace = dynamic_cast<AndType *>(this->left.get()) != nullptr;
-    bool rightBrace = dynamic_cast<AndType *>(this->right.get()) != nullptr;
+    bool leftBrace = cast_type<AndType>(this->left.get()) != nullptr;
+    bool rightBrace = cast_type<AndType>(this->right.get()) != nullptr;
 
     if (leftBrace) {
         buf << "(";
@@ -386,8 +386,8 @@ string OrType::toString(GlobalState &gs, int tabs) {
 void AndType::_sanityCheck(core::Context ctx) {
     left->_sanityCheck(ctx);
     right->_sanityCheck(ctx);
-    Error::check(dynamic_cast<ProxyType *>(left.get()) == nullptr);
-    Error::check(dynamic_cast<ProxyType *>(right.get()) == nullptr);
+    Error::check(cast_type<ProxyType>(left.get()) == nullptr);
+    Error::check(cast_type<ProxyType>(right.get()) == nullptr);
     Error::check(!left->isDynamic());
     Error::check(!right->isDynamic());
 }
@@ -395,8 +395,8 @@ void AndType::_sanityCheck(core::Context ctx) {
 void OrType::_sanityCheck(core::Context ctx) {
     left->_sanityCheck(ctx);
     right->_sanityCheck(ctx);
-    Error::check(dynamic_cast<ProxyType *>(left.get()) == nullptr);
-    Error::check(dynamic_cast<ProxyType *>(right.get()) == nullptr);
+    Error::check(cast_type<ProxyType>(left.get()) == nullptr);
+    Error::check(cast_type<ProxyType>(right.get()) == nullptr);
     Error::check(!left->isDynamic());
     Error::check(!right->isDynamic());
 }

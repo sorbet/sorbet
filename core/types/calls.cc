@@ -56,7 +56,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
             vector<shared_ptr<LiteralType>> keys;
             vector<shared_ptr<Type>> values;
             for (int i = 0; i < args.size(); i += 2) {
-                auto *key = dynamic_cast<LiteralType *>(args[i].type.get());
+                auto *key = cast_type<LiteralType>(args[i].type.get());
                 if (key == nullptr) {
                     return core::Types::hashClass();
                 }
@@ -205,7 +205,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         if (hashArg.type->isDynamic()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
-        } else if (ShapeType *hash = dynamic_cast<ShapeType *>(hashArg.type.get())) {
+        } else if (ShapeType *hash = cast_type<ShapeType>(hashArg.type.get())) {
             --aend;
 
             while (kwit != info.arguments().end()) {
@@ -216,7 +216,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 ++kwit;
 
                 auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<LiteralType> lit) {
-                    return dynamic_cast<ClassType *>(lit->underlying.get())->symbol == ctx.state.defn_Symbol() &&
+                    return cast_type<ClassType>(lit->underlying.get())->symbol == ctx.state.defn_Symbol() &&
                            lit->value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
@@ -232,7 +232,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 matchArgType(ctx, callLoc, method, tpe, spec);
             }
             for (auto &key : hash->keys) {
-                SymbolRef klass = dynamic_cast<ClassType *>(key->underlying.get())->symbol;
+                SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
                 if (klass == ctx.state.defn_Symbol() && consumed.find(NameRef(key->value)) != consumed.end()) {
                     continue;
                 }

@@ -48,20 +48,20 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites() {
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         for (Binding &bind : bb->exprs) {
             writes[bind.bind].insert(bb.get());
-            if (auto *v = dynamic_cast<Ident *>(bind.value.get())) {
+            if (auto *v = cast_instruction<Ident>(bind.value.get())) {
                 reads[v->what].insert(bb.get());
-            } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
                 reads[v->recv].insert(bb.get());
                 for (auto arg : v->args) {
                     reads[arg].insert(bb.get());
                 }
-            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                 reads[v->what].insert(bb.get());
-            } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<NamedArg>(bind.value.get())) {
                 reads[v->value].insert(bb.get());
-            } else if (auto *v = dynamic_cast<LoadArg *>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<LoadArg>(bind.value.get())) {
                 reads[v->receiver].insert(bb.get());
-            } else if (auto *v = dynamic_cast<Cast *>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
                 reads[v->value].insert(bb.get());
             }
         }
