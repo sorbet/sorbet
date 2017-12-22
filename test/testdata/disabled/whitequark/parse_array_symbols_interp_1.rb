@@ -1,0 +1,3 @@
+# @typed
+
+%I[foo#{bar}]

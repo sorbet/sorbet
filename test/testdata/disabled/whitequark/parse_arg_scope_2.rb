@@ -1,0 +1,3 @@
+# @typed
+
+lambda{|;a|a}

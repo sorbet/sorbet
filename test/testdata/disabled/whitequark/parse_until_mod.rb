@@ -1,0 +1,3 @@
+# @typed
+
+meth until foo

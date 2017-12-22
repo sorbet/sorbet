@@ -1,0 +1,3 @@
+# @typed
+
+module Foo; end

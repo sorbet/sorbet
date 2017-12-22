@@ -1,0 +1,3 @@
+# @typed
+
+__ENCODING__

@@ -1,0 +1,3 @@
+# @typed
+
+bar unless foo

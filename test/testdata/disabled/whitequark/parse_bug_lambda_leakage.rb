@@ -1,0 +1,3 @@
+# @typed
+
+->(scope) {}; scope

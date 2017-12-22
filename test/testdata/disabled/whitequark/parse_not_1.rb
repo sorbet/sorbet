@@ -1,0 +1,3 @@
+# @typed
+
+not(foo)

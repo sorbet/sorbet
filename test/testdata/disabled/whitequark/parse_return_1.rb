@@ -1,0 +1,3 @@
+# @typed
+
+return foo
