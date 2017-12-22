@@ -25,7 +25,7 @@ for f in $(cat ../ci/stripe-internal-ruby-typer-pay-server-typechecked); do
 done
 
 RECORD_STATS=
-if [ "$GIT_BRANCH" == "master" ] || [ echo "$GIT_BRANCH" | grep -q "^integration-" ]; then
+if [ "$GIT_BRANCH" == "master" ] || [[ "$GIT_BRANCH" == integration-* ]]; then
     RECORD_STATS=1
 fi
 
