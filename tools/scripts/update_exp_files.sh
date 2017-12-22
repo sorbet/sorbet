@@ -39,4 +39,4 @@ done
 
 ./tools/scripts/dot2svg.sh
 
-bazel-bin/main/ruby-typer test/end-to-end-test-input.rb > test/end-to-end-test-output 2>&1
+bazel-bin/main/ruby-typer test/end-to-end-test-input.rb  2>&1 | sed -r -e 's,(rbi/stdlib.rbi:)[0-9]+,\1__LINE__,' > test/end-to-end-test-output
