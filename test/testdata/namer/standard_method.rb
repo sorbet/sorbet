@@ -97,5 +97,8 @@ class A
   overridable_implementation_method(returns: T1)
   def test_overridable_implementation; end
 
+  abstract_method; def test_abstract_untyped; end
+  standard_method; def test_standard_untyped; end # error: No arguments passed
+
   standard_method({z: T1}, returns: T1) # error: Malformed standard_method. No method def following it.
 end
