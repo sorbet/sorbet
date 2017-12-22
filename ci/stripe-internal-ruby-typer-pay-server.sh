@@ -24,6 +24,11 @@ for f in $(cat ../ci/stripe-internal-ruby-typer-pay-server-typechecked); do
     echo "# @typed" >> "$f"
 done
 
+RECORD_STATS=
+if [ "$GIT_BRANCH" == "master" ] || [ echo "$GIT_BRANCH" | grep -q "^integration-" ]; then
+    RECORD_STATS=1
+fi
+
 OUT=$(mktemp)
 TIMEFILE1=$(mktemp)
 
@@ -35,7 +40,7 @@ fi
 cat "$TIMEFILE1"
 
 TIME1="$(cat $TIMEFILE1 |grep User |cut -d ' ' -f 4)"
-if [ "$GIT_BRANCH" == "master" ] || [ "$GIT_BRANCH" == "dp-datadog" ]; then
+if [ "$RECORD_STATS" ]; then
   veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$TIME1"s -name ruby_typer.payserver.prod_run.seconds
 fi
 
@@ -56,6 +61,6 @@ ASAN_OPTIONS=detect_leaks=0 LSAN_OPTIONS=verbosity=1:log_threads=1  /usr/bin/tim
 cat "$TIMEFILE2"
 
 TIME2="$(cat $TIMEFILE2 |grep User |cut -d ' ' -f 4)"
-if [ "$GIT_BRANCH" == "master" ] || [ "$GIT_BRANCH" == "dp-datadog" ]; then
+if [ "$RECORD_STATS" ]; then
   veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$TIME2"s -name ruby_typer.payserver.full_run.seconds
 fi
