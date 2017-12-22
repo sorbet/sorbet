@@ -230,6 +230,12 @@ unique_ptr<Block> node2Proc(core::Context ctx, unique_ptr<parser::Node> node) {
     return make_unique<Block>(loc, move(args), move(body));
 }
 
+unique_ptr<Expression> unsupportedNode(core::Context ctx, parser::Node *node) {
+    ctx.state.errors.error(node->loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
+                           node->nodeName());
+    return mkEmptyTree(node->loc);
+}
+
 // Desugar a multi-assignment
 //
 // TODO(nelhage): Known incompletenesses:
@@ -1312,21 +1318,35 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Preexe *preexe) {
-                ctx.state.errors.error(loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
-                                       preexe->nodeName());
-                unique_ptr<Expression> res = mkEmptyTree(loc);
+                auto res = unsupportedNode(ctx, preexe);
                 result.swap(res);
             },
             [&](parser::Postexe *postexe) {
-                ctx.state.errors.error(loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
-                                       postexe->nodeName());
-                unique_ptr<Expression> res = mkEmptyTree(loc);
+                auto res = unsupportedNode(ctx, postexe);
                 result.swap(res);
             },
             [&](parser::Undef *undef) {
-                ctx.state.errors.error(loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}",
-                                       undef->nodeName());
-                unique_ptr<Expression> res = mkEmptyTree(loc);
+                auto res = unsupportedNode(ctx, undef);
+                result.swap(res);
+            },
+            [&](parser::Backref *backref) {
+                auto res = unsupportedNode(ctx, backref);
+                result.swap(res);
+            },
+            [&](parser::EFlipflop *eflipflop) {
+                auto res = unsupportedNode(ctx, eflipflop);
+                result.swap(res);
+            },
+            [&](parser::IFlipflop *iflipflop) {
+                auto res = unsupportedNode(ctx, iflipflop);
+                result.swap(res);
+            },
+            [&](parser::MatchCurLine *matchCurLine) {
+                auto res = unsupportedNode(ctx, matchCurLine);
+                result.swap(res);
+            },
+            [&](parser::Redo *redo) {
+                auto res = unsupportedNode(ctx, redo);
                 result.swap(res);
             },
 
