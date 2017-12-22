@@ -173,8 +173,8 @@ module Opus::CIBot::Gerald
           end
         end
         next if a_name.nil?
-        { # error: unreachable
-          a_name: a_name,
+        {
+          a_name: a_name, # error: unreachable
           b_name: b_name,
           added_lines: added_lines,
           removed_lines: removed_lines,
