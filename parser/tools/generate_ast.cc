@@ -250,7 +250,10 @@ void emit_node_header(ostream &out, NodeDef &node) {
         }
         out << ")";
     }
-    out << " {}" << endl;
+    out << endl;
+    out << "{";
+    out << "    categoryCounterInc(\"nodes\", \"" << node.name << "\");" << endl;
+    out << "}" << endl;
     out << endl;
 
     // Generate fields

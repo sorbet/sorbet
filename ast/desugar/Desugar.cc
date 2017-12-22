@@ -303,6 +303,73 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
         unique_ptr<Expression> result;
         typecase(
             what.get(),
+            // The top N clauses here are ordered according to observed
+            // frequency in pay-server. Do not reorder the top of this list, or
+            // add entries here, without consulting the "node.*" counters from a
+            // run over a representative code base.
+            [&](parser::Send *send) {
+                u4 flags = 0;
+                auto rec = node2TreeImpl(ctx, send->receiver);
+                if (cast_tree<EmptyTree>(rec.get()) != nullptr) {
+                    rec = mkSelf(loc);
+                    flags |= Send::PRIVATE_OK;
+                }
+                Send::ARGS_store args;
+                unique_ptr<parser::Node> block;
+                args.reserve(send->args.size());
+                for (auto &stat : send->args) {
+                    if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
+                        Error::check(block == nullptr);
+                        block = move(bp->block);
+                    } else {
+                        args.emplace_back(node2TreeImpl(ctx, stat));
+                    }
+                };
+
+                auto res = mkSend(loc, move(rec), send->method, move(args), flags, node2Proc(ctx, move(block)));
+                result.swap(res);
+            },
+            [&](parser::Const *const_) {
+                auto scope = node2TreeImpl(ctx, const_->scope);
+                unique_ptr<Expression> res = mkConstant(loc, move(scope), const_->name);
+                result.swap(res);
+            },
+            [&](parser::String *string) {
+                unique_ptr<Expression> res = make_unique<StringLit>(loc, string->val);
+                result.swap(res);
+            },
+            [&](parser::Symbol *symbol) {
+                unique_ptr<Expression> res = make_unique<ast::SymbolLit>(loc, symbol->val);
+                result.swap(res);
+            },
+            [&](parser::LVar *var) {
+                unique_ptr<Expression> res = mkLocal(loc, var->name);
+                result.swap(res);
+            },
+            [&](parser::DString *dstring) {
+                unique_ptr<Expression> res = desugarDString(ctx, loc, move(dstring->nodes));
+                result.swap(res);
+            },
+            [&](parser::Begin *begin) {
+                if (!begin->stmts.empty()) {
+                    InsSeq::STATS_store stats;
+                    stats.reserve(begin->stmts.size() - 1);
+                    auto end = begin->stmts.end();
+                    --end;
+                    for (auto it = begin->stmts.begin(); it != end; ++it) {
+                        auto &stat = *it;
+                        stats.emplace_back(node2TreeImpl(ctx, stat));
+                    };
+                    auto &last = begin->stmts.back();
+                    auto expr = node2TreeImpl(ctx, last);
+                    auto block = mkInsSeq(loc, move(stats), move(expr));
+                    result.swap(block);
+                } else {
+                    unique_ptr<Expression> res = mkEmptyTree(loc);
+                    result.swap(res);
+                }
+            },
+            // END hand-ordered clauses
             [&](parser::And *and_) {
                 auto lhs = node2TreeImpl(ctx, and_->left);
                 if (auto i = cast_tree<Reference>(lhs.get())) {
@@ -444,28 +511,6 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     Error::notImplemented();
                 }
             },
-            [&](parser::Send *send) {
-                u4 flags = 0;
-                auto rec = node2TreeImpl(ctx, send->receiver);
-                if (cast_tree<EmptyTree>(rec.get()) != nullptr) {
-                    rec = mkSelf(loc);
-                    flags |= Send::PRIVATE_OK;
-                }
-                Send::ARGS_store args;
-                unique_ptr<parser::Node> block;
-                args.reserve(send->args.size());
-                for (auto &stat : send->args) {
-                    if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
-                        Error::check(block == nullptr);
-                        block = move(bp->block);
-                    } else {
-                        args.emplace_back(node2TreeImpl(ctx, stat));
-                    }
-                };
-
-                auto res = mkSend(loc, move(rec), send->method, move(args), flags, node2Proc(ctx, move(block)));
-                result.swap(res);
-            },
             [&](parser::CSend *csend) {
                 core::NameRef tempRecv =
                     ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp());
@@ -491,10 +536,6 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::Self *self) {
                 unique_ptr<Expression> res = mkSelf(loc);
-                result.swap(res);
-            },
-            [&](parser::DString *dstring) {
-                unique_ptr<Expression> res = desugarDString(ctx, loc, move(dstring->nodes));
                 result.swap(res);
             },
             [&](parser::DSymbol *dsymbol) {
@@ -527,21 +568,8 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
 
                 result.swap(res);
             },
-            [&](parser::Symbol *symbol) {
-                unique_ptr<Expression> res = make_unique<ast::SymbolLit>(loc, symbol->val);
-                result.swap(res);
-            },
-            [&](parser::String *string) {
-                unique_ptr<Expression> res = make_unique<StringLit>(loc, string->val);
-                result.swap(res);
-            },
             [&](parser::FileLiteral *fileLiteral) {
                 unique_ptr<Expression> res = make_unique<StringLit>(loc, core::Names::currentFile());
-                result.swap(res);
-            },
-            [&](parser::Const *const_) {
-                auto scope = node2TreeImpl(ctx, const_->scope);
-                unique_ptr<Expression> res = mkConstant(loc, move(scope), const_->name);
                 result.swap(res);
             },
             [&](parser::ConstLhs *constLhs) {
@@ -552,25 +580,6 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             [&](parser::Cbase *cbase) {
                 unique_ptr<Expression> res = mkIdent(loc, core::GlobalState::defn_root());
                 result.swap(res);
-            },
-            [&](parser::Begin *begin) {
-                if (!begin->stmts.empty()) {
-                    InsSeq::STATS_store stats;
-                    stats.reserve(begin->stmts.size() - 1);
-                    auto end = begin->stmts.end();
-                    --end;
-                    for (auto it = begin->stmts.begin(); it != end; ++it) {
-                        auto &stat = *it;
-                        stats.emplace_back(node2TreeImpl(ctx, stat));
-                    };
-                    auto &last = begin->stmts.back();
-                    auto expr = node2TreeImpl(ctx, last);
-                    auto block = mkInsSeq(loc, move(stats), move(expr));
-                    result.swap(block);
-                } else {
-                    unique_ptr<Expression> res = mkEmptyTree(loc);
-                    result.swap(res);
-                }
             },
             [&](parser::Kwbegin *kwbegin) {
                 if (!kwbegin->stmts.empty()) {
@@ -763,10 +772,6 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::IVar *var) {
                 unique_ptr<Expression> res = make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Instance, var->name);
-                result.swap(res);
-            },
-            [&](parser::LVar *var) {
-                unique_ptr<Expression> res = mkLocal(loc, var->name);
                 result.swap(res);
             },
             [&](parser::GVar *var) {
