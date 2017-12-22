@@ -522,7 +522,6 @@ private:
                     case core::Names::returns()._id:
                         // fill in return type
                         methoInfo.resultType = getResultType(ctx, value);
-                        methoInfo.definitionLoc = value->loc;
                         break;
                     case core::Names::checked()._id:
                         break;
