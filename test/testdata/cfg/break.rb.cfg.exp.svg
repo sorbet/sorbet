@@ -61,7 +61,7 @@
 <ellipse fill="none" stroke="#000000" cx="364" cy="-315.5635" rx="259.7871" ry="65.1077"/>
 <text text-anchor="middle" x="364" y="-346.3635" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](statTemp$3)</text>
 <text text-anchor="middle" x="364" y="-332.3635" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="364" y="-318.3635" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: x&gt; = load_arg(statTemp$3#map, 0) : untyped</text>
+<text text-anchor="middle" x="364" y="-318.3635" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: x&gt; = load_arg(statTemp$3#map, 0) : Proc</text>
 <text text-anchor="middle" x="364" y="-304.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="364" y="-290.3635" font-family="Times,serif" font-size="14.00" fill="#000000">returnTemp$10 = &lt;block&#45;nested: x&gt;.+(statTemp$12) : untyped</text>
 <text text-anchor="middle" x="364" y="-276.3635" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
@@ -101,4 +101,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 51cd0f02c49f629a4091a98e6a415749c6ed7d09f6700e694b23f5036876dced -->
+<!-- ruby-types:sha256: 332bdb617eff341183e9d0c64971417fa9b71be85da98480b1eb468e0fb5dfd9 -->
