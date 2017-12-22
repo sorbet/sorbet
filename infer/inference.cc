@@ -6,7 +6,6 @@
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"
 #include <algorithm> // find, remove_if
-#include <unordered_map>
 
 using namespace std;
 using namespace ruby_typer;
@@ -20,9 +19,9 @@ class Environment;
  */
 struct KnowledgeFact {
     /* the following type tests are known to be true */
-    std::vector<std::pair<core::LocalVariable, shared_ptr<core::Type>>> yesTypeTests;
+    InlinedVector<std::pair<core::LocalVariable, shared_ptr<core::Type>>, 1> yesTypeTests;
     /* he following type tests are known to be false */
-    std::vector<std::pair<core::LocalVariable, shared_ptr<core::Type>>> noTypeTests;
+    InlinedVector<std::pair<core::LocalVariable, shared_ptr<core::Type>>, 1> noTypeTests;
 
     /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
     void min(core::Context ctx, KnowledgeFact other) {
@@ -230,7 +229,7 @@ public:
         if (send->fun == core::Names::kind_of() || send->fun == core::Names::is_a_p()) {
             core::TypeAndOrigins klass = getTypeAndOrigin(ctx, send->args[0]);
             if (klass.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {
-                auto *s = dynamic_cast<core::ClassType *>(klass.type.get());
+                auto *s = core::cast_type<core::ClassType>(klass.type.get());
                 Error::check(s != nullptr);
                 core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
                 if (attachedClass.exists()) {
@@ -403,7 +402,7 @@ public:
 
     shared_ptr<core::Type> dispatchNew(core::Context ctx, core::TypeAndOrigins recvType, cfg::Send *send,
                                        vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
-        core::ClassType *classType = dynamic_cast<core::ClassType *>(recvType.type.get());
+        core::ClassType *classType = core::cast_type<core::ClassType>(recvType.type.get());
         if (classType == nullptr) {
             return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
         }
@@ -441,7 +440,7 @@ public:
     }
 
     shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
-        if (auto *a = dynamic_cast<core::LiteralType *>(tp.get())) {
+        if (auto *a = core::cast_type<core::LiteralType>(tp.get())) {
             return a->underlying;
         }
         return tp;
@@ -450,35 +449,10 @@ public:
     shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops) {
         try {
             core::TypeAndOrigins tp;
-            bool noLoopChecking = dynamic_cast<cfg::Alias *>(bind.value.get()) != nullptr ||
-                                  dynamic_cast<cfg::LoadArg *>(bind.value.get()) != nullptr;
+            bool noLoopChecking = cfg::cast_instruction<cfg::Alias>(bind.value.get()) != nullptr ||
+                                  cfg::cast_instruction<cfg::LoadArg>(bind.value.get()) != nullptr;
             typecase(
                 bind.value.get(),
-                [&](cfg::Alias *a) {
-                    core::SymbolRef symbol = a->what;
-                    core::Symbol &info = symbol.info(ctx);
-                    if (info.isClass()) {
-                        Error::check(info.resultType.get(), "Type should have been filled in by the namer");
-                        tp.type = info.resultType;
-                        tp.origins.push_back(symbol.info(ctx).definitionLoc);
-                    } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
-                        if (info.resultType.get() != nullptr) {
-                            tp.type = info.resultType;
-                            tp.origins.push_back(info.definitionLoc);
-                        } else {
-                            tp.origins.push_back(core::Loc::none(0));
-                            tp.type = core::Types::dynamic();
-                        }
-                    } else {
-                        Error::notImplemented();
-                    }
-                },
-                [&](cfg::Ident *i) {
-                    auto typeAndOrigin = getTypeAndOrigin(ctx, i->what, true);
-                    tp.type = typeAndOrigin.type;
-                    tp.origins = typeAndOrigin.origins;
-                    Error::check(!tp.origins.empty(), "Inferencer did not assign location");
-                },
                 [&](cfg::Send *send) {
                     vector<core::TypeAndOrigins> args;
 
@@ -499,32 +473,46 @@ public:
                     }
                     tp.origins.push_back(bind.loc);
                 },
-                [&](cfg::FloatLit *i) {
-                    tp.type = make_shared<core::LiteralType>(i->value);
-                    tp.origins.push_back(bind.loc);
+                [&](cfg::Ident *i) {
+                    auto typeAndOrigin = getTypeAndOrigin(ctx, i->what, true);
+                    tp.type = typeAndOrigin.type;
+                    tp.origins = typeAndOrigin.origins;
+                    Error::check(!tp.origins.empty(), "Inferencer did not assign location");
                 },
-                [&](cfg::IntLit *i) {
-                    tp.type = make_shared<core::LiteralType>(i->value);
-                    tp.origins.push_back(bind.loc);
+                [&](cfg::Alias *a) {
+                    core::SymbolRef symbol = a->what;
+                    core::Symbol &info = symbol.info(ctx);
+                    if (info.isClass()) {
+                        Error::check(info.resultType.get(), "Type should have been filled in by the namer");
+                        tp.type = info.resultType;
+                        tp.origins.push_back(symbol.info(ctx).definitionLoc);
+                    } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
+                        if (info.resultType.get() != nullptr) {
+                            tp.type = info.resultType;
+                            tp.origins.push_back(info.definitionLoc);
+                        } else {
+                            tp.origins.push_back(core::Loc::none(0));
+                            tp.type = core::Types::dynamic();
+                        }
+                    } else {
+                        Error::notImplemented();
+                    }
                 },
-                [&](cfg::StringLit *i) {
-                    tp.type = make_shared<core::LiteralType>(ctx.state.defn_String(), i->value);
+                [&](cfg::Self *i) {
+                    tp.type = make_shared<core::ClassType>(i->klass);
                     tp.origins.push_back(bind.loc);
                 },
                 [&](cfg::SymbolLit *i) {
                     tp.type = make_shared<core::LiteralType>(ctx.state.defn_Symbol(), i->value);
                     tp.origins.push_back(bind.loc);
                 },
-                [&](cfg::BoolLit *i) {
-                    tp.type = make_shared<core::LiteralType>(i->value);
+                [&](cfg::StringLit *i) {
+                    tp.type = make_shared<core::LiteralType>(ctx.state.defn_String(), i->value);
                     tp.origins.push_back(bind.loc);
                 },
-                [&](cfg::Self *i) {
-                    tp.type = make_shared<core::ClassType>(i->klass);
-                    tp.origins.push_back(bind.loc);
-                },
-                [&](cfg::Unanalyzable *i) {
-                    tp.type = core::Types::dynamic();
+                [&](cfg::LoadArg *i) {
+                    /* read type from info filled by define_method */
+                    tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
                     tp.origins.push_back(bind.loc);
                 },
                 [&](cfg::Return *i) {
@@ -552,9 +540,20 @@ public:
                     tp.type = core::Types::bottom();
                     tp.origins.push_back(bind.loc);
                 },
-                [&](cfg::LoadArg *i) {
-                    /* read type from info filled by define_method */
-                    tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
+                [&](cfg::IntLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::BoolLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::FloatLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Unanalyzable *i) {
+                    tp.type = core::Types::dynamic();
                     tp.origins.push_back(bind.loc);
                 },
                 [&](cfg::Cast *c) {
@@ -588,9 +587,9 @@ public:
 
             if (noLoopChecking || loopCount == bindMinLoops) {
                 clearKnowledge(ctx, bind.bind);
-                if (auto *send = dynamic_cast<cfg::Send *>(bind.value.get())) {
+                if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                     updateKnowledge(ctx, bind.bind, send);
-                } else if (auto *i = dynamic_cast<cfg::Ident *>(bind.value.get())) {
+                } else if (auto *i = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
                     propagateKnowledge(ctx, bind.bind, i->what);
                 }
                 setTypeAndOrigin(bind.bind, tp);
@@ -602,9 +601,9 @@ public:
                     tp.type = core::Types::dynamic();
                 }
                 clearKnowledge(ctx, bind.bind);
-                if (auto *send = dynamic_cast<cfg::Send *>(bind.value.get())) {
+                if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                     updateKnowledge(ctx, bind.bind, send);
-                } else if (auto *i = dynamic_cast<cfg::Ident *>(bind.value.get())) {
+                } else if (auto *i = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
                     propagateKnowledge(ctx, bind.bind, i->what);
                 }
                 setTypeAndOrigin(bind.bind, tp);

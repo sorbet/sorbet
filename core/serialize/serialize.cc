@@ -156,29 +156,29 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
         p.putU4(0);
         return;
     }
-    if (auto *c = dynamic_cast<ClassType *>(what)) {
+    if (auto *c = cast_type<ClassType>(what)) {
         p.putU4(1);
         p.putU4(c->symbol._id);
-    } else if (auto *o = dynamic_cast<OrType *>(what)) {
+    } else if (auto *o = cast_type<OrType>(what)) {
         p.putU4(2);
         pickle(p, o->left.get());
         pickle(p, o->right.get());
-    } else if (auto *c = dynamic_cast<LiteralType *>(what)) {
+    } else if (auto *c = cast_type<LiteralType>(what)) {
         p.putU4(3);
         pickle(p, c->underlying.get());
         p.putS8(c->value);
-    } else if (auto *a = dynamic_cast<AndType *>(what)) {
+    } else if (auto *a = cast_type<AndType>(what)) {
         p.putU4(4);
         pickle(p, a->left.get());
         pickle(p, a->right.get());
-    } else if (auto *arr = dynamic_cast<TupleType *>(what)) {
+    } else if (auto *arr = cast_type<TupleType>(what)) {
         p.putU4(5);
         pickle(p, arr->underlying.get());
         p.putU4(arr->elems.size());
         for (auto &el : arr->elems) {
             pickle(p, el.get());
         }
-    } else if (auto *hash = dynamic_cast<ShapeType *>(what)) {
+    } else if (auto *hash = cast_type<ShapeType>(what)) {
         p.putU4(6);
         pickle(p, hash->underlying.get());
         p.putU4(hash->keys.size());
@@ -189,9 +189,9 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
         for (auto &el : hash->values) {
             pickle(p, el.get());
         }
-    } else if (auto *hash = dynamic_cast<MagicType *>(what)) {
+    } else if (auto *hash = cast_type<MagicType>(what)) {
         p.putU4(7);
-    } else if (auto *alias = dynamic_cast<AliasType *>(what)) {
+    } else if (auto *alias = cast_type<AliasType>(what)) {
         p.putU4(8);
         p.putU4(alias->symbol._id);
     } else {
@@ -238,7 +238,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
             values.reserve(sz);
             for (int i = 0; i < sz; i++) {
                 auto key = unpickleType(p);
-                if (auto *lit = dynamic_cast<LiteralType *>(key.get())) {
+                if (auto *lit = cast_type<LiteralType>(key.get())) {
                     keys.emplace_back(lit);
                     key.reset();
                 }

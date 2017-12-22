@@ -165,7 +165,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
         }
 
         for (Binding &bind : bb->exprs) {
-            if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
+            if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 i->what = maybeDealias(ctx, i->what, current);
             }
             /* invalidate a stale record */
@@ -177,21 +177,21 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 }
             }
             /* dealias */
-            if (auto *v = dynamic_cast<Ident *>(bind.value.get())) {
+            if (auto *v = cast_instruction<Ident>(bind.value.get())) {
                 v->what = maybeDealias(ctx, v->what, current);
-            } else if (auto *v = dynamic_cast<Send *>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
                 v->recv = maybeDealias(ctx, v->recv, current);
                 for (auto &arg : v->args) {
                     arg = maybeDealias(ctx, arg, current);
                 }
-            } else if (auto *v = dynamic_cast<Return *>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                 v->what = maybeDealias(ctx, v->what, current);
-            } else if (auto *v = dynamic_cast<NamedArg *>(bind.value.get())) {
+            } else if (auto *v = cast_instruction<NamedArg>(bind.value.get())) {
                 v->value = maybeDealias(ctx, v->value, current);
             }
 
             // record new aliases
-            if (auto *i = dynamic_cast<Ident *>(bind.value.get())) {
+            if (auto *i = cast_instruction<Ident>(bind.value.get())) {
                 current[bind.bind] = i->what;
             }
         }
@@ -220,17 +220,17 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
             if (fnd == RnW.reads.end()) {
                 // This should be !New && !Send && !Return, but I prefer to list explicitly in case we start adding
                 // nodes.
-                if (dynamic_cast<Ident *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<ArraySplat *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<HashSplat *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<BoolLit *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<StringLit *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<SymbolLit *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<IntLit *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<FloatLit *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<Self *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<LoadArg *>(bind.value.get()) != nullptr ||
-                    dynamic_cast<NamedArg *>(bind.value.get()) != nullptr) {
+                if (cast_instruction<Ident>(bind.value.get()) != nullptr ||
+                    cast_instruction<ArraySplat>(bind.value.get()) != nullptr ||
+                    cast_instruction<HashSplat>(bind.value.get()) != nullptr ||
+                    cast_instruction<BoolLit>(bind.value.get()) != nullptr ||
+                    cast_instruction<StringLit>(bind.value.get()) != nullptr ||
+                    cast_instruction<SymbolLit>(bind.value.get()) != nullptr ||
+                    cast_instruction<IntLit>(bind.value.get()) != nullptr ||
+                    cast_instruction<FloatLit>(bind.value.get()) != nullptr ||
+                    cast_instruction<Self>(bind.value.get()) != nullptr ||
+                    cast_instruction<LoadArg>(bind.value.get()) != nullptr ||
+                    cast_instruction<NamedArg>(bind.value.get()) != nullptr) {
                     expIt = it->exprs.erase(expIt);
                 } else {
                     ++expIt;

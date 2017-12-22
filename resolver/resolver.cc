@@ -630,7 +630,7 @@ private:
 
     core::SymbolRef dealiasSym(core::Context ctx, core::SymbolRef sym) {
         while (sym.info(ctx).isStaticField()) {
-            auto *ct = dynamic_cast<core::ClassType *>(sym.info(ctx).resultType.get());
+            auto *ct = core::cast_type<core::ClassType>(sym.info(ctx).resultType.get());
             if (ct == nullptr) {
                 break;
             }
