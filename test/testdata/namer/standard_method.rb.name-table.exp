@@ -37,12 +37,14 @@ class <constant:A> < ::<constant:Object> () -> <class:A>
   method public (x) -> T1
     argument x<> -> T1
   method test_abstract () -> T1
+  method test_abstract_untyped ()
   method test_implementation () -> T1
   method test_kwargs (returns) -> T2
     argument returns<> -> T1
   method test_overridable () -> T1
   method test_overridable_implementation () -> T1
   method test_override () -> T1
+  method test_standard_untyped ()
 class <constant:T1> < ::<constant:Object> () -> <class:T1>
 class <constant:T2> < ::<constant:Object> () -> <class:T2>
 class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()

@@ -456,9 +456,13 @@ private:
             return;
         }
         if (lastStandardMethod->args.empty()) {
-            ctx.state.errors.error(lastStandardMethod->loc, core::errors::Resolver::InvalidMethodSignature,
-                                   "No arguments passed to `{}'. Expected (arg_types, options)",
-                                   lastStandardMethod->fun.toString(ctx));
+            if (lastStandardMethod->fun == core::Names::standardMethod()) {
+                ctx.state.errors.error(lastStandardMethod->loc, core::errors::Resolver::InvalidMethodSignature,
+                                       "No arguments passed to `{}'. Expected (arg_types, options)",
+                                       lastStandardMethod->fun.toString(ctx));
+            }
+            // Otherwise, this is declaring the method flavor
+            // (abstract/implementation/etc). Nothing to do.
             return;
         }
         if (lastStandardMethod->args.size() > 2) {
