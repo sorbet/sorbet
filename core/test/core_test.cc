@@ -54,5 +54,24 @@ TEST(ASTTest, SymbolRef) { // NOLINT
     EXPECT_EQ(ref, ref.info(gs).ref(gs));
 }
 
+extern bool fileIsTyped(absl::string_view source);
+struct FileIsTypedCase {
+    absl::string_view src;
+    bool isTyped;
+};
+
+TEST(CoreTest, FileIsTyped) {
+    vector<FileIsTypedCase> cases = {
+        {"", false},
+        {"# @typed", true},
+        {"\n# @typed\n", true},
+        {"not an @typed sigil\n# @typed\n", true},
+        {"@typed\n# @typed some noise\n", false},
+    };
+    for (auto &tc : cases) {
+        EXPECT_EQ(tc.isTyped, ruby_typer::core::fileIsTyped(tc.src));
+    }
+}
+
 } // namespace core
 } // namespace ruby_typer
