@@ -819,7 +819,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -827,7 +827,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -835,7 +835,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -844,7 +844,7 @@ class Array
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -881,7 +881,7 @@ class Array
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Integer
   )
@@ -890,7 +890,7 @@ class Array
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -899,7 +899,7 @@ class Array
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, BasicObject)
   )
@@ -915,7 +915,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -931,7 +931,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -939,7 +939,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Enumerator, Opus::Types.array_of(Opus::Types.untyped))
   )
@@ -947,7 +947,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -963,7 +963,7 @@ class Array
     {
       _: Integer,
       _1: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, BasicObject)
   )
@@ -974,7 +974,7 @@ class Array
       _: Opus::Types.any(BasicObject, Integer, Range),
       _1: Opus::Types.any(Integer, Range),
       _2: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
@@ -989,7 +989,7 @@ class Array
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Integer, Enumerator)
   )
@@ -1045,7 +1045,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
@@ -1076,7 +1076,7 @@ class Array
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(Enumerator, Opus::Types.array_of(Opus::Types.untyped))
   )
@@ -1108,7 +1108,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1116,7 +1116,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1125,7 +1125,7 @@ class Array
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1134,7 +1134,7 @@ class Array
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1154,7 +1154,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1163,7 +1163,7 @@ class Array
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Integer, Enumerator)
   )
@@ -1195,7 +1195,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1203,7 +1203,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1240,7 +1240,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
@@ -1248,7 +1248,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
@@ -1256,7 +1256,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1272,7 +1272,7 @@ class Array
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -1448,7 +1448,7 @@ class BasicObject
       _: String,
       filename: String,
       lineno: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -1457,7 +1457,7 @@ class BasicObject
   standard_method(
     {
       args: BasicObject,
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Opus::Types.untyped
   )
@@ -1495,7 +1495,7 @@ module Benchmark
     {
       label_width: Integer,
       labels: String,
-      blk: Proc,
+      blk: Opus::Types.proc([Process], returns: NilClass),
     },
     returns: Opus::Types.array_of(Benchmark::Tms)
   )
@@ -1504,7 +1504,7 @@ module Benchmark
   standard_method(
     {
       width: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Process], returns: NilClass),
     },
     returns: Opus::Types.array_of(Benchmark::Tms)
   )
@@ -1520,7 +1520,7 @@ module Benchmark
 
   standard_method(
     {
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Integer
   )
@@ -2069,7 +2069,7 @@ class CSV
     {
       path: Opus::Types.any(String, File),
       options: Opus::Types.hash_of(keys: Symbol, values: BasicObject),
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.array_of(String)], returns: BasicObject),
     },
     returns: NilClass
   )
@@ -2417,7 +2417,7 @@ class Dir
   standard_method(
     {
       _: Opus::Types.any(String, Pathname),
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Opus::Types.untyped)
   )
@@ -2460,7 +2460,7 @@ class Dir
     {
       dir: String,
       _: Encoding,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(NilClass, Enumerator)
   )
@@ -2476,7 +2476,7 @@ class Dir
     {
       pattern: Opus::Types.any(String, Opus::Types.array_of(String)),
       flags: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
@@ -2503,7 +2503,7 @@ class Dir
     {
       _: String,
       _1: Encoding,
-      blk: Proc,
+      blk: Opus::Types.proc([Dir], returns: BasicObject),
     },
     returns: Opus::Types.any(Dir, Opus::Types.untyped)
   )
@@ -2539,7 +2539,7 @@ class Dir
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -2622,7 +2622,7 @@ class Dir
     {
       pattern: Opus::Types.any(String, Opus::Types.array_of(String)),
       flags: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
@@ -2741,7 +2741,7 @@ end
 module Enumerable
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
@@ -2749,7 +2749,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
@@ -2757,7 +2757,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -2765,7 +2765,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Enumerator),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
@@ -2774,7 +2774,7 @@ module Enumerable
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Integer
   )
@@ -2783,7 +2783,7 @@ module Enumerable
   standard_method(
     {
       n: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(NilClass, Enumerator)
   )
@@ -2792,7 +2792,7 @@ module Enumerable
   standard_method(
     {
       ifnone: Proc,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(BasicObject, NilClass, Enumerator)
   )
@@ -2808,7 +2808,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -2817,7 +2817,7 @@ module Enumerable
   standard_method(
     {
       n: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(NilClass, Enumerator)
   )
@@ -2825,7 +2825,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Integer], returns: BasicObject),
     },
     returns: Enumerable
   )
@@ -2839,7 +2839,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -2848,7 +2848,7 @@ module Enumerable
   standard_method(
     {
       value: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Integer, NilClass, Enumerator)
   )
@@ -2865,7 +2865,7 @@ module Enumerable
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
@@ -2873,7 +2873,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.array_of(Opus::Types.untyped)), Enumerator)
   )
@@ -2891,7 +2891,7 @@ module Enumerable
     {
       initial: Opus::Types.any(BasicObject, Symbol),
       _: Symbol,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -2900,7 +2900,7 @@ module Enumerable
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
@@ -2909,7 +2909,7 @@ module Enumerable
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Enumerator, Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
@@ -2918,7 +2918,7 @@ module Enumerable
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
@@ -2927,7 +2927,7 @@ module Enumerable
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Enumerator, Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
@@ -2935,7 +2935,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: [BasicObject, BasicObject]
   )
@@ -2943,7 +2943,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any([BasicObject, BasicObject], Enumerator)
   )
@@ -2951,7 +2951,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
@@ -2959,7 +2959,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
@@ -2967,7 +2967,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any([Opus::Types.array_of(BasicObject), Opus::Types.array_of(BasicObject)], Enumerator)
   )
@@ -2975,7 +2975,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -2983,7 +2983,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Enumerator
   )
@@ -2991,7 +2991,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
@@ -2999,7 +2999,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -3015,7 +3015,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -3030,7 +3030,7 @@ module Enumerable
   standard_method(
     {
       n: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(NilClass, Enumerator)
   )
@@ -3039,7 +3039,7 @@ module Enumerable
   standard_method(
     {
       ifnone: Proc,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(BasicObject, NilClass, Enumerator)
   )
@@ -3047,7 +3047,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Enumerator),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
@@ -3055,7 +3055,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -3073,7 +3073,7 @@ module Enumerable
     {
       initial: Opus::Types.any(BasicObject, Symbol),
       _: Symbol,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -3081,7 +3081,7 @@ module Enumerable
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
@@ -3098,7 +3098,7 @@ class Enumerator
   standard_method(
     {
       _: Opus::Types.any(Integer, Proc),
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Object
   )
@@ -3106,7 +3106,7 @@ class Enumerator
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -3114,7 +3114,7 @@ class Enumerator
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -3123,7 +3123,7 @@ class Enumerator
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -3181,7 +3181,7 @@ class Enumerator
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -3190,7 +3190,7 @@ class Enumerator
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -3527,7 +3527,7 @@ class File
       textmode: BasicObject,
       binmode: BasicObject,
       autoclose: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([File], returns: BasicObject),
     },
     returns: Opus::Types.any(File, Opus::Types.untyped)
   )
@@ -4706,7 +4706,7 @@ class Hash
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -4723,7 +4723,7 @@ class Hash
   standard_method(
     {
       _: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, BasicObject)
   )
@@ -4731,7 +4731,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped), Enumerator)
   )
@@ -4739,7 +4739,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped), Enumerator)
   )
@@ -4747,7 +4747,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped), Enumerator)
   )
@@ -4755,7 +4755,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped), Enumerator)
   )
@@ -4763,7 +4763,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped), Enumerator)
   )
@@ -4779,7 +4779,7 @@ class Hash
     {
       _: BasicObject,
       _1: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, BasicObject)
   )
@@ -4845,7 +4845,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped), Enumerator)
   )
@@ -4880,7 +4880,7 @@ class Hash
   standard_method(
     {
       _: Opus::Types.hash_of(keys: BasicObject, values: BasicObject),
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.hash_of(keys: BasicObject, values: BasicObject)
   )
@@ -4902,7 +4902,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Enumerator, Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped))
   )
@@ -4910,7 +4910,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
   )
@@ -4918,7 +4918,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
   )
@@ -4926,7 +4926,7 @@ class Hash
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
   )
@@ -5062,7 +5062,7 @@ class IO
     {
       sep: String,
       limit: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5070,7 +5070,7 @@ class IO
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5078,7 +5078,7 @@ class IO
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5086,7 +5086,7 @@ class IO
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5474,7 +5474,7 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(NilClass, Enumerator)
   )
@@ -5491,7 +5491,7 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: Proc,
+      blk: Opus::Types.proc([IO], returns: BasicObject),
     },
     returns: Opus::Types.any(IO, Opus::Types.untyped)
   )
@@ -5508,7 +5508,7 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: Proc,
+      blk: Opus::Types.proc([[IO, IO]], returns: BasicObject),
     },
     returns: Opus::Types.any([IO, IO], Opus::Types.untyped)
   )
@@ -5606,7 +5606,7 @@ class IO
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5614,7 +5614,7 @@ class IO
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5622,7 +5622,7 @@ class IO
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5632,7 +5632,7 @@ class IO
     {
       sep: String,
       limit: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5648,7 +5648,7 @@ class IO
     {
       sep: String,
       limit: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -5985,7 +5985,7 @@ class Integer
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Enumerator)
   )
@@ -6131,7 +6131,7 @@ class Integer
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Enumerator)
   )
@@ -6176,7 +6176,7 @@ class Integer
   standard_method(
     {
       _: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Enumerator)
   )
@@ -6285,7 +6285,7 @@ module Kernel
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Proc
   )
@@ -6442,7 +6442,7 @@ module Kernel
 
   standard_method(
     {
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Proc
   )
@@ -6586,7 +6586,7 @@ module Kernel
     {
       _: Opus::Types.any(String, Symbol),
       _1: BasicObject,
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Opus::Types.untyped
   )
@@ -6687,7 +6687,7 @@ module Kernel
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Proc
   )
@@ -6797,7 +6797,7 @@ module Kernel
 
   standard_method(
     {
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Proc
   )
@@ -7309,7 +7309,7 @@ class Module
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Module], returns: BasicObject),
     },
     returns: Object
   )
@@ -7423,7 +7423,7 @@ class Module
   standard_method(
     {
       args: BasicObject,
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Opus::Types.untyped
   )
@@ -7570,7 +7570,7 @@ class Module
   standard_method(
     {
       args: BasicObject,
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Opus::Types.untyped
   )
@@ -7743,7 +7743,7 @@ class Module
     {
       _: Symbol,
       _1: Method,
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Symbol
   )
@@ -7840,7 +7840,7 @@ class Module
   standard_method(
     {
       _: Class,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -8200,7 +8200,7 @@ class Numeric
     {
       _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
       _1: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex, Enumerator)
   )
@@ -8294,7 +8294,7 @@ class Object
     {
       method: Symbol,
       args: BasicObject,
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Enumerator
   )
@@ -8505,7 +8505,7 @@ class Object
     {
       method: Symbol,
       args: BasicObject,
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Enumerator
   )
@@ -8592,7 +8592,7 @@ class Pathname
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Pathname], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -8695,7 +8695,7 @@ class Pathname
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Pathname], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -8716,7 +8716,7 @@ class Pathname
   standard_method(
     {
       with_directory: Opus::Types.any(TrueClass, FalseClass),
-      blk: Proc,
+      blk: Opus::Types.proc([Pathname], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -8724,7 +8724,7 @@ class Pathname
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Pathname], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
@@ -8732,7 +8732,7 @@ class Pathname
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -8742,7 +8742,7 @@ class Pathname
     {
       sep: String,
       limit: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -8803,7 +8803,7 @@ class Pathname
   standard_method(
     {
       ignore_error: Opus::Types.any(TrueClass, FalseClass),
-      blk: Proc,
+      blk: Opus::Types.proc([Pathname], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -8914,7 +8914,7 @@ class Pathname
       mode: String,
       perm: String,
       opt: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([File], returns: BasicObject),
     },
     returns: Opus::Types.any(File, Opus::Types.untyped)
   )
@@ -8923,7 +8923,7 @@ class Pathname
   standard_method(
     {
       _: Encoding,
-      blk: Proc,
+      blk: Opus::Types.proc([Dir], returns: BasicObject),
     },
     returns: Opus::Types.any(Dir, Opus::Types.untyped)
   )
@@ -9376,7 +9376,7 @@ module Process
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, NilClass)
   )
@@ -9656,7 +9656,7 @@ module Process::GID
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Opus::Types.untyped)
   )
@@ -9938,7 +9938,7 @@ module Process::UID
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Opus::Types.untyped)
   )
@@ -10058,7 +10058,7 @@ class Range
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(BasicObject, NilClass)
   )
@@ -10074,7 +10074,7 @@ class Range
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -10131,7 +10131,7 @@ class Range
   standard_method(
     {
       n: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
@@ -10140,7 +10140,7 @@ class Range
   standard_method(
     {
       n: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
@@ -10155,7 +10155,7 @@ class Range
   standard_method(
     {
       n: Integer,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -10728,7 +10728,7 @@ class Set
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Set)
   )
@@ -10758,7 +10758,7 @@ class Set
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.untyped
   )
@@ -10782,7 +10782,7 @@ class Set
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
@@ -10824,7 +10824,7 @@ class Set
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.untyped
   )
@@ -10832,7 +10832,7 @@ class Set
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Set
   )
@@ -10872,7 +10872,7 @@ class Set
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(BasicObject, NilClass)
   )
@@ -10888,7 +10888,7 @@ class Set
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(BasicObject, NilClass)
   )
@@ -10988,7 +10988,7 @@ class Set
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Set
   )
@@ -11217,7 +11217,7 @@ class String
 
   standard_method(
     {
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Opus::Types.array_of(Integer)
   )
@@ -11286,7 +11286,7 @@ class String
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(String, Enumerator)
   )
@@ -11294,7 +11294,7 @@ class String
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(String, Enumerator)
   )
@@ -11302,7 +11302,7 @@ class String
 
   standard_method(
     {
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(String, Enumerator)
   )
@@ -11311,7 +11311,7 @@ class String
   standard_method(
     {
       _: String,
-      blk: Proc,
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(String, Enumerator)
   )
@@ -11365,7 +11365,7 @@ class String
     {
       _: Opus::Types.any(Regexp, String),
       _1: Opus::Types.any(String, Hash),
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(String, Enumerator)
   )
@@ -11375,7 +11375,7 @@ class String
     {
       _: Opus::Types.any(Regexp, String),
       _1: String,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(String, NilClass, Enumerator)
   )
@@ -11570,7 +11570,7 @@ class String
   standard_method(
     {
       _: Opus::Types.any(Regexp, String),
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Opus::Types.array_of(Opus::Types.any(String, Opus::Types.array_of(String)))
   )
@@ -11579,7 +11579,7 @@ class String
   standard_method(
     {
       _: String,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: String
   )
@@ -11588,7 +11588,7 @@ class String
   standard_method(
     {
       _: String,
-      blk: Proc,
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: String
   )
@@ -11667,7 +11667,7 @@ class String
     {
       _: Opus::Types.any(Regexp, String),
       _1: Opus::Types.any(String, Hash),
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: String
   )
@@ -11677,7 +11677,7 @@ class String
     {
       _: Opus::Types.any(Regexp, String),
       _1: String,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: String
   )
@@ -11813,7 +11813,7 @@ class String
     {
       _: String,
       _1: BasicObject,
-      blk: Proc,
+      blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Enumerator, String)
   )
@@ -12465,7 +12465,7 @@ module URI
     {
       str: String,
       schemes: Array,
-      blk: Proc,
+      blk: BasicObject,
     },
     returns: Opus::Types.array_of(String)
   )
