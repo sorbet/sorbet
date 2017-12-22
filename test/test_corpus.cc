@@ -407,6 +407,9 @@ vector<Expectations> listDir(const char *name) {
             if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
                 continue;
             }
+            if (strcmp(entry->d_name, "disabled") == 0) {
+                continue;
+            }
             char path[1024];
             snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
             auto nested = listDir(path);

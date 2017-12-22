@@ -1,0 +1,3 @@
+# @typed
+
+!m foo

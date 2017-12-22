@@ -1,0 +1,3 @@
+# @typed
+
+class Foo end

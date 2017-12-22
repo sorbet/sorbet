@@ -1,0 +1,3 @@
+# @typed
+
+assert dogs

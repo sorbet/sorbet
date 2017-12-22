@@ -1,0 +1,3 @@
+# @typed
+
+BEGIN { 1 }

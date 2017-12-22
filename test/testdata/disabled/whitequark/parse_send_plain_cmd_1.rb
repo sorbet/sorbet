@@ -1,0 +1,3 @@
+# @typed
+
+foo::fun bar

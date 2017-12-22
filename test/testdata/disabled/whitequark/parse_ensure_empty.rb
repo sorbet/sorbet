@@ -1,0 +1,3 @@
+# @typed
+
+begin ensure end

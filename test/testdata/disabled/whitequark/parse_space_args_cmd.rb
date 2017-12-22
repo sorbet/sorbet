@@ -1,0 +1,3 @@
+# @typed
+
+fun (f bar)

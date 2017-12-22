@@ -1,0 +1,3 @@
+# @typed
+
+not m foo

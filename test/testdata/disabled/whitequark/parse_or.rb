@@ -1,0 +1,3 @@
+# @typed
+
+foo or bar

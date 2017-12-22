@@ -1,0 +1,3 @@
+# @typed
+
+super do end

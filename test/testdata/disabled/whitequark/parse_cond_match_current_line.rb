@@ -1,0 +1,3 @@
+# @typed
+
+if /wat/; end

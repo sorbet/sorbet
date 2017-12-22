@@ -1,0 +1,3 @@
+# @typed
+
+::A, foo = foo

@@ -1,0 +1,3 @@
+# @typed
+
+%i[foo bar]

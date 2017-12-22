@@ -1,0 +1,3 @@
+# @typed
+
+def String=; end

@@ -1,0 +1,3 @@
+# @typed
+
+def until; end
