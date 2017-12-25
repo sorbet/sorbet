@@ -10,7 +10,7 @@ You can read more in our [design doc](https://hackpad.corp.stripe.com/Design-Doc
 We build using [bazel](https://bazel.build/); Run `./bazel test
 //...` to build and run the tests.
 
-# Code convenctions
+# Code conventions
 
  - use smart pointers for storage, references for arguments;
  - no c-style allocators. Use vectors instead.
