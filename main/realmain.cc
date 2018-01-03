@@ -10,6 +10,8 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
+#include "progressbar/progressbar.h"
+#include "progressbar/statusbar.h"
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 #include "spdlog/spdlog.h"
@@ -60,7 +62,7 @@ shared_ptr<spd::logger> console_err;
 shared_ptr<spd::logger> tracer;
 shared_ptr<spd::logger> console;
 int returnCode = 0;
-
+bool showProgress = false;
 vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalState &gs,
                                                       std::vector<ruby_typer::core::FileRef> frs,
                                                       vector<string> &prints, cxxopts::Options &opts,
@@ -72,6 +74,12 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     bool printParseTree = removeOption(prints, "parse-tree");
     bool printDesugared = removeOption(prints, "ast");
     bool printDesugaredRaw = removeOption(prints, "ast-raw");
+
+    progressbar *progress;
+
+    if (showProgress) {
+        progress = progressbar_new("Indexing", frs.size());
+    }
 
     try {
         for (auto f : frs) {
@@ -95,6 +103,9 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
                 nodes = nullptr; // free up space early
                 tracer->trace("Naming: {}", f.file(gs).path());
                 result.emplace_back(ruby_typer::namer::Namer::run(context, move(ast)));
+                if (showProgress) {
+                    progressbar_inc(progress);
+                }
             } catch (...) {
                 console_err->error("Exception on file: {} (backtrace is above)", f.file(gs).path());
             }
@@ -105,6 +116,9 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     }
     if (silenceErrors) {
         gs.errors.getAndEmptyErrors();
+    }
+    if (showProgress) {
+        progressbar_finish(progress);
     }
     gs.errors.keepErrorsInMemory = oldErrors;
     return result;
@@ -122,14 +136,22 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
     bool printNameTree = removeOption(prints, "name-tree");
     bool printNameTreeRaw = removeOption(prints, "name-tree-raw");
     bool printCFG = removeOption(prints, "cfg");
+    progressbar *progress;
+    statusbar *status;
 
     try {
+        if (showProgress) {
+            status = statusbar_new("Resolving");
+        }
         try {
             tracer->trace("Resolving (global pass)...");
             ruby_typer::core::Context context(gs, gs.defn_root());
             what = ruby_typer::resolver::Resolver::run(context, move(what));
         } catch (...) {
             console_err->error("Exception resolving (backtrace is above)");
+        }
+        if (showProgress) {
+            statusbar_finish(status);
         }
 
         for (auto &resolved : what) {
@@ -139,6 +161,10 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
             if (printNameTreeRaw) {
                 cout << resolved->showRaw(gs) << endl;
             }
+        }
+
+        if (showProgress) {
+            progress = progressbar_new("CFG+Typechecking", what.size());
         }
 
         for (auto &resolved : what) {
@@ -157,9 +183,15 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                 if (printCFG) {
                     cout << "}" << endl << endl;
                 }
+                if (showProgress) {
+                    progressbar_inc(progress);
+                }
             } catch (...) {
                 console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
             }
+        }
+        if (showProgress) {
+            progressbar_finish(progress);
         }
 
         if (printNameTable) {
@@ -244,6 +276,7 @@ cxxopts::Options buildOptions() {
     options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
+    options.add_options()("P,progress", "Draw progressbar");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
 
@@ -351,6 +384,10 @@ int realmain(int argc, char **argv) {
 
     if (options.count("q") != 0) {
         console->set_level(spd::level::critical);
+    }
+
+    if (options.count("P") != 0) {
+        showProgress = true;
     }
 
     if (options.count("trace") != 0) {

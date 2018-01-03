@@ -21,6 +21,13 @@ def externals():
     )
 
     new_git_repository(
+            name="progressbar",
+            remote="https://github.com/doches/progressbar.git",
+            commit="c4c54f891ab05cfc411ec5c2ed147dd4cad1ccf3",
+            build_file="//:progressbar.BUILD",
+        )
+
+    new_git_repository(
             name="statsd",
             remote="https://github.com/romanbsd/statsd-c-client",
             commit="93c9df3831ac543a7ebed1684528d63de7575e05",

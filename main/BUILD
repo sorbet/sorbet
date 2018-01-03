@@ -53,6 +53,7 @@ cc_library(
         "//payload/text",
         "//resolver",
         "@cxxopts",
+        "@progressbar",
     ],
 )
 

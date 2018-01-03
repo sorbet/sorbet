@@ -6,7 +6,7 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 ENV PATH $JAVA_HOME/bin:$PATH
 RUN export JAVA_HOME
 
-RUN apt-get update && apt-get install -y clang-4.0 clang-format-4.0 time
+RUN apt-get update && apt-get install -y clang-4.0 clang-format-4.0 time libncurses5-dev
 
 # Dependencies for the parser
 RUN apt-get update && apt-get install -y ragel bison ruby
