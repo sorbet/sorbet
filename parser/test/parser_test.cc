@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "core/Unfreeze.h"
 #include "core/core.h"
 #include "parser/Dedenter.h"
 #include "parser/parser.h"
@@ -15,6 +16,8 @@ using namespace std;
 TEST(ParserTest, SimpleParse) { // NOLINT
     auto console = spd::stderr_color_mt("parse");
     ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);
+    ruby_typer::core::UnfreezeFileTable ft(gs);
     ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
     ruby_typer::parser::Parser::run(gs, "<test>", "class A; class B; end; end");
     ruby_typer::parser::Parser::run(gs, "<test>", "class A::B; module B; end; end");

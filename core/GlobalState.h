@@ -29,6 +29,9 @@ class GlobalState final {
     friend File;
     friend FileRef;
     friend serialize::GlobalStateSerializer;
+    friend class UnfreezeNameTable;
+    friend class UnfreezeSymbolTable;
+    friend class UnfreezeFileTable;
 
 public:
     GlobalState(spdlog::logger &logger);
@@ -203,6 +206,15 @@ private:
     std::vector<Symbol> symbols;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<File> files;
+    bool freezeSymbolTable();
+    bool freezeNameTable();
+    bool freezeFileTable();
+    bool unfreezeSymbolTable();
+    bool unfreezeNameTable();
+    bool unfreezeFileTable();
+    bool nameTableFrozen = false;
+    bool symbolTableFrozen = false;
+    bool fileTableFrozen = false;
 
     void expandNames();
 

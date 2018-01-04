@@ -4,6 +4,7 @@
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
 #include "core/Files.h"
+#include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
@@ -84,15 +85,23 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     try {
         for (auto f : frs) {
             try {
-                tracer->trace("Parsing: {}", f.file(gs).path());
-                auto nodes = ruby_typer::parser::Parser::run(gs, f);
+                std::unique_ptr<ruby_typer::parser::Node> nodes;
+                {
+                    tracer->trace("Parsing: {}", f.file(gs).path());
+                    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters strings from source code as names
+                    nodes = ruby_typer::parser::Parser::run(gs, f);
+                }
                 if (printParseTree) {
                     cout << nodes->toString(gs, 0) << endl;
                 }
 
                 ruby_typer::core::Context context(gs, gs.defn_root());
-                tracer->trace("Desugaring: {}", f.file(gs).path());
-                auto ast = ruby_typer::ast::desugar::node2Tree(context, nodes);
+                std::unique_ptr<ruby_typer::ast::Expression> ast;
+                {
+                    tracer->trace("Desugaring: {}", f.file(gs).path());
+                    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // creates temporaries during desugaring
+                    ast = ruby_typer::ast::desugar::node2Tree(context, nodes);
+                }
                 if (printDesugared) {
                     cout << ast->toString(gs, 0) << endl;
                 }
@@ -101,8 +110,13 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
                     cout << ast->showRaw(gs) << endl;
                 }
                 nodes = nullptr; // free up space early
-                tracer->trace("Naming: {}", f.file(gs).path());
-                result.emplace_back(ruby_typer::namer::Namer::run(context, move(ast)));
+                {
+                    tracer->trace("Naming: {}", f.file(gs).path());
+                    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+                    ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+                    ast = ruby_typer::namer::Namer::run(context, move(ast));
+                }
+                result.emplace_back(move(ast));
                 if (showProgress) {
                     progressbar_inc(progress);
                 }
@@ -144,9 +158,13 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
             status = statusbar_new("Resolving");
         }
         try {
-            tracer->trace("Resolving (global pass)...");
             ruby_typer::core::Context context(gs, gs.defn_root());
-            what = ruby_typer::resolver::Resolver::run(context, move(what));
+            {
+                tracer->trace("Resolving (global pass)...");
+                ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
+                ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+                what = ruby_typer::resolver::Resolver::run(context, move(what));
+            }
         } catch (...) {
             console_err->error("Exception resolving (backtrace is above)");
         }
@@ -174,11 +192,15 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                 if (printCFG) {
                     cout << "digraph \"" << ruby_typer::File::getFileName(f.file(gs).path()) << "\"{" << endl;
                 }
-                tracer->trace("CFG+Infer: {}", f.file(gs).path());
                 bool doType = opts["typed"].as<string>() != "never";
                 CFG_Collector_and_Typer collector(doType, printCFG);
-                result.emplace_back(
-                    ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
+                {
+                    tracer->trace("CFG+Infer: {}", f.file(gs).path());
+                    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates names for temporaries in CFG
+                    ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // lazily creates singleton classes
+                    result.emplace_back(
+                        ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
+                }
 
                 if (printCFG) {
                     cout << "}" << endl << endl;
@@ -407,36 +429,39 @@ int realmain(int argc, char **argv) {
     clock_t begin = clock();
     vector<ruby_typer::core::FileRef> inputFiles;
     tracer->trace("Files: ");
-    for (auto &fileName : files) {
-        string src;
-        try {
-            src = ruby_typer::File::read(fileName.c_str());
-        } catch (ruby_typer::FileNotFoundException e) {
-            console->error("File Not Found: {}", fileName);
-            returnCode = 11;
-            continue;
+    {
+        ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
+        for (auto &fileName : files) {
+            string src;
+            try {
+                src = ruby_typer::File::read(fileName.c_str());
+            } catch (ruby_typer::FileNotFoundException e) {
+                console->error("File Not Found: {}", fileName);
+                returnCode = 11;
+                continue;
+            }
+            ruby_typer::counterAdd("types.input.bytes", src.size());
+            ruby_typer::counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
+            ruby_typer::counterInc("types.input.files");
+            inputFiles.push_back(gs.enterFile(fileName, src));
+            tracer->trace("{}", fileName);
         }
-        ruby_typer::counterAdd("types.input.bytes", src.size());
-        ruby_typer::counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
-        ruby_typer::counterInc("types.input.files");
-        inputFiles.push_back(gs.enterFile(fileName, src));
-        tracer->trace("{}", fileName);
-    }
-    if (options.count("e") != 0) {
-        string src = options["e"].as<string>();
-        ruby_typer::counterAdd("types.input.bytes", src.size());
-        ruby_typer::counterInc("types.input.lines");
-        ruby_typer::counterInc("types.input.files");
-        inputFiles.push_back(gs.enterFile(string("-e"), src));
-        if (typed == "never") {
-            console->error("`-e` implies `--typed always` and you passed `--typed never`");
-            return 1;
+        if (options.count("e") != 0) {
+            string src = options["e"].as<string>();
+            ruby_typer::counterAdd("types.input.bytes", src.size());
+            ruby_typer::counterInc("types.input.lines");
+            ruby_typer::counterInc("types.input.files");
+            inputFiles.push_back(gs.enterFile(string("-e"), src));
+            if (typed == "never") {
+                console->error("`-e` implies `--typed always` and you passed `--typed never`");
+                return 1;
+            }
+            forceTyped = true;
         }
-        forceTyped = true;
-    }
-    if (forceTyped) {
-        for (auto &f : inputFiles) {
-            f.file(gs).source_type = ruby_typer::core::File::Typed;
+        if (forceTyped) {
+            for (auto &f : inputFiles) {
+                f.file(gs).source_type = ruby_typer::core::File::Typed;
+            }
         }
     }
 

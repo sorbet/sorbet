@@ -1,6 +1,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
+#include "core/Unfreeze.h"
 #include "namer/namer.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
@@ -32,6 +33,8 @@ private:
 static const char *testClass_str = "Test";
 
 unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
+    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+    ruby_typer::core::UnfreezeFileTable ft(gs);              // enters original strings
     auto ast = parser::Parser::run(gs, "<test>", str);
     ruby_typer::core::Context ctx(gs, gs.defn_root());
     return ast::desugar::node2Tree(ctx, ast);
@@ -44,7 +47,12 @@ unique_ptr<ast::Expression> hello_world(core::GlobalState &gs) {
 TEST_F(NamerFixture, HelloWorld) { // NOLINT
     auto ctx = getCtx();
     auto tree = hello_world(ctx);
-    namer::Namer::run(ctx, move(tree));
+    {
+        ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
+        ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
+        namer::Namer::run(ctx, move(tree));
+    }
+
     auto &objectScope = core::GlobalState::defn_Object().info(ctx);
     ASSERT_EQ(core::GlobalState::defn_root(), objectScope.owner);
 
@@ -62,7 +70,12 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     auto baseNames = ctx.state.namesUsed();
 
     auto tree = hello_world(ctx);
-    auto newtree = namer::Namer::run(ctx, move(tree));
+    std::unique_ptr<ruby_typer::ast::Expression> newtree;
+    {
+        ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
+        ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
+        newtree = namer::Namer::run(ctx, move(tree));
+    }
     ASSERT_EQ(baseSymbols + 1, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
 
@@ -75,7 +88,11 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
 TEST_F(NamerFixture, NameClass) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Test; class Foo; end; end");
-    namer::Namer::run(ctx, move(tree));
+    {
+        ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
+        ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
+        namer::Namer::run(ctx, move(tree));
+    }
     auto &rootScope =
         core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).info(ctx);
 
@@ -89,7 +106,11 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
 TEST_F(NamerFixture, InsideClass) { // NOLINT
     auto ctx = getCtx();
     auto tree = getTree(ctx, "class Test; class Foo; def bar; end; end; end");
-    namer::Namer::run(ctx, move(tree));
+    {
+        ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
+        ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
+        namer::Namer::run(ctx, move(tree));
+    }
     auto &rootScope =
         core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).info(ctx);
 

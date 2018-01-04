@@ -223,6 +223,10 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     }
 
     Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
+
+    freezeNameTable();
+    freezeSymbolTable();
+    freezeFileTable();
 }
 
 GlobalState::~GlobalState() = default;
@@ -246,6 +250,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
         }
         from++;
     }
+    Error::check(!symbolTableFrozen);
 
     bool reallocate = symbols.size() == symbols.capacity();
 
@@ -356,6 +361,8 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
         bucketId = (bucketId + probe_count) & mask;
         probe_count++;
     }
+    Error::check(!nameTableFrozen);
+
     DEBUG_ONLY(if (probe_count == hashTableSize) { Error::raise("Full table?"); });
 
     if (names.size() == names.capacity()) {
@@ -408,6 +415,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     if (probe_count == hashTableSize) {
         Error::raise("Full table?");
     }
+    Error::check(!nameTableFrozen);
 
     if (names.size() == names.capacity()) {
         expandNames();
@@ -495,6 +503,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     if (probe_count == hashTableSize) {
         Error::raise("Full table?");
     }
+    Error::check(!nameTableFrozen);
 
     if (names.size() == names.capacity()) {
         expandNames();
@@ -555,6 +564,7 @@ bool fileIsTyped(absl::string_view source) {
 }
 
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
+    Error::check(!fileTableFrozen);
     auto idx = files.size();
     File::Type source_type = File::Untyped;
     if (fileIsTyped(source)) {
@@ -615,6 +625,42 @@ void GlobalState::sanityCheck() const {
         const Name &nm = names[ent.second];
         Error::check(ent.first == nm.hash(*this));
     }
+}
+
+bool GlobalState::freezeNameTable() {
+    bool old = this->nameTableFrozen;
+    this->nameTableFrozen = true;
+    return old;
+}
+
+bool GlobalState::freezeFileTable() {
+    bool old = this->fileTableFrozen;
+    this->fileTableFrozen = true;
+    return old;
+}
+
+bool GlobalState::freezeSymbolTable() {
+    bool old = this->symbolTableFrozen;
+    this->symbolTableFrozen = true;
+    return old;
+}
+
+bool GlobalState::unfreezeNameTable() {
+    bool old = this->nameTableFrozen;
+    this->nameTableFrozen = false;
+    return old;
+}
+
+bool GlobalState::unfreezeFileTable() {
+    bool old = this->fileTableFrozen;
+    this->fileTableFrozen = false;
+    return old;
+}
+
+bool GlobalState::unfreezeSymbolTable() {
+    bool old = this->symbolTableFrozen;
+    this->symbolTableFrozen = false;
+    return old;
 }
 
 } // namespace core

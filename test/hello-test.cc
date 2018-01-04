@@ -1,6 +1,7 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/common.h"
+#include "core/Unfreeze.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
@@ -150,6 +151,8 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     ruby_typer::core::Context ctx(cb, cb.defn_root());
     static const char *foo_str = "Foo";
     ruby_typer::core::Loc loc(0, 42, 91);
+    ruby_typer::core::UnfreezeNameTable nt(ctx);
+    ruby_typer::core::UnfreezeSymbolTable st(ctx);
 
     auto name = ctx.state.enterNameUTF8(foo_str);
     auto classSym = ctx.state.enterClassSymbol(loc, ruby_typer::core::GlobalState::defn_root(), name);

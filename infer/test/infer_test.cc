@@ -2,6 +2,7 @@
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
 #include "core/Names/infer.h"
+#include "core/Unfreeze.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
@@ -33,6 +34,9 @@ private:
 };
 
 void processSource(core::GlobalState &cb, string str) {
+    ruby_typer::core::UnfreezeNameTable nt(cb);
+    ruby_typer::core::UnfreezeSymbolTable st(cb);
+    ruby_typer::core::UnfreezeFileTable ft(cb);
     auto ast = parser::Parser::run(cb, "<test>", str);
     ruby_typer::core::Context ctx(cb, cb.defn_root());
     auto tree = ast::desugar::node2Tree(ctx, ast);

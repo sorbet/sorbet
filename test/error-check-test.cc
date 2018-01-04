@@ -1,6 +1,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
+#include "core/Unfreeze.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
@@ -19,6 +20,9 @@ TEST(ErrorTest, RawCheck) { // NOLINT
 TEST(ErrorTest, ParserCheck) { // NOLINT
     auto console = spdlog::stderr_color_mt("Error Test");
     ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::UnfreezeNameTable nt(gs);
+    ruby_typer::core::UnfreezeSymbolTable st(gs);
+    ruby_typer::core::UnfreezeFileTable ft(gs);
     ruby_typer::core::Context context(gs, gs.defn_root());
     auto ast = ruby_typer::parser::Parser::run(gs, "<test input>", "a");
     ast->loc = core::Loc::none(0);

@@ -4,6 +4,7 @@
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
 #include "common/common.h"
+#include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
@@ -89,6 +90,8 @@ public:
     CFG_Collector_and_Typer() = default;
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
+        ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx);     // creates names for temporaries in CFG
+        ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(ctx); // lazily creates singleton classes
         auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
 
@@ -123,16 +126,25 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // Parser
     vector<ruby_typer::core::FileRef> files;
-    for (auto &srcPath : test.sourceFiles) {
-        auto path = test.folder + srcPath;
-        auto src = ruby_typer::File::read(path.c_str());
-        files.push_back(gs.enterFile(path, src));
+    {
+        ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
+
+        for (auto &srcPath : test.sourceFiles) {
+            auto path = test.folder + srcPath;
+            auto src = ruby_typer::File::read(path.c_str());
+            files.push_back(gs.enterFile(path, src));
+        }
     }
     vector<unique_ptr<ruby_typer::ast::Expression>> trees;
     map<string, string> got;
 
     for (auto file : files) {
-        auto ast = ruby_typer::parser::Parser::run(gs, file);
+        std::unique_ptr<ruby_typer::parser::Node> nodes;
+        {
+            ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+
+            nodes = ruby_typer::parser::Parser::run(gs, file);
+        }
         {
             auto newErrors = gs.errors.getAndEmptyErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
@@ -141,14 +153,19 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         auto expectation = test.expectations.find("parse-tree");
         if (expectation != test.expectations.end()) {
-            got["parse-tree"].append(ast->toString(gs)).append("\n");
+            got["parse-tree"].append(nodes->toString(gs)).append("\n");
             auto newErrors = gs.errors.getAndEmptyErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
 
         // Desugarer
-        auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
+        std::unique_ptr<ruby_typer::ast::Expression> desugared;
+        {
+            ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+
+            desugared = ruby_typer::ast::desugar::node2Tree(context, nodes);
+        }
 
         expectation = test.expectations.find("ast");
         if (expectation != test.expectations.end()) {
@@ -167,11 +184,20 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // Namer
-        auto namedTree = ruby_typer::namer::Namer::run(context, move(desugared));
+        std::unique_ptr<ruby_typer::ast::Expression> namedTree;
+        {
+            ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+            ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+            namedTree = ruby_typer::namer::Namer::run(context, move(desugared));
+        }
         trees.emplace_back(move(namedTree));
     }
 
-    trees = ruby_typer::resolver::Resolver::run(context, move(trees));
+    {
+        ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
+        ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+        trees = ruby_typer::resolver::Resolver::run(context, move(trees));
+    }
 
     auto expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {

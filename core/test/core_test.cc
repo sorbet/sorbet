@@ -1,3 +1,4 @@
+#include "core/Unfreeze.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
 #include "spdlog/spdlog.h"
@@ -19,6 +20,7 @@ struct Offset2PosTest {
 
 TEST(ASTTest, TestOffset2Pos) { // NOLINT
     core::GlobalState gs(*console);
+    ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
 
     vector<Offset2PosTest> cases = {{"hello", 0, 1, 1},
                                     {"line 1\nline 2", 1, 1, 2},
@@ -43,6 +45,7 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
 
 TEST(ASTTest, ErrorReporter) { // NOLINT
     core::GlobalState gs(*console);
+    ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
     core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
     gs.errors.error(core::Loc{f, 0, 3}, core::errors::Internal::InternalError, "Use of metavariable: {}", "foo");
     ASSERT_TRUE(gs.errors.hadCriticalError());
