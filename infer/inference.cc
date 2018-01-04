@@ -250,6 +250,20 @@ public:
             whoKnows.truthy.yesTypeTests.emplace_back(send->recv, tp1.type);
             whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], tp2.type);
             whoKnows.sanityCheck();
+        } else if (send->fun == core::Names::tripleEq()) {
+            core::TypeAndOrigins recvKlass = getTypeAndOrigin(ctx, send->recv);
+            if (!recvKlass.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {
+                return;
+            }
+
+            auto *s = core::cast_type<core::ClassType>(recvKlass.type.get());
+            Error::check(s != nullptr);
+            core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
+            if (attachedClass.exists()) {
+                whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], make_shared<core::ClassType>(attachedClass));
+                whoKnows.falsy.noTypeTests.emplace_back(send->args[0], make_shared<core::ClassType>(attachedClass));
+            }
+            whoKnows.sanityCheck();
         }
     }
 

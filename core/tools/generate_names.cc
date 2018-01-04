@@ -51,7 +51,7 @@ NameDef names[] = {
     {"star", "*", Parser},
     {"starStar", "**", Parser},
     {"ampersand", "&", Parser},
-    {"tripleEq", "===", Desugar},
+    {"tripleEq", "===", Desugar | Infer},
     {"orOp", "|", Desugar},
     {"backtick", "`", Desugar},
     {"slice", Desugar},

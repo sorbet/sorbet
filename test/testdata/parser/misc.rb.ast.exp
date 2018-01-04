@@ -32,7 +32,7 @@ begin
   end
   begin
     assignTemp$10004 = self(<constant:<todo sym>>).x()
-    if assignTemp$10004.===(y)
+    if y.===(assignTemp$10004)
       1
     else
       self(<constant:<todo sym>>).z()

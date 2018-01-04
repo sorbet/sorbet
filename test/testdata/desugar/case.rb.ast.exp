@@ -3,13 +3,13 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<constant:<todo s
     begin
       begin
         assignTemp$10000 = self(<constant:<todo sym>>).a()
-        if assignTemp$10000.===(self(<constant:<todo sym>>).foo1())
+        if self(<constant:<todo sym>>).foo1().===(assignTemp$10000)
           :a
         else
-          if if assignTemp$10000.===(self(<constant:<todo sym>>).foo3())
+          if if self(<constant:<todo sym>>).foo3().===(assignTemp$10000)
               true
             else
-              assignTemp$10000.===(self(<constant:<todo sym>>).foo2())
+              self(<constant:<todo sym>>).foo2().===(assignTemp$10000)
             end
             :b
           else

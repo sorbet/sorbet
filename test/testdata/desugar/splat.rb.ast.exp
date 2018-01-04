@@ -39,7 +39,7 @@ begin
         assignTemp$10000 = begin
           1
         end
-        if assignTemp$10000.===(::<constant:<Magic>>.<splat>(<emptyTree>::<constant:Integer>.to_a()))
+        if ::<constant:<Magic>>.<splat>(<emptyTree>::<constant:Integer>.to_a()).===(assignTemp$10000)
           <emptyTree>
         else
           <emptyTree>

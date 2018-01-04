@@ -1272,7 +1272,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                         unique_ptr<Expression> test;
                         if (temp.exists()) {
                             auto local = mkLocal(cloc, temp);
-                            test = mkSend1(cnode->loc, move(local), core::Names::tripleEq(), move(ctree));
+                            test = mkSend1(cnode->loc, move(ctree), core::Names::tripleEq(), move(local));
                         } else {
                             test.swap(ctree);
                         }
