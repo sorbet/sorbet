@@ -56,13 +56,15 @@ public:
 
     friend class GlobalState;
 
-    absl::string_view path();
-    absl::string_view source();
+    absl::string_view path() const;
+    absl::string_view source() const;
     Type source_type;
 
     File(std::string &&path_, std::string &&source_, Type sourcetype);
     File(File &&other) = default;
     File(const File &other) = delete;
+    File() = delete;
+    File deepCopy();
 
 private:
     std::string path_;

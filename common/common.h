@@ -32,9 +32,15 @@ template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
 
 #if defined(NDEBUG) && !defined(FORCE_DEBUG)
 constexpr bool debug_mode = false;
+#undef DEBUG_MODE
 #else
+#define DEBUG_MODE
 constexpr bool debug_mode = true;
 #endif
+#define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
+#define ENFORCE(x, ...)                  \
+    (::ruby_typer::debug_mode && !(x) && \
+     ::ruby_typer::Error::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)))
 
 #define DEBUG_ONLY(X) \
     if (debug_mode) { \

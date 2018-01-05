@@ -111,9 +111,9 @@ std::shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, std::shared_ptr<T
                  }
              },
              [&](Type *) { result = from; });
-    DEBUG_ONLY(Error::check(Types::isSubType(ctx, result, from),
-                            "dropSubtypesOf(" + from->toString(ctx) + "," + klass.info(ctx).fullName(ctx) +
-                                ") returned " + result->toString(ctx) + ", which is not a subtype of the input"));
+    ENFORCE(Types::isSubType(ctx, result, from), "dropSubtypesOf(" + from->toString(ctx) + "," +
+                                                     klass.info(ctx).fullName(ctx) + ") returned " +
+                                                     result->toString(ctx) + ", which is not a subtype of the input");
     return result;
 }
 
@@ -147,7 +147,7 @@ std::shared_ptr<Type> Types::approximateSubtract(core::Context ctx, std::shared_
 }
 
 ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {
-    Error::check(symbol.exists());
+    ENFORCE(symbol.exists());
 }
 
 namespace {
@@ -156,8 +156,8 @@ string classNameToString(GlobalState &gs, core::NameRef nm) {
     if (name.kind == core::CONSTANT) {
         return name.cnst.original.toString(gs);
     } else {
-        Error::check(name.kind == core::UNIQUE);
-        Error::check(name.unique.uniqueNameKind == core::Singleton);
+        ENFORCE(name.kind == core::UNIQUE);
+        ENFORCE(name.unique.uniqueNameKind == core::Singleton);
         return "<class:" + classNameToString(gs, name.unique.original) + ">";
     }
 }
@@ -174,7 +174,7 @@ string ruby_typer::core::ClassType::typeName() {
 ruby_typer::core::ProxyType::ProxyType(shared_ptr<ruby_typer::core::Type> underlying) : underlying(move(underlying)) {}
 
 void ProxyType::_sanityCheck(core::Context ctx) {
-    Error::check(cast_type<ClassType>(this->underlying.get()) != nullptr);
+    ENFORCE(cast_type<ClassType>(this->underlying.get()) != nullptr);
     this->underlying->sanityCheck(ctx);
 }
 
@@ -195,7 +195,7 @@ ruby_typer::core::LiteralType::LiteralType(double val)
 
 ruby_typer::core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
     : ProxyType(klass == core::GlobalState::defn_String() ? Types::String() : Types::Symbol()), value(val._id) {
-    Error::check(klass == core::GlobalState::defn_String() || klass == core::GlobalState::defn_Symbol());
+    ENFORCE(klass == core::GlobalState::defn_String() || klass == core::GlobalState::defn_Symbol());
 }
 
 ruby_typer::core::LiteralType::LiteralType(bool val)
@@ -208,27 +208,20 @@ string LiteralType::typeName() {
 string LiteralType::toString(GlobalState &gs, int tabs) {
     string value;
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
-    switch (undSymbol._id) {
-        case GlobalState::defn_String()._id:
-            value = "\"" + NameRef(this->value).toString(gs) + "\"";
-            break;
-        case GlobalState::defn_Symbol()._id:
-            value = ":\"" + NameRef(this->value).toString(gs) + "\"";
-            break;
-        case GlobalState::defn_Integer()._id:
-            value = to_string(this->value);
-            break;
-        case GlobalState::defn_Float()._id:
-            value = to_string(*reinterpret_cast<double *>(&(this->value)));
-            break;
-        case GlobalState::defn_TrueClass()._id:
-            value = "true";
-            break;
-        case GlobalState::defn_FalseClass()._id:
-            value = "false";
-            break;
-        default:
-            Error::raise("should not be reachable");
+    if (undSymbol == GlobalState::defn_String()) {
+        value = "\"" + NameRef(this->value).toString(gs) + "\"";
+    } else if (undSymbol == GlobalState::defn_Symbol()) {
+        value = ":\"" + NameRef(this->value).toString(gs) + "\"";
+    } else if (undSymbol == GlobalState::defn_Integer()) {
+        value = to_string(this->value);
+    } else if (undSymbol == GlobalState::defn_Float()) {
+        value = to_string(*reinterpret_cast<double *>(&(this->value)));
+    } else if (undSymbol == GlobalState::defn_TrueClass()) {
+        value = "true";
+    } else if (undSymbol == GlobalState::defn_FalseClass()) {
+        value = "false";
+    } else {
+        Error::raise("should not be reachable");
     }
     return this->underlying->toString(gs, tabs) + "(" + value + ")";
 }
@@ -310,7 +303,7 @@ string ShapeType::toString(GlobalState &gs, int tabs) {
 
 void ShapeType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
-    Error::check(this->values.size() == this->keys.size());
+    ENFORCE(this->values.size() == this->keys.size());
     for (auto &v : this->keys) {
         v->_sanityCheck(ctx);
     }
@@ -386,19 +379,19 @@ string OrType::toString(GlobalState &gs, int tabs) {
 void AndType::_sanityCheck(core::Context ctx) {
     left->_sanityCheck(ctx);
     right->_sanityCheck(ctx);
-    Error::check(cast_type<ProxyType>(left.get()) == nullptr);
-    Error::check(cast_type<ProxyType>(right.get()) == nullptr);
-    Error::check(!left->isDynamic());
-    Error::check(!right->isDynamic());
+    ENFORCE(cast_type<ProxyType>(left.get()) == nullptr);
+    ENFORCE(cast_type<ProxyType>(right.get()) == nullptr);
+    ENFORCE(!left->isDynamic());
+    ENFORCE(!right->isDynamic());
 }
 
 void OrType::_sanityCheck(core::Context ctx) {
     left->_sanityCheck(ctx);
     right->_sanityCheck(ctx);
-    Error::check(cast_type<ProxyType>(left.get()) == nullptr);
-    Error::check(cast_type<ProxyType>(right.get()) == nullptr);
-    Error::check(!left->isDynamic());
-    Error::check(!right->isDynamic());
+    ENFORCE(cast_type<ProxyType>(left.get()) == nullptr);
+    ENFORCE(cast_type<ProxyType>(right.get()) == nullptr);
+    ENFORCE(!left->isDynamic());
+    ENFORCE(!right->isDynamic());
 }
 
 int ClassType::kind() {
@@ -406,7 +399,7 @@ int ClassType::kind() {
 }
 
 void ClassType::_sanityCheck(core::Context ctx) {
-    Error::check(this->symbol.exists());
+    ENFORCE(this->symbol.exists());
 }
 
 int AndType::kind() {

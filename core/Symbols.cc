@@ -41,22 +41,25 @@ bool Symbol::derivesFrom(GlobalState &gs, SymbolRef sym) {
     return false;
 }
 
-SymbolRef Symbol::ref(GlobalState &gs) const {
+SymbolRef Symbol::ref(const GlobalState &gs) const {
     auto distance = this - gs.symbols.data();
-    return SymbolRef(distance);
+    return SymbolRef(gs, distance);
 }
 
 Symbol &SymbolRef::info(GlobalState &gs, bool allowNone) const {
-    Error::check(_id < gs.symbols.size());
+    ENFORCE(_id < gs.symbols.size());
+#ifdef DEBUG_MODE
+    ENFORCE(isSynthetic() || this->globalStateId == gs.globalStateId, "Symbol leaked between global states");
+#endif
     if (!allowNone) {
-        Error::check(this->exists());
+        ENFORCE(this->exists());
     }
 
     return gs.symbols[this->_id];
 }
 
 bool SymbolRef::isSynthetic() const {
-    return this->_id <= GlobalState::defn_last_synthetic_sym()._id;
+    return this->_id < GlobalState::MAX_SYNTHETIC_SYMBOLS;
 }
 
 bool SymbolRef::isHiddenFromPrinting(GlobalState &gs) const {
@@ -162,6 +165,22 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
     return os.str();
 }
 
+SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {
+#ifdef DEBUG_MODE
+    globalStateId = from.globalStateId;
+#endif
+}
+
+SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {
+#ifdef DEBUG_MODE
+    if (from == nullptr) {
+        ENFORCE(isSynthetic());
+    } else {
+        globalStateId = from->globalStateId;
+    }
+#endif
+}
+
 SymbolRef Symbol::findMember(GlobalState &gs, NameRef name) {
     histogramInc("find_member_scope_size", members.size());
     for (auto &member : members) {
@@ -169,11 +188,11 @@ SymbolRef Symbol::findMember(GlobalState &gs, NameRef name) {
             return member.second.info(gs).dealias(gs);
         }
     }
-    return SymbolRef(0);
+    return SymbolRef();
 }
 
 SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDepth) {
-    Error::check(this->isClass());
+    ENFORCE(this->isClass());
     if (maxDepth == 0) {
         gs.logger.critical("findMemberTransitive hit a loop while resolving {} in {}. Parents are: ", name.toString(gs),
                            this->fullName(gs));
@@ -197,7 +216,7 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
         return result;
     }
     for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
-        Error::check(it->exists());
+        ENFORCE(it->exists());
         result = it->info(gs).findMemberTransitive(gs, name, maxDepth - 1);
         if (result.exists()) {
             return result;
@@ -206,7 +225,7 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
     if (this->superClass.exists()) {
         return this->superClass.info(gs).findMemberTransitive(gs, name, maxDepth - 1);
     }
-    return SymbolRef(0);
+    return SymbolRef();
 }
 
 string Symbol::fullName(GlobalState &gs) const {
@@ -223,7 +242,7 @@ string Symbol::fullName(GlobalState &gs) const {
 }
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
-    Error::check(this->isClass());
+    ENFORCE(this->isClass());
     SymbolRef selfRef = this->ref(gs);
     if (selfRef == GlobalState::defn_untyped()) {
         return GlobalState::defn_untyped();
@@ -234,7 +253,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
         return singleton;
     }
 
-    NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name);
+    NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
     Symbol &singletonInfo = singleton.info(gs);
 
@@ -247,7 +266,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 }
 
 SymbolRef Symbol::attachedClass(GlobalState &gs) {
-    Error::check(this->isClass());
+    ENFORCE(this->isClass());
     if (this->ref(gs) == GlobalState::defn_untyped()) {
         return GlobalState::defn_untyped();
     }
@@ -266,6 +285,30 @@ SymbolRef Symbol::dealias(GlobalState &gs) {
 bool Symbol::isBlockSymbol(GlobalState &gs) const {
     core::Name &nm = name.name(gs);
     return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
+}
+
+Symbol Symbol::deepCopy() {
+    Symbol result;
+    result.owner = this->owner;
+    result.flags = this->flags;
+    result.argumentsOrMixins = this->argumentsOrMixins;
+    result.resultType = this->resultType;
+    result.name = this->name;
+    result.definitionLoc = this->definitionLoc;
+    result.members = this->members;
+    result.superClass = this->superClass;
+    result.uniqueCounter = this->uniqueCounter;
+    return result;
+}
+
+void Symbol::sanityCheck(GlobalState &gs) {
+    if (!debug_mode)
+        return;
+    SymbolRef current = this->ref(gs);
+    if (current != GlobalState::defn_root()) {
+        SymbolRef current2 = gs.enterSymbol(this->definitionLoc, this->owner, this->name, this->flags);
+        ENFORCE(current == current2);
+    }
 }
 
 LocalVariable::LocalVariable(NameRef name) : name(name) {}

@@ -61,6 +61,7 @@ public:
     }
 
     GlobalState &gs_;
+    u2 uniqueCounter_ = 1;
     core::FileRef file_;
     u4 max_off_;
     ruby_parser::base_driver *driver_;
@@ -88,10 +89,10 @@ public:
 
     Loc collection_loc(const token *begin, ruby_typer::parser::NodeVec &elts, const token *end) {
         if (begin != nullptr) {
-            DEBUG_ONLY(Error::check(end != nullptr));
+            ENFORCE(end != nullptr);
             return tok_loc(begin, end);
         }
-        DEBUG_ONLY(Error::check(end == nullptr));
+        ENFORCE(end == nullptr);
         if (elts.empty()) {
             return Loc::none(file_);
         }
@@ -134,7 +135,7 @@ public:
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (Ident *id = parser::cast_node<Ident>(node.get())) {
             core::Name &name = id->name.name(gs_);
-            DEBUG_ONLY(Error::check(name.kind == core::UTF8));
+            ENFORCE(name.kind == core::UTF8);
             if (driver_->lex.is_declared(name.toString(gs_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {
@@ -354,7 +355,7 @@ public:
             loc = loc.join(tok_loc(name));
             nm = gs_.enterNameUTF8(name->string());
         } else {
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand());
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::ampersand(), ++uniqueCounter_);
         }
         return make_unique<Blockarg>(loc, nm);
     }
@@ -656,7 +657,7 @@ public:
             loc = loc.join(tok_loc(name));
             nm = gs_.enterNameUTF8(name->string());
         } else {
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar());
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::starStar(), ++uniqueCounter_);
         }
         return make_unique<Kwrestarg>(loc, nm);
     }
@@ -752,7 +753,7 @@ public:
             return make_unique<Send>(loc, move(receiver), core::Names::bang(), ruby_typer::parser::NodeVec());
         }
 
-        DEBUG_ONLY(Error::check(begin != nullptr && end != nullptr));
+        ENFORCE(begin != nullptr && end != nullptr);
         auto body = make_unique<Begin>(tok_loc(begin).join(tok_loc(end)), ruby_typer::parser::NodeVec());
         return make_unique<Send>(tok_loc(not_).join(body->loc), move(body), core::Names::bang(),
                                  ruby_typer::parser::NodeVec());
@@ -858,7 +859,7 @@ public:
             loc = loc.join(tok_loc(name));
             nm = gs_.enterNameUTF8(name->string());
         } else {
-            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star());
+            nm = gs_.freshNameUnique(core::UniqueNameKind::Parser, core::Names::star(), ++uniqueCounter_);
         }
         return make_unique<Restarg>(loc, nm);
     }
@@ -1094,7 +1095,7 @@ public:
             return nullptr;
         }
 
-        Error::check(foreign_nodes_[off] != nullptr);
+        ENFORCE(foreign_nodes_[off] != nullptr);
         return move(foreign_nodes_[off]);
     }
 

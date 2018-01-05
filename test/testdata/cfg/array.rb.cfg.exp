@@ -6,8 +6,8 @@ subgraph "cluster_::<constant:TestArray>#an_int" {
     "bb::<constant:TestArray>#an_int_1" [shape = parallelogram];
 
     "bb::<constant:TestArray>#an_int_0" [label = "block[id=0]()
-returnMethodTemp$1 = 0 : Integer(0)
-returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+returnMethodTemp$2 = 0 : Integer(0)
+returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestArray>#an_int_0" -> "bb::<constant:TestArray>#an_int_1" [style="bold"];
@@ -24,8 +24,8 @@ subgraph "cluster_::<constant:TestArray>#a_string" {
     "bb::<constant:TestArray>#a_string_1" [shape = parallelogram];
 
     "bb::<constant:TestArray>#a_string_0" [label = "block[id=0]()
-returnMethodTemp$1 = str : String(\"str\")
-returnMethodTemp$3 = return returnMethodTemp$1 : <bottom>
+returnMethodTemp$2 = str : String(\"str\")
+returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestArray>#a_string_0" -> "bb::<constant:TestArray>#a_string_1" [style="bold"];
@@ -42,31 +42,31 @@ subgraph "cluster_::<constant:TestArray>#test_arrays" {
     "bb::<constant:TestArray>#test_arrays_1" [shape = parallelogram];
 
     "bb::<constant:TestArray>#test_arrays_0" [label = "block[id=0]()
-arrayTemp$4 = alias <constant:<Magic>> : <Magic>
-statTemp$3 = arrayTemp$4.<build-array>() : TupleType {
+arrayTemp$5 = alias <constant:<Magic>> : <Magic>
+statTemp$4 = arrayTemp$5.<build-array>() : TupleType {
 }
-arrayTemp$6 = 1 : Integer(1)
-arrayTemp$7 = 2 : Integer(2)
-arrayTemp$8 = alias <constant:<Magic>> : <Magic>
-statTemp$5 = arrayTemp$8.<build-array>(arrayTemp$6, arrayTemp$7) : TupleType {
+arrayTemp$7 = 1 : Integer(1)
+arrayTemp$8 = 2 : Integer(2)
+arrayTemp$9 = alias <constant:<Magic>> : <Magic>
+statTemp$6 = arrayTemp$9.<build-array>(arrayTemp$7, arrayTemp$8) : TupleType {
   0 = Integer(1)
   1 = Integer(2)
 }
-statTemp$10 = self : TestArray
-arrayTemp$9 = statTemp$10.an_int() : Integer
-statTemp$12 = self : TestArray
-arrayTemp$11 = statTemp$12.a_string() : String
-arrayTemp$14 = alias <constant:<Magic>> : <Magic>
-arrayTemp$13 = arrayTemp$14.<build-array>() : TupleType {
-}
+statTemp$11 = self : TestArray
+arrayTemp$10 = statTemp$11.an_int() : Integer
+statTemp$13 = self : TestArray
+arrayTemp$12 = statTemp$13.a_string() : String
 arrayTemp$15 = alias <constant:<Magic>> : <Magic>
-returnMethodTemp$1 = arrayTemp$15.<build-array>(arrayTemp$9, arrayTemp$11, arrayTemp$13) : TupleType {
+arrayTemp$14 = arrayTemp$15.<build-array>() : TupleType {
+}
+arrayTemp$16 = alias <constant:<Magic>> : <Magic>
+returnMethodTemp$2 = arrayTemp$16.<build-array>(arrayTemp$10, arrayTemp$12, arrayTemp$14) : TupleType {
   0 = Integer
   1 = String
   2 = TupleType {
       }
 }
-returnMethodTemp$16 = return returnMethodTemp$1 : <bottom>
+returnMethodTemp$17 = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestArray>#test_arrays_0" -> "bb::<constant:TestArray>#test_arrays_1" [style="bold"];

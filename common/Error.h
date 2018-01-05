@@ -41,13 +41,7 @@ public:
 
 class Error final {
 public:
-    template <typename... TArgs>[[noreturn]] static void raise(const TArgs &... args) __attribute__((noreturn));
-
-    template <typename T, typename... TArgs>
-    static inline void assertEquals(const T &expected, const T &actual, const TArgs &... args) {
-        DEBUG_ONLY(check(expected == actual, "assertEqual failed: expected=", expected, ", actual=", actual,
-                         ", message: ", args...));
-    }
+    template <typename... TArgs>[[noreturn]] static bool raise(const TArgs &... args) __attribute__((noreturn));
 
     template <typename... TArgs> static inline void check(bool cond, const TArgs &... args) {
         if (debug_mode)
@@ -62,6 +56,12 @@ public:
 
     static void print_backtrace();
 
+    template <typename... TArgs>
+    [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line,
+                                                    const TArgs &... args) __attribute__((noreturn)) {
+        raise(file + ":" + std::to_string(line), " enforced condition ", check, " has failed:", args...);
+    }
+
 private:
     static inline void _raise(std::ostream &) {}
 
@@ -72,7 +72,7 @@ private:
     }
 };
 
-template <typename... TArgs>[[noreturn]] void Error::raise(const TArgs &... args) {
+template <typename... TArgs>[[noreturn]] bool Error::raise(const TArgs &... args) {
     std::stringstream message;
     _raise(message, args...);
 

@@ -24,8 +24,8 @@
 <title>bb::&lt;constant:MyClass&gt;#foo=_0</title>
 <polygon fill="none" stroke="#000000" points="16.1318,-535.9271 348,-497.3177 679.8682,-535.9271 679.5585,-598.3986 16.4415,-598.3986 16.1318,-535.9271"/>
 <text text-anchor="middle" x="348" y="-569.9938" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="348" y="-555.9938" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : MyClass</text>
-<text text-anchor="middle" x="348" y="-541.9938" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="348" y="-555.9938" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$3 = self : MyClass</text>
+<text text-anchor="middle" x="348" y="-541.9938" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="348" y="-527.9938" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:MyClass&gt;#foo=_1 -->
@@ -51,19 +51,19 @@
 <g id="node3" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_0</title>
 <polygon fill="none" stroke="#000000" points="853.9711,-532.0727 1234,-484.8444 1614.0289,-532.0727 1613.6742,-608.4897 854.3258,-608.4897 853.9711,-532.0727"/>
-<text text-anchor="middle" x="1234" y="-576.9938" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](&lt;constant:Exception&gt;$8, &lt;constant:MyClass&gt;$13)</text>
-<text text-anchor="middle" x="1234" y="-562.9938" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Exception&gt;$8 = alias &lt;constant:Exception&gt; : &lt;class:Exception&gt;</text>
-<text text-anchor="middle" x="1234" y="-548.9938" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MyClass&gt;$13 = alias &lt;constant:MyClass&gt; : &lt;class:MyClass&gt;</text>
-<text text-anchor="middle" x="1234" y="-534.9938" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3 = &lt;unanalyzable&gt; : untyped</text>
-<text text-anchor="middle" x="1234" y="-520.9938" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
+<text text-anchor="middle" x="1234" y="-576.9938" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](&lt;constant:Exception&gt;$9, &lt;constant:MyClass&gt;$14)</text>
+<text text-anchor="middle" x="1234" y="-562.9938" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Exception&gt;$9 = alias &lt;constant:Exception&gt; : &lt;class:Exception&gt;</text>
+<text text-anchor="middle" x="1234" y="-548.9938" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MyClass&gt;$14 = alias &lt;constant:MyClass&gt; : &lt;class:MyClass&gt;</text>
+<text text-anchor="middle" x="1234" y="-534.9938" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$4 = &lt;unanalyzable&gt; : untyped</text>
+<text text-anchor="middle" x="1234" y="-520.9938" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_3 -->
 <g id="node5" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_3</title>
 <ellipse fill="none" stroke="#000000" cx="1040" cy="-413.0193" rx="326.2121" ry="35.2113"/>
-<text text-anchor="middle" x="1040" y="-422.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](rescueTemp$3, &lt;constant:Exception&gt;$8, &lt;constant:MyClass&gt;$13)</text>
-<text text-anchor="middle" x="1040" y="-408.8193" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$9 = rescueTemp$3.is_a?(&lt;constant:Exception&gt;$8) : untyped</text>
-<text text-anchor="middle" x="1040" y="-394.8193" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$9</text>
+<text text-anchor="middle" x="1040" y="-422.8193" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](rescueTemp$4, &lt;constant:Exception&gt;$9, &lt;constant:MyClass&gt;$14)</text>
+<text text-anchor="middle" x="1040" y="-408.8193" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$10 = rescueTemp$4.is_a?(&lt;constant:Exception&gt;$9) : untyped</text>
+<text text-anchor="middle" x="1040" y="-394.8193" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$10</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_3 -->
 <g id="edge3" class="edge">
@@ -75,10 +75,10 @@
 <g id="node6" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_4</title>
 <ellipse fill="none" stroke="#000000" cx="1644" cy="-285.865" rx="270.4563" ry="55.3091"/>
-<text text-anchor="middle" x="1644" y="-309.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$1)</text>
-<text text-anchor="middle" x="1644" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = self : Object</text>
-<text text-anchor="middle" x="1644" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = boop : String(&quot;boop&quot;)</text>
-<text text-anchor="middle" x="1644" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$4.raise(statTemp$5) : NilClass</text>
+<text text-anchor="middle" x="1644" y="-309.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$2)</text>
+<text text-anchor="middle" x="1644" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = self : Object</text>
+<text text-anchor="middle" x="1644" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = boop : String(&quot;boop&quot;)</text>
+<text text-anchor="middle" x="1644" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = statTemp$5.raise(statTemp$6) : NilClass</text>
 <text text-anchor="middle" x="1644" y="-253.665" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_4 -->
@@ -110,10 +110,10 @@
 <g id="node7" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_8</title>
 <ellipse fill="none" stroke="#000000" cx="1040" cy="-285.865" rx="315.7944" ry="55.3091"/>
-<text text-anchor="middle" x="1040" y="-309.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=8](returnMethodTemp$1, rescueTemp$3, &lt;constant:MyClass&gt;$13)</text>
-<text text-anchor="middle" x="1040" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = &lt;constant:MyClass&gt;$13.new() : MyClass</text>
-<text text-anchor="middle" x="1040" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = statTemp$11.foo=(rescueTemp$3) : untyped</text>
-<text text-anchor="middle" x="1040" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 3 : Integer(3)</text>
+<text text-anchor="middle" x="1040" y="-309.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=8](returnMethodTemp$2, rescueTemp$4, &lt;constant:MyClass&gt;$14)</text>
+<text text-anchor="middle" x="1040" y="-295.665" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = &lt;constant:MyClass&gt;$14.new() : MyClass</text>
+<text text-anchor="middle" x="1040" y="-281.665" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = statTemp$12.foo=(rescueTemp$4) : untyped</text>
+<text text-anchor="middle" x="1040" y="-267.665" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = 3 : Integer(3)</text>
 <text text-anchor="middle" x="1040" y="-253.665" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_3&#45;&gt;bb::&lt;constant:Object&gt;#foo_8 -->
@@ -126,8 +126,8 @@
 <g id="node8" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_7</title>
 <ellipse fill="none" stroke="#000000" cx="1040" cy="-159.3553" rx="273.0758" ry="35.2113"/>
-<text text-anchor="middle" x="1040" y="-169.1553" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=7](returnMethodTemp$1)</text>
-<text text-anchor="middle" x="1040" y="-155.1553" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$15 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1040" y="-169.1553" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=7](returnMethodTemp$2)</text>
+<text text-anchor="middle" x="1040" y="-155.1553" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$16 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1040" y="-141.1553" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_4&#45;&gt;bb::&lt;constant:Object&gt;#foo_7 -->
@@ -150,4 +150,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 7aa2c7010ce0e981fe607535d738c4c755c84e8cd09b1d91b465ba9ca111753f -->
+<!-- ruby-types:sha256: eb35c57e50703a9e782a30f4bc47285833c67549ea69f1cdb4833c27d4e9fbb9 -->

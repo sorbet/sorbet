@@ -51,7 +51,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
     categoryCounterInc("dispatch_call", "magictype");
     switch (fun._id) {
         case Names::buildHash()._id: {
-            Error::check(args.size() % 2 == 0);
+            ENFORCE(args.size() % 2 == 0);
 
             vector<shared_ptr<LiteralType>> keys;
             vector<shared_ptr<Type>> values;

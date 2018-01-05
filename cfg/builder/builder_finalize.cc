@@ -104,15 +104,16 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
     }
     for (auto &bb : cfg.basicBlocks) {
         for (auto parent : bb->backEdges) {
-            Error::check(parent->bexit.thenb == bb.get() || parent->bexit.elseb == bb.get());
+            ENFORCE(parent->bexit.thenb == bb.get() || parent->bexit.elseb == bb.get(),
+                    "parent is not aware of a child");
         }
         if (bb.get() == cfg.deadBlock()) {
             continue;
         }
         auto thenFnd = std::find(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get());
         auto elseFnd = std::find(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get());
-        Error::check(thenFnd != bb->bexit.thenb->backEdges.end());
-        Error::check(elseFnd != bb->bexit.elseb->backEdges.end());
+        ENFORCE(thenFnd != bb->bexit.thenb->backEdges.end(), "backedge unset for thenb");
+        ENFORCE(elseFnd != bb->bexit.elseb->backEdges.end(), "backedge unset for elseb");
     }
 }
 
@@ -374,7 +375,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
 }
 
 int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
-    // Error::check(!marked[currentBB]) // graph is cyclic!
+    // ENFORCE(!marked[currentBB]) // graph is cyclic!
     if ((currentBB->flags & CFG::FORWARD_TOPO_SORT_VISITED) != 0) {
         return nextFree;
     } else {

@@ -80,7 +80,7 @@ absl::string_view ruby_typer::File::getExtension(const absl::string_view path) {
 string strprintf(const char *format, va_list vlist) {
     char *buf = nullptr;
     int ret = vasprintf(&buf, format, vlist);
-    ruby_typer::Error::check(ret >= 0);
+    ENFORCE(ret >= 0, "vasprintf failed");
     string str = buf;
     free(buf);
     return str;

@@ -2,7 +2,7 @@ class <constant:F> < ::<constant:Object> () -> <class:F>
   method bar (baz)
     argument baz<>
   method bla ()
-    method <block>$10001 ()
+    method <block>$2 ()
   method foo (<blk>)
     argument <blk><block>
 class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> ()

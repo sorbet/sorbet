@@ -23,7 +23,7 @@ class NameInserter {
     core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, unique_ptr<ast::Expression> &node) {
         auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
         if (constLit == nullptr) {
-            Error::check(node.get() != nullptr);
+            ENFORCE(node.get() != nullptr);
             return owner;
         }
 
@@ -91,7 +91,7 @@ class NameInserter {
                                             unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
         if (send == nullptr) {
-            Error::check(node.get() != nullptr);
+            ENFORCE(node.get() != nullptr);
             return nullptr;
         }
 
@@ -149,7 +149,7 @@ public:
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
         if (ident && ident->name == core::Names::singletonClass()) {
-            Error::check(ident->kind == ast::UnresolvedIdent::Class);
+            ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
             klass->symbol = ctx.contextClass().info(ctx).singletonClass(ctx);
         }
         scopeStack.emplace_back();
@@ -186,11 +186,11 @@ public:
 
             if (ast::ShadowArg *sarg = ast::cast_tree<ast::ShadowArg>(arg.get())) {
                 auto id = ast::cast_tree<ast::UnresolvedIdent>(sarg->expr.get());
-                Error::check(id != nullptr);
+                ENFORCE(id != nullptr);
                 name = id->name;
                 inShadows = true;
             } else {
-                Error::check(!inShadows, "shadow argument followed by non-shadow argument!");
+                ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
                 core::SymbolRef sym = arg2Symbol(ctx, arg.get());
                 ctx.owner.info(ctx).argumentsOrMixins.push_back(sym);
                 name = sym.info(ctx).name;
@@ -308,7 +308,7 @@ public:
                 owner = owner.info(ctx).singletonClass(ctx);
             }
         }
-        Error::check(owner.info(ctx).isClass());
+        ENFORCE(owner.info(ctx).isClass());
 
         auto sym = owner.info(ctx).findMember(ctx, method->name);
         if (sym.exists()) {
@@ -332,13 +332,13 @@ public:
 
     ast::MethodDef *postTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
         method->args = popEnclosingArgs();
-        Error::check(method->args.size() == method->symbol.info(ctx).arguments().size());
+        ENFORCE(method->args.size() == method->symbol.info(ctx).arguments().size());
         scopeStack.pop_back();
         if (scopeStack.back().moduleFunctionActive) {
             aliasModuleFunction(ctx, method->symbol);
         }
-        Error::check(method->args.size() == method->symbol.info(ctx).arguments().size(), method->name.toString(ctx),
-                     ": ", method->args.size(), " != ", method->symbol.info(ctx).arguments().size());
+        ENFORCE(method->args.size() == method->symbol.info(ctx).arguments().size(), method->name.toString(ctx), ": ",
+                method->args.size(), " != ", method->symbol.info(ctx).arguments().size());
         return method;
     }
 
@@ -348,8 +348,10 @@ public:
             // Root methods end up going on object
             owner = core::GlobalState::defn_Object();
         }
-        blk->symbol = ctx.state.enterMethodSymbol(
-            blk->loc, owner, ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp()));
+        blk->symbol =
+            ctx.state.enterMethodSymbol(blk->loc, owner,
+                                        ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp(),
+                                                                  ++(owner.info(ctx).uniqueCounter)));
 
         scopeStack.emplace_back();
         auto &parent = *(scopeStack.end() - 2);

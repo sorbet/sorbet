@@ -607,7 +607,7 @@ Begin {
       args = Args {
         args = [
           Restarg {
-            name = *$10000
+            name = *$2
           }
         ]
       }
@@ -618,7 +618,7 @@ Begin {
       args = Args {
         args = [
           Kwrestarg {
-            name = **$10001
+            name = **$3
           }
         ]
       }

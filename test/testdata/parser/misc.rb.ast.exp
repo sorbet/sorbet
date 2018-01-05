@@ -4,16 +4,16 @@ begin
   @@cv = 1
   $gv = 1
   begin
-    assignTemp$10002 = [::<constant:nil>, ::<constant:nil>]
-    self(<constant:<todo sym>>).x().var=(assignTemp$10002.[](0))
-    y = assignTemp$10002.[](1)
-    assignTemp$10002
+    assignTemp$2 = [::<constant:nil>, ::<constant:nil>]
+    self(<constant:<todo sym>>).x().var=(assignTemp$2.[](0))
+    y = assignTemp$2.[](1)
+    assignTemp$2
   end
   begin
-    assignTemp$10003 = self(<constant:<todo sym>>).zaaaz()
-    baaaar = assignTemp$10003.[](0)
-    naaar = assignTemp$10003.[](1)
-    assignTemp$10003
+    assignTemp$3 = self(<constant:<todo sym>>).zaaaz()
+    baaaar = assignTemp$3.[](0)
+    naaar = assignTemp$3.[](1)
+    assignTemp$3
   end
   xaaaaz = [self(<constant:<todo sym>>).yayayaya(), self(<constant:<todo sym>>).tutututu()]
   <emptyTree>
@@ -31,8 +31,8 @@ begin
     <emptyTree>
   end
   begin
-    assignTemp$10004 = self(<constant:<todo sym>>).x()
-    if y.===(assignTemp$10004)
+    assignTemp$4 = self(<constant:<todo sym>>).x()
+    if y.===(assignTemp$4)
       1
     else
       self(<constant:<todo sym>>).z()
@@ -49,19 +49,19 @@ begin
     <emptyTree>
   end
   begin
-    ||$10005 = true
-    if ||$10005
-      ||$10005
+    ||$5 = true
+    if ||$5
+      ||$5
     else
       false
     end
   end
-  self(<constant:<todo sym>>).arr().each() do |*forTemp$10006|
+  self(<constant:<todo sym>>).arr().each() do |*forTemp$6|
     begin
       begin
-        assignTemp$10007 = forTemp$10006
-        x = assignTemp$10007.[](0)
-        assignTemp$10007
+        assignTemp$7 = forTemp$6
+        x = assignTemp$7.[](0)
+        assignTemp$7
       end
       <emptyTree>
     end
@@ -96,14 +96,14 @@ begin
     ::<constant:nil>
   end
   begin
-    assignTemp$10008 = 1
-    a = assignTemp$10008.[](0)
+    assignTemp$8 = 1
+    a = assignTemp$8.[](0)
     begin
-      assignTemp$10009 = assignTemp$10008.[](1)
-      x = assignTemp$10009.[](0)
-      assignTemp$10009
+      assignTemp$9 = assignTemp$8.[](1)
+      x = assignTemp$9.[](0)
+      assignTemp$9
     end
-    assignTemp$10008
+    assignTemp$8
   end
   4
   def optfoo<<constant:<todo sym>>>(x = 1, *y)
@@ -120,9 +120,9 @@ begin
     ::<constant:nil>
   end
   begin
-    assignTemp$10010 = y.to_a()
-    x = assignTemp$10010.slice(::<constant:Range>.new(0, -1, false))
-    assignTemp$10010
+    assignTemp$10 = y.to_a()
+    x = assignTemp$10.slice(::<constant:Range>.new(0, -1, false))
+    assignTemp$10
   end
   "foo".concat(begin
       self(<constant:<todo sym>>).bar()
@@ -143,10 +143,10 @@ begin
   break(self(<constant:<todo sym>>).cfoo(1) do ||
       <emptyTree>
     end)
-  def sfoo<<constant:<todo sym>>>(**$10000)
+  def sfoo<<constant:<todo sym>>>(**$2)
     <emptyTree>
   end
-  def ssfoo<<constant:<todo sym>>>(***$10001:)
+  def ssfoo<<constant:<todo sym>>>(***$3:)
     <emptyTree>
   end
 end

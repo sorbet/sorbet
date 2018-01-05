@@ -12,12 +12,10 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
                                                                 shared_ptr<Type> &t2) {
     auto ret = _lub(ctx, t1, t2);
     ret->sanityCheck(ctx);
-    DEBUG_ONLY(Error::check(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a subtype of " +
-                                                                t1->toString(ctx) + " was lubbing with " +
-                                                                t2->toString(ctx)));
-    DEBUG_ONLY(Error::check(Types::isSubType(ctx, t2, ret), ret->toString(ctx) + " is not a subtype of " +
-                                                                t2->toString(ctx) + " was lubbing with " +
-                                                                t1->toString(ctx)));
+    ENFORCE(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a subtype of " + t1->toString(ctx) +
+                                                " was lubbing with " + t2->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, t2, ret), ret->toString(ctx) + " is not a subtype of " + t2->toString(ctx) +
+                                                " was lubbing with " + t1->toString(ctx));
     return ret;
 }
 
@@ -92,7 +90,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                             vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
                             for (auto &el2 : h2->keys) {
                                 ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
-                                Error::check(u2 != nullptr);
+                                ENFORCE(u2 != nullptr);
                                 auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                     ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
                                     return candidate->value == el2->value && u1 == u2; // from lambda
@@ -118,7 +116,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                     if (LiteralType *l2 = cast_type<LiteralType>(p2)) {
                         ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
                         ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
-                        Error::check(u1 != nullptr && u2 != nullptr);
+                        ENFORCE(u1 != nullptr && u2 != nullptr);
                         if (u1->symbol == u2->symbol) {
                             if (l1->value == l2->value) {
                                 result = t1;
@@ -133,7 +131,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                     }
 
                 });
-            Error::check(result.get() != nullptr);
+            ENFORCE(result.get() != nullptr);
             return result;
         } else {
             // only 1st is proxy
@@ -153,7 +151,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
 
 shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     OrType *o1 = cast_type<OrType>(t1.get());
-    Error::check(o1 != nullptr);
+    ENFORCE(o1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
         categoryCounterInc("lub_distribute_or.outcome", "t1");
@@ -186,8 +184,8 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr
 shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
-    ruby_typer::Error::check(g1 != nullptr);
-    ruby_typer::Error::check(g2 != nullptr);
+    ENFORCE(g1 != nullptr);
+    ENFORCE(g2 != nullptr);
 
     if (g1->kind() > g2->kind()) { // force the relation to be symmentric and half the implementation
         return lubGround(ctx, t2, t1);
@@ -239,7 +237,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     ClassType *c1 = cast_type<ClassType>(t1.get());
     ClassType *c2 = cast_type<ClassType>(t2.get());
     categoryCounterInc("lub", "<class>");
-    Error::check(c1 != nullptr && c2 != nullptr);
+    ENFORCE(c1 != nullptr && c2 != nullptr);
 
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
@@ -257,7 +255,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
 
 shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     AndType *a1 = cast_type<AndType>(t1.get());
-    Error::check(t1 != nullptr);
+    ENFORCE(t1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
         categoryCounterInc("lub_distribute_or.outcome", "t1");
@@ -291,8 +289,8 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
 shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
-    ruby_typer::Error::check(g1 != nullptr);
-    ruby_typer::Error::check(g2 != nullptr);
+    ENFORCE(g1 != nullptr);
+    ENFORCE(g2 != nullptr);
 
     if (g1->kind() > g2->kind()) { // force the relation to be symmentric and half the implementation
         return glbGround(ctx, t2, t1);
@@ -379,7 +377,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
     // 1 :-)
     ClassType *c1 = cast_type<ClassType>(t1.get());
     ClassType *c2 = cast_type<ClassType>(t2.get());
-    Error::check(c1 != nullptr && c2 != nullptr);
+    ENFORCE(c1 != nullptr && c2 != nullptr);
     categoryCounterInc("glb", "<class>");
 
     core::SymbolRef sym1 = c1->symbol;
@@ -403,12 +401,10 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ct
                                                                 shared_ptr<Type> &t2) {
     auto ret = _glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
-    DEBUG_ONLY(Error::check(Types::isSubType(ctx, ret, t1), ret->toString(ctx) + " is not a supertype of " +
-                                                                t1->toString(ctx) + " was glbbing with " +
-                                                                t2->toString(ctx)));
-    DEBUG_ONLY(Error::check(Types::isSubType(ctx, ret, t2), ret->toString(ctx) + " is not a supertype of " +
-                                                                t2->toString(ctx) + " was glbbing with " +
-                                                                t1->toString(ctx)));
+    ENFORCE(Types::isSubType(ctx, ret, t1), ret->toString(ctx) + " is not a supertype of " + t1->toString(ctx) +
+                                                " was glbbing with " + t2->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, ret, t2), ret->toString(ctx) + " is not a supertype of " + t2->toString(ctx) +
+                                                " was glbbing with " + t1->toString(ctx));
     return ret;
 }
 
@@ -459,7 +455,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                 p1,
                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
                     TupleType *a2 = cast_type<TupleType>(p2);
-                    Error::check(a2 != nullptr);
+                    ENFORCE(a2 != nullptr);
                     if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                         vector<shared_ptr<ruby_typer::core::Type>> elemGlbs;
                         int i = 0;
@@ -480,7 +476,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                 },
                 [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
                     ShapeType *h2 = cast_type<ShapeType>(p2);
-                    Error::check(h2 != nullptr);
+                    ENFORCE(h2 != nullptr);
                     if (h2->keys.size() == h1->keys.size()) {
                         // have enough keys.
                         int i = 0;
@@ -488,7 +484,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                         vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
                         for (auto &el2 : h2->keys) {
                             ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
-                            Error::check(u2 != nullptr);
+                            ENFORCE(u2 != nullptr);
                             auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                 ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
                                 return candidate->value == el2->value && u1 == u2; // from lambda
@@ -515,10 +511,10 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                 },
                 [&](LiteralType *l1) {
                     LiteralType *l2 = cast_type<LiteralType>(p2);
-                    Error::check(l2 != nullptr);
+                    ENFORCE(l2 != nullptr);
                     ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
                     ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
-                    Error::check(u1 != nullptr && u2 != nullptr);
+                    ENFORCE(u1 != nullptr && u2 != nullptr);
                     if (u1->symbol == u2->symbol) {
                         if (l1->value == l2->value) {
                             result = t1;
@@ -530,7 +526,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                     }
 
                 });
-            Error::check(result.get() != nullptr);
+            ENFORCE(result.get() != nullptr);
             return result;
         } else {
             // only 1st is proxy
@@ -616,7 +612,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                                      int i = 0;
                                      for (auto &el2 : h2->keys) {
                                          ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
-                                         Error::check(u2 != nullptr);
+                                         ENFORCE(u2 != nullptr);
                                          auto fnd =
                                              find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                                  ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
@@ -635,7 +631,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                                      LiteralType *l2 = cast_type<LiteralType>(p2);
                                      ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
                                      ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
-                                     Error::check(u1 != nullptr && u2 != nullptr);
+                                     ENFORCE(u1 != nullptr && u2 != nullptr);
                                      result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
                                  });
             return result;
@@ -726,7 +722,7 @@ bool AliasType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 }
 
 void AliasType::_sanityCheck(core::Context ctx) {
-    Error::check(this->symbol.exists());
+    ENFORCE(this->symbol.exists());
 }
 
 } // namespace core

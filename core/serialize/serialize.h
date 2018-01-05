@@ -34,10 +34,10 @@ public:
     static void pickle(Pickler &p, Type *what);
     static void pickle(Pickler &p, Symbol &what);
 
-    static File unpickleFile(UnPickler &p);
+    static std::shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
-    static std::shared_ptr<Type> unpickleType(UnPickler &p);
-    static Symbol unpickleSymbol(UnPickler &p);
+    static std::shared_ptr<Type> unpickleType(UnPickler &p, GlobalState *gs);
+    static Symbol unpickleSymbol(UnPickler &p, GlobalState *gs);
     static GlobalState unpickleGS(UnPickler &p, spdlog::logger &logger);
 };
 } // namespace serialize

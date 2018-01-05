@@ -27,8 +27,8 @@ for this_src in "${rb_src[@]}" DUMMY; do
         for pass in "${passes[@]}" ; do
             candidate="$basename.$pass.exp"
             if [ -e "$candidate" ]; then
-                echo "bazel-bin/main/ruby-typer --print $pass --set-freshNameId=10000 ${srcs[@]} > $candidate"
-                bazel-bin/main/ruby-typer --print "$pass" --set-freshNameId=10000 "${srcs[@]}" > "$candidate" 2>/dev/null
+                echo "bazel-bin/main/ruby-typer --print $pass ${srcs[@]} > $candidate"
+                bazel-bin/main/ruby-typer --print "$pass" "${srcs[@]}" > "$candidate" 2>/dev/null
             fi
         done
     fi

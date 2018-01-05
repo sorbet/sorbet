@@ -6,8 +6,8 @@ subgraph "cluster_::<constant:Trigger>#trigger" {
     "bb::<constant:Trigger>#trigger_1" [shape = parallelogram];
 
     "bb::<constant:Trigger>#trigger_0" [label = "block[id=0]()
-@__fake_logger$3 = alias @__fake_logger : untyped
-returnMethodTemp$4 = return @__fake_logger$3 : <bottom>
+@__fake_logger$4 = alias @__fake_logger : untyped
+returnMethodTemp$5 = return @__fake_logger$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Trigger>#trigger_0" -> "bb::<constant:Trigger>#trigger_1" [style="bold"];

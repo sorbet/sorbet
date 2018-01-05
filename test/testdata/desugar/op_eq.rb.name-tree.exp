@@ -33,23 +33,23 @@ class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
         a
       end
       begin
-        b$10000 = self(<constant:OpEq>)
-        b$10001 = b$10000.b()
-        if b$10001
-          b$10000.b=(:b)
+        b$2 = self(<constant:OpEq>)
+        b$3 = b$2.b()
+        if b$3
+          b$2.b=(:b)
         else
-          b$10001
+          b$3
         end
       end
       begin
-        []$10002 = a
-        []$10003 = self(<constant:OpEq>).y()
-        []$10004 = self(<constant:OpEq>).z()
-        []$10005 = []$10002.[]([]$10003, []$10004)
-        if []$10005
-          []$10002.[]=([]$10003, []$10004, 1)
+        []$4 = a
+        []$5 = self(<constant:OpEq>).y()
+        []$6 = self(<constant:OpEq>).z()
+        []$7 = []$4.[]([]$5, []$6)
+        if []$7
+          []$4.[]=([]$5, []$6, 1)
         else
-          []$10005
+          []$7
         end
       end
       if a
@@ -58,23 +58,23 @@ class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
         a = :a
       end
       begin
-        b$10006 = self(<constant:OpEq>)
-        b$10007 = b$10006.b()
-        if b$10007
-          b$10007
+        b$8 = self(<constant:OpEq>)
+        b$9 = b$8.b()
+        if b$9
+          b$9
         else
-          b$10006.b=(:b)
+          b$8.b=(:b)
         end
       end
       begin
-        []$10008 = a
-        []$10009 = self(<constant:OpEq>).y()
-        []$10010 = self(<constant:OpEq>).z()
-        []$10011 = []$10008.[]([]$10009, []$10010)
-        if []$10011
-          []$10011
+        []$10 = a
+        []$11 = self(<constant:OpEq>).y()
+        []$12 = self(<constant:OpEq>).z()
+        []$13 = []$10.[]([]$11, []$12)
+        if []$13
+          []$13
         else
-          []$10008.[]=([]$10009, []$10010, 1)
+          []$10.[]=([]$11, []$12, 1)
         end
       end
     end

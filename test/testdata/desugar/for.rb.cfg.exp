@@ -6,37 +6,37 @@ subgraph "cluster_::<singleton class:<constant:A>>#each" {
     "bb::<singleton class:<constant:A>>#each_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:A>>#each_0" [label = "block[id=0]()
-selfMethodTemp$2 = self : <class:A>
-<blk> = load_arg(selfMethodTemp$2#each, 0) : untyped
-arrayTemp$6 = 1 : Integer(1)
-arrayTemp$7 = 2 : Integer(2)
-arrayTemp$8 = 3 : Integer(3)
-arrayTemp$9 = 4 : Integer(4)
-arrayTemp$10 = 5 : Integer(5)
-arrayTemp$11 = alias <constant:<Magic>> : <Magic>
-statTemp$5 = arrayTemp$11.<build-array>(arrayTemp$6, arrayTemp$7, arrayTemp$8, arrayTemp$9, arrayTemp$10) : TupleType {
+selfMethodTemp$3 = self : <class:A>
+<blk> = load_arg(selfMethodTemp$3#each, 0) : untyped
+arrayTemp$7 = 1 : Integer(1)
+arrayTemp$8 = 2 : Integer(2)
+arrayTemp$9 = 3 : Integer(3)
+arrayTemp$10 = 4 : Integer(4)
+arrayTemp$11 = 5 : Integer(5)
+arrayTemp$12 = alias <constant:<Magic>> : <Magic>
+statTemp$6 = arrayTemp$12.<build-array>(arrayTemp$7, arrayTemp$8, arrayTemp$9, arrayTemp$10, arrayTemp$11) : TupleType {
   0 = Integer(1)
   1 = Integer(2)
   2 = Integer(3)
   3 = Integer(4)
   4 = Integer(5)
 }
-statTemp$3 = <blk>.call(statTemp$5) : untyped
-arrayTemp$14 = 6 : Integer(6)
-arrayTemp$15 = 7 : Integer(7)
-arrayTemp$16 = 8 : Integer(8)
-arrayTemp$17 = 9 : Integer(9)
-arrayTemp$18 = 0 : Integer(0)
-arrayTemp$19 = alias <constant:<Magic>> : <Magic>
-statTemp$13 = arrayTemp$19.<build-array>(arrayTemp$14, arrayTemp$15, arrayTemp$16, arrayTemp$17, arrayTemp$18) : TupleType {
+statTemp$4 = <blk>.call(statTemp$6) : untyped
+arrayTemp$15 = 6 : Integer(6)
+arrayTemp$16 = 7 : Integer(7)
+arrayTemp$17 = 8 : Integer(8)
+arrayTemp$18 = 9 : Integer(9)
+arrayTemp$19 = 0 : Integer(0)
+arrayTemp$20 = alias <constant:<Magic>> : <Magic>
+statTemp$14 = arrayTemp$20.<build-array>(arrayTemp$15, arrayTemp$16, arrayTemp$17, arrayTemp$18, arrayTemp$19) : TupleType {
   0 = Integer(6)
   1 = Integer(7)
   2 = Integer(8)
   3 = Integer(9)
   4 = Integer(0)
 }
-returnMethodTemp$1 = <blk>.call(statTemp$13) : untyped
-returnMethodTemp$20 = return returnMethodTemp$1 : <bottom>
+returnMethodTemp$2 = <blk>.call(statTemp$14) : untyped
+returnMethodTemp$21 = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#each_0" -> "bb::<singleton class:<constant:A>>#each_1" [style="bold"];
@@ -53,10 +53,10 @@ subgraph "cluster_::<singleton class:<constant:E>>#e=" {
     "bb::<singleton class:<constant:E>>#e=_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:E>>#e=_0" [label = "block[id=0]()
-@e$3 = alias @e : untyped
-selfMethodTemp$2 = self : <class:E>
-e = load_arg(selfMethodTemp$2#e=, 0) : untyped
-returnMethodTemp$4 = return e : <bottom>
+@e$4 = alias @e : untyped
+selfMethodTemp$3 = self : <class:E>
+e = load_arg(selfMethodTemp$3#e=, 0) : untyped
+returnMethodTemp$5 = return e : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:E>>#e=_0" -> "bb::<singleton class:<constant:E>>#e=_1" [style="bold"];
@@ -73,8 +73,8 @@ subgraph "cluster_::<singleton class:<constant:E>>#e" {
     "bb::<singleton class:<constant:E>>#e_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:E>>#e_0" [label = "block[id=0]()
-@e$3 = alias @e : untyped
-returnMethodTemp$4 = return @e$3 : <bottom>
+@e$4 = alias @e : untyped
+returnMethodTemp$5 = return @e$4 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:E>>#e_0" -> "bb::<singleton class:<constant:E>>#e_1" [style="bold"];
@@ -90,13 +90,13 @@ subgraph "cluster_::<singleton class:<constant:Main>>#main" {
     "bb::<singleton class:<constant:Main>>#main_0" [shape = invhouse];
     "bb::<singleton class:<constant:Main>>#main_1" [shape = parallelogram];
 
-    "bb::<singleton class:<constant:Main>>#main_0" [label = "block[id=0](statTemp$4, <constant:A>$5, @a$73, @@b$77, $c$81, <constant:E>$89)
-<constant:A>$5 = alias <constant:A> : <class:A>
-@a$73 = alias @a : untyped
-@@b$77 = alias @@b : untyped
-$c$81 = alias $c : untyped
-<constant:E>$89 = alias <constant:E> : <class:E>
-statTemp$4 = <constant:A>$5 : <class:A>
+    "bb::<singleton class:<constant:Main>>#main_0" [label = "block[id=0](statTemp$11, <constant:A>$12, @a$80, @@b$84, $c$88, <constant:E>$96)
+<constant:A>$12 = alias <constant:A> : <class:A>
+@a$80 = alias @a : untyped
+@@b$84 = alias @@b : untyped
+$c$88 = alias $c : untyped
+<constant:E>$96 = alias <constant:E> : <class:E>
+statTemp$11 = <constant:A>$12 : <class:A>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_0" -> "bb::<singleton class:<constant:Main>>#main_2" [style="bold"];
@@ -104,207 +104,207 @@ statTemp$4 = <constant:A>$5 : <class:A>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_1" -> "bb::<singleton class:<constant:Main>>#main_1" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_2" [label = "block[id=2](statTemp$4, <constant:A>$5, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_2" [label = "block[id=2](statTemp$11, <constant:A>$12, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
 <block-call>"];
 
     "bb::<singleton class:<constant:Main>>#main_2" -> "bb::<singleton class:<constant:Main>>#main_4" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_2" -> "bb::<singleton class:<constant:Main>>#main_3" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_3" [label = "block[id=3](statTemp$4, <constant:A>$5, statTemp$16, @a$73, @@b$77, $c$81, <constant:E>$89)
-statTemp$3 = statTemp$4.each() : untyped
-statTemp$16 = <constant:A>$5 : <class:A>
+    "bb::<singleton class:<constant:Main>>#main_3" [label = "block[id=3](statTemp$11, <constant:A>$12, statTemp$23, @a$80, @@b$84, $c$88, <constant:E>$96)
+statTemp$10 = statTemp$11.each() : untyped
+statTemp$23 = <constant:A>$12 : <class:A>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_3" -> "bb::<singleton class:<constant:Main>>#main_5" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_4" [label = "block[id=4](statTemp$4, <constant:A>$5, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_4" [label = "block[id=4](statTemp$11, <constant:A>$12, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
-<block-nested: forTemp$10000> = load_arg(statTemp$4#each, 0) : untyped
-statTemp$11 = 0 : Integer(0)
-<block-nested: a> = <block-nested: forTemp$10000>.[](statTemp$11) : untyped
-statTemp$12 = self : <class:Main>
-statTemp$13 = <block-nested: a>.inspect() : untyped
-blockReturnTemp$6 = statTemp$12.puts(statTemp$13) : NilClass
+<block-nested: forTemp$2> = load_arg(statTemp$11#each, 0) : untyped
+statTemp$18 = 0 : Integer(0)
+<block-nested: a> = <block-nested: forTemp$2>.[](statTemp$18) : untyped
+statTemp$19 = self : <class:Main>
+statTemp$20 = <block-nested: a>.inspect() : untyped
+blockReturnTemp$13 = statTemp$19.puts(statTemp$20) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_4" -> "bb::<singleton class:<constant:Main>>#main_2" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_5" [label = "block[id=5](<constant:A>$5, statTemp$16, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_5" [label = "block[id=5](<constant:A>$12, statTemp$23, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
 <block-call>"];
 
     "bb::<singleton class:<constant:Main>>#main_5" -> "bb::<singleton class:<constant:Main>>#main_7" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_5" -> "bb::<singleton class:<constant:Main>>#main_6" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_6" [label = "block[id=6](<constant:A>$5, statTemp$16, statTemp$28, @a$73, @@b$77, $c$81, <constant:E>$89)
-statTemp$15 = statTemp$16.each() : untyped
-statTemp$28 = <constant:A>$5 : <class:A>
+    "bb::<singleton class:<constant:Main>>#main_6" [label = "block[id=6](<constant:A>$12, statTemp$23, statTemp$35, @a$80, @@b$84, $c$88, <constant:E>$96)
+statTemp$22 = statTemp$23.each() : untyped
+statTemp$35 = <constant:A>$12 : <class:A>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_6" -> "bb::<singleton class:<constant:Main>>#main_8" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_7" [label = "block[id=7](<constant:A>$5, statTemp$16, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_7" [label = "block[id=7](<constant:A>$12, statTemp$23, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
-<block-nested: forTemp> = load_arg(statTemp$16#each, 0) : untyped
-<block-nested: assignTemp$10002> = <block-nested: forTemp>.to_a() : untyped
-statTemp$23 = 0 : Integer(0)
-<block-nested: a> = <block-nested: assignTemp$10002>.[](statTemp$23) : untyped
-statTemp$24 = self : <class:Main>
-statTemp$25 = <block-nested: a>.inspect() : untyped
-blockReturnTemp$17 = statTemp$24.puts(statTemp$25) : NilClass
+<block-nested: forTemp> = load_arg(statTemp$23#each, 0) : untyped
+<block-nested: assignTemp$4> = <block-nested: forTemp>.to_a() : untyped
+statTemp$30 = 0 : Integer(0)
+<block-nested: a> = <block-nested: assignTemp$4>.[](statTemp$30) : untyped
+statTemp$31 = self : <class:Main>
+statTemp$32 = <block-nested: a>.inspect() : untyped
+blockReturnTemp$24 = statTemp$31.puts(statTemp$32) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_7" -> "bb::<singleton class:<constant:Main>>#main_5" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_8" [label = "block[id=8](<constant:A>$5, statTemp$28, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_8" [label = "block[id=8](<constant:A>$12, statTemp$35, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
 <block-call>"];
 
     "bb::<singleton class:<constant:Main>>#main_8" -> "bb::<singleton class:<constant:Main>>#main_10" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_8" -> "bb::<singleton class:<constant:Main>>#main_9" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_9" [label = "block[id=9](<constant:A>$5, statTemp$28, statTemp$46, @a$73, @@b$77, $c$81, <constant:E>$89)
-statTemp$27 = statTemp$28.each() : untyped
-statTemp$46 = <constant:A>$5 : <class:A>
+    "bb::<singleton class:<constant:Main>>#main_9" [label = "block[id=9](<constant:A>$12, statTemp$35, statTemp$53, @a$80, @@b$84, $c$88, <constant:E>$96)
+statTemp$34 = statTemp$35.each() : untyped
+statTemp$53 = <constant:A>$12 : <class:A>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_9" -> "bb::<singleton class:<constant:Main>>#main_11" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_10" [label = "block[id=10](<constant:A>$5, statTemp$28, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_10" [label = "block[id=10](<constant:A>$12, statTemp$35, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
-<block-nested: forTemp$10003> = load_arg(statTemp$28#each, 0) : untyped
-statTemp$34 = 0 : Integer(0)
-<block-nested: a> = <block-nested: forTemp$10003>.[](statTemp$34) : untyped
-statTemp$37 = 1 : Integer(1)
-<block-nested: b> = <block-nested: forTemp$10003>.[](statTemp$37) : untyped
-statTemp$39 = self : <class:Main>
-statTemp$40 = <block-nested: a>.inspect() : untyped
-statTemp$38 = statTemp$39.puts(statTemp$40) : NilClass
-statTemp$42 = self : <class:Main>
-statTemp$43 = <block-nested: b>.inspect() : untyped
-blockReturnTemp$29 = statTemp$42.puts(statTemp$43) : NilClass
+<block-nested: forTemp$5> = load_arg(statTemp$35#each, 0) : untyped
+statTemp$41 = 0 : Integer(0)
+<block-nested: a> = <block-nested: forTemp$5>.[](statTemp$41) : untyped
+statTemp$44 = 1 : Integer(1)
+<block-nested: b> = <block-nested: forTemp$5>.[](statTemp$44) : untyped
+statTemp$46 = self : <class:Main>
+statTemp$47 = <block-nested: a>.inspect() : untyped
+statTemp$45 = statTemp$46.puts(statTemp$47) : NilClass
+statTemp$49 = self : <class:Main>
+statTemp$50 = <block-nested: b>.inspect() : untyped
+blockReturnTemp$36 = statTemp$49.puts(statTemp$50) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_10" -> "bb::<singleton class:<constant:Main>>#main_8" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_11" [label = "block[id=11](<constant:A>$5, statTemp$46, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_11" [label = "block[id=11](<constant:A>$12, statTemp$53, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
 <block-call>"];
 
     "bb::<singleton class:<constant:Main>>#main_11" -> "bb::<singleton class:<constant:Main>>#main_13" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_11" -> "bb::<singleton class:<constant:Main>>#main_12" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_12" [label = "block[id=12](<constant:A>$5, statTemp$46, statTemp$68, @a$73, @@b$77, $c$81, <constant:E>$89)
-statTemp$45 = statTemp$46.each() : untyped
-statTemp$65 = self : <class:Main>
-statTemp$66 = main : String(\"main\")
-statTemp$64 = statTemp$65.puts(statTemp$66) : NilClass
-statTemp$68 = <constant:A>$5 : <class:A>
+    "bb::<singleton class:<constant:Main>>#main_12" [label = "block[id=12](<constant:A>$12, statTemp$53, statTemp$75, @a$80, @@b$84, $c$88, <constant:E>$96)
+statTemp$52 = statTemp$53.each() : untyped
+statTemp$72 = self : <class:Main>
+statTemp$73 = main : String(\"main\")
+statTemp$71 = statTemp$72.puts(statTemp$73) : NilClass
+statTemp$75 = <constant:A>$12 : <class:A>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_12" -> "bb::<singleton class:<constant:Main>>#main_14" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_13" [label = "block[id=13](<constant:A>$5, statTemp$46, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_13" [label = "block[id=13](<constant:A>$12, statTemp$53, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
-<block-nested: forTemp> = load_arg(statTemp$46#each, 0) : untyped
-<block-nested: assignTemp$10005> = <block-nested: forTemp>.to_a() : untyped
-statTemp$53 = 0 : Integer(0)
-<block-nested: a> = <block-nested: assignTemp$10005>.[](statTemp$53) : untyped
-statTemp$56 = 1 : Integer(1)
-<block-nested: b> = <block-nested: assignTemp$10005>.[](statTemp$56) : untyped
-statTemp$58 = self : <class:Main>
-statTemp$59 = <block-nested: a>.inspect() : untyped
-statTemp$57 = statTemp$58.puts(statTemp$59) : NilClass
-statTemp$61 = self : <class:Main>
-statTemp$62 = <block-nested: b>.inspect() : untyped
-blockReturnTemp$47 = statTemp$61.puts(statTemp$62) : NilClass
+<block-nested: forTemp> = load_arg(statTemp$53#each, 0) : untyped
+<block-nested: assignTemp$7> = <block-nested: forTemp>.to_a() : untyped
+statTemp$60 = 0 : Integer(0)
+<block-nested: a> = <block-nested: assignTemp$7>.[](statTemp$60) : untyped
+statTemp$63 = 1 : Integer(1)
+<block-nested: b> = <block-nested: assignTemp$7>.[](statTemp$63) : untyped
+statTemp$65 = self : <class:Main>
+statTemp$66 = <block-nested: a>.inspect() : untyped
+statTemp$64 = statTemp$65.puts(statTemp$66) : NilClass
+statTemp$68 = self : <class:Main>
+statTemp$69 = <block-nested: b>.inspect() : untyped
+blockReturnTemp$54 = statTemp$68.puts(statTemp$69) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_13" -> "bb::<singleton class:<constant:Main>>#main_11" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_14" [label = "block[id=14](<constant:A>$5, statTemp$68, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_14" [label = "block[id=14](<constant:A>$12, statTemp$75, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
 <block-call>"];
 
     "bb::<singleton class:<constant:Main>>#main_14" -> "bb::<singleton class:<constant:Main>>#main_16" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_14" -> "bb::<singleton class:<constant:Main>>#main_15" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_15" [label = "block[id=15](<constant:A>$5, statTemp$68, @a$73, @@b$77, $c$81, <constant:E>$89, statTemp$113)
-statTemp$67 = statTemp$68.each() : untyped
-statTemp$113 = <constant:A>$5 : <class:A>
+    "bb::<singleton class:<constant:Main>>#main_15" [label = "block[id=15](<constant:A>$12, statTemp$75, @a$80, @@b$84, $c$88, <constant:E>$96, statTemp$120)
+statTemp$74 = statTemp$75.each() : untyped
+statTemp$120 = <constant:A>$12 : <class:A>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_15" -> "bb::<singleton class:<constant:Main>>#main_17" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_16" [label = "block[id=16](<constant:A>$5, statTemp$68, @a$73, @@b$77, $c$81, <constant:E>$89)
+    "bb::<singleton class:<constant:Main>>#main_16" [label = "block[id=16](<constant:A>$12, statTemp$75, @a$80, @@b$84, $c$88, <constant:E>$96)
 outerLoops: 1
-<block-nested: forTemp$10006> = load_arg(statTemp$68#each, 0) : untyped
-statTemp$75 = 0 : Integer(0)
-@a$73 = <block-nested: forTemp$10006>.[](statTemp$75) : untyped
-statTemp$79 = 1 : Integer(1)
-@@b$77 = <block-nested: forTemp$10006>.[](statTemp$79) : untyped
-statTemp$83 = 2 : Integer(2)
-$c$81 = <block-nested: forTemp$10006>.[](statTemp$83) : untyped
-statTemp$86 = 3 : Integer(3)
-<block-nested: d> = <block-nested: forTemp$10006>.[](statTemp$86) : untyped
-statTemp$92 = 4 : Integer(4)
-statTemp$90 = <block-nested: forTemp$10006>.[](statTemp$92) : untyped
-statTemp$87 = <constant:E>$89.e=(statTemp$90) : untyped
-statTemp$94 = self : <class:Main>
-statTemp$95 = @a$73.inspect() : untyped
-statTemp$93 = statTemp$94.puts(statTemp$95) : NilClass
-statTemp$98 = self : <class:Main>
-statTemp$99 = @@b$77.inspect() : untyped
-statTemp$97 = statTemp$98.puts(statTemp$99) : NilClass
-statTemp$102 = self : <class:Main>
-statTemp$103 = $c$81.inspect() : untyped
-statTemp$101 = statTemp$102.puts(statTemp$103) : NilClass
-statTemp$106 = self : <class:Main>
-statTemp$107 = <block-nested: d>.inspect() : untyped
-statTemp$105 = statTemp$106.puts(statTemp$107) : NilClass
+<block-nested: forTemp$8> = load_arg(statTemp$75#each, 0) : untyped
+statTemp$82 = 0 : Integer(0)
+@a$80 = <block-nested: forTemp$8>.[](statTemp$82) : untyped
+statTemp$86 = 1 : Integer(1)
+@@b$84 = <block-nested: forTemp$8>.[](statTemp$86) : untyped
+statTemp$90 = 2 : Integer(2)
+$c$88 = <block-nested: forTemp$8>.[](statTemp$90) : untyped
+statTemp$93 = 3 : Integer(3)
+<block-nested: d> = <block-nested: forTemp$8>.[](statTemp$93) : untyped
+statTemp$99 = 4 : Integer(4)
+statTemp$97 = <block-nested: forTemp$8>.[](statTemp$99) : untyped
+statTemp$94 = <constant:E>$96.e=(statTemp$97) : untyped
+statTemp$101 = self : <class:Main>
+statTemp$102 = @a$80.inspect() : untyped
+statTemp$100 = statTemp$101.puts(statTemp$102) : NilClass
+statTemp$105 = self : <class:Main>
+statTemp$106 = @@b$84.inspect() : untyped
+statTemp$104 = statTemp$105.puts(statTemp$106) : NilClass
 statTemp$109 = self : <class:Main>
-statTemp$111 = <constant:E>$89.e() : untyped
-statTemp$110 = statTemp$111.inspect() : untyped
-blockReturnTemp$69 = statTemp$109.puts(statTemp$110) : NilClass
+statTemp$110 = $c$88.inspect() : untyped
+statTemp$108 = statTemp$109.puts(statTemp$110) : NilClass
+statTemp$113 = self : <class:Main>
+statTemp$114 = <block-nested: d>.inspect() : untyped
+statTemp$112 = statTemp$113.puts(statTemp$114) : NilClass
+statTemp$116 = self : <class:Main>
+statTemp$118 = <constant:E>$96.e() : untyped
+statTemp$117 = statTemp$118.inspect() : untyped
+blockReturnTemp$76 = statTemp$116.puts(statTemp$117) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_16" -> "bb::<singleton class:<constant:Main>>#main_14" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_17" [label = "block[id=17](@a$73, @@b$77, $c$81, <constant:E>$89, statTemp$113)
+    "bb::<singleton class:<constant:Main>>#main_17" [label = "block[id=17](@a$80, @@b$84, $c$88, <constant:E>$96, statTemp$120)
 outerLoops: 1
 <block-call>"];
 
     "bb::<singleton class:<constant:Main>>#main_17" -> "bb::<singleton class:<constant:Main>>#main_19" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_17" -> "bb::<singleton class:<constant:Main>>#main_18" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_18" [label = "block[id=18](statTemp$113)
-returnMethodTemp$1 = statTemp$113.each() : untyped
-returnMethodTemp$155 = return returnMethodTemp$1 : <bottom>
+    "bb::<singleton class:<constant:Main>>#main_18" [label = "block[id=18](statTemp$120)
+returnMethodTemp$8 = statTemp$120.each() : untyped
+returnMethodTemp$162 = return returnMethodTemp$8 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_18" -> "bb::<singleton class:<constant:Main>>#main_1" [style="bold"];
-    "bb::<singleton class:<constant:Main>>#main_19" [label = "block[id=19](@a$73, @@b$77, $c$81, <constant:E>$89, statTemp$113)
+    "bb::<singleton class:<constant:Main>>#main_19" [label = "block[id=19](@a$80, @@b$84, $c$88, <constant:E>$96, statTemp$120)
 outerLoops: 1
-<block-nested: forTemp> = load_arg(statTemp$113#each, 0) : untyped
-<block-nested: assignTemp$10008> = <block-nested: forTemp>.to_a() : untyped
-statTemp$120 = 0 : Integer(0)
-@a$73 = <block-nested: assignTemp$10008>.[](statTemp$120) : untyped
-statTemp$123 = 1 : Integer(1)
-@@b$77 = <block-nested: assignTemp$10008>.[](statTemp$123) : untyped
-statTemp$126 = 2 : Integer(2)
-$c$81 = <block-nested: assignTemp$10008>.[](statTemp$126) : untyped
-statTemp$129 = 3 : Integer(3)
-<block-nested: d> = <block-nested: assignTemp$10008>.[](statTemp$129) : untyped
-statTemp$134 = 4 : Integer(4)
-statTemp$132 = <block-nested: assignTemp$10008>.[](statTemp$134) : untyped
-statTemp$130 = <constant:E>$89.e=(statTemp$132) : untyped
-statTemp$136 = self : <class:Main>
-statTemp$137 = @a$73.inspect() : untyped
-statTemp$135 = statTemp$136.puts(statTemp$137) : NilClass
-statTemp$140 = self : <class:Main>
-statTemp$141 = @@b$77.inspect() : untyped
-statTemp$139 = statTemp$140.puts(statTemp$141) : NilClass
-statTemp$144 = self : <class:Main>
-statTemp$145 = $c$81.inspect() : untyped
-statTemp$143 = statTemp$144.puts(statTemp$145) : NilClass
-statTemp$148 = self : <class:Main>
-statTemp$149 = <block-nested: d>.inspect() : untyped
-statTemp$147 = statTemp$148.puts(statTemp$149) : NilClass
+<block-nested: forTemp> = load_arg(statTemp$120#each, 0) : untyped
+<block-nested: assignTemp$10> = <block-nested: forTemp>.to_a() : untyped
+statTemp$127 = 0 : Integer(0)
+@a$80 = <block-nested: assignTemp$10>.[](statTemp$127) : untyped
+statTemp$130 = 1 : Integer(1)
+@@b$84 = <block-nested: assignTemp$10>.[](statTemp$130) : untyped
+statTemp$133 = 2 : Integer(2)
+$c$88 = <block-nested: assignTemp$10>.[](statTemp$133) : untyped
+statTemp$136 = 3 : Integer(3)
+<block-nested: d> = <block-nested: assignTemp$10>.[](statTemp$136) : untyped
+statTemp$141 = 4 : Integer(4)
+statTemp$139 = <block-nested: assignTemp$10>.[](statTemp$141) : untyped
+statTemp$137 = <constant:E>$96.e=(statTemp$139) : untyped
+statTemp$143 = self : <class:Main>
+statTemp$144 = @a$80.inspect() : untyped
+statTemp$142 = statTemp$143.puts(statTemp$144) : NilClass
+statTemp$147 = self : <class:Main>
+statTemp$148 = @@b$84.inspect() : untyped
+statTemp$146 = statTemp$147.puts(statTemp$148) : NilClass
 statTemp$151 = self : <class:Main>
-statTemp$153 = <constant:E>$89.e() : untyped
-statTemp$152 = statTemp$153.inspect() : untyped
-blockReturnTemp$114 = statTemp$151.puts(statTemp$152) : NilClass
+statTemp$152 = $c$88.inspect() : untyped
+statTemp$150 = statTemp$151.puts(statTemp$152) : NilClass
+statTemp$155 = self : <class:Main>
+statTemp$156 = <block-nested: d>.inspect() : untyped
+statTemp$154 = statTemp$155.puts(statTemp$156) : NilClass
+statTemp$158 = self : <class:Main>
+statTemp$160 = <constant:E>$96.e() : untyped
+statTemp$159 = statTemp$160.inspect() : untyped
+blockReturnTemp$121 = statTemp$158.puts(statTemp$159) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_19" -> "bb::<singleton class:<constant:Main>>#main_17" [style="bold"];

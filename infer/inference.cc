@@ -59,10 +59,10 @@ struct KnowledgeFact {
             return;
         }
         for (auto &a : yesTypeTests) {
-            Error::check(a.second.get() != nullptr);
+            ENFORCE(a.second.get() != nullptr);
         }
         for (auto &a : noTypeTests) {
-            Error::check(a.second.get() != nullptr);
+            ENFORCE(a.second.get() != nullptr);
         }
     }
 
@@ -109,10 +109,10 @@ public:
         }
         truthy.sanityCheck();
         falsy.sanityCheck();
-        Error::check(TestedKnowledge::empty.falsy.yesTypeTests.empty());
-        Error::check(TestedKnowledge::empty.falsy.noTypeTests.empty());
-        Error::check(TestedKnowledge::empty.truthy.noTypeTests.empty());
-        Error::check(TestedKnowledge::empty.truthy.yesTypeTests.empty());
+        ENFORCE(TestedKnowledge::empty.falsy.yesTypeTests.empty());
+        ENFORCE(TestedKnowledge::empty.falsy.noTypeTests.empty());
+        ENFORCE(TestedKnowledge::empty.truthy.noTypeTests.empty());
+        ENFORCE(TestedKnowledge::empty.truthy.yesTypeTests.empty());
     };
 };
 
@@ -153,14 +153,14 @@ public:
             }
             return ret;
         }
-        Error::check(types[fnd - vars.begin()].type.get() != nullptr);
+        ENFORCE(types[fnd - vars.begin()].type.get() != nullptr);
         return types[fnd - vars.begin()];
     }
 
     TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
-            Error::check(!shouldFail, "Missing knowledge?");
+            ENFORCE(!shouldFail, "Missing knowledge?");
             return TestedKnowledge::empty;
         }
         auto &r = knowledge[fnd - vars.begin()];
@@ -230,7 +230,7 @@ public:
             core::TypeAndOrigins klass = getTypeAndOrigin(ctx, send->args[0]);
             if (klass.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {
                 auto *s = core::cast_type<core::ClassType>(klass.type.get());
-                Error::check(s != nullptr);
+                ENFORCE(s != nullptr);
                 core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
                 if (attachedClass.exists()) {
                     whoKnows.truthy.yesTypeTests.emplace_back(send->recv, make_shared<core::ClassType>(attachedClass));
@@ -245,8 +245,8 @@ public:
                 return;
             }
 
-            Error::check(tp1.type.get() != nullptr);
-            Error::check(tp2.type.get() != nullptr);
+            ENFORCE(tp1.type.get() != nullptr);
+            ENFORCE(tp2.type.get() != nullptr);
             whoKnows.truthy.yesTypeTests.emplace_back(send->recv, tp1.type);
             whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], tp2.type);
             whoKnows.sanityCheck();
@@ -268,7 +268,7 @@ public:
     }
 
     void setTypeAndOrigin(core::LocalVariable symbol, core::TypeAndOrigins typeAndOrigins) {
-        Error::check(typeAndOrigins.type.get() != nullptr);
+        ENFORCE(typeAndOrigins.type.get() != nullptr);
 
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
@@ -491,13 +491,13 @@ public:
                     auto typeAndOrigin = getTypeAndOrigin(ctx, i->what, true);
                     tp.type = typeAndOrigin.type;
                     tp.origins = typeAndOrigin.origins;
-                    Error::check(!tp.origins.empty(), "Inferencer did not assign location");
+                    ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
                 },
                 [&](cfg::Alias *a) {
                     core::SymbolRef symbol = a->what;
                     core::Symbol &info = symbol.info(ctx);
                     if (info.isClass()) {
-                        Error::check(info.resultType.get(), "Type should have been filled in by the namer");
+                        ENFORCE(info.resultType.get(), "Type should have been filled in by the namer");
                         tp.type = info.resultType;
                         tp.origins.push_back(symbol.info(ctx).definitionLoc);
                     } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
@@ -593,8 +593,8 @@ public:
                         }
                     }
                 });
-            Error::check(tp.type.get() != nullptr, "Inferencer did not assign type");
-            Error::check(!tp.origins.empty(), "Inferencer did not assign location");
+            ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type");
+            ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
             core::TypeAndOrigins cur = getTypeAndOrigin(ctx, bind.bind, true);
 
@@ -648,7 +648,7 @@ KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc
                            [&](auto const &e) -> bool { return e.first == local; });
         if (fnd == copy.yesTypeTests.end()) {
             // add info from env to knowledge
-            Error::check(env.types[i].type.get() != nullptr);
+            ENFORCE(env.types[i].type.get() != nullptr);
             // This is intentionally disabled to dumb the inference down.
             // It was intended to handle code snippets such as
             //

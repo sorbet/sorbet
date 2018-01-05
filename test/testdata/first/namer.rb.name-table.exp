@@ -4,7 +4,7 @@ class <constant:ANamespace> (<constant:BasicObject>) -> <class:ANamespace>
   class <singleton class:<constant:ClassInNamespace>> < ::<singleton class:<constant:Object>> ()
   class <singleton class:<constant:ObviousChild>> < ::<singleton class:<constant:Object>> ()
 class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <class:Child>
-  method <block>$10010 ()
+  method <block>$2 ()
 class <constant:Mixin> (<constant:BasicObject>) -> <class:Mixin>
 class <constant:NormalClass> < ::<constant:Object> () -> <class:NormalClass>
   class <constant:InnerClass> < ::<constant:Object> () -> <class:InnerClass>

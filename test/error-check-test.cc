@@ -12,7 +12,7 @@ namespace ruby_typer {
 
 TEST(ErrorTest, RawCheck) { // NOLINT
     try {
-        Error::check(false);
+        ENFORCE(false, "intentional");
     } catch (...) {
     }
 }

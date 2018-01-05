@@ -3,7 +3,7 @@ DefMethod {
   args = Args {
     args = [
       Blockarg {
-        name = &$10000
+        name = &$2
       }
     ]
   }

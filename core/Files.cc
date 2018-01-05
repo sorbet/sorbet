@@ -22,14 +22,14 @@ File::File(std::string &&path_, std::string &&source_, Type source_type)
     : source_type(source_type), path_(path_), source_(source_), line_breaks(findLineBreaks(this->source_)) {}
 
 File &FileRef::file(GlobalState &gs) const {
-    return gs.files[_id];
+    return *(gs.files[_id]);
 }
 
-absl::string_view File::path() {
+absl::string_view File::path() const {
     return this->path_;
 }
 
-absl::string_view File::source() {
+absl::string_view File::source() const {
     return this->source_;
 }
 } // namespace core

@@ -120,7 +120,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
     ruby_typer::core::GlobalState gs =
         ruby_typer::core::serialize::GlobalStateSerializer::load(getNameTablePayload, *console);
-    gs.freshNameId = 10000;
     ruby_typer::core::Context context(gs, gs.defn_root());
     gs.errors.keepErrorsInMemory = true;
 

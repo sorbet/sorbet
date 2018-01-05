@@ -17,9 +17,9 @@ begin
   def multiple_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => rescueTemp$10000
+    rescue => rescueTemp$2
       self(<constant:<todo sym>>).baz()
-    rescue => rescueTemp$10001
+    rescue => rescueTemp$3
       self(<constant:<todo sym>>).bar()
     end
   end
@@ -33,7 +33,7 @@ begin
   def parse_rescue_ensure<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => rescueTemp$10002
+    rescue => rescueTemp$2
       self(<constant:<todo sym>>).baz()
     ensure
       self(<constant:<todo sym>>).bar()
@@ -42,20 +42,20 @@ begin
   def parse_bug_rescue_empty_else<<constant:<todo sym>>>()
     begin
       <emptyTree>
-    rescue <emptyTree>::<constant:LoadError> => rescueTemp$10003
+    rescue <emptyTree>::<constant:LoadError> => rescueTemp$2
       <emptyTree>
     end
   end
   def parse_ruby_bug_12686<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).take_arg(begin
         self(<constant:<todo sym>>).bar()
-      rescue => rescueTemp$10004
+      rescue => rescueTemp$2
         ::<constant:nil>
       end)
   end
   def parse_rescue_mod<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).meth()
-  rescue => rescueTemp$10005
+  rescue => rescueTemp$2
     self(<constant:<todo sym>>).bar()
   end
   def parse_resbody_list_var<<constant:<todo sym>>>()
@@ -68,7 +68,7 @@ begin
   def parse_rescue_else_ensure<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => rescueTemp$10006
+    rescue => rescueTemp$2
       self(<constant:<todo sym>>).baz()
     else
       self(<constant:<todo sym>>).foo()
@@ -79,7 +79,7 @@ begin
   def parse_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => rescueTemp$10007
+    rescue => rescueTemp$2
       self(<constant:<todo sym>>).foo()
     end
   end
@@ -93,34 +93,34 @@ begin
   def parse_resbody_var_1<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => rescueTemp$10008
+    rescue => rescueTemp$2
       begin
-        @ex = rescueTemp$10008
+        @ex = rescueTemp$2
         self(<constant:<todo sym>>).bar()
       end
     end
   end
   def parse_rescue_mod_op_assign<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).meth()
-    rescue => rescueTemp$10009
+    rescue => rescueTemp$2
       self(<constant:<todo sym>>).bar())
   end
   def parse_ruby_bug_12402<<constant:<todo sym>>>()
     foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-  rescue => rescueTemp$10010
+  rescue => rescueTemp$2
     ::<constant:nil>
   end
   def parse_ruby_bug_12402_1<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-    rescue => rescueTemp$10011
+    rescue => rescueTemp$2
       ::<constant:nil>)
   end
   def parse_ruby_bug_12402_2<<constant:<todo sym>>>()
     begin
-      []$10013 = self(<constant:<todo sym>>).foo()
-      []$10014 = 0
-      []$10013.[]=([]$10014, []$10013.[]([]$10014).+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-        rescue => rescueTemp$10012
+      []$3 = self(<constant:<todo sym>>).foo()
+      []$4 = 0
+      []$3.[]=([]$4, []$3.[]([]$4).+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
+        rescue => rescueTemp$2
           ::<constant:nil>))
     end
   end

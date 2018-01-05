@@ -1,8 +1,8 @@
 class <constant:TestLocals> < ::<constant:Object> () -> <class:TestLocals>
   method method ()
-    method <block>$10001 ()
-      method <block>$10002 ()
-    method <block>$10003 (a)
+    method <block>$2 ()
+      method <block>$2 ()
+    method <block>$3 (a)
       argument a<>
 class <singleton class:<constant:TestLocals>> < ::<singleton class:<constant:Object>> ()
 

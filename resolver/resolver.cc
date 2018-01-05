@@ -35,7 +35,7 @@ private:
             }
             scope = scope->parent.get();
         }
-        return core::SymbolRef(0);
+        return core::SymbolRef();
     }
 
     core::SymbolRef resolveConstant(core::Context ctx, ast::ConstantLit *c) {
@@ -288,7 +288,7 @@ private:
                                             "Unsupported type literal");
                      result = core::Types::dynamic();
                  });
-        Error::check(result.get() != nullptr);
+        ENFORCE(result.get() != nullptr);
         result->sanityCheck(ctx);
         return result;
     }
@@ -441,7 +441,7 @@ private:
                                        "Unsupported type syntax");
                 result = core::Types::dynamic();
             });
-        Error::check(result.get() != nullptr);
+        ENFORCE(result.get() != nullptr);
         result->sanityCheck(ctx);
         return result;
     }
@@ -490,7 +490,7 @@ private:
         }
 
         ast::Hash *hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[0].get());
-        Error::check(hash != nullptr);
+        ENFORCE(hash != nullptr);
         if (lastStandardMethod->args.size() == 2) {
             int i = 0;
             for (unique_ptr<ast::Expression> &key : hash->keys) {
@@ -731,9 +731,9 @@ public:
         newMethodSet();
     }
     ~FlattenWalk() {
-        Error::check(methodsStack.empty());
-        Error::check(classes.empty());
-        Error::check(classOrder.empty());
+        ENFORCE(methodsStack.empty());
+        ENFORCE(classes.empty());
+        ENFORCE(classOrder.empty());
     }
 
     ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
@@ -764,7 +764,7 @@ public:
 
     std::unique_ptr<ast::Expression> addClasses(core::Context &ctx, std::unique_ptr<ast::Expression> tree) {
         if (classes.empty()) {
-            Error::check(sortedClasses().size() == 0);
+            ENFORCE(sortedClasses().size() == 0);
             return tree;
         }
         if (classes.size() == 1 && ast::cast_tree<ast::EmptyTree>(tree.get())) {
@@ -780,7 +780,7 @@ public:
         }
 
         for (auto &clas : sortedClasses()) {
-            Error::check(!!clas);
+            ENFORCE(!!clas);
             insSeq->stats.emplace_back(move(clas));
         }
         return tree;
@@ -789,7 +789,7 @@ public:
     std::unique_ptr<ast::Expression> addMethods(core::Context &ctx, std::unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
-            Error::check(popCurMethodDefs().size() == 0);
+            ENFORCE(popCurMethodDefs().size() == 0);
             return tree;
         }
         if (methods.size() == 1 && ast::cast_tree<ast::EmptyTree>(tree.get())) {
@@ -806,7 +806,7 @@ public:
         }
 
         for (auto &method : popCurMethodDefs()) {
-            Error::check(!!method);
+            ENFORCE(!!method);
             insSeq->stats.emplace_back(move(method));
         }
         return tree;
@@ -815,7 +815,7 @@ public:
 private:
     vector<unique_ptr<ast::ClassDef>> sortedClasses() {
         vector<unique_ptr<ast::ClassDef>> ret;
-        Error::check(classOrder.size() == classes.size());
+        ENFORCE(classOrder.size() == classes.size());
 
         for (auto symbol : classOrder) {
             for (auto it = classes.begin(); it != classes.end(); ++it) {
@@ -828,7 +828,7 @@ private:
             }
         }
         classOrder.clear();
-        Error::check(classes.size() == 0);
+        ENFORCE(classes.size() == 0);
         return ret;
     }
 
@@ -840,7 +840,7 @@ private:
             return rhs;
         }
         for (auto &method : popCurMethodDefs()) {
-            Error::check(!!method);
+            ENFORCE(!!method);
             rhs.emplace_back(move(method));
         }
         return rhs;
@@ -864,7 +864,7 @@ private:
             }
         }
         order.clear();
-        Error::check(methods.size() == 0);
+        ENFORCE(methods.size() == 0);
         popCurMethodSet();
         return ret;
     };
@@ -876,7 +876,7 @@ private:
             if (!debug_mode) {
                 return;
             }
-            Error::check(order.size() == methods.size(), order.size(), " != ", methods.size());
+            ENFORCE(order.size() == methods.size(), order.size(), " != ", methods.size());
         }
         Methods() {}
     };
@@ -885,11 +885,11 @@ private:
         methodsStack.emplace_back(move(methods));
     }
     Methods &curMethodSet() {
-        Error::check(methodsStack.size() > 0);
+        ENFORCE(methodsStack.size() > 0);
         return methodsStack.back();
     }
     void popCurMethodSet() {
-        Error::check(methodsStack.size() > 0);
+        ENFORCE(methodsStack.size() > 0);
         methodsStack.pop_back();
     }
 
@@ -934,7 +934,7 @@ public:
 namespace {
 void finalizeResolution(core::GlobalState &gs) {
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto &info = core::SymbolRef(i).info(gs);
+        auto &info = core::SymbolRef(gs, i).info(gs);
         if (!info.isClass() || info.superClass != core::GlobalState::defn_todo()) {
             continue;
         }
@@ -947,7 +947,7 @@ void finalizeResolution(core::GlobalState &gs) {
             } else if (!attached.info(gs).superClass.exists()) {
                 info.superClass = core::GlobalState::defn_Module();
             } else {
-                Error::check(attached.info(gs).superClass != core::GlobalState::defn_todo());
+                ENFORCE(attached.info(gs).superClass != core::GlobalState::defn_todo());
                 info.superClass = attached.info(gs).superClass.info(gs).singletonClass(gs);
             }
         } else {
@@ -960,30 +960,30 @@ void finalizeResolution(core::GlobalState &gs) {
 class ResolveSanityCheckWalk {
 public:
     ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
-        Error::check(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::GlobalState::defn_todo());
         return original;
     }
     ast::Expression *postTransformMethodDef(core::Context ctx, ast::MethodDef *original) {
-        Error::check(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::GlobalState::defn_todo());
         return original;
     }
     ast::Expression *postTransformConstDef(core::Context ctx, ast::ConstDef *original) {
-        Error::check(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::GlobalState::defn_todo());
         return original;
     }
     ast::Expression *postTransformIdent(core::Context ctx, ast::Ident *original) {
-        Error::check(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::GlobalState::defn_todo());
         return original;
     }
     ast::Expression *postTransformUnresolvedIdent(core::Context ctx, ast::UnresolvedIdent *original) {
         Error::raise("These should have all been removed");
     }
     ast::Expression *postTransformSelf(core::Context ctx, ast::Self *original) {
-        Error::check(original->claz != core::GlobalState::defn_todo());
+        ENFORCE(original->claz != core::GlobalState::defn_todo());
         return original;
     }
     ast::Expression *postTransformBlock(core::Context ctx, ast::Block *original) {
-        Error::check(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::GlobalState::defn_todo());
         return original;
     }
 };

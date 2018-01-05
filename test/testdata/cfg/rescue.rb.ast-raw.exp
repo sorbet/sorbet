@@ -21,7 +21,7 @@ InsSeq{
               ]
               var = UnresolvedIdent{
                 kind = Local
-                name = rescueTemp$10000
+                name = rescueTemp$2
               }
               body = Send{
                 recv = Self{ claz = ::<constant:<todo sym>> }

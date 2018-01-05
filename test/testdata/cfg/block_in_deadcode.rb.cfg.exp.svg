@@ -18,15 +18,15 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_0</title>
 <polygon fill="none" stroke="#000000" points="313.0558,-499.3548 457,-469.0178 600.9442,-499.3548 600.8099,-548.4411 313.1901,-548.4411 313.0558,-499.3548"/>
-<text text-anchor="middle" x="457" y="-522.7219" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](statTemp$3)</text>
-<text text-anchor="middle" x="457" y="-508.7219" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = self : Object</text>
+<text text-anchor="middle" x="457" y="-522.7219" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](statTemp$5)</text>
+<text text-anchor="middle" x="457" y="-508.7219" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = self : Object</text>
 <text text-anchor="middle" x="457" y="-494.7219" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_2 -->
 <g id="node3" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_2</title>
 <ellipse fill="none" stroke="#000000" cx="457" cy="-397.865" rx="110.5459" ry="35.2113"/>
-<text text-anchor="middle" x="457" y="-407.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](statTemp$3)</text>
+<text text-anchor="middle" x="457" y="-407.665" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](statTemp$5)</text>
 <text text-anchor="middle" x="457" y="-393.665" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
 <text text-anchor="middle" x="457" y="-379.665" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
@@ -39,19 +39,19 @@
 <!-- bb::&lt;constant:Object&gt;#foo_1 -->
 <g id="node2" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_1</title>
-<polygon fill="none" stroke="#000000" points="747.5383,-200 331.4894,-200 224.4617,-16 640.5106,-16 747.5383,-200"/>
+<polygon fill="none" stroke="#000000" points="751.0546,-200 329.4121,-200 220.9454,-16 642.5879,-16 751.0546,-200"/>
 <text text-anchor="middle" x="486" y="-138.8" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
-<text text-anchor="middle" x="486" y="-124.8" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = self</text>
-<text text-anchor="middle" x="486" y="-110.8" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = self</text>
-<text text-anchor="middle" x="486" y="-96.8" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$8 = statTemp$9.foo()</text>
-<text text-anchor="middle" x="486" y="-82.8" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$4 = statTemp$7.inner()</text>
+<text text-anchor="middle" x="486" y="-124.8" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = self</text>
+<text text-anchor="middle" x="486" y="-110.8" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = self</text>
+<text text-anchor="middle" x="486" y="-96.8" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$10 = statTemp$11.foo()</text>
+<text text-anchor="middle" x="486" y="-82.8" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$6 = statTemp$9.inner()</text>
 <text text-anchor="middle" x="486" y="-68.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_1&#45;&gt;bb::&lt;constant:Object&gt;#foo_1 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;constant:Object&gt;#foo_1&#45;&gt;bb::&lt;constant:Object&gt;#foo_1</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M711.0157,-137.1006C743.7299,-132.4814 765.769,-122.7813 765.769,-108 765.769,-89.6527 731.8131,-79.1338 685.6337,-76.4435"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="685.7503,-72.9452 675.6018,-75.9882 685.4328,-79.938 685.7503,-72.9452"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M714.1193,-137.0611C747.0883,-132.4263 769.2772,-122.7393 769.2772,-108 769.2772,-89.6527 734.8954,-79.1338 688.137,-76.4435"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="688.1261,-72.9395 677.9793,-75.9882 687.8126,-79.9325 688.1261,-72.9395"/>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_4 -->
 <g id="node4" class="node">
@@ -59,7 +59,7 @@
 <ellipse fill="none" stroke="#000000" cx="213" cy="-281.2548" rx="196.7136" ry="45.011"/>
 <text text-anchor="middle" x="213" y="-298.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4]()</text>
 <text text-anchor="middle" x="213" y="-284.0548" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="213" y="-270.0548" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = return returnTemp$6 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="213" y="-270.0548" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = return returnTemp$8 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="213" y="-256.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_2&#45;&gt;bb::&lt;constant:Object&gt;#foo_4 -->
@@ -72,9 +72,9 @@
 <g id="node5" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_3</title>
 <ellipse fill="none" stroke="#000000" cx="701" cy="-281.2548" rx="273.0758" ry="45.011"/>
-<text text-anchor="middle" x="701" y="-298.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](statTemp$3)</text>
-<text text-anchor="middle" x="701" y="-284.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$3.outer() : untyped</text>
-<text text-anchor="middle" x="701" y="-270.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$10 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="701" y="-298.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](statTemp$5)</text>
+<text text-anchor="middle" x="701" y="-284.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$5.outer() : untyped</text>
+<text text-anchor="middle" x="701" y="-270.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$12 = return returnMethodTemp$3 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="701" y="-256.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_2&#45;&gt;bb::&lt;constant:Object&gt;#foo_3 -->
@@ -97,4 +97,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 50e6cf66d4dff5ba00afa401ee62169897a458e4596833757abb84c42dd21d73 -->
+<!-- ruby-types:sha256: 14b75efce274efbd5e02f129c08853ad1c24e085a12e5ea49f464a0e4209d7dc -->

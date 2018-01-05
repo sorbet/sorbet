@@ -29,8 +29,8 @@
 <title>bb::&lt;constant:Object&gt;#main_0</title>
 <polygon fill="none" stroke="#000000" points="48.4743,-340.0411 273.9014,-309.7041 499.3285,-340.0411 499.1181,-389.1274 48.6847,-389.1274 48.4743,-340.0411"/>
 <text text-anchor="middle" x="273.9014" y="-363.4082" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="273.9014" y="-349.4082" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3 = &lt;unanalyzable&gt; : untyped</text>
-<text text-anchor="middle" x="273.9014" y="-335.4082" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$3</text>
+<text text-anchor="middle" x="273.9014" y="-349.4082" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$4 = &lt;unanalyzable&gt; : untyped</text>
+<text text-anchor="middle" x="273.9014" y="-335.4082" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#main_1 -->
 <g id="node2" class="node">
@@ -49,12 +49,12 @@
 <g id="node3" class="node">
 <title>bb::&lt;constant:Object&gt;#main_4</title>
 <ellipse fill="none" stroke="#000000" cx="305.9014" cy="-198.9533" rx="268.1762" ry="74.9067"/>
-<text text-anchor="middle" x="305.9014" y="-236.7533" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$1)</text>
-<text text-anchor="middle" x="305.9014" y="-222.7533" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = self : Object</text>
-<text text-anchor="middle" x="305.9014" y="-208.7533" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = statTemp$4.a() : untyped</text>
-<text text-anchor="middle" x="305.9014" y="-194.7533" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = self : Object</text>
-<text text-anchor="middle" x="305.9014" y="-180.7533" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$5 = statTemp$6.b() : untyped</text>
-<text text-anchor="middle" x="305.9014" y="-166.7533" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="305.9014" y="-236.7533" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$2)</text>
+<text text-anchor="middle" x="305.9014" y="-222.7533" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = self : Object</text>
+<text text-anchor="middle" x="305.9014" y="-208.7533" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = statTemp$5.a() : untyped</text>
+<text text-anchor="middle" x="305.9014" y="-194.7533" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = self : Object</text>
+<text text-anchor="middle" x="305.9014" y="-180.7533" font-family="Times,serif" font-size="14.00" fill="#000000">rescueTemp$6 = statTemp$7.b() : untyped</text>
+<text text-anchor="middle" x="305.9014" y="-166.7533" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="305.9014" y="-152.7533" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#main_0&#45;&gt;bb::&lt;constant:Object&gt;#main_4 -->
@@ -80,7 +80,7 @@
 <title>bb::&lt;constant:Object&gt;#a_0</title>
 <polygon fill="none" stroke="#000000" points="598.0332,-340.0411 929.9014,-309.7041 1261.7696,-340.0411 1261.4599,-389.1274 598.3429,-389.1274 598.0332,-340.0411"/>
 <text text-anchor="middle" x="929.9014" y="-363.4082" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="929.9014" y="-349.4082" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="929.9014" y="-349.4082" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="929.9014" y="-335.4082" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#a_1 -->
@@ -107,7 +107,7 @@
 <title>bb::&lt;constant:Object&gt;#b_0</title>
 <polygon fill="none" stroke="#000000" points="1286.0332,-340.0411 1617.9014,-309.7041 1949.7696,-340.0411 1949.4599,-389.1274 1286.3429,-389.1274 1286.0332,-340.0411"/>
 <text text-anchor="middle" x="1617.9014" y="-363.4082" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="1617.9014" y="-349.4082" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1617.9014" y="-349.4082" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$4 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1617.9014" y="-335.4082" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#b_1 -->
@@ -131,4 +131,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 0abdb6ad5d27ed8fdb48abe17330abad9791f3a46c5dcc6daa51c92a9633cc23 -->
+<!-- ruby-types:sha256: 719c6208a6e53833cd6f0125d867098a2cf62f60b887ef85a7fac9b0949f6623 -->

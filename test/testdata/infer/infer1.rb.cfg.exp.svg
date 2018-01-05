@@ -56,7 +56,7 @@
 <text text-anchor="middle" x="247" y="-533.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="247" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">a = foo : String(&quot;foo&quot;)</text>
 <text text-anchor="middle" x="247" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = a.getbyte(a) : Integer | NilClass</text>
-<text text-anchor="middle" x="247" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="247" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="247" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz1_1 -->
@@ -84,9 +84,9 @@
 <polygon fill="none" stroke="#000000" points="502.3389,-484.4439 740,-428.9427 977.6611,-484.4439 977.4392,-574.2466 502.5608,-574.2466 502.3389,-484.4439"/>
 <text text-anchor="middle" x="740" y="-540.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
 <text text-anchor="middle" x="740" y="-526.0647" font-family="Times,serif" font-size="14.00" fill="#000000">a = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="740" y="-512.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="740" y="-498.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = a.getbyte(statTemp$5) : Integer | NilClass</text>
-<text text-anchor="middle" x="740" y="-484.0647" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="740" y="-512.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = foo : String(&quot;foo&quot;)</text>
+<text text-anchor="middle" x="740" y="-498.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = a.getbyte(statTemp$6) : Integer | NilClass</text>
+<text text-anchor="middle" x="740" y="-484.0647" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="740" y="-470.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz2_1 -->
@@ -113,10 +113,10 @@
 <title>bb::&lt;constant:Object&gt;#baz3_0</title>
 <polygon fill="none" stroke="#000000" points="1001.8688,-484.4439 1291,-428.9427 1580.1312,-484.4439 1579.8614,-574.2466 1002.1386,-574.2466 1001.8688,-484.4439"/>
 <text text-anchor="middle" x="1291" y="-540.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="1291" y="-526.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="1291" y="-512.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="1291" y="-498.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$3.getbyte(statTemp$4) : Integer | NilClass</text>
-<text text-anchor="middle" x="1291" y="-484.0647" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$5 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1291" y="-526.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = foo : String(&quot;foo&quot;)</text>
+<text text-anchor="middle" x="1291" y="-512.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = foo : String(&quot;foo&quot;)</text>
+<text text-anchor="middle" x="1291" y="-498.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$4.getbyte(statTemp$5) : Integer | NilClass</text>
+<text text-anchor="middle" x="1291" y="-484.0647" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1291" y="-470.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz3_1 -->
@@ -143,11 +143,11 @@
 <title>bb::&lt;constant:Object&gt;#baz4_0</title>
 <polygon fill="none" stroke="#000000" points="1603.7616,-480.5895 1847,-416.4697 2090.2384,-480.5895 2090.0114,-584.3375 1603.9886,-584.3375 1603.7616,-480.5895"/>
 <text text-anchor="middle" x="1847" y="-547.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="1847" y="-533.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = self : Object</text>
-<text text-anchor="middle" x="1847" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$3 = statTemp$4.a() : untyped</text>
-<text text-anchor="middle" x="1847" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="1847" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$3.getbyte(statTemp$5) : untyped</text>
-<text text-anchor="middle" x="1847" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="1847" y="-533.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = self : Object</text>
+<text text-anchor="middle" x="1847" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = statTemp$5.a() : untyped</text>
+<text text-anchor="middle" x="1847" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = foo : String(&quot;foo&quot;)</text>
+<text text-anchor="middle" x="1847" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$4.getbyte(statTemp$6) : untyped</text>
+<text text-anchor="middle" x="1847" y="-477.0647" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1847" y="-463.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz4_1 -->
@@ -174,8 +174,8 @@
 <title>bb::&lt;constant:Object&gt;#baz5_0</title>
 <polygon fill="none" stroke="#000000" points="2131.8141,-495.6976 2311,-465.3606 2490.1859,-495.6976 2490.0186,-544.7839 2131.9814,-544.7839 2131.8141,-495.6976"/>
 <text text-anchor="middle" x="2311" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="2311" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="2311" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
+<text text-anchor="middle" x="2311" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="2311" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz5_2 -->
 <g id="node11" class="node">
@@ -223,10 +223,10 @@
 <title>bb::&lt;constant:Object&gt;#baz5_4</title>
 <ellipse fill="none" stroke="#000000" cx="2311" cy="-189.0538" rx="196.8753" ry="65.1077"/>
 <text text-anchor="middle" x="2311" y="-219.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](b)</text>
-<text text-anchor="middle" x="2311" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = b : Integer | String</text>
-<text text-anchor="middle" x="2311" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = 1 : Integer(1)</text>
-<text text-anchor="middle" x="2311" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$5.getbyte(statTemp$6) : untyped</text>
-<text text-anchor="middle" x="2311" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="2311" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = b : Integer | String</text>
+<text text-anchor="middle" x="2311" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="2311" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$6.getbyte(statTemp$7) : untyped</text>
+<text text-anchor="middle" x="2311" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="2311" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz5_2&#45;&gt;bb::&lt;constant:Object&gt;#baz5_4 -->
@@ -252,8 +252,8 @@
 <title>bb::&lt;constant:Object&gt;#baz6_0</title>
 <polygon fill="none" stroke="#000000" points="2579.8141,-495.6976 2759,-465.3606 2938.1859,-495.6976 2938.0186,-544.7839 2579.9814,-544.7839 2579.8141,-495.6976"/>
 <text text-anchor="middle" x="2759" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="2759" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="2759" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
+<text text-anchor="middle" x="2759" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="2759" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz6_2 -->
 <g id="node16" class="node">
@@ -301,10 +301,10 @@
 <title>bb::&lt;constant:Object&gt;#baz6_4</title>
 <ellipse fill="none" stroke="#000000" cx="2766" cy="-189.0538" rx="233.7181" ry="65.1077"/>
 <text text-anchor="middle" x="2766" y="-219.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](b)</text>
-<text text-anchor="middle" x="2766" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="2766" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = b : Integer | String</text>
-<text text-anchor="middle" x="2766" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$5.getbyte(statTemp$6) : Integer | NilClass</text>
-<text text-anchor="middle" x="2766" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="2766" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = foo : String(&quot;foo&quot;)</text>
+<text text-anchor="middle" x="2766" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = b : Integer | String</text>
+<text text-anchor="middle" x="2766" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$6.getbyte(statTemp$7) : Integer | NilClass</text>
+<text text-anchor="middle" x="2766" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="2766" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz6_2&#45;&gt;bb::&lt;constant:Object&gt;#baz6_4 -->
@@ -330,8 +330,8 @@
 <title>bb::&lt;constant:Object&gt;#baz7_0</title>
 <polygon fill="none" stroke="#000000" points="3064.8141,-495.6976 3244,-465.3606 3423.1859,-495.6976 3423.0186,-544.7839 3064.9814,-544.7839 3064.8141,-495.6976"/>
 <text text-anchor="middle" x="3244" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="3244" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="3244" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$4</text>
+<text text-anchor="middle" x="3244" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="3244" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz7_2 -->
 <g id="node21" class="node">
@@ -352,10 +352,10 @@
 <title>bb::&lt;constant:Object&gt;#baz7_4</title>
 <ellipse fill="none" stroke="#000000" cx="3258" cy="-189.0538" rx="233.7181" ry="65.1077"/>
 <text text-anchor="middle" x="3258" y="-219.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](b)</text>
-<text text-anchor="middle" x="3258" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = foo : String(&quot;foo&quot;)</text>
-<text text-anchor="middle" x="3258" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = b : NilClass | Integer</text>
-<text text-anchor="middle" x="3258" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$5.getbyte(statTemp$6) : Integer | NilClass</text>
-<text text-anchor="middle" x="3258" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return b : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="3258" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = foo : String(&quot;foo&quot;)</text>
+<text text-anchor="middle" x="3258" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = b : NilClass | Integer</text>
+<text text-anchor="middle" x="3258" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = statTemp$6.getbyte(statTemp$7) : Integer | NilClass</text>
+<text text-anchor="middle" x="3258" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$8 = return b : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="3258" y="-149.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz7_0&#45;&gt;bb::&lt;constant:Object&gt;#baz7_4 -->
@@ -393,18 +393,18 @@
 <g id="node23" class="node">
 <title>bb::&lt;constant:Object&gt;#baz8_0</title>
 <polygon fill="none" stroke="#000000" points="3515.6245,-495.6976 3774,-465.3606 4032.3755,-495.6976 4032.1344,-544.7839 3515.8656,-544.7839 3515.6245,-495.6976"/>
-<text text-anchor="middle" x="3774" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](&lt;constant:nil&gt;$5)</text>
-<text text-anchor="middle" x="3774" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:nil&gt;$5 = alias &lt;constant:nil&gt; : NilClass</text>
+<text text-anchor="middle" x="3774" y="-519.0647" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](&lt;constant:nil&gt;$6)</text>
+<text text-anchor="middle" x="3774" y="-505.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:nil&gt;$6 = alias &lt;constant:nil&gt; : NilClass</text>
 <text text-anchor="middle" x="3774" y="-491.0647" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz8_2 -->
 <g id="node25" class="node">
 <title>bb::&lt;constant:Object&gt;#baz8_2</title>
 <ellipse fill="none" stroke="#000000" cx="3725" cy="-335.3625" rx="160.6716" ry="45.011"/>
-<text text-anchor="middle" x="3725" y="-352.1625" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](&lt;constant:nil&gt;$5)</text>
+<text text-anchor="middle" x="3725" y="-352.1625" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](&lt;constant:nil&gt;$6)</text>
 <text text-anchor="middle" x="3725" y="-338.1625" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="3725" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3 = true : TrueClass(true)</text>
-<text text-anchor="middle" x="3725" y="-310.1625" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$3</text>
+<text text-anchor="middle" x="3725" y="-324.1625" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4 = true : TrueClass(true)</text>
+<text text-anchor="middle" x="3725" y="-310.1625" font-family="Times,serif" font-size="14.00" fill="#000000">whileTemp$4</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz8_0&#45;&gt;bb::&lt;constant:Object&gt;#baz8_2 -->
 <g id="edge26" class="edge">
@@ -429,7 +429,7 @@
 <g id="node26" class="node">
 <title>bb::&lt;constant:Object&gt;#baz8_3</title>
 <ellipse fill="none" stroke="#000000" cx="3648" cy="-189.0538" rx="131.9663" ry="45.011"/>
-<text text-anchor="middle" x="3648" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](&lt;constant:nil&gt;$5)</text>
+<text text-anchor="middle" x="3648" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](&lt;constant:nil&gt;$6)</text>
 <text text-anchor="middle" x="3648" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
 <text text-anchor="middle" x="3648" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">b = 1 : Integer(1)</text>
 <text text-anchor="middle" x="3648" y="-163.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
@@ -444,8 +444,8 @@
 <g id="node27" class="node">
 <title>bb::&lt;constant:Object&gt;#baz8_4</title>
 <ellipse fill="none" stroke="#000000" cx="4047" cy="-189.0538" rx="248.7259" ry="35.2113"/>
-<text text-anchor="middle" x="4047" y="-198.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](&lt;constant:nil&gt;$5)</text>
-<text text-anchor="middle" x="4047" y="-184.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$6 = return &lt;constant:nil&gt;$5 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="4047" y="-198.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](&lt;constant:nil&gt;$6)</text>
+<text text-anchor="middle" x="4047" y="-184.8538" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$7 = return &lt;constant:nil&gt;$6 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="4047" y="-170.8538" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#baz8_2&#45;&gt;bb::&lt;constant:Object&gt;#baz8_4 -->
@@ -468,4 +468,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 7daf2e543325bd91a6c45908823248656149fe52c2a2fee91d6b8e3935711d55 -->
+<!-- ruby-types:sha256: 499b79b51a748c99b59c2662368da32df9db991c6f28d53dcf2013a4e15f262f -->

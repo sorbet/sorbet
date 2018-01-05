@@ -8,7 +8,7 @@ class VerifierWalker {
     void check(Expression *node) {
         // EmptyTree is the only thing allowed to not have a loc, and there
         // isn't any transform for it in TreeMap, so all nodes need a loc
-        DEBUG_ONLY(Error::check(!node->loc.is_none()));
+        ENFORCE(!node->loc.is_none(), "location is unset");
     }
 
 public:

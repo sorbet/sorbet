@@ -77,7 +77,7 @@ void CFG::sanityCheck(core::Context ctx) {
         return;
 
     for (auto &bb : this->basicBlocks) {
-        Error::check(bb->bexit.isCondSet(), "Block exit condition left unset for block " + bb->toString(ctx));
+        ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block " + bb->toString(ctx));
     }
 
     // check that synthetic variable that is read is ever written to.
@@ -86,7 +86,7 @@ void CFG::sanityCheck(core::Context ctx) {
         core::Name &nm = el.first.name.name(ctx);
         if (nm.kind != core::NameKind::UNIQUE || nm.unique.uniqueNameKind != core::UniqueNameKind::CFG)
             continue;
-        //        Error::check(writes.find(el.first) != writes.end());
+        //        ENFORCE(writes.find(el.first) != writes.end());
     }
 }
 

@@ -3,6 +3,7 @@
 #include "core/Names/core.h"
 #include <regex>
 
+template class std::vector<std::pair<unsigned int, unsigned int>>;
 using namespace std;
 
 namespace ruby_typer {
@@ -80,17 +81,17 @@ const char *m_str = "M";
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
 
-SymbolRef GlobalState::synthesizeClass(absl::string_view name, SymbolRef superclass) {
+SymbolRef GlobalState::synthesizeClass(absl::string_view name, int superclass) {
     NameRef nameId = enterNameConstant(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
     // These will be added to defn_root().members later.
-    SymbolRef symRef = SymbolRef(symbols.size());
+    SymbolRef symRef = SymbolRef(this, symbols.size());
     symbols.emplace_back();
     Symbol &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
     info.name = nameId;
     info.owner = defn_root();
-    info.superClass = superclass;
+    info.superClass = SymbolRef(this, superclass);
     info.flags = 0;
     info.setClass();
 
@@ -100,7 +101,10 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, SymbolRef supercl
     return symRef;
 }
 
-GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this) {
+int globalStateIdCounter = 1;
+
+GlobalState::GlobalState(spdlog::logger &logger)
+    : logger(logger), errors(*this), globalStateId(globalStateIdCounter++) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
@@ -108,7 +112,7 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     symbols.reserve(max_symbol_count);
     int names_by_hash_size = 2 * max_name_count;
     names_by_hash.resize(names_by_hash_size);
-    DEBUG_ONLY(Error::check((names_by_hash_size & (names_by_hash_size - 1)) == 0));
+    ENFORCE((names_by_hash_size & (names_by_hash_size - 1)) == 0, "names_by_hash_size is not a power of 2");
 
     names.emplace_back(); // first name is used in hashes to indicate empty cell
     names[0].kind = NameKind::UTF8;
@@ -118,9 +122,14 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef top_id = synthesizeClass(top_str, 0);
     SymbolRef bottom_id = synthesizeClass(bottom_str, 0);
     SymbolRef root_id = synthesizeClass(root_str, 0);
+    GlobalState::defn_root()
+        .info(*this, true)
+        .members.push_back(make_pair(enterNameConstant(no_symbol_str), no_symbol_id));
+    GlobalState::defn_root().info(*this, true).members.push_back(make_pair(enterNameConstant(top_str), top_id));
+    GlobalState::defn_root().info(*this, true).members.push_back(make_pair(enterNameConstant(bottom_str), bottom_id));
     SymbolRef nil_id = synthesizeClass(nil_str);
     SymbolRef todo_id = synthesizeClass(todo_str, 0);
-    SymbolRef object_id = synthesizeClass(object_str, core::GlobalState::defn_BasicObject());
+    SymbolRef object_id = synthesizeClass(object_str, core::GlobalState::defn_BasicObject()._id);
     SymbolRef junk_id = synthesizeClass(junk_str, 0);
     SymbolRef integer_id = synthesizeClass(integer_str);
     SymbolRef float_id = synthesizeClass(float_str);
@@ -145,36 +154,36 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef complex_id = synthesizeClass(complex_str);
     SymbolRef rational_id = synthesizeClass(rational_str);
 
-    Error::check(no_symbol_id == noSymbol());
-    Error::check(top_id == defn_top());
-    Error::check(bottom_id == defn_bottom());
-    Error::check(root_id == defn_root());
-    Error::check(nil_id == defn_nil());
-    Error::check(todo_id == defn_todo());
-    Error::check(object_id == defn_Object());
-    Error::check(junk_id == defn_junk());
-    Error::check(integer_id == defn_Integer());
-    Error::check(float_id == defn_Float());
-    Error::check(string_id == defn_String());
-    Error::check(symbol_id == defn_Symbol());
-    Error::check(array_id == defn_Array());
-    Error::check(hash_id == defn_Hash());
-    Error::check(trueClass_id == defn_TrueClass());
-    Error::check(falseClass_id == defn_FalseClass());
-    Error::check(nilClass_id == defn_NilClass());
-    Error::check(untyped_id == defn_untyped());
-    Error::check(opus_id == defn_Opus());
-    Error::check(opus_types_id == defn_Opus_Types());
-    Error::check(class_id == defn_Class());
-    Error::check(basicObject_id == defn_BasicObject());
-    Error::check(kernel_id == defn_Kernel());
-    Error::check(range_id == defn_Range());
-    Error::check(regexp_id == defn_Regexp());
-    Error::check(magic_id == defn_Magic());
-    Error::check(module_id == defn_Module());
-    Error::check(standardError_id == defn_StandardError());
-    Error::check(complex_id == defn_Complex());
-    Error::check(rational_id == defn_Rational());
+    ENFORCE(no_symbol_id == noSymbol(), "no symbol creation failed");
+    ENFORCE(top_id == defn_top(), "top symbol creation failed");
+    ENFORCE(bottom_id == defn_bottom(), "bottom symbol creation failed");
+    ENFORCE(root_id == defn_root(), "root symbol creation failed");
+    ENFORCE(nil_id == defn_nil(), "nil symbol creation failed");
+    ENFORCE(todo_id == defn_todo(), "todo symbol creation failed");
+    ENFORCE(object_id == defn_Object(), "object symbol creation failed");
+    ENFORCE(junk_id == defn_junk(), "junk symbol creation failed");
+    ENFORCE(integer_id == defn_Integer(), "Integer symbol creation failed");
+    ENFORCE(float_id == defn_Float(), "Float symbol creation failed");
+    ENFORCE(string_id == defn_String(), "String symbol creation failed");
+    ENFORCE(symbol_id == defn_Symbol(), "Symbol symbol creation failed");
+    ENFORCE(array_id == defn_Array(), "Array symbol creation failed");
+    ENFORCE(hash_id == defn_Hash(), "Hash symbol creation failed");
+    ENFORCE(trueClass_id == defn_TrueClass(), "TrueClass symbol creation failed");
+    ENFORCE(falseClass_id == defn_FalseClass(), "FalseClass symbol creation failed");
+    ENFORCE(nilClass_id == defn_NilClass(), "NilClass symbol creation failed");
+    ENFORCE(untyped_id == defn_untyped(), "untyped symbol creation failed");
+    ENFORCE(opus_id == defn_Opus(), "Opus symbol creation failed");
+    ENFORCE(opus_types_id == defn_Opus_Types(), "Opus::Types symbol creation failed");
+    ENFORCE(class_id == defn_Class(), "Class symbol creation failed");
+    ENFORCE(basicObject_id == defn_BasicObject(), "BasicObject symbol creation failed");
+    ENFORCE(kernel_id == defn_Kernel(), "Kernel symbol creation failed");
+    ENFORCE(range_id == defn_Range(), "Range symbol creation failed");
+    ENFORCE(regexp_id == defn_Regexp(), "Regexp symbol creation failed");
+    ENFORCE(magic_id == defn_Magic(), "Magic symbol creation failed");
+    ENFORCE(module_id == defn_Module(), "Module symbol creation failed");
+    ENFORCE(standardError_id == defn_StandardError(), "StandardError symbol creation failed");
+    ENFORCE(complex_id == defn_Complex(), "Complex symbol creation failed");
+    ENFORCE(rational_id == defn_Rational(), "Rational symbol creation failed");
 
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = core::Types::nil();
@@ -218,15 +227,20 @@ GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), errors(*this)
     SymbolRef m = enterStaticFieldSymbol(Loc::none(0), defn_root(), enterNameConstant(m_str));
     m.info(*this).resultType = make_unique<AliasType>(model);
 
-    while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
-        synthesizeClass(reserved_str);
-    }
+    int reservedCount = 0;
 
-    Error::check(symbols.size() == defn_last_synthetic_sym()._id + 1);
+    while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
+        std::string res(reserved_str);
+        res = res + to_string(reservedCount);
+        synthesizeClass(res);
+        reservedCount++;
+    }
 
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
+    ENFORCE(symbols.size() == defn_last_synthetic_sym()._id + 1, "Too many synthetic symbols?");
+    sanityCheck();
 }
 
 GlobalState::~GlobalState() = default;
@@ -234,8 +248,8 @@ GlobalState::~GlobalState() = default;
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
-    DEBUG_ONLY(Error::check(owner.exists()));
-    Error::check(name.exists());
+    ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
+    ENFORCE(name.exists(), "entering symbol with non-existing name");
     Symbol &ownerScope = owner.info(*this, true);
     auto from = ownerScope.members.begin();
     auto to = ownerScope.members.end();
@@ -244,17 +258,17 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     while (from != to) {
         auto &el = *from;
         if (el.first == name) {
-            Error::check((from->second.info(*this).flags & flags) == flags);
+            ENFORCE((from->second.info(*this).flags & flags) == flags, "existing symbol has wrong flags");
             counterInc("symbols.hit");
             return from->second;
         }
         from++;
     }
-    Error::check(!symbolTableFrozen);
+    ENFORCE(!symbolTableFrozen);
 
     bool reallocate = symbols.size() == symbols.capacity();
 
-    SymbolRef ret = SymbolRef(symbols.size());
+    SymbolRef ret = SymbolRef(this, symbols.size());
     symbols.emplace_back();
     Symbol &info = ret.info(*this, true);
     info.name = name;
@@ -289,12 +303,12 @@ SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) 
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
     bool isBlock = name.name(*this).kind == NameKind::UNIQUE && name.name(*this).unique.original == Names::blockTemp();
-    Error::check(isBlock || owner.info(*this).isClass());
+    ENFORCE(isBlock || owner.info(*this).isClass(), "entering method symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    Error::check(owner.info(*this).isClass());
+    ENFORCE(owner.info(*this).isClass(), "entering field symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::FIELD);
 }
 
@@ -303,16 +317,25 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef 
 }
 
 SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    Error::check(owner.info(*this).isMethod());
+    ENFORCE(owner.info(*this).isMethod(), "entering method argument symbol into not-a-method");
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD_ARGUMENT);
 }
 
 LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
     // THIS IS NOT TRUE. Top level code is still a thing
-    // Error::check(owner.info(*this).isMethod());
+    // ENFORCE(owner.info(*this).isMethod());
     categoryCounterInc("symbols", "local");
     if (owner.info(*this).isBlockSymbol(*this) && !name.isBlockClashSafe(*this)) {
-        name = freshNameUnique(UniqueNameKind::NestedScope, name, owner._id);
+        // Reproducibly create a name that depends on the owners scope.
+        // This is used to distinguish between name "foo" defined in a block
+        // and name "foo" defined by outer function.
+        // We can't use block nesting level, otherwise there may be crosstalk
+        // currently we use lower bits of owner id
+        // this is fine until method has more than 64k blocks + nested methods + nested classes
+        constexpr u2 rangeSize = (256 * 256 - 1);
+        name = freshNameUnique(UniqueNameKind::NestedScope, name, 1 + owner._id % rangeSize);
+        ENFORCE(owner._id - Context(*this, owner).enclosingMethod()._id < rangeSize);
+        // check that did not overflow
     }
     LocalVariable r(name);
     return r;
@@ -361,9 +384,9 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
         bucketId = (bucketId + probe_count) & mask;
         probe_count++;
     }
-    Error::check(!nameTableFrozen);
+    ENFORCE(!nameTableFrozen);
 
-    DEBUG_ONLY(if (probe_count == hashTableSize) { Error::raise("Full table?"); });
+    ENFORCE(probe_count != hashTableSize, "Full table?");
 
     if (names.size() == names.capacity()) {
         expandNames();
@@ -391,8 +414,8 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
 }
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
-    Error::check(original.exists());
-    Error::check(original.name(*this).kind == UTF8);
+    ENFORCE(original.exists(), "making a constant name over non-exiting name");
+    ENFORCE(original.name(*this).kind == UTF8, "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(CONSTANT, original.id());
     unsigned int hashTableSize = names_by_hash.size();
@@ -415,7 +438,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     if (probe_count == hashTableSize) {
         Error::raise("Full table?");
     }
-    Error::check(!nameTableFrozen);
+    ENFORCE(!nameTableFrozen);
 
     if (names.size() == names.capacity()) {
         expandNames();
@@ -450,8 +473,8 @@ NameRef GlobalState::enterNameConstant(absl::string_view original) {
 void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsigned int> *to, unsigned int szFrom,
                unsigned int szTo) {
     // printf("\nResizing name hash table from %u to %u\n", szFrom, szTo);
-    DEBUG_ONLY(Error::check((szTo & (szTo - 1)) == 0));
-    DEBUG_ONLY(Error::check((szFrom & (szFrom - 1)) == 0));
+    ENFORCE((szTo & (szTo - 1)) == 0, "name hash table size corruption");
+    ENFORCE((szFrom & (szFrom - 1)) == 0, "name hash table size corruption");
     unsigned int mask = szTo - 1;
     for (unsigned int orig = 0; orig < szFrom; orig++) {
         if (from[orig].second != 0u) {
@@ -468,8 +491,8 @@ void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsign
 }
 
 void GlobalState::expandNames() {
-    DEBUG_ONLY(sanityCheck());
-    Error::check(names.size() == names.capacity());
+    sanityCheck();
+    ENFORCE(names.size() == names.capacity(), "names have wrong capacity");
 
     names.reserve(names.size() * 2);
     vector<pair<unsigned int, unsigned int>> new_names_by_hash(names_by_hash.capacity() * 2);
@@ -478,9 +501,7 @@ void GlobalState::expandNames() {
 }
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
-    if (num == 0) {
-        num = freshNameId++;
-    }
+    ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
     unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
@@ -503,7 +524,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     if (probe_count == hashTableSize) {
         Error::raise("Full table?");
     }
-    Error::check(!nameTableFrozen);
+    ENFORCE(!nameTableFrozen);
 
     if (names.size() == names.capacity()) {
         expandNames();
@@ -563,21 +584,26 @@ bool fileIsTyped(absl::string_view source) {
     }
 }
 
-FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
-    Error::check(!fileTableFrozen);
+FileRef GlobalState::enterFile(std::shared_ptr<File> file) {
+    ENFORCE(!fileTableFrozen);
     auto idx = files.size();
+    files.emplace_back(file);
+    return FileRef(idx);
+}
+
+FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
     File::Type source_type = File::Untyped;
     if (fileIsTyped(source)) {
         source_type = File::Typed;
     }
 
-    files.emplace_back(string(path.begin(), path.end()), string(source.begin(), source.end()), source_type);
-    return FileRef(idx);
+    return GlobalState::enterFile(
+        std::make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), source_type));
 }
 
 LocalVariable GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     Symbol &info = owner.info(*this);
-    Error::check(info.isMethod());
+    ENFORCE(info.isMethod(), "entering temporary outside of a method");
     int id = ++(info.uniqueCounter);
     NameRef tempName = this->freshNameUnique(kind, name, id);
 
@@ -611,19 +637,35 @@ string GlobalState::toString(bool showHidden) {
     return os.str();
 }
 
-void GlobalState::sanityCheck() const {
+void GlobalState::sanityCheck() {
     if (!debug_mode) {
         return;
     }
-    Error::check((names_by_hash.size() & (names_by_hash.size() - 1)) == 0);
-    Error::check(names.capacity() * 2 == names_by_hash.capacity());
-    Error::check(names_by_hash.size() == names_by_hash.capacity());
+    ENFORCE(names.size() > 0, "empty name table size");
+    ENFORCE(strings.size() > 0, "empty string table size");
+    ENFORCE(names_by_hash.size() > 0, "empty name hash table size");
+    ENFORCE((names_by_hash.size() & (names_by_hash.size() - 1)) == 0, "name hash table size is not a power of two");
+    ENFORCE(names.capacity() * 2 == names_by_hash.capacity(), "name table and hash name table sizes out of sync");
+    ENFORCE(names_by_hash.size() == names_by_hash.capacity(), "hash name table not at full capacity");
+    int i = 0;
+    for (auto &nm : names) {
+        if (i != 0)
+            nm.sanityCheck(*this);
+        i++;
+    }
+
+    i = 0;
+    for (auto &sym : symbols) {
+        if (i != 0)
+            sym.sanityCheck(*this);
+        i++;
+    }
     for (auto &ent : names_by_hash) {
         if (ent.second == 0) {
             continue;
         }
         const Name &nm = names[ent.second];
-        Error::check(ent.first == nm.hash(*this));
+        ENFORCE(ent.first == nm.hash(*this), "name hash table corruption");
     }
 }
 
@@ -663,5 +705,27 @@ bool GlobalState::unfreezeSymbolTable() {
     return old;
 }
 
+GlobalState GlobalState::deepCopy() {
+    this->sanityCheck();
+    GlobalState result(this->logger);
+    result.strings = this->strings;
+    this->strings_last_page_used = STRINGS_PAGE_SIZE;
+    result.strings_last_page_used = this->strings_last_page_used;
+    result.symbols.clear();
+    result.symbols.reserve(this->symbols.capacity());
+    for (auto &sym : symbols) {
+        result.symbols.emplace_back(sym.deepCopy());
+    }
+    result.files = this->files;
+
+    result.names.reserve(this->names.capacity());
+    result.names.resize(this->names.size());
+    memcpy(result.names.data(), this->names.data(), this->names.size() * sizeof(Name));
+
+    result.names_by_hash.reserve(this->names_by_hash.size());
+    result.names_by_hash = this->names_by_hash;
+    result.sanityCheck();
+    return result;
+}
 } // namespace core
 } // namespace ruby_typer

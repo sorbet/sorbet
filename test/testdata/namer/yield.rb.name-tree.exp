@@ -46,17 +46,17 @@ begin
             3
           end
         end
-        self(<constant:Main>).yielder() do |<block-nested: <block-pass>$10000>|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$10000>.to_a()))
+        self(<constant:Main>).yielder() do |<block-nested: <block-pass>$2>|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$2>.to_a()))
         end
-        self(<constant:Main>).blockpass() do |<block-nested: <block-pass>$10001>|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$10001>.to_a()))
+        self(<constant:Main>).blockpass() do |<block-nested: <block-pass>$3>|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$3>.to_a()))
         end
-        self(<constant:Main>).mixed() do |<block-nested: <block-pass>$10002>|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$10002>.to_a()))
+        self(<constant:Main>).mixed() do |<block-nested: <block-pass>$4>|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$4>.to_a()))
         end
-        self(<constant:Main>).blockyield() do |<block-nested: <block-pass>$10003>|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$10003>.to_a()))
+        self(<constant:Main>).blockyield() do |<block-nested: <block-pass>$5>|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-nested: <block-pass>$5>.to_a()))
         end
       end
     end

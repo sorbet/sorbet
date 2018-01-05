@@ -13,9 +13,9 @@ namespace cfg {
 void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                      core::Loc loc) {
     if (from != inWhat.deadBlock()) {
-        Error::check(!from->bexit.isCondSet());
-        Error::check(from->bexit.thenb == nullptr);
-        Error::check(from->bexit.elseb == nullptr);
+        ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
+        ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
+        ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
         from->bexit.cond = cond;
         from->bexit.thenb = thenb;
         from->bexit.elseb = elseb;
@@ -27,9 +27,9 @@ void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *the
 
 void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::Loc loc) {
     if (from != inWhat.deadBlock()) {
-        Error::check(!from->bexit.isCondSet());
-        Error::check(from->bexit.thenb == nullptr);
-        Error::check(from->bexit.elseb == nullptr);
+        ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
+        ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
+        ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
         from->bexit.cond = core::NameRef(0);
         from->bexit.elseb = to;
         from->bexit.thenb = to;
@@ -41,9 +41,9 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::Loc 
 void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
     auto *db = inWhat.deadBlock();
     if (from != db) {
-        Error::check(!from->bexit.isCondSet());
-        Error::check(from->bexit.thenb == nullptr);
-        Error::check(from->bexit.elseb == nullptr);
+        ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
+        ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
+        ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
         from->bexit.cond = core::NameRef(0);
         from->bexit.elseb = db;
         from->bexit.thenb = db;
@@ -70,8 +70,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
      * Though this may lead to more effictient and a better CFG if it was to be actually compiled into code
      * This will lead to duplicate typechecking and may lead to exponential explosion of typechecking time
      * for some code snippets. */
-    Error::check(!current->bexit.isCondSet() || current == cctx.inWhat.deadBlock(),
-                 "current block has already been finalized!");
+    ENFORCE(!current->bexit.isCondSet() || current == cctx.inWhat.deadBlock(),
+            "current block has already been finalized!");
 
     try {
         BasicBlock *ret = nullptr;
@@ -112,7 +112,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::If *a) {
                 core::LocalVariable ifSym =
                     cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::ifTemp(), cctx.inWhat.symbol);
-                Error::check(ifSym.exists());
+                ENFORCE(ifSym.exists(), "ifSym does not exist");
                 auto cont = walk(cctx.withTarget(ifSym), a->cond.get(), current);
                 auto thenBlock = cctx.inWhat.freshBlock(cctx.loops, cont);
                 auto elseBlock = cctx.inWhat.freshBlock(cctx.loops, cont);
@@ -355,7 +355,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
 
                     auto *local = ast::cast_tree<ast::Local>(rescueCase->var.get());
-                    Error::check(local != nullptr);
+                    ENFORCE(local != nullptr, "rescue case var not a local?");
                     caseBody->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
                                                  make_unique<Ident>(unanalyzableCondition));
 
@@ -426,7 +426,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
         // For, Rescue,
         // Symbol, NamedArg, Array,
-        Error::check(ret != nullptr);
+        ENFORCE(ret != nullptr, "CFB builder ret unset");
         return ret;
     } catch (...) {
         cctx.ctx.state.errors.error(what->loc, core::errors::Internal::InternalError,

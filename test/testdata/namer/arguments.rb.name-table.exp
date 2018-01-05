@@ -7,7 +7,7 @@ class <constant:A> < ::<constant:Object> () -> <class:A>
     argument e<optional, keyword>
     argument f<keyword, repeated>
     argument g<block>
-    method <block>$10001 (a, b, c, d, e, f, g)
+    method <block>$2 (a, b, c, d, e, f, g)
       argument a<>
       argument b<optional>
       argument c<repeated>

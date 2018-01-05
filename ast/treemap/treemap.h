@@ -78,6 +78,7 @@ public:
     Expression *postTransformIntLit(core::Context ctx, IntLit *original);
 
     Expression *postTransformStringLit(core::Context ctx, StringLit *original);
+    Expression *postTransformSymbolLit(core::Context ctx, StringLit *original);
 
     Expression *postTransformConstantLit(core::Context ctx, ConstantLit *original);
 
@@ -147,6 +148,7 @@ GENERATE_HAS_MEMBER(preTransformIdent);
 GENERATE_HAS_MEMBER(preTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(preTransformBoolLit);
 GENERATE_HAS_MEMBER(preTransformStringLit);
+GENERATE_HAS_MEMBER(preTransformSymbolLit);
 GENERATE_HAS_MEMBER(preTransformFloatLit);
 GENERATE_HAS_MEMBER(preTransformLocal);
 GENERATE_HAS_MEMBER(preTransformIntLit);
@@ -178,6 +180,7 @@ GENERATE_HAS_MEMBER(postTransformBoolLit);
 GENERATE_HAS_MEMBER(postTransformFloatLit);
 GENERATE_HAS_MEMBER(postTransformIntLit);
 GENERATE_HAS_MEMBER(postTransformStringLit);
+GENERATE_HAS_MEMBER(postTransformSymbolLit);
 GENERATE_HAS_MEMBER(postTransformConstantLit);
 GENERATE_HAS_MEMBER(postTransformArraySplat);
 GENERATE_HAS_MEMBER(postTransformHashSplat);
@@ -281,6 +284,7 @@ GENERATE_POSTPONE_POSTCLASS(Local);
 GENERATE_POSTPONE_POSTCLASS(FloatLit);
 GENERATE_POSTPONE_POSTCLASS(IntLit);
 GENERATE_POSTPONE_POSTCLASS(StringLit);
+GENERATE_POSTPONE_POSTCLASS(SymbolLit);
 GENERATE_POSTPONE_POSTCLASS(ConstantLit);
 GENERATE_POSTPONE_POSTCLASS(ArraySplat);
 GENERATE_POSTPONE_POSTCLASS(HashSplat);
@@ -304,6 +308,7 @@ private:
     static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformBoolLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformStringLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformSymbolLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformFloatLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformIntLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
@@ -541,7 +546,7 @@ private:
                     auto narg = mapIt(oarg, ctx);
                     if (oarg != narg) {
                         auto nargCase = cast_tree<RescueCase>(narg);
-                        Error::check(nargCase != nullptr);
+                        ENFORCE(nargCase != nullptr, "rescue case was mapped into non-a rescue case");
                         el.reset(nargCase);
                     }
                     i++;
@@ -624,7 +629,7 @@ private:
                     auto oblock = v->block.get();
                     auto nblock = mapIt(oblock, ctx);
                     if (oblock != nblock) {
-                        Error::check(cast_tree<Block>(nblock) != nullptr);
+                        ENFORCE(cast_tree<Block>(nblock) != nullptr, "block was mapped into not-a block");
                         v->block.reset(cast_tree<Block>(nblock));
                     }
                 }
@@ -770,7 +775,11 @@ private:
                 }
                 return v;
             } else if (SymbolLit *v = cast_tree<SymbolLit>(what)) {
-                return what;
+                if (HAS_MEMBER_postTransformSymbolLit<FUNC>::value) {
+                    return PostPonePostTransform_SymbolLit<FUNC, HAS_MEMBER_postTransformSymbolLit<FUNC>::value>::call(
+                        ctx, v, func);
+                }
+                return v;
             } else if (Self *v = cast_tree<Self>(what)) {
                 if (HAS_MEMBER_postTransformSelf<FUNC>::value) {
                     return PostPonePostTransform_Self<FUNC, HAS_MEMBER_postTransformSelf<FUNC>::value>::call(ctx, v,

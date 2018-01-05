@@ -119,7 +119,7 @@ Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store res
 }
 
 Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
-    Error::check(symbol.exists());
+    ENFORCE(symbol.exists(), "Creating Ident over non-existing symbol");
     categoryCounterInc("trees", "ident");
 }
 

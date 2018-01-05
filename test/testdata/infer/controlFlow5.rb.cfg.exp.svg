@@ -18,18 +18,18 @@
 <g id="node1" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_0</title>
 <polygon fill="none" stroke="#000000" points="15.7411,-724.4057 455,-677.1774 894.2589,-724.4057 893.8489,-800.8227 16.1511,-800.8227 15.7411,-724.4057"/>
-<text text-anchor="middle" x="455" y="-769.3269" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](foo, &lt;constant:StandardError&gt;$8)</text>
-<text text-anchor="middle" x="455" y="-755.3269" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:StandardError&gt;$8 = alias &lt;constant:StandardError&gt; : &lt;class:StandardError&gt;</text>
-<text text-anchor="middle" x="455" y="-741.3269" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$2 = self : Object</text>
-<text text-anchor="middle" x="455" y="-727.3269" font-family="Times,serif" font-size="14.00" fill="#000000">foo = load_arg(selfMethodTemp$2#foo, 0) : untyped</text>
+<text text-anchor="middle" x="455" y="-769.3269" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](foo, &lt;constant:StandardError&gt;$9)</text>
+<text text-anchor="middle" x="455" y="-755.3269" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:StandardError&gt;$9 = alias &lt;constant:StandardError&gt; : &lt;class:StandardError&gt;</text>
+<text text-anchor="middle" x="455" y="-741.3269" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$3 = self : Object</text>
+<text text-anchor="middle" x="455" y="-727.3269" font-family="Times,serif" font-size="14.00" fill="#000000">foo = load_arg(selfMethodTemp$3#foo, 0) : untyped</text>
 <text text-anchor="middle" x="455" y="-713.3269" font-family="Times,serif" font-size="14.00" fill="#000000">foo</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_2 -->
 <g id="node3" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_2</title>
 <ellipse fill="none" stroke="#000000" cx="296" cy="-605.997" rx="229.6333" ry="35.2113"/>
-<text text-anchor="middle" x="296" y="-615.797" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](foo, &lt;constant:StandardError&gt;$8)</text>
-<text text-anchor="middle" x="296" y="-601.797" font-family="Times,serif" font-size="14.00" fill="#000000">bar = foo.is_a?(&lt;constant:StandardError&gt;$8) : untyped</text>
+<text text-anchor="middle" x="296" y="-615.797" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](foo, &lt;constant:StandardError&gt;$9)</text>
+<text text-anchor="middle" x="296" y="-601.797" font-family="Times,serif" font-size="14.00" fill="#000000">bar = foo.is_a?(&lt;constant:StandardError&gt;$9) : untyped</text>
 <text text-anchor="middle" x="296" y="-587.797" font-family="Times,serif" font-size="14.00" fill="#000000">bar</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_0&#45;&gt;bb::&lt;constant:Object&gt;#foo_2 -->
@@ -90,8 +90,8 @@
 <g id="node6" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_8</title>
 <ellipse fill="none" stroke="#000000" cx="296" cy="-266.066" rx="160.604" ry="35.2113"/>
-<text text-anchor="middle" x="296" y="-275.866" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=8](returnMethodTemp$1)</text>
-<text text-anchor="middle" x="296" y="-261.866" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$1 = 1 : Integer(1)</text>
+<text text-anchor="middle" x="296" y="-275.866" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=8](returnMethodTemp$2)</text>
+<text text-anchor="middle" x="296" y="-261.866" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="296" y="-247.866" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_7&#45;&gt;bb::&lt;constant:Object&gt;#foo_8 -->
@@ -104,8 +104,8 @@
 <g id="node7" class="node">
 <title>bb::&lt;constant:Object&gt;#foo_10</title>
 <ellipse fill="none" stroke="#000000" cx="353" cy="-159.3553" rx="273.0758" ry="35.2113"/>
-<text text-anchor="middle" x="353" y="-169.1553" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=10](returnMethodTemp$1)</text>
-<text text-anchor="middle" x="353" y="-155.1553" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$13 = return returnMethodTemp$1 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="353" y="-169.1553" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=10](returnMethodTemp$2)</text>
+<text text-anchor="middle" x="353" y="-155.1553" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$14 = return returnMethodTemp$2 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="353" y="-141.1553" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#foo_7&#45;&gt;bb::&lt;constant:Object&gt;#foo_10 -->
@@ -134,4 +134,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: f5b458b8ce1435a6f9bb1d9e9a0a0a1255b75215f83ea34b0cd0892f7a2282fd -->
+<!-- ruby-types:sha256: 9c5ad0e9d263458cd5489888bf8603a722317645df5b487f5660d2c4ddb5cfdd -->

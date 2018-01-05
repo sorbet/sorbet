@@ -39,6 +39,7 @@ compilation_database(
         "//core:core_test",
         "//cfg/builder:builder",
         "//cfg:cfg",
+        "//ast/substitute:substitute",
         "//ast/desugar:desugar_test",
         "//ast/desugar:desugar",
         "//parser:parser",

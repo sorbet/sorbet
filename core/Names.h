@@ -20,17 +20,17 @@ enum NameKind : u1 {
 CheckSize(NameKind, 1, 1);
 
 inline int _NameKind2Id_UTF8(NameKind nm) {
-    DEBUG_ONLY(Error::check(nm == UTF8));
+    ENFORCE(nm == UTF8);
     return 1;
 }
 
 inline int _NameKind2Id_UNIQUE(NameKind nm) {
-    DEBUG_ONLY(Error::check(nm == UNIQUE));
+    ENFORCE(nm == UNIQUE);
     return 2;
 }
 
 inline int _NameKind2Id_CONSTANT(NameKind nm) {
-    DEBUG_ONLY(Error::check(nm == CONSTANT));
+    ENFORCE(nm == CONSTANT);
     return 3;
 }
 
@@ -137,6 +137,8 @@ public:
     bool operator!=(const Name &rhs) const;
 
     std::string toString(GlobalState &gs) const;
+    void sanityCheck(GlobalState &gs);
+    NameRef ref(GlobalState &gs) const;
 
 private:
     unsigned int hash(const GlobalState &gs) const;

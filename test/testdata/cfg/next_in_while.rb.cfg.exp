@@ -5,36 +5,36 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:nil>$11)
-<constant:nil>$11 = alias <constant:nil> : NilClass
+    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:nil>$12)
+<constant:nil>$12 = alias <constant:nil> : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
     "bb::<constant:Object>#foo_1" [label = "block[id=1]()
-statTemp$10 = self
-statTemp$4 = statTemp$10.bad()
+statTemp$11 = self
+statTemp$5 = statTemp$11.bad()
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_2" [label = "block[id=2](<constant:nil>$11)
+    "bb::<constant:Object>#foo_2" [label = "block[id=2](<constant:nil>$12)
 outerLoops: 1
-whileTemp$3 = true : TrueClass(true)
-whileTemp$3"];
+whileTemp$4 = true : TrueClass(true)
+whileTemp$4"];
 
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="bold"];
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="tapered"];
 
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](<constant:nil>$11)
+    "bb::<constant:Object>#foo_3" [label = "block[id=3](<constant:nil>$12)
 outerLoops: 1
-statTemp$6 = self : Object
-statTemp$5 = statTemp$6.good() : untyped
-statTemp$9 = self : Object
-returnTemp$8 = statTemp$9.value() : untyped
+statTemp$7 = self : Object
+statTemp$6 = statTemp$7.good() : untyped
+statTemp$10 = self : Object
+returnTemp$9 = statTemp$10.value() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_2" [style="bold"];
-    "bb::<constant:Object>#foo_4" [label = "block[id=4](<constant:nil>$11)
-returnMethodTemp$12 = return <constant:nil>$11 : <bottom>
+    "bb::<constant:Object>#foo_4" [label = "block[id=4](<constant:nil>$12)
+returnMethodTemp$13 = return <constant:nil>$12 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1" [style="bold"];

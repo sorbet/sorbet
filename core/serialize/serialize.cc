@@ -1,17 +1,18 @@
 #include "serialize.h"
+#include "../Symbols.h"
 
 namespace ruby_typer {
 namespace core {
 namespace serialize {
 
-const u4 VERSION = 1;
+const u4 VERSION = 2;
 
 void GlobalStateSerializer::Pickler::putStr(const absl::string_view s) {
     putU4(s.size());
     constexpr int step = (sizeof(u4) / sizeof(u1));
     int end = (s.size() / step) * step;
 
-    Error::check(step == 4);
+    ENFORCE(step == 4);
     for (int i = 0; i < end; i += step) {
         put4U1((u1)s[i], (u1)s[i + 1], (u1)s[i + 2], (u1)s[i + 3]);
     }
@@ -107,11 +108,10 @@ void GlobalStateSerializer::pickle(Pickler &p, File &what) {
     p.putStr(what.source());
 }
 
-File GlobalStateSerializer::unpickleFile(UnPickler &p) {
+std::shared_ptr<File> GlobalStateSerializer::unpickleFile(UnPickler &p) {
     std::string path = p.getStr();
     std::string source = p.getStr();
-    File to(move(path), move(source), File::Payload);
-    return to;
+    return std::make_shared<File>(move(path), move(source), File::Payload);
 }
 
 void GlobalStateSerializer::pickle(Pickler &p, Name &what) {
@@ -182,7 +182,7 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
         p.putU4(6);
         pickle(p, hash->underlying.get());
         p.putU4(hash->keys.size());
-        Error::check(hash->keys.size() == hash->values.size());
+        ENFORCE(hash->keys.size() == hash->values.size());
         for (auto &el : hash->keys) {
             pickle(p, el.get());
         }
@@ -199,52 +199,52 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
     }
 }
 
-std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
+std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalState *gs) {
     switch (p.getU4()) {
         case 0: {
             std::shared_ptr<Type> empty;
             return empty;
         }
         case 1:
-            return std::make_shared<ClassType>(p.getU4());
+            return std::make_shared<ClassType>(SymbolRef(gs, p.getU4()));
         case 2:
-            return OrType::make_shared(unpickleType(p), unpickleType(p));
+            return OrType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case 3: {
             std::shared_ptr<LiteralType> result = std::make_shared<LiteralType>(true);
-            result->underlying = unpickleType(p);
+            result->underlying = unpickleType(p, gs);
             result->value = p.getS8();
             return result;
         }
         case 4:
-            return AndType::make_shared(unpickleType(p), unpickleType(p));
+            return AndType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case 5: {
-            auto underlying = unpickleType(p);
+            auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
             std::vector<std::shared_ptr<Type>> elems;
             elems.reserve(sz);
             for (int i = 0; i < sz; i++) {
-                elems.emplace_back(unpickleType(p));
+                elems.emplace_back(unpickleType(p, gs));
             }
             auto result = std::make_shared<TupleType>(elems);
             result->underlying = underlying;
             return result;
         }
         case 6: {
-            auto underlying = unpickleType(p);
+            auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
             std::vector<std::shared_ptr<LiteralType>> keys;
             std::vector<std::shared_ptr<Type>> values;
             keys.reserve(sz);
             values.reserve(sz);
             for (int i = 0; i < sz; i++) {
-                auto key = unpickleType(p);
+                auto key = unpickleType(p, gs);
                 if (auto *lit = cast_type<LiteralType>(key.get())) {
                     keys.emplace_back(lit);
                     key.reset();
                 }
             }
             for (int i = 0; i < sz; i++) {
-                values.emplace_back(unpickleType(p));
+                values.emplace_back(unpickleType(p, gs));
             }
             auto result = std::make_shared<ShapeType>(keys, values);
             result->underlying = underlying;
@@ -253,7 +253,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p) {
         case 7:
             return std::make_shared<MagicType>();
         case 8:
-            return std::make_shared<AliasType>(SymbolRef(p.getU4()));
+            return std::make_shared<AliasType>(SymbolRef(gs, p.getU4()));
         default:
             Error::notImplemented();
     }
@@ -281,26 +281,26 @@ void GlobalStateSerializer::pickle(Pickler &p, Symbol &what) {
     p.putU4(what.definitionLoc.end_pos);
 }
 
-Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p) {
+Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     Symbol result;
-    result.owner = p.getU4();
+    result.owner = SymbolRef(gs, p.getU4());
     result.name = p.getU4();
-    result.superClass = p.getU4();
+    result.superClass = SymbolRef(gs, p.getU4());
     result.flags = p.getU4();
     result.uniqueCounter = p.getU4();
     int argumentsOrMixinsSize = p.getU4();
     result.argumentsOrMixins.reserve(argumentsOrMixinsSize);
     for (int i = 0; i < argumentsOrMixinsSize; i++) {
-        result.argumentsOrMixins.emplace_back(p.getU4());
+        result.argumentsOrMixins.emplace_back(SymbolRef(gs, p.getU4()));
     }
     int membersSize = p.getU4();
     result.members.reserve(membersSize);
     for (int i = 0; i < membersSize; i++) {
         auto name = p.getU4();
-        auto sym = p.getU4();
+        auto sym = SymbolRef(gs, p.getU4());
         result.members.push_back(std::make_pair(name, sym));
     }
-    result.resultType = unpickleType(p);
+    result.resultType = unpickleType(p, gs);
 
     result.definitionLoc.file = p.getU4();
     result.definitionLoc.begin_pos = p.getU4();
@@ -312,8 +312,8 @@ GlobalStateSerializer::Pickler GlobalStateSerializer::pickle(GlobalState &gs) {
     Pickler result;
     result.putU4(VERSION);
     result.putU4(gs.files.size());
-    for (File &f : gs.files) {
-        pickle(result, f);
+    for (auto &f : gs.files) {
+        pickle(result, *f);
     }
 
     result.putU4(gs.names.size());
@@ -331,7 +331,6 @@ GlobalStateSerializer::Pickler GlobalStateSerializer::pickle(GlobalState &gs) {
         result.putU4(s.first);
         result.putU4(s.second);
     }
-    result.putU4(gs.freshNameId);
     return result;
 }
 
@@ -344,9 +343,11 @@ int nearestPowerOf2(int from) {
 }
 
 GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logger) {
-    Error::check(p.getU4() == VERSION);
+    if (p.getU4() != VERSION) {
+        Error::raise("Payload version mismatch");
+    }
     GlobalState result(logger);
-    std::vector<File> files(move(result.files));
+    std::vector<std::shared_ptr<File>> files(move(result.files));
     files.clear();
     std::vector<Name> names(move(result.names));
     names.clear();
@@ -362,15 +363,17 @@ GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logg
     }
 
     int namesSize = p.getU4();
+    ENFORCE(namesSize > 0);
     names.reserve(nearestPowerOf2(namesSize));
     for (int i = 0; i < namesSize; i++) {
         names.emplace_back(unpickleName(p, result));
     }
 
     int symbolSize = p.getU4();
+    ENFORCE(symbolSize > 0);
     symbols.reserve(symbolSize);
     for (int i = 0; i < symbolSize; i++) {
-        symbols.emplace_back(unpickleSymbol(p));
+        symbols.emplace_back(unpickleSymbol(p, &result));
     }
 
     int namesByHashSize = p.getU4();
@@ -380,7 +383,6 @@ GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logg
         auto value = p.getU4();
         names_by_hash.emplace_back(std::make_pair(hash, value));
     }
-    result.freshNameId = p.getU4();
     result.files = move(files);
     result.names = move(names);
     result.symbols = move(symbols);

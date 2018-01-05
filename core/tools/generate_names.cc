@@ -177,8 +177,8 @@ void emit_register(ostream &out) {
     }
     out << endl;
     for (auto &name : names) {
-        out << "    DEBUG_ONLY(Error::check(" << name.srcName << "_id == " << name.id
-            << ")); /* Names::" << name.srcName << "() */" << endl;
+        out << "    ENFORCE(" << name.srcName << "_id == " << name.id << "); /* Names::" << name.srcName << "() */"
+            << endl;
     }
     out << endl;
     out << "}" << endl;

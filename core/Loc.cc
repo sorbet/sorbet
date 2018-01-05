@@ -16,7 +16,7 @@ Loc Loc::join(Loc other) {
     if (other.is_none()) {
         return *this;
     }
-    Error::check(this->file == other.file);
+    ENFORCE(this->file == other.file, "joining locations from different files");
 
     return Loc{this->file, min(this->begin_pos, other.begin_pos), max(this->end_pos, other.end_pos)};
 }
@@ -25,7 +25,7 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs)
     Loc::Detail pos;
 
     core::File &file = source.file(gs);
-    Error::check(off <= file.source().size());
+    ENFORCE(off <= file.source().size(), "file offset out of bounds");
     auto it = std::lower_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
     if (it == file.line_breaks.begin()) {
         pos.line = 1;

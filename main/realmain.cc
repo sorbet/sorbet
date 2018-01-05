@@ -309,7 +309,6 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
     options.add_options("dev")("trace", "Trace phases");
-    options.add_options("dev")("set-freshNameId", "Start freshNameId at value", cxxopts::value<int>(), "int");
     options.add_options("dev")("counters", "Print internal counters");
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
     options.add_options("dev")("statsd-prefix", "StatsD prefix", cxxopts::value<string>(), "prefix");
@@ -463,10 +462,6 @@ int realmain(int argc, char **argv) {
                 f.file(gs).source_type = ruby_typer::core::File::Typed;
             }
         }
-    }
-
-    if (options.count("set-freshNameId") != 0) {
-        gs.freshNameId = options["set-freshNameId"].as<int>();
     }
 
     typecheck(gs, index(gs, inputFiles, prints, options), prints, options);
