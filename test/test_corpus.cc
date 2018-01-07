@@ -340,6 +340,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         for (int i = pos.first.line; i <= pos.second.line; i++) {
             auto expectedError = expectedErrors.find(make_pair(error->loc.file, i));
             if (expectedError != expectedErrors.end()) {
+                found = true;
+                seenErrorLines[make_pair(error->loc.file, i)]++;
                 bool isMultipleErrors =
                     expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
                 if (expectedError->second.empty()) {
@@ -351,10 +353,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                     ADD_FAILURE_AT(filePath.data(), i) << "Error string mismatch." << endl
                                                        << " Expectation: " << expectedError->second << endl
                                                        << " Reported error: " << error->formatted;
-                } else {
-                    found = true;
-                    seenErrorLines[make_pair(error->loc.file, i)]++;
-                    continue;
                 }
             }
         }
