@@ -100,6 +100,13 @@ public:
     }
 };
 
+class ErrorAndPos {
+public:
+    string error;
+    int beginPos = -1;
+    int endPos = -1;
+};
+
 unordered_set<string> knownPasses = {
     "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "infer",
 };
@@ -287,8 +294,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // Check warnings and errors
 
-    map<pair<ruby_typer::core::FileRef, int>, string> expectedErrors;
-    regex errorRegex("# error: ?(.*)");
+    map<pair<ruby_typer::core::FileRef, int>, ErrorAndPos> expectedErrors;
+    regex errorRegex("# error: ?(.*)");           // something like 'foo   # error: Badness'
+    regex errorPosRegex("([ ]*#[ ]+)(\\^+)[ ]*"); // someting like '   #    ^^^^^  '
+    regex commendOut("^[ ]*#");
 
     for (auto file : files) {
         string src(file.file(gs).source().begin(), file.file(gs).source().end());
@@ -299,6 +308,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         while (getline(ss, line, '\n')) {
             smatch matches;
             if (regex_search(line, matches, errorRegex)) {
+                if (regex_search(line, commendOut)) {
+                    continue;
+                }
                 string match = matches[1].str();
                 int len = match.size();
                 if (len < 10 && match.find("MULTI") == string::npos) {
@@ -306,7 +318,17 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                         << "Too short of a error message at " << len
                         << " characters. Use MULTI or write something longer than: " << match;
                 }
-                expectedErrors[make_pair(file, linenum)] = match;
+                expectedErrors[make_pair(file, linenum)].error = match;
+            } else if (regex_match(line, matches, errorPosRegex)) {
+                auto expectedError = expectedErrors.find(make_pair(file, linenum - 1));
+                if (expectedError == expectedErrors.end()) {
+                    ADD_FAILURE_AT(file.file(gs).path().data(), linenum)
+                        << "Position comment must come right after a line with a `error:` comment. Found position "
+                           "comment on line "
+                        << linenum << " matching " << matches[0].str();
+                }
+                expectedError->second.beginPos = matches[1].str().size() + 1; // We start our columns at 1
+                expectedError->second.endPos = expectedError->second.beginPos + matches[2].str().size();
             }
             linenum += 1;
         }
@@ -325,9 +347,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             if (expectedError == expectedErrors.end()) {
                 ADD_FAILURE_AT(filePath.data(), line) << "Unknown location error thrown but not annotated." << endl
                                                       << "Reported error: " << error->formatted;
-            } else if (error->formatted.find(expectedError->second) == string::npos) {
+            } else if (error->formatted.find(expectedError->second.error) == string::npos) {
                 ADD_FAILURE_AT(filePath.data(), line) << "Error string mismatch." << endl
-                                                      << " Expectation: " << expectedError->second << endl
+                                                      << " Expectation: " << expectedError->second.error << endl
                                                       << " Reported error: " << error->formatted;
             } else {
                 seenErrorLines[make_pair(files.front(), line)]++;
@@ -338,21 +360,33 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto pos = error->loc.position(gs);
         bool found = false;
         for (int i = pos.first.line; i <= pos.second.line; i++) {
-            auto expectedError = expectedErrors.find(make_pair(error->loc.file, i));
-            if (expectedError != expectedErrors.end()) {
+            auto expectedErrorIt = expectedErrors.find(make_pair(error->loc.file, i));
+            if (expectedErrorIt != expectedErrors.end()) {
+                string expectedError = expectedErrorIt->second.error;
                 found = true;
                 seenErrorLines[make_pair(error->loc.file, i)]++;
-                bool isMultipleErrors =
-                    expectedError->second.find("MULTI") != string::npos; // multiple errors. Ignore message
-                if (expectedError->second.empty()) {
+                if (expectedError.empty()) {
                     ADD_FAILURE_AT(filePath.data(), i) << "Error occurred, but no expected text found. Please put (a "
                                                           "substring of) the expected error after `# error:` "
                                                        << endl
                                                        << "The message was: '" << error->formatted << "'";
-                } else if (error->formatted.find(expectedError->second) == string::npos && !isMultipleErrors) {
+                } else if (expectedError.find("MULTI") != string::npos) { // multiple errors. Ignore message and pos
+                    continue;
+                } else if (error->formatted.find(expectedError) == string::npos) {
                     ADD_FAILURE_AT(filePath.data(), i) << "Error string mismatch." << endl
-                                                       << " Expectation: " << expectedError->second << endl
+                                                       << " Expectation: " << expectedError << endl
                                                        << " Reported error: " << error->formatted;
+                } else if (expectedErrorIt->second.beginPos != -1 &&
+                           pos.first.column != expectedErrorIt->second.beginPos) {
+                    ADD_FAILURE_AT(filePath.data(), i)
+                        << "Wrong starting error position. Expected error starting at position "
+                        << expectedErrorIt->second.beginPos << " but found one starting at position "
+                        << pos.first.column;
+                } else if (expectedErrorIt->second.endPos != -1 &&
+                           pos.second.column != expectedErrorIt->second.endPos) {
+                    ADD_FAILURE_AT(filePath.data(), i)
+                        << "Wrong ending error position. Expected error ending at position "
+                        << expectedErrorIt->second.endPos << " but found one ending at position " << pos.second.column;
                 }
             }
         }
@@ -366,7 +400,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
             ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected error did not happen.";
         }
-        if (error.second.find("MULTI") != string::npos && seenErrorLines[error.first] == 1) {
+        if (error.second.error.find("MULTI") != string::npos && seenErrorLines[error.first] == 1) {
             ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected multiple errors, but only saw one.";
         }
     }
