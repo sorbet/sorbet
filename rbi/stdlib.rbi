@@ -735,6 +735,50 @@ module Abbrev
   def self.abbrev(words); end
 end
 
+class ArgumentError
+  standard_method(
+    {},
+    returns: ArgumentError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: ArgumentError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: ArgumentError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: ArgumentError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: ArgumentError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: ArgumentError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: ArgumentError
+  )
+  def untrust(); end
+end
+
 class Array
   standard_method(
     {
@@ -1339,6 +1383,48 @@ class Array
     returns: Opus::Types.array_of(BasicObject)
   )
   def |(arg0); end
+
+  standard_method(
+    {},
+    returns: Array
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Array
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Array
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Array
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Array
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Array
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Array
+  )
+  def untrust(); end
 
   standard_method(
     {},
@@ -1990,6 +2076,48 @@ class BigDecimal
     returns: [BigDecimal, BigDecimal]
   )
   def coerce(arg0); end
+
+  standard_method(
+    {},
+    returns: BigDecimal
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: BigDecimal
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: BigDecimal
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: BigDecimal
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: BigDecimal
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: BigDecimal
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: BigDecimal
+  )
+  def untrust(); end
 end
 
 module BigMath
@@ -2064,6 +2192,50 @@ module BigMath
   def sqrt(x, prec); end
 end
 
+class Binding
+  standard_method(
+    {},
+    returns: Binding
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Binding
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Binding
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Binding
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Binding
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Binding
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Binding
+  )
+  def untrust(); end
+end
+
 class CSV
   standard_method(
     {
@@ -2074,6 +2246,48 @@ class CSV
     returns: NilClass
   )
   def self.foreach(path, options=_, &blk); end
+
+  standard_method(
+    {},
+    returns: CSV
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: CSV
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: CSV
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: CSV
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: CSV
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: CSV
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: CSV
+  )
+  def untrust(); end
 end
 
 class Class
@@ -2116,6 +2330,140 @@ class Class
     returns: String
   )
   def name(); end
+
+  standard_method(
+    {},
+    returns: Class
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Class
+  )
+  def freeze(); end
+
+  standard_method(
+    {
+      arg0: Module,
+    },
+    returns: Class
+  )
+  def include(*arg0); end
+
+  standard_method(
+    {
+      arg0: Module,
+    },
+    returns: Class
+  )
+  def prepend(*arg0); end
+
+  standard_method(
+    {
+      arg0: Opus::Types.any(Symbol, String),
+    },
+    returns: Class
+  )
+  def private_class_method(*arg0); end
+
+  standard_method(
+    {
+      arg0: Symbol,
+    },
+    returns: Class
+  )
+  def private_constant(*arg0); end
+
+  standard_method(
+    {
+      arg0: Opus::Types.any(Symbol, String),
+    },
+    returns: Class
+  )
+  def public_class_method(*arg0); end
+
+  standard_method(
+    {
+      arg0: Symbol,
+    },
+    returns: Class
+  )
+  def public_constant(*arg0); end
+
+  standard_method(
+    {},
+    returns: Class
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Class
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Class
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Class
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Class
+  )
+  def untrust(); end
+end
+
+class ClosedQueueError
+  standard_method(
+    {},
+    returns: ClosedQueueError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: ClosedQueueError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: ClosedQueueError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: ClosedQueueError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: ClosedQueueError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: ClosedQueueError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: ClosedQueueError
+  )
+  def untrust(); end
 end
 
 class Complex
@@ -2376,6 +2724,48 @@ class Complex
     returns: [Complex, Complex]
   )
   def coerce(arg0); end
+
+  standard_method(
+    {},
+    returns: Complex
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Complex
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Complex
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Complex
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Complex
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Complex
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Complex
+  )
+  def untrust(); end
 end
 
 module Coverage
@@ -2390,6 +2780,50 @@ module Coverage
     returns: Opus::Types.hash_of(keys: String, values: Opus::Types.array_of(Opus::Types.any(Integer, NilClass)))
   )
   def self.result(); end
+end
+
+class Data
+  standard_method(
+    {},
+    returns: Data
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Data
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Data
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Data
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Data
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Data
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Data
+  )
+  def untrust(); end
 end
 
 class Date
@@ -2411,6 +2845,92 @@ class Date
     returns: String
   )
   def strftime(arg0); end
+
+  standard_method(
+    {},
+    returns: Date
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Date
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Date
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Date
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Date
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Date
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Date
+  )
+  def untrust(); end
+end
+
+class DateTime
+  standard_method(
+    {},
+    returns: DateTime
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: DateTime
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: DateTime
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: DateTime
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: DateTime
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: DateTime
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: DateTime
+  )
+  def untrust(); end
 end
 
 class Dir
@@ -2541,7 +3061,7 @@ class Dir
     {
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(Dir, Enumerator)
   )
   def each(&blk); end
 
@@ -2594,7 +3114,7 @@ class Dir
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Dir
   )
   def rewind(); end
 
@@ -2602,7 +3122,7 @@ class Dir
     {
       arg0: Integer,
     },
-    returns: Opus::Types.untyped
+    returns: Dir
   )
   def seek(arg0); end
 
@@ -2619,6 +3139,48 @@ class Dir
   def to_path(); end
 
   standard_method(
+    {},
+    returns: Dir
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Dir
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Dir
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Dir
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Dir
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Dir
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Dir
+  )
+  def untrust(); end
+
+  standard_method(
     {
       pattern: Opus::Types.any(String, Opus::Types.array_of(String)),
       flags: Integer,
@@ -2627,6 +3189,50 @@ class Dir
     returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
   def self.[](pattern, flags=_, &blk); end
+end
+
+class EOFError
+  standard_method(
+    {},
+    returns: EOFError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: EOFError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: EOFError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: EOFError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: EOFError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: EOFError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: EOFError
+  )
+  def untrust(); end
 end
 
 class Encoding
@@ -2733,9 +3339,95 @@ class Encoding
 
   standard_method(
     {},
+    returns: Encoding
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Encoding
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Encoding
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Encoding
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Encoding
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Encoding
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Encoding
+  )
+  def untrust(); end
+
+  standard_method(
+    {},
     returns: String
   )
   def to_s(); end
+end
+
+class EncodingError
+  standard_method(
+    {},
+    returns: EncodingError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: EncodingError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: EncodingError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: EncodingError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: EncodingError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: EncodingError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: EncodingError
+  )
+  def untrust(); end
 end
 
 module Enumerable
@@ -3108,7 +3800,7 @@ class Enumerator
     {
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
-    returns: Opus::Types.untyped
+    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
   def each(&blk); end
 
@@ -3169,7 +3861,7 @@ class Enumerator
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Enumerator
   )
   def rewind(); end
 
@@ -3178,6 +3870,48 @@ class Enumerator
     returns: Opus::Types.any(Integer, Float, NilClass)
   )
   def size(); end
+
+  standard_method(
+    {},
+    returns: Enumerator
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Enumerator
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Enumerator
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Enumerator
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Enumerator
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Enumerator
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Enumerator
+  )
+  def untrust(); end
 
   standard_method(
     {
@@ -3265,6 +3999,180 @@ class Exception
     returns: String
   )
   def to_s(); end
+
+  standard_method(
+    {},
+    returns: Exception
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Exception
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Exception
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Exception
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Exception
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Exception
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Exception
+  )
+  def untrust(); end
+end
+
+class FalseClass
+  standard_method(
+    {},
+    returns: FalseClass
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: FalseClass
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: FalseClass
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: FalseClass
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: FalseClass
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: FalseClass
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: FalseClass
+  )
+  def untrust(); end
+end
+
+class Fiber
+  standard_method(
+    {},
+    returns: Fiber
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Fiber
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Fiber
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Fiber
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Fiber
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Fiber
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Fiber
+  )
+  def untrust(); end
+end
+
+class FiberError
+  standard_method(
+    {},
+    returns: FiberError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: FiberError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: FiberError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: FiberError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: FiberError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: FiberError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: FiberError
+  )
+  def untrust(); end
 end
 
 class File
@@ -3841,6 +4749,117 @@ class File
     returns: Integer
   )
   def truncate(arg0); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def clone(); end
+
+  standard_method(
+    {
+      arg0: BasicObject,
+    },
+    returns: File
+  )
+  def <<(arg0); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def binmode(); end
+
+  standard_method(
+    {
+      sep: String,
+      limit: Integer,
+      blk: Opus::Types.proc([String], returns: BasicObject),
+    },
+    returns: File
+  )
+  def each(sep=_, limit=_, &blk); end
+
+  standard_method(
+    {
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
+    },
+    returns: File
+  )
+  def each_byte(&blk); end
+
+  standard_method(
+    {
+      blk: Opus::Types.proc([String], returns: BasicObject),
+    },
+    returns: File
+  )
+  def each_char(&blk); end
+
+  standard_method(
+    {
+      blk: Opus::Types.proc([Integer], returns: BasicObject),
+    },
+    returns: File
+  )
+  def each_codepoint(&blk); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def flush(); end
+
+  standard_method(
+    {
+      ext_or_ext_int_enc: Opus::Types.any(String, Encoding),
+      int_enc: Opus::Types.any(String, Encoding),
+    },
+    returns: File
+  )
+  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def to_io(); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: File
+  )
+  def untrust(); end
 
   standard_method(
     {
@@ -4534,6 +5553,92 @@ class Float
     returns: Complex
   )
   def to_c(); end
+
+  standard_method(
+    {},
+    returns: Float
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Float
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Float
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Float
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Float
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Float
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Float
+  )
+  def untrust(); end
+end
+
+class FloatDomainError
+  standard_method(
+    {},
+    returns: FloatDomainError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: FloatDomainError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: FloatDomainError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: FloatDomainError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: FloatDomainError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: FloatDomainError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: FloatDomainError
+  )
+  def untrust(); end
 end
 
 module Gem
@@ -4963,6 +6068,48 @@ class Hash
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
   def values_at(*arg0); end
+
+  standard_method(
+    {},
+    returns: Hash
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Hash
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Hash
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Hash
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Hash
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Hash
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Hash
+  )
+  def untrust(); end
 end
 
 class IO
@@ -4980,7 +6127,7 @@ class IO
     {
       arg0: BasicObject,
     },
-    returns: Opus::Types.untyped
+    returns: IO
   )
   def <<(arg0); end
 
@@ -5010,7 +6157,7 @@ class IO
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: IO
   )
   def binmode(); end
 
@@ -5064,7 +6211,7 @@ class IO
       limit: Integer,
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def each(sep=_, limit=_, &blk); end
 
@@ -5072,7 +6219,7 @@ class IO
     {
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def each_byte(&blk); end
 
@@ -5080,7 +6227,7 @@ class IO
     {
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def each_char(&blk); end
 
@@ -5088,7 +6235,7 @@ class IO
     {
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def each_codepoint(&blk); end
 
@@ -5121,7 +6268,7 @@ class IO
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: IO
   )
   def flush(); end
 
@@ -5332,7 +6479,7 @@ class IO
       ext_or_ext_int_enc: Opus::Types.any(String, Encoding),
       int_enc: Opus::Types.any(String, Encoding),
     },
-    returns: Opus::Types.untyped
+    returns: IO
   )
   def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
 
@@ -5390,7 +6537,7 @@ class IO
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: IO
   )
   def to_io(); end
 
@@ -5423,6 +6570,48 @@ class IO
     returns: Integer
   )
   def write(arg0); end
+
+  standard_method(
+    {},
+    returns: IO
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: IO
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: IO
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: IO
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: IO
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: IO
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: IO
+  )
+  def untrust(); end
 
   standard_method(
     {
@@ -5600,7 +6789,7 @@ class IO
       mode: Integer,
       opt: Integer,
     },
-    returns: Opus::Types.untyped
+    returns: IO
   )
   def self.for_fd(fd, mode=_, opt=_); end
 
@@ -5608,7 +6797,7 @@ class IO
     {
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def bytes(&blk); end
 
@@ -5616,7 +6805,7 @@ class IO
     {
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def chars(&blk); end
 
@@ -5624,7 +6813,7 @@ class IO
     {
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def codepoints(&blk); end
 
@@ -5634,7 +6823,7 @@ class IO
       limit: Integer,
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def each_line(sep=_, limit=_, &blk); end
 
@@ -5650,7 +6839,7 @@ class IO
       limit: Integer,
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(IO, Enumerator)
   )
   def lines(sep=_, limit=_, &blk); end
 
@@ -5659,6 +6848,94 @@ class IO
     returns: Integer
   )
   def to_i(); end
+end
+
+class IOError
+  standard_method(
+    {},
+    returns: IOError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: IOError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: IOError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: IOError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: IOError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: IOError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: IOError
+  )
+  def untrust(); end
+end
+
+class IndexError
+  standard_method(
+    {},
+    returns: IndexError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: IndexError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: IndexError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: IndexError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: IndexError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: IndexError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: IndexError
+  )
+  def untrust(); end
 end
 
 class Integer
@@ -6187,6 +7464,92 @@ class Integer
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Integer
+  )
+  def untrust(); end
+end
+
+class Interrupt
+  standard_method(
+    {},
+    returns: Interrupt
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Interrupt
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Interrupt
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Interrupt
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Interrupt
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Interrupt
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Interrupt
+  )
+  def untrust(); end
 end
 
 module Kernel
@@ -6578,7 +7941,7 @@ module Kernel
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Kernel
   )
   def clone(); end
 
@@ -6928,6 +8291,138 @@ module Kernel
   def raise(arg0=_, arg1=_, arg2=_); end
 end
 
+class KeyError
+  standard_method(
+    {},
+    returns: KeyError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: KeyError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: KeyError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: KeyError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: KeyError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: KeyError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: KeyError
+  )
+  def untrust(); end
+end
+
+class LoadError
+  standard_method(
+    {},
+    returns: LoadError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: LoadError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: LoadError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: LoadError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: LoadError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: LoadError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: LoadError
+  )
+  def untrust(); end
+end
+
+class LocalJumpError
+  standard_method(
+    {},
+    returns: LocalJumpError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: LocalJumpError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: LocalJumpError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: LocalJumpError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: LocalJumpError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: LocalJumpError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: LocalJumpError
+  )
+  def untrust(); end
+end
+
 module Marshal
   standard_method(
     {
@@ -7078,6 +8573,48 @@ class MatchData
     returns: Opus::Types.array_of(String)
   )
   def values_at(*indexes); end
+
+  standard_method(
+    {},
+    returns: MatchData
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: MatchData
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: MatchData
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: MatchData
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: MatchData
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: MatchData
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: MatchData
+  )
+  def untrust(); end
 end
 
 module Math
@@ -7294,6 +8831,50 @@ module Math
   def self.tanh(x); end
 end
 
+class Method
+  standard_method(
+    {},
+    returns: Method
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Method
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Method
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Method
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Method
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Method
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Method
+  )
+  def untrust(); end
+end
+
 class Module
   standard_method(
     {},
@@ -7507,7 +9088,7 @@ class Module
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def freeze(); end
 
@@ -7515,7 +9096,7 @@ class Module
     {
       arg0: Module,
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def include(*arg0); end
 
@@ -7586,7 +9167,7 @@ class Module
     {
       arg0: Module,
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def prepend(*arg0); end
 
@@ -7594,7 +9175,7 @@ class Module
     {
       arg0: Opus::Types.any(Symbol, String),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def private_class_method(*arg0); end
 
@@ -7602,7 +9183,7 @@ class Module
     {
       arg0: Symbol,
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def private_constant(*arg0); end
 
@@ -7642,7 +9223,7 @@ class Module
     {
       arg0: Opus::Types.any(Symbol, String),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def public_class_method(*arg0); end
 
@@ -7650,7 +9231,7 @@ class Module
     {
       arg0: Symbol,
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def public_constant(*arg0); end
 
@@ -7703,7 +9284,7 @@ class Module
       new_name: Symbol,
       old_name: Symbol,
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def alias_method(new_name, old_name); end
 
@@ -7711,7 +9292,7 @@ class Module
     {
       arg0: Module,
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def append_features(arg0); end
 
@@ -7793,7 +9374,7 @@ class Module
     {
       arg0: Opus::Types.any(Symbol, String),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def module_function(*arg0); end
 
@@ -7801,7 +9382,7 @@ class Module
     {
       arg0: Module,
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def prepend_features(arg0); end
 
@@ -7817,7 +9398,7 @@ class Module
     {
       arg0: Opus::Types.any(Symbol, String),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def private(*arg0); end
 
@@ -7825,7 +9406,7 @@ class Module
     {
       arg0: Opus::Types.any(Symbol, String),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def protected(*arg0); end
 
@@ -7833,7 +9414,7 @@ class Module
     {
       arg0: Opus::Types.any(Symbol, String),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def public(*arg0); end
 
@@ -7842,7 +9423,7 @@ class Module
       arg0: Class,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def refine(arg0, &blk); end
 
@@ -7858,7 +9439,7 @@ class Module
     {
       arg0: Opus::Types.any(Symbol, String),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def remove_method(arg0); end
 
@@ -7866,7 +9447,7 @@ class Module
     {
       arg0: Opus::Types.any(Symbol, String),
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def undef_method(arg0); end
 
@@ -7874,9 +9455,45 @@ class Module
     {
       arg0: Module,
     },
-    returns: Opus::Types.untyped
+    returns: Module
   )
   def using(arg0); end
+
+  standard_method(
+    {},
+    returns: Module
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Module
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Module
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Module
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Module
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Module
+  )
+  def untrust(); end
 
   standard_method(
     {},
@@ -7891,6 +9508,94 @@ class Module
     returns: NilClass
   )
   def attr(*arg0); end
+end
+
+class Monitor
+  standard_method(
+    {},
+    returns: Monitor
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Monitor
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Monitor
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Monitor
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Monitor
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Monitor
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Monitor
+  )
+  def untrust(); end
+end
+
+class NameError
+  standard_method(
+    {},
+    returns: NameError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: NameError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: NameError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: NameError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: NameError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: NameError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: NameError
+  )
+  def untrust(); end
 end
 
 class NilClass
@@ -7953,6 +9658,180 @@ class NilClass
     returns: Rational
   )
   def to_r(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: NilClass
+  )
+  def untrust(); end
+end
+
+class NoMemoryError
+  standard_method(
+    {},
+    returns: NoMemoryError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: NoMemoryError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: NoMemoryError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: NoMemoryError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: NoMemoryError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: NoMemoryError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: NoMemoryError
+  )
+  def untrust(); end
+end
+
+class NoMethodError
+  standard_method(
+    {},
+    returns: NoMethodError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: NoMethodError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: NoMethodError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: NoMethodError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: NoMethodError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: NoMethodError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: NoMethodError
+  )
+  def untrust(); end
+end
+
+class NotImplementedError
+  standard_method(
+    {},
+    returns: NotImplementedError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: NotImplementedError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: NotImplementedError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: NotImplementedError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: NotImplementedError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: NotImplementedError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: NotImplementedError
+  )
+  def untrust(); end
 end
 
 class Numeric
@@ -8229,6 +10108,48 @@ class Numeric
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def zero?(); end
+
+  standard_method(
+    {},
+    returns: Numeric
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Numeric
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Numeric
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Numeric
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Numeric
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Numeric
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Numeric
+  )
+  def untrust(); end
 end
 
 class Object
@@ -8272,7 +10193,7 @@ class Object
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Object
   )
   def clone(); end
 
@@ -8286,7 +10207,7 @@ class Object
 
   standard_method(
     {},
-    returns: BasicObject
+    returns: Object
   )
   def dup(); end
 
@@ -8310,7 +10231,7 @@ class Object
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Object
   )
   def freeze(); end
 
@@ -8491,7 +10412,7 @@ class Object
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Object
   )
   def taint(); end
 
@@ -8513,19 +10434,19 @@ class Object
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Object
   )
   def trust(); end
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Object
   )
   def untaint(); end
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Object
   )
   def untrust(); end
 
@@ -8820,7 +10741,7 @@ class Pathname
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Pathname
   )
   def freeze(); end
 
@@ -9116,7 +11037,7 @@ class Pathname
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Pathname
   )
   def taint(); end
 
@@ -9142,7 +11063,7 @@ class Pathname
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Pathname
   )
   def untaint(); end
 
@@ -9263,7 +11184,7 @@ class Proc
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Proc
   )
   def to_proc(); end
 
@@ -9272,6 +11193,48 @@ class Proc
     returns: String
   )
   def to_s(); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Proc
+  )
+  def untrust(); end
 
   standard_method(
     {},
@@ -10002,6 +11965,48 @@ class Random
 
   standard_method(
     {},
+    returns: Random
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Random
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Random
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Random
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Random
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Random
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Random
+  )
+  def untrust(); end
+
+  standard_method(
+    {},
     returns: Integer
   )
   def self.new_seed(); end
@@ -10076,7 +12081,7 @@ class Range
     {
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(Range, Enumerator)
   )
   def each(&blk); end
 
@@ -10157,7 +12162,7 @@ class Range
       n: Integer,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(Range, Enumerator)
   )
   def step(n=_, &blk); end
 
@@ -10166,6 +12171,48 @@ class Range
     returns: String
   )
   def to_s(); end
+
+  standard_method(
+    {},
+    returns: Range
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Range
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Range
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Range
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Range
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Range
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Range
+  )
+  def untrust(); end
 
   standard_method(
     {
@@ -10182,6 +12229,50 @@ class Range
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def member?(obj); end
+end
+
+class RangeError
+  standard_method(
+    {},
+    returns: RangeError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: RangeError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: RangeError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: RangeError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: RangeError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: RangeError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: RangeError
+  )
+  def untrust(); end
 end
 
 class Rational
@@ -10514,6 +12605,48 @@ class Rational
     returns: Opus::Types.any([Rational, Rational], [Float, Float], [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)])
   )
   def coerce(arg0); end
+
+  standard_method(
+    {},
+    returns: Rational
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Rational
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Rational
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Rational
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Rational
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Rational
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Rational
+  )
+  def untrust(); end
 end
 
 class Regexp
@@ -10651,12 +12784,54 @@ class Regexp
   def ~(); end
 
   standard_method(
+    {},
+    returns: Regexp
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Regexp
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Regexp
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Regexp
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Regexp
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Regexp
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Regexp
+  )
+  def untrust(); end
+
+  standard_method(
     {
       arg0: Opus::Types.any(String, Regexp),
       options: BasicObject,
       kcode: String,
     },
-    returns: Opus::Types.untyped
+    returns: Regexp
   )
   def self.compile(arg0, options=_, kcode=_); end
 
@@ -10675,6 +12850,226 @@ class Regexp
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
   def eql?(other); end
+end
+
+class RegexpError
+  standard_method(
+    {},
+    returns: RegexpError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: RegexpError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: RegexpError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: RegexpError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: RegexpError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: RegexpError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: RegexpError
+  )
+  def untrust(); end
+end
+
+class RubyVM
+  standard_method(
+    {},
+    returns: RubyVM
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: RubyVM
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: RubyVM
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: RubyVM
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: RubyVM
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: RubyVM
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: RubyVM
+  )
+  def untrust(); end
+end
+
+class RuntimeError
+  standard_method(
+    {},
+    returns: RuntimeError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: RuntimeError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: RuntimeError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: RuntimeError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: RuntimeError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: RuntimeError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: RuntimeError
+  )
+  def untrust(); end
+end
+
+class ScriptError
+  standard_method(
+    {},
+    returns: ScriptError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: ScriptError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: ScriptError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: ScriptError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: ScriptError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: ScriptError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: ScriptError
+  )
+  def untrust(); end
+end
+
+class SecurityError
+  standard_method(
+    {},
+    returns: SecurityError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: SecurityError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: SecurityError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: SecurityError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: SecurityError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: SecurityError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: SecurityError
+  )
+  def untrust(); end
 end
 
 class Set
@@ -10714,7 +13109,7 @@ class Set
     {
       o: BasicObject,
     },
-    returns: Opus::Types.untyped
+    returns: Set
   )
   def add(o); end
 
@@ -10736,7 +13131,7 @@ class Set
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Set
   )
   def clear(); end
 
@@ -10744,7 +13139,7 @@ class Set
     {
       o: BasicObject,
     },
-    returns: Opus::Types.untyped
+    returns: Set
   )
   def delete(o); end
 
@@ -10760,7 +13155,7 @@ class Set
     {
       blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
-    returns: Opus::Types.untyped
+    returns: Set
   )
   def delete_if(&blk); end
 
@@ -10784,7 +13179,7 @@ class Set
     {
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
-    returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
+    returns: Opus::Types.any(Set, Enumerator)
   )
   def each(&blk); end
 
@@ -10826,7 +13221,7 @@ class Set
     {
       blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
-    returns: Opus::Types.untyped
+    returns: Set
   )
   def keep_if(&blk); end
 
@@ -10850,7 +13245,7 @@ class Set
     {
       enum: Enumerable,
     },
-    returns: Opus::Types.untyped
+    returns: Set
   )
   def merge(enum); end
 
@@ -10912,7 +13307,7 @@ class Set
     {
       enum: Enumerable,
     },
-    returns: Opus::Types.untyped
+    returns: Set
   )
   def subtract(enum); end
 
@@ -10929,6 +13324,48 @@ class Set
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
   def to_a(); end
+
+  standard_method(
+    {},
+    returns: Set
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Set
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Set
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Set
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Set
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Set
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Set
+  )
+  def untrust(); end
 
   standard_method(
     {
@@ -10958,7 +13395,7 @@ class Set
     {
       o: BasicObject,
     },
-    returns: Opus::Types.untyped
+    returns: Set
   )
   def <<(o); end
 
@@ -11023,6 +13460,244 @@ class Set
     returns: Set
   )
   def union(enum); end
+end
+
+class SignalException
+  standard_method(
+    {},
+    returns: SignalException
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: SignalException
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: SignalException
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: SignalException
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: SignalException
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: SignalException
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: SignalException
+  )
+  def untrust(); end
+end
+
+class SortedSet
+  standard_method(
+    {},
+    returns: SortedSet
+  )
+  def clone(); end
+
+  standard_method(
+    {
+      o: BasicObject,
+    },
+    returns: SortedSet
+  )
+  def add(o); end
+
+  standard_method(
+    {},
+    returns: SortedSet
+  )
+  def clear(); end
+
+  standard_method(
+    {
+      o: BasicObject,
+    },
+    returns: SortedSet
+  )
+  def delete(o); end
+
+  standard_method(
+    {
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
+    },
+    returns: SortedSet
+  )
+  def delete_if(&blk); end
+
+  standard_method(
+    {
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
+    },
+    returns: SortedSet
+  )
+  def each(&blk); end
+
+  standard_method(
+    {
+      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
+    },
+    returns: SortedSet
+  )
+  def keep_if(&blk); end
+
+  standard_method(
+    {
+      enum: Enumerable,
+    },
+    returns: SortedSet
+  )
+  def merge(enum); end
+
+  standard_method(
+    {
+      enum: Enumerable,
+    },
+    returns: SortedSet
+  )
+  def subtract(enum); end
+
+  standard_method(
+    {},
+    returns: SortedSet
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: SortedSet
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: SortedSet
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: SortedSet
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: SortedSet
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: SortedSet
+  )
+  def untrust(); end
+end
+
+class StandardError
+  standard_method(
+    {},
+    returns: StandardError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: StandardError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: StandardError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: StandardError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: StandardError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: StandardError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: StandardError
+  )
+  def untrust(); end
+end
+
+class StopIteration
+  standard_method(
+    {},
+    returns: StopIteration
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: StopIteration
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: StopIteration
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: StopIteration
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: StopIteration
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: StopIteration
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: StopIteration
+  )
+  def untrust(); end
 end
 
 class String
@@ -11826,6 +14501,48 @@ class String
   def valid_encoding?(); end
 
   standard_method(
+    {},
+    returns: String
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: String
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: String
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: String
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: String
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: String
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: String
+  )
+  def untrust(); end
+
+  standard_method(
     {
       obj: Object,
     },
@@ -11841,6 +14558,50 @@ class String
     returns: Opus::Types.any(String, NilClass)
   )
   def slice(arg0, arg1=_); end
+end
+
+class StringIO
+  standard_method(
+    {},
+    returns: StringIO
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: StringIO
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: StringIO
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: StringIO
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: StringIO
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: StringIO
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: StringIO
+  )
+  def untrust(); end
 end
 
 class StringScanner
@@ -11872,6 +14633,50 @@ class StringScanner
     returns: String
   )
   def getch(); end
+end
+
+class Struct
+  standard_method(
+    {},
+    returns: Struct
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Struct
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Struct
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Struct
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Struct
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Struct
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Struct
+  )
+  def untrust(); end
 end
 
 class Symbol
@@ -11960,7 +14765,7 @@ class Symbol
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Symbol
   )
   def intern(); end
 
@@ -12004,6 +14809,48 @@ class Symbol
 
   standard_method(
     {},
+    returns: Symbol
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Symbol
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Symbol
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Symbol
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Symbol
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Symbol
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Symbol
+  )
+  def untrust(); end
+
+  standard_method(
+    {},
     returns: Integer
   )
   def size(); end
@@ -12025,9 +14872,317 @@ class Symbol
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Symbol
   )
   def to_sym(); end
+end
+
+class SyntaxError
+  standard_method(
+    {},
+    returns: SyntaxError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: SyntaxError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: SyntaxError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: SyntaxError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: SyntaxError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: SyntaxError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: SyntaxError
+  )
+  def untrust(); end
+end
+
+class SystemCallError
+  standard_method(
+    {},
+    returns: SystemCallError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: SystemCallError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: SystemCallError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: SystemCallError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: SystemCallError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: SystemCallError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: SystemCallError
+  )
+  def untrust(); end
+end
+
+class SystemExit
+  standard_method(
+    {},
+    returns: SystemExit
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: SystemExit
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: SystemExit
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: SystemExit
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: SystemExit
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: SystemExit
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: SystemExit
+  )
+  def untrust(); end
+end
+
+class SystemStackError
+  standard_method(
+    {},
+    returns: SystemStackError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: SystemStackError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: SystemStackError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: SystemStackError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: SystemStackError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: SystemStackError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: SystemStackError
+  )
+  def untrust(); end
+end
+
+class Thread
+  standard_method(
+    {},
+    returns: Thread
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Thread
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Thread
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Thread
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Thread
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Thread
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Thread
+  )
+  def untrust(); end
+end
+
+class ThreadError
+  standard_method(
+    {},
+    returns: ThreadError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: ThreadError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: ThreadError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: ThreadError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: ThreadError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: ThreadError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: ThreadError
+  )
+  def untrust(); end
+end
+
+class ThreadGroup
+  standard_method(
+    {},
+    returns: ThreadGroup
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: ThreadGroup
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: ThreadGroup
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: ThreadGroup
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: ThreadGroup
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: ThreadGroup
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: ThreadGroup
+  )
+  def untrust(); end
 end
 
 class Time
@@ -12198,7 +15353,7 @@ class Time
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Time
   )
   def gmtime(); end
 
@@ -12230,7 +15385,7 @@ class Time
     {
       utc_offset: String,
     },
-    returns: Opus::Types.untyped
+    returns: Time
   )
   def localtime(utc_offset=_); end
 
@@ -12378,7 +15533,7 @@ class Time
 
   standard_method(
     {},
-    returns: Opus::Types.untyped
+    returns: Time
   )
   def utc(); end
 
@@ -12425,6 +15580,48 @@ class Time
   def zone(); end
 
   standard_method(
+    {},
+    returns: Time
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: Time
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: Time
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: Time
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: Time
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: Time
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: Time
+  )
+  def untrust(); end
+
+  standard_method(
     {
       year: Integer,
       month: Opus::Types.any(Integer, String),
@@ -12449,6 +15646,138 @@ class Time
     returns: Integer
   )
   def month(); end
+end
+
+class TracePoint
+  standard_method(
+    {},
+    returns: TracePoint
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: TracePoint
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: TracePoint
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: TracePoint
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: TracePoint
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: TracePoint
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: TracePoint
+  )
+  def untrust(); end
+end
+
+class TrueClass
+  standard_method(
+    {},
+    returns: TrueClass
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: TrueClass
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: TrueClass
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: TrueClass
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: TrueClass
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: TrueClass
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: TrueClass
+  )
+  def untrust(); end
+end
+
+class TypeError
+  standard_method(
+    {},
+    returns: TypeError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: TypeError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: TypeError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: TypeError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: TypeError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: TypeError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: TypeError
+  )
+  def untrust(); end
 end
 
 module URI
@@ -12544,6 +15873,94 @@ module URI
   def self.decode(*arg); end
 end
 
+class UnboundMethod
+  standard_method(
+    {},
+    returns: UnboundMethod
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: UnboundMethod
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: UnboundMethod
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: UnboundMethod
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: UnboundMethod
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: UnboundMethod
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: UnboundMethod
+  )
+  def untrust(); end
+end
+
+class UncaughtThrowError
+  standard_method(
+    {},
+    returns: UncaughtThrowError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: UncaughtThrowError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: UncaughtThrowError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: UncaughtThrowError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: UncaughtThrowError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: UncaughtThrowError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: UncaughtThrowError
+  )
+  def untrust(); end
+end
+
 module YAML
   standard_method(
     {
@@ -12552,4 +15969,48 @@ module YAML
     returns: Opus::Types.array_of(String)
   )
   def self.load_file(filename); end
+end
+
+class ZeroDivisionError
+  standard_method(
+    {},
+    returns: ZeroDivisionError
+  )
+  def clone(); end
+
+  standard_method(
+    {},
+    returns: ZeroDivisionError
+  )
+  def dup(); end
+
+  standard_method(
+    {},
+    returns: ZeroDivisionError
+  )
+  def freeze(); end
+
+  standard_method(
+    {},
+    returns: ZeroDivisionError
+  )
+  def taint(); end
+
+  standard_method(
+    {},
+    returns: ZeroDivisionError
+  )
+  def trust(); end
+
+  standard_method(
+    {},
+    returns: ZeroDivisionError
+  )
+  def untaint(); end
+
+  standard_method(
+    {},
+    returns: ZeroDivisionError
+  )
+  def untrust(); end
 end
