@@ -592,6 +592,11 @@ public:
                                                               ty.origins2Explanations(ctx))}));
                         }
                     }
+                },
+                [&](cfg::DebugEnvironment *d) {
+                    d->str = toString(ctx);
+                    tp.type = core::Types::bottom();
+                    tp.origins.push_back(bind.loc);
                 });
             ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type");
             ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
@@ -738,8 +743,6 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
             }
             i++;
         }
-        //        printf("Entry into basic block #%i with body \n%s\n, context:\n%s", bb->id, bb->toString(ctx).c_str(),
-        //               current.toString(ctx).c_str());
 
         visited[bb->id] = true;
         if (current.isDead) {

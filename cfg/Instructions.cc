@@ -125,5 +125,9 @@ string Cast::toString(core::Context ctx) {
     return buf.str();
 }
 
+string DebugEnvironment::toString(core::Context ctx) {
+    return str;
+}
+
 } // namespace cfg
 } // namespace ruby_typer

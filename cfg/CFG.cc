@@ -139,6 +139,10 @@ string BasicBlock::toString(core::Context ctx) {
         buf << "outerLoops: " << this->outerLoops << endl;
     }
     for (Binding &exp : this->exprs) {
+        if (dynamic_cast<DebugEnvironment *>(exp.value.get())) {
+            buf << exp.value->toString(ctx);
+            continue;
+        }
         buf << exp.bind.name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
         if (exp.tpe) {
             buf << " : " << exp.tpe->toString(ctx);

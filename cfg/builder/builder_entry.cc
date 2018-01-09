@@ -112,5 +112,13 @@ CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakSco
     return ret;
 }
 
+void CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> &cfg) {
+    for (auto *bb : cfg->backwardsTopoSort) {
+        core::LocalVariable retSym;
+        core::Loc loc;
+        bb->exprs.emplace(bb->exprs.begin(), retSym, loc, make_unique<cfg::DebugEnvironment>());
+    }
+}
+
 } // namespace cfg
 } // namespace ruby_typer
