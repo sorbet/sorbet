@@ -86,13 +86,18 @@ public:
 #define TEST_COUT TestCout()
 
 class CFG_Collector_and_Typer {
+    bool raw = false;
+
 public:
-    CFG_Collector_and_Typer() = default;
+    CFG_Collector_and_Typer(bool raw = false) : raw(raw){};
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx);     // creates names for temporaries in CFG
         ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(ctx); // lazily creates singleton classes
         auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
+        if (raw) {
+            ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
+        }
         ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
 
         cfgs.push_back(cfg->toString(ctx));
@@ -108,7 +113,7 @@ public:
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "infer",
+    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "cfg-raw", "infer",
 };
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
@@ -234,11 +239,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree->loc.file;
         // CFG
-        CFG_Collector_and_Typer collector;
-        auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
 
         expectation = test.expectations.find("cfg");
         if (expectation != test.expectations.end()) {
+            CFG_Collector_and_Typer collector;
+            auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
             if (file.file(context).source_type != ruby_typer::core::File::Typed) {
                 auto path = file.file(context).path();
                 ADD_FAILURE_AT(path.begin(), 1)
@@ -258,8 +263,33 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                           std::make_move_iterator(newErrors.end()));
         }
 
+        expectation = test.expectations.find("cfg-raw");
+        if (expectation != test.expectations.end()) {
+            CFG_Collector_and_Typer collector(true);
+            auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
+            if (file.file(context).source_type != ruby_typer::core::File::Typed) {
+                auto path = file.file(context).path();
+                ADD_FAILURE_AT(path.begin(), 1)
+                    << "Missing `@typed` pragma. Sources with .cfg-raw.exp expectations must specify @typed.";
+            }
+
+            stringstream dot;
+            dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
+            for (auto &cfg : collector.cfgs) {
+                dot << cfg << endl << endl;
+            }
+            dot << "}" << endl << endl;
+            got["cfg-raw"].append(dot.str());
+
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
         expectation = test.expectations.find("infer");
         if (expectation != test.expectations.end()) {
+            CFG_Collector_and_Typer collector;
+            ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
             auto checker = test.folder + expectation->second;
             SCOPED_TRACE(checker);
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-passes=(cfg parse-tree ast ast-raw name-table name-tree name-tree-raw)
+passes=(parse-tree ast ast-raw name-table name-tree name-tree-raw cfg cfg-raw)
 
 bazel build //main:ruby-typer --config=unsafe -c opt
 
@@ -9,7 +9,7 @@ rb_src=("$@")
 
 if [ -z "${rb_src[*]}" ]; then
     rb_src=(
-        $(find ./test/testdata/ -name '*.rb' | sort)
+        $(find ./test/testdata -name '*.rb' | sort)
     )
 fi
 

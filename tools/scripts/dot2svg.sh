@@ -2,7 +2,7 @@
 set -e
 
 rb_src=(
-    $(find ./test/testdata/ -name '*.rb.cfg.exp')
+    $(find ./test/testdata -name '*.rb.cfg.exp' -or -name '*.rb.cfg-raw.exp')
 )
 
 for src in "${rb_src[@]}"; do

@@ -1,0 +1,47 @@
+digraph "debug_raw.rb"{
+subgraph "cluster_::<constant:Object>#main" {
+    label = "::<constant:Object>#main";
+    color = blue;
+    "bb::<constant:Object>#main_0" [shape = invhouse];
+    "bb::<constant:Object>#main_1" [shape = parallelogram];
+
+    "bb::<constant:Object>#main_0" [label = "block[id=0](a)
+dead=0
+a: NilClass
+
+selfMethodTemp$3 = self : Object
+a = load_arg(selfMethodTemp$3#main, 0) : untyped
+a"];
+
+    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_2" [style="bold"];
+    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_4" [style="tapered"];
+
+    "bb::<constant:Object>#main_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
+    "bb::<constant:Object>#main_2" [label = "block[id=2](a, returnMethodTemp$2)
+dead=0
+a: untyped
+
+returnMethodTemp$2: NilClass
+
+a = 2 : Integer(2)
+returnMethodTemp$2 = a : Integer(2)
+<unconditional>"];
+
+    "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="bold"];
+    "bb::<constant:Object>#main_4" [label = "block[id=4](returnMethodTemp$2)
+dead=0
+returnMethodTemp$2: NilClass | Integer
+  Being truthy entails:
+    a NOT to be NilClass | FalseClass
+
+returnMethodTemp$5 = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_1" [style="bold"];
+}
+
+}
+

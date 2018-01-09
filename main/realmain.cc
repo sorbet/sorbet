@@ -30,9 +30,11 @@ using namespace std;
 class CFG_Collector_and_Typer {
     bool shouldType;
     bool printCFGs;
+    bool printCFGRaw;
 
 public:
-    CFG_Collector_and_Typer(bool shouldType, bool printCFGs) : shouldType(shouldType), printCFGs(printCFGs){};
+    CFG_Collector_and_Typer(bool shouldType, bool printCFGs, bool printCFGRaw)
+        : shouldType(shouldType), printCFGs(printCFGs), printCFGRaw(printCFGRaw){};
 
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         if (m->loc.file.file(ctx).source_type == ruby_typer::core::File::Untyped) {
@@ -40,6 +42,9 @@ public:
         }
 
         auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
+        if (printCFGRaw) {
+            ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
+        }
         if (shouldType) {
             ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
         }
@@ -150,6 +155,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
     bool printNameTree = removeOption(prints, "name-tree");
     bool printNameTreeRaw = removeOption(prints, "name-tree-raw");
     bool printCFG = removeOption(prints, "cfg");
+    bool printCFGRaw = removeOption(prints, "cfg-raw");
     progressbar *progress;
     statusbar *status;
 
@@ -189,11 +195,11 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
             ruby_typer::core::FileRef f = resolved->loc.file;
             try {
                 ruby_typer::core::Context context(gs, gs.defn_root());
-                if (printCFG) {
+                if (printCFG || printCFGRaw) {
                     cout << "digraph \"" << ruby_typer::File::getFileName(f.file(gs).path()) << "\"{" << endl;
                 }
                 bool doType = opts["typed"].as<string>() != "never";
-                CFG_Collector_and_Typer collector(doType, printCFG);
+                CFG_Collector_and_Typer collector(doType, printCFG || printCFGRaw, printCFGRaw);
                 {
                     tracer->trace("CFG+Infer: {}", f.file(gs).path());
                     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates names for temporaries in CFG
@@ -202,7 +208,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                         ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
                 }
 
-                if (printCFG) {
+                if (printCFG || printCFGRaw) {
                     cout << "}" << endl << endl;
                 }
                 if (showProgress) {
@@ -289,7 +295,8 @@ public:
     }
 };
 
-std::string print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg]");
+std::string
+    print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg, cfg-raw]");
 
 cxxopts::Options buildOptions() {
     cxxopts::Options options("ruby_typer", "Typechecker for Ruby");

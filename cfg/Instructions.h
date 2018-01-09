@@ -189,6 +189,14 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
+class DebugEnvironment final : public Instruction {
+public:
+    std::string str;
+
+    DebugEnvironment() {}
+    virtual std::string toString(core::Context ctx);
+};
+
 } // namespace cfg
 } // namespace ruby_typer
 
