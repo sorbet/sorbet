@@ -18,7 +18,7 @@ def main
         retry
         1
       end
-  rescue B # error: Argument _ does not match expected type
+  rescue B # error: Argument arg0 does not match expected type
     puts "rescue B "
     retry
     2

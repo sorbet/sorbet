@@ -738,78 +738,78 @@ end
 class Array
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def <<(_); end
+  def <<(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Range, Integer, Float),
-      _1: Integer,
+      arg0: Opus::Types.any(Range, Integer, Float),
+      arg1: Integer,
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Opus::Types.untyped)
   )
-  def [](_, _1=_); end
+  def [](arg0, arg1=_); end
 
   standard_method(
     {
-      _: Opus::Types.array_of(BasicObject),
+      arg0: Opus::Types.array_of(BasicObject),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def &(_); end
+  def &(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, String),
+      arg0: Opus::Types.any(Integer, String),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), String)
   )
-  def *(_); end
+  def *(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Enumerable, Opus::Types.array_of(BasicObject)),
+      arg0: Opus::Types.any(Enumerable, Opus::Types.array_of(BasicObject)),
     },
     returns: Opus::Types.array_of(BasicObject)
   )
-  def +(_); end
+  def +(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.array_of(BasicObject),
+      arg0: Opus::Types.array_of(BasicObject),
     },
     returns: Opus::Types.array_of(BasicObject)
   )
-  def -(_); end
+  def -(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Range),
-      _1: Opus::Types.any(BasicObject, Integer),
-      _2: BasicObject,
+      arg0: Opus::Types.any(Integer, Range),
+      arg1: Opus::Types.any(BasicObject, Integer),
+      arg2: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def []=(_, _1, _2=_); end
+  def []=(arg0, arg1, arg2=_); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def assoc(_); end
+  def assoc(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.untyped
   )
-  def at(_); end
+  def at(arg0); end
 
   standard_method(
     {},
@@ -843,20 +843,20 @@ class Array
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
-  def combination(_, &blk); end
+  def combination(arg0, &blk); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def push(*_); end
+  def push(*arg0); end
 
   standard_method(
     {},
@@ -872,46 +872,46 @@ class Array
 
   standard_method(
     {
-      _: Opus::Types.array_of(BasicObject),
+      arg0: Opus::Types.array_of(BasicObject),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def concat(_); end
+  def concat(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Integer
   )
-  def count(_=_, &blk); end
+  def count(arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
-  def cycle(_=_, &blk); end
+  def cycle(arg0=_, &blk); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, BasicObject)
   )
-  def delete(_, &blk); end
+  def delete(arg0, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def delete_at(_); end
+  def delete_at(arg0); end
 
   standard_method(
     {
@@ -923,11 +923,11 @@ class Array
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def drop(_); end
+  def drop(arg0); end
 
   standard_method(
     {
@@ -961,24 +961,24 @@ class Array
 
   standard_method(
     {
-      _: Integer,
-      _1: BasicObject,
+      arg0: Integer,
+      arg1: BasicObject,
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, BasicObject)
   )
-  def fetch(_, _1=_, &blk); end
+  def fetch(arg0, arg1=_, &blk); end
 
   standard_method(
     {
-      _: Opus::Types.any(BasicObject, Integer, Range),
-      _1: Opus::Types.any(Integer, Range),
-      _2: Integer,
+      arg0: Opus::Types.any(BasicObject, Integer, Range),
+      arg1: Opus::Types.any(Integer, Range),
+      arg2: Integer,
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def fill(_=_, _1=_, _2=_, &blk); end
+  def fill(arg0=_, arg1=_, arg2=_, &blk); end
 
   standard_method(
     {},
@@ -988,46 +988,46 @@ class Array
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Integer, Enumerator)
   )
-  def index(_=_, &blk); end
+  def index(arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def first(_=_); end
+  def first(arg0=_); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def include?(_); end
+  def include?(arg0); end
 
   standard_method(
     {
-      _: Integer,
-      _1: BasicObject,
+      arg0: Integer,
+      arg1: BasicObject,
     },
     returns: Object
   )
-  def initialize(_=_, _1=_); end
+  def initialize(arg0=_, arg1=_); end
 
   standard_method(
     {
-      _: Integer,
-      _1: BasicObject,
+      arg0: Integer,
+      arg1: BasicObject,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def insert(_, *_1); end
+  def insert(arg0, *arg1); end
 
   standard_method(
     {},
@@ -1037,11 +1037,11 @@ class Array
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def join(_=_); end
+  def join(arg0=_); end
 
   standard_method(
     {
@@ -1053,19 +1053,19 @@ class Array
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def last(_=_); end
+  def last(arg0=_); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def member?(_); end
+  def member?(arg0); end
 
   standard_method(
     {},
@@ -1075,36 +1075,36 @@ class Array
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(Enumerator, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def permutation(_=_, &blk); end
+  def permutation(arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Opus::Types.untyped)
   )
-  def pop(_=_); end
+  def pop(arg0=_); end
 
   standard_method(
     {
-      _: Opus::Types.array_of(BasicObject),
+      arg0: Opus::Types.array_of(BasicObject),
     },
     returns: Opus::Types.array_of(Opus::Types.array_of(BasicObject))
   )
-  def product(*_); end
+  def product(*arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def rassoc(_); end
+  def rassoc(arg0); end
 
   standard_method(
     {
@@ -1124,21 +1124,21 @@ class Array
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
-  def repeated_combination(_, &blk); end
+  def repeated_combination(arg0, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Enumerator)
   )
-  def repeated_permutation(_, &blk); end
+  def repeated_permutation(arg0, &blk); end
 
   standard_method(
     {},
@@ -1162,36 +1162,36 @@ class Array
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Integer, Enumerator)
   )
-  def rindex(_=_, &blk); end
+  def rindex(arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def rotate(_=_); end
+  def rotate(arg0=_); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def rotate!(_=_); end
+  def rotate!(arg0=_); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def sample(_=_); end
+  def sample(arg0=_); end
 
   standard_method(
     {
@@ -1211,11 +1211,11 @@ class Array
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def shift(_=_); end
+  def shift(arg0=_); end
 
   standard_method(
     {},
@@ -1231,12 +1231,12 @@ class Array
 
   standard_method(
     {
-      _: Opus::Types.any(Range, Integer, Float),
-      _1: Integer,
+      arg0: Opus::Types.any(Range, Integer, Float),
+      arg1: Integer,
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Opus::Types.untyped)
   )
-  def slice!(_, _1=_); end
+  def slice!(arg0, arg1=_); end
 
   standard_method(
     {
@@ -1264,11 +1264,11 @@ class Array
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def take(_); end
+  def take(arg0); end
 
   standard_method(
     {
@@ -1310,35 +1310,35 @@ class Array
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def unshift(*_); end
+  def unshift(*arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Range, Integer),
+      arg0: Opus::Types.any(Range, Integer),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def values_at(*_); end
+  def values_at(*arg0); end
 
   standard_method(
     {
-      _: Opus::Types.array_of(BasicObject),
+      arg0: Opus::Types.array_of(BasicObject),
     },
     returns: Opus::Types.array_of(Opus::Types.array_of(BasicObject))
   )
-  def zip(*_); end
+  def zip(*arg0); end
 
   standard_method(
     {
-      _: Opus::Types.array_of(BasicObject),
+      arg0: Opus::Types.array_of(BasicObject),
     },
     returns: Opus::Types.array_of(BasicObject)
   )
-  def |(_); end
+  def |(arg0); end
 
   standard_method(
     {},
@@ -1348,12 +1348,12 @@ class Array
 
   standard_method(
     {
-      _: Opus::Types.any(Range, Integer, Float),
-      _1: Integer,
+      arg0: Opus::Types.any(Range, Integer, Float),
+      arg1: Integer,
     },
     returns: Opus::Types.any(Opus::Types.array_of(Opus::Types.untyped), Opus::Types.untyped)
   )
-  def slice(_, _1=_); end
+  def slice(arg0, arg1=_); end
 
   standard_method(
     {},
@@ -1445,14 +1445,14 @@ class BasicObject
 
   standard_method(
     {
-      _: String,
+      arg0: String,
       filename: String,
       lineno: Integer,
       blk: Opus::Types.proc([], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
-  def instance_eval(_=_, filename=_, lineno=_, &blk); end
+  def instance_eval(arg0=_, filename=_, lineno=_, &blk); end
 
   standard_method(
     {
@@ -1465,12 +1465,12 @@ class BasicObject
 
   standard_method(
     {
-      _: Symbol,
-      _1: BasicObject,
+      arg0: Symbol,
+      arg1: BasicObject,
     },
     returns: BasicObject
   )
-  def __send__(_, *_1); end
+  def __send__(arg0, *arg1); end
 
   standard_method(
     {},
@@ -1530,27 +1530,27 @@ end
 class BigDecimal
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: BigDecimal
   )
-  def %(_); end
+  def %(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(BigDecimal, Complex)
   )
-  def +(_); end
+  def +(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(BigDecimal, Complex)
   )
-  def -(_); end
+  def -(arg0); end
 
   standard_method(
     {},
@@ -1566,83 +1566,83 @@ class BigDecimal
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(BigDecimal, Complex)
   )
-  def *(_); end
+  def *(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: BigDecimal
   )
-  def **(_); end
+  def **(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(BigDecimal, Complex)
   )
-  def /(_); end
+  def /(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def <(_); end
+  def <(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def <=(_); end
+  def <=(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def >(_); end
+  def >(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def >=(_); end
+  def >=(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ===(_); end
+  def ===(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Object
   )
-  def <=>(_); end
+  def <=>(arg0); end
 
   standard_method(
     {},
@@ -1694,43 +1694,43 @@ class BigDecimal
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Integer
   )
-  def div(_); end
+  def div(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
   )
-  def divmod(_); end
+  def divmod(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def equal?(_); end
+  def equal?(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def eql?(_); end
+  def eql?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
-  def fdiv(_); end
+  def fdiv(arg0); end
 
   standard_method(
     {},
@@ -1788,11 +1788,11 @@ class BigDecimal
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: BigDecimal
   )
-  def modulo(_); end
+  def modulo(arg0); end
 
   standard_method(
     {},
@@ -1814,11 +1814,11 @@ class BigDecimal
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(BigDecimal, Complex)
   )
-  def quo(_); end
+  def quo(arg0); end
 
   standard_method(
     {},
@@ -1834,11 +1834,11 @@ class BigDecimal
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Integer, BigDecimal)
   )
-  def round(_=_); end
+  def round(arg0=_); end
 
   standard_method(
     {},
@@ -1872,11 +1872,11 @@ class BigDecimal
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Integer, Rational)
   )
-  def truncate(_=_); end
+  def truncate(arg0=_); end
 
   standard_method(
     {},
@@ -1898,11 +1898,11 @@ class BigDecimal
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: BigDecimal
   )
-  def remainder(_); end
+  def remainder(arg0); end
 
   standard_method(
     {},
@@ -1918,11 +1918,11 @@ class BigDecimal
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: BigDecimal
   )
-  def power(_); end
+  def power(arg0); end
 
   standard_method(
     {},
@@ -1950,66 +1950,66 @@ class BigDecimal
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: BigDecimal
   )
-  def sqrt(_); end
+  def sqrt(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-      _1: Integer,
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg1: Integer,
     },
     returns: BigDecimal
   )
-  def add(_, _1); end
+  def add(arg0, arg1); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-      _1: Integer,
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg1: Integer,
     },
     returns: BigDecimal
   )
-  def sub(_, _1); end
+  def sub(arg0, arg1); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-      _1: Integer,
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg1: Integer,
     },
     returns: BigDecimal
   )
-  def mult(_, _1); end
+  def mult(arg0, arg1); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: [BigDecimal, BigDecimal]
   )
-  def coerce(_); end
+  def coerce(arg0); end
 end
 
 module BigMath
   standard_method(
     {
-      _: Integer,
-      _1: Integer,
+      arg0: Integer,
+      arg1: Integer,
     },
     returns: BigDecimal
   )
-  def self.exp(_, _1); end
+  def self.exp(arg0, arg1); end
 
   standard_method(
     {
-      _: Integer,
-      _1: Integer,
+      arg0: Integer,
+      arg1: Integer,
     },
     returns: BigDecimal
   )
-  def self.log(_, _1); end
+  def self.log(arg0, arg1); end
 
   standard_method(
     {
@@ -2085,11 +2085,11 @@ class Class
 
   standard_method(
     {
-      _: Class,
+      arg0: Class,
     },
     returns: Opus::Types.untyped
   )
-  def inherited(_); end
+  def inherited(arg0); end
 
   standard_method(
     {},
@@ -2099,11 +2099,11 @@ class Class
 
   standard_method(
     {
-      _: Opus::Types.any(TrueClass, FalseClass),
+      arg0: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: Opus::Types.array_of(Symbol)
   )
-  def instance_methods(_=_); end
+  def instance_methods(arg0=_); end
 
   standard_method(
     {},
@@ -2121,35 +2121,35 @@ end
 class Complex
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Complex
   )
-  def *(_); end
+  def *(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Complex
   )
-  def **(_); end
+  def **(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Complex
   )
-  def +(_); end
+  def +(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Complex
   )
-  def -(_); end
+  def -(arg0); end
 
   standard_method(
     {},
@@ -2165,19 +2165,19 @@ class Complex
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Complex
   )
-  def /(_); end
+  def /(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {},
@@ -2223,27 +2223,27 @@ class Complex
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def equal?(_); end
+  def equal?(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def eql?(_); end
+  def eql?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Complex
   )
-  def fdiv(_); end
+  def fdiv(arg0); end
 
   standard_method(
     {},
@@ -2295,19 +2295,19 @@ class Complex
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Complex, BigDecimal)
   )
-  def quo(_); end
+  def quo(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Rational
   )
-  def rationalize(_=_); end
+  def rationalize(arg0=_); end
 
   standard_method(
     {},
@@ -2371,11 +2371,11 @@ class Complex
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: [Complex, Complex]
   )
-  def coerce(_); end
+  def coerce(arg0); end
 end
 
 module Coverage
@@ -2395,58 +2395,58 @@ end
 class Date
   standard_method(
     {
-      _: Integer,
-      _1: Integer,
-      _2: Integer,
-      _3: Integer,
+      arg0: Integer,
+      arg1: Integer,
+      arg2: Integer,
+      arg3: Integer,
     },
     returns: Object
   )
-  def initialize(_=_, _1=_, _2=_, _3=_); end
+  def initialize(arg0=_, arg1=_, arg2=_, arg3=_); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def strftime(_); end
+  def strftime(arg0); end
 end
 
 class Dir
   standard_method(
     {
-      _: Opus::Types.any(String, Pathname),
+      arg0: Opus::Types.any(String, Pathname),
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Opus::Types.untyped)
   )
-  def self.chdir(_=_, &blk); end
+  def self.chdir(arg0=_, &blk); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Integer
   )
-  def self.chroot(_); end
+  def self.chroot(arg0); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Integer
   )
-  def self.delete(_); end
+  def self.delete(arg0); end
 
   standard_method(
     {
-      _: String,
-      _1: Encoding,
+      arg0: String,
+      arg1: Encoding,
     },
     returns: Opus::Types.array_of(String)
   )
-  def self.entries(_, _1=_); end
+  def self.entries(arg0, arg1=_); end
 
   standard_method(
     {
@@ -2459,12 +2459,12 @@ class Dir
   standard_method(
     {
       dir: String,
-      _: Encoding,
+      arg0: Encoding,
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(NilClass, Enumerator)
   )
-  def self.foreach(dir, _=_, &blk); end
+  def self.foreach(dir, arg0=_, &blk); end
 
   standard_method(
     {},
@@ -2484,30 +2484,30 @@ class Dir
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def self.home(_=_); end
+  def self.home(arg0=_); end
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
+      arg0: String,
+      arg1: Integer,
     },
     returns: Integer
   )
-  def self.mkdir(_, _1=_); end
+  def self.mkdir(arg0, arg1=_); end
 
   standard_method(
     {
-      _: String,
-      _1: Encoding,
+      arg0: String,
+      arg1: Encoding,
       blk: Opus::Types.proc([Dir], returns: BasicObject),
     },
     returns: Opus::Types.any(Dir, Opus::Types.untyped)
   )
-  def self.open(_, _1=_, &blk); end
+  def self.open(arg0, arg1=_, &blk); end
 
   standard_method(
     {},
@@ -2517,19 +2517,19 @@ class Dir
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Integer
   )
-  def self.rmdir(_); end
+  def self.rmdir(arg0); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Integer
   )
-  def self.unlink(_); end
+  def self.unlink(arg0); end
 
   standard_method(
     {},
@@ -2553,12 +2553,12 @@ class Dir
 
   standard_method(
     {
-      _: String,
-      _1: Encoding,
+      arg0: String,
+      arg1: Encoding,
     },
     returns: Object
   )
-  def initialize(_, _1=_); end
+  def initialize(arg0, arg1=_); end
 
   standard_method(
     {},
@@ -2580,11 +2580,11 @@ class Dir
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def pos=(_); end
+  def pos=(arg0); end
 
   standard_method(
     {},
@@ -2600,11 +2600,11 @@ class Dir
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.untyped
   )
-  def seek(_); end
+  def seek(arg0); end
 
   standard_method(
     {},
@@ -2653,11 +2653,11 @@ class Encoding
 
   standard_method(
     {
-      _: Opus::Types.any(String, Encoding),
+      arg0: Opus::Types.any(String, Encoding),
     },
     returns: Opus::Types.any(String, Encoding)
   )
-  def self.default_external=(_); end
+  def self.default_external=(arg0); end
 
   standard_method(
     {},
@@ -2667,19 +2667,19 @@ class Encoding
 
   standard_method(
     {
-      _: Opus::Types.any(String, Encoding),
+      arg0: Opus::Types.any(String, Encoding),
     },
     returns: Opus::Types.any(String, NilClass, Encoding)
   )
-  def self.default_internal=(_); end
+  def self.default_internal=(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(String, Encoding),
+      arg0: Opus::Types.any(String, Encoding),
     },
     returns: Encoding
   )
-  def self.find(_); end
+  def self.find(arg0); end
 
   standard_method(
     {},
@@ -2773,12 +2773,12 @@ module Enumerable
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
     },
     returns: Integer
   )
-  def count(_=_, &blk); end
+  def count(arg0=_, &blk); end
 
   standard_method(
     {
@@ -2864,12 +2864,12 @@ module Enumerable
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def grep(_, &blk); end
+  def grep(arg0, &blk); end
 
   standard_method(
     {
@@ -2881,57 +2881,57 @@ module Enumerable
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def include?(_); end
+  def include?(arg0); end
 
   standard_method(
     {
       initial: Opus::Types.any(BasicObject, Symbol),
-      _: Symbol,
+      arg0: Symbol,
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
-  def inject(initial=_, _=_, &blk); end
+  def inject(initial=_, arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def max(_=_, &blk); end
+  def max(arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Enumerator, Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def max_by(_=_, &blk); end
+  def max_by(arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def min(_=_, &blk); end
+  def min(arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
     },
     returns: Opus::Types.any(Enumerator, Opus::Types.untyped, Opus::Types.array_of(Opus::Types.untyped))
   )
-  def min_by(_=_, &blk); end
+  def min_by(arg0=_, &blk); end
 
   standard_method(
     {
@@ -3063,21 +3063,21 @@ module Enumerable
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def member?(_); end
+  def member?(arg0); end
 
   standard_method(
     {
       initial: Opus::Types.any(BasicObject, Symbol),
-      _: Symbol,
+      arg0: Symbol,
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
-  def reduce(initial=_, _=_, &blk); end
+  def reduce(initial=_, arg0=_, &blk); end
 
   standard_method(
     {
@@ -3097,12 +3097,12 @@ end
 class Enumerator
   standard_method(
     {
-      _: Opus::Types.any(Integer, Proc),
+      arg0: Opus::Types.any(Integer, Proc),
       blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
     },
     returns: Object
   )
-  def initialize(_=_, &blk); end
+  def initialize(arg0=_, &blk); end
 
   standard_method(
     {
@@ -3122,20 +3122,20 @@ class Enumerator
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
-  def each_with_object(_, &blk); end
+  def each_with_object(arg0, &blk); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: NilClass
   )
-  def feed(_); end
+  def feed(arg0); end
 
   standard_method(
     {},
@@ -3189,22 +3189,22 @@ class Enumerator
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, Enumerator)
   )
-  def with_object(_, &blk); end
+  def with_object(arg0, &blk); end
 end
 
 class Exception
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {},
@@ -3226,19 +3226,19 @@ class Exception
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Exception
   )
-  def exception(_=_); end
+  def exception(arg0=_); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Object
   )
-  def initialize(_=_); end
+  def initialize(arg0=_); end
 
   standard_method(
     {},
@@ -3254,11 +3254,11 @@ class Exception
 
   standard_method(
     {
-      _: Opus::Types.any(String, Opus::Types.array_of(String)),
+      arg0: Opus::Types.any(String, Opus::Types.array_of(String)),
     },
     returns: Opus::Types.array_of(String)
   )
-  def set_backtrace(_); end
+  def set_backtrace(arg0); end
 
   standard_method(
     {},
@@ -3296,13 +3296,13 @@ class File
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
-      _2: Integer,
+      arg0: String,
+      arg1: Integer,
+      arg2: Integer,
     },
     returns: String
   )
-  def self.binread(_, _1=_, _2=_); end
+  def self.binread(arg0, arg1=_, arg2=_); end
 
   standard_method(
     {
@@ -3465,11 +3465,11 @@ class File
 
   standard_method(
     {
-      _: Opus::Types.any(BasicObject, Pathname, File, Opus::Types.array_of(String)),
+      arg0: Opus::Types.any(BasicObject, Pathname, File, Opus::Types.array_of(String)),
     },
     returns: String
   )
-  def self.join(*_); end
+  def self.join(*arg0); end
 
   standard_method(
     {
@@ -3692,19 +3692,19 @@ class File
   standard_method(
     {
       file: String,
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.truncate(file, _); end
+  def self.truncate(file, arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.umask(_=_); end
+  def self.umask(arg0=_); end
 
   standard_method(
     {
@@ -3793,11 +3793,11 @@ class File
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Integer, TrueClass, FalseClass)
   )
-  def flock(_); end
+  def flock(arg0); end
 
   standard_method(
     {
@@ -3836,11 +3836,11 @@ class File
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def truncate(_); end
+  def truncate(arg0); end
 
   standard_method(
     {
@@ -4155,43 +4155,43 @@ end
 class Float
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(Float, BigDecimal)
   )
-  def %(_); end
+  def %(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
-  def *(_); end
+  def *(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, Integer, Rational, BigDecimal, Complex)
   )
-  def **(_); end
+  def **(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
-  def +(_); end
+  def +(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
-  def -(_); end
+  def -(arg0); end
 
   standard_method(
     {},
@@ -4207,67 +4207,67 @@ class Float
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
-  def /(_); end
+  def /(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def <(_); end
+  def <(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def <=(_); end
+  def <=(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Object
   )
-  def <=>(_); end
+  def <=>(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ===(_); end
+  def ===(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def >(_); end
+  def >(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def >=(_); end
+  def >=(arg0); end
 
   standard_method(
     {},
@@ -4283,19 +4283,19 @@ class Float
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Integer
   )
-  def div(_); end
+  def div(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
   )
-  def divmod(_); end
+  def divmod(arg0); end
 
   standard_method(
     {},
@@ -4317,11 +4317,11 @@ class Float
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: [Float, Float]
   )
-  def coerce(_); end
+  def coerce(arg0); end
 
   standard_method(
     {},
@@ -4331,27 +4331,27 @@ class Float
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def equal?(_); end
+  def equal?(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def eql?(_); end
+  def eql?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
-  def fdiv(_); end
+  def fdiv(arg0); end
 
   standard_method(
     {},
@@ -4397,11 +4397,11 @@ class Float
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(Float, BigDecimal)
   )
-  def modulo(_); end
+  def modulo(arg0); end
 
   standard_method(
     {},
@@ -4435,27 +4435,27 @@ class Float
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
-  def quo(_); end
+  def quo(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Rational
   )
-  def rationalize(_=_); end
+  def rationalize(arg0=_); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def round(_=_); end
+  def round(arg0=_); end
 
   standard_method(
     {},
@@ -4653,37 +4653,37 @@ end
 class Hash
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def [](_); end
+  def [](arg0); end
 
   standard_method(
     {
-      _: BasicObject,
-      _1: BasicObject,
+      arg0: BasicObject,
+      arg1: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def []=(_, _1); end
+  def []=(arg0, arg1); end
 
   standard_method(
     {
-      _: BasicObject,
-      _1: BasicObject,
+      arg0: BasicObject,
+      arg1: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def store(_, _1); end
+  def store(arg0, arg1); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.array_of(BasicObject)
   )
-  def assoc(_); end
+  def assoc(arg0); end
 
   standard_method(
     {},
@@ -4705,29 +4705,29 @@ class Hash
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
-  def default(_=_, &blk); end
+  def default(arg0=_, &blk); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def default=(_); end
+  def default=(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, BasicObject)
   )
-  def delete(_, &blk); end
+  def delete(arg0, &blk); end
 
   standard_method(
     {
@@ -4777,53 +4777,53 @@ class Hash
 
   standard_method(
     {
-      _: BasicObject,
-      _1: BasicObject,
+      arg0: BasicObject,
+      arg1: BasicObject,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.any(Opus::Types.untyped, BasicObject)
   )
-  def fetch(_, _1=_, &blk); end
+  def fetch(arg0, arg1=_, &blk); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def member?(_); end
+  def member?(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def has_key?(_); end
+  def has_key?(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def key?(_); end
+  def key?(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def has_value?(_); end
+  def has_value?(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def value?(_); end
+  def value?(arg0); end
 
   standard_method(
     {},
@@ -4853,11 +4853,11 @@ class Hash
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def key(_); end
+  def key(arg0); end
 
   standard_method(
     {},
@@ -4879,20 +4879,20 @@ class Hash
 
   standard_method(
     {
-      _: Opus::Types.hash_of(keys: BasicObject, values: BasicObject),
+      arg0: Opus::Types.hash_of(keys: BasicObject, values: BasicObject),
       blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.hash_of(keys: BasicObject, values: BasicObject)
   )
-  def merge(_, &blk); end
+  def merge(arg0, &blk); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.array_of(BasicObject)
   )
-  def rassoc(_); end
+  def rassoc(arg0); end
 
   standard_method(
     {},
@@ -4958,11 +4958,11 @@ class Hash
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  def values_at(*_); end
+  def values_at(*arg0); end
 end
 
 class IO
@@ -4978,29 +4978,29 @@ class IO
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def <<(_); end
+  def <<(arg0); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
       offset: Integer,
       len: Integer,
     },
     returns: NilClass
   )
-  def advise(_, offset=_, len=_); end
+  def advise(arg0, offset=_, len=_); end
 
   standard_method(
     {
-      _: Opus::Types.any(TrueClass, FalseClass),
+      arg0: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def autoclose=(_); end
+  def autoclose=(arg0); end
 
   standard_method(
     {},
@@ -5028,11 +5028,11 @@ class IO
 
   standard_method(
     {
-      _: Opus::Types.any(TrueClass, FalseClass),
+      arg0: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def close_on_exec=(_); end
+  def close_on_exec=(arg0); end
 
   standard_method(
     {},
@@ -5187,11 +5187,11 @@ class IO
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def lineno=(_); end
+  def lineno=(arg0); end
 
   standard_method(
     {},
@@ -5207,44 +5207,44 @@ class IO
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def pos=(_); end
+  def pos=(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: NilClass
   )
-  def print(*_); end
+  def print(*arg0); end
 
   standard_method(
     {
       format_string: String,
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: NilClass
   )
-  def printf(format_string, *_); end
+  def printf(format_string, *arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Numeric, String),
+      arg0: Opus::Types.any(Numeric, String),
     },
     returns: Opus::Types.untyped
   )
-  def putc(_); end
+  def putc(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: NilClass
   )
-  def puts(*_); end
+  def puts(*arg0); end
 
   standard_method(
     {
@@ -5350,11 +5350,11 @@ class IO
 
   standard_method(
     {
-      _: Opus::Types.any(TrueClass, FalseClass),
+      arg0: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def sync=(_); end
+  def sync=(arg0); end
 
   standard_method(
     {
@@ -5376,11 +5376,11 @@ class IO
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Integer
   )
-  def syswrite(_); end
+  def syswrite(arg0); end
 
   standard_method(
     {},
@@ -5402,27 +5402,27 @@ class IO
 
   standard_method(
     {
-      _: Opus::Types.any(String, Integer),
+      arg0: Opus::Types.any(String, Integer),
     },
     returns: NilClass
   )
-  def ungetbyte(_); end
+  def ungetbyte(arg0); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: NilClass
   )
-  def ungetc(_); end
+  def ungetc(arg0); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Integer
   )
-  def write(_); end
+  def write(arg0); end
 
   standard_method(
     {
@@ -5437,7 +5437,7 @@ class IO
   standard_method(
     {
       name: String,
-      _: String,
+      arg0: String,
       offset: Integer,
       external_encoding: String,
       internal_encoding: String,
@@ -5449,7 +5449,7 @@ class IO
     },
     returns: Integer
   )
-  def self.binwrite(name, _, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+  def self.binwrite(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
   standard_method(
     {
@@ -5571,16 +5571,16 @@ class IO
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(IO, NilClass)
   )
-  def self.try_convert(_); end
+  def self.try_convert(arg0); end
 
   standard_method(
     {
       name: String,
-      _: String,
+      arg0: String,
       offset: Integer,
       external_encoding: String,
       internal_encoding: String,
@@ -5592,7 +5592,7 @@ class IO
     },
     returns: Integer
   )
-  def self.write(name, _, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+  def self.write(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
   standard_method(
     {
@@ -5664,51 +5664,51 @@ end
 class Integer
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
-  def %(_); end
+  def %(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def &(_); end
+  def &(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def *(_); end
+  def *(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def **(_); end
+  def **(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def +(_); end
+  def +(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def -(_); end
+  def -(arg0); end
 
   standard_method(
     {},
@@ -5724,107 +5724,107 @@ class Integer
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def /(_); end
+  def /(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def <(_); end
+  def <(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def <<(_); end
+  def <<(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def <=(_); end
+  def <=(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Object
   )
-  def <=>(_); end
+  def <=>(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ===(_); end
+  def ===(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def >(_); end
+  def >(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def >=(_); end
+  def >=(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def >>(_); end
+  def >>(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Rational, Float, BigDecimal),
+      arg0: Opus::Types.any(Integer, Rational, Float, BigDecimal),
     },
     returns: Integer
   )
-  def [](_); end
+  def [](arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def ^(_); end
+  def ^(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def |(_); end
+  def |(arg0); end
 
   standard_method(
     {},
@@ -5846,27 +5846,27 @@ class Integer
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Integer
   )
-  def div(_); end
+  def div(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
   )
-  def divmod(_); end
+  def divmod(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Float, BigDecimal, Complex)
   )
-  def fdiv(_); end
+  def fdiv(arg0); end
 
   standard_method(
     {},
@@ -5888,19 +5888,19 @@ class Integer
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
-  def modulo(_); end
+  def modulo(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
-  def quo(_); end
+  def quo(arg0); end
 
   standard_method(
     {},
@@ -5922,19 +5922,19 @@ class Integer
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def equal?(_); end
+  def equal?(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def eql?(_); end
+  def eql?(arg0); end
 
   standard_method(
     {},
@@ -5950,19 +5950,19 @@ class Integer
 
   standard_method(
     {
-      _: Encoding,
+      arg0: Encoding,
     },
     returns: String
   )
-  def chr(_); end
+  def chr(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
   )
-  def coerce(_); end
+  def coerce(arg0); end
 
   standard_method(
     {},
@@ -5984,12 +5984,12 @@ class Integer
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Enumerator)
   )
-  def downto(_, &blk); end
+  def downto(arg0, &blk); end
 
   standard_method(
     {},
@@ -5999,19 +5999,19 @@ class Integer
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def gcd(_); end
+  def gcd(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: [Integer, Integer]
   )
-  def gcdlcm(_); end
+  def gcdlcm(arg0); end
 
   standard_method(
     {},
@@ -6039,11 +6039,11 @@ class Integer
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def lcm(_); end
+  def lcm(arg0); end
 
   standard_method(
     {},
@@ -6083,11 +6083,11 @@ class Integer
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Rational
   )
-  def rationalize(_=_); end
+  def rationalize(arg0=_); end
 
   standard_method(
     {},
@@ -6103,19 +6103,19 @@ class Integer
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
-  def remainder(_); end
+  def remainder(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def round(_=_); end
+  def round(arg0=_); end
 
   standard_method(
     {},
@@ -6175,12 +6175,12 @@ class Integer
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Enumerator)
   )
-  def upto(_, &blk); end
+  def upto(arg0, &blk); end
 
   standard_method(
     {},
@@ -6269,11 +6269,11 @@ module Kernel
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def self.`(_); end
+  def self.`(arg0); end
 
   standard_method(
     {
@@ -6340,14 +6340,14 @@ module Kernel
 
   standard_method(
     {
-      _: String,
-      _1: Binding,
+      arg0: String,
+      arg1: Binding,
       filename: String,
       lineno: Integer,
     },
     returns: Opus::Types.untyped
   )
-  def self.eval(_, _1=_, filename=_, lineno=_); end
+  def self.eval(arg0, arg1=_, filename=_, lineno=_); end
 
   standard_method(
     {
@@ -6367,13 +6367,13 @@ module Kernel
 
   standard_method(
     {
-      _: Opus::Types.any(String, Class),
-      _1: Opus::Types.any(Opus::Types.array_of(String), String),
-      _2: Opus::Types.array_of(String),
+      arg0: Opus::Types.any(String, Class),
+      arg1: Opus::Types.any(Opus::Types.array_of(String), String),
+      arg2: Opus::Types.array_of(String),
     },
     returns: NilClass
   )
-  def self.fail(_=_, _1=_, _2=_); end
+  def self.fail(arg0=_, arg1=_, arg2=_); end
 
   standard_method(
     {
@@ -6386,12 +6386,12 @@ module Kernel
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
+      arg0: String,
+      arg1: Integer,
     },
     returns: String
   )
-  def self.gets(_=_, _1=_); end
+  def self.gets(arg0=_, arg1=_); end
 
   standard_method(
     {},
@@ -6408,11 +6408,11 @@ module Kernel
   standard_method(
     {
       filename: String,
-      _: Opus::Types.any(TrueClass, FalseClass),
+      arg0: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def self.load(filename, _=_); end
+  def self.load(filename, arg0=_); end
 
   standard_method(
     {},
@@ -6432,13 +6432,13 @@ module Kernel
 
   standard_method(
     {
-      _: IO,
-      _1: String,
-      _2: BasicObject,
+      arg0: IO,
+      arg1: String,
+      arg2: BasicObject,
     },
     returns: NilClass
   )
-  def self.printf(_=_, _1=_, *_2); end
+  def self.printf(arg0=_, arg1=_, *arg2); end
 
   standard_method(
     {
@@ -6450,19 +6450,19 @@ module Kernel
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.putc(_); end
+  def self.putc(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: NilClass
   )
-  def self.puts(*_); end
+  def self.puts(*arg0); end
 
   standard_method(
     {
@@ -6474,21 +6474,21 @@ module Kernel
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
+      arg0: String,
+      arg1: Integer,
     },
     returns: String
   )
-  def self.readline(_=_, _1=_); end
+  def self.readline(arg0=_, arg1=_); end
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
+      arg0: String,
+      arg1: Integer,
     },
     returns: Opus::Types.array_of(String)
   )
-  def self.readlines(_=_, _1=_); end
+  def self.readlines(arg0=_, arg1=_); end
 
   standard_method(
     {
@@ -6562,13 +6562,13 @@ module Kernel
 
   standard_method(
     {
-      _: Opus::Types.any(String, Class, Exception),
-      _1: String,
-      _2: Opus::Types.array_of(String),
+      arg0: Opus::Types.any(String, Class, Exception),
+      arg1: String,
+      arg2: Opus::Types.array_of(String),
     },
     returns: NilClass
   )
-  def self.raise(_=_, _1=_, _2=_); end
+  def self.raise(arg0=_, arg1=_, arg2=_); end
 
   standard_method(
     {},
@@ -6584,13 +6584,13 @@ module Kernel
 
   standard_method(
     {
-      _: Opus::Types.any(String, Symbol),
-      _1: BasicObject,
+      arg0: Opus::Types.any(String, Symbol),
+      arg1: BasicObject,
       blk: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def send(_, *_1, &blk); end
+  def send(arg0, *arg1, &blk); end
 
   standard_method(
     {
@@ -6671,11 +6671,11 @@ module Kernel
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def `(_); end
+  def `(arg0); end
 
   standard_method(
     {
@@ -6734,13 +6734,13 @@ module Kernel
 
   standard_method(
     {
-      _: Opus::Types.any(String, Class),
-      _1: Opus::Types.any(Opus::Types.array_of(String), String),
-      _2: Opus::Types.array_of(String),
+      arg0: Opus::Types.any(String, Class),
+      arg1: Opus::Types.any(Opus::Types.array_of(String), String),
+      arg2: Opus::Types.array_of(String),
     },
     returns: NilClass
   )
-  def fail(_=_, _1=_, _2=_); end
+  def fail(arg0=_, arg1=_, arg2=_); end
 
   standard_method(
     {
@@ -6753,12 +6753,12 @@ module Kernel
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
+      arg0: String,
+      arg1: Integer,
     },
     returns: String
   )
-  def gets(_=_, _1=_); end
+  def gets(arg0=_, arg1=_); end
 
   standard_method(
     {},
@@ -6769,11 +6769,11 @@ module Kernel
   standard_method(
     {
       filename: String,
-      _: Opus::Types.any(TrueClass, FalseClass),
+      arg0: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def load(filename, _=_); end
+  def load(filename, arg0=_); end
 
   standard_method(
     {
@@ -6787,13 +6787,13 @@ module Kernel
 
   standard_method(
     {
-      _: IO,
-      _1: String,
-      _2: BasicObject,
+      arg0: IO,
+      arg1: String,
+      arg2: BasicObject,
     },
     returns: NilClass
   )
-  def printf(_=_, _1=_, *_2); end
+  def printf(arg0=_, arg1=_, *arg2); end
 
   standard_method(
     {
@@ -6805,37 +6805,37 @@ module Kernel
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def putc(_); end
+  def putc(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: NilClass
   )
-  def puts(*_); end
+  def puts(*arg0); end
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
+      arg0: String,
+      arg1: Integer,
     },
     returns: String
   )
-  def readline(_=_, _1=_); end
+  def readline(arg0=_, arg1=_); end
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
+      arg0: String,
+      arg1: Integer,
     },
     returns: Opus::Types.array_of(String)
   )
-  def readlines(_=_, _1=_); end
+  def readlines(arg0=_, arg1=_); end
 
   standard_method(
     {
@@ -6919,44 +6919,44 @@ module Kernel
 
   standard_method(
     {
-      _: Opus::Types.any(String, Class, Exception),
-      _1: String,
-      _2: Opus::Types.array_of(String),
+      arg0: Opus::Types.any(String, Class, Exception),
+      arg1: String,
+      arg2: Opus::Types.array_of(String),
     },
     returns: NilClass
   )
-  def raise(_=_, _1=_, _2=_); end
+  def raise(arg0=_, arg1=_, arg2=_); end
 end
 
 module Marshal
   standard_method(
     {
-      _: String,
-      _1: Proc,
+      arg0: String,
+      arg1: Proc,
     },
     returns: Object
   )
-  def self.load(_, _1=_); end
+  def self.load(arg0, arg1=_); end
 
   standard_method(
     {
-      _: Object,
-      _1: Opus::Types.any(IO, Integer),
-      _2: Integer,
+      arg0: Object,
+      arg1: Opus::Types.any(IO, Integer),
+      arg2: Integer,
     },
     returns: Object
   )
-  def self.dump(_, _1=_, _2=_); end
+  def self.dump(arg0, arg1=_, arg2=_); end
 end
 
 class MatchData
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {
@@ -7412,13 +7412,13 @@ class Module
 
   standard_method(
     {
-      _: String,
+      arg0: String,
       filename: String,
       lineno: Integer,
     },
     returns: Opus::Types.untyped
   )
-  def class_eval(_, filename=_, lineno=_); end
+  def class_eval(arg0, filename=_, lineno=_); end
 
   standard_method(
     {
@@ -7431,28 +7431,28 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def class_variable_defined?(_); end
+  def class_variable_defined?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def class_variable_get(_); end
+  def class_variable_get(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
-      _1: BasicObject,
+      arg0: Opus::Types.any(Symbol, String),
+      arg1: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def class_variable_set(_, _1); end
+  def class_variable_set(arg0, arg1); end
 
   standard_method(
     {
@@ -7464,38 +7464,38 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
       inherit: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def const_defined?(_, inherit=_); end
+  def const_defined?(arg0, inherit=_); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
       inherit: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: Opus::Types.untyped
   )
-  def const_get(_, inherit=_); end
+  def const_get(arg0, inherit=_); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Opus::Types.untyped
   )
-  def const_missing(_); end
+  def const_missing(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
-      _1: BasicObject,
+      arg0: Opus::Types.any(Symbol, String),
+      arg1: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def const_set(_, _1); end
+  def const_set(arg0, arg1); end
 
   standard_method(
     {
@@ -7513,19 +7513,19 @@ class Module
 
   standard_method(
     {
-      _: Module,
+      arg0: Module,
     },
     returns: Opus::Types.untyped
   )
-  def include(*_); end
+  def include(*arg0); end
 
   standard_method(
     {
-      _: Module,
+      arg0: Module,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def include?(_); end
+  def include?(arg0); end
 
   standard_method(
     {},
@@ -7535,11 +7535,11 @@ class Module
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: UnboundMethod
   )
-  def instance_method(_); end
+  def instance_method(arg0); end
 
   standard_method(
     {
@@ -7551,21 +7551,21 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def method_defined?(_); end
+  def method_defined?(arg0); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
       filename: String,
       lineno: Integer,
     },
     returns: Opus::Types.untyped
   )
-  def module_eval(_, filename=_, lineno=_); end
+  def module_eval(arg0, filename=_, lineno=_); end
 
   standard_method(
     {
@@ -7584,27 +7584,27 @@ class Module
 
   standard_method(
     {
-      _: Module,
+      arg0: Module,
     },
     returns: Opus::Types.untyped
   )
-  def prepend(*_); end
+  def prepend(*arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def private_class_method(*_); end
+  def private_class_method(*arg0); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Opus::Types.untyped
   )
-  def private_constant(*_); end
+  def private_constant(*arg0); end
 
   standard_method(
     {
@@ -7616,11 +7616,11 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def private_method_defined?(_); end
+  def private_method_defined?(arg0); end
 
   standard_method(
     {
@@ -7632,35 +7632,35 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def protected_method_defined?(_); end
+  def protected_method_defined?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def public_class_method(*_); end
+  def public_class_method(*arg0); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Opus::Types.untyped
   )
-  def public_constant(*_); end
+  def public_constant(*arg0); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: UnboundMethod
   )
-  def public_instance_method(_); end
+  def public_instance_method(arg0); end
 
   standard_method(
     {
@@ -7672,19 +7672,19 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def public_method_defined?(_); end
+  def public_method_defined?(arg0); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Opus::Types.untyped
   )
-  def remove_class_variable(_); end
+  def remove_class_variable(arg0); end
 
   standard_method(
     {},
@@ -7709,53 +7709,53 @@ class Module
 
   standard_method(
     {
-      _: Module,
+      arg0: Module,
     },
     returns: Opus::Types.untyped
   )
-  def append_features(_); end
+  def append_features(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: NilClass
   )
-  def attr_accessor(*_); end
+  def attr_accessor(*arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: NilClass
   )
-  def attr_reader(*_); end
+  def attr_reader(*arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: NilClass
   )
-  def attr_writer(*_); end
+  def attr_writer(*arg0); end
 
   standard_method(
     {
-      _: Symbol,
-      _1: Method,
+      arg0: Symbol,
+      arg1: Method,
       blk: BasicObject,
     },
     returns: Symbol
   )
-  def define_method(_, _1=_, &blk); end
+  def define_method(arg0, arg1=_, &blk); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def extend_object(_); end
+  def extend_object(arg0); end
 
   standard_method(
     {
@@ -7791,19 +7791,19 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def module_function(*_); end
+  def module_function(*arg0); end
 
   standard_method(
     {
-      _: Module,
+      arg0: Module,
     },
     returns: Opus::Types.untyped
   )
-  def prepend_features(_); end
+  def prepend_features(arg0); end
 
   standard_method(
     {
@@ -7815,68 +7815,68 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def private(*_); end
+  def private(*arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def protected(*_); end
+  def protected(*arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def public(*_); end
+  def public(*arg0); end
 
   standard_method(
     {
-      _: Class,
+      arg0: Class,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: Opus::Types.untyped
   )
-  def refine(_, &blk); end
+  def refine(arg0, &blk); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Opus::Types.untyped
   )
-  def remove_const(_); end
+  def remove_const(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def remove_method(_); end
+  def remove_method(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def undef_method(_); end
+  def undef_method(arg0); end
 
   standard_method(
     {
-      _: Module,
+      arg0: Module,
     },
     returns: Opus::Types.untyped
   )
-  def using(_); end
+  def using(arg0); end
 
   standard_method(
     {},
@@ -7886,11 +7886,11 @@ class Module
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: NilClass
   )
-  def attr(*_); end
+  def attr(*arg0); end
 end
 
 class NilClass
@@ -7958,11 +7958,11 @@ end
 class Numeric
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def %(_); end
+  def %(arg0); end
 
   standard_method(
     {},
@@ -7978,11 +7978,11 @@ class Numeric
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Object
   )
-  def <=>(_); end
+  def <=>(arg0); end
 
   standard_method(
     {},
@@ -8016,11 +8016,11 @@ class Numeric
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]
   )
-  def coerce(_); end
+  def coerce(arg0); end
 
   standard_method(
     {},
@@ -8042,35 +8042,35 @@ class Numeric
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Integer
   )
-  def div(_); end
+  def div(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]
   )
-  def divmod(_); end
+  def divmod(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def eql?(_); end
+  def eql?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def fdiv(_); end
+  def fdiv(arg0); end
 
   standard_method(
     {},
@@ -8110,11 +8110,11 @@ class Numeric
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
-  def modulo(_); end
+  def modulo(arg0); end
 
   standard_method(
     {},
@@ -8142,11 +8142,11 @@ class Numeric
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def quo(_); end
+  def quo(arg0); end
 
   standard_method(
     {},
@@ -8174,37 +8174,37 @@ class Numeric
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
   )
-  def remainder(_); end
+  def remainder(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def round(_); end
+  def round(arg0); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: TypeError
   )
-  def singleton_method_added(_); end
+  def singleton_method_added(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-      _1: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg1: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
       blk: Opus::Types.proc([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)], returns: BasicObject),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex, Enumerator)
   )
-  def step(_, _1=_, &blk); end
+  def step(arg0, arg1=_, &blk); end
 
   standard_method(
     {},
@@ -8334,36 +8334,36 @@ class Object
 
   standard_method(
     {
-      _: Class,
+      arg0: Class,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def instance_of?(_); end
+  def instance_of?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def instance_variable_defined?(_); end
+  def instance_variable_defined?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
     },
     returns: Opus::Types.untyped
   )
-  def instance_variable_get(_); end
+  def instance_variable_get(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
-      _1: BasicObject,
+      arg0: Opus::Types.any(Symbol, String),
+      arg1: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def instance_variable_set(_, _1); end
+  def instance_variable_set(arg0, arg1); end
 
   standard_method(
     {},
@@ -8373,27 +8373,27 @@ class Object
 
   standard_method(
     {
-      _: Opus::Types.any(Class, Module),
+      arg0: Opus::Types.any(Class, Module),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def is_a?(_); end
+  def is_a?(arg0); end
 
   standard_method(
     {
-      _: Class,
+      arg0: Class,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def kind_of?(_); end
+  def kind_of?(arg0); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Method
   )
-  def method(_); end
+  def method(arg0); end
 
   standard_method(
     {
@@ -8427,11 +8427,11 @@ class Object
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Method
   )
-  def public_method(_); end
+  def public_method(arg0); end
 
   standard_method(
     {
@@ -8443,29 +8443,29 @@ class Object
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
       args: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def public_send(_, *args); end
+  def public_send(arg0, *args); end
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Opus::Types.untyped
   )
-  def remove_instance_variable(_); end
+  def remove_instance_variable(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Symbol, String),
+      arg0: Opus::Types.any(Symbol, String),
       args: BasicObject,
     },
     returns: Opus::Types.untyped
   )
-  def send(_, *args); end
+  def send(arg0, *args); end
 
   standard_method(
     {},
@@ -8475,11 +8475,11 @@ class Object
 
   standard_method(
     {
-      _: Symbol,
+      arg0: Symbol,
     },
     returns: Method
   )
-  def singleton_method(_); end
+  def singleton_method(arg0); end
 
   standard_method(
     {
@@ -8623,12 +8623,12 @@ class Pathname
 
   standard_method(
     {
-      _: String,
+      arg0: String,
       offset: Integer,
     },
     returns: Integer
   )
-  def binwrite(_, offset=_); end
+  def binwrite(arg0, offset=_); end
 
   standard_method(
     {},
@@ -8756,11 +8756,11 @@ class Pathname
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def eql?(_); end
+  def eql?(arg0); end
 
   standard_method(
     {},
@@ -8922,12 +8922,12 @@ class Pathname
 
   standard_method(
     {
-      _: Encoding,
+      arg0: Encoding,
       blk: Opus::Types.proc([Dir], returns: BasicObject),
     },
     returns: Opus::Types.any(Dir, Opus::Types.untyped)
   )
-  def opendir(_=_, &blk); end
+  def opendir(arg0=_, &blk); end
 
   standard_method(
     {},
@@ -9181,13 +9181,13 @@ class Pathname
 
   standard_method(
     {
-      _: String,
+      arg0: String,
       offset: Integer,
       open_args: Integer,
     },
     returns: Integer
   )
-  def write(_, offset=_, open_args=_); end
+  def write(arg0, offset=_, open_args=_); end
 
   standard_method(
     {},
@@ -9338,11 +9338,11 @@ module Process
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.egid=(_); end
+  def self.egid=(arg0); end
 
   standard_method(
     {},
@@ -9352,11 +9352,11 @@ module Process
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.euid=(_); end
+  def self.euid=(arg0); end
 
   standard_method(
     {
@@ -9399,11 +9399,11 @@ module Process
   standard_method(
     {
       kind: Integer,
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.getpriority(kind, _); end
+  def self.getpriority(kind, arg0); end
 
   standard_method(
     {
@@ -9429,11 +9429,11 @@ module Process
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.gid=(_); end
+  def self.gid=(arg0); end
 
   standard_method(
     {},
@@ -9443,11 +9443,11 @@ module Process
 
   standard_method(
     {
-      _: Opus::Types.array_of(Integer),
+      arg0: Opus::Types.array_of(Integer),
     },
     returns: Opus::Types.array_of(Integer)
   )
-  def self.groups=(_); end
+  def self.groups=(arg0); end
 
   standard_method(
     {
@@ -9475,11 +9475,11 @@ module Process
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.maxgroups=(_); end
+  def self.maxgroups=(arg0); end
 
   standard_method(
     {},
@@ -9496,20 +9496,20 @@ module Process
   standard_method(
     {
       kind: Integer,
-      _: Integer,
+      arg0: Integer,
       priority: Integer,
     },
     returns: Integer
   )
-  def self.setpriority(kind, _, priority); end
+  def self.setpriority(kind, arg0, priority); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def self.setproctitle(_); end
+  def self.setproctitle(arg0); end
 
   standard_method(
     {
@@ -9524,11 +9524,11 @@ module Process
   standard_method(
     {
       pid: Integer,
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def self.setpgid(pid, _); end
+  def self.setpgid(pid, arg0); end
 
   standard_method(
     {},
@@ -9972,11 +9972,11 @@ class Random
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {
@@ -10187,35 +10187,35 @@ end
 class Rational
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(Rational, Float, BigDecimal)
   )
-  def %(_); end
+  def %(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
-  def *(_); end
+  def *(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
-  def +(_); end
+  def +(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
-  def -(_); end
+  def -(arg0); end
 
   standard_method(
     {},
@@ -10231,67 +10231,67 @@ class Rational
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def **(_); end
+  def **(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
-  def /(_); end
+  def /(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def <(_); end
+  def <(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def <=(_); end
+  def <=(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def >(_); end
+  def >(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def >=(_); end
+  def >=(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Object
   )
-  def <=>(_); end
+  def <=>(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {},
@@ -10319,27 +10319,27 @@ class Rational
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Integer
   )
-  def div(_); end
+  def div(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: Opus::Types.any(Rational, Float, BigDecimal)
   )
-  def modulo(_); end
+  def modulo(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def ceil(_=_); end
+  def ceil(arg0=_); end
 
   standard_method(
     {},
@@ -10349,35 +10349,35 @@ class Rational
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
     },
     returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
   )
-  def divmod(_); end
+  def divmod(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def equal?(_); end
+  def equal?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Float
   )
-  def fdiv(_); end
+  def fdiv(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def floor(_=_); end
+  def floor(arg0=_); end
 
   standard_method(
     {},
@@ -10405,27 +10405,27 @@ class Rational
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Opus::Types.any(Rational, Float, BigDecimal, Complex)
   )
-  def quo(_); end
+  def quo(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
     },
     returns: Rational
   )
-  def rationalize(_=_); end
+  def rationalize(arg0=_); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  def round(_=_); end
+  def round(arg0=_); end
 
   standard_method(
     {},
@@ -10453,11 +10453,11 @@ class Rational
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Integer, Rational)
   )
-  def truncate(_=_); end
+  def truncate(arg0=_); end
 
   standard_method(
     {},
@@ -10509,29 +10509,29 @@ class Rational
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Float, Rational, Complex),
+      arg0: Opus::Types.any(Integer, Float, Rational, Complex),
     },
     returns: Opus::Types.any([Rational, Rational], [Float, Float], [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)])
   )
-  def coerce(_); end
+  def coerce(arg0); end
 end
 
 class Regexp
   standard_method(
     {
-      _: Opus::Types.any(String, Symbol),
+      arg0: Opus::Types.any(String, Symbol),
     },
     returns: String
   )
-  def self.escape(_); end
+  def self.escape(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(MatchData, String)
   )
-  def self.last_match(_=_); end
+  def self.last_match(arg0=_); end
 
   standard_method(
     {
@@ -10543,13 +10543,13 @@ class Regexp
 
   standard_method(
     {
-      _: Opus::Types.any(String, Regexp),
+      arg0: Opus::Types.any(String, Regexp),
       options: BasicObject,
       kcode: String,
     },
     returns: Object
   )
-  def initialize(_, options=_, kcode=_); end
+  def initialize(arg0, options=_, kcode=_); end
 
   standard_method(
     {
@@ -10607,12 +10607,12 @@ class Regexp
 
   standard_method(
     {
-      _: String,
-      _1: Integer,
+      arg0: String,
+      arg1: Integer,
     },
     returns: Opus::Types.any(MatchData, NilClass)
   )
-  def match(_, _1=_); end
+  def match(arg0, arg1=_); end
 
   standard_method(
     {},
@@ -10652,21 +10652,21 @@ class Regexp
 
   standard_method(
     {
-      _: Opus::Types.any(String, Regexp),
+      arg0: Opus::Types.any(String, Regexp),
       options: BasicObject,
       kcode: String,
     },
     returns: Opus::Types.untyped
   )
-  def self.compile(_, options=_, kcode=_); end
+  def self.compile(arg0, options=_, kcode=_); end
 
   standard_method(
     {
-      _: Opus::Types.any(String, Symbol),
+      arg0: Opus::Types.any(String, Symbol),
     },
     returns: String
   )
-  def self.quote(_); end
+  def self.quote(arg0); end
 
   standard_method(
     {
@@ -11036,35 +11036,35 @@ class String
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: String
   )
-  def %(_); end
+  def %(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: String
   )
-  def *(_); end
+  def *(arg0); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def +(_); end
+  def +(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: String
   )
-  def <<(_); end
+  def <<(arg0); end
 
   standard_method(
     {
@@ -11076,36 +11076,36 @@ class String
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ==(_); end
+  def ==(arg0); end
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def ===(_); end
+  def ===(arg0); end
 
   standard_method(
     {
-      _: Object,
+      arg0: Object,
     },
     returns: Opus::Types.any(Integer, NilClass)
   )
-  def =~(_); end
+  def =~(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Range, Regexp, String),
-      _1: Opus::Types.any(Integer, String),
+      arg0: Opus::Types.any(Integer, Range, Regexp, String),
+      arg1: Opus::Types.any(Integer, String),
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def [](_, _1=_); end
+  def [](arg0, arg1=_); end
 
   standard_method(
     {},
@@ -11133,12 +11133,12 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Range),
-      _1: Integer,
+      arg0: Opus::Types.any(Integer, Range),
+      arg1: Integer,
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def byteslice(_, _1=_); end
+  def byteslice(arg0, arg1=_); end
 
   standard_method(
     {},
@@ -11154,20 +11154,20 @@ class String
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Opus::Types.any(NilClass, Integer)
   )
-  def casecmp(_); end
+  def casecmp(arg0); end
 
   standard_method(
     {
-      _: Integer,
-      _1: String,
+      arg0: Integer,
+      arg1: String,
     },
     returns: String
   )
-  def center(_, _1=_); end
+  def center(arg0, arg1=_); end
 
   standard_method(
     {},
@@ -11177,19 +11177,19 @@ class String
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def chomp(_=_); end
+  def chomp(arg0=_); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def chomp!(_=_); end
+  def chomp!(arg0=_); end
 
   standard_method(
     {},
@@ -11225,46 +11225,46 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Object),
+      arg0: Opus::Types.any(Integer, Object),
     },
     returns: String
   )
-  def concat(_); end
+  def concat(arg0); end
 
   standard_method(
     {
-      _: String,
-      _1: String,
+      arg0: String,
+      arg1: String,
     },
     returns: Integer
   )
-  def count(_, *_1); end
+  def count(arg0, *arg1); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def crypt(_); end
+  def crypt(arg0); end
 
   standard_method(
     {
-      _: String,
-      _1: String,
+      arg0: String,
+      arg1: String,
     },
     returns: String
   )
-  def delete(_, *_1); end
+  def delete(arg0, *arg1); end
 
   standard_method(
     {
-      _: String,
-      _1: String,
+      arg0: String,
+      arg1: String,
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def delete!(_, *_1); end
+  def delete!(arg0, *arg1); end
 
   standard_method(
     {},
@@ -11310,12 +11310,12 @@ class String
 
   standard_method(
     {
-      _: String,
+      arg0: String,
       blk: Opus::Types.proc([Integer], returns: BasicObject),
     },
     returns: Opus::Types.any(String, Enumerator)
   )
-  def each_line(_=_, &blk); end
+  def each_line(arg0=_, &blk); end
 
   standard_method(
     {},
@@ -11331,55 +11331,55 @@ class String
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def end_with?(*_); end
+  def end_with?(*arg0); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def eql?(_); end
+  def eql?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(String, Encoding),
+      arg0: Opus::Types.any(String, Encoding),
     },
     returns: String
   )
-  def force_encoding(_); end
+  def force_encoding(arg0); end
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Opus::Types.any(Integer, NilClass)
   )
-  def getbyte(_); end
+  def getbyte(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String),
-      _1: Opus::Types.any(String, Hash),
+      arg0: Opus::Types.any(Regexp, String),
+      arg1: Opus::Types.any(String, Hash),
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(String, Enumerator)
   )
-  def gsub(_, _1=_, &blk); end
+  def gsub(arg0, arg1=_, &blk); end
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String),
-      _1: String,
+      arg0: Opus::Types.any(Regexp, String),
+      arg1: String,
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(String, NilClass, Enumerator)
   )
-  def gsub!(_, _1=_, &blk); end
+  def gsub!(arg0, arg1=_, &blk); end
 
   standard_method(
     {},
@@ -11395,37 +11395,37 @@ class String
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def include?(_); end
+  def include?(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String),
-      _1: Integer,
+      arg0: Opus::Types.any(Regexp, String),
+      arg1: Integer,
     },
     returns: Opus::Types.any(Integer, NilClass)
   )
-  def index(_, _1=_); end
+  def index(arg0, arg1=_); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def replace(_); end
+  def replace(arg0); end
 
   standard_method(
     {
-      _: Integer,
-      _1: String,
+      arg0: Integer,
+      arg1: String,
     },
     returns: String
   )
-  def insert(_, _1); end
+  def insert(arg0, arg1); end
 
   standard_method(
     {},
@@ -11447,20 +11447,20 @@ class String
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Opus::Types.array_of(String)
   )
-  def lines(_=_); end
+  def lines(arg0=_); end
 
   standard_method(
     {
-      _: Integer,
-      _1: String,
+      arg0: Integer,
+      arg1: String,
     },
     returns: String
   )
-  def ljust(_, _1=_); end
+  def ljust(arg0, arg1=_); end
 
   standard_method(
     {},
@@ -11476,12 +11476,12 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String),
-      _1: Integer,
+      arg0: Opus::Types.any(Regexp, String),
+      arg1: Integer,
     },
     returns: MatchData
   )
-  def match(_, _1=_); end
+  def match(arg0, arg1=_); end
 
   standard_method(
     {},
@@ -11509,19 +11509,19 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String),
+      arg0: Opus::Types.any(Regexp, String),
     },
     returns: Opus::Types.array_of(String)
   )
-  def partition(_); end
+  def partition(arg0); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def prepend(_); end
+  def prepend(arg0); end
 
   standard_method(
     {},
@@ -11531,29 +11531,29 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(String, Regexp),
-      _1: Integer,
+      arg0: Opus::Types.any(String, Regexp),
+      arg1: Integer,
     },
     returns: Opus::Types.any(Integer, NilClass)
   )
-  def rindex(_, _1=_); end
+  def rindex(arg0, arg1=_); end
 
   standard_method(
     {
-      _: Integer,
-      _1: String,
+      arg0: Integer,
+      arg1: String,
     },
     returns: String
   )
-  def rjust(_, _1=_); end
+  def rjust(arg0, arg1=_); end
 
   standard_method(
     {
-      _: Opus::Types.any(String, Regexp),
+      arg0: Opus::Types.any(String, Regexp),
     },
     returns: Opus::Types.array_of(String)
   )
-  def rpartition(_); end
+  def rpartition(arg0); end
 
   standard_method(
     {},
@@ -11569,39 +11569,39 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String),
+      arg0: Opus::Types.any(Regexp, String),
       blk: BasicObject,
     },
     returns: Opus::Types.array_of(Opus::Types.any(String, Opus::Types.array_of(String)))
   )
-  def scan(_, &blk); end
+  def scan(arg0, &blk); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: String
   )
-  def scrub(_=_, &blk); end
+  def scrub(arg0=_, &blk); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
       blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
     },
     returns: String
   )
-  def scrub!(_=_, &blk); end
+  def scrub!(arg0=_, &blk); end
 
   standard_method(
     {
-      _: Integer,
-      _1: Integer,
+      arg0: Integer,
+      arg1: Integer,
     },
     returns: Integer
   )
-  def setbyte(_, _1); end
+  def setbyte(arg0, arg1); end
 
   standard_method(
     {},
@@ -11611,45 +11611,45 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Range, Regexp, String),
-      _1: Opus::Types.any(Integer, String),
+      arg0: Opus::Types.any(Integer, Range, Regexp, String),
+      arg1: Opus::Types.any(Integer, String),
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def slice!(_, _1=_); end
+  def slice!(arg0, arg1=_); end
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String, Integer),
-      _1: Integer,
+      arg0: Opus::Types.any(Regexp, String, Integer),
+      arg1: Integer,
     },
     returns: Opus::Types.array_of(String)
   )
-  def split(_=_, _1=_); end
+  def split(arg0=_, arg1=_); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def squeeze(_=_); end
+  def squeeze(arg0=_); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def squeeze!(_=_); end
+  def squeeze!(arg0=_); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def start_with?(*_); end
+  def start_with?(*arg0); end
 
   standard_method(
     {},
@@ -11665,23 +11665,23 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String),
-      _1: Opus::Types.any(String, Hash),
+      arg0: Opus::Types.any(Regexp, String),
+      arg1: Opus::Types.any(String, Hash),
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: String
   )
-  def sub(_, _1=_, &blk); end
+  def sub(arg0, arg1=_, &blk); end
 
   standard_method(
     {
-      _: Opus::Types.any(Regexp, String),
-      _1: String,
+      arg0: Opus::Types.any(Regexp, String),
+      arg1: String,
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: String
   )
-  def sub!(_, _1=_, &blk); end
+  def sub!(arg0, arg1=_, &blk); end
 
   standard_method(
     {},
@@ -11691,11 +11691,11 @@ class String
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def sum(_=_); end
+  def sum(arg0=_); end
 
   standard_method(
     {},
@@ -11723,11 +11723,11 @@ class String
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Integer
   )
-  def to_i(_=_); end
+  def to_i(arg0=_); end
 
   standard_method(
     {},
@@ -11755,47 +11755,47 @@ class String
 
   standard_method(
     {
-      _: String,
-      _1: String,
+      arg0: String,
+      arg1: String,
     },
     returns: String
   )
-  def tr(_, _1); end
+  def tr(arg0, arg1); end
 
   standard_method(
     {
-      _: String,
-      _1: String,
+      arg0: String,
+      arg1: String,
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def tr!(_, _1); end
+  def tr!(arg0, arg1); end
 
   standard_method(
     {
-      _: String,
-      _1: String,
+      arg0: String,
+      arg1: String,
     },
     returns: String
   )
-  def tr_s(_, _1); end
+  def tr_s(arg0, arg1); end
 
   standard_method(
     {
-      _: String,
-      _1: String,
+      arg0: String,
+      arg1: String,
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def tr_s!(_, _1); end
+  def tr_s!(arg0, arg1); end
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: Opus::Types.array_of(String)
   )
-  def unpack(_); end
+  def unpack(arg0); end
 
   standard_method(
     {},
@@ -11811,13 +11811,13 @@ class String
 
   standard_method(
     {
-      _: String,
-      _1: BasicObject,
+      arg0: String,
+      arg1: BasicObject,
       blk: Opus::Types.proc([String], returns: BasicObject),
     },
     returns: Opus::Types.any(Enumerator, String)
   )
-  def upto(_, _1=_, &blk); end
+  def upto(arg0, arg1=_, &blk); end
 
   standard_method(
     {},
@@ -11835,23 +11835,23 @@ class String
 
   standard_method(
     {
-      _: Opus::Types.any(Integer, Range, Regexp, String),
-      _1: Opus::Types.any(Integer, String),
+      arg0: Opus::Types.any(Integer, Range, Regexp, String),
+      arg1: Opus::Types.any(Integer, String),
     },
     returns: Opus::Types.any(String, NilClass)
   )
-  def slice(_, _1=_); end
+  def slice(arg0, arg1=_); end
 end
 
 class StringScanner
   standard_method(
     {
-      _: String,
-      _1: Opus::Types.any(TrueClass, FalseClass),
+      arg0: String,
+      arg1: Opus::Types.any(TrueClass, FalseClass),
     },
     returns: StringScanner
   )
-  def self.new(_, _1=_); end
+  def self.new(arg0, arg1=_); end
 
   standard_method(
     {},
@@ -11861,11 +11861,11 @@ class StringScanner
 
   standard_method(
     {
-      _: Regexp,
+      arg0: Regexp,
     },
     returns: String
   )
-  def scan(_); end
+  def scan(arg0); end
 
   standard_method(
     {},
@@ -12033,12 +12033,12 @@ end
 class Time
   standard_method(
     {
-      _: Opus::Types.any(Time, Numeric),
+      arg0: Opus::Types.any(Time, Numeric),
       microseconds_with_frac: Numeric,
     },
     returns: Time
   )
-  def self.at(_, microseconds_with_frac=_); end
+  def self.at(arg0, microseconds_with_frac=_); end
 
   standard_method(
     {
@@ -12104,19 +12104,19 @@ class Time
 
   standard_method(
     {
-      _: Numeric,
+      arg0: Numeric,
     },
     returns: Time
   )
-  def +(_); end
+  def +(arg0); end
 
   standard_method(
     {
-      _: Opus::Types.any(Time, Numeric),
+      arg0: Opus::Types.any(Time, Numeric),
     },
     returns: Opus::Types.any(Float, Time)
   )
-  def -(_); end
+  def -(arg0); end
 
   standard_method(
     {
@@ -12152,11 +12152,11 @@ class Time
 
   standard_method(
     {
-      _: BasicObject,
+      arg0: BasicObject,
     },
     returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  def eql?(_); end
+  def eql?(arg0); end
 
   standard_method(
     {},
@@ -12266,11 +12266,11 @@ class Time
 
   standard_method(
     {
-      _: Integer,
+      arg0: Integer,
     },
     returns: Time
   )
-  def round(_); end
+  def round(arg0); end
 
   standard_method(
     {},
@@ -12286,11 +12286,11 @@ class Time
 
   standard_method(
     {
-      _: String,
+      arg0: String,
     },
     returns: String
   )
-  def strftime(_); end
+  def strftime(arg0); end
 
   standard_method(
     {},
@@ -12512,11 +12512,11 @@ module URI
   standard_method(
     {
       arg: String,
-      _: Opus::Types.any(Regexp, String),
+      arg0: Opus::Types.any(Regexp, String),
     },
     returns: String
   )
-  def self.escape(arg, *_); end
+  def self.escape(arg, *arg0); end
 
   standard_method(
     {
@@ -12529,11 +12529,11 @@ module URI
   standard_method(
     {
       arg: String,
-      _: Opus::Types.any(Regexp, String),
+      arg0: Opus::Types.any(Regexp, String),
     },
     returns: String
   )
-  def self.encode(arg, *_); end
+  def self.encode(arg, *arg0); end
 
   standard_method(
     {

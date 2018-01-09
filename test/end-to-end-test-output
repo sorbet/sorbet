@@ -1,13 +1,13 @@
 test/end-to-end-test-input.rb:4 Stubbing out unknown constant <emptyTree>::<constant:MissingConstant> [5002]
     MissingConstant
     ^^^^^^^^^^^^^^^
-test/end-to-end-test-input.rb:17 Argument _ does not match expected type. [7002]
+test/end-to-end-test-input.rb:17 Argument arg0 does not match expected type. [7002]
     raise arg # raise is defined by stdlib
     ^^^^^^^^^
   Expected String | Class | Exception
-    rbi/stdlib.rbi:__LINE__ Method raise has specified type of argument _ as String | Class | Exception
-      _: Opus::Types.any(String, Class, Exception),
-      ^^
+    rbi/stdlib.rbi:__LINE__ Method raise has specified type of argument arg0 as String | Class | Exception
+      arg0: Opus::Types.any(String, Class, Exception),
+      ^^^^^
 
   Got Integer originating from:
     test/end-to-end-test-input.rb:11 
