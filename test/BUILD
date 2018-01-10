@@ -1,6 +1,6 @@
 cc_test(
     name = "test_corpus",
-    size = "small",
+    size = "medium",
     srcs = [
         "test_corpus.cc",
     ],

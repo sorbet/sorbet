@@ -230,7 +230,9 @@ public:
             core::TypeAndOrigins klass = getTypeAndOrigin(ctx, send->args[0]);
             if (klass.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {
                 auto *s = core::cast_type<core::ClassType>(klass.type.get());
-                ENFORCE(s != nullptr);
+                if (s == nullptr) {
+                    return;
+                }
                 core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
                 if (attachedClass.exists()) {
                     whoKnows.truthy.yesTypeTests.emplace_back(send->recv, make_shared<core::ClassType>(attachedClass));
@@ -257,7 +259,10 @@ public:
             }
 
             auto *s = core::cast_type<core::ClassType>(recvKlass.type.get());
-            Error::check(s != nullptr);
+            if (s == nullptr) {
+                return;
+            }
+
             core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
             if (attachedClass.exists()) {
                 whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], make_shared<core::ClassType>(attachedClass));
