@@ -28,13 +28,11 @@ namespace spd = spdlog;
 using namespace std;
 
 class CFG_Collector_and_Typer {
-    bool shouldType;
     bool printCFGs;
     bool printCFGRaw;
 
 public:
-    CFG_Collector_and_Typer(bool shouldType, bool printCFGs, bool printCFGRaw)
-        : shouldType(shouldType), printCFGs(printCFGs), printCFGRaw(printCFGRaw){};
+    CFG_Collector_and_Typer(bool printCFGs, bool printCFGRaw) : printCFGs(printCFGs), printCFGRaw(printCFGRaw){};
 
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         if (m->loc.file.file(ctx).source_type == ruby_typer::core::File::Untyped) {
@@ -45,9 +43,7 @@ public:
         if (printCFGRaw) {
             ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
         }
-        if (shouldType) {
-            ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
-        }
+        ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
         if (printCFGs) {
             cout << cfg->toString(ctx) << endl << endl;
         }
@@ -198,8 +194,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::Glob
                 if (printCFG || printCFGRaw) {
                     cout << "digraph \"" << ruby_typer::File::getFileName(f.file(gs).path()) << "\"{" << endl;
                 }
-                bool doType = opts["typed"].as<string>() != "never";
-                CFG_Collector_and_Typer collector(doType, printCFG || printCFGRaw, printCFGRaw);
+                CFG_Collector_and_Typer collector(printCFG || printCFGRaw, printCFGRaw);
                 {
                     tracer->trace("CFG+Infer: {}", f.file(gs).path());
                     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates names for temporaries in CFG
@@ -425,10 +420,6 @@ int realmain(int argc, char **argv) {
     }
 
     string typed = options["typed"].as<string>();
-    if (typed != "auto" && typed != "never" && typed != "always") {
-        console->error("Invalid valud for `--typed`: {}", typed);
-    }
-
     bool forceTyped = typed == "always";
     ruby_typer::core::GlobalState gs = createInitialGlobalState(options);
 
@@ -468,6 +459,14 @@ int realmain(int argc, char **argv) {
             for (auto &f : inputFiles) {
                 f.file(gs).source_type = ruby_typer::core::File::Typed;
             }
+        } else if (typed == "never") {
+            for (auto &f : inputFiles) {
+                f.file(gs).source_type = ruby_typer::core::File::Untyped;
+            }
+        } else if (typed == "auto") {
+            // Use the annotation in the file
+        } else {
+            console->error("Invalid valud for `--typed`: {}", typed);
         }
     }
 
