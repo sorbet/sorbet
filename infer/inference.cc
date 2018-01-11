@@ -510,7 +510,7 @@ public:
                             tp.type = info.resultType;
                             tp.origins.push_back(info.definitionLoc);
                         } else {
-                            tp.origins.push_back(core::Loc::none(0));
+                            tp.origins.push_back(core::Loc::none());
                             tp.type = core::Types::dynamic();
                         }
                     } else {

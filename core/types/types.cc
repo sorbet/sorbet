@@ -209,9 +209,9 @@ string LiteralType::toString(GlobalState &gs, int tabs) {
     string value;
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
     if (undSymbol == GlobalState::defn_String()) {
-        value = "\"" + NameRef(this->value).toString(gs) + "\"";
+        value = "\"" + NameRef(gs, this->value).toString(gs) + "\"";
     } else if (undSymbol == GlobalState::defn_Symbol()) {
-        value = ":\"" + NameRef(this->value).toString(gs) + "\"";
+        value = ":\"" + NameRef(gs, this->value).toString(gs) + "\"";
     } else if (undSymbol == GlobalState::defn_Integer()) {
         value = to_string(this->value);
     } else if (undSymbol == GlobalState::defn_Float()) {

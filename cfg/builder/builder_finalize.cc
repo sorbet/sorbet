@@ -187,8 +187,6 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 }
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                 v->what = maybeDealias(ctx, v->what, current);
-            } else if (auto *v = cast_instruction<NamedArg>(bind.value.get())) {
-                v->value = maybeDealias(ctx, v->value, current);
             }
 
             // record new aliases
@@ -230,8 +228,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                     cast_instruction<IntLit>(bind.value.get()) != nullptr ||
                     cast_instruction<FloatLit>(bind.value.get()) != nullptr ||
                     cast_instruction<Self>(bind.value.get()) != nullptr ||
-                    cast_instruction<LoadArg>(bind.value.get()) != nullptr ||
-                    cast_instruction<NamedArg>(bind.value.get()) != nullptr) {
+                    cast_instruction<LoadArg>(bind.value.get()) != nullptr) {
                     expIt = it->exprs.erase(expIt);
                 } else {
                     ++expIt;

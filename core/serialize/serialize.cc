@@ -141,11 +141,11 @@ Name GlobalStateSerializer::unpickleName(UnPickler &p, GlobalState &gs) {
             break;
         case NameKind::UNIQUE:
             result.unique.uniqueNameKind = (UniqueNameKind)p.getU4();
-            result.unique.original._id = p.getU4();
+            result.unique.original = NameRef(gs, p.getU4());
             result.unique.num = p.getU4();
             break;
         case NameKind::CONSTANT:
-            result.cnst.original = p.getU4();
+            result.cnst.original = NameRef(gs, p.getU4());
             break;
     }
     return result;
@@ -284,7 +284,7 @@ void GlobalStateSerializer::pickle(Pickler &p, Symbol &what) {
 Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     Symbol result;
     result.owner = SymbolRef(gs, p.getU4());
-    result.name = p.getU4();
+    result.name = NameRef(*gs, p.getU4());
     result.superClass = SymbolRef(gs, p.getU4());
     result.flags = p.getU4();
     result.uniqueCounter = p.getU4();
@@ -296,13 +296,13 @@ Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     int membersSize = p.getU4();
     result.members.reserve(membersSize);
     for (int i = 0; i < membersSize; i++) {
-        auto name = p.getU4();
+        auto name = NameRef(*gs, p.getU4());
         auto sym = SymbolRef(gs, p.getU4());
         result.members.push_back(std::make_pair(name, sym));
     }
     result.resultType = unpickleType(p, gs);
 
-    result.definitionLoc.file = p.getU4();
+    result.definitionLoc.file = FileRef(*gs, p.getU4());
     result.definitionLoc.begin_pos = p.getU4();
     result.definitionLoc.end_pos = p.getU4();
     return result;
@@ -342,11 +342,11 @@ int nearestPowerOf2(int from) {
     return i;
 }
 
-GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logger) {
+void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
     if (p.getU4() != VERSION) {
         Error::raise("Payload version mismatch");
     }
-    GlobalState result(logger);
+
     std::vector<std::shared_ptr<File>> files(move(result.files));
     files.clear();
     std::vector<Name> names(move(result.names));
@@ -388,7 +388,6 @@ GlobalState GlobalStateSerializer::unpickleGS(UnPickler &p, spdlog::logger &logg
     result.symbols = move(symbols);
     result.names_by_hash = move(names_by_hash);
     result.sanityCheck();
-    return result;
 }
 
 std::vector<u4> GlobalStateSerializer::store(GlobalState &gs) {
@@ -396,9 +395,10 @@ std::vector<u4> GlobalStateSerializer::store(GlobalState &gs) {
     return move(p.data);
 }
 
-GlobalState GlobalStateSerializer::load(const u4 *const data, spdlog::logger &logger) {
+void GlobalStateSerializer::load(GlobalState &gs, const u4 *const data) {
+    ENFORCE(gs.files.empty() && gs.names.empty() && gs.symbols.empty(), "Can't load into a non-empty state");
     UnPickler p(data);
-    return unpickleGS(p, logger);
+    unpickleGS(p, gs);
 }
 } // namespace serialize
 } // namespace core

@@ -64,10 +64,6 @@ public:
         check(original);
         return original;
     }
-    Expression *postTransformNamedArg(core::Context ctx, NamedArg *original) {
-        check(original);
-        return original;
-    }
     Expression *postTransformHash(core::Context ctx, Hash *original) {
         check(original);
         return original;

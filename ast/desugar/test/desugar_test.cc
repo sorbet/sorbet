@@ -15,6 +15,7 @@ namespace spd = spdlog;
 TEST(DesugarTest, SimpleDesugar) { // NOLINT
     auto console = spd::stderr_color_mt("console");
     ruby_typer::core::GlobalState gs(*console);
+    gs.initEmpty();
     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);
     ruby_typer::core::UnfreezeFileTable ft(gs);
 

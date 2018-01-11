@@ -49,10 +49,6 @@ public:
         ENFORCE(from._id < nameSubstitution.size(), "name substitution index out of bounds");
         return nameSubstitution[from._id];
     }
-    SymbolRef substitute(SymbolRef from) const {
-        ENFORCE(from._id < symbolSubstitution.size(), "symbol substitution index out of bounds");
-        return symbolSubstitution[from._id];
-    }
     FileRef substitute(FileRef from) const {
         if (from.id() < 0)
             return from;
@@ -67,12 +63,9 @@ public:
         return result;
     }
 
-    std::shared_ptr<Type> substitute(std::shared_ptr<Type> from) const;
-
 private:
     std::vector<NameRef> nameSubstitution;
     std::vector<FileRef> fileSubstitution;
-    std::vector<SymbolRef> symbolSubstitution;
 };
 
 } // namespace core

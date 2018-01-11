@@ -305,7 +305,7 @@ bool locReported = false;
 unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node> &what, u2 &uniqueCounter) {
     try {
         if (what.get() == nullptr) {
-            return mkEmptyTree(core::Loc::none(0));
+            return mkEmptyTree(core::Loc::none());
         }
         auto loc = what->loc;
         if (loc.is_none()) {
@@ -1221,7 +1221,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto body = node2TreeImpl(ctx, resbody->body, uniqueCounter);
 
                 auto varLoc = varExpr->loc;
-                core::NameRef var(0);
+                auto var = core::NameRef::noName();
                 if (auto *id = cast_tree<UnresolvedIdent>(varExpr.get())) {
                     if (id->kind == UnresolvedIdent::Local) {
                         var = id->name;
@@ -1283,7 +1283,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::Case *case_) {
                 unique_ptr<Expression> assign;
-                core::NameRef temp(0);
+                auto temp = core::NameRef::noName();
                 core::Loc cloc;
 
                 if (case_->condition != nullptr) {

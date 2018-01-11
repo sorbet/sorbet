@@ -1,5 +1,8 @@
 #ifndef SRUBY_COUNTERS_H
 #define SRUBY_COUNTERS_H
+#include <map>
+#include <string>
+#include <unordered_map>
 
 #include "common.h"
 namespace ruby_typer {
@@ -15,6 +18,20 @@ struct ConstExprStr {
 
     ConstExprStr(const std::string s) : str(s.c_str()), size(s.size()) {}
 };
+
+struct CounterState {
+    CounterState() = default;
+    CounterState(CounterState const &) = delete;
+    CounterState(CounterState &&) = default;
+    CounterState &operator=(CounterState &&) = default;
+    typedef unsigned long CounterType;
+    std::unordered_map<std::string, std::map<int, CounterType>> histograms;
+    std::unordered_map<std::string, CounterType> counters;
+    std::unordered_map<std::string, std::unordered_map<std::string, CounterType>> counters_by_category;
+};
+
+CounterState getAndClearThreadCounters();
+void counterConsume(CounterState cs);
 
 void counterInc(ConstExprStr counter);
 void counterAdd(ConstExprStr counter, unsigned int value);

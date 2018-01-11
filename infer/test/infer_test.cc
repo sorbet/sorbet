@@ -24,6 +24,7 @@ class InferFixture : public ::testing::Test {
 public:
     void SetUp() override {
         ctxPtr = make_unique<core::GlobalState>(*console);
+        ctxPtr->initEmpty();
     }
     core::Context getCtx() {
         return core::Context(*ctxPtr, ctxPtr->defn_root());

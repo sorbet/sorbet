@@ -355,17 +355,6 @@ public:
     virtual std::string nodeName();
 };
 
-class NamedArg final : public Expression {
-public:
-    core::NameRef name;
-    std::unique_ptr<Expression> arg;
-
-    NamedArg(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> arg);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-};
-
 class Hash final : public Expression {
 public:
     static constexpr int EXPECTED_ENTRY_COUNT = 2;

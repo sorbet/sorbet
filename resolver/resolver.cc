@@ -234,7 +234,7 @@ private:
 
     void defineAttr(core::Context ctx, ast::Send *send, bool r, bool w) {
         for (auto &arg : send->args) {
-            core::NameRef name(0);
+            auto name = core::NameRef::noName();
             if (auto *sym = ast::cast_tree<ast::SymbolLit>(arg.get())) {
                 name = sym->name;
             } else if (auto *str = ast::cast_tree<ast::StringLit>(arg.get())) {

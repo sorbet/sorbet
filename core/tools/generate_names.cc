@@ -156,7 +156,7 @@ NameDef names[] = {
 void emit_name_header(ostream &out, NameDef &name) {
     out << "    // \"" << name.val << "\"" << endl;
     out << "    static inline constexpr NameRef " << name.srcName << "() {" << endl;
-    out << "        return NameRef(" << name.id << ");" << endl;
+    out << "        return NameRef(NameRef::WellKnown{}, " << name.id << ");" << endl;
     out << "    }" << endl;
     out << endl;
 }
@@ -177,7 +177,7 @@ void emit_register(ostream &out) {
     }
     out << endl;
     for (auto &name : names) {
-        out << "    ENFORCE(" << name.srcName << "_id == " << name.id << "); /* Names::" << name.srcName << "() */"
+        out << "    ENFORCE(" << name.srcName << "_id._id == " << name.id << "); /* Names::" << name.srcName << "() */"
             << endl;
     }
     out << endl;
@@ -189,6 +189,7 @@ int main(int argc, char **argv) {
     for (auto &name : names) {
         name.id = i++;
     }
+    int lastId = i - 1;
 
     // emit header file
     {
@@ -258,6 +259,11 @@ int main(int argc, char **argv) {
                 emit_name_header(header, name);
             }
         }
+
+        if (phase == "core") {
+            header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << endl;
+        }
+
         header << "};" << endl;
         header << "};" << endl;
         header << "};" << endl;

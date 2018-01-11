@@ -233,10 +233,11 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
             }
             for (auto &key : hash->keys) {
                 SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
-                if (klass == ctx.state.defn_Symbol() && consumed.find(NameRef(key->value)) != consumed.end()) {
+                if (klass == ctx.state.defn_Symbol() &&
+                    consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
                     continue;
                 }
-                NameRef arg(key->value);
+                NameRef arg(ctx.state, key->value);
 
                 ctx.state.errors.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
                                        "Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),

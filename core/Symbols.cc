@@ -48,9 +48,6 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
 
 Symbol &SymbolRef::info(GlobalState &gs, bool allowNone) const {
     ENFORCE(_id < gs.symbols.size());
-#ifdef DEBUG_MODE
-    ENFORCE(isSynthetic() || this->globalStateId == gs.globalStateId, "Symbol leaked between global states");
-#endif
     if (!allowNone) {
         ENFORCE(this->exists());
     }
@@ -63,8 +60,11 @@ bool SymbolRef::isSynthetic() const {
 }
 
 bool SymbolRef::isHiddenFromPrinting(GlobalState &gs) const {
-    return (isSynthetic() && *this != GlobalState::defn_Opus()) ||
-           info(gs).definitionLoc.file.file(gs).source_type == File::Payload;
+    if (isSynthetic() && *this != GlobalState::defn_Opus()) {
+        return true;
+    }
+    auto loc = info(gs).definitionLoc;
+    return loc.file.id() < 0 || loc.file.file(gs).source_type == File::Payload;
 }
 
 void printTabs(ostringstream &to, int count) {
@@ -165,21 +165,8 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
     return os.str();
 }
 
-SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {
-#ifdef DEBUG_MODE
-    globalStateId = from.globalStateId;
-#endif
-}
-
-SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {
-#ifdef DEBUG_MODE
-    if (from == nullptr) {
-        ENFORCE(isSynthetic());
-    } else {
-        globalStateId = from->globalStateId;
-    }
-#endif
-}
+SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {}
+SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {}
 
 SymbolRef Symbol::findMember(GlobalState &gs, NameRef name) {
     histogramInc("find_member_scope_size", members.size());
@@ -243,6 +230,8 @@ string Symbol::fullName(GlobalState &gs) const {
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
     ENFORCE(this->isClass());
+    ENFORCE(this->name.name(gs).isClassName(gs));
+
     SymbolRef selfRef = this->ref(gs);
     if (selfRef == GlobalState::defn_untyped()) {
         return GlobalState::defn_untyped();
@@ -287,32 +276,38 @@ bool Symbol::isBlockSymbol(GlobalState &gs) const {
     return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
 }
 
-Symbol Symbol::deepCopy() {
+Symbol Symbol::deepCopy(const GlobalState &to) const {
     Symbol result;
     result.owner = this->owner;
     result.flags = this->flags;
     result.argumentsOrMixins = this->argumentsOrMixins;
     result.resultType = this->resultType;
-    result.name = this->name;
+    result.name = NameRef(to, this->name.id());
     result.definitionLoc = this->definitionLoc;
-    result.members = this->members;
+    result.definitionLoc.file = FileRef(to, this->definitionLoc.file.id());
+
+    result.members.reserve(this->members.size());
+    for (auto &mem : this->members) {
+        result.members.emplace_back(NameRef(to, mem.first.id()), mem.second);
+    }
     result.superClass = this->superClass;
     result.uniqueCounter = this->uniqueCounter;
     return result;
 }
 
-void Symbol::sanityCheck(GlobalState &gs) {
+void Symbol::sanityCheck(const GlobalState &gs) const {
     if (!debug_mode)
         return;
     SymbolRef current = this->ref(gs);
     if (current != GlobalState::defn_root()) {
-        SymbolRef current2 = gs.enterSymbol(this->definitionLoc, this->owner, this->name, this->flags);
+        SymbolRef current2 =
+            const_cast<GlobalState &>(gs).enterSymbol(this->definitionLoc, this->owner, this->name, this->flags);
         ENFORCE(current == current2);
     }
 }
 
 LocalVariable::LocalVariable(NameRef name) : name(name) {}
-LocalVariable::LocalVariable() : name(0) {}
+LocalVariable::LocalVariable() : name() {}
 bool LocalVariable::exists() {
     return name._id > 0;
 }

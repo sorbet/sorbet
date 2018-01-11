@@ -12,7 +12,7 @@ public:
     FileRef file;
     u4 begin_pos, end_pos;
 
-    static Loc none(FileRef file) {
+    static Loc none(FileRef file = FileRef()) {
         return Loc{file, (u4)-1, (u4)-1};
     }
 
@@ -22,7 +22,7 @@ public:
 
     Loc join(Loc other);
 
-    Loc() : file(0), begin_pos(-1), end_pos(-1){};
+    Loc() : file(), begin_pos(-1), end_pos(-1){};
     Loc(FileRef file, u4 begin, u4 end) : file(file), begin_pos(begin), end_pos(end){};
 
     Loc &operator=(const Loc &rhs) = default;

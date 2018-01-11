@@ -38,7 +38,7 @@ CFG::CFG() {
     freshBlock(0, nullptr); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
-    deadBlock()->bexit.cond = core::NameRef(0);
+    deadBlock()->bexit.cond = core::NameRef::noName();
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites() {
@@ -56,8 +56,6 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites() {
                 }
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                 reads[v->what].insert(bb.get());
-            } else if (auto *v = cast_instruction<NamedArg>(bind.value.get())) {
-                reads[v->value].insert(bb.get());
             } else if (auto *v = cast_instruction<LoadArg>(bind.value.get())) {
                 reads[v->receiver].insert(bb.get());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {

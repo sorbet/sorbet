@@ -65,12 +65,6 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class NamedArg : public Instruction {
-public:
-    core::NameRef name;
-    core::LocalVariable value;
-};
-
 class FloatLit final : public Instruction {
 public:
     double value;

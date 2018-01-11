@@ -21,9 +21,9 @@ public:
     BasicBlock *elseb;
     core::Loc loc;
     bool isCondSet() {
-        return cond.name.id() != INT_MAX;
+        return cond.name.id() >= 0;
     }
-    BlockExit() : cond(INT_MAX), thenb(nullptr), elseb(nullptr){};
+    BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
 };
 
 class Binding final {

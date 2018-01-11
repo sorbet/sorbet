@@ -16,6 +16,7 @@ using namespace std;
 TEST(ParserTest, SimpleParse) { // NOLINT
     auto console = spd::stderr_color_mt("parse");
     ruby_typer::core::GlobalState gs(*console);
+    gs.initEmpty();
     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);
     ruby_typer::core::UnfreezeFileTable ft(gs);
     ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");

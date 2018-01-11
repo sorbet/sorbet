@@ -13,7 +13,7 @@ class File;
 class FileRef final {
 public:
     FileRef() : _id(-1){};
-    FileRef(unsigned int id) : _id(id) {}
+    FileRef(const GlobalState &gs, unsigned int id);
 
     FileRef(const FileRef &f) = default;
     FileRef(FileRef &&f) = default;
@@ -44,6 +44,10 @@ public:
 
 private:
     int _id;
+
+#ifdef DEBUG_MODE
+    int globalStateId;
+#endif
 };
 
 class File final {

@@ -15,11 +15,9 @@ class Type;
 
 class SymbolRef final {
     friend class GlobalState;
+    friend class Symbol;
 
 public:
-#ifdef DEBUG_MODE
-    int globalStateId = 0;
-#endif
     SymbolRef(GlobalState const *from, u4 _id);
     SymbolRef(const GlobalState &from, u4 _id);
     SymbolRef() : _id(0){};
@@ -75,6 +73,8 @@ public:
     std::string toString(GlobalState &gs, int tabs = 0, bool showHidden = false) const;
 
     u4 _id;
+
+private:
 };
 #ifndef DEBUG_MODE
 CheckSize(SymbolRef, 4, 4);
@@ -353,8 +353,8 @@ public:
         members; // TODO: replace with https://github.com/greg7mdp/sparsepp . Should be only in ClassSymbol
     // optimize for absence
 
-    Symbol deepCopy();
-    void sanityCheck(GlobalState &gs);
+    Symbol deepCopy(const GlobalState &to) const;
+    void sanityCheck(const GlobalState &gs) const;
 };
 
 // CheckSize(Symbol, 88, 8); // This is under too much churn to be worth checking

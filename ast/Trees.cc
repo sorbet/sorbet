@@ -156,11 +156,6 @@ ZSuperArgs::ZSuperArgs(core::Loc loc) : Expression(loc) {
     categoryCounterInc("trees", "zsuper");
 }
 
-NamedArg::NamedArg(core::Loc loc, core::NameRef name, unique_ptr<Expression> arg)
-    : Expression(loc), name(name), arg(move(arg)) {
-    categoryCounterInc("trees", "namedarg");
-}
-
 RestArg::RestArg(core::Loc loc, unique_ptr<Reference> arg) : Reference(loc), expr(move(arg)) {
     categoryCounterInc("trees", "restarg");
 }
@@ -662,22 +657,6 @@ string BoolLit::showRaw(core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
 }
 
-string NamedArg::toString(core::GlobalState &gs, int tabs) {
-    return this->name.name(gs).toString(gs) + " : " + this->arg->toString(gs, tabs + 1);
-}
-
-string NamedArg::showRaw(core::GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "NamedArg{" << endl;
-    printTabs(buf, tabs + 1);
-    buf << "name = " << this->name.name(gs).toString(gs) << endl;
-    printTabs(buf, tabs + 1);
-    buf << "arg = " << this->arg->showRaw(gs, tabs + 1) << endl;
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
-}
-
 string FloatLit::toString(core::GlobalState &gs, int tabs) {
     return to_string(this->value);
 }
@@ -1048,9 +1027,6 @@ string Cast::nodeName() {
 
 string ZSuperArgs::nodeName() {
     return "ZSuperArgs";
-}
-string NamedArg::nodeName() {
-    return "NamedArg";
 }
 
 string Hash::nodeName() {

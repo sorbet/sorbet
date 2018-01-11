@@ -62,9 +62,6 @@ public:
     Send *preTransformSend(core::Context ctx, Send *original);
     Expression *postTransformSend(core::Context ctx, Send *original);
 
-    NamedArg *preTransformNamedArg(core::Context ctx, NamedArg *original);
-    Expression *postTransformNamedArg(core::Context ctx, NamedArg *original);
-
     Hash *preTransformHash(core::Context ctx, Hash *original);
     Expression *postTransformHash(core::Context ctx, Hash *original);
 
@@ -121,6 +118,7 @@ public:
         enum { value = sizeof(func<Derived>(0)) == 2 };                                 \
     };
 
+GENERATE_HAS_MEMBER(preTransformExpression);
 GENERATE_HAS_MEMBER(preTransformClassDef);
 GENERATE_HAS_MEMBER(preTransformMethodDef);
 GENERATE_HAS_MEMBER(preTransformConstDef);
@@ -135,7 +133,6 @@ GENERATE_HAS_MEMBER(preTransformRescueCase);
 GENERATE_HAS_MEMBER(preTransformRescue);
 GENERATE_HAS_MEMBER(preTransformAssign);
 GENERATE_HAS_MEMBER(preTransformSend);
-GENERATE_HAS_MEMBER(preTransformNamedArg);
 GENERATE_HAS_MEMBER(preTransformHash);
 GENERATE_HAS_MEMBER(preTransformArray);
 GENERATE_HAS_MEMBER(preTransformArraySplat);
@@ -172,7 +169,6 @@ GENERATE_HAS_MEMBER(postTransformIdent);
 GENERATE_HAS_MEMBER(postTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(postTransformAssign);
 GENERATE_HAS_MEMBER(postTransformSend);
-GENERATE_HAS_MEMBER(postTransformNamedArg);
 GENERATE_HAS_MEMBER(postTransformHash);
 GENERATE_HAS_MEMBER(postTransformLocal);
 GENERATE_HAS_MEMBER(postTransformArray);
@@ -237,6 +233,7 @@ GENERATE_HAS_MEMBER(postTransformCast);
         }                                                                      \
     };
 
+GENERATE_POSTPONE_PRECLASS(Expression);
 GENERATE_POSTPONE_PRECLASS(ClassDef);
 GENERATE_POSTPONE_PRECLASS(MethodDef);
 GENERATE_POSTPONE_PRECLASS(ConstDef);
@@ -251,7 +248,6 @@ GENERATE_POSTPONE_PRECLASS(RescueCase);
 GENERATE_POSTPONE_PRECLASS(Rescue);
 GENERATE_POSTPONE_PRECLASS(Assign);
 GENERATE_POSTPONE_PRECLASS(Send);
-GENERATE_POSTPONE_PRECLASS(NamedArg);
 GENERATE_POSTPONE_PRECLASS(Hash);
 GENERATE_POSTPONE_PRECLASS(Array);
 GENERATE_POSTPONE_PRECLASS(ArraySplat);
@@ -276,7 +272,6 @@ GENERATE_POSTPONE_POSTCLASS(Ident);
 GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent);
 GENERATE_POSTPONE_POSTCLASS(Assign);
 GENERATE_POSTPONE_POSTCLASS(Send);
-GENERATE_POSTPONE_POSTCLASS(NamedArg);
 GENERATE_POSTPONE_POSTCLASS(Hash);
 GENERATE_POSTPONE_POSTCLASS(Array);
 GENERATE_POSTPONE_POSTCLASS(BoolLit);
@@ -320,8 +315,14 @@ private:
     Expression *mapIt(Expression *what, core::Context ctx) {
         try {
             // TODO: reorder by frequency
+            if (HAS_MEMBER_preTransformExpression<FUNC>::value) {
+                what = PostPonePreTransform_Expression<FUNC, HAS_MEMBER_preTransformExpression<FUNC>::value>::call(
+                    ctx, what, func);
+            }
+
             if (what == nullptr || cast_tree<EmptyTree>(what) != nullptr || cast_tree<ZSuperArgs>(what) != nullptr)
                 return what;
+
             if (ClassDef *v = cast_tree<ClassDef>(what)) {
                 if (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
                     v = PostPonePreTransform_ClassDef<FUNC, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(ctx, v,
@@ -637,23 +638,6 @@ private:
                 if (HAS_MEMBER_postTransformSend<FUNC>::value) {
                     return PostPonePostTransform_Send<FUNC, HAS_MEMBER_postTransformSend<FUNC>::value>::call(ctx, v,
                                                                                                              func);
-                }
-
-                return v;
-            } else if (NamedArg *v = cast_tree<NamedArg>(what)) {
-                if (HAS_MEMBER_preTransformNamedArg<FUNC>::value) {
-                    v = PostPonePreTransform_NamedArg<FUNC, HAS_MEMBER_preTransformNamedArg<FUNC>::value>::call(ctx, v,
-                                                                                                                func);
-                }
-                auto oarg = v->arg.get();
-                auto narg = mapIt(oarg, ctx);
-                if (oarg != narg) {
-                    v->arg.reset(narg);
-                }
-
-                if (HAS_MEMBER_postTransformNamedArg<FUNC>::value) {
-                    return PostPonePostTransform_NamedArg<FUNC, HAS_MEMBER_postTransformNamedArg<FUNC>::value>::call(
-                        ctx, v, func);
                 }
 
                 return v;

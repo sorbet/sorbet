@@ -30,7 +30,7 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::Loc 
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
         ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = core::NameRef(0);
+        from->bexit.cond = core::NameRef::noName();
         from->bexit.elseb = to;
         from->bexit.thenb = to;
         from->bexit.loc = loc;
@@ -44,7 +44,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
         ENFORCE(!from->bexit.isCondSet(), "condition for block already set");
         ENFORCE(from->bexit.thenb == nullptr, "thenb already set");
         ENFORCE(from->bexit.elseb == nullptr, "elseb already set");
-        from->bexit.cond = core::NameRef(0);
+        from->bexit.cond = core::NameRef::noName();
         from->bexit.elseb = db;
         from->bexit.thenb = db;
         from->bexit.loc = loc;
@@ -425,7 +425,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Expression *n) { Error::raise("Unimplemented AST Node: ", n->nodeName()); });
 
         // For, Rescue,
-        // Symbol, NamedArg, Array,
+        // Symbol, Array,
         ENFORCE(ret != nullptr, "CFB builder ret unset");
         return ret;
     } catch (...) {

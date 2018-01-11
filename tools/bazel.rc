@@ -61,6 +61,10 @@ build:unsafe --copt=-fno-sanitize=undefined
 build:unsafe --cxxopt=-fno-sanitize=undefined
 build:unsafe --linkopt=-fno-sanitize=undefined
 
+build:tstan --copt=-fsanitize=thread
+build:tstan --cxxopt==-fsanitize=thread
+build:tstan --linkopt=-fsanitize=thread
+
 # Build optimized for executable size. Can be faster if size of executable code is a bottleneck.
 build:size --linkopt=-Os
 build:size --copt=-Os

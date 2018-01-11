@@ -37,9 +37,10 @@ class GlobalState final {
 
 public:
     GlobalState(spdlog::logger &logger);
+    void initEmpty();
 
     GlobalState(const GlobalState &) = delete;
-    GlobalState(GlobalState &&) = default;
+    GlobalState(GlobalState &&) = delete;
 
     ~GlobalState();
 
@@ -67,7 +68,7 @@ public:
     unsigned int symbolsUsed();
     unsigned int filesUsed();
 
-    void sanityCheck();
+    void sanityCheck() const;
 
     std::string toString(bool showHidden = false);
 
@@ -199,14 +200,14 @@ public:
 
     int globalStateId;
 
-    GlobalState deepCopy();
+    std::unique_ptr<GlobalState> deepCopy() const;
 
 private:
     static constexpr int MAX_SYNTHETIC_SYMBOLS = 100;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     absl::string_view enterString(absl::string_view nm);
-    u2 strings_last_page_used = STRINGS_PAGE_SIZE;
+    u2 strings_last_page_used = STRINGS_PAGE_SIZE + 1;
     std::vector<Name> names;
     std::vector<Symbol> symbols;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;

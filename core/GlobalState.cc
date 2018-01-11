@@ -113,7 +113,9 @@ GlobalState::GlobalState(spdlog::logger &logger)
     int names_by_hash_size = 2 * max_name_count;
     names_by_hash.resize(names_by_hash_size);
     ENFORCE((names_by_hash_size & (names_by_hash_size - 1)) == 0, "names_by_hash_size is not a power of 2");
+}
 
+void GlobalState::initEmpty() {
     names.emplace_back(); // first name is used in hashes to indicate empty cell
     names[0].kind = NameKind::UTF8;
     Names::registerNames(*this);
@@ -142,7 +144,7 @@ GlobalState::GlobalState(spdlog::logger &logger)
     SymbolRef nilClass_id = synthesizeClass(nilClass_str);
     SymbolRef untyped_id = synthesizeClass(untyped_str, 0);
     SymbolRef opus_id = synthesizeClass(opus_str, 0);
-    SymbolRef opus_types_id = enterClassSymbol(Loc::none(0), opus_id, enterNameConstant(types_str));
+    SymbolRef opus_types_id = enterClassSymbol(Loc::none(), opus_id, enterNameConstant(types_str));
     SymbolRef class_id = synthesizeClass(class_str, 0);
     SymbolRef basicObject_id = synthesizeClass(basicObject_str, 0);
     SymbolRef kernel_id = synthesizeClass(kernel_str, 0);
@@ -195,24 +197,24 @@ GlobalState::GlobalState(spdlog::logger &logger)
     defn_Magic().info(*this).resultType = make_shared<MagicType>();
 
     // Synthesize <Magic>#build_hash(*vs : Object) => Hash
-    SymbolRef method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::buildHash());
-    SymbolRef arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
+    SymbolRef method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::buildHash());
+    SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.info(*this).setRepeated();
     arg.info(*this).resultType = core::Types::Object();
     method.info(*this).arguments().push_back(arg);
     method.info(*this).resultType = core::Types::hashClass();
 
     // Synthesize <Magic>#build_array(*vs : Object) => Array
-    method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::buildArray());
-    arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
+    method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::buildArray());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.info(*this).setRepeated();
     arg.info(*this).resultType = core::Types::Object();
     method.info(*this).arguments().push_back(arg);
     method.info(*this).resultType = core::Types::arrayClass();
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
-    method = enterMethodSymbol(Loc::none(0), defn_Magic(), Names::splat());
-    arg = enterMethodArgumentSymbol(Loc::none(0), method, Names::arg0());
+    method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::splat());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.info(*this).resultType = core::Types::arrayClass();
     method.info(*this).arguments().push_back(arg);
     method.info(*this).resultType = core::Types::dynamic();
@@ -222,9 +224,9 @@ GlobalState::GlobalState(spdlog::logger &logger)
     // This is a hack to handle that specific alias in pay-server; More-general
     // handling will require substantial additional sophistication in the
     // namer+resolver.
-    SymbolRef db = enterClassSymbol(Loc::none(0), defn_Opus(), enterNameConstant(DB_str));
-    SymbolRef model = enterClassSymbol(Loc::none(0), db, enterNameConstant(model_str));
-    SymbolRef m = enterStaticFieldSymbol(Loc::none(0), defn_root(), enterNameConstant(m_str));
+    SymbolRef db = enterClassSymbol(Loc::none(), defn_Opus(), enterNameConstant(DB_str));
+    SymbolRef model = enterClassSymbol(Loc::none(), db, enterNameConstant(model_str));
+    SymbolRef m = enterStaticFieldSymbol(Loc::none(), defn_root(), enterNameConstant(m_str));
     m.info(*this).resultType = make_unique<AliasType>(model);
 
     int reservedCount = 0;
@@ -298,6 +300,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 }
 
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    ENFORCE(name.name(*this).isClassName(*this));
     return enterSymbol(loc, owner, name, Symbol::Flags::CLASS);
 }
 
@@ -378,7 +381,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
             auto &nm2 = names[name_id];
             if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
                 counterInc("names.utf8.hit");
-                return name_id;
+                return nm2.ref(*this);
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -410,7 +413,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
     names[idx].raw.utf8 = enterString(nm);
     categoryCounterInc("names", "utf8");
 
-    return idx;
+    return NameRef(*this, idx);
 }
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
@@ -429,7 +432,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
             auto &nm2 = names[bucket.second];
             if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
                 counterInc("names.constant.hit");
-                return bucket.second;
+                return nm2.ref(*this);
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -463,7 +466,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     names[idx].kind = CONSTANT;
     names[idx].cnst.original = original;
     categoryCounterInc("names", "constant");
-    return idx;
+    return NameRef(*this, idx);
 }
 
 NameRef GlobalState::enterNameConstant(absl::string_view original) {
@@ -515,7 +518,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
                 counterInc("names.unique.hit");
-                return bucket.second;
+                return nm2.ref(*this);
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -551,7 +554,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
     categoryCounterInc("names", "unique");
-    return idx;
+    return NameRef(*this, idx);
 }
 
 bool fileIsTyped(absl::string_view source) {
@@ -588,7 +591,7 @@ FileRef GlobalState::enterFile(std::shared_ptr<File> file) {
     ENFORCE(!fileTableFrozen);
     auto idx = files.size();
     files.emplace_back(file);
-    return FileRef(idx);
+    return FileRef(*this, idx);
 }
 
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
@@ -637,7 +640,7 @@ string GlobalState::toString(bool showHidden) {
     return os.str();
 }
 
-void GlobalState::sanityCheck() {
+void GlobalState::sanityCheck() const {
     if (!debug_mode) {
         return;
     }
@@ -705,26 +708,27 @@ bool GlobalState::unfreezeSymbolTable() {
     return old;
 }
 
-GlobalState GlobalState::deepCopy() {
+std::unique_ptr<GlobalState> GlobalState::deepCopy() const {
     this->sanityCheck();
-    GlobalState result(this->logger);
-    result.strings = this->strings;
-    this->strings_last_page_used = STRINGS_PAGE_SIZE;
-    result.strings_last_page_used = this->strings_last_page_used;
-    result.symbols.clear();
-    result.symbols.reserve(this->symbols.capacity());
-    for (auto &sym : symbols) {
-        result.symbols.emplace_back(sym.deepCopy());
+    auto result = make_unique<GlobalState>(this->logger);
+
+    result->strings = this->strings;
+    result->strings_last_page_used = STRINGS_PAGE_SIZE;
+    result->files = this->files;
+
+    result->names.reserve(this->names.capacity());
+    for (auto &nm : this->names) {
+        result->names.emplace_back(nm.deepCopy(*result));
     }
-    result.files = this->files;
 
-    result.names.reserve(this->names.capacity());
-    result.names.resize(this->names.size());
-    memcpy(result.names.data(), this->names.data(), this->names.size() * sizeof(Name));
+    result->names_by_hash.reserve(this->names_by_hash.size());
+    result->names_by_hash = this->names_by_hash;
 
-    result.names_by_hash.reserve(this->names_by_hash.size());
-    result.names_by_hash = this->names_by_hash;
-    result.sanityCheck();
+    result->symbols.reserve(this->symbols.size());
+    for (auto &sym : this->symbols) {
+        result->symbols.emplace_back(sym.deepCopy(*result));
+    }
+    result->sanityCheck();
     return result;
 }
 } // namespace core

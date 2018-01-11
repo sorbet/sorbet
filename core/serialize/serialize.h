@@ -6,7 +6,7 @@ namespace serialize {
 class GlobalStateSerializer {
 public:
     static std::vector<u4> store(GlobalState &gs);
-    static GlobalState load(const u4 *const p, spdlog::logger &logger);
+    static void load(GlobalState &gs, const u4 *const p);
 
     class Pickler {
     public:
@@ -38,7 +38,7 @@ public:
     static Name unpickleName(UnPickler &p, GlobalState &gs);
     static std::shared_ptr<Type> unpickleType(UnPickler &p, GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, GlobalState *gs);
-    static GlobalState unpickleGS(UnPickler &p, spdlog::logger &logger);
+    static void unpickleGS(UnPickler &p, GlobalState &gs);
 };
 } // namespace serialize
 } // namespace core

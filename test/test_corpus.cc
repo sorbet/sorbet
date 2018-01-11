@@ -92,8 +92,7 @@ public:
     CFG_Collector_and_Typer(bool raw = false) : raw(raw){};
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
-        ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx);     // creates names for temporaries in CFG
-        ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(ctx); // lazily creates singleton classes
+        ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx); // creates names for temporaries in CFG
         auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (raw) {
             ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
@@ -116,6 +115,26 @@ unordered_set<string> knownPasses = {
     "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "cfg-raw", "infer",
 };
 
+TEST(CorpusTest, CloneSubstitutePayload) {
+    auto console = spd::stderr_color_mt("ClonePayload");
+    ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
+
+    auto c1 = gs.deepCopy();
+    auto c2 = gs.deepCopy();
+
+    ruby_typer::core::NameRef n1;
+    {
+        ruby_typer::core::UnfreezeNameTable thaw1(*c1);
+        n1 = c1->enterNameUTF8("test new name");
+    }
+
+    ruby_typer::core::GlobalSubstitution subst(*c1, *c2);
+    ASSERT_EQ("test new name", subst.substitute(n1).toString(*c2));
+    ASSERT_EQ(c1->symbolsUsed(), c2->symbolsUsed());
+    ASSERT_EQ(c1->symbolsUsed(), gs.symbolsUsed());
+}
+
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
     Expectations test = GetParam();
@@ -130,8 +149,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
-    ruby_typer::core::GlobalState gs =
-        ruby_typer::core::serialize::GlobalStateSerializer::load(getNameTablePayload, *console);
+    ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
     ruby_typer::core::Context context(gs, gs.defn_root());
     gs.errors.keepErrorsInMemory = true;
 
