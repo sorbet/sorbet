@@ -29,125 +29,142 @@
 namespace spd = spdlog;
 using namespace std;
 
+namespace ruby_typer {
+
+struct Printers {
+    bool ParseTree = false;
+    bool Desugared = false;
+    bool DesugaredRaw = false;
+    bool NameTree = false;
+    bool NameTreeRaw = false;
+    bool NameTable = false;
+    bool NameTableFull = false;
+    bool CFG = false;
+    bool CFGRaw = false;
+};
+
+struct Options {
+    Printers print;
+    bool showProgress = false;
+    bool noStdlib = false;
+    int threads = 0;
+};
+
+shared_ptr<spd::logger> console_err;
+shared_ptr<spd::logger> tracer;
+shared_ptr<spd::logger> console;
+
+int returnCode = 0;
+
+struct {
+    string option;
+    bool Printers::*flag;
+} print_options[] = {
+    {"parse-tree", &Printers::ParseTree},
+    {"ast", &Printers::Desugared},
+    {"ast-raw", &Printers::DesugaredRaw},
+    {"name-table", &Printers::NameTable},
+    {"name-table-full", &Printers::NameTableFull},
+    {"name-tree", &Printers::NameTree},
+    {"name-tree-raw", &Printers::NameTreeRaw},
+    {"cfg", &Printers::CFG},
+    {"cfg-raw", &Printers::CFGRaw},
+};
+
 class CFG_Collector_and_Typer {
-    bool printCFGs;
-    bool printCFGRaw;
+    const Printers &print;
 
 public:
-    CFG_Collector_and_Typer(bool printCFGs, bool printCFGRaw) : printCFGs(printCFGs), printCFGRaw(printCFGRaw){};
+    CFG_Collector_and_Typer(const Printers &print) : print(print){};
 
-    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
-        if (m->loc.file.file(ctx).source_type == ruby_typer::core::File::Untyped) {
+    ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *m) {
+        if (m->loc.file.file(ctx).source_type == core::File::Untyped) {
             return m;
         }
 
-        auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        if (printCFGRaw) {
-            ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
+        if (print.CFGRaw) {
+            cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
         }
-        ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
-        if (printCFGs) {
+        infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+        if (print.CFG) {
             cout << cfg->toString(ctx) << endl << endl;
         }
         return m;
     }
 };
 
-static bool removeOption(vector<string> &prints, string option) {
-    auto it = find(prints.begin(), prints.end(), option);
-    if (it != prints.end()) {
-        prints.erase(it);
-        return true;
-    } else {
-        return false;
-    }
-}
-shared_ptr<spd::logger> console_err;
-shared_ptr<spd::logger> tracer;
-shared_ptr<spd::logger> console;
-int returnCode = 0;
-bool showProgress = false;
-
 struct thread_result {
-    unique_ptr<ruby_typer::core::GlobalState> gs;
-    ruby_typer::CounterState counters;
-    vector<unique_ptr<ruby_typer::ast::Expression>> trees;
+    unique_ptr<core::GlobalState> gs;
+    CounterState counters;
+    vector<unique_ptr<ast::Expression>> trees;
 };
 
-vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalState &gs,
-                                                      std::vector<ruby_typer::core::FileRef> frs,
-                                                      vector<string> &prints, cxxopts::Options &opts,
-                                                      bool silenceErrors = false) {
-    vector<unique_ptr<ruby_typer::ast::Expression>> result;
-    vector<unique_ptr<ruby_typer::ast::Expression>> empty;
-    bool oldErrors = gs.errors.keepErrorsInMemory;
-    gs.errors.keepErrorsInMemory = oldErrors || silenceErrors;
-    bool printParseTree = removeOption(prints, "parse-tree");
-    bool printDesugared = removeOption(prints, "ast");
-    bool printDesugaredRaw = removeOption(prints, "ast-raw");
-
-    progressbar *progress;
-
-    if (showProgress) {
-        progress = progressbar_new("Indexing", frs.size());
+unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &lgs, core::FileRef file) {
+    std::unique_ptr<parser::Node> nodes;
+    {
+        tracer->trace("Parsing: {}", file.file(lgs).path());
+        core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
+        nodes = parser::Parser::run(lgs, file);
+    }
+    if (print.ParseTree) {
+        cout << nodes->toString(lgs, 0) << endl;
     }
 
-    vector<unique_ptr<ruby_typer::ast::Expression>> trees;
+    core::Context context(lgs, lgs.defn_root());
+    std::unique_ptr<ast::Expression> ast;
+    {
+        tracer->trace("Desugaring: {}", file.file(lgs).path());
+        core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
+        ast = ast::desugar::node2Tree(context, nodes);
+    }
+    if (print.Desugared) {
+        cout << ast->toString(lgs, 0) << endl;
+    }
 
-    int nthreads = opts["threads"].as<unsigned int>();
-    nthreads = max((int)(frs.size() / 2), nthreads);
-    ENFORCE(nthreads > 0);
-    ruby_typer::ThreadQueue<ruby_typer::core::FileRef> fileq;
-    ruby_typer::ThreadQueue<thread_result> resultq;
+    if (print.DesugaredRaw) {
+        cout << ast->showRaw(lgs) << endl;
+    }
+    return ast;
+}
+
+vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<core::FileRef> frs, const Options &opts,
+                                          bool silenceErrors = false) {
+    vector<unique_ptr<ast::Expression>> result;
+    vector<unique_ptr<ast::Expression>> empty;
+    bool oldErrors = gs.errors.keepErrorsInMemory;
+    gs.errors.keepErrorsInMemory = oldErrors || silenceErrors;
+
+    unique_ptr<progressbar> progress;
+
+    if (opts.showProgress) {
+        progress.reset(progressbar_new("Indexing", frs.size()));
+    }
+
+    vector<unique_ptr<ast::Expression>> trees;
+
+    ThreadQueue<core::FileRef> fileq;
+    ThreadQueue<thread_result> resultq;
 
     gs.sanityCheck();
     const auto &cgs = gs;
     {
         vector<unique_ptr<Joinable>> threads;
-        for (int i = 0; i < nthreads; ++i) {
-            threads.emplace_back(
-                runInAThread([&cgs, &fileq, &resultq, printParseTree, printDesugared, printDesugaredRaw]() {
-                    auto lgs = cgs.deepCopy();
-                    thread_result result;
-                    ruby_typer::core::FileRef file;
+        for (int i = 0; i < opts.threads; ++i) {
+            threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq]() {
+                auto lgs = cgs.deepCopy();
+                thread_result result;
+                core::FileRef file;
 
-                    while (fileq.pop(&file)) {
-                        file = ruby_typer::core::FileRef(*lgs, file.id());
+                while (fileq.pop(&file)) {
+                    file = core::FileRef(*lgs, file.id());
+                    result.trees.emplace_back(indexOne(opts.print, *lgs, file));
+                }
 
-                        std::unique_ptr<ruby_typer::parser::Node> nodes;
-                        {
-                            tracer->trace("Parsing: {}", file.file(*lgs).path());
-                            ruby_typer::core::UnfreezeNameTable nameTableAccess(
-                                *lgs); // enters strings from source code as names
-                            nodes = ruby_typer::parser::Parser::run(*lgs, file);
-                        }
-                        if (printParseTree) {
-                            cout << nodes->toString(*lgs, 0) << endl;
-                        }
-
-                        ruby_typer::core::Context context(*lgs, lgs->defn_root());
-                        std::unique_ptr<ruby_typer::ast::Expression> ast;
-                        {
-                            tracer->trace("Desugaring: {}", file.file(*lgs).path());
-                            ruby_typer::core::UnfreezeNameTable nameTableAccess(
-                                *lgs); // creates temporaries during desugaring
-                            ast = ruby_typer::ast::desugar::node2Tree(context, nodes);
-                        }
-                        if (printDesugared) {
-                            cout << ast->toString(*lgs, 0) << endl;
-                        }
-
-                        if (printDesugaredRaw) {
-                            cout << ast->showRaw(*lgs) << endl;
-                        }
-
-                        result.trees.emplace_back(move(ast));
-                    }
-
-                    result.counters = ruby_typer::getAndClearThreadCounters();
-                    result.gs = move(lgs);
-                    resultq.push(move(result));
-                }));
+                result.counters = getAndClearThreadCounters();
+                result.gs = move(lgs);
+                resultq.push(move(result));
+            }));
         }
 
         for (auto f : frs) {
@@ -160,11 +177,11 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     {
         thread_result result;
         while (resultq.try_pop(&result)) {
-            ruby_typer::core::GlobalSubstitution substitution(*result.gs, gs);
-            ruby_typer::counterConsume(move(result.counters));
-            ruby_typer::core::Context context(gs, gs.defn_root());
+            core::GlobalSubstitution substitution(*result.gs, gs);
+            counterConsume(move(result.counters));
+            core::Context context(gs, gs.defn_root());
             for (auto &tree : result.trees) {
-                trees.emplace_back(ruby_typer::ast::Substitute::run(context, substitution, move(tree)));
+                trees.emplace_back(ast::Substitute::run(context, substitution, move(tree)));
             }
         }
     }
@@ -175,17 +192,17 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
         for (auto &tree : trees) {
             auto file = tree->loc.file;
             try {
-                unique_ptr<ruby_typer::ast::Expression> ast;
+                unique_ptr<ast::Expression> ast;
                 {
-                    ruby_typer::core::Context context(gs, gs.defn_root());
+                    core::Context context(gs, gs.defn_root());
                     tracer->trace("Naming: {}", file.file(gs).path());
-                    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-                    ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-                    ast = ruby_typer::namer::Namer::run(context, move(tree));
+                    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+                    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+                    ast = namer::Namer::run(context, move(tree));
                 }
                 result.emplace_back(move(ast));
-                if (showProgress) {
-                    progressbar_inc(progress);
+                if (opts.showProgress) {
+                    progressbar_inc(progress.get());
                 }
             } catch (...) {
                 console_err->error("Exception on file: {} (backtrace is above)", file.file(gs).path());
@@ -198,94 +215,86 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     if (silenceErrors) {
         gs.errors.getAndEmptyErrors();
     }
-    if (showProgress) {
-        progressbar_finish(progress);
+    if (opts.showProgress) {
+        progressbar_finish(progress.get());
     }
     gs.errors.keepErrorsInMemory = oldErrors;
     return result;
 }
 
-vector<unique_ptr<ruby_typer::ast::Expression>> typecheck(ruby_typer::core::GlobalState &gs,
-                                                          vector<unique_ptr<ruby_typer::ast::Expression>> what,
-                                                          vector<string> &prints, cxxopts::Options &opts,
-                                                          bool silenceErrors = false) {
-    vector<unique_ptr<ruby_typer::ast::Expression>> result;
+vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
+                                              const Options &opts, bool silenceErrors = false) {
+    vector<unique_ptr<ast::Expression>> result;
     bool oldErrors = gs.errors.keepErrorsInMemory;
     gs.errors.keepErrorsInMemory = oldErrors || silenceErrors;
-    bool printNameTable = removeOption(prints, "name-table");
-    bool printNameTableFull = removeOption(prints, "name-table-full");
-    bool printNameTree = removeOption(prints, "name-tree");
-    bool printNameTreeRaw = removeOption(prints, "name-tree-raw");
-    bool printCFG = removeOption(prints, "cfg");
-    bool printCFGRaw = removeOption(prints, "cfg-raw");
-    progressbar *progress;
-    statusbar *status;
+    unique_ptr<progressbar> progress;
+    unique_ptr<statusbar> status;
 
     try {
-        if (showProgress) {
-            status = statusbar_new("Resolving");
+        if (opts.showProgress) {
+            status.reset(statusbar_new("Resolving"));
         }
         try {
-            ruby_typer::core::Context context(gs, gs.defn_root());
+            core::Context context(gs, gs.defn_root());
             {
                 tracer->trace("Resolving (global pass)...");
-                ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
-                ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-                what = ruby_typer::resolver::Resolver::run(context, move(what));
+                core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
+                core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+                what = resolver::Resolver::run(context, move(what));
             }
         } catch (...) {
             console_err->error("Exception resolving (backtrace is above)");
         }
-        if (showProgress) {
-            statusbar_finish(status);
+        if (opts.showProgress) {
+            statusbar_finish(status.get());
         }
 
         for (auto &resolved : what) {
-            if (printNameTree) {
+            if (opts.print.NameTree) {
                 cout << resolved->toString(gs, 0) << endl;
             }
-            if (printNameTreeRaw) {
+            if (opts.print.NameTreeRaw) {
                 cout << resolved->showRaw(gs) << endl;
             }
         }
 
-        if (showProgress) {
-            progress = progressbar_new("CFG+Typechecking", what.size());
+        if (opts.showProgress) {
+            progress.reset(progressbar_new("CFG+Typechecking", what.size()));
         }
 
         for (auto &resolved : what) {
-            ruby_typer::core::FileRef f = resolved->loc.file;
+            core::FileRef f = resolved->loc.file;
             try {
-                ruby_typer::core::Context context(gs, gs.defn_root());
-                if (printCFG || printCFGRaw) {
-                    cout << "digraph \"" << ruby_typer::File::getFileName(f.file(gs).path()) << "\"{" << endl;
+                core::Context context(gs, gs.defn_root());
+                if (opts.print.CFG || opts.print.CFGRaw) {
+                    cout << "digraph \"" << File::getFileName(f.file(gs).path()) << "\"{" << endl;
                 }
-                CFG_Collector_and_Typer collector(printCFG || printCFGRaw, printCFGRaw);
+                CFG_Collector_and_Typer collector(opts.print);
                 {
                     tracer->trace("CFG+Infer: {}", f.file(gs).path());
-                    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // creates names for temporaries in CFG
+                    core::UnfreezeNameTable nameTableAccess(gs); // creates names for temporaries in CFG
                     result.emplace_back(
-                        ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
+                        ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
                 }
 
-                if (printCFG || printCFGRaw) {
+                if (opts.print.CFG || opts.print.CFGRaw) {
                     cout << "}" << endl << endl;
                 }
-                if (showProgress) {
-                    progressbar_inc(progress);
+                if (opts.showProgress) {
+                    progressbar_inc(progress.get());
                 }
             } catch (...) {
                 console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
             }
         }
-        if (showProgress) {
-            progressbar_finish(progress);
+        if (opts.showProgress) {
+            progressbar_finish(progress.get());
         }
 
-        if (printNameTable) {
+        if (opts.print.NameTable) {
             cout << gs.toString() << endl;
         }
-        if (printNameTableFull) {
+        if (opts.print.NameTableFull) {
             cout << gs.toString(true) << endl;
         }
     } catch (...) {
@@ -324,13 +333,13 @@ public:
         for (int i = 0; i < argc; i++) {
             if (argv[i][0] == '@') {
                 try {
-                    string argsP = ruby_typer::File::read(argv[i] + 1);
+                    string argsP = File::read(argv[i] + 1);
                     for (string arg : split(argsP, '\n')) {
                         char *c_arg = (char *)malloc(arg.size() + 1);
                         memcpy(c_arg, arg.c_str(), arg.size() + 1);
                         args.push_back(c_arg);
                     }
-                } catch (ruby_typer::FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     console_err->error("File Not Found: {}", argv[i]);
                     returnCode = 11;
                     continue;
@@ -355,8 +364,8 @@ public:
     }
 };
 
-std::string
-    print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg, cfg-raw]");
+// std::string
+//     print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg, cfg-raw]");
 
 cxxopts::Options buildOptions() {
     cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
@@ -369,20 +378,24 @@ cxxopts::Options buildOptions() {
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
 
-    auto ncpu = std::thread::hardware_concurrency();
-    if (ncpu == 0) {
-        ncpu = 4;
+    stringstream all_prints;
+    all_prints << "Print: [";
+    for (auto &pr : print_options) {
+        if (&pr != &print_options[0]) {
+            all_prints << ", ";
+        }
+        all_prints << pr.option;
     }
+    all_prints << "]";
 
     // Developer options
-    options.add_options("dev")("p,print", "Print: " + print_options, cxxopts::value<vector<string>>(), "type");
+    options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
                                cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
     options.add_options("dev")("trace", "Trace phases");
-    options.add_options("dev")("threads", "Set number of threads",
-                               cxxopts::value<unsigned int>()->default_value(to_string(ncpu)), "int");
+    options.add_options("dev")("threads", "Set number of threads", cxxopts::value<unsigned int>(), "int");
     options.add_options("dev")("counters", "Print internal counters");
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
     options.add_options("dev")("statsd-prefix", "StatsD prefix", cxxopts::value<string>(), "prefix");
@@ -395,43 +408,64 @@ cxxopts::Options buildOptions() {
     return options;
 }
 
-void createInitialGlobalState(ruby_typer::core::GlobalState &gs, cxxopts::Options &options) {
-    if (options["no-stdlib"].as<bool>()) {
+void createInitialGlobalState(core::GlobalState &gs, const Options &options) {
+    if (options.noStdlib) {
         gs.initEmpty();
         return;
     }
 
-    const ruby_typer::u4 *const nameTablePayload = getNameTablePayload;
+    const u4 *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
         gs.initEmpty();
         clock_t begin = clock();
-        vector<ruby_typer::core::FileRef> payloadFiles;
+        vector<core::FileRef> payloadFiles;
         {
-            ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
-            for (auto &p : ruby_typer::rbi::all()) {
+            core::UnfreezeFileTable fileTableAccess(gs);
+            for (auto &p : rbi::all()) {
                 payloadFiles.push_back(gs.enterFile(p.first, p.second));
             }
         }
-        vector<string> emptyPrintsPayload;
-        cxxopts::Options emptyOpts = buildOptions();
-        int argc = 1;
-        char **argv = {nullptr};
-        // parse() populates default values
-        emptyOpts.parse(argc, argv);
+        Options emptyOpts;
+        emptyOpts.threads = 1;
 
-        typecheck(gs, index(gs, payloadFiles, emptyPrintsPayload, emptyOpts, true), emptyPrintsPayload, emptyOpts,
-                  true); // result is thrown away
+        typecheck(gs, index(gs, payloadFiles, emptyOpts, true), emptyOpts, true); // result is thrown away
 
         clock_t end = clock();
         double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
         console_err->debug("Indexed payload in {} ms\n", elapsed_secs);
     } else {
         clock_t begin = clock();
-        ruby_typer::core::serialize::GlobalStateSerializer::load(gs, nameTablePayload);
+        core::serialize::GlobalStateSerializer::load(gs, nameTablePayload);
         clock_t end = clock();
         double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
         console_err->debug("Read payload name-table in {} ms\n", elapsed_secs);
     }
+}
+
+bool extractPrinters(cxxopts::Options &opts, Printers &print) {
+    vector<string> printOpts = opts["print"].as<vector<string>>();
+    for (auto opt : printOpts) {
+        bool found = false;
+        for (auto &known : print_options) {
+            if (known.option == opt) {
+                print.*(known.flag) = true;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            stringstream all;
+            for (auto &known : print_options) {
+                if (&known != &print_options[0]) {
+                    all << ", ";
+                }
+                all << known.option;
+            }
+            console_err->error("Unknown --print option: {}\nValid values: {}", opt, all.str());
+            return false;
+        }
+    }
+    return true;
 }
 
 int realmain(int argc, char **argv) {
@@ -458,7 +492,20 @@ int realmain(int argc, char **argv) {
     }
 
     vector<string> files = options["files"].as<vector<string>>();
-    vector<string> prints = options["print"].as<vector<string>>();
+
+    Options opts;
+    if (!extractPrinters(options, opts.print)) {
+        return 1;
+    }
+    opts.noStdlib = options["no-stdlib"].as<bool>();
+    if (opts.threads <= 0) {
+        int ncpu = std::thread::hardware_concurrency();
+        if (ncpu == 0) {
+            ncpu = 4;
+        }
+        opts.threads = min(ncpu, int((files.size() + 1) / 2));
+    }
+
     if (files.size() > 10) {
         //        spd::set_async_mode(1024); // makes logging asyncronous but adds 60ms to startup time.
     }
@@ -485,14 +532,14 @@ int realmain(int argc, char **argv) {
             break;
     }
 
-    console_err->debug("Using {} threads", options["threads"].as<unsigned int>());
+    console_err->debug("Using {} threads", opts.threads);
 
     if (options.count("q") != 0) {
         console->set_level(spd::level::critical);
     }
 
     if (options.count("P") != 0) {
-        showProgress = true;
+        opts.showProgress = true;
     }
 
     if (options.count("trace") != 0) {
@@ -503,34 +550,34 @@ int realmain(int argc, char **argv) {
 
     string typed = options["typed"].as<string>();
     bool forceTyped = typed == "always";
-    ruby_typer::core::GlobalState gs(*console);
-    createInitialGlobalState(gs, options);
+    core::GlobalState gs(*console);
+    createInitialGlobalState(gs, opts);
 
     clock_t begin = clock();
-    vector<ruby_typer::core::FileRef> inputFiles;
+    vector<core::FileRef> inputFiles;
     tracer->trace("Files: ");
     {
-        ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
+        core::UnfreezeFileTable fileTableAccess(gs);
         for (auto &fileName : files) {
             string src;
             try {
-                src = ruby_typer::File::read(fileName.c_str());
-            } catch (ruby_typer::FileNotFoundException e) {
+                src = File::read(fileName.c_str());
+            } catch (FileNotFoundException e) {
                 console->error("File Not Found: {}", fileName);
                 returnCode = 11;
                 continue;
             }
-            ruby_typer::counterAdd("types.input.bytes", src.size());
-            ruby_typer::counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
-            ruby_typer::counterInc("types.input.files");
+            counterAdd("types.input.bytes", src.size());
+            counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
+            counterInc("types.input.files");
             inputFiles.push_back(gs.enterFile(fileName, src));
             tracer->trace("{}", fileName);
         }
         if (options.count("e") != 0) {
             string src = options["e"].as<string>();
-            ruby_typer::counterAdd("types.input.bytes", src.size());
-            ruby_typer::counterInc("types.input.lines");
-            ruby_typer::counterInc("types.input.files");
+            counterAdd("types.input.bytes", src.size());
+            counterInc("types.input.lines");
+            counterInc("types.input.files");
             inputFiles.push_back(gs.enterFile(string("-e"), src));
             if (typed == "never") {
                 console->error("`-e` implies `--typed always` and you passed `--typed never`");
@@ -540,11 +587,11 @@ int realmain(int argc, char **argv) {
         }
         if (forceTyped) {
             for (auto &f : inputFiles) {
-                f.file(gs).source_type = ruby_typer::core::File::Typed;
+                f.file(gs).source_type = core::File::Typed;
             }
         } else if (typed == "never") {
             for (auto &f : inputFiles) {
-                f.file(gs).source_type = ruby_typer::core::File::Untyped;
+                f.file(gs).source_type = core::File::Untyped;
             }
         } else if (typed == "auto") {
             // Use the annotation in the file
@@ -553,16 +600,9 @@ int realmain(int argc, char **argv) {
         }
     }
 
-    typecheck(gs, index(gs, inputFiles, prints, options), prints, options);
+    typecheck(gs, index(gs, inputFiles, opts), opts);
 
     clock_t end = clock();
-
-    if (!prints.empty()) {
-        for (auto option : prints) {
-            console_err->error("Unknown --print option: {}\nValid values: {}", option, print_options);
-            return 1;
-        }
-    }
 
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
 
@@ -570,20 +610,22 @@ int realmain(int argc, char **argv) {
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
-        ruby_typer::File::write(outfile.c_str(), ruby_typer::core::serialize::GlobalStateSerializer::store(gs));
+        File::write(outfile.c_str(), core::serialize::GlobalStateSerializer::store(gs));
     }
 
     if (options.count("counters") != 0) {
         for (auto e : gs.errors.errorHistogram) {
-            ruby_typer::categoryCounterAdd("error", to_string(e.first), e.second);
+            categoryCounterAdd("error", to_string(e.first), e.second);
         }
-        console_err->warn("" + ruby_typer::getCounterStatistics());
+        console_err->warn("" + getCounterStatistics());
     }
 
     if (options.count("statsd-host") != 0) {
-        ruby_typer::submitCountersToStatsd(options["statsd-host"].as<string>(), options["statsd-port"].as<int>(),
-                                           options["statsd-prefix"].as<string>() + ".counters");
+        submitCountersToStatsd(options["statsd-host"].as<string>(), options["statsd-port"].as<int>(),
+                               options["statsd-prefix"].as<string>() + ".counters");
     }
 
     return gs.errors.hadCriticalError() ? 10 : returnCode;
 };
+
+} // namespace ruby_typer
