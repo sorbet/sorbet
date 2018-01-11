@@ -95,6 +95,7 @@ vector<unique_ptr<ruby_typer::ast::Expression>> index(ruby_typer::core::GlobalSt
     vector<unique_ptr<ruby_typer::ast::Expression>> trees;
 
     int nthreads = opts["threads"].as<unsigned int>();
+    nthreads = max((int)(frs.size() / 2), nthreads);
     ENFORCE(nthreads > 0);
     ruby_typer::ThreadQueue<ruby_typer::core::FileRef> fileq;
     ruby_typer::ThreadQueue<thread_result> resultq;
