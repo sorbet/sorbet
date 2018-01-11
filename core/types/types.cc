@@ -409,3 +409,35 @@ int AndType::kind() {
 int OrType::kind() {
     return 3;
 }
+
+bool ClassType::isFullyDefined() {
+    return !this->isDynamic();
+}
+
+bool LiteralType::isFullyDefined() {
+    return true;
+}
+
+bool ShapeType::isFullyDefined() {
+    return true; // might not be true if we support uninstantiated types inside hashes. For now, we don't
+}
+
+bool TupleType::isFullyDefined() {
+    return true; // might not be true if we support uninstantiated types inside tuples. For now, we don't
+}
+
+bool MagicType::isFullyDefined() {
+    return true;
+}
+
+bool AliasType::isFullyDefined() {
+    return true;
+}
+
+bool AndType::isFullyDefined() {
+    return this->left->isFullyDefined() && this->right->isFullyDefined();
+}
+
+bool OrType::isFullyDefined() {
+    return this->left->isFullyDefined() && this->right->isFullyDefined();
+}

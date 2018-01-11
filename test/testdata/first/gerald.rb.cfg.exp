@@ -289,10 +289,10 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 <constant:TOTAL_TIME_MS>$15 = alias <constant:TOTAL_TIME_MS> : Integer
 <constant:MatchTimeout>$19 = alias <constant:MatchTimeout> : <class:MatchTimeout>
 statTemp$6 = <constant:Time>$8.now() : Time
-statTemp$5 = statTemp$6.-(@start$10) : Float | Time
+statTemp$5 = statTemp$6.-(@start$10) : Float
 statTemp$11 = 1000 : Integer(1000)
-dur_ms = statTemp$5.*(statTemp$11) : untyped
-ifTemp$12 = dur_ms.>(<constant:TOTAL_TIME_MS>$15) : untyped
+dur_ms = statTemp$5.*(statTemp$11) : Float
+ifTemp$12 = dur_ms.>(<constant:TOTAL_TIME_MS>$15) : TrueClass | FalseClass
 ifTemp$12"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" [style="bold"];
@@ -338,10 +338,10 @@ rule = load_arg(selfMethodTemp$3#time_rule, 0) : untyped
 rule_start = <constant:Time>$6.now() : Time
 res = <blk>.call(statTemp$9) : untyped
 statTemp$12 = <constant:Time>$6.now() : Time
-statTemp$11 = statTemp$12.-(rule_start) : Float | Time
+statTemp$11 = statTemp$12.-(rule_start) : Float
 statTemp$15 = 1000 : Integer(1000)
-dur_ms = statTemp$11.*(statTemp$15) : untyped
-ifTemp$17 = dur_ms.>(<constant:PER_RULE_MS>$20) : untyped
+dur_ms = statTemp$11.*(statTemp$15) : Float
+ifTemp$17 = dur_ms.>(<constant:PER_RULE_MS>$20) : TrueClass | FalseClass
 ifTemp$17"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" [style="bold"];
@@ -359,8 +359,8 @@ statTemp$33 = statTemp$34.to_s() : untyped
 statTemp$31 = statTemp$32.concat(statTemp$33) : String
 statTemp$36 = ' exceeded per-rule time budget actual= : String(\"' exceeded per-rule time budget actual=\")
 statTemp$30 = statTemp$31.concat(statTemp$36) : String
-statTemp$38 = dur_ms.to_i() : untyped
-statTemp$37 = statTemp$38.to_s() : untyped
+statTemp$38 = dur_ms.to_i() : Integer
+statTemp$37 = statTemp$38.to_s() : String
 statTemp$29 = statTemp$30.concat(statTemp$37) : String
 statTemp$40 = ms budget= : String(\"ms budget=\")
 statTemp$28 = statTemp$29.concat(statTemp$40) : String

@@ -87,7 +87,7 @@ module Opus::CIBot::Gerald
     end
 
     def check!
-      dur_ms = (Time.now - @start) * 1000 # error: Method * does not exist on Time component of Float | Time
+      dur_ms = (Time.now - @start) * 1000
       if dur_ms > TOTAL_TIME_MS
         raise MatchTimeout.new("Gerald match time budged exceeded #{TOTAL_TIME_MS}ms")
       end
@@ -96,7 +96,7 @@ module Opus::CIBot::Gerald
     def time_rule(rule)
       rule_start = Time.now
       res = yield
-      dur_ms = (Time.now - rule_start) * 1000 # error: Method * does not exist on Time component of Float | Time
+      dur_ms = (Time.now - rule_start) * 1000
       if dur_ms > PER_RULE_MS
         raise MatchTimeout.new(
           "Gerald rule '#{rule.token}' exceeded per-rule time budget actual=#{dur_ms.to_i}ms budget=#{PER_RULE_MS}ms",

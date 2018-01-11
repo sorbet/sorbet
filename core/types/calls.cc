@@ -2,9 +2,10 @@
 #include "core/Names/core.h"
 #include "core/Types.h"
 #include "core/errors/infer.h"
-#include <algorithm> // find_if
+#include <algorithm> // find_if, sort
 #include <unordered_set>
 
+template class std::vector<ruby_typer::core::SymbolRef>;
 using namespace ruby_typer;
 using namespace ruby_typer::core;
 using namespace std;
@@ -116,6 +117,96 @@ void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
 }
 }; // namespace
 
+// Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
+// arguments that is >= args.size()
+core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector<TypeAndOrigins> &args,
+                              shared_ptr<Type> fullType) {
+    counterInc("calls.overloaded_invocations");
+    Error::check(ctx.permitOverloadDefinitions(), "overload not permitted here");
+    core::SymbolRef fallback = primary;
+    vector<core::SymbolRef> allCandidates;
+
+    allCandidates.push_back(primary);
+    { // create candidates and sort them by number of arguments(stable by symbol id)
+        int i = 1;
+        core::SymbolRef current = primary;
+        while (current.info(ctx).isOverloaded()) {
+            core::NameRef overloadName =
+                ctx.state.freshNameUnique(core::UniqueNameKind::Overload, primary.info(ctx).name, i);
+            core::SymbolRef overload = primary.info(ctx).owner.info(ctx).findMember(ctx, overloadName);
+            i++;
+            if (!overload.exists()) {
+                Error::raise("Corruption of overloads?");
+            } else {
+                allCandidates.push_back(overload);
+                current = overload;
+            }
+        }
+
+        sort(allCandidates.begin(), allCandidates.end(), [&](core::SymbolRef s1, core::SymbolRef s2) -> bool {
+            if (s1.info(ctx).argumentsOrMixins.size() < s2.info(ctx).argumentsOrMixins.size())
+                return true;
+            if (s1.info(ctx).argumentsOrMixins.size() == s2.info(ctx).argumentsOrMixins.size()) {
+                return s1._id < s2._id;
+            }
+            return false;
+        });
+    }
+
+    vector<core::SymbolRef> leftCandidates = allCandidates;
+
+    {
+        // Lets see if we can filter them out using arguments.
+        int i = 0;
+        for (auto &a : args) {
+            for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
+                core::SymbolRef candidate = *it;
+                if (i >= candidate.info(ctx).argumentsOrMixins.size()) {
+                    it = leftCandidates.erase(it);
+                    continue;
+                }
+
+                auto argType = candidate.info(ctx).argumentsOrMixins[i].info(ctx).resultType;
+                if (argType->isFullyDefined() && !Types::isSubType(ctx, a.type, argType)) {
+                    it = leftCandidates.erase(it);
+                    continue;
+                }
+                ++it;
+            }
+            i++;
+        }
+    }
+    if (leftCandidates.empty()) {
+        leftCandidates = allCandidates;
+    } else {
+        fallback = leftCandidates[0];
+    }
+
+    { // keep only candidates with closes arity
+        struct Comp {
+            core::Context &ctx;
+
+            bool operator()(core::SymbolRef s, int i) const {
+                return s.info(ctx).argumentsOrMixins.size() < i;
+            }
+            bool operator()(int i, core::SymbolRef s) const {
+                return i < s.info(ctx).argumentsOrMixins.size();
+            }
+            Comp(core::Context &ctx) : ctx(ctx){};
+        } cmp(ctx);
+
+        auto er = std::equal_range(leftCandidates.begin(), leftCandidates.end(), args.size(), cmp);
+        if (er.first != leftCandidates.end()) {
+            leftCandidates.erase(leftCandidates.begin(), er.first);
+        }
+    }
+
+    if (!leftCandidates.empty()) {
+        return leftCandidates[0];
+    }
+    return fallback;
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -132,9 +223,9 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     if (isDynamic()) {
         return Types::dynamic();
     }
-    core::SymbolRef method = this->symbol.info(ctx).findMemberTransitive(ctx, fun);
+    core::SymbolRef mayBeOverloaded = this->symbol.info(ctx).findMemberTransitive(ctx, fun);
 
-    if (!method.exists()) {
+    if (!mayBeOverloaded.exists()) {
         string maybeComponent;
         if (fullType.get() != this) {
             maybeComponent = " component of " + fullType->toString(ctx);
@@ -143,6 +234,11 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                                fun.name(ctx).toString(ctx), this->toString(ctx), maybeComponent);
         return Types::dynamic();
     }
+
+    core::SymbolRef method = mayBeOverloaded.info(ctx).isOverloaded()
+                                 ? guessOverload(ctx.withOwner(mayBeOverloaded), mayBeOverloaded, args, fullType)
+                                 : mayBeOverloaded;
+
     core::Symbol &info = method.info(ctx);
 
     bool hasKwargs = std::any_of(info.arguments().begin(), info.arguments().end(),

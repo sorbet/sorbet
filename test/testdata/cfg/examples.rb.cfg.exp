@@ -176,7 +176,7 @@ b = 2 : Integer(2)
 
     "bb::<constant:Examples>#variables_6" -> "bb::<constant:Examples>#variables_7" [style="bold"];
     "bb::<constant:Examples>#variables_7" [label = "block[id=7](b, a)
-returnMethodTemp$2 = a.+(b) : Integer | Float | Rational | BigDecimal | Complex
+returnMethodTemp$2 = a.+(b) : Integer
 returnMethodTemp$10 = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 

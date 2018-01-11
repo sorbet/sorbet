@@ -126,6 +126,7 @@ public:
 
     bool isDynamic();
     bool isBottom();
+    virtual bool isFullyDefined() = 0;
 };
 
 template <class To> To *cast_type(Type *what) {
@@ -167,6 +168,8 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
+
+    virtual bool isFullyDefined() final;
 };
 
 class OrType final : public GroundType {
@@ -182,6 +185,7 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
 
 private:
     /*
@@ -222,6 +226,7 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
 
 private:
     // See the comments on OrType()
@@ -249,6 +254,7 @@ public:
 
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
+    virtual bool isFullyDefined() final;
 };
 
 class ShapeType final : public ProxyType {
@@ -263,6 +269,7 @@ public:
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
     void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
 };
 
 class TupleType final : public ProxyType {
@@ -273,6 +280,7 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
 };
 
 // MagicType is the type of the built-in core::GlobalState::defn_Magic()
@@ -287,6 +295,7 @@ public:
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
     void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
 };
 
 class AliasType final : public Type {
@@ -301,6 +310,7 @@ public:
 
     SymbolRef symbol;
     void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
 };
 
 } // namespace core

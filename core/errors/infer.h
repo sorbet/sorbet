@@ -11,6 +11,7 @@ constexpr ErrorClass MethodArgumentCountMismatch = 7004;
 constexpr ErrorClass ReturnTypeMismatch = 7005;
 constexpr ErrorClass DeadBranchInferencer = 7006;
 constexpr ErrorClass CastTypeMismatch = 7007;
+constexpr ErrorClass OverloadedArgumentCountMismatch = 7008;
 
 } // namespace Infer
 } // namespace errors

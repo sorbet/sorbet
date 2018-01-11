@@ -46,6 +46,7 @@ public:
 
     SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, u2 num);
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);

@@ -27,6 +27,7 @@ public:
 
     SymbolRef enclosingMethod();
     SymbolRef enclosingClass();
+    bool permitOverloadDefinitions();
 
     // Returns the SymbolRef corresponding to the class `self.class`, unless the
     // context is a class, in which case return it. This class is most notably

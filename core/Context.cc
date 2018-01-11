@@ -50,6 +50,17 @@ SymbolRef Context::enclosingClass() {
     return owner;
 }
 
+bool Context::permitOverloadDefinitions() {
+    if (!owner.exists()) {
+        return false;
+    }
+    auto path = owner.info(*this).definitionLoc.file.file(*this).path();
+    constexpr char const *whitelisted = "stdlib.rbi";
+    constexpr char const *whitelistedTest = "overloads_test.rb";
+    return ::ruby_typer::File::getFileName(path) == whitelisted ||
+           ::ruby_typer::File::getFileName(path) == whitelistedTest;
+}
+
 SymbolRef Context::contextClass() {
     SymbolRef owner = this->owner;
     while (!owner.info(this->state, false).isClass()) {

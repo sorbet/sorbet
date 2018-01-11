@@ -114,6 +114,7 @@ enum UniqueNameKind : u2 {
     CFG,
     NestedScope, // used by freshName to make sure blocks local variables do not collapse into method variables
     Singleton,
+    Overload
 };
 
 struct UniqueName final {

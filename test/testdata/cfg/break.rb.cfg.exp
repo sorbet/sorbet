@@ -28,7 +28,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="tapered"];
 
     "bb::<constant:Object>#foo_3" [label = "block[id=3](statTemp$5)
-returnMethodTemp$3 = statTemp$5.map() : Array | Enumerator
+returnMethodTemp$3 = statTemp$5.map() : Enumerator
 returnMethodTemp$15 = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 

@@ -310,6 +310,20 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
+SymbolRef GlobalState::enterNewMethodOverload(Loc loc, SymbolRef original, u2 num) {
+    NameRef name = freshNameUnique(UniqueNameKind::Overload, original.info(*this).name, num);
+    SymbolRef res = enterMethodSymbol(loc, original.info(*this).owner, name);
+    res.info(*this).argumentsOrMixins.reserve(original.info(*this).argumentsOrMixins.size());
+    for (auto &arg : original.info(*this).argumentsOrMixins) {
+        Loc loc = arg.info(*this).definitionLoc;
+        NameRef nm = arg.info(*this).name;
+        SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
+        newArg.info(*this).flags = arg.info(*this).flags;
+        res.info(*this).argumentsOrMixins.push_back(newArg);
+    }
+    return res;
+}
+
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE(owner.info(*this).isClass(), "entering field symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::FIELD);

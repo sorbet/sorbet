@@ -447,7 +447,7 @@ private:
     }
 
     void fillInInfoFromStandardMethod(core::Context ctx, core::Symbol &methoInfo, ast::Send *lastStandardMethod,
-                                      int argsSize) {
+                                      bool isOverloaded) {
         if (ast::cast_tree<ast::Self>(lastStandardMethod->recv.get()) == nullptr ||
             lastStandardMethod->block != nullptr) {
             ctx.state.errors.error(lastStandardMethod->loc, core::errors::Resolver::InvalidMethodSignature,
@@ -513,6 +513,28 @@ private:
             // We consumed the first hash, leave the next one for options
             hash = ast::cast_tree<ast::Hash>(lastStandardMethod->args[1].get());
         }
+        // for overloaded method: remove arguments that did not have a type, otherwise error
+        // check that overloaded method do not have keyword args
+        for (auto it = methoInfo.arguments().begin(); it != methoInfo.arguments().end(); /* nothing */) {
+            core::SymbolRef arg = *it;
+            if (isOverloaded && arg.info(ctx).isKeyword()) {
+                ctx.state.errors.error(arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
+                                       "Malformed {}. Overloaded functions cannot have keyword arguments:  {}",
+                                       lastStandardMethod->fun.toString(ctx), arg.info(ctx).name.toString(ctx));
+            }
+            if (arg.info(ctx).resultType.get() != nullptr) {
+                ++it;
+            } else {
+                if (isOverloaded)
+                    it = methoInfo.arguments().erase(it);
+                else {
+                    arg.info(ctx).resultType = core::Types::dynamic();
+                    ctx.state.errors.error(arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
+                                           "Malformed {}. Type not specified for argument {}",
+                                           lastStandardMethod->fun.toString(ctx), arg.info(ctx).name.toString(ctx));
+                }
+            }
+        }
 
         int i = 0;
         for (unique_ptr<ast::Expression> &key : hash->keys) {
@@ -535,20 +557,15 @@ private:
     }
 
     void processClassBody(core::Context ctx, ast::ClassDef *klass) {
-        unique_ptr<ast::Expression> lastStandardMethod;
-
+        InlinedVector<unique_ptr<ast::Expression>, 1> lastStandardMethod;
         for (auto &stat : klass->rhs) {
             typecase(stat.get(),
 
                      [&](ast::Send *send) {
-                         // Take ownership of the statement inside this block
-                         unique_ptr<ast::Expression> mine;
-                         swap(mine, stat);
-
                          if (ast::cast_tree<ast::Self>(send->recv.get()) == nullptr) {
-                             swap(mine, stat);
                              return;
                          }
+
                          switch (send->fun._id) {
                              case core::Names::standardMethod()._id:
                              case core::Names::abstractMethod()._id:
@@ -556,14 +573,16 @@ private:
                              case core::Names::overrideMethod()._id:
                              case core::Names::overridableMethod()._id:
                              case core::Names::overridableImplementationMethod()._id:
-                                 if (lastStandardMethod) {
-                                     ctx.state.errors.error(core::Reporter::ComplexError(
-                                         lastStandardMethod->loc, core::errors::Resolver::InvalidMethodSignature,
-                                         "Unused type annotation. No method def before next annotation.",
-                                         core::Reporter::ErrorLine(mine->loc,
-                                                                   "Type annotation that will be used instead.")));
+                                 if (!lastStandardMethod.empty()) {
+                                     if (!ctx.withOwner(klass->symbol).permitOverloadDefinitions()) {
+                                         ctx.state.errors.error(core::Reporter::ComplexError(
+                                             lastStandardMethod[0]->loc, core::errors::Resolver::InvalidMethodSignature,
+                                             "Unused type annotation. No method def before next annotation.",
+                                             core::Reporter::ErrorLine(send->loc,
+                                                                       "Type annotation that will be used instead.")));
+                                     }
                                  }
-                                 swap(lastStandardMethod, mine);
+                                 lastStandardMethod.emplace_back(move(stat));
                                  break;
                              case core::Names::declareVariables()._id:
                                  processDeclareVariables(ctx.withOwner(klass->symbol), send);
@@ -571,7 +590,6 @@ private:
                              case core::Names::attr()._id:
                              case core::Names::attrReader()._id:
                                  defineAttr(ctx.withOwner(klass->symbol), send, true, false);
-
                                  break;
                              case core::Names::attrWriter()._id:
                                  defineAttr(ctx.withOwner(klass->symbol), send, false, true);
@@ -581,20 +599,42 @@ private:
                                  defineAttr(ctx.withOwner(klass->symbol), send, true, true);
                                  break;
                              default:
-                                 swap(mine, stat);
                                  return;
                          }
                          stat.reset(nullptr);
                      },
 
                      [&](ast::MethodDef *mdef) {
-                         if (lastStandardMethod) {
+                         if (!lastStandardMethod.empty()) {
                              counterInc("types.standard_method.count");
                              core::Symbol &methoInfo = mdef->symbol.info(ctx);
-                             fillInInfoFromStandardMethod(ctx, methoInfo,
-                                                          ast::cast_tree<ast::Send>(lastStandardMethod.get()),
-                                                          mdef->args.size());
-                             lastStandardMethod.reset(nullptr);
+
+                             bool isOverloaded = lastStandardMethod.size() > 1 &&
+                                                 ctx.withOwner(klass->symbol).permitOverloadDefinitions();
+
+                             if (isOverloaded) {
+                                 methoInfo.setOverloaded();
+                                 int i = 1;
+
+                                 while (i < lastStandardMethod.size()) {
+                                     core::Symbol &overloadInfo =
+                                         ctx.state.enterNewMethodOverload(lastStandardMethod[i]->loc, mdef->symbol, i)
+                                             .info(ctx);
+                                     fillInInfoFromStandardMethod(
+                                         ctx, overloadInfo, ast::cast_tree<ast::Send>(lastStandardMethod[i].get()),
+                                         isOverloaded);
+                                     if (i + 1 < lastStandardMethod.size()) {
+                                         overloadInfo.setOverloaded();
+                                     }
+                                     i++;
+                                 }
+                             }
+
+                             fillInInfoFromStandardMethod(
+                                 ctx, methoInfo, ast::cast_tree<ast::Send>(lastStandardMethod[0].get()), isOverloaded);
+
+                             // OVERLOAD
+                             lastStandardMethod.clear();
                          }
 
                      },
@@ -615,10 +655,10 @@ private:
                      [&](ast::Expression *e) {});
         }
 
-        if (lastStandardMethod) {
-            ctx.state.errors.error(lastStandardMethod->loc, core::errors::Resolver::InvalidMethodSignature,
+        if (!lastStandardMethod.empty()) {
+            ctx.state.errors.error(lastStandardMethod[0]->loc, core::errors::Resolver::InvalidMethodSignature,
                                    "Malformed {}. No method def following it.",
-                                   ast::cast_tree<ast::Send>(lastStandardMethod.get())->fun.toString(ctx));
+                                   ast::cast_tree<ast::Send>(lastStandardMethod[0].get())->fun.toString(ctx));
         }
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),

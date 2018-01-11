@@ -124,6 +124,7 @@ public:
         // Method flags
         static constexpr int METHOD_PROTECTED = 0x0100;
         static constexpr int METHOD_PRIVATE = 0x0080;
+        static constexpr int METHOD_OVERLOADED = 0x040;
 
         static constexpr int TYPE_COVARIANT = 0x0100;
         static constexpr int TYPE_INVARIANT = 0x0080;
@@ -200,6 +201,11 @@ public:
     inline bool isRepeated() const {
         ENFORCE(isMethodArgument());
         return (flags & Symbol::Flags::ARGUMENT_REPEATED) != 0;
+    }
+
+    inline bool isOverloaded() const {
+        DEBUG_ONLY(Error::check(isMethod()));
+        return (flags & Symbol::Flags::METHOD_OVERLOADED) != 0;
     }
 
     inline bool isKeyword() const {
@@ -310,6 +316,11 @@ public:
     inline void setRepeated() {
         ENFORCE(isMethodArgument());
         flags |= Symbol::Flags::ARGUMENT_REPEATED;
+    }
+
+    inline void setOverloaded() {
+        DEBUG_ONLY(Error::check(isMethod()));
+        flags |= Symbol::Flags::METHOD_OVERLOADED;
     }
 
     inline void setBlockArgument() {

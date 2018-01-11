@@ -615,10 +615,10 @@
 <text text-anchor="middle" x="6270" y="-3267.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:TOTAL_TIME_MS&gt;$15 = alias &lt;constant:TOTAL_TIME_MS&gt; : Integer</text>
 <text text-anchor="middle" x="6270" y="-3253.0468" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:MatchTimeout&gt;$19 = alias &lt;constant:MatchTimeout&gt; : &lt;class:MatchTimeout&gt;</text>
 <text text-anchor="middle" x="6270" y="-3239.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = &lt;constant:Time&gt;$8.now() : Time</text>
-<text text-anchor="middle" x="6270" y="-3225.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = statTemp$6.&#45;(@start$10) : Float | Time</text>
+<text text-anchor="middle" x="6270" y="-3225.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = statTemp$6.&#45;(@start$10) : Float</text>
 <text text-anchor="middle" x="6270" y="-3211.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = 1000 : Integer(1000)</text>
-<text text-anchor="middle" x="6270" y="-3197.0468" font-family="Times,serif" font-size="14.00" fill="#000000">dur_ms = statTemp$5.*(statTemp$11) : untyped</text>
-<text text-anchor="middle" x="6270" y="-3183.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$12 = dur_ms.&gt;(&lt;constant:TOTAL_TIME_MS&gt;$15) : untyped</text>
+<text text-anchor="middle" x="6270" y="-3197.0468" font-family="Times,serif" font-size="14.00" fill="#000000">dur_ms = statTemp$5.*(statTemp$11) : Float</text>
+<text text-anchor="middle" x="6270" y="-3183.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$12 = dur_ms.&gt;(&lt;constant:TOTAL_TIME_MS&gt;$15) : TrueClass | FalseClass</text>
 <text text-anchor="middle" x="6270" y="-3169.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$12</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#check!_2 -->
@@ -696,10 +696,10 @@
 <text text-anchor="middle" x="7232" y="-3239.0468" font-family="Times,serif" font-size="14.00" fill="#000000">rule_start = &lt;constant:Time&gt;$6.now() : Time</text>
 <text text-anchor="middle" x="7232" y="-3225.0468" font-family="Times,serif" font-size="14.00" fill="#000000">res = &lt;blk&gt;.call(statTemp$9) : untyped</text>
 <text text-anchor="middle" x="7232" y="-3211.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = &lt;constant:Time&gt;$6.now() : Time</text>
-<text text-anchor="middle" x="7232" y="-3197.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = statTemp$12.&#45;(rule_start) : Float | Time</text>
+<text text-anchor="middle" x="7232" y="-3197.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = statTemp$12.&#45;(rule_start) : Float</text>
 <text text-anchor="middle" x="7232" y="-3183.0468" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$15 = 1000 : Integer(1000)</text>
-<text text-anchor="middle" x="7232" y="-3169.0468" font-family="Times,serif" font-size="14.00" fill="#000000">dur_ms = statTemp$11.*(statTemp$15) : untyped</text>
-<text text-anchor="middle" x="7232" y="-3155.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$17 = dur_ms.&gt;(&lt;constant:PER_RULE_MS&gt;$20) : untyped</text>
+<text text-anchor="middle" x="7232" y="-3169.0468" font-family="Times,serif" font-size="14.00" fill="#000000">dur_ms = statTemp$11.*(statTemp$15) : Float</text>
+<text text-anchor="middle" x="7232" y="-3155.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$17 = dur_ms.&gt;(&lt;constant:PER_RULE_MS&gt;$20) : TrueClass | FalseClass</text>
 <text text-anchor="middle" x="7232" y="-3141.0468" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$17</text>
 </g>
 <!-- bb::&lt;constant:Opus&gt;::&lt;constant:CIBot&gt;::&lt;constant:Gerald&gt;::&lt;constant:MatchTimeBudget&gt;#time_rule_2 -->
@@ -714,8 +714,8 @@
 <text text-anchor="middle" x="7205" y="-2790.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$31 = statTemp$32.concat(statTemp$33) : String</text>
 <text text-anchor="middle" x="7205" y="-2776.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$36 = &#39; exceeded per&#45;rule time budget actual= : String(&quot;&#39; exceeded per&#45;rule time budget actual=&quot;)</text>
 <text text-anchor="middle" x="7205" y="-2762.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$30 = statTemp$31.concat(statTemp$36) : String</text>
-<text text-anchor="middle" x="7205" y="-2748.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$38 = dur_ms.to_i() : untyped</text>
-<text text-anchor="middle" x="7205" y="-2734.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$37 = statTemp$38.to_s() : untyped</text>
+<text text-anchor="middle" x="7205" y="-2748.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$38 = dur_ms.to_i() : Integer</text>
+<text text-anchor="middle" x="7205" y="-2734.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$37 = statTemp$38.to_s() : String</text>
 <text text-anchor="middle" x="7205" y="-2720.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$29 = statTemp$30.concat(statTemp$37) : String</text>
 <text text-anchor="middle" x="7205" y="-2706.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$40 = ms budget= : String(&quot;ms budget=&quot;)</text>
 <text text-anchor="middle" x="7205" y="-2692.3823" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$28 = statTemp$29.concat(statTemp$40) : String</text>
@@ -2001,4 +2001,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 0814025fa7c2053a0beb7fc710f5812bcb41903b6af9bb890931268d135150e1 -->
+<!-- ruby-types:sha256: fd6402ffcc621ab628606ec9fe8bf0232a7a0735d2e6b0656c9d21af2f01354d -->

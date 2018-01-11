@@ -62,7 +62,7 @@
 <text text-anchor="middle" x="1285" y="-400.6335" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$5 = &lt;symbol:bar&gt; : Symbol(:&quot;bar&quot;)</text>
 <text text-anchor="middle" x="1285" y="-386.6335" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="1285" y="-372.6335" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = 2 : Integer(2)</text>
-<text text-anchor="middle" x="1285" y="-358.6335" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$7 = statTemp$9.+(statTemp$10) : Integer | Float | Rational | BigDecimal | Complex</text>
+<text text-anchor="middle" x="1285" y="-358.6335" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$7 = statTemp$9.+(statTemp$10) : Integer</text>
 <text text-anchor="middle" x="1285" y="-344.6335" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$8 = 2 : Integer(2)</text>
 <text text-anchor="middle" x="1285" y="-330.6335" font-family="Times,serif" font-size="14.00" fill="#000000">hashTemp$11 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
 <text text-anchor="middle" x="1285" y="-316.6335" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = hashTemp$11.&lt;build&#45;hash&gt;(hashTemp$4, hashTemp$5, hashTemp$7, hashTemp$8) : Hash</text>
@@ -133,4 +133,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: d44e7557182ded15ffad56f4a5423316fa14d649e559c4c415e9839e0fb90b60 -->
+<!-- ruby-types:sha256: e312df0ad6d485b01701b1ec3dc4baf2f7621eaa2f152de79dcafe516a75514c -->

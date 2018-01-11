@@ -55,6 +55,9 @@ string Name::toString(GlobalState &gs) const {
                 return "<singleton class:" + this->unique.original.name(gs).toString(gs) + ">";
             } else if (this->unique.uniqueNameKind == UniqueNameKind::NestedScope) {
                 return "<block-nested: " + this->unique.original.name(gs).toString(gs) + ">";
+            } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
+                return "<overload N." + to_string(this->unique.num) + " : " +
+                       this->unique.original.name(gs).toString(gs) + ">";
             }
             return this->unique.original.name(gs).toString(gs) + "$" + to_string(this->unique.num);
         case CONSTANT:

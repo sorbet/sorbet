@@ -77,7 +77,7 @@
 <title>bb::&lt;constant:Object&gt;#foo_3</title>
 <ellipse fill="none" stroke="#000000" cx="445" cy="-169.2548" rx="273.0758" ry="45.011"/>
 <text text-anchor="middle" x="445" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](statTemp$5)</text>
-<text text-anchor="middle" x="445" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$5.map() : Array | Enumerator</text>
+<text text-anchor="middle" x="445" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$5.map() : Enumerator</text>
 <text text-anchor="middle" x="445" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$15 = return returnMethodTemp$3 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="445" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -101,4 +101,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 7444db95c0f2f94916d5e8f1fbe716c39e4de8f55f0c74586fce70c20361ecdb -->
+<!-- ruby-types:sha256: ef781128f4e2868348f94f066887bd2c3b32fb39c8248789bb47fc1e016a49a7 -->
