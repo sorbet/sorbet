@@ -2,7 +2,7 @@
 
 set -e
 
-cd $(dirname $0)/../..
+cd "$(dirname "$0")/../.."
 
 bazel build //tools:clang-tidy
 ./tools/scripts/build_compilation_db.sh
@@ -17,6 +17,7 @@ done
 if [ "$got_cc" ]; then
     cxx_src=()
 else
+    # shellcheck disable=SC2207
     cxx_src=(
         $(find . -path ./third_party -prune -false -o -name ".?*" -prune -false -o -name '*.cxx' -o -name '*.cc' )
     )

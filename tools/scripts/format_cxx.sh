@@ -8,10 +8,11 @@ else
     mode="fix"
 fi
 
-cd $(dirname $0)/../..
+cd "$(dirname "$0")/../.."
 
 bazel build //tools:clang-format
 
+# shellcheck disable=SC2207
 cxx_src=(
     $(find . -path ./third_party -prune -false -o -name ".?*" -prune -false -o -name '*.cxx' -o -name '*.h' -o -name '*.cc' )
 )
@@ -47,10 +48,10 @@ fi
 if [ "$mode" = "fix" ]; then
     echo "Formatted the following files:" >&2
 else
-    echo -ne "\e[1;31m" >&2
+    echo -ne "\\e[1;31m" >&2
     echo "The following files are misformatted!" >&2
-    echo -ne "\e[0m" >&2
-    echo -e "Run \e[97;1;42m ./tools/scripts/format_cxx.sh \e[0m to format." >&2
+    echo -ne "\\e[0m" >&2
+    echo -e "Run \\e[97;1;42m ./tools/scripts/format_cxx.sh \\e[0m to format." >&2
 fi
 
 for src in "${misformatted[@]}"; do

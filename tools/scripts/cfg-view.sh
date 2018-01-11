@@ -4,7 +4,7 @@ set -e
 dot=$(mktemp)
 svg=$(mktemp)
 cleanup() {
-    rm -r $dot $svg
+    rm -r "$dot" "$svg"
 }
 trap cleanup EXIT
 

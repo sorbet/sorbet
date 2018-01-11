@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+# shellcheck disable=SC2207
 rb_src=(
     $(find ./test/testdata -name '*.rb.cfg.exp' -or -name '*.rb.cfg-raw.exp')
 )

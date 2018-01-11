@@ -5,7 +5,8 @@ DIR=./pay-server
 
 # This is what we'll ship to our users
 bazel build main:ruby-typer --config=unsafe -c opt
-export PATH=$PATH:"$(pwd)/bazel-bin/main/"
+PATH=$PATH:"$(pwd)/bazel-bin/main/"
+export PATH
 
 if [ ! -d $DIR ]; then
     echo "$DIR doesn't exist"
@@ -20,9 +21,9 @@ fi
 git checkout "$(cat ../ci/stripe-internal-ruby-typer-pay-server-sha)"
 
 # Make sure these specific files are typed
-for f in $(cat ../ci/stripe-internal-ruby-typer-pay-server-typechecked); do
+while IFS= read -r f; do
     echo "# @typed" >> "$f"
-done
+done < ../ci/stripe-internal-ruby-typer-pay-server-typechecked
 
 RECORD_STATS=
 if [ "$GIT_BRANCH" == "master" ] || [[ "$GIT_BRANCH" == integration-* ]]; then
@@ -39,7 +40,7 @@ fi
 
 cat "$TIMEFILE1"
 
-TIME1="$(cat $TIMEFILE1 |grep User |cut -d ' ' -f 4)"
+TIME1="$(grep User < "$TIMEFILE1" | cut -d ' ' -f 4)"
 if [ "$RECORD_STATS" ]; then
   veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$TIME1"s -name ruby_typer.payserver.prod_run.seconds
 fi
@@ -48,9 +49,10 @@ fi
 
 # Run 2: Make sure we don't crash on all of pay-server with ASAN on
 
-cd -
-bazel build main:ruby-typer -c opt --config=ci
-cd -
+(
+    cd -
+    bazel build main:ruby-typer -c opt --config=ci
+)
 
 TIMEFILE2=$(mktemp)
 
@@ -64,7 +66,7 @@ env ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-4.0/bin/llvm-symbolizer \
 
 cat "$TIMEFILE2"
 
-TIME2="$(cat $TIMEFILE2 |grep User |cut -d ' ' -f 4)"
+TIME2="$(grep User < "$TIMEFILE2" | cut -d ' ' -f 4)"
 if [ "$RECORD_STATS" ]; then
   veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$TIME2"s -name ruby_typer.payserver.full_run.seconds
 fi

@@ -8,6 +8,7 @@ bazel build //main:ruby-typer --config=unsafe -c opt
 rb_src=("$@")
 
 if [ -z "${rb_src[*]}" ]; then
+    # shellcheck disable=SC2207
     rb_src=(
         $(find ./test/testdata -name '*.rb' | sort)
     )
@@ -27,8 +28,8 @@ for this_src in "${rb_src[@]}" DUMMY; do
         for pass in "${passes[@]}" ; do
             candidate="$basename.$pass.exp"
             if [ -e "$candidate" ]; then
-                echo "bazel-bin/main/ruby-typer --print $pass ${srcs[@]} > $candidate"
-                bazel-bin/main/ruby-typer --print "$pass" --threads 1 "${srcs[@]}" > "$candidate" 2>/dev/null
+                echo "bazel-bin/main/ruby-typer --print $pass ${srcs[*]} > $candidate"
+                bazel-bin/main/ruby-typer --print "$pass" --threads 1 "${srcs[*]}" > "$candidate" 2>/dev/null
             fi
         done
     fi
