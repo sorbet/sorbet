@@ -1,6 +1,6 @@
 begin
   <emptyTree>
-  def foo<foo>(a)
+  def foo<foo>(a, b)
     <emptyTree>
   end
   def foo<foo>(a, b)

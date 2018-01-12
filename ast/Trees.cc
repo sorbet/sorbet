@@ -372,15 +372,26 @@ string MethodDef::toString(core::GlobalState &gs, int tabs) {
     } else {
         buf << "def ";
     }
-    buf << name.name(gs).toString(gs) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs) << ">";
+    auto &info = this->symbol.info(gs, true);
+    buf << name.name(gs).toString(gs) << "<" << info.name.name(gs).toString(gs) << ">";
     buf << "(";
     bool first = true;
-    for (auto &a : this->args) {
-        if (!first) {
-            buf << ", ";
+    if (this->symbol == core::GlobalState::defn_todo()) {
+        for (auto &a : this->args) {
+            if (!first) {
+                buf << ", ";
+            }
+            first = false;
+            buf << a->toString(gs, tabs + 1);
         }
-        first = false;
-        buf << a->toString(gs, tabs + 1);
+    } else {
+        for (auto &a : info.arguments()) {
+            if (!first) {
+                buf << ", ";
+            }
+            first = false;
+            buf << a.info(gs).name.toString(gs);
+        }
     }
     buf << ")" << endl;
     printTabs(buf, tabs + 1);
