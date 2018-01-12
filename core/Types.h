@@ -135,6 +135,10 @@ template <class To> To *cast_type(Type *what) {
     return fast_cast<Type, To>(what);
 }
 
+template <class To> bool isa_type(Type *what) {
+    return cast_type<To>(what) != nullptr;
+}
+
 class GroundType : public Type {
 public:
     virtual int kind() = 0;

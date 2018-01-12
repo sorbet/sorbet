@@ -98,7 +98,7 @@ class NameInserter {
         if (send->fun != core::Names::include()) {
             return nullptr;
         }
-        if (ast::cast_tree<ast::Self>(send->recv.get()) == nullptr) {
+        if (!ast::isa_tree<ast::Self>(send->recv.get())) {
             // ignore `something.include`
             return nullptr;
         }
@@ -205,7 +205,7 @@ public:
     }
 
     ast::Expression *postTransformSend(core::Context ctx, ast::Send *original) {
-        if (original->args.size() == 1 && ast::cast_tree<ast::ZSuperArgs>(original->args[0].get()) != nullptr) {
+        if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
             original->args.clear();
             core::SymbolRef method = ctx.enclosingMethod();
             if (method.exists()) {
@@ -237,7 +237,7 @@ public:
             }
             return original->args[0].release();
         }
-        if (ast::cast_tree<ast::Self>(original->recv.get()) != nullptr) {
+        if (ast::isa_tree<ast::Self>(original->recv.get())) {
             switch (original->fun._id) {
                 case core::Names::moduleFunction()._id: {
                     if (original->args.empty()) {

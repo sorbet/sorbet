@@ -191,8 +191,7 @@ public:
             return make_unique<CVarLhs>(cv->loc, cv->name);
         } else if (GVar *gv = parser::cast_node<GVar>(node.get())) {
             return make_unique<GVarLhs>(gv->loc, gv->name);
-        } else if (parser::cast_node<Backref>(node.get()) != nullptr ||
-                   parser::cast_node<NthRef>(node.get()) != nullptr) {
+        } else if (parser::isa_node<Backref>(node.get()) || parser::isa_node<NthRef>(node.get())) {
             error(ruby_parser::dclass::BackrefAssignment, node->loc);
             return make_unique<Nil>(node->loc);
         } else {
@@ -631,7 +630,7 @@ public:
     unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
-        if (!args.empty() && parser::cast_node<BlockPass>(args.back().get()) != nullptr) {
+        if (!args.empty() && parser::isa_node<BlockPass>(args.back().get())) {
             error(ruby_parser::dclass::BlockGivenToYield, loc);
         }
         return make_unique<Yield>(loc, move(args));
@@ -764,7 +763,7 @@ public:
     }
 
     unique_ptr<Node> op_assign(unique_ptr<Node> lhs, const token *op, unique_ptr<Node> rhs) {
-        if (parser::cast_node<Backref>(lhs.get()) != nullptr || parser::cast_node<NthRef>(lhs.get()) != nullptr) {
+        if (parser::isa_node<Backref>(lhs.get()) || parser::isa_node<NthRef>(lhs.get())) {
             error(ruby_parser::dclass::BackrefAssignment, lhs->loc);
         }
 

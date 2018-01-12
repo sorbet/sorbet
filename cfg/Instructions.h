@@ -29,6 +29,10 @@ template <class To> To *cast_instruction(Instruction *what) {
     return fast_cast<Instruction, To>(what);
 }
 
+template <class To> bool isa_instruction(Instruction *what) {
+    return cast_instruction<To>(what) != nullptr;
+}
+
 class Ident final : public Instruction {
 public:
     core::LocalVariable what;

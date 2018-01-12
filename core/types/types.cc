@@ -332,8 +332,8 @@ string AliasType::toString(GlobalState &gs, int tabs) {
 
 string AndType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
-    bool leftBrace = cast_type<OrType>(this->left.get()) != nullptr;
-    bool rightBrace = cast_type<OrType>(this->right.get()) != nullptr;
+    bool leftBrace = isa_type<OrType>(this->left.get());
+    bool rightBrace = isa_type<OrType>(this->right.get());
 
     if (leftBrace) {
         buf << "(";
@@ -355,8 +355,8 @@ string AndType::toString(GlobalState &gs, int tabs) {
 
 string OrType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
-    bool leftBrace = cast_type<AndType>(this->left.get()) != nullptr;
-    bool rightBrace = cast_type<AndType>(this->right.get()) != nullptr;
+    bool leftBrace = isa_type<AndType>(this->left.get());
+    bool rightBrace = isa_type<AndType>(this->right.get());
 
     if (leftBrace) {
         buf << "(";
@@ -379,8 +379,8 @@ string OrType::toString(GlobalState &gs, int tabs) {
 void AndType::_sanityCheck(core::Context ctx) {
     left->_sanityCheck(ctx);
     right->_sanityCheck(ctx);
-    ENFORCE(cast_type<ProxyType>(left.get()) == nullptr);
-    ENFORCE(cast_type<ProxyType>(right.get()) == nullptr);
+    ENFORCE(!isa_type<ProxyType>(left.get()));
+    ENFORCE(!isa_type<ProxyType>(right.get()));
     ENFORCE(!left->isDynamic());
     ENFORCE(!right->isDynamic());
 }
@@ -388,8 +388,8 @@ void AndType::_sanityCheck(core::Context ctx) {
 void OrType::_sanityCheck(core::Context ctx) {
     left->_sanityCheck(ctx);
     right->_sanityCheck(ctx);
-    ENFORCE(cast_type<ProxyType>(left.get()) == nullptr);
-    ENFORCE(cast_type<ProxyType>(right.get()) == nullptr);
+    ENFORCE(!isa_type<ProxyType>(left.get()));
+    ENFORCE(!isa_type<ProxyType>(right.get()));
     ENFORCE(!left->isDynamic());
     ENFORCE(!right->isDynamic());
 }

@@ -211,7 +211,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(ctx, t2, t1);
-    } else if (cast_type<OrType>(t1.get()) != nullptr) {
+    } else if (isa_type<OrType>(t1.get())) {
         categoryCounterInc("lub", "<or");
         Error::raise("should not happen");
     } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 4

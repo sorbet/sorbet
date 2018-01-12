@@ -320,7 +320,7 @@ private:
                     ctx, what, func);
             }
 
-            if (what == nullptr || cast_tree<EmptyTree>(what) != nullptr || cast_tree<ZSuperArgs>(what) != nullptr)
+            if (what == nullptr || isa_tree<EmptyTree>(what) || isa_tree<ZSuperArgs>(what))
                 return what;
 
             if (ClassDef *v = cast_tree<ClassDef>(what)) {
@@ -630,7 +630,7 @@ private:
                     auto oblock = v->block.get();
                     auto nblock = mapIt(oblock, ctx);
                     if (oblock != nblock) {
-                        ENFORCE(cast_tree<Block>(nblock) != nullptr, "block was mapped into not-a block");
+                        ENFORCE(isa_tree<Block>(nblock), "block was mapped into not-a block");
                         v->block.reset(cast_tree<Block>(nblock));
                     }
                 }
