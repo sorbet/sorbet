@@ -6,7 +6,6 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
     "bb::<constant:Object>#main_0" [label = "block[id=0](a)
-dead=0
 a: NilClass
 
 selfMethodTemp$3 = self : Object
@@ -21,7 +20,6 @@ a"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_2" [label = "block[id=2](a, returnMethodTemp$2)
-dead=0
 a: untyped
 
 returnMethodTemp$2: NilClass
@@ -32,7 +30,6 @@ returnMethodTemp$2 = a : Integer(2)
 
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="bold"];
     "bb::<constant:Object>#main_4" [label = "block[id=4](returnMethodTemp$2)
-dead=0
 returnMethodTemp$2: NilClass | Integer
   Being truthy entails:
     a NOT to be NilClass | FalseClass
