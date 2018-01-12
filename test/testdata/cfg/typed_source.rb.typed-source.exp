@@ -2,72 +2,55 @@
 # @typed
 class Examples
   def i_like_ifs()
-       # dead=0
     if true
-             # dead=0
       return 1
     else
-             # dead=0
       return 2
     end
   end
 
-    # dead=0
     # returnMethodTemp$2: Integer
     def i_like_exps()
-          # dead=0
       if (true)
-        # dead=0
         # returnMethodTemp$2: NilClass
         1
       else
-        # dead=0
         # returnMethodTemp$2: NilClass
         2
       end
     end
 
     def return_in_one_branch1()
-          # dead=0
       if (true)
-               # dead=0
         return 1
       else
-        # dead=0
         # returnMethodTemp$2: NilClass
         2
       end
     end
 
     def variables()
-          # dead=0
       if (true)
-            # dead=0
             # a: NilClass
         a = 1
       else
-            # dead=0
             # a: NilClass
         a = 2
       end
 
-          # dead=0
           # a: Integer
       if (false)
-            # dead=0
             # b: NilClass
             #
             # a: Integer
         b = 1
       else
-            # dead=0
             # b: NilClass
             #
             # a: Integer
         b = 2
       end
 
-      # dead=0
       # b: Integer
       #
       # a: Integer
@@ -75,40 +58,33 @@ class Examples
     end
 
 
-    # dead=0
     # <constant:nil>$10: NilClass
     def variables_and_loop()
       if (true)
-            # dead=0
             # a: NilClass
             #
             # <constant:nil>$10: NilClass
         a = 1
       else
-            # dead=0
             # a: NilClass
             #
             # <constant:nil>$10: NilClass
         a = 2
       end
 
-            # dead=0
             # b: NilClass
             #
             # <constant:nil>$10: NilClass
       while true
-            # dead=0
             # b: NilClass
             #
             # <constant:nil>$10: NilClass
         if (false)
-              # dead=0
               # b: NilClass
               #
               # <constant:nil>$10: NilClass
           b = 1 # error: Changing type of pinned argument
         else
-              # dead=0
               # b: NilClass
               #
               # <constant:nil>$10: NilClass
@@ -116,7 +92,6 @@ class Examples
         end
       end
 
-      # dead=0
       # b: NilClass
       #
       # <constant:nil>$10: NilClass
@@ -124,26 +99,21 @@ class Examples
     end
 
 
-    # dead=0
     # <constant:nil>$8: NilClass
     def variables_loop_if()
-            # dead=0
             # b: NilClass
             #
             # <constant:nil>$8: NilClass
       while true
-            # dead=0
             # b: NilClass
             #
             # <constant:nil>$8: NilClass
         if (false)
-              # dead=0
               # b: NilClass
               #
               # <constant:nil>$8: NilClass
           b = 1 # error: Changing type of pinned argument
         else
-              # dead=0
               # b: NilClass
               #
               # <constant:nil>$8: NilClass
@@ -151,26 +121,21 @@ class Examples
         end
       end
 
-      # dead=0
       # b: NilClass
       #
       # <constant:nil>$8: NilClass
       b
     end
 
-    # dead=0
     # i: NilClass
-    # dead=0
     # returnMethodTemp$2: untyped
     #   Being falsy entails:
     #     i to be NilClass | FalseClass
     def take_arguments(i)
       if(false)
-       # dead=0
        # returnMethodTemp$2: NilClass
        2
       else
-       # dead=0
        # i: untyped
        #
        # returnMethodTemp$2: NilClass
