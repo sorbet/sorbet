@@ -399,7 +399,7 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
     options.add_options("dev")("trace", "Trace phases");
-    options.add_options("dev")("threads", "Set number of threads", cxxopts::value<unsigned int>(), "int");
+    options.add_options("dev")("threads", "Set number of threads", cxxopts::value<int>(), "int");
     options.add_options("dev")("counters", "Print internal counters");
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
     options.add_options("dev")("statsd-prefix", "StatsD prefix", cxxopts::value<string>(), "prefix");
@@ -502,6 +502,7 @@ int realmain(int argc, char **argv) {
         return 1;
     }
     opts.noStdlib = options["no-stdlib"].as<bool>();
+    opts.threads = options["threads"].as<int>();
     if (opts.threads <= 0) {
         int ncpu = std::thread::hardware_concurrency();
         if (ncpu == 0) {
