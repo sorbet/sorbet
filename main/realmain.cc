@@ -49,6 +49,7 @@ struct Options {
     bool showProgress = false;
     bool noStdlib = false;
     int threads = 0;
+    string typedSource = "";
 };
 
 shared_ptr<spd::logger> console_err;
@@ -227,6 +228,45 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
     return result;
 }
 
+unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast::Expression> resolved, Options opts,
+                                          progressbar *progress) {
+    unique_ptr<ast::Expression> result;
+    core::FileRef f = resolved->loc.file;
+    bool forceTypedSource = !opts.typedSource.empty() && f.file(gs).path().find(opts.typedSource) != std::string::npos;
+    if (forceTypedSource) {
+        ENFORCE(!opts.print.TypedSource);
+        opts.print.TypedSource = true;
+        f.file(gs).source_type = ruby_typer::core::File::Typed;
+    }
+    try {
+        core::Context context(gs, gs.defn_root());
+        if (opts.print.CFG || opts.print.CFGRaw) {
+            cout << "digraph \"" << File::getFileName(f.file(gs).path()) << "\"{" << endl;
+        }
+        CFG_Collector_and_Typer collector(opts.print);
+        {
+            tracer->trace("CFG+Infer: {}", f.file(gs).path());
+            core::UnfreezeNameTable nameTableAccess(gs); // creates names for temporaries in CFG
+            result = ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved));
+        }
+        if (opts.print.TypedSource) {
+            cout << gs.showAnnotatedSource(f);
+        }
+        if (opts.print.CFG || opts.print.CFGRaw) {
+            cout << "}" << endl << endl;
+        }
+        if (opts.showProgress) {
+            progressbar_inc(progress);
+        }
+    } catch (...) {
+        console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
+    }
+    if (forceTypedSource) {
+        opts.print.TypedSource = false;
+    }
+    return result;
+}
+
 vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
                                               const Options &opts, bool silenceErrors = false) {
     vector<unique_ptr<ast::Expression>> result;
@@ -268,34 +308,17 @@ vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<uniq
         }
 
         for (auto &resolved : what) {
-            core::FileRef f = resolved->loc.file;
-            try {
-                core::Context context(gs, gs.defn_root());
-                if (opts.print.CFG || opts.print.CFGRaw) {
-                    cout << "digraph \"" << File::getFileName(f.file(gs).path()) << "\"{" << endl;
-                }
-                CFG_Collector_and_Typer collector(opts.print);
-                {
-                    tracer->trace("CFG+Infer: {}", f.file(gs).path());
-                    core::UnfreezeNameTable nameTableAccess(gs); // creates names for temporaries in CFG
-                    result.emplace_back(
-                        ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
-                }
-                if (opts.print.TypedSource) {
-                    cout << gs.showAnnotatedSource(f);
-                }
-                if (opts.print.CFG || opts.print.CFGRaw) {
-                    cout << "}" << endl << endl;
-                }
-                if (opts.showProgress) {
-                    progressbar_inc(progress.get());
-                }
-            } catch (...) {
-                console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
-            }
+            result.emplace_back(typecheckFile(gs, move(resolved), opts, progress.get()));
         }
         if (opts.showProgress) {
             progressbar_finish(progress.get());
+        }
+        if (!opts.typedSource.empty()) {
+            stringstream files;
+            for (auto &cfg : result) {
+                files << "  " << cfg->loc.file.file(gs).path() << endl;
+            }
+            console_err->error("`--typed-source " + opts.typedSource + "` not found in input list of:\n" + files.str());
         }
 
         if (opts.print.NameTable) {
@@ -398,6 +421,8 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
                                cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
+    options.add_options("dev")("typed-source", "Print the specified file with type annotations",
+                               cxxopts::value<string>(), "file");
     options.add_options("dev")("trace", "Trace phases");
     options.add_options("dev")("threads", "Set number of threads", cxxopts::value<int>(), "int");
     options.add_options("dev")("counters", "Print internal counters");
@@ -555,6 +580,13 @@ int realmain(int argc, char **argv) {
 
     string typed = options["typed"].as<string>();
     bool forceTyped = typed == "always";
+    opts.typedSource = options["typed-source"].as<string>();
+    if (opts.typedSource != "" && opts.print.TypedSource) {
+        console_err->error("`--typed-source " + opts.typedSource +
+                           "` and `-p typed-source` are incompatible. Either print out one file or all files.");
+        return 1;
+    }
+
     core::GlobalState gs(*console);
     createInitialGlobalState(gs, opts);
 
