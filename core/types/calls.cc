@@ -211,7 +211,6 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
 // method call to formal parameters of the method).
 //
 // Known incompleteness or inconsistencies with Ruby:
-//  - Missing handling of repeated keyword arguments (**kwargs)
 //  - Missing coercion to keyword arguments via `#to_hash`
 //  - Missing handling of block arguments
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
@@ -306,7 +305,27 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
 
             while (kwit != info.arguments().end()) {
                 core::Symbol &spec = kwit->info(ctx);
-                if (spec.isRepeated() || spec.isBlockArgument()) {
+                if (spec.isBlockArgument()) {
+                    break;
+                } else if (spec.isRepeated()) {
+                    for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
+                        auto key = *it;
+                        SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
+                        if (klass != ctx.state.defn_Symbol()) {
+                            continue;
+                        }
+
+                        NameRef arg(ctx.state, key->value);
+                        if (consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
+                            continue;
+                        }
+                        consumed.insert(arg);
+
+                        TypeAndOrigins tpe;
+                        tpe.origins = args.back().origins;
+                        tpe.type = hash->values[it - hash->keys.begin()];
+                        matchArgType(ctx, callLoc, method, tpe, spec);
+                    }
                     break;
                 }
                 ++kwit;
