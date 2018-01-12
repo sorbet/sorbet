@@ -1,16 +1,16 @@
 # @typed
 module Funcs
-  standard_method({x: Integer}, returns: Integer)
+  sig(x: Integer).returns(Integer)
   def f(x); x; end
 
   module_function :f
 
-  standard_method({s: Symbol}, returns: Symbol)
+  sig(s: Symbol).returns(Symbol)
   module_function def g(s); s; end
 
   module_function
 
-  standard_method({s: String}, returns: String)
+  sig(s: String).returns(String)
   def h(s); s; end
 end
 

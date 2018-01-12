@@ -1,6 +1,6 @@
 # @typed
 class A
-  standard_method({s: Opus::Types.nilable(String)}, returns: NilClass)
+  sig(s: T.nilable(String)).returns(NilClass)
   def test_return(s)
     if s.nil?
       return

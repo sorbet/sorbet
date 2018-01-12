@@ -2,7 +2,7 @@
 
 class TestSubtype
   def test_subtype(a)
-    a = Opus::Types.cast(nil, Opus::Types.enum([:foo]))
-    Opus::Types.assert_type!(a, Opus::Types.enum([:foo, :bar]))
+    a = T.cast(nil, T.enum([:foo]))
+    T.assert_type!(a, T.enum([:foo, :bar]))
   end
 end

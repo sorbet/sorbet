@@ -38,6 +38,8 @@ const char *array_str = "Array";
 
 const char *hash_str = "Hash";
 
+const char *proc_str = "Proc";
+
 const char *trueClass_str = "TrueClass";
 
 const char *falseClass_str = "FalseClass";
@@ -54,7 +56,7 @@ const char *no_symbol_str = "<none>";
 
 const char *opus_str = "Opus";
 
-const char *types_str = "Types";
+const char *T_str = "T";
 
 const char *basicObject_str = "BasicObject";
 
@@ -146,7 +148,7 @@ void GlobalState::initEmpty() {
     SymbolRef nilClass_id = synthesizeClass(nilClass_str);
     SymbolRef untyped_id = synthesizeClass(untyped_str, 0);
     SymbolRef opus_id = synthesizeClass(opus_str, 0);
-    SymbolRef opus_types_id = enterClassSymbol(Loc::none(), opus_id, enterNameConstant(types_str));
+    SymbolRef T_id = synthesizeClass(T_str, 0);
     SymbolRef class_id = synthesizeClass(class_str, 0);
     SymbolRef basicObject_id = synthesizeClass(basicObject_str, 0);
     SymbolRef kernel_id = synthesizeClass(kernel_str, 0);
@@ -157,6 +159,10 @@ void GlobalState::initEmpty() {
     SymbolRef standardError_id = synthesizeClass(standardError_str);
     SymbolRef complex_id = synthesizeClass(complex_str);
     SymbolRef rational_id = synthesizeClass(rational_str);
+    SymbolRef T_Array_id = enterClassSymbol(Loc::none(), T_id, enterNameConstant(array_str));
+    SymbolRef T_Hash_id = enterClassSymbol(Loc::none(), T_id, enterNameConstant(hash_str));
+    SymbolRef T_Proc_id = enterClassSymbol(Loc::none(), T_id, enterNameConstant(proc_str));
+    SymbolRef proc_id = synthesizeClass(proc_str);
 
     ENFORCE(no_symbol_id == noSymbol(), "no symbol creation failed");
     ENFORCE(top_id == defn_top(), "top symbol creation failed");
@@ -177,7 +183,7 @@ void GlobalState::initEmpty() {
     ENFORCE(nilClass_id == defn_NilClass(), "NilClass symbol creation failed");
     ENFORCE(untyped_id == defn_untyped(), "untyped symbol creation failed");
     ENFORCE(opus_id == defn_Opus(), "Opus symbol creation failed");
-    ENFORCE(opus_types_id == defn_Opus_Types(), "Opus::Types symbol creation failed");
+    ENFORCE(T_id == defn_T(), "T symbol creation failed");
     ENFORCE(class_id == defn_Class(), "Class symbol creation failed");
     ENFORCE(basicObject_id == defn_BasicObject(), "BasicObject symbol creation failed");
     ENFORCE(kernel_id == defn_Kernel(), "Kernel symbol creation failed");
@@ -188,6 +194,10 @@ void GlobalState::initEmpty() {
     ENFORCE(standardError_id == defn_StandardError(), "StandardError symbol creation failed");
     ENFORCE(complex_id == defn_Complex(), "Complex symbol creation failed");
     ENFORCE(rational_id == defn_Rational(), "Rational symbol creation failed");
+    ENFORCE(T_Array_id = defn_T_Array(), "T::Array symbol creation failed");
+    ENFORCE(T_Hash_id = defn_T_Hash(), "T::Hash symbol creation failed");
+    ENFORCE(T_Proc_id = defn_T_Proc(), "T::Proc symbol creation failed");
+    ENFORCE(proc_id = defn_Proc(), "Proc symbol creation failed");
 
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = core::Types::nil();

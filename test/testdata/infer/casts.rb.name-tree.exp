@@ -9,16 +9,16 @@ class <emptyTree>::<constant:TestCasts><<constant:TestCasts>> < (::<constant:<to
 
   def test_casts<test_casts>()
     begin
-      t = Opus::Types.assert_type!(self(<constant:TestCasts>).untyped(), Integer)
+      t = T.assert_type!(self(<constant:TestCasts>).untyped(), Integer)
       t.+(4)
-      t1 = Opus::Types.assert_type!("hi", Integer)
+      t1 = T.assert_type!("hi", Integer)
       t1.+(1)
-      s = Opus::Types.cast(self(<constant:TestCasts>).untyped(), String)
+      s = T.cast(self(<constant:TestCasts>).untyped(), String)
       s.+("hi")
-      s = Opus::Types.cast(6, String)
+      s = T.cast(6, String)
       s.+("hi")
       s.+(3)
-      s = Opus::Types.cast(6, untyped)
+      s = T.cast(6, untyped)
       s.+("hi")
       s.+(3)
     end

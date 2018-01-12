@@ -726,5250 +726,3138 @@ end
 class ZeroDivisionError < StandardError
 end
 module Abbrev
-  standard_method(
-    {
-      words: Opus::Types.array_of(String),
-    },
-    returns: Opus::Types.hash_of(keys: String, values: String)
+  sig(
+      words: T::Array[String],
   )
+  .returns(T::Hash[String, String])
   def self.abbrev(words); end
 end
 
 class ArgumentError
-  standard_method(
-    {},
-    returns: ArgumentError
-  )
-  standard_method(
-    {},
-    returns: ArgumentError
-  )
+  sig.returns(ArgumentError)
+  sig.returns(ArgumentError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: ArgumentError
-  )
+  sig.returns(ArgumentError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: ArgumentError
-  )
+  sig.returns(ArgumentError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: ArgumentError
-  )
+  sig.returns(ArgumentError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: ArgumentError
-  )
+  sig.returns(ArgumentError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: ArgumentError
-  )
+  sig.returns(ArgumentError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: ArgumentError
-  )
+  sig.returns(ArgumentError)
   def untrust(); end
 end
 
 class Array
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def <<(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Range,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float),
-    },
-    returns: Opus::Types.untyped
+  .returns(T::Array[T.untyped])
+  sig(
+      arg0: T.any(Integer, Float),
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def [](arg0, arg1=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.array_of(BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      arg0: T::Array[BasicObject],
   )
+  .returns(T::Array[T.untyped])
   def &(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def *(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Enumerable,
-    },
-    returns: Opus::Types.array_of(BasicObject)
   )
-  standard_method(
-    {
-      arg0: Opus::Types.array_of(BasicObject),
-    },
-    returns: Opus::Types.array_of(BasicObject)
+  .returns(T::Array[BasicObject])
+  sig(
+      arg0: T::Array[BasicObject],
   )
+  .returns(T::Array[BasicObject])
   def +(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.array_of(BasicObject),
-    },
-    returns: Opus::Types.array_of(BasicObject)
+  sig(
+      arg0: T::Array[BasicObject],
   )
+  .returns(T::Array[BasicObject])
   def -(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
       arg1: Integer,
       arg2: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Range,
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def []=(arg0, arg1, arg2=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def assoc(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def at(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def clear(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def map(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def map!(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def collect(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def combination(arg0, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def push(*arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def compact(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def compact!(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.array_of(BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      arg0: T::Array[BasicObject],
   )
+  .returns(T::Array[T.untyped])
   def concat(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {
+  sig.returns(Integer)
+  sig(
       arg0: BasicObject,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Integer
+  .returns(Integer)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(Integer)
   def count(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def cycle(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: BasicObject,
-      blk: Opus::Types.proc([], returns: BasicObject),
-    },
-    returns: BasicObject
+      blk: T::Proc[[], returns: BasicObject],
   )
+  .returns(BasicObject)
   def delete(arg0, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def delete_at(arg0); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def delete_if(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def drop(arg0); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def drop_while(&blk); end
 
-  standard_method(
-    {},
-    returns: Enumerator
+  sig.returns(Enumerator)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  .returns(T::Array[T.untyped])
   def each(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def each_index(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def empty?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: BasicObject
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
+  .returns(BasicObject)
   def fetch(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: BasicObject,
       arg1: Integer,
       arg2: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: BasicObject,
       arg1: Range,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  .returns(T::Array[T.untyped])
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: Integer,
       arg1: Integer,
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: Range,
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
+  .returns(T::Array[T.untyped])
   def fill(arg0=_, arg1=_, arg2=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def flatten(); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Integer
+  .returns(Integer)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(Integer)
+  sig.returns(Enumerator)
   def index(arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  sig.returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def first(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def include?(arg0); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
-  standard_method(
-    {
+  sig.returns(Object)
+  sig(
       arg0: Integer,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Integer,
       arg1: BasicObject,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(arg0=_, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def insert(arg0, *arg1); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def join(arg0=_); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(T::Array[T.untyped])
   def keep_if(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  sig.returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def last(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def member?(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def length(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Enumerator
   )
-  standard_method(
-    {
+  .returns(Enumerator)
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
   )
+  .returns(T::Array[T.untyped])
   def permutation(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(T.untyped)
   def pop(arg0=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.array_of(BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.array_of(BasicObject))
+  sig(
+      arg0: T::Array[BasicObject],
   )
+  .returns(T::Array[T::Array[BasicObject]])
   def product(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def rassoc(arg0); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def reject(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def reject!(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def repeated_combination(arg0, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def repeated_permutation(arg0, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def reverse(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def reverse!(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def reverse_each(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Integer
+  .returns(T.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(Integer)
+  sig.returns(Enumerator)
   def rindex(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def rotate(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def rotate!(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  sig.returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def sample(arg0=_); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def select(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def select!(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  sig.returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def shift(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def shuffle(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def shuffle!(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Range,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float),
-    },
-    returns: Opus::Types.untyped
+  .returns(T::Array[T.untyped])
+  sig(
+      arg0: T.any(Integer, Float),
   )
+  .returns(T.untyped)
   def slice!(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig.returns(T::Array[T.untyped])
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  .returns(T::Array[T.untyped])
   def sort(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig.returns(T::Array[T.untyped])
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  .returns(T::Array[T.untyped])
   def sort!(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def sort_by!(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def take(arg0); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def take_while(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def to_a(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def to_ary(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def transpose(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def uniq(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def uniq!(); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def unshift(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Range, Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      arg0: T.any(Range, Integer),
   )
+  .returns(T::Array[T.untyped])
   def values_at(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.array_of(BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.array_of(BasicObject))
+  sig(
+      arg0: T::Array[BasicObject],
   )
+  .returns(T::Array[T::Array[BasicObject]])
   def zip(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.array_of(BasicObject),
-    },
-    returns: Opus::Types.array_of(BasicObject)
+  sig(
+      arg0: T::Array[BasicObject],
   )
+  .returns(T::Array[BasicObject])
   def |(arg0); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
+  sig.returns(Array)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
   def untrust(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Range,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float),
-    },
-    returns: Opus::Types.untyped
+  .returns(T::Array[T.untyped])
+  sig(
+      arg0: T.any(Integer, Float),
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def slice(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 end
 
 module Base64
-  standard_method(
-    {
+  sig(
       str: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.decode64(str); end
 
-  standard_method(
-    {
+  sig(
       bin: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.encode64(bin); end
 
-  standard_method(
-    {
+  sig(
       str: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.strict_decode64(str); end
 
-  standard_method(
-    {
+  sig(
       bin: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.strict_encode64(bin); end
 
-  standard_method(
-    {
+  sig(
       str: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.urlsafe_decode64(str); end
 
-  standard_method(
-    {
+  sig(
       bin: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.urlsafe_encode64(bin); end
 end
 
 class BasicObject
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def equal?(other); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def !(); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def !=(other); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       filename: String,
       lineno: Integer,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  .returns(T.untyped)
+  sig(
+      blk: T::Proc[[], returns: BasicObject],
   )
+  .returns(T.untyped)
   def instance_eval(arg0=_, filename=_, lineno=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       args: BasicObject,
       blk: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def instance_exec(*args, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
       arg1: BasicObject,
-    },
-    returns: BasicObject
   )
+  .returns(BasicObject)
   def __send__(arg0, *arg1); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def __id__(); end
 end
 
 module Benchmark
-  standard_method(
-    {
+  sig(
       caption: String,
       label_width: Integer,
       format: String,
       labels: String,
-    },
-    returns: Opus::Types.array_of(Benchmark::Tms)
   )
+  .returns(T::Array[Benchmark::Tms])
   def self.benchmark(caption, label_width=_, format=_, *labels); end
 
-  standard_method(
-    {
+  sig(
       label_width: Integer,
       labels: String,
-      blk: Opus::Types.proc([Process], returns: NilClass),
-    },
-    returns: Opus::Types.array_of(Benchmark::Tms)
+      blk: T::Proc[[Process], returns: NilClass],
   )
+  .returns(T::Array[Benchmark::Tms])
   def self.bm(label_width=_, *labels, &blk); end
 
-  standard_method(
-    {
+  sig(
       width: Integer,
-      blk: Opus::Types.proc([Process], returns: NilClass),
-    },
-    returns: Opus::Types.array_of(Benchmark::Tms)
+      blk: T::Proc[[Process], returns: NilClass],
   )
+  .returns(T::Array[Benchmark::Tms])
   def self.bmbm(width=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       label: String,
-    },
-    returns: Benchmark::Tms
   )
+  .returns(Benchmark::Tms)
   def self.measure(label=_); end
 
-  standard_method(
-    {
+  sig(
       blk: BasicObject,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.realtime(&blk); end
 end
 
 class BigDecimal
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: BigDecimal
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(BigDecimal)
   def %(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Float,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Rational,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def +(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Float,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Rational,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def -(arg0); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def -@(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def +@(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Float,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Rational,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def *(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Float,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Rational,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def **(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Float,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Rational,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def /(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Float,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Rational,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Object
   )
+  .returns(Object)
   def <=>(arg0); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def abs(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def abs2(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def angle(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def arg(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def ceil(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def conj(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def conjugate(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def denominator(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Rational,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def div(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def divmod(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def equal?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def fdiv(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def finite?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def floor(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def imag(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def imaginary(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(NilClass, Integer)
-  )
+  sig.returns(T.any(NilClass, Integer))
   def infinite?(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def magnitude(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: BigDecimal
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(BigDecimal)
   def modulo(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def nan?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def numerator(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def phase(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Float,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Rational,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def quo(arg0); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def real(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def real?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {
+  sig.returns(Integer)
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def round(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def to_f(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_i(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_int(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def to_r(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def to_c(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {
+  sig.returns(Integer)
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
+  .returns(Rational)
   def truncate(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 
-  standard_method(
-    {},
-    returns: [Integer, Integer]
-  )
+  sig.returns([Integer, Integer])
   def precs(); end
 
-  standard_method(
-    {},
-    returns: [Integer, String, Integer, Integer]
-  )
+  sig.returns([Integer, String, Integer, Integer])
   def split(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: BigDecimal
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(BigDecimal)
   def remainder(arg0); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def fix(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def frac(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Float,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Rational,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def power(arg0); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def nonzero?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def exponent(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def sign(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def _dump(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def sqrt(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
       arg1: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def add(arg0, arg1); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
       arg1: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def sub(arg0, arg1); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
       arg1: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def mult(arg0, arg1); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: [BigDecimal, BigDecimal]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns([BigDecimal, BigDecimal])
   def coerce(arg0); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
+  sig.returns(BigDecimal)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: BigDecimal
-  )
+  sig.returns(BigDecimal)
   def untrust(); end
 end
 
 module BigMath
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def self.exp(arg0, arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def self.log(arg0, arg1); end
 
-  standard_method(
-    {
+  sig(
       prec: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def E(prec); end
 
-  standard_method(
-    {
+  sig(
       prec: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def PI(prec); end
 
-  standard_method(
-    {
+  sig(
       x: Integer,
       prec: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def atan(x, prec); end
 
-  standard_method(
-    {
+  sig(
       x: Integer,
       prec: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def cos(x, prec); end
 
-  standard_method(
-    {
+  sig(
       x: Integer,
       prec: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def sin(x, prec); end
 
-  standard_method(
-    {
+  sig(
       x: Integer,
       prec: Integer,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def sqrt(x, prec); end
 end
 
 class Binding
-  standard_method(
-    {},
-    returns: Binding
-  )
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
+  sig.returns(Binding)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def untrust(); end
 end
 
 class CSV
-  standard_method(
-    {
-      path: Opus::Types.any(String, File),
-      options: Opus::Types.hash_of(keys: Symbol, values: BasicObject),
-      blk: Opus::Types.proc([Opus::Types.array_of(String)], returns: BasicObject),
-    },
-    returns: NilClass
+  sig(
+      path: T.any(String, File),
+      options: T::Hash[Symbol, BasicObject],
+      blk: T::Proc[[T::Array[String]], returns: BasicObject],
   )
+  .returns(NilClass)
   def self.foreach(path, options=_, &blk); end
 
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
-  standard_method(
-    {},
-    returns: CSV
-  )
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
+  sig.returns(CSV)
   def untrust(); end
 end
 
 class Class
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  sig.returns(T.untyped)
   def allocate(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Class,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def inherited(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Class, NilClass)
-  )
-  standard_method(
-    {},
-    returns: Class
-  )
+  sig.returns(T.any(Class, NilClass))
+  sig.returns(Class)
   def superclass(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      arg0: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def instance_methods(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Class
-  )
+  sig.returns(Class)
   def class(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def name(); end
 
-  standard_method(
-    {},
-    returns: Class
-  )
-  standard_method(
-    {},
-    returns: Class
-  )
-  def clone(); end
-
-  standard_method(
-    {},
-    returns: Class
-  )
-  def dup(); end
-
-  standard_method(
-    {},
-    returns: Class
-  )
-  standard_method(
-    {},
-    returns: Class
-  )
+  sig.returns(Class)
+  sig.returns(Class)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Class
-  )
-  def taint(); end
-
-  standard_method(
-    {},
-    returns: Class
-  )
-  def trust(); end
-
-  standard_method(
-    {},
-    returns: Class
-  )
-  def untaint(); end
-
-  standard_method(
-    {},
-    returns: Class
-  )
-  def untrust(); end
-
-  standard_method(
-    {
+  sig(
       arg0: Module,
-    },
-    returns: Class
   )
+  .returns(Class)
   def include(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Module,
-    },
-    returns: Class
   )
+  .returns(Class)
   def prepend(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Class
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Class)
   def private_class_method(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Class
   )
+  .returns(Class)
   def private_constant(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Class
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Class)
   def public_class_method(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Class
   )
+  .returns(Class)
   def public_constant(*arg0); end
+
+  sig.returns(Class)
+  sig.returns(Class)
+  def clone(); end
+
+  sig.returns(Class)
+  def dup(); end
+
+  sig.returns(Class)
+  def taint(); end
+
+  sig.returns(Class)
+  def trust(); end
+
+  sig.returns(Class)
+  def untaint(); end
+
+  sig.returns(Class)
+  def untrust(); end
 end
 
 class ClosedQueueError
-  standard_method(
-    {},
-    returns: ClosedQueueError
-  )
-  standard_method(
-    {},
-    returns: ClosedQueueError
-  )
+  sig.returns(ClosedQueueError)
+  sig.returns(ClosedQueueError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: ClosedQueueError
-  )
+  sig.returns(ClosedQueueError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: ClosedQueueError
-  )
+  sig.returns(ClosedQueueError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: ClosedQueueError
-  )
+  sig.returns(ClosedQueueError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: ClosedQueueError
-  )
+  sig.returns(ClosedQueueError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: ClosedQueueError
-  )
+  sig.returns(ClosedQueueError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: ClosedQueueError
-  )
+  sig.returns(ClosedQueueError)
   def untrust(); end
 end
 
 class Complex
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Float,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Rational,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def *(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Float,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Rational,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def **(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Float,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Rational,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def +(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Float,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Rational,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def -(arg0); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def -@(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def +@(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Float,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Rational,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def /(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def abs(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def abs2(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def angle(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def arg(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def conj(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def conjugate(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def denominator(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def equal?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Complex
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(Complex)
   def fdiv(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
   def imag(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
   def imaginary(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
   def magnitude(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def numerator(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def phase(); end
 
-  standard_method(
-    {},
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
-  )
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def polar(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Float,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: Rational,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def quo(arg0); end
 
-  standard_method(
-    {},
-    returns: Rational
+  sig.returns(Rational)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Rational
-  )
+  .returns(Rational)
   def rationalize(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
   def real(); end
 
-  standard_method(
-    {},
-    returns: FalseClass
-  )
+  sig.returns(FalseClass)
   def real?(); end
 
-  standard_method(
-    {},
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
-  )
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def rect(); end
 
-  standard_method(
-    {},
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
-  )
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def rectangular(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def to_c(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def to_f(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_i(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def to_r(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: [Complex, Complex]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns([Complex, Complex])
   def coerce(arg0); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
+  sig.returns(Complex)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def untrust(); end
 end
 
 module Coverage
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def self.start(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: String, values: Opus::Types.array_of(Opus::Types.any(Integer, NilClass)))
-  )
+  sig.returns(T::Hash[String, T::Array[T.any(Integer, NilClass)]])
   def self.result(); end
 end
 
 class Data
-  standard_method(
-    {},
-    returns: Data
-  )
-  standard_method(
-    {},
-    returns: Data
-  )
+  sig.returns(Data)
+  sig.returns(Data)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Data
-  )
+  sig.returns(Data)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Data
-  )
+  sig.returns(Data)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Data
-  )
+  sig.returns(Data)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Data
-  )
+  sig.returns(Data)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Data
-  )
+  sig.returns(Data)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Data
-  )
+  sig.returns(Data)
   def untrust(); end
 end
 
 class Date
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: Integer,
       arg2: Integer,
       arg3: Integer,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(arg0=_, arg1=_, arg2=_, arg3=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def strftime(arg0); end
 
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
+  sig.returns(Date)
+  sig.returns(Date)
+  sig.returns(Date)
+  sig.returns(Date)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
+  sig.returns(Date)
+  sig.returns(Date)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
+  sig.returns(Date)
+  sig.returns(Date)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
+  sig.returns(Date)
+  sig.returns(Date)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
+  sig.returns(Date)
+  sig.returns(Date)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
+  sig.returns(Date)
+  sig.returns(Date)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Date
-  )
-  standard_method(
-    {},
-    returns: Date
-  )
+  sig.returns(Date)
+  sig.returns(Date)
   def untrust(); end
 end
 
 class DateTime
-  standard_method(
-    {},
-    returns: DateTime
-  )
-  standard_method(
-    {},
-    returns: DateTime
-  )
+  sig.returns(DateTime)
+  sig.returns(DateTime)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: DateTime
-  )
+  sig.returns(DateTime)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: DateTime
-  )
+  sig.returns(DateTime)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: DateTime
-  )
+  sig.returns(DateTime)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: DateTime
-  )
+  sig.returns(DateTime)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: DateTime
-  )
+  sig.returns(DateTime)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: DateTime
-  )
+  sig.returns(DateTime)
   def untrust(); end
 end
 
 class Dir
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Pathname),
-    },
-    returns: Integer
+  sig(
+      arg0: T.any(String, Pathname),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Pathname),
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  .returns(Integer)
+  sig(
+      arg0: T.any(String, Pathname),
+      blk: T::Proc[[String], returns: BasicObject],
   )
+  .returns(T.untyped)
   def self.chdir(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.chroot(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.delete(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Encoding,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def self.entries(arg0, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.exist?(file); end
 
-  standard_method(
-    {
+  sig(
       dir: String,
       arg0: Encoding,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: NilClass
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       dir: String,
       arg0: Encoding,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def self.foreach(dir, arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def self.getwd(); end
 
-  standard_method(
-    {
-      pattern: Opus::Types.any(String, Opus::Types.array_of(String)),
+  sig(
+      pattern: T.any(String, T::Array[String]),
       flags: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
-  standard_method(
-    {
-      pattern: Opus::Types.any(String, Opus::Types.array_of(String)),
+  .returns(T::Array[String])
+  sig(
+      pattern: T.any(String, T::Array[String]),
       flags: Integer,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: NilClass
+      blk: T::Proc[[String], returns: BasicObject],
   )
+  .returns(NilClass)
   def self.glob(pattern, flags=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.home(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.mkdir(arg0, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Encoding,
-    },
-    returns: Dir
   )
-  standard_method(
-    {
+  .returns(Dir)
+  sig(
       arg0: String,
       arg1: Encoding,
-      blk: Opus::Types.proc([Dir], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[Dir], returns: BasicObject],
   )
+  .returns(T.untyped)
   def self.open(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def self.pwd(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.rmdir(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.unlink(arg0); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def close(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: Dir
+  sig(
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(Dir)
+  sig.returns(Enumerator)
   def each(&blk); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def fileno(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Encoding,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def path(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def pos(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def pos=(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def read(); end
 
-  standard_method(
-    {},
-    returns: Dir
-  )
+  sig.returns(Dir)
   def rewind(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Dir
   )
+  .returns(Dir)
   def seek(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def tell(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def to_path(); end
 
-  standard_method(
-    {},
-    returns: Dir
-  )
-  standard_method(
-    {},
-    returns: Dir
-  )
+  sig.returns(Dir)
+  sig.returns(Dir)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Dir
-  )
+  sig.returns(Dir)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Dir
-  )
+  sig.returns(Dir)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Dir
-  )
+  sig.returns(Dir)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Dir
-  )
+  sig.returns(Dir)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Dir
-  )
+  sig.returns(Dir)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Dir
-  )
+  sig.returns(Dir)
   def untrust(); end
 
-  standard_method(
-    {
-      pattern: Opus::Types.any(String, Opus::Types.array_of(String)),
+  sig(
+      pattern: T.any(String, T::Array[String]),
       flags: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
-  standard_method(
-    {
-      pattern: Opus::Types.any(String, Opus::Types.array_of(String)),
+  .returns(T::Array[String])
+  sig(
+      pattern: T.any(String, T::Array[String]),
       flags: Integer,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: NilClass
+      blk: T::Proc[[String], returns: BasicObject],
   )
+  .returns(NilClass)
   def self.[](pattern, flags=_, &blk); end
 end
 
 class EOFError
-  standard_method(
-    {},
-    returns: EOFError
-  )
-  standard_method(
-    {},
-    returns: EOFError
-  )
+  sig.returns(EOFError)
+  sig.returns(EOFError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: EOFError
-  )
+  sig.returns(EOFError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: EOFError
-  )
+  sig.returns(EOFError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: EOFError
-  )
+  sig.returns(EOFError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: EOFError
-  )
+  sig.returns(EOFError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: EOFError
-  )
+  sig.returns(EOFError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: EOFError
-  )
+  sig.returns(EOFError)
   def untrust(); end
 end
 
 class Encoding
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: String, values: String)
-  )
+  sig.returns(T::Hash[String, String])
   def self.aliases(); end
 
-  standard_method(
-    {
+  sig(
       obj1: BasicObject,
       obj2: BasicObject,
-    },
-    returns: Opus::Types.any(Encoding, NilClass)
   )
+  .returns(T.any(Encoding, NilClass))
   def self.compatible?(obj1, obj2); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
   def self.default_external(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg0: Encoding,
-    },
-    returns: Encoding
   )
+  .returns(Encoding)
   def self.default_external=(arg0); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
   def self.default_internal(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: Encoding,
-    },
-    returns: Opus::Types.any(Encoding, NilClass)
   )
+  .returns(T.any(Encoding, NilClass))
   def self.default_internal=(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Encoding),
-    },
-    returns: Encoding
+  sig(
+      arg0: T.any(String, Encoding),
   )
+  .returns(Encoding)
   def self.find(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Encoding)
-  )
+  sig.returns(T::Array[Encoding])
   def self.list(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(String)
-  )
+  sig.returns(T::Array[String])
   def self.name_list(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def ascii_compatible?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def dummy?(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def name(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(String)
-  )
+  sig.returns(T::Array[String])
   def names(); end
 
-  standard_method(
-    {
+  sig(
       name: String,
-    },
-    returns: Encoding
   )
+  .returns(Encoding)
   def replicate(name); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
+  sig.returns(Encoding)
   def untrust(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 end
 
 class EncodingError
-  standard_method(
-    {},
-    returns: EncodingError
-  )
-  standard_method(
-    {},
-    returns: EncodingError
-  )
+  sig.returns(EncodingError)
+  sig.returns(EncodingError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: EncodingError
-  )
+  sig.returns(EncodingError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: EncodingError
-  )
+  sig.returns(EncodingError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: EncodingError
-  )
+  sig.returns(EncodingError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: EncodingError
-  )
+  sig.returns(EncodingError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: EncodingError
-  )
+  sig.returns(EncodingError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: EncodingError
-  )
+  sig.returns(EncodingError)
   def untrust(); end
 end
 
 module Enumerable
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig.returns(T.any(TrueClass, FalseClass))
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  .returns(T.any(TrueClass, FalseClass))
   def all?(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig.returns(T.any(TrueClass, FalseClass))
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  .returns(T.any(TrueClass, FalseClass))
   def any?(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def collect(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Enumerator),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: Enumerator],
   )
+  .returns(T::Array[T.untyped])
   def collect_concat(&blk); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {
+  sig.returns(Integer)
+  sig(
       arg0: BasicObject,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Integer
+  .returns(Integer)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(Integer)
   def count(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: NilClass
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       n: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def cycle(n=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       ifnone: Proc,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(BasicObject, NilClass)
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {
+  .returns(T.any(BasicObject, NilClass))
+  sig(
       ifnone: Proc,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def detect(ifnone=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def drop(n); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def drop_while(&blk); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
-    },
-    returns: NilClass
+      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       n: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def each_cons(n, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Integer], returns: BasicObject),
-    },
-    returns: Enumerable
+  sig(
+      blk: T::Proc[[T.untyped, Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerable
-  )
+  .returns(Enumerable)
+  sig.returns(Enumerable)
   def each_with_index(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def entries(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def find_all(&blk); end
 
-  standard_method(
-    {
+  sig(
       value: BasicObject,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(Integer, NilClass)
+  .returns(T.any(Integer, NilClass))
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T.any(Integer, NilClass))
+  sig.returns(Enumerator)
   def find_index(value=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(BasicObject, NilClass)
-  )
-  standard_method(
-    {
+  sig.returns(T.any(BasicObject, NilClass))
+  sig(
       n: Integer,
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(BasicObject), NilClass)
   )
+  .returns(T.any(T::Array[BasicObject], NilClass))
   def first(n=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: BasicObject,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(T::Array[T.untyped])
   def grep(arg0, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.array_of(Opus::Types.untyped))
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Hash[T.untyped, T::Array[T.untyped]])
+  sig.returns(Enumerator)
   def group_by(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def include?(arg0); end
 
-  standard_method(
-    {
+  sig(
       initial: BasicObject,
       arg0: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       initial: BasicObject,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  .returns(T.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
   )
+  .returns(T.untyped)
   def inject(initial=_, arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
+  sig.returns(T.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
+  .returns(T::Array[T.untyped])
   def max(arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Enumerator
+  sig.returns(Enumerator)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Enumerator
   )
-  standard_method(
-    {
+  .returns(Enumerator)
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
+  .returns(T::Array[T.untyped])
   def max_by(arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
+  sig.returns(T.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
+  .returns(T::Array[T.untyped])
   def min(arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Enumerator
+  sig.returns(Enumerator)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Integer,
-    },
-    returns: Enumerator
   )
-  standard_method(
-    {
+  .returns(Enumerator)
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
+  .returns(T::Array[T.untyped])
   def min_by(arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: [BasicObject, BasicObject]
+  sig.returns([BasicObject, BasicObject])
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: [BasicObject, BasicObject]
-  )
+  .returns([BasicObject, BasicObject])
   def minmax(&blk); end
 
-  standard_method(
-    {},
-    returns: [BasicObject, BasicObject]
+  sig.returns([BasicObject, BasicObject])
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Enumerator
-  )
+  .returns(Enumerator)
   def minmax_by(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig.returns(T.any(TrueClass, FalseClass))
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  .returns(T.any(TrueClass, FalseClass))
   def none?(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig.returns(T.any(TrueClass, FalseClass))
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  .returns(T.any(TrueClass, FalseClass))
   def one?(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: [Opus::Types.array_of(BasicObject), Opus::Types.array_of(BasicObject)]
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns([T::Array[BasicObject], T::Array[BasicObject]])
+  sig.returns(Enumerator)
   def partition(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def reject(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Enumerator
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(Enumerator)
+  sig.returns(Enumerator)
   def reverse_each(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig.returns(T::Array[T.untyped])
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  .returns(T::Array[T.untyped])
   def sort(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def sort_by(&blk); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(BasicObject), NilClass)
   )
+  .returns(T.any(T::Array[BasicObject], NilClass))
   def take(n); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def take_while(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
-  )
+  sig.returns(T::Hash[T.untyped, T.untyped])
   def to_h(); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
-    },
-    returns: NilClass
+      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       n: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def each_slice(n, &blk); end
 
-  standard_method(
-    {
+  sig(
       ifnone: Proc,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(BasicObject, NilClass)
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {
+  .returns(T.any(BasicObject, NilClass))
+  sig(
       ifnone: Proc,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def find(ifnone=_, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Enumerator),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: Enumerator],
   )
+  .returns(T::Array[T.untyped])
   def flat_map(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def map(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def member?(arg0); end
 
-  standard_method(
-    {
+  sig(
       initial: BasicObject,
       arg0: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       initial: BasicObject,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  .returns(T.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
   )
+  .returns(T.untyped)
   def reduce(initial=_, arg0=_, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator)
   def select(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def to_a(); end
 end
 
 class Enumerator
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
-    },
-    returns: Object
+      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Proc,
-      blk: Opus::Types.proc([Opus::Types.array_of(Opus::Types.untyped)], returns: BasicObject),
-    },
-    returns: Object
+      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
   )
+  .returns(Object)
   def initialize(arg0=_, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T.untyped)
+  sig.returns(Enumerator)
   def each(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Integer], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      blk: T::Proc[[T.untyped, Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T.untyped)
+  sig.returns(Enumerator)
   def each_with_index(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: BasicObject,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def each_with_object(arg0, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def feed(arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  sig.returns(T.untyped)
   def next(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def next_values(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  sig.returns(T.untyped)
   def peek(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def peek_values(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  sig.returns(Enumerator)
   def rewind(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, NilClass)
-  )
+  sig.returns(T.any(Integer, Float, NilClass))
   def size(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
+  sig.returns(Enumerator)
   def untrust(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Integer], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      blk: T::Proc[[T.untyped, Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T.untyped)
+  sig.returns(Enumerator)
   def with_index(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: BasicObject,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def with_object(arg0, &blk); end
 end
 
 class Exception
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(String)
-  )
+  sig.returns(T::Array[String])
   def backtrace(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Thread::Backtrace::Location)
-  )
+  sig.returns(T::Array[Thread::Backtrace::Location])
   def backtrace_locations(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def cause(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Exception
   )
+  .returns(Exception)
   def exception(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(arg0=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def message(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Opus::Types.array_of(String)),
-    },
-    returns: Opus::Types.array_of(String)
+  sig(
+      arg0: T.any(String, T::Array[String]),
   )
+  .returns(T::Array[String])
   def set_backtrace(arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Exception
-  )
-  standard_method(
-    {},
-    returns: Exception
-  )
+  sig.returns(Exception)
+  sig.returns(Exception)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Exception
-  )
+  sig.returns(Exception)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Exception
-  )
+  sig.returns(Exception)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Exception
-  )
+  sig.returns(Exception)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Exception
-  )
+  sig.returns(Exception)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Exception
-  )
+  sig.returns(Exception)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Exception
-  )
+  sig.returns(Exception)
   def untrust(); end
 end
 
 class FalseClass
-  standard_method(
-    {},
-    returns: FalseClass
-  )
-  standard_method(
-    {},
-    returns: FalseClass
-  )
+  sig.returns(FalseClass)
+  sig.returns(FalseClass)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: FalseClass
-  )
+  sig.returns(FalseClass)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: FalseClass
-  )
+  sig.returns(FalseClass)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: FalseClass
-  )
+  sig.returns(FalseClass)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: FalseClass
-  )
+  sig.returns(FalseClass)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: FalseClass
-  )
+  sig.returns(FalseClass)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: FalseClass
-  )
+  sig.returns(FalseClass)
   def untrust(); end
 end
 
 class Fiber
-  standard_method(
-    {},
-    returns: Fiber
-  )
-  standard_method(
-    {},
-    returns: Fiber
-  )
+  sig.returns(Fiber)
+  sig.returns(Fiber)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Fiber
-  )
+  sig.returns(Fiber)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Fiber
-  )
+  sig.returns(Fiber)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Fiber
-  )
+  sig.returns(Fiber)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Fiber
-  )
+  sig.returns(Fiber)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Fiber
-  )
+  sig.returns(Fiber)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Fiber
-  )
+  sig.returns(Fiber)
   def untrust(); end
 end
 
 class FiberError
-  standard_method(
-    {},
-    returns: FiberError
-  )
-  standard_method(
-    {},
-    returns: FiberError
-  )
+  sig.returns(FiberError)
+  sig.returns(FiberError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: FiberError
-  )
+  sig.returns(FiberError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: FiberError
-  )
+  sig.returns(FiberError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: FiberError
-  )
+  sig.returns(FiberError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: FiberError
-  )
+  sig.returns(FiberError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: FiberError
-  )
+  sig.returns(FiberError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: FiberError
-  )
+  sig.returns(FiberError)
   def untrust(); end
 end
 
 class File
-  standard_method(
-    {
+  sig(
       file: String,
       dir: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.absolute_path(file, dir=_); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(BasicObject, Pathname, IO),
-    },
-    returns: Time
+  sig(
+      file: T.any(BasicObject, Pathname, IO),
   )
+  .returns(Time)
   def self.atime(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
       suffix: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.basename(file, suffix=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg0: String,
       arg1: Integer,
       arg2: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def self.binread(arg0, arg1=_, arg2=_); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(BasicObject, Pathname, IO),
-    },
-    returns: Time
+  sig(
+      file: T.any(BasicObject, Pathname, IO),
   )
+  .returns(Time)
   def self.birthtime(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.blockdev?(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.chardev?(file); end
 
-  standard_method(
-    {
+  sig(
       mode: Integer,
       files: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.chmod(mode, *files); end
 
-  standard_method(
-    {
+  sig(
       owner: Integer,
       group: Integer,
       files: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.chown(owner, group, *files); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(BasicObject, Pathname, IO),
-    },
-    returns: Time
+  sig(
+      file: T.any(BasicObject, Pathname, IO),
   )
+  .returns(Time)
   def self.ctime(file); end
 
-  standard_method(
-    {
+  sig(
       files: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.delete(*files); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.directory?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.dirname(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.executable?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.executable_real?(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(BasicObject, Pathname, IO),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      file: T.any(BasicObject, Pathname, IO),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.exist?(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(BasicObject, Pathname),
-      dir: Opus::Types.any(BasicObject, Pathname),
-    },
-    returns: String
+  sig(
+      file: T.any(BasicObject, Pathname),
+      dir: T.any(BasicObject, Pathname),
   )
+  .returns(String)
   def self.expand_path(file, dir=_); end
 
-  standard_method(
-    {
+  sig(
       path: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.extname(path); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.file?(file); end
 
-  standard_method(
-    {
+  sig(
       pattern: String,
       path: String,
       flags: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.fnmatch(pattern, path, flags=_); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.ftype(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.grpowned?(file); end
 
-  standard_method(
-    {
-      file_1: Opus::Types.any(String, IO),
-      file_2: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      file_1: T.any(String, IO),
+      file_2: T.any(String, IO),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.identical?(file_1, file_2); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(BasicObject, Pathname, File, Opus::Types.array_of(String)),
-    },
-    returns: String
+  sig(
+      arg0: T.any(BasicObject, Pathname, File, T::Array[String]),
   )
+  .returns(String)
   def self.join(*arg0); end
 
-  standard_method(
-    {
+  sig(
       mode: Integer,
       files: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.lchmod(mode, *files); end
 
-  standard_method(
-    {
+  sig(
       owner: Integer,
       group: Integer,
       files: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.lchown(owner, group, *files); end
 
-  standard_method(
-    {
+  sig(
       old: String,
       new: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.link(old, new); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: File::Stat
   )
+  .returns(File::Stat)
   def self.lstat(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(BasicObject, Pathname, IO),
-    },
-    returns: Time
+  sig(
+      file: T.any(BasicObject, Pathname, IO),
   )
+  .returns(Time)
   def self.mtime(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
       perm: String,
       opt: Integer,
@@ -5980,12 +3868,10 @@ class File
       textmode: BasicObject,
       binmode: BasicObject,
       autoclose: BasicObject,
-    },
-    returns: File
   )
-  standard_method(
-    {
-      file: Opus::Types.any(BasicObject, Pathname),
+  .returns(File)
+  sig(
+      file: T.any(BasicObject, Pathname),
       mode: String,
       perm: String,
       opt: Integer,
@@ -5996,2866 +3882,1747 @@ class File
       textmode: BasicObject,
       binmode: BasicObject,
       autoclose: BasicObject,
-      blk: Opus::Types.proc([File], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[File], returns: BasicObject],
   )
+  .returns(T.untyped)
   def self.open(file=_, perm=_, opt=_, mode: _, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, &blk); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.owned?(file); end
 
-  standard_method(
-    {
+  sig(
       path: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.path(path); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.pipe?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.readable?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.readable_real?(file); end
 
-  standard_method(
-    {
+  sig(
       link: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.readlink(link); end
 
-  standard_method(
-    {
+  sig(
       pathname: String,
       dir: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.realdirpath(pathname, dir=_); end
 
-  standard_method(
-    {
+  sig(
       pathname: String,
       dir: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.realpath(pathname, dir=_); end
 
-  standard_method(
-    {
+  sig(
       old: String,
       new: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.rename(old, new); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.setgid?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.setuid?(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Integer
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(Integer)
   def self.size(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(Integer, NilClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(Integer, NilClass))
   def self.size?(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.socket?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: [String, String]
   )
+  .returns([String, String])
   def self.split(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(BasicObject, Pathname),
-    },
-    returns: File::Stat
+  sig(
+      file: T.any(BasicObject, Pathname),
   )
+  .returns(File::Stat)
   def self.stat(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.sticky?(file); end
 
-  standard_method(
-    {
+  sig(
       old: String,
       new: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.symlink(old, new); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.symlink?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.truncate(file, arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.umask(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       atime: Time,
       mtime: Time,
       files: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.utime(atime, mtime, *files); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(Integer, NilClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(Integer, NilClass))
   def self.world_readable?(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(Integer, NilClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(Integer, NilClass))
   def self.world_writable?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def self.writable?(file); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def self.writable_real?(file); end
 
-  standard_method(
-    {
-      file: Opus::Types.any(String, IO),
-    },
-    returns: Opus::Types.any(Integer, NilClass)
+  sig(
+      file: T.any(String, IO),
   )
+  .returns(T.any(Integer, NilClass))
   def self.zero?(file); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def atime(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def birthtime(); end
 
-  standard_method(
-    {
+  sig(
       mode: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def chmod(mode); end
 
-  standard_method(
-    {
+  sig(
       owner: Integer,
       group: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def chown(owner, group); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def ctime(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(Integer, TrueClass, FalseClass)
   )
+  .returns(T.any(Integer, TrueClass, FalseClass))
   def flock(arg0); end
 
-  standard_method(
-    {
+  sig(
       file: String,
       mode: String,
       perm: String,
       opt: Integer,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(file, mode=_, perm=_, opt=_); end
 
-  standard_method(
-    {},
-    returns: File::Stat
-  )
+  sig.returns(File::Stat)
   def lstat(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def mtime(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def path(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def truncate(arg0); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
+  sig.returns(File)
+  sig.returns(File)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def untrust(); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: File
   )
-  standard_method(
-    {
+  .returns(File)
+  sig(
       arg0: BasicObject,
-    },
-    returns: File
   )
+  .returns(File)
   def <<(arg0); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def binmode(); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: File
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(File)
+  sig(
       sep: String,
       limit: Integer,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: File
+      blk: T::Proc[[String], returns: BasicObject],
   )
+  .returns(File)
   def each(sep=_, limit=_, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: File
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: File
+  .returns(File)
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
+  .returns(File)
   def each_byte(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: File
+  sig(
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: File
+  .returns(File)
+  sig(
+      blk: T::Proc[[String], returns: BasicObject],
   )
+  .returns(File)
   def each_char(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: File
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: File
+  .returns(File)
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
+  .returns(File)
   def each_codepoint(&blk); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def flush(); end
 
-  standard_method(
-    {
-      ext_or_ext_int_enc: Opus::Types.any(String, Encoding),
-    },
-    returns: File
+  sig(
+      ext_or_ext_int_enc: T.any(String, Encoding),
   )
-  standard_method(
-    {
-      ext_or_ext_int_enc: Opus::Types.any(String, Encoding),
-    },
-    returns: File
+  .returns(File)
+  sig(
+      ext_or_ext_int_enc: T.any(String, Encoding),
   )
-  standard_method(
-    {
-      ext_enc: Opus::Types.any(String, Encoding),
-      int_enc: Opus::Types.any(String, Encoding),
-    },
-    returns: File
+  .returns(File)
+  sig(
+      ext_enc: T.any(String, Encoding),
+      int_enc: T.any(String, Encoding),
   )
-  standard_method(
-    {
-      ext_enc: Opus::Types.any(String, Encoding),
-      int_enc: Opus::Types.any(String, Encoding),
-    },
-    returns: File
+  .returns(File)
+  sig(
+      ext_enc: T.any(String, Encoding),
+      int_enc: T.any(String, Encoding),
   )
+  .returns(File)
   def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
 
-  standard_method(
-    {},
-    returns: File
-  )
-  standard_method(
-    {},
-    returns: File
-  )
+  sig.returns(File)
+  sig.returns(File)
   def to_io(); end
 
-  standard_method(
-    {
+  sig(
       pattern: String,
       path: String,
       flags: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.fnmatch?(pattern, path, flags=_); end
 
-  standard_method(
-    {
+  sig(
       files: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.unlink(*files); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_path(); end
 end
 
 class File::Stat
-  standard_method(
-    {
+  sig(
       other: File::Stat,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def <=>(other); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def atime(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def birthtime(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def blksize(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def blockdev?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def blocks(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def chardev?(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def ctime(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def dev(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def dev_major(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def dev_minor(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def directory?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def executable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def executable_real?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def file?(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def ftype(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def gid(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def grpowned?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def ino(); end
 
-  standard_method(
-    {
+  sig(
       file: String,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(file); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def mode(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def mtime(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def nlink(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def owned?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def pipe?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def rdev(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def rdev_major(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def rdev_minor(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def readable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def readable_real?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def setgid?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def setuid?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def socket?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def sticky?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def symlink?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def uid(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def world_readable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def world_writable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def writable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def writable_real?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 end
 
 module FileUtils
-  standard_method(
-    {
-      src: Opus::Types.any(String, Pathname),
-      dest: Opus::Types.any(String, Pathname),
-      preserve: Opus::Types.hash_of(keys: Symbol, values: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(String)
+  sig(
+      src: T.any(String, Pathname),
+      dest: T.any(String, Pathname),
+      preserve: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
   )
+  .returns(T::Array[String])
   def self.cp_r(src, dest, preserve=_); end
 
-  standard_method(
-    {
-      list: Opus::Types.any(String, Pathname),
-      mode: Opus::Types.hash_of(keys: Symbol, values: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.array_of(String)
+  sig(
+      list: T.any(String, Pathname),
+      mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
   )
+  .returns(T::Array[String])
   def self.mkdir_p(list, mode=_); end
 end
 
 class Float
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def %(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def *(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  standard_method(
-    {
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  standard_method(
-    {
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def **(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def +(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def -(arg0); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def -@(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def +@(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def /(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Float,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Rational,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Object
   )
+  .returns(Object)
   def <=>(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >=(arg0); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def abs(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def abs2(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Rational,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def div(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def divmod(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def angle(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def arg(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def ceil(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: [Float, Float]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: [Float, Float]
+  .returns([Float, Float])
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns([Float, Float])
   def coerce(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def denominator(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def equal?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def fdiv(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def finite?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def floor(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def infinite?(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def magnitude(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def modulo(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def nan?(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def next_float(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def numerator(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def phase(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def prev_float(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def quo(arg0); end
 
-  standard_method(
-    {},
-    returns: Rational
+  sig.returns(Rational)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Rational
-  )
+  .returns(Rational)
   def rationalize(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Integer
+  sig.returns(Integer)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def round(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def to_f(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_i(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_int(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def to_r(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def truncate(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def conj(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def conjugate(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def imag(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def imaginary(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def real(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def real?(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def to_c(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
+  sig.returns(Float)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def untrust(); end
 end
 
 class FloatDomainError
-  standard_method(
-    {},
-    returns: FloatDomainError
-  )
-  standard_method(
-    {},
-    returns: FloatDomainError
-  )
+  sig.returns(FloatDomainError)
+  sig.returns(FloatDomainError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: FloatDomainError
-  )
+  sig.returns(FloatDomainError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: FloatDomainError
-  )
+  sig.returns(FloatDomainError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: FloatDomainError
-  )
+  sig.returns(FloatDomainError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: FloatDomainError
-  )
+  sig.returns(FloatDomainError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: FloatDomainError
-  )
+  sig.returns(FloatDomainError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: FloatDomainError
-  )
+  sig.returns(FloatDomainError)
   def untrust(); end
 end
 
 module Gem
-  standard_method(
-    {
+  sig(
       name: String,
       args: String,
       requirements: Gem::Requirement,
-    },
-    returns: String
   )
+  .returns(String)
   def self.bin_path(name, args=_, *requirements); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def self.binary_mode(); end
 
-  standard_method(
-    {
+  sig(
       install_dir: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.bindir(install_dir=_); end
 
-  standard_method(
-    {},
-    returns: Hash
-  )
+  sig.returns(Hash)
   def self.clear_default_specs(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def self.clear_paths(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def self.config_file(); end
 
-  standard_method(
-    {},
-    returns: Gem::ConfigFile
-  )
+  sig.returns(Gem::ConfigFile)
   def self.configuration(); end
 
-  standard_method(
-    {
+  sig(
       config: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def self.configuration=(config); end
 
-  standard_method(
-    {
+  sig(
       gem_name: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def self.datadir(gem_name); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def self.default_bindir(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def self.default_cert_path(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def self.default_dir(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def self.default_exec_format(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def self.default_key_path(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def self.default_path(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
-  )
+  sig.returns(T.any(T::Array[String], NilClass))
   def self.default_rubygems_dirs(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
-  )
+  sig.returns(T.any(T::Array[String], NilClass))
   def self.default_sources(); end
 end
 
 class Hash
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def [](arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def []=(arg0, arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def store(arg0, arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(BasicObject)
   )
+  .returns(T::Array[BasicObject])
   def assoc(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
-  )
+  sig.returns(T::Hash[T.untyped, T.untyped])
   def clear(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
-  )
+  sig.returns(T::Hash[T.untyped, T.untyped])
   def compare_by_identity(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def compare_by_identity?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: BasicObject,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(T.untyped)
   def default(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def default=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: BasicObject,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: BasicObject
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(BasicObject)
   def delete(arg0, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(Enumerator)
   def delete_if(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(Enumerator)
   def each(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(Enumerator)
   def each_pair(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(Enumerator)
   def each_key(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(Enumerator)
   def each_value(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def empty?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       arg0: BasicObject,
       arg1: BasicObject,
-    },
-    returns: BasicObject
   )
-  standard_method(
-    {
+  .returns(BasicObject)
+  sig(
       arg0: BasicObject,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: BasicObject
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(BasicObject)
   def fetch(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def member?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def has_key?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def key?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def has_value?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def value?(arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
-  )
+  sig.returns(T::Hash[T.untyped, T.untyped])
   def invert(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(Enumerator)
   def keep_if(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def key(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def keys(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def length(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.hash_of(keys: BasicObject, values: BasicObject),
-    },
-    returns: Opus::Types.hash_of(keys: BasicObject, values: BasicObject)
+  sig(
+      arg0: T::Hash[BasicObject, BasicObject],
   )
-  standard_method(
-    {
-      arg0: Opus::Types.hash_of(keys: BasicObject, values: BasicObject),
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped, Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.hash_of(keys: BasicObject, values: BasicObject)
+  .returns(T::Hash[BasicObject, BasicObject])
+  sig(
+      arg0: T::Hash[BasicObject, BasicObject],
+      blk: T::Proc[[T.untyped, T.untyped, T.untyped], returns: BasicObject],
   )
+  .returns(T::Hash[BasicObject, BasicObject])
   def merge(arg0, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(BasicObject)
   )
+  .returns(T::Array[BasicObject])
   def rassoc(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
-  )
+  sig.returns(T::Hash[T.untyped, T.untyped])
   def rehash(); end
 
-  standard_method(
-    {},
-    returns: Enumerator
+  sig.returns(Enumerator)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
-  )
+  .returns(T::Hash[T.untyped, T.untyped])
   def reject(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(T::Hash[T.untyped, T.untyped])
   def reject!(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(T::Hash[T.untyped, T.untyped])
   def select(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(T::Hash[T.untyped, T.untyped])
   def select!(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(BasicObject)
-  )
+  sig.returns(T::Array[BasicObject])
   def shift(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.array_of(BasicObject))
-  )
+  sig.returns(T::Array[T::Array[BasicObject]])
   def to_a(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
-  )
+  sig.returns(T::Hash[T.untyped, T.untyped])
   def to_hash(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def values(); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def values_at(*arg0); end
 
-  standard_method(
-    {},
-    returns: Hash
-  )
-  standard_method(
-    {},
-    returns: Hash
-  )
+  sig.returns(Hash)
+  sig.returns(Hash)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Hash
-  )
+  sig.returns(Hash)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Hash
-  )
+  sig.returns(Hash)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Hash
-  )
+  sig.returns(Hash)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Hash
-  )
+  sig.returns(Hash)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Hash
-  )
+  sig.returns(Hash)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Hash
-  )
+  sig.returns(Hash)
   def untrust(); end
 end
 
 class IO
-  standard_method(
-    {
+  sig(
       fd: Integer,
       mode: Integer,
       opt: Integer,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(fd, mode=_, opt=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: IO
   )
+  .returns(IO)
   def <<(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
       offset: Integer,
       len: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def advise(arg0, offset=_, len=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(TrueClass, FalseClass),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def autoclose=(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def autoclose?(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
   def binmode(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def binmode?(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def close(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(TrueClass, FalseClass),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def close_on_exec=(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def close_on_exec?(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def close_read(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def close_write(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def closed?(); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: IO
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(IO)
+  sig(
       sep: String,
       limit: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def each(sep=_, limit=_, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: IO
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(IO)
+  sig.returns(Enumerator)
   def each_byte(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: IO
+  sig(
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(IO)
+  sig.returns(Enumerator)
   def each_char(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: IO
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(IO)
+  sig.returns(Enumerator)
   def each_codepoint(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def eof(); end
 
-  standard_method(
-    {
+  sig(
       integer_cmd: Integer,
-      arg: Opus::Types.any(String, Integer),
-    },
-    returns: Integer
+      arg: T.any(String, Integer),
   )
+  .returns(Integer)
   def fcntl(integer_cmd, arg); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def fdatasync(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def fileno(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
   def flush(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def fsync(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def getbyte(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def getc(); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def gets(sep=_, limit=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
   def internal_encoding(); end
 
-  standard_method(
-    {
+  sig(
       integer_cmd: Integer,
-      arg: Opus::Types.any(String, Integer),
-    },
-    returns: Integer
+      arg: T.any(String, Integer),
   )
+  .returns(Integer)
   def ioctl(integer_cmd, arg); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def isatty(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def lineno(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def lineno=(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def pid(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def pos(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def pos=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def print(*arg0); end
 
-  standard_method(
-    {
+  sig(
       format_string: String,
       arg0: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def printf(format_string, *arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Numeric, String),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      arg0: T.any(Numeric, String),
   )
+  .returns(T.untyped)
   def putc(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def puts(*arg0); end
 
-  standard_method(
-    {
+  sig(
       length: Integer,
       outbuf: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def read(length=_, outbuf=_); end
 
-  standard_method(
-    {
+  sig(
       len: Integer,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       len: Integer,
       buf: String,
-    },
-    returns: String
   )
+  .returns(String)
   def read_nonblock(len, buf=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def readbyte(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def readchar(); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def readline(sep=_, limit=_); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def readlines(sep=_, limit=_); end
 
-  standard_method(
-    {
+  sig(
       maxlen: Integer,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       maxlen: Integer,
       outbuf: String,
-    },
-    returns: String
   )
+  .returns(String)
   def readpartial(maxlen, outbuf=_); end
 
-  standard_method(
-    {
+  sig(
       other_IO: IO,
-    },
-    returns: IO
   )
-  standard_method(
-    {
+  .returns(IO)
+  sig(
       path: String,
       mode_str: String,
-    },
-    returns: IO
   )
+  .returns(IO)
   def reopen(other_IO, mode_str=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def rewind(); end
 
-  standard_method(
-    {
+  sig(
       amount: Integer,
       whence: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def seek(amount, whence=_); end
 
-  standard_method(
-    {
-      ext_or_ext_int_enc: Opus::Types.any(String, Encoding),
-    },
-    returns: IO
+  sig(
+      ext_or_ext_int_enc: T.any(String, Encoding),
   )
-  standard_method(
-    {
-      ext_enc: Opus::Types.any(String, Encoding),
-      int_enc: Opus::Types.any(String, Encoding),
-    },
-    returns: IO
+  .returns(IO)
+  sig(
+      ext_enc: T.any(String, Encoding),
+      int_enc: T.any(String, Encoding),
   )
+  .returns(IO)
   def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
 
-  standard_method(
-    {},
-    returns: File::Stat
-  )
+  sig.returns(File::Stat)
   def stat(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def sync(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(TrueClass, FalseClass),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def sync=(arg0); end
 
-  standard_method(
-    {
+  sig(
       maxlen: Integer,
       outbuf: String,
-    },
-    returns: String
   )
+  .returns(String)
   def sysread(maxlen, outbuf); end
 
-  standard_method(
-    {
+  sig(
       amount: Integer,
       whence: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def sysseek(amount, whence=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def syswrite(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def tell(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
   def to_io(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def tty?(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Integer),
-    },
-    returns: NilClass
+  sig(
+      arg0: T.any(String, Integer),
   )
+  .returns(NilClass)
   def ungetbyte(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def ungetc(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def write(arg0); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
-  standard_method(
-    {},
-    returns: IO
-  )
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
+  sig.returns(IO)
   def untrust(); end
 
-  standard_method(
-    {
+  sig(
       name: String,
       length: Integer,
       offset: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def self.binread(name, length=_, offset=_); end
 
-  standard_method(
-    {
+  sig(
       name: String,
       arg0: String,
       offset: Integer,
@@ -8866,24 +5633,20 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.binwrite(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
-  standard_method(
-    {
-      src: Opus::Types.any(String, IO),
-      dst: Opus::Types.any(String, IO),
+  sig(
+      src: T.any(String, IO),
+      dst: T.any(String, IO),
       copy_length: Integer,
       src_offset: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.copy_stream(src, dst, copy_length=_, src_offset=_); end
 
-  standard_method(
-    {
+  sig(
       name: String,
       sep: String,
       limit: Integer,
@@ -8894,12 +5657,10 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: NilClass
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       name: String,
       sep: String,
       limit: Integer,
@@ -8910,13 +5671,11 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def self.foreach(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
-  standard_method(
-    {
+  sig(
       fd: Integer,
       mode: String,
       external_encoding: String,
@@ -8926,11 +5685,9 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-    },
-    returns: IO
   )
-  standard_method(
-    {
+  .returns(IO)
+  sig(
       fd: Integer,
       mode: String,
       external_encoding: String,
@@ -8940,14 +5697,12 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: Opus::Types.proc([IO], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[IO], returns: BasicObject],
   )
+  .returns(T.untyped)
   def self.open(fd, mode=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
-  standard_method(
-    {
+  sig(
       ext_or_ext_int_enc: String,
       external_encoding: String,
       internal_encoding: String,
@@ -8956,11 +5711,9 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-    },
-    returns: [IO, IO]
   )
-  standard_method(
-    {
+  .returns([IO, IO])
+  sig(
       ext_enc: String,
       int_enc: String,
       external_encoding: String,
@@ -8970,11 +5723,9 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-    },
-    returns: [IO, IO]
   )
-  standard_method(
-    {
+  .returns([IO, IO])
+  sig(
       ext_or_ext_int_enc: String,
       external_encoding: String,
       internal_encoding: String,
@@ -8983,12 +5734,10 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: Opus::Types.proc([[IO, IO]], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[[IO, IO]], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       ext_enc: String,
       int_enc: String,
       external_encoding: String,
@@ -8998,14 +5747,12 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: Opus::Types.proc([[IO, IO]], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[[IO, IO]], returns: BasicObject],
   )
+  .returns(T.untyped)
   def self.pipe(ext_or_ext_int_enc=_, int_enc=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
-  standard_method(
-    {
+  sig(
       name: String,
       length: Integer,
       offset: Integer,
@@ -9016,13 +5763,11 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.read(name, length=_, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
-  standard_method(
-    {
+  sig(
       name: String,
       sep: String,
       limit: Integer,
@@ -9033,42 +5778,34 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def self.readlines(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
-  standard_method(
-    {
-      read_array: Opus::Types.array_of(IO),
-      write_array: Opus::Types.array_of(IO),
-      error_array: Opus::Types.array_of(IO),
+  sig(
+      read_array: T::Array[IO],
+      write_array: T::Array[IO],
+      error_array: T::Array[IO],
       timeout: Integer,
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(IO), NilClass)
   )
+  .returns(T.any(T::Array[IO], NilClass))
   def self.select(read_array, write_array=_, error_array=_, timeout=_); end
 
-  standard_method(
-    {
+  sig(
       path: String,
       mode: String,
       perm: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.sysopen(path, mode=_, perm=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(IO, NilClass)
   )
+  .returns(T.any(IO, NilClass))
   def self.try_convert(arg0); end
 
-  standard_method(
-    {
+  sig(
       name: String,
       arg0: String,
       offset: Integer,
@@ -9079,10976 +5816,6834 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.write(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
-  standard_method(
-    {
+  sig(
       fd: Integer,
       mode: Integer,
       opt: Integer,
-    },
-    returns: IO
   )
+  .returns(IO)
   def self.for_fd(fd, mode=_, opt=_); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: IO
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(IO)
+  sig.returns(Enumerator)
   def bytes(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: IO
+  sig(
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(IO)
+  sig.returns(Enumerator)
   def chars(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: IO
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(IO)
+  sig.returns(Enumerator)
   def codepoints(&blk); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: IO
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(IO)
+  sig(
       sep: String,
       limit: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def each_line(sep=_, limit=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def eof?(); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: IO
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(IO)
+  sig(
       sep: String,
       limit: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def lines(sep=_, limit=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_i(); end
 end
 
 class IOError
-  standard_method(
-    {},
-    returns: IOError
-  )
-  standard_method(
-    {},
-    returns: IOError
-  )
+  sig.returns(IOError)
+  sig.returns(IOError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: IOError
-  )
+  sig.returns(IOError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: IOError
-  )
+  sig.returns(IOError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: IOError
-  )
+  sig.returns(IOError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: IOError
-  )
+  sig.returns(IOError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: IOError
-  )
+  sig.returns(IOError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: IOError
-  )
+  sig.returns(IOError)
   def untrust(); end
 end
 
 class IndexError
-  standard_method(
-    {},
-    returns: IndexError
-  )
-  standard_method(
-    {},
-    returns: IndexError
-  )
+  sig.returns(IndexError)
+  sig.returns(IndexError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: IndexError
-  )
+  sig.returns(IndexError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: IndexError
-  )
+  sig.returns(IndexError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: IndexError
-  )
+  sig.returns(IndexError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: IndexError
-  )
+  sig.returns(IndexError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: IndexError
-  )
+  sig.returns(IndexError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: IndexError
-  )
+  sig.returns(IndexError)
   def untrust(); end
 end
 
 class Integer
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def %(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def &(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def *(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  standard_method(
-    {
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  standard_method(
-    {
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  standard_method(
-    {
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def **(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def +(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def -(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def -@(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def +@(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def /(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def <<(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Float,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Rational,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Object
   )
+  .returns(Object)
   def <=>(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def >>(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Rational,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def [](arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def ^(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def |(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def ~(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def abs(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def bit_length(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Rational,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def div(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def divmod(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def fdiv(arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def magnitude(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def modulo(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def quo(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def abs2(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def angle(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def arg(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def equal?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def ceil(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Encoding,
-    },
-    returns: String
   )
+  .returns(String)
   def chr(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def coerce(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def conj(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def conjugate(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def denominator(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: Integer
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       limit: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def downto(arg0, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def even?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def gcd(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: [Integer, Integer]
   )
+  .returns([Integer, Integer])
   def gcdlcm(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def floor(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def imag(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def imaginary(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def integer?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def lcm(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def next(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def numerator(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def odd?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def ord(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def phase(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def pred(); end
 
-  standard_method(
-    {},
-    returns: Rational
+  sig.returns(Rational)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Rational
-  )
+  .returns(Rational)
   def rationalize(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def real(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def real?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def remainder(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
+  sig.returns(Integer)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def round(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def succ(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: Integer
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(Integer)
+  sig.returns(Enumerator)
   def times(&blk); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def to_c(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def to_f(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_i(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_int(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def to_r(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def truncate(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: Integer
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def upto(arg0, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
+  sig.returns(Integer)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def untrust(); end
 end
 
 class Interrupt
-  standard_method(
-    {},
-    returns: Interrupt
-  )
-  standard_method(
-    {},
-    returns: Interrupt
-  )
+  sig.returns(Interrupt)
+  sig.returns(Interrupt)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Interrupt
-  )
+  sig.returns(Interrupt)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Interrupt
-  )
+  sig.returns(Interrupt)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Interrupt
-  )
+  sig.returns(Interrupt)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Interrupt
-  )
+  sig.returns(Interrupt)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Interrupt
-  )
+  sig.returns(Interrupt)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Interrupt
-  )
+  sig.returns(Interrupt)
   def untrust(); end
 end
 
 module Kernel
-  standard_method(
-    {
+  sig(
       x: Object,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def self.Array(x); end
 
-  standard_method(
-    {
+  sig(
       x: Numeric,
       y: Numeric,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       x: String,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def self.Complex(x, y=_); end
 
-  standard_method(
-    {
+  sig(
       x: Numeric,
-    },
-    returns: Float
   )
+  .returns(Float)
   def self.Float(x); end
 
-  standard_method(
-    {
+  sig(
       x: Object,
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
   )
+  .returns(T::Hash[T.untyped, T.untyped])
   def self.Hash(x); end
 
-  standard_method(
-    {
-      arg: Opus::Types.any(Numeric, String),
+  sig(
+      arg: T.any(Numeric, String),
       base: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.Integer(arg, base=_); end
 
-  standard_method(
-    {
+  sig(
       x: Numeric,
       y: Numeric,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       x: Object,
-    },
-    returns: Rational
   )
+  .returns(Rational)
   def self.Rational(x, y=_); end
 
-  standard_method(
-    {
+  sig(
       x: Object,
-    },
-    returns: String
   )
+  .returns(String)
   def self.String(x); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Symbol, NilClass)
-  )
+  sig.returns(T.any(Symbol, NilClass))
   def self.__callee__(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def self.__dir__(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Symbol, NilClass)
-  )
+  sig.returns(T.any(Symbol, NilClass))
   def self.__method__(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.`(arg0); end
 
-  standard_method(
-    {
+  sig(
       msg: String,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.abort(msg=_); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([], returns: BasicObject),
-    },
-    returns: Proc
+  sig(
+      blk: T::Proc[[], returns: BasicObject],
   )
+  .returns(Proc)
   def self.at_exit(&blk); end
 
-  standard_method(
-    {
-      _module: Opus::Types.any(String, Symbol),
+  sig(
+      _module: T.any(String, Symbol),
       filename: String,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.autoload(_module, filename); end
 
-  standard_method(
-    {
-      name: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.any(String, NilClass)
+  sig(
+      name: T.any(Symbol, String),
   )
+  .returns(T.any(String, NilClass))
   def self.autoload?(name); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def self.binding(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def self.block_given?(); end
 
-  standard_method(
-    {
+  sig(
       start: Integer,
       length: Integer,
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(T::Array[String], NilClass))
+  sig(
       arg0: Range,
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
+  .returns(T.any(T::Array[String], NilClass))
   def self.caller(start=_, length=_); end
 
-  standard_method(
-    {
+  sig(
       start: Integer,
       length: Integer,
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(T::Array[String], NilClass))
+  sig(
       arg0: Range,
-    },
-    returns: Opus::Types.any(Opus::Types.array_of(String), NilClass)
   )
+  .returns(T.any(T::Array[String], NilClass))
   def self.caller_locations(start=_, length=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Binding,
       filename: String,
       lineno: Integer,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def self.eval(arg0, arg1=_, filename=_, lineno=_); end
 
-  standard_method(
-    {},
-    returns: NilClass
+  sig.returns(NilClass)
+  sig(
+      status: T.any(Integer, TrueClass, FalseClass),
   )
-  standard_method(
-    {
-      status: Opus::Types.any(Integer, TrueClass, FalseClass),
-    },
-    returns: NilClass
-  )
+  .returns(NilClass)
   def self.exit(status=_); end
 
-  standard_method(
-    {
-      status: Opus::Types.any(Integer, TrueClass, FalseClass),
-    },
-    returns: NilClass
+  sig(
+      status: T.any(Integer, TrueClass, FalseClass),
   )
+  .returns(NilClass)
   def self.exit!(status); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
-  standard_method(
-    {
+  sig.returns(NilClass)
+  sig(
       arg0: String,
-    },
-    returns: NilClass
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       arg0: Class,
-      arg1: Opus::Types.array_of(String),
-    },
-    returns: NilClass
+      arg1: T::Array[String],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       arg0: Class,
       arg1: String,
-      arg2: Opus::Types.array_of(String),
-    },
-    returns: NilClass
+      arg2: T::Array[String],
   )
+  .returns(NilClass)
   def self.fail(arg0=_, arg1=_, arg2=_); end
 
-  standard_method(
-    {
+  sig(
       format: String,
       args: BasicObject,
-    },
-    returns: String
   )
+  .returns(String)
   def self.format(format, *args); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def self.gets(arg0=_, arg1=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Symbol)
-  )
+  sig.returns(T::Array[Symbol])
   def self.global_variables(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def self.iterator?(); end
 
-  standard_method(
-    {
+  sig(
       filename: String,
-      arg0: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+      arg0: T.any(TrueClass, FalseClass),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.load(filename, arg0=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Symbol)
-  )
+  sig.returns(T::Array[Symbol])
   def self.local_variables(); end
 
-  standard_method(
-    {
+  sig(
       name: String,
-      rest: Opus::Types.any(String, Integer),
+      rest: T.any(String, Integer),
       block: String,
-    },
-    returns: Opus::Types.any(IO, NilClass)
   )
+  .returns(T.any(IO, NilClass))
   def self.open(name, rest=_, block=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: IO,
       arg1: String,
       arg2: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.printf(arg0=_, arg1=_, *arg2); end
 
-  standard_method(
-    {
+  sig(
       blk: BasicObject,
-    },
-    returns: Proc
   )
+  .returns(Proc)
   def self.proc(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.putc(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.puts(*arg0); end
 
-  standard_method(
-    {
-      max: Opus::Types.any(Integer, Range),
-    },
-    returns: Numeric
+  sig(
+      max: T.any(Integer, Range),
   )
+  .returns(Numeric)
   def self.rand(max); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def self.readline(arg0=_, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def self.readlines(arg0=_, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       name: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.require(name); end
 
-  standard_method(
-    {
+  sig(
       name: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def self.require_relative(name); end
 
-  standard_method(
-    {
-      read: Opus::Types.array_of(IO),
-      write: Opus::Types.array_of(IO),
-      error: Opus::Types.array_of(IO),
+  sig(
+      read: T::Array[IO],
+      write: T::Array[IO],
+      error: T::Array[IO],
       timeout: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def self.select(read, write=_, error=_, timeout=_); end
 
-  standard_method(
-    {
+  sig(
       duration: Numeric,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.sleep(duration); end
 
-  standard_method(
-    {
+  sig(
       number: Numeric,
-    },
-    returns: Numeric
   )
+  .returns(Numeric)
   def self.srand(number); end
 
-  standard_method(
-    {
+  sig(
       num: Integer,
       args: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def self.syscall(num, *args); end
 
-  standard_method(
-    {
+  sig(
       cmd: String,
       file1: String,
       file2: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass, Time)
   )
+  .returns(T.any(TrueClass, FalseClass, Time))
   def self.test(cmd, file1, file2=_); end
 
-  standard_method(
-    {
+  sig(
       msg: String,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.warn(*msg); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
-  standard_method(
-    {
+  sig.returns(NilClass)
+  sig(
       arg0: String,
-    },
-    returns: NilClass
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       arg0: Class,
       arg1: String,
-      arg2: Opus::Types.array_of(String),
-    },
-    returns: NilClass
+      arg2: T::Array[String],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       arg0: Exception,
       arg1: String,
-      arg2: Opus::Types.array_of(String),
-    },
-    returns: NilClass
+      arg2: T::Array[String],
   )
+  .returns(NilClass)
   def self.raise(arg0=_, arg1=_, arg2=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Kernel
-  )
+  sig.returns(Kernel)
   def clone(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Symbol),
+  sig(
+      arg0: T.any(String, Symbol),
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Symbol),
+  .returns(T.untyped)
+  sig(
+      arg0: T.any(String, Symbol),
       arg1: BasicObject,
       blk: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def send(arg0, *arg1, &blk); end
 
-  standard_method(
-    {
+  sig(
       x: Object,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def Array(x); end
 
-  standard_method(
-    {
+  sig(
       x: Numeric,
       y: Numeric,
-    },
-    returns: Complex
   )
-  standard_method(
-    {
+  .returns(Complex)
+  sig(
       x: String,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def Complex(x, y=_); end
 
-  standard_method(
-    {
+  sig(
       x: Numeric,
-    },
-    returns: Float
   )
+  .returns(Float)
   def Float(x); end
 
-  standard_method(
-    {
+  sig(
       x: Object,
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Opus::Types.untyped)
   )
+  .returns(T::Hash[T.untyped, T.untyped])
   def Hash(x); end
 
-  standard_method(
-    {
-      arg: Opus::Types.any(Numeric, String),
+  sig(
+      arg: T.any(Numeric, String),
       base: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def Integer(arg, base=_); end
 
-  standard_method(
-    {
+  sig(
       x: Numeric,
       y: Numeric,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       x: Object,
-    },
-    returns: Rational
   )
+  .returns(Rational)
   def Rational(x, y=_); end
 
-  standard_method(
-    {
+  sig(
       x: Object,
-    },
-    returns: String
   )
+  .returns(String)
   def String(x); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Symbol, NilClass)
-  )
+  sig.returns(T.any(Symbol, NilClass))
   def __callee__(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def __dir__(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Symbol, NilClass)
-  )
+  sig.returns(T.any(Symbol, NilClass))
   def __method__(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def `(arg0); end
 
-  standard_method(
-    {
+  sig(
       msg: String,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def abort(msg=_); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([], returns: BasicObject),
-    },
-    returns: Proc
+  sig(
+      blk: T::Proc[[], returns: BasicObject],
   )
+  .returns(Proc)
   def at_exit(&blk); end
 
-  standard_method(
-    {
-      _module: Opus::Types.any(String, Symbol),
+  sig(
+      _module: T.any(String, Symbol),
       filename: String,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def autoload(_module, filename); end
 
-  standard_method(
-    {
-      name: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.any(String, NilClass)
+  sig(
+      name: T.any(Symbol, String),
   )
+  .returns(T.any(String, NilClass))
   def autoload?(name); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def binding(); end
 
-  standard_method(
-    {},
-    returns: NilClass
+  sig.returns(NilClass)
+  sig(
+      status: T.any(Integer, TrueClass, FalseClass),
   )
-  standard_method(
-    {
-      status: Opus::Types.any(Integer, TrueClass, FalseClass),
-    },
-    returns: NilClass
-  )
+  .returns(NilClass)
   def exit(status=_); end
 
-  standard_method(
-    {
-      status: Opus::Types.any(Integer, TrueClass, FalseClass),
-    },
-    returns: NilClass
+  sig(
+      status: T.any(Integer, TrueClass, FalseClass),
   )
+  .returns(NilClass)
   def exit!(status); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
-  standard_method(
-    {
+  sig.returns(NilClass)
+  sig(
       arg0: String,
-    },
-    returns: NilClass
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       arg0: Class,
-      arg1: Opus::Types.array_of(String),
-    },
-    returns: NilClass
+      arg1: T::Array[String],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       arg0: Class,
       arg1: String,
-      arg2: Opus::Types.array_of(String),
-    },
-    returns: NilClass
+      arg2: T::Array[String],
   )
+  .returns(NilClass)
   def fail(arg0=_, arg1=_, arg2=_); end
 
-  standard_method(
-    {
+  sig(
       format: String,
       args: BasicObject,
-    },
-    returns: String
   )
+  .returns(String)
   def format(format, *args); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def gets(arg0=_, arg1=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Symbol)
-  )
+  sig.returns(T::Array[Symbol])
   def global_variables(); end
 
-  standard_method(
-    {
+  sig(
       filename: String,
-      arg0: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+      arg0: T.any(TrueClass, FalseClass),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def load(filename, arg0=_); end
 
-  standard_method(
-    {
+  sig(
       name: String,
-      rest: Opus::Types.any(String, Integer),
+      rest: T.any(String, Integer),
       block: String,
-    },
-    returns: Opus::Types.any(IO, NilClass)
   )
+  .returns(T.any(IO, NilClass))
   def open(name, rest=_, block=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: IO,
       arg1: String,
       arg2: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def printf(arg0=_, arg1=_, *arg2); end
 
-  standard_method(
-    {
+  sig(
       blk: BasicObject,
-    },
-    returns: Proc
   )
+  .returns(Proc)
   def proc(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def putc(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def puts(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def readline(arg0=_, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def readlines(arg0=_, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       path: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def require(path); end
 
-  standard_method(
-    {
+  sig(
       feature: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def require_relative(feature); end
 
-  standard_method(
-    {
-      read: Opus::Types.array_of(IO),
-      write: Opus::Types.array_of(IO),
-      error: Opus::Types.array_of(IO),
+  sig(
+      read: T::Array[IO],
+      write: T::Array[IO],
+      error: T::Array[IO],
       timeout: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def select(read, write=_, error=_, timeout=_); end
 
-  standard_method(
-    {
+  sig(
       duration: Numeric,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def sleep(duration); end
 
-  standard_method(
-    {
+  sig(
       format: String,
       args: BasicObject,
-    },
-    returns: String
   )
+  .returns(String)
   def self.sprintf(format, *args); end
 
-  standard_method(
-    {
+  sig(
       format: String,
       args: BasicObject,
-    },
-    returns: String
   )
+  .returns(String)
   def sprintf(format, *args); end
 
-  standard_method(
-    {
+  sig(
       num: Integer,
       args: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def syscall(num, *args); end
 
-  standard_method(
-    {
+  sig(
       cmd: String,
       file1: String,
       file2: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass, Time)
   )
+  .returns(T.any(TrueClass, FalseClass, Time))
   def test(cmd, file1, file2=_); end
 
-  standard_method(
-    {
+  sig(
       msg: String,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def warn(*msg); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
-  standard_method(
-    {
+  sig.returns(NilClass)
+  sig(
       arg0: String,
-    },
-    returns: NilClass
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       arg0: Class,
       arg1: String,
-      arg2: Opus::Types.array_of(String),
-    },
-    returns: NilClass
+      arg2: T::Array[String],
   )
-  standard_method(
-    {
+  .returns(NilClass)
+  sig(
       arg0: Exception,
       arg1: String,
-      arg2: Opus::Types.array_of(String),
-    },
-    returns: NilClass
+      arg2: T::Array[String],
   )
+  .returns(NilClass)
   def raise(arg0=_, arg1=_, arg2=_); end
 end
 
 class KeyError
-  standard_method(
-    {},
-    returns: KeyError
-  )
-  standard_method(
-    {},
-    returns: KeyError
-  )
+  sig.returns(KeyError)
+  sig.returns(KeyError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: KeyError
-  )
+  sig.returns(KeyError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: KeyError
-  )
+  sig.returns(KeyError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: KeyError
-  )
+  sig.returns(KeyError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: KeyError
-  )
+  sig.returns(KeyError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: KeyError
-  )
+  sig.returns(KeyError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: KeyError
-  )
+  sig.returns(KeyError)
   def untrust(); end
 end
 
 class LoadError
-  standard_method(
-    {},
-    returns: LoadError
-  )
-  standard_method(
-    {},
-    returns: LoadError
-  )
+  sig.returns(LoadError)
+  sig.returns(LoadError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: LoadError
-  )
+  sig.returns(LoadError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: LoadError
-  )
+  sig.returns(LoadError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: LoadError
-  )
+  sig.returns(LoadError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: LoadError
-  )
+  sig.returns(LoadError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: LoadError
-  )
+  sig.returns(LoadError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: LoadError
-  )
+  sig.returns(LoadError)
   def untrust(); end
 end
 
 class LocalJumpError
-  standard_method(
-    {},
-    returns: LocalJumpError
-  )
-  standard_method(
-    {},
-    returns: LocalJumpError
-  )
+  sig.returns(LocalJumpError)
+  sig.returns(LocalJumpError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: LocalJumpError
-  )
+  sig.returns(LocalJumpError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: LocalJumpError
-  )
+  sig.returns(LocalJumpError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: LocalJumpError
-  )
+  sig.returns(LocalJumpError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: LocalJumpError
-  )
+  sig.returns(LocalJumpError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: LocalJumpError
-  )
+  sig.returns(LocalJumpError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: LocalJumpError
-  )
+  sig.returns(LocalJumpError)
   def untrust(); end
 end
 
 module Marshal
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Proc,
-    },
-    returns: Object
   )
+  .returns(Object)
   def self.load(arg0, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
       arg1: IO,
       arg2: Integer,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Object,
       arg1: Integer,
-    },
-    returns: Object
   )
+  .returns(Object)
   def self.dump(arg0, arg1=_, arg2=_); end
 end
 
 class MatchData
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {
+  sig(
       i: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       start: Integer,
       length: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
-  standard_method(
-    {
+  .returns(T::Array[String])
+  sig(
       range: Range,
-    },
-    returns: Opus::Types.array_of(String)
   )
-  standard_method(
-    {
-      name: Opus::Types.any(String, Symbol),
-    },
-    returns: Opus::Types.any(String, NilClass)
+  .returns(T::Array[String])
+  sig(
+      name: T.any(String, Symbol),
   )
+  .returns(T.any(String, NilClass))
   def [](i, length=_); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def begin(n); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(String)
-  )
+  sig.returns(T::Array[String])
   def captures(); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def end(n); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(other); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def length(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(String)
-  )
+  sig.returns(T::Array[String])
   def names(); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-    },
-    returns: Opus::Types.array_of(Integer)
   )
+  .returns(T::Array[Integer])
   def offset(n); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def post_match(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def pre_match(); end
 
-  standard_method(
-    {},
-    returns: Regexp
-  )
+  sig.returns(Regexp)
   def regexp(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def string(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(String)
-  )
+  sig.returns(T::Array[String])
   def to_a(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {
+  sig(
       indexes: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def values_at(*indexes); end
 
-  standard_method(
-    {},
-    returns: MatchData
-  )
-  standard_method(
-    {},
-    returns: MatchData
-  )
+  sig.returns(MatchData)
+  sig.returns(MatchData)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: MatchData
-  )
+  sig.returns(MatchData)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: MatchData
-  )
+  sig.returns(MatchData)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: MatchData
-  )
+  sig.returns(MatchData)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: MatchData
-  )
+  sig.returns(MatchData)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: MatchData
-  )
+  sig.returns(MatchData)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: MatchData
-  )
+  sig.returns(MatchData)
   def untrust(); end
 end
 
 module Math
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.acos(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.acosh(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.asin(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.asinh(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.atan(x); end
 
-  standard_method(
-    {
-      y: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      y: T.any(Integer, Float, Rational, BigDecimal),
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.atan2(y, x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.atanh(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.cbrt(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.cos(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.cosh(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.erf(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.erfc(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.exp(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def self.frexp(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.gamma(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-      y: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
+      y: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.hypot(x, y); end
 
-  standard_method(
-    {
-      fraction: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-      exponent: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      fraction: T.any(Integer, Float, Rational, BigDecimal),
+      exponent: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.ldexp(fraction, exponent); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Opus::Types.any(Integer, Float)
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(T.any(Integer, Float))
   def self.lgamma(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-      base: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
+      base: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.log(x, base=_); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.log10(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.log2(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.sin(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.sinh(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.sqrt(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.tan(x); end
 
-  standard_method(
-    {
-      x: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: Float
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns(Float)
   def self.tanh(x); end
 end
 
 class Method
-  standard_method(
-    {},
-    returns: Method
-  )
-  standard_method(
-    {},
-    returns: Method
-  )
+  sig.returns(Method)
+  sig.returns(Method)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Method
-  )
+  sig.returns(Method)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Method
-  )
+  sig.returns(Method)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Method
-  )
+  sig.returns(Method)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Method
-  )
+  sig.returns(Method)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Method
-  )
+  sig.returns(Method)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Method
-  )
+  sig.returns(Method)
   def untrust(); end
 end
 
 class Module
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Integer)
-  )
+  sig.returns(T::Array[Integer])
   def self.constants(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Module)
-  )
+  sig.returns(T::Array[Module])
   def self.nesting(); end
 
-  standard_method(
-    {},
-    returns: Object
+  sig.returns(Object)
+  sig(
+      blk: T::Proc[[Module], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Module], returns: BasicObject),
-    },
-    returns: Object
-  )
+  .returns(Object)
   def initialize(&blk); end
 
-  standard_method(
-    {
+  sig(
       other: Module,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass, NilClass)
   )
+  .returns(T.any(TrueClass, FalseClass, NilClass))
   def <(other); end
 
-  standard_method(
-    {
+  sig(
       other: Module,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass, NilClass)
   )
+  .returns(T.any(TrueClass, FalseClass, NilClass))
   def <=(other); end
 
-  standard_method(
-    {
+  sig(
       other: Module,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def <=>(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def equal?(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(other); end
 
-  standard_method(
-    {
+  sig(
       other: Module,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass, NilClass)
   )
+  .returns(T.any(TrueClass, FalseClass, NilClass))
   def >(other); end
 
-  standard_method(
-    {
+  sig(
       other: Module,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass, NilClass)
   )
+  .returns(T.any(TrueClass, FalseClass, NilClass))
   def >=(other); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Module)
-  )
+  sig.returns(T::Array[Module])
   def ancestors(); end
 
-  standard_method(
-    {
+  sig(
       _module: Symbol,
       filename: String,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def autoload(_module, filename); end
 
-  standard_method(
-    {
+  sig(
       name: Symbol,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def autoload?(name); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       filename: String,
       lineno: Integer,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def class_eval(arg0, filename=_, lineno=_); end
 
-  standard_method(
-    {
+  sig(
       args: BasicObject,
       blk: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def class_exec(*args, &blk); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def class_variable_defined?(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(T.untyped)
   def class_variable_get(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
+  sig(
+      arg0: T.any(Symbol, String),
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def class_variable_set(arg0, arg1); end
 
-  standard_method(
-    {
-      inherit: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      inherit: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def class_variables(inherit=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-      inherit: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Symbol, String),
+      inherit: T.any(TrueClass, FalseClass),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def const_defined?(arg0, inherit=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-      inherit: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      arg0: T.any(Symbol, String),
+      inherit: T.any(TrueClass, FalseClass),
   )
+  .returns(T.untyped)
   def const_get(arg0, inherit=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def const_missing(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
+  sig(
+      arg0: T.any(Symbol, String),
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def const_set(arg0, arg1); end
 
-  standard_method(
-    {
-      inherit: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      inherit: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def constants(inherit=_); end
 
-  standard_method(
-    {},
-    returns: Module
-  )
+  sig.returns(Module)
   def freeze(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Module,
-    },
-    returns: Module
   )
+  .returns(Module)
   def include(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Module,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def include?(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Module)
-  )
+  sig.returns(T::Array[Module])
   def included_modules(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: UnboundMethod
   )
+  .returns(UnboundMethod)
   def instance_method(arg0); end
 
-  standard_method(
-    {
-      include_super: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      include_super: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def instance_methods(include_super=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def method_defined?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       filename: String,
       lineno: Integer,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def module_eval(arg0, filename=_, lineno=_); end
 
-  standard_method(
-    {
+  sig(
       args: BasicObject,
       blk: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def module_exec(*args, &blk); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def name(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Module,
-    },
-    returns: Module
   )
+  .returns(Module)
   def prepend(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Module
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Module)
   def private_class_method(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Module
   )
+  .returns(Module)
   def private_constant(*arg0); end
 
-  standard_method(
-    {
-      include_super: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      include_super: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def private_instance_methods(include_super=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def private_method_defined?(arg0); end
 
-  standard_method(
-    {
-      include_super: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      include_super: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def protected_instance_methods(include_super=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def protected_method_defined?(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Module
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Module)
   def public_class_method(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Module
   )
+  .returns(Module)
   def public_constant(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: UnboundMethod
   )
+  .returns(UnboundMethod)
   def public_instance_method(arg0); end
 
-  standard_method(
-    {
-      include_super: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      include_super: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def public_instance_methods(include_super=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def public_method_defined?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def remove_class_variable(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def singleton_class?(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {
+  sig(
       new_name: Symbol,
       old_name: Symbol,
-    },
-    returns: Module
   )
+  .returns(Module)
   def alias_method(new_name, old_name); end
 
-  standard_method(
-    {
+  sig(
       arg0: Module,
-    },
-    returns: Module
   )
+  .returns(Module)
   def append_features(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: NilClass
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(NilClass)
   def attr_accessor(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: NilClass
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(NilClass)
   def attr_reader(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: NilClass
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(NilClass)
   def attr_writer(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
       arg1: Method,
-    },
-    returns: Symbol
   )
-  standard_method(
-    {
+  .returns(Symbol)
+  sig(
       arg0: Symbol,
       blk: BasicObject,
-    },
-    returns: Symbol
   )
+  .returns(Symbol)
   def define_method(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def extend_object(arg0); end
 
-  standard_method(
-    {
+  sig(
       othermod: Module,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def extended(othermod); end
 
-  standard_method(
-    {
+  sig(
       othermod: Module,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def included(othermod); end
 
-  standard_method(
-    {
+  sig(
       meth: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def method_added(meth); end
 
-  standard_method(
-    {
+  sig(
       method_name: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def method_removed(method_name); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Module
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Module)
   def module_function(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Module,
-    },
-    returns: Module
   )
+  .returns(Module)
   def prepend_features(arg0); end
 
-  standard_method(
-    {
+  sig(
       othermod: Module,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def prepended(othermod); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Module
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Module)
   def private(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Module
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Module)
   def protected(*arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Module
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Module)
   def public(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Class,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Module
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(Module)
   def refine(arg0, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def remove_const(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Module
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Module)
   def remove_method(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Module
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(Module)
   def undef_method(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Module,
-    },
-    returns: Module
   )
+  .returns(Module)
   def using(arg0); end
 
-  standard_method(
-    {},
-    returns: Module
-  )
-  standard_method(
-    {},
-    returns: Module
-  )
+  sig.returns(Module)
+  sig.returns(Module)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Module
-  )
+  sig.returns(Module)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Module
-  )
+  sig.returns(Module)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Module
-  )
+  sig.returns(Module)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Module
-  )
+  sig.returns(Module)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Module
-  )
+  sig.returns(Module)
   def untrust(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: NilClass
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(NilClass)
   def attr(*arg0); end
 end
 
 class Monitor
-  standard_method(
-    {},
-    returns: Monitor
-  )
-  standard_method(
-    {},
-    returns: Monitor
-  )
+  sig.returns(Monitor)
+  sig.returns(Monitor)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Monitor
-  )
+  sig.returns(Monitor)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Monitor
-  )
+  sig.returns(Monitor)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Monitor
-  )
+  sig.returns(Monitor)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Monitor
-  )
+  sig.returns(Monitor)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Monitor
-  )
+  sig.returns(Monitor)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Monitor
-  )
+  sig.returns(Monitor)
   def untrust(); end
 end
 
 class NameError
-  standard_method(
-    {},
-    returns: NameError
-  )
-  standard_method(
-    {},
-    returns: NameError
-  )
+  sig.returns(NameError)
+  sig.returns(NameError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: NameError
-  )
+  sig.returns(NameError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: NameError
-  )
+  sig.returns(NameError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: NameError
-  )
+  sig.returns(NameError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: NameError
-  )
+  sig.returns(NameError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: NameError
-  )
+  sig.returns(NameError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: NameError
-  )
+  sig.returns(NameError)
   def untrust(); end
 end
 
 class NilClass
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: FalseClass
   )
+  .returns(FalseClass)
   def &(obj); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ^(obj); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def |(obj); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def rationalize(); end
 
-  standard_method(
-    {},
-    returns: []
-  )
+  sig.returns([])
   def to_a(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def to_c(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def to_f(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  sig.returns(T.untyped)
   def to_h(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def to_r(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
+  sig.returns(NilClass)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: NilClass
-  )
+  sig.returns(NilClass)
   def untrust(); end
 end
 
 class NoMemoryError
-  standard_method(
-    {},
-    returns: NoMemoryError
-  )
-  standard_method(
-    {},
-    returns: NoMemoryError
-  )
+  sig.returns(NoMemoryError)
+  sig.returns(NoMemoryError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: NoMemoryError
-  )
+  sig.returns(NoMemoryError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: NoMemoryError
-  )
+  sig.returns(NoMemoryError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: NoMemoryError
-  )
+  sig.returns(NoMemoryError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: NoMemoryError
-  )
+  sig.returns(NoMemoryError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: NoMemoryError
-  )
+  sig.returns(NoMemoryError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: NoMemoryError
-  )
+  sig.returns(NoMemoryError)
   def untrust(); end
 end
 
 class NoMethodError
-  standard_method(
-    {},
-    returns: NoMethodError
-  )
-  standard_method(
-    {},
-    returns: NoMethodError
-  )
+  sig.returns(NoMethodError)
+  sig.returns(NoMethodError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: NoMethodError
-  )
+  sig.returns(NoMethodError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: NoMethodError
-  )
+  sig.returns(NoMethodError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: NoMethodError
-  )
+  sig.returns(NoMethodError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: NoMethodError
-  )
+  sig.returns(NoMethodError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: NoMethodError
-  )
+  sig.returns(NoMethodError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: NoMethodError
-  )
+  sig.returns(NoMethodError)
   def untrust(); end
 end
 
 class NotImplementedError
-  standard_method(
-    {},
-    returns: NotImplementedError
-  )
-  standard_method(
-    {},
-    returns: NotImplementedError
-  )
+  sig.returns(NotImplementedError)
+  sig.returns(NotImplementedError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: NotImplementedError
-  )
+  sig.returns(NotImplementedError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: NotImplementedError
-  )
+  sig.returns(NotImplementedError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: NotImplementedError
-  )
+  sig.returns(NotImplementedError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: NotImplementedError
-  )
+  sig.returns(NotImplementedError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: NotImplementedError
-  )
+  sig.returns(NotImplementedError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: NotImplementedError
-  )
+  sig.returns(NotImplementedError)
   def untrust(); end
 end
 
 class Numeric
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def %(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def -@(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def +@(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Object
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(Object)
   def <=>(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def abs(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def abs2(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def angle(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def arg(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def ceil(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def coerce(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def conj(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def conjugate(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def denominator(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Integer
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(Integer)
   def div(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def divmod(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def fdiv(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def floor(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def i(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def imag(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def imaginary(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def integer?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def magnitude(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal))
   def modulo(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(BasicObject, NilClass)
-  )
+  sig.returns(T.any(BasicObject, NilClass))
   def nonzero?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def numerator(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def phase(); end
 
-  standard_method(
-    {},
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]
-  )
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def polar(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def quo(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def real(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def real?(); end
 
-  standard_method(
-    {},
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]
-  )
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def rect(); end
 
-  standard_method(
-    {},
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]
-  )
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def rectangular(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal))
   def remainder(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def round(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: TypeError
   )
+  .returns(TypeError)
   def singleton_method_added(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-      blk: Opus::Types.proc([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)], returns: BasicObject),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      blk: T::Proc[[T.any(Integer, Float, Rational, BigDecimal, Complex)], returns: BasicObject],
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Enumerator
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-      arg1: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-      blk: Opus::Types.proc([Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)], returns: BasicObject),
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
+  .returns(Enumerator)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg1: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      blk: T::Proc[[T.any(Integer, Float, Rational, BigDecimal, Complex)], returns: BasicObject],
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-      arg1: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Enumerator
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg1: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
+  .returns(Enumerator)
   def step(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def to_c(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_int(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def truncate(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
+  sig.returns(Numeric)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def untrust(); end
 end
 
 class Object
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def !~(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def <=>(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def =~(other); end
 
-  standard_method(
-    {},
-    returns: Class
-  )
+  sig.returns(Class)
   def class(); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def clone(); end
 
-  standard_method(
-    {
+  sig(
       port: IO,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def display(port); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def dup(); end
 
-  standard_method(
-    {
+  sig(
       method: Symbol,
       args: BasicObject,
-    },
-    returns: Enumerator
   )
-  standard_method(
-    {
+  .returns(Enumerator)
+  sig(
       method: Symbol,
       args: BasicObject,
       blk: BasicObject,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def enum_for(method=_, *args, &blk); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(other); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def frozen?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Class,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def instance_of?(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def instance_variable_defined?(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      arg0: T.any(Symbol, String),
   )
+  .returns(T.untyped)
   def instance_variable_get(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
+  sig(
+      arg0: T.any(Symbol, String),
       arg1: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def instance_variable_set(arg0, arg1); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Symbol)
-  )
+  sig.returns(T::Array[Symbol])
   def instance_variables(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Class, Module),
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
+  sig(
+      arg0: T.any(Class, Module),
   )
+  .returns(T.any(TrueClass, FalseClass))
   def is_a?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Class,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def kind_of?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Method
   )
+  .returns(Method)
   def method(arg0); end
 
-  standard_method(
-    {
-      regular: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      regular: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def methods(regular=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def nil?(); end
 
-  standard_method(
-    {
-      all: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      all: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def private_methods(all=_); end
 
-  standard_method(
-    {
-      all: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      all: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def protected_methods(all=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Method
   )
+  .returns(Method)
   def public_method(arg0); end
 
-  standard_method(
-    {
-      all: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      all: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def public_methods(all=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
+  sig(
+      arg0: T.any(Symbol, String),
       args: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def public_send(arg0, *args); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def remove_instance_variable(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Symbol, String),
+  sig(
+      arg0: T.any(Symbol, String),
       args: BasicObject,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def send(arg0, *args); end
 
-  standard_method(
-    {},
-    returns: Class
-  )
+  sig.returns(Class)
   def singleton_class(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Symbol,
-    },
-    returns: Method
   )
+  .returns(Method)
   def singleton_method(arg0); end
 
-  standard_method(
-    {
-      all: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Symbol)
+  sig(
+      all: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Symbol])
   def singleton_methods(all=_); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def tainted?(); end
 
-  standard_method(
-    {
+  sig(
       method: Symbol,
       args: BasicObject,
-    },
-    returns: Enumerator
   )
-  standard_method(
-    {
+  .returns(Enumerator)
+  sig(
       method: Symbol,
       args: BasicObject,
       blk: BasicObject,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def to_enum(method=_, *args, &blk); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Object
-  )
+  sig.returns(Object)
   def untrust(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def untrusted?(); end
 end
 
 class Pathname
-  standard_method(
-    {},
-    returns: Pathname
-  )
+  sig.returns(Pathname)
   def self.getwd(); end
 
-  standard_method(
-    {
+  sig(
       p1: String,
       p2: String,
-    },
-    returns: Opus::Types.array_of(Pathname)
   )
+  .returns(T::Array[Pathname])
   def self.glob(p1, p2=_); end
 
-  standard_method(
-    {
-      other: Opus::Types.any(String, Pathname),
-    },
-    returns: Pathname
+  sig(
+      other: T.any(String, Pathname),
   )
+  .returns(Pathname)
   def +(other); end
 
-  standard_method(
-    {
+  sig(
       p1: BasicObject,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def <=>(p1); end
 
-  standard_method(
-    {
+  sig(
       p1: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(p1); end
 
-  standard_method(
-    {
+  sig(
       p1: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(p1); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def absolute?(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Pathname], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      blk: T::Proc[[Pathname], returns: BasicObject],
   )
+  .returns(T.untyped)
   def ascend(&blk); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def atime(); end
 
-  standard_method(
-    {
+  sig(
       p1: String,
-    },
-    returns: Pathname
   )
+  .returns(Pathname)
   def basename(p1=_); end
 
-  standard_method(
-    {
+  sig(
       length: Integer,
       offset: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def binread(length=_, offset=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       offset: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def binwrite(arg0, offset=_); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def birthtime(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def blockdev?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def chardev?(); end
 
-  standard_method(
-    {
-      with_directory: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.array_of(Pathname)
+  sig(
+      with_directory: T.any(TrueClass, FalseClass),
   )
+  .returns(T::Array[Pathname])
   def children(with_directory); end
 
-  standard_method(
-    {
+  sig(
       mode: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def chmod(mode); end
 
-  standard_method(
-    {
+  sig(
       owner: Integer,
       group: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def chown(owner, group); end
 
-  standard_method(
-    {
-      consider_symlink: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      consider_symlink: T.any(TrueClass, FalseClass),
   )
+  .returns(T.untyped)
   def cleanpath(consider_symlink=_); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def ctime(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  sig.returns(T.untyped)
   def delete(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Pathname], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      blk: T::Proc[[Pathname], returns: BasicObject],
   )
+  .returns(T.untyped)
   def descend(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def directory?(); end
 
-  standard_method(
-    {},
-    returns: Pathname
-  )
+  sig.returns(Pathname)
   def dirname(); end
 
-  standard_method(
-    {
-      with_directory: Opus::Types.any(TrueClass, FalseClass),
-      blk: Opus::Types.proc([Pathname], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      with_directory: T.any(TrueClass, FalseClass),
+      blk: T::Proc[[Pathname], returns: BasicObject],
   )
+  .returns(T.untyped)
   def each_child(with_directory, &blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Pathname], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      blk: T::Proc[[Pathname], returns: BasicObject],
   )
+  .returns(T.untyped)
   def each_entry(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(T.untyped)
+  sig.returns(Enumerator)
   def each_filename(&blk); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       sep: String,
       limit: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def each_line(sep=_, limit=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Pathname)
-  )
+  sig.returns(T::Array[Pathname])
   def entries(); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def executable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def executable_real?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def exist?(); end
 
-  standard_method(
-    {
-      p1: Opus::Types.any(String, Pathname),
-    },
-    returns: Pathname
+  sig(
+      p1: T.any(String, Pathname),
   )
+  .returns(Pathname)
   def expand_path(p1=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def extname(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def file?(); end
 
-  standard_method(
-    {
-      ignore_error: Opus::Types.any(TrueClass, FalseClass),
-      blk: Opus::Types.proc([Pathname], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+  sig(
+      ignore_error: T.any(TrueClass, FalseClass),
+      blk: T::Proc[[Pathname], returns: BasicObject],
   )
-  standard_method(
-    {
-      ignore_error: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Enumerator
+  .returns(T.untyped)
+  sig(
+      ignore_error: T.any(TrueClass, FalseClass),
   )
+  .returns(Enumerator)
   def find(ignore_error, &blk); end
 
-  standard_method(
-    {
+  sig(
       pattern: String,
       flags: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def fnmatch(pattern, flags=_); end
 
-  standard_method(
-    {},
-    returns: Pathname
-  )
+  sig.returns(Pathname)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def ftype(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def grpowned?(); end
 
-  standard_method(
-    {
-      args: Opus::Types.any(String, Pathname),
-    },
-    returns: Pathname
+  sig(
+      args: T.any(String, Pathname),
   )
+  .returns(Pathname)
   def join(*args); end
 
-  standard_method(
-    {
+  sig(
       mode: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def lchmod(mode); end
 
-  standard_method(
-    {
+  sig(
       owner: Integer,
       group: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def lchown(owner, group); end
 
-  standard_method(
-    {},
-    returns: File::Stat
-  )
+  sig.returns(File::Stat)
   def lstat(); end
 
-  standard_method(
-    {
+  sig(
       old: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def make_link(old); end
 
-  standard_method(
-    {
+  sig(
       old: String,
-    },
-    returns: Integer
   )
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  .returns(Integer)
+  sig.returns(T.any(TrueClass, FalseClass))
   def symlink?(old=_); end
 
-  standard_method(
-    {
+  sig(
       p1: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def mkdir(p1); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  sig.returns(T.untyped)
   def mkpath(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def mountpoint?(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def mtime(); end
 
-  standard_method(
-    {
+  sig(
       mode: String,
       perm: String,
       opt: Integer,
-    },
-    returns: File
   )
-  standard_method(
-    {
+  .returns(File)
+  sig(
       mode: String,
       perm: String,
       opt: Integer,
-      blk: Opus::Types.proc([File], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[File], returns: BasicObject],
   )
+  .returns(T.untyped)
   def open(mode=_, perm=_, opt=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Encoding,
-    },
-    returns: Dir
   )
-  standard_method(
-    {
+  .returns(Dir)
+  sig(
       arg0: Encoding,
-      blk: Opus::Types.proc([Dir], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
+      blk: T::Proc[[Dir], returns: BasicObject],
   )
+  .returns(T.untyped)
   def opendir(arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def owned?(); end
 
-  standard_method(
-    {},
-    returns: Pathname
-  )
+  sig.returns(Pathname)
   def parent(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def pipe?(); end
 
-  standard_method(
-    {
+  sig(
       length: Integer,
       offset: Integer,
       open_args: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def read(length=_, offset=_, open_args=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def readable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def readable_real?(); end
 
-  standard_method(
-    {
+  sig(
       sep: String,
       limit: Integer,
       open_args: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def readlines(sep=_, limit=_, open_args=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def readlink(); end
 
-  standard_method(
-    {
+  sig(
       p1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def realdirpath(p1=_); end
 
-  standard_method(
-    {
+  sig(
       p1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def realpath(p1=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def relative?(); end
 
-  standard_method(
-    {
-      base_directory: Opus::Types.any(String, Pathname),
-    },
-    returns: Pathname
+  sig(
+      base_directory: T.any(String, Pathname),
   )
+  .returns(Pathname)
   def relative_path_from(base_directory); end
 
-  standard_method(
-    {
+  sig(
       p1: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def rename(p1); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def rmdir(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def rmtree(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def root?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def setgid?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def setuid?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def size?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def socket?(); end
 
-  standard_method(
-    {},
-    returns: [Pathname, Pathname]
-  )
+  sig.returns([Pathname, Pathname])
   def split(); end
 
-  standard_method(
-    {},
-    returns: File::Stat
-  )
+  sig.returns(File::Stat)
   def stat(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def sticky?(); end
 
-  standard_method(
-    {
+  sig(
       args: String,
-    },
-    returns: Pathname
   )
+  .returns(Pathname)
   def sub(*args); end
 
-  standard_method(
-    {
+  sig(
       p1: String,
-    },
-    returns: Pathname
   )
+  .returns(Pathname)
   def sub_ext(p1); end
 
-  standard_method(
-    {
+  sig(
       mode: Integer,
       perm: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def sysopen(mode=_, perm=_); end
 
-  standard_method(
-    {},
-    returns: Pathname
-  )
+  sig.returns(Pathname)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_path(); end
 
-  standard_method(
-    {
+  sig(
       length: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def truncate(length); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def unlink(); end
 
-  standard_method(
-    {},
-    returns: Pathname
-  )
+  sig.returns(Pathname)
   def untaint(); end
 
-  standard_method(
-    {
+  sig(
       atime: Time,
       mtime: Time,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def utime(atime, mtime); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def world_readable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def world_writable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def writable?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def writable_real?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       offset: Integer,
       open_args: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def write(arg0, offset=_, open_args=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 
-  standard_method(
-    {},
-    returns: Pathname
-  )
+  sig.returns(Pathname)
   def self.pwd(); end
 
-  standard_method(
-    {
-      other: Opus::Types.any(String, Pathname),
-    },
-    returns: Pathname
+  sig(
+      other: T.any(String, Pathname),
   )
+  .returns(Pathname)
   def /(other); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 end
 
 class Proc
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def arity(); end
 
-  standard_method(
-    {},
-    returns: Binding
-  )
+  sig.returns(Binding)
   def binding(); end
 
-  standard_method(
-    {
+  sig(
       arity: Integer,
-    },
-    returns: Proc
   )
+  .returns(Proc)
   def curry(arity=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def lambda(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of([Symbol, Symbol])
-  )
+  sig.returns(T::Array[[Symbol, Symbol]])
   def parameters(); end
 
-  standard_method(
-    {},
-    returns: [String, Integer]
-  )
+  sig.returns([String, Integer])
   def source_location(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
   def to_proc(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
+  sig.returns(Proc)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
   def untrust(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 end
 
 module Process
-  standard_method(
-    {
+  sig(
       msg: String,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def self.abort(msg=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def self.argv0(); end
 
-  standard_method(
-    {
-      clock_id: Opus::Types.any(Symbol, Integer),
+  sig(
+      clock_id: T.any(Symbol, Integer),
       unit: Symbol,
-    },
-    returns: Opus::Types.any(Float, Integer)
   )
+  .returns(T.any(Float, Integer))
   def self.clock_getres(clock_id, unit=_); end
 
-  standard_method(
-    {
-      clock_id: Opus::Types.any(Symbol, Integer),
+  sig(
+      clock_id: T.any(Symbol, Integer),
       unit: Symbol,
-    },
-    returns: Opus::Types.any(Float, Integer)
   )
+  .returns(T.any(Float, Integer))
   def self.clock_gettime(clock_id, unit=_); end
 
-  standard_method(
-    {
+  sig(
       nochdir: BasicObject,
       noclose: BasicObject,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.daemon(nochdir=_, noclose=_); end
 
-  standard_method(
-    {
+  sig(
       pid: Integer,
-    },
-    returns: Thread
   )
+  .returns(Thread)
   def self.detach(pid); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.egid(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.egid=(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.euid(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.euid=(arg0); end
 
-  standard_method(
-    {
+  sig(
       status: Integer,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def self.exit(status=_); end
 
-  standard_method(
-    {
+  sig(
       status: Integer,
-    },
-    returns: Opus::Types.untyped
   )
+  .returns(T.untyped)
   def self.exit!(status=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
+  sig.returns(T.any(Integer, NilClass))
+  sig(
+      blk: T::Proc[[], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([], returns: BasicObject),
-    },
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  .returns(T.any(Integer, NilClass))
   def self.fork(&blk); end
 
-  standard_method(
-    {
+  sig(
       pid: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.getpgid(pid); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.getpgrp(); end
 
-  standard_method(
-    {
+  sig(
       kind: Integer,
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.getpriority(kind, arg0); end
 
-  standard_method(
-    {
-      resource: Opus::Types.any(Symbol, String, Integer),
-    },
-    returns: [Integer, Integer]
+  sig(
+      resource: T.any(Symbol, String, Integer),
   )
+  .returns([Integer, Integer])
   def self.getrlimit(resource); end
 
-  standard_method(
-    {
+  sig(
       pid: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.getsid(pid=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.gid(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.gid=(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Integer)
-  )
+  sig.returns(T::Array[Integer])
   def self.groups(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.array_of(Integer),
-    },
-    returns: Opus::Types.array_of(Integer)
+  sig(
+      arg0: T::Array[Integer],
   )
+  .returns(T::Array[Integer])
   def self.groups=(arg0); end
 
-  standard_method(
-    {
+  sig(
       username: String,
       gid: Integer,
-    },
-    returns: Opus::Types.array_of(Integer)
   )
+  .returns(T::Array[Integer])
   def self.initgroups(username, gid); end
 
-  standard_method(
-    {
-      signal: Opus::Types.any(Integer, Symbol, String),
+  sig(
+      signal: T.any(Integer, Symbol, String),
       pids: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.kill(signal, *pids); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.maxgroups(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.maxgroups=(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.pid(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.ppid(); end
 
-  standard_method(
-    {
+  sig(
       kind: Integer,
       arg0: Integer,
       priority: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.setpriority(kind, arg0, priority); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.setproctitle(arg0); end
 
-  standard_method(
-    {
-      resource: Opus::Types.any(Symbol, String, Integer),
+  sig(
+      resource: T.any(Symbol, String, Integer),
       cur_limit: Integer,
       max_limit: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setrlimit(resource, cur_limit, max_limit=_); end
 
-  standard_method(
-    {
+  sig(
       pid: Integer,
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.setpgid(pid, arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.setsid(); end
 
-  standard_method(
-    {},
-    returns: Process::Tms
-  )
+  sig.returns(Process::Tms)
   def self.times(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.uid(); end
 
-  standard_method(
-    {
+  sig(
       user: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.uid=(user); end
 
-  standard_method(
-    {
+  sig(
       pid: Integer,
       flags: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.wait(pid=_, flags=_); end
 
-  standard_method(
-    {
+  sig(
       pid: Integer,
       flags: Integer,
-    },
-    returns: [Integer, Integer]
   )
+  .returns([Integer, Integer])
   def self.wait2(pid=_, flags=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of([Integer, Integer])
-  )
+  sig.returns(T::Array[[Integer, Integer]])
   def self.waitall(); end
 
-  standard_method(
-    {
+  sig(
       pid: Integer,
       flags: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.waitpid(pid=_, flags=_); end
 
-  standard_method(
-    {
+  sig(
       pid: Integer,
       flags: Integer,
-    },
-    returns: [Integer, Integer]
   )
+  .returns([Integer, Integer])
   def self.waitpid2(pid=_, flags=_); end
 end
 
 module Process::GID
-  standard_method(
-    {
+  sig(
       group: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.change_privilege(group); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.eid(); end
 
-  standard_method(
-    {
+  sig(
       name: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.from_name(name); end
 
-  standard_method(
-    {
+  sig(
       group: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.grant_privilege(group); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.re_exchange(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def self.re_exchangeable?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.rid(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def self.sid_available?(); end
 
-  standard_method(
-    {},
-    returns: Integer
+  sig.returns(Integer)
+  sig(
+      blk: T::Proc[[], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
-  )
+  .returns(T.untyped)
   def self.switch(&blk); end
 
-  standard_method(
-    {
+  sig(
       group: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.eid=(group); end
 end
 
 class Process::Status
-  standard_method(
-    {
+  sig(
       num: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def &(num); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(other); end
 
-  standard_method(
-    {
+  sig(
       num: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def >>(num); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def coredump?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def exited?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def exitstatus(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def pid(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def signaled?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def stopped?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def stopsig(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def success?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def termsig(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_i(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 end
 
 module Process::Sys
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.geteuid(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.getgid(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.getuid(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def self.issetugid(); end
 
-  standard_method(
-    {
+  sig(
       group: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setegid(group); end
 
-  standard_method(
-    {
+  sig(
       user: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.seteuid(user); end
 
-  standard_method(
-    {
+  sig(
       group: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setgid(group); end
 
-  standard_method(
-    {
+  sig(
       rid: Integer,
       eid: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setregid(rid, eid); end
 
-  standard_method(
-    {
+  sig(
       rid: Integer,
       eid: Integer,
       sid: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setresgid(rid, eid, sid); end
 
-  standard_method(
-    {
+  sig(
       rid: Integer,
       eid: Integer,
       sid: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setresuid(rid, eid, sid); end
 
-  standard_method(
-    {
+  sig(
       rid: Integer,
       eid: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setreuid(rid, eid); end
 
-  standard_method(
-    {
+  sig(
       group: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setrgid(group); end
 
-  standard_method(
-    {
+  sig(
       user: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setruid(user); end
 
-  standard_method(
-    {
+  sig(
       user: Integer,
-    },
-    returns: NilClass
   )
+  .returns(NilClass)
   def self.setuid(user); end
 end
 
 module Process::UID
-  standard_method(
-    {
+  sig(
       user: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.change_privilege(user); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.eid(); end
 
-  standard_method(
-    {
+  sig(
       name: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.from_name(name); end
 
-  standard_method(
-    {
+  sig(
       user: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.grant_privilege(user); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.re_exchange(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def self.re_exchangeable?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.rid(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def self.sid_available?(); end
 
-  standard_method(
-    {},
-    returns: Integer
+  sig.returns(Integer)
+  sig(
+      blk: T::Proc[[], returns: BasicObject],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([], returns: BasicObject),
-    },
-    returns: Opus::Types.untyped
-  )
+  .returns(T.untyped)
   def self.switch(&blk); end
 
-  standard_method(
-    {
+  sig(
       user: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def self.eid=(user); end
 end
 
 class Process::Waiter
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def pid(); end
 end
 
 class Random
-  standard_method(
-    {
+  sig(
       seed: Integer,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(seed=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {
+  sig(
       size: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def bytes(size); end
 
-  standard_method(
-    {
-      max: Opus::Types.any(Integer, Range),
-    },
-    returns: Integer
+  sig(
+      max: T.any(Integer, Range),
   )
-  standard_method(
-    {
-      max: Opus::Types.any(Float, Range),
-    },
-    returns: Float
+  .returns(Integer)
+  sig(
+      max: T.any(Float, Range),
   )
+  .returns(Float)
   def rand(max=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def seed(); end
 
-  standard_method(
-    {},
-    returns: Random
-  )
-  standard_method(
-    {},
-    returns: Random
-  )
+  sig.returns(Random)
+  sig.returns(Random)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Random
-  )
+  sig.returns(Random)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Random
-  )
+  sig.returns(Random)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Random
-  )
+  sig.returns(Random)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Random
-  )
+  sig.returns(Random)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Random
-  )
+  sig.returns(Random)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Random
-  )
+  sig.returns(Random)
   def untrust(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def self.new_seed(); end
 
-  standard_method(
-    {
+  sig(
       max: Integer,
-    },
-    returns: Numeric
   )
+  .returns(Numeric)
   def self.rand(max=_); end
 
-  standard_method(
-    {
+  sig(
       number: Integer,
-    },
-    returns: Numeric
   )
+  .returns(Numeric)
   def self.srand(number=_); end
 end
 
 class Range
-  standard_method(
-    {
+  sig(
       _begin: Integer,
       _end: Integer,
-      exclude_end: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: Object
+      exclude_end: T.any(TrueClass, FalseClass),
   )
+  .returns(Object)
   def initialize(_begin, _end, exclude_end=_); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(obj); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(obj); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  sig.returns(T.untyped)
   def begin(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(BasicObject, NilClass)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(T.any(BasicObject, NilClass))
   def bsearch(&blk); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def cover?(obj); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Range
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(Range)
+  sig.returns(Enumerator)
   def each(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
+  sig.returns(T.untyped)
   def end(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def exclude_end?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  sig.returns(T.untyped)
+  sig(
       n: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def first(n=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def include?(obj); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  sig.returns(T.untyped)
+  sig(
       n: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
+  .returns(T::Array[T.untyped])
   def last(n=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
+  sig.returns(T.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       n: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       n: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
+  .returns(T::Array[T.untyped])
   def max(n=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.untyped
+  sig.returns(T.untyped)
+  sig(
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.untyped
-  )
-  standard_method(
-    {
+  .returns(T.untyped)
+  sig(
       n: Integer,
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
   )
-  standard_method(
-    {
+  .returns(T::Array[T.untyped])
+  sig(
       n: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped, Opus::Types.untyped], returns: Integer),
-    },
-    returns: Opus::Types.array_of(Opus::Types.untyped)
+      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
+  .returns(T::Array[T.untyped])
   def min(n=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def size(); end
 
-  standard_method(
-    {
+  sig(
       n: Integer,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Range
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(Range)
+  sig(
       n: Integer,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def step(n=_, &blk); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Range
-  )
-  standard_method(
-    {},
-    returns: Range
-  )
+  sig.returns(Range)
+  sig.returns(Range)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Range
-  )
+  sig.returns(Range)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Range
-  )
+  sig.returns(Range)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Range
-  )
+  sig.returns(Range)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Range
-  )
+  sig.returns(Range)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Range
-  )
+  sig.returns(Range)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Range
-  )
+  sig.returns(Range)
   def untrust(); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(obj); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def member?(obj); end
 end
 
 class RangeError
-  standard_method(
-    {},
-    returns: RangeError
-  )
-  standard_method(
-    {},
-    returns: RangeError
-  )
+  sig.returns(RangeError)
+  sig.returns(RangeError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: RangeError
-  )
+  sig.returns(RangeError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: RangeError
-  )
+  sig.returns(RangeError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: RangeError
-  )
+  sig.returns(RangeError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: RangeError
-  )
+  sig.returns(RangeError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: RangeError
-  )
+  sig.returns(RangeError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: RangeError
-  )
+  sig.returns(RangeError)
   def untrust(); end
 end
 
 class Rational
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def %(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def *(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def +(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def -(arg0); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def -@(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def +@(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  standard_method(
-    {
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  standard_method(
-    {
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
-  standard_method(
-    {
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def **(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def /(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Float,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: Rational,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
-  standard_method(
-    {
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >=(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Float,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Rational,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Object
   )
+  .returns(Object)
   def <=>(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def abs(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def abs2(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def angle(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def arg(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Float,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: Rational,
-    },
-    returns: Integer
   )
-  standard_method(
-    {
+  .returns(Integer)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def div(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
+  .returns(BigDecimal)
   def modulo(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {
+  sig.returns(Integer)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def ceil(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def denominator(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal),
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal), Opus::Types.any(Integer, Float, Rational, BigDecimal)]
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def divmod(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def equal?(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Complex,
-    },
-    returns: Float
   )
+  .returns(Float)
   def fdiv(arg0); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {
+  sig.returns(Integer)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def floor(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def numerator(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
-  )
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def phase(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: Float,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Rational,
-    },
-    returns: Rational
   )
-  standard_method(
-    {
+  .returns(Rational)
+  sig(
       arg0: BigDecimal,
-    },
-    returns: BigDecimal
   )
-  standard_method(
-    {
+  .returns(BigDecimal)
+  sig(
       arg0: Complex,
-    },
-    returns: Complex
   )
+  .returns(Complex)
   def quo(arg0); end
 
-  standard_method(
-    {},
-    returns: Rational
+  sig.returns(Rational)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex),
-    },
-    returns: Rational
-  )
+  .returns(Rational)
   def rationalize(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {
+  sig.returns(Integer)
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)
   )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
   def round(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def to_f(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def to_i(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def to_r(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
-  standard_method(
-    {
+  sig.returns(Integer)
+  sig(
       arg0: Integer,
-    },
-    returns: Rational
   )
+  .returns(Rational)
   def truncate(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def conj(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def conjugate(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def imag(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def imaginary(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def real(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def real?(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def to_c(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: [Rational, Rational]
   )
-  standard_method(
-    {
+  .returns([Rational, Rational])
+  sig(
       arg0: Float,
-    },
-    returns: [Float, Float]
   )
-  standard_method(
-    {
+  .returns([Float, Float])
+  sig(
       arg0: Rational,
-    },
-    returns: [Rational, Rational]
   )
-  standard_method(
-    {
+  .returns([Rational, Rational])
+  sig(
       arg0: Complex,
-    },
-    returns: [Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex), Opus::Types.any(Integer, Float, Rational, BigDecimal, Complex)]
   )
+  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def coerce(arg0); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
+  sig.returns(Rational)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def untrust(); end
 end
 
 class Regexp
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Symbol),
-    },
-    returns: String
+  sig(
+      arg0: T.any(String, Symbol),
   )
+  .returns(String)
   def self.escape(arg0); end
 
-  standard_method(
-    {},
-    returns: MatchData
-  )
-  standard_method(
-    {
+  sig.returns(MatchData)
+  sig(
       arg0: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def self.last_match(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(Regexp, NilClass)
   )
+  .returns(T.any(Regexp, NilClass))
   def self.try_convert(obj); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       options: BasicObject,
       kcode: String,
-    },
-    returns: Object
   )
-  standard_method(
-    {
+  .returns(Object)
+  sig(
       arg0: Regexp,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(arg0, options=_, kcode=_); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(other); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(other); end
 
-  standard_method(
-    {
+  sig(
       str: String,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def =~(str); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def casefold?(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
   def encoding(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def fixed_encoding?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: Integer,
-    },
-    returns: Opus::Types.any(MatchData, NilClass)
   )
+  .returns(T.any(MatchData, NilClass))
   def match(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: String, values: Opus::Types.array_of(Integer))
-  )
+  sig.returns(T::Hash[String, T::Array[Integer]])
   def named_captures(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(String)
-  )
+  sig.returns(T::Array[String])
   def names(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def options(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def source(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(Integer, NilClass)
-  )
+  sig.returns(T.any(Integer, NilClass))
   def ~(); end
 
-  standard_method(
-    {},
-    returns: Regexp
-  )
-  standard_method(
-    {},
-    returns: Regexp
-  )
+  sig.returns(Regexp)
+  sig.returns(Regexp)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Regexp
-  )
+  sig.returns(Regexp)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Regexp
-  )
+  sig.returns(Regexp)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Regexp
-  )
+  sig.returns(Regexp)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Regexp
-  )
+  sig.returns(Regexp)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Regexp
-  )
+  sig.returns(Regexp)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Regexp
-  )
+  sig.returns(Regexp)
   def untrust(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       options: BasicObject,
       kcode: String,
-    },
-    returns: Regexp
   )
-  standard_method(
-    {
+  .returns(Regexp)
+  sig(
       arg0: Regexp,
-    },
-    returns: Regexp
   )
+  .returns(Regexp)
   def self.compile(arg0, options=_, kcode=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Symbol),
-    },
-    returns: String
+  sig(
+      arg0: T.any(String, Symbol),
   )
+  .returns(String)
   def self.quote(arg0); end
 
-  standard_method(
-    {
+  sig(
       other: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(other); end
 end
 
 class RegexpError
-  standard_method(
-    {},
-    returns: RegexpError
-  )
-  standard_method(
-    {},
-    returns: RegexpError
-  )
+  sig.returns(RegexpError)
+  sig.returns(RegexpError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: RegexpError
-  )
+  sig.returns(RegexpError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: RegexpError
-  )
+  sig.returns(RegexpError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: RegexpError
-  )
+  sig.returns(RegexpError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: RegexpError
-  )
+  sig.returns(RegexpError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: RegexpError
-  )
+  sig.returns(RegexpError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: RegexpError
-  )
+  sig.returns(RegexpError)
   def untrust(); end
 end
 
 class RubyVM
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: RubyVM
-  )
-  standard_method(
-    {},
-    returns: RubyVM
-  )
+  sig.returns(RubyVM)
+  sig.returns(RubyVM)
   def untrust(); end
 end
 
 class RuntimeError
-  standard_method(
-    {},
-    returns: RuntimeError
-  )
-  standard_method(
-    {},
-    returns: RuntimeError
-  )
+  sig.returns(RuntimeError)
+  sig.returns(RuntimeError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: RuntimeError
-  )
+  sig.returns(RuntimeError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: RuntimeError
-  )
+  sig.returns(RuntimeError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: RuntimeError
-  )
+  sig.returns(RuntimeError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: RuntimeError
-  )
+  sig.returns(RuntimeError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: RuntimeError
-  )
+  sig.returns(RuntimeError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: RuntimeError
-  )
+  sig.returns(RuntimeError)
   def untrust(); end
 end
 
 class ScriptError
-  standard_method(
-    {},
-    returns: ScriptError
-  )
-  standard_method(
-    {},
-    returns: ScriptError
-  )
+  sig.returns(ScriptError)
+  sig.returns(ScriptError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: ScriptError
-  )
+  sig.returns(ScriptError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: ScriptError
-  )
+  sig.returns(ScriptError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: ScriptError
-  )
+  sig.returns(ScriptError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: ScriptError
-  )
+  sig.returns(ScriptError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: ScriptError
-  )
+  sig.returns(ScriptError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: ScriptError
-  )
+  sig.returns(ScriptError)
   def untrust(); end
 end
 
 class SecurityError
-  standard_method(
-    {},
-    returns: SecurityError
-  )
-  standard_method(
-    {},
-    returns: SecurityError
-  )
+  sig.returns(SecurityError)
+  sig.returns(SecurityError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: SecurityError
-  )
+  sig.returns(SecurityError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: SecurityError
-  )
+  sig.returns(SecurityError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: SecurityError
-  )
+  sig.returns(SecurityError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: SecurityError
-  )
+  sig.returns(SecurityError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: SecurityError
-  )
+  sig.returns(SecurityError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: SecurityError
-  )
+  sig.returns(SecurityError)
   def untrust(); end
 end
 
 class Set
-  standard_method(
-    {
+  sig(
       ary: BasicObject,
-    },
-    returns: Set
   )
+  .returns(Set)
   def self.[](*ary); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(enum=_); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def +(enum); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def ^(enum); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: Set
   )
+  .returns(Set)
   def add(o); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: Opus::Types.any(BasicObject, NilClass)
   )
+  .returns(T.any(BasicObject, NilClass))
   def add?(o); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Opus::Types.hash_of(keys: Opus::Types.untyped, values: Set)
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(T::Hash[T.untyped, Set])
   def classify(&blk); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
   def clear(); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: Set
   )
+  .returns(Set)
   def delete(o); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: Opus::Types.any(BasicObject, NilClass)
   )
+  .returns(T.any(BasicObject, NilClass))
   def delete?(o); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Set
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(Set)
   def delete_if(&blk); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def difference(enum); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def disjoint?(set); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Set
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(Set)
+  sig.returns(Enumerator)
   def each(&blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def empty?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(BasicObject, NilClass)
-  )
+  sig.returns(T.any(BasicObject, NilClass))
   def flatten!(); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
   def flatten(); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def intersect?(set); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def intersection(enum); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Set
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(Set)
   def keep_if(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Set
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(Set)
   def map!(&blk); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def member?(o); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def merge(enum); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def proper_subset?(set); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def proper_superset?(set); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(BasicObject, NilClass)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(T.any(BasicObject, NilClass))
   def reject!(&blk); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def replace(enum); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: Opus::Types.any(BasicObject, NilClass)
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(T.any(BasicObject, NilClass))
   def select!(&blk); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def subset?(set); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def subtract(enum); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def superset?(set); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Opus::Types.untyped)
-  )
+  sig.returns(T::Array[T.untyped])
   def to_a(); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
+  sig.returns(Set)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Set
-  )
+  sig.returns(Set)
   def untrust(); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def &(enum); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def -(enum); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <(set); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: Set
   )
+  .returns(Set)
   def <<(o); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def <=(set); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >(set); end
 
-  standard_method(
-    {
+  sig(
       set: Set,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def >=(set); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: Set
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(Set)
   def collect!(&blk); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def include?(o); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def length(); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def |(enum); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: Set
   )
+  .returns(Set)
   def union(enum); end
 end
 
 class SignalException
-  standard_method(
-    {},
-    returns: SignalException
-  )
-  standard_method(
-    {},
-    returns: SignalException
-  )
+  sig.returns(SignalException)
+  sig.returns(SignalException)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: SignalException
-  )
+  sig.returns(SignalException)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: SignalException
-  )
+  sig.returns(SignalException)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: SignalException
-  )
+  sig.returns(SignalException)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: SignalException
-  )
+  sig.returns(SignalException)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: SignalException
-  )
+  sig.returns(SignalException)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: SignalException
-  )
+  sig.returns(SignalException)
   def untrust(); end
 end
 
 class SortedSet
-  standard_method(
-    {},
-    returns: SortedSet
-  )
-  standard_method(
-    {},
-    returns: SortedSet
-  )
+  sig.returns(SortedSet)
+  sig.returns(SortedSet)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: SortedSet
-  )
+  sig.returns(SortedSet)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: SortedSet
-  )
+  sig.returns(SortedSet)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: SortedSet
-  )
+  sig.returns(SortedSet)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: SortedSet
-  )
+  sig.returns(SortedSet)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: SortedSet
-  )
+  sig.returns(SortedSet)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: SortedSet
-  )
+  sig.returns(SortedSet)
   def untrust(); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: SortedSet
   )
+  .returns(SortedSet)
   def add(o); end
 
-  standard_method(
-    {},
-    returns: SortedSet
-  )
+  sig.returns(SortedSet)
   def clear(); end
 
-  standard_method(
-    {
+  sig(
       o: BasicObject,
-    },
-    returns: SortedSet
   )
+  .returns(SortedSet)
   def delete(o); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: SortedSet
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(SortedSet)
   def delete_if(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: SortedSet
+  sig(
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(SortedSet)
   def each(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: Opus::Types.any(TrueClass, FalseClass)),
-    },
-    returns: SortedSet
+  sig(
+      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
   )
+  .returns(SortedSet)
   def keep_if(&blk); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: SortedSet
   )
+  .returns(SortedSet)
   def merge(enum); end
 
-  standard_method(
-    {
+  sig(
       enum: Enumerable,
-    },
-    returns: SortedSet
   )
+  .returns(SortedSet)
   def subtract(enum); end
 end
 
 class StandardError
-  standard_method(
-    {},
-    returns: StandardError
-  )
-  standard_method(
-    {},
-    returns: StandardError
-  )
+  sig.returns(StandardError)
+  sig.returns(StandardError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: StandardError
-  )
+  sig.returns(StandardError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: StandardError
-  )
+  sig.returns(StandardError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: StandardError
-  )
+  sig.returns(StandardError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: StandardError
-  )
+  sig.returns(StandardError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: StandardError
-  )
+  sig.returns(StandardError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: StandardError
-  )
+  sig.returns(StandardError)
   def untrust(); end
 end
 
 class StopIteration
-  standard_method(
-    {},
-    returns: StopIteration
-  )
-  standard_method(
-    {},
-    returns: StopIteration
-  )
+  sig.returns(StopIteration)
+  sig.returns(StopIteration)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: StopIteration
-  )
+  sig.returns(StopIteration)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: StopIteration
-  )
+  sig.returns(StopIteration)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: StopIteration
-  )
+  sig.returns(StopIteration)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: StopIteration
-  )
+  sig.returns(StopIteration)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: StopIteration
-  )
+  sig.returns(StopIteration)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: StopIteration
-  )
+  sig.returns(StopIteration)
   def untrust(); end
 end
 
 class String
-  standard_method(
-    {
+  sig(
       str: String,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(str=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: String
   )
+  .returns(String)
   def %(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: String
   )
+  .returns(String)
   def *(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def +(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: String
   )
+  .returns(String)
   def <<(arg0); end
 
-  standard_method(
-    {
+  sig(
       other: String,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def <=>(other); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ===(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Object,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def =~(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Range, Regexp),
-    },
-    returns: Opus::Types.any(String, NilClass)
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: T.any(Range, Regexp),
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: Regexp,
       arg1: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: Regexp,
       arg1: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def [](arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def ascii_only?(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def b(); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
   def bytes(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def bytesize(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: Range,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def byteslice(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def capitalize(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def capitalize!(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(NilClass, Integer)
   )
+  .returns(T.any(NilClass, Integer))
   def casecmp(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def center(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: Array
-  )
+  sig.returns(Array)
   def chars(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def chomp(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def chomp!(arg0=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def chop(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def chop!(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def chr(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def clear(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Integer)
-  )
-  standard_method(
-    {
+  sig.returns(T::Array[Integer])
+  sig(
       blk: BasicObject,
-    },
-    returns: Opus::Types.array_of(Integer)
   )
+  .returns(T::Array[Integer])
   def codepoints(&blk); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Integer, Object),
-    },
-    returns: String
+  sig(
+      arg0: T.any(Integer, Object),
   )
+  .returns(String)
   def concat(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: String,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def count(arg0, *arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def crypt(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def delete(arg0, *arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def delete!(arg0, *arg1); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def downcase(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def downcase!(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def dump(); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: String
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(String)
+  sig.returns(Enumerator)
   def each_byte(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: String
+  sig(
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(String)
+  sig.returns(Enumerator)
   def each_char(&blk); end
 
-  standard_method(
-    {
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: String
+  sig(
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {},
-    returns: Enumerator
-  )
+  .returns(String)
+  sig.returns(Enumerator)
   def each_codepoint(&blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-      blk: Opus::Types.proc([Integer], returns: BasicObject),
-    },
-    returns: String
+      blk: T::Proc[[Integer], returns: BasicObject],
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg0: String,
-    },
-    returns: Enumerator
   )
+  .returns(Enumerator)
   def each_line(arg0=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def empty?(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
   def encoding(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def end_with?(*arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Encoding),
-    },
-    returns: String
+  sig(
+      arg0: T.any(String, Encoding),
   )
+  .returns(String)
   def force_encoding(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def getbyte(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
+  sig(
+      arg0: T.any(Regexp, String),
       arg1: String,
-    },
-    returns: String
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
+  .returns(String)
+  sig(
+      arg0: T.any(Regexp, String),
       arg1: Hash,
-    },
-    returns: String
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: String
+  .returns(String)
+  sig(
+      arg0: T.any(Regexp, String),
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-    },
-    returns: Enumerator
+  .returns(String)
+  sig(
+      arg0: T.any(Regexp, String),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-    },
-    returns: String
+  .returns(Enumerator)
+  sig(
+      arg0: T.any(Regexp, String),
   )
+  .returns(String)
   def gsub(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
+  sig(
+      arg0: T.any(Regexp, String),
       arg1: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: Opus::Types.any(String, NilClass)
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: T.any(Regexp, String),
+      blk: T::Proc[[String], returns: BasicObject],
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-    },
-    returns: Enumerator
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: T.any(Regexp, String),
   )
+  .returns(Enumerator)
   def gsub!(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hex(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def include?(arg0); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
+  sig(
+      arg0: T.any(Regexp, String),
       arg1: Integer,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def index(arg0, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def replace(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def insert(arg0, arg1); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def intern(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def length(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def lines(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def ljust(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def lstrip(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def lstrip!(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-    },
-    returns: MatchData
+  sig(
+      arg0: T.any(Regexp, String),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
+  .returns(MatchData)
+  sig(
+      arg0: T.any(Regexp, String),
       arg1: Integer,
-    },
-    returns: MatchData
   )
+  .returns(MatchData)
   def match(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def next(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def next!(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def oct(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def ord(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-    },
-    returns: Opus::Types.array_of(String)
+  sig(
+      arg0: T.any(Regexp, String),
   )
+  .returns(T::Array[String])
   def partition(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def prepend(arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def reverse(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Regexp),
+  sig(
+      arg0: T.any(String, Regexp),
       arg1: Integer,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def rindex(arg0, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def rjust(arg0, arg1=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(String, Regexp),
-    },
-    returns: Opus::Types.array_of(String)
+  sig(
+      arg0: T.any(String, Regexp),
   )
+  .returns(T::Array[String])
   def rpartition(arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def rstrip(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def rstrip!(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-    },
-    returns: Opus::Types.array_of(Opus::Types.any(String, Opus::Types.array_of(String)))
+  sig(
+      arg0: T.any(Regexp, String),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
+  .returns(T::Array[T.any(String, T::Array[String])])
+  sig(
+      arg0: T.any(Regexp, String),
       blk: BasicObject,
-    },
-    returns: Opus::Types.array_of(Opus::Types.any(String, Opus::Types.array_of(String)))
   )
+  .returns(T::Array[T.any(String, T::Array[String])])
   def scan(arg0, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg0: String,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: String
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(String)
   def scrub(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg0: String,
-      blk: Opus::Types.proc([Opus::Types.untyped], returns: BasicObject),
-    },
-    returns: String
+      blk: T::Proc[[T.untyped], returns: BasicObject],
   )
+  .returns(String)
   def scrub!(arg0=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def setbyte(arg0, arg1); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Range, Regexp),
-    },
-    returns: Opus::Types.any(String, NilClass)
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: T.any(Range, Regexp),
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: Regexp,
       arg1: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: Regexp,
       arg1: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def slice!(arg0, arg1=_); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
+  sig(
+      arg0: T.any(Regexp, String),
       arg1: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
-  standard_method(
-    {
+  .returns(T::Array[String])
+  sig(
       arg0: Integer,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def split(arg0=_, arg1=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def squeeze(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def squeeze!(arg0=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def start_with?(*arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def strip(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def strip!(); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-      arg1: Opus::Types.any(String, Hash),
-    },
-    returns: String
+  sig(
+      arg0: T.any(Regexp, String),
+      arg1: T.any(String, Hash),
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: String
+  .returns(String)
+  sig(
+      arg0: T.any(Regexp, String),
+      blk: T::Proc[[String], returns: BasicObject],
   )
+  .returns(String)
   def sub(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
+  sig(
+      arg0: T.any(Regexp, String),
       arg1: String,
-    },
-    returns: String
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Regexp, String),
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: String
+  .returns(String)
+  sig(
+      arg0: T.any(Regexp, String),
+      blk: T::Proc[[String], returns: BasicObject],
   )
+  .returns(String)
   def sub!(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def succ(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def sum(arg0=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def swapcase(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def swapcase!(); end
 
-  standard_method(
-    {},
-    returns: Complex
-  )
+  sig.returns(Complex)
   def to_c(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def to_f(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Integer
   )
+  .returns(Integer)
   def to_i(arg0=_); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def to_r(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_str(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def to_sym(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def tr(arg0, arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def tr!(arg0, arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: String,
-    },
-    returns: String
   )
+  .returns(String)
   def tr_s(arg0, arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def tr_s!(arg0, arg1); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def unpack(arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def upcase(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(String, NilClass)
-  )
+  sig.returns(T.any(String, NilClass))
   def upcase!(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
       arg1: BasicObject,
-    },
-    returns: Enumerator
   )
-  standard_method(
-    {
+  .returns(Enumerator)
+  sig(
       arg0: String,
       arg1: BasicObject,
-      blk: Opus::Types.proc([String], returns: BasicObject),
-    },
-    returns: String
+      blk: T::Proc[[String], returns: BasicObject],
   )
+  .returns(String)
   def upto(arg0, arg1=_, &blk); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def valid_encoding?(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
+  sig.returns(String)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def untrust(); end
 
-  standard_method(
-    {
+  sig(
       obj: Object,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def self.try_convert(obj); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
       arg1: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
-      arg0: Opus::Types.any(Range, Regexp),
-    },
-    returns: Opus::Types.any(String, NilClass)
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: T.any(Range, Regexp),
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: Regexp,
       arg1: Integer,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: Regexp,
       arg1: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
-  standard_method(
-    {
+  .returns(T.any(String, NilClass))
+  sig(
       arg0: String,
-    },
-    returns: Opus::Types.any(String, NilClass)
   )
+  .returns(T.any(String, NilClass))
   def slice(arg0, arg1=_); end
 end
 
 class StringIO
-  standard_method(
-    {},
-    returns: StringIO
-  )
-  standard_method(
-    {},
-    returns: StringIO
-  )
+  sig.returns(StringIO)
+  sig.returns(StringIO)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: StringIO
-  )
+  sig.returns(StringIO)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: StringIO
-  )
+  sig.returns(StringIO)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: StringIO
-  )
+  sig.returns(StringIO)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: StringIO
-  )
+  sig.returns(StringIO)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: StringIO
-  )
+  sig.returns(StringIO)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: StringIO
-  )
+  sig.returns(StringIO)
   def untrust(); end
 end
 
 class StringScanner
-  standard_method(
-    {
+  sig(
       arg0: String,
-      arg1: Opus::Types.any(TrueClass, FalseClass),
-    },
-    returns: StringScanner
+      arg1: T.any(TrueClass, FalseClass),
   )
+  .returns(StringScanner)
   def self.new(arg0, arg1=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def eos?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Regexp,
-    },
-    returns: String
   )
+  .returns(String)
   def scan(arg0); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def getch(); end
 end
 
 class Struct
-  standard_method(
-    {},
-    returns: Struct
-  )
-  standard_method(
-    {},
-    returns: Struct
-  )
+  sig.returns(Struct)
+  sig.returns(Struct)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Struct
-  )
+  sig.returns(Struct)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Struct
-  )
+  sig.returns(Struct)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Struct
-  )
+  sig.returns(Struct)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Struct
-  )
+  sig.returns(Struct)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Struct
-  )
+  sig.returns(Struct)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Struct
-  )
+  sig.returns(Struct)
   def untrust(); end
 end
 
 class Symbol
-  standard_method(
-    {},
-    returns: Opus::Types.array_of(Symbol)
-  )
+  sig.returns(T::Array[Symbol])
   def self.all_symbols(); end
 
-  standard_method(
-    {
+  sig(
       other: Symbol,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def <=>(other); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def ==(obj); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def =~(obj); end
 
-  standard_method(
-    {
+  sig(
       idx: Integer,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       b: Integer,
       n: Integer,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg0: Range,
-    },
-    returns: String
   )
+  .returns(String)
   def [](idx, n=_); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def capitalize(); end
 
-  standard_method(
-    {
+  sig(
       other: Symbol,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def casecmp(other); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def downcase(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def empty?(); end
 
-  standard_method(
-    {},
-    returns: Encoding
-  )
+  sig.returns(Encoding)
   def encoding(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def id2name(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def intern(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def length(); end
 
-  standard_method(
-    {
+  sig(
       obj: BasicObject,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def match(obj); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def succ(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def swapcase(); end
 
-  standard_method(
-    {},
-    returns: Proc
-  )
+  sig.returns(Proc)
   def to_proc(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def upcase(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
+  sig.returns(Symbol)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def untrust(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def size(); end
 
-  standard_method(
-    {
+  sig(
       idx: Integer,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       b: Integer,
       n: Integer,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg0: Range,
-    },
-    returns: String
   )
+  .returns(String)
   def slice(idx, n=_); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Symbol
-  )
+  sig.returns(Symbol)
   def to_sym(); end
 end
 
 class SyntaxError
-  standard_method(
-    {},
-    returns: SyntaxError
-  )
-  standard_method(
-    {},
-    returns: SyntaxError
-  )
+  sig.returns(SyntaxError)
+  sig.returns(SyntaxError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: SyntaxError
-  )
+  sig.returns(SyntaxError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: SyntaxError
-  )
+  sig.returns(SyntaxError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: SyntaxError
-  )
+  sig.returns(SyntaxError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: SyntaxError
-  )
+  sig.returns(SyntaxError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: SyntaxError
-  )
+  sig.returns(SyntaxError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: SyntaxError
-  )
+  sig.returns(SyntaxError)
   def untrust(); end
 end
 
 class SystemCallError
-  standard_method(
-    {},
-    returns: SystemCallError
-  )
-  standard_method(
-    {},
-    returns: SystemCallError
-  )
+  sig.returns(SystemCallError)
+  sig.returns(SystemCallError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: SystemCallError
-  )
+  sig.returns(SystemCallError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: SystemCallError
-  )
+  sig.returns(SystemCallError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: SystemCallError
-  )
+  sig.returns(SystemCallError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: SystemCallError
-  )
+  sig.returns(SystemCallError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: SystemCallError
-  )
+  sig.returns(SystemCallError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: SystemCallError
-  )
+  sig.returns(SystemCallError)
   def untrust(); end
 end
 
 class SystemExit
-  standard_method(
-    {},
-    returns: SystemExit
-  )
-  standard_method(
-    {},
-    returns: SystemExit
-  )
+  sig.returns(SystemExit)
+  sig.returns(SystemExit)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: SystemExit
-  )
+  sig.returns(SystemExit)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: SystemExit
-  )
+  sig.returns(SystemExit)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: SystemExit
-  )
+  sig.returns(SystemExit)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: SystemExit
-  )
+  sig.returns(SystemExit)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: SystemExit
-  )
+  sig.returns(SystemExit)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: SystemExit
-  )
+  sig.returns(SystemExit)
   def untrust(); end
 end
 
 class SystemStackError
-  standard_method(
-    {},
-    returns: SystemStackError
-  )
-  standard_method(
-    {},
-    returns: SystemStackError
-  )
+  sig.returns(SystemStackError)
+  sig.returns(SystemStackError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: SystemStackError
-  )
+  sig.returns(SystemStackError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: SystemStackError
-  )
+  sig.returns(SystemStackError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: SystemStackError
-  )
+  sig.returns(SystemStackError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: SystemStackError
-  )
+  sig.returns(SystemStackError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: SystemStackError
-  )
+  sig.returns(SystemStackError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: SystemStackError
-  )
+  sig.returns(SystemStackError)
   def untrust(); end
 end
 
 class Thread
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
-  standard_method(
-    {},
-    returns: Thread
-  )
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
+  sig.returns(Thread)
   def untrust(); end
 end
 
 class ThreadError
-  standard_method(
-    {},
-    returns: ThreadError
-  )
-  standard_method(
-    {},
-    returns: ThreadError
-  )
+  sig.returns(ThreadError)
+  sig.returns(ThreadError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: ThreadError
-  )
+  sig.returns(ThreadError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: ThreadError
-  )
+  sig.returns(ThreadError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: ThreadError
-  )
+  sig.returns(ThreadError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: ThreadError
-  )
+  sig.returns(ThreadError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: ThreadError
-  )
+  sig.returns(ThreadError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: ThreadError
-  )
+  sig.returns(ThreadError)
   def untrust(); end
 end
 
 class ThreadGroup
-  standard_method(
-    {},
-    returns: ThreadGroup
-  )
-  standard_method(
-    {},
-    returns: ThreadGroup
-  )
+  sig.returns(ThreadGroup)
+  sig.returns(ThreadGroup)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: ThreadGroup
-  )
+  sig.returns(ThreadGroup)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: ThreadGroup
-  )
+  sig.returns(ThreadGroup)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: ThreadGroup
-  )
+  sig.returns(ThreadGroup)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: ThreadGroup
-  )
+  sig.returns(ThreadGroup)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: ThreadGroup
-  )
+  sig.returns(ThreadGroup)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: ThreadGroup
-  )
+  sig.returns(ThreadGroup)
   def untrust(); end
 end
 
 class Time
-  standard_method(
-    {
+  sig(
       arg0: Time,
-    },
-    returns: Time
   )
-  standard_method(
-    {
+  .returns(Time)
+  sig(
       seconds_with_frac: Numeric,
-    },
-    returns: Time
   )
-  standard_method(
-    {
+  .returns(Time)
+  sig(
       seconds: Numeric,
       microseconds_with_frac: Numeric,
-    },
-    returns: Time
   )
+  .returns(Time)
   def self.at(arg0, microseconds_with_frac=_); end
 
-  standard_method(
-    {
+  sig(
       year: Integer,
-      month: Opus::Types.any(Integer, String),
+      month: T.any(Integer, String),
       day: Integer,
       hour: Integer,
       min: Integer,
       sec: Numeric,
       usec_with_frac: Numeric,
-    },
-    returns: Time
   )
+  .returns(Time)
   def self.gm(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  standard_method(
-    {
+  sig(
       year: Integer,
-      month: Opus::Types.any(Integer, String),
+      month: T.any(Integer, String),
       day: Integer,
       hour: Integer,
       min: Integer,
       sec: Numeric,
       usec_with_frac: Numeric,
-    },
-    returns: Time
   )
+  .returns(Time)
   def self.local(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def self.now(); end
 
-  standard_method(
-    {
+  sig(
       year: Integer,
-      month: Opus::Types.any(Integer, String),
+      month: T.any(Integer, String),
       day: Integer,
       hour: Integer,
       min: Integer,
       sec: Numeric,
       usec_with_frac: Numeric,
-    },
-    returns: Time
   )
+  .returns(Time)
   def self.utc(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  standard_method(
-    {
+  sig(
       year: Integer,
-      month: Opus::Types.any(Integer, String),
+      month: T.any(Integer, String),
       day: Integer,
       hour: Integer,
       min: Integer,
       sec: Numeric,
       usec_with_frac: Numeric,
-    },
-    returns: Object
   )
+  .returns(Object)
   def initialize(year=_, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  standard_method(
-    {
+  sig(
       arg0: Numeric,
-    },
-    returns: Time
   )
+  .returns(Time)
   def +(arg0); end
 
-  standard_method(
-    {
+  sig(
       arg0: Time,
-    },
-    returns: Float
   )
-  standard_method(
-    {
+  .returns(Float)
+  sig(
       arg0: Numeric,
-    },
-    returns: Time
   )
+  .returns(Time)
   def -(arg0); end
 
-  standard_method(
-    {
+  sig(
       other: Time,
-    },
-    returns: Opus::Types.any(Integer, NilClass)
   )
+  .returns(T.any(Integer, NilClass))
   def <=>(other); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def asctime(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def ctime(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def day(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def dst?(); end
 
-  standard_method(
-    {
+  sig(
       arg0: BasicObject,
-    },
-    returns: Opus::Types.any(TrueClass, FalseClass)
   )
+  .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def friday?(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def getgm(); end
 
-  standard_method(
-    {
+  sig(
       utc_offset: Integer,
-    },
-    returns: Time
   )
+  .returns(Time)
   def getlocal(utc_offset=_); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def getutc(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def gmt?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def gmt_offset(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def gmtime(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hash(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def hour(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def inspect(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def isdst(); end
 
-  standard_method(
-    {
+  sig(
       utc_offset: String,
-    },
-    returns: Time
   )
+  .returns(Time)
   def localtime(utc_offset=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def mday(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def min(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def mon(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def monday?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def nsec(); end
 
-  standard_method(
-    {
+  sig(
       arg0: Integer,
-    },
-    returns: Time
   )
+  .returns(Time)
   def round(arg0); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def saturday?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def sec(); end
 
-  standard_method(
-    {
+  sig(
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def strftime(arg0); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def subsec(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def succ(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def sunday?(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def thursday?(); end
 
-  standard_method(
-    {},
-    returns: [Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, Opus::Types.any(TrueClass, FalseClass), String]
-  )
+  sig.returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T.any(TrueClass, FalseClass), String])
   def to_a(); end
 
-  standard_method(
-    {},
-    returns: Float
-  )
+  sig.returns(Float)
   def to_f(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def to_i(); end
 
-  standard_method(
-    {},
-    returns: Rational
-  )
+  sig.returns(Rational)
   def to_r(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def to_s(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def tuesday?(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def tv_nsec(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def tv_sec(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def tv_usec(); end
 
-  standard_method(
-    {},
-    returns: Numeric
-  )
+  sig.returns(Numeric)
   def usec(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def utc(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def utc?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def utc_offset(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def wday(); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.any(TrueClass, FalseClass)
-  )
+  sig.returns(T.any(TrueClass, FalseClass))
   def wednesday?(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def yday(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def year(); end
 
-  standard_method(
-    {},
-    returns: String
-  )
+  sig.returns(String)
   def zone(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
+  sig.returns(Time)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: Time
-  )
+  sig.returns(Time)
   def untrust(); end
 
-  standard_method(
-    {
+  sig(
       year: Integer,
-      month: Opus::Types.any(Integer, String),
+      month: T.any(Integer, String),
       day: Integer,
       hour: Integer,
       min: Integer,
       sec: Numeric,
       usec_with_frac: Numeric,
-    },
-    returns: Time
   )
+  .returns(Time)
   def self.mktime(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def gmtoff(); end
 
-  standard_method(
-    {},
-    returns: Integer
-  )
+  sig.returns(Integer)
   def month(); end
 end
 
 class TracePoint
-  standard_method(
-    {},
-    returns: TracePoint
-  )
-  standard_method(
-    {},
-    returns: TracePoint
-  )
+  sig.returns(TracePoint)
+  sig.returns(TracePoint)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: TracePoint
-  )
+  sig.returns(TracePoint)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: TracePoint
-  )
+  sig.returns(TracePoint)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: TracePoint
-  )
+  sig.returns(TracePoint)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: TracePoint
-  )
+  sig.returns(TracePoint)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: TracePoint
-  )
+  sig.returns(TracePoint)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: TracePoint
-  )
+  sig.returns(TracePoint)
   def untrust(); end
 end
 
 class TrueClass
-  standard_method(
-    {},
-    returns: TrueClass
-  )
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
+  sig.returns(TrueClass)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: TrueClass
-  )
+  sig.returns(TrueClass)
   def untrust(); end
 end
 
 class TypeError
-  standard_method(
-    {},
-    returns: TypeError
-  )
-  standard_method(
-    {},
-    returns: TypeError
-  )
+  sig.returns(TypeError)
+  sig.returns(TypeError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: TypeError
-  )
+  sig.returns(TypeError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: TypeError
-  )
+  sig.returns(TypeError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: TypeError
-  )
+  sig.returns(TypeError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: TypeError
-  )
+  sig.returns(TypeError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: TypeError
-  )
+  sig.returns(TypeError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: TypeError
-  )
+  sig.returns(TypeError)
   def untrust(); end
 end
 
 module URI
-  standard_method(
-    {
+  sig(
       str: String,
       enc: Encoding,
-    },
-    returns: Opus::Types.array_of([String, String])
   )
+  .returns(T::Array[[String, String]])
   def self.decode_www_form_component(str, enc=_); end
 
-  standard_method(
-    {
+  sig(
       str: String,
       schemes: Array,
       blk: BasicObject,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def self.extract(str, schemes=_, &blk); end
 
-  standard_method(
-    {
+  sig(
       str: String,
-    },
-    returns: URI::HTTP
   )
+  .returns(URI::HTTP)
   def self.join(*str); end
 
-  standard_method(
-    {
+  sig(
       uri: String,
-    },
-    returns: URI::HTTP
   )
+  .returns(URI::HTTP)
   def self.parse(uri); end
 
-  standard_method(
-    {
+  sig(
       schemes: Array,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def self.regexp(schemes=_); end
 
-  standard_method(
-    {},
-    returns: Opus::Types.hash_of(keys: String, values: Class)
-  )
+  sig.returns(T::Hash[String, Class])
   def self.scheme_list(); end
 
-  standard_method(
-    {
+  sig(
       uri: String,
-    },
-    returns: Opus::Types.array_of(Opus::Types.any(String, NilClass))
   )
+  .returns(T::Array[T.any(String, NilClass)])
   def self.split(uri); end
 
-  standard_method(
-    {
+  sig(
       arg: String,
       arg0: Regexp,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg: String,
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.escape(arg, *arg0); end
 
-  standard_method(
-    {
+  sig(
       arg: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.unescape(*arg); end
 
-  standard_method(
-    {
+  sig(
       arg: String,
       arg0: Regexp,
-    },
-    returns: String
   )
-  standard_method(
-    {
+  .returns(String)
+  sig(
       arg: String,
       arg0: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.encode(arg, *arg0); end
 
-  standard_method(
-    {
+  sig(
       arg: String,
-    },
-    returns: String
   )
+  .returns(String)
   def self.decode(*arg); end
 end
 
 class UnboundMethod
-  standard_method(
-    {},
-    returns: UnboundMethod
-  )
-  standard_method(
-    {},
-    returns: UnboundMethod
-  )
+  sig.returns(UnboundMethod)
+  sig.returns(UnboundMethod)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: UnboundMethod
-  )
+  sig.returns(UnboundMethod)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: UnboundMethod
-  )
+  sig.returns(UnboundMethod)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: UnboundMethod
-  )
+  sig.returns(UnboundMethod)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: UnboundMethod
-  )
+  sig.returns(UnboundMethod)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: UnboundMethod
-  )
+  sig.returns(UnboundMethod)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: UnboundMethod
-  )
+  sig.returns(UnboundMethod)
   def untrust(); end
 end
 
 class UncaughtThrowError
-  standard_method(
-    {},
-    returns: UncaughtThrowError
-  )
-  standard_method(
-    {},
-    returns: UncaughtThrowError
-  )
+  sig.returns(UncaughtThrowError)
+  sig.returns(UncaughtThrowError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: UncaughtThrowError
-  )
+  sig.returns(UncaughtThrowError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: UncaughtThrowError
-  )
+  sig.returns(UncaughtThrowError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: UncaughtThrowError
-  )
+  sig.returns(UncaughtThrowError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: UncaughtThrowError
-  )
+  sig.returns(UncaughtThrowError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: UncaughtThrowError
-  )
+  sig.returns(UncaughtThrowError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: UncaughtThrowError
-  )
+  sig.returns(UncaughtThrowError)
   def untrust(); end
 end
 
 module YAML
-  standard_method(
-    {
+  sig(
       filename: String,
-    },
-    returns: Opus::Types.array_of(String)
   )
+  .returns(T::Array[String])
   def self.load_file(filename); end
 end
 
 class ZeroDivisionError
-  standard_method(
-    {},
-    returns: ZeroDivisionError
-  )
-  standard_method(
-    {},
-    returns: ZeroDivisionError
-  )
+  sig.returns(ZeroDivisionError)
+  sig.returns(ZeroDivisionError)
   def clone(); end
 
-  standard_method(
-    {},
-    returns: ZeroDivisionError
-  )
+  sig.returns(ZeroDivisionError)
   def dup(); end
 
-  standard_method(
-    {},
-    returns: ZeroDivisionError
-  )
+  sig.returns(ZeroDivisionError)
   def freeze(); end
 
-  standard_method(
-    {},
-    returns: ZeroDivisionError
-  )
+  sig.returns(ZeroDivisionError)
   def taint(); end
 
-  standard_method(
-    {},
-    returns: ZeroDivisionError
-  )
+  sig.returns(ZeroDivisionError)
   def trust(); end
 
-  standard_method(
-    {},
-    returns: ZeroDivisionError
-  )
+  sig.returns(ZeroDivisionError)
   def untaint(); end
 
-  standard_method(
-    {},
-    returns: ZeroDivisionError
-  )
+  sig.returns(ZeroDivisionError)
   def untrust(); end
 end

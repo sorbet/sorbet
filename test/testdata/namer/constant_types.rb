@@ -4,6 +4,6 @@ module Constants
   B = "hi"
   C = :hi
   D = 1.0
-  E = Opus::Types.cast(some_value, Opus::Types.array_of(Integer))
-  F = Opus::Types.assert_type!(some_value, Opus::Types.array_of(String)) # error: Use cast()
+  E = T.cast(some_value, T::Array[Integer])
+  F = T.assert_type!(some_value, T::Array[String]) # error: Use cast()
 end

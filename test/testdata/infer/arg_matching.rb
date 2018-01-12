@@ -2,7 +2,7 @@
 class TestArgs
   def any; end
 
-  standard_method({}, returns: Hash)
+  sig.returns(Hash)
   def a_hash; end # error: does not conform to method result type
 
   def required(a, b)
@@ -23,11 +23,11 @@ class TestArgs
     optional(1, 2, 3) # error: Too many arguments
   end
 
-  standard_method(
-    {
-      a: Integer,
-      b: Integer,
-    }, returns: NilClass)
+  sig(
+    a: Integer,
+    b: Integer,
+  )
+  .returns(NilClass)
   def kwarg(a, b:)
   end
 
@@ -45,10 +45,10 @@ class TestArgs
     kwarg(1, a_hash) # error: Passing an untyped hash
   end
 
-  standard_method(
-    {
-      x: Integer
-    }, returns: NilClass)
+  sig(
+    x: Integer
+  )
+  .returns(NilClass)
   def repeated(*x)
   end
 
@@ -61,16 +61,15 @@ class TestArgs
     repeated("hi", "there") # error: MULTI
   end
 
-  standard_method(
-    {
-      x: Integer,
-      y: Integer,
-      z: Hash,
-      w: String,
-      u: Integer,
-      v: Integer
-    },
-    returns: NilClass)
+  sig(
+    x: Integer,
+    y: Integer,
+    z: Hash,
+    w: String,
+    u: Integer,
+    v: Integer
+  )
+  .returns(NilClass)
   def mixed(x, y=_, z=_, *w, u:, v: 0)
   end
 

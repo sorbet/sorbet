@@ -813,9 +813,9 @@ string Send::showRaw(core::GlobalState &gs, int tabs) {
 string Cast::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     if (this->assertType) {
-        buf << "Opus::Types.assert_type!";
+        buf << "T.assert_type!";
     } else {
-        buf << "Opus::Types.cast";
+        buf << "T.cast";
     }
     buf << "(" << this->arg->toString(gs, tabs) << ", " << this->type->toString(gs, tabs) << ")";
 

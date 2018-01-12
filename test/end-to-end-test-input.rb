@@ -6,12 +6,7 @@ class BasicError
 end
 
 class ComplexError
-  standard_method(
-    {
-      arg: Integer
-    },
-    returns: NilClass
-  )
+  sig(arg: Integer).returns(NilClass)
   def foo(arg)
     arg
     raise arg # raise is defined by stdlib
