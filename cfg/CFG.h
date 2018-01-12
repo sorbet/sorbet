@@ -55,6 +55,7 @@ public:
     };
 
     std::string toString(core::Context ctx);
+    void recordAnnotations(core::Context ctx);
     core::Loc loc();
 };
 
@@ -87,6 +88,7 @@ public:
     };
 
     std::string toString(core::Context ctx);
+    void recordAnnotations(core::Context ctx);
 
     static int FORWARD_TOPO_SORT_VISITED;
     static int BACKWARD_TOPO_SORT_VISITED;

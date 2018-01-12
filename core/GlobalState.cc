@@ -3,6 +3,8 @@
 #include "core/Names/core.h"
 #include <regex>
 
+#include "absl/strings/str_split.h"
+
 template class std::vector<std::pair<unsigned int, unsigned int>>;
 using namespace std;
 
@@ -745,5 +747,67 @@ std::unique_ptr<GlobalState> GlobalState::deepCopy() const {
     result->sanityCheck();
     return result;
 }
+
+string GlobalState::showAnnotatedSource(FileRef file) {
+    vector<pair<Loc, std::string>> annotations;
+    for (auto annotation : this->annotations) {
+        if (annotation.first.file == file) {
+            annotations.emplace_back(annotation);
+        }
+    }
+    if (annotations.empty()) {
+        return "";
+    }
+
+    // Sort the locs backwards
+    auto compare = [](pair<core::Loc, string> left, pair<core::Loc, string> right) {
+        auto a = left.first;
+        auto b = right.first;
+        if (a.file != b.file) {
+            throw "Trying to compare across files";
+        }
+        return a.begin_pos > b.begin_pos;
+    };
+    sort(annotations.begin(), annotations.end(), compare);
+
+    auto source = file.file(*this).source();
+    string outline(source.begin(), source.end());
+    for (auto annotation : annotations) {
+        stringstream buf;
+
+        auto loc = annotation.first;
+        auto pos = loc.position(*this);
+        std::vector<std::string> lines = absl::StrSplit(annotation.second, "\n");
+        while (!lines.empty() && lines.back().empty()) {
+            lines.pop_back();
+        }
+        stopInDebugger();
+        if (!lines.empty()) {
+            buf << endl;
+            for (auto line : lines) {
+                for (int p = 1; p < pos.first.column; p++) {
+                    buf << " ";
+                }
+                if (line.empty()) {
+                    // Avoid the trailing space
+                    buf << "#";
+                } else {
+                    buf << "# " << line;
+                }
+                buf << endl;
+            }
+        }
+        auto out = buf.str();
+        out = out.substr(0, out.size() - 1); // Remove the last newline that the buf always has
+
+        auto start_of_line = loc.begin_pos;
+        while (*(outline.begin() + start_of_line) != '\n') {
+            start_of_line--;
+        }
+        outline = outline.substr(0, start_of_line) + out + outline.substr(start_of_line);
+    }
+    return outline;
+}
+
 } // namespace core
 } // namespace ruby_typer

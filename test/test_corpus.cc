@@ -87,17 +87,21 @@ public:
 
 class CFG_Collector_and_Typer {
     bool raw = false;
+    bool typedSource = false;
 
 public:
-    CFG_Collector_and_Typer(bool raw = false) : raw(raw){};
+    CFG_Collector_and_Typer(bool raw = false, bool typedSource = false) : raw(raw), typedSource(typedSource){};
     vector<string> cfgs;
     ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
         ruby_typer::core::UnfreezeNameTable nameTableAccess(ctx); // creates names for temporaries in CFG
         auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        if (raw) {
+        if (raw || typedSource) {
             ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
         }
         ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+        if (typedSource) {
+            cfg->recordAnnotations(ctx);
+        }
 
         cfgs.push_back(cfg->toString(ctx));
         return m;
@@ -111,9 +115,8 @@ public:
     int endPos = -1;
 };
 
-unordered_set<string> knownPasses = {
-    "parse-tree", "ast", "ast-raw", "name-table", "name-tree", "name-tree-raw", "cfg", "cfg-raw", "infer",
-};
+unordered_set<string> knownPasses = {"parse-tree",    "ast", "ast-raw", "name-table", "name-tree",
+                                     "name-tree-raw", "cfg", "cfg-raw", "infer",      "typed-source"};
 
 TEST(CorpusTest, CloneSubstitutePayload) {
     auto console = spd::stderr_color_mt("ClonePayload");
@@ -257,17 +260,27 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &resolvedTree : trees) {
         auto file = resolvedTree->loc.file;
+        auto checkTree = [&]() {
+            if (resolvedTree == nullptr) {
+                auto path = file.file(context).path();
+                ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
+            }
+        };
+        auto checkPragma = [&](string ext) {
+            if (file.file(context).source_type != ruby_typer::core::File::Typed) {
+                auto path = file.file(context).path();
+                ADD_FAILURE_AT(path.begin(), 1)
+                    << "Missing `@typed` pragma. Sources with ." << ext << ".exp expectations must specify @typed.";
+            }
+        };
         // CFG
 
         expectation = test.expectations.find("cfg");
         if (expectation != test.expectations.end()) {
+            checkTree();
+            checkPragma("cfg");
             CFG_Collector_and_Typer collector;
             auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
-            if (file.file(context).source_type != ruby_typer::core::File::Typed) {
-                auto path = file.file(context).path();
-                ADD_FAILURE_AT(path.begin(), 1)
-                    << "Missing `@typed` pragma. Sources with .cfg.exp expectations must specify @typed.";
-            }
 
             stringstream dot;
             dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
@@ -284,13 +297,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         expectation = test.expectations.find("cfg-raw");
         if (expectation != test.expectations.end()) {
+            checkTree();
+            checkPragma("cfg-raw");
             CFG_Collector_and_Typer collector(true);
             auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
-            if (file.file(context).source_type != ruby_typer::core::File::Typed) {
-                auto path = file.file(context).path();
-                ADD_FAILURE_AT(path.begin(), 1)
-                    << "Missing `@typed` pragma. Sources with .cfg-raw.exp expectations must specify @typed.";
-            }
 
             stringstream dot;
             dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
@@ -305,18 +315,29 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                           std::make_move_iterator(newErrors.end()));
         }
 
+        expectation = test.expectations.find("typed-source");
+        if (expectation != test.expectations.end()) {
+            checkTree();
+            checkPragma("typed-source");
+            CFG_Collector_and_Typer collector(false, true);
+            ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
+
+            got["typed-source"].append(gs.showAnnotatedSource(file));
+
+            auto newErrors = gs.errors.getAndEmptyErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
         expectation = test.expectations.find("infer");
         if (expectation != test.expectations.end()) {
+            checkTree();
+            checkPragma("infer");
             CFG_Collector_and_Typer collector;
             ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
             auto checker = test.folder + expectation->second;
             SCOPED_TRACE(checker);
 
-            if (file.file(context).source_type != ruby_typer::core::File::Typed) {
-                auto path = file.file(context).path();
-                ADD_FAILURE_AT(path.begin(), 1)
-                    << "Missing `@typed` pragma. Sources with .cfg.exp expectations must specify @typed.";
-            }
             got["infer"] = "";
             auto newErrors = gs.errors.getAndEmptyErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),

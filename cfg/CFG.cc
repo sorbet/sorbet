@@ -155,6 +155,25 @@ string BasicBlock::toString(core::Context ctx) {
     return buf.str();
 }
 
+void CFG::recordAnnotations(core::Context ctx) {
+    for (auto &basicBlock : this->basicBlocks) {
+        basicBlock->recordAnnotations(ctx);
+    }
+}
+
+void BasicBlock::recordAnnotations(core::Context ctx) {
+    // Exit out if there was no user written code
+    if (this->exprs.size() <= 1) {
+        return;
+    }
+
+    for (Binding &exp : this->exprs) {
+        if (dynamic_cast<DebugEnvironment *>(exp.value.get())) {
+            ctx.state.addAnnotation(exp.loc, exp.value->toString(ctx));
+        }
+    }
+}
+
 core::Loc BasicBlock::loc() {
     core::Loc loc;
     if (!this->exprs.empty()) {

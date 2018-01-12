@@ -41,6 +41,7 @@ struct Printers {
     bool NameTableFull = false;
     bool CFG = false;
     bool CFGRaw = false;
+    bool TypedSource = false;
 };
 
 struct Options {
@@ -69,6 +70,7 @@ struct {
     {"name-tree-raw", &Printers::NameTreeRaw},
     {"cfg", &Printers::CFG},
     {"cfg-raw", &Printers::CFGRaw},
+    {"typed-source", &Printers::TypedSource},
 };
 
 class CFG_Collector_and_Typer {
@@ -83,12 +85,15 @@ public:
         }
 
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        if (print.CFGRaw) {
+        if (print.CFGRaw || print.TypedSource) {
             cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
         }
         infer::Inference::run(ctx.withOwner(m->symbol), cfg);
-        if (print.CFG) {
+        if (print.CFG || print.CFGRaw) {
             cout << cfg->toString(ctx) << endl << endl;
+        }
+        if (print.TypedSource) {
+            cfg->recordAnnotations(ctx);
         }
         return m;
     }
@@ -276,7 +281,9 @@ vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<uniq
                     result.emplace_back(
                         ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved)));
                 }
-
+                if (opts.print.TypedSource) {
+                    cout << gs.showAnnotatedSource(f);
+                }
                 if (opts.print.CFG || opts.print.CFGRaw) {
                     cout << "}" << endl << endl;
                 }
@@ -363,9 +370,6 @@ public:
         }
     }
 };
-
-// std::string
-//     print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg, cfg-raw]");
 
 cxxopts::Options buildOptions() {
     cxxopts::Options options("ruby_typer", "Typechecker for Ruby");

@@ -114,9 +114,11 @@ CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakSco
 
 void CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> &cfg) {
     for (auto *bb : cfg->backwardsTopoSort) {
-        core::LocalVariable retSym;
-        core::Loc loc;
-        bb->exprs.emplace(bb->exprs.begin(), retSym, loc, make_unique<cfg::DebugEnvironment>());
+        if (bb->exprs.empty()) {
+            continue;
+        }
+        auto &firstExpr = bb->exprs[0];
+        bb->exprs.emplace(bb->exprs.begin(), firstExpr.bind, firstExpr.loc, make_unique<cfg::DebugEnvironment>());
     }
 }
 
