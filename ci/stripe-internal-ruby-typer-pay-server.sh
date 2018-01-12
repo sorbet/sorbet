@@ -3,6 +3,13 @@ set -eux
 
 DIR=./pay-server
 
+export TIME='cmd: "%C"
+wall: %e
+user: %U
+system: %S
+maxrss: %M
+'
+
 # This is what we'll ship to our users
 bazel build main:ruby-typer --config=unsafe -c opt
 PATH=$PATH:"$(pwd)/bazel-bin/main/"
@@ -33,16 +40,18 @@ fi
 OUT=$(mktemp)
 TIMEFILE1=$(mktemp)
 
-/usr/bin/time -v -o "$TIMEFILE1" ./scripts/ruby-types/typecheck 2>&1 | tee "$OUT"
+/usr/bin/time -o "$TIMEFILE1" ./scripts/ruby-types/typecheck 2>&1 | tee "$OUT"
 if [ -s "$OUT" ]; then
     exit 1
 fi
 
 cat "$TIMEFILE1"
 
-TIME1="$(grep User < "$TIMEFILE1" | cut -d ' ' -f 4)"
 if [ "$RECORD_STATS" ]; then
-  veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$TIME1"s -name ruby_typer.payserver.prod_run.seconds
+    t_user="$(grep user "$TIMEFILE1" | cut -d ' ' -f 2)"
+    t_wall="$(grep wall "$TIMEFILE1" | cut -d ' ' -f 2)"
+    veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_wall"s -name ruby_typer.payserver.prod_run.seconds
+    veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_user"s -name ruby_typer.payserver.prod_run.cpu_seconds
 fi
 
 
@@ -61,12 +70,14 @@ TIMEFILE2=$(mktemp)
 env ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-4.0/bin/llvm-symbolizer \
     ASAN_OPTIONS=detect_leaks=0 \
     LSAN_OPTIONS=verbosity=1:log_threads=1 \
-    /usr/bin/time -v -o "$TIMEFILE2" \
+    /usr/bin/time -o "$TIMEFILE2" \
     ./scripts/ruby-types/typecheck --quiet --typed=always --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters
 
 cat "$TIMEFILE2"
 
-TIME2="$(grep User < "$TIMEFILE2" | cut -d ' ' -f 4)"
 if [ "$RECORD_STATS" ]; then
-  veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$TIME2"s -name ruby_typer.payserver.full_run.seconds
+    t_user="$(grep user "$TIMEFILE2" | cut -d ' ' -f 2)"
+    t_wall="$(grep wall "$TIMEFILE2" | cut -d ' ' -f 2)"
+    veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_wall"s -name ruby_typer.payserver.full_run.seconds
+    veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_user"s -name ruby_typer.payserver.full_run.cpu_seconds
 fi
