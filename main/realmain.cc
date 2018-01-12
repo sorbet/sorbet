@@ -364,9 +364,6 @@ public:
     }
 };
 
-// std::string
-//     print_options("[parse-tree, ast, ast-raw, name-table, name-table-full, name-tree, name-tree-raw, cfg, cfg-raw]");
-
 cxxopts::Options buildOptions() {
     cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
 
