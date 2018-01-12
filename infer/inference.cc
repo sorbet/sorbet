@@ -468,8 +468,8 @@ public:
     shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops) {
         try {
             core::TypeAndOrigins tp;
-            bool noLoopChecking = cfg::cast_instruction<cfg::Alias>(bind.value.get()) != nullptr ||
-                                  cfg::cast_instruction<cfg::LoadArg>(bind.value.get()) != nullptr;
+            bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value.get()) ||
+                                  cfg::isa_instruction<cfg::LoadArg>(bind.value.get());
             typecase(
                 bind.value.get(),
                 [&](cfg::Send *send) {

@@ -224,16 +224,11 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
             if (fnd == RnW.reads.end()) {
                 // This should be !New && !Send && !Return, but I prefer to list explicitly in case we start adding
                 // nodes.
-                if (cast_instruction<Ident>(bind.value.get()) != nullptr ||
-                    cast_instruction<ArraySplat>(bind.value.get()) != nullptr ||
-                    cast_instruction<HashSplat>(bind.value.get()) != nullptr ||
-                    cast_instruction<BoolLit>(bind.value.get()) != nullptr ||
-                    cast_instruction<StringLit>(bind.value.get()) != nullptr ||
-                    cast_instruction<SymbolLit>(bind.value.get()) != nullptr ||
-                    cast_instruction<IntLit>(bind.value.get()) != nullptr ||
-                    cast_instruction<FloatLit>(bind.value.get()) != nullptr ||
-                    cast_instruction<Self>(bind.value.get()) != nullptr ||
-                    cast_instruction<LoadArg>(bind.value.get()) != nullptr) {
+                if (isa_instruction<Ident>(bind.value.get()) || isa_instruction<ArraySplat>(bind.value.get()) ||
+                    isa_instruction<HashSplat>(bind.value.get()) || isa_instruction<BoolLit>(bind.value.get()) ||
+                    isa_instruction<StringLit>(bind.value.get()) || isa_instruction<SymbolLit>(bind.value.get()) ||
+                    isa_instruction<IntLit>(bind.value.get()) || isa_instruction<FloatLit>(bind.value.get()) ||
+                    isa_instruction<Self>(bind.value.get()) || isa_instruction<LoadArg>(bind.value.get())) {
                     expIt = it->exprs.erase(expIt);
                 } else {
                     ++expIt;

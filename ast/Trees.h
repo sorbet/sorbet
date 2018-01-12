@@ -27,6 +27,10 @@ template <class To> To *cast_tree(Expression *what) {
     return fast_cast<Expression, To>(what);
 }
 
+template <class To> bool isa_tree(Expression *what) {
+    return cast_tree<To>(what) != nullptr;
+}
+
 class Reference : public Expression {
 public:
     Reference(core::Loc loc);

@@ -17,7 +17,7 @@ private:
     void substClassName(core::Context ctx, unique_ptr<ast::Expression> &node) {
         auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
         if (constLit == nullptr) { // uncommon case. something is strange
-            if (ast::cast_tree<ast::EmptyTree>(node.get()) != nullptr) {
+            if (ast::isa_tree<ast::EmptyTree>(node.get())) {
                 return;
             }
             node = TreeMap<SubstWalk>::apply(ctx, *this, move(node));

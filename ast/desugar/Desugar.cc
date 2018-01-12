@@ -177,17 +177,17 @@ unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::
     auto end = nodes.end();
     unique_ptr<Expression> res;
     unique_ptr<Expression> first = node2TreeImpl(ctx, *it, uniqueCounter);
-    if (cast_tree<StringLit>(first.get()) == nullptr) {
+    if (isa_tree<StringLit>(first.get())) {
+        res = move(first);
+    } else {
         auto pieceLoc = first->loc;
         res = mkSend0(pieceLoc, move(first), core::Names::to_s());
-    } else {
-        res = move(first);
     }
     ++it;
     for (; it != end; ++it) {
         auto &stat = *it;
         unique_ptr<Expression> narg = node2TreeImpl(ctx, stat, uniqueCounter);
-        if (cast_tree<StringLit>(narg.get()) == nullptr) {
+        if (!isa_tree<StringLit>(narg.get())) {
             auto pieceLoc = narg->loc;
             narg = mkSend0(pieceLoc, move(narg), core::Names::to_s());
         }
@@ -270,7 +270,7 @@ unique_ptr<Expression> desugarMlhs(core::Context ctx, core::Loc loc, parser::Mlh
 
             int left = i;
             int right = lhs->exprs.size() - left - 1;
-            if (cast_tree<EmptyTree>(lh.get()) == nullptr) {
+            if (!isa_tree<EmptyTree>(lh.get())) {
                 auto exclusive = mkTrue(lh->loc);
                 if (right == 0) {
                     right = 1;
@@ -321,7 +321,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             [&](parser::Send *send) {
                 u4 flags = 0;
                 auto rec = node2TreeImpl(ctx, send->receiver, uniqueCounter);
-                if (cast_tree<EmptyTree>(rec.get()) != nullptr) {
+                if (isa_tree<EmptyTree>(rec.get())) {
                     rec = mkSelf(loc);
                     flags |= Send::PRIVATE_OK;
                 }
@@ -569,16 +569,16 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto end = dsymbol->nodes.end();
                 unique_ptr<Expression> res;
                 unique_ptr<Expression> first = node2TreeImpl(ctx, *it, uniqueCounter);
-                if (cast_tree<StringLit>(first.get()) == nullptr) {
-                    res = mkSend0(loc, move(first), core::Names::to_s());
-                } else {
+                if (isa_tree<StringLit>(first.get())) {
                     res = move(first);
+                } else {
+                    res = mkSend0(loc, move(first), core::Names::to_s());
                 }
                 ++it;
                 for (; it != end; ++it) {
                     auto &stat = *it;
                     unique_ptr<Expression> narg = node2TreeImpl(ctx, stat, uniqueCounter);
-                    if (cast_tree<StringLit>(narg.get()) == nullptr) {
+                    if (!isa_tree<StringLit>(narg.get())) {
                         narg = mkSend0(loc, move(narg), core::Names::to_s());
                     }
                     auto n = mkSend1(loc, move(res), core::Names::concat(), move(narg));
@@ -866,7 +866,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(), ++uniqueCounter);
 
                 auto mlhsNode = move(for_->vars);
-                if (parser::cast_node<parser::Mlhs>(mlhsNode.get()) == nullptr) {
+                if (!parser::isa_node<parser::Mlhs>(mlhsNode.get())) {
                     parser::NodeVec vars;
                     vars.emplace_back(move(mlhsNode));
                     mlhsNode = make_unique<parser::Mlhs>(loc, move(vars));
@@ -1200,7 +1200,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             [&](parser::Resbody *resbody) {
                 RescueCase::EXCEPTION_store exceptions;
                 auto exceptionsExpr = node2TreeImpl(ctx, resbody->exception, uniqueCounter);
-                if (cast_tree<EmptyTree>(exceptionsExpr.get()) != nullptr) {
+                if (isa_tree<EmptyTree>(exceptionsExpr.get())) {
                     // No exceptions captured
                 } else if (auto exceptionsArray = cast_tree<ast::Array>(exceptionsExpr.get())) {
                     ENFORCE(exceptionsArray != nullptr, "exception array cast failed");
@@ -1234,7 +1234,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                                                     ++uniqueCounter);
                 }
 
-                if (cast_tree<EmptyTree>(varExpr.get()) != nullptr) {
+                if (isa_tree<EmptyTree>(varExpr.get())) {
                     varLoc = loc;
                 } else if (varExpr != nullptr) {
                     body = mkInsSeq1(varLoc, mkAssign(varLoc, move(varExpr), mkLocal(varLoc, var)), move(body));

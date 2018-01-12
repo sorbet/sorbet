@@ -39,7 +39,7 @@ private:
     }
 
     core::SymbolRef resolveConstant(core::Context ctx, ast::ConstantLit *c) {
-        if (ast::cast_tree<ast::EmptyTree>(c->scope.get()) != nullptr) {
+        if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (!result.exists()) {
                 ctx.state.errors.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant {}",
@@ -448,8 +448,7 @@ private:
 
     void fillInInfoFromStandardMethod(core::Context ctx, core::Symbol &methoInfo, ast::Send *lastStandardMethod,
                                       bool isOverloaded) {
-        if (ast::cast_tree<ast::Self>(lastStandardMethod->recv.get()) == nullptr ||
-            lastStandardMethod->block != nullptr) {
+        if (!ast::isa_tree<ast::Self>(lastStandardMethod->recv.get()) || lastStandardMethod->block != nullptr) {
             ctx.state.errors.error(lastStandardMethod->loc, core::errors::Resolver::InvalidMethodSignature,
                                    "Malformed {}: {} ", lastStandardMethod->fun.toString(ctx),
                                    lastStandardMethod->toString(ctx));
@@ -475,7 +474,7 @@ private:
         for (auto &arg : lastStandardMethod->args) {
             if (auto *hash = ast::cast_tree<ast::Hash>(arg.get())) {
                 for (auto &key : hash->keys) {
-                    if (ast::cast_tree<ast::SymbolLit>(key.get()) == nullptr) {
+                    if (!ast::isa_tree<ast::SymbolLit>(key.get())) {
                         ctx.state.errors.error(arg->loc, core::errors::Resolver::InvalidMethodSignature,
                                                "Malformed {}. Keys must be symbol literals.",
                                                lastStandardMethod->fun.toString(ctx));
@@ -562,7 +561,7 @@ private:
             typecase(stat.get(),
 
                      [&](ast::Send *send) {
-                         if (ast::cast_tree<ast::Self>(send->recv.get()) == nullptr) {
+                         if (!ast::isa_tree<ast::Self>(send->recv.get())) {
                              return;
                          }
 

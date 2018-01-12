@@ -42,6 +42,10 @@ template <class To> To *cast_node(Node *what) {
     return fast_cast<Node, To>(what);
 }
 
+template <class To> bool isa_node(Node *what) {
+    return cast_node<To>(what) != nullptr;
+}
+
 typedef InlinedVector<std::unique_ptr<Node>, 4> NodeVec;
 
 #include "parser/Node_gen.h"
