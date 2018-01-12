@@ -102,7 +102,7 @@ public:
         std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> reads;
         std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> writes;
     };
-    ReadsAndWrites findAllReadsAndWrites();
+    ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 
 private:
     CFG();

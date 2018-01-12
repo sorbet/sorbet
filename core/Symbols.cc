@@ -312,8 +312,12 @@ bool LocalVariable::exists() {
     return name._id > 0;
 }
 
-bool LocalVariable::isSyntheticTemporary(GlobalState &gs) {
+bool LocalVariable::isSyntheticTemporary(GlobalState &gs) const {
     return name.name(gs).kind == NameKind::UNIQUE;
+}
+
+bool LocalVariable::isAliasForGlobal(GlobalState &gs) const {
+    return name.name(gs).kind == NameKind::UNIQUE && name.name(gs).unique.uniqueNameKind == UniqueNameKind::CFGAlias;
 }
 
 bool LocalVariable::operator==(const LocalVariable &rhs) const {

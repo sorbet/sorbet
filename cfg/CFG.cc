@@ -41,12 +41,23 @@ CFG::CFG() {
     deadBlock()->bexit.cond = core::NameRef::noName();
 }
 
-CFG::ReadsAndWrites CFG::findAllReadsAndWrites() {
+CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> reads;
     unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> writes;
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         for (Binding &bind : bb->exprs) {
             writes[bind.bind].insert(bb.get());
+
+            /*
+             * When we write to an alias, we rely on the type information being
+             * propagated through block arguments from the point of
+             * assignment. Treating every write as also reading from the
+             * variable serves to represent this.
+             */
+            if (bind.bind.isAliasForGlobal(ctx) && cast_instruction<Alias>(bind.value.get()) == nullptr) {
+                reads[bind.bind].insert(bb.get());
+            }
+
             if (auto *v = cast_instruction<Ident>(bind.value.get())) {
                 reads[v->what].insert(bb.get());
             } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
@@ -78,7 +89,7 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 
     // check that synthetic variable that is read is ever written to.
-    ReadsAndWrites RnW = CFG::findAllReadsAndWrites();
+    ReadsAndWrites RnW = CFG::findAllReadsAndWrites(ctx);
     for (auto &el : RnW.reads) {
         core::Name &nm = el.first.name.name(ctx);
         if (nm.kind != core::NameKind::UNIQUE || nm.unique.uniqueNameKind != core::UniqueNameKind::CFG)

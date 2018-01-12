@@ -57,7 +57,7 @@ core::LocalVariable global2Local(core::Context ctx, core::SymbolRef what, CFG &i
     core::LocalVariable &alias = aliases[what];
     if (!alias.exists()) {
         core::Symbol &info = what.info(ctx);
-        alias = ctx.state.newTemporary(core::UniqueNameKind::CFG, info.name, inWhat.symbol);
+        alias = ctx.state.newTemporary(core::UniqueNameKind::CFGAlias, info.name, inWhat.symbol);
     }
     return alias;
 }

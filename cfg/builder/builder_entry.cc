@@ -63,7 +63,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     sanityCheck(ctx, *res);
     fillInTopoSorts(ctx, *res);
     dealias(ctx, *res);
-    CFG::ReadsAndWrites RnW = res->findAllReadsAndWrites();
+    CFG::ReadsAndWrites RnW = res->findAllReadsAndWrites(ctx);
     computeMinMaxLoops(ctx, RnW, *res);
     removeDeadAssigns(ctx, RnW, *res);
     fillInBlockArguments(ctx, RnW, *res);

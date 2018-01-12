@@ -215,6 +215,11 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
             Binding &bind = *expIt;
+            if (bind.bind.isAliasForGlobal(ctx)) {
+                ++expIt;
+                continue;
+            }
+
             auto fnd = RnW.reads.find(bind.bind);
             if (fnd == RnW.reads.end()) {
                 // This should be !New && !Send && !Return, but I prefer to list explicitly in case we start adding

@@ -56,6 +56,7 @@ subgraph "cluster_::<singleton class:<constant:E>>#e=" {
 @e$4 = alias @e : untyped
 selfMethodTemp$3 = self : <class:E>
 e = load_arg(selfMethodTemp$3#e=, 0) : untyped
+@e$4 = e : untyped
 returnMethodTemp$5 = return e : <bottom>
 <unconditional>"];
 

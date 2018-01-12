@@ -12,6 +12,7 @@ message = load_arg(selfMethodTemp$3#initialize, 0) : untyped
 rule_token = load_arg(selfMethodTemp$3#initialize, 1) : untyped
 statTemp$5 = self : MatchTimeout
 statTemp$4 = statTemp$5.super(message) : untyped
+@rule_token$7 = rule_token : untyped
 returnMethodTemp$8 = return rule_token : <bottom>
 <unconditional>"];
 
@@ -226,6 +227,14 @@ body = load_arg(selfMethodTemp$3#initialize, 4) : untyped
 title = load_arg(selfMethodTemp$3#initialize, 5) : untyped
 diff = load_arg(selfMethodTemp$3#initialize, 6) : untyped
 openapi_diff = load_arg(selfMethodTemp$3#initialize, 7) : untyped
+@repo$5 = repo : untyped
+@assignee$7 = assignee : untyped
+@gh_user$9 = gh_user : untyped
+@merge_branch$11 = merge_branch : untyped
+@body$13 = body : untyped
+@title$15 = title : untyped
+@diff$17 = diff : untyped
+@openapi_diff$18 = openapi_diff : untyped
 returnMethodTemp$19 = return openapi_diff : <bottom>
 <unconditional>"];
 
@@ -400,6 +409,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 @parsed$6 = alias @parsed : untyped
 selfMethodTemp$3 = self : Diff
 raw_diff = load_arg(selfMethodTemp$3#initialize, 0) : untyped
+@raw$5 = raw_diff : untyped
 statTemp$7 = self : Diff
 @parsed$6 = statTemp$7.parse(raw_diff) : untyped
 returnMethodTemp$9 = return @parsed$6 : <bottom>

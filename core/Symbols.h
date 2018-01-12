@@ -86,7 +86,8 @@ public:
     LocalVariable(NameRef name);
     LocalVariable();
     bool exists();
-    bool isSyntheticTemporary(GlobalState &gs);
+    bool isSyntheticTemporary(GlobalState &gs) const;
+    bool isAliasForGlobal(GlobalState &gs) const;
     LocalVariable(const LocalVariable &) = default;
     LocalVariable(LocalVariable &&) = default;
     LocalVariable &operator=(LocalVariable &&) = default;
