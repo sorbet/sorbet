@@ -339,6 +339,8 @@ public:
         }
         ENFORCE(method->args.size() == method->symbol.info(ctx).arguments().size(), method->name.toString(ctx), ": ",
                 method->args.size(), " != ", method->symbol.info(ctx).arguments().size());
+        // All this info is now in the symbol, lets not keep detritus to aide confusion.
+        method->args.clear();
         return method;
     }
 
