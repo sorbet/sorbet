@@ -74,6 +74,28 @@ struct {
     {"typed-source", &Printers::TypedSource},
 };
 
+long timespec_delta(struct timespec *start, struct timespec *stop) {
+    return (stop->tv_sec - start->tv_sec) * 1000000000 + stop->tv_nsec - start->tv_nsec;
+}
+
+class Timer {
+public:
+    Timer(shared_ptr<spd::logger> log, const std::string &msg) : log(log), msg(msg) {
+        clock_gettime(CLOCK_REALTIME, &begin);
+    }
+
+    ~Timer() {
+        struct timespec end;
+        clock_gettime(CLOCK_REALTIME, &end);
+        log->debug("{}: {}ms", this->msg, timespec_delta(&begin, &end) / 1000000);
+    }
+
+private:
+    shared_ptr<spd::logger> log;
+    const std::string msg;
+    struct timespec begin;
+};
+
 class CFG_Collector_and_Typer {
     const Printers &print;
 
@@ -153,18 +175,22 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
     ThreadQueue<thread_result> resultq;
 
     gs.sanityCheck();
-    const auto &cgs = gs;
+    const auto cgs = gs.deepCopy();
     {
         vector<unique_ptr<Joinable>> threads;
         for (int i = 0; i < opts.threads; ++i) {
             threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq]() {
-                auto lgs = cgs.deepCopy();
+                auto lgs = cgs->deepCopy();
                 thread_result result;
                 core::FileRef file;
 
                 while (fileq.pop(&file)) {
                     file = core::FileRef(*lgs, file.id());
-                    result.trees.emplace_back(indexOne(opts.print, *lgs, file));
+                    try {
+                        result.trees.emplace_back(indexOne(opts.print, *lgs, file));
+                    } catch (...) {
+                        console_err->error("Exception parsing file: {} (backtrace is above)", file.file(*lgs).path());
+                    }
                 }
 
                 result.counters = getAndClearThreadCounters();
@@ -177,12 +203,11 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
             tracer->trace("enqueue: {}", f.file(gs).path());
             fileq.push(f);
         }
-        fileq.close(); // close does not wait for threads to finish.
-    }
+        fileq.close();
 
-    {
         thread_result result;
-        while (resultq.try_pop(&result)) {
+        for (int i = 0; i < opts.threads; ++i) {
+            resultq.pop(&result);
             core::GlobalSubstitution substitution(*result.gs, gs);
             counterConsume(move(result.counters));
             core::Context context(gs, gs.defn_root());
@@ -195,6 +220,8 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
     ENFORCE(frs.size() == trees.size());
 
     try {
+        Timer timeit(console_err, "naming");
+
         for (auto &tree : trees) {
             auto file = tree->loc.file;
             try {
@@ -282,6 +309,7 @@ vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<uniq
         try {
             core::Context context(gs, gs.defn_root());
             {
+                Timer timeit(console_err, "Resolving");
                 tracer->trace("Resolving (global pass)...");
                 core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
                 core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
@@ -446,7 +474,8 @@ void createInitialGlobalState(core::GlobalState &gs, const Options &options) {
     const u4 *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
         gs.initEmpty();
-        clock_t begin = clock();
+        Timer timeit(console_err, "Indexed payload");
+
         vector<core::FileRef> payloadFiles;
         {
             core::UnfreezeFileTable fileTableAccess(gs);
@@ -458,16 +487,9 @@ void createInitialGlobalState(core::GlobalState &gs, const Options &options) {
         emptyOpts.threads = 1;
 
         typecheck(gs, index(gs, payloadFiles, emptyOpts, true), emptyOpts, true); // result is thrown away
-
-        clock_t end = clock();
-        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
-        console_err->debug("Indexed payload in {} ms\n", elapsed_secs);
     } else {
-        clock_t begin = clock();
+        Timer timeit(console_err, "Read serialized payload");
         core::serialize::GlobalStateSerializer::load(gs, nameTablePayload);
-        clock_t end = clock();
-        double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
-        console_err->debug("Read payload name-table in {} ms\n", elapsed_secs);
     }
 }
 
@@ -590,10 +612,11 @@ int realmain(int argc, char **argv) {
     core::GlobalState gs(*console);
     createInitialGlobalState(gs, opts);
 
-    clock_t begin = clock();
+    Timer timeall(console_err, "Done in");
     vector<core::FileRef> inputFiles;
     tracer->trace("Files: ");
     {
+        Timer timeit(console_err, "reading files");
         core::UnfreezeFileTable fileTableAccess(gs);
         for (auto &fileName : files) {
             string src;
@@ -637,13 +660,16 @@ int realmain(int argc, char **argv) {
         }
     }
 
-    typecheck(gs, index(gs, inputFiles, opts), opts);
+    vector<unique_ptr<ast::Expression>> indexed;
+    {
+        Timer timeit(console_err, "index");
+        indexed = index(gs, inputFiles, opts);
+    }
 
-    clock_t end = clock();
-
-    double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC * 1000;
-
-    console_err->debug("Done in {} ms", elapsed_secs);
+    {
+        Timer timeit(console_err, "typecheck");
+        typecheck(gs, move(indexed), opts);
+    }
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
