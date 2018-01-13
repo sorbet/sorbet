@@ -12,7 +12,7 @@ class FalseClass
 end
 
 class TestBoolean
-  standard_method({b: Boolean}, returns: Boolean)
+  sig(b: Boolean).returns(Boolean)
   def test_boolean(b)
     "b is: #{b}"
     !b

@@ -4,6 +4,6 @@ class <constant:F> < ::<constant:Object> () -> <class:F>
   method bla ()
     method <block>$2 ()
   method foo (<blk>)
-    argument <blk><block>
+    argument <blk><block> -> untyped
 class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> ()
 

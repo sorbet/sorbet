@@ -588,7 +588,7 @@ public:
                                 "The typechecker was unable to infer the type of the argument to "
                                 "assert_type!.",
                                 {core::Reporter::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)),
-                                 core::Reporter::ErrorSection("You may need to add additional `standard_method` "
+                                 core::Reporter::ErrorSection("You may need to add additional `sig` "
                                                               "annotations.")}));
                         } else if (!core::Types::isSubType(ctx, ty.type, c->type)) {
                             ctx.state.errors.error(core::Reporter::ComplexError(

@@ -3,7 +3,7 @@ class <constant:Main> < ::<constant:Object> () -> <class:Main>
     argument blk<block>
   method blockyield ()
     method <block>$2 (i, <blk>)
-      argument <blk><block>
+      argument <blk><block> -> untyped
       argument i<>
   method main ()
     method <block>$2 (x)
@@ -19,6 +19,6 @@ class <constant:Main> < ::<constant:Object> () -> <class:Main>
   method mixed (blk)
     argument blk<block>
   method yielder (<blk>)
-    argument <blk><block>
+    argument <blk><block> -> untyped
 class <singleton class:<constant:Main>> < ::<singleton class:<constant:Object>> ()
 

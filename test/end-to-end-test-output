@@ -1,7 +1,7 @@
 test/end-to-end-test-input.rb:4 Stubbing out unknown constant <emptyTree>::<constant:MissingConstant> [5002]
     MissingConstant
     ^^^^^^^^^^^^^^^
-test/end-to-end-test-input.rb:17 Argument arg0 does not match expected type. [7002]
+test/end-to-end-test-input.rb:12 Argument arg0 does not match expected type. [7002]
     raise arg # raise is defined by stdlib
     ^^^^^^^^^
   Expected String
@@ -10,20 +10,20 @@ test/end-to-end-test-input.rb:17 Argument arg0 does not match expected type. [70
       ^^^^^
 
   Got Integer originating from:
-    test/end-to-end-test-input.rb:11 
-      arg: Integer
+    test/end-to-end-test-input.rb:9 
+  sig(arg: Integer).returns(NilClass)
       ^^^^
 
-test/end-to-end-test-input.rb:21 Argument arg does not match expected type. [7002]
+test/end-to-end-test-input.rb:16 Argument arg does not match expected type. [7002]
     foo("foo")
     ^^^^^^^^^^
   Expected Integer
-    test/end-to-end-test-input.rb:11 Method foo has specified type of argument arg as Integer
-      arg: Integer
+    test/end-to-end-test-input.rb:9 Method foo has specified type of argument arg as Integer
+  sig(arg: Integer).returns(NilClass)
       ^^^^
 
   Got String("foo") originating from:
-    test/end-to-end-test-input.rb:21 
+    test/end-to-end-test-input.rb:16 
     foo("foo")
         ^^^^^
 

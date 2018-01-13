@@ -10,11 +10,11 @@ class Main
     def one_required(foo, **args)
     end
 
-    standard_method({foo: Integer, args: String}, returns: NilClass)
+    sig(foo: Integer, args: String).returns(NilClass)
     def one_kwarg(foo:, **args)
     end
 
-    standard_method({args: Integer}, returns: NilClass)
+    sig(args: Integer).returns(NilClass)
     def with_type(**args)
     end
 

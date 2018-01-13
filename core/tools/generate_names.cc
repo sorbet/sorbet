@@ -44,7 +44,7 @@ NameDef names[] = {
     {"intern", Desugar},
     {"call", Desugar | Namer},
     {"bang", "!", Desugar | Infer | Parser},
-    {"squareBrackets", "[]", Desugar | Parser},
+    {"squareBrackets", "[]", Desugar | Parser | Resolver},
     {"squareBracketsEq", "[]=", Parser},
     {"unaryPlus", "@+", Parser},
     {"unaryMinus", "@-", Parser},
@@ -77,13 +77,12 @@ NameDef names[] = {
     {"currentFile", "__FILE__", Desugar},
     {"merge", Desugar},
 
-    // Opus::Types keywords
-    {"standardMethod", "standard_method", Resolver},
-    {"abstractMethod", "abstract_method", Resolver},
-    {"implementationMethod", "implementation_method", Resolver},
-    {"overrideMethod", "override_method", Resolver},
-    {"overridableMethod", "overridable_method", Resolver},
-    {"overridableImplementationMethod", "overridable_implementation_method", Resolver},
+    // T keywords
+    {"sig", Resolver},
+    {"abstract", Resolver},
+    {"implementation", Resolver},
+    {"override_", "override", Resolver},
+    {"overridable", Resolver},
 
     {"returns", Resolver},
     {"checked", Resolver},
@@ -95,12 +94,11 @@ NameDef names[] = {
     {"arrayOf", "array_of", Resolver},
     {"hashOf", "hash_of", Resolver},
     {"noreturn", Resolver},
-    {"interface", Resolver},
     {"declareVariables", "declare_variables", Resolver},
 
     {"assertType", "assert_type!", Resolver},
     {"cast", Resolver},
-    // end Opus::Types keywords
+    // end T keywords
 
     // Ruby DSL methods which we understand
     {"attr", Resolver},

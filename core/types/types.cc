@@ -57,6 +57,12 @@ std::shared_ptr<Type> Types::hashClass() {
     static auto res = make_shared<ClassType>(core::GlobalState::defn_Hash());
     return res;
 }
+
+std::shared_ptr<Type> Types::procClass() {
+    static auto res = make_shared<ClassType>(core::GlobalState::defn_Proc());
+    return res;
+}
+
 std::shared_ptr<Type> Types::String() {
     static auto res = make_shared<ClassType>(core::GlobalState::defn_String());
     return res;

@@ -434,6 +434,7 @@ public:
             auto name = core::Names::blkArg();
             blockArg = ctx.state.enterMethodArgumentSymbol(yield->loc, method, name);
             blockArg.info(ctx).setBlockArgument();
+            blockArg.info(ctx).resultType = core::Types::dynamic();
             method.info(ctx).argumentsOrMixins.push_back(blockArg);
 
             // Also put it in the MethodDef since we rely on that being correct for blocks

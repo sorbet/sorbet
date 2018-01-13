@@ -154,7 +154,7 @@ public:
         return SymbolRef(nullptr, 18);
     }
 
-    static SymbolRef defn_Opus_Types() {
+    static SymbolRef defn_T() {
         return SymbolRef(nullptr, 19);
     }
 
@@ -196,6 +196,22 @@ public:
 
     static SymbolRef defn_Rational() {
         return SymbolRef(nullptr, 29);
+    }
+
+    static SymbolRef defn_T_Array() {
+        return SymbolRef(nullptr, 30);
+    }
+
+    static SymbolRef defn_T_Hash() {
+        return SymbolRef(nullptr, 31);
+    }
+
+    static SymbolRef defn_T_Proc() {
+        return SymbolRef(nullptr, 32);
+    }
+
+    static SymbolRef defn_Proc() {
+        return SymbolRef(nullptr, 33);
     }
 
     // Keep as last and update to match the last entry

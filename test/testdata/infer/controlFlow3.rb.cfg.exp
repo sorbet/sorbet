@@ -59,7 +59,7 @@ returnMethodTemp$3 = statTemp$17.map() : Enumerator
     "bb::<constant:Test>#normalize_params_7" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
     "bb::<constant:Test>#normalize_params_8" [label = "block[id=8](statTemp$17)
 outerLoops: 1
-<block-nested: e> = load_arg(statTemp$17#map, 0) : untyped
+<block-nested: e> = load_arg(statTemp$17#map, 0) : Proc
 statTemp$19 = self : Test
 blockReturnTemp$18 = statTemp$19.normalize_params(<block-nested: e>) : untyped
 <unconditional>"];

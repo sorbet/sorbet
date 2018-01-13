@@ -29,15 +29,13 @@ outerLoops: 1
 
     "bb::<constant:Object>#foo_3" [label = "block[id=3](statTemp$5)
 returnMethodTemp$3 = statTemp$5.map() : Enumerator
-returnMethodTemp$15 = return returnMethodTemp$3 : <bottom>
+returnMethodTemp$13 = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_4" [label = "block[id=4](statTemp$5)
 outerLoops: 1
-<block-nested: x> = load_arg(statTemp$5#map, 0) : untyped
-statTemp$14 = 1 : Integer(1)
-returnTemp$12 = <block-nested: x>.+(statTemp$14) : untyped
+<block-nested: x> = load_arg(statTemp$5#map, 0) : Proc
 <unconditional>"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_3" [style="bold"];

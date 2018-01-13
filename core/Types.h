@@ -82,6 +82,7 @@ public:
     static std::shared_ptr<Type> Object();
     static std::shared_ptr<Type> arrayClass();
     static std::shared_ptr<Type> hashClass();
+    static std::shared_ptr<Type> procClass();
     static std::shared_ptr<Type> falsyTypes();
     static std::shared_ptr<Type> dropSubtypesOf(core::Context ctx, std::shared_ptr<Type> from, core::SymbolRef klass);
     static std::shared_ptr<Type> approximateSubtract(core::Context ctx, std::shared_ptr<Type> from,

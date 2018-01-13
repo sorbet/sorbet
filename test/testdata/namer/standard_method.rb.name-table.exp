@@ -7,14 +7,14 @@ class <constant:A> < ::<constant:Object> () -> <class:A>
     argument e<> -> untyped
     argument f<> -> untyped
     argument g<> -> <bottom>
-  method f1 (x)
-    argument x<>
-  method f2 (x)
-    argument x<>
+  method f1 (x) -> T1
+    argument x<> -> untyped
+  method f2 (x) -> T2
+    argument x<> -> T1
   method f3 () -> T1
   method f4 (y) -> T1
     argument y<> -> T1
-  method good (a, b, c, d, e, f, g, h, i, j) -> T2
+  method good (a, b, c, d, e, f, g, h, i) -> T2
     argument a<> -> TupleType {
       0 = T1
       1 = T2
@@ -27,7 +27,6 @@ class <constant:A> < ::<constant:Object> () -> <class:A>
     argument g<> -> Hash
     argument h<> -> FalseClass | Integer | Float | String | Symbol
     argument i<> -> T1
-    argument j<> -> T1
   method no_params () -> T1
   method noreturn () -> <bottom>
   method private : private (x) -> T1
@@ -38,13 +37,18 @@ class <constant:A> < ::<constant:Object> () -> <class:A>
     argument x<> -> T1
   method test_abstract () -> T1
   method test_abstract_untyped ()
-  method test_implementation () -> T1
+  method test_implementation (x, y)
+    argument x<> -> untyped
+    argument y<> -> untyped
   method test_kwargs (returns) -> T2
     argument returns<> -> T1
   method test_overridable () -> T1
   method test_overridable_implementation () -> T1
   method test_override () -> T1
   method test_standard_untyped ()
+  method test_yield_no_block_type (x, <blk>) -> Integer
+    argument <blk><block> -> untyped
+    argument x<> -> Integer
 class <constant:T1> < ::<constant:Object> () -> <class:T1>
 class <constant:T2> < ::<constant:Object> () -> <class:T2>
 class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
