@@ -177,6 +177,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
     gs.sanityCheck();
     const auto cgs = gs.deepCopy();
     {
+        ENFORCE(opts.threads > 0);
         vector<unique_ptr<Joinable>> threads;
         for (int i = 0; i < opts.threads; ++i) {
             threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq]() {
@@ -555,7 +556,10 @@ int realmain(int argc, char **argv) {
         if (ncpu == 0) {
             ncpu = 4;
         }
-        opts.threads = min(ncpu, int((files.size() + 1) / 2));
+        opts.threads = min(ncpu, int(files.size() / 2));
+        if (opts.threads == 0) {
+            opts.threads = 1;
+        }
     }
 
     if (files.size() > 10) {
