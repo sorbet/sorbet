@@ -57,8 +57,8 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
     auto &objectScope = core::GlobalState::defn_Object().info(ctx);
     ASSERT_EQ(core::GlobalState::defn_root(), objectScope.owner);
 
-    ASSERT_EQ(1, objectScope.members.size());
-    auto methodPair = objectScope.members[0];
+    ASSERT_EQ(2, objectScope.members.size());
+    auto methodPair = objectScope.members[1];
     ASSERT_EQ("hello_world", methodPair.first.name(ctx).toString(ctx));
     auto &symbol = methodPair.second.info(ctx);
     ASSERT_EQ(core::GlobalState::defn_Object(), symbol.owner);

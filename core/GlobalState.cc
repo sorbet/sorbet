@@ -243,6 +243,25 @@ void GlobalState::initEmpty() {
 
     int reservedCount = 0;
 
+    // Set the correct resultTypes for all synthesized classes
+    // Does it in two passes since the singletonClass will go in the defn_root() members which will invalidate the
+    // iterator
+    vector<SymbolRef> needsResultType;
+    for (auto &info : symbols) {
+        auto ref = info.ref(*this);
+        if (ref._id < defn_root()._id) {
+            // These aren't real classes and won't have singleton classes
+            continue;
+        }
+        if (info.isClass() && !info.resultType) {
+            needsResultType.emplace_back(info.ref(*this));
+        }
+    }
+    for (auto sym : needsResultType) {
+        Symbol &info = sym.info(*this);
+        info.resultType = make_unique<core::ClassType>(info.singletonClass(*this));
+    }
+
     while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
         std::string res(reserved_str);
         res = res + to_string(reservedCount);

@@ -75,8 +75,8 @@ TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
     processSource(ctx, "class Bar; end; class Foo < Bar; end");
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
-    auto barPair = rootScope.members[rootScope.members.size() - 6];
-    auto fooPair = rootScope.members[rootScope.members.size() - 4];
+    auto barPair = rootScope.members[rootScope.members.size() - 4];
+    auto fooPair = rootScope.members[rootScope.members.size() - 2];
     ASSERT_EQ("<constant:Foo>", fooPair.first.name(ctx).toString(ctx));
     ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
 
@@ -94,9 +94,9 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
-    auto barPair = rootScope.members[rootScope.members.size() - 8];
-    auto foo1Pair = rootScope.members[rootScope.members.size() - 6];
-    auto foo2Pair = rootScope.members[rootScope.members.size() - 4];
+    auto barPair = rootScope.members[rootScope.members.size() - 6];
+    auto foo1Pair = rootScope.members[rootScope.members.size() - 4];
+    auto foo2Pair = rootScope.members[rootScope.members.size() - 2];
     ASSERT_EQ("<constant:Foo2>", foo2Pair.first.name(ctx).toString(ctx));
     ASSERT_EQ("<constant:Foo1>", foo1Pair.first.name(ctx).toString(ctx));
     ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
@@ -144,9 +144,9 @@ TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     auto &rootScope = core::GlobalState::defn_root().info(ctx);
 
-    auto barPair = rootScope.members[rootScope.members.size() - 8];
-    auto foo1Pair = rootScope.members[rootScope.members.size() - 6];
-    auto foo2Pair = rootScope.members[rootScope.members.size() - 4];
+    auto barPair = rootScope.members[rootScope.members.size() - 6];
+    auto foo1Pair = rootScope.members[rootScope.members.size() - 4];
+    auto foo2Pair = rootScope.members[rootScope.members.size() - 2];
     ASSERT_EQ("<constant:Foo2>", foo2Pair.first.name(ctx).toString(ctx));
     ASSERT_EQ("<constant:Foo1>", foo1Pair.first.name(ctx).toString(ctx));
     ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
