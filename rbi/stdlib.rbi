@@ -2172,6 +2172,10 @@ class Class
 
   sig.returns(Class)
   sig.returns(Class)
+  def clone(); end
+
+  sig.returns(Class)
+  sig.returns(Class)
   def freeze(); end
 
   sig(
@@ -2209,10 +2213,6 @@ class Class
   )
   .returns(Class)
   def public_constant(*arg0); end
-
-  sig.returns(Class)
-  sig.returns(Class)
-  def clone(); end
 
   sig.returns(Class)
   def dup(); end
@@ -4117,30 +4117,6 @@ class File
   sig.returns(File)
   def clone(); end
 
-  sig.returns(File)
-  sig.returns(File)
-  def dup(); end
-
-  sig.returns(File)
-  sig.returns(File)
-  def freeze(); end
-
-  sig.returns(File)
-  sig.returns(File)
-  def taint(); end
-
-  sig.returns(File)
-  sig.returns(File)
-  def trust(); end
-
-  sig.returns(File)
-  sig.returns(File)
-  def untaint(); end
-
-  sig.returns(File)
-  sig.returns(File)
-  def untrust(); end
-
   sig(
       arg0: BasicObject,
   )
@@ -4226,6 +4202,30 @@ class File
   sig.returns(File)
   sig.returns(File)
   def to_io(); end
+
+  sig.returns(File)
+  sig.returns(File)
+  def dup(); end
+
+  sig.returns(File)
+  sig.returns(File)
+  def freeze(); end
+
+  sig.returns(File)
+  sig.returns(File)
+  def taint(); end
+
+  sig.returns(File)
+  sig.returns(File)
+  def trust(); end
+
+  sig.returns(File)
+  sig.returns(File)
+  def untaint(); end
+
+  sig.returns(File)
+  sig.returns(File)
+  def untrust(); end
 
   sig(
       pattern: String,
@@ -10897,24 +10897,6 @@ class SortedSet
   sig.returns(SortedSet)
   def clone(); end
 
-  sig.returns(SortedSet)
-  def dup(); end
-
-  sig.returns(SortedSet)
-  def freeze(); end
-
-  sig.returns(SortedSet)
-  def taint(); end
-
-  sig.returns(SortedSet)
-  def trust(); end
-
-  sig.returns(SortedSet)
-  def untaint(); end
-
-  sig.returns(SortedSet)
-  def untrust(); end
-
   sig(
       o: BasicObject,
   )
@@ -10959,6 +10941,24 @@ class SortedSet
   )
   .returns(SortedSet)
   def subtract(enum); end
+
+  sig.returns(SortedSet)
+  def dup(); end
+
+  sig.returns(SortedSet)
+  def freeze(); end
+
+  sig.returns(SortedSet)
+  def taint(); end
+
+  sig.returns(SortedSet)
+  def trust(); end
+
+  sig.returns(SortedSet)
+  def untaint(); end
+
+  sig.returns(SortedSet)
+  def untrust(); end
 end
 
 class StandardError

@@ -43,8 +43,8 @@ class Date
   JULIAN = _
   GREGORIAN = _
 
-  sig(_: T.untyped).returns(T.untyped)
-  def upto(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def upto(arg0); end
 
   sig(
     locale: T.untyped,
@@ -53,20 +53,20 @@ class Date
   .returns(T.untyped)
   def localize(locale=_, options=_); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def <=>(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def <=>(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def <<(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def <<(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def >>(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def >>(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def ===(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def ===(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def eql?(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def eql?(arg0); end
 
   sig.returns(T.untyped)
   def start(); end
@@ -74,20 +74,20 @@ class Date
   sig.returns(T.untyped)
   def marshal_dump(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def marshal_load(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def marshal_load(arg0); end
 
   sig.returns(T.untyped)
   def ajd(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def +(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def +(arg0); end
 
   sig.returns(T.untyped)
   def inspect(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def -(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def -(arg0); end
 
   sig.returns(T.untyped)
   def mday(); end
@@ -137,8 +137,8 @@ class Date
   sig.returns(T.untyped)
   def wednesday?(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def step(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def step(*arg0); end
 
   sig.returns(T.untyped)
   def friday?(); end
@@ -149,14 +149,14 @@ class Date
   sig.returns(T.untyped)
   def blank?(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def downto(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def downto(arg0); end
 
   sig.returns(T.untyped)
   def asctime(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def strftime(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def strftime(*arg0); end
 
   sig.returns(T.untyped)
   def thursday?(); end
@@ -215,8 +215,8 @@ class Date
   sig.returns(T.untyped)
   def gregorian?(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def new_start(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def new_start(*arg0); end
 
   sig.returns(T.untyped)
   def italy(); end
@@ -230,29 +230,29 @@ class Date
   sig.returns(T.untyped)
   def gregorian(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def next_day(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def next_day(*arg0); end
 
   sig.returns(T.untyped)
   def ld(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def next_month(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def next_month(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def prev_day(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def prev_day(*arg0); end
 
   sig.returns(T.untyped)
   def next(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def prev_month(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def prev_month(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def next_year(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def next_year(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def prev_year(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def prev_year(*arg0); end
 
   sig.returns(Time)
   def to_time(); end
@@ -263,108 +263,108 @@ class Date
   sig.returns(DateTime)
   def to_datetime(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.new(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.new(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self._load(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self._load(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.today(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.today(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.parse(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.parse(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.jd(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.jd(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.valid_jd?(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.valid_jd?(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.valid_ordinal?(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.valid_ordinal?(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.valid_civil?(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.valid_civil?(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.valid_date?(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.valid_date?(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.valid_commercial?(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.valid_commercial?(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.julian_leap?(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.julian_leap?(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.gregorian_leap?(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.gregorian_leap?(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.leap?(_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.leap?(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.ordinal(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.ordinal(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.civil(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.civil(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.commercial(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.commercial(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self._strptime(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self._strptime(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.strptime(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.strptime(*arg0); end
 
   sig(
-    _: String,
+    arg0: String,
     comp: T.any(TrueClass, FalseClass)
   )
   .returns(Hash)
-  def self._parse(_, comp=true); end
+  def self._parse(arg0, comp=true); end
 
-  sig(_: String).returns(Hash)
-  def self._iso8601(_); end
+  sig(arg0: String).returns(Hash)
+  def self._iso8601(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.iso8601(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.iso8601(*arg0); end
 
-  sig(_: String).returns(Hash)
-  def self._rfc3339(_); end
+  sig(arg0: String).returns(Hash)
+  def self._rfc3339(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.rfc3339(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.rfc3339(*arg0); end
 
-  sig(_: String).returns(Hash)
-  def self._xmlschema(_); end
+  sig(arg0: String).returns(Hash)
+  def self._xmlschema(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.xmlschema(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.xmlschema(*arg0); end
 
-  sig(_: String).returns(Hash)
-  def self._rfc2822(_); end
+  sig(arg0: String).returns(Hash)
+  def self._rfc2822(arg0); end
 
-  sig(_: String).returns(Hash)
-  def self._rfc822(_); end
+  sig(arg0: String).returns(Hash)
+  def self._rfc822(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.rfc2822(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.rfc2822(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.rfc822(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.rfc822(*arg0); end
 
-  sig(_: String).returns(Hash)
-  def self._httpdate(_); end
+  sig(arg0: String).returns(Hash)
+  def self._httpdate(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.httpdate(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.httpdate(*arg0); end
 
-  sig(_: String).returns(Hash)
-  def self._jisx0301(_); end
+  sig(arg0: String).returns(Hash)
+  def self._jisx0301(arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.jisx0301(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.jisx0301(*arg0); end
 end
 
 class DateTime
@@ -386,23 +386,23 @@ class DateTime
   sig.returns(T.untyped)
   def hour(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def strftime(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def strftime(*arg0); end
 
   sig.returns(T.untyped)
   def second(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def iso8601(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def iso8601(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def rfc3339(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def rfc3339(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def xmlschema(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def xmlschema(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def jisx0301(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def jisx0301(*arg0); end
 
   sig.returns(T.untyped)
   def minute(); end
@@ -413,8 +413,8 @@ class DateTime
   sig.returns(T.untyped)
   def second_fraction(); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def new_offset(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def new_offset(*arg0); end
 
   sig.returns(Time)
   def to_time(); end
@@ -438,57 +438,57 @@ class DateTime
   .returns(T.untyped)
   def localize(locale=_, options=_); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.new(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.new(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.now(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.now(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.parse(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.parse(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.jd(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.jd(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.ordinal(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.ordinal(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.civil(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.civil(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.commercial(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.commercial(*arg0); end
 
   sig(
-    _: String,
+    arg0: String,
     format: String
   )
   .returns(Hash)
-  def self._strptime(_, format="%F"); end
+  def self._strptime(arg0, format="%F"); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.strptime(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.strptime(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.iso8601(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.iso8601(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.rfc3339(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.rfc3339(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.xmlschema(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.xmlschema(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.rfc2822(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.rfc2822(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.rfc822(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.rfc822(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.httpdate(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.httpdate(*arg0); end
 
-  sig(_: T.untyped).returns(T.untyped)
-  def self.jisx0301(*_); end
+  sig(arg0: T.untyped).returns(T.untyped)
+  def self.jisx0301(*arg0); end
 end
 
 class Time
