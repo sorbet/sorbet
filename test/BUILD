@@ -107,8 +107,18 @@ sh_test(
     size = "small",
     srcs = ["end-to-end-test.sh"],
     data = [
+        "end-to-end-test.out",
         "end-to-end-test-input.rb",
-        "end-to-end-test-output",
+        "//main:ruby-typer",
+    ],
+)
+
+sh_test(
+    name = "dash-e-test",
+    size = "small",
+    srcs = ["dash-e-test.sh"],
+    data = [
+        "dash-e-test.out",
         "//main:ruby-typer",
     ],
 )

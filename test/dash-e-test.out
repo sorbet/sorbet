@@ -1,0 +1,3 @@
+class <constant:Foo> < ::<constant:Object> () -> <class:Foo>
+class <singleton class:<constant:Foo>> < ::<singleton class:<constant:Object>> ()
+
