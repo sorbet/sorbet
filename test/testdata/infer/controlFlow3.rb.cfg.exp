@@ -53,7 +53,7 @@ outerLoops: 1
     "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_7" [style="tapered"];
 
     "bb::<constant:Test>#normalize_params_7" [label = "block[id=7](returnMethodTemp$3, statTemp$17)
-returnMethodTemp$3 = statTemp$17.map() : Enumerator
+returnMethodTemp$3 = statTemp$17.map() : Array
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_7" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];

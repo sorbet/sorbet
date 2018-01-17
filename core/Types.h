@@ -115,7 +115,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0) = 0;
     virtual std::string typeName() = 0;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) = 0;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) = 0;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) = 0;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) = 0;
     virtual void _sanityCheck(core::Context ctx) = 0;
@@ -152,8 +153,8 @@ public:
     ProxyType(std::shared_ptr<Type> underlying);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args,
-                                               std::shared_ptr<Type> fullType) override;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) override;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) override;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) override;
 
@@ -169,7 +170,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
@@ -186,7 +188,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
@@ -226,7 +229,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
 
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
@@ -272,7 +276,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 };
@@ -298,7 +303,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 };
@@ -309,7 +315,8 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
 

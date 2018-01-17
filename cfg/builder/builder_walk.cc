@@ -246,7 +246,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     current = postBlock;
                 }
 
-                current->exprs.emplace_back(cctx.target, s->loc, make_unique<Send>(recv, s->fun, args));
+                current->exprs.emplace_back(cctx.target, s->loc,
+                                            make_unique<Send>(recv, s->fun, args, s->block != nullptr));
                 ret = current;
             },
 
@@ -344,7 +345,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         args.emplace_back(exceptionClass);
 
                         rescueHandlersBlock->exprs.emplace_back(
-                            isaCheck, loc, make_unique<Send>(unanalyzableCondition, core::Names::is_a_p(), args));
+                            isaCheck, loc,
+                            make_unique<Send>(unanalyzableCondition, core::Names::is_a_p(), args, false));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops, rescueHandlersBlock);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
@@ -389,7 +391,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
                 current->exprs.emplace_back(magic, h->loc, make_unique<Alias>(cctx.ctx.state.defn_Magic()));
                 current->exprs.emplace_back(cctx.target, h->loc,
-                                            make_unique<Send>(magic, core::Names::buildHash(), vars));
+                                            make_unique<Send>(magic, core::Names::buildHash(), vars, false));
                 ret = current;
             },
 
@@ -405,7 +407,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                                                         core::Names::arrayTemp(), cctx.inWhat.symbol);
                 current->exprs.emplace_back(magic, a->loc, make_unique<Alias>(cctx.ctx.state.defn_Magic()));
                 current->exprs.emplace_back(cctx.target, a->loc,
-                                            make_unique<Send>(magic, core::Names::buildArray(), vars));
+                                            make_unique<Send>(magic, core::Names::buildArray(), vars, false));
                 ret = current;
             },
 

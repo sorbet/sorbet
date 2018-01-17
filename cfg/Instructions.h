@@ -55,8 +55,9 @@ public:
     core::LocalVariable recv;
     core::NameRef fun;
     std::vector<core::LocalVariable> args;
+    bool hasBlock;
 
-    Send(core::LocalVariable recv, core::NameRef fun, std::vector<core::LocalVariable> &args);
+    Send(core::LocalVariable recv, core::NameRef fun, std::vector<core::LocalVariable> &args, bool hasBlock);
 
     virtual std::string toString(core::Context ctx);
 };

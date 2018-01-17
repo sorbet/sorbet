@@ -425,7 +425,7 @@ public:
                                        vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
         core::ClassType *classType = core::cast_type<core::ClassType>(recvType.type.get());
         if (classType == nullptr) {
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
         }
 
         if (classType->symbol == core::GlobalState::defn_untyped()) {
@@ -435,13 +435,13 @@ public:
         core::SymbolRef newSymbol = classType->symbol.info(ctx).findMemberTransitive(ctx, core::Names::new_());
         if (newSymbol.exists() && newSymbol.info(ctx).owner != core::GlobalState::defn_BasicObject()) {
             // custom `new` was defined
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
         }
 
         core::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
         if (!attachedClass.exists()) {
             // `foo`.new() but `foo` isn't a Class
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
         }
 
         auto type = make_shared<core::ClassType>(attachedClass);
@@ -449,7 +449,8 @@ public:
         // call constructor
         newSymbol = attachedClass.info(ctx).findMemberTransitive(ctx, core::Names::initialize());
         if (newSymbol.exists()) {
-            auto initializeResult = type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, recvType.type);
+            auto initializeResult =
+                type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, recvType.type, send->hasBlock);
         } else {
             if (!args.empty()) {
                 ctx.state.errors.error(bind.loc, core::errors::Infer::MethodArgumentCountMismatch,
@@ -490,7 +491,8 @@ public:
                         tp.type = core::Types::dynamic();
                         tp.origins.push_back(bind.loc);
                     } else {
-                        tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type);
+                        tp.type =
+                            recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
                     }
                     tp.origins.push_back(bind.loc);
                 },

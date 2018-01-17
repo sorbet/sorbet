@@ -16,8 +16,8 @@ string Return::toString(core::Context ctx) {
     return "return " + this->what.name.name(ctx).toString(ctx);
 }
 
-Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args)
-    : recv(recv), fun(fun), args(move(args)) {
+Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args, bool hasBlock)
+    : recv(recv), fun(fun), args(move(args)), hasBlock(hasBlock) {
     categoryCounterInc("cfg", "send");
     histogramInc("cfg.send.args", this->args.size());
 }

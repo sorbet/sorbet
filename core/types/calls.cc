@@ -11,9 +11,9 @@ using namespace ruby_typer::core;
 using namespace std;
 
 shared_ptr<Type> ProxyType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
     categoryCounterInc("dispatch_call", "proxytype");
-    return underlying->dispatchCall(ctx, name, callLoc, args, fullType);
+    return underlying->dispatchCall(ctx, name, callLoc, args, fullType, hasBlock);
 }
 
 shared_ptr<Type> ProxyType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
@@ -21,10 +21,10 @@ shared_ptr<Type> ProxyType::getCallArgumentType(core::Context ctx, core::NameRef
 }
 
 shared_ptr<Type> OrType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                      vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                      vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
     categoryCounterInc("dispatch_call", "ortype");
-    return Types::lub(ctx, left->dispatchCall(ctx, name, callLoc, args, fullType),
-                      right->dispatchCall(ctx, name, callLoc, args, fullType));
+    return Types::lub(ctx, left->dispatchCall(ctx, name, callLoc, args, fullType, hasBlock),
+                      right->dispatchCall(ctx, name, callLoc, args, fullType, hasBlock));
 }
 
 shared_ptr<Type> OrType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
@@ -32,7 +32,7 @@ shared_ptr<Type> OrType::getCallArgumentType(core::Context ctx, core::NameRef na
 }
 
 shared_ptr<Type> AndType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                       vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
     categoryCounterInc("dispatch_call", "andtype");
     Error::notImplemented();
 }
@@ -42,13 +42,13 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
 }
 
 shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
     categoryCounterInc("dispatch_call", "shapetype");
-    return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
+    return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType, hasBlock);
 }
 
 shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
     categoryCounterInc("dispatch_call", "magictype");
     switch (fun._id) {
         case Names::buildHash()._id: {
@@ -81,7 +81,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
             return make_unique<TupleType>(elems);
         }
         default:
-            return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType);
+            return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType, hasBlock);
     }
 }
 
@@ -120,7 +120,7 @@ void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector<TypeAndOrigins> &args,
-                              shared_ptr<Type> fullType) {
+                              shared_ptr<Type> fullType, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     Error::check(ctx.permitOverloadDefinitions(), "overload not permitted here");
     core::SymbolRef fallback = primary;
@@ -158,7 +158,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
     {
         // Lets see if we can filter them out using arguments.
         int i = 0;
-        for (auto &a : args) {
+        for (auto &arg : args) {
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 core::SymbolRef candidate = *it;
                 if (i >= candidate.info(ctx).argumentsOrMixins.size()) {
@@ -167,7 +167,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
                 }
 
                 auto argType = candidate.info(ctx).argumentsOrMixins[i].info(ctx).resultType;
-                if (argType->isFullyDefined() && !Types::isSubType(ctx, a.type, argType)) {
+                if (argType->isFullyDefined() && !Types::isSubType(ctx, arg.type, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
@@ -180,6 +180,26 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
         leftCandidates = allCandidates;
     } else {
         fallback = leftCandidates[0];
+    }
+
+    { // keep only candidates that have a block iff we are passing one
+        for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
+            core::SymbolRef candidate = *it;
+            auto args = candidate.info(ctx).argumentsOrMixins;
+            if (args.size() == 0) {
+                if (hasBlock) {
+                    it = leftCandidates.erase(it);
+                    continue;
+                }
+            } else {
+                auto &lastArg = args.back().info(ctx);
+                if (lastArg.isBlockArgument() != hasBlock) {
+                    it = leftCandidates.erase(it);
+                    continue;
+                }
+            }
+            ++it;
+        }
     }
 
     { // keep only candidates with closes arity
@@ -217,7 +237,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : dynamic
 //    (with a subtype check on the key type, once we have generics)
 shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
     categoryCounterInc("dispatch_call", "classtype");
     if (isDynamic()) {
         return Types::dynamic();
@@ -234,9 +254,10 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         return Types::dynamic();
     }
 
-    core::SymbolRef method = mayBeOverloaded.info(ctx).isOverloaded()
-                                 ? guessOverload(ctx.withOwner(mayBeOverloaded), mayBeOverloaded, args, fullType)
-                                 : mayBeOverloaded;
+    core::SymbolRef method =
+        mayBeOverloaded.info(ctx).isOverloaded()
+            ? guessOverload(ctx.withOwner(mayBeOverloaded), mayBeOverloaded, args, fullType, hasBlock)
+            : mayBeOverloaded;
 
     core::Symbol &info = method.info(ctx);
 
@@ -419,7 +440,8 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
 }
 
 std::shared_ptr<Type> AliasType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType) {
+                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                              bool hasBlock) {
     Error::raise("AliasType::dispatchCall");
 }
 
