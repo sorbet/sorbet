@@ -29,12 +29,16 @@ public:
 class Reporter final {
     friend GlobalState;
 
+    ~Reporter();
+
 public:
     struct BasicError {
         Loc loc;
         ErrorClass what;
         std::string formatted;
-        BasicError(Loc loc, ErrorClass what, std::string formatted) : loc(loc), what(what), formatted(formatted) {}
+        bool isCritical;
+        BasicError(Loc loc, ErrorClass what, std::string formatted)
+            : loc(loc), what(what), formatted(formatted), isCritical(false) {}
         virtual std::string toString(GlobalState &gs);
         virtual ~BasicError() = default;
         static std::string filePosToString(GlobalState &gs, Loc loc);
@@ -73,6 +77,8 @@ public:
             : BasicError(loc, what, header), sections({ErrorSection("", {other_line})}) {}
     };
 
+    void flush();
+
     void _error(std::unique_ptr<BasicError> error);
     std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> errors;
 
@@ -88,7 +94,6 @@ public:
         _error(std::make_unique<ComplexError>(error));
     }
 
-    bool keepErrorsInMemory = false;
     std::vector<std::unique_ptr<ruby_typer::core::Reporter::BasicError>> getAndEmptyErrors();
 
     std::vector<std::pair<int, int>> errorHistogram;
@@ -98,6 +103,30 @@ private:
     Reporter(GlobalState &gs) : gs_(gs), hadCriticalError_(false) {}
     GlobalState &gs_;
     bool hadCriticalError_;
+};
+
+/*
+ * Used with a Reporter in an RAII fashion:
+ *
+ * {
+ *   core::ErrorRegion errs(gs.reporter);
+ *   runNamer();
+ * }
+ */
+class ErrorRegion {
+public:
+    ErrorRegion(Reporter &reporter, bool silenceErrors = false) : reporter(&reporter), silenceErrors(silenceErrors){};
+    ~ErrorRegion() {
+        if (silenceErrors) {
+            reporter->getAndEmptyErrors();
+        } else {
+            reporter->flush();
+        }
+    }
+
+private:
+    Reporter *reporter;
+    bool silenceErrors;
 };
 
 } // namespace core

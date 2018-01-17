@@ -128,10 +128,12 @@ struct thread_result {
     vector<unique_ptr<ast::Expression>> trees;
 };
 
-unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &lgs, core::FileRef file) {
+unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &lgs, core::FileRef file,
+                                     bool silenceErrors = false) {
     std::unique_ptr<parser::Node> nodes;
     {
         tracer->trace("Parsing: {}", file.file(lgs).path());
+        core::ErrorRegion errs(lgs.errors, silenceErrors);
         core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
         nodes = parser::Parser::run(lgs, file);
     }
@@ -143,6 +145,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
     std::unique_ptr<ast::Expression> ast;
     {
         tracer->trace("Desugaring: {}", file.file(lgs).path());
+        core::ErrorRegion errs(lgs.errors, silenceErrors);
         core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(context, nodes);
     }
@@ -160,8 +163,6 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
                                           bool silenceErrors = false) {
     vector<unique_ptr<ast::Expression>> result;
     vector<unique_ptr<ast::Expression>> empty;
-    bool oldErrors = gs.errors.keepErrorsInMemory;
-    gs.errors.keepErrorsInMemory = oldErrors || silenceErrors;
 
     unique_ptr<progressbar> progress;
 
@@ -180,15 +181,16 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
         ENFORCE(opts.threads > 0);
         vector<unique_ptr<Joinable>> threads;
         for (int i = 0; i < opts.threads; ++i) {
-            threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq]() {
+            threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq, silenceErrors]() {
                 auto lgs = cgs->deepCopy();
                 thread_result result;
                 core::FileRef file;
+                core::ErrorRegion errs(lgs->errors, silenceErrors);
 
                 while (fileq.pop(&file)) {
                     file = core::FileRef(*lgs, file.id());
                     try {
-                        result.trees.emplace_back(indexOne(opts.print, *lgs, file));
+                        result.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
                     } catch (...) {
                         console_err->error("Exception parsing file: {} (backtrace is above)", file.file(*lgs).path());
                     }
@@ -220,7 +222,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
 
     ENFORCE(frs.size() == trees.size());
 
-    try {
+    {
         Timer timeit(console_err, "naming");
 
         for (auto &tree : trees) {
@@ -230,6 +232,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
                 {
                     core::Context context(gs, gs.defn_root());
                     tracer->trace("Naming: {}", file.file(gs).path());
+                    core::ErrorRegion errs(gs.errors, silenceErrors);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
                     ast = namer::Namer::run(context, move(tree));
@@ -242,22 +245,15 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
                 console_err->error("Exception on file: {} (backtrace is above)", file.file(gs).path());
             }
         }
-    } catch (...) {
-        gs.errors.keepErrorsInMemory = oldErrors;
-        throw;
+        if (opts.showProgress) {
+            progressbar_finish(progress.get());
+        }
     }
-    if (silenceErrors) {
-        gs.errors.getAndEmptyErrors();
-    }
-    if (opts.showProgress) {
-        progressbar_finish(progress.get());
-    }
-    gs.errors.keepErrorsInMemory = oldErrors;
     return result;
 }
 
 unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast::Expression> resolved, Options opts,
-                                          progressbar *progress) {
+                                          progressbar *progress, bool silenceErrors = false) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
     bool forceTypedSource = !opts.typedSource.empty() && f.file(gs).path().find(opts.typedSource) != std::string::npos;
@@ -274,6 +270,7 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
         CFG_Collector_and_Typer collector(opts.print);
         {
             tracer->trace("CFG+Infer: {}", f.file(gs).path());
+            core::ErrorRegion errs(gs.errors, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(gs); // creates names for temporaries in CFG
             result = ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved));
         }
@@ -298,72 +295,62 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
 vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
                                               const Options &opts, bool silenceErrors = false) {
     vector<unique_ptr<ast::Expression>> result;
-    bool oldErrors = gs.errors.keepErrorsInMemory;
-    gs.errors.keepErrorsInMemory = oldErrors || silenceErrors;
     unique_ptr<progressbar> progress;
     unique_ptr<statusbar> status;
 
+    if (opts.showProgress) {
+        status.reset(statusbar_new("Resolving"));
+    }
     try {
-        if (opts.showProgress) {
-            status.reset(statusbar_new("Resolving"));
-        }
-        try {
-            core::Context context(gs, gs.defn_root());
-            {
-                Timer timeit(console_err, "Resolving");
-                tracer->trace("Resolving (global pass)...");
-                core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
-                core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-                what = resolver::Resolver::run(context, move(what));
-            }
-        } catch (...) {
-            console_err->error("Exception resolving (backtrace is above)");
-        }
-        if (opts.showProgress) {
-            statusbar_finish(status.get());
-        }
-
-        for (auto &resolved : what) {
-            if (opts.print.NameTree) {
-                cout << resolved->toString(gs, 0) << endl;
-            }
-            if (opts.print.NameTreeRaw) {
-                cout << resolved->showRaw(gs) << endl;
-            }
-        }
-
-        if (opts.showProgress) {
-            progress.reset(progressbar_new("CFG+Typechecking", what.size()));
-        }
-
-        for (auto &resolved : what) {
-            result.emplace_back(typecheckFile(gs, move(resolved), opts, progress.get()));
-        }
-        if (opts.showProgress) {
-            progressbar_finish(progress.get());
-        }
-        if (!opts.typedSource.empty()) {
-            stringstream files;
-            for (auto &cfg : result) {
-                files << "  " << cfg->loc.file.file(gs).path() << endl;
-            }
-            console_err->error("`--typed-source " + opts.typedSource + "` not found in input list of:\n" + files.str());
-        }
-
-        if (opts.print.NameTable) {
-            cout << gs.toString() << endl;
-        }
-        if (opts.print.NameTableFull) {
-            cout << gs.toString(true) << endl;
+        core::Context context(gs, gs.defn_root());
+        {
+            Timer timeit(console_err, "Resolving");
+            tracer->trace("Resolving (global pass)...");
+            core::ErrorRegion errs(gs.errors, silenceErrors);
+            core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
+            core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+            what = resolver::Resolver::run(context, move(what));
         }
     } catch (...) {
-        gs.errors.keepErrorsInMemory = oldErrors;
-        throw;
+        console_err->error("Exception resolving (backtrace is above)");
     }
-    if (silenceErrors) {
-        gs.errors.getAndEmptyErrors();
+    if (opts.showProgress) {
+        statusbar_finish(status.get());
     }
-    gs.errors.keepErrorsInMemory = oldErrors;
+
+    for (auto &resolved : what) {
+        if (opts.print.NameTree) {
+            cout << resolved->toString(gs, 0) << endl;
+        }
+        if (opts.print.NameTreeRaw) {
+            cout << resolved->showRaw(gs) << endl;
+        }
+    }
+
+    if (opts.showProgress) {
+        progress.reset(progressbar_new("CFG+Typechecking", what.size()));
+    }
+
+    for (auto &resolved : what) {
+        result.emplace_back(typecheckFile(gs, move(resolved), opts, progress.get(), silenceErrors));
+    }
+    if (opts.showProgress) {
+        progressbar_finish(progress.get());
+    }
+    if (!opts.typedSource.empty()) {
+        stringstream files;
+        for (auto &cfg : result) {
+            files << "  " << cfg->loc.file.file(gs).path() << endl;
+        }
+        console_err->error("`--typed-source " + opts.typedSource + "` not found in input list of:\n" + files.str());
+    }
+
+    if (opts.print.NameTable) {
+        cout << gs.toString() << endl;
+    }
+    if (opts.print.NameTableFull) {
+        cout << gs.toString(true) << endl;
+    }
     return result;
 }
 

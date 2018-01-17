@@ -8,8 +8,11 @@ namespace core {
 
 using namespace std;
 
+Reporter::~Reporter() {
+    ENFORCE(errors.empty());
+}
+
 void Reporter::_error(unique_ptr<BasicError> error) {
-    bool isCriticalError = false;
     File::Type source_type = File::Typed;
     if (error->loc.file.exists()) {
         source_type = error->loc.file.file(gs_).source_type;
@@ -17,7 +20,8 @@ void Reporter::_error(unique_ptr<BasicError> error) {
 
     switch (error->what.code) {
         case errors::Internal::InternalError.code:
-            isCriticalError = true;
+            error->isCritical = true;
+            hadCriticalError_ = true;
             break;
         case errors::Parser::ParserError.code:
         case errors::Resolver::InvalidMethodSignature.code:
@@ -33,9 +37,6 @@ void Reporter::_error(unique_ptr<BasicError> error) {
             }
     }
 
-    if (isCriticalError) {
-        hadCriticalError_ = true;
-    }
     auto f = find_if(this->errorHistogram.begin(), this->errorHistogram.end(),
                      [&](auto &el) -> bool { return el.first == error->what.code; });
     if (f != this->errorHistogram.end()) {
@@ -43,11 +44,30 @@ void Reporter::_error(unique_ptr<BasicError> error) {
     } else {
         this->errorHistogram.push_back(std::make_pair((int)error->what.code, 1));
     }
-    if (keepErrorsInMemory) {
-        errors.emplace_back(move(error));
+    errors.emplace_back(move(error));
+}
+
+void Reporter::flush() {
+    if (errors.empty()) {
         return;
     }
-    gs_.logger.log(isCriticalError ? spdlog::level::critical : spdlog::level::err, "{}", error->toString(gs_));
+    stringstream critical;
+    stringstream nonCritical;
+    for (auto &error : errors) {
+        auto &out = error->isCritical ? critical : nonCritical;
+        if (out.tellp()) {
+            out << '\n';
+        }
+        out << error->toString(gs_);
+    }
+
+    if (critical.tellp()) {
+        gs_.logger.log(spdlog::level::critical, "{}", critical.str());
+    }
+    if (nonCritical.tellp()) {
+        gs_.logger.log(spdlog::level::err, "{}", nonCritical.str());
+    }
+    errors.clear();
 }
 
 string Reporter::BasicError::filePosToString(GlobalState &gs, Loc loc) {

@@ -51,6 +51,8 @@ TEST(ASTTest, ErrorReporter) { // NOLINT
     core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
     gs.errors.error(core::Loc{f, 0, 3}, core::errors::Internal::InternalError, "Use of metavariable: {}", "foo");
     ASSERT_TRUE(gs.errors.hadCriticalError());
+    auto errors = gs.errors.getAndEmptyErrors();
+    ASSERT_EQ(1, errors.size());
 }
 
 TEST(ASTTest, SymbolRef) { // NOLINT

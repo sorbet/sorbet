@@ -155,7 +155,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     ruby_typer::core::GlobalState gs(*console);
     ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
     ruby_typer::core::Context context(gs, gs.defn_root());
-    gs.errors.keepErrorsInMemory = true;
 
     // Parser
     vector<ruby_typer::core::FileRef> files;
@@ -474,6 +473,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected multiple errors, but only saw one.";
         }
     }
+
+    // Allow later phases to have errors that we didn't test for
+    gs.errors.getAndEmptyErrors();
 
     TEST_COUT << "errors OK" << endl;
 }
