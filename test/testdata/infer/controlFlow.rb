@@ -10,6 +10,15 @@ class ControlFlow
     end
   end
 
+  sig(a: Integer).returns(Integer)
+  def orZero0a(a)
+    if (a)
+      return a
+    else
+      return 0 # error: This code is unreachable
+    end
+  end
+
    sig(a: T.any(Integer, NilClass)).returns(Integer)
     def orZero0n(a)
       b = !a
@@ -47,7 +56,7 @@ class ControlFlow
 
   sig(a: T.any(Integer, NilClass)).returns(Integer)
   def orZero3n(a)
-      b = !(a && 1 == 2) # error: unreachable
+      b = !(a && 1 == 2)
       if (b)
          return 0
       else
@@ -60,7 +69,7 @@ class ControlFlow
       if (a || true)
          return a # error: does not conform to method result type
       else
-         return 0
+         return 0 # error: This code is unreachable
       end
   end
 

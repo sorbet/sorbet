@@ -14,7 +14,7 @@ a"];
     "bb::<constant:ControlFlow>#orZero0_0" -> "bb::<constant:ControlFlow>#orZero0_3" [style="tapered"];
 
     "bb::<constant:ControlFlow>#orZero0_1" [label = "block[id=1](returnMethodTemp$2)
-returnMethodTemp$7 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero0_1" -> "bb::<constant:ControlFlow>#orZero0_1" [style="bold"];
@@ -29,6 +29,38 @@ returnMethodTemp$2 = return returnTemp$6 : <bottom>
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero0_3" -> "bb::<constant:ControlFlow>#orZero0_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:ControlFlow>#orZero0a" {
+    label = "::<constant:ControlFlow>#orZero0a";
+    color = blue;
+    "bb::<constant:ControlFlow>#orZero0a_0" [shape = invhouse];
+    "bb::<constant:ControlFlow>#orZero0a_1" [shape = parallelogram];
+
+    "bb::<constant:ControlFlow>#orZero0a_0" [label = "block[id=0](a)
+selfMethodTemp$3 = self : ControlFlow
+a = load_arg(selfMethodTemp$3#orZero0a, 0) : Integer
+a"];
+
+    "bb::<constant:ControlFlow>#orZero0a_0" -> "bb::<constant:ControlFlow>#orZero0a_2" [style="bold"];
+    "bb::<constant:ControlFlow>#orZero0a_0" -> "bb::<constant:ControlFlow>#orZero0a_3" [style="tapered"];
+
+    "bb::<constant:ControlFlow>#orZero0a_1" [label = "block[id=1](returnMethodTemp$2)
+finalReturn = return returnMethodTemp$2
+<unconditional>"];
+
+    "bb::<constant:ControlFlow>#orZero0a_1" -> "bb::<constant:ControlFlow>#orZero0a_1" [style="bold"];
+    "bb::<constant:ControlFlow>#orZero0a_2" [label = "block[id=2](a)
+returnMethodTemp$2 = return a : <bottom>
+<unconditional>"];
+
+    "bb::<constant:ControlFlow>#orZero0a_2" -> "bb::<constant:ControlFlow>#orZero0a_1" [style="bold"];
+    "bb::<constant:ControlFlow>#orZero0a_3" [label = "block[id=3]()
+returnTemp$6 = 0
+returnMethodTemp$2 = return returnTemp$6
+<unconditional>"];
+
+    "bb::<constant:ControlFlow>#orZero0a_3" -> "bb::<constant:ControlFlow>#orZero0a_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:ControlFlow>#orZero0n" {
@@ -47,7 +79,7 @@ b"];
     "bb::<constant:ControlFlow>#orZero0n_0" -> "bb::<constant:ControlFlow>#orZero0n_3" [style="tapered"];
 
     "bb::<constant:ControlFlow>#orZero0n_1" [label = "block[id=1](returnMethodTemp$2)
-returnMethodTemp$9 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero0n_1" -> "bb::<constant:ControlFlow>#orZero0n_1" [style="bold"];
@@ -82,7 +114,7 @@ b"];
     "bb::<constant:ControlFlow>#orZero1n_0" -> "bb::<constant:ControlFlow>#orZero1n_3" [style="tapered"];
 
     "bb::<constant:ControlFlow>#orZero1n_1" [label = "block[id=1](returnMethodTemp$2)
-returnMethodTemp$12 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero1n_1" -> "bb::<constant:ControlFlow>#orZero1n_1" [style="bold"];
@@ -123,7 +155,7 @@ a = 0 : Integer(0)
 
     "bb::<constant:ControlFlow>#orZero2_3" -> "bb::<constant:ControlFlow>#orZero2_4" [style="bold"];
     "bb::<constant:ControlFlow>#orZero2_4" [label = "block[id=4](a)
-returnMethodTemp$6 = return a : <bottom>
+finalReturn = return a : <bottom>
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero2_4" -> "bb::<constant:ControlFlow>#orZero2_1" [style="bold"];
@@ -144,7 +176,7 @@ a"];
     "bb::<constant:ControlFlow>#orZero3_0" -> "bb::<constant:ControlFlow>#orZero3_3" [style="tapered"];
 
     "bb::<constant:ControlFlow>#orZero3_1" [label = "block[id=1](returnMethodTemp$2)
-returnMethodTemp$10 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero3_1" -> "bb::<constant:ControlFlow>#orZero3_1" [style="bold"];
@@ -193,7 +225,7 @@ a"];
     "bb::<constant:ControlFlow>#orZero3n_0" -> "bb::<constant:ControlFlow>#orZero3n_3" [style="tapered"];
 
     "bb::<constant:ControlFlow>#orZero3n_1" [label = "block[id=1](returnMethodTemp$2)
-returnMethodTemp$12 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero3n_1" -> "bb::<constant:ControlFlow>#orZero3n_1" [style="bold"];
@@ -245,7 +277,7 @@ a"];
     "bb::<constant:ControlFlow>#orZero4_0" -> "bb::<constant:ControlFlow>#orZero4_3" [style="tapered"];
 
     "bb::<constant:ControlFlow>#orZero4_1" [label = "block[id=1](returnMethodTemp$2)
-returnMethodTemp$8 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero4_1" -> "bb::<constant:ControlFlow>#orZero4_1" [style="bold"];
@@ -269,8 +301,8 @@ returnMethodTemp$2 = return a : <bottom>
 
     "bb::<constant:ControlFlow>#orZero4_5" -> "bb::<constant:ControlFlow>#orZero4_1" [style="bold"];
     "bb::<constant:ControlFlow>#orZero4_6" [label = "block[id=6]()
-returnTemp$7 = 0 : Integer(0)
-returnMethodTemp$2 = return returnTemp$7 : <bottom>
+returnTemp$7 = 0
+returnMethodTemp$2 = return returnTemp$7
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero4_6" -> "bb::<constant:ControlFlow>#orZero4_1" [style="bold"];
@@ -291,7 +323,7 @@ a"];
     "bb::<constant:ControlFlow>#orZero5_0" -> "bb::<constant:ControlFlow>#orZero5_3" [style="tapered"];
 
     "bb::<constant:ControlFlow>#orZero5_1" [label = "block[id=1](returnMethodTemp$2)
-returnMethodTemp$8 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero5_1" -> "bb::<constant:ControlFlow>#orZero5_1" [style="bold"];

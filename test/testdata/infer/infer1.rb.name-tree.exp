@@ -24,10 +24,10 @@ begin
   def baz4<baz4>()
     b = self(<constant:Object>).a().getbyte("foo")
   end
-  def baz5<baz5>()
+  def baz5<baz5>(cond)
     begin
       if begin
-          true
+          cond
         end
         b = 1
       else
@@ -36,10 +36,10 @@ begin
       b = b.getbyte(1)
     end
   end
-  def baz6<baz6>()
+  def baz6<baz6>(cond)
     begin
       if begin
-          true
+          cond
         end
         b = 1
       else
@@ -48,10 +48,10 @@ begin
       b = "foo".getbyte(b)
     end
   end
-  def baz7<baz7>()
+  def baz7<baz7>(cond)
     begin
       if begin
-          true
+          cond
         end
         b = 1
       else

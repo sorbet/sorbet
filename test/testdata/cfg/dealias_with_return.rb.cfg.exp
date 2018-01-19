@@ -35,7 +35,7 @@ statTemp$4 = return returnTemp$6 : <bottom>
 a = 2 : Integer(2)
 statTemp$12 = 3 : Integer(3)
 returnMethodTemp$2 = a.+(statTemp$12) : Integer
-returnMethodTemp$13 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#a_5" -> "bb::<constant:Object>#a_1" [style="bold"];

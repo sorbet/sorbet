@@ -6,7 +6,7 @@ subgraph "cluster_::<constant:A>#foo" {
     "bb::<constant:A>#foo_1" [shape = parallelogram];
 
     "bb::<constant:A>#foo_0" [label = "block[id=0]()
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:A>#foo_0" -> "bb::<constant:A>#foo_1" [style="bold"];
@@ -26,7 +26,7 @@ subgraph "cluster_::<constant:Bar>#baz" {
 selfMethodTemp$3 = self : Bar
 statTemp$4 = self : Bar
 returnMethodTemp$2 = statTemp$4.foo() : Integer
-returnMethodTemp$5 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Bar>#baz_0" -> "bb::<constant:Bar>#baz_1" [style="bold"];

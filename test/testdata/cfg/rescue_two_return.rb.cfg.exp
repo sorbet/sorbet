@@ -16,7 +16,7 @@ rescueTemp$5"];
     "bb::<constant:Object>#foo_1" [label = "block[id=1]()
 statTemp$12 = self
 returnMethodTemp$2 = statTemp$12.deadcode()
-returnMethodTemp$13 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];

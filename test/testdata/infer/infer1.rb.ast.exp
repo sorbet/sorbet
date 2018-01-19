@@ -17,10 +17,10 @@ begin
   def baz4<<constant:<todo sym>>>()
     b = self(<constant:<todo sym>>).a().getbyte("foo")
   end
-  def baz5<<constant:<todo sym>>>()
+  def baz5<<constant:<todo sym>>>(cond)
     begin
       if begin
-          true
+          cond
         end
         b = 1
       else
@@ -29,10 +29,10 @@ begin
       b = b.getbyte(1)
     end
   end
-  def baz6<<constant:<todo sym>>>()
+  def baz6<<constant:<todo sym>>>(cond)
     begin
       if begin
-          true
+          cond
         end
         b = 1
       else
@@ -41,10 +41,10 @@ begin
       b = "foo".getbyte(b)
     end
   end
-  def baz7<<constant:<todo sym>>>()
+  def baz7<<constant:<todo sym>>>(cond)
     begin
       if begin
-          true
+          cond
         end
         b = 1
       else

@@ -5,18 +5,17 @@ class Examples
     if true
       return 1
     else
-      return 2
+      return 2 # error: This code is unreachable
     end
   end
 
-    # returnMethodTemp$2: Integer
+    # returnMethodTemp$2: Integer(1)
     def i_like_exps()
       if (true)
         # returnMethodTemp$2: NilClass
         1
       else
-        # returnMethodTemp$2: NilClass
-        2
+        2 # error: This code is unreachable
       end
     end
 
@@ -24,8 +23,7 @@ class Examples
       if (true)
         return 1
       else
-        # returnMethodTemp$2: NilClass
-        2
+        2 # error: This code is unreachable
       end
     end
 
@@ -34,107 +32,155 @@ class Examples
             # a: NilClass
         a = 1
       else
-            # a: NilClass
-        a = 2
+        a = 2 # error: This code is unreachable
       end
 
-          # a: Integer
+          # a: Integer(1)
       if (false)
             # b: NilClass
             #
-            # a: Integer
-        b = 1
+            # a: Integer(1)
+        b = 1 # not-yet-an-error: This code is unreachable
       else
             # b: NilClass
             #
-            # a: Integer
+            # a: Integer(1)
         b = 2
       end
 
       # b: Integer
       #
-      # a: Integer
+      # a: Integer(1)
       a + b
     end
 
 
+    # cond: NilClass
+    #
     # <constant:nil>$10: NilClass
-    def variables_and_loop()
+    def variables_and_loop(cond)
       if (true)
             # a: NilClass
+            #
+            # cond: untyped
             #
             # <constant:nil>$10: NilClass
         a = 1
       else
-            # a: NilClass
-            #
-            # <constant:nil>$10: NilClass
-        a = 2
+        a = 2 # error: This code is unreachable
       end
 
             # b: NilClass
             #
-            # <constant:nil>$10: NilClass
-      while true
-            # b: NilClass
+            # cond: untyped
+            #   Being truthy entails:
+            #     a to be Integer(1)
+            #     cond to be untyped
+            #     <constant:nil>$10 to be NilClass
+            #   Being falsy entails:
+            #     a to be Integer(1)
+            #     cond to be untyped
+            #     <constant:nil>$10 to be NilClass
             #
             # <constant:nil>$10: NilClass
-        if (false)
+      while true
+        if (cond)
               # b: NilClass
+              #
+              # cond: untyped
+              #   Being truthy entails:
+              #     a to be Integer(1)
+              #     cond to be untyped
+              #     <constant:nil>$10 to be NilClass
+              #   Being falsy entails:
+              #     a to be Integer(1)
+              #     cond to be untyped
+              #     <constant:nil>$10 to be NilClass
               #
               # <constant:nil>$10: NilClass
           b = 1 # error: Changing type of pinned argument
         else
               # b: NilClass
               #
+              # cond: untyped
+              #   Being truthy entails:
+              #     a to be Integer(1)
+              #     cond to be untyped
+              #     <constant:nil>$10 to be NilClass
+              #   Being falsy entails:
+              #     a to be Integer(1)
+              #     cond to be untyped
+              #     <constant:nil>$10 to be NilClass
+              #
               # <constant:nil>$10: NilClass
           b = 2 # error: Changing type of pinned argument
         end
       end
 
-      # b: NilClass
-      #
-      # <constant:nil>$10: NilClass
-      b
+      b # error: This code is unreachable
     end
 
 
+    # cond: NilClass
+    #
     # <constant:nil>$8: NilClass
-    def variables_loop_if()
+    def variables_loop_if(cond)
             # b: NilClass
+            #
+            # cond: untyped
+            #   Being truthy entails:
+            #     cond to be untyped
+            #     <constant:nil>$8 to be NilClass
+            #     selfMethodTemp$3 to be Examples
+            #   Being falsy entails:
+            #     cond to be untyped
+            #     <constant:nil>$8 to be NilClass
+            #     selfMethodTemp$3 to be Examples
             #
             # <constant:nil>$8: NilClass
       while true
-            # b: NilClass
-            #
-            # <constant:nil>$8: NilClass
-        if (false)
+        if (cond)
               # b: NilClass
+              #
+              # cond: untyped
+              #   Being truthy entails:
+              #     cond to be untyped
+              #     <constant:nil>$8 to be NilClass
+              #     selfMethodTemp$3 to be Examples
+              #   Being falsy entails:
+              #     cond to be untyped
+              #     <constant:nil>$8 to be NilClass
+              #     selfMethodTemp$3 to be Examples
               #
               # <constant:nil>$8: NilClass
           b = 1 # error: Changing type of pinned argument
         else
               # b: NilClass
               #
+              # cond: untyped
+              #   Being truthy entails:
+              #     cond to be untyped
+              #     <constant:nil>$8 to be NilClass
+              #     selfMethodTemp$3 to be Examples
+              #   Being falsy entails:
+              #     cond to be untyped
+              #     <constant:nil>$8 to be NilClass
+              #     selfMethodTemp$3 to be Examples
+              #
               # <constant:nil>$8: NilClass
           b = 2 # error: Changing type of pinned argument
         end
       end
 
-      # b: NilClass
-      #
-      # <constant:nil>$8: NilClass
-      b
+      b # error: This code is unreachable
     end
 
     # i: NilClass
     # returnMethodTemp$2: untyped
-    #   Being falsy entails:
-    #     i to be NilClass | FalseClass
     def take_arguments(i)
       if(false)
        # returnMethodTemp$2: NilClass
-       2
+       2 # not-yet-an-error: This code is unreachable
       else
        # i: untyped
        #

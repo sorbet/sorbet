@@ -33,8 +33,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         i++;
     }
     auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, nullptr, aliases), md.rhs.get(), entry);
-    core::LocalVariable retSym1 =
-        ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
+    core::LocalVariable retSym1(core::Names::finalReturn());
 
     auto rvLoc = cont->exprs.empty() ? md.loc : cont->exprs.back().loc;
     cont->exprs.emplace_back(retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.

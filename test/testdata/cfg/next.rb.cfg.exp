@@ -29,7 +29,7 @@ outerLoops: 1
 
     "bb::<constant:Object>#foo_3" [label = "block[id=3](statTemp$5)
 returnMethodTemp$3 = statTemp$5.map() : Array
-returnMethodTemp$14 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];

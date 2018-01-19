@@ -26,7 +26,7 @@ outerLoops: 1
 
     "bb::<constant:BlockTest>#block_pass_3" [label = "block[id=3](statTemp$5, statTemp$6, statTemp$7, statTemp$8)
 returnMethodTemp$3 = statTemp$5.foo(statTemp$6, statTemp$7, statTemp$8) : untyped
-returnMethodTemp$10 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:BlockTest>#block_pass_3" -> "bb::<constant:BlockTest>#block_pass_1" [style="bold"];

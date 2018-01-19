@@ -6,7 +6,7 @@ subgraph "cluster_::<constant:Test>::<constant:Baz>#foo" {
     "bb::<constant:Test>::<constant:Baz>#foo_1" [shape = parallelogram];
 
     "bb::<constant:Test>::<constant:Baz>#foo_0" [label = "block[id=0]()
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Test>::<constant:Baz>#foo_0" -> "bb::<constant:Test>::<constant:Baz>#foo_1" [style="bold"];
@@ -44,7 +44,7 @@ outerLoops: 1
 
     "bb::<constant:Test>::<constant:Diff>#parse_3" [label = "block[id=3](statTemp$7)
 returnMethodTemp$3 = statTemp$7.each() : untyped
-returnMethodTemp$14 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_3" -> "bb::<constant:Test>::<constant:Diff>#parse_1" [style="bold"];

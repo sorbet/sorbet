@@ -75,7 +75,7 @@ ifTemp$12"];
     "bb::<constant:ModuleMethods>#instrumented_request_15" -> "bb::<constant:ModuleMethods>#instrumented_request_24" [style="tapered"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_16" [label = "block[id=16](err, is_successful, ifTemp$12)
-ifTemp$12 = err : <bottom>
+ifTemp$12 = err
 ifTemp$12"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_16" -> "bb::<constant:ModuleMethods>#instrumented_request_19" [style="bold"];
@@ -94,7 +94,7 @@ returnMethodTemp$2 = 1 : Integer(1)
 
     "bb::<constant:ModuleMethods>#instrumented_request_21" -> "bb::<constant:ModuleMethods>#instrumented_request_24" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_24" [label = "block[id=24](returnMethodTemp$2)
-returnMethodTemp$19 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_24" -> "bb::<constant:ModuleMethods>#instrumented_request_1" [style="bold"];

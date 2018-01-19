@@ -13,7 +13,7 @@ rule_token = load_arg(selfMethodTemp$3#initialize, 1) : untyped
 statTemp$5 = self : MatchTimeout
 statTemp$4 = statTemp$5.super(message) : untyped
 @rule_token$7 = rule_token : untyped
-returnMethodTemp$8 = return rule_token : <bottom>
+finalReturn = return rule_token : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_1" [style="bold"];
@@ -104,7 +104,7 @@ blockReturnTemp$30 = <block-nested: <block-pass>$4>.token() : untyped
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_9" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_7" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_10" [label = "block[id=10](returnMethodTemp$4)
-returnMethodTemp$38 = return returnMethodTemp$4 : <bottom>
+finalReturn = return returnMethodTemp$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_10" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_1" [style="bold"];
@@ -170,7 +170,7 @@ outerLoops: 1
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_5" [label = "block[id=5](statTemp$31)
 returnMethodTemp$3 = statTemp$31.select() : untyped
-returnMethodTemp$39 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_5" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1" [style="bold"];
@@ -235,7 +235,7 @@ openapi_diff = load_arg(selfMethodTemp$3#initialize, 7) : untyped
 @title$15 = title : untyped
 @diff$17 = diff : untyped
 @openapi_diff$18 = openapi_diff : untyped
-returnMethodTemp$19 = return openapi_diff : <bottom>
+finalReturn = return openapi_diff : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#initialize_1" [style="bold"];
@@ -256,7 +256,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 statTemp$7 = stripe-internal/ : String(\"stripe-internal/\")
 statTemp$4 = @repo$6.start_with?(statTemp$7) : untyped
 returnMethodTemp$2 = statTemp$4.!() : untyped
-returnMethodTemp$8 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#user_stripe_suffix?_1" [style="bold"];
@@ -276,7 +276,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 @start$4 = alias @start : untyped
 <constant:Time>$6 = alias <constant:Time> : <class:Time>
 @start$4 = <constant:Time>$6.now() : Time
-returnMethodTemp$7 = return @start$4 : <bottom>
+finalReturn = return @start$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_1" [style="bold"];
@@ -325,7 +325,7 @@ returnMethodTemp$2 = statTemp$16.raise(statTemp$17) : NilClass
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4" [label = "block[id=4](returnMethodTemp$2)
-returnMethodTemp$27 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1" [style="bold"];
@@ -392,7 +392,7 @@ statTemp$16 = statTemp$21.raise(statTemp$22) : NilClass
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4" [label = "block[id=4](res)
 statTemp$50 = self : MatchTimeBudget
 statTemp$49 = statTemp$50.check!() : untyped
-returnMethodTemp$51 = return res : <bottom>
+finalReturn = return res : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1" [style="bold"];
@@ -412,7 +412,7 @@ raw_diff = load_arg(selfMethodTemp$3#initialize, 0) : untyped
 @raw$5 = raw_diff : untyped
 statTemp$7 = self : Diff
 @parsed$6 = statTemp$7.parse(raw_diff) : untyped
-returnMethodTemp$9 = return @parsed$6 : <bottom>
+finalReturn = return @parsed$6 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_1" [style="bold"];
@@ -437,7 +437,7 @@ statTemp$4 = statTemp$5.+(statTemp$7) : untyped
 statTemp$10 = self : Diff
 statTemp$9 = statTemp$10.changed_files() : untyped
 returnMethodTemp$2 = statTemp$4.+(statTemp$9) : untyped
-returnMethodTemp$11 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_1" [style="bold"];
@@ -494,7 +494,7 @@ outerLoops: 1
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_6" [label = "block[id=6](statTemp$6)
 returnMethodTemp$4 = statTemp$6.map() : untyped
-returnMethodTemp$17 = return returnMethodTemp$4 : <bottom>
+finalReturn = return returnMethodTemp$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_files_1" [style="bold"];
@@ -555,7 +555,7 @@ outerLoops: 1
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_6" [label = "block[id=6](statTemp$6)
 returnMethodTemp$4 = statTemp$6.map() : untyped
-returnMethodTemp$17 = return returnMethodTemp$4 : <bottom>
+finalReturn = return returnMethodTemp$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#deleted_files_1" [style="bold"];
@@ -617,7 +617,7 @@ outerLoops: 1
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_6" [label = "block[id=6](statTemp$6)
 returnMethodTemp$4 = statTemp$6.map() : untyped
-returnMethodTemp$19 = return returnMethodTemp$4 : <bottom>
+finalReturn = return returnMethodTemp$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_files_1" [style="bold"];
@@ -657,7 +657,7 @@ outerLoops: 1
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_3" [label = "block[id=3](statTemp$6)
 statTemp$5 = statTemp$6.map() : untyped
 returnMethodTemp$3 = statTemp$5.flatten() : untyped
-returnMethodTemp$11 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#added_lines_1" [style="bold"];
@@ -697,7 +697,7 @@ outerLoops: 1
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_3" [label = "block[id=3](statTemp$6)
 statTemp$5 = statTemp$6.map() : untyped
 returnMethodTemp$3 = statTemp$5.flatten() : untyped
-returnMethodTemp$11 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_3" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#removed_lines_1" [style="bold"];
@@ -723,7 +723,7 @@ statTemp$4 = statTemp$5.added_lines() : untyped
 statTemp$7 = self : Diff
 statTemp$6 = statTemp$7.removed_lines() : untyped
 returnMethodTemp$2 = statTemp$4.+(statTemp$6) : untyped
-returnMethodTemp$8 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_1" [style="bold"];
@@ -744,7 +744,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 statTemp$5 = self : Diff
 statTemp$4 = statTemp$5.changed_files() : untyped
 returnMethodTemp$2 = statTemp$4.include?(<constant:SPEC_PATH>$7) : untyped
-returnMethodTemp$8 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_0" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_1" [style="bold"];
@@ -807,7 +807,7 @@ outerLoops: 1
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6" [label = "block[id=6](statTemp$24)
 statTemp$23 = statTemp$24.map() : untyped
 returnMethodTemp$3 = statTemp$23.compact() : untyped
-returnMethodTemp$113 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_6" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_1" [style="bold"];

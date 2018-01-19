@@ -34,7 +34,7 @@ returnTemp$9 = statTemp$10.value() : untyped
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_2" [style="bold"];
     "bb::<constant:Object>#foo_4" [label = "block[id=4](<constant:nil>$12)
-returnMethodTemp$13 = return <constant:nil>$12 : <bottom>
+finalReturn = return <constant:nil>$12
 <unconditional>"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1" [style="bold"];

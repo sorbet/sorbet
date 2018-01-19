@@ -7,7 +7,7 @@ subgraph "cluster_::<constant:TestHash>#something" {
 
     "bb::<constant:TestHash>#something_0" [label = "block[id=0]()
 returnMethodTemp$2 = 17 : Integer(17)
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestHash>#something_0" -> "bb::<constant:TestHash>#something_1" [style="bold"];
@@ -33,7 +33,7 @@ hashTemp$7 = statTemp$9.+(statTemp$10) : Integer
 hashTemp$8 = 2 : Integer(2)
 hashTemp$11 = alias <constant:<Magic>> : <Magic>
 returnMethodTemp$2 = hashTemp$11.<build-hash>(hashTemp$4, hashTemp$5, hashTemp$7, hashTemp$8) : Hash
-returnMethodTemp$12 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestHash>#test_0" -> "bb::<constant:TestHash>#test_1" [style="bold"];
@@ -66,7 +66,7 @@ returnMethodTemp$2 = hashTemp$13.<build-hash>(hashTemp$4, hashTemp$5, hashTemp$6
   Symbol(:\"foo\") => Symbol(:\"bar\")
   Symbol(:\"baz\") => untyped
 }
-returnMethodTemp$14 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestHash>#test_shaped_0" -> "bb::<constant:TestHash>#test_shaped_1" [style="bold"];

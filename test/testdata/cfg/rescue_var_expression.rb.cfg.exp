@@ -7,7 +7,7 @@ subgraph "cluster_::<constant:MyClass>#foo=" {
 
     "bb::<constant:MyClass>#foo=_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : MyClass
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:MyClass>#foo=_0" -> "bb::<constant:MyClass>#foo=_1" [style="bold"];
@@ -51,7 +51,7 @@ returnMethodTemp$2 = statTemp$5.raise(statTemp$6) : NilClass
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_7" [style="bold"];
     "bb::<constant:Object>#foo_7" [label = "block[id=7](returnMethodTemp$2)
-returnMethodTemp$16 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_1" [style="bold"];

@@ -8,7 +8,7 @@ subgraph "cluster_::<constant:Funcs>#f" {
     "bb::<constant:Funcs>#f_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : Funcs
 x = load_arg(selfMethodTemp$3#f, 0) : Integer
-returnMethodTemp$4 = return x : <bottom>
+finalReturn = return x : <bottom>
 <unconditional>"];
 
     "bb::<constant:Funcs>#f_0" -> "bb::<constant:Funcs>#f_1" [style="bold"];
@@ -27,7 +27,7 @@ subgraph "cluster_::<constant:Funcs>#g" {
     "bb::<constant:Funcs>#g_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : Funcs
 s = load_arg(selfMethodTemp$3#g, 0) : Symbol
-returnMethodTemp$4 = return s : <bottom>
+finalReturn = return s : <bottom>
 <unconditional>"];
 
     "bb::<constant:Funcs>#g_0" -> "bb::<constant:Funcs>#g_1" [style="bold"];
@@ -46,7 +46,7 @@ subgraph "cluster_::<constant:Funcs>#h" {
     "bb::<constant:Funcs>#h_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : Funcs
 s = load_arg(selfMethodTemp$3#h, 0) : String
-returnMethodTemp$4 = return s : <bottom>
+finalReturn = return s : <bottom>
 <unconditional>"];
 
     "bb::<constant:Funcs>#h_0" -> "bb::<constant:Funcs>#h_1" [style="bold"];
@@ -81,7 +81,7 @@ statTemp$17 = statTemp$18.h(statTemp$19) : String
 statTemp$22 = world : String(\"world\")
 statTemp$20 = <constant:Funcs>$9.h(statTemp$22) : String
 returnMethodTemp$2 = <constant:C>$24.f() : untyped
-returnMethodTemp$25 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:C>#test_calls_0" -> "bb::<constant:C>#test_calls_1" [style="bold"];

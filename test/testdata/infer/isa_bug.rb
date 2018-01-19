@@ -5,12 +5,10 @@ class TestIsA
 
   def test_is_a?(x)
     case x
-    when T1 || T2
-      # This is equivalent to `T1`, since Ruby evaluates the `||`
-      # before the `match, but it exhibited a bug in the typechecker.
+    when T1 || T2 # error: This code is unreachable
     end
 
-    if x.is_a?(T1 || T2)
+    if x.is_a?(T1 || T2) # error: This code is unreachable
     end
   end
 end

@@ -71,6 +71,7 @@ NameDef names[] = {
     {"arrayTemp", CFG},
     {"rescueTemp", Desugar | CFG},
     {"castTemp", Resolver | CFG},
+    {"finalReturn", CFG | Infer},
     // end CFG temporaries
 
     {"include", Namer | Resolver},
@@ -112,6 +113,10 @@ NameDef names[] = {
     {"moduleFunction", "module_function", Namer | Resolver},
     {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
     // end DSL methods
+
+    // Our own special methods which have special meaning
+    {"hardAssert", "hard_assert", Infer}, // Kernel.hard_assert
+    // end special methods
 
     // The next two names are used as keys in SymbolInfo::members to store
     // pointers up and down the singleton-class hierarchy. If A's singleton

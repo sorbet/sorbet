@@ -1,7 +1,7 @@
 # @typed
 class Foo
-  def bar()
-   s = if (true)
+  def bar(cond)
+   s = if (cond)
          {}
        else
          {}

@@ -77,16 +77,16 @@
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1 -->
 <g id="node2" class="node">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1</title>
-<polygon fill="none" stroke="#000000" points="1516.8076,-116 988.976,-116 853.1924,-16 1381.024,-16 1516.8076,-116"/>
+<polygon fill="none" stroke="#000000" points="1447.5793,-116 1029.8744,-116 922.4207,-16 1340.1256,-16 1447.5793,-116"/>
 <text text-anchor="middle" x="1185" y="-75.8" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1](returnMethodTemp$2)</text>
-<text text-anchor="middle" x="1185" y="-61.8" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$90 = return returnMethodTemp$2</text>
+<text text-anchor="middle" x="1185" y="-61.8" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return returnMethodTemp$2</text>
 <text text-anchor="middle" x="1185" y="-47.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1&#45;&gt;bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_1</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M1477.5681,-86.9115C1512.2657,-83.095 1534.9038,-76.1245 1534.9038,-66 1534.9038,-51.4489 1488.1427,-43.4127 1426.0249,-41.8914"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1425.9918,-38.3903 1415.9283,-41.7032 1425.8613,-45.3891 1425.9918,-38.3903"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1416.8644,-87.295C1446.3486,-83.572 1465.7896,-76.4736 1465.7896,-66 1465.7896,-51.4202 1428.1171,-43.3811 1378.1224,-41.8825"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1378.0377,-38.3801 1367.9666,-41.67 1377.8912,-45.3785 1378.0377,-38.3801"/>
 </g>
 <!-- bb::&lt;singleton class:&lt;constant:A&gt;&gt;#send_beta_invitation_61 -->
 <g id="node5" class="node">
@@ -783,4 +783,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: e6feb9303b7d89604374dcafbfee7a7c63093cc464dc6a06d52e088be96912a6 -->
+<!-- ruby-types:sha256: 1fb35b1ff2ca41a06ba73450d5686c6a182a985095787d1490cdbb535b927d9d -->

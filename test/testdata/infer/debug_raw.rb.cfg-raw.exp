@@ -31,10 +31,8 @@ returnMethodTemp$2 = a : Integer(2)
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="bold"];
     "bb::<constant:Object>#main_4" [label = "block[id=4](returnMethodTemp$2)
 returnMethodTemp$2: NilClass | Integer
-  Being truthy entails:
-    a NOT to be NilClass | FalseClass
 
-returnMethodTemp$5 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_1" [style="bold"];

@@ -7,7 +7,7 @@ subgraph "cluster_::<constant:TestRescue>#meth" {
 
     "bb::<constant:TestRescue>#meth_0" [label = "block[id=0]()
 returnMethodTemp$2 = 0 : Integer(0)
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#meth_0" -> "bb::<constant:TestRescue>#meth_1" [style="bold"];
@@ -25,7 +25,7 @@ subgraph "cluster_::<constant:TestRescue>#foo" {
 
     "bb::<constant:TestRescue>#foo_0" [label = "block[id=0]()
 returnMethodTemp$2 = 1 : Integer(1)
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#foo_0" -> "bb::<constant:TestRescue>#foo_1" [style="bold"];
@@ -43,7 +43,7 @@ subgraph "cluster_::<constant:TestRescue>#bar" {
 
     "bb::<constant:TestRescue>#bar_0" [label = "block[id=0]()
 returnMethodTemp$2 = 2 : Integer(2)
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#bar_0" -> "bb::<constant:TestRescue>#bar_1" [style="bold"];
@@ -61,7 +61,7 @@ subgraph "cluster_::<constant:TestRescue>#baz" {
 
     "bb::<constant:TestRescue>#baz_0" [label = "block[id=0]()
 returnMethodTemp$2 = 3 : Integer(3)
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#baz_0" -> "bb::<constant:TestRescue>#baz_1" [style="bold"];
@@ -80,7 +80,7 @@ subgraph "cluster_::<constant:TestRescue>#take_arg" {
     "bb::<constant:TestRescue>#take_arg_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : TestRescue
 x = load_arg(selfMethodTemp$3#take_arg, 0) : untyped
-returnMethodTemp$4 = return x : <bottom>
+finalReturn = return x : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#take_arg_0" -> "bb::<constant:TestRescue>#take_arg_1" [style="bold"];
@@ -122,7 +122,7 @@ returnMethodTemp$2 = statTemp$5.meth() : untyped
 
     "bb::<constant:TestRescue>#multiple_rescue_4" -> "bb::<constant:TestRescue>#multiple_rescue_7" [style="bold"];
     "bb::<constant:TestRescue>#multiple_rescue_7" [label = "block[id=7](returnMethodTemp$2)
-returnMethodTemp$14 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#multiple_rescue_7" -> "bb::<constant:TestRescue>#multiple_rescue_1" [style="bold"];
@@ -180,7 +180,7 @@ returnMethodTemp$2 = statTemp$5.meth() : untyped
 
     "bb::<constant:TestRescue>#multiple_rescue_classes_4" -> "bb::<constant:TestRescue>#multiple_rescue_classes_7" [style="bold"];
     "bb::<constant:TestRescue>#multiple_rescue_classes_7" [label = "block[id=7](returnMethodTemp$2)
-returnMethodTemp$13 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#multiple_rescue_classes_7" -> "bb::<constant:TestRescue>#multiple_rescue_classes_1" [style="bold"];
@@ -233,7 +233,7 @@ returnMethodTemp$2 = statTemp$5.meth() : untyped
     "bb::<constant:TestRescue>#parse_rescue_ensure_6" [label = "block[id=6](returnMethodTemp$2)
 statTemp$7 = self : TestRescue
 rescueTemp$6 = statTemp$7.bar() : untyped
-returnMethodTemp$12 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_rescue_ensure_6" -> "bb::<constant:TestRescue>#parse_rescue_ensure_1" [style="bold"];
@@ -271,7 +271,7 @@ rescueTemp$8"];
     "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_3" -> "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_1" [style="tapered"];
 
     "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_7" [label = "block[id=7]()
-returnMethodTemp$9 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_7" -> "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_1" [style="bold"];
@@ -312,7 +312,7 @@ statTemp$5 = statTemp$7.bar() : untyped
     "bb::<constant:TestRescue>#parse_ruby_bug_12686_4" -> "bb::<constant:TestRescue>#parse_ruby_bug_12686_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_ruby_bug_12686_7" [label = "block[id=7](statTemp$5, statTemp$4)
 returnMethodTemp$2 = statTemp$4.take_arg(statTemp$5) : untyped
-returnMethodTemp$13 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_ruby_bug_12686_7" -> "bb::<constant:TestRescue>#parse_ruby_bug_12686_1" [style="bold"];
@@ -355,7 +355,7 @@ returnMethodTemp$2 = statTemp$5.meth() : untyped
 
     "bb::<constant:TestRescue>#parse_rescue_mod_4" -> "bb::<constant:TestRescue>#parse_rescue_mod_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_rescue_mod_7" [label = "block[id=7](returnMethodTemp$2)
-returnMethodTemp$11 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_rescue_mod_7" -> "bb::<constant:TestRescue>#parse_rescue_mod_1" [style="bold"];
@@ -400,7 +400,7 @@ returnMethodTemp$2 = statTemp$5.meth() : untyped
 
     "bb::<constant:TestRescue>#parse_resbody_list_var_4" -> "bb::<constant:TestRescue>#parse_resbody_list_var_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_resbody_list_var_7" [label = "block[id=7](returnMethodTemp$2)
-returnMethodTemp$11 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_resbody_list_var_7" -> "bb::<constant:TestRescue>#parse_resbody_list_var_1" [style="bold"];
@@ -448,7 +448,7 @@ returnMethodTemp$2 = statTemp$6.foo() : untyped
     "bb::<constant:TestRescue>#parse_rescue_else_ensure_6" [label = "block[id=6](returnMethodTemp$2)
 statTemp$8 = self : TestRescue
 rescueTemp$7 = statTemp$8.bar() : untyped
-returnMethodTemp$13 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_rescue_else_ensure_6" -> "bb::<constant:TestRescue>#parse_rescue_else_ensure_1" [style="bold"];
@@ -492,7 +492,7 @@ returnMethodTemp$2 = statTemp$5.meth() : untyped
 
     "bb::<constant:TestRescue>#parse_rescue_4" -> "bb::<constant:TestRescue>#parse_rescue_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_rescue_7" [label = "block[id=7](returnMethodTemp$2)
-returnMethodTemp$11 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_rescue_7" -> "bb::<constant:TestRescue>#parse_rescue_1" [style="bold"];
@@ -536,7 +536,7 @@ returnMethodTemp$2 = statTemp$5.meth() : untyped
 
     "bb::<constant:TestRescue>#parse_resbody_var_4" -> "bb::<constant:TestRescue>#parse_resbody_var_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_resbody_var_7" [label = "block[id=7](returnMethodTemp$2)
-returnMethodTemp$11 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_resbody_var_7" -> "bb::<constant:TestRescue>#parse_resbody_var_1" [style="bold"];
@@ -581,7 +581,7 @@ returnMethodTemp$2 = statTemp$5.meth() : untyped
 
     "bb::<constant:TestRescue>#parse_resbody_var_1_4" -> "bb::<constant:TestRescue>#parse_resbody_var_1_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_resbody_var_1_7" [label = "block[id=7](returnMethodTemp$2)
-returnMethodTemp$13 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_resbody_var_1_7" -> "bb::<constant:TestRescue>#parse_resbody_var_1_1" [style="bold"];
@@ -628,7 +628,7 @@ statTemp$5 = statTemp$7.meth() : untyped
     "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_4" -> "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_7" [label = "block[id=7](foo, statTemp$5, statTemp$4)
 foo = statTemp$4.+(statTemp$5) : untyped
-returnMethodTemp$13 = return foo : <bottom>
+finalReturn = return foo : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_7" -> "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_1" [style="bold"];
@@ -675,7 +675,7 @@ foo = statTemp$5.raise(statTemp$6) : NilClass
 
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_4" -> "bb::<constant:TestRescue>#parse_ruby_bug_12402_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_7" [label = "block[id=7](foo)
-returnMethodTemp$13 = return foo : <bottom>
+finalReturn = return foo : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_7" -> "bb::<constant:TestRescue>#parse_ruby_bug_12402_1" [style="bold"];
@@ -723,7 +723,7 @@ statTemp$5 = statTemp$7.raise(statTemp$8) : NilClass
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_4" -> "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_7" [style="bold"];
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_7" [label = "block[id=7](foo, statTemp$5, statTemp$4)
 foo = statTemp$4.+(statTemp$5) : untyped
-returnMethodTemp$15 = return foo : <bottom>
+finalReturn = return foo : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_7" -> "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_1" [style="bold"];
@@ -775,7 +775,7 @@ statTemp$13 = statTemp$15.raise(statTemp$16) : NilClass
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_7" [label = "block[id=7]([]$3, []$4, statTemp$10, statTemp$13)
 statTemp$9 = statTemp$10.+(statTemp$13) : untyped
 returnMethodTemp$2 = []$3.[]=([]$4, statTemp$9) : untyped
-returnMethodTemp$23 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_7" -> "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_1" [style="bold"];

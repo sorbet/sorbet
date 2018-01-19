@@ -17,8 +17,8 @@ def baz4
   b = a.getbyte("foo") # error: does not exist
 end
 
-def baz5
- if (true)
+def baz5(cond)
+ if (cond)
    b = 1
  else
    b = "foo"
@@ -26,8 +26,8 @@ def baz5
  b = b.getbyte(1) # error: does not exist
 end
 
-def baz6
- if (true)
+def baz6(cond)
+ if (cond)
    b = 1
  else
    b = "foo"
@@ -35,8 +35,8 @@ def baz6
  b = "foo".getbyte(b) # error: does not match expected type
 end
 
-def baz7
- if (true)
+def baz7(cond)
+ if (cond)
    b = 1
  end
  b = "foo".getbyte(b) # error: does not match expected type

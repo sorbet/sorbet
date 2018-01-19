@@ -5,182 +5,182 @@
  -->
 <!-- Title: controlFlow3.rb Pages: 1 -->
 <svg width="1234pt" height="1008pt"
- viewBox="0.00 0.00 1234.37 1007.64" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ viewBox="0.00 0.00 1234.40 1007.64" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1003.6421)">
 <title>controlFlow3.rb</title>
-<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-1003.6421 1230.372,-1003.6421 1230.372,4 -4,4"/>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-1003.6421 1230.3982,-1003.6421 1230.3982,4 -4,4"/>
 <g id="clust1" class="cluster">
 <title>cluster_::&lt;constant:Test&gt;#normalize_params</title>
-<polygon fill="none" stroke="#0000ff" points="8.372,-8 8.372,-991.6421 1218.372,-991.6421 1218.372,-8 8.372,-8"/>
-<text text-anchor="middle" x="613.372" y="-976.4421" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Test&gt;#normalize_params</text>
+<polygon fill="none" stroke="#0000ff" points="8.3982,-8 8.3982,-991.6421 1218.3982,-991.6421 1218.3982,-8 8.3982,-8"/>
+<text text-anchor="middle" x="613.3982" y="-976.4421" font-family="Times,serif" font-size="14.00" fill="#000000">::&lt;constant:Test&gt;#normalize_params</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_0 -->
 <g id="node1" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_0</title>
-<polygon fill="none" stroke="#000000" points="227.9861,-840.3195 565.372,-776.1997 902.7578,-840.3195 902.4429,-944.0675 228.3011,-944.0675 227.9861,-840.3195"/>
-<text text-anchor="middle" x="565.372" y="-906.7947" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](v, &lt;constant:Array&gt;$16)</text>
-<text text-anchor="middle" x="565.372" y="-892.7947" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Hash&gt;$8 = alias &lt;constant:Hash&gt; : &lt;class:Hash&gt;</text>
-<text text-anchor="middle" x="565.372" y="-878.7947" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Array&gt;$16 = alias &lt;constant:Array&gt; : &lt;class:Array&gt;</text>
-<text text-anchor="middle" x="565.372" y="-864.7947" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$4 = self : Test</text>
-<text text-anchor="middle" x="565.372" y="-850.7947" font-family="Times,serif" font-size="14.00" fill="#000000">v = load_arg(selfMethodTemp$4#normalize_params, 0) : untyped</text>
-<text text-anchor="middle" x="565.372" y="-836.7947" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5 = v.is_a?(&lt;constant:Hash&gt;$8) : untyped</text>
-<text text-anchor="middle" x="565.372" y="-822.7947" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5</text>
+<polygon fill="none" stroke="#000000" points="228.0124,-840.3195 565.3982,-776.1997 902.784,-840.3195 902.4691,-944.0675 228.3273,-944.0675 228.0124,-840.3195"/>
+<text text-anchor="middle" x="565.3982" y="-906.7947" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](v, &lt;constant:Array&gt;$16)</text>
+<text text-anchor="middle" x="565.3982" y="-892.7947" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Hash&gt;$8 = alias &lt;constant:Hash&gt; : &lt;class:Hash&gt;</text>
+<text text-anchor="middle" x="565.3982" y="-878.7947" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:Array&gt;$16 = alias &lt;constant:Array&gt; : &lt;class:Array&gt;</text>
+<text text-anchor="middle" x="565.3982" y="-864.7947" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$4 = self : Test</text>
+<text text-anchor="middle" x="565.3982" y="-850.7947" font-family="Times,serif" font-size="14.00" fill="#000000">v = load_arg(selfMethodTemp$4#normalize_params, 0) : untyped</text>
+<text text-anchor="middle" x="565.3982" y="-836.7947" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5 = v.is_a?(&lt;constant:Hash&gt;$8) : untyped</text>
+<text text-anchor="middle" x="565.3982" y="-822.7947" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$5</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_2 -->
 <g id="node3" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_2</title>
-<ellipse fill="none" stroke="#000000" cx="307.372" cy="-461.8721" rx="291.0967" ry="65.1077"/>
-<text text-anchor="middle" x="307.372" y="-492.6721" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](v, returnMethodTemp$3)</text>
-<text text-anchor="middle" x="307.372" y="-478.6721" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = self : Test</text>
-<text text-anchor="middle" x="307.372" y="-464.6721" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = v.to_a() : Array</text>
-<text text-anchor="middle" x="307.372" y="-450.6721" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = statTemp$10.normalize_params(statTemp$11) : untyped</text>
-<text text-anchor="middle" x="307.372" y="-436.6721" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$9.sort() : untyped</text>
-<text text-anchor="middle" x="307.372" y="-422.6721" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="307.3982" cy="-461.8721" rx="291.0967" ry="65.1077"/>
+<text text-anchor="middle" x="307.3982" y="-492.6721" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](v, returnMethodTemp$3)</text>
+<text text-anchor="middle" x="307.3982" y="-478.6721" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = self : Test</text>
+<text text-anchor="middle" x="307.3982" y="-464.6721" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = v.to_a() : Array</text>
+<text text-anchor="middle" x="307.3982" y="-450.6721" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = statTemp$10.normalize_params(statTemp$11) : untyped</text>
+<text text-anchor="middle" x="307.3982" y="-436.6721" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$9.sort() : untyped</text>
+<text text-anchor="middle" x="307.3982" y="-422.6721" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_0&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_2 -->
 <g id="edge1" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_0&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_2</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M512.8508,-786.1167C466.2246,-712.5407 398.7357,-606.0437 353.9876,-535.4314"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="356.6834,-533.1467 348.3742,-526.5735 350.7707,-536.8937 356.6834,-533.1467"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M512.8771,-786.1167C466.2508,-712.5407 398.762,-606.0437 354.0139,-535.4314"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="356.7097,-533.1467 348.4005,-526.5735 350.797,-536.8937 356.7097,-533.1467"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_3 -->
 <g id="node4" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_3</title>
-<ellipse fill="none" stroke="#000000" cx="732.372" cy="-704.992" rx="223.0851" ry="35.2113"/>
-<text text-anchor="middle" x="732.372" y="-714.792" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](v, &lt;constant:Array&gt;$16)</text>
-<text text-anchor="middle" x="732.372" y="-700.792" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$13 = v.is_a?(&lt;constant:Array&gt;$16) : untyped</text>
-<text text-anchor="middle" x="732.372" y="-686.792" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$13</text>
+<ellipse fill="none" stroke="#000000" cx="732.3982" cy="-704.992" rx="223.0851" ry="35.2113"/>
+<text text-anchor="middle" x="732.3982" y="-714.792" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](v, &lt;constant:Array&gt;$16)</text>
+<text text-anchor="middle" x="732.3982" y="-700.792" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$13 = v.is_a?(&lt;constant:Array&gt;$16) : untyped</text>
+<text text-anchor="middle" x="732.3982" y="-686.792" font-family="Times,serif" font-size="14.00" fill="#000000">ifTemp$13</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_0&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_3 -->
 <g id="edge2" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_0&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_3</title>
-<polygon fill="#000000" stroke="transparent" points="645.3095,-791.1927 647.589,-788.9178 649.8697,-786.6418 652.1498,-784.3663 654.428,-782.0928 656.7026,-779.8228 658.9721,-777.5579 661.2351,-775.2995 663.4899,-773.0493 665.735,-770.8087 667.969,-768.5794 670.1901,-766.3627 672.397,-764.1603 674.5881,-761.9737 676.7618,-759.8044 678.9166,-757.654 681.051,-755.524 683.1634,-753.4159 685.2523,-751.3312 687.3162,-749.2716 689.3535,-747.2384 689.3535,-747.2384 687.2838,-749.2386 685.1871,-751.2648 683.0649,-753.3156 680.9189,-755.3895 678.7506,-757.4849 676.5615,-759.6004 674.3532,-761.7345 672.1273,-763.8856 669.8853,-766.0523 667.6288,-768.2329 665.3593,-770.4261 663.0785,-772.6303 660.7878,-774.844 658.4888,-777.0657 656.1832,-779.2939 653.8723,-781.527 651.5579,-783.7636 649.2415,-786.0022 646.9246,-788.2412 644.6088,-790.4792 645.3095,-791.1927"/>
-<polygon fill="#000000" stroke="#000000" points="692.0175,-749.5278 696.6999,-740.0238 687.1127,-744.5334 692.0175,-749.5278"/>
+<polygon fill="#000000" stroke="transparent" points="645.3358,-791.1927 647.6153,-788.9178 649.8959,-786.6418 652.176,-784.3663 654.4542,-782.0928 656.7288,-779.8228 658.9984,-777.5579 661.2613,-775.2995 663.5162,-773.0493 665.7613,-770.8087 667.9952,-768.5794 670.2164,-766.3627 672.4233,-764.1603 674.6144,-761.9737 676.7881,-759.8044 678.9429,-757.654 681.0772,-755.524 683.1897,-753.4159 685.2786,-751.3312 687.3424,-749.2716 689.3797,-747.2384 689.3797,-747.2384 687.31,-749.2386 685.2133,-751.2648 683.0912,-753.3156 680.9452,-755.3895 678.7768,-757.4849 676.5877,-759.6004 674.3795,-761.7345 672.1535,-763.8856 669.9115,-766.0523 667.655,-768.2329 665.3856,-770.4261 663.1047,-772.6303 660.814,-774.844 658.5151,-777.0657 656.2094,-779.2939 653.8986,-781.527 651.5842,-783.7636 649.2678,-786.0022 646.9509,-788.2412 644.6351,-790.4792 645.3358,-791.1927"/>
+<polygon fill="#000000" stroke="#000000" points="692.0437,-749.5278 696.7262,-740.0238 687.139,-744.5334 692.0437,-749.5278"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_1 -->
 <g id="node2" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_1</title>
-<polygon fill="none" stroke="#000000" points="1049.9229,-88 870.8795,-88 824.821,-16 1003.8644,-16 1049.9229,-88"/>
-<text text-anchor="middle" x="937.372" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
-<text text-anchor="middle" x="937.372" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<polygon fill="none" stroke="#000000" points="1086.9492,-88 907.9058,-88 861.8473,-16 1040.8906,-16 1086.9492,-88"/>
+<text text-anchor="middle" x="974.3982" y="-54.8" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1]()</text>
+<text text-anchor="middle" x="974.3982" y="-40.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_1&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_1 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_1&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_1</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M1038.812,-70.554C1056.1411,-68.0186 1068.1472,-61.834 1068.1472,-52 1068.1472,-39.6173 1049.1115,-33.0207 1024.3822,-32.2102"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1024.2704,-28.7101 1014.2645,-32.1932 1024.2586,-35.7101 1024.2704,-28.7101"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1075.8383,-70.554C1093.1674,-68.0186 1105.1735,-61.834 1105.1735,-52 1105.1735,-39.6173 1086.1377,-33.0207 1061.4085,-32.2102"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1061.2967,-28.7101 1051.2908,-32.1932 1061.2849,-35.7101 1061.2967,-28.7101"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_10 -->
 <g id="node5" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_10</title>
-<ellipse fill="none" stroke="#000000" cx="937.372" cy="-159.3553" rx="273.0758" ry="35.2113"/>
-<text text-anchor="middle" x="937.372" y="-169.1553" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=10](returnMethodTemp$3)</text>
-<text text-anchor="middle" x="937.372" y="-155.1553" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$21 = return returnMethodTemp$3 : &lt;bottom&gt;</text>
-<text text-anchor="middle" x="937.372" y="-141.1553" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="974.3982" cy="-159.3553" rx="226.2985" ry="35.2113"/>
+<text text-anchor="middle" x="974.3982" y="-169.1553" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=10](returnMethodTemp$3)</text>
+<text text-anchor="middle" x="974.3982" y="-155.1553" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return returnMethodTemp$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="974.3982" y="-141.1553" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_2&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_10 -->
 <g id="edge4" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_2&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_10</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M119.6647,-412.0832C76.9777,-396.8811 40.3285,-379.269 27.372,-360.8183 -5.8595,-313.4953 -11.8862,-273.1677 27.372,-230.7107 49.1888,-207.1162 408.7858,-184.7709 669.3012,-171.5665"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="669.4899,-175.0615 679.3007,-171.0617 669.1369,-168.0704 669.4899,-175.0615"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M119.6909,-412.0832C77.004,-396.8811 40.3547,-379.269 27.3982,-360.8183 -5.8333,-313.4953 -11.9246,-273.1079 27.3982,-230.7107 51.573,-204.6458 473.1166,-181.3101 745.5575,-168.8594"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="745.758,-172.354 755.5885,-168.4028 745.4397,-165.3612 745.758,-172.354"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_4 -->
 <g id="node6" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_4</title>
-<ellipse fill="none" stroke="#000000" cx="732.372" cy="-598.2813" rx="124.9581" ry="35.2113"/>
-<text text-anchor="middle" x="732.372" y="-608.0813" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](v, statTemp$17)</text>
-<text text-anchor="middle" x="732.372" y="-594.0813" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$17 = v : Array</text>
-<text text-anchor="middle" x="732.372" y="-580.0813" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="732.3982" cy="-598.2813" rx="124.9581" ry="35.2113"/>
+<text text-anchor="middle" x="732.3982" y="-608.0813" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](v, statTemp$17)</text>
+<text text-anchor="middle" x="732.3982" y="-594.0813" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$17 = v : Array</text>
+<text text-anchor="middle" x="732.3982" y="-580.0813" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_3&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_4 -->
 <g id="edge5" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_3&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_4</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M732.372,-669.4589C732.372,-661.2692 732.372,-652.4466 732.372,-643.895"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="735.8721,-643.6592 732.372,-633.6593 728.8721,-643.6593 735.8721,-643.6592"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M732.3982,-669.4589C732.3982,-661.2692 732.3982,-652.4466 732.3982,-643.895"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="735.8983,-643.6592 732.3982,-633.6593 728.8983,-643.6593 735.8983,-643.6592"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_5 -->
 <g id="node7" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_5</title>
-<ellipse fill="none" stroke="#000000" cx="1042.372" cy="-598.2813" rx="160.93" ry="35.2113"/>
-<text text-anchor="middle" x="1042.372" y="-608.0813" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=5](v, returnMethodTemp$3)</text>
-<text text-anchor="middle" x="1042.372" y="-594.0813" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = v : untyped</text>
-<text text-anchor="middle" x="1042.372" y="-580.0813" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="1042.3982" cy="-598.2813" rx="160.93" ry="35.2113"/>
+<text text-anchor="middle" x="1042.3982" y="-608.0813" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=5](v, returnMethodTemp$3)</text>
+<text text-anchor="middle" x="1042.3982" y="-594.0813" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = v : untyped</text>
+<text text-anchor="middle" x="1042.3982" y="-580.0813" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_3&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_5 -->
 <g id="edge6" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_3&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_5</title>
-<polygon fill="#000000" stroke="transparent" points="825.9653,-673.3033 831.7074,-671.3015 837.5294,-669.2718 843.4226,-667.2172 849.3785,-665.1409 855.3882,-663.0457 861.4434,-660.9347 867.5352,-658.8109 873.655,-656.6774 879.7942,-654.537 885.9442,-652.393 892.0963,-650.2482 898.2419,-648.1057 904.3723,-645.9684 910.4789,-643.8395 916.5531,-641.7219 922.5862,-639.6186 928.5695,-637.5326 934.4945,-635.467 940.3525,-633.4247 946.1348,-631.4088 946.1348,-631.4088 940.3368,-633.3792 934.463,-635.3754 928.522,-637.3944 922.5224,-639.4333 916.473,-641.4891 910.3824,-643.5589 904.2592,-645.6398 898.1122,-647.7288 891.95,-649.823 885.7812,-651.9194 879.6145,-654.0151 873.4587,-656.1071 867.3223,-658.1925 861.214,-660.2683 855.1425,-662.3316 849.1164,-664.3795 843.1444,-666.409 837.2352,-668.4172 831.3975,-670.4011 825.6398,-672.3578 825.9653,-673.3033"/>
-<polygon fill="#000000" stroke="#000000" points="947.435,-634.6629 955.7512,-628.0986 945.1565,-628.0441 947.435,-634.6629"/>
+<polygon fill="#000000" stroke="transparent" points="825.9916,-673.3033 831.7337,-671.3015 837.5556,-669.2718 843.4489,-667.2172 849.4047,-665.1409 855.4145,-663.0457 861.4696,-660.9347 867.5614,-658.8109 873.6812,-656.6774 879.8205,-654.537 885.9705,-652.393 892.1226,-650.2482 898.2682,-648.1057 904.3986,-645.9684 910.5052,-643.8395 916.5794,-641.7219 922.6124,-639.6186 928.5958,-637.5326 934.5208,-635.467 940.3787,-633.4247 946.161,-631.4088 946.161,-631.4088 940.3631,-633.3792 934.4892,-635.3754 928.5482,-637.3944 922.5487,-639.4333 916.4992,-641.4891 910.4086,-643.5589 904.2855,-645.6398 898.1384,-647.7288 891.9762,-649.823 885.8074,-651.9194 879.6408,-654.0151 873.4849,-656.1071 867.3485,-658.1925 861.2402,-660.2683 855.1687,-662.3316 849.1426,-664.3795 843.1707,-666.409 837.2615,-668.4172 831.4237,-670.4011 825.6661,-672.3578 825.9916,-673.3033"/>
+<polygon fill="#000000" stroke="#000000" points="947.4612,-634.6629 955.7775,-628.0986 945.1828,-628.0441 947.4612,-634.6629"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_10&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_1 -->
 <g id="edge13" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_10&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_1</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M937.372,-123.9057C937.372,-115.7426 937.372,-106.9414 937.372,-98.3915"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="940.8721,-98.1468 937.372,-88.1469 933.8721,-98.1469 940.8721,-98.1468"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M974.3982,-123.9057C974.3982,-115.7426 974.3982,-106.9414 974.3982,-98.3915"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="977.8983,-98.1468 974.3982,-88.1469 970.8983,-98.1469 977.8983,-98.1468"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_6 -->
 <g id="node8" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_6</title>
-<ellipse fill="none" stroke="#000000" cx="732.372" cy="-461.8721" rx="115.9453" ry="35.2113"/>
-<text text-anchor="middle" x="732.372" y="-471.6721" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=6](statTemp$17)</text>
-<text text-anchor="middle" x="732.372" y="-457.6721" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="732.372" y="-443.6721" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="732.3982" cy="-461.8721" rx="115.9453" ry="35.2113"/>
+<text text-anchor="middle" x="732.3982" y="-471.6721" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=6](statTemp$17)</text>
+<text text-anchor="middle" x="732.3982" y="-457.6721" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="732.3982" y="-443.6721" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;call&gt;</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_4&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_6 -->
 <g id="edge7" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_4&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_6</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M732.372,-562.7975C732.372,-546.0363 732.372,-525.8199 732.372,-507.8967"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="735.8721,-507.6521 732.372,-497.6522 728.8721,-507.6522 735.8721,-507.6521"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M732.3982,-562.7975C732.3982,-546.0363 732.3982,-525.8199 732.3982,-507.8967"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="735.8983,-507.6521 732.3982,-497.6522 728.8983,-507.6522 735.8983,-507.6521"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_5&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_10 -->
 <g id="edge8" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_5&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_10</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M1079.1238,-563.6671C1147.773,-494.8186 1281.4203,-338.0932 1199.372,-230.7107 1186.8518,-214.3246 1152.2904,-200.8047 1112.2148,-190.1057"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1113.0365,-186.7031 1102.4786,-187.5869 1111.2833,-193.48 1113.0365,-186.7031"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M1079.0293,-563.6898C1147.0722,-495.2164 1279.1146,-339.6206 1199.3982,-230.7107 1188.2056,-215.4191 1155.7338,-201.8632 1118.8189,-190.7848"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="1119.4079,-187.311 1108.8281,-187.8747 1117.4503,-194.0317 1119.4079,-187.311"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_8 -->
 <g id="node9" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_8</title>
-<ellipse fill="none" stroke="#000000" cx="388.372" cy="-295.7645" rx="352.3392" ry="65.1077"/>
-<text text-anchor="middle" x="388.372" y="-326.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=8](statTemp$17)</text>
-<text text-anchor="middle" x="388.372" y="-312.5645" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="388.372" y="-298.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: e&gt; = load_arg(statTemp$17#map, 0) : Proc</text>
-<text text-anchor="middle" x="388.372" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = self : Test</text>
-<text text-anchor="middle" x="388.372" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$18 = statTemp$19.normalize_params(&lt;block&#45;nested: e&gt;) : untyped</text>
-<text text-anchor="middle" x="388.372" y="-256.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="388.3982" cy="-295.7645" rx="352.3392" ry="65.1077"/>
+<text text-anchor="middle" x="388.3982" y="-326.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=8](statTemp$17)</text>
+<text text-anchor="middle" x="388.3982" y="-312.5645" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
+<text text-anchor="middle" x="388.3982" y="-298.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;block&#45;nested: e&gt; = load_arg(statTemp$17#map, 0) : Proc</text>
+<text text-anchor="middle" x="388.3982" y="-284.5645" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = self : Test</text>
+<text text-anchor="middle" x="388.3982" y="-270.5645" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$18 = statTemp$19.normalize_params(&lt;block&#45;nested: e&gt;) : untyped</text>
+<text text-anchor="middle" x="388.3982" y="-256.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_6&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_8 -->
 <g id="edge9" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_6&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_8</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M668.5806,-432.3188C646.3666,-420.9855 621.324,-408.0783 598.372,-396.8183 574.1817,-384.9509 548.3156,-372.6647 523.2875,-360.9201"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="524.6495,-357.6932 514.1092,-356.6194 521.6794,-364.0318 524.6495,-357.6932"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M668.6069,-432.3188C646.3928,-420.9855 621.3503,-408.0783 598.3982,-396.8183 574.2079,-384.9509 548.3419,-372.6647 523.3138,-360.9201"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="524.6758,-357.6932 514.1355,-356.6194 521.7056,-364.0318 524.6758,-357.6932"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_7 -->
 <g id="node10" class="node">
 <title>bb::&lt;constant:Test&gt;#normalize_params_7</title>
-<ellipse fill="none" stroke="#000000" cx="974.372" cy="-295.7645" rx="215.8613" ry="35.2113"/>
-<text text-anchor="middle" x="974.372" y="-305.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=7](returnMethodTemp$3, statTemp$17)</text>
-<text text-anchor="middle" x="974.372" y="-291.5645" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$17.map() : Array</text>
-<text text-anchor="middle" x="974.372" y="-277.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
+<ellipse fill="none" stroke="#000000" cx="974.3982" cy="-295.7645" rx="215.8613" ry="35.2113"/>
+<text text-anchor="middle" x="974.3982" y="-305.5645" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=7](returnMethodTemp$3, statTemp$17)</text>
+<text text-anchor="middle" x="974.3982" y="-291.5645" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$17.map() : Array</text>
+<text text-anchor="middle" x="974.3982" y="-277.5645" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_6&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_7 -->
 <g id="edge10" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_6&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_7</title>
-<polygon fill="#000000" stroke="transparent" points="779.8894,-429.8628 785.8259,-425.7615 791.9857,-421.5059 798.3464,-417.1115 804.8856,-412.5938 811.5809,-407.9683 818.4098,-403.2504 825.3499,-398.4557 832.3789,-393.5996 839.4743,-388.6976 846.6136,-383.7653 853.7745,-378.818 860.9346,-373.8714 868.0714,-368.9408 875.1625,-364.0418 882.1855,-359.1898 889.1179,-354.4004 895.9374,-349.6891 902.6216,-345.0712 909.148,-340.5623 915.4941,-336.178 915.4941,-336.178 909.1215,-340.5238 902.5679,-344.9929 895.8558,-349.5701 889.0079,-354.2401 882.0465,-358.9873 874.9942,-363.7966 867.8735,-368.6525 860.7069,-373.5397 853.517,-378.4428 846.3262,-383.3465 839.157,-388.2354 832.0321,-393.0942 824.9738,-397.9076 818.0046,-402.6601 811.1472,-407.3365 804.424,-411.9213 797.8575,-416.3993 791.4703,-420.755 785.2848,-424.9731 779.3235,-429.0384 779.8894,-429.8628"/>
-<polygon fill="#000000" stroke="#000000" points="917.6553,-338.9397 923.9193,-330.395 913.6939,-333.1685 917.6553,-338.9397"/>
+<polygon fill="#000000" stroke="transparent" points="779.9157,-429.8628 785.8522,-425.7615 792.012,-421.5059 798.3727,-417.1115 804.9119,-412.5938 811.6071,-407.9683 818.436,-403.2504 825.3762,-398.4557 832.4052,-393.5996 839.5005,-388.6976 846.6399,-383.7653 853.8008,-378.818 860.9609,-373.8714 868.0976,-368.9408 875.1887,-364.0418 882.2117,-359.1898 889.1442,-354.4004 895.9637,-349.6891 902.6478,-345.0712 909.1742,-340.5623 915.5204,-336.178 915.5204,-336.178 909.1477,-340.5238 902.5941,-344.9929 895.8821,-349.5701 889.0341,-354.2401 882.0727,-358.9873 875.0204,-363.7966 867.8997,-368.6525 860.7332,-373.5397 853.5432,-378.4428 846.3524,-383.3465 839.1833,-388.2354 832.0583,-393.0942 825,-397.9076 818.0309,-402.6601 811.1735,-407.3365 804.4503,-411.9213 797.8838,-416.3993 791.4965,-420.755 785.311,-424.9731 779.3498,-429.0384 779.9157,-429.8628"/>
+<polygon fill="#000000" stroke="#000000" points="917.6816,-338.9397 923.9456,-330.395 913.7202,-333.1685 917.6816,-338.9397"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_8&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_6 -->
 <g id="edge12" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_8&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_6</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M529.07,-355.4054C558.112,-368.7774 588.3651,-383.0785 616.372,-396.8183 634.6078,-405.7646 654.1634,-415.7507 671.9573,-425.1611"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="670.6138,-428.4109 681.0856,-430.0211 673.9035,-422.2321 670.6138,-428.4109"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M529.0963,-355.4054C558.1382,-368.7774 588.3913,-383.0785 616.3982,-396.8183 634.6341,-405.7646 654.1896,-415.7507 671.9836,-425.1611"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="670.64,-428.4109 681.1118,-430.0211 673.9298,-422.2321 670.64,-428.4109"/>
 </g>
 <!-- bb::&lt;constant:Test&gt;#normalize_params_7&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_10 -->
 <g id="edge11" class="edge">
 <title>bb::&lt;constant:Test&gt;#normalize_params_7&#45;&gt;bb::&lt;constant:Test&gt;#normalize_params_10</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M964.7472,-260.2807C960.1584,-243.3628 954.6148,-222.9249 949.7196,-204.8779"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="953.0729,-203.8704 947.077,-195.1354 946.317,-205.7029 953.0729,-203.8704"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M974.3982,-260.2807C974.3982,-243.5195 974.3982,-223.3031 974.3982,-205.3798"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="977.8983,-205.1353 974.3982,-195.1354 970.8983,-205.1354 977.8983,-205.1353"/>
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 388ef44e13b3331244f81482390c9abd9b90c02c1c79c3f6a70c97ce6156dbe5 -->
+<!-- ruby-types:sha256: cdfdc21b650e38f3765ccedf878f612c41bcaad71b5062de3a7a1c2351d8f347 -->

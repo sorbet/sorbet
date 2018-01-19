@@ -31,7 +31,7 @@ returnMethodTemp$2 = return returnTemp$5 : <bottom>
 
     "bb::<constant:Object>#a_4" -> "bb::<constant:Object>#a_1" [style="bold"];
     "bb::<constant:Object>#a_7" [label = "block[id=7]()
-returnMethodTemp$10 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#a_7" -> "bb::<constant:Object>#a_1" [style="bold"];

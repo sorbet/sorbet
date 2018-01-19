@@ -8,11 +8,11 @@ module ModuleMethods
     end
 
     is_successful = err.nil?
-    if is_successful || final_attempt || (err && foo)
+    if is_successful || final_attempt || (err && foo) # error: This code is unreachable
+    # Disabling a smarter algorithm in inference.cc will no longer classify this as unreachable.
+    # this is because `e` is not assigned yet, is_successful is always true
       if !is_successful
-        1 # was-error: unrechable. Enabling a smarter algorithm in inference.cc classifies this as unreachable.
-          # see 96ea3cacc6759fb2861252d51fcf3a148b85586d
-          # this is because `e` is not assigned yet, is_successful is always true
+        1
       end
     end
 

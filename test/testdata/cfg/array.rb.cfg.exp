@@ -7,7 +7,7 @@ subgraph "cluster_::<constant:TestArray>#an_int" {
 
     "bb::<constant:TestArray>#an_int_0" [label = "block[id=0]()
 returnMethodTemp$2 = 0 : Integer(0)
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestArray>#an_int_0" -> "bb::<constant:TestArray>#an_int_1" [style="bold"];
@@ -25,7 +25,7 @@ subgraph "cluster_::<constant:TestArray>#a_string" {
 
     "bb::<constant:TestArray>#a_string_0" [label = "block[id=0]()
 returnMethodTemp$2 = str : String(\"str\")
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestArray>#a_string_0" -> "bb::<constant:TestArray>#a_string_1" [style="bold"];
@@ -66,7 +66,7 @@ returnMethodTemp$2 = arrayTemp$16.<build-array>(arrayTemp$10, arrayTemp$12, arra
   2 = TupleType {
       }
 }
-returnMethodTemp$17 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestArray>#test_arrays_0" -> "bb::<constant:TestArray>#test_arrays_1" [style="bold"];

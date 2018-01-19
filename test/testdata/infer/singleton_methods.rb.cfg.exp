@@ -7,7 +7,7 @@ subgraph "cluster_::<singleton class:<constant:Foo>>#bar" {
 
     "bb::<singleton class:<constant:Foo>>#bar_0" [label = "block[id=0]()
 returnMethodTemp$2 = 1 : Integer(1)
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Foo>>#bar_0" -> "bb::<singleton class:<constant:Foo>>#bar_1" [style="bold"];
@@ -26,7 +26,7 @@ subgraph "cluster_::<constant:Bar>#baz" {
     "bb::<constant:Bar>#baz_0" [label = "block[id=0]()
 <constant:Foo>$5 = alias <constant:Foo> : <class:Foo>
 returnMethodTemp$2 = <constant:Foo>$5.bar() : untyped
-returnMethodTemp$6 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Bar>#baz_0" -> "bb::<constant:Bar>#baz_1" [style="bold"];

@@ -1,8 +1,8 @@
 # @typed
 class Side
-    def foo
+    def foo(cond)
         a = self
-        a.bar(a, if true; a = true; else a = 2; end, a);
+        a.bar(a, if cond; a = true; else a = 2; end, a);
     end
 
     def bar(a, b, c)

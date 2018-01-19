@@ -36,7 +36,7 @@ ifTemp$6"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_0" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_3" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [label = "block[id=1](returnMethodTemp$2)
-returnMethodTemp$90 = return returnMethodTemp$2
+finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_1" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [style="bold"];

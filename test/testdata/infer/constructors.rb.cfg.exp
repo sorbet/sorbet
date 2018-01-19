@@ -7,7 +7,7 @@ subgraph "cluster_::<singleton class:<constant:Foo2>>#new" {
 
     "bb::<singleton class:<constant:Foo2>>#new_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : <class:Foo2>
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Foo2>>#new_0" -> "bb::<singleton class:<constant:Foo2>>#new_1" [style="bold"];
@@ -25,7 +25,7 @@ subgraph "cluster_::<constant:Foo3>#initialize" {
 
     "bb::<constant:Foo3>#initialize_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : Foo3
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Foo3>#initialize_0" -> "bb::<constant:Foo3>#initialize_1" [style="bold"];
@@ -51,7 +51,7 @@ statTemp$7 = <constant:Foo2>$9.new(statTemp$10) : untyped
 statTemp$13 = 1 : Integer(1)
 statTemp$14 = 2 : Integer(2)
 returnMethodTemp$2 = <constant:Foo3>$12.new(statTemp$13, statTemp$14) : Foo3
-returnMethodTemp$15 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Bar>#foo_0" -> "bb::<constant:Bar>#foo_1" [style="bold"];
@@ -71,7 +71,7 @@ subgraph "cluster_::<constant:InstanceMethod>#test_imethod_new" {
 <constant:Object>$6 = alias <constant:Object> : <class:Object>
 o = <constant:Object>$6.new() : Object
 returnMethodTemp$2 = o.new() : untyped
-returnMethodTemp$8 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:InstanceMethod>#test_imethod_new_0" -> "bb::<constant:InstanceMethod>#test_imethod_new_1" [style="bold"];

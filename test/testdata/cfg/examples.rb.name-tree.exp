@@ -73,7 +73,7 @@ class <emptyTree>::<constant:Examples><<constant:Examples>> < (::<constant:<todo
     end
   end
 
-  def variables_and_loop<variables_and_loop>()
+  def variables_and_loop<variables_and_loop>(cond)
     begin
       if begin
           true
@@ -84,7 +84,7 @@ class <emptyTree>::<constant:Examples><<constant:Examples>> < (::<constant:<todo
       end
       while true
         if begin
-            false
+            cond
           end
           b = 1
         else
@@ -95,11 +95,11 @@ class <emptyTree>::<constant:Examples><<constant:Examples>> < (::<constant:<todo
     end
   end
 
-  def variables_loop_if<variables_loop_if>()
+  def variables_loop_if<variables_loop_if>(cond)
     begin
       while true
         if begin
-            false
+            cond
           end
           b = 1
         else

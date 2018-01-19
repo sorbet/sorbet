@@ -36,7 +36,7 @@ statTemp$14 = arrayTemp$20.<build-array>(arrayTemp$15, arrayTemp$16, arrayTemp$1
   4 = Integer(0)
 }
 returnMethodTemp$2 = <blk>.call(statTemp$14) : untyped
-returnMethodTemp$21 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#each_0" -> "bb::<singleton class:<constant:A>>#each_1" [style="bold"];
@@ -57,7 +57,7 @@ subgraph "cluster_::<singleton class:<constant:E>>#e=" {
 selfMethodTemp$3 = self : <class:E>
 e = load_arg(selfMethodTemp$3#e=, 0) : untyped
 @e$4 = e : untyped
-returnMethodTemp$5 = return e : <bottom>
+finalReturn = return e : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:E>>#e=_0" -> "bb::<singleton class:<constant:E>>#e=_1" [style="bold"];
@@ -75,7 +75,7 @@ subgraph "cluster_::<singleton class:<constant:E>>#e" {
 
     "bb::<singleton class:<constant:E>>#e_0" [label = "block[id=0]()
 @e$4 = alias @e : untyped
-returnMethodTemp$5 = return @e$4 : <bottom>
+finalReturn = return @e$4 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:E>>#e_0" -> "bb::<singleton class:<constant:E>>#e_1" [style="bold"];
@@ -271,7 +271,7 @@ outerLoops: 1
 
     "bb::<singleton class:<constant:Main>>#main_18" [label = "block[id=18](statTemp$120)
 returnMethodTemp$8 = statTemp$120.each() : untyped
-returnMethodTemp$162 = return returnMethodTemp$8 : <bottom>
+finalReturn = return returnMethodTemp$8 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_18" -> "bb::<singleton class:<constant:Main>>#main_1" [style="bold"];

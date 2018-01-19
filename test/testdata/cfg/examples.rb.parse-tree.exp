@@ -176,6 +176,9 @@ Class {
         name = variables_and_loop
         args = Args {
           args = [
+            Arg {
+              name = cond
+            }
           ]
         }
         body = Begin {
@@ -210,7 +213,8 @@ Class {
               body = If {
                 condition = Begin {
                   stmts = [
-                    False {
+                    LVar {
+                      name = cond
                     }
                   ]
                 }
@@ -242,6 +246,9 @@ Class {
         name = variables_loop_if
         args = Args {
           args = [
+            Arg {
+              name = cond
+            }
           ]
         }
         body = Begin {
@@ -252,7 +259,8 @@ Class {
               body = If {
                 condition = Begin {
                   stmts = [
-                    False {
+                    LVar {
+                      name = cond
                     }
                   ]
                 }

@@ -57,7 +57,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
     end
   end
 
-  def variables_and_loop<<constant:<todo sym>>>()
+  def variables_and_loop<<constant:<todo sym>>>(cond)
     begin
       if begin
           true
@@ -68,7 +68,7 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
       end
       while true
         if begin
-            false
+            cond
           end
           b = 1
         else
@@ -79,11 +79,11 @@ class <emptyTree>::<constant:Examples><<constant:<todo sym>>> < (::<constant:<to
     end
   end
 
-  def variables_loop_if<<constant:<todo sym>>>()
+  def variables_loop_if<<constant:<todo sym>>>(cond)
     begin
       while true
         if begin
-            false
+            cond
           end
           b = 1
         else

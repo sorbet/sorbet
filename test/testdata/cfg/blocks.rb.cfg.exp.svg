@@ -73,7 +73,7 @@
 <ellipse fill="none" stroke="#000000" cx="926" cy="-169.2548" rx="364.5395" ry="45.011"/>
 <text text-anchor="middle" x="926" y="-186.0548" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](statTemp$5, statTemp$6, statTemp$7, statTemp$8)</text>
 <text text-anchor="middle" x="926" y="-172.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$5.foo(statTemp$6, statTemp$7, statTemp$8) : untyped</text>
-<text text-anchor="middle" x="926" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$10 = return returnMethodTemp$3 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="926" y="-158.0548" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return returnMethodTemp$3 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="926" y="-144.0548" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:BlockTest&gt;#block_pass_2&#45;&gt;bb::&lt;constant:BlockTest&gt;#block_pass_3 -->
@@ -96,4 +96,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 02a3d5bf8a7ba9112d3dfdbf454c1b3527bb57f231dc2add4c932604f1447443 -->
+<!-- ruby-types:sha256: f9e31a4158fba2cc46f8efe2a01d5fd21aada63b533df78d2a8c850480061e53 -->

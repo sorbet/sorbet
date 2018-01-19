@@ -6,7 +6,9 @@ class <constant:Examples> < ::<constant:Object> () -> <class:Examples>
   method take_arguments (i)
     argument i<>
   method variables ()
-  method variables_and_loop ()
-  method variables_loop_if ()
+  method variables_and_loop (cond)
+    argument cond<>
+  method variables_loop_if (cond)
+    argument cond<>
 class <singleton class:<constant:Examples>> < ::<singleton class:<constant:Object>> ()
 

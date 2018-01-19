@@ -25,7 +25,7 @@ outerLoops: 1
 
     "bb::<constant:A>#initialize_3" [label = "block[id=3](statTemp$5)
 returnMethodTemp$3 = statTemp$5.map() : untyped
-returnMethodTemp$13 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:A>#initialize_3" -> "bb::<constant:A>#initialize_1" [style="bold"];

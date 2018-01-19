@@ -11,7 +11,7 @@ selfMethodTemp$3 = self : Main
 statTemp$6 = 1 : Integer(1)
 a = <blk>.call(statTemp$6) : untyped
 returnMethodTemp$2 = <blk>.call(a) : untyped
-returnMethodTemp$9 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Main>#yielder_0" -> "bb::<constant:Main>#yielder_1" [style="bold"];
@@ -33,7 +33,7 @@ blk = load_arg(selfMethodTemp$3#blockpass, 0) : untyped
 statTemp$6 = 1 : Integer(1)
 a = blk.call(statTemp$6) : untyped
 returnMethodTemp$2 = blk.call(a) : untyped
-returnMethodTemp$9 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Main>#blockpass_0" -> "bb::<constant:Main>#blockpass_1" [style="bold"];
@@ -55,7 +55,7 @@ blk = load_arg(selfMethodTemp$3#mixed, 0) : untyped
 statTemp$6 = 1 : Integer(1)
 a = blk.call(statTemp$6) : untyped
 returnMethodTemp$2 = blk.call(a) : untyped
-returnMethodTemp$9 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Main>#mixed_0" -> "bb::<constant:Main>#mixed_1" [style="bold"];
@@ -89,7 +89,7 @@ outerLoops: 1
 
     "bb::<constant:Main>#blockyield_3" [label = "block[id=3](statTemp$5)
 returnMethodTemp$3 = statTemp$5.yielder() : untyped
-returnMethodTemp$9 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Main>#blockyield_3" -> "bb::<constant:Main>#blockyield_1" [style="bold"];
@@ -218,7 +218,7 @@ outerLoops: 1
 
     "bb::<constant:Main>#main_15" [label = "block[id=15](statTemp$43)
 returnMethodTemp$7 = statTemp$43.blockyield() : untyped
-returnMethodTemp$51 = return returnMethodTemp$7 : <bottom>
+finalReturn = return returnMethodTemp$7 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Main>#main_15" -> "bb::<constant:Main>#main_1" [style="bold"];

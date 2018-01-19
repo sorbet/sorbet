@@ -7,7 +7,7 @@ subgraph "cluster_::<constant:HasMeth>#meth" {
 
     "bb::<constant:HasMeth>#meth_0" [label = "block[id=0]()
 returnMethodTemp$2 = meth : String(\"meth\")
-returnMethodTemp$4 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasMeth>#meth_0" -> "bb::<constant:HasMeth>#meth_1" [style="bold"];
@@ -26,7 +26,7 @@ subgraph "cluster_::<constant:HasToProc>#to_proc" {
     "bb::<constant:HasToProc>#to_proc_0" [label = "block[id=0]()
 statTemp$4 = self : HasToProc
 returnMethodTemp$2 = statTemp$4.returns_lambda() : untyped
-returnMethodTemp$5 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasToProc>#to_proc_0" -> "bb::<constant:HasToProc>#to_proc_1" [style="bold"];
@@ -48,7 +48,7 @@ selfMethodTemp$3 = self : <class:CallsWithObject>
 blk = load_arg(selfMethodTemp$3#calls_with_object, 0) : untyped
 statTemp$5 = <constant:HasMeth>$7.new() : HasMeth
 returnMethodTemp$2 = blk.call(statTemp$5) : untyped
-returnMethodTemp$8 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_0" -> "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_1" [style="bold"];
@@ -85,7 +85,7 @@ outerLoops: 1
 
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_3" [label = "block[id=3](statTemp$5)
 returnMethodTemp$3 = statTemp$5.super() : untyped
-returnMethodTemp$14 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_3" -> "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_1" [style="bold"];
@@ -125,7 +125,7 @@ outerLoops: 1
 
     "bb::<constant:Object>#returns_lambda_3" [label = "block[id=3](statTemp$5)
 returnMethodTemp$3 = statTemp$5.lambda() : untyped
-returnMethodTemp$7 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#returns_lambda_3" -> "bb::<constant:Object>#returns_lambda_1" [style="bold"];
@@ -142,7 +142,7 @@ selfMethodTemp$3 = self : Object
 arg = load_arg(selfMethodTemp$3#calls_arg_with_object, 0) : untyped
 blk = load_arg(selfMethodTemp$3#calls_arg_with_object, 1) : untyped
 returnMethodTemp$2 = blk.call(arg) : untyped
-returnMethodTemp$6 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#calls_arg_with_object_0" -> "bb::<constant:Object>#calls_arg_with_object_1" [style="bold"];
@@ -181,7 +181,7 @@ outerLoops: 1
 
     "bb::<constant:Object>#calls_with_object_3" [label = "block[id=3](statTemp$5, statTemp$6)
 returnMethodTemp$3 = statTemp$5.calls_arg_with_object(statTemp$6) : untyped
-returnMethodTemp$17 = return returnMethodTemp$3 : <bottom>
+finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#calls_with_object_3" -> "bb::<constant:Object>#calls_with_object_1" [style="bold"];
@@ -504,7 +504,7 @@ outerLoops: 1
 
     "bb::<constant:Object>#foo_42" [label = "block[id=42](statTemp$106, statTemp$107)
 returnMethodTemp$15 = statTemp$106.calls_arg_with_object(statTemp$107) : untyped
-returnMethodTemp$111 = return returnMethodTemp$15 : <bottom>
+finalReturn = return returnMethodTemp$15 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_42" -> "bb::<constant:Object>#foo_1" [style="bold"];

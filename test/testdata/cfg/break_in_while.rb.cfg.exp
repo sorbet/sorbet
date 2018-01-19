@@ -8,7 +8,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:nil>$10)
 <constant:nil>$10 = alias <constant:nil> : NilClass
 whileTemp$4 = true : untyped
-returnMethodTemp$11 = return <constant:nil>$10 : <bottom>
+finalReturn = return <constant:nil>$10 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_1" [style="bold"];

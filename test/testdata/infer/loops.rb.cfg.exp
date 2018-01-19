@@ -29,7 +29,7 @@ a = 1 : Integer(1)
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_3" -> "bb::<constant:HasLoops>#variable_only_inside_loop_2" [style="bold"];
     "bb::<constant:HasLoops>#variable_only_inside_loop_4" [label = "block[id=4](<constant:nil>$6)
-returnMethodTemp$7 = return <constant:nil>$6 : <bottom>
+finalReturn = return <constant:nil>$6
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_4" -> "bb::<constant:HasLoops>#variable_only_inside_loop_1" [style="bold"];
@@ -66,7 +66,7 @@ a = 1 : untyped
 
     "bb::<constant:HasLoops>#incorrect_assignment_3" -> "bb::<constant:HasLoops>#incorrect_assignment_2" [style="bold"];
     "bb::<constant:HasLoops>#incorrect_assignment_4" [label = "block[id=4](<constant:nil>$7)
-returnMethodTemp$8 = return <constant:nil>$7 : <bottom>
+finalReturn = return <constant:nil>$7 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_4" -> "bb::<constant:HasLoops>#incorrect_assignment_1" [style="bold"];
@@ -103,7 +103,7 @@ a = a : String(\"a\")
 
     "bb::<constant:HasLoops>#correct_assignment_3" -> "bb::<constant:HasLoops>#correct_assignment_2" [style="bold"];
     "bb::<constant:HasLoops>#correct_assignment_4" [label = "block[id=4](<constant:nil>$7)
-returnMethodTemp$8 = return <constant:nil>$7 : <bottom>
+finalReturn = return <constant:nil>$7 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_4" -> "bb::<constant:HasLoops>#correct_assignment_1" [style="bold"];

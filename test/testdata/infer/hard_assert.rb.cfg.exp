@@ -1,0 +1,98 @@
+digraph "hard_assert.rb"{
+subgraph "cluster_::<constant:Main>#basic" {
+    label = "::<constant:Main>#basic";
+    color = blue;
+    "bb::<constant:Main>#basic_0" [shape = invhouse];
+    "bb::<constant:Main>#basic_1" [shape = parallelogram];
+
+    "bb::<constant:Main>#basic_0" [label = "block[id=0]()
+<constant:String>$9 = alias <constant:String> : <class:String>
+<constant:nil>$12 = alias <constant:nil> : NilClass
+selfMethodTemp$3 = self : Main
+a = load_arg(selfMethodTemp$3#basic, 0) : Integer | String
+statTemp$5 = self : Main
+statTemp$6 = a.is_a?(<constant:String>$9) : TrueClass | FalseClass
+statTemp$4 = statTemp$5.hard_assert(statTemp$6) : NilClass
+castTemp$11 = a : String
+statTemp$10 = cast(castTemp$11, String); : String
+finalReturn = return <constant:nil>$12 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Main>#basic_0" -> "bb::<constant:Main>#basic_1" [style="bold"];
+    "bb::<constant:Main>#basic_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Main>#basic_1" -> "bb::<constant:Main>#basic_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:Main>#not" {
+    label = "::<constant:Main>#not";
+    color = blue;
+    "bb::<constant:Main>#not_0" [shape = invhouse];
+    "bb::<constant:Main>#not_1" [shape = parallelogram];
+
+    "bb::<constant:Main>#not_0" [label = "block[id=0]()
+<constant:nil>$11 = alias <constant:nil> : NilClass
+selfMethodTemp$3 = self : Main
+a = load_arg(selfMethodTemp$3#not, 0) : String | NilClass
+statTemp$5 = self : Main
+statTemp$7 = a.nil?() : TrueClass | FalseClass
+statTemp$6 = statTemp$7.!() : TrueClass | FalseClass
+statTemp$4 = statTemp$5.hard_assert(statTemp$6) : NilClass
+castTemp$10 = a : String
+statTemp$9 = cast(castTemp$10, String); : String
+finalReturn = return <constant:nil>$11 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Main>#not_0" -> "bb::<constant:Main>#not_1" [style="bold"];
+    "bb::<constant:Main>#not_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Main>#not_1" -> "bb::<constant:Main>#not_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:Main>#with_and" {
+    label = "::<constant:Main>#with_and";
+    color = blue;
+    "bb::<constant:Main>#with_and_0" [shape = invhouse];
+    "bb::<constant:Main>#with_and_1" [shape = parallelogram];
+
+    "bb::<constant:Main>#with_and_0" [label = "block[id=0](a, &&$2, statTemp$5, <constant:nil>$14)
+<constant:nil>$14 = alias <constant:nil> : NilClass
+selfMethodTemp$3 = self : Main
+a = load_arg(selfMethodTemp$3#with_and, 0) : String | NilClass
+statTemp$5 = self : Main
+&&$2 = a.nil?() : TrueClass | FalseClass
+&&$2"];
+
+    "bb::<constant:Main>#with_and_0" -> "bb::<constant:Main>#with_and_2" [style="bold"];
+    "bb::<constant:Main>#with_and_0" -> "bb::<constant:Main>#with_and_3" [style="tapered"];
+
+    "bb::<constant:Main>#with_and_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Main>#with_and_1" -> "bb::<constant:Main>#with_and_1" [style="bold"];
+    "bb::<constant:Main>#with_and_2" [label = "block[id=2](a, statTemp$5, statTemp$6, <constant:nil>$14)
+statTemp$10 = 1 : Integer(1)
+statTemp$11 = 1 : Integer(1)
+statTemp$6 = statTemp$10.==(statTemp$11) : TrueClass | FalseClass
+<unconditional>"];
+
+    "bb::<constant:Main>#with_and_2" -> "bb::<constant:Main>#with_and_4" [style="bold"];
+    "bb::<constant:Main>#with_and_3" [label = "block[id=3](a, &&$2, statTemp$5, statTemp$6, <constant:nil>$14)
+statTemp$6 = &&$2 : FalseClass
+<unconditional>"];
+
+    "bb::<constant:Main>#with_and_3" -> "bb::<constant:Main>#with_and_4" [style="bold"];
+    "bb::<constant:Main>#with_and_4" [label = "block[id=4](a, statTemp$5, statTemp$6, <constant:nil>$14)
+statTemp$4 = statTemp$5.hard_assert(statTemp$6) : NilClass
+castTemp$13 = a : NilClass
+statTemp$12 = cast(castTemp$13, NilClass); : NilClass
+finalReturn = return <constant:nil>$14 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Main>#with_and_4" -> "bb::<constant:Main>#with_and_1" [style="bold"];
+}
+
+}
+

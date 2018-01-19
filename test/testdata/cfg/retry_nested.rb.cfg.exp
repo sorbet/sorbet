@@ -97,7 +97,7 @@ statTemp$33 = statTemp$34.puts(statTemp$35) : NilClass
 
     "bb::<constant:Object>#main_17" -> "bb::<constant:Object>#main_5" [style="bold"];
     "bb::<constant:Object>#main_21" [label = "block[id=21](returnMethodTemp$2)
-returnMethodTemp$44 = return returnMethodTemp$2 : <bottom>
+finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_21" -> "bb::<constant:Object>#main_1" [style="bold"];
