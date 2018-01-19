@@ -122,6 +122,7 @@ GlobalState::GlobalState(spdlog::logger &logger)
 void GlobalState::initEmpty() {
     names.emplace_back(); // first name is used in hashes to indicate empty cell
     names[0].kind = NameKind::UTF8;
+    names[0].raw.utf8 = absl::string_view();
     Names::registerNames(*this);
 
     SymbolRef no_symbol_id = synthesizeClass(no_symbol_str, 0);
