@@ -185,14 +185,18 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
                 auto lgs = cgs->deepCopy();
                 thread_result result;
                 core::FileRef file;
-                core::ErrorRegion errs(lgs->errors, silenceErrors);
 
-                while (fileq.pop(&file)) {
-                    file = core::FileRef(*lgs, file.id());
-                    try {
-                        result.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
-                    } catch (...) {
-                        console_err->error("Exception parsing file: {} (backtrace is above)", file.file(*lgs).path());
+                {
+                    core::ErrorRegion errs(lgs->errors, silenceErrors);
+
+                    while (fileq.pop(&file)) {
+                        file = core::FileRef(*lgs, file.id());
+                        try {
+                            result.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
+                        } catch (...) {
+                            console_err->error("Exception parsing file: {} (backtrace is above)",
+                                               file.file(*lgs).path());
+                        }
                     }
                 }
 
