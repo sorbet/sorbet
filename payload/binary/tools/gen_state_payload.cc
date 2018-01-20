@@ -28,9 +28,10 @@ int main(int argc, char **argv) {
     classfile << "#include \"common/common.h\"\n"
               << "\n"
               << "const ruby_typer::u4 nameTablePayload[] = {\n";
-    int i = 0;
+    int i = -1;
     bool first = true;
     for (auto c : data) {
+        ++i;
         if (!first) {
             classfile << ", ";
         }
@@ -39,7 +40,6 @@ int main(int argc, char **argv) {
             classfile << "\n    ";
         }
         classfile << c;
-        ++i;
     }
     classfile << "};\n";
     classfile

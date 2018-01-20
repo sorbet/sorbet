@@ -260,8 +260,9 @@ public:
     /* variable was reasigned. Forget everything about previous value */
     void clearKnowledge(core::Context ctx, core::LocalVariable reassigned,
                         unique_ptr<KnowledgeFilter> &knowledgeFilter) {
-        int i = 0;
+        int i = -1;
         for (auto &k : knowledge) {
+            i++;
             if (knowledgeFilter->isNeeded(this->vars[i])) {
                 k.truthy.yesTypeTests.erase(
                     remove_if(k.truthy.yesTypeTests.begin(), k.truthy.yesTypeTests.end(),
@@ -281,7 +282,6 @@ public:
                     k.falsy.noTypeTests.end());
                 k.sanityCheck();
             }
-            i++;
         }
     }
 
@@ -483,9 +483,10 @@ public:
 
     void mergeWith(core::Context ctx, Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock &forBlock,
                    unique_ptr<KnowledgeFilter> &knowledgeFilter) {
-        int i = 0;
+        int i = -1;
         this->isDead |= other.isDead;
         for (core::LocalVariable var : vars) {
+            i++;
             auto otherTO = other.getTypeAndOrigin(ctx, var);
             auto &thisTO = types[i];
             if (thisTO.type.get() != nullptr) {
@@ -501,7 +502,6 @@ public:
             }
 
             if (((forBlock.flags & cfg::CFG::LOOP_HEADER) != 0) && forBlock.outerLoops <= inWhat.maxLoopWrite[var]) {
-                i++;
                 continue;
             }
             bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type);
@@ -534,22 +534,20 @@ public:
                     }
                 }
             }
-
-            i++;
         }
     }
 
     void populateFrom(core::Context ctx, Environment &other) {
-        int i = 0;
+        int i = -1;
         this->isDead = other.isDead;
         for (core::LocalVariable var : vars) {
+            i++;
             auto otherTO = other.getTypeAndOrigin(ctx, var);
             types[i].type = otherTO.type;
             types[i].origins = otherTO.origins;
             auto &thisKnowledge = getKnowledge(var);
             auto &otherKnowledge = other.getKnowledge(var, false);
             thisKnowledge = otherKnowledge;
-            i++;
         }
     }
 
@@ -788,11 +786,11 @@ KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc
         copy.isDead = true;
         return copy;
     }
-    int i = 0;
+    int i = -1;
     bool enteringLoop = (bb.flags & cfg::CFG::LOOP_HEADER) != 0;
     for (auto local : env.vars) {
+        i++;
         if (enteringLoop && bb.outerLoops <= cfg.maxLoopWrite[local]) {
-            i++;
             continue;
         }
         auto fnd = find_if(copy.yesTypeTests.begin(), copy.yesTypeTests.end(),
@@ -833,7 +831,6 @@ KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc
                 break;
             }
         }
-        i++;
     }
     return copy;
 }
@@ -889,15 +886,15 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
                 }
             }
         }
-        int i = 0;
+        int i = -1;
         for (auto &uninitialized : current.types) {
+            i++;
             if (uninitialized.type.get() == nullptr) {
                 uninitialized.type = core::Types::nil();
                 uninitialized.origins.push_back(ctx.owner.info(ctx).definitionLoc);
             } else {
                 uninitialized.type->sanityCheck(ctx);
             }
-            i++;
         }
 
         visited[bb->id] = true;

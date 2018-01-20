@@ -274,10 +274,11 @@ void printTabs(stringstream &to, int count) {
 string TupleType::toString(GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "TupleType {" << endl;
-    int i = 0;
+    int i = -1;
     for (auto &el : this->elems) {
+        i++;
         printTabs(buf, tabs + 1);
-        buf << i++ << " = " << el->toString(gs, tabs + 3) << endl;
+        buf << i << " = " << el->toString(gs, tabs + 3) << endl;
     }
     printTabs(buf, tabs);
     buf << "}";

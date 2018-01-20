@@ -183,8 +183,9 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
     if (maxDepth == 0) {
         gs.logger.critical("findMemberTransitive hit a loop while resolving {} in {}. Parents are: ", name.toString(gs),
                            this->fullName(gs));
-        int i = 0;
+        int i = -1;
         for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+            i++;
             gs.logger.critical("{}:- {}", i, it->info(gs).fullName(gs));
             int j = 0;
             for (auto it2 = it->info(gs).argumentsOrMixins.rbegin(); it2 != it->info(gs).argumentsOrMixins.rend();
@@ -192,7 +193,6 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
                 gs.logger.critical("{}:{} {}", i, j, it2->info(gs).fullName(gs));
                 j++;
             }
-            i++;
         }
 
         Error::raise("findMemberTransitive hit a loop while resolving ");

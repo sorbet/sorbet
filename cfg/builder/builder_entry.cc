@@ -24,13 +24,13 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     entry->exprs.emplace_back(selfSym, md.loc, make_unique<Self>(md.symbol.info(ctx).owner));
     auto methodName = md.symbol.info(ctx).name;
 
-    int i = 0;
+    int i = -1;
     std::unordered_map<core::SymbolRef, core::LocalVariable> aliases;
     for (core::SymbolRef argSym : md.symbol.info(ctx).arguments()) {
+        i++;
         core::LocalVariable arg(argSym.info(ctx).name);
         entry->exprs.emplace_back(arg, argSym.info(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
         aliases[argSym] = arg;
-        i++;
     }
     auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, nullptr, aliases), md.rhs.get(), entry);
     core::LocalVariable retSym1(core::Names::finalReturn());

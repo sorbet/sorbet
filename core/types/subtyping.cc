@@ -68,10 +68,10 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                     if (TupleType *a2 = cast_type<TupleType>(p2)) {
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                             vector<shared_ptr<ruby_typer::core::Type>> elemLubs;
-                            int i = 0;
+                            int i = -1;
                             for (auto &el2 : a2->elems) {
-                                elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
                                 ++i;
+                                elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
                             }
                             result = make_shared<TupleType>(elemLubs);
                         } else {
@@ -85,10 +85,11 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                     if (ShapeType *h2 = cast_type<ShapeType>(p2)) {
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
-                            int i = 0;
+                            int i = -1;
                             vector<shared_ptr<ruby_typer::core::LiteralType>> keys;
                             vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
                             for (auto &el2 : h2->keys) {
+                                ++i;
                                 ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
                                 ENFORCE(u2 != nullptr);
                                 auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
@@ -102,7 +103,6 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                                     result = core::Types::hashClass();
                                     return;
                                 }
-                                ++i;
                             }
                             result = make_shared<ShapeType>(keys, valueLubs);
                         } else {
@@ -458,15 +458,15 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                     ENFORCE(a2 != nullptr);
                     if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                         vector<shared_ptr<ruby_typer::core::Type>> elemGlbs;
-                        int i = 0;
+                        int i = -1;
                         for (auto &el2 : a2->elems) {
+                            ++i;
                             auto glbe = glb(ctx, a1->elems[i], el2);
                             if (glbe->isBottom()) {
                                 result = Types::bottom();
                                 return;
                             }
                             elemGlbs.emplace_back(glbe);
-                            ++i;
                         }
                         result = make_shared<TupleType>(elemGlbs);
                     } else {
@@ -479,10 +479,11 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                     ENFORCE(h2 != nullptr);
                     if (h2->keys.size() == h1->keys.size()) {
                         // have enough keys.
-                        int i = 0;
+                        int i = -1;
                         vector<shared_ptr<ruby_typer::core::LiteralType>> keys;
                         vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
                         for (auto &el2 : h2->keys) {
+                            ++i;
                             ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
                             ENFORCE(u2 != nullptr);
                             auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
@@ -501,7 +502,6 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                                 result = Types::bottom();
                                 return;
                             }
-                            ++i;
                         }
                         result = make_shared<ShapeType>(keys, valueLubs);
                     } else {
@@ -592,13 +592,13 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                                      TupleType *a2 = cast_type<TupleType>(p2);
                                      result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
                                      if (result) {
-                                         int i = 0;
+                                         int i = -1;
                                          for (auto &el2 : a2->elems) {
+                                             ++i;
                                              result = Types::isSubType(ctx, a1->elems[i], el2);
                                              if (!result) {
                                                  break;
                                              }
-                                             ++i;
                                          }
                                      }
                                  },
@@ -609,8 +609,9 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                                          return;
                                      }
                                      // have enough keys.
-                                     int i = 0;
+                                     int i = -1;
                                      for (auto &el2 : h2->keys) {
+                                         ++i;
                                          ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
                                          ENFORCE(u2 != nullptr);
                                          auto fnd =
@@ -624,7 +625,6 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                                          if (!result) {
                                              return;
                                          }
-                                         ++i;
                                      }
                                  },
                                  [&](LiteralType *l1) {

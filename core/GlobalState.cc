@@ -697,18 +697,18 @@ void GlobalState::sanityCheck() const {
     ENFORCE((names_by_hash.size() & (names_by_hash.size() - 1)) == 0, "name hash table size is not a power of two");
     ENFORCE(names.capacity() * 2 == names_by_hash.capacity(), "name table and hash name table sizes out of sync");
     ENFORCE(names_by_hash.size() == names_by_hash.capacity(), "hash name table not at full capacity");
-    int i = 0;
+    int i = -1;
     for (auto &nm : names) {
+        i++;
         if (i != 0)
             nm.sanityCheck(*this);
-        i++;
     }
 
-    i = 0;
+    i = -1;
     for (auto &sym : symbols) {
+        i++;
         if (i != 0)
             sym.sanityCheck(*this);
-        i++;
     }
     for (auto &ent : names_by_hash) {
         if (ent.second == 0) {

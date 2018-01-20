@@ -94,8 +94,10 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
     bool seenEmpty = false;
     {
         UnfreezeNameTable unfreezeNames(to);
-        int i = 0;
+        int i = -1;
         for (const Name &nm : from.names) {
+            i++;
+            ENFORCE(nameSubstitution.size() == i, "Name substitution has wrong size");
             if (seenEmpty) {
                 switch (nm.kind) {
                     case NameKind::UNIQUE:
@@ -115,8 +117,6 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
                 nameSubstitution.push_back(NameRef(to, 0));
                 seenEmpty = true;
             }
-            i++;
-            ENFORCE(nameSubstitution.size() == i, "Name substitution has wrong size");
         }
     }
 

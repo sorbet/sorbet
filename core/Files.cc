@@ -8,12 +8,12 @@ namespace core {
 
 vector<int> findLineBreaks(const std::string &s) {
     vector<int> res;
-    int i = 0;
+    int i = -1;
     for (auto c : s) {
+        i++;
         if (c == '\n') {
             res.push_back(i);
         }
-        i++;
     }
     return res;
 }

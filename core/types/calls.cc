@@ -128,13 +128,13 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
 
     allCandidates.push_back(primary);
     { // create candidates and sort them by number of arguments(stable by symbol id)
-        int i = 1;
+        int i = 0;
         core::SymbolRef current = primary;
         while (current.info(ctx).isOverloaded()) {
+            i++;
             core::NameRef overloadName =
                 ctx.state.freshNameUnique(core::UniqueNameKind::Overload, primary.info(ctx).name, i);
             core::SymbolRef overload = primary.info(ctx).owner.info(ctx).findMember(ctx, overloadName);
-            i++;
             if (!overload.exists()) {
                 Error::raise("Corruption of overloads?");
             } else {
@@ -157,8 +157,9 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
 
     {
         // Lets see if we can filter them out using arguments.
-        int i = 0;
+        int i = -1;
         for (auto &arg : args) {
+            i++;
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 core::SymbolRef candidate = *it;
                 if (i >= candidate.info(ctx).argumentsOrMixins.size()) {
@@ -173,7 +174,6 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
                 }
                 ++it;
             }
-            i++;
         }
     }
     if (leftCandidates.empty()) {

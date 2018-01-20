@@ -846,8 +846,9 @@ string Hash::showRaw(core::GlobalState &gs, int tabs) {
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
     buf << "pairs = [" << endl;
-    int i = 0;
+    int i = -1;
     for (auto &key : keys) {
+        i++;
         auto &value = values[i];
 
         printTabs(buf, tabs + 2);
@@ -858,8 +859,6 @@ string Hash::showRaw(core::GlobalState &gs, int tabs) {
         buf << "value = " << value->showRaw(gs, tabs + 3) << endl;
         printTabs(buf, tabs + 2);
         buf << "]" << endl;
-
-        i++;
     }
     printTabs(buf, tabs + 1);
     buf << "]" << endl;
@@ -894,8 +893,9 @@ string Hash::toString(core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "{";
     bool first = true;
-    int i = 0;
+    int i = -1;
     for (auto &key : this->keys) {
+        i++;
         auto &value = this->values[i];
         if (!first) {
             buf << ", ";
@@ -904,7 +904,6 @@ string Hash::toString(core::GlobalState &gs, int tabs) {
         buf << key->toString(gs, tabs + 1);
         buf << " => ";
         buf << value->toString(gs, tabs + 1);
-        i++;
     }
     buf << "}";
     return buf.str();
