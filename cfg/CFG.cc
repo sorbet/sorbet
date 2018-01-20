@@ -179,8 +179,8 @@ void BasicBlock::recordAnnotations(core::Context ctx) {
     }
 
     for (Binding &exp : this->exprs) {
-        if (dynamic_cast<DebugEnvironment *>(exp.value.get())) {
-            ctx.state.addAnnotation(exp.loc, exp.value->toString(ctx));
+        if (auto debugEnv = dynamic_cast<DebugEnvironment *>(exp.value.get())) {
+            ctx.state.addAnnotation(exp.loc, exp.value->toString(ctx), debugEnv->pos);
         }
     }
 }

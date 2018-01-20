@@ -73,8 +73,15 @@ public:
 
     std::string toString(bool showHidden = false);
     std::string showAnnotatedSource(FileRef file);
-    void addAnnotation(Loc loc, std::string str) {
-        annotations.emplace_back(loc, str);
+    enum AnnotationPos { BEFORE, AFTER };
+    struct Annotation {
+        Loc loc;
+        std::string str;
+        AnnotationPos pos;
+        Annotation(Loc loc, std::string str, AnnotationPos pos) : loc(loc), str(str), pos(pos){};
+    };
+    void addAnnotation(Loc loc, std::string str, AnnotationPos pos = AnnotationPos::BEFORE) {
+        annotations.emplace_back(loc, str, pos);
     }
 
     spdlog::logger &logger;
@@ -233,7 +240,7 @@ private:
     std::vector<Symbol> symbols;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;
-    std::vector<std::pair<Loc, std::string>> annotations;
+    std::vector<Annotation> annotations;
 
     bool freezeSymbolTable();
     bool freezeNameTable();

@@ -191,8 +191,9 @@ public:
 class DebugEnvironment final : public Instruction {
 public:
     std::string str;
+    core::GlobalState::AnnotationPos pos;
 
-    DebugEnvironment() {}
+    DebugEnvironment(core::GlobalState::AnnotationPos pos) : pos(pos) {}
     virtual std::string toString(core::Context ctx);
 };
 

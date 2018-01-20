@@ -35,7 +35,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, nullptr, aliases), md.rhs.get(), entry);
     core::LocalVariable retSym1(core::Names::finalReturn());
 
-    auto rvLoc = cont->exprs.empty() ? md.loc : cont->exprs.back().loc;
+    auto rvLoc = cont->exprs.empty() ? md.rhs->loc : cont->exprs.back().loc;
     cont->exprs.emplace_back(retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
     jumpToDead(cont, *res.get(), rvLoc);
 
@@ -116,8 +116,15 @@ void CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> &cfg) {
         if (bb->exprs.empty()) {
             continue;
         }
+        core::LocalVariable bind =
+            ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::debugEnvironmentTemp(), cfg->symbol);
         auto &firstExpr = bb->exprs[0];
-        bb->exprs.emplace(bb->exprs.begin(), firstExpr.bind, firstExpr.loc, make_unique<cfg::DebugEnvironment>());
+        bb->exprs.emplace(bb->exprs.begin(), bind, firstExpr.loc,
+                          make_unique<cfg::DebugEnvironment>(core::GlobalState::AnnotationPos::BEFORE));
+
+        auto &lastExpr = bb->exprs[bb->exprs.size() - 1];
+        bb->exprs.emplace_back(bind, lastExpr.loc,
+                               make_unique<cfg::DebugEnvironment>(core::GlobalState::AnnotationPos::AFTER));
     }
 }
 

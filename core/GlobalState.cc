@@ -6,6 +6,7 @@
 #include "absl/strings/str_split.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
+
 using namespace std;
 
 namespace ruby_typer {
@@ -779,39 +780,47 @@ std::unique_ptr<GlobalState> GlobalState::deepCopy() const {
 }
 
 string GlobalState::showAnnotatedSource(FileRef file) {
-    vector<pair<Loc, std::string>> annotations;
-    for (auto annotation : this->annotations) {
-        if (annotation.first.file == file) {
-            annotations.emplace_back(annotation);
-        }
-    }
     if (annotations.empty()) {
         return "";
     }
 
     // Sort the locs backwards
-    auto compare = [](pair<core::Loc, string> left, pair<core::Loc, string> right) {
-        auto a = left.first;
-        auto b = right.first;
-        if (a.file != b.file) {
-            throw "Trying to compare across files";
+    auto compare = [](Annotation left, Annotation right) {
+        if (left.loc.file != right.loc.file) {
+            return left.loc.file.id() > right.loc.file.id();
         }
-        return a.begin_pos > b.begin_pos;
+
+        auto a = left.pos == GlobalState::AnnotationPos::BEFORE ? left.loc.begin_pos : left.loc.end_pos;
+        auto b = right.pos == GlobalState::AnnotationPos::BEFORE ? right.loc.begin_pos : right.loc.end_pos;
+
+        if (a != b) {
+            return a > b;
+        }
+        if (left.pos != right.pos) {
+            if (left.pos == GlobalState::AnnotationPos::BEFORE && right.pos == GlobalState::AnnotationPos::AFTER) {
+                return false;
+            }
+            if (left.pos == GlobalState::AnnotationPos::AFTER && right.pos == GlobalState::AnnotationPos::BEFORE) {
+                return true;
+            }
+        }
+        return false;
     };
     sort(annotations.begin(), annotations.end(), compare);
 
     auto source = file.file(*this).source();
     string outline(source.begin(), source.end());
     for (auto annotation : annotations) {
+        if (annotation.loc.file != file) {
+            continue;
+        }
         stringstream buf;
 
-        auto loc = annotation.first;
-        auto pos = loc.position(*this);
-        std::vector<std::string> lines = absl::StrSplit(annotation.second, "\n");
+        auto pos = annotation.loc.position(*this);
+        std::vector<std::string> lines = absl::StrSplit(annotation.str, "\n");
         while (!lines.empty() && lines.back().empty()) {
             lines.pop_back();
         }
-        stopInDebugger();
         if (!lines.empty()) {
             buf << endl;
             for (auto line : lines) {
@@ -830,9 +839,22 @@ string GlobalState::showAnnotatedSource(FileRef file) {
         auto out = buf.str();
         out = out.substr(0, out.size() - 1); // Remove the last newline that the buf always has
 
-        auto start_of_line = loc.begin_pos;
-        while (*(outline.begin() + start_of_line) != '\n') {
-            start_of_line--;
+        size_t start_of_line;
+        switch (annotation.pos) {
+            case GlobalState::AnnotationPos::BEFORE:
+                start_of_line = annotation.loc.begin_pos;
+                start_of_line = outline.find_last_of('\n', start_of_line);
+                if (start_of_line == std::string::npos) {
+                    start_of_line = 0;
+                }
+                break;
+            case GlobalState::AnnotationPos::AFTER:
+                start_of_line = annotation.loc.end_pos;
+                start_of_line = outline.find_first_of('\n', start_of_line);
+                if (start_of_line == std::string::npos) {
+                    start_of_line = outline.end() - outline.begin();
+                }
+                break;
         }
         outline = outline.substr(0, start_of_line) + out + outline.substr(start_of_line);
     }

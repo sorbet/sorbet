@@ -65,6 +65,7 @@ NameDef names[] = {
     {"statTemp", CFG},
     {"assignTemp", Desugar | Infer},
     {"returnMethodTemp", CFG},
+    {"debugEnvironmentTemp", CFG | Infer},
     {"blockReturnTemp", CFG},
     {"selfMethodTemp", CFG},
     {"hashTemp", CFG},

@@ -10,6 +10,10 @@ a: NilClass
 
 selfMethodTemp$3 = self : Object
 a = load_arg(selfMethodTemp$3#main, 0) : untyped
+a: untyped
+
+selfMethodTemp$3: Object
+
 a"];
 
     "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_2" [style="bold"];
@@ -26,6 +30,10 @@ returnMethodTemp$2: NilClass
 
 a = 2 : Integer(2)
 returnMethodTemp$2 = a : Integer(2)
+a: Integer(2)
+
+returnMethodTemp$2: Integer(2)
+
 <unconditional>"];
 
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="bold"];
@@ -33,6 +41,10 @@ returnMethodTemp$2 = a : Integer(2)
 returnMethodTemp$2: NilClass | Integer
 
 finalReturn = return returnMethodTemp$2 : <bottom>
+returnMethodTemp$2: NilClass | Integer
+
+finalReturn: <bottom>
+
 <unconditional>"];
 
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_1" [style="bold"];

@@ -201,12 +201,15 @@ public:
         if (isDead) {
             buf << "dead=" << isDead << endl;
         }
-        int i = 0;
+        int i = -1;
         for (auto var : vars) {
+            i++;
+            auto &name = var.name.name(ctx);
+            if (name.kind == core::NameKind::UNIQUE && name.unique.original == core::Names::debugEnvironmentTemp()) {
+                continue;
+            }
             buf << var.name.toString(ctx) << ": " << types[i].type->toString(ctx, 0) << endl;
             buf << knowledge[i].toString(ctx) << endl;
-
-            i++;
         }
         return buf.str();
     }
