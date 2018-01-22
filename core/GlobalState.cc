@@ -1,6 +1,7 @@
 #include "GlobalState.h"
 #include "Types.h"
 #include "core/Names/core.h"
+#include "core/errors/errors.h"
 #include <regex>
 
 #include "absl/strings/str_split.h"
@@ -108,8 +109,7 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, int superclass) {
 
 int globalStateIdCounter = 1;
 
-GlobalState::GlobalState(spdlog::logger &logger)
-    : logger(logger), errors(*this), globalStateId(globalStateIdCounter++) {
+GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), globalStateId(globalStateIdCounter++) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
@@ -278,7 +278,9 @@ void GlobalState::initEmpty() {
     sanityCheck();
 }
 
-GlobalState::~GlobalState() = default;
+GlobalState::~GlobalState() {
+    ENFORCE(errors.buffer.empty());
+};
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
@@ -859,6 +861,78 @@ string GlobalState::showAnnotatedSource(FileRef file) {
         outline = outline.substr(0, start_of_line) + out + outline.substr(start_of_line);
     }
     return outline;
+}
+
+int GlobalState::totalErrors() {
+    int sum = 0;
+    for (const auto &e : this->errors.histogram) {
+        sum += e.second;
+    }
+    return sum;
+}
+
+void GlobalState::_error(unique_ptr<BasicError> error) {
+    File::Type source_type = File::Typed;
+    if (error->loc.file.exists()) {
+        source_type = error->loc.file.file(*this).source_type;
+    }
+
+    switch (error->what.code) {
+        case errors::Internal::InternalError.code:
+            error->isCritical = true;
+            this->errors.hadCritical = true;
+            break;
+        case errors::Parser::ParserError.code:
+        case errors::Resolver::InvalidMethodSignature.code:
+        case errors::Resolver::InvalidTypeDeclaration.code:
+        case errors::Resolver::InvalidDeclareVariables.code:
+        case errors::Resolver::DuplicateVariableDeclaration.code:
+            // These are always shown, even for untyped source
+            break;
+
+        default:
+            if (source_type == File::Untyped) {
+                return;
+            }
+    }
+
+    auto f = find_if(this->errors.histogram.begin(), this->errors.histogram.end(),
+                     [&](auto &el) -> bool { return el.first == error->what.code; });
+    if (f != this->errors.histogram.end()) {
+        (*f).second++;
+    } else {
+        this->errors.histogram.push_back(std::make_pair((int)error->what.code, 1));
+    }
+    this->errors.buffer.emplace_back(move(error));
+}
+
+void GlobalState::flushErrors() {
+    if (this->errors.buffer.empty()) {
+        return;
+    }
+    stringstream critical;
+    stringstream nonCritical;
+    for (auto &error : this->errors.buffer) {
+        auto &out = error->isCritical ? critical : nonCritical;
+        if (out.tellp()) {
+            out << '\n';
+        }
+        out << error->toString(*this);
+    }
+
+    if (critical.tellp()) {
+        this->logger.log(spdlog::level::critical, "{}", critical.str());
+    }
+    if (nonCritical.tellp()) {
+        this->logger.log(spdlog::level::err, "{}", nonCritical.str());
+    }
+    this->errors.buffer.clear();
+}
+
+std::vector<std::unique_ptr<BasicError>> GlobalState::drainErrors() {
+    std::vector<std::unique_ptr<BasicError>> res;
+    swap(res, this->errors.buffer);
+    return res;
 }
 
 } // namespace core

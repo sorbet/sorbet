@@ -96,24 +96,24 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef method, 
     if (Types::isSubType(ctx, argTpe.type, expectedType)) {
         return;
     }
-    ctx.state.errors.error(core::Reporter::ComplexError(
+    ctx.state.error(core::ComplexError(
         callLoc, core::errors::Infer::MethodArgumentMismatch,
         "Argument " + argSym.name.toString(ctx) + " does not match expected type.",
-        {core::Reporter::ErrorSection(
+        {core::ErrorSection(
              "Expected " + expectedType->toString(ctx),
              {
-                 core::Reporter::ErrorLine::from(
-                     argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
-                     method.info(ctx).name.toString(ctx), argSym.name.toString(ctx), expectedType->toString(ctx)),
+                 core::ErrorLine::from(argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
+                                       method.info(ctx).name.toString(ctx), argSym.name.toString(ctx),
+                                       expectedType->toString(ctx)),
              }),
-         core::Reporter::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
-                                      argTpe.origins2Explanations(ctx))}));
+         core::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
+                            argTpe.origins2Explanations(ctx))}));
 }
 
 void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
-    ctx.state.errors.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                           "Missing required keyword argument {} for method {}.", arg.info(ctx).name.toString(ctx),
-                           method.toString(ctx));
+    ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
+                    "Missing required keyword argument {} for method {}.", arg.info(ctx).name.toString(ctx),
+                    method.toString(ctx));
 }
 }; // namespace
 
@@ -249,8 +249,8 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         if (fullType.get() != this) {
             maybeComponent = " component of " + fullType->toString(ctx);
         }
-        ctx.state.errors.error(callLoc, core::errors::Infer::UnknownMethod, "Method {} does not exist on {}{}",
-                               fun.name(ctx).toString(ctx), this->toString(ctx), maybeComponent);
+        ctx.state.error(callLoc, core::errors::Infer::UnknownMethod, "Method {} does not exist on {}{}",
+                        fun.name(ctx).toString(ctx), this->toString(ctx), maybeComponent);
         return Types::dynamic();
     }
 
@@ -295,14 +295,14 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     if (pit != pend) {
         if (!(pit->info(ctx).isKeyword() || pit->info(ctx).isOptional() || pit->info(ctx).isRepeated() ||
               pit->info(ctx).isBlockArgument())) {
-            ctx.state.errors.error(
-                callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                "Not enough arguments provided for method {}.\n Expected: {}, provided: {}", fun.toString(ctx),
+            ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
+                            "Not enough arguments provided for method {}.\n Expected: {}, provided: {}",
+                            fun.toString(ctx),
 
-                // TODO(nelhage): report actual counts of required arguments,
-                // and account for keyword arguments
-                info.arguments().size(),
-                args.size()); // TODO: should use position and print the source tree, not the cfg one.
+                            // TODO(nelhage): report actual counts of required arguments,
+                            // and account for keyword arguments
+                            info.arguments().size(),
+                            args.size()); // TODO: should use position and print the source tree, not the cfg one.
         }
     }
 
@@ -375,16 +375,16 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 }
                 NameRef arg(ctx.state, key->value);
 
-                ctx.state.errors.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                                       "Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),
-                                       fun.toString(ctx));
+                ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
+                                "Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),
+                                fun.toString(ctx));
             }
         } else if (hashArg.type->derivesFrom(ctx, ctx.state.defn_Hash())) {
             --aend;
-            ctx.state.errors.error(core::Reporter::ComplexError(
+            ctx.state.error(core::ComplexError(
                 callLoc, core::errors::Infer::MethodArgumentMismatch, "Passing an untyped hash to keyword arguments",
-                {core::Reporter::ErrorSection("Got " + hashArg.type->toString(ctx) + " originating from:",
-                                              hashArg.origins2Explanations(ctx))}));
+                {core::ErrorSection("Got " + hashArg.type->toString(ctx) + " originating from:",
+                                    hashArg.origins2Explanations(ctx))}));
         }
     }
     if (hasKwargs && aend == args.end()) {
@@ -399,14 +399,13 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
     }
 
     if (ait != aend) {
-        ctx.state.errors.error(
-            callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-            "Too many arguments provided for method {}.\n Expected: {}, provided: {}", fun.toString(ctx),
+        ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
+                        "Too many arguments provided for method {}.\n Expected: {}, provided: {}", fun.toString(ctx),
 
-            // TODO(nelhage): report actual counts of required arguments,
-            // and account for keyword arguments
-            info.arguments().size(),
-            aend - args.begin()); // TODO: should use position and print the source tree, not the cfg one.
+                        // TODO(nelhage): report actual counts of required arguments,
+                        // and account for keyword arguments
+                        info.arguments().size(),
+                        aend - args.begin()); // TODO: should use position and print the source tree, not the cfg one.
     }
 
     shared_ptr<Type> resultType = method.info(ctx).resultType;

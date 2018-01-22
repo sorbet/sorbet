@@ -104,21 +104,20 @@ class NameInserter {
         }
 
         if (send->args.size() != 1) {
-            ctx.state.errors.error(send->loc, core::errors::Namer::IncludeMutipleParam,
-                                   "`include` should only be passed a single constant. You passed {} parameters.",
-                                   send->args.size());
+            ctx.state.error(send->loc, core::errors::Namer::IncludeMutipleParam,
+                            "`include` should only be passed a single constant. You passed {} parameters.",
+                            send->args.size());
             return nullptr;
         }
         auto constLit = ast::cast_tree<ast::ConstantLit>(send->args[0].get());
         if (constLit == nullptr) {
-            ctx.state.errors.error(send->loc, core::errors::Namer::IncludeNotConstant,
-                                   "`include` must be passed a constant literal. You passed {}.",
-                                   send->args[0]->toString(ctx));
+            ctx.state.error(send->loc, core::errors::Namer::IncludeNotConstant,
+                            "`include` must be passed a constant literal. You passed {}.",
+                            send->args[0]->toString(ctx));
             return nullptr;
         }
         if (send->block != nullptr) {
-            ctx.state.errors.error(send->loc, core::errors::Namer::IncludePassedBlock,
-                                   "`include` can not be passed a block.");
+            ctx.state.error(send->loc, core::errors::Namer::IncludePassedBlock, "`include` can not be passed a block.");
             return nullptr;
         }
         // TODO check that send->block is empty
@@ -213,7 +212,7 @@ public:
                     original->args.emplace_back(make_unique<ast::Ident>(original->loc, arg));
                 }
             } else {
-                ctx.state.errors.error(original->loc, core::errors::Namer::SelfOutsideClass, "super outside of method");
+                ctx.state.error(original->loc, core::errors::Namer::SelfOutsideClass, "super outside of method");
             }
         }
         ast::MethodDef *mdef;
@@ -247,16 +246,15 @@ public:
                     for (auto &arg : original->args) {
                         auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
                         if (sym == nullptr) {
-                            ctx.state.errors.error(arg->loc, core::errors::Namer::DynamicDSLInvocation,
-                                                   "Unsupported argument to {}: arguments must be symbol literals",
-                                                   original->fun.toString(ctx));
+                            ctx.state.error(arg->loc, core::errors::Namer::DynamicDSLInvocation,
+                                            "Unsupported argument to {}: arguments must be symbol literals",
+                                            original->fun.toString(ctx));
                             continue;
                         }
                         core::SymbolRef meth = methodOwner(ctx).info(ctx).findMember(ctx, sym->name);
                         if (!meth.exists()) {
-                            ctx.state.errors.error(arg->loc, core::errors::Namer::MethodNotFound,
-                                                   "{}: no such method: {}", original->fun.toString(ctx),
-                                                   sym->name.toString(ctx));
+                            ctx.state.error(arg->loc, core::errors::Namer::MethodNotFound, "{}: no such method: {}",
+                                            original->fun.toString(ctx), sym->name.toString(ctx));
                             continue;
                         }
                         aliasModuleFunction(ctx, meth);
@@ -268,17 +266,16 @@ public:
                     for (auto &arg : original->args) {
                         auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
                         if (sym == nullptr) {
-                            ctx.state.errors.error(arg->loc, core::errors::Namer::DynamicDSLInvocation,
-                                                   "Unsupported argument to {}: arguments must be symbol literals",
-                                                   original->fun.toString(ctx));
+                            ctx.state.error(arg->loc, core::errors::Namer::DynamicDSLInvocation,
+                                            "Unsupported argument to {}: arguments must be symbol literals",
+                                            original->fun.toString(ctx));
                             continue;
                         }
                         args.push_back(sym->name);
                     }
                     if (original->args.size() != 2) {
-                        ctx.state.errors.error(original->loc, core::errors::Namer::InvalidAlias,
-                                               "Wrong number of arguments to {}; Expected 2",
-                                               original->fun.toString(ctx));
+                        ctx.state.error(original->loc, core::errors::Namer::InvalidAlias,
+                                        "Wrong number of arguments to {}; Expected 2", original->fun.toString(ctx));
                         break;
                     }
                     if (args.size() != 2) {
@@ -286,9 +283,8 @@ public:
                     }
                     core::SymbolRef meth = methodOwner(ctx).info(ctx).findMember(ctx, args[1]);
                     if (!meth.exists()) {
-                        ctx.state.errors.error(original->args[1]->loc, core::errors::Namer::MethodNotFound,
-                                               "{}: no such method: {}", original->fun.toString(ctx),
-                                               args[1].toString(ctx));
+                        ctx.state.error(original->args[1]->loc, core::errors::Namer::MethodNotFound,
+                                        "{}: no such method: {}", original->fun.toString(ctx), args[1].toString(ctx));
                         break;
                     }
                     aliasMethod(ctx, methodOwner(ctx), args[0], meth);
@@ -312,10 +308,10 @@ public:
 
         auto sym = owner.info(ctx).findMember(ctx, method->name);
         if (sym.exists()) {
-            ctx.state.errors.error(core::Reporter::ComplexError(
-                method->loc, core::errors::Namer::RedefinitionOfMethod,
-                method->name.toString(ctx) + ": Method redefined",
-                core::Reporter::ErrorLine::from(sym.info(ctx).definitionLoc, "Original definition")));
+            ctx.state.error(
+                core::ComplexError(method->loc, core::errors::Namer::RedefinitionOfMethod,
+                                   method->name.toString(ctx) + ": Method redefined",
+                                   core::ErrorLine::from(sym.info(ctx).definitionLoc, "Original definition")));
             method->symbol = sym;
             // TODO Check that the previous args match the new ones instead of
             // just wiping the original ones

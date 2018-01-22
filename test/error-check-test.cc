@@ -33,7 +33,7 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     } catch (...) {
     }
 
-    EXPECT_EQ(0, gs.errors.getAndEmptyErrors().size());
+    EXPECT_EQ(0, gs.drainErrors().size());
 }
 
 } // namespace ruby_typer

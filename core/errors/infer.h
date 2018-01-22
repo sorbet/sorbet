@@ -1,4 +1,4 @@
-#include "core/Reporter.h"
+#include "core/Errors.h"
 
 namespace ruby_typer {
 namespace core {

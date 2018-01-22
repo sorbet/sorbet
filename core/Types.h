@@ -95,8 +95,8 @@ class TypeAndOrigins final {
 public:
     std::shared_ptr<core::Type> type;
     InlinedVector<core::Loc, 2> origins;
-    std::vector<core::Reporter::ErrorLine> origins2Explanations(core::Context ctx) {
-        std::vector<core::Reporter::ErrorLine> result;
+    std::vector<ErrorLine> origins2Explanations(core::Context ctx) {
+        std::vector<ErrorLine> result;
         for (auto o : origins) {
             result.emplace_back(o, "");
         }

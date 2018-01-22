@@ -842,8 +842,8 @@ private:
         } catch (...) {
             if (!locReported) {
                 locReported = true;
-                ctx.state.errors.error(what->loc, core::errors::Internal::InternalError,
-                                       "Failed to process tree (backtrace is above)");
+                ctx.state.error(what->loc, core::errors::Internal::InternalError,
+                                "Failed to process tree (backtrace is above)");
             }
             throw;
         }

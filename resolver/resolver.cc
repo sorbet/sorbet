@@ -42,8 +42,8 @@ private:
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (!result.exists()) {
-                ctx.state.errors.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant {}",
-                                       c->toString(ctx));
+                ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant {}",
+                                c->toString(ctx));
                 result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
                 result.info(ctx).resultType = core::Types::dynamic();
             }
@@ -62,8 +62,8 @@ private:
             core::SymbolRef result = resolved.info(ctx).findMember(ctx, c->cnst);
             if (!result.exists()) {
                 if (resolved.info(ctx).resultType.get() == nullptr || !resolved.info(ctx).resultType->isDynamic()) {
-                    ctx.state.errors.error(c->loc, core::errors::Resolver::StubConstant,
-                                           "Stubbing out unknown constant {}", c->toString(ctx));
+                    ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant {}",
+                                    c->toString(ctx));
                 }
                 result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
                 result.info(ctx).resultType = core::Types::dynamic();
@@ -71,8 +71,8 @@ private:
 
             return result;
         } else {
-            ctx.state.errors.error(c->loc, core::errors::Resolver::DynamicConstant,
-                                   "Dynamic constant references are unsupported {}", c->toString(ctx));
+            ctx.state.error(c->loc, core::errors::Resolver::DynamicConstant,
+                            "Dynamic constant references are unsupported {}", c->toString(ctx));
             return core::GlobalState::defn_untyped();
         }
     }
@@ -109,15 +109,14 @@ public:
         for (auto &ancst : original->ancestors) {
             ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
             if (id == nullptr || !id->symbol.info(ctx).isClass()) {
-                ctx.state.errors.error(ancst->loc, core::errors::Resolver::DynamicSuperclass,
-                                       "Superclasses and mixins must be statically resolved.");
+                ctx.state.error(ancst->loc, core::errors::Resolver::DynamicSuperclass,
+                                "Superclasses and mixins must be statically resolved.");
                 continue;
             }
             if (id->symbol == original->symbol || id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
-                ctx.state.errors.error(id->loc, core::errors::Resolver::CircularDependency,
-                                       "Circular dependency: {} and {} are declared as parents of each other",
-                                       original->symbol.info(ctx).name.toString(ctx),
-                                       id->symbol.info(ctx).name.toString(ctx));
+                ctx.state.error(id->loc, core::errors::Resolver::CircularDependency,
+                                "Circular dependency: {} and {} are declared as parents of each other",
+                                original->symbol.info(ctx).name.toString(ctx), id->symbol.info(ctx).name.toString(ctx));
                 continue;
             }
 
@@ -129,9 +128,9 @@ public:
                     info.superClass == id->symbol) {
                     info.superClass = id->symbol;
                 } else {
-                    ctx.state.errors.error(id->loc, core::errors::Resolver::RedefinitionOfParents,
-                                           "Class parents redefined for class {}",
-                                           original->symbol.info(ctx).name.toString(ctx));
+                    ctx.state.error(id->loc, core::errors::Resolver::RedefinitionOfParents,
+                                    "Class parents redefined for class {}",
+                                    original->symbol.info(ctx).name.toString(ctx));
                 }
             } else {
                 info.argumentsOrMixins.emplace_back(id->symbol);
@@ -173,20 +172,20 @@ class ResolveSignaturesWalk {
 private:
     void processDeclareVariables(core::Context ctx, ast::Send *send) {
         if (send->block != nullptr) {
-            ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                   "Malformed `declare_variables'");
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
+                            "Malformed `declare_variables'");
             return;
         }
 
         if (send->args.size() != 1) {
-            ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                   "Wrong number of arguments to `declare_variables'");
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
+                            "Wrong number of arguments to `declare_variables'");
             return;
         }
         auto hash = ast::cast_tree<ast::Hash>(send->args.front().get());
         if (hash == nullptr) {
-            ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                   "Malformed `declare_variables': Argument must be a hash");
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
+                            "Malformed `declare_variables': Argument must be a hash");
             return;
         }
         for (int i = 0; i < hash->keys.size(); ++i) {
@@ -194,8 +193,8 @@ private:
             auto &value = hash->values[i];
             auto sym = ast::cast_tree<ast::SymbolLit>(key.get());
             if (sym == nullptr) {
-                ctx.state.errors.error(key->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                       "`declare_variables': variable names must be symbols");
+                ctx.state.error(key->loc, core::errors::Resolver::InvalidDeclareVariables,
+                                "`declare_variables': variable names must be symbols");
                 continue;
             }
 
@@ -207,8 +206,8 @@ private:
                 core::Symbol &info = ctx.owner.info(ctx);
                 var = info.findMember(ctx, sym->name);
                 if (var.exists()) {
-                    ctx.state.errors.error(key->loc, core::errors::Resolver::DuplicateVariableDeclaration,
-                                           "Redeclaring variable `{}'", str);
+                    ctx.state.error(key->loc, core::errors::Resolver::DuplicateVariableDeclaration,
+                                    "Redeclaring variable `{}'", str);
                 } else {
                     var = ctx.state.enterStaticFieldSymbol(sym->loc, ctx.owner, sym->name);
                 }
@@ -216,14 +215,14 @@ private:
                 core::Symbol &info = ctx.owner.info(ctx);
                 var = info.findMember(ctx, sym->name);
                 if (var.exists()) {
-                    ctx.state.errors.error(key->loc, core::errors::Resolver::DuplicateVariableDeclaration,
-                                           "Redeclaring variable `{}'", str);
+                    ctx.state.error(key->loc, core::errors::Resolver::DuplicateVariableDeclaration,
+                                    "Redeclaring variable `{}'", str);
                 } else {
                     var = ctx.state.enterFieldSymbol(sym->loc, ctx.owner, sym->name);
                 }
             } else {
-                ctx.state.errors.error(key->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                       "`declare_variables`: variables must start with @ or @@");
+                ctx.state.error(key->loc, core::errors::Resolver::InvalidDeclareVariables,
+                                "`declare_variables`: variables must start with @ or @@");
             }
 
             if (var.exists()) {
@@ -240,16 +239,16 @@ private:
             } else if (auto *str = ast::cast_tree<ast::StringLit>(arg.get())) {
                 name = str->value;
             } else {
-                ctx.state.errors.error(arg->loc, core::errors::Resolver::InvalidAttr,
-                                       "{} argument must be a string or symbol literal", send->fun.toString(ctx));
+                ctx.state.error(arg->loc, core::errors::Resolver::InvalidAttr,
+                                "{} argument must be a string or symbol literal", send->fun.toString(ctx));
                 continue;
             }
 
             core::NameRef varName = ctx.state.enterNameUTF8("@" + name.toString(ctx));
             core::SymbolRef sym = ctx.owner.info(ctx).findMemberTransitive(ctx, varName);
             if (!sym.exists()) {
-                ctx.state.errors.error(arg->loc, core::errors::Resolver::UndeclaredVariable,
-                                       "Accessor for undeclared variable `{}'", varName.toString(ctx));
+                ctx.state.error(arg->loc, core::errors::Resolver::UndeclaredVariable,
+                                "Accessor for undeclared variable `{}'", varName.toString(ctx));
                 sym = ctx.state.enterFieldSymbol(arg->loc, ctx.owner, varName);
             }
 
@@ -284,8 +283,8 @@ private:
                      result = make_shared<core::LiteralType>(core::GlobalState::defn_Symbol(), lit->name);
                  },
                  [&](ast::Expression *expr) {
-                     ctx.state.errors.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                            "Unsupported type literal");
+                     ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                     "Unsupported type literal");
                      result = core::Types::dynamic();
                  });
         ENFORCE(result.get() != nullptr);
@@ -317,21 +316,20 @@ private:
             }
             case core::Names::enum_()._id: {
                 if (send->args.size() != 1) {
-                    ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                           "enum only takes a single argument");
+                    ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                    "enum only takes a single argument");
                     return core::Types::dynamic();
                 }
                 auto arr = ast::cast_tree<ast::Array>(send->args[0].get());
                 if (arr == nullptr) {
                     // TODO(pay-server) unsilence this error and support enums from pay-server
                     { return core::Types::bottom(); }
-                    ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                           "enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
+                    ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                    "enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
                     return core::Types::dynamic();
                 }
                 if (arr->elems.empty()) {
-                    ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                           "enum([]) is invalid");
+                    ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "enum([]) is invalid");
                     return core::Types::dynamic();
                 }
                 auto result = getResultLiteral(ctx, arr->elems[0]);
@@ -355,88 +353,87 @@ private:
                 return core::Types::bottom();
 
             default:
-                ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                       "Unsupported type combinator {}", send->fun.toString(ctx));
+                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                "Unsupported type combinator {}", send->fun.toString(ctx));
                 return core::Types::dynamic();
         }
     }
 
     shared_ptr<core::Type> getResultType(core::Context ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
-        typecase(
-            expr.get(),
-            [&](ast::Array *arr) {
-                vector<shared_ptr<core::Type>> elems;
-                for (auto &el : arr->elems) {
-                    elems.emplace_back(getResultType(ctx, el));
-                }
-                result = make_shared<core::TupleType>(elems);
-            },
-            [&](ast::Ident *i) {
-                auto sym = dealiasSym(ctx, i->symbol);
-                if (sym.info(ctx).isClass()) {
-                    result = make_shared<core::ClassType>(sym);
-                } else {
-                    ctx.state.errors.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                           "Malformed type declaration. Not a class type {}", i->toString(ctx));
-                    result = core::Types::dynamic();
-                }
-            },
-            [&](ast::Send *s) {
-                auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
-                if (recvi == nullptr) {
-                    ctx.state.errors.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                           "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
-                    result = core::Types::dynamic();
-                    return;
-                }
-                if (recvi->symbol == core::GlobalState::defn_T()) {
-                    result = interpretTCombinator(ctx, s);
-                    return;
-                }
+        typecase(expr.get(),
+                 [&](ast::Array *arr) {
+                     vector<shared_ptr<core::Type>> elems;
+                     for (auto &el : arr->elems) {
+                         elems.emplace_back(getResultType(ctx, el));
+                     }
+                     result = make_shared<core::TupleType>(elems);
+                 },
+                 [&](ast::Ident *i) {
+                     auto sym = dealiasSym(ctx, i->symbol);
+                     if (sym.info(ctx).isClass()) {
+                         result = make_shared<core::ClassType>(sym);
+                     } else {
+                         ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                         "Malformed type declaration. Not a class type {}", i->toString(ctx));
+                         result = core::Types::dynamic();
+                     }
+                 },
+                 [&](ast::Send *s) {
+                     auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
+                     if (recvi == nullptr) {
+                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                         "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                         result = core::Types::dynamic();
+                         return;
+                     }
+                     if (recvi->symbol == core::GlobalState::defn_T()) {
+                         result = interpretTCombinator(ctx, s);
+                         return;
+                     }
 
-                if (recvi->symbol == core::GlobalState::defn_Magic() && s->fun == core::Names::splat()) {
-                    // TODO(pay-server) remove this block
-                    result = core::Types::bottom();
-                    return;
-                }
+                     if (recvi->symbol == core::GlobalState::defn_Magic() && s->fun == core::Names::splat()) {
+                         // TODO(pay-server) remove this block
+                         result = core::Types::bottom();
+                         return;
+                     }
 
-                if (s->fun != core::Names::squareBrackets()) {
-                    ctx.state.errors.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                           "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
-                }
+                     if (s->fun != core::Names::squareBrackets()) {
+                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                         "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                     }
 
-                if (recvi->symbol == core::GlobalState::defn_T_Array()) {
-                    if (s->args.size() != 1) {
-                        ctx.state.errors.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                               "Malformed T::Array[]: Expected 1 type argument");
-                    }
-                    for (auto &arg : s->args) {
-                        getResultType(ctx, arg);
-                    }
-                    result = core::Types::arrayClass();
-                } else if (recvi->symbol == core::GlobalState::defn_T_Hash()) {
-                    if (s->args.size() != 2) {
-                        ctx.state.errors.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                               "Malformed T::Hash[]: Expected 2 type arguments");
-                    }
-                    for (auto &arg : s->args) {
-                        getResultType(ctx, arg);
-                    }
-                    result = core::Types::hashClass();
-                } else if (recvi->symbol == core::GlobalState::defn_T_Proc()) {
-                    result = core::Types::procClass();
-                } else {
-                    ctx.state.errors.error(recvi->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                           "Malformed type declaration. Unknown argument type {}", expr->toString(ctx));
-                    result = core::Types::dynamic();
-                }
-            },
-            [&](ast::Expression *expr) {
-                ctx.state.errors.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                       "Unsupported type syntax");
-                result = core::Types::dynamic();
-            });
+                     if (recvi->symbol == core::GlobalState::defn_T_Array()) {
+                         if (s->args.size() != 1) {
+                             ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                             "Malformed T::Array[]: Expected 1 type argument");
+                         }
+                         for (auto &arg : s->args) {
+                             getResultType(ctx, arg);
+                         }
+                         result = core::Types::arrayClass();
+                     } else if (recvi->symbol == core::GlobalState::defn_T_Hash()) {
+                         if (s->args.size() != 2) {
+                             ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                             "Malformed T::Hash[]: Expected 2 type arguments");
+                         }
+                         for (auto &arg : s->args) {
+                             getResultType(ctx, arg);
+                         }
+                         result = core::Types::hashClass();
+                     } else if (recvi->symbol == core::GlobalState::defn_T_Proc()) {
+                         result = core::Types::procClass();
+                     } else {
+                         ctx.state.error(recvi->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                         "Malformed type declaration. Unknown argument type {}", expr->toString(ctx));
+                         result = core::Types::dynamic();
+                     }
+                 },
+                 [&](ast::Expression *expr) {
+                     ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                     "Unsupported type syntax");
+                     result = core::Types::dynamic();
+                 });
         ENFORCE(result.get() != nullptr);
         result->sanityCheck(ctx);
         return result;
@@ -466,15 +463,13 @@ private:
                     seen.args = true;
 
                     if (send->args.size() > 1) {
-                        ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                               "Wrong number of args to `sig`. Got {}, expected 0-1",
-                                               send->args.size());
+                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                        "Wrong number of args to `sig`. Got {}, expected 0-1", send->args.size());
                     }
                     auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
                     if (hash == nullptr) {
-                        ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                               "Malformed `sig`; Expected a hash of arguments => types.",
-                                               send->args.size());
+                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                        "Malformed `sig`; Expected a hash of arguments => types.", send->args.size());
                         break;
                     }
 
@@ -486,8 +481,8 @@ private:
                                 methoInfo.arguments().begin(), methoInfo.arguments().end(),
                                 [&](core::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
                             if (fnd == methoInfo.arguments().end()) {
-                                ctx.state.errors.error(key->loc, core::errors::Resolver::InvalidMethodSignature,
-                                                       "Malformed `sig`. Unknown argument name {}", key->toString(ctx));
+                                ctx.state.error(key->loc, core::errors::Resolver::InvalidMethodSignature,
+                                                "Malformed `sig`. Unknown argument name {}", key->toString(ctx));
                             } else {
                                 core::SymbolRef arg = *fnd;
                                 arg.info(ctx).resultType = getResultType(ctx, value);
@@ -512,9 +507,8 @@ private:
                 case core::Names::returns()._id:
                     seen.returns = true;
                     if (send->args.size() != 1) {
-                        ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                               "Wrong number of args to `sig.returns`. Got {}, expected 1",
-                                               send->args.size());
+                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                        "Wrong number of args to `sig.returns`. Got {}, expected 1", send->args.size());
                     }
                     if (!send->args.empty()) {
                         methoInfo.resultType = getResultType(ctx, send->args.front());
@@ -525,8 +519,8 @@ private:
                     seen.checked = true;
                     break;
                 default:
-                    ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                           "Unknown `sig` builder method {}.", send->fun.toString(ctx));
+                    ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                    "Unknown `sig` builder method {}.", send->fun.toString(ctx));
             }
             send = ast::cast_tree<ast::Send>(send->recv.get());
         }
@@ -535,17 +529,17 @@ private:
         if (!seen.returns) {
             if (seen.args ||
                 !(seen.abstract || seen.override_ || seen.implementation || seen.overridable || seen.abstract)) {
-                ctx.state.errors.error(exprLoc, core::errors::Resolver::InvalidMethodSignature,
-                                       "Malformed `sig`: No return type specified. Specify one with .returns()");
+                ctx.state.error(exprLoc, core::errors::Resolver::InvalidMethodSignature,
+                                "Malformed `sig`: No return type specified. Specify one with .returns()");
             }
         }
 
         for (auto it = methoInfo.arguments().begin(); it != methoInfo.arguments().end(); /* nothing */) {
             core::SymbolRef arg = *it;
             if (isOverloaded && arg.info(ctx).isKeyword()) {
-                ctx.state.errors.error(arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
-                                       "Malformed sig. Overloaded functions cannot have keyword arguments:  {}",
-                                       arg.info(ctx).name.toString(ctx));
+                ctx.state.error(arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
+                                "Malformed sig. Overloaded functions cannot have keyword arguments:  {}",
+                                arg.info(ctx).name.toString(ctx));
             }
             if (arg.info(ctx).resultType.get() != nullptr) {
                 ++it;
@@ -556,9 +550,9 @@ private:
                     arg.info(ctx).resultType = core::Types::dynamic();
                     if (seen.args || seen.returns) {
                         // Only error if we have any types
-                        ctx.state.errors.error(
-                            arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
-                            "Malformed sig. Type not specified for argument {}", arg.info(ctx).name.toString(ctx));
+                        ctx.state.error(arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
+                                        "Malformed sig. Type not specified for argument {}",
+                                        arg.info(ctx).name.toString(ctx));
                     }
                 }
             }
@@ -584,11 +578,10 @@ private:
                          if (isSig(ctx, send)) {
                              if (!lastSig.empty()) {
                                  if (!ctx.withOwner(klass->symbol).permitOverloadDefinitions()) {
-                                     ctx.state.errors.error(core::Reporter::ComplexError(
+                                     ctx.state.error(core::ComplexError(
                                          lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature,
                                          "Unused type annotation. No method def before next annotation.",
-                                         core::Reporter::ErrorLine(send->loc,
-                                                                   "Type annotation that will be used instead.")));
+                                         core::ErrorLine(send->loc, "Type annotation that will be used instead.")));
                                  }
                              }
                              lastSig.emplace_back(move(stat));
@@ -670,8 +663,8 @@ private:
         }
 
         if (!lastSig.empty()) {
-            ctx.state.errors.error(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature,
-                                   "Malformed sig. No method def following it.");
+            ctx.state.error(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature,
+                            "Malformed sig. No method def following it.");
         }
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
@@ -716,9 +709,8 @@ private:
                  },
                  [&](ast::Cast *cast) {
                      if (cast->assertType) {
-                         ctx.state.errors.error(
-                             cast->loc, core::errors::Resolver::ConstantAssertType,
-                             "Use cast() instead of assert_type!() to specify the type of constants.");
+                         ctx.state.error(cast->loc, core::errors::Resolver::ConstantAssertType,
+                                         "Use cast() instead of assert_type!() to specify the type of constants.");
                      }
                      result = cast->type;
                  },
@@ -762,9 +754,9 @@ public:
                 /* fallthrough */
             case core::Names::cast()._id: {
                 if (send->args.size() < 2) {
-                    ctx.state.errors.error(send->loc, core::errors::Resolver::InvalidCast,
-                                           "Not enough arguments to {}: got {}, expected 2", send->fun.toString(ctx),
-                                           send->args.size());
+                    ctx.state.error(send->loc, core::errors::Resolver::InvalidCast,
+                                    "Not enough arguments to {}: got {}, expected 2", send->fun.toString(ctx),
+                                    send->args.size());
                     return send;
                 }
 
@@ -970,8 +962,8 @@ public:
 
         core::SymbolRef sym = klass.info(ctx).findMemberTransitive(ctx, id->name);
         if (!sym.exists()) {
-            ctx.state.errors.error(id->loc, core::errors::Resolver::UndeclaredVariable,
-                                   "Use of undeclared variable `{}'", id->name.toString(ctx));
+            ctx.state.error(id->loc, core::errors::Resolver::UndeclaredVariable, "Use of undeclared variable `{}'",
+                            id->name.toString(ctx));
             if (id->kind == ast::UnresolvedIdent::Class) {
                 sym = ctx.state.enterStaticFieldSymbol(id->loc, klass, id->name);
             } else {

@@ -133,7 +133,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
     std::unique_ptr<parser::Node> nodes;
     {
         tracer->trace("Parsing: {}", file.file(lgs).path());
-        core::ErrorRegion errs(lgs.errors, silenceErrors);
+        core::ErrorRegion errs(lgs, silenceErrors);
         core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
         nodes = parser::Parser::run(lgs, file);
     }
@@ -145,7 +145,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
     std::unique_ptr<ast::Expression> ast;
     {
         tracer->trace("Desugaring: {}", file.file(lgs).path());
-        core::ErrorRegion errs(lgs.errors, silenceErrors);
+        core::ErrorRegion errs(lgs, silenceErrors);
         core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
         ast = ast::desugar::node2Tree(context, nodes);
     }
@@ -187,7 +187,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
                 core::FileRef file;
 
                 {
-                    core::ErrorRegion errs(lgs->errors, silenceErrors);
+                    core::ErrorRegion errs(*lgs, silenceErrors);
 
                     while (fileq.pop(&file)) {
                         file = core::FileRef(*lgs, file.id());
@@ -236,7 +236,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
                 {
                     core::Context context(gs, gs.defn_root());
                     tracer->trace("Naming: {}", file.file(gs).path());
-                    core::ErrorRegion errs(gs.errors, silenceErrors);
+                    core::ErrorRegion errs(gs, silenceErrors);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
                     ast = namer::Namer::run(context, move(tree));
@@ -274,7 +274,7 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
         CFG_Collector_and_Typer collector(opts.print);
         {
             tracer->trace("CFG+Infer: {}", f.file(gs).path());
-            core::ErrorRegion errs(gs.errors, silenceErrors);
+            core::ErrorRegion errs(gs, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(gs); // creates names for temporaries in CFG
             result = ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved));
         }
@@ -310,7 +310,7 @@ vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<uniq
         {
             Timer timeit(console_err, "Resolving");
             tracer->trace("Resolving (global pass)...");
-            core::ErrorRegion errs(gs.errors, silenceErrors);
+            core::ErrorRegion errs(gs, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
             what = resolver::Resolver::run(context, move(what));
@@ -672,7 +672,7 @@ int realmain(int argc, char **argv) {
     }
 
     if (options.count("counters") != 0) {
-        for (auto e : gs.errors.errorHistogram) {
+        for (auto e : gs.errorHistogram()) {
             categoryCounterAdd("error", to_string(e.first), e.second);
         }
         console_err->warn("" + getCounterStatistics());
@@ -683,7 +683,7 @@ int realmain(int argc, char **argv) {
                                options["statsd-prefix"].as<string>() + ".counters");
     }
 
-    return gs.errors.hadCriticalError() ? 10 : returnCode;
+    return gs.hadCriticalError() ? 10 : returnCode;
 };
 
 } // namespace ruby_typer

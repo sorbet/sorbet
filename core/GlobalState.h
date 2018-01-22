@@ -1,10 +1,10 @@
 #ifndef SRUBY_GLOBAL_STATE_H
 #define SRUBY_GLOBAL_STATE_H
+#include "Errors.h"
 #include "Files.h"
 #include "Hashing.h"
 #include "Loc.h"
 #include "Names.h"
-#include "Reporter.h"
 #include "Symbols.h"
 #include "spdlog/spdlog.h"
 #include <memory>
@@ -84,8 +84,26 @@ public:
         annotations.emplace_back(loc, str, pos);
     }
 
+    bool hadCriticalError() {
+        return errors.hadCritical;
+    };
+
+    template <typename... Args> void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) {
+        std::string formatted = fmt::format(msg, args...);
+        _error(std::make_unique<BasicError>(BasicError(loc, what, formatted)));
+    }
+    void error(ComplexError error) {
+        _error(std::make_unique<ComplexError>(error));
+    }
+
+    int totalErrors();
+    void flushErrors();
+    std::vector<std::unique_ptr<BasicError>> drainErrors();
+    std::vector<std::pair<int, int>> errorHistogram() {
+        return this->errors.histogram;
+    }
+
     spdlog::logger &logger;
-    Reporter errors;
 
     static SymbolRef noSymbol() {
         return SymbolRef(nullptr, 0);
@@ -241,6 +259,11 @@ private:
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;
     std::vector<Annotation> annotations;
+    struct {
+        std::vector<std::unique_ptr<BasicError>> buffer;
+        std::vector<std::pair<int, int>> histogram;
+        bool hadCritical = false;
+    } errors;
 
     bool freezeSymbolTable();
     bool freezeNameTable();
@@ -251,6 +274,8 @@ private:
     bool nameTableFrozen = false;
     bool symbolTableFrozen = false;
     bool fileTableFrozen = false;
+
+    void _error(std::unique_ptr<BasicError> error);
 
     void expandNames();
 

@@ -259,7 +259,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto afterNext = walk(cctx.withTarget(exprSym), a->expr.get(), current);
 
                 if (cctx.nextScope == nullptr) {
-                    cctx.ctx.state.errors.error(a->loc, core::errors::CFG::NoNextScope, "No `do` block around `next`");
+                    cctx.ctx.state.error(a->loc, core::errors::CFG::NoNextScope, "No `do` block around `next`");
                     // I guess just keep going into deadcode?
                     unconditionalJump(afterNext, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
                 } else {
@@ -275,7 +275,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto afterBreak = walk(cctx.withTarget(exprSym), a->expr.get(), current);
 
                 if (cctx.breakScope == nullptr) {
-                    cctx.ctx.state.errors.error(a->loc, core::errors::CFG::NoNextScope, "No `do` block around `break`");
+                    cctx.ctx.state.error(a->loc, core::errors::CFG::NoNextScope, "No `do` block around `break`");
                     // I guess just keep going into deadcode?
                     unconditionalJump(afterBreak, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
                 } else {
@@ -286,8 +286,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Retry *a) {
                 if (cctx.rescueScope == nullptr) {
-                    cctx.ctx.state.errors.error(a->loc, core::errors::CFG::NoNextScope,
-                                                "No `begin` block around `retry`");
+                    cctx.ctx.state.error(a->loc, core::errors::CFG::NoNextScope, "No `begin` block around `retry`");
                     // I guess just keep going into deadcode?
                     unconditionalJump(current, cctx.inWhat.deadBlock(), cctx.inWhat, a->loc);
                 } else {
@@ -431,8 +430,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         ENFORCE(ret != nullptr, "CFB builder ret unset");
         return ret;
     } catch (...) {
-        cctx.ctx.state.errors.error(what->loc, core::errors::Internal::InternalError,
-                                    "Failed to convert tree to CFG (backtrace is above )");
+        cctx.ctx.state.error(what->loc, core::errors::Internal::InternalError,
+                             "Failed to convert tree to CFG (backtrace is above )");
         throw;
     }
 }
