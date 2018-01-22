@@ -1,3 +1,5 @@
+#ifndef SRUBY_CORE_ERRORS_RESOLVER_H
+#define SRUBY_CORE_ERRORS_RESOLVER_H
 #include "core/Errors.h"
 
 namespace ruby_typer {
@@ -17,7 +19,13 @@ constexpr ErrorClass InvalidCast = 5010;
 constexpr ErrorClass CircularDependency = 5011;
 constexpr ErrorClass RedefinitionOfParents = 5012;
 constexpr ErrorClass ConstantAssertType = 5013;
+constexpr ErrorClass ParentTypeNotDeclared = 5014;
+constexpr ErrorClass ParentVarianceMismatch = 5015;
+constexpr ErrorClass VariantTypeMemberInClass = 5015;
+constexpr ErrorClass TypeMembersInWrongOrder = 5015;
 } // namespace Resolver
 } // namespace errors
 } // namespace core
 } // namespace ruby_typer
+
+#endif

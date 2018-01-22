@@ -32,7 +32,13 @@ statTemp$10 = 2 : Integer(2)
 hashTemp$7 = statTemp$9.+(statTemp$10) : Integer
 hashTemp$8 = 2 : Integer(2)
 hashTemp$11 = alias <constant:<Magic>> : <Magic>
-returnMethodTemp$2 = hashTemp$11.<build-hash>(hashTemp$4, hashTemp$5, hashTemp$7, hashTemp$8) : Hash
+returnMethodTemp$2 = hashTemp$11.<build-hash>(hashTemp$4, hashTemp$5, hashTemp$7, hashTemp$8) : AppliedType {
+  klass = ::<constant:Hash>
+  targs = [
+    0 = untyped
+    0 = untyped
+  ]
+}
 finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 

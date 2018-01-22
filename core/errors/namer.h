@@ -14,6 +14,7 @@ constexpr ErrorClass DynamicDSLInvocation = 4007;
 constexpr ErrorClass MethodNotFound = 4008;
 constexpr ErrorClass InvalidAlias = 4009;
 constexpr ErrorClass RedefinitionOfMethod = 4010;
+constexpr ErrorClass InvalidTypeDefinition = 4010;
 } // namespace Namer
 } // namespace errors
 } // namespace core

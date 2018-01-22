@@ -6,11 +6,11 @@ def main
   begin
       puts "top"
       begin
-        if try < 3 # error: Method < does not exist on NilClass component of Integer | NilClass
-            try += 1 # error: Method + does not exist on NilClass component of Integer | NilClass
+        if try < 3 # error: Method < does not exist on NilClass component of NilClass | Integer
+            try += 1 # error: Method + does not exist on NilClass component of NilClass | Integer
             raise A.new # error: MULTI
-        elsif try < 6 # error: Method < does not exist on NilClass component of Integer | NilClass
-            try += 1 # error: Method + does not exist on NilClass component of Integer | NilClass
+        elsif try < 6 # error: Method < does not exist on NilClass component of NilClass | Integer
+            try += 1 # error: Method + does not exist on NilClass component of NilClass | Integer
             raise B.new # error: MULTI
         end
       rescue A

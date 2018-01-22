@@ -41,7 +41,7 @@ ifTemp$6"];
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_6" [style="tapered"];
 
     "bb::<constant:Object>#main_5" [label = "block[id=5](try, returnMethodTemp$2, <constant:A>$15)
-statTemp$10 = try : Integer | NilClass
+statTemp$10 = try : NilClass | Integer
 statTemp$11 = 1 : Integer(1)
 try = statTemp$10.+(statTemp$11) : untyped
 statTemp$12 = self : Object
@@ -59,7 +59,7 @@ ifTemp$16"];
     "bb::<constant:Object>#main_6" -> "bb::<constant:Object>#main_13" [style="tapered"];
 
     "bb::<constant:Object>#main_7" [label = "block[id=7](try, returnMethodTemp$2, <constant:B>$25)
-statTemp$20 = try : Integer | NilClass
+statTemp$20 = try : NilClass | Integer
 statTemp$21 = 1 : Integer(1)
 try = statTemp$20.+(statTemp$21) : untyped
 statTemp$22 = self : Object

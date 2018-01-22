@@ -1,4 +1,5 @@
 #include "namer/namer.h"
+#include "../core/Symbols.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
@@ -150,6 +151,15 @@ public:
         if (ident && ident->name == core::Names::singletonClass()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
             klass->symbol = ctx.contextClass().info(ctx).singletonClass(ctx);
+        } else {
+            switch (klass->kind) {
+                case ast::ClassDefKind::Class:
+                    klass->symbol.info(ctx).setIsModule(false);
+                    break;
+                case ast::ClassDefKind ::Module:
+                    klass->symbol.info(ctx).setIsModule(true);
+                    break;
+            }
         }
         scopeStack.emplace_back();
         return klass;
@@ -288,6 +298,35 @@ public:
                         break;
                     }
                     aliasMethod(ctx, methodOwner(ctx), args[0], meth);
+                    break;
+                }
+                case core::Names::type_decl()._id: {
+                    bool fail = false;
+                    core::Variance variance = core::Variance ::Invariant;
+                    fail = fail || original->args.size() != 1;
+                    ast::ConstantLit *nameLit = nullptr;
+                    nameLit = ast::cast_tree<ast::ConstantLit>(original->args[0].get());
+                    if (!fail && nameLit == nullptr) {
+                        auto send = ast::cast_tree<ast::Send>(original->args[0].get());
+                        if (send != nullptr &&
+                            (send->fun == core::Names::unaryMinus() || send->fun == core::Names::unaryPlus())) {
+                            if (send->fun == core::Names::unaryMinus()) {
+                                variance = core::Variance ::ContraVariant;
+                            } else {
+                                variance = core::Variance ::CoVariant;
+                            }
+                            nameLit = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+                        }
+                    }
+                    fail = fail || nameLit == nullptr;
+                    fail = fail || ast::cast_tree<ast::EmptyTree>(nameLit->scope.get()) == nullptr;
+                    if (fail) {
+                        ctx.state.error(original->loc, core::errors::Namer::InvalidTypeDefinition,
+                                        "Invalid type definition");
+                    } else {
+                        ctx.state.enterTypeMember(original->loc, ctx.enclosingClass(), nameLit->cnst, variance);
+                    }
+                    return new ast::EmptyTree(original->loc);
                 }
             }
         }

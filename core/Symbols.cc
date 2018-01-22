@@ -94,6 +94,24 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
         type = "method";
     } else if (myInfo.isMethodArgument()) {
         type = "argument";
+    } else if (myInfo.isTypeMember()) {
+        type = "typeMember";
+    } else if (myInfo.isTypeArgument()) {
+        type = "type argument";
+    }
+
+    if (myInfo.isTypeArgument() || myInfo.isTypeMember()) {
+        char variance;
+        if (myInfo.isCovariant()) {
+            variance = '+';
+        } else if (myInfo.isContravariant()) {
+            variance = '-';
+        } else if (myInfo.isInvariant()) {
+            variance = '=';
+        } else {
+            Error::raise("type without variance");
+        }
+        type = type + "(" + variance + ")";
     }
 
     os << type << " " << name;
@@ -105,6 +123,21 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
                 os << " : protected";
             }
         }
+
+        if (!myInfo.typeParams.empty()) {
+            os << "[";
+            bool first = true;
+            for (SymbolRef thing : myInfo.typeParams) {
+                if (first) {
+                    first = false;
+                } else {
+                    os << ", ";
+                }
+                os << thing.info(gs).name.toString(gs);
+            }
+            os << "]";
+        }
+
         if (myInfo.superClass.exists()) {
             os << " < " << myInfo.superClass.info(gs).fullName(gs);
         }
@@ -249,6 +282,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     counterInc("singleton_classes");
     singletonInfo.members.push_back(make_pair(Names::attachedClass(), selfRef));
     singletonInfo.superClass = core::GlobalState::defn_todo();
+    singletonInfo.setIsModule(false);
 
     selfRef.info(gs).members.push_back(make_pair(Names::singletonClass(), singleton));
     return singleton;
@@ -274,6 +308,31 @@ SymbolRef Symbol::dealias(GlobalState &gs) {
 bool Symbol::isBlockSymbol(GlobalState &gs) const {
     core::Name &nm = name.name(gs);
     return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
+}
+
+SymbolRef SymbolRef::dealiasAt(GlobalState &gs, core::SymbolRef klass) {
+    ENFORCE(info(gs).isTypeMember());
+    if (info(gs).owner == klass) {
+        return *this;
+    } else {
+        SymbolRef cursor;
+        if (info(gs).owner.info(gs).derivesFrom(gs, klass)) {
+            cursor = info(gs).owner;
+        } else if (klass.info(gs).derivesFrom(gs, info(gs).owner)) {
+            cursor = klass;
+        }
+        while (true) {
+            if (!cursor.exists()) {
+                return cursor;
+            }
+            for (auto aliasPair : cursor.info(gs).typeAliases) {
+                if (aliasPair.first == *this) {
+                    return aliasPair.second.dealiasAt(gs, klass);
+                }
+            }
+            cursor = cursor.info(gs).superClass;
+        }
+    }
 }
 
 Symbol Symbol::deepCopy(const GlobalState &to) const {

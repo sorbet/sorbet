@@ -117,7 +117,7 @@
 <title>bb::&lt;constant:Object&gt;#main_5</title>
 <ellipse fill="none" stroke="#000000" cx="919.5559" cy="-371.5635" rx="280.2551" ry="84.7059"/>
 <text text-anchor="middle" x="919.5559" y="-416.3635" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=5](try, returnMethodTemp$2, &lt;constant:A&gt;$15)</text>
-<text text-anchor="middle" x="919.5559" y="-402.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = try : Integer | NilClass</text>
+<text text-anchor="middle" x="919.5559" y="-402.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = try : NilClass | Integer</text>
 <text text-anchor="middle" x="919.5559" y="-388.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="919.5559" y="-374.3635" font-family="Times,serif" font-size="14.00" fill="#000000">try = statTemp$10.+(statTemp$11) : untyped</text>
 <text text-anchor="middle" x="919.5559" y="-360.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = self : Object</text>
@@ -199,7 +199,7 @@
 <title>bb::&lt;constant:Object&gt;#main_7</title>
 <ellipse fill="none" stroke="#000000" cx="1497.5559" cy="-371.5635" rx="280.2551" ry="84.7059"/>
 <text text-anchor="middle" x="1497.5559" y="-416.3635" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=7](try, returnMethodTemp$2, &lt;constant:B&gt;$25)</text>
-<text text-anchor="middle" x="1497.5559" y="-402.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$20 = try : Integer | NilClass</text>
+<text text-anchor="middle" x="1497.5559" y="-402.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$20 = try : NilClass | Integer</text>
 <text text-anchor="middle" x="1497.5559" y="-388.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$21 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="1497.5559" y="-374.3635" font-family="Times,serif" font-size="14.00" fill="#000000">try = statTemp$20.+(statTemp$21) : untyped</text>
 <text text-anchor="middle" x="1497.5559" y="-360.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$22 = self : Object</text>
@@ -233,4 +233,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 464a4a8cf22c0dbcf432fa8f3b7c990992c6906af6d82f340831cbd5133356fe -->
+<!-- ruby-types:sha256: 5951b136d6c2dff77ed2bdd8d46a667bd94c1acc857c87ed3ef5c9e076b07b59 -->

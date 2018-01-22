@@ -149,6 +149,105 @@ struct KnowledgeFact {
     }
 };
 
+std::shared_ptr<core::Type> allocateBySymbol(core::Context ctx, core::SymbolRef symbol) {
+    ENFORCE(symbol.info(ctx).isClass());
+    if (symbol.info(ctx).typeParams.size() == 0) {
+        return make_shared<core::ClassType>(symbol);
+    } else {
+        vector<std::shared_ptr<core::Type>> targs;
+        targs.reserve(symbol.info(ctx).typeParams.size());
+        for (auto UNUSED(x) : symbol.info(ctx).typeParams) {
+            targs.emplace_back(core::Types::dynamic());
+        }
+        return make_shared<core::AppliedType>(symbol, move(targs));
+    }
+}
+
+shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
+    if (auto *a = core::cast_type<core::LiteralType>(tp.get())) {
+        return a->underlying;
+    }
+    return tp;
+}
+
+shared_ptr<core::Type> runTypeConstructor(core::Context ctx, core::TypeConstructor *typeConstructor) {
+    ENFORCE(typeConstructor->protoType.info(ctx).isClass());
+    if (typeConstructor->protoType == core::GlobalState::defn_T_all()) {
+        int i = 1;
+        shared_ptr<core::Type> result = typeConstructor->targs[0];
+        while (i < typeConstructor->targs.size()) {
+            result = core::Types::buildAnd(ctx, result, typeConstructor->targs[i]);
+            i++;
+        }
+        return result;
+    }
+    if (typeConstructor->protoType == core::GlobalState::defn_T_any()) {
+        int i = 1;
+        shared_ptr<core::Type> result = typeConstructor->targs[0];
+        while (i < typeConstructor->targs.size()) {
+            result = core::Types::buildOr(ctx, result, typeConstructor->targs[i]);
+            i++;
+        }
+        return result;
+    }
+    if (typeConstructor->protoType == core::GlobalState::defn_T_Array()) {
+        return make_shared<core::AppliedType>(core::GlobalState::defn_Array(), typeConstructor->targs);
+    }
+
+    if (typeConstructor->protoType == core::GlobalState::defn_T_Hash()) {
+        return make_shared<core::AppliedType>(core::GlobalState::defn_Hash(), typeConstructor->targs);
+    }
+    return make_shared<core::AppliedType>(typeConstructor->protoType, typeConstructor->targs);
+}
+
+bool isTypeConstructor(core::Context ctx, std::shared_ptr<core::Type> recv) {
+    if (dynamic_cast<core::TypeConstructor *>(recv.get()) != nullptr) {
+        return true;
+    }
+    auto asClass = dynamic_cast<core::ClassType *>(recv.get());
+    if (asClass == nullptr) {
+        return false;
+    }
+    core::SymbolRef klass = asClass->symbol;
+    // Consider using a flag for this?
+    auto attached = klass.info(ctx).attachedClass(ctx);
+    return attached.exists() && !attached.info(ctx).typeParams.empty() &&
+           !klass.info(ctx).findMemberTransitive(ctx, core::Names::squareBrackets()).exists();
+}
+
+shared_ptr<core::Type> unwrapConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> &tp) {
+    if (auto *tc = dynamic_cast<core::TypeConstructor *>(tp.get())) {
+        if (!tc->targs.empty()) {
+            return runTypeConstructor(ctx, tc);
+        } else {
+            if (tc->protoType != core::GlobalState::defn_untyped()) {
+                ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
+            }
+            return core::Types::dynamic();
+        }
+    }
+    if (core::ClassType *classType = dynamic_cast<core::ClassType *>(tp.get())) {
+        core::SymbolRef attachedClass = classType->symbol.info(ctx).attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
+            return core::Types::dynamic();
+        }
+
+        return make_shared<core::ClassType>(attachedClass);
+    }
+    return tp;
+}
+
+shared_ptr<core::Type> dropConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> &tp) {
+    if (auto *tc = dynamic_cast<core::TypeConstructor *>(tp.get())) {
+        if (tc->protoType != core::GlobalState::defn_untyped()) {
+            ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
+        }
+        return core::Types::dynamic();
+    }
+    return tp;
+}
+
 /** Almost a named pair of two KnowledgeFact-s. One holds knowledge that is true when a variable is falsy,
  * the other holds knowledge which is true if the same variable is falsy.
  */
@@ -327,8 +426,8 @@ public:
                 }
                 core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
                 if (attachedClass.exists()) {
-                    whoKnows.truthy.yesTypeTests.emplace_back(send->recv, make_shared<core::ClassType>(attachedClass));
-                    whoKnows.falsy.noTypeTests.emplace_back(send->recv, make_shared<core::ClassType>(attachedClass));
+                    whoKnows.truthy.yesTypeTests.emplace_back(send->recv, allocateBySymbol(ctx, attachedClass));
+                    whoKnows.falsy.noTypeTests.emplace_back(send->recv, allocateBySymbol(ctx, attachedClass));
                 }
                 whoKnows.sanityCheck();
             }
@@ -363,8 +462,8 @@ public:
 
             core::SymbolRef attachedClass = s->symbol.info(ctx).attachedClass(ctx);
             if (attachedClass.exists()) {
-                whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], make_shared<core::ClassType>(attachedClass));
-                whoKnows.falsy.noTypeTests.emplace_back(send->args[0], make_shared<core::ClassType>(attachedClass));
+                whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], allocateBySymbol(ctx, attachedClass));
+                whoKnows.falsy.noTypeTests.emplace_back(send->args[0], allocateBySymbol(ctx, attachedClass));
             }
             whoKnows.sanityCheck();
 
@@ -488,12 +587,13 @@ public:
         for (core::LocalVariable var : vars) {
             i++;
             auto otherTO = other.getTypeAndOrigin(ctx, var);
+            auto otherType = dropConstructor(ctx, loc, otherTO.type);
             auto &thisTO = types[i];
             if (thisTO.type.get() != nullptr) {
-                thisTO.type = core::Types::lub(ctx, thisTO.type, otherTO.type);
+                thisTO.type = core::Types::lub(ctx, thisTO.type, otherType);
                 thisTO.type->sanityCheck(ctx);
             } else {
-                types[i].type = otherTO.type;
+                types[i].type = otherType;
             }
             for (auto origin : otherTO.origins) {
                 if (find(thisTO.origins.begin(), thisTO.origins.end(), origin) == thisTO.origins.end()) {
@@ -504,8 +604,8 @@ public:
             if (((forBlock.flags & cfg::CFG::LOOP_HEADER) != 0) && forBlock.outerLoops <= inWhat.maxLoopWrite[var]) {
                 continue;
             }
-            bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type);
-            bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
+            bool canBeFalsy = core::Types::canBeFalsy(ctx, otherType);
+            bool canBeTruthy = core::Types::canBeTruthy(ctx, otherType);
 
             if (canBeTruthy) {
                 auto &thisKnowledge = getKnowledge(var);
@@ -543,18 +643,22 @@ public:
         for (core::LocalVariable var : vars) {
             i++;
             auto otherTO = other.getTypeAndOrigin(ctx, var);
-            types[i].type = otherTO.type;
+            types[i].type = dropConstructor(ctx, otherTO.origins[0], otherTO.type);
             types[i].origins = otherTO.origins;
             auto &thisKnowledge = getKnowledge(var);
             auto &otherKnowledge = other.getKnowledge(var, false);
             thisKnowledge = otherKnowledge;
         }
     }
-
     shared_ptr<core::Type> dispatchNew(core::Context ctx, core::TypeAndOrigins recvType, cfg::Send *send,
                                        vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
         core::ClassType *classType = core::cast_type<core::ClassType>(recvType.type.get());
         if (classType == nullptr) {
+            core::TypeConstructor *typeConstructor = dynamic_cast<core::TypeConstructor *>(recvType.type.get());
+            if (typeConstructor != nullptr) {
+                ENFORCE(!typeConstructor->targs.empty());
+                return runTypeConstructor(ctx, typeConstructor);
+            }
             return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
         }
 
@@ -574,7 +678,7 @@ public:
             return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
         }
 
-        auto type = make_shared<core::ClassType>(attachedClass);
+        auto type = allocateBySymbol(ctx, attachedClass);
 
         // call constructor
         newSymbol = attachedClass.info(ctx).findMemberTransitive(ctx, core::Names::initialize());
@@ -603,138 +707,201 @@ public:
             core::TypeAndOrigins tp;
             bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value.get()) ||
                                   cfg::isa_instruction<cfg::LoadArg>(bind.value.get());
-            typecase(bind.value.get(),
-                     [&](cfg::Send *send) {
-                         vector<core::TypeAndOrigins> args;
+            typecase(
+                bind.value.get(),
+                [&](cfg::Send *send) {
+                    vector<core::TypeAndOrigins> args;
 
-                         args.reserve(send->args.size());
-                         for (core::LocalVariable arg : send->args) {
-                             args.emplace_back(getTypeAndOrigin(ctx, arg));
-                         }
+                    args.reserve(send->args.size());
+                    for (core::LocalVariable arg : send->args) {
+                        args.emplace_back(getTypeAndOrigin(ctx, arg));
+                    }
 
-                         auto recvType = getTypeAndOrigin(ctx, send->recv);
-                         if (send->fun == core::Names::new_()) {
-                             tp.type = dispatchNew(ctx, recvType, send, args, bind);
-                         } else if (send->fun == core::Names::super()) {
-                             // TODO
-                             tp.type = core::Types::dynamic();
-                             tp.origins.push_back(bind.loc);
-                         } else {
-                             tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
-                                                                   send->hasBlock);
-                         }
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::Ident *i) {
-                         auto typeAndOrigin = getTypeAndOrigin(ctx, i->what, true);
-                         tp.type = typeAndOrigin.type;
-                         tp.origins = typeAndOrigin.origins;
-                         ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
-                     },
-                     [&](cfg::Alias *a) {
-                         core::SymbolRef symbol = a->what;
-                         core::Symbol &info = symbol.info(ctx);
-                         if (info.isClass()) {
-                             ENFORCE(info.resultType.get(), "Type should have been filled in by the namer");
-                             tp.type = info.resultType;
-                             tp.origins.push_back(symbol.info(ctx).definitionLoc);
-                         } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
-                             if (info.resultType.get() != nullptr) {
-                                 tp.type = info.resultType;
-                                 tp.origins.push_back(info.definitionLoc);
-                             } else {
-                                 tp.origins.push_back(core::Loc::none());
-                                 tp.type = core::Types::dynamic();
-                             }
-                         } else {
-                             Error::notImplemented();
-                         }
-                     },
-                     [&](cfg::Self *i) {
-                         tp.type = make_shared<core::ClassType>(i->klass);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::SymbolLit *i) {
-                         tp.type = make_shared<core::LiteralType>(ctx.state.defn_Symbol(), i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::StringLit *i) {
-                         tp.type = make_shared<core::LiteralType>(ctx.state.defn_String(), i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::LoadArg *i) {
-                         /* read type from info filled by define_method */
-                         tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::Return *i) {
-                         auto expectedType = ctx.owner.info(ctx).resultType;
-                         if (!expectedType) {
-                             expectedType = core::Types::dynamic();
-                         }
-                         auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
-                         if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
-                             ctx.state.error(core::ComplexError(
-                                 bind.loc, core::errors::Infer::ReturnTypeMismatch,
-                                 "Returning value that does not conform to method result type",
-                                 {core::ErrorSection("Expected " + expectedType->toString(ctx),
-                                                     {
-                                                         core::ErrorLine::from(ctx.owner.info(ctx).definitionLoc,
-                                                                               "Method `{}` has return type `{}`",
-                                                                               ctx.owner.info(ctx).name.toString(ctx),
-                                                                               expectedType->toString(ctx)),
-                                                     }),
-                                  core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
-                                                     typeAndOrigin.origins2Explanations(ctx))}));
-                         }
-                         tp.type = core::Types::bottom();
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::IntLit *i) {
-                         tp.type = make_shared<core::LiteralType>(i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::BoolLit *i) {
-                         tp.type = make_shared<core::LiteralType>(i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::FloatLit *i) {
-                         tp.type = make_shared<core::LiteralType>(i->value);
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::Unanalyzable *i) {
-                         tp.type = core::Types::dynamic();
-                         tp.origins.push_back(bind.loc);
-                     },
-                     [&](cfg::Cast *c) {
-                         tp.type = c->type;
-                         tp.origins.push_back(bind.loc);
+                    auto recvType = getTypeAndOrigin(ctx, send->recv);
 
-                         if (c->assertType) {
-                             auto ty = getTypeAndOrigin(ctx, c->value);
-                             if (ty.type->isDynamic()) {
-                                 ctx.state.error(core::ComplexError(
-                                     bind.loc, core::errors::Infer::CastTypeMismatch,
-                                     "The typechecker was unable to infer the type of the argument to "
-                                     "assert_type!.",
-                                     {core::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)),
-                                      core::ErrorSection("You may need to add additional `sig` "
-                                                         "annotations.")}));
-                             } else if (!core::Types::isSubType(ctx, ty.type, c->type)) {
-                                 ctx.state.error(core::ComplexError(
-                                     bind.loc, core::errors::Infer::CastTypeMismatch,
-                                     "assert_type!: argument does not have asserted type",
-                                     {core::ErrorSection("Expected " + c->type->toString(ctx), {}),
-                                      core::ErrorSection("Got " + ty.type->toString(ctx) + " originating from:",
-                                                         ty.origins2Explanations(ctx))}));
-                             }
-                         }
-                     },
-                     [&](cfg::DebugEnvironment *d) {
-                         d->str = toString(ctx);
-                         tp.type = core::Types::bottom();
-                         tp.origins.push_back(bind.loc);
-                     });
+                    switch (send->fun.id()) {
+                        case core::Names::untyped()._id: {
+                            if (!recvType.type->derivesFrom(ctx, core::GlobalState::defn_T()) ||
+                                recvType.type->isDynamic()) {
+                                break;
+                            }
+                            vector<shared_ptr<core::Type>> empty;
+                            tp.origins.push_back(bind.loc);
+                            tp.type = make_shared<core::TypeConstructor>(core::GlobalState::defn_untyped(), empty);
+                            return;
+                        }
+                        case core::Names::any()._id:
+                        case core::Names::all()._id: {
+                            if (!recvType.type->derivesFrom(ctx, core::GlobalState::defn_T()) ||
+                                recvType.type->isDynamic()) {
+                                break;
+                            }
+                            tp.origins.push_back(bind.loc);
+                            ENFORCE(!send->args.empty());
+                            vector<shared_ptr<core::Type>> targs;
+                            for (auto &arg : send->args) {
+                                auto tp = getTypeAndOrigin(ctx, arg);
+                                targs.push_back(unwrapConstructor(ctx, tp.origins[0], tp.type));
+                            }
+                            tp.origins.push_back(bind.loc);
+
+                            tp.type = make_shared<core::TypeConstructor>(
+                                core::GlobalState::defn_T().info(ctx).findMember(ctx, send->fun), targs);
+                            return;
+                        }
+                        default:
+                            break;
+                    }
+                    if (send->fun == core::Names::new_()) {
+                        tp.type = dispatchNew(ctx, recvType, send, args, bind);
+                    } else if (send->fun == core::Names::squareBrackets() && isTypeConstructor(ctx, recvType.type)) {
+                        core::SymbolRef attached;
+                        auto *asClass = dynamic_cast<core::ClassType *>(recvType.type.get());
+                        if (asClass != nullptr) {
+                            core::SymbolRef klass = asClass->symbol;
+                            // Consider using a flag for this?
+                            attached = klass.info(ctx).attachedClass(ctx);
+                        } else {
+                            auto *tc = dynamic_cast<core::TypeConstructor *>(recvType.type.get());
+                            ENFORCE(tc != nullptr);
+                            ENFORCE(tc->targs.empty());
+                            attached = tc->protoType;
+                        }
+                        vector<shared_ptr<core::Type>> targs;
+                        // TODO match arguments
+                        for (auto arg : args) {
+                            targs.emplace_back(unwrapConstructor(ctx, arg.origins[0], arg.type));
+                        }
+                        tp.type = make_shared<core::TypeConstructor>(attached, targs);
+                    } else if (send->fun == core::Names::super()) {
+                        // TODO
+                        tp.type = core::Types::dynamic();
+                    } else {
+                        tp.type =
+                            recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
+                    }
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Ident *i) {
+                    auto typeAndOrigin = getTypeAndOrigin(ctx, i->what, true);
+                    tp.type = typeAndOrigin.type;
+                    tp.origins = typeAndOrigin.origins;
+                    ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
+                },
+                [&](cfg::Alias *a) {
+                    core::SymbolRef symbol = a->what;
+                    core::Symbol &info = symbol.info(ctx);
+                    if (a->what == core::GlobalState::defn_T_Array()) {
+                        vector<shared_ptr<core::Type>> empty;
+                        tp.type = make_shared<core::TypeConstructor>(core::GlobalState::defn_Array(), empty);
+                        tp.origins.push_back(symbol.info(ctx).definitionLoc);
+
+                    } else if (a->what == core::GlobalState::defn_T_Hash()) {
+                        vector<shared_ptr<core::Type>> empty;
+                        tp.type = make_shared<core::TypeConstructor>(core::GlobalState::defn_Hash(), empty);
+                        tp.origins.push_back(symbol.info(ctx).definitionLoc);
+                    } else if (info.isClass()) {
+                        ENFORCE(info.resultType.get(), "Type should have been filled in by the namer");
+                        tp.type = info.resultType;
+                        tp.origins.push_back(symbol.info(ctx).definitionLoc);
+                    } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
+                        if (info.resultType.get() != nullptr) {
+                            tp.type = info.resultType;
+                            tp.origins.push_back(info.definitionLoc);
+                        } else {
+                            tp.origins.push_back(core::Loc::none());
+                            tp.type = core::Types::dynamic();
+                        }
+                    } else {
+                        Error::notImplemented();
+                    }
+                },
+                [&](cfg::Self *i) {
+                    tp.type = make_shared<core::ClassType>(i->klass);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::SymbolLit *i) {
+                    tp.type = make_shared<core::LiteralType>(ctx.state.defn_Symbol(), i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::StringLit *i) {
+                    tp.type = make_shared<core::LiteralType>(ctx.state.defn_String(), i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::LoadArg *i) {
+                    /* read type from info filled by define_method */
+                    tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Return *i) {
+                    auto expectedType = ctx.owner.info(ctx).resultType;
+                    if (!expectedType) {
+                        expectedType = core::Types::dynamic();
+                    }
+                    auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
+                    if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
+                        ctx.state.error(core::ComplexError(
+                            bind.loc, core::errors::Infer::ReturnTypeMismatch,
+                            "Returning value that does not conform to method result type",
+                            {core::ErrorSection("Expected " + expectedType->toString(ctx),
+                                                {
+                                                    core::ErrorLine::from(ctx.owner.info(ctx).definitionLoc,
+                                                                          "Method `{}` has return type `{}`",
+                                                                          ctx.owner.info(ctx).name.toString(ctx),
+                                                                          expectedType->toString(ctx)),
+                                                }),
+                             core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
+                                                typeAndOrigin.origins2Explanations(ctx))}));
+                    }
+                    tp.type = core::Types::bottom();
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::IntLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::BoolLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::FloatLit *i) {
+                    tp.type = make_shared<core::LiteralType>(i->value);
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Unanalyzable *i) {
+                    tp.type = core::Types::dynamic();
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::Cast *c) {
+                    tp.type = c->type;
+                    tp.origins.push_back(bind.loc);
+
+                    if (c->assertType) {
+                        auto ty = getTypeAndOrigin(ctx, c->value);
+                        if (ty.type->isDynamic()) {
+                            ctx.state.error(core::ComplexError(
+                                bind.loc, core::errors::Infer::CastTypeMismatch,
+                                "The typechecker was unable to infer the type of the argument to "
+                                "assert_type!.",
+                                {core::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)),
+                                 core::ErrorSection("You may need to add additional `sig` "
+                                                    "annotations.")}));
+                        } else if (!core::Types::isSubType(ctx, ty.type, c->type)) {
+                            ctx.state.error(core::ComplexError(
+                                bind.loc, core::errors::Infer::CastTypeMismatch,
+                                "assert_type!: argument does not have asserted type",
+                                {core::ErrorSection("Expected " + c->type->toString(ctx), {}),
+                                 core::ErrorSection("Got " + ty.type->toString(ctx) + " originating from:",
+                                                    ty.origins2Explanations(ctx))}));
+                        }
+                    }
+                },
+                [&](cfg::DebugEnvironment *d) {
+                    d->str = toString(ctx);
+                    tp.type = core::Types::bottom();
+                    tp.origins.push_back(bind.loc);
+                });
+
             ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type");
             ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
@@ -821,7 +988,8 @@ KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc
         } else {
             auto &second = fnd->second;
             auto &typeAndOrigin = env.types[i];
-            auto combinedType = core::Types::glb(ctx, typeAndOrigin.type, second);
+            auto combinedType =
+                core::Types::glb(ctx, dropConstructor(ctx, typeAndOrigin.origins[0], typeAndOrigin.type), second);
             if (combinedType->isBottom()) {
                 copy.isDead = true;
                 break;

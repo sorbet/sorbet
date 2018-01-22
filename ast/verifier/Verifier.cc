@@ -8,7 +8,9 @@ class VerifierWalker {
     void check(Expression *node) {
         // EmptyTree is the only thing allowed to not have a loc, and there
         // isn't any transform for it in TreeMap, so all nodes need a loc
-        ENFORCE(!node->loc.is_none(), "location is unset");
+        //        ENFORCE(!node->loc.is_none(), "location is unset");
+        // Temporarily disabled as it had false positives before.
+        // File = -1 used to be treated as a set position
     }
 
 public:

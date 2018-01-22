@@ -31,10 +31,28 @@ shared_ptr<Type> OrType::getCallArgumentType(core::Context ctx, core::NameRef na
     return left->getCallArgumentType(ctx, name, i); // TODO: should glb with right
 }
 
+shared_ptr<Type> AppliedType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                           vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
+    categoryCounterInc("dispatch_call", "appliedType");
+    ClassType ct(this->klass);
+    return ct.dispatchCallWithTargs(ctx, name, callLoc, args, fullType, this->targs, hasBlock);
+}
+
+shared_ptr<Type> TypeVar::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                       vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
+    ENFORCE(isInstantiated);
+    return instantiation->dispatchCall(ctx, name, callLoc, args, fullType, hasBlock);
+}
+
 shared_ptr<Type> AndType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                        vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
     categoryCounterInc("dispatch_call", "andtype");
-    Error::notImplemented();
+    // "AppliedType {\n      klass = ::<constant:Hash>\n      targs = [\n        0 = untyped\n        0 = untyped\n
+    // ]\n    } & BasicObject" this type should not have been constructed.
+    // TODO: was constructed for lib/db/model/mixins/ipm_derived.rb ,
+    // lib/db/model/middleware/enforce_durable_write_middleware.rb fail silently.
+
+    return this->left->dispatchCall(ctx, name, callLoc, args, fullType, hasBlock);
 }
 
 shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
@@ -59,7 +77,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
             for (int i = 0; i < args.size(); i += 2) {
                 auto *key = cast_type<LiteralType>(args[i].type.get());
                 if (key == nullptr) {
-                    return core::Types::hashClass();
+                    return core::Types::hashOfUntyped();
                 }
 
                 // HACK(nelhage): clone the LiteralType by hand, since there's no way to go
@@ -86,9 +104,10 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
 }
 
 namespace {
-void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef method, TypeAndOrigins &argTpe,
-                  core::Symbol &argSym) {
-    shared_ptr<Type> expectedType = argSym.resultType;
+void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass, core::SymbolRef method,
+                  TypeAndOrigins &argTpe, core::Symbol &argSym, shared_ptr<core::Type> &fullType,
+                  vector<shared_ptr<Type>> &targs) {
+    shared_ptr<Type> expectedType = core::Types::resultTypeAsSeenFrom(ctx, argSym.ref(ctx), inClass, targs);
     if (!expectedType) {
         expectedType = Types::dynamic();
     }
@@ -122,7 +141,7 @@ void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
 core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector<TypeAndOrigins> &args,
                               shared_ptr<Type> fullType, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
-    Error::check(ctx.permitOverloadDefinitions(), "overload not permitted here");
+    ENFORCE(ctx.permitOverloadDefinitions(), "overload not permitted here");
     core::SymbolRef fallback = primary;
     vector<core::SymbolRef> allCandidates;
 
@@ -236,8 +255,9 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : dynamic
 //    (with a subtype check on the key type, once we have generics)
-shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
+shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef fun, core::Loc callLoc,
+                                                  vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
+                                                  vector<shared_ptr<Type>> &targs, bool hasBlock) {
     categoryCounterInc("dispatch_call", "classtype");
     if (isDynamic()) {
         return Types::dynamic();
@@ -289,7 +309,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
         }
         ++ait;
 
-        matchArgType(ctx, callLoc, method, arg, spec);
+        matchArgType(ctx, callLoc, this->symbol, method, arg, spec, fullType, targs);
     }
 
     if (pit != pend) {
@@ -345,7 +365,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                         TypeAndOrigins tpe;
                         tpe.origins = args.back().origins;
                         tpe.type = hash->values[it - hash->keys.begin()];
-                        matchArgType(ctx, callLoc, method, tpe, spec);
+                        matchArgType(ctx, callLoc, this->symbol, method, tpe, spec, fullType, targs);
                     }
                     break;
                 }
@@ -365,7 +385,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                 TypeAndOrigins tpe;
                 tpe.origins = args.back().origins;
                 tpe.type = hash->values[arg - hash->keys.begin()];
-                matchArgType(ctx, callLoc, method, tpe, spec);
+                matchArgType(ctx, callLoc, this->symbol, method, tpe, spec, fullType, targs);
             }
             for (auto &key : hash->keys) {
                 SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
@@ -408,11 +428,17 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
                         aend - args.begin()); // TODO: should use position and print the source tree, not the cfg one.
     }
 
-    shared_ptr<Type> resultType = method.info(ctx).resultType;
+    shared_ptr<Type> resultType = Types::resultTypeAsSeenFrom(ctx, method, this->symbol, targs);
     if (!resultType) {
         resultType = Types::dynamic();
     }
     return resultType;
+}
+
+shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, bool hasBlock) {
+    vector<shared_ptr<Type>> empty;
+    return dispatchCallWithTargs(ctx, fun, callLoc, args, fullType, empty, hasBlock);
 }
 
 shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {

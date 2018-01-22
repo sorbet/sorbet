@@ -12,6 +12,7 @@ class Context final {
 public:
     GlobalState &state;
     SymbolRef owner;
+    bool frozenConstraint = false;
     operator GlobalState &() {
         return state;
     }
@@ -37,6 +38,12 @@ public:
     Context withOwner(SymbolRef sym) {
         Context r = Context(*this);
         r.owner = sym;
+        return r;
+    }
+
+    Context withFrozenConstraint() {
+        Context r = Context(*this);
+        r.frozenConstraint = true;
         return r;
     }
     SymbolRef newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);

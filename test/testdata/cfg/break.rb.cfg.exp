@@ -28,7 +28,12 @@ outerLoops: 1
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="tapered"];
 
     "bb::<constant:Object>#foo_3" [label = "block[id=3](statTemp$5)
-returnMethodTemp$3 = statTemp$5.map() : Array
+returnMethodTemp$3 = statTemp$5.map() : AppliedType {
+  klass = ::<constant:Array>
+  targs = [
+    0 = untyped
+  ]
+}
 finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 

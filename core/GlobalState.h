@@ -45,6 +45,8 @@ public:
     ~GlobalState();
 
     SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance);
+    SymbolRef enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance);
     SymbolRef enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterNewMethodOverload(Loc loc, SymbolRef original, u2 num);
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
@@ -239,6 +241,22 @@ public:
         return SymbolRef(nullptr, 33);
     }
 
+    static SymbolRef defn_T_any() {
+        return SymbolRef(nullptr, 34);
+    }
+
+    static SymbolRef defn_T_all() {
+        return SymbolRef(nullptr, 35);
+    }
+
+    static SymbolRef defn_T_untyped() {
+        return SymbolRef(nullptr, 36);
+    }
+
+    static SymbolRef defn_T_nilable() {
+        return SymbolRef(nullptr, 37);
+    }
+
     // Keep as last and update to match the last entry
     static SymbolRef defn_last_synthetic_sym() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - 1);
@@ -283,8 +301,8 @@ private:
 
     void complete(SymbolRef id, Symbol &currentInfo);
 
-    SymbolRef synthesizeClass(absl::string_view name, int superclass = core::GlobalState::defn_todo()._id);
-
+    SymbolRef synthesizeClass(absl::string_view name, u4 superclass = core::GlobalState::defn_todo()._id,
+                              bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef getTopLevelClassSymbol(NameRef name);

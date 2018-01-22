@@ -194,13 +194,24 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
     } else if (auto *alias = cast_type<AliasType>(what)) {
         p.putU4(8);
         p.putU4(alias->symbol._id);
+    } else if (auto *lp = dynamic_cast<LambdaParam *>(what)) {
+        p.putU4(9);
+        p.putU4(lp->definition._id);
+    } else if (auto *at = dynamic_cast<AppliedType *>(what)) {
+        p.putU4(10);
+        p.putU4(at->klass._id);
+        p.putU4(at->targs.size());
+        for (auto &t : at->targs) {
+            pickle(p, t.get());
+        }
     } else {
         Error::notImplemented();
     }
 }
 
 std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalState *gs) {
-    switch (p.getU4()) {
+    auto tag = p.getU4();
+    switch (tag) {
         case 0: {
             std::shared_ptr<Type> empty;
             return empty;
@@ -254,6 +265,19 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalSt
             return std::make_shared<MagicType>();
         case 8:
             return std::make_shared<AliasType>(SymbolRef(gs, p.getU4()));
+        case 9: {
+            return std::make_shared<LambdaParam>(SymbolRef(gs, p.getU4()));
+        }
+        case 10: {
+            SymbolRef klass(gs, p.getU4());
+            int sz = p.getU4();
+            std::vector<std::shared_ptr<Type>> targs;
+            targs.reserve(sz);
+            for (int i = 0; i < sz; i++) {
+                targs.emplace_back(unpickleType(p, gs));
+            }
+            return std::make_shared<AppliedType>(klass, targs);
+        }
         default:
             Error::notImplemented();
     }
@@ -267,6 +291,10 @@ void GlobalStateSerializer::pickle(Pickler &p, Symbol &what) {
     p.putU4(what.uniqueCounter);
     p.putU4(what.argumentsOrMixins.size());
     for (SymbolRef s : what.argumentsOrMixins) {
+        p.putU4(s._id);
+    }
+    p.putU4(what.typeParams.size());
+    for (SymbolRef s : what.typeParams) {
         p.putU4(s._id);
     }
     p.putU4(what.members.size());
@@ -293,6 +321,13 @@ Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     for (int i = 0; i < argumentsOrMixinsSize; i++) {
         result.argumentsOrMixins.emplace_back(SymbolRef(gs, p.getU4()));
     }
+    int typeParamsSize = p.getU4();
+
+    result.typeParams.reserve(typeParamsSize);
+    for (int i = 0; i < typeParamsSize; i++) {
+        result.typeParams.emplace_back(SymbolRef(gs, p.getU4()));
+    }
+
     int membersSize = p.getU4();
     result.members.reserve(membersSize);
     for (int i = 0; i < membersSize; i++) {

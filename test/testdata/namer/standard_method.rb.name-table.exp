@@ -23,8 +23,19 @@ class <constant:A> < ::<constant:Object> () -> <class:A>
     argument c<> -> T1 | NilClass
     argument d<> -> T1 | T2
     argument e<> -> untyped
-    argument f<> -> Array
-    argument g<> -> Hash
+    argument f<> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        0 = T1
+      ]
+    }
+    argument g<> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        0 = T1
+        0 = T2
+      ]
+    }
     argument h<> -> FalseClass | Integer | Float | String | Symbol
     argument i<> -> T1
   method no_params () -> T1

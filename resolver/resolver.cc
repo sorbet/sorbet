@@ -1,4 +1,6 @@
 #include "core/errors/resolver.h"
+#include "../ast/Trees.h"
+#include "../core/core.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "core/Names/resolver.h"
@@ -46,6 +48,7 @@ private:
                                 c->toString(ctx));
                 result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
                 result.info(ctx).resultType = core::Types::dynamic();
+                result.info(ctx).setIsModule(false);
             }
             return result;
 
@@ -67,6 +70,7 @@ private:
                 }
                 result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
                 result.info(ctx).resultType = core::Types::dynamic();
+                result.info(ctx).setIsModule(false);
             }
 
             return result;
@@ -343,11 +347,34 @@ private:
             case core::Names::untyped()._id:
                 return core::Types::dynamic();
 
-            case core::Names::arrayOf()._id:
-                return core::Types::arrayClass();
+            case core::Names::arrayOf()._id: {
+                auto elem = getResultType(ctx, send->args[0]);
+                std::vector<shared_ptr<core::Type>> targs;
+                targs.emplace_back(move(elem));
+                return make_shared<core::AppliedType>(core::GlobalState::defn_Array(), move(targs));
+            }
+            case core::Names::hashOf()._id: {
+                bool fail = (send->args.size() != 1);
+                ast::Hash *hash;
+                if (!fail) {
+                    hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                    fail = hash == nullptr;
+                }
+                int keyIndex = 0;
+                int valueIndex = 1;
+                // TODO: detect them(or not, as new syntax would not need this)
+                if (!fail) {
+                    auto key = getResultType(ctx, hash->values[keyIndex]);
+                    auto value = getResultType(ctx, hash->values[valueIndex]);
+                    std::vector<shared_ptr<core::Type>> targs;
+                    targs.emplace_back(move(key));
+                    targs.emplace_back(move(value));
+                    return make_shared<core::AppliedType>(core::GlobalState::defn_Hash(), move(targs));
+                }
 
-            case core::Names::hashOf()._id:
-                return core::Types::hashClass();
+                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "Malformed hash type");
+                return core::Types::dynamic();
+            }
 
             case core::Names::noreturn()._id:
                 return core::Types::bottom();
@@ -373,6 +400,8 @@ private:
                      auto sym = dealiasSym(ctx, i->symbol);
                      if (sym.info(ctx).isClass()) {
                          result = make_shared<core::ClassType>(sym);
+                     } else if (sym.info(ctx).isTypeMember()) {
+                         result = make_shared<core::LambdaParam>(sym);
                      } else {
                          ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
                                          "Malformed type declaration. Not a class type {}", i->toString(ctx));
@@ -407,20 +436,26 @@ private:
                          if (s->args.size() != 1) {
                              ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
                                              "Malformed T::Array[]: Expected 1 type argument");
+                             result = core::Types::dynamic();
+                             return;
                          }
-                         for (auto &arg : s->args) {
-                             getResultType(ctx, arg);
-                         }
-                         result = core::Types::arrayClass();
+                         auto elem = getResultType(ctx, s->args[0]);
+                         std::vector<shared_ptr<core::Type>> targs;
+                         targs.emplace_back(move(elem));
+                         result = make_shared<core::AppliedType>(core::GlobalState::defn_Array(), move(targs));
                      } else if (recvi->symbol == core::GlobalState::defn_T_Hash()) {
                          if (s->args.size() != 2) {
                              ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
                                              "Malformed T::Hash[]: Expected 2 type arguments");
+                             result = core::Types::dynamic();
+                             return;
                          }
-                         for (auto &arg : s->args) {
-                             getResultType(ctx, arg);
-                         }
-                         result = core::Types::hashClass();
+                         auto key = getResultType(ctx, s->args[0]);
+                         auto value = getResultType(ctx, s->args[1]);
+                         std::vector<shared_ptr<core::Type>> targs;
+                         targs.emplace_back(move(key));
+                         targs.emplace_back(move(value));
+                         result = make_shared<core::AppliedType>(core::GlobalState::defn_Hash(), move(targs));
                      } else if (recvi->symbol == core::GlobalState::defn_T_Proc()) {
                          result = core::Types::procClass();
                      } else {
@@ -966,10 +1001,82 @@ public:
 };
 
 namespace {
+bool resolveTypeMember(core::GlobalState &gs, core::Symbol &parent, core::SymbolRef parentTypeMember,
+                       core::Symbol &inSym) {
+    core::NameRef name = parentTypeMember.info(gs).name;
+    auto parentVariance = parentTypeMember.info(gs).variance();
+    core::SymbolRef my = inSym.findMember(gs, name);
+    if (!my.exists()) {
+        gs.error(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared,
+                 "Type {} declared by parent {} should be declared again", name.toString(gs), parent.fullName(gs));
+        return false;
+    }
+    auto myVariance = my.info(gs).variance();
+    if (!inSym.derivesFrom(gs, core::GlobalState::defn_Class()) && (myVariance != parentVariance)) {
+        // this requirement can be loozened. You can go from variant to invariant.
+        gs.error(my.info(gs).definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
+                 "Type variance mismatch with parent {}", parent.fullName(gs));
+        return true;
+    }
+    inSym.typeAliases.emplace_back(parentTypeMember, my);
+    return true;
+}
+
+void resolveTypeMembers(core::GlobalState &gs, core::Symbol &inSym) {
+    ENFORCE(inSym.isClass());
+    if (inSym.isClassClass()) {
+        for (core::SymbolRef tp : inSym.typeParams) {
+            auto myVariance = tp.info(gs).variance();
+            if (myVariance != core::Variance::Invariant) {
+                gs.error(tp.info(gs).definitionLoc, core::errors::Resolver::VariantTypeMemberInClass,
+                         "Classes can only have invariant type members");
+                return;
+            }
+        }
+    }
+
+    if (inSym.superClass.exists()) {
+        core::Symbol &parent = inSym.superClass.info(gs);
+        bool foundAll = true;
+        for (core::SymbolRef tp : parent.typeParams) {
+            bool foundThis = resolveTypeMember(gs, parent, tp, inSym);
+            foundAll = foundAll && foundThis;
+        }
+        if (foundAll) {
+            int i = 0;
+            // check that type params are in the same order.
+            for (core::SymbolRef tp : parent.typeParams) {
+                core::SymbolRef my = tp.dealiasAt(gs, inSym.ref(gs));
+                ENFORCE(my.exists(), "resolver failed to register type member aliases");
+                if (inSym.typeParams[i] != my) {
+                    gs.error(my.info(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder,
+                             "Type members in wrong order");
+                }
+                i++;
+            }
+        }
+    }
+
+    for (core::SymbolRef mixin : inSym.mixins(gs)) {
+        core::Symbol &parent = mixin.info(gs);
+        for (core::SymbolRef tp : parent.typeParams) {
+            resolveTypeMember(gs, parent, tp, inSym);
+        }
+    }
+
+    // TODO: this will be the right moment to implement checks for correct locations of co&contra variant types.
+}
 void finalizeResolution(core::GlobalState &gs) {
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto &info = core::SymbolRef(gs, i).info(gs);
-        if (!info.isClass() || info.superClass != core::GlobalState::defn_todo()) {
+        auto &info = core::SymbolRef(&gs, i).info(gs);
+        if (!info.isClass()) {
+            continue;
+        }
+        if (!info.isClassModuleSet()) {
+            // we did not see a declaration for this type not did we see it used. Default to module.
+            info.setIsModule(true);
+        }
+        if (info.superClass != core::GlobalState::defn_todo()) {
             continue;
         }
 
@@ -986,6 +1093,12 @@ void finalizeResolution(core::GlobalState &gs) {
             }
         } else {
             info.superClass = core::GlobalState::defn_Object();
+        }
+    }
+    for (int i = 1; i < gs.symbolsUsed(); ++i) {
+        auto &info = core::SymbolRef(&gs, i).info(gs);
+        if (info.isClass()) {
+            resolveTypeMembers(gs, info);
         }
     }
 }

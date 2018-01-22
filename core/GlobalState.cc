@@ -87,7 +87,7 @@ const char *m_str = "M";
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
 
-SymbolRef GlobalState::synthesizeClass(absl::string_view name, int superclass) {
+SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bool isModule) {
     NameRef nameId = enterNameConstant(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
@@ -100,6 +100,7 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, int superclass) {
     info.superClass = SymbolRef(this, superclass);
     info.flags = 0;
     info.setClass();
+    info.setIsModule(isModule);
 
     if (symRef._id > GlobalState::defn_root()._id) {
         GlobalState::defn_root().info(*this, true).members.push_back(make_pair(nameId, symRef));
@@ -149,11 +150,14 @@ void GlobalState::initEmpty() {
     SymbolRef falseClass_id = synthesizeClass(falseClass_str);
     SymbolRef nilClass_id = synthesizeClass(nilClass_str);
     SymbolRef untyped_id = synthesizeClass(untyped_str, 0);
-    SymbolRef opus_id = synthesizeClass(opus_str, 0);
-    SymbolRef T_id = synthesizeClass(T_str, 0);
+    SymbolRef opus_id = synthesizeClass(opus_str, 0, true);
+
+    SymbolRef T_id = synthesizeClass(T_str, core::GlobalState::defn_todo()._id, true);
+    T_id.info(*this).setIsModule(true);
+
     SymbolRef class_id = synthesizeClass(class_str, 0);
     SymbolRef basicObject_id = synthesizeClass(basicObject_str, 0);
-    SymbolRef kernel_id = synthesizeClass(kernel_str, 0);
+    SymbolRef kernel_id = synthesizeClass(kernel_str, 0, true);
     SymbolRef range_id = synthesizeClass(range_str);
     SymbolRef regexp_id = synthesizeClass(regexp_str);
     SymbolRef magic_id = synthesizeClass(magic_str);
@@ -161,10 +165,14 @@ void GlobalState::initEmpty() {
     SymbolRef standardError_id = synthesizeClass(standardError_str);
     SymbolRef complex_id = synthesizeClass(complex_str);
     SymbolRef rational_id = synthesizeClass(rational_str);
-    SymbolRef T_Array_id = enterClassSymbol(Loc::none(), T_id, enterNameConstant(array_str));
-    SymbolRef T_Hash_id = enterClassSymbol(Loc::none(), T_id, enterNameConstant(hash_str));
-    SymbolRef T_Proc_id = enterClassSymbol(Loc::none(), T_id, enterNameConstant(proc_str));
+    SymbolRef T_Array_id = enterClassSymbol(Loc::none(), defn_T(), enterNameConstant(array_str));
+    SymbolRef T_Hash_id = enterClassSymbol(Loc::none(), defn_T(), enterNameConstant(hash_str));
+    SymbolRef T_Proc_id = enterClassSymbol(Loc::none(), defn_T(), enterNameConstant(proc_str));
     SymbolRef proc_id = synthesizeClass(proc_str);
+    SymbolRef T_any_id = enterMethodSymbol(Loc::none(), defn_T(), Names::any());
+    SymbolRef T_all_id = enterMethodSymbol(Loc::none(), defn_T(), Names::all());
+    SymbolRef T_untyped_id = enterMethodSymbol(Loc::none(), defn_T(), Names::untyped());
+    SymbolRef T_nilable_id = enterMethodSymbol(Loc::none(), defn_T(), Names::nilable());
 
     ENFORCE(no_symbol_id == noSymbol(), "no symbol creation failed");
     ENFORCE(top_id == defn_top(), "top symbol creation failed");
@@ -200,6 +208,10 @@ void GlobalState::initEmpty() {
     ENFORCE(T_Hash_id = defn_T_Hash(), "T::Hash symbol creation failed");
     ENFORCE(T_Proc_id = defn_T_Proc(), "T::Proc symbol creation failed");
     ENFORCE(proc_id = defn_Proc(), "Proc symbol creation failed");
+    ENFORCE(T_any_id = defn_T_any());
+    ENFORCE(T_all_id = defn_T_all());
+    ENFORCE(T_untyped_id = defn_T_untyped());
+    ENFORCE(T_nilable_id = defn_T_nilable());
 
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = core::Types::nil();
@@ -216,7 +228,7 @@ void GlobalState::initEmpty() {
     arg.info(*this).setRepeated();
     arg.info(*this).resultType = core::Types::Object();
     method.info(*this).arguments().push_back(arg);
-    method.info(*this).resultType = core::Types::hashClass();
+    method.info(*this).resultType = core::Types::hashOfUntyped();
 
     // Synthesize <Magic>#build_array(*vs : Object) => Array
     method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::buildArray());
@@ -224,12 +236,12 @@ void GlobalState::initEmpty() {
     arg.info(*this).setRepeated();
     arg.info(*this).resultType = core::Types::Object();
     method.info(*this).arguments().push_back(arg);
-    method.info(*this).resultType = core::Types::arrayClass();
+    method.info(*this).resultType = core::Types::arrayOfUntyped();
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.info(*this).resultType = core::Types::arrayClass();
+    arg.info(*this).resultType = core::Types::arrayOfUntyped();
     method.info(*this).arguments().push_back(arg);
     method.info(*this).resultType = core::Types::dynamic();
 
@@ -238,10 +250,20 @@ void GlobalState::initEmpty() {
     // This is a hack to handle that specific alias in pay-server; More-general
     // handling will require substantial additional sophistication in the
     // namer+resolver.
+
     SymbolRef db = enterClassSymbol(Loc::none(), defn_Opus(), enterNameConstant(DB_str));
+    db.info(*this).setIsModule(true);
+
     SymbolRef model = enterClassSymbol(Loc::none(), db, enterNameConstant(model_str));
+    model.info(*this).setIsModule(true);
+
     SymbolRef m = enterStaticFieldSymbol(Loc::none(), defn_root(), enterNameConstant(m_str));
     m.info(*this).resultType = make_unique<AliasType>(model);
+
+    // Allow T::Array[Int] to work as an an alias for Array[Int]
+    T_Array_id.info(*this).resultType = make_shared<ClassType>(T_Array_id);
+    // same for hash.
+    T_Hash_id.info(*this).resultType = make_shared<ClassType>(T_Hash_id);
 
     int reservedCount = 0;
 
@@ -337,6 +359,43 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
     ENFORCE(name.name(*this).isClassName(*this));
     return enterSymbol(loc, owner, name, Symbol::Flags::CLASS);
+}
+
+SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
+    u4 flags;
+    ENFORCE(owner.info(*this).isClass());
+    if (variance == Variance::Invariant) {
+        flags = Symbol::Flags::TYPE_INVARIANT;
+    } else if (variance == Variance::CoVariant) {
+        flags = Symbol::Flags::TYPE_COVARIANT;
+    } else if (variance == Variance::ContraVariant) {
+        flags = Symbol::Flags::TYPE_CONTRAVARIANT;
+    } else {
+        Error::notImplemented();
+    }
+
+    flags = flags | Symbol::Flags::TYPE_MEMBER;
+    SymbolRef result = enterSymbol(loc, owner, name, flags);
+    owner.info(*this).typeParams.emplace_back(result);
+    return result;
+}
+
+SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
+    u4 flags;
+    if (variance == Variance::Invariant) {
+        flags = Symbol::Flags::TYPE_INVARIANT;
+    } else if (variance == Variance::CoVariant) {
+        flags = Symbol::Flags::TYPE_COVARIANT;
+    } else if (variance == Variance::ContraVariant) {
+        flags = Symbol::Flags::TYPE_CONTRAVARIANT;
+    } else {
+        Error::notImplemented();
+    }
+
+    flags = flags | Symbol::Flags::TYPE_ARGUMENT;
+    SymbolRef result = enterSymbol(loc, owner, name, flags);
+    owner.info(*this).typeParams.emplace_back(result);
+    return result;
 }
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {

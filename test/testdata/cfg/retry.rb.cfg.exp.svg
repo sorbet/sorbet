@@ -107,7 +107,7 @@
 <title>bb::&lt;constant:Object&gt;#main_5</title>
 <ellipse fill="none" stroke="#000000" cx="296" cy="-343.5635" rx="280.2551" ry="84.7059"/>
 <text text-anchor="middle" x="296" y="-388.3635" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=5](try, returnMethodTemp$2)</text>
-<text text-anchor="middle" x="296" y="-374.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = try : Integer | NilClass</text>
+<text text-anchor="middle" x="296" y="-374.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = try : NilClass | Integer</text>
 <text text-anchor="middle" x="296" y="-360.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="296" y="-346.3635" font-family="Times,serif" font-size="14.00" fill="#000000">try = statTemp$10.+(statTemp$11) : untyped</text>
 <text text-anchor="middle" x="296" y="-332.3635" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = self : Object</text>
@@ -155,4 +155,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: f19f1973902113cc07a29ece04bcbc02b774bd4be8220a1d973b7b37fd4f97f2 -->
+<!-- ruby-types:sha256: bac6e380f211749d5d44c9720aeda540e31435592349d065c647346da662df32 -->

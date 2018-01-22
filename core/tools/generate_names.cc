@@ -44,10 +44,10 @@ NameDef names[] = {
     {"intern", Desugar},
     {"call", Desugar | Namer},
     {"bang", "!", Desugar | Infer | Parser},
-    {"squareBrackets", "[]", Desugar | Parser | Resolver},
+    {"squareBrackets", "[]", Desugar | Parser | Infer | Resolver},
     {"squareBracketsEq", "[]=", Parser},
-    {"unaryPlus", "@+", Parser},
-    {"unaryMinus", "@-", Parser},
+    {"unaryPlus", "@+", Parser | Namer},
+    {"unaryMinus", "@-", Parser | Namer},
     {"star", "*", Parser},
     {"starStar", "**", Parser},
     {"ampersand", "&", Parser},
@@ -88,12 +88,17 @@ NameDef names[] = {
 
     {"returns", Resolver},
     {"checked", Resolver},
-    {"all", Resolver},
-    {"any", Resolver},
+    {"all", Resolver | Infer | Core},
+    {"any", Resolver | Infer | Core},
     {"enum_", "enum", Resolver},
-    {"nilable", Resolver | Desugar | Infer},
-    {"untyped", Resolver},
+    {"nilable", Resolver | Desugar | Infer | Core},
+    {"untyped", Resolver | Infer | Core},
+    {"Array", Infer},
+    {"Hash", Infer},
     {"arrayOf", "array_of", Resolver},
+    {"Elem", Resolver},  // Array Type parameter name
+    {"Key", Resolver},   // Hash Type parameter name
+    {"Value", Resolver}, // Hash Type parameter name
     {"hashOf", "hash_of", Resolver},
     {"noreturn", Resolver},
     {"declareVariables", "declare_variables", Resolver},
@@ -113,6 +118,7 @@ NameDef names[] = {
     {"privateClassMethod", "private_class_method", Namer | Resolver},
     {"moduleFunction", "module_function", Namer | Resolver},
     {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
+    {"type_decl", "type_decl", Namer | Resolver},
     // end DSL methods
 
     // Our own special methods which have special meaning

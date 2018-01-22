@@ -37,7 +37,7 @@ public:
     }
 
     inline bool exists() const {
-        return _id != 0;
+        return _id > 0;
     }
 
     File &file(GlobalState &gs) const;

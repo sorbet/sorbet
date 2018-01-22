@@ -13,6 +13,8 @@ class Symbol;
 class GlobalState;
 class Type;
 
+enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
+
 class SymbolRef final {
     friend class GlobalState;
     friend class Symbol;
@@ -71,6 +73,7 @@ public:
     }
 
     std::string toString(GlobalState &gs, int tabs = 0, bool showHidden = false) const;
+    SymbolRef dealiasAt(GlobalState &gs, core::SymbolRef klass);
 
     u4 _id;
 
@@ -116,6 +119,10 @@ public:
         static constexpr int TYPE_ARGUMENT = 0x0400;
         static constexpr int TYPE_MEMBER = 0x0200;
 
+        // Class flags
+        static constexpr int CLASS_CLASS = 0x0100;
+        static constexpr int CLASS_MODULE = 0x0080;
+
         // Method argument flags
         static constexpr int ARGUMENT_OPTIONAL = 0x0100;
         static constexpr int ARGUMENT_KEYWORD = 0x0080;
@@ -125,7 +132,7 @@ public:
         // Method flags
         static constexpr int METHOD_PROTECTED = 0x0100;
         static constexpr int METHOD_PRIVATE = 0x0080;
-        static constexpr int METHOD_OVERLOADED = 0x040;
+        static constexpr int METHOD_OVERLOADED = 0x0040;
 
         static constexpr int TYPE_COVARIANT = 0x0100;
         static constexpr int TYPE_INVARIANT = 0x0080;
@@ -152,6 +159,9 @@ public:
      * for method - ordered type generic type arguments of the class
      */
     std::vector<SymbolRef> typeParams;
+
+    /** Type alisases are introduced by resolver and SHOULD NOT be seriazlied */
+    std::vector<std::pair<SymbolRef, SymbolRef>> typeAliases;
     SymbolRef superClass;
     std::shared_ptr<Type> resultType;
 
@@ -242,6 +252,16 @@ public:
         return (flags & Symbol::Flags::TYPE_CONTRAVARIANT) != 0;
     }
 
+    core::Variance variance() const {
+        if (isInvariant())
+            return Variance::Invariant;
+        if (isCovariant())
+            return Variance ::CoVariant;
+        if (isContravariant())
+            return Variance ::ContraVariant;
+        Error::raise("Should not happen");
+    }
+
     inline bool isPublic() const {
         ENFORCE(isMethod());
         return !isProtected() && !isPrivate();
@@ -264,6 +284,34 @@ public:
         flags = flags | Symbol::Flags::CLASS;
     }
 
+    inline void setIsModule(bool isModule) {
+        ENFORCE(isClass());
+        if (isModule) {
+            ENFORCE((flags & Symbol::Flags::CLASS_CLASS) == 0);
+            flags = flags | Symbol::Flags::CLASS_MODULE;
+        } else {
+            ENFORCE((flags & Symbol::Flags::CLASS_MODULE) == 0);
+            flags = flags | Symbol::Flags::CLASS_CLASS;
+        }
+    }
+
+    inline bool isClassModule() {
+        ENFORCE(isClass());
+        if (flags & Symbol::Flags::CLASS_MODULE)
+            return true;
+        if (flags & Symbol::Flags::CLASS_CLASS)
+            return false;
+        Error::raise("Should never happen");
+    }
+
+    inline bool isClassModuleSet() {
+        ENFORCE(isClass());
+        return flags & (Symbol::Flags::CLASS_MODULE | Symbol::Flags::CLASS_CLASS);
+    }
+
+    inline bool isClassClass() {
+        return !isClassModule();
+    }
     inline void setStaticField() {
         ENFORCE(!isClass() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::STATIC_FIELD;

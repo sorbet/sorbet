@@ -967,7 +967,12 @@ statTemp$88 = 1 : Integer(1)
 statTemp$89 = -1 : Integer(-1)
 statTemp$86 = <constant:Range>$17.new(statTemp$88, statTemp$89) : Range
 statTemp$84 = <block-nested: line>.[](statTemp$86) : untyped
-blockReturnTemp$37 = <block-nested: added_lines>.<<(statTemp$84) : Array
+blockReturnTemp$37 = <block-nested: added_lines>.<<(statTemp$84) : AppliedType {
+  klass = ::<constant:Array>
+  targs = [
+    0 = untyped
+  ]
+}
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_29" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" [style="bold"];
@@ -986,7 +991,12 @@ statTemp$98 = 1 : Integer(1)
 statTemp$99 = -1 : Integer(-1)
 statTemp$96 = <constant:Range>$17.new(statTemp$98, statTemp$99) : Range
 statTemp$94 = <block-nested: line>.[](statTemp$96) : untyped
-blockReturnTemp$37 = <block-nested: removed_lines>.<<(statTemp$94) : Array
+blockReturnTemp$37 = <block-nested: removed_lines>.<<(statTemp$94) : AppliedType {
+  klass = ::<constant:Array>
+  targs = [
+    0 = untyped
+  ]
+}
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_31" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_8" [style="bold"];

@@ -22,7 +22,17 @@ ifTemp$5"];
     "bb::<constant:Test>#normalize_params_1" -> "bb::<constant:Test>#normalize_params_1" [style="bold"];
     "bb::<constant:Test>#normalize_params_2" [label = "block[id=2](v, returnMethodTemp$3)
 statTemp$10 = self : Test
-statTemp$11 = v.to_a() : Array
+statTemp$11 = v.to_a() : AppliedType {
+  klass = ::<constant:Array>
+  targs = [
+    0 = AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          0 = BasicObject
+        ]
+      }
+  ]
+}
 statTemp$9 = statTemp$10.normalize_params(statTemp$11) : untyped
 returnMethodTemp$3 = statTemp$9.sort() : untyped
 <unconditional>"];
@@ -36,7 +46,12 @@ ifTemp$13"];
     "bb::<constant:Test>#normalize_params_3" -> "bb::<constant:Test>#normalize_params_5" [style="tapered"];
 
     "bb::<constant:Test>#normalize_params_4" [label = "block[id=4](v, statTemp$17)
-statTemp$17 = v : Array
+statTemp$17 = v : AppliedType {
+  klass = ::<constant:Array>
+  targs = [
+    0 = untyped
+  ]
+}
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_4" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];
@@ -53,7 +68,12 @@ outerLoops: 1
     "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_7" [style="tapered"];
 
     "bb::<constant:Test>#normalize_params_7" [label = "block[id=7](returnMethodTemp$3, statTemp$17)
-returnMethodTemp$3 = statTemp$17.map() : Array
+returnMethodTemp$3 = statTemp$17.map() : AppliedType {
+  klass = ::<constant:Array>
+  targs = [
+    0 = untyped
+  ]
+}
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_7" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];

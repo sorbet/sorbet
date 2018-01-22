@@ -50,6 +50,20 @@ public:
         return isSubType(ctx, t1, t2);
     }
 
+    /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
+    static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+        return isSubType(ctx.withFrozenConstraint(), t1, t2);
+    }
+    inline static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &&t2) {
+        return isSubTypeWhenFrozen(ctx, t1, t2);
+    }
+    inline static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &t2) {
+        return isSubTypeWhenFrozen(ctx, t1, t2);
+    }
+    inline static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
+        return isSubTypeWhenFrozen(ctx, t1, t2);
+    }
+
     static bool equiv(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
     inline static bool equiv(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &&t2) {
         return equiv(ctx, t1, t2);
@@ -82,6 +96,8 @@ public:
     static std::shared_ptr<Type> Object();
     static std::shared_ptr<Type> arrayClass();
     static std::shared_ptr<Type> hashClass();
+    static std::shared_ptr<Type> arrayOfUntyped();
+    static std::shared_ptr<Type> hashOfUntyped();
     static std::shared_ptr<Type> procClass();
     static std::shared_ptr<Type> falsyTypes();
     static std::shared_ptr<Type> dropSubtypesOf(core::Context ctx, std::shared_ptr<Type> from, core::SymbolRef klass);
@@ -89,6 +105,15 @@ public:
                                                      std::shared_ptr<Type> what);
     static bool canBeTruthy(core::Context ctx, std::shared_ptr<Type> what);
     static bool canBeFalsy(core::Context ctx, std::shared_ptr<Type> what);
+    enum Combinator { OR, AND };
+    static std::shared_ptr<Type> dropRefinements(core::Context ctx, std::shared_ptr<Type> onWhat,
+                                                 core::NameRef refiningName);
+    static std::shared_ptr<Type> resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
+                                                      std::vector<std::shared_ptr<Type>> &targs);
+
+    static std::vector<core::SymbolRef> alignBaseTypeArgs(core::Context ctx, core::SymbolRef what,
+                                                          std::vector<std::shared_ptr<Type>> &targs,
+                                                          core::SymbolRef asIf);
 };
 
 class TypeAndOrigins final {
@@ -114,6 +139,8 @@ public:
     virtual ~Type() = default;
     virtual std::string toString(GlobalState &gs, int tabs = 0) = 0;
     virtual std::string typeName() = 0;
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              std::vector<std::shared_ptr<Type>> &targs) = 0;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                bool hasBlock) = 0;
@@ -128,7 +155,9 @@ public:
 
     bool isDynamic();
     bool isBottom();
+    bool isTop();
     virtual bool isFullyDefined() = 0;
+    virtual int kind() = 0;
 };
 
 template <class To> To *cast_type(Type *what) {
@@ -141,10 +170,7 @@ template <class To> bool isa_type(Type *what) {
     return cast_type<To>(what) != nullptr;
 }
 
-class GroundType : public Type {
-public:
-    virtual int kind() = 0;
-};
+class GroundType : public Type {};
 
 class ProxyType : public Type {
 public:
@@ -167,15 +193,19 @@ public:
     ClassType(core::SymbolRef symbol);
     virtual int kind() final;
 
-    virtual std::string toString(GlobalState &gs, int tabs = 0);
-    virtual std::string typeName();
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                bool hasBlock) final;
+    std::shared_ptr<Type> dispatchCallWithTargs(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                                std::vector<std::shared_ptr<Type>> &targs, bool hasBlock);
+
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
-
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
     virtual bool isFullyDefined() final;
 };
 
@@ -185,8 +215,8 @@ public:
     std::shared_ptr<Type> right;
     virtual int kind() final;
 
-    virtual std::string toString(GlobalState &gs, int tabs = 0);
-    virtual std::string typeName();
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                bool hasBlock) final;
@@ -194,6 +224,7 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
 
 private:
     /*
@@ -213,6 +244,8 @@ private:
     friend class ruby_typer::core::serialize::GlobalStateSerializer;
     friend std::shared_ptr<Type> lubDistributeOr(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     friend std::shared_ptr<Type> lubGround(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::_lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::_glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
 
     static inline std::shared_ptr<Type> make_shared(std::shared_ptr<Type> left, std::shared_ptr<Type> right) {
         std::shared_ptr<Type> res(new OrType(left, right));
@@ -226,8 +259,8 @@ public:
     std::shared_ptr<Type> right;
     virtual int kind() final;
 
-    virtual std::string toString(GlobalState &gs, int tabs = 0);
-    virtual std::string typeName();
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                bool hasBlock) final;
@@ -236,6 +269,7 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
 
 private:
     // See the comments on OrType()
@@ -243,9 +277,13 @@ private:
 
     friend class ruby_typer::core::GlobalSubstitution;
     friend class ruby_typer::core::serialize::GlobalStateSerializer;
+    friend std::shared_ptr<Type> Types::dropRefinements(core::Context ctx, std::shared_ptr<Type> onWhat,
+                                                        core::NameRef refiningName);
     friend std::shared_ptr<Type> lubGround(Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
     friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     friend std::shared_ptr<Type> glbGround(Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::_lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::_glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
 
     static inline std::shared_ptr<Type> make_shared(std::shared_ptr<Type> left, std::shared_ptr<Type> right) {
         std::shared_ptr<Type> res(new AndType(left, right));
@@ -264,6 +302,9 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0);
     virtual std::string typeName();
     virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
 };
 
 class ShapeType final : public ProxyType {
@@ -280,6 +321,9 @@ public:
                                                bool hasBlock) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
 };
 
 class TupleType final : public ProxyType {
@@ -291,6 +335,9 @@ public:
     virtual std::string typeName();
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
 };
 
 // MagicType is the type of the built-in core::GlobalState::defn_Magic()
@@ -307,13 +354,105 @@ public:
                                                bool hasBlock) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
+};
+
+class TypeVar final : public Type {
+public:
+    std::vector<std::shared_ptr<Type>> upperConstraints; // todo: make sure this does not build cycles
+    std::vector<std::shared_ptr<Type>> lowerConstraints; // todo: make sure this does not build cycles
+    std::shared_ptr<Type> instantiation;
+    bool isInstantiated = false;
+    NameRef name;
+    TypeVar(NameRef name);
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
+    void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
+};
+
+class AppliedType final : public Type {
+public:
+    // .underlying is always a ClassType
+    core::SymbolRef klass;
+    std::vector<std::shared_ptr<Type>> targs;
+    AppliedType(core::SymbolRef klass, std::vector<std::shared_ptr<Type>> targs) : klass(klass), targs(targs){};
+
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
+    void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
+
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
+
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+};
+
+class TypeConstructor final : public Type {
+public:
+    core::SymbolRef protoType;
+    std::vector<std::shared_ptr<Type>> targs;
+
+    TypeConstructor(core::SymbolRef proto, const std::vector<std::shared_ptr<Type>> &targs);
+
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
+
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
+};
+
+class LambdaParam final : public Type {
+public:
+    core::SymbolRef definition;
+
+    LambdaParam(const SymbolRef definition);
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
+
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
 };
 
 class AliasType final : public Type {
 public:
     AliasType(SymbolRef other);
-    virtual std::string toString(GlobalState &gs, int tabs = 0);
-    virtual std::string typeName();
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                bool hasBlock) final;
@@ -323,6 +462,9 @@ public:
     SymbolRef symbol;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
 };
 
 } // namespace core

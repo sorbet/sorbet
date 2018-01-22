@@ -16,6 +16,7 @@ end
 module Enumerable
 end
 class Array < Object
+  type_decl Elem
   include Enumerable
 end
 module Benchmark
@@ -529,6 +530,8 @@ class Gem::Version < Object
   include Comparable
 end
 class Hash < Object
+  type_decl Key
+  type_decl Value
   include Enumerable
 end
 module IO::WaitReadable
@@ -759,6 +762,12 @@ end
 
 class Array
   sig(
+    stuff: T.untyped
+  )
+  .returns(T::Array[T.untyped])
+  def self.[](*stuff); end
+
+  sig(
       arg0: BasicObject,
   )
   .returns(T::Array[T.untyped])
@@ -771,7 +780,7 @@ class Array
   sig(
       arg0: T.any(Integer, Float),
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
       arg0: Integer,
       arg1: Integer,
@@ -4966,6 +4975,12 @@ module Gem
 end
 
 class Hash
+  sig(
+    stuff: T.untyped
+  )
+  .returns(T::Array[T.untyped])
+  def self.[](*stuff); end
+
   sig(
       arg0: BasicObject,
   )
