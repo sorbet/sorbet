@@ -784,34 +784,47 @@ public:
         newMethodSet();
     }
     ~FlattenWalk() {
-        ENFORCE(methodsStack.empty());
+        ENFORCE(methodScopes.empty());
         ENFORCE(classes.empty());
-        ENFORCE(classOrder.empty());
+        ENFORCE(classStack.empty());
     }
 
     ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
         newMethodSet();
-        classOrder.emplace_back(classDef->symbol);
+        classStack.emplace_back(classes.size());
+        classes.emplace_back();
         return classDef;
     }
 
     ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
-        classDef->rhs = addMethods(ctx, move(classDef->rhs));
-        classes.emplace_back(make_unique<ast::ClassDef>(classDef->loc, classDef->symbol, move(classDef->name),
-                                                        move(classDef->ancestors), move(classDef->rhs),
-                                                        classDef->kind));
+        ENFORCE(!classStack.empty());
+        ENFORCE(classes.size() > classStack.back());
+        ENFORCE(classes[classStack.back()] == nullptr);
+
+        auto rhs = addMethods(ctx, move(classDef->rhs));
+        classes[classStack.back()] = make_unique<ast::ClassDef>(classDef->loc, classDef->symbol, move(classDef->name),
+                                                                move(classDef->ancestors), move(rhs), classDef->kind);
+        classStack.pop_back();
         return new ast::EmptyTree(classDef->loc);
     };
 
     ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *methodDef) {
-        curMethodSet().order.emplace_back(methodDef->symbol);
+        auto &methods = curMethodSet();
+        methods.stack.emplace_back(methods.methods.size());
+        methods.methods.emplace_back();
         return methodDef;
     }
 
     ast::Expression *postTransformMethodDef(core::Context ctx, ast::MethodDef *methodDef) {
-        curMethodSet().methods.emplace_back(make_unique<ast::MethodDef>(methodDef->loc, methodDef->symbol,
-                                                                        move(methodDef->name), move(methodDef->args),
-                                                                        move(methodDef->rhs), methodDef->isSelf));
+        auto &methods = curMethodSet();
+        ENFORCE(!methods.stack.empty());
+        ENFORCE(methods.methods.size() > methods.stack.back());
+        ENFORCE(methods.methods[methods.stack.back()] == nullptr);
+
+        methods.methods[methods.stack.back()] =
+            make_unique<ast::MethodDef>(methodDef->loc, methodDef->symbol, move(methodDef->name), move(methodDef->args),
+                                        move(methodDef->rhs), methodDef->isSelf);
+        methods.stack.pop_back();
         return new ast::EmptyTree(methodDef->loc);
     };
 
@@ -867,21 +880,9 @@ public:
 
 private:
     vector<unique_ptr<ast::ClassDef>> sortedClasses() {
-        vector<unique_ptr<ast::ClassDef>> ret;
-        ENFORCE(classOrder.size() == classes.size());
-
-        for (auto symbol : classOrder) {
-            for (auto it = classes.begin(); it != classes.end(); ++it) {
-                auto &classDef = *it;
-                if (classDef->symbol == symbol) {
-                    ret.emplace_back(move(classDef));
-                    classes.erase(it);
-                    break;
-                }
-            }
-        }
-        classOrder.clear();
-        ENFORCE(classes.size() == 0);
+        ENFORCE(classStack.empty());
+        auto ret = move(classes);
+        classes.clear();
         return ret;
     }
 
@@ -900,55 +901,43 @@ private:
     }
 
     vector<unique_ptr<ast::MethodDef>> popCurMethodDefs() {
-        vector<unique_ptr<ast::MethodDef>> ret;
-        auto &methodStack = curMethodSet();
-        methodStack.sanityCheck();
-        auto &order = methodStack.order;
-        auto &methods = methodStack.methods;
-
-        for (auto symbol : order) {
-            for (auto it = methods.begin(); it != methods.end(); ++it) {
-                auto &methodDef = *it;
-                if (methodDef->symbol == symbol) {
-                    ret.emplace_back(move(methodDef));
-                    methods.erase(it);
-                    break;
-                }
-            }
-        }
-        order.clear();
-        ENFORCE(methods.size() == 0);
+        auto ret = move(curMethodSet().methods);
+        ENFORCE(curMethodSet().stack.empty());
         popCurMethodSet();
         return ret;
     };
 
     struct Methods {
         vector<unique_ptr<ast::MethodDef>> methods;
-        vector<core::SymbolRef> order;
-        void sanityCheck() {
-            if (!debug_mode) {
-                return;
-            }
-            ENFORCE(order.size() == methods.size(), order.size(), " != ", methods.size());
-        }
+        vector<int> stack;
         Methods() {}
     };
     void newMethodSet() {
-        Methods methods;
-        methodsStack.emplace_back(move(methods));
+        methodScopes.emplace_back();
     }
     Methods &curMethodSet() {
-        ENFORCE(methodsStack.size() > 0);
-        return methodsStack.back();
+        ENFORCE(methodScopes.size() > 0);
+        return methodScopes.back();
     }
     void popCurMethodSet() {
-        ENFORCE(methodsStack.size() > 0);
-        methodsStack.pop_back();
+        ENFORCE(methodScopes.size() > 0);
+        methodScopes.pop_back();
     }
 
-    vector<Methods> methodsStack;
+    // We flatten nested classes and methods into a flat list. We want to sort
+    // them by their starts, so that `class A; class B; end; end` --> `class A;
+    // end; class B; end`.
+    //
+    // In order to make TreeMap work out, we can't remove them from the AST
+    // until the `postTransform*` hook. Appending them to a list at that point
+    // would result in an "bottom-up" ordering, so instead we store a stack of
+    // "where does the next definition belong" into `classStack` and
+    // `methodScopes.stack`, which we push onto in the `preTransform* hook, and
+    // pop from in the `postTransform` hook.
+
+    vector<Methods> methodScopes;
     vector<unique_ptr<ast::ClassDef>> classes;
-    vector<core::SymbolRef> classOrder;
+    vector<int> classStack;
 };
 
 class ResolveVariablesWalk {
