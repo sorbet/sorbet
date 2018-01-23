@@ -115,3 +115,8 @@ SHARDS = 8
     )
     for shard in range(SHARDS)
 ]
+
+test_suite(
+    name = "test_corpus",
+    tests = ["test_corpus{}".format(shard) for shard in range(SHARDS)],
+)
