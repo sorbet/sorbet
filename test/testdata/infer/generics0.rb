@@ -5,7 +5,7 @@
 
 
 class Box
-  type_decl A
+  A = T.type
 
    # declare_variables(
    #   :@value => T,

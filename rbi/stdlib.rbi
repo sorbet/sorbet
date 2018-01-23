@@ -16,7 +16,7 @@ end
 module Enumerable
 end
 class Array < Object
-  type_decl Elem
+  Elem = T.type
   include Enumerable
 end
 module Benchmark
@@ -530,8 +530,8 @@ class Gem::Version < Object
   include Comparable
 end
 class Hash < Object
-  type_decl Key
-  type_decl Value
+  Key = T.type
+  Value = T.type
   include Enumerable
 end
 module IO::WaitReadable

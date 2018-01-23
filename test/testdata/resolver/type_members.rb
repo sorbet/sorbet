@@ -1,33 +1,32 @@
 # @typed
 
 class CovariantNotAllowed
-  type_decl +T # error: can only have invariant type members
+  Elem = T.type(:in) # error: can only have invariant type members
 end
 
 class Invalids
-  type_decl t # error: Invalid type definition
-  type_decl 1+1 # error: Invalid type definition
-  type_decl :baz # error: Invalid type definition
-  type_decl "mama" # error: Invalid type definition
-  type_decl 1 # error: Invalid type definition
-  type_decl [1] # error: Invalid type definition
+  Exp = T.type(1+1) # error: Invalid type definition
+  Baz = T.type(:baz) # error: Invalid variance kind, only :out and :in are supported
+  Mama = T.type("mama") # error: Invalid type definition
+  One = T.type(1) # error: Invalid type definition
+  ArrOne = T.type([1]) # error: Invalid type definition
 end
 
 
 class Parent
-  type_decl T
+  Elem = T.type
 end
 
 class GoodChild < Parent
-  type_decl T
-  type_decl My
+  Elem = T.type
+  My = T.type
 end
 
 class BadChild1 < Parent
-  type_decl My
-  type_decl T # error: Type members in wrong order
+  My = T.type
+  Elem = T.type # error: Type members in wrong order
 end
 
 class BadChild2 < Parent # error: should be declared again
-  type_decl My
+  My = T.type
 end

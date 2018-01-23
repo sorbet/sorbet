@@ -118,7 +118,11 @@ NameDef names[] = {
     {"privateClassMethod", "private_class_method", Namer | Resolver},
     {"moduleFunction", "module_function", Namer | Resolver},
     {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
-    {"type_decl", "type_decl", Namer | Resolver},
+    {"typeDecl", "type", Namer},
+    {"T", Namer},
+    {"covariant", "out", Namer},
+    {"contravariant", "in", Namer},
+    {"invariant", "<invariant>", Namer},
     // end DSL methods
 
     // Our own special methods which have special meaning
