@@ -26,10 +26,7 @@ namespace ruby_typer {
 // various other memory errors normally associated with raw C strings. The
 // compiler will typically deduplicate string literals within a translation
 // units (but not necessarily between translation units), but this can't be
-// relied upon, so we have a slow-path `strings_by_value` hash below that we
-// will use to lookup unknown `const char *`s the first time they enter the
-// system. We will incur that lookup cost once per unique pointer value per
-// thread.
+// relied upon, so we canonicalize strings when retrieving statistics.
 
 struct ConstExprStr {
     char const *str;
@@ -44,23 +41,22 @@ struct ConstExprStr {
     ConstExprStr() = delete;
 };
 
+struct CounterImpl;
+
 struct CounterState {
-    CounterState() = default;
-    CounterState(CounterState const &) = delete;
-    CounterState(CounterState &&) = default;
-    CounterState &operator=(CounterState &&) = default;
-    typedef unsigned long CounterType;
+    CounterState();
+    ~CounterState();
+    CounterState(CounterState &&rhs);
+    CounterState &operator=(CounterState &&rhs);
 
-    void clear();
+    CounterState(const CounterState &rhs) = delete;
 
-    // absl::string_view isn't hashable, so we use an unordered map. We could
-    // implement hash ourselves, but this is the slowpath anyways.
-    std::map<absl::string_view, const char *> strings_by_value;
-    std::map<const char *, const char *> strings_by_ptr;
+private:
+    friend CounterState getAndClearThreadCounters();
+    friend void counterConsume(CounterState cs);
 
-    std::map<const char *, std::map<int, CounterType>> histograms;
-    std::map<const char *, CounterType> counters;
-    std::map<const char *, std::map<const char *, CounterType>> counters_by_category;
+    CounterState(std::unique_ptr<CounterImpl> counters);
+    std::unique_ptr<CounterImpl> counters;
 };
 
 CounterState getAndClearThreadCounters();

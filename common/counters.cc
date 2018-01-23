@@ -17,66 +17,86 @@ using namespace std;
 namespace ruby_typer {
 static constexpr bool enable_counters = debug_mode;
 
-thread_local CounterState counterState;
+CounterState::CounterState(unique_ptr<CounterImpl> counters) : counters(move(counters)) {}
 
-namespace {
-const char *internKey(const char *str) {
-    auto it1 = counterState.strings_by_ptr.find(str);
-    if (it1 != counterState.strings_by_ptr.end()) {
-        return it1->second;
+CounterState::CounterState() = default;
+CounterState::~CounterState() = default;
+CounterState::CounterState(CounterState &&rhs) = default;
+CounterState &CounterState::operator=(CounterState &&rhs) = default;
+
+struct CounterImpl {
+    CounterImpl() = default;
+    CounterImpl(CounterImpl const &) = delete;
+    CounterImpl(CounterImpl &&) = default;
+    CounterImpl &operator=(CounterImpl &&) = delete;
+    typedef unsigned long CounterType;
+
+    CounterImpl canonicalize();
+
+    void clear();
+
+    const char *internKey(const char *str) {
+        auto it1 = this->strings_by_ptr.find(str);
+        if (it1 != this->strings_by_ptr.end()) {
+            return it1->second;
+        }
+
+        absl::string_view view(str);
+        auto it2 = this->strings_by_value.find(view);
+        if (it2 != this->strings_by_value.end()) {
+            this->strings_by_ptr[str] = it2->second;
+            return it2->second;
+        }
+
+        this->strings_by_value[view] = str;
+        this->strings_by_ptr[str] = str;
+        return str;
     }
 
-    absl::string_view view(str);
-    auto it2 = counterState.strings_by_value.find(view);
-    if (it2 != counterState.strings_by_value.end()) {
-        counterState.strings_by_ptr[str] = it2->second;
-        return it2->second;
+    void histogramAdd(const char *histogram, int key, unsigned int value) {
+        if (!enable_counters) {
+            return;
+        }
+        this->histograms[histogram][key] += value;
     }
 
-    counterState.strings_by_value[view] = str;
-    counterState.strings_by_ptr[str] = str;
-    return str;
-}
+    void categoryCounterAdd(const char *category, const char *counter, unsigned int value) {
+        if (!enable_counters) {
+            return;
+        }
 
-void histogramAdd(const char *histogram, int key, unsigned int value) {
-    if (!enable_counters) {
-        return;
-    }
-    const char *skey = internKey(histogram);
-    counterState.histograms[skey][key] += value;
-}
-
-void categoryCounterAdd(const char *category, const char *counter, unsigned int value) {
-    if (!enable_counters) {
-        return;
+        this->counters_by_category[category][counter] += value;
     }
 
-    const char *categoryKey = internKey(category);
-    const char *key = internKey(counter);
-    counterState.counters_by_category[categoryKey][key] += value;
-}
-
-void counterAdd(const char *counter, unsigned int value) {
-    if (!enable_counters) {
-        return;
+    void counterAdd(const char *counter, unsigned int value) {
+        if (!enable_counters) {
+            return;
+        }
+        this->counters[counter] += value;
     }
-    const char *key = internKey(counter);
-    counterState.counters[key] += value;
-}
 
-} // namespace
+    // absl::string_view isn't hashable, so we use an unordered map. We could
+    // implement hash ourselves, but this is the slowpath anyways.
+    std::map<absl::string_view, const char *> strings_by_value;
+    std::map<const char *, const char *> strings_by_ptr;
+
+    std::map<const char *, std::map<int, CounterType>> histograms;
+    std::map<const char *, CounterType> counters;
+    std::map<const char *, std::map<const char *, CounterType>> counters_by_category;
+};
+
+thread_local CounterImpl counterState;
 
 CounterState getAndClearThreadCounters() {
     if (!enable_counters) {
-        CounterState empty;
-        return empty;
+        return CounterState(make_unique<CounterImpl>());
     }
-    CounterState result = move(counterState);
+    auto state = make_unique<CounterImpl>(move(counterState));
     counterState.clear();
-    return result;
+    return CounterState(move(state));
 }
 
-void CounterState::clear() {
+void CounterImpl::clear() {
     this->strings_by_value.clear();
     this->strings_by_ptr.clear();
     this->histograms.clear();
@@ -88,25 +108,25 @@ void counterConsume(CounterState cs) {
     if (!enable_counters) {
         return;
     }
-    for (auto &cat : counterState.counters_by_category) {
+    for (auto &cat : cs.counters->counters_by_category) {
         for (auto &e : cat.second) {
-            categoryCounterAdd(cat.first, e.first, e.second);
+            counterState.categoryCounterAdd(cat.first, e.first, e.second);
         }
     }
 
-    for (auto &hist : counterState.histograms) {
+    for (auto &hist : cs.counters->histograms) {
         for (auto &e : hist.second) {
-            histogramAdd(hist.first, e.first, e.second);
+            counterState.histogramAdd(hist.first, e.first, e.second);
         }
     }
 
-    for (auto &e : counterState.counters) {
-        counterAdd(e.first, e.second);
+    for (auto &e : cs.counters->counters) {
+        counterState.counterAdd(e.first, e.second);
     }
 }
 
 void counterAdd(ConstExprStr counter, unsigned int value) {
-    counterAdd(counter.str, value);
+    counterState.counterAdd(counter.str, value);
 }
 
 void counterInc(ConstExprStr counter) {
@@ -118,15 +138,15 @@ void categoryCounterInc(ConstExprStr category, ConstExprStr counter) {
 }
 
 void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value) {
-    categoryCounterAdd(category.str, counter.str, value);
+    counterState.categoryCounterAdd(category.str, counter.str, value);
 }
 
 void histogramInc(ConstExprStr histogram, int key) {
-    histogramAdd(histogram.str, key, 1);
+    counterState.histogramAdd(histogram.str, key, 1);
 }
 
 void histogramAdd(ConstExprStr histogram, int key, unsigned int value) {
-    histogramAdd(histogram.str, key, value);
+    counterState.histogramAdd(histogram.str, key, value);
 }
 
 const int MAX_WIDTH = 100;
@@ -144,6 +164,27 @@ string padOrLimit(string s, int l) {
     return s;
 }
 
+CounterImpl CounterImpl::canonicalize() {
+    CounterImpl out;
+
+    for (auto &cat : this->counters_by_category) {
+        for (auto &e : cat.second) {
+            out.categoryCounterAdd(internKey(cat.first), internKey(e.first), e.second);
+        }
+    }
+
+    for (auto &hist : this->histograms) {
+        for (auto &e : hist.second) {
+            out.histogramAdd(internKey(hist.first), e.first, e.second);
+        }
+    }
+
+    for (auto &e : this->counters) {
+        counterAdd(internKey(e.first), e.second);
+    }
+    return out;
+}
+
 string getCounterStatistics() {
     if (!enable_counters) {
         return "Statistics collection is not available in production build. Use debug build.";
@@ -151,9 +192,12 @@ string getCounterStatistics() {
     stringstream buf;
 
     buf << "Counters: " << endl;
-    for (auto &cat : counterState.counters_by_category) {
-        CounterState::CounterType sum = 0;
-        std::vector<pair<CounterState::CounterType, string>> sorted;
+
+    auto canon = counterState.canonicalize();
+
+    for (auto &cat : canon.counters_by_category) {
+        CounterImpl::CounterType sum = 0;
+        std::vector<pair<CounterImpl::CounterType, string>> sorted;
         for (auto &e : cat.second) {
             sum += e.second;
             sorted.emplace_back(e.second, e.first);
@@ -173,14 +217,14 @@ string getCounterStatistics() {
     }
 
     buf << "\nHistograms: " << endl;
-    for (auto &hist : counterState.histograms) {
-        CounterState::CounterType sum = 0;
+    for (auto &hist : canon.histograms) {
+        CounterImpl::CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
         }
         buf << " " << hist.first << "    Total: " << sum << endl;
 
-        CounterState::CounterType header = 0;
+        CounterImpl::CounterType header = 0;
         auto it = hist.second.begin();
         while (it != hist.second.end() && (header + it->second) * 1.0 / sum < HIST_CUTOFF) {
             header += it->second;
@@ -216,7 +260,7 @@ string getCounterStatistics() {
     buf << "\nOther:\n";
     {
         vector<pair<string, string>> sortedOther;
-        for (auto &e : counterState.counters) {
+        for (auto &e : canon.counters) {
             string number = to_string(e.second);
             if (number.size() < 6) {
                 number = padOrLimit(number, 6);
@@ -258,8 +302,9 @@ bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
 
     StatsdClientWrapper statsd(host, port, prefix);
 
-    for (auto &cat : counterState.counters_by_category) {
-        CounterState::CounterType sum = 0;
+    auto canon = counterState.canonicalize();
+    for (auto &cat : canon.counters_by_category) {
+        CounterImpl::CounterType sum = 0;
         for (auto &e : cat.second) {
             sum += e.second;
             statsd.gauge(absl::StrCat(cat.first, ".", e.first), e.second);
@@ -268,8 +313,8 @@ bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
         statsd.gauge(absl::StrCat(cat.first, ".total"), sum);
     }
 
-    for (auto &hist : counterState.histograms) {
-        CounterState::CounterType sum = 0;
+    for (auto &hist : canon.histograms) {
+        CounterImpl::CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
             statsd.gauge(absl::StrCat(hist.first, ".", e.first), e.second);
@@ -278,7 +323,7 @@ bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
         statsd.gauge(absl::StrCat(hist.first, ".total"), sum);
     }
 
-    for (auto &e : counterState.counters) {
+    for (auto &e : canon.counters) {
         statsd.gauge(e.first, e.second);
     }
 
