@@ -300,34 +300,6 @@ public:
                     aliasMethod(ctx, methodOwner(ctx), args[0], meth);
                     break;
                 }
-                case core::Names::type_decl()._id: {
-                    bool fail = false;
-                    core::Variance variance = core::Variance ::Invariant;
-                    fail = fail || original->args.size() != 1;
-                    ast::ConstantLit *nameLit = nullptr;
-                    nameLit = ast::cast_tree<ast::ConstantLit>(original->args[0].get());
-                    if (!fail && nameLit == nullptr) {
-                        auto send = ast::cast_tree<ast::Send>(original->args[0].get());
-                        if (send != nullptr &&
-                            (send->fun == core::Names::unaryMinus() || send->fun == core::Names::unaryPlus())) {
-                            if (send->fun == core::Names::unaryMinus()) {
-                                variance = core::Variance ::ContraVariant;
-                            } else {
-                                variance = core::Variance ::CoVariant;
-                            }
-                            nameLit = ast::cast_tree<ast::ConstantLit>(send->recv.get());
-                        }
-                    }
-                    fail = fail || nameLit == nullptr;
-                    fail = fail || ast::cast_tree<ast::EmptyTree>(nameLit->scope.get()) == nullptr;
-                    if (fail) {
-                        ctx.state.error(original->loc, core::errors::Namer::InvalidTypeDefinition,
-                                        "Invalid type definition");
-                    } else {
-                        ctx.state.enterTypeMember(original->loc, ctx.enclosingClass(), nameLit->cnst, variance);
-                    }
-                    return new ast::EmptyTree(original->loc);
-                }
             }
         }
 
@@ -443,17 +415,60 @@ public:
         return self;
     }
 
-    ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
+    ast::Assign *fillAssign(core::Context ctx, ast::ConstantLit *lhs, ast::Assign *asgn) {
+        // TODO(nelhage): forbid dynamic constant definition
+        core::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);
+        core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
+        auto loc = lhs->loc;
+        asgn->lhs = make_unique<ast::Ident>(loc, cnst);
+        return asgn;
+    }
+
+    ast::Expression *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
         ast::ConstantLit *lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
         if (lhs == nullptr) {
             return asgn;
         }
 
-        // TODO(nelhage): forbid dynamic constant definition
-        core::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);
-        core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
+        auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+        if (send == nullptr || send->fun != core::Names::typeDecl()) {
+            return fillAssign(ctx, lhs, asgn);
+        }
+        auto *shouldBeT = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+        if (shouldBeT == nullptr || !(shouldBeT->cnst.name(ctx).kind == core::NameKind::CONSTANT &&
+                                      shouldBeT->cnst.name(ctx).cnst.original == core::Names::T())) {
+            return fillAssign(ctx, lhs, asgn);
+        }
 
-        return new ast::Assign(asgn->loc, make_unique<ast::Ident>(lhs->loc, cnst), move(asgn->rhs));
+        auto *typeName = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+        if (typeName == nullptr) {
+            return fillAssign(ctx, lhs, asgn);
+        }
+
+        core::Variance variance;
+        if (send->args.empty()) {
+            variance = core::Variance::Invariant;
+        } else {
+            auto *symbol = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
+            if (send->args.size() > 1 || symbol == nullptr) {
+                ctx.state.error(asgn->loc, core::errors::Namer::InvalidTypeDefinition, "Invalid type definition");
+                return new ast::EmptyTree(asgn->loc);
+            }
+            if (symbol->name == core::Names::covariant()) {
+                variance = core::Variance::CoVariant;
+            } else if (symbol->name == core::Names::contravariant()) {
+                variance = core::Variance::ContraVariant;
+            } else if (symbol->name == core::Names::invariant()) {
+                variance = core::Variance::Invariant;
+            } else {
+                ctx.state.error(asgn->loc, core::errors::Namer::InvalidTypeDefinition,
+                                "Invalid variance kind, only :{} and :{} are supported",
+                                core::Names::covariant().toString(ctx), core::Names::contravariant().toString(ctx));
+                variance = core::Variance::Invariant;
+            }
+        }
+        ctx.state.enterTypeMember(asgn->loc, ctx.enclosingClass(), typeName->cnst, variance);
+        return new ast::EmptyTree(asgn->loc);
     }
 
     ast::Expression *postTransformYield(core::Context ctx, ast::Yield *yield) {
