@@ -518,7 +518,7 @@ int realmain(int argc, char **argv) {
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
     tracer = spd::details::registry::instance().create("tracer", color_sink);
-    tracer->set_pattern("T%t %v");
+    tracer->set_pattern("[T%t][%Y-%m-%dT%T.%f] %v");
 
     console = spd::details::registry::instance().create("console", color_sink);
     console->set_pattern("%v");
@@ -665,6 +665,7 @@ int realmain(int argc, char **argv) {
         Timer timeit(console_err, "typecheck");
         typecheck(gs, move(indexed), opts);
     }
+    tracer->trace("done");
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
@@ -673,7 +674,7 @@ int realmain(int argc, char **argv) {
 
     if (options.count("counters") != 0) {
         for (auto e : gs.errorHistogram()) {
-            categoryCounterAdd("error", to_string(e.first), e.second);
+            histogramAdd("error", e.first, e.second);
         }
         console_err->warn("" + getCounterStatistics());
     }

@@ -2,6 +2,7 @@
 extern "C" {
 #include "statsd-client.h"
 }
+#include "absl/strings/str_cat.h"
 #include <algorithm>
 #include <cmath>
 #include <iomanip> // setw
@@ -13,80 +14,119 @@ extern "C" {
 
 using namespace std;
 
-static constexpr bool enable_counters = ruby_typer::debug_mode;
+namespace ruby_typer {
+static constexpr bool enable_counters = debug_mode;
 
-thread_local ruby_typer::CounterState counterState;
+thread_local CounterState counterState;
 
-ruby_typer::CounterState ruby_typer::getAndClearThreadCounters() {
+namespace {
+const char *internKey(const char *str) {
+    auto it1 = counterState.strings_by_ptr.find(str);
+    if (it1 != counterState.strings_by_ptr.end()) {
+        return it1->second;
+    }
+
+    absl::string_view view(str);
+    auto it2 = counterState.strings_by_value.find(view);
+    if (it2 != counterState.strings_by_value.end()) {
+        counterState.strings_by_ptr[str] = it2->second;
+        return it2->second;
+    }
+
+    counterState.strings_by_value[view] = str;
+    counterState.strings_by_ptr[str] = str;
+    return str;
+}
+
+void histogramAdd(const char *histogram, int key, unsigned int value) {
     if (!enable_counters) {
-        ruby_typer::CounterState empty;
+        return;
+    }
+    const char *skey = internKey(histogram);
+    counterState.histograms[skey][key] += value;
+}
+
+void categoryCounterAdd(const char *category, const char *counter, unsigned int value) {
+    if (!enable_counters) {
+        return;
+    }
+
+    const char *categoryKey = internKey(category);
+    const char *key = internKey(counter);
+    counterState.counters_by_category[categoryKey][key] += value;
+}
+
+void counterAdd(const char *counter, unsigned int value) {
+    if (!enable_counters) {
+        return;
+    }
+    const char *key = internKey(counter);
+    counterState.counters[key] += value;
+}
+
+} // namespace
+
+CounterState getAndClearThreadCounters() {
+    if (!enable_counters) {
+        CounterState empty;
         return empty;
     }
-    ruby_typer::CounterState result{move(counterState.histograms), move(counterState.counters),
-                                    move(counterState.counters_by_category)};
-    counterState.histograms.clear();
-    counterState.counters.clear();
-    counterState.counters_by_category.clear();
+    CounterState result = move(counterState);
+    counterState.clear();
     return result;
 }
 
-void ruby_typer::counterConsume(ruby_typer::CounterState cs) {
+void CounterState::clear() {
+    this->strings_by_value.clear();
+    this->strings_by_ptr.clear();
+    this->histograms.clear();
+    this->counters.clear();
+    this->counters_by_category.clear();
+}
+
+void counterConsume(CounterState cs) {
     if (!enable_counters) {
         return;
     }
     for (auto &cat : counterState.counters_by_category) {
         for (auto &e : cat.second) {
-            ruby_typer::categoryCounterAdd(cat.first, e.first, e.second);
+            categoryCounterAdd(cat.first, e.first, e.second);
         }
     }
 
     for (auto &hist : counterState.histograms) {
         for (auto &e : hist.second) {
-            ruby_typer::histogramAdd(hist.first, e.first, e.second);
+            histogramAdd(hist.first, e.first, e.second);
         }
     }
 
     for (auto &e : counterState.counters) {
-        ruby_typer::counterAdd(e.first, e.second);
+        counterAdd(e.first, e.second);
     }
 }
 
-void ruby_typer::counterAdd(ConstExprStr counter, unsigned int value) {
-    if (!enable_counters) {
-        return;
-    }
-    string key(counter.str, counter.size);
-    counterState.counters[key] += value;
+void counterAdd(ConstExprStr counter, unsigned int value) {
+    counterAdd(counter.str, value);
 }
 
-void ruby_typer::counterInc(ConstExprStr counter) {
+void counterInc(ConstExprStr counter) {
     counterAdd(counter, 1);
 }
 
-void ruby_typer::categoryCounterInc(ConstExprStr category, ConstExprStr counter) {
+void categoryCounterInc(ConstExprStr category, ConstExprStr counter) {
     categoryCounterAdd(category, counter, 1);
 }
 
-void ruby_typer::categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value) {
-    if (!enable_counters) {
-        return;
-    }
-
-    string categoryKey(category.str, category.size);
-    string key(counter.str, counter.size);
-    counterState.counters_by_category[categoryKey][key] += value;
+void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value) {
+    categoryCounterAdd(category.str, counter.str, value);
 }
 
-void ruby_typer::histogramInc(ConstExprStr histogram, int key) {
-    histogramAdd(histogram, key, 1);
+void histogramInc(ConstExprStr histogram, int key) {
+    histogramAdd(histogram.str, key, 1);
 }
 
-void ruby_typer::histogramAdd(ConstExprStr histogram, int key, unsigned int value) {
-    if (!enable_counters) {
-        return;
-    }
-    string skey(histogram.str, histogram.size);
-    counterState.histograms[skey][key] += value;
+void histogramAdd(ConstExprStr histogram, int key, unsigned int value) {
+    histogramAdd(histogram.str, key, value);
 }
 
 const int MAX_WIDTH = 100;
@@ -104,7 +144,7 @@ string padOrLimit(string s, int l) {
     return s;
 }
 
-string ruby_typer::getCounterStatistics() {
+string getCounterStatistics() {
     if (!enable_counters) {
         return "Statistics collection is not available in production build. Use debug build.";
     }
@@ -212,7 +252,7 @@ public:
     }
 };
 
-bool ruby_typer::submitCountersToStatsd(std::string host, int port, std::string prefix) {
+bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
     if (!enable_counters)
         return false;
 
@@ -222,20 +262,20 @@ bool ruby_typer::submitCountersToStatsd(std::string host, int port, std::string 
         CounterState::CounterType sum = 0;
         for (auto &e : cat.second) {
             sum += e.second;
-            statsd.gauge(cat.first + "." + e.first, e.second);
+            statsd.gauge(absl::StrCat(cat.first, ".", e.first), e.second);
         }
 
-        statsd.gauge(cat.first + ".total", sum);
+        statsd.gauge(absl::StrCat(cat.first, ".total"), sum);
     }
 
     for (auto &hist : counterState.histograms) {
         CounterState::CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
-            statsd.gauge(hist.first + "." + to_string(e.first), e.second);
+            statsd.gauge(absl::StrCat(hist.first, ".", e.first), e.second);
         }
 
-        statsd.gauge(hist.first + ".total", sum);
+        statsd.gauge(absl::StrCat(hist.first, ".total"), sum);
     }
 
     for (auto &e : counterState.counters) {
@@ -244,3 +284,5 @@ bool ruby_typer::submitCountersToStatsd(std::string host, int port, std::string 
 
     return true;
 }
+
+}; // namespace ruby_typer
