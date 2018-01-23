@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <cstdio>
+#include <cxxopts.hpp>
 #include <dirent.h>
 #include <fstream>
 #include <memory>
@@ -36,7 +37,10 @@ struct Expectations {
     unordered_map<string, string> expectations;
 };
 
-vector<Expectations> getInputs();
+int shardId;
+int totalShards;
+
+vector<Expectations> getInputs(int myId, int totalShards);
 
 string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
     string res = arg.param.folder + arg.param.basename;
@@ -480,7 +484,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     TEST_COUT << "errors OK" << endl;
 }
 
-INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs()), prettyPrintTest);
+INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs(shardId, totalShards)), prettyPrintTest);
 
 bool endsWith(const string &a, const string &b) {
     if (b.size() > a.size()) {
@@ -589,6 +593,27 @@ vector<Expectations> listDir(const char *name) {
     return result;
 }
 
-vector<Expectations> getInputs() {
-    return listDir("test/testdata");
+vector<Expectations> getInputs(int myId, int totalShards) {
+    auto all = listDir("test/testdata");
+    vector<Expectations> result;
+    for (Expectations &f : all) {
+        if (((std::hash<string>()(f.basename) % totalShards) + totalShards) % totalShards == myId) {
+            result.push_back(f);
+        }
+    }
+    return result;
+}
+
+int main(int argc, char **argv) {
+    cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
+    options.add_options()("shards_total", "Number of parallel test workers", cxxopts::value<int>()->default_value("1"),
+                          "shards");
+    options.add_options()("my_id", "ID of this worker across parallel shards. Should be in [0..shards_total)",
+                          cxxopts::value<int>()->default_value("0"), "id");
+    options.parse(argc, argv);
+    shardId = options["my_id"].as<int>();
+    totalShards = options["shards_total"].as<int>();
+
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

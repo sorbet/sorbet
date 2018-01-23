@@ -1,15 +1,10 @@
-cc_test(
-    name = "test_corpus",
-    size = "medium",
+cc_binary(
+    name = "test_corpus_sharded",
+    testonly = 1,
     srcs = [
         "test_corpus.cc",
     ],
     copts = ["-Iexternal/gtest/include"],
-    data = glob([
-        "testdata/**/*.rb",
-        "testdata/**/*.exp",
-        "testdata/**/*.exp.svg",
-    ]),
     linkstatic = select({
         "//tools/config:fastbuild": 0,
         "//conditions:default": 1,
@@ -26,8 +21,8 @@ cc_test(
         "//namer",
         "//payload/binary",
         "//resolver",
+        "@cxxopts",
         "@gtest",
-        "@gtest//:gtest_main",
     ],
 )
 
@@ -102,23 +97,21 @@ cc_binary(
     deps = ["//common"],
 )
 
-sh_test(
-    name = "end-to-end-test",
-    size = "small",
-    srcs = ["end-to-end-test.sh"],
-    data = [
-        "end-to-end-test.out",
-        "end-to-end-test-input.rb",
-        "//main:ruby-typer",
-    ],
-)
+SHARDS = 8
 
-sh_test(
-    name = "dash-e-test",
-    size = "small",
-    srcs = ["dash-e-test.sh"],
-    data = [
-        "dash-e-test.out",
-        "//main:ruby-typer",
-    ],
-)
+[
+    sh_test(
+        name = "test_corpus{}".format(shard),
+        srcs = ["test_corpus_forwarder.sh"],
+        args = [
+            "--shards_total={}".format(SHARDS),
+            "--my_id={}".format(shard),
+        ],
+        data = glob([
+            "testdata/**/*.rb",
+            "testdata/**/*.exp",
+            "testdata/**/*.exp.svg",
+        ]) + ["test_corpus_sharded"],
+    )
+    for shard in range(SHARDS)
+]

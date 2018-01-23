@@ -11,7 +11,7 @@ compilation_database(
     exec_root_marker = True,
     targets = [
         # BEGIN compile_commands targets
-        "//test:test_corpus",
+        "//test:test_corpus_sharded",
         "//test:hello-test",
         "//test:error-check-test",
         "//test:backtrace-test-raise",
