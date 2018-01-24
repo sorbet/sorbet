@@ -38,7 +38,7 @@ unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
     ruby_typer::core::UnfreezeFileTable ft(gs);              // enters original strings
     auto ast = parser::Parser::run(gs, "<test>", str);
     ruby_typer::core::Context ctx(gs, gs.defn_root());
-    return ast::desugar::node2Tree(ctx, ast);
+    return ast::desugar::node2Tree(ctx, move(ast));
 }
 
 unique_ptr<ast::Expression> hello_world(core::GlobalState &gs) {

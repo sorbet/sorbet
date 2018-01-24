@@ -29,7 +29,7 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     ast->loc = core::Loc::none();
 
     try {
-        auto desugared = ruby_typer::ast::desugar::node2Tree(context, ast);
+        auto desugared = ruby_typer::ast::desugar::node2Tree(context, move(ast));
     } catch (...) {
     }
 

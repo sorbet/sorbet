@@ -147,7 +147,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         tracer->trace("Desugaring: {}", file.file(lgs).path());
         core::ErrorRegion errs(lgs, silenceErrors);
         core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
-        ast = ast::desugar::node2Tree(context, nodes);
+        ast = ast::desugar::node2Tree(context, move(nodes));
     }
     if (print.Desugared) {
         cout << ast->toString(lgs, 0) << endl;
