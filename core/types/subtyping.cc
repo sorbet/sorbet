@@ -197,7 +197,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
         int i = 0;
         for (SymbolRef idx : indexes) {
             int j = 0;
-            while (a2->klass.info(ctx).typeParams[i] != idx) {
+            while (a2->klass.info(ctx).typeMembers()[i] != idx) {
                 j++;
             }
             if (idx.info(ctx).isCovariant()) {
@@ -654,7 +654,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
         int i = 0;
         for (SymbolRef idx : indexes) {
             int j = 0;
-            while (a2->klass.info(ctx).typeParams[i] != idx) {
+            while (a2->klass.info(ctx).typeMembers()[i] != idx) {
                 j++;
             }
             if (idx.info(ctx).isCovariant()) {
@@ -765,7 +765,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
             int i = 0;
             for (SymbolRef idx : indexes) {
                 int j = 0;
-                while (a2->klass.info(ctx).typeParams[i] != idx) {
+                while (a2->klass.info(ctx).typeMembers()[i] != idx) {
                     j++;
                 }
                 if (idx.info(ctx).isCovariant()) {

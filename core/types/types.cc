@@ -524,13 +524,13 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
     }
 
     if (what == asIf || asIf.info(ctx).isClassClass()) {
-        currentAlignment = asIf.info(ctx).typeParams;
+        currentAlignment = asIf.info(ctx).typeMembers();
     } else {
-        for (auto originalTp : asIf.info(ctx).typeParams) {
+        for (auto originalTp : asIf.info(ctx).typeMembers()) {
             auto name = originalTp.info(ctx).name;
             core::SymbolRef align;
             int i = 0;
-            for (auto x : what.info(ctx).typeParams) {
+            for (auto x : what.info(ctx).typeMembers()) {
                 if (x.info(ctx).name == name) {
                     align = x;
                     currentAlignment.push_back(x);
@@ -541,7 +541,7 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
             ENFORCE(align.exists());
         }
     }
-    ENFORCE(currentAlignment.size() == asIf.info(ctx).typeParams.size());
+    ENFORCE(currentAlignment.size() == asIf.info(ctx).typeMembers().size());
     return currentAlignment;
 }
 
@@ -550,7 +550,7 @@ std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::Symbo
     core::Symbol &original = what.info(ctx);
     core::SymbolRef originalOwner = ctx.withOwner(what).enclosingClass();
 
-    if (originalOwner.info(ctx).typeParams.empty() || (original.resultType == nullptr)) {
+    if (originalOwner.info(ctx).typeMembers().empty() || (original.resultType == nullptr)) {
         return original.resultType;
     }
 
@@ -762,7 +762,7 @@ std::string AppliedType::typeName() {
 
 void AppliedType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->klass.info(ctx).isClass());
-    ENFORCE(this->klass.info(ctx).typeParams.size() == this->targs.size());
+    ENFORCE(this->klass.info(ctx).typeMembers().size() == this->targs.size());
     for (auto &targ : this->targs) {
         targ->sanityCheck(ctx);
     }

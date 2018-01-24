@@ -1027,7 +1027,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
     auto &inSym = sym.info(gs);
     ENFORCE(inSym.isClass());
     if (inSym.isClassClass()) {
-        for (core::SymbolRef tp : inSym.typeParams) {
+        for (core::SymbolRef tp : inSym.typeMembers()) {
             auto myVariance = tp.info(gs).variance();
             if (myVariance != core::Variance::Invariant) {
                 gs.error(tp.info(gs).definitionLoc, core::errors::Resolver::VariantTypeMemberInClass,
@@ -1039,7 +1039,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
 
     if (inSym.superClass.exists()) {
         auto parent = inSym.superClass;
-        auto tps = parent.info(gs).typeParams;
+        auto tps = parent.info(gs).typeMembers();
         bool foundAll = true;
         for (core::SymbolRef tp : tps) {
             bool foundThis = resolveTypeMember(gs, parent, tp, sym);
@@ -1051,7 +1051,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
             for (core::SymbolRef tp : tps) {
                 core::SymbolRef my = tp.dealiasAt(gs, sym);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
-                if (inSym.typeParams[i] != my) {
+                if (inSym.typeMembers()[i] != my) {
                     gs.error(my.info(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder,
                              "Type members in wrong order");
                 }
@@ -1061,7 +1061,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
     }
 
     for (core::SymbolRef mixin : inSym.mixins(gs)) {
-        for (core::SymbolRef tp : mixin.info(gs).typeParams) {
+        for (core::SymbolRef tp : mixin.info(gs).typeMembers()) {
             resolveTypeMember(gs, mixin, tp, sym);
         }
     }

@@ -141,10 +141,11 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
             }
         }
 
-        if (!myInfo.typeParams.empty()) {
+        auto typeMembers = myInfo.isClass() ? myInfo.typeMembers() : myInfo.typeArguments();
+        if (!typeMembers.empty()) {
             os << "[";
             bool first = true;
-            for (SymbolRef thing : myInfo.typeParams) {
+            for (SymbolRef thing : typeMembers) {
                 if (first) {
                     first = false;
                 } else {

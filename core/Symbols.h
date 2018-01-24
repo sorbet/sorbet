@@ -101,6 +101,10 @@ public:
     bool operator!=(const LocalVariable &rhs) const;
 };
 
+namespace serialize {
+class GlobalStateSerializer;
+}
+
 class Symbol final {
 public:
     Symbol(const Symbol &) = delete;
@@ -156,10 +160,6 @@ public:
      */
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
-    /** For Class or module - ordered type members of the class,
-     * for method - ordered type generic type arguments of the class
-     */
-    std::vector<SymbolRef> typeParams;
 
     /** Type alisases are introduced by resolver and SHOULD NOT be seriazlied */
     std::vector<std::pair<SymbolRef, SymbolRef>> typeAliases;
@@ -171,12 +171,22 @@ public:
         return argumentsOrMixins;
     }
 
-    bool derivesFrom(GlobalState &gs, SymbolRef sym);
-
     inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
         ENFORCE(isClass());
         return argumentsOrMixins;
     }
+
+    inline std::vector<SymbolRef> &typeMembers() {
+        ENFORCE(isClass());
+        return typeParams;
+    }
+
+    inline std::vector<SymbolRef> &typeArguments() {
+        ENFORCE(isMethod());
+        return typeParams;
+    }
+
+    bool derivesFrom(GlobalState &gs, SymbolRef sym);
 
     inline SymbolRef parent(GlobalState &gs) {
         ENFORCE(isClass());
@@ -417,6 +427,14 @@ public:
 
     Symbol deepCopy(const GlobalState &to) const;
     void sanityCheck(const GlobalState &gs) const;
+
+private:
+    friend class serialize::GlobalStateSerializer;
+
+    /** For Class or module - ordered type members of the class,
+     * for method - ordered type generic type arguments of the class
+     */
+    std::vector<SymbolRef> typeParams;
 };
 
 // CheckSize(Symbol, 88, 8); // This is under too much churn to be worth checking

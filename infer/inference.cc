@@ -150,12 +150,12 @@ struct KnowledgeFact {
 
 std::shared_ptr<core::Type> allocateBySymbol(core::Context ctx, core::SymbolRef symbol) {
     ENFORCE(symbol.info(ctx).isClass());
-    if (symbol.info(ctx).typeParams.size() == 0) {
+    if (symbol.info(ctx).typeMembers().size() == 0) {
         return make_shared<core::ClassType>(symbol);
     } else {
         vector<std::shared_ptr<core::Type>> targs;
-        targs.reserve(symbol.info(ctx).typeParams.size());
-        for (auto UNUSED(x) : symbol.info(ctx).typeParams) {
+        targs.reserve(symbol.info(ctx).typeMembers().size());
+        for (auto UNUSED(x) : symbol.info(ctx).typeMembers()) {
             targs.emplace_back(core::Types::dynamic());
         }
         return make_shared<core::AppliedType>(symbol, move(targs));
@@ -210,7 +210,7 @@ bool isTypeConstructor(core::Context ctx, std::shared_ptr<core::Type> recv) {
     core::SymbolRef klass = asClass->symbol;
     // Consider using a flag for this?
     auto attached = klass.info(ctx).attachedClass(ctx);
-    return attached.exists() && !attached.info(ctx).typeParams.empty() &&
+    return attached.exists() && !attached.info(ctx).typeMembers().empty() &&
            !klass.info(ctx).findMemberTransitive(ctx, core::Names::squareBrackets()).exists();
 }
 
