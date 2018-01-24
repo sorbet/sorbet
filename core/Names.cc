@@ -68,8 +68,9 @@ string Name::toString(GlobalState &gs) const {
 }
 
 void Name::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode)
+    if (!debug_mode) {
         return;
+    }
     NameRef current = this->ref(gs);
     switch (this->kind) {
         case UTF8:

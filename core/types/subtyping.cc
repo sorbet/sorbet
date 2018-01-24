@@ -723,10 +723,12 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
         for (auto &upperB : tv1->upperConstraints) {
             already = already || Types::isSubTypeWhenFrozen(ctx, upperB, t2);
         }
-        if (already)
+        if (already) {
             return true;
-        if (ctx.frozenConstraint)
+        }
+        if (ctx.frozenConstraint) {
             return false;
+        }
         tv1->upperConstraints.push_back(t2);
         // TODO: check upper constraint for validity?
 
@@ -741,10 +743,12 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
         for (auto &lowerB : tv2->lowerConstraints) {
             already = already || Types::isSubTypeWhenFrozen(ctx, t1, lowerB);
         }
-        if (already)
+        if (already) {
             return true;
-        if (ctx.frozenConstraint)
+        }
+        if (ctx.frozenConstraint) {
             return false;
+        }
 
         tv2->lowerConstraints.push_back(t1);
         return true;
@@ -775,8 +779,9 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
                 } else if (idx.info(ctx).isContravariant()) {
                     result = Types::isSubType(ctx, a2->targs[j], a1->targs[i]);
                 }
-                if (!result)
+                if (!result) {
                     break;
+                }
                 i++;
             }
             // alight type params.

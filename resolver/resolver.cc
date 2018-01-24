@@ -579,9 +579,9 @@ private:
             if (arg.info(ctx).resultType.get() != nullptr) {
                 ++it;
             } else {
-                if (isOverloaded)
+                if (isOverloaded) {
                     it = methodInfo.arguments().erase(it);
-                else {
+                } else {
                     arg.info(ctx).resultType = core::Types::dynamic();
                     if (seen.args || seen.returns) {
                         // Only error if we have any types
@@ -847,7 +847,7 @@ public:
         ENFORCE(methods.methods[methods.stack.back()] == nullptr);
 
         methods.methods[methods.stack.back()] =
-            make_unique<ast::MethodDef>(methodDef->loc, methodDef->symbol, move(methodDef->name), move(methodDef->args),
+            make_unique<ast::MethodDef>(methodDef->loc, methodDef->symbol, methodDef->name, move(methodDef->args),
                                         move(methodDef->rhs), methodDef->isSelf);
         methods.stack.pop_back();
         return new ast::EmptyTree(methodDef->loc);
@@ -855,10 +855,10 @@ public:
 
     std::unique_ptr<ast::Expression> addClasses(core::Context ctx, std::unique_ptr<ast::Expression> tree) {
         if (classes.empty()) {
-            ENFORCE(sortedClasses().size() == 0);
+            ENFORCE(sortedClasses().empty());
             return tree;
         }
-        if (classes.size() == 1 && ast::cast_tree<ast::EmptyTree>(tree.get())) {
+        if (classes.size() == 1 && (ast::cast_tree<ast::EmptyTree>(tree.get()) != nullptr)) {
             // It was only 1 class to begin with, put it back
             return move(sortedClasses()[0]);
         }
@@ -880,10 +880,10 @@ public:
     std::unique_ptr<ast::Expression> addMethods(core::Context ctx, std::unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
-            ENFORCE(popCurMethodDefs().size() == 0);
+            ENFORCE(popCurMethodDefs().empty());
             return tree;
         }
-        if (methods.size() == 1 && ast::cast_tree<ast::EmptyTree>(tree.get())) {
+        if (methods.size() == 1 && (ast::cast_tree<ast::EmptyTree>(tree.get()) != nullptr)) {
             // It was only 1 method to begin with, put it back
             unique_ptr<ast::Expression> methodDef = move(popCurMethodDefs()[0]);
             return methodDef;
@@ -912,7 +912,8 @@ private:
     }
 
     ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs) {
-        if (curMethodSet().methods.size() == 1 && rhs.size() == 1 && ast::cast_tree<ast::EmptyTree>(rhs[0].get())) {
+        if (curMethodSet().methods.size() == 1 && rhs.size() == 1 &&
+            (ast::cast_tree<ast::EmptyTree>(rhs[0].get()) != nullptr)) {
             // It was only 1 method to begin with, put it back
             rhs.pop_back();
             rhs.emplace_back(move(popCurMethodDefs()[0]));
@@ -935,17 +936,17 @@ private:
     struct Methods {
         vector<unique_ptr<ast::MethodDef>> methods;
         vector<int> stack;
-        Methods() {}
+        Methods() = default;
     };
     void newMethodSet() {
         methodScopes.emplace_back();
     }
     Methods &curMethodSet() {
-        ENFORCE(methodScopes.size() > 0);
+        ENFORCE(!methodScopes.empty());
         return methodScopes.back();
     }
     void popCurMethodSet() {
-        ENFORCE(methodScopes.size() > 0);
+        ENFORCE(!methodScopes.empty());
         methodScopes.pop_back();
     }
 

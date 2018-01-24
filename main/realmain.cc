@@ -642,7 +642,7 @@ int realmain(int argc, char **argv) {
         console->error("Invalid value for `--typed`: {}", typed);
     }
     opts.typedSource = options["typed-source"].as<string>();
-    if (opts.typedSource != "" && opts.print.TypedSource) {
+    if (!opts.typedSource.empty() && opts.print.TypedSource) {
         console_err->error("`--typed-source " + opts.typedSource +
                            "` and `-p typed-source` are incompatible. Either print out one file or all files.");
         return 1;

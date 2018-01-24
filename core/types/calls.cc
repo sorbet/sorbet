@@ -163,8 +163,9 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
         }
 
         sort(allCandidates.begin(), allCandidates.end(), [&](core::SymbolRef s1, core::SymbolRef s2) -> bool {
-            if (s1.info(ctx).argumentsOrMixins.size() < s2.info(ctx).argumentsOrMixins.size())
+            if (s1.info(ctx).argumentsOrMixins.size() < s2.info(ctx).argumentsOrMixins.size()) {
                 return true;
+            }
             if (s1.info(ctx).argumentsOrMixins.size() == s2.info(ctx).argumentsOrMixins.size()) {
                 return s1._id < s2._id;
             }
@@ -205,7 +206,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             core::SymbolRef candidate = *it;
             auto args = candidate.info(ctx).argumentsOrMixins;
-            if (args.size() == 0) {
+            if (args.empty()) {
                 if (hasBlock) {
                     it = leftCandidates.erase(it);
                     continue;

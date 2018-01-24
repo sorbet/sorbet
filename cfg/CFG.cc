@@ -87,8 +87,9 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
 }
 
 void CFG::sanityCheck(core::Context ctx) {
-    if (!debug_mode)
+    if (!debug_mode) {
         return;
+    }
 
     for (auto &bb : this->basicBlocks) {
         ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block " + bb->toString(ctx));
@@ -98,8 +99,9 @@ void CFG::sanityCheck(core::Context ctx) {
     ReadsAndWrites RnW = CFG::findAllReadsAndWrites(ctx);
     for (auto &el : RnW.reads) {
         core::Name &nm = el.first.name.name(ctx);
-        if (nm.kind != core::NameKind::UNIQUE || nm.unique.uniqueNameKind != core::UniqueNameKind::CFG)
+        if (nm.kind != core::NameKind::UNIQUE || nm.unique.uniqueNameKind != core::UniqueNameKind::CFG) {
             continue;
+        }
         //        ENFORCE(writes.find(el.first) != writes.end());
     }
 }
@@ -154,7 +156,7 @@ string BasicBlock::toString(core::Context ctx) {
         buf << "outerLoops: " << this->outerLoops << endl;
     }
     for (Binding &exp : this->exprs) {
-        if (dynamic_cast<DebugEnvironment *>(exp.value.get())) {
+        if (dynamic_cast<DebugEnvironment *>(exp.value.get()) != nullptr) {
             buf << exp.value->toString(ctx);
             continue;
         }

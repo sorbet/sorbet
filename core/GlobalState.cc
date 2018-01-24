@@ -771,24 +771,26 @@ void GlobalState::sanityCheck() const {
     if (!debug_mode) {
         return;
     }
-    ENFORCE(names.size() > 0, "empty name table size");
-    ENFORCE(strings.size() > 0, "empty string table size");
-    ENFORCE(names_by_hash.size() > 0, "empty name hash table size");
+    ENFORCE(!names.empty(), "empty name table size");
+    ENFORCE(!strings.empty(), "empty string table size");
+    ENFORCE(!names_by_hash.empty(), "empty name hash table size");
     ENFORCE((names_by_hash.size() & (names_by_hash.size() - 1)) == 0, "name hash table size is not a power of two");
     ENFORCE(names.capacity() * 2 == names_by_hash.capacity(), "name table and hash name table sizes out of sync");
     ENFORCE(names_by_hash.size() == names_by_hash.capacity(), "hash name table not at full capacity");
     int i = -1;
     for (auto &nm : names) {
         i++;
-        if (i != 0)
+        if (i != 0) {
             nm.sanityCheck(*this);
+        }
     }
 
     i = -1;
     for (auto &sym : symbols) {
         i++;
-        if (i != 0)
+        if (i != 0) {
             sym.sanityCheck(*this);
+        }
     }
     for (auto &ent : names_by_hash) {
         if (ent.second == 0) {
@@ -992,16 +994,16 @@ void GlobalState::flushErrors() {
     stringstream nonCritical;
     for (auto &error : this->errors.buffer) {
         auto &out = error->isCritical ? critical : nonCritical;
-        if (out.tellp()) {
+        if (out.tellp() != 0) {
             out << '\n';
         }
         out << error->toString(*this);
     }
 
-    if (critical.tellp()) {
+    if (critical.tellp() != 0) {
         this->logger.log(spdlog::level::critical, "{}", critical.str());
     }
-    if (nonCritical.tellp()) {
+    if (nonCritical.tellp() != 0) {
         this->logger.log(spdlog::level::err, "{}", nonCritical.str());
     }
     this->errors.buffer.clear();

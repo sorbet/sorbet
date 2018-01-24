@@ -29,7 +29,7 @@ public:
             for (auto &bind : bb->exprs) {
                 if (cfg::Send *send = dynamic_cast<cfg::Send *>(bind.value.get())) {
                     if (send->fun == core::Names::hardAssert()) {
-                        if (send->args.size() >= 1) {
+                        if (!send->args.empty()) {
                             used_vars.insert(send->args[0]);
                         }
                     }
@@ -49,7 +49,7 @@ public:
                         }
                     } else if (cfg::Send *send = dynamic_cast<cfg::Send *>(bind.value.get())) {
                         if (send->fun == core::Names::bang()) {
-                            if (send->args.size() == 0) {
+                            if (send->args.empty()) {
                                 if (isNeeded(bind.bind) && !isNeeded(send->recv)) {
                                     used_vars.insert(send->recv);
                                     changed = true;
@@ -150,7 +150,7 @@ struct KnowledgeFact {
 
 std::shared_ptr<core::Type> allocateBySymbol(core::Context ctx, core::SymbolRef symbol) {
     ENFORCE(symbol.info(ctx).isClass());
-    if (symbol.info(ctx).typeMembers().size() == 0) {
+    if (symbol.info(ctx).typeMembers().empty()) {
         return make_shared<core::ClassType>(symbol);
     } else {
         vector<std::shared_ptr<core::Type>> targs;
@@ -386,8 +386,9 @@ public:
     void updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, cfg::Send *send,
                          KnowledgeFilter &knowledgeFilter) {
         if (send->fun == core::Names::bang()) {
-            if (!knowledgeFilter.isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local)) {
                 return;
+            }
             auto &whoKnows = getKnowledge(local);
             auto other = find(vars.begin(), vars.end(), send->recv) - vars.begin();
             if (other != vars.size()) {
@@ -401,8 +402,9 @@ public:
 
             whoKnows.sanityCheck();
         } else if (send->fun == core::Names::nil_p()) {
-            if (!knowledgeFilter.isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local)) {
                 return;
+            }
             auto &whoKnows = getKnowledge(local);
             whoKnows.truthy.yesTypeTests.emplace_back(send->recv, core::Types::nil());
             whoKnows.falsy.noTypeTests.emplace_back(send->recv, core::Types::nil());
@@ -413,8 +415,9 @@ public:
             return;
         }
         if (send->fun == core::Names::kind_of() || send->fun == core::Names::is_a_p()) {
-            if (!knowledgeFilter.isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local)) {
                 return;
+            }
             auto &whoKnows = getKnowledge(local);
             core::TypeAndOrigins klass = getTypeAndOrigin(ctx, send->args[0]);
             if (klass.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {
@@ -430,8 +433,9 @@ public:
                 whoKnows.sanityCheck();
             }
         } else if (send->fun == core::Names::eqeq()) {
-            if (!knowledgeFilter.isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local)) {
                 return;
+            }
             auto &whoKnows = getKnowledge(local);
             core::TypeAndOrigins tp1 = getTypeAndOrigin(ctx, send->args[0]);
             core::TypeAndOrigins tp2 = getTypeAndOrigin(ctx, send->recv);
@@ -445,8 +449,9 @@ public:
             whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], tp2.type);
             whoKnows.sanityCheck();
         } else if (send->fun == core::Names::tripleEq()) {
-            if (!knowledgeFilter.isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local)) {
                 return;
+            }
             auto &whoKnows = getKnowledge(local);
             core::TypeAndOrigins recvKlass = getTypeAndOrigin(ctx, send->recv);
             if (!recvKlass.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {

@@ -148,7 +148,7 @@ public:
     ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *klass) {
         klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
-        if (ident && ident->name == core::Names::singletonClass()) {
+        if ((ident != nullptr) && ident->name == core::Names::singletonClass()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
             klass->symbol = ctx.contextClass().info(ctx).singletonClass(ctx);
         } else {

@@ -297,8 +297,9 @@ public:
 };
 
 bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
-    if (!enable_counters)
+    if (!enable_counters) {
         return false;
+    }
 
     StatsdClientWrapper statsd(host, port, prefix);
 

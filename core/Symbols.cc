@@ -361,8 +361,9 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
 }
 
 void Symbol::sanityCheck(const GlobalState &gs) const {
-    if (!debug_mode)
+    if (!debug_mode) {
         return;
+    }
     SymbolRef current = this->ref(gs);
     if (current != GlobalState::defn_root()) {
         SymbolRef current2 =

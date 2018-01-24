@@ -1248,7 +1248,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 auto bodyExpr = node2TreeImpl(ctx, move(ensure->body), uniqueCounter);
                 auto ensureExpr = node2TreeImpl(ctx, move(ensure->ensure), uniqueCounter);
                 auto rescue = cast_tree<ast::Rescue>(bodyExpr.get());
-                if (rescue) {
+                if (rescue != nullptr) {
                     rescue->ensure = move(ensureExpr);
                     result.swap(bodyExpr);
                 } else {

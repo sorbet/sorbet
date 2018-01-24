@@ -581,7 +581,7 @@ std::string TypeVar::toString(GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "TypeVar(" + name.toString(gs) + ") {" << endl;
     printTabs(buf, tabs + 1);
-    buf << "instantiated = " + std::to_string(isInstantiated) << endl;
+    buf << "instantiated = " + std::to_string(static_cast<int>(isInstantiated)) << endl;
     if (isInstantiated) {
         printTabs(buf, tabs + 1);
         buf << "instantiation = " << this->instantiation->toString(gs, tabs + 1) << endl;

@@ -68,7 +68,7 @@ struct FileIsTypedCase {
     bool isTyped;
 };
 
-TEST(CoreTest, FileIsTyped) {
+TEST(CoreTest, FileIsTyped) { // NOLINT
     vector<FileIsTypedCase> cases = {
         {"", false},
         {"# @typed", true},
@@ -81,7 +81,7 @@ TEST(CoreTest, FileIsTyped) {
     }
 }
 
-TEST(CoreTest, Substitute) {
+TEST(CoreTest, Substitute) { // NOLINT
     core::GlobalState gs1(*console);
     gs1.initEmpty();
 
