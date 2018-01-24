@@ -111,7 +111,7 @@ public:
         if (print.CFGRaw || print.TypedSource) {
             cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
         }
-        infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+        cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         if (print.CFG || print.CFGRaw) {
             cout << cfg->toString(ctx) << endl << endl;
         }

@@ -1008,7 +1008,7 @@ bool isSyntheticReturn(core::Context ctx, cfg::Binding &bind) {
     return false;
 }
 
-void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
+unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     counterInc("infer.methods_typechecked");
     const int startErrorCount = ctx.state.totalErrors();
     vector<Environment> outEnvironments;
@@ -1096,4 +1096,5 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
     if (startErrorCount == ctx.state.totalErrors()) {
         counterInc("infer.methods_typechecked.no_errors");
     }
+    return cfg;
 }
