@@ -9,7 +9,7 @@ namespace cfg {
 class CFGBuilder final {
 public:
     static std::unique_ptr<CFG> buildFor(core::Context ctx, ast::MethodDef &md);
-    static void addDebugEnvironment(core::Context ctx, std::unique_ptr<CFG> &cfg);
+    static std::unique_ptr<CFG> addDebugEnvironment(core::Context ctx, std::unique_ptr<CFG> cfg);
 
 private:
     static BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);

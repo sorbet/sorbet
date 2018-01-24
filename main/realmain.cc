@@ -109,7 +109,7 @@ public:
 
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (print.CFGRaw || print.TypedSource) {
-            cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
+            cfg = cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
         }
         cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         if (print.CFG || print.CFGRaw) {
