@@ -495,9 +495,9 @@ public:
     }
 
     /* Create an Environment out of this one that holds if final condition in this environment was isTrue */
-    Environment withCond(
-        core::Context ctx, bool isTrue, const vector<core::LocalVariable> &filter,
-        unique_ptr<KnowledgeFilter> &knowledgeFilter) { // todo: copying environments here is slow. And commonly this
+    Environment
+    withCond(core::Context ctx, bool isTrue,
+             const vector<core::LocalVariable> &filter) { // todo: copying environments here is slow. And commonly this
         // returns a simple copy. Add an external fast path
         if (!bb->bexit.cond.exists() || bb->bexit.cond.name == core::Names::blockCall()) {
             return *this; // copy
@@ -1032,8 +1032,7 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
-            auto envAsSeenFromBranch =
-                outEnvironments[parent->id].withCond(ctx, isTrueBranch, current.vars, knowledgeFilter); // copy
+            auto envAsSeenFromBranch = outEnvironments[parent->id].withCond(ctx, isTrueBranch, current.vars); // copy
             current.populateFrom(ctx, envAsSeenFromBranch);
         } else {
             current.isDead = (bb != cfg->entry());
@@ -1043,7 +1042,7 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
                 auto envAsSeenFromBranch =
-                    outEnvironments[parent->id].withCond(ctx, isTrueBranch, current.vars, knowledgeFilter); // copy
+                    outEnvironments[parent->id].withCond(ctx, isTrueBranch, current.vars); // copy
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
                     current.mergeWith(ctx, envAsSeenFromBranch, parent->bexit.loc, *cfg.get(), *bb, knowledgeFilter);
