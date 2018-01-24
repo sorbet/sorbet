@@ -5,7 +5,8 @@ subgraph "cluster_::<constant:Foo>#bar" {
     "bb::<constant:Foo>#bar_0" [shape = invhouse];
     "bb::<constant:Foo>#bar_1" [shape = parallelogram];
 
-    "bb::<constant:Foo>#bar_0" [label = "block[id=0]()
+    "bb::<constant:Foo>#bar_0" [label = "block[id=0](<constant:<Magic>>$6)
+<constant:<Magic>>$6 = alias <constant:<Magic>> : <Magic>
 selfMethodTemp$3 = self : Foo
 cond = load_arg(selfMethodTemp$3#bar, 0) : untyped
 cond"];
@@ -18,16 +19,14 @@ finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:Foo>#bar_1" -> "bb::<constant:Foo>#bar_1" [style="bold"];
-    "bb::<constant:Foo>#bar_2" [label = "block[id=2](s)
-hashTemp$6 = alias <constant:<Magic>> : <Magic>
-s = hashTemp$6.<build-hash>() : ShapeType {
+    "bb::<constant:Foo>#bar_2" [label = "block[id=2](<constant:<Magic>>$6)
+s = <constant:<Magic>>$6.<build-hash>() : ShapeType {
 }
 <unconditional>"];
 
     "bb::<constant:Foo>#bar_2" -> "bb::<constant:Foo>#bar_4" [style="bold"];
-    "bb::<constant:Foo>#bar_3" [label = "block[id=3](s)
-hashTemp$7 = alias <constant:<Magic>> : <Magic>
-s = hashTemp$7.<build-hash>() : ShapeType {
+    "bb::<constant:Foo>#bar_3" [label = "block[id=3](<constant:<Magic>>$6)
+s = <constant:<Magic>>$6.<build-hash>() : ShapeType {
 }
 <unconditional>"];
 

@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:A>#initialize" {
     "bb::<constant:A>#initialize_0" [shape = invhouse];
     "bb::<constant:A>#initialize_1" [shape = parallelogram];
 
-    "bb::<constant:A>#initialize_0" [label = "block[id=0](statTemp$5, <constant:StandardError>$11)
+    "bb::<constant:A>#initialize_0" [label = "block[id=0](<constant:StandardError>$11)
 <constant:StandardError>$11 = alias <constant:StandardError> : <class:StandardError>
 statTemp$6 = self : A
 statTemp$5 = statTemp$6.spec_list() : untyped
@@ -16,7 +16,7 @@ statTemp$5 = statTemp$6.spec_list() : untyped
 <unconditional>"];
 
     "bb::<constant:A>#initialize_1" -> "bb::<constant:A>#initialize_1" [style="bold"];
-    "bb::<constant:A>#initialize_2" [label = "block[id=2](statTemp$5, rescueTemp$8, <constant:StandardError>$11)
+    "bb::<constant:A>#initialize_2" [label = "block[id=2](statTemp$5, <constant:StandardError>$11)
 outerLoops: 1
 <block-call>"];
 
@@ -29,7 +29,7 @@ finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:A>#initialize_3" -> "bb::<constant:A>#initialize_1" [style="bold"];
-    "bb::<constant:A>#initialize_5" [label = "block[id=5](statTemp$5, rescueTemp$8, <constant:StandardError>$11)
+    "bb::<constant:A>#initialize_5" [label = "block[id=5](statTemp$5, <constant:StandardError>$11)
 outerLoops: 1
 rescueTemp$8 = <unanalyzable> : untyped
 rescueTemp$8"];

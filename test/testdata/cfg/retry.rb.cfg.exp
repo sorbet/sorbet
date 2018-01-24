@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_0" [shape = invhouse];
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#main_0" [label = "block[id=0](try, <constant:StandardError>$16)
+    "bb::<constant:Object>#main_0" [label = "block[id=0](<constant:StandardError>$16)
 <constant:StandardError>$16 = alias <constant:StandardError> : <class:StandardError>
 try = 0 : Integer(0)
 <unconditional>"];
@@ -16,7 +16,7 @@ returnMethodTemp$2 = 1
 <unconditional>"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_2" [label = "block[id=2](try, rescueTemp$5, <constant:StandardError>$16)
+    "bb::<constant:Object>#main_2" [label = "block[id=2](try, <constant:StandardError>$16)
 rescueTemp$5 = <unanalyzable> : untyped
 rescueTemp$5"];
 
@@ -38,7 +38,7 @@ ifTemp$6"];
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_5" [style="bold"];
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_10" [style="tapered"];
 
-    "bb::<constant:Object>#main_5" [label = "block[id=5](try, returnMethodTemp$2)
+    "bb::<constant:Object>#main_5" [label = "block[id=5](try)
 statTemp$10 = try : NilClass | Integer
 statTemp$11 = 1 : Integer(1)
 try = statTemp$10.+(statTemp$11) : untyped

@@ -5,11 +5,11 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0](statTemp$5)
+    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
+<constant:<Magic>>$8 = alias <constant:<Magic>> : <Magic>
 arrayTemp$6 = 1 : Integer(1)
 arrayTemp$7 = 2 : Integer(2)
-arrayTemp$8 = alias <constant:<Magic>> : <Magic>
-statTemp$5 = arrayTemp$8.<build-array>(arrayTemp$6, arrayTemp$7) : TupleType {
+statTemp$5 = <constant:<Magic>>$8.<build-array>(arrayTemp$6, arrayTemp$7) : TupleType {
   0 = Integer(1)
   1 = Integer(2)
 }

@@ -24,7 +24,7 @@ rescueTemp$11"];
     "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_8" [style="bold"];
     "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_1" [style="tapered"];
 
-    "bb::<constant:Object>#main_4" [label = "block[id=4](returnMethodTemp$2)
+    "bb::<constant:Object>#main_4" [label = "block[id=4]()
 statTemp$5 = self : Object
 returnMethodTemp$2 = statTemp$5.a() : untyped
 statTemp$6 = self : Object
@@ -39,7 +39,7 @@ finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_6" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_8" [label = "block[id=8](returnMethodTemp$2, rescueTemp$4)
+    "bb::<constant:Object>#main_8" [label = "block[id=8](rescueTemp$4)
 statTemp$12 = self : Object
 returnMethodTemp$2 = statTemp$12.b() : untyped
 <unconditional>"];

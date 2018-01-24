@@ -387,8 +387,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     vars.push_back(valTmp);
                 }
                 core::LocalVariable magic =
-                    cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::hashTemp(), cctx.inWhat.symbol);
-                current->exprs.emplace_back(magic, h->loc, make_unique<Alias>(cctx.ctx.state.defn_Magic()));
+                    global2Local(cctx.ctx, core::GlobalState::defn_Magic(), cctx.inWhat, cctx.aliases);
                 current->exprs.emplace_back(cctx.target, h->loc,
                                             make_unique<Send>(magic, core::Names::buildHash(), vars, false));
                 ret = current;
@@ -402,9 +401,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     current = walk(cctx.withTarget(tmp), elem.get(), current);
                     vars.push_back(tmp);
                 }
-                core::LocalVariable magic = cctx.ctx.state.newTemporary(core::UniqueNameKind::CFG,
-                                                                        core::Names::arrayTemp(), cctx.inWhat.symbol);
-                current->exprs.emplace_back(magic, a->loc, make_unique<Alias>(cctx.ctx.state.defn_Magic()));
+                core::LocalVariable magic =
+                    global2Local(cctx.ctx, core::GlobalState::defn_Magic(), cctx.inWhat, cctx.aliases);
                 current->exprs.emplace_back(cctx.target, a->loc,
                                             make_unique<Send>(magic, core::Names::buildArray(), vars, false));
                 ret = current;

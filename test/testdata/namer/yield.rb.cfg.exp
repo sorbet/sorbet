@@ -71,7 +71,7 @@ subgraph "cluster_::<constant:Main>#blockyield" {
     "bb::<constant:Main>#blockyield_0" [shape = invhouse];
     "bb::<constant:Main>#blockyield_1" [shape = parallelogram];
 
-    "bb::<constant:Main>#blockyield_0" [label = "block[id=0](statTemp$5)
+    "bb::<constant:Main>#blockyield_0" [label = "block[id=0]()
 statTemp$5 = self : Main
 <unconditional>"];
 
@@ -109,7 +109,7 @@ subgraph "cluster_::<constant:Main>#main" {
     "bb::<constant:Main>#main_0" [shape = invhouse];
     "bb::<constant:Main>#main_1" [shape = parallelogram];
 
-    "bb::<constant:Main>#main_0" [label = "block[id=0](statTemp$10, <constant:<Magic>>$22)
+    "bb::<constant:Main>#main_0" [label = "block[id=0](<constant:<Magic>>$22)
 <constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>
 statTemp$10 = self : Main
 <unconditional>"];
@@ -126,7 +126,7 @@ outerLoops: 1
     "bb::<constant:Main>#main_2" -> "bb::<constant:Main>#main_4" [style="bold"];
     "bb::<constant:Main>#main_2" -> "bb::<constant:Main>#main_3" [style="tapered"];
 
-    "bb::<constant:Main>#main_3" [label = "block[id=3](l, statTemp$10, statTemp$16, <constant:<Magic>>$22)
+    "bb::<constant:Main>#main_3" [label = "block[id=3](statTemp$10, <constant:<Magic>>$22)
 l = statTemp$10.lambda() : untyped
 statTemp$16 = self : Main
 <unconditional>"];
@@ -147,7 +147,7 @@ outerLoops: 1
     "bb::<constant:Main>#main_5" -> "bb::<constant:Main>#main_7" [style="bold"];
     "bb::<constant:Main>#main_5" -> "bb::<constant:Main>#main_6" [style="tapered"];
 
-    "bb::<constant:Main>#main_6" [label = "block[id=6](l, statTemp$16, <constant:<Magic>>$22, statTemp$26)
+    "bb::<constant:Main>#main_6" [label = "block[id=6](l, statTemp$16, <constant:<Magic>>$22)
 statTemp$15 = statTemp$16.yielder() : untyped
 statTemp$26 = self : Main
 <unconditional>"];
@@ -170,7 +170,7 @@ outerLoops: 1
     "bb::<constant:Main>#main_8" -> "bb::<constant:Main>#main_10" [style="bold"];
     "bb::<constant:Main>#main_8" -> "bb::<constant:Main>#main_9" [style="tapered"];
 
-    "bb::<constant:Main>#main_9" [label = "block[id=9](l, <constant:<Magic>>$22, statTemp$26, statTemp$35)
+    "bb::<constant:Main>#main_9" [label = "block[id=9](l, <constant:<Magic>>$22, statTemp$26)
 statTemp$25 = statTemp$26.blockpass() : untyped
 statTemp$35 = self : Main
 <unconditional>"];
@@ -193,7 +193,7 @@ outerLoops: 1
     "bb::<constant:Main>#main_11" -> "bb::<constant:Main>#main_13" [style="bold"];
     "bb::<constant:Main>#main_11" -> "bb::<constant:Main>#main_12" [style="tapered"];
 
-    "bb::<constant:Main>#main_12" [label = "block[id=12](l, <constant:<Magic>>$22, statTemp$35, statTemp$43)
+    "bb::<constant:Main>#main_12" [label = "block[id=12](l, <constant:<Magic>>$22, statTemp$35)
 statTemp$34 = statTemp$35.mixed() : untyped
 statTemp$43 = self : Main
 <unconditional>"];

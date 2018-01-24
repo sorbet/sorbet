@@ -6,6 +6,7 @@ subgraph "cluster_::<singleton class:<constant:A>>#each" {
     "bb::<singleton class:<constant:A>>#each_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:A>>#each_0" [label = "block[id=0]()
+<constant:<Magic>>$12 = alias <constant:<Magic>> : <Magic>
 selfMethodTemp$3 = self : <class:A>
 <blk> = load_arg(selfMethodTemp$3#each, 0) : untyped
 arrayTemp$7 = 1 : Integer(1)
@@ -13,8 +14,7 @@ arrayTemp$8 = 2 : Integer(2)
 arrayTemp$9 = 3 : Integer(3)
 arrayTemp$10 = 4 : Integer(4)
 arrayTemp$11 = 5 : Integer(5)
-arrayTemp$12 = alias <constant:<Magic>> : <Magic>
-statTemp$6 = arrayTemp$12.<build-array>(arrayTemp$7, arrayTemp$8, arrayTemp$9, arrayTemp$10, arrayTemp$11) : TupleType {
+statTemp$6 = <constant:<Magic>>$12.<build-array>(arrayTemp$7, arrayTemp$8, arrayTemp$9, arrayTemp$10, arrayTemp$11) : TupleType {
   0 = Integer(1)
   1 = Integer(2)
   2 = Integer(3)
@@ -27,8 +27,7 @@ arrayTemp$16 = 7 : Integer(7)
 arrayTemp$17 = 8 : Integer(8)
 arrayTemp$18 = 9 : Integer(9)
 arrayTemp$19 = 0 : Integer(0)
-arrayTemp$20 = alias <constant:<Magic>> : <Magic>
-statTemp$14 = arrayTemp$20.<build-array>(arrayTemp$15, arrayTemp$16, arrayTemp$17, arrayTemp$18, arrayTemp$19) : TupleType {
+statTemp$14 = <constant:<Magic>>$12.<build-array>(arrayTemp$15, arrayTemp$16, arrayTemp$17, arrayTemp$18, arrayTemp$19) : TupleType {
   0 = Integer(6)
   1 = Integer(7)
   2 = Integer(8)
@@ -91,7 +90,7 @@ subgraph "cluster_::<singleton class:<constant:Main>>#main" {
     "bb::<singleton class:<constant:Main>>#main_0" [shape = invhouse];
     "bb::<singleton class:<constant:Main>>#main_1" [shape = parallelogram];
 
-    "bb::<singleton class:<constant:Main>>#main_0" [label = "block[id=0](statTemp$11, <constant:A>$12, @a$80, @@b$84, $c$88, <constant:E>$96)
+    "bb::<singleton class:<constant:Main>>#main_0" [label = "block[id=0](<constant:A>$12, @a$80, @@b$84, $c$88, <constant:E>$96)
 <constant:A>$12 = alias <constant:A> : <class:A>
 @a$80 = alias @a : untyped
 @@b$84 = alias @@b : untyped
@@ -112,7 +111,7 @@ outerLoops: 1
     "bb::<singleton class:<constant:Main>>#main_2" -> "bb::<singleton class:<constant:Main>>#main_4" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_2" -> "bb::<singleton class:<constant:Main>>#main_3" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_3" [label = "block[id=3](statTemp$11, <constant:A>$12, statTemp$23, @a$80, @@b$84, $c$88, <constant:E>$96)
+    "bb::<singleton class:<constant:Main>>#main_3" [label = "block[id=3](statTemp$11, <constant:A>$12, @a$80, @@b$84, $c$88, <constant:E>$96)
 statTemp$10 = statTemp$11.each() : untyped
 statTemp$23 = <constant:A>$12 : <class:A>
 <unconditional>"];
@@ -136,7 +135,7 @@ outerLoops: 1
     "bb::<singleton class:<constant:Main>>#main_5" -> "bb::<singleton class:<constant:Main>>#main_7" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_5" -> "bb::<singleton class:<constant:Main>>#main_6" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_6" [label = "block[id=6](<constant:A>$12, statTemp$23, statTemp$35, @a$80, @@b$84, $c$88, <constant:E>$96)
+    "bb::<singleton class:<constant:Main>>#main_6" [label = "block[id=6](<constant:A>$12, statTemp$23, @a$80, @@b$84, $c$88, <constant:E>$96)
 statTemp$22 = statTemp$23.each() : untyped
 statTemp$35 = <constant:A>$12 : <class:A>
 <unconditional>"];
@@ -161,7 +160,7 @@ outerLoops: 1
     "bb::<singleton class:<constant:Main>>#main_8" -> "bb::<singleton class:<constant:Main>>#main_10" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_8" -> "bb::<singleton class:<constant:Main>>#main_9" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_9" [label = "block[id=9](<constant:A>$12, statTemp$35, statTemp$53, @a$80, @@b$84, $c$88, <constant:E>$96)
+    "bb::<singleton class:<constant:Main>>#main_9" [label = "block[id=9](<constant:A>$12, statTemp$35, @a$80, @@b$84, $c$88, <constant:E>$96)
 statTemp$34 = statTemp$35.each() : untyped
 statTemp$53 = <constant:A>$12 : <class:A>
 <unconditional>"];
@@ -190,7 +189,7 @@ outerLoops: 1
     "bb::<singleton class:<constant:Main>>#main_11" -> "bb::<singleton class:<constant:Main>>#main_13" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_11" -> "bb::<singleton class:<constant:Main>>#main_12" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_12" [label = "block[id=12](<constant:A>$12, statTemp$53, statTemp$75, @a$80, @@b$84, $c$88, <constant:E>$96)
+    "bb::<singleton class:<constant:Main>>#main_12" [label = "block[id=12](<constant:A>$12, statTemp$53, @a$80, @@b$84, $c$88, <constant:E>$96)
 statTemp$52 = statTemp$53.each() : untyped
 statTemp$72 = self : <class:Main>
 statTemp$73 = main : String(\"main\")
@@ -223,7 +222,7 @@ outerLoops: 1
     "bb::<singleton class:<constant:Main>>#main_14" -> "bb::<singleton class:<constant:Main>>#main_16" [style="bold"];
     "bb::<singleton class:<constant:Main>>#main_14" -> "bb::<singleton class:<constant:Main>>#main_15" [style="tapered"];
 
-    "bb::<singleton class:<constant:Main>>#main_15" [label = "block[id=15](<constant:A>$12, statTemp$75, @a$80, @@b$84, $c$88, <constant:E>$96, statTemp$120)
+    "bb::<singleton class:<constant:Main>>#main_15" [label = "block[id=15](<constant:A>$12, statTemp$75, @a$80, @@b$84, $c$88, <constant:E>$96)
 statTemp$74 = statTemp$75.each() : untyped
 statTemp$120 = <constant:A>$12 : <class:A>
 <unconditional>"];

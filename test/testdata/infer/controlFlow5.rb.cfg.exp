@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0](foo, <constant:StandardError>$9)
+    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:StandardError>$9)
 <constant:StandardError>$9 = alias <constant:StandardError> : <class:StandardError>
 selfMethodTemp$3 = self : Object
 foo = load_arg(selfMethodTemp$3#foo, 0) : untyped
@@ -25,7 +25,7 @@ bar"];
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="bold"];
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_7" [style="tapered"];
 
-    "bb::<constant:Object>#foo_4" [label = "block[id=4](foo, err)
+    "bb::<constant:Object>#foo_4" [label = "block[id=4](foo)
 e = foo : StandardError
 err = e : StandardError
 <unconditional>"];
@@ -38,7 +38,7 @@ err"];
     "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_8" [style="bold"];
     "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_10" [style="tapered"];
 
-    "bb::<constant:Object>#foo_8" [label = "block[id=8](returnMethodTemp$2)
+    "bb::<constant:Object>#foo_8" [label = "block[id=8]()
 returnMethodTemp$2 = 1 : Integer(1)
 <unconditional>"];
 

@@ -97,12 +97,12 @@ cond"];
 <unconditional>"];
 
     "bb::<constant:Object>#baz5_1" -> "bb::<constant:Object>#baz5_1" [style="bold"];
-    "bb::<constant:Object>#baz5_2" [label = "block[id=2](b)
+    "bb::<constant:Object>#baz5_2" [label = "block[id=2]()
 b = 1 : Integer(1)
 <unconditional>"];
 
     "bb::<constant:Object>#baz5_2" -> "bb::<constant:Object>#baz5_4" [style="bold"];
-    "bb::<constant:Object>#baz5_3" [label = "block[id=3](b)
+    "bb::<constant:Object>#baz5_3" [label = "block[id=3]()
 b = foo : String(\"foo\")
 <unconditional>"];
 
@@ -135,12 +135,12 @@ cond"];
 <unconditional>"];
 
     "bb::<constant:Object>#baz6_1" -> "bb::<constant:Object>#baz6_1" [style="bold"];
-    "bb::<constant:Object>#baz6_2" [label = "block[id=2](b)
+    "bb::<constant:Object>#baz6_2" [label = "block[id=2]()
 b = 1 : Integer(1)
 <unconditional>"];
 
     "bb::<constant:Object>#baz6_2" -> "bb::<constant:Object>#baz6_4" [style="bold"];
-    "bb::<constant:Object>#baz6_3" [label = "block[id=3](b)
+    "bb::<constant:Object>#baz6_3" [label = "block[id=3]()
 b = foo : String(\"foo\")
 <unconditional>"];
 
@@ -173,7 +173,7 @@ cond"];
 <unconditional>"];
 
     "bb::<constant:Object>#baz7_1" -> "bb::<constant:Object>#baz7_1" [style="bold"];
-    "bb::<constant:Object>#baz7_2" [label = "block[id=2](b)
+    "bb::<constant:Object>#baz7_2" [label = "block[id=2]()
 b = 1 : Integer(1)
 <unconditional>"];
 

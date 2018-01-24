@@ -5,14 +5,12 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_0" [shape = invhouse];
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#main_0" [label = "block[id=0](a)
-a: NilClass
-
+    "bb::<constant:Object>#main_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : Object
 a = load_arg(selfMethodTemp$3#main, 0) : untyped
-a: untyped
-
 selfMethodTemp$3: Object
+
+a: untyped
 
 a"];
 
@@ -23,11 +21,7 @@ a"];
 <unconditional>"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_2" [label = "block[id=2](a, returnMethodTemp$2)
-a: untyped
-
-returnMethodTemp$2: NilClass
-
+    "bb::<constant:Object>#main_2" [label = "block[id=2]()
 a = 2 : Integer(2)
 returnMethodTemp$2 = a : Integer(2)
 a: Integer(2)

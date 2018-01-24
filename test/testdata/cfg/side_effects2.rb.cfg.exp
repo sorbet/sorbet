@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Side>#foo" {
     "bb::<constant:Side>#foo_0" [shape = invhouse];
     "bb::<constant:Side>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Side>#foo_0" [label = "block[id=0](a, statTemp$5, statTemp$6)
+    "bb::<constant:Side>#foo_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : Side
 cond = load_arg(selfMethodTemp$3#foo, 0) : untyped
 a = self : Side
@@ -20,12 +20,12 @@ cond"];
 <unconditional>"];
 
     "bb::<constant:Side>#foo_1" -> "bb::<constant:Side>#foo_1" [style="bold"];
-    "bb::<constant:Side>#foo_2" [label = "block[id=2](a, statTemp$5, statTemp$6)
+    "bb::<constant:Side>#foo_2" [label = "block[id=2](statTemp$5, statTemp$6)
 a = true : TrueClass(true)
 <unconditional>"];
 
     "bb::<constant:Side>#foo_2" -> "bb::<constant:Side>#foo_4" [style="bold"];
-    "bb::<constant:Side>#foo_3" [label = "block[id=3](a, statTemp$5, statTemp$6)
+    "bb::<constant:Side>#foo_3" [label = "block[id=3](statTemp$5, statTemp$6)
 a = 2 : Integer(2)
 <unconditional>"];
 

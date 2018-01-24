@@ -64,7 +64,7 @@ subgraph "cluster_::<singleton class:<constant:CallsWithObjectChild>>#calls_with
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_0" [shape = invhouse];
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_1" [shape = parallelogram];
 
-    "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_0" [label = "block[id=0](blk, statTemp$5, <constant:<Magic>>$11)
+    "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_0" [label = "block[id=0](<constant:<Magic>>$11)
 <constant:<Magic>>$11 = alias <constant:<Magic>> : <Magic>
 selfMethodTemp$4 = self : <class:CallsWithObjectChild>
 blk = load_arg(selfMethodTemp$4#calls_with_object, 0) : untyped
@@ -107,7 +107,7 @@ subgraph "cluster_::<constant:Object>#returns_lambda" {
     "bb::<constant:Object>#returns_lambda_0" [shape = invhouse];
     "bb::<constant:Object>#returns_lambda_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#returns_lambda_0" [label = "block[id=0](statTemp$5)
+    "bb::<constant:Object>#returns_lambda_0" [label = "block[id=0]()
 statTemp$5 = self : Object
 <unconditional>"];
 
@@ -158,7 +158,7 @@ subgraph "cluster_::<constant:Object>#calls_with_object" {
     "bb::<constant:Object>#calls_with_object_0" [shape = invhouse];
     "bb::<constant:Object>#calls_with_object_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#calls_with_object_0" [label = "block[id=0](blk, statTemp$5, statTemp$6, <constant:<Magic>>$14)
+    "bb::<constant:Object>#calls_with_object_0" [label = "block[id=0](<constant:<Magic>>$14)
 <constant:HasMeth>$8 = alias <constant:HasMeth> : <class:HasMeth>
 <constant:<Magic>>$14 = alias <constant:<Magic>> : <Magic>
 selfMethodTemp$4 = self : Object
@@ -203,7 +203,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0](blk, statTemp$18, <constant:<Magic>>$28, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:<Magic>>$28, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 <constant:<Magic>>$28 = alias <constant:<Magic>> : <Magic>
 <constant:HasToProc>$66 = alias <constant:HasToProc> : <class:HasToProc>
 <constant:CallsWithObject>$83 = alias <constant:CallsWithObject> : <class:CallsWithObject>
@@ -227,7 +227,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="bold"];
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="tapered"];
 
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](blk, statTemp$18, statTemp$22, <constant:<Magic>>$28, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_3" [label = "block[id=3](blk, statTemp$18, <constant:<Magic>>$28, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$17 = statTemp$18.calls_with_object() : untyped
 statTemp$22 = self : Object
 <unconditional>"];
@@ -247,7 +247,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_5" -> "bb::<constant:Object>#foo_7" [style="bold"];
     "bb::<constant:Object>#foo_5" -> "bb::<constant:Object>#foo_6" [style="tapered"];
 
-    "bb::<constant:Object>#foo_6" [label = "block[id=6](blk, statTemp$22, <constant:<Magic>>$28, statTemp$32, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_6" [label = "block[id=6](blk, statTemp$22, <constant:<Magic>>$28, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$21 = statTemp$22.calls_with_object() : untyped
 statTemp$32 = self : Object
 <unconditional>"];
@@ -271,7 +271,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_10" [style="bold"];
     "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_9" [style="tapered"];
 
-    "bb::<constant:Object>#foo_9" [label = "block[id=9](blk, <constant:<Magic>>$28, statTemp$32, statTemp$38, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_9" [label = "block[id=9](blk, <constant:<Magic>>$28, statTemp$32, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$31 = statTemp$32.calls_with_object() : untyped
 statTemp$38 = self : Object
 <unconditional>"];
@@ -293,7 +293,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_11" -> "bb::<constant:Object>#foo_13" [style="bold"];
     "bb::<constant:Object>#foo_11" -> "bb::<constant:Object>#foo_12" [style="tapered"];
 
-    "bb::<constant:Object>#foo_12" [label = "block[id=12](blk, <constant:<Magic>>$28, statTemp$38, statTemp$42, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_12" [label = "block[id=12](blk, <constant:<Magic>>$28, statTemp$38, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$37 = statTemp$38.calls_with_object() : untyped
 statTemp$42 = self : Object
 <unconditional>"];
@@ -313,7 +313,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_14" -> "bb::<constant:Object>#foo_16" [style="bold"];
     "bb::<constant:Object>#foo_14" -> "bb::<constant:Object>#foo_15" [style="tapered"];
 
-    "bb::<constant:Object>#foo_15" [label = "block[id=15](<constant:<Magic>>$28, statTemp$42, statTemp$51, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_15" [label = "block[id=15](<constant:<Magic>>$28, statTemp$42, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$41 = statTemp$42.calls_with_object() : untyped
 statTemp$51 = self : Object
 <unconditional>"];
@@ -336,7 +336,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_17" -> "bb::<constant:Object>#foo_19" [style="bold"];
     "bb::<constant:Object>#foo_17" -> "bb::<constant:Object>#foo_18" [style="tapered"];
 
-    "bb::<constant:Object>#foo_18" [label = "block[id=18](<constant:<Magic>>$28, statTemp$51, statTemp$61, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_18" [label = "block[id=18](<constant:<Magic>>$28, statTemp$51, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$50 = statTemp$51.calls_with_object() : untyped
 statTemp$61 = self : Object
 <unconditional>"];
@@ -361,7 +361,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_20" -> "bb::<constant:Object>#foo_22" [style="bold"];
     "bb::<constant:Object>#foo_20" -> "bb::<constant:Object>#foo_21" [style="tapered"];
 
-    "bb::<constant:Object>#foo_21" [label = "block[id=21](<constant:<Magic>>$28, statTemp$61, <constant:HasToProc>$66, statTemp$72, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_21" [label = "block[id=21](<constant:<Magic>>$28, statTemp$61, <constant:HasToProc>$66, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$60 = statTemp$61.calls_with_object() : untyped
 statTemp$72 = self : Object
 <unconditional>"];
@@ -385,7 +385,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_23" -> "bb::<constant:Object>#foo_25" [style="bold"];
     "bb::<constant:Object>#foo_23" -> "bb::<constant:Object>#foo_24" [style="tapered"];
 
-    "bb::<constant:Object>#foo_24" [label = "block[id=24](statTemp$72, statTemp$82, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_24" [label = "block[id=24](statTemp$72, <constant:CallsWithObject>$83, <constant:nil>$90, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$71 = statTemp$72.calls_with_object() : untyped
 statTemp$82 = <constant:CallsWithObject>$83 : <class:CallsWithObject>
 <unconditional>"];
@@ -424,7 +424,7 @@ blockReturnTemp$84 = <block-nested: <block-pass>$6>.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_28" -> "bb::<constant:Object>#foo_26" [style="bold"];
-    "bb::<constant:Object>#foo_30" [label = "block[id=30](<constant:CallsWithObject>$83, statTemp$91, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_30" [label = "block[id=30](<constant:CallsWithObject>$83, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$91 = <constant:CallsWithObject>$83 : <class:CallsWithObject>
 <unconditional>"];
 
@@ -448,7 +448,7 @@ blockReturnTemp$92 = <block-nested: <block-pass>$8>.meth() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_33" -> "bb::<constant:Object>#foo_31" [style="bold"];
-    "bb::<constant:Object>#foo_34" [label = "block[id=34](statTemp$95, <constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_34" [label = "block[id=34](<constant:CallsWithObjectChild>$96, <constant:HasMeth>$103)
 statTemp$95 = <constant:CallsWithObjectChild>$96 : <class:CallsWithObjectChild>
 <unconditional>"];
 
@@ -460,7 +460,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_35" -> "bb::<constant:Object>#foo_37" [style="bold"];
     "bb::<constant:Object>#foo_35" -> "bb::<constant:Object>#foo_36" [style="tapered"];
 
-    "bb::<constant:Object>#foo_36" [label = "block[id=36](statTemp$95, statTemp$100, statTemp$101, <constant:HasMeth>$103)
+    "bb::<constant:Object>#foo_36" [label = "block[id=36](statTemp$95, <constant:HasMeth>$103)
 statTemp$94 = statTemp$95.calls_with_object() : untyped
 statTemp$100 = self : Object
 statTemp$101 = <constant:HasMeth>$103.new() : HasMeth
@@ -481,7 +481,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_38" -> "bb::<constant:Object>#foo_40" [style="bold"];
     "bb::<constant:Object>#foo_38" -> "bb::<constant:Object>#foo_39" [style="tapered"];
 
-    "bb::<constant:Object>#foo_39" [label = "block[id=39](statTemp$100, statTemp$101, <constant:HasMeth>$103, statTemp$106, statTemp$107)
+    "bb::<constant:Object>#foo_39" [label = "block[id=39](statTemp$100, statTemp$101, <constant:HasMeth>$103)
 statTemp$99 = statTemp$100.calls_arg_with_object(statTemp$101) : untyped
 statTemp$106 = self : Object
 statTemp$107 = <constant:HasMeth>$103.new() : HasMeth

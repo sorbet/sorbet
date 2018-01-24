@@ -24,7 +24,7 @@ rescueTemp$9"];
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_10" [style="bold"];
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="tapered"];
 
-    "bb::<constant:Object>#foo_4" [label = "block[id=4](returnMethodTemp$2)
+    "bb::<constant:Object>#foo_4" [label = "block[id=4]()
 returnMethodTemp$2 = 1 : Integer(1)
 ifTemp$5 = 2 : Integer(2)
 ifTemp$5"];
@@ -32,7 +32,7 @@ ifTemp$5"];
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_6" [style="bold"];
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_10" [style="tapered"];
 
-    "bb::<constant:Object>#foo_6" [label = "block[id=6](returnMethodTemp$2)
+    "bb::<constant:Object>#foo_6" [label = "block[id=6]()
 returnMethodTemp$2 = 3 : Integer(3)
 <unconditional>"];
 

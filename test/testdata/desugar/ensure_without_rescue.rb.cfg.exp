@@ -16,7 +16,7 @@ rescueTemp$4"];
 <unconditional>"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_4" [label = "block[id=4](returnMethodTemp$2)
+    "bb::<constant:Object>#main_4" [label = "block[id=4]()
 statTemp$5 = self : Object
 returnMethodTemp$2 = statTemp$5.a() : untyped
 statTemp$7 = self : Object

@@ -26,7 +26,7 @@ subgraph "cluster_::<constant:Bar>#baz" {
     "bb::<constant:Bar>#baz_0" [shape = invhouse];
     "bb::<constant:Bar>#baz_1" [shape = parallelogram];
 
-    "bb::<constant:Bar>#baz_0" [label = "block[id=0](statTemp$5, statTemp$6)
+    "bb::<constant:Bar>#baz_0" [label = "block[id=0]()
 selfMethodTemp$4 = self : Bar
 b = load_arg(selfMethodTemp$4#baz, 0) : untyped
 statTemp$5 = self : Bar

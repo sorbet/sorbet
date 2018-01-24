@@ -26,7 +26,7 @@ subgraph "cluster_::<constant:Foo>#baz" {
     "bb::<constant:Foo>#baz_0" [shape = invhouse];
     "bb::<constant:Foo>#baz_1" [shape = parallelogram];
 
-    "bb::<constant:Foo>#baz_0" [label = "block[id=0](statTemp$5)
+    "bb::<constant:Foo>#baz_0" [label = "block[id=0]()
 statTemp$5 = self : Foo
 <unconditional>"];
 

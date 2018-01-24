@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:BlockTest>#block_pass" {
     "bb::<constant:BlockTest>#block_pass_0" [shape = invhouse];
     "bb::<constant:BlockTest>#block_pass_1" [shape = parallelogram];
 
-    "bb::<constant:BlockTest>#block_pass_0" [label = "block[id=0](statTemp$5, statTemp$6, statTemp$7, statTemp$8)
+    "bb::<constant:BlockTest>#block_pass_0" [label = "block[id=0]()
 statTemp$5 = self : BlockTest
 statTemp$6 = 1 : Integer(1)
 statTemp$7 = 2 : Integer(2)

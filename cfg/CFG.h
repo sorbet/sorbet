@@ -101,6 +101,7 @@ public:
     struct ReadsAndWrites {
         std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> reads;
         std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> writes;
+        std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> kills;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 

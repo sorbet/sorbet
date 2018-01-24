@@ -44,9 +44,15 @@ CFG::CFG() {
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> reads;
     unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> writes;
+    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> kills;
+
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         for (Binding &bind : bb->exprs) {
             writes[bind.bind].insert(bb.get());
+            auto fnd = reads.find(bind.bind);
+            if (fnd == reads.end() || fnd->second.count(bb.get()) == 0) {
+                kills[bind.bind].insert(bb.get());
+            }
 
             /*
              * When we write to an alias, we rely on the type information being
@@ -77,7 +83,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             reads[bb->bexit.cond].insert(bb.get());
         }
     }
-    return CFG::ReadsAndWrites{move(reads), move(writes)};
+    return CFG::ReadsAndWrites{move(reads), move(writes), move(kills)};
 }
 
 void CFG::sanityCheck(core::Context ctx) {

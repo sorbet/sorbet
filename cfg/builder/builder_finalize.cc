@@ -286,6 +286,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
 
     vector<unordered_set<core::LocalVariable>> reads_by_block(cfg.basicBlocks.size());
     vector<unordered_set<core::LocalVariable>> writes_by_block(cfg.basicBlocks.size());
+    vector<unordered_set<core::LocalVariable>> kills_by_block(cfg.basicBlocks.size());
 
     for (auto &rds : RnW.reads) {
         auto &wts = RnW.writes[rds.first];
@@ -312,6 +313,12 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
         }
     }
 
+    for (auto &kills : RnW.kills) {
+        for (BasicBlock *bb : kills.second) {
+            kills_by_block[bb->id].insert(kills.first);
+        }
+    }
+
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
     vector<unordered_set<core::LocalVariable>> upper_bounds1(cfg.basicBlocks.size());
     bool changed = true;
@@ -329,6 +336,18 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
                 upper_bounds1[bb->id].insert(upper_bounds1[bb->bexit.elseb->id].begin(),
                                              upper_bounds1[bb->bexit.elseb->id].end());
             }
+            // Any variable that we write and do not read is dead on entry to
+            // this block, and we do not require it.
+            for (auto kill : kills_by_block[bb->id]) {
+                // TODO(nelhage) We can't erase for variables inside loops, due
+                // to how our "pinning" type inference works. We can remove this
+                // inner condition when we get a better type inference
+                // algorithm.
+                if (bb->outerLoops <= cfg.minLoops[kill]) {
+                    upper_bounds1[bb->id].erase(kill);
+                }
+            }
+
             changed = changed || (upper_bounds1[bb->id].size() != sz);
         }
     }

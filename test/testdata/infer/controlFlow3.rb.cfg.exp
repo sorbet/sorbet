@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Test>#normalize_params" {
     "bb::<constant:Test>#normalize_params_0" [shape = invhouse];
     "bb::<constant:Test>#normalize_params_1" [shape = parallelogram];
 
-    "bb::<constant:Test>#normalize_params_0" [label = "block[id=0](v, <constant:Array>$16)
+    "bb::<constant:Test>#normalize_params_0" [label = "block[id=0](<constant:Array>$16)
 <constant:Hash>$8 = alias <constant:Hash> : <class:Hash>
 <constant:Array>$16 = alias <constant:Array> : <class:Array>
 selfMethodTemp$4 = self : Test
@@ -20,7 +20,7 @@ ifTemp$5"];
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_1" -> "bb::<constant:Test>#normalize_params_1" [style="bold"];
-    "bb::<constant:Test>#normalize_params_2" [label = "block[id=2](v, returnMethodTemp$3)
+    "bb::<constant:Test>#normalize_params_2" [label = "block[id=2](v)
 statTemp$10 = self : Test
 statTemp$11 = v.to_a() : AppliedType {
   klass = ::<constant:Array>
@@ -45,7 +45,7 @@ ifTemp$13"];
     "bb::<constant:Test>#normalize_params_3" -> "bb::<constant:Test>#normalize_params_4" [style="bold"];
     "bb::<constant:Test>#normalize_params_3" -> "bb::<constant:Test>#normalize_params_5" [style="tapered"];
 
-    "bb::<constant:Test>#normalize_params_4" [label = "block[id=4](v, statTemp$17)
+    "bb::<constant:Test>#normalize_params_4" [label = "block[id=4](v)
 statTemp$17 = v : AppliedType {
   klass = ::<constant:Array>
   targs = [
@@ -55,7 +55,7 @@ statTemp$17 = v : AppliedType {
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_4" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];
-    "bb::<constant:Test>#normalize_params_5" [label = "block[id=5](v, returnMethodTemp$3)
+    "bb::<constant:Test>#normalize_params_5" [label = "block[id=5](v)
 returnMethodTemp$3 = v : untyped
 <unconditional>"];
 
@@ -67,7 +67,7 @@ outerLoops: 1
     "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_8" [style="bold"];
     "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_7" [style="tapered"];
 
-    "bb::<constant:Test>#normalize_params_7" [label = "block[id=7](returnMethodTemp$3, statTemp$17)
+    "bb::<constant:Test>#normalize_params_7" [label = "block[id=7](statTemp$17)
 returnMethodTemp$3 = statTemp$17.map() : AppliedType {
   klass = ::<constant:Array>
   targs = [

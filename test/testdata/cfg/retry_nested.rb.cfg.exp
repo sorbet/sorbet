@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_0" [shape = invhouse];
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#main_0" [label = "block[id=0](try, <constant:A>$19, <constant:B>$29)
+    "bb::<constant:Object>#main_0" [label = "block[id=0](<constant:A>$19, <constant:B>$29)
 <constant:A>$19 = alias <constant:A> : <class:A>
 <constant:B>$29 = alias <constant:B> : <class:B>
 try = 0 : Integer(0)
@@ -18,7 +18,7 @@ returnMethodTemp$2 = 2
 <unconditional>"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_2" [label = "block[id=2](try, rescueTemp$5, <constant:A>$19, <constant:B>$29)
+    "bb::<constant:Object>#main_2" [label = "block[id=2](try, <constant:A>$19, <constant:B>$29)
 rescueTemp$5 = <unanalyzable> : untyped
 rescueTemp$5"];
 
@@ -39,7 +39,7 @@ statTemp$6 = statTemp$7.puts(statTemp$8) : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_5" [style="bold"];
-    "bb::<constant:Object>#main_5" [label = "block[id=5](try, rescueTemp$9, <constant:A>$19, <constant:B>$29)
+    "bb::<constant:Object>#main_5" [label = "block[id=5](try, <constant:A>$19, <constant:B>$29)
 rescueTemp$9 = <unanalyzable> : untyped
 rescueTemp$9"];
 
@@ -61,7 +61,7 @@ ifTemp$10"];
     "bb::<constant:Object>#main_7" -> "bb::<constant:Object>#main_8" [style="bold"];
     "bb::<constant:Object>#main_7" -> "bb::<constant:Object>#main_9" [style="tapered"];
 
-    "bb::<constant:Object>#main_8" [label = "block[id=8](try, returnMethodTemp$2, <constant:A>$19)
+    "bb::<constant:Object>#main_8" [label = "block[id=8](try, <constant:A>$19)
 statTemp$14 = try : NilClass | Integer
 statTemp$15 = 1 : Integer(1)
 try = statTemp$14.+(statTemp$15) : untyped
@@ -79,7 +79,7 @@ ifTemp$20"];
     "bb::<constant:Object>#main_9" -> "bb::<constant:Object>#main_10" [style="bold"];
     "bb::<constant:Object>#main_9" -> "bb::<constant:Object>#main_21" [style="tapered"];
 
-    "bb::<constant:Object>#main_10" [label = "block[id=10](try, returnMethodTemp$2, <constant:B>$29)
+    "bb::<constant:Object>#main_10" [label = "block[id=10](try, <constant:B>$29)
 statTemp$24 = try : NilClass | Integer
 statTemp$25 = 1 : Integer(1)
 try = statTemp$24.+(statTemp$25) : untyped

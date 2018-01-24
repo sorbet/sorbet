@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero0" {
     "bb::<constant:ControlFlow>#orZero0_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero0_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero0_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero0_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero0, 0) : Integer | NilClass
 a"];
@@ -37,7 +37,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero0a" {
     "bb::<constant:ControlFlow>#orZero0a_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero0a_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero0a_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero0a_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero0a, 0) : Integer
 a"];
@@ -69,7 +69,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero0n" {
     "bb::<constant:ControlFlow>#orZero0n_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero0n_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero0n_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero0n_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero0n, 0) : Integer | NilClass
 b = a.!() : TrueClass | FalseClass
@@ -102,7 +102,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero1n" {
     "bb::<constant:ControlFlow>#orZero1n_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero1n_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero1n_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero1n_0" [label = "block[id=0]()
 <constant:Integer>$8 = alias <constant:Integer> : <class:Integer>
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero1n, 0) : Integer | NilClass
@@ -137,7 +137,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero2" {
     "bb::<constant:ControlFlow>#orZero2_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero2_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero2_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero2_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero2, 0) : Integer | NilClass
 a"];
@@ -149,7 +149,7 @@ a"];
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero2_1" -> "bb::<constant:ControlFlow>#orZero2_1" [style="bold"];
-    "bb::<constant:ControlFlow>#orZero2_3" [label = "block[id=3](a)
+    "bb::<constant:ControlFlow>#orZero2_3" [label = "block[id=3]()
 a = 0 : Integer(0)
 <unconditional>"];
 
@@ -167,7 +167,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero3" {
     "bb::<constant:ControlFlow>#orZero3_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero3_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero3_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero3_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero3, 0) : Integer | NilClass
 a"];
@@ -180,7 +180,7 @@ finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero3_1" -> "bb::<constant:ControlFlow>#orZero3_1" [style="bold"];
-    "bb::<constant:ControlFlow>#orZero3_2" [label = "block[id=2](ifTemp$4)
+    "bb::<constant:ControlFlow>#orZero3_2" [label = "block[id=2]()
 statTemp$6 = 1 : Integer(1)
 statTemp$7 = 2 : Integer(2)
 ifTemp$4 = statTemp$6.==(statTemp$7) : TrueClass | FalseClass
@@ -189,7 +189,7 @@ ifTemp$4"];
     "bb::<constant:ControlFlow>#orZero3_2" -> "bb::<constant:ControlFlow>#orZero3_5" [style="bold"];
     "bb::<constant:ControlFlow>#orZero3_2" -> "bb::<constant:ControlFlow>#orZero3_6" [style="tapered"];
 
-    "bb::<constant:ControlFlow>#orZero3_3" [label = "block[id=3](a, ifTemp$4)
+    "bb::<constant:ControlFlow>#orZero3_3" [label = "block[id=3](a)
 ifTemp$4 = a : NilClass
 ifTemp$4"];
 
@@ -216,7 +216,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero3n" {
     "bb::<constant:ControlFlow>#orZero3n_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero3n_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero3n_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero3n_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero3n, 0) : Integer | NilClass
 a"];
@@ -229,14 +229,14 @@ finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero3n_1" -> "bb::<constant:ControlFlow>#orZero3n_1" [style="bold"];
-    "bb::<constant:ControlFlow>#orZero3n_2" [label = "block[id=2](statTemp$5)
+    "bb::<constant:ControlFlow>#orZero3n_2" [label = "block[id=2]()
 statTemp$7 = 1 : Integer(1)
 statTemp$8 = 2 : Integer(2)
 statTemp$5 = statTemp$7.==(statTemp$8) : TrueClass | FalseClass
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero3n_2" -> "bb::<constant:ControlFlow>#orZero3n_4" [style="bold"];
-    "bb::<constant:ControlFlow>#orZero3n_3" [label = "block[id=3](a, statTemp$5)
+    "bb::<constant:ControlFlow>#orZero3n_3" [label = "block[id=3](a)
 statTemp$5 = a : NilClass
 <unconditional>"];
 
@@ -268,7 +268,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero4" {
     "bb::<constant:ControlFlow>#orZero4_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero4_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero4_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero4_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero4, 0) : Integer | NilClass
 a"];
@@ -281,14 +281,14 @@ finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero4_1" -> "bb::<constant:ControlFlow>#orZero4_1" [style="bold"];
-    "bb::<constant:ControlFlow>#orZero4_2" [label = "block[id=2](a, ifTemp$4)
+    "bb::<constant:ControlFlow>#orZero4_2" [label = "block[id=2](a)
 ifTemp$4 = a : Integer
 ifTemp$4"];
 
     "bb::<constant:ControlFlow>#orZero4_2" -> "bb::<constant:ControlFlow>#orZero4_5" [style="bold"];
     "bb::<constant:ControlFlow>#orZero4_2" -> "bb::<constant:ControlFlow>#orZero4_6" [style="tapered"];
 
-    "bb::<constant:ControlFlow>#orZero4_3" [label = "block[id=3](a, ifTemp$4)
+    "bb::<constant:ControlFlow>#orZero4_3" [label = "block[id=3](a)
 ifTemp$4 = true : TrueClass(true)
 ifTemp$4"];
 
@@ -314,7 +314,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero5" {
     "bb::<constant:ControlFlow>#orZero5_0" [shape = invhouse];
     "bb::<constant:ControlFlow>#orZero5_1" [shape = parallelogram];
 
-    "bb::<constant:ControlFlow>#orZero5_0" [label = "block[id=0](a)
+    "bb::<constant:ControlFlow>#orZero5_0" [label = "block[id=0]()
 selfMethodTemp$3 = self : ControlFlow
 a = load_arg(selfMethodTemp$3#orZero5, 0) : Integer | NilClass
 a"];
@@ -327,14 +327,14 @@ finalReturn = return returnMethodTemp$2
 <unconditional>"];
 
     "bb::<constant:ControlFlow>#orZero5_1" -> "bb::<constant:ControlFlow>#orZero5_1" [style="bold"];
-    "bb::<constant:ControlFlow>#orZero5_2" [label = "block[id=2](a, ifTemp$4)
+    "bb::<constant:ControlFlow>#orZero5_2" [label = "block[id=2](a)
 ifTemp$4 = true : TrueClass(true)
 ifTemp$4"];
 
     "bb::<constant:ControlFlow>#orZero5_2" -> "bb::<constant:ControlFlow>#orZero5_5" [style="bold"];
     "bb::<constant:ControlFlow>#orZero5_2" -> "bb::<constant:ControlFlow>#orZero5_6" [style="tapered"];
 
-    "bb::<constant:ControlFlow>#orZero5_3" [label = "block[id=3](a, ifTemp$4)
+    "bb::<constant:ControlFlow>#orZero5_3" [label = "block[id=3](a)
 ifTemp$4 = a : NilClass
 ifTemp$4"];
 

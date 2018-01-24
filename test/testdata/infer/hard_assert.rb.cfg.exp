@@ -57,7 +57,7 @@ subgraph "cluster_::<constant:Main>#with_and" {
     "bb::<constant:Main>#with_and_0" [shape = invhouse];
     "bb::<constant:Main>#with_and_1" [shape = parallelogram];
 
-    "bb::<constant:Main>#with_and_0" [label = "block[id=0](a, &&$2, statTemp$5, <constant:nil>$14)
+    "bb::<constant:Main>#with_and_0" [label = "block[id=0](<constant:nil>$14)
 <constant:nil>$14 = alias <constant:nil> : NilClass
 selfMethodTemp$3 = self : Main
 a = load_arg(selfMethodTemp$3#with_and, 0) : String | NilClass
@@ -72,14 +72,14 @@ statTemp$5 = self : Main
 <unconditional>"];
 
     "bb::<constant:Main>#with_and_1" -> "bb::<constant:Main>#with_and_1" [style="bold"];
-    "bb::<constant:Main>#with_and_2" [label = "block[id=2](a, statTemp$5, statTemp$6, <constant:nil>$14)
+    "bb::<constant:Main>#with_and_2" [label = "block[id=2](a, statTemp$5, <constant:nil>$14)
 statTemp$10 = 1 : Integer(1)
 statTemp$11 = 1 : Integer(1)
 statTemp$6 = statTemp$10.==(statTemp$11) : TrueClass | FalseClass
 <unconditional>"];
 
     "bb::<constant:Main>#with_and_2" -> "bb::<constant:Main>#with_and_4" [style="bold"];
-    "bb::<constant:Main>#with_and_3" [label = "block[id=3](a, &&$2, statTemp$5, statTemp$6, <constant:nil>$14)
+    "bb::<constant:Main>#with_and_3" [label = "block[id=3](a, &&$2, statTemp$5, <constant:nil>$14)
 statTemp$6 = &&$2 : FalseClass
 <unconditional>"];
 
