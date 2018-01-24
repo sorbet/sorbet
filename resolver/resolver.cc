@@ -1013,7 +1013,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::Symbol &parent, core::Symbol
     }
     auto myVariance = my.info(gs).variance();
     if (!inSym.derivesFrom(gs, core::GlobalState::defn_Class()) && (myVariance != parentVariance)) {
-        // this requirement can be loozened. You can go from variant to invariant.
+        // this requirement can be loosened. You can go from variant to invariant.
         gs.error(my.info(gs).definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
                  "Type variance mismatch with parent {}", parent.fullName(gs));
         return true;

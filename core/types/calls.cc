@@ -221,7 +221,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
         }
     }
 
-    { // keep only candidates with closes arity
+    { // keep only candidates with closest arity
         struct Comp {
             core::Context ctx;
 

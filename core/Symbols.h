@@ -134,6 +134,7 @@ public:
         static constexpr int METHOD_PRIVATE = 0x0080;
         static constexpr int METHOD_OVERLOADED = 0x0040;
 
+        // Type flags
         static constexpr int TYPE_COVARIANT = 0x0100;
         static constexpr int TYPE_INVARIANT = 0x0080;
         static constexpr int TYPE_CONTRAVARIANT = 0x0040;
