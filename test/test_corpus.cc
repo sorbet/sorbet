@@ -102,7 +102,7 @@ public:
         if (raw || typedSource) {
             ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), cfg);
         }
-        ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), cfg);
+        cfg = ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         if (typedSource) {
             cfg->recordAnnotations(ctx);
         }
