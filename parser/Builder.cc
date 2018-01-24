@@ -1121,7 +1121,7 @@ public:
     }
 };
 
-Builder::Builder(GlobalState &ctx, core::FileRef file) : impl_(new Builder::Impl(ctx, file)) {}
+Builder::Builder(GlobalState &gs, core::FileRef file) : impl_(new Builder::Impl(gs, file)) {}
 Builder::~Builder() = default;
 
 }; // namespace parser
