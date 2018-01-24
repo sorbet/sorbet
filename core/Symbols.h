@@ -200,6 +200,14 @@ public:
         return (flags & Symbol::Flags::METHOD) != 0;
     }
 
+    inline bool isTypeMember() const {
+        return (flags & Symbol::Flags::TYPE_MEMBER) != 0;
+    }
+
+    inline bool isTypeArgument() const {
+        return (flags & Symbol::Flags::TYPE_ARGUMENT) != 0;
+    }
+
     inline bool isMethodArgument() const {
         return (flags & Symbol::Flags::METHOD_ARGUMENT) != 0;
     }
@@ -227,14 +235,6 @@ public:
     inline bool isBlockArgument() const {
         ENFORCE(isMethodArgument());
         return (flags & Symbol::Flags::ARGUMENT_BLOCK) != 0;
-    }
-
-    inline bool isTypeMember() const {
-        return (flags & Symbol::Flags::TYPE_MEMBER) != 0;
-    }
-
-    inline bool isTypeArgument() const {
-        return (flags & Symbol::Flags::TYPE_ARGUMENT) != 0;
     }
 
     inline bool isCovariant() const {
@@ -279,22 +279,6 @@ public:
 
     bool isBlockSymbol(GlobalState &gs) const;
 
-    inline void setClass() {
-        ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
-        flags = flags | Symbol::Flags::CLASS;
-    }
-
-    inline void setIsModule(bool isModule) {
-        ENFORCE(isClass());
-        if (isModule) {
-            ENFORCE((flags & Symbol::Flags::CLASS_CLASS) == 0);
-            flags = flags | Symbol::Flags::CLASS_MODULE;
-        } else {
-            ENFORCE((flags & Symbol::Flags::CLASS_MODULE) == 0);
-            flags = flags | Symbol::Flags::CLASS_CLASS;
-        }
-    }
-
     inline bool isClassModule() {
         ENFORCE(isClass());
         if (flags & Symbol::Flags::CLASS_MODULE)
@@ -312,6 +296,12 @@ public:
     inline bool isClassClass() {
         return !isClassModule();
     }
+
+    inline void setClass() {
+        ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
+        flags = flags | Symbol::Flags::CLASS;
+    }
+
     inline void setStaticField() {
         ENFORCE(!isClass() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::STATIC_FIELD;
@@ -335,6 +325,17 @@ public:
     inline void setTypeMember() {
         ENFORCE(!isClass() && !isStaticField() && !isField() && !isMethod() && !isTypeArgument());
         flags = flags | Symbol::Flags::TYPE_MEMBER;
+    }
+
+    inline void setIsModule(bool isModule) {
+        ENFORCE(isClass());
+        if (isModule) {
+            ENFORCE((flags & Symbol::Flags::CLASS_CLASS) == 0);
+            flags = flags | Symbol::Flags::CLASS_MODULE;
+        } else {
+            ENFORCE((flags & Symbol::Flags::CLASS_MODULE) == 0);
+            flags = flags | Symbol::Flags::CLASS_CLASS;
+        }
     }
 
     inline void setCovariant() {
