@@ -21,4 +21,8 @@ class Main
         T.assert_type!(a, NilClass)
         nil
     end
+
+    def with_storytime
+        hard_assert(false, storytime: 42)
+    end
 end
