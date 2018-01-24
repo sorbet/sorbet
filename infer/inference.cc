@@ -120,10 +120,11 @@ struct KnowledgeFact {
         }
     }
 
-    /** Computes all possible implications of this knowledge holding as an exit from environment env in block forBlock
+    /** Computes all possible implications of this knowledge holding as an exit from environment env in block bb
      */
-    KnowledgeFact under(core::Context ctx, Environment env, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock &forBlock,
+    KnowledgeFact under(core::Context ctx, Environment env, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                         bool isNeeded);
+
     void sanityCheck() {
         if (!debug_mode) {
             return;
@@ -580,7 +581,7 @@ public:
         }
     }
 
-    void mergeWith(core::Context ctx, Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock &forBlock,
+    void mergeWith(core::Context ctx, Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                    unique_ptr<KnowledgeFilter> &knowledgeFilter) {
         int i = -1;
         this->isDead |= other.isDead;
@@ -601,7 +602,7 @@ public:
                 }
             }
 
-            if (((forBlock.flags & cfg::CFG::LOOP_HEADER) != 0) && forBlock.outerLoops <= inWhat.maxLoopWrite[var]) {
+            if (((bb->flags & cfg::CFG::LOOP_HEADER) != 0) && bb->outerLoops <= inWhat.maxLoopWrite[var]) {
                 continue;
             }
             bool canBeFalsy = core::Types::canBeFalsy(ctx, otherType);
@@ -610,7 +611,7 @@ public:
             if (canBeTruthy) {
                 auto &thisKnowledge = getKnowledge(var);
                 auto otherTruthy = other.getKnowledge(var, false)
-                                       .truthy.under(ctx, other, loc, inWhat, forBlock, knowledgeFilter->isNeeded(var));
+                                       .truthy.under(ctx, other, loc, inWhat, bb, knowledgeFilter->isNeeded(var));
                 if (!otherTruthy.isDead) {
                     if (!thisKnowledge.seenTruthyOption) {
                         thisKnowledge.seenTruthyOption = true;
@@ -624,7 +625,7 @@ public:
             if (canBeFalsy) {
                 auto &thisKnowledge = getKnowledge(var);
                 auto otherFalsy = other.getKnowledge(var, false)
-                                      .falsy.under(ctx, other, loc, inWhat, forBlock, knowledgeFilter->isNeeded(var));
+                                      .falsy.under(ctx, other, loc, inWhat, bb, knowledgeFilter->isNeeded(var));
                 if (!otherFalsy.isDead) {
                     if (!thisKnowledge.seenFalsyOption) {
                         thisKnowledge.seenFalsyOption = true;
@@ -942,18 +943,18 @@ public:
     void ensureGoodAssignTarget(core::Context ctx, core::LocalVariable target) {}
 };
 
-KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc loc, cfg::CFG &cfg,
-                                   cfg::BasicBlock &bb, bool isNeeded) {
+KnowledgeFact KnowledgeFact::under(core::Context ctx, Environment env, core::Loc loc, cfg::CFG &inWhat,
+                                   cfg::BasicBlock *bb, bool isNeeded) {
     KnowledgeFact copy = *this;
     if (env.isDead) {
         copy.isDead = true;
         return copy;
     }
     int i = -1;
-    bool enteringLoop = (bb.flags & cfg::CFG::LOOP_HEADER) != 0;
+    bool enteringLoop = (bb->flags & cfg::CFG::LOOP_HEADER) != 0;
     for (auto local : env.vars) {
         i++;
-        if (enteringLoop && bb.outerLoops <= cfg.maxLoopWrite[local]) {
+        if (enteringLoop && bb->outerLoops <= inWhat.maxLoopWrite[local]) {
             continue;
         }
         auto fnd = find_if(copy.yesTypeTests.begin(), copy.yesTypeTests.end(),
@@ -1046,7 +1047,7 @@ void ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> &
                     outEnvironments[parent->id].withCond(ctx, isTrueBranch, current.vars, knowledgeFilter); // copy
                 if (!envAsSeenFromBranch.isDead) {
                     current.isDead = false;
-                    current.mergeWith(ctx, envAsSeenFromBranch, parent->bexit.loc, *cfg.get(), *bb, knowledgeFilter);
+                    current.mergeWith(ctx, envAsSeenFromBranch, parent->bexit.loc, *cfg.get(), bb, knowledgeFilter);
                 }
             }
         }
