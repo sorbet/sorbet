@@ -12,6 +12,9 @@ public:
     static std::vector<std::unique_ptr<ast::Expression>> run(core::Context ctx,
                                                              std::vector<std::unique_ptr<ast::Expression>> trees);
     Resolver() = delete;
+
+private:
+    static void finalizeResolution(core::GlobalState &gs);
 };
 
 } // namespace resolver
