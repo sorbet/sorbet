@@ -855,7 +855,7 @@ public:
         return new ast::EmptyTree(methodDef->loc);
     };
 
-    std::unique_ptr<ast::Expression> addClasses(core::Context &ctx, std::unique_ptr<ast::Expression> tree) {
+    std::unique_ptr<ast::Expression> addClasses(core::Context ctx, std::unique_ptr<ast::Expression> tree) {
         if (classes.empty()) {
             ENFORCE(sortedClasses().size() == 0);
             return tree;
@@ -879,7 +879,7 @@ public:
         return tree;
     }
 
-    std::unique_ptr<ast::Expression> addMethods(core::Context &ctx, std::unique_ptr<ast::Expression> tree) {
+    std::unique_ptr<ast::Expression> addMethods(core::Context ctx, std::unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
             ENFORCE(popCurMethodDefs().size() == 0);
@@ -913,7 +913,7 @@ private:
         return ret;
     }
 
-    ast::ClassDef::RHS_store addMethods(core::Context &ctx, ast::ClassDef::RHS_store rhs) {
+    ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs) {
         if (curMethodSet().methods.size() == 1 && rhs.size() == 1 && ast::cast_tree<ast::EmptyTree>(rhs[0].get())) {
             // It was only 1 method to begin with, put it back
             rhs.pop_back();
@@ -1135,7 +1135,7 @@ public:
     }
 };
 
-std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context &ctx,
+std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context ctx,
                                                             std::vector<std::unique_ptr<ast::Expression>> trees) {
     ResolveConstantsWalk constants(ctx);
     for (auto &tree : trees) {

@@ -223,15 +223,15 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
 
     { // keep only candidates with closes arity
         struct Comp {
-            core::Context &ctx;
+            core::Context ctx;
 
             bool operator()(core::SymbolRef s, int i) const {
-                return s.info(ctx).argumentsOrMixins.size() < i;
+                return s.info(ctx.state).argumentsOrMixins.size() < i;
             }
             bool operator()(int i, core::SymbolRef s) const {
-                return i < s.info(ctx).argumentsOrMixins.size();
+                return i < s.info(ctx.state).argumentsOrMixins.size();
             }
-            Comp(core::Context &ctx) : ctx(ctx){};
+            Comp(core::Context ctx) : ctx(ctx){};
         } cmp(ctx);
 
         auto er = std::equal_range(leftCandidates.begin(), leftCandidates.end(), args.size(), cmp);
