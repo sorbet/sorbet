@@ -22,7 +22,8 @@ class KnowledgeFilter {
     KnowledgeFilter() = default;
 
 public:
-    KnowledgeFilter(KnowledgeFilter &&) = default;
+    KnowledgeFilter(KnowledgeFilter &) = delete;
+    KnowledgeFilter(KnowledgeFilter &&) = delete;
 
     bool isNeeded(core::LocalVariable var) {
         return used_vars.find(var) != used_vars.end();
