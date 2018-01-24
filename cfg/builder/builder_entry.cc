@@ -111,7 +111,7 @@ CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakSco
     return ret;
 }
 
-void CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> &cfg) {
+unique_ptr<CFG> CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> cfg) {
     for (auto *bb : cfg->backwardsTopoSort) {
         if (bb->exprs.empty()) {
             continue;
@@ -126,6 +126,7 @@ void CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> &cfg) {
         bb->exprs.emplace_back(bind, lastExpr.loc,
                                make_unique<cfg::DebugEnvironment>(core::GlobalState::AnnotationPos::AFTER));
     }
+    return cfg;
 }
 
 } // namespace cfg
