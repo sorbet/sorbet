@@ -738,7 +738,6 @@ end
 
 class ArgumentError
   sig.returns(ArgumentError)
-  sig.returns(ArgumentError)
   def clone(); end
 
   sig.returns(ArgumentError)
@@ -1328,7 +1327,6 @@ class Array
   .returns(T::Array[BasicObject])
   def |(arg0); end
 
-  sig.returns(Array)
   sig.returns(Array)
   def clone(); end
 
@@ -1987,7 +1985,6 @@ class BigDecimal
   def coerce(arg0); end
 
   sig.returns(BigDecimal)
-  sig.returns(BigDecimal)
   def clone(); end
 
   sig.returns(BigDecimal)
@@ -2067,7 +2064,6 @@ end
 
 class Binding
   sig.returns(Binding)
-  sig.returns(Binding)
   def clone(); end
 
   sig.returns(Binding)
@@ -2099,56 +2095,23 @@ class CSV
   def self.foreach(path, options=_, &blk); end
 
   sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
   def clone(); end
 
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
   sig.returns(CSV)
   def dup(); end
 
   sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
   def freeze(); end
 
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
   sig.returns(CSV)
   def taint(); end
 
   sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
   def trust(); end
 
   sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
   def untaint(); end
 
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
-  sig.returns(CSV)
   sig.returns(CSV)
   def untrust(); end
 end
@@ -2180,10 +2143,8 @@ class Class
   def name(); end
 
   sig.returns(Class)
-  sig.returns(Class)
   def clone(); end
 
-  sig.returns(Class)
   sig.returns(Class)
   def freeze(); end
 
@@ -2240,7 +2201,6 @@ class Class
 end
 
 class ClosedQueueError
-  sig.returns(ClosedQueueError)
   sig.returns(ClosedQueueError)
   def clone(); end
 
@@ -2515,7 +2475,6 @@ class Complex
   def coerce(arg0); end
 
   sig.returns(Complex)
-  sig.returns(Complex)
   def clone(); end
 
   sig.returns(Complex)
@@ -2546,7 +2505,6 @@ module Coverage
 end
 
 class Data
-  sig.returns(Data)
   sig.returns(Data)
   def clone(); end
 
@@ -2586,38 +2544,28 @@ class Date
   def strftime(arg0); end
 
   sig.returns(Date)
-  sig.returns(Date)
-  sig.returns(Date)
-  sig.returns(Date)
   def clone(); end
 
-  sig.returns(Date)
   sig.returns(Date)
   def dup(); end
 
   sig.returns(Date)
-  sig.returns(Date)
   def freeze(); end
 
-  sig.returns(Date)
   sig.returns(Date)
   def taint(); end
 
   sig.returns(Date)
-  sig.returns(Date)
   def trust(); end
 
   sig.returns(Date)
-  sig.returns(Date)
   def untaint(); end
 
-  sig.returns(Date)
   sig.returns(Date)
   def untrust(); end
 end
 
 class DateTime
-  sig.returns(DateTime)
   sig.returns(DateTime)
   def clone(); end
 
@@ -2801,7 +2749,6 @@ class Dir
   def to_path(); end
 
   sig.returns(Dir)
-  sig.returns(Dir)
   def clone(); end
 
   sig.returns(Dir)
@@ -2837,7 +2784,6 @@ class Dir
 end
 
 class EOFError
-  sig.returns(EOFError)
   sig.returns(EOFError)
   def clone(); end
 
@@ -2931,64 +2877,23 @@ class Encoding
   def replicate(name); end
 
   sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
   def clone(); end
 
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
   sig.returns(Encoding)
   def dup(); end
 
   sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
   def freeze(); end
 
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
   sig.returns(Encoding)
   def taint(); end
 
   sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
   def trust(); end
 
   sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
   def untaint(); end
 
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
-  sig.returns(Encoding)
   sig.returns(Encoding)
   def untrust(); end
 
@@ -2997,7 +2902,6 @@ class Encoding
 end
 
 class EncodingError
-  sig.returns(EncodingError)
   sig.returns(EncodingError)
   def clone(); end
 
@@ -3465,48 +3369,23 @@ class Enumerator
   def size(); end
 
   sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
   def clone(); end
 
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
   sig.returns(Enumerator)
   def dup(); end
 
   sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
   def freeze(); end
 
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
   sig.returns(Enumerator)
   def taint(); end
 
   sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
   def trust(); end
 
   sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
   def untaint(); end
 
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
-  sig.returns(Enumerator)
   sig.returns(Enumerator)
   def untrust(); end
 
@@ -3573,7 +3452,6 @@ class Exception
   def to_s(); end
 
   sig.returns(Exception)
-  sig.returns(Exception)
   def clone(); end
 
   sig.returns(Exception)
@@ -3596,7 +3474,6 @@ class Exception
 end
 
 class FalseClass
-  sig.returns(FalseClass)
   sig.returns(FalseClass)
   def clone(); end
 
@@ -3621,7 +3498,6 @@ end
 
 class Fiber
   sig.returns(Fiber)
-  sig.returns(Fiber)
   def clone(); end
 
   sig.returns(Fiber)
@@ -3644,7 +3520,6 @@ class Fiber
 end
 
 class FiberError
-  sig.returns(FiberError)
   sig.returns(FiberError)
   def clone(); end
 
@@ -4121,15 +3996,8 @@ class File
   def truncate(arg0); end
 
   sig.returns(File)
-  sig.returns(File)
-  sig.returns(File)
-  sig.returns(File)
   def clone(); end
 
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(File)
   sig(
       arg0: BasicObject,
   )
@@ -4137,15 +4005,8 @@ class File
   def <<(arg0); end
 
   sig.returns(File)
-  sig.returns(File)
   def binmode(); end
 
-  sig(
-      sep: String,
-      limit: Integer,
-      blk: T::Proc[[String], returns: BasicObject],
-  )
-  .returns(File)
   sig(
       sep: String,
       limit: Integer,
@@ -4158,16 +4019,8 @@ class File
       blk: T::Proc[[Integer], returns: BasicObject],
   )
   .returns(File)
-  sig(
-      blk: T::Proc[[Integer], returns: BasicObject],
-  )
-  .returns(File)
   def each_byte(&blk); end
 
-  sig(
-      blk: T::Proc[[String], returns: BasicObject],
-  )
-  .returns(File)
   sig(
       blk: T::Proc[[String], returns: BasicObject],
   )
@@ -4178,27 +4031,13 @@ class File
       blk: T::Proc[[Integer], returns: BasicObject],
   )
   .returns(File)
-  sig(
-      blk: T::Proc[[Integer], returns: BasicObject],
-  )
-  .returns(File)
   def each_codepoint(&blk); end
 
-  sig.returns(File)
   sig.returns(File)
   def flush(); end
 
   sig(
       ext_or_ext_int_enc: T.any(String, Encoding),
-  )
-  .returns(File)
-  sig(
-      ext_or_ext_int_enc: T.any(String, Encoding),
-  )
-  .returns(File)
-  sig(
-      ext_enc: T.any(String, Encoding),
-      int_enc: T.any(String, Encoding),
   )
   .returns(File)
   sig(
@@ -4209,30 +4048,23 @@ class File
   def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
 
   sig.returns(File)
-  sig.returns(File)
   def to_io(); end
 
-  sig.returns(File)
   sig.returns(File)
   def dup(); end
 
   sig.returns(File)
-  sig.returns(File)
   def freeze(); end
 
-  sig.returns(File)
   sig.returns(File)
   def taint(); end
 
   sig.returns(File)
-  sig.returns(File)
   def trust(); end
 
   sig.returns(File)
-  sig.returns(File)
   def untaint(); end
 
-  sig.returns(File)
   sig.returns(File)
   def untrust(); end
 
@@ -4861,7 +4693,6 @@ class Float
   def to_c(); end
 
   sig.returns(Float)
-  sig.returns(Float)
   def clone(); end
 
   sig.returns(Float)
@@ -4884,7 +4715,6 @@ class Float
 end
 
 class FloatDomainError
-  sig.returns(FloatDomainError)
   sig.returns(FloatDomainError)
   def clone(); end
 
@@ -5222,7 +5052,6 @@ class Hash
   .returns(T::Array[T.untyped])
   def values_at(*arg0); end
 
-  sig.returns(Hash)
   sig.returns(Hash)
   def clone(); end
 
@@ -5576,56 +5405,23 @@ class IO
   def write(arg0); end
 
   sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
   def clone(); end
 
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
   sig.returns(IO)
   def dup(); end
 
   sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
   def freeze(); end
 
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
   sig.returns(IO)
   def taint(); end
 
   sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
   def trust(); end
 
   sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
   def untaint(); end
 
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
-  sig.returns(IO)
   sig.returns(IO)
   def untrust(); end
 
@@ -5899,7 +5695,6 @@ end
 
 class IOError
   sig.returns(IOError)
-  sig.returns(IOError)
   def clone(); end
 
   sig.returns(IOError)
@@ -5922,7 +5717,6 @@ class IOError
 end
 
 class IndexError
-  sig.returns(IndexError)
   sig.returns(IndexError)
   def clone(); end
 
@@ -6528,7 +6322,6 @@ class Integer
   def zero?(); end
 
   sig.returns(Integer)
-  sig.returns(Integer)
   def clone(); end
 
   sig.returns(Integer)
@@ -6551,7 +6344,6 @@ class Integer
 end
 
 class Interrupt
-  sig.returns(Interrupt)
   sig.returns(Interrupt)
   def clone(); end
 
@@ -7195,7 +6987,6 @@ end
 
 class KeyError
   sig.returns(KeyError)
-  sig.returns(KeyError)
   def clone(); end
 
   sig.returns(KeyError)
@@ -7219,7 +7010,6 @@ end
 
 class LoadError
   sig.returns(LoadError)
-  sig.returns(LoadError)
   def clone(); end
 
   sig.returns(LoadError)
@@ -7242,7 +7032,6 @@ class LoadError
 end
 
 class LocalJumpError
-  sig.returns(LocalJumpError)
   sig.returns(LocalJumpError)
   def clone(); end
 
@@ -7379,7 +7168,6 @@ class MatchData
   .returns(T::Array[String])
   def values_at(*indexes); end
 
-  sig.returns(MatchData)
   sig.returns(MatchData)
   def clone(); end
 
@@ -7565,7 +7353,6 @@ module Math
 end
 
 class Method
-  sig.returns(Method)
   sig.returns(Method)
   def clone(); end
 
@@ -8024,7 +7811,6 @@ class Module
   def using(arg0); end
 
   sig.returns(Module)
-  sig.returns(Module)
   def clone(); end
 
   sig.returns(Module)
@@ -8054,7 +7840,6 @@ end
 
 class Monitor
   sig.returns(Monitor)
-  sig.returns(Monitor)
   def clone(); end
 
   sig.returns(Monitor)
@@ -8077,7 +7862,6 @@ class Monitor
 end
 
 class NameError
-  sig.returns(NameError)
   sig.returns(NameError)
   def clone(); end
 
@@ -8138,7 +7922,6 @@ class NilClass
   def to_r(); end
 
   sig.returns(NilClass)
-  sig.returns(NilClass)
   def clone(); end
 
   sig.returns(NilClass)
@@ -8161,7 +7944,6 @@ class NilClass
 end
 
 class NoMemoryError
-  sig.returns(NoMemoryError)
   sig.returns(NoMemoryError)
   def clone(); end
 
@@ -8186,7 +7968,6 @@ end
 
 class NoMethodError
   sig.returns(NoMethodError)
-  sig.returns(NoMethodError)
   def clone(); end
 
   sig.returns(NoMethodError)
@@ -8209,7 +7990,6 @@ class NoMethodError
 end
 
 class NotImplementedError
-  sig.returns(NotImplementedError)
   sig.returns(NotImplementedError)
   def clone(); end
 
@@ -8412,7 +8192,6 @@ class Numeric
   def zero?(); end
 
   sig.returns(Numeric)
-  sig.returns(Numeric)
   def clone(); end
 
   sig.returns(Numeric)
@@ -8492,6 +8271,12 @@ class Object
   )
   .returns(T.any(TrueClass, FalseClass))
   def eql?(other); end
+
+  sig(
+      mod: Module,
+  )
+  .returns(NilClass)
+  def extend(mod); end
 
   sig.returns(Object)
   def freeze(); end
@@ -9142,7 +8927,6 @@ class Proc
   def to_s(); end
 
   sig.returns(Proc)
-  sig.returns(Proc)
   def clone(); end
 
   sig.returns(Proc)
@@ -9662,7 +9446,6 @@ class Random
   def seed(); end
 
   sig.returns(Random)
-  sig.returns(Random)
   def clone(); end
 
   sig.returns(Random)
@@ -9824,7 +9607,6 @@ class Range
   def to_s(); end
 
   sig.returns(Range)
-  sig.returns(Range)
   def clone(); end
 
   sig.returns(Range)
@@ -9859,7 +9641,6 @@ class Range
 end
 
 class RangeError
-  sig.returns(RangeError)
   sig.returns(RangeError)
   def clone(); end
 
@@ -10322,7 +10103,6 @@ class Rational
   def coerce(arg0); end
 
   sig.returns(Rational)
-  sig.returns(Rational)
   def clone(); end
 
   sig.returns(Rational)
@@ -10435,7 +10215,6 @@ class Regexp
   def ~(); end
 
   sig.returns(Regexp)
-  sig.returns(Regexp)
   def clone(); end
 
   sig.returns(Regexp)
@@ -10483,7 +10262,6 @@ end
 
 class RegexpError
   sig.returns(RegexpError)
-  sig.returns(RegexpError)
   def clone(); end
 
   sig.returns(RegexpError)
@@ -10507,38 +10285,28 @@ end
 
 class RubyVM
   sig.returns(RubyVM)
-  sig.returns(RubyVM)
-  sig.returns(RubyVM)
-  sig.returns(RubyVM)
   def clone(); end
 
-  sig.returns(RubyVM)
   sig.returns(RubyVM)
   def dup(); end
 
   sig.returns(RubyVM)
-  sig.returns(RubyVM)
   def freeze(); end
 
-  sig.returns(RubyVM)
   sig.returns(RubyVM)
   def taint(); end
 
   sig.returns(RubyVM)
-  sig.returns(RubyVM)
   def trust(); end
 
   sig.returns(RubyVM)
-  sig.returns(RubyVM)
   def untaint(); end
 
-  sig.returns(RubyVM)
   sig.returns(RubyVM)
   def untrust(); end
 end
 
 class RuntimeError
-  sig.returns(RuntimeError)
   sig.returns(RuntimeError)
   def clone(); end
 
@@ -10563,7 +10331,6 @@ end
 
 class ScriptError
   sig.returns(ScriptError)
-  sig.returns(ScriptError)
   def clone(); end
 
   sig.returns(ScriptError)
@@ -10586,7 +10353,6 @@ class ScriptError
 end
 
 class SecurityError
-  sig.returns(SecurityError)
   sig.returns(SecurityError)
   def clone(); end
 
@@ -10792,7 +10558,6 @@ class Set
   def to_a(); end
 
   sig.returns(Set)
-  sig.returns(Set)
   def clone(); end
 
   sig.returns(Set)
@@ -10885,7 +10650,6 @@ end
 
 class SignalException
   sig.returns(SignalException)
-  sig.returns(SignalException)
   def clone(); end
 
   sig.returns(SignalException)
@@ -10908,7 +10672,6 @@ class SignalException
 end
 
 class SortedSet
-  sig.returns(SortedSet)
   sig.returns(SortedSet)
   def clone(); end
 
@@ -10978,7 +10741,6 @@ end
 
 class StandardError
   sig.returns(StandardError)
-  sig.returns(StandardError)
   def clone(); end
 
   sig.returns(StandardError)
@@ -11001,7 +10763,6 @@ class StandardError
 end
 
 class StopIteration
-  sig.returns(StopIteration)
   sig.returns(StopIteration)
   def clone(); end
 
@@ -11672,7 +11433,6 @@ class String
   def valid_encoding?(); end
 
   sig.returns(String)
-  sig.returns(String)
   def clone(); end
 
   sig.returns(String)
@@ -11727,7 +11487,6 @@ end
 
 class StringIO
   sig.returns(StringIO)
-  sig.returns(StringIO)
   def clone(); end
 
   sig.returns(StringIO)
@@ -11771,7 +11530,6 @@ class StringScanner
 end
 
 class Struct
-  sig.returns(Struct)
   sig.returns(Struct)
   def clone(); end
 
@@ -11880,7 +11638,6 @@ class Symbol
   def upcase(); end
 
   sig.returns(Symbol)
-  sig.returns(Symbol)
   def clone(); end
 
   sig.returns(Symbol)
@@ -11928,7 +11685,6 @@ end
 
 class SyntaxError
   sig.returns(SyntaxError)
-  sig.returns(SyntaxError)
   def clone(); end
 
   sig.returns(SyntaxError)
@@ -11951,7 +11707,6 @@ class SyntaxError
 end
 
 class SystemCallError
-  sig.returns(SystemCallError)
   sig.returns(SystemCallError)
   def clone(); end
 
@@ -11976,7 +11731,6 @@ end
 
 class SystemExit
   sig.returns(SystemExit)
-  sig.returns(SystemExit)
   def clone(); end
 
   sig.returns(SystemExit)
@@ -11999,7 +11753,6 @@ class SystemExit
 end
 
 class SystemStackError
-  sig.returns(SystemStackError)
   sig.returns(SystemStackError)
   def clone(); end
 
@@ -12024,78 +11777,28 @@ end
 
 class Thread
   sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
   def clone(); end
 
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
   sig.returns(Thread)
   def dup(); end
 
   sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
   def freeze(); end
 
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
   sig.returns(Thread)
   def taint(); end
 
   sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
   def trust(); end
 
   sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
   def untaint(); end
 
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
-  sig.returns(Thread)
   sig.returns(Thread)
   def untrust(); end
 end
 
 class ThreadError
-  sig.returns(ThreadError)
   sig.returns(ThreadError)
   def clone(); end
 
@@ -12119,7 +11822,6 @@ class ThreadError
 end
 
 class ThreadGroup
-  sig.returns(ThreadGroup)
   sig.returns(ThreadGroup)
   def clone(); end
 
@@ -12391,7 +12093,6 @@ class Time
   def zone(); end
 
   sig.returns(Time)
-  sig.returns(Time)
   def clone(); end
 
   sig.returns(Time)
@@ -12433,7 +12134,6 @@ end
 
 class TracePoint
   sig.returns(TracePoint)
-  sig.returns(TracePoint)
   def clone(); end
 
   sig.returns(TracePoint)
@@ -12457,7 +12157,6 @@ end
 
 class TrueClass
   sig.returns(TrueClass)
-  sig.returns(TrueClass)
   def clone(); end
 
   sig.returns(TrueClass)
@@ -12480,7 +12179,6 @@ class TrueClass
 end
 
 class TypeError
-  sig.returns(TypeError)
   sig.returns(TypeError)
   def clone(); end
 
@@ -12585,7 +12283,6 @@ end
 
 class UnboundMethod
   sig.returns(UnboundMethod)
-  sig.returns(UnboundMethod)
   def clone(); end
 
   sig.returns(UnboundMethod)
@@ -12608,7 +12305,6 @@ class UnboundMethod
 end
 
 class UncaughtThrowError
-  sig.returns(UncaughtThrowError)
   sig.returns(UncaughtThrowError)
   def clone(); end
 
@@ -12640,7 +12336,6 @@ module YAML
 end
 
 class ZeroDivisionError
-  sig.returns(ZeroDivisionError)
   sig.returns(ZeroDivisionError)
   def clone(); end
 
