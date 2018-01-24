@@ -26,7 +26,6 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     ruby_typer::core::UnfreezeFileTable ft(gs);
     ruby_typer::core::Context context(gs, gs.defn_root());
     auto ast = ruby_typer::parser::Parser::run(gs, "<test input>", "a");
-    ast->loc = core::Loc::none();
 
     try {
         auto desugared = ruby_typer::ast::desugar::node2Tree(context, move(ast));
