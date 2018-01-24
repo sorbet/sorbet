@@ -474,8 +474,9 @@ private:
         return result;
     }
 
-    void fillInInfoFromSig(core::Context ctx, core::Symbol &methoInfo, ast::Send *send, bool isOverloaded) {
+    void fillInInfoFromSig(core::Context ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
         auto exprLoc = send->loc;
+        auto &methodInfo = method.info(ctx);
 
         struct {
             bool sig = false;
@@ -513,9 +514,9 @@ private:
                         auto &value = hash->values[i++];
                         if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
                             auto fnd = find_if(
-                                methoInfo.arguments().begin(), methoInfo.arguments().end(),
+                                methodInfo.arguments().begin(), methodInfo.arguments().end(),
                                 [&](core::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
-                            if (fnd == methoInfo.arguments().end()) {
+                            if (fnd == methodInfo.arguments().end()) {
                                 ctx.state.error(key->loc, core::errors::Resolver::InvalidMethodSignature,
                                                 "Malformed `sig`. Unknown argument name {}", key->toString(ctx));
                             } else {
@@ -546,7 +547,7 @@ private:
                                         "Wrong number of args to `sig.returns`. Got {}, expected 1", send->args.size());
                     }
                     if (!send->args.empty()) {
-                        methoInfo.resultType = getResultType(ctx, send->args.front());
+                        methodInfo.resultType = getResultType(ctx, send->args.front());
                     }
 
                     break;
@@ -569,7 +570,7 @@ private:
             }
         }
 
-        for (auto it = methoInfo.arguments().begin(); it != methoInfo.arguments().end(); /* nothing */) {
+        for (auto it = methodInfo.arguments().begin(); it != methodInfo.arguments().end(); /* nothing */) {
             core::SymbolRef arg = *it;
             if (isOverloaded && arg.info(ctx).isKeyword()) {
                 ctx.state.error(arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
@@ -580,7 +581,7 @@ private:
                 ++it;
             } else {
                 if (isOverloaded)
-                    it = methoInfo.arguments().erase(it);
+                    it = methodInfo.arguments().erase(it);
                 else {
                     arg.info(ctx).resultType = core::Types::dynamic();
                     if (seen.args || seen.returns) {
@@ -651,28 +652,26 @@ private:
                      [&](ast::MethodDef *mdef) {
                          if (!lastSig.empty()) {
                              counterInc("types.sig.count");
-                             core::Symbol &methoInfo = mdef->symbol.info(ctx);
 
                              bool isOverloaded =
                                  lastSig.size() > 1 && ctx.withOwner(klass->symbol).permitOverloadDefinitions();
 
                              if (isOverloaded) {
-                                 methoInfo.setOverloaded();
+                                 mdef->symbol.info(ctx).setOverloaded();
                                  int i = 1;
 
                                  while (i < lastSig.size()) {
-                                     core::Symbol &overloadInfo =
-                                         ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i).info(ctx);
-                                     fillInInfoFromSig(ctx, overloadInfo, ast::cast_tree<ast::Send>(lastSig[i].get()),
+                                     auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
+                                     fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i].get()),
                                                        isOverloaded);
                                      if (i + 1 < lastSig.size()) {
-                                         overloadInfo.setOverloaded();
+                                         overload.info(ctx).setOverloaded();
                                      }
                                      i++;
                                  }
                              }
 
-                             fillInInfoFromSig(ctx, methoInfo, ast::cast_tree<ast::Send>(lastSig[0].get()),
+                             fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0].get()),
                                                isOverloaded);
 
                              // OVERLOAD
@@ -1001,28 +1000,31 @@ public:
 };
 
 namespace {
-bool resolveTypeMember(core::GlobalState &gs, core::Symbol &parent, core::SymbolRef parentTypeMember,
-                       core::Symbol &inSym) {
+bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef parentTypeMember,
+                       core::SymbolRef sym) {
     core::NameRef name = parentTypeMember.info(gs).name;
     auto parentVariance = parentTypeMember.info(gs).variance();
+    auto &inSym = sym.info(gs);
     core::SymbolRef my = inSym.findMember(gs, name);
     if (!my.exists()) {
         gs.error(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared,
-                 "Type {} declared by parent {} should be declared again", name.toString(gs), parent.fullName(gs));
+                 "Type {} declared by parent {} should be declared again", name.toString(gs),
+                 parent.info(gs).fullName(gs));
         return false;
     }
     auto myVariance = my.info(gs).variance();
     if (!inSym.derivesFrom(gs, core::GlobalState::defn_Class()) && (myVariance != parentVariance)) {
         // this requirement can be loosened. You can go from variant to invariant.
         gs.error(my.info(gs).definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
-                 "Type variance mismatch with parent {}", parent.fullName(gs));
+                 "Type variance mismatch with parent {}", parent.info(gs).fullName(gs));
         return true;
     }
     inSym.typeAliases.emplace_back(parentTypeMember, my);
     return true;
 }
 
-void resolveTypeMembers(core::GlobalState &gs, core::Symbol &inSym) {
+void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
+    auto &inSym = sym.info(gs);
     ENFORCE(inSym.isClass());
     if (inSym.isClassClass()) {
         for (core::SymbolRef tp : inSym.typeParams) {
@@ -1036,17 +1038,18 @@ void resolveTypeMembers(core::GlobalState &gs, core::Symbol &inSym) {
     }
 
     if (inSym.superClass.exists()) {
-        core::Symbol &parent = inSym.superClass.info(gs);
+        auto parent = inSym.superClass;
+        auto tps = parent.info(gs).typeParams;
         bool foundAll = true;
-        for (core::SymbolRef tp : parent.typeParams) {
-            bool foundThis = resolveTypeMember(gs, parent, tp, inSym);
+        for (core::SymbolRef tp : tps) {
+            bool foundThis = resolveTypeMember(gs, parent, tp, sym);
             foundAll = foundAll && foundThis;
         }
         if (foundAll) {
             int i = 0;
             // check that type params are in the same order.
-            for (core::SymbolRef tp : parent.typeParams) {
-                core::SymbolRef my = tp.dealiasAt(gs, inSym.ref(gs));
+            for (core::SymbolRef tp : tps) {
+                core::SymbolRef my = tp.dealiasAt(gs, sym);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (inSym.typeParams[i] != my) {
                     gs.error(my.info(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder,
@@ -1058,9 +1061,8 @@ void resolveTypeMembers(core::GlobalState &gs, core::Symbol &inSym) {
     }
 
     for (core::SymbolRef mixin : inSym.mixins(gs)) {
-        core::Symbol &parent = mixin.info(gs);
-        for (core::SymbolRef tp : parent.typeParams) {
-            resolveTypeMember(gs, parent, tp, inSym);
+        for (core::SymbolRef tp : mixin.info(gs).typeParams) {
+            resolveTypeMember(gs, mixin, tp, sym);
         }
     }
 
@@ -1096,9 +1098,9 @@ void finalizeResolution(core::GlobalState &gs) {
         }
     }
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto &info = core::SymbolRef(&gs, i).info(gs);
-        if (info.isClass()) {
-            resolveTypeMembers(gs, info);
+        auto sym = core::SymbolRef(&gs, i);
+        if (sym.info(gs).isClass()) {
+            resolveTypeMembers(gs, sym);
         }
     }
 }
