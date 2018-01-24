@@ -76,19 +76,17 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
     const_cast<GlobalState &>(from).sanityCheck();
     {
         UnfreezeFileTable unfreezeFiles(to);
-        unordered_map<File *, FileRef> files;
-        for (auto &f : to.files) {
-            files.emplace(f.get(), FileRef(to, &f - &to.files.front()));
-        }
-
-        for (const auto &f : from.files) {
-            auto it = files.find(f.get());
-            if (it == files.end()) {
-                fileSubstitution.push_back(to.enterFile(f->path(), f->source()));
-            } else {
-                FileRef ref(it->second);
-                fileSubstitution.push_back(ref);
+        int fileIdx = -1;
+        while (fileIdx + 1 < from.filesUsed()) {
+            fileIdx++;
+            if (from.files[fileIdx]->source_type == core::File::TombStone) {
+                continue;
             }
+            if (fileIdx < to.filesUsed() && from.files[fileIdx].get() == to.files[fileIdx].get()) {
+                continue;
+            }
+            ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->source_type == core::File::TombStone);
+            to.enterFileAt(from.files[fileIdx], fileIdx);
         }
     }
     bool seenEmpty = false;

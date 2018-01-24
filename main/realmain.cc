@@ -48,6 +48,8 @@ struct Options {
     Printers print;
     bool showProgress = false;
     bool noStdlib = false;
+    bool forceTyped = false;
+    bool forceUntyped = false;
     int threads = 0;
     string typedSource = "";
 };
@@ -159,7 +161,8 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
     return ast;
 }
 
-vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<core::FileRef> frs, const Options &opts,
+vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std::string> frs,
+                                          std::vector<core::FileRef> mainThreadFiles, const Options &opts,
                                           bool silenceErrors = false) {
     vector<unique_ptr<ast::Expression>> result;
     vector<unique_ptr<ast::Expression>> empty;
@@ -172,7 +175,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
 
     vector<unique_ptr<ast::Expression>> trees;
 
-    ThreadQueue<core::FileRef> fileq;
+    ThreadQueue<std::pair<int, std::string>> fileq;
     ThreadQueue<thread_result> resultq;
 
     gs.sanityCheck();
@@ -184,13 +187,40 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
             threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq, silenceErrors]() {
                 auto lgs = cgs->deepCopy();
                 thread_result result;
-                core::FileRef file;
+                std::pair<int, std::string> job;
 
                 {
                     core::ErrorRegion errs(*lgs, silenceErrors);
 
-                    while (fileq.pop(&file)) {
-                        file = core::FileRef(*lgs, file.id());
+                    while (fileq.pop(&job)) {
+                        std::string fileName = job.second;
+                        int fileId = job.first;
+                        string src;
+                        try {
+                            src = File::read(fileName.c_str());
+                        } catch (FileNotFoundException e) {
+                            console->error("File Not Found: {}", fileName);
+                            returnCode = 11;
+                            continue;
+                        }
+                        counterAdd("types.input.bytes", src.size());
+                        counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
+                        counterInc("types.input.files");
+
+                        core::FileRef file;
+                        {
+                            core::UnfreezeFileTable unfreezeFiles(*lgs);
+                            file = lgs->enterFileAt(fileName, src, fileId);
+                        }
+
+                        if (opts.forceTyped) {
+                            file.file(*lgs).source_type = core::File::Typed;
+                        } else if (opts.forceUntyped) {
+                            file.file(*lgs).source_type = core::File::Untyped;
+                        }
+
+                        tracer->trace("{}", fileName);
+
                         try {
                             result.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
                         } catch (...) {
@@ -205,12 +235,21 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<cor
                 resultq.push(move(result));
             }));
         }
-
+        int i = gs.filesUsed();
         for (auto f : frs) {
-            tracer->trace("enqueue: {}", f.file(gs).path());
-            fileq.push(f);
+            tracer->trace("enqueue: {}", f);
+            std::pair<int, std::string> job(i++, f);
+            fileq.push(job);
         }
         fileq.close();
+
+        for (auto f : mainThreadFiles) {
+            try {
+                trees.emplace_back(indexOne(opts.print, gs, f, silenceErrors));
+            } catch (...) {
+                console_err->error("Exception parsing file: {} (backtrace is above)", f.file(gs).path());
+            }
+        }
 
         thread_result result;
         for (int i = 0; i < opts.threads; ++i) {
@@ -477,8 +516,9 @@ void createInitialGlobalState(core::GlobalState &gs, const Options &options) {
         }
         Options emptyOpts;
         emptyOpts.threads = 1;
+        vector<std::string> empty;
 
-        typecheck(gs, index(gs, payloadFiles, emptyOpts, true), emptyOpts, true); // result is thrown away
+        typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, true), emptyOpts, true); // result is thrown away
     } else {
         Timer timeit(console_err, "Read serialized payload");
         core::serialize::GlobalStateSerializer::load(gs, nameTablePayload);
@@ -596,7 +636,11 @@ int realmain(int argc, char **argv) {
     }
 
     string typed = options["typed"].as<string>();
-    bool forceTyped = typed == "always";
+    opts.forceTyped = typed == "always";
+    opts.forceUntyped = typed == "never";
+    if (typed != "always" && typed != "never" && typed != "auto") {
+        console->error("Invalid value for `--typed`: {}", typed);
+    }
     opts.typedSource = options["typed-source"].as<string>();
     if (opts.typedSource != "" && opts.print.TypedSource) {
         console_err->error("`--typed-source " + opts.typedSource +
@@ -613,52 +657,25 @@ int realmain(int argc, char **argv) {
     {
         Timer timeit(console_err, "reading files");
         core::UnfreezeFileTable fileTableAccess(gs);
-        for (auto &fileName : files) {
-            string src;
-            try {
-                src = File::read(fileName.c_str());
-            } catch (FileNotFoundException e) {
-                console->error("File Not Found: {}", fileName);
-                returnCode = 11;
-                continue;
-            }
-            counterAdd("types.input.bytes", src.size());
-            counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
-            counterInc("types.input.files");
-            inputFiles.push_back(gs.enterFile(fileName, src));
-            tracer->trace("{}", fileName);
-        }
         if (options.count("e") != 0) {
             string src = options["e"].as<string>();
             counterAdd("types.input.bytes", src.size());
             counterInc("types.input.lines");
             counterInc("types.input.files");
-            inputFiles.push_back(gs.enterFile(string("-e"), src));
-            if (typed == "never") {
+            auto file = gs.enterFile(string("-e"), src);
+            inputFiles.push_back(file);
+            if (opts.forceUntyped) {
                 console->error("`-e` implies `--typed always` and you passed `--typed never`");
                 return 1;
             }
-            forceTyped = true;
-        }
-        if (forceTyped) {
-            for (auto &f : inputFiles) {
-                f.file(gs).source_type = core::File::Typed;
-            }
-        } else if (typed == "never") {
-            for (auto &f : inputFiles) {
-                f.file(gs).source_type = core::File::Untyped;
-            }
-        } else if (typed == "auto") {
-            // Use the annotation in the file
-        } else {
-            console->error("Invalid valud for `--typed`: {}", typed);
+            file.file(gs).source_type = core::File::Typed;
         }
     }
 
     vector<unique_ptr<ast::Expression>> indexed;
     {
         Timer timeit(console_err, "index");
-        indexed = index(gs, inputFiles, opts);
+        indexed = index(gs, files, inputFiles, opts);
     }
 
     {

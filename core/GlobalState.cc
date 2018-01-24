@@ -712,6 +712,36 @@ FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source)
         std::make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), source_type));
 }
 
+FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view source, int id) {
+    File::Type source_type = File::Untyped;
+    if (fileIsTyped(source)) {
+        source_type = File::Typed;
+    }
+
+    return GlobalState::enterFileAt(
+        std::make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), source_type),
+        id);
+}
+
+FileRef GlobalState::enterFileAt(std::shared_ptr<File> file, int id) {
+    ENFORCE(id >= this->files.size() || this->files[id]->source_type == File::Type::TombStone);
+    if (id >= this->files.size()) {
+        while (id > this->files.size()) {
+            auto file = std::make_shared<File>("", "", File::Type::TombStone);
+            this->enterFile(move(file));
+        }
+
+        core::FileRef result = this->enterFile(file);
+        ENFORCE(result.id() == id);
+        return result;
+    } else {
+        // was a tombstone before.
+        this->files[id] = file;
+        core::FileRef result(*this, id);
+        return result;
+    }
+}
+
 LocalVariable GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
     Symbol &info = owner.info(*this);
     ENFORCE(info.isMethod(), "entering temporary outside of a method");
@@ -725,7 +755,7 @@ unsigned int GlobalState::symbolsUsed() {
     return symbols.size();
 }
 
-unsigned int GlobalState::filesUsed() {
+unsigned int GlobalState::filesUsed() const {
     return files.size();
 }
 
