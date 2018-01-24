@@ -36,25 +36,26 @@ We build using [bazel](https://bazel.build/); Run `./bazel test
 
 ## Dependencies
 
-- [ragel](http://www.colm.net/open-source/ragel/)
-- [bison](https://www.gnu.org/software/bison/)
-- [ruby](https://www.ruby-lang.org/en/)
+- [ragel](http://www.colm.net/open-source/ragel/);
+- [bison](https://www.gnu.org/software/bison/);
+- [ruby](https://www.ruby-lang.org/en/);
 - [clang](https://clang.llvm.org/) at least version 4.0.0, and
   [clang-format](https://clang.llvm.org/docs/ClangFormat.html) at
-  least version 5.0.0.
+  least version 5.0.0;
+- [autoconf](https://www.gnu.org/software/autoconf/autoconf.html) for building jemalloc from source;
 - platform headers for [ncurses5](https://www.gnu.org/software/ncurses/).
 
 
 ### On macOS
 
 ```
-brew install ragel bison
+brew install ragel bison autoconf
 ```
 
 ### On Ubuntu 16.04
 
 ```
-sudo apt install ragel bison clang-4.0 libncurses5-dev
+sudo apt install ragel bison clang-4.0 libncurses5-dev autoconf
 ```
 
 And then copy `bazelrc-ubuntu` to `.bazelrc` to configure bazel to use

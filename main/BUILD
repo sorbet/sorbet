@@ -1,3 +1,11 @@
+config_setting(
+    name = "can-use-jemalloc",
+    values = {
+        "copt": "-fno-sanitize=address",
+        "compilation_mode": "opt",
+    },
+)
+
 cc_binary(
     name = "ruby-typer",
     srcs = [
@@ -7,6 +15,10 @@ cc_binary(
     linkstatic = select({
         "//tools/config:fastbuild": 0,
         "//conditions:default": 1,
+    }),
+    malloc = select({
+        ":can-use-jemalloc": "@jemalloc//:jemalloc",
+        "//conditions:default": "@bazel_tools//tools/cpp:malloc",
     }),
     visibility = ["//visibility:public"],
     deps = [
