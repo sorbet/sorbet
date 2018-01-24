@@ -1,5 +1,6 @@
-class <constant:A> (<constant:BasicObject>, <constant:B>) -> <class:A>
-class <constant:B> (<constant:BasicObject>) -> <class:B>
-class <singleton class:<constant:A>> < ::<constant:Module> ()
-class <singleton class:<constant:B>> < ::<constant:Module> ()
+class <constant:<root>> () -> <class:<root>>
+  class <constant:A> (<constant:BasicObject>, <constant:B>) -> <class:A>
+  class <constant:B> (<constant:BasicObject>) -> <class:B>
+  class <singleton class:<constant:A>> < ::<constant:Module> ()
+  class <singleton class:<constant:B>> < ::<constant:Module> ()
 

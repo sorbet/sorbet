@@ -1,8 +1,9 @@
-class <constant:Destructure> < ::<constant:Object> () -> <class:Destructure>
-  method f (<destructure>$2, z)
-    argument <destructure>$2<>
-    argument z<>
-    method <block>$2 (<destructure>$4)
-      argument <destructure>$4<>
-class <singleton class:<constant:Destructure>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> () -> <class:<root>>
+  class <constant:Destructure> < ::<constant:Object> () -> <class:Destructure>
+    method f (<destructure>$2, z)
+      argument <destructure>$2<>
+      argument z<>
+      method <block>$2 (<destructure>$4)
+        argument <destructure>$4<>
+  class <singleton class:<constant:Destructure>> < ::<singleton class:<constant:Object>> ()
 

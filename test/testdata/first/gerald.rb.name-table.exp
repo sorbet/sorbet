@@ -1,1 +1,110 @@
+class <constant:<root>> () -> <class:<root>>
+  class <constant:Opus> () -> <class:Opus>
+    class <constant:AutogenLoader> () -> untyped
+    class <constant:CIBot> () -> <class:CIBot>
+      class <constant:Actions> () -> untyped
+        class <constant:OpenAPI> () -> untyped
+          class <constant:SPEC_PATH> () -> untyped
+      class <constant:Gerald> (<constant:BasicObject>) -> <class:Gerald>
+        class <constant:Chalk> () -> untyped
+          class <constant:Log> () -> untyped
+        class <constant:Diff> < ::<constant:Object> () -> <class:Diff>
+          field @parsed -> untyped
+          field @raw -> untyped
+          method added_files ()
+            method <block>$2 (part)
+              argument part<>
+            method <block>$3 (part)
+              argument part<>
+          method added_lines ()
+            method <block>$2 (part)
+              argument part<>
+          method affected_files ()
+          method changed_files ()
+            method <block>$2 (part)
+              argument part<>
+            method <block>$3 (part)
+              argument part<>
+          method changed_lines ()
+          method changed_openapi? ()
+          method deleted_files ()
+            method <block>$2 (part)
+              argument part<>
+            method <block>$3 (part)
+              argument part<>
+          method initialize (raw_diff)
+            argument raw_diff<>
+          method parse : private (diff)
+            argument diff<>
+            method <block>$2 (part)
+              argument part<>
+              method <block>$2 (line)
+                argument line<>
+          method removed_lines ()
+            method <block>$2 (part)
+              argument part<>
+        class <constant:MatchContext> < ::<constant:Object> () -> <class:MatchContext>
+          field @assignee
+          field @body
+          field @diff
+          field @gh_user
+          field @merge_branch
+          field @openapi_diff
+          field @repo
+          field @title
+          method assignee ()
+          method body ()
+          method diff ()
+          method gh_user ()
+          method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
+            argument assignee<>
+            argument body<>
+            argument diff<>
+            argument gh_user<>
+            argument merge_branch<>
+            argument openapi_diff<>
+            argument repo<>
+            argument title<>
+          method merge_branch ()
+          method openapi_diff ()
+          method repo ()
+          method title ()
+          method user_stripe_suffix? ()
+        class <constant:MatchTimeBudget> < ::<constant:Object> () -> <class:MatchTimeBudget>
+          field @start -> untyped
+          method check! ()
+          method initialize ()
+          method time_rule (rule, <blk>)
+            argument <blk><block> -> untyped
+            argument rule<>
+          static-field <constant:PER_RULE_MS> -> Integer
+          static-field <constant:TOTAL_TIME_MS> -> Integer
+        class <constant:MatchTimeout> < ::<constant:StandardError> () -> <class:MatchTimeout>
+          field @rule_token
+          method initialize (message, rule_token)
+            argument message<>
+            argument rule_token<optional, keyword>
+          method rule_token ()
+        class <constant:Matcher> < ::<constant:Object> (<constant:Log>) -> <class:Matcher>
+          field @rules -> untyped
+          method initialize ()
+            method <block>$2 (<block-pass>$2)
+              argument <block-pass>$2<>
+            method <block>$3 (<block-pass>$4)
+              argument <block-pass>$4<>
+          method match (match_context)
+            argument match_context<>
+            method <block>$2 (r)
+              argument r<>
+              method <block>$2 ()
+          static-field <constant:MAX_AFFECTED_FILES> -> Integer
+        class <singleton class:<constant:Diff>> < ::<singleton class:<constant:Object>> ()
+        class <singleton class:<constant:MatchContext>> < ::<singleton class:<constant:Object>> ()
+        class <singleton class:<constant:MatchTimeBudget>> < ::<singleton class:<constant:Object>> ()
+        class <singleton class:<constant:MatchTimeout>> < ::<singleton class:<constant:StandardError>> ()
+        class <singleton class:<constant:Matcher>> < ::<singleton class:<constant:Object>> ()
+      class <constant:Model> () -> untyped
+        class <constant:GeraldRule> () -> untyped
+      class <singleton class:<constant:Gerald>> < ::<constant:Module> ()
+    class <singleton class:<constant:CIBot>> < ::<constant:Module> ()
 

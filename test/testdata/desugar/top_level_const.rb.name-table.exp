@@ -1,2 +1,3 @@
-class <constant:TopLevelConst> () -> untyped
+class <constant:<root>> () -> <class:<root>>
+  class <constant:TopLevelConst> () -> untyped
 
