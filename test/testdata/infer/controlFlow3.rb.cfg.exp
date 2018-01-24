@@ -28,7 +28,7 @@ statTemp$11 = v.to_a() : AppliedType {
     0 = AppliedType {
         klass = ::<constant:Array>
         targs = [
-          0 = BasicObject
+          0 = untyped
         ]
       }
   ]
