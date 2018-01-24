@@ -523,7 +523,7 @@ private:
     }
 }; // namespace namer
 
-unique_ptr<ast::Expression> Namer::run(core::Context &ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> Namer::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
     NameInserter nameInserter;
     return ast::TreeMap<NameInserter>::apply(ctx, nameInserter, move(tree));
 }
