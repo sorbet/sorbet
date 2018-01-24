@@ -44,10 +44,6 @@ public:
 
 private:
     int _id;
-
-#ifdef DEBUG_MODE
-    int globalStateId;
-#endif
 };
 
 class File final {
@@ -56,6 +52,7 @@ public:
         Payload,
         Untyped,
         Typed,
+        TombStone,
     };
 
     friend class GlobalState;

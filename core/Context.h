@@ -57,19 +57,6 @@ public:
         ENFORCE(from._id < nameSubstitution.size(), "name substitution index out of bounds");
         return nameSubstitution[from._id];
     }
-    FileRef substitute(FileRef from) const {
-        if (from.id() < 0)
-            return from;
-        ENFORCE(from.id() < fileSubstitution.size(), "file substitution index out of bounds");
-        return fileSubstitution[from.id()];
-    }
-    Loc substitute(Loc from) const {
-        Loc result;
-        result.file = substitute(from.file);
-        result.begin_pos = from.begin_pos;
-        result.end_pos = from.end_pos;
-        return result;
-    }
 
 private:
     std::vector<NameRef> nameSubstitution;

@@ -64,12 +64,14 @@ public:
     NameRef enterNameConstant(absl::string_view original);
 
     FileRef enterFile(absl::string_view path, absl::string_view source);
+    FileRef enterFileAt(absl::string_view path, absl::string_view source, int id);
     FileRef enterFile(std::shared_ptr<File> file);
+    FileRef enterFileAt(std::shared_ptr<File> file, int id);
 
     unsigned int namesUsed();
 
     unsigned int symbolsUsed();
-    unsigned int filesUsed();
+    unsigned int filesUsed() const;
 
     void sanityCheck() const;
 

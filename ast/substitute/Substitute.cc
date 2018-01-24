@@ -8,13 +8,6 @@ class SubstWalk {
 private:
     const ruby_typer::core::GlobalSubstitution &subst;
 
-    core::Loc substLoc(core::Loc loc) {
-        if (loc.file.id() >= 0) {
-            loc.file = subst.substitute(loc.file);
-        }
-        return loc;
-    }
-
     unique_ptr<ast::Expression> substClassName(core::Context ctx, unique_ptr<ast::Expression> node) {
         auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
         if (constLit == nullptr) { // uncommon case. something is strange
@@ -24,18 +17,15 @@ private:
             return TreeMap<SubstWalk>::apply(ctx, *this, move(node));
         }
 
-        auto loc = substLoc(constLit->loc);
         auto scope = substClassName(ctx, move(constLit->scope));
         auto cnst = subst.substitute(constLit->cnst);
 
-        return make_unique<ast::ConstantLit>(loc, move(scope), cnst);
+        return make_unique<ast::ConstantLit>(constLit->loc, move(scope), cnst);
     }
 
     unique_ptr<ast::Expression> substArg(core::Context ctx, unique_ptr<ast::Expression> argp) {
         ast::Expression *arg = argp.get();
         while (arg != nullptr) {
-            arg->loc = substLoc(arg->loc);
-
             typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
                      [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
                      [&](ast::OptionalArg *opt) {
@@ -54,11 +44,6 @@ private:
 
 public:
     SubstWalk(const ruby_typer::core::GlobalSubstitution &subst) : subst(subst) {}
-
-    Expression *preTransformExpression(core::Context ctx, Expression *original) {
-        original->loc = substLoc(original->loc);
-        return original;
-    }
 
     ClassDef *preTransformClassDef(core::Context ctx, ClassDef *original) {
         original->name = substClassName(ctx, move(original->name));
