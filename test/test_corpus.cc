@@ -200,7 +200,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            desugared = ruby_typer::ast::desugar::node2Tree(context, nodes);
+            desugared = ruby_typer::ast::desugar::node2Tree(context, move(nodes));
         }
 
         expectation = test.expectations.find("ast");

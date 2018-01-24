@@ -40,7 +40,7 @@ void processSource(core::GlobalState &cb, string str) {
     ruby_typer::core::UnfreezeFileTable ft(cb);
     auto ast = parser::Parser::run(cb, "<test>", str);
     ruby_typer::core::Context ctx(cb, cb.defn_root());
-    auto tree = ast::desugar::node2Tree(ctx, ast);
+    auto tree = ast::desugar::node2Tree(ctx, move(ast));
     tree = namer::Namer::run(ctx, move(tree));
     vector<unique_ptr<ast::Expression>> trees;
     trees.emplace_back(move(tree));
