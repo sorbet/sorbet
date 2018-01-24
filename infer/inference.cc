@@ -19,26 +19,18 @@ class Environment;
 // wallk all the instructions and collect knowledge that we may ever need
 class KnowledgeFilter {
     unordered_set<core::LocalVariable> used_vars;
-    KnowledgeFilter() = default;
 
 public:
-    KnowledgeFilter(KnowledgeFilter &) = delete;
-    KnowledgeFilter(KnowledgeFilter &&) = delete;
-
-    bool isNeeded(core::LocalVariable var) {
-        return used_vars.find(var) != used_vars.end();
-    }
-    static unique_ptr<KnowledgeFilter> buildFor(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
-        unique_ptr<KnowledgeFilter> result(new KnowledgeFilter());
+    KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
         for (auto &bb : cfg->basicBlocks) {
             if (bb->bexit.cond.name != core::NameRef::noName() && bb->bexit.cond.name != core::Names::blockCall()) {
-                result->used_vars.insert(bb->bexit.cond);
+                used_vars.insert(bb->bexit.cond);
             }
             for (auto &bind : bb->exprs) {
                 if (cfg::Send *send = dynamic_cast<cfg::Send *>(bind.value.get())) {
                     if (send->fun == core::Names::hardAssert()) {
                         if (send->args.size() >= 1) {
-                            result->used_vars.insert(send->args[0]);
+                            used_vars.insert(send->args[0]);
                         }
                     }
                 }
@@ -51,25 +43,25 @@ public:
                 auto &bb = *it;
                 for (auto &bind : bb->exprs) {
                     if (cfg::Ident *id = dynamic_cast<cfg::Ident *>(bind.value.get())) {
-                        if (result->isNeeded(bind.bind) && !result->isNeeded(id->what)) {
-                            result->used_vars.insert(id->what);
+                        if (isNeeded(bind.bind) && !isNeeded(id->what)) {
+                            used_vars.insert(id->what);
                             changed = true;
                         }
                     } else if (cfg::Send *send = dynamic_cast<cfg::Send *>(bind.value.get())) {
                         if (send->fun == core::Names::bang()) {
                             if (send->args.size() == 0) {
-                                if (result->isNeeded(bind.bind) && !result->isNeeded(send->recv)) {
-                                    result->used_vars.insert(send->recv);
+                                if (isNeeded(bind.bind) && !isNeeded(send->recv)) {
+                                    used_vars.insert(send->recv);
                                     changed = true;
                                 }
                             }
                         } else if (send->fun == core::Names::eqeq()) {
                             if (send->args.size() == 1) {
-                                if (result->isNeeded(send->args[0]) && !result->isNeeded(send->recv)) {
-                                    result->used_vars.insert(send->recv);
+                                if (isNeeded(send->args[0]) && !isNeeded(send->recv)) {
+                                    used_vars.insert(send->recv);
                                     changed = true;
-                                } else if (result->isNeeded(send->recv) && !result->isNeeded(send->args[0])) {
-                                    result->used_vars.insert(send->args[0]);
+                                } else if (isNeeded(send->recv) && !isNeeded(send->args[0])) {
+                                    used_vars.insert(send->args[0]);
                                     changed = true;
                                 }
                             }
@@ -78,8 +70,13 @@ public:
                 }
             }
         }
+    }
 
-        return result;
+    KnowledgeFilter(KnowledgeFilter &) = delete;
+    KnowledgeFilter(KnowledgeFilter &&) = delete;
+
+    bool isNeeded(core::LocalVariable var) {
+        return used_vars.find(var) != used_vars.end();
     }
 };
 
@@ -346,8 +343,8 @@ public:
 
     /* propagate knowledge on `to = from` */
     void propagateKnowledge(core::Context ctx, core::LocalVariable to, core::LocalVariable from,
-                            unique_ptr<KnowledgeFilter> &knowledgeFilter) {
-        if (knowledgeFilter->isNeeded(to) && knowledgeFilter->isNeeded(from)) {
+                            KnowledgeFilter &knowledgeFilter) {
+        if (knowledgeFilter.isNeeded(to) && knowledgeFilter.isNeeded(from)) {
             getKnowledge(to) = getKnowledge(from);
             getKnowledge(to).truthy.noTypeTests.emplace_back(from, core::Types::falsyTypes());
             getKnowledge(to).falsy.yesTypeTests.emplace_back(from, core::Types::falsyTypes());
@@ -359,12 +356,11 @@ public:
     }
 
     /* variable was reasigned. Forget everything about previous value */
-    void clearKnowledge(core::Context ctx, core::LocalVariable reassigned,
-                        unique_ptr<KnowledgeFilter> &knowledgeFilter) {
+    void clearKnowledge(core::Context ctx, core::LocalVariable reassigned, KnowledgeFilter &knowledgeFilter) {
         int i = -1;
         for (auto &k : knowledge) {
             i++;
-            if (knowledgeFilter->isNeeded(this->vars[i])) {
+            if (knowledgeFilter.isNeeded(this->vars[i])) {
                 k.truthy.yesTypeTests.erase(
                     remove_if(k.truthy.yesTypeTests.begin(), k.truthy.yesTypeTests.end(),
                               [&](auto const &c) -> bool { return c.first.name == reassigned.name; }),
@@ -388,9 +384,9 @@ public:
 
     /* Special case sources of knowledge */
     void updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, cfg::Send *send,
-                         unique_ptr<KnowledgeFilter> &knowledgeFilter) {
+                         KnowledgeFilter &knowledgeFilter) {
         if (send->fun == core::Names::bang()) {
-            if (!knowledgeFilter->isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local))
                 return;
             auto &whoKnows = getKnowledge(local);
             auto other = find(vars.begin(), vars.end(), send->recv) - vars.begin();
@@ -405,7 +401,7 @@ public:
 
             whoKnows.sanityCheck();
         } else if (send->fun == core::Names::nil_p()) {
-            if (!knowledgeFilter->isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local))
                 return;
             auto &whoKnows = getKnowledge(local);
             whoKnows.truthy.yesTypeTests.emplace_back(send->recv, core::Types::nil());
@@ -417,7 +413,7 @@ public:
             return;
         }
         if (send->fun == core::Names::kind_of() || send->fun == core::Names::is_a_p()) {
-            if (!knowledgeFilter->isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local))
                 return;
             auto &whoKnows = getKnowledge(local);
             core::TypeAndOrigins klass = getTypeAndOrigin(ctx, send->args[0]);
@@ -434,7 +430,7 @@ public:
                 whoKnows.sanityCheck();
             }
         } else if (send->fun == core::Names::eqeq()) {
-            if (!knowledgeFilter->isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local))
                 return;
             auto &whoKnows = getKnowledge(local);
             core::TypeAndOrigins tp1 = getTypeAndOrigin(ctx, send->args[0]);
@@ -449,7 +445,7 @@ public:
             whoKnows.truthy.yesTypeTests.emplace_back(send->args[0], tp2.type);
             whoKnows.sanityCheck();
         } else if (send->fun == core::Names::tripleEq()) {
-            if (!knowledgeFilter->isNeeded(local))
+            if (!knowledgeFilter.isNeeded(local))
                 return;
             auto &whoKnows = getKnowledge(local);
             core::TypeAndOrigins recvKlass = getTypeAndOrigin(ctx, send->recv);
@@ -583,7 +579,7 @@ public:
     }
 
     void mergeWith(core::Context ctx, Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
-                   unique_ptr<KnowledgeFilter> &knowledgeFilter) {
+                   KnowledgeFilter &knowledgeFilter) {
         int i = -1;
         this->isDead |= other.isDead;
         for (core::LocalVariable var : vars) {
@@ -612,7 +608,7 @@ public:
             if (canBeTruthy) {
                 auto &thisKnowledge = getKnowledge(var);
                 auto otherTruthy = other.getKnowledge(var, false)
-                                       .truthy.under(ctx, other, loc, inWhat, bb, knowledgeFilter->isNeeded(var));
+                                       .truthy.under(ctx, other, loc, inWhat, bb, knowledgeFilter.isNeeded(var));
                 if (!otherTruthy.isDead) {
                     if (!thisKnowledge.seenTruthyOption) {
                         thisKnowledge.seenTruthyOption = true;
@@ -626,7 +622,7 @@ public:
             if (canBeFalsy) {
                 auto &thisKnowledge = getKnowledge(var);
                 auto otherFalsy = other.getKnowledge(var, false)
-                                      .falsy.under(ctx, other, loc, inWhat, bb, knowledgeFilter->isNeeded(var));
+                                      .falsy.under(ctx, other, loc, inWhat, bb, knowledgeFilter.isNeeded(var));
                 if (!otherFalsy.isDead) {
                     if (!thisKnowledge.seenFalsyOption) {
                         thisKnowledge.seenFalsyOption = true;
@@ -704,7 +700,7 @@ public:
     }
 
     shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
-                                          unique_ptr<KnowledgeFilter> &knowledgeFilter) {
+                                          KnowledgeFilter &knowledgeFilter) {
         try {
             core::TypeAndOrigins tp;
             bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value.get()) ||
@@ -1019,7 +1015,7 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
     }
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
-    unique_ptr<KnowledgeFilter> knowledgeFilter = KnowledgeFilter::buildFor(ctx, cfg);
+    KnowledgeFilter knowledgeFilter(ctx, cfg);
     for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
         if (bb == cfg->deadBlock()) {
             continue;
