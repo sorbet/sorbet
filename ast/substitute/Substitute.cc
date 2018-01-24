@@ -8,33 +8,33 @@ class SubstWalk {
 private:
     const ruby_typer::core::GlobalSubstitution &subst;
 
-    void substLoc(core::Loc &loc) {
+    core::Loc substLoc(core::Loc loc) {
         if (loc.file.id() >= 0) {
             loc.file = subst.substitute(loc.file);
         }
+        return loc;
     }
 
-    void substClassName(core::Context ctx, unique_ptr<ast::Expression> &node) {
+    unique_ptr<ast::Expression> substClassName(core::Context ctx, unique_ptr<ast::Expression> node) {
         auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
         if (constLit == nullptr) { // uncommon case. something is strange
             if (ast::isa_tree<ast::EmptyTree>(node.get())) {
-                return;
+                return node;
             }
-            node = TreeMap<SubstWalk>::apply(ctx, *this, move(node));
-            return;
+            return TreeMap<SubstWalk>::apply(ctx, *this, move(node));
         }
 
-        substLoc(constLit->loc);
-        constLit->cnst = subst.substitute(constLit->cnst);
+        auto loc = substLoc(constLit->loc);
+        auto scope = substClassName(ctx, move(constLit->scope));
+        auto cnst = subst.substitute(constLit->cnst);
 
-        substClassName(ctx, constLit->scope);
-        return;
+        return make_unique<ast::ConstantLit>(loc, move(scope), cnst);
     }
 
-    void substArg(core::Context ctx, unique_ptr<ast::Expression> &argp) {
+    unique_ptr<ast::Expression> substArg(core::Context ctx, unique_ptr<ast::Expression> argp) {
         ast::Expression *arg = argp.get();
         while (arg != nullptr) {
-            substLoc(arg->loc);
+            arg->loc = substLoc(arg->loc);
 
             typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
                      [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
@@ -49,34 +49,35 @@ private:
                          arg = nullptr;
                      });
         }
+        return argp;
     }
 
 public:
     SubstWalk(const ruby_typer::core::GlobalSubstitution &subst) : subst(subst) {}
 
     Expression *preTransformExpression(core::Context ctx, Expression *original) {
-        substLoc(original->loc);
+        original->loc = substLoc(original->loc);
         return original;
     }
 
     ClassDef *preTransformClassDef(core::Context ctx, ClassDef *original) {
-        substClassName(ctx, original->name);
+        original->name = substClassName(ctx, move(original->name));
         for (auto &anc : original->ancestors) {
-            substClassName(ctx, anc);
+            anc = substClassName(ctx, move(anc));
         }
         return original;
     }
     MethodDef *preTransformMethodDef(core::Context ctx, MethodDef *original) {
         original->name = subst.substitute(original->name);
         for (auto &arg : original->args) {
-            substArg(ctx, arg);
+            arg = substArg(ctx, move(arg));
         }
         return original;
     }
 
     Block *preTransformBlock(core::Context ctx, Block *original) {
         for (auto &arg : original->args) {
-            substArg(ctx, arg);
+            arg = substArg(ctx, move(arg));
         }
         return original;
     }
@@ -100,7 +101,7 @@ public:
     }
     Expression *postTransformConstantLit(core::Context ctx, ConstantLit *original) {
         original->cnst = subst.substitute(original->cnst);
-        substClassName(ctx, original->scope);
+        original->scope = substClassName(ctx, move(original->scope));
         return original;
     }
 };
