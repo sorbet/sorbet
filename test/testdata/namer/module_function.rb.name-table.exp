@@ -1,15 +1,16 @@
-class <constant:C> < ::<constant:Object> (<constant:Funcs>) -> <class:C>
-  method test_calls ()
-class <constant:Funcs> (<constant:BasicObject>) -> <class:Funcs>
-  method f (x) -> Integer
-    argument x<> -> Integer
-  method g (s) -> Symbol
-    argument s<> -> Symbol
-  method h (s) -> String
-    argument s<> -> String
-class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
-class <singleton class:<constant:Funcs>> < ::<constant:Module> ()
-  method f () -> AliasType { symbol = ::<constant:Funcs>#f }
-  method g () -> AliasType { symbol = ::<constant:Funcs>#g }
-  method h () -> AliasType { symbol = ::<constant:Funcs>#h }
+class <constant:<root>> () -> <class:<root>>
+  class <constant:C> < ::<constant:Object> (<constant:Funcs>) -> <class:C>
+    method test_calls ()
+  class <constant:Funcs> (<constant:BasicObject>) -> <class:Funcs>
+    method f (x) -> Integer
+      argument x<> -> Integer
+    method g (s) -> Symbol
+      argument s<> -> Symbol
+    method h (s) -> String
+      argument s<> -> String
+  class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
+  class <singleton class:<constant:Funcs>> < ::<constant:Module> ()
+    method f () -> AliasType { symbol = ::<constant:Funcs>#f }
+    method g () -> AliasType { symbol = ::<constant:Funcs>#g }
+    method h () -> AliasType { symbol = ::<constant:Funcs>#h }
 

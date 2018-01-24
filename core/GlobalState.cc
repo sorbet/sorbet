@@ -734,18 +734,7 @@ unsigned int GlobalState::namesUsed() {
 }
 
 string GlobalState::toString(bool showHidden) {
-    vector<string> children;
-    for (auto element : defn_root().info(*this).members) {
-        if (showHidden || !element.second.isHiddenFromPrinting(*this)) {
-            children.push_back(element.second.toString(*this, 0, showHidden));
-        }
-    }
-    sort(children.begin(), children.end());
-    ostringstream os;
-    for (auto child : children) {
-        os << child;
-    }
-    return os.str();
+    return defn_root().toString(*this, 0, showHidden);
 }
 
 void GlobalState::sanityCheck() const {

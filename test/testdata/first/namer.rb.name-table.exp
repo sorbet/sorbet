@@ -1,24 +1,25 @@
-class <constant:ANamespace> (<constant:BasicObject>) -> <class:ANamespace>
-  class <constant:ClassInNamespace> < ::<constant:Object> () -> <class:ClassInNamespace>
-  class <constant:ObviousChild> < ::<constant:Object> () -> <class:ObviousChild>
-  class <singleton class:<constant:ClassInNamespace>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:ObviousChild>> < ::<singleton class:<constant:Object>> ()
-class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <class:Child>
-  method <block>$2 ()
-class <constant:Mixin> (<constant:BasicObject>) -> <class:Mixin>
-class <constant:NormalClass> < ::<constant:Object> () -> <class:NormalClass>
-  class <constant:InnerClass> < ::<constant:Object> () -> <class:InnerClass>
-  class <constant:InnerModule> (<constant:BasicObject>) -> <class:InnerModule>
-  class <singleton class:<constant:InnerClass>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:InnerModule>> < ::<constant:Module> ()
-  method normal_method ()
-class <constant:OtherMixin> (<constant:BasicObject>) -> <class:OtherMixin>
-class <constant:Parent> < ::<constant:Object> () -> <class:Parent>
-class <singleton class:<constant:ANamespace>> < ::<constant:Module> ()
-class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> ()
-class <singleton class:<constant:Mixin>> < ::<constant:Module> ()
-class <singleton class:<constant:NormalClass>> < ::<singleton class:<constant:Object>> ()
-  method normal_static_method ()
-class <singleton class:<constant:OtherMixin>> < ::<constant:Module> ()
-class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> () -> <class:<root>>
+  class <constant:ANamespace> (<constant:BasicObject>) -> <class:ANamespace>
+    class <constant:ClassInNamespace> < ::<constant:Object> () -> <class:ClassInNamespace>
+    class <constant:ObviousChild> < ::<constant:Object> () -> <class:ObviousChild>
+    class <singleton class:<constant:ClassInNamespace>> < ::<singleton class:<constant:Object>> ()
+    class <singleton class:<constant:ObviousChild>> < ::<singleton class:<constant:Object>> ()
+  class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <class:Child>
+    method <block>$2 ()
+  class <constant:Mixin> (<constant:BasicObject>) -> <class:Mixin>
+  class <constant:NormalClass> < ::<constant:Object> () -> <class:NormalClass>
+    class <constant:InnerClass> < ::<constant:Object> () -> <class:InnerClass>
+    class <constant:InnerModule> (<constant:BasicObject>) -> <class:InnerModule>
+    class <singleton class:<constant:InnerClass>> < ::<singleton class:<constant:Object>> ()
+    class <singleton class:<constant:InnerModule>> < ::<constant:Module> ()
+    method normal_method ()
+  class <constant:OtherMixin> (<constant:BasicObject>) -> <class:OtherMixin>
+  class <constant:Parent> < ::<constant:Object> () -> <class:Parent>
+  class <singleton class:<constant:ANamespace>> < ::<constant:Module> ()
+  class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> ()
+  class <singleton class:<constant:Mixin>> < ::<constant:Module> ()
+  class <singleton class:<constant:NormalClass>> < ::<singleton class:<constant:Object>> ()
+    method normal_static_method ()
+  class <singleton class:<constant:OtherMixin>> < ::<constant:Module> ()
+  class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
 

@@ -1,24 +1,25 @@
-class <constant:Main> < ::<constant:Object> () -> <class:Main>
-  method blockpass (blk)
-    argument blk<block>
-  method blockyield ()
-    method <block>$2 (i, <blk>)
+class <constant:<root>> () -> <class:<root>>
+  class <constant:Main> < ::<constant:Object> () -> <class:Main>
+    method blockpass (blk)
+      argument blk<block>
+    method blockyield ()
+      method <block>$2 (i, <blk>)
+        argument <blk><block> -> untyped
+        argument i<>
+    method main ()
+      method <block>$2 (x)
+        argument x<>
+      method <block>$3 (<block-pass>$2)
+        argument <block-pass>$2<repeated>
+      method <block>$4 (<block-pass>$3)
+        argument <block-pass>$3<repeated>
+      method <block>$5 (<block-pass>$4)
+        argument <block-pass>$4<repeated>
+      method <block>$6 (<block-pass>$5)
+        argument <block-pass>$5<repeated>
+    method mixed (blk)
+      argument blk<block>
+    method yielder (<blk>)
       argument <blk><block> -> untyped
-      argument i<>
-  method main ()
-    method <block>$2 (x)
-      argument x<>
-    method <block>$3 (<block-pass>$2)
-      argument <block-pass>$2<repeated>
-    method <block>$4 (<block-pass>$3)
-      argument <block-pass>$3<repeated>
-    method <block>$5 (<block-pass>$4)
-      argument <block-pass>$4<repeated>
-    method <block>$6 (<block-pass>$5)
-      argument <block-pass>$5<repeated>
-  method mixed (blk)
-    argument blk<block>
-  method yielder (<blk>)
-    argument <blk><block> -> untyped
-class <singleton class:<constant:Main>> < ::<singleton class:<constant:Object>> ()
+  class <singleton class:<constant:Main>> < ::<singleton class:<constant:Object>> ()
 

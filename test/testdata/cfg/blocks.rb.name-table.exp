@@ -1,7 +1,8 @@
-class <constant:BlockTest> < ::<constant:Object> () -> <class:BlockTest>
-  method block_pass ()
-    method <block>$2 (x, y)
-      argument x<>
-      argument y<>
-class <singleton class:<constant:BlockTest>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> () -> <class:<root>>
+  class <constant:BlockTest> < ::<constant:Object> () -> <class:BlockTest>
+    method block_pass ()
+      method <block>$2 (x, y)
+        argument x<>
+        argument y<>
+  class <singleton class:<constant:BlockTest>> < ::<singleton class:<constant:Object>> ()
 

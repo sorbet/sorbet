@@ -1,16 +1,17 @@
-class <constant:Outer1> < ::<constant:Object> () -> <class:Outer1>
-class <constant:Outer2> < ::<constant:Object> () -> <class:Outer2>
-  class <constant:C> < ::<constant:Object> () -> <class:C>
-  class <constant:Inner1> < ::<constant:Object> () -> <class:Inner1>
-    class <constant:A> < ::<constant:Object> () -> <class:A>
-    class <constant:Inner2> < ::<constant:Object> () -> <class:Inner2>
-      class <constant:A> () -> untyped
-    class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
-    class <singleton class:<constant:Inner2>> < ::<singleton class:<constant:Object>> ()
-  class <constant:Other> < ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2> () -> <class:Other>
-  class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:Inner1>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:Other>> < ::<constant:Outer2>::<constant:Inner1>::<singleton class:<constant:Inner2>> ()
-class <singleton class:<constant:Outer1>> < ::<singleton class:<constant:Object>> ()
-class <singleton class:<constant:Outer2>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> () -> <class:<root>>
+  class <constant:Outer1> < ::<constant:Object> () -> <class:Outer1>
+  class <constant:Outer2> < ::<constant:Object> () -> <class:Outer2>
+    class <constant:C> < ::<constant:Object> () -> <class:C>
+    class <constant:Inner1> < ::<constant:Object> () -> <class:Inner1>
+      class <constant:A> < ::<constant:Object> () -> <class:A>
+      class <constant:Inner2> < ::<constant:Object> () -> <class:Inner2>
+        class <constant:A> () -> untyped
+      class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
+      class <singleton class:<constant:Inner2>> < ::<singleton class:<constant:Object>> ()
+    class <constant:Other> < ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2> () -> <class:Other>
+    class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
+    class <singleton class:<constant:Inner1>> < ::<singleton class:<constant:Object>> ()
+    class <singleton class:<constant:Other>> < ::<constant:Outer2>::<constant:Inner1>::<singleton class:<constant:Inner2>> ()
+  class <singleton class:<constant:Outer1>> < ::<singleton class:<constant:Object>> ()
+  class <singleton class:<constant:Outer2>> < ::<singleton class:<constant:Object>> ()
 

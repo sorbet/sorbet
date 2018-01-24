@@ -1,19 +1,20 @@
-class <constant:Constants> (<constant:BasicObject>) -> <class:Constants>
-  static-field <constant:A> -> Integer
-  static-field <constant:B> -> String
-  static-field <constant:C> -> Symbol
-  static-field <constant:D> -> Float
-  static-field <constant:E> -> AppliedType {
-    klass = ::<constant:Array>
-    targs = [
-      0 = Integer
-    ]
-  }
-  static-field <constant:F> -> AppliedType {
-    klass = ::<constant:Array>
-    targs = [
-      0 = String
-    ]
-  }
-class <singleton class:<constant:Constants>> < ::<constant:Module> ()
+class <constant:<root>> () -> <class:<root>>
+  class <constant:Constants> (<constant:BasicObject>) -> <class:Constants>
+    static-field <constant:A> -> Integer
+    static-field <constant:B> -> String
+    static-field <constant:C> -> Symbol
+    static-field <constant:D> -> Float
+    static-field <constant:E> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        0 = Integer
+      ]
+    }
+    static-field <constant:F> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        0 = String
+      ]
+    }
+  class <singleton class:<constant:Constants>> < ::<constant:Module> ()
 

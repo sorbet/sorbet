@@ -1,3 +1,4 @@
-class <constant:Foo> () -> untyped
-  class <constant:Bar> () -> untyped
+class <constant:<root>> () -> <class:<root>>
+  class <constant:Foo> () -> untyped
+    class <constant:Bar> () -> untyped
 

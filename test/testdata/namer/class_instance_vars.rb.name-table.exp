@@ -1,19 +1,20 @@
-class <constant:Child1> < ::<constant:Object> () -> <class:Child1>
-  static-field @@class_var -> untyped
-class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <class:Child>
-  field @undefinedivar -> untyped
-  method child_method ()
-  static-field @@undefined_cvar -> untyped
-class <constant:Mixin> (<constant:BasicObject>) -> <class:Mixin>
-  static-field @@mixin_cvar -> Integer
-class <constant:Parent> < ::<constant:Object> () -> <class:Parent>
-  field @ivar -> Integer
-  field @ivar2 -> Integer
-  method hi ()
-  static-field @@class_var -> String
-class <singleton class:<constant:Child1>> < ::<singleton class:<constant:Object>> ()
-class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> ()
-class <singleton class:<constant:Mixin>> < ::<constant:Module> ()
-class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
-static-field <constant:Alias> -> <class:Parent>
+class <constant:<root>> () -> <class:<root>>
+  class <constant:Child1> < ::<constant:Object> () -> <class:Child1>
+    static-field @@class_var -> untyped
+  class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <class:Child>
+    field @undefinedivar -> untyped
+    method child_method ()
+    static-field @@undefined_cvar -> untyped
+  class <constant:Mixin> (<constant:BasicObject>) -> <class:Mixin>
+    static-field @@mixin_cvar -> Integer
+  class <constant:Parent> < ::<constant:Object> () -> <class:Parent>
+    field @ivar -> Integer
+    field @ivar2 -> Integer
+    method hi ()
+    static-field @@class_var -> String
+  class <singleton class:<constant:Child1>> < ::<singleton class:<constant:Object>> ()
+  class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> ()
+  class <singleton class:<constant:Mixin>> < ::<constant:Module> ()
+  class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
+  static-field <constant:Alias> -> <class:Parent>
 

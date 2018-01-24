@@ -60,7 +60,7 @@ bool SymbolRef::isSynthetic() const {
 }
 
 bool SymbolRef::isHiddenFromPrinting(GlobalState &gs) const {
-    if (isSynthetic() && *this != GlobalState::defn_Opus()) {
+    if (isSynthetic()) {
         return true;
     }
     auto loc = info(gs).definitionLoc;
@@ -79,7 +79,24 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
     ostringstream os;
     Symbol &myInfo = info(gs, true);
     string name = myInfo.name.toString(gs);
-    auto members = myInfo.members;
+    auto &members = myInfo.members;
+
+    vector<string> children;
+    children.reserve(members.size());
+    for (auto pair : members) {
+        if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass()) {
+            continue;
+        }
+
+        auto str = pair.second.toString(gs, tabs + 1, showHidden);
+        if (!str.empty()) {
+            children.push_back(str);
+        }
+    }
+
+    if (!showHidden && this->isHiddenFromPrinting(gs) && children.empty()) {
+        return "";
+    }
 
     printTabs(os, tabs);
 
@@ -179,18 +196,6 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
     }
     os << endl;
 
-    vector<string> children;
-    children.reserve(members.size());
-    for (auto pair : members) {
-        if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass()) {
-            continue;
-        }
-        if (!showHidden && pair.second.isHiddenFromPrinting(gs)) {
-            continue;
-        }
-
-        children.push_back(pair.second.toString(gs, tabs + 1, showHidden));
-    }
     sort(children.begin(), children.end());
     for (auto row : children) {
         os << row;
