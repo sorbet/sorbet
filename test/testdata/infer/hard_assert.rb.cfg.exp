@@ -94,5 +94,31 @@ finalReturn = return <constant:nil>$14 : <bottom>
     "bb::<constant:Main>#with_and_4" -> "bb::<constant:Main>#with_and_1" [style="bold"];
 }
 
+subgraph "cluster_::<constant:Main>#with_storytime" {
+    label = "::<constant:Main>#with_storytime";
+    color = blue;
+    "bb::<constant:Main>#with_storytime_0" [shape = invhouse];
+    "bb::<constant:Main>#with_storytime_1" [shape = parallelogram];
+
+    "bb::<constant:Main>#with_storytime_0" [label = "block[id=0]()
+<constant:<Magic>>$9 = alias <constant:<Magic>> : <Magic>
+statTemp$4 = self : Main
+statTemp$5 = false : FalseClass(false)
+hashTemp$7 = <symbol:storytime> : Symbol(:\"storytime\")
+hashTemp$8 = 42 : Integer(42)
+statTemp$6 = <constant:<Magic>>$9.<build-hash>(hashTemp$7, hashTemp$8) : ShapeType {
+  Symbol(:\"storytime\") => Integer(42)
+}
+returnMethodTemp$2 = statTemp$4.hard_assert(statTemp$5, statTemp$6) : NilClass
+finalReturn = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Main>#with_storytime_0" -> "bb::<constant:Main>#with_storytime_1" [style="bold"];
+    "bb::<constant:Main>#with_storytime_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Main>#with_storytime_1" -> "bb::<constant:Main>#with_storytime_1" [style="bold"];
+}
+
 }
 
