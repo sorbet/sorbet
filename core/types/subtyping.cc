@@ -9,10 +9,10 @@ namespace core {
 
 using namespace std;
 
-shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2);
+shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2);
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> &t1,
-                                                                shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> t1,
+                                                                shared_ptr<Type> t2) {
     auto ret = _lub(ctx, t1, t2);
     ret->sanityCheck(ctx);
     ENFORCE(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a super type of " + t1->toString(ctx) +
@@ -22,7 +22,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
     return ret;
 }
 
-shared_ptr<ruby_typer::core::Type> underlying(shared_ptr<Type> &t1) {
+shared_ptr<ruby_typer::core::Type> underlying(shared_ptr<Type> t1) {
     if (auto *f = dynamic_cast<ProxyType *>(t1.get())) {
         return f->underlying;
     }
@@ -94,8 +94,8 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
     return AndType::make_shared(t1, t2);
 }
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context ctx, shared_ptr<Type> &t1,
-                                                                 shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
+                                                                 shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("lub", "ref-eq");
         return t1;
@@ -294,13 +294,13 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
             return result;
         } else {
             // only 1st is proxy
-            shared_ptr<Type> &und = p1->underlying;
+            shared_ptr<Type> und = p1->underlying;
             return lub(ctx, und, t2);
         }
     } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
         categoryCounterInc("lub", "proxy>");
         // only 2nd is proxy
-        shared_ptr<Type> &und = p2->underlying;
+        shared_ptr<Type> und = p2->underlying;
         return lub(ctx, t1, und);
     } else {
         // none is proxy
@@ -308,7 +308,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
     }
 }
 
-shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -355,7 +355,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     }
 }
 
-shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -404,8 +404,8 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
         return AndType::make_shared(t1, t2);
     }
 }
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> &t1,
-                                                                shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> t1,
+                                                                shared_ptr<Type> t2) {
     auto ret = _glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
 
@@ -418,8 +418,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ct
     return ret;
 }
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context ctx, shared_ptr<Type> &t1,
-                                                                 shared_ptr<Type> &t2) {
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
+                                                                 shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("glb", "ref-eq");
         return t1;
@@ -683,7 +683,7 @@ bool classSymbolIsAsGoodAs(core::Context ctx, core::SymbolRef c1, core::SymbolRe
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
-bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -850,7 +850,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
             // both are proxy
         } else {
             // only 1st is proxy
-            shared_ptr<Type> &und = p1->underlying;
+            shared_ptr<Type> und = p1->underlying;
             return isSubTypeSingle(ctx, und, t2);
         }
     } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
@@ -866,7 +866,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &
     }
 }
 
-bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -906,7 +906,7 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> &t1,
     return isSubTypeSingle(ctx, t1, t2); // 1
 }
 
-bool ruby_typer::core::Types::equiv(core::Context ctx, shared_ptr<Type> &t1, shared_ptr<Type> &t2) {
+bool ruby_typer::core::Types::equiv(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 

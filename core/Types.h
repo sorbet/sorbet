@@ -13,67 +13,22 @@ class Type;
 class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
-    static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
-    inline static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &&t2) {
-        return glb(ctx, t1, t2);
-    }
-    inline static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &t2) {
-        return glb(ctx, t1, t2);
-    }
-    inline static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
-        return glb(ctx, t1, t2);
-    }
-    static std::shared_ptr<Type> _glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    static std::shared_ptr<Type> _glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
 
     /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
-    static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
-    inline static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &&t2) {
-        return lub(ctx, t1, t2);
-    }
-    inline static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &t2) {
-        return lub(ctx, t1, t2);
-    }
-    inline static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
-        return lub(ctx, t1, t2);
-    }
-    static std::shared_ptr<Type> _lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    static std::shared_ptr<Type> _lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
 
     /** is every instance of  t1 an  instance of t2? */
-    static bool isSubType(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
-    inline static bool isSubType(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &&t2) {
-        return isSubType(ctx, t1, t2);
-    }
-    inline static bool isSubType(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &t2) {
-        return isSubType(ctx, t1, t2);
-    }
-    inline static bool isSubType(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
-        return isSubType(ctx, t1, t2);
-    }
+    static bool isSubType(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
-    static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2) {
+    static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2) {
         return isSubType(ctx.withFrozenConstraint(), t1, t2);
     }
-    inline static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &&t2) {
-        return isSubTypeWhenFrozen(ctx, t1, t2);
-    }
-    inline static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &t2) {
-        return isSubTypeWhenFrozen(ctx, t1, t2);
-    }
-    inline static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
-        return isSubTypeWhenFrozen(ctx, t1, t2);
-    }
 
-    static bool equiv(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
-    inline static bool equiv(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &&t2) {
-        return equiv(ctx, t1, t2);
-    }
-    inline static bool equiv(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &t2) {
-        return equiv(ctx, t1, t2);
-    }
-    inline static bool equiv(core::Context ctx, std::shared_ptr<Type> &&t1, std::shared_ptr<Type> &&t2) {
-        return equiv(ctx, t1, t2);
-    }
+    static bool equiv(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
 
     static inline std::shared_ptr<Type> buildOr(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2) {
         return lub(ctx, t1, t2);
@@ -243,9 +198,9 @@ private:
     friend class ruby_typer::core::GlobalSubstitution;
     friend class ruby_typer::core::serialize::GlobalStateSerializer;
     friend std::shared_ptr<Type> lubDistributeOr(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> lubGround(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> Types::_lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> Types::_glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> lubGround(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    friend std::shared_ptr<Type> Types::_lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    friend std::shared_ptr<Type> Types::_glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
 
     static inline std::shared_ptr<Type> make_shared(std::shared_ptr<Type> left, std::shared_ptr<Type> right) {
         std::shared_ptr<Type> res(new OrType(left, right));
@@ -279,11 +234,11 @@ private:
     friend class ruby_typer::core::serialize::GlobalStateSerializer;
     friend std::shared_ptr<Type> Types::dropRefinements(core::Context ctx, std::shared_ptr<Type> onWhat,
                                                         core::NameRef refiningName);
-    friend std::shared_ptr<Type> lubGround(Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> lubGround(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> glbGround(Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> Types::_lub(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> Types::_glb(core::Context ctx, std::shared_ptr<Type> &t1, std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> glbGround(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    friend std::shared_ptr<Type> Types::_lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    friend std::shared_ptr<Type> Types::_glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
 
     static inline std::shared_ptr<Type> make_shared(std::shared_ptr<Type> left, std::shared_ptr<Type> right) {
         std::shared_ptr<Type> res(new AndType(left, right));
