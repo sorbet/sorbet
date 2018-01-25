@@ -514,17 +514,20 @@ bool OrType::isFullyDefined() {
 
 ruby_typer::core::TypeVar::TypeVar(NameRef name) : name(name) {}
 
+/** Returns type parameters of what reordered in the order of type parameters of asIf */
 std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::SymbolRef what,
                                                       std::vector<std::shared_ptr<Type>> &targs, core::SymbolRef asIf) {
     ENFORCE(asIf.info(ctx).isClass());
     ENFORCE(what.info(ctx).isClass());
+    ENFORCE(what == asIf || what.info(ctx).derivesFrom(ctx, asIf) || asIf.info(ctx).derivesFrom(ctx, what),
+            what.info(ctx).name.toString(ctx), asIf.info(ctx).name.toString(ctx));
     std::vector<core::SymbolRef> currentAlignment;
     if (targs.empty()) {
         return currentAlignment;
     }
 
-    if (what == asIf || asIf.info(ctx).isClassClass()) {
-        currentAlignment = asIf.info(ctx).typeMembers();
+    if (what == asIf || (asIf.info(ctx).isClassClass() && what.info(ctx).isClassClass())) {
+        currentAlignment = what.info(ctx).typeMembers();
     } else {
         for (auto originalTp : asIf.info(ctx).typeMembers()) {
             auto name = originalTp.info(ctx).name;
@@ -541,7 +544,6 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
             ENFORCE(align.exists());
         }
     }
-    ENFORCE(currentAlignment.size() == asIf.info(ctx).typeMembers().size());
     return currentAlignment;
 }
 

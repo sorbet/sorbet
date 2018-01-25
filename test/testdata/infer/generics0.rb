@@ -36,11 +36,10 @@ class Generics0
      s.store("foo")
      T.assert_type!(s.read, String)
 
-     # NOTE(nelhage): broken right now
-     # child = BoxChild[Integer].new
-     # child.store(17)
-     # T.assert_type!(child.read, Integer)
-     # T.assert_type!(child.put(99), Integer)
+     child = BoxChild[Integer].new
+     child.store(17)
+     T.assert_type!(child.read, Integer)
+     T.assert_type!(child.put(99), Integer)
 
      nil
    end
