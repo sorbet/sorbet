@@ -376,14 +376,6 @@ vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<uniq
     if (opts.showProgress) {
         progressbar_finish(progress.get());
     }
-    if (!opts.typedSource.empty()) {
-        stringstream files;
-        for (auto &cfg : result) {
-            files << "  " << cfg->loc.file.file(gs).path() << endl;
-        }
-        console_err->error("`--typed-source " + opts.typedSource + "` not found in input list of:\n" + files.str());
-    }
-
     if (opts.print.NameTable) {
         cout << gs.toString() << endl;
     }
