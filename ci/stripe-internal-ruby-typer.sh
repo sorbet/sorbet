@@ -11,7 +11,7 @@ err=0
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
-bazel test //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0" || err=$?
+bazel test --config=ci //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0" || err=$?
 
 mkdir -p /log/junit
 find bazel-testlogs/ -name '*.xml' | while read -r line; do

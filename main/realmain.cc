@@ -132,33 +132,38 @@ struct thread_result {
 
 unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &lgs, core::FileRef file,
                                      bool silenceErrors = false) {
-    std::unique_ptr<parser::Node> nodes;
-    {
-        tracer->trace("Parsing: {}", file.file(lgs).path());
-        core::ErrorRegion errs(lgs, silenceErrors);
-        core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
-        nodes = parser::Parser::run(lgs, file);
-    }
-    if (print.ParseTree) {
-        cout << nodes->toString(lgs, 0) << endl;
-    }
+    try {
+        std::unique_ptr<parser::Node> nodes;
+        {
+            tracer->trace("Parsing: {}", file.file(lgs).path());
+            core::ErrorRegion errs(lgs, silenceErrors);
+            core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
+            nodes = parser::Parser::run(lgs, file);
+        }
+        if (print.ParseTree) {
+            cout << nodes->toString(lgs, 0) << endl;
+        }
 
-    core::Context context(lgs, lgs.defn_root());
-    std::unique_ptr<ast::Expression> ast;
-    {
-        tracer->trace("Desugaring: {}", file.file(lgs).path());
-        core::ErrorRegion errs(lgs, silenceErrors);
-        core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
-        ast = ast::desugar::node2Tree(context, move(nodes));
-    }
-    if (print.Desugared) {
-        cout << ast->toString(lgs, 0) << endl;
-    }
+        core::Context context(lgs, lgs.defn_root());
+        std::unique_ptr<ast::Expression> ast;
+        {
+            tracer->trace("Desugaring: {}", file.file(lgs).path());
+            core::ErrorRegion errs(lgs, silenceErrors);
+            core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
+            ast = ast::desugar::node2Tree(context, move(nodes));
+        }
+        if (print.Desugared) {
+            cout << ast->toString(lgs, 0) << endl;
+        }
 
-    if (print.DesugaredRaw) {
-        cout << ast->showRaw(lgs) << endl;
+        if (print.DesugaredRaw) {
+            cout << ast->showRaw(lgs) << endl;
+        }
+        return ast;
+    } catch (...) {
+        console_err->error("Exception parsing file: {} (backtrace is above)", file.file(lgs).path());
+        return make_unique<ast::EmptyTree>(core::Loc::none(file));
     }
-    return ast;
 }
 
 vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std::string> frs,
@@ -221,12 +226,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
 
                         tracer->trace("{}", fileName);
 
-                        try {
-                            result.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
-                        } catch (...) {
-                            console_err->error("Exception parsing file: {} (backtrace is above)",
-                                               file.file(*lgs).path());
-                        }
+                        result.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
                     }
                 }
 
@@ -244,11 +244,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
         fileq.close();
 
         for (auto f : mainThreadFiles) {
-            try {
-                trees.emplace_back(indexOne(opts.print, gs, f, silenceErrors));
-            } catch (...) {
-                console_err->error("Exception parsing file: {} (backtrace is above)", f.file(gs).path());
-            }
+            trees.emplace_back(indexOne(opts.print, gs, f, silenceErrors));
         }
 
         thread_result result;
@@ -263,7 +259,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
         }
     }
 
-    ENFORCE(frs.size() == trees.size());
+    ENFORCE(mainThreadFiles.size() + frs.size() == trees.size());
 
     {
         Timer timeit(console_err, "naming");
