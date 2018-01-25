@@ -826,7 +826,7 @@ bool AppliedType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {}
 
 std::string LambdaParam::toString(GlobalState &gs, int tabs) {
-    return "LambdaParam(" + this->definition.toString(gs) + ")";
+    return "LambdaParam(" + this->definition.info(gs).fullName(gs) + ")";
 }
 
 std::string LambdaParam::typeName() {

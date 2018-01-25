@@ -735,6 +735,26 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         return true;
     }
 
+    auto *lambda1 = cast_type<LambdaParam>(t1.get());
+    auto *lambda2 = cast_type<LambdaParam>(t2.get());
+    if (lambda1 != nullptr || lambda2 != nullptr) {
+        if (lambda1 == nullptr || lambda2 == nullptr) {
+            return false;
+        }
+        if (lambda1->definition == lambda2->definition) {
+            return true;
+        }
+        auto o1 = lambda1->definition.info(ctx).owner;
+        auto o2 = lambda2->definition.info(ctx).owner;
+        if (o1.info(ctx).derivesFrom(ctx, o2)) {
+            return lambda1->definition == lambda2->definition.dealiasAt(ctx, o1);
+        } else if (o2.info(ctx).derivesFrom(ctx, o1)) {
+            return lambda2->definition == lambda1->definition.dealiasAt(ctx, o2);
+        } else {
+            return false;
+        }
+    }
+
     if (TypeVar *tv2 = dynamic_cast<TypeVar *>(t2.get())) {
         if (tv2->isInstantiated) {
             return Types::isSubType(ctx, t1, tv2->instantiation);
