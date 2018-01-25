@@ -735,24 +735,16 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         return true;
     }
 
-    auto *lambda1 = cast_type<LambdaParam>(t1.get());
-    auto *lambda2 = cast_type<LambdaParam>(t2.get());
-    if (lambda1 != nullptr || lambda2 != nullptr) {
-        if (lambda1 == nullptr || lambda2 == nullptr) {
+    ENFORCE(cast_type<LambdaParam>(t1.get()) == nullptr);
+    ENFORCE(cast_type<LambdaParam>(t2.get()) == nullptr);
+
+    auto *self1 = cast_type<SelfTypeParam>(t1.get());
+    auto *self2 = cast_type<SelfTypeParam>(t2.get());
+    if (self1 != nullptr || self2 != nullptr) {
+        if (self1 == nullptr || self2 == nullptr) {
             return false;
         }
-        if (lambda1->definition == lambda2->definition) {
-            return true;
-        }
-        auto o1 = lambda1->definition.info(ctx).owner;
-        auto o2 = lambda2->definition.info(ctx).owner;
-        if (o1.info(ctx).derivesFrom(ctx, o2)) {
-            return lambda1->definition == lambda2->definition.dealiasAt(ctx, o1);
-        } else if (o2.info(ctx).derivesFrom(ctx, o1)) {
-            return lambda2->definition == lambda1->definition.dealiasAt(ctx, o2);
-        } else {
-            return false;
-        }
+        return self1->definition == self2->definition;
     }
 
     if (TypeVar *tv2 = dynamic_cast<TypeVar *>(t2.get())) {
@@ -957,7 +949,8 @@ void AliasType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-std::shared_ptr<Type> AliasType::instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> AliasType::instantiate(std::vector<SymbolRef> params,
+                                             const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
@@ -972,7 +965,7 @@ std::string TypeConstructor::typeName() {
 void TypeConstructor::_sanityCheck(core::Context ctx) {}
 
 bool TypeConstructor::isFullyDefined() {
-    return false;
+    return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.
 }
 std::shared_ptr<Type> TypeConstructor::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                     std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
@@ -989,7 +982,7 @@ bool TypeConstructor::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 }
 
 std::shared_ptr<Type> TypeConstructor::instantiate(std::vector<SymbolRef> params,
-                                                   std::vector<std::shared_ptr<Type>> &targs) {
+                                                   const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 

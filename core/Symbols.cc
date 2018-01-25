@@ -28,6 +28,24 @@ bool Symbol::isConstructor(GlobalState &gs) const {
     return this->name._id == 1;
 }
 
+std::vector<std::shared_ptr<core::Type>> Symbol::selfTypeArgs(GlobalState &gs) {
+    ENFORCE(isClass()); // should be removed when we have generic methods
+    std::vector<shared_ptr<core::Type>> targs;
+    for (auto tm : typeMembers()) {
+        targs.emplace_back(make_shared<core::SelfTypeParam>(tm));
+    }
+    return targs;
+}
+std::shared_ptr<core::Type> Symbol::selfType(GlobalState &gs) {
+    ENFORCE(isClass());
+    // todo: in dotty it made sense to cache those.
+    if (typeMembers().empty()) {
+        return make_shared<core::ClassType>(ref(gs));
+    } else {
+        return make_shared<core::AppliedType>(ref(gs), selfTypeArgs(gs));
+    }
+}
+
 bool Symbol::derivesFrom(GlobalState &gs, SymbolRef sym) {
     // TODO: add baseClassSet
     for (SymbolRef a : argumentsOrMixins) {

@@ -64,10 +64,10 @@ public:
     static std::shared_ptr<Type> dropRefinements(core::Context ctx, std::shared_ptr<Type> onWhat,
                                                  core::NameRef refiningName);
     static std::shared_ptr<Type> resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
-                                                      std::vector<std::shared_ptr<Type>> &targs);
+                                                      const std::vector<std::shared_ptr<Type>> &targs);
 
     static std::vector<core::SymbolRef> alignBaseTypeArgs(core::Context ctx, core::SymbolRef what,
-                                                          std::vector<std::shared_ptr<Type>> &targs,
+                                                          const std::vector<std::shared_ptr<Type>> &targs,
                                                           core::SymbolRef asIf);
 };
 
@@ -95,7 +95,7 @@ public:
     virtual std::string toString(GlobalState &gs, int tabs = 0) = 0;
     virtual std::string typeName() = 0;
     virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
-                                              std::vector<std::shared_ptr<Type>> &targs) = 0;
+                                              const std::vector<std::shared_ptr<Type>> &targs) = 0;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                bool hasBlock) = 0;
@@ -160,7 +160,8 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual bool isFullyDefined() final;
 };
 
@@ -179,7 +180,8 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
 
 private:
     /*
@@ -224,7 +226,8 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
 
 private:
     // See the comments on OrType()
@@ -258,7 +261,8 @@ public:
     virtual std::string typeName();
     virtual bool isFullyDefined() final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 };
 
@@ -277,7 +281,8 @@ public:
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 };
 
@@ -291,7 +296,8 @@ public:
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 };
 
@@ -310,7 +316,8 @@ public:
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 };
 
@@ -332,7 +339,8 @@ public:
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 };
 
@@ -351,7 +359,8 @@ public:
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
@@ -378,7 +387,8 @@ public:
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 };
 
@@ -399,7 +409,30 @@ public:
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
+    virtual int kind() final;
+};
+
+class SelfTypeParam final : public Type {
+public:
+    core::SymbolRef definition;
+
+    SelfTypeParam(const SymbolRef definition);
+    virtual std::string toString(GlobalState &gs, int tabs = 0) final;
+    virtual std::string typeName() final;
+
+    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                               bool hasBlock) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    void _sanityCheck(core::Context ctx) final;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 };
 
@@ -418,7 +451,8 @@ public:
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
-    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs);
+    virtual std::shared_ptr<Type> instantiate(std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs);
     virtual int kind() final;
 };
 

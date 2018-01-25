@@ -171,6 +171,9 @@ public:
         return argumentsOrMixins;
     }
 
+    std::vector<std::shared_ptr<Type>> selfTypeArgs(GlobalState &gs);
+    std::shared_ptr<Type> selfType(GlobalState &gs);
+
     inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
         ENFORCE(isClass());
         return argumentsOrMixins;

@@ -865,7 +865,13 @@ public:
                         tp.origins.push_back(symbol.info(ctx).definitionLoc);
                     } else if (info.isField() || info.isStaticField() || info.isMethodArgument()) {
                         if (info.resultType.get() != nullptr) {
-                            tp.type = info.resultType;
+                            if (info.isField()) {
+                                tp.type =
+                                    core::Types::resultTypeAsSeenFrom(ctx, symbol, ctx.enclosingClass(),
+                                                                      ctx.enclosingClass().info(ctx).selfTypeArgs(ctx));
+                            } else {
+                                tp.type = info.resultType;
+                            }
                             tp.origins.push_back(info.definitionLoc);
                         } else {
                             tp.origins.push_back(core::Loc::none());
@@ -876,7 +882,7 @@ public:
                     }
                 },
                 [&](cfg::Self *i) {
-                    tp.type = make_shared<core::ClassType>(i->klass);
+                    tp.type = i->klass.info(ctx).selfType(ctx);
                     tp.origins.push_back(bind.loc);
                 },
                 [&](cfg::SymbolLit *i) {
@@ -896,6 +902,9 @@ public:
                     auto expectedType = ctx.owner.info(ctx).resultType;
                     if (!expectedType) {
                         expectedType = core::Types::dynamic();
+                    } else {
+                        expectedType = core::Types::resultTypeAsSeenFrom(
+                            ctx, ctx.owner, ctx.enclosingClass(), ctx.enclosingClass().info(ctx).selfTypeArgs(ctx));
                     }
                     auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                     if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
@@ -961,7 +970,8 @@ public:
                     tp.origins.push_back(bind.loc);
                 });
 
-            ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type");
+            ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: ", bind.value->toString(ctx));
+            ENFORCE(tp.type->isFullyDefined(), "Inferencer did not assign a fully defined type");
             ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
             core::TypeAndOrigins cur = getOrCreateTypeAndOrigin(ctx, bind.bind);

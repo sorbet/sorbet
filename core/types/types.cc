@@ -456,6 +456,10 @@ int LambdaParam::kind() {
     return 6;
 }
 
+int SelfTypeParam::kind() {
+    return 6;
+}
+
 int TypeConstructor::kind() {
     return 7;
 }
@@ -516,7 +520,8 @@ ruby_typer::core::TypeVar::TypeVar(NameRef name) : name(name) {}
 
 /** Returns type parameters of what reordered in the order of type parameters of asIf */
 std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::SymbolRef what,
-                                                      std::vector<std::shared_ptr<Type>> &targs, core::SymbolRef asIf) {
+                                                      const std::vector<std::shared_ptr<Type>> &targs,
+                                                      core::SymbolRef asIf) {
     ENFORCE(asIf.info(ctx).isClass());
     ENFORCE(what.info(ctx).isClass());
     ENFORCE(what == asIf || what.info(ctx).derivesFrom(ctx, asIf) || asIf.info(ctx).derivesFrom(ctx, what),
@@ -548,7 +553,7 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
 }
 
 std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
-                                                  std::vector<std::shared_ptr<Type>> &targs) {
+                                                  const std::vector<std::shared_ptr<Type>> &targs) {
     core::Symbol &original = what.info(ctx);
     core::SymbolRef originalOwner = ctx.withOwner(what).enclosingClass();
 
@@ -629,24 +634,28 @@ void TypeVar::_sanityCheck(core::Context ctx) {
     }
 }
 
-std::shared_ptr<Type> TypeVar::instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> TypeVar::instantiate(std::vector<SymbolRef> params,
+                                           const std::vector<std::shared_ptr<Type>> &targs) {
     Error::notImplemented();
 }
 
-std::shared_ptr<Type> ClassType::instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> ClassType::instantiate(std::vector<SymbolRef> params,
+                                             const std::vector<std::shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
 std::shared_ptr<Type> LiteralType::instantiate(std::vector<SymbolRef> params,
-                                               std::vector<std::shared_ptr<Type>> &targs) {
+                                               const std::vector<std::shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-std::shared_ptr<Type> MagicType::instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> MagicType::instantiate(std::vector<SymbolRef> params,
+                                             const std::vector<std::shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-std::shared_ptr<Type> TupleType::instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> TupleType::instantiate(std::vector<SymbolRef> params,
+                                             const std::vector<std::shared_ptr<Type>> &targs) {
     bool changed = false;
     std::vector<std::shared_ptr<Type>> newElems;
     for (auto &a : this->elems) {
@@ -672,7 +681,8 @@ std::shared_ptr<Type> TupleType::instantiate(std::vector<SymbolRef> params, std:
     return nullptr;
 }
 
-std::shared_ptr<Type> ShapeType::instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> ShapeType::instantiate(std::vector<SymbolRef> params,
+                                             const std::vector<std::shared_ptr<Type>> &targs) {
     bool changed = false;
     std::vector<std::shared_ptr<Type>> newValues;
     for (auto &a : this->values) {
@@ -698,7 +708,8 @@ std::shared_ptr<Type> ShapeType::instantiate(std::vector<SymbolRef> params, std:
     return nullptr;
 }
 
-std::shared_ptr<Type> OrType::instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> OrType::instantiate(std::vector<SymbolRef> params,
+                                          const std::vector<std::shared_ptr<Type>> &targs) {
     auto left = this->left->instantiate(params, targs);
     auto right = this->right->instantiate(params, targs);
     if (left || right) {
@@ -713,7 +724,8 @@ std::shared_ptr<Type> OrType::instantiate(std::vector<SymbolRef> params, std::ve
     return nullptr;
 }
 
-std::shared_ptr<Type> AndType::instantiate(std::vector<SymbolRef> params, std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> AndType::instantiate(std::vector<SymbolRef> params,
+                                           const std::vector<std::shared_ptr<Type>> &targs) {
     auto left = this->left->instantiate(params, targs);
     auto right = this->right->instantiate(params, targs);
     if (left || right) {
@@ -771,7 +783,7 @@ void AppliedType::_sanityCheck(core::Context ctx) {
 }
 
 std::shared_ptr<Type> AppliedType::instantiate(std::vector<SymbolRef> params,
-                                               std::vector<std::shared_ptr<Type>> &targs) {
+                                               const std::vector<std::shared_ptr<Type>> &targs) {
     bool changed = false;
     std::vector<std::shared_ptr<Type>> newTargs;
     // TODO: make it not allocate if returns nullptr
@@ -826,20 +838,37 @@ bool AppliedType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 }
 
 LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {}
+SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition) {}
 
 std::string LambdaParam::toString(GlobalState &gs, int tabs) {
     return "LambdaParam(" + this->definition.info(gs).fullName(gs) + ")";
+}
+
+std::string SelfTypeParam::toString(GlobalState &gs, int tabs) {
+    return "SelfTypeParam(" + this->definition.info(gs).fullName(gs) + ")";
 }
 
 std::string LambdaParam::typeName() {
     return "LambdaParam";
 }
 
+std::string SelfTypeParam::typeName() {
+    return "SelfTypeParam";
+}
+
 bool LambdaParam::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     Error::raise("should not happen");
 }
 
+bool SelfTypeParam::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+    Error::raise("should not happen");
+}
+
 std::shared_ptr<Type> LambdaParam::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+    Error::raise("should not happen");
+}
+
+std::shared_ptr<Type> SelfTypeParam::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     Error::raise("should not happen");
 }
 
@@ -849,14 +878,30 @@ std::shared_ptr<Type> LambdaParam::dispatchCall(core::Context ctx, core::NameRef
     Error::raise("should not happen");
 }
 
+std::shared_ptr<Type> SelfTypeParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                                  std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                                  bool hasBlock) {
+    Error::raise("should not happen");
+}
+
 void LambdaParam::_sanityCheck(core::Context ctx) {}
+void SelfTypeParam::_sanityCheck(core::Context ctx) {}
 
 bool LambdaParam::isFullyDefined() {
     return false;
 }
 
+bool SelfTypeParam::isFullyDefined() {
+    return true;
+}
+
+std::shared_ptr<Type> SelfTypeParam::instantiate(std::vector<SymbolRef> params,
+                                                 const std::vector<std::shared_ptr<Type>> &targs) {
+    return nullptr;
+}
+
 std::shared_ptr<Type> LambdaParam::instantiate(std::vector<SymbolRef> params,
-                                               std::vector<std::shared_ptr<Type>> &targs) {
+                                               const std::vector<std::shared_ptr<Type>> &targs) {
     int i = 0;
     for (auto el : params) {
         if (el == this->definition) {
