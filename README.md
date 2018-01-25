@@ -5,21 +5,20 @@ aimed at producing a static typechecker for a subset of Ruby.
 
 You can read more in our [design doc](https://hackpad.corp.stripe.com/Design-Doc-ruby-typer-zd1LGHPfpvW)
 
-It is still in its early days and should be considered alpha-quality. 
+It is still in its early days and should be considered alpha-quality.
 You are welcome to try it, though, but your experience might still be rough.
 
 # Trying out
 Install [Dependencies](#Dependencies) first.
 
-You'll need to build ruby-typer. 
-In order to build the production version please run `./bazel build //main:ruby-typer -c opt --config=unsafe`. 
-The `--config=unsafe` command disables sanitizers that should only be necessary during development. 
+You'll need to build ruby-typer.
+In order to build the production version please run `./bazel build //main:ruby-typer -c opt`.
 
-The resulting executable will be in `bazel-bin/main/ruby-typer`. 
-It should be statically linked and have no dependencies, so feel free to copy it. 
+The resulting executable will be in `bazel-bin/main/ruby-typer`.
+It should be statically linked and have no dependencies, so feel free to copy it.
 
 # Security concerns
-Note that in order to speed up startup time, `ruby-typer` preloads some ruby code into itself. 
+Note that in order to speed up startup time, `ruby-typer` preloads some ruby code into itself.
 Please do not spread those executables outside of Stripe.
 
 # Developing on `ruby-typer`

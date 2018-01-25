@@ -3,7 +3,7 @@ set -e
 
 passes=(parse-tree ast ast-raw name-table name-tree name-tree-raw cfg cfg-raw typed-source)
 
-bazel build //main:ruby-typer --config=unsafe -c opt
+bazel build //main:ruby-typer -c opt
 
 rb_src=("$@")
 

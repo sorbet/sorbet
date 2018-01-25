@@ -5,20 +5,11 @@ build --cxxopt=--std=c++14
 build --copt=-fno-omit-frame-pointer
 build --cxxopt=-fno-omit-frame-pointer
 
-build --copt=-fsanitize=address
-build --cxxopt=-fsanitize=address
-
 build --copt=-fstack-protector
 build --cxxopt=-fstack-protector
 
-build --copt=-fsanitize=undefined
-build --cxxopt=-fsanitize=undefined
-
 build --copt=-Werror
 build --cxxopt=-Werror
-
-build --linkopt=-fsanitize=address
-build --linkopt=-fsanitize=undefined
 
 build --host_cxxopt=-O0
 build --host_copt=-O0
@@ -54,19 +45,25 @@ build:lto --linkopt=-fno-pie
 build:lto --copt=-fno-pie
 build:lto --cxxopt=-fno-pie
 
-# Unsafe build: disable sanitizers. Smaller size and better perf, undefined behaviour in case of bugs.
-build:unsafe --copt=-fno-stack-protector
-build:unsafe --cxxopt=-fno-stack-protector
-build:unsafe --copt=-fno-sanitize=address
-build:unsafe --cxxopt=-fno-sanitize=address
-build:unsafe --linkopt=-fno-sanitize=address
-build:unsafe --copt=-fno-sanitize=undefined
-build:unsafe --cxxopt=-fno-sanitize=undefined
-build:unsafe --linkopt=-fno-sanitize=undefined
+# It's useful to be able to write `config_setting` rules for "this is
+# an unsanitized build", but we can't express "copt does not contain
+# -fsanitize". So we set this `--define` and unset it if we're using a
+# sanitizer.
+build --define unsanitized=true
+# sanitize build: run with ASAN and UBSAN. Catches most memory and
+# undefined-behavior errors, substantially larger and slower binary.
+build:sanitize --copt=-fsanitize=address
+build:sanitize --cxxopt=-fsanitize=address
+build:sanitize --linkopt=-fsanitize=address
+build:sanitize --copt=-fsanitize=undefined
+build:sanitize --cxxopt=-fsanitize=undefined
+build:sanitize --linkopt=-fsanitize=undefined
+build:sanitize --define unsanitized=false
 
 build:tstan --copt=-fsanitize=thread
 build:tstan --cxxopt==-fsanitize=thread
 build:tstan --linkopt=-fsanitize=thread
+build:sanitize --define unsanitized=false
 
 # Build optimized for executable size. Can be faster if size of executable code is a bottleneck.
 build:size --linkopt=-Os
