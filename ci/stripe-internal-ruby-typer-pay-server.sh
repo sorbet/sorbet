@@ -11,7 +11,7 @@ maxrss: %M
 '
 
 # This is what we'll ship to our users
-bazel build main:ruby-typer --config=unsafe -c opt
+bazel build main:ruby-typer -c opt
 PATH=$PATH:"$(pwd)/bazel-bin/main/"
 export PATH
 
@@ -60,7 +60,7 @@ fi
 
 (
     cd -
-    bazel build main:ruby-typer -c opt --config=ci
+    bazel build main:ruby-typer -c opt --config=ci --config=sanitize
 )
 
 TIMEFILE2=$(mktemp)

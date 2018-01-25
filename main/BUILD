@@ -1,7 +1,7 @@
 config_setting(
     name = "can-use-jemalloc",
     values = {
-        "copt": "-fno-sanitize=address",
+        "define": "unsanitized=true",
         "compilation_mode": "opt",
     },
 )
