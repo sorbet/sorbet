@@ -55,9 +55,9 @@ build --define unsanitized=true
 build:sanitize --copt=-fsanitize=address
 build:sanitize --cxxopt=-fsanitize=address
 build:sanitize --linkopt=-fsanitize=address
-build:sanitize --copt=-fsanitize=undefined
-build:sanitize --cxxopt=-fsanitize=undefined
-build:sanitize --linkopt=-fsanitize=undefined
+build:sanitize --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
+build:sanitize --cxxopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
+build:sanitize --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --define unsanitized=false
 
 build:tstan --copt=-fsanitize=thread

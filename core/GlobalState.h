@@ -259,6 +259,22 @@ public:
         return SymbolRef(nullptr, 37);
     }
 
+    static SymbolRef defn_Enumerable() {
+        return SymbolRef(nullptr, 38);
+    }
+
+    static SymbolRef defn_Set() {
+        return SymbolRef(nullptr, 39);
+    }
+
+    static SymbolRef defn_Struct() {
+        return SymbolRef(nullptr, 40);
+    }
+
+    static SymbolRef defn_File() {
+        return SymbolRef(nullptr, 41);
+    }
+
     // Keep as last and update to match the last entry
     static SymbolRef defn_last_synthetic_sym() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - 1);

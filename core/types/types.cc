@@ -567,7 +567,7 @@ std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::Symbo
 
     std::vector<core::SymbolRef> currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
 
-    auto res1 = original.resultType->instantiate(currentAlignment, targs);
+    auto res1 = original.resultType->instantiate(ctx, currentAlignment, targs);
     if (res1) {
         return res1;
     }
@@ -638,32 +638,32 @@ void TypeVar::_sanityCheck(core::Context ctx) {
     }
 }
 
-std::shared_ptr<Type> TypeVar::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> TypeVar::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                            const std::vector<std::shared_ptr<Type>> &targs) {
     Error::notImplemented();
 }
 
-std::shared_ptr<Type> ClassType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> ClassType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                              const std::vector<std::shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-std::shared_ptr<Type> LiteralType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> LiteralType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-std::shared_ptr<Type> MagicType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> MagicType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                              const std::vector<std::shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-std::shared_ptr<Type> TupleType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> TupleType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                              const std::vector<std::shared_ptr<Type>> &targs) {
     bool changed = false;
     std::vector<std::shared_ptr<Type>> newElems;
     for (auto &a : this->elems) {
-        auto t = a->instantiate(params, targs);
+        auto t = a->instantiate(ctx, params, targs);
         if (changed || t) {
             changed = true;
             if (!t) {
@@ -685,12 +685,12 @@ std::shared_ptr<Type> TupleType::instantiate(std::vector<SymbolRef> params,
     return nullptr;
 }
 
-std::shared_ptr<Type> ShapeType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> ShapeType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                              const std::vector<std::shared_ptr<Type>> &targs) {
     bool changed = false;
     std::vector<std::shared_ptr<Type>> newValues;
     for (auto &a : this->values) {
-        auto t = a->instantiate(params, targs);
+        auto t = a->instantiate(ctx, params, targs);
         if (changed || t) {
             changed = true;
             if (!t) {
@@ -712,10 +712,10 @@ std::shared_ptr<Type> ShapeType::instantiate(std::vector<SymbolRef> params,
     return nullptr;
 }
 
-std::shared_ptr<Type> OrType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> OrType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                           const std::vector<std::shared_ptr<Type>> &targs) {
-    auto left = this->left->instantiate(params, targs);
-    auto right = this->right->instantiate(params, targs);
+    auto left = this->left->instantiate(ctx, params, targs);
+    auto right = this->right->instantiate(ctx, params, targs);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -723,15 +723,15 @@ std::shared_ptr<Type> OrType::instantiate(std::vector<SymbolRef> params,
         if (!right) {
             right = this->right;
         }
-        return OrType::make_shared(left, right);
+        return Types::buildOr(ctx, left, right);
     }
     return nullptr;
 }
 
-std::shared_ptr<Type> AndType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> AndType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                            const std::vector<std::shared_ptr<Type>> &targs) {
-    auto left = this->left->instantiate(params, targs);
-    auto right = this->right->instantiate(params, targs);
+    auto left = this->left->instantiate(ctx, params, targs);
+    auto right = this->right->instantiate(ctx, params, targs);
     if (left || right) {
         if (!left) {
             left = this->left;
@@ -739,7 +739,7 @@ std::shared_ptr<Type> AndType::instantiate(std::vector<SymbolRef> params,
         if (!right) {
             right = this->right;
         }
-        return AndType::make_shared(left, right);
+        return Types::buildAnd(ctx, left, right);
     }
     return nullptr;
 }
@@ -786,13 +786,13 @@ void AppliedType::_sanityCheck(core::Context ctx) {
     }
 }
 
-std::shared_ptr<Type> AppliedType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> AppliedType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) {
     bool changed = false;
     std::vector<std::shared_ptr<Type>> newTargs;
     // TODO: make it not allocate if returns nullptr
     for (auto &a : this->targs) {
-        auto t = a->instantiate(params, targs);
+        auto t = a->instantiate(ctx, params, targs);
         if (changed || t) {
             changed = true;
             if (!t) {
@@ -899,12 +899,12 @@ bool SelfTypeParam::isFullyDefined() {
     return true;
 }
 
-std::shared_ptr<Type> SelfTypeParam::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> SelfTypeParam::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                  const std::vector<std::shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-std::shared_ptr<Type> LambdaParam::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> LambdaParam::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) {
     int i = 0;
     for (auto el : params) {

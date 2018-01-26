@@ -2,7 +2,7 @@
 class TestArgs
   def any; end
 
-  sig.returns(Hash)
+  sig.returns(T::Hash[Integer, Integer])
   def a_hash; end # error: does not conform to method result type
 
   def required(a, b)
@@ -64,7 +64,7 @@ class TestArgs
   sig(
     x: Integer,
     y: Integer,
-    z: Hash,
+    z: T::Hash[Integer, Integer],
     w: String,
     u: Integer,
     v: Integer

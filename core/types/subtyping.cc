@@ -185,21 +185,22 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
-        if (ltr) { // swap
-            auto tmp = a1;
-            a1 = a2;
-            a2 = tmp;
+        if (ltr) {
+            std::swap(a1, a2);
         }
+        // now a1 <: a2
 
         vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
         vector<shared_ptr<Type>> newTargs;
         newTargs.reserve(indexes.size());
-        int i = 0;
-        for (SymbolRef idx : indexes) {
-            int j = 0;
-            while (a2->klass.info(ctx).typeMembers()[i] != idx) {
-                j++;
+        // code below inverts permutation of type params
+        int j = 0;
+        for (SymbolRef idx : a2->klass.info(ctx).typeMembers()) {
+            int i = 0;
+            while (indexes[j] != a1->klass.info(ctx).typeMembers()[i]) {
+                i++;
             }
+            ENFORCE(i < a1->klass.info(ctx).typeMembers().size());
             if (idx.info(ctx).isCovariant()) {
                 newTargs.push_back(Types::lub(ctx, a1->targs[i], a2->targs[j]));
             } else if (idx.info(ctx).isInvariant()) {
@@ -210,7 +211,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
             } else if (idx.info(ctx).isContravariant()) {
                 newTargs.push_back(Types::glb(ctx, a1->targs[i], a2->targs[j]));
             }
-            i++;
+            j++;
         }
         return make_shared<AppliedType>(a2->klass, newTargs);
     }
@@ -302,10 +303,28 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
         // only 2nd is proxy
         shared_ptr<Type> und = p2->underlying;
         return lub(ctx, t1, und);
-    } else {
-        // none is proxy
-        return lubGround(ctx, t1, t2);
     }
+
+    LambdaParam *p1 = cast_type<LambdaParam>(t1.get());
+    LambdaParam *p2 = cast_type<LambdaParam>(t2.get());
+
+    if (p1 != nullptr || p2 != nullptr) {
+        return OrType::make_shared(t1, t2);
+    }
+
+    SelfTypeParam *s1 = cast_type<SelfTypeParam>(t1.get());
+    SelfTypeParam *s2 = cast_type<SelfTypeParam>(t2.get());
+
+    if (s1 != nullptr || s2 != nullptr) {
+        if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+            return OrType::make_shared(t1, t2);
+        } else {
+            return t1;
+        }
+    }
+
+    // none is proxy
+    return lubGround(ctx, t1, t2);
 }
 
 shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
@@ -643,9 +662,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
             return AndType::make_shared(t1, t2); // we can as well return nothing here?
         }
         if (ltr) { // swap
-            auto tmp = a1;
-            a1 = a2;
-            a2 = tmp;
+            std::swap(a1, a2);
         }
 
         vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
@@ -735,8 +752,18 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         return true;
     }
 
-    ENFORCE(cast_type<LambdaParam>(t1.get()) == nullptr);
-    ENFORCE(cast_type<LambdaParam>(t2.get()) == nullptr);
+    //    ENFORCE(cast_type<LambdaParam>(t1.get()) == nullptr); // sandly, this is false in Resolver, as we build
+    //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2.get()) == nullptr);
+
+    auto *lambda1 = cast_type<LambdaParam>(t1.get());
+    auto *lambda2 = cast_type<LambdaParam>(t2.get());
+    if (lambda1 != nullptr || lambda2 != nullptr) {
+        // This should only be reachable in resolver.
+        if (lambda1 == nullptr || lambda2 == nullptr) {
+            return false;
+        }
+        return lambda1->definition == lambda2->definition;
+    }
 
     auto *self1 = cast_type<SelfTypeParam>(t1.get());
     auto *self2 = cast_type<SelfTypeParam>(t2.get());
@@ -778,12 +805,16 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         }
         if (result) {
             vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
-            int i = 0;
-            for (SymbolRef idx : indexes) {
-                int j = 0;
-                while (a2->klass.info(ctx).typeMembers()[i] != idx) {
-                    j++;
+            // code below inverts permutation of type params
+            int j = 0;
+            for (SymbolRef idx : a2->klass.info(ctx).typeMembers()) {
+                int i = 0;
+                while (indexes[j] != a1->klass.info(ctx).typeMembers()[i]) {
+                    i++;
                 }
+
+                ENFORCE(i < a1->klass.info(ctx).typeMembers().size());
+
                 if (idx.info(ctx).isCovariant()) {
                     result = Types::isSubType(ctx, a1->targs[i], a2->targs[j]);
                 } else if (idx.info(ctx).isInvariant()) {
@@ -794,7 +825,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
                 if (!result) {
                     break;
                 }
-                i++;
+                j++;
             }
             // alight type params.
         }
@@ -949,7 +980,7 @@ void AliasType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-std::shared_ptr<Type> AliasType::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> AliasType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                              const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
@@ -981,7 +1012,7 @@ bool TypeConstructor::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return false;
 }
 
-std::shared_ptr<Type> TypeConstructor::instantiate(std::vector<SymbolRef> params,
+std::shared_ptr<Type> TypeConstructor::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                    const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }

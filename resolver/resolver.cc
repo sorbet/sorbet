@@ -396,9 +396,27 @@ private:
                      result = make_shared<core::TupleType>(elems);
                  },
                  [&](ast::Ident *i) {
+                     bool silenceGenericError =
+                         i->symbol == core::GlobalState::defn_Hash() || i->symbol == core::GlobalState::defn_Array() ||
+                         i->symbol == core::GlobalState::defn_Set() || i->symbol == core::GlobalState::defn_Struct() ||
+                         i->symbol == core::GlobalState::defn_File();
+                     // TODO: reduce this^^^ set.
                      auto sym = dealiasSym(ctx, i->symbol);
                      if (sym.info(ctx).isClass()) {
-                         result = make_shared<core::ClassType>(sym);
+                         if (sym.info(ctx).typeMembers().empty()) {
+                             result = make_shared<core::ClassType>(sym);
+                         } else {
+                             std::vector<shared_ptr<core::Type>> targs;
+                             for (auto &UNUSED(arg) : sym.info(ctx).typeMembers()) {
+                                 targs.emplace_back(core::Types::dynamic());
+                             }
+                             result = make_shared<core::AppliedType>(sym, targs);
+                             if (!silenceGenericError) {
+                                 ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                                 "Malformed type declaration. Generic class without type arguments {}",
+                                                 i->toString(ctx));
+                             }
+                         }
                      } else if (sym.info(ctx).isTypeMember()) {
                          result = make_shared<core::LambdaParam>(sym);
                      } else {
@@ -458,9 +476,20 @@ private:
                      } else if (recvi->symbol == core::GlobalState::defn_T_Proc()) {
                          result = core::Types::procClass();
                      } else {
-                         ctx.state.error(recvi->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                         "Malformed type declaration. Unknown argument type {}", expr->toString(ctx));
-                         result = core::Types::dynamic();
+                         auto &info = recvi->symbol.info(ctx);
+                         if (s->args.size() != info.typeMembers().size()) {
+                             ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                             "Malformed {}[]: Expected %d type arguments, got %d",
+                                             info.name.toString(ctx), info.typeMembers().size(), s->args.size());
+                             result = core::Types::dynamic();
+                             return;
+                         }
+                         std::vector<shared_ptr<core::Type>> targs;
+                         for (auto &arg : s->args) {
+                             auto elem = getResultType(ctx, arg);
+                             targs.emplace_back(move(elem));
+                         }
+                         result = make_shared<core::AppliedType>(recvi->symbol, move(targs));
                      }
                  },
                  [&](ast::Expression *expr) {

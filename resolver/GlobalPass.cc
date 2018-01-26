@@ -59,6 +59,13 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
                 if (inSym.typeMembers()[i] != my) {
                     gs.error(my.info(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder,
                              "Type members in wrong order");
+                    int foundIdx = 0;
+                    while (foundIdx < inSym.typeMembers().size() && inSym.typeMembers()[foundIdx] != my) {
+                        foundIdx++;
+                    }
+                    ENFORCE(foundIdx < inSym.typeMembers().size());
+                    // quadratic
+                    std::swap(inSym.typeMembers()[foundIdx], inSym.typeMembers()[i]);
                 }
                 i++;
             }

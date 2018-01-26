@@ -200,7 +200,7 @@ shared_ptr<core::Type> runTypeConstructor(core::Context ctx, core::TypeConstruct
     return make_shared<core::AppliedType>(typeConstructor->protoType, typeConstructor->targs);
 }
 
-bool isTypeConstructor(core::Context ctx, std::shared_ptr<core::Type> recv) {
+bool isTypeConstructor(core::Context ctx, std::shared_ptr<core::Type> recv, const vector<core::TypeAndOrigins> &args) {
     if (dynamic_cast<core::TypeConstructor *>(recv.get()) != nullptr) {
         return true;
     }
@@ -211,8 +211,24 @@ bool isTypeConstructor(core::Context ctx, std::shared_ptr<core::Type> recv) {
     core::SymbolRef klass = asClass->symbol;
     // Consider using a flag for this?
     auto attached = klass.info(ctx).attachedClass(ctx);
-    return attached.exists() && !attached.info(ctx).typeMembers().empty() &&
-           !klass.info(ctx).findMemberTransitive(ctx, core::Names::squareBrackets()).exists();
+    bool canBeGeneric = attached.exists() && !attached.info(ctx).typeMembers().empty() &&
+                        !klass.info(ctx).findMemberTransitive(ctx, core::Names::squareBrackets()).exists();
+    if (!canBeGeneric) {
+        return false;
+    }
+
+    if (attached == core::GlobalState::defn_Array() || attached == core::GlobalState::defn_Hash()) {
+        // they are generic but we dont' allow [] on them
+        return false;
+    }
+
+    for (auto &a : args) {
+        if (!a.type->derivesFrom(ctx, core::GlobalState::defn_Class())) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 shared_ptr<core::Type> unwrapConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> &tp) {
@@ -813,7 +829,8 @@ public:
                     }
                     if (send->fun == core::Names::new_()) {
                         tp.type = dispatchNew(ctx, recvType, send, args, bind);
-                    } else if (send->fun == core::Names::squareBrackets() && isTypeConstructor(ctx, recvType.type)) {
+                    } else if (send->fun == core::Names::squareBrackets() &&
+                               isTypeConstructor(ctx, recvType.type, args)) {
                         core::SymbolRef attached;
                         auto *asClass = dynamic_cast<core::ClassType *>(recvType.type.get());
                         if (asClass != nullptr) {

@@ -83,6 +83,14 @@ const char *model_str = "Model";
 
 const char *m_str = "M";
 
+const char *enumerable_str = "Enumerable";
+
+const char *set_str = "Set";
+
+const char *struct_str = "Struct";
+
+const char *file_str = "File";
+
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
@@ -173,6 +181,10 @@ void GlobalState::initEmpty() {
     SymbolRef T_all_id = enterMethodSymbol(Loc::none(), defn_T(), Names::all());
     SymbolRef T_untyped_id = enterMethodSymbol(Loc::none(), defn_T(), Names::untyped());
     SymbolRef T_nilable_id = enterMethodSymbol(Loc::none(), defn_T(), Names::nilable());
+    SymbolRef enumerable_id = synthesizeClass(enumerable_str, 0, true);
+    SymbolRef set_id = synthesizeClass(set_str);
+    SymbolRef struct_id = synthesizeClass(struct_str);
+    SymbolRef file_id = synthesizeClass(file_str);
 
     ENFORCE(no_symbol_id == noSymbol(), "no symbol creation failed");
     ENFORCE(top_id == defn_top(), "top symbol creation failed");
@@ -212,6 +224,10 @@ void GlobalState::initEmpty() {
     ENFORCE(T_all_id = defn_T_all());
     ENFORCE(T_untyped_id = defn_T_untyped());
     ENFORCE(T_nilable_id = defn_T_nilable());
+    ENFORCE(enumerable_id = defn_Enumerable());
+    ENFORCE(set_id = defn_Set());
+    ENFORCE(struct_id = defn_Struct());
+    ENFORCE(file_id = defn_File());
 
     // Synthesize nil = NilClass()
     defn_nil().info(*this).resultType = core::Types::nil();
