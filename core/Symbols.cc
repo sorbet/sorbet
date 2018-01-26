@@ -232,7 +232,7 @@ SymbolRef Symbol::findMember(GlobalState &gs, NameRef name) {
             return member.second.info(gs).dealias(gs);
         }
     }
-    return SymbolRef();
+    return GlobalState::noSymbol();
 }
 
 SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDepth) {
@@ -269,7 +269,7 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
     if (this->superClass.exists()) {
         return this->superClass.info(gs).findMemberTransitive(gs, name, maxDepth - 1);
     }
-    return SymbolRef();
+    return GlobalState::noSymbol();
 }
 
 string Symbol::fullName(GlobalState &gs) const {
