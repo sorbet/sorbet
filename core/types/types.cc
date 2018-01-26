@@ -857,31 +857,31 @@ std::string SelfTypeParam::typeName() {
 }
 
 bool LambdaParam::derivesFrom(core::Context ctx, core::SymbolRef klass) {
-    Error::raise("should not happen");
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 bool SelfTypeParam::derivesFrom(core::Context ctx, core::SymbolRef klass) {
-    Error::raise("should not happen");
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 std::shared_ptr<Type> LambdaParam::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    Error::raise("should not happen");
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 std::shared_ptr<Type> SelfTypeParam::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    Error::raise("should not happen");
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 std::shared_ptr<Type> LambdaParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                 std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                 bool hasBlock) {
-    Error::raise("should not happen");
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 std::shared_ptr<Type> SelfTypeParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                   std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                   bool hasBlock) {
-    Error::raise("should not happen");
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 void LambdaParam::_sanityCheck(core::Context ctx) {}
