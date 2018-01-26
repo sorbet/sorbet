@@ -778,7 +778,7 @@ public:
         } else {
             if (!args.empty()) {
                 ctx.state.error(bind.loc, core::errors::Infer::MethodArgumentCountMismatch,
-                                "Wrong number of arguments for constructor.\n Expected: 0, found: {}", args.size());
+                                "Wrong number of arguments for constructor. Expected: 0, found: {}", args.size());
             }
         }
         return type;

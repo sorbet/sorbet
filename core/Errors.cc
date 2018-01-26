@@ -8,6 +8,11 @@ namespace core {
 
 using namespace std;
 
+BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
+    : loc(loc), what(what), formatted(formatted), isCritical(false) {
+    ENFORCE(formatted.find("\n") == std::string::npos, formatted, " has a newline in it");
+}
+
 string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
     stringstream buf;
     if (loc.is_none()) {

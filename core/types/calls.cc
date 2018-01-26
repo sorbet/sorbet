@@ -315,7 +315,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         if (!(pit->info(ctx).isKeyword() || pit->info(ctx).isOptional() || pit->info(ctx).isRepeated() ||
               pit->info(ctx).isBlockArgument())) {
             ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                            "Not enough arguments provided for method {}.\n Expected: {}, provided: {}",
+                            "Not enough arguments provided for method {}. Expected: {}, provided: {}",
                             fun.toString(ctx),
 
                             // TODO(nelhage): report actual counts of required arguments,
@@ -419,7 +419,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
 
     if (ait != aend) {
         ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                        "Too many arguments provided for method {}.\n Expected: {}, provided: {}", fun.toString(ctx),
+                        "Too many arguments provided for method {}. Expected: {}, provided: {}", fun.toString(ctx),
 
                         // TODO(nelhage): report actual counts of required arguments,
                         // and account for keyword arguments

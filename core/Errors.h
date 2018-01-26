@@ -31,8 +31,9 @@ struct BasicError {
     ErrorClass what;
     std::string formatted;
     bool isCritical;
-    BasicError(Loc loc, ErrorClass what, std::string formatted)
-        : loc(loc), what(what), formatted(formatted), isCritical(false) {}
+
+    BasicError(Loc loc, ErrorClass what, std::string formatted);
+
     virtual std::string toString(const GlobalState &gs);
     virtual ~BasicError() = default;
     static std::string filePosToString(const GlobalState &gs, Loc loc);

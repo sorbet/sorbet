@@ -113,8 +113,7 @@ class NameInserter {
         auto constLit = ast::cast_tree<ast::ConstantLit>(send->args[0].get());
         if (constLit == nullptr) {
             ctx.state.error(send->loc, core::errors::Namer::IncludeNotConstant,
-                            "`include` must be passed a constant literal. You passed {}.",
-                            send->args[0]->toString(ctx));
+                            "`include` must be passed a constant literal. You passed a {}.", send->args[0]->nodeName());
             return nullptr;
         }
         if (send->block != nullptr) {
