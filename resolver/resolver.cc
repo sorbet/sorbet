@@ -36,7 +36,7 @@ private:
             }
             scope = scope->parent.get();
         }
-        return core::SymbolRef();
+        return core::GlobalState::noSymbol();
     }
 
     core::SymbolRef resolveConstant(core::Context ctx, ast::ConstantLit *c) {

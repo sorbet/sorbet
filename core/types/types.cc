@@ -518,7 +518,9 @@ bool OrType::isFullyDefined() {
 
 ruby_typer::core::TypeVar::TypeVar(NameRef name) : name(name) {}
 
-/** Returns type parameters of what reordered in the order of type parameters of asIf */
+/** Returns type parameters of what reordered in the order of type parameters of asIf
+ * If some typeArgs are not present, return NoSymbol
+ * */
 std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::SymbolRef what,
                                                       const std::vector<std::shared_ptr<Type>> &targs,
                                                       core::SymbolRef asIf) {
@@ -546,7 +548,9 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
                 }
                 i++;
             }
-            ENFORCE(align.exists());
+            if (!align.exists()) {
+                currentAlignment.push_back(GlobalState::noSymbol());
+            }
         }
     }
     return currentAlignment;
