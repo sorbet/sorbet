@@ -13,10 +13,11 @@ def externals():
         strip_prefix = "googletest-release-1.8.0",
     )
 
+    # their zip archive has symlinks that bazel does not like
     new_git_repository(
         name="spdlog",
         remote="https://github.com/gabime/spdlog.git",
-        commit="4fba14c79f356ae48d6141c561bf9fd7ba33fabd",
+        commit="ccd675a286f457068ee8c823f8207f13c2325b26", # v0.16.3
         build_file="//:spdlog.BUILD",
     )
 
@@ -37,7 +38,7 @@ def externals():
     new_git_repository(
             name="statsd",
             remote="https://github.com/romanbsd/statsd-c-client",
-            commit="93c9df3831ac543a7ebed1684528d63de7575e05",
+            commit="0bfa3d59e29ad7eff332c9e2506a23d311ff8db4",
             build_file="//:statsd.BUILD",
         )
 
@@ -51,7 +52,7 @@ def externals():
     git_repository(
             name="com_google_absl",
             remote="https://github.com/abseil/abseil-cpp.git",
-            commit="0271cd35577599fa99b59202da17d3136956e4c0"
+            commit="f6eea9486ae1935017f42d1f89005ddafb0bd53a"
         )
 
     new_git_repository(
