@@ -783,15 +783,25 @@ private:
 public:
     ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
-        if (id == nullptr || !id->symbol.info(ctx).isStaticField()) {
+        if (id == nullptr) {
             return asgn;
         }
 
-        if (id->symbol.info(ctx).resultType != nullptr) {
-            return asgn;
+        auto &info = id->symbol.info(ctx);
+        if (info.isTypeMember()) {
+            ENFORCE(info.isAlias());
+            auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
+            auto recv = ast::cast_tree<ast::Ident>(send->recv.get());
+            ENFORCE(recv->symbol == core::GlobalState::defn_T());
+            ENFORCE(send->fun == core::Names::typeAlias());
+            ENFORCE(send->args.size() == 1);
+            info.resultType = getResultType(ctx, send->args[0]);
+        } else if (info.isStaticField()) {
+            if (info.resultType != nullptr) {
+                return asgn;
+            }
+            info.resultType = resolveConstantType(ctx, asgn->rhs);
         }
-
-        id->symbol.info(ctx).resultType = resolveConstantType(ctx, asgn->rhs);
 
         return asgn;
     }

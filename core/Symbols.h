@@ -142,6 +142,7 @@ public:
         static constexpr int TYPE_COVARIANT = 0x0100;
         static constexpr int TYPE_INVARIANT = 0x0080;
         static constexpr int TYPE_CONTRAVARIANT = 0x0040;
+        static constexpr int TYPE_ALIAS = 0x0020;
     };
 
     SymbolRef owner;
@@ -266,6 +267,11 @@ public:
         return (flags & Symbol::Flags::TYPE_CONTRAVARIANT) != 0;
     }
 
+    inline bool isAlias() const {
+        ENFORCE(isTypeArgument() || isTypeMember());
+        return (flags & Symbol::Flags::TYPE_ALIAS) != 0;
+    }
+
     core::Variance variance() const {
         if (isInvariant())
             return Variance::Invariant;
@@ -353,18 +359,26 @@ public:
     }
 
     inline void setCovariant() {
+        ENFORCE(isTypeArgument() || isTypeMember());
         ENFORCE(!isContravariant() && !isInvariant());
         flags |= Symbol::Flags::TYPE_COVARIANT;
     }
 
     inline void setContravariant() {
+        ENFORCE(isTypeArgument() || isTypeMember());
         ENFORCE(!isCovariant() && !isInvariant());
         flags |= Symbol::Flags::TYPE_CONTRAVARIANT;
     }
 
     inline void setInvariant() {
+        ENFORCE(isTypeArgument() || isTypeMember());
         ENFORCE(!isCovariant() && !isContravariant());
         flags |= Symbol::Flags::TYPE_INVARIANT;
+    }
+
+    inline void setAlias() {
+        ENFORCE(isTypeArgument() || isTypeMember());
+        flags |= Symbol::Flags::TYPE_ALIAS;
     }
 
     inline void setOptional() {

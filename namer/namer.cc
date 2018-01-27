@@ -431,7 +431,7 @@ public:
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
-        if (send == nullptr || send->fun != core::Names::typeDecl()) {
+        if (send == nullptr) {
             return fillAssign(ctx, lhs, asgn);
         }
         auto *shouldBeT = ast::cast_tree<ast::ConstantLit>(send->recv.get());
@@ -445,30 +445,48 @@ public:
             return fillAssign(ctx, lhs, asgn);
         }
 
-        core::Variance variance;
-        if (send->args.empty()) {
-            variance = core::Variance::Invariant;
-        } else {
-            auto *symbol = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
-            if (send->args.size() > 1 || symbol == nullptr) {
-                ctx.state.error(asgn->loc, core::errors::Namer::InvalidTypeDefinition, "Invalid type definition");
+        switch (send->fun._id) {
+            case core::Names::typeDecl()._id:
+                core::Variance variance;
+                if (send->args.empty()) {
+                    variance = core::Variance::Invariant;
+                } else {
+                    auto *symbol = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
+                    if (send->args.size() > 1 || symbol == nullptr) {
+                        ctx.state.error(asgn->loc, core::errors::Namer::InvalidTypeDefinition,
+                                        "Invalid type definition");
+                        return new ast::EmptyTree(asgn->loc);
+                    }
+                    if (symbol->name == core::Names::covariant()) {
+                        variance = core::Variance::CoVariant;
+                    } else if (symbol->name == core::Names::contravariant()) {
+                        variance = core::Variance::ContraVariant;
+                    } else if (symbol->name == core::Names::invariant()) {
+                        variance = core::Variance::Invariant;
+                    } else {
+                        ctx.state.error(asgn->loc, core::errors::Namer::InvalidTypeDefinition,
+                                        "Invalid variance kind, only :{} and :{} are supported",
+                                        core::Names::covariant().toString(ctx),
+                                        core::Names::contravariant().toString(ctx));
+                        variance = core::Variance::Invariant;
+                    }
+                }
+                ctx.state.enterTypeMember(asgn->loc, ctx.enclosingClass(), typeName->cnst, variance);
                 return new ast::EmptyTree(asgn->loc);
+
+            case core::Names::typeAlias()._id: {
+                if (send->args.size() != 1) {
+                    return fillAssign(ctx, lhs, asgn);
+                }
+                auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.enclosingClass(), typeName->cnst,
+                                                     core::Variance::Invariant);
+                sym.info(ctx).setAlias();
+                asgn->lhs = make_unique<ast::Ident>(asgn->lhs->loc, sym);
+                return asgn;
             }
-            if (symbol->name == core::Names::covariant()) {
-                variance = core::Variance::CoVariant;
-            } else if (symbol->name == core::Names::contravariant()) {
-                variance = core::Variance::ContraVariant;
-            } else if (symbol->name == core::Names::invariant()) {
-                variance = core::Variance::Invariant;
-            } else {
-                ctx.state.error(asgn->loc, core::errors::Namer::InvalidTypeDefinition,
-                                "Invalid variance kind, only :{} and :{} are supported",
-                                core::Names::covariant().toString(ctx), core::Names::contravariant().toString(ctx));
-                variance = core::Variance::Invariant;
-            }
+            default:
+                return fillAssign(ctx, lhs, asgn);
         }
-        ctx.state.enterTypeMember(asgn->loc, ctx.enclosingClass(), typeName->cnst, variance);
-        return new ast::EmptyTree(asgn->loc);
     }
 
     ast::Expression *postTransformYield(core::Context ctx, ast::Yield *yield) {

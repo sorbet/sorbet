@@ -156,8 +156,13 @@ std::shared_ptr<core::Type> allocateBySymbol(core::Context ctx, core::SymbolRef 
     } else {
         vector<std::shared_ptr<core::Type>> targs;
         targs.reserve(symbol.info(ctx).typeMembers().size());
-        for (auto UNUSED(x) : symbol.info(ctx).typeMembers()) {
-            targs.emplace_back(core::Types::dynamic());
+        for (auto tmRef : symbol.info(ctx).typeMembers()) {
+            auto &tm = tmRef.info(ctx);
+            if (tm.isAlias()) {
+                targs.emplace_back(tm.resultType);
+            } else {
+                targs.emplace_back(core::Types::dynamic());
+            }
         }
         return make_shared<core::AppliedType>(symbol, move(targs));
     }
@@ -193,9 +198,23 @@ shared_ptr<core::Type> runTypeConstructor(core::Context ctx, core::TypeConstruct
     if (typeConstructor->protoType == core::GlobalState::defn_T_Array()) {
         return make_shared<core::AppliedType>(core::GlobalState::defn_Array(), typeConstructor->targs);
     }
-
     if (typeConstructor->protoType == core::GlobalState::defn_T_Hash()) {
         return make_shared<core::AppliedType>(core::GlobalState::defn_Hash(), typeConstructor->targs);
+    }
+
+    if (typeConstructor->targs.size() != typeConstructor->protoType.info(ctx).typeMembers().size()) {
+        vector<std::shared_ptr<core::Type>> targs;
+        int i = 0;
+        for (auto tmRef : typeConstructor->protoType.info(ctx).typeMembers()) {
+            auto &tm = tmRef.info(ctx);
+            if (tm.isAlias()) {
+                targs.emplace_back(tm.resultType);
+            } else {
+                targs.emplace_back(typeConstructor->targs[i++]);
+            }
+        }
+        ENFORCE(i == typeConstructor->targs.size());
+        return make_shared<core::AppliedType>(typeConstructor->protoType, targs);
     }
     return make_shared<core::AppliedType>(typeConstructor->protoType, typeConstructor->targs);
 }
