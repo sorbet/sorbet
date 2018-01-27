@@ -25,10 +25,10 @@ statTemp$10 = self : Test
 statTemp$11 = v.to_a() : AppliedType {
   klass = ::<constant:Array>
   targs = [
-    0 = AppliedType {
+    <constant:Elem> = AppliedType {
         klass = ::<constant:Array>
         targs = [
-          0 = untyped
+          <constant:Elem> = untyped
         ]
       }
   ]
@@ -49,7 +49,7 @@ ifTemp$13"];
 statTemp$17 = v : AppliedType {
   klass = ::<constant:Array>
   targs = [
-    0 = untyped
+    <constant:Elem> = untyped
   ]
 }
 <unconditional>"];
@@ -71,7 +71,7 @@ outerLoops: 1
 returnMethodTemp$3 = statTemp$17.map() : AppliedType {
   klass = ::<constant:Array>
   targs = [
-    0 = untyped
+    <constant:Elem> = untyped
   ]
 }
 <unconditional>"];

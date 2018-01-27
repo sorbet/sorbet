@@ -31,7 +31,7 @@ outerLoops: 1
 returnMethodTemp$3 = statTemp$5.map() : AppliedType {
   klass = ::<constant:Array>
   targs = [
-    0 = untyped
+    <constant:Elem> = untyped
   ]
 }
 finalReturn = return returnMethodTemp$3 : <bottom>

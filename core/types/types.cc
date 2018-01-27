@@ -752,10 +752,12 @@ std::string AppliedType::toString(GlobalState &gs, int tabs) {
 
     printTabs(buf, tabs + 1);
     buf << "targs = [" << endl;
-    int i = 0;
+    int i = -1;
     for (auto &targ : this->targs) {
+        ++i;
         printTabs(buf, tabs + 2);
-        buf << i << " = " << targ->toString(gs, tabs + 3) << endl;
+        auto tyMem = this->klass.info(gs).typeMembers()[i];
+        buf << tyMem.info(gs).name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << endl;
     }
     printTabs(buf, tabs + 1);
     buf << "]" << endl;
@@ -906,10 +908,9 @@ std::shared_ptr<Type> SelfTypeParam::instantiate(core::Context ctx, std::vector<
 
 std::shared_ptr<Type> LambdaParam::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) {
-    int i = 0;
-    for (auto el : params) {
+    for (auto &el : params) {
         if (el == this->definition) {
-            return targs[i];
+            return targs[&el - &params.front()];
         }
     }
     return nullptr;

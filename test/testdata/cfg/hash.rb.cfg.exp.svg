@@ -68,8 +68,8 @@
 <text text-anchor="middle" x="1271" y="-380.994" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = &lt;constant:&lt;Magic&gt;&gt;$11.&lt;build&#45;hash&gt;(hashTemp$4, hashTemp$5, hashTemp$7, hashTemp$8) : AppliedType {</text>
 <text text-anchor="middle" x="1271" y="-365.994" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;klass = ::&lt;constant:Hash&gt;</text>
 <text text-anchor="middle" x="1271" y="-350.994" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;targs = [</text>
-<text text-anchor="middle" x="1271" y="-335.994" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;0 = untyped</text>
-<text text-anchor="middle" x="1271" y="-320.994" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;0 = untyped</text>
+<text text-anchor="middle" x="1271" y="-335.994" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&lt;constant:Key&gt; = untyped</text>
+<text text-anchor="middle" x="1271" y="-320.994" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&lt;constant:Value&gt; = untyped</text>
 <text text-anchor="middle" x="1271" y="-305.994" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;]</text>
 <text text-anchor="middle" x="1271" y="-290.994" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="1271" y="-275.994" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return returnMethodTemp$2 : &lt;bottom&gt;</text>
@@ -139,4 +139,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 29daf27aa865446411779ff4e278bb55ecfe281850473fd11b6d964ed38a7a66 -->
+<!-- ruby-types:sha256: d1b3f0e19c0806fe8291c786c26964140bf159c762fc9d1862c6fbafe0569346 -->

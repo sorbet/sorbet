@@ -968,7 +968,7 @@ statTemp$82 = <block-nested: line>.[](statTemp$84) : untyped
 blockReturnTemp$35 = <block-nested: added_lines>.<<(statTemp$82) : AppliedType {
   klass = ::<constant:Array>
   targs = [
-    0 = untyped
+    <constant:Elem> = untyped
   ]
 }
 <unconditional>"];
@@ -992,7 +992,7 @@ statTemp$92 = <block-nested: line>.[](statTemp$94) : untyped
 blockReturnTemp$35 = <block-nested: removed_lines>.<<(statTemp$92) : AppliedType {
   klass = ::<constant:Array>
   targs = [
-    0 = untyped
+    <constant:Elem> = untyped
   ]
 }
 <unconditional>"];

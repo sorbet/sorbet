@@ -27,14 +27,14 @@ class <constant:<root>> () -> <class:<root>>
       argument f<> -> AppliedType {
         klass = ::<constant:Array>
         targs = [
-          0 = T1
+          <constant:Elem> = T1
         ]
       }
       argument g<> -> AppliedType {
         klass = ::<constant:Hash>
         targs = [
-          0 = T1
-          0 = T2
+          <constant:Key> = T1
+          <constant:Value> = T2
         ]
       }
       argument h<> -> FalseClass | Integer | Float | String | Symbol

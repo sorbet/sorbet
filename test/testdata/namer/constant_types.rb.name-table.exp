@@ -7,13 +7,13 @@ class <constant:<root>> () -> <class:<root>>
     static-field <constant:E> -> AppliedType {
       klass = ::<constant:Array>
       targs = [
-        0 = Integer
+        <constant:Elem> = Integer
       ]
     }
     static-field <constant:F> -> AppliedType {
       klass = ::<constant:Array>
       targs = [
-        0 = String
+        <constant:Elem> = String
       ]
     }
   class <singleton class:<constant:Constants>> < ::<constant:Module> ()

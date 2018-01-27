@@ -80,7 +80,7 @@
 <text text-anchor="middle" x="752" y="-330.4163" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$3 = statTemp$5.map() : AppliedType {</text>
 <text text-anchor="middle" x="752" y="-315.4163" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;klass = ::&lt;constant:Array&gt;</text>
 <text text-anchor="middle" x="752" y="-300.4163" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;targs = [</text>
-<text text-anchor="middle" x="752" y="-285.4163" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;0 = untyped</text>
+<text text-anchor="middle" x="752" y="-285.4163" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;&#160;&#160;&lt;constant:Elem&gt; = untyped</text>
 <text text-anchor="middle" x="752" y="-270.4163" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;]</text>
 <text text-anchor="middle" x="752" y="-255.4163" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="752" y="-240.4163" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return returnMethodTemp$3 : &lt;bottom&gt;</text>
@@ -106,4 +106,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 70152228837943e0c7bc8f53f80bb207240a361dc816f58a0e6150e11ea87fb2 -->
+<!-- ruby-types:sha256: f8ea0389f9553f1e6927e4aceb5f5c9f84149e09c9d1aee2dfb108367d8ce3ad -->
