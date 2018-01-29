@@ -206,7 +206,9 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         } catch (FileNotFoundException e) {
                             console->error("File Not Found: {}", fileName);
                             returnCode = 11;
-                            continue;
+                            // continue with an empty source, because the
+                            // assertion below requires every input file to map
+                            // to one output tree
                         }
                         counterAdd("types.input.bytes", src.size());
                         counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
