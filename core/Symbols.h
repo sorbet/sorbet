@@ -184,7 +184,7 @@ public:
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
 
-    /** Type alisases are introduced by resolver and SHOULD NOT be seriazlied */
+    /** Type aliases are introduced by resolver and SHOULD NOT be serialized */
     std::vector<std::pair<SymbolRef, SymbolRef>> typeAliases;
     SymbolRef superClass;
     std::shared_ptr<Type> resultType;
@@ -221,6 +221,11 @@ public:
         ENFORCE(isClass());
         return typeParams;
     }
+
+    // Return the number of type parameters that must be passed to instantiate
+    // this generic type. May differ from typeMembers.size() if some type
+    // members have fixed values.
+    int typeArity(const GlobalState &gs) const;
 
     inline std::vector<SymbolRef> &typeArguments() {
         ENFORCE(isMethod());

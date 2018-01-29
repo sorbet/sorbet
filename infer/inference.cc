@@ -863,6 +863,13 @@ public:
                         for (auto arg : args) {
                             targs.emplace_back(unwrapConstructor(ctx, arg.origins[0], arg.type));
                         }
+                        auto arity = attached.info(ctx).typeArity(ctx);
+                        if (targs.size() != arity) {
+                            ctx.state.error(bind.loc, core::errors::Infer::GenericArgumentCountMismatch,
+                                            "Wrong number of type parameters for {}. Expected {}, got {}",
+                                            attached.info(ctx).fullName(ctx), arity, targs.size());
+                            targs.resize(arity, core::Types::dynamic());
+                        }
                         tp.type = make_shared<core::TypeConstructor>(attached, targs);
                     } else if (send->fun == core::Names::super()) {
                         // TODO
@@ -1003,6 +1010,7 @@ public:
                 });
 
             ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: ", bind.value->toString(ctx));
+            tp.type->sanityCheck(ctx);
             ENFORCE(tp.type->isFullyDefined(), "Inferencer did not assign a fully defined type");
             ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 

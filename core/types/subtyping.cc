@@ -993,7 +993,10 @@ std::string TypeConstructor::typeName() {
     return "TypeConstructor";
 }
 
-void TypeConstructor::_sanityCheck(const core::Context ctx) {}
+void TypeConstructor::_sanityCheck(const core::Context ctx) {
+    ENFORCE(this->protoType.info(ctx).isClass());
+    ENFORCE(this->targs.empty() || this->protoType.info(ctx).typeArity(ctx) == this->targs.size());
+}
 
 bool TypeConstructor::isFullyDefined() {
     return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.

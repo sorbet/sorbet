@@ -387,6 +387,17 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     return result;
 }
 
+int Symbol::typeArity(const GlobalState &gs) const {
+    ENFORCE(this->isClass());
+    int arity = 0;
+    for (auto &ty : this->typeMembers()) {
+        if (!ty.info(gs).isAlias()) {
+            ++arity;
+        }
+    }
+    return arity;
+}
+
 void Symbol::sanityCheck(const GlobalState &gs) const {
     if (!debug_mode) {
         return;
