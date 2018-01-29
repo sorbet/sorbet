@@ -460,11 +460,12 @@ LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
         // currently we use lower bits of owner id
         // this is fine until method has more than 64k blocks + nested methods + nested classes
         constexpr u2 rangeSize = (256 * 256 - 1);
-        name = freshNameUnique(UniqueNameKind::NestedScope, name, 1 + owner._id % rangeSize);
+        LocalVariable ret(name, 1 + owner._id % rangeSize);
         ENFORCE(owner._id - Context(*this, owner).enclosingMethod()._id < rangeSize);
         // check that did not overflow
+        return ret;
     }
-    LocalVariable r(name);
+    LocalVariable r(name, 0);
     return r;
 }
 
@@ -758,13 +759,13 @@ FileRef GlobalState::enterFileAt(std::shared_ptr<File> file, int id) {
     }
 }
 
-LocalVariable GlobalState::newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner) {
+LocalVariable GlobalState::newTemporary(NameRef name, SymbolRef owner) {
     Symbol &info = owner.info(*this);
     ENFORCE(info.isMethod(), "entering temporary outside of a method");
     int id = ++(info.uniqueCounter);
-    NameRef tempName = this->freshNameUnique(kind, name, id);
 
-    return this->enterLocalSymbol(owner, tempName);
+    LocalVariable ret(name, id);
+    return ret;
 }
 
 unsigned int GlobalState::symbolsUsed() {

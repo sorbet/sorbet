@@ -54,7 +54,7 @@ public:
     SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
     LocalVariable enterLocalSymbol(SymbolRef owner, NameRef name);
 
-    LocalVariable newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
+    LocalVariable newTemporary(NameRef name, SymbolRef owner);
 
     NameRef enterNameUTF8(absl::string_view nm);
 

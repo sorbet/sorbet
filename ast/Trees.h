@@ -15,9 +15,9 @@ class Expression {
 public:
     Expression(core::Loc loc);
     virtual ~Expression() = default;
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0) = 0;
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0) = 0;
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
     core::Loc loc;
 };
 
@@ -72,8 +72,8 @@ public:
     ClassDef(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<Expression> name, ANCESTORS_store ancestors,
              RHS_store rhs, ClassDefKind kind);
 
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
 
     virtual std::string nodeName();
 };
@@ -91,8 +91,8 @@ public:
 
     MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
               std::unique_ptr<Expression> rhs, bool isSelf);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -101,8 +101,8 @@ public:
     std::unique_ptr<Expression> rhs;
 
     ConstDef(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<Expression> rhs);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -113,8 +113,8 @@ public:
     std::unique_ptr<Expression> elsep;
     If(core::Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp,
        std::unique_ptr<Expression> elsep);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -124,8 +124,8 @@ public:
     std::unique_ptr<Expression> body;
 
     While(core::Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> body);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -134,16 +134,16 @@ public:
     std::unique_ptr<Expression> expr;
 
     Break(core::Loc loc, std::unique_ptr<Expression> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
 class Retry final : public Expression {
 public:
     Retry(core::Loc loc);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -152,8 +152,8 @@ public:
     std::unique_ptr<Expression> expr;
 
     Next(core::Loc loc, std::unique_ptr<Expression> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -162,8 +162,8 @@ public:
     std::unique_ptr<Expression> expr;
 
     Return(core::Loc loc, std::unique_ptr<Expression> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -172,8 +172,8 @@ public:
     std::unique_ptr<Expression> expr;
 
     Yield(core::Loc loc, std::unique_ptr<Expression> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -191,8 +191,8 @@ public:
 
     RescueCase(core::Loc loc, EXCEPTION_store exceptions, std::unique_ptr<Expression> var,
                std::unique_ptr<Expression> body);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -208,8 +208,8 @@ public:
 
     Rescue(core::Loc loc, std::unique_ptr<Expression> body, RESCUE_CASE_store rescueCases,
            std::unique_ptr<Expression> else_, std::unique_ptr<Expression> ensure);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -218,8 +218,8 @@ public:
     core::SymbolRef symbol;
 
     Ident(core::Loc loc, core::SymbolRef symbol);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -228,8 +228,8 @@ public:
     core::LocalVariable localVariable;
 
     Local(core::Loc loc, core::LocalVariable localVariable1);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -245,8 +245,8 @@ public:
     core::NameRef name;
 
     UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -255,8 +255,8 @@ public:
     std::unique_ptr<Reference> expr;
 
     RestArg(core::Loc loc, std::unique_ptr<Reference> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -265,8 +265,8 @@ public:
     std::unique_ptr<Reference> expr;
 
     KeywordArg(core::Loc loc, std::unique_ptr<Reference> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -276,8 +276,8 @@ public:
     std::unique_ptr<Expression> default_;
 
     OptionalArg(core::Loc loc, std::unique_ptr<Reference> expr, std::unique_ptr<Expression> default_);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -286,8 +286,8 @@ public:
     std::unique_ptr<Reference> expr;
 
     BlockArg(core::Loc loc, std::unique_ptr<Reference> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -296,8 +296,8 @@ public:
     std::unique_ptr<Reference> expr;
 
     ShadowArg(core::Loc loc, std::unique_ptr<Reference> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -307,8 +307,8 @@ public:
 
     SymbolLit(core::Loc loc, core::NameRef name);
 
-    virtual std::string toString(core::GlobalState &gs, int tabs);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -318,8 +318,8 @@ public:
     std::unique_ptr<Expression> rhs;
 
     Assign(core::Loc loc, std::unique_ptr<Expression> lhs, std::unique_ptr<Expression> rhs);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -342,8 +342,8 @@ public:
 
     Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
          std::unique_ptr<Block> block = nullptr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -354,8 +354,8 @@ public:
     bool assertType;
 
     Cast(core::Loc loc, std::shared_ptr<core::Type> type, std::unique_ptr<Expression> arg, bool assertType);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -369,8 +369,8 @@ public:
 
     Hash(core::Loc loc, ENTRY_store keys, ENTRY_store values);
 
-    virtual std::string toString(core::GlobalState &gs, int tabs);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -383,8 +383,8 @@ public:
 
     Array(core::Loc loc, ENTRY_store elems);
 
-    virtual std::string toString(core::GlobalState &gs, int tabs);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -393,8 +393,8 @@ public:
     double value;
 
     FloatLit(core::Loc loc, double value);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -403,8 +403,8 @@ public:
     int64_t value;
 
     IntLit(core::Loc loc, int64_t value);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -413,8 +413,8 @@ public:
     core::NameRef value;
 
     StringLit(core::Loc loc, core::NameRef value);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -423,8 +423,8 @@ public:
     bool value;
 
     BoolLit(core::Loc loc, bool value);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -434,8 +434,8 @@ public:
     std::unique_ptr<Expression> scope;
 
     ConstantLit(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef cnst);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -444,8 +444,8 @@ public:
     std::unique_ptr<Expression> arg;
 
     ArraySplat(core::Loc loc, std::unique_ptr<Expression> arg);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -454,8 +454,8 @@ public:
     std::unique_ptr<Expression> arg;
 
     HashSplat(core::Loc loc, std::unique_ptr<Expression> arg);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -464,8 +464,8 @@ public:
     // null if no block passed
     ZSuperArgs(core::Loc loc);
 
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -474,8 +474,8 @@ public:
     core::SymbolRef claz;
 
     Self(core::Loc loc, core::SymbolRef claz);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -486,8 +486,8 @@ public:
     core::SymbolRef symbol;
 
     Block(core::Loc loc, MethodDef::ARGS_store args, std::unique_ptr<Expression> body);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
@@ -500,16 +500,16 @@ public:
     std::unique_ptr<Expression> expr;
 
     InsSeq(core::Loc loc, STATS_store stats, std::unique_ptr<Expression> expr);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 
 class EmptyTree final : public Expression {
 public:
     EmptyTree(core::Loc loc);
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(core::GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
 };
 

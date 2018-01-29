@@ -51,7 +51,7 @@ a = s : String(\"s\")
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_1" -> "bb::<constant:HasLoops>#incorrect_assignment_1" [style="bold"];
-    "bb::<constant:HasLoops>#incorrect_assignment_2" [label = "block[id=2](a, <constant:nil>$7)
+    "bb::<constant:HasLoops>#incorrect_assignment_2" [label = "block[id=2](<constant:nil>$7, a)
 outerLoops: 1
 whileTemp$5 = false : FalseClass(false)
 whileTemp$5"];
@@ -59,7 +59,7 @@ whileTemp$5"];
     "bb::<constant:HasLoops>#incorrect_assignment_2" -> "bb::<constant:HasLoops>#incorrect_assignment_3" [style="bold"];
     "bb::<constant:HasLoops>#incorrect_assignment_2" -> "bb::<constant:HasLoops>#incorrect_assignment_4" [style="tapered"];
 
-    "bb::<constant:HasLoops>#incorrect_assignment_3" [label = "block[id=3](a, <constant:nil>$7)
+    "bb::<constant:HasLoops>#incorrect_assignment_3" [label = "block[id=3](<constant:nil>$7, a)
 outerLoops: 1
 a = 1 : untyped
 <unconditional>"];
@@ -88,7 +88,7 @@ a = s : String(\"s\")
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_1" -> "bb::<constant:HasLoops>#correct_assignment_1" [style="bold"];
-    "bb::<constant:HasLoops>#correct_assignment_2" [label = "block[id=2](a, <constant:nil>$7)
+    "bb::<constant:HasLoops>#correct_assignment_2" [label = "block[id=2](<constant:nil>$7, a)
 outerLoops: 1
 whileTemp$5 = false : FalseClass(false)
 whileTemp$5"];
@@ -96,7 +96,7 @@ whileTemp$5"];
     "bb::<constant:HasLoops>#correct_assignment_2" -> "bb::<constant:HasLoops>#correct_assignment_3" [style="bold"];
     "bb::<constant:HasLoops>#correct_assignment_2" -> "bb::<constant:HasLoops>#correct_assignment_4" [style="tapered"];
 
-    "bb::<constant:HasLoops>#correct_assignment_3" [label = "block[id=3](a, <constant:nil>$7)
+    "bb::<constant:HasLoops>#correct_assignment_3" [label = "block[id=3](<constant:nil>$7, a)
 outerLoops: 1
 a = a : String(\"a\")
 <unconditional>"];

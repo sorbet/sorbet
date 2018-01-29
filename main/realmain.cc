@@ -312,7 +312,6 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
         {
             tracer->trace("CFG+Infer: {}", f.file(gs).path());
             core::ErrorRegion errs(gs, silenceErrors);
-            core::UnfreezeNameTable nameTableAccess(gs); // creates names for temporaries in CFG
             result = ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved));
         }
         if (opts.print.TypedSource) {

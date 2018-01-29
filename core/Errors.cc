@@ -8,7 +8,7 @@ namespace core {
 
 using namespace std;
 
-string BasicError::filePosToString(GlobalState &gs, Loc loc) {
+string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
     stringstream buf;
     if (loc.is_none()) {
         buf << "???:";
@@ -24,7 +24,7 @@ string BasicError::filePosToString(GlobalState &gs, Loc loc) {
     return buf.str();
 }
 
-string BasicError::toString(GlobalState &gs) {
+string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
     buf << filePosToString(gs, loc) << " " << formatted << " [" << what.code << "]" << endl;
     if (!loc.is_none()) {
@@ -33,7 +33,7 @@ string BasicError::toString(GlobalState &gs) {
     return buf.str();
 }
 
-string ErrorLine::toString(GlobalState &gs) {
+string ErrorLine::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
     buf << indent << BasicError::filePosToString(gs, loc) << " " << formattedMessage << endl;
@@ -43,7 +43,7 @@ string ErrorLine::toString(GlobalState &gs) {
     return buf.str();
 }
 
-string ErrorSection::toString(GlobalState &gs) {
+string ErrorSection::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
     if (!this->header.empty()) {
@@ -55,7 +55,7 @@ string ErrorSection::toString(GlobalState &gs) {
     return buf.str();
 }
 
-string ComplexError::toString(GlobalState &gs) {
+string ComplexError::toString(const GlobalState &gs) {
     stringstream buf;
     buf << BasicError::toString(gs) << endl;
 

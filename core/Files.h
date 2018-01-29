@@ -40,6 +40,7 @@ public:
         return _id > 0;
     }
 
+    const File &file(const GlobalState &gs) const;
     File &file(GlobalState &gs) const;
 
 private:

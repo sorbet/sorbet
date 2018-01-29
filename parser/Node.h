@@ -20,13 +20,13 @@ public:
         ENFORCE(!loc.is_none(), "Location of parser node is none");
     }
     virtual ~Node() = default;
-    virtual std::string toString(core::GlobalState &gs, int tabs = 0) = 0;
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     Loc loc;
 
 protected:
     void printTabs(std::stringstream &to, int count);
-    void printNode(std::stringstream &to, unique_ptr<Node> &node, core::GlobalState &gs, int tabs);
+    void printNode(std::stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
 };
 
 template <class To> To *cast_node(Node *what) {

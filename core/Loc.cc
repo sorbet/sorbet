@@ -21,10 +21,10 @@ Loc Loc::join(Loc other) {
     return Loc{this->file, min(this->begin_pos, other.begin_pos), max(this->end_pos, other.end_pos)};
 }
 
-Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs) {
+Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalState &gs) {
     Loc::Detail pos;
 
-    core::File &file = source.file(gs);
+    const core::File &file = source.file(gs);
     ENFORCE(off <= file.source().size(), "file offset out of bounds");
     auto it = std::lower_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
     if (it == file.line_breaks.begin()) {
@@ -38,7 +38,7 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs)
     return pos;
 }
 
-pair<Loc::Detail, Loc::Detail> Loc::position(core::GlobalState &gs) {
+pair<Loc::Detail, Loc::Detail> Loc::position(const core::GlobalState &gs) {
     Loc::Detail begin(offset2Pos(this->file, begin_pos, gs));
     Loc::Detail end(offset2Pos(this->file, end_pos, gs));
     return make_pair(begin, end);
@@ -52,7 +52,7 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
-string Loc::toString(core::GlobalState &gs, int tabs) {
+string Loc::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     absl::string_view source = this->file.file(gs).source();
     auto pos = this->position(gs);

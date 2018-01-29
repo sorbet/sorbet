@@ -38,7 +38,7 @@ CFG::CFG() {
     freshBlock(0, nullptr); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
-    deadBlock()->bexit.cond = core::NameRef::noName();
+    deadBlock()->bexit.cond = core::LocalVariable::noVariable();
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
@@ -98,15 +98,14 @@ void CFG::sanityCheck(core::Context ctx) {
     // check that synthetic variable that is read is ever written to.
     ReadsAndWrites RnW = CFG::findAllReadsAndWrites(ctx);
     for (auto &el : RnW.reads) {
-        core::Name &nm = el.first.name.name(ctx);
-        if (nm.kind != core::NameKind::UNIQUE || nm.unique.uniqueNameKind != core::UniqueNameKind::CFG) {
+        if (!el.first.isSyntheticTemporary(ctx)) {
             continue;
         }
         //        ENFORCE(writes.find(el.first) != writes.end());
     }
 }
 
-string CFG::toString(core::Context ctx) {
+string CFG::toString(const core::Context ctx) {
     stringstream buf;
     string symbolName = this->symbol.info(ctx).fullName(ctx);
     buf << "subgraph \"cluster_" << symbolName << "\" {" << endl;
@@ -140,7 +139,7 @@ string CFG::toString(core::Context ctx) {
     return buf.str();
 }
 
-string BasicBlock::toString(core::Context ctx) {
+string BasicBlock::toString(const core::Context ctx) {
     stringstream buf;
     buf << "block[id=" << this->id << "](";
     bool first = true;
@@ -149,7 +148,7 @@ string BasicBlock::toString(core::Context ctx) {
             buf << ", ";
         }
         first = false;
-        buf << arg.name.name(ctx).toString(ctx);
+        buf << arg.toString(ctx);
     }
     buf << ")" << endl;
     if (this->outerLoops > 0) {
@@ -160,14 +159,14 @@ string BasicBlock::toString(core::Context ctx) {
             buf << exp.value->toString(ctx);
             continue;
         }
-        buf << exp.bind.name.name(ctx).toString(ctx) << " = " << exp.value->toString(ctx);
+        buf << exp.bind.toString(ctx) << " = " << exp.value->toString(ctx);
         if (exp.tpe) {
             buf << " : " << exp.tpe->toString(ctx);
         }
         buf << endl;
     }
     if (this->bexit.cond.exists()) {
-        buf << this->bexit.cond.name.name(ctx).toString(ctx);
+        buf << this->bexit.cond.toString(ctx);
     } else {
         buf << "<unconditional>";
     }

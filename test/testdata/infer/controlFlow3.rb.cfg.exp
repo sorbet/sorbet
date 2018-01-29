@@ -6,8 +6,8 @@ subgraph "cluster_::<constant:Test>#normalize_params" {
     "bb::<constant:Test>#normalize_params_1" [shape = parallelogram];
 
     "bb::<constant:Test>#normalize_params_0" [label = "block[id=0](<constant:Array>$16)
-<constant:Hash>$8 = alias <constant:Hash> : <class:Hash>
 <constant:Array>$16 = alias <constant:Array> : <class:Array>
+<constant:Hash>$8 = alias <constant:Hash> : <class:Hash>
 selfMethodTemp$4 = self : Test
 v = load_arg(selfMethodTemp$4#normalize_params, 0) : untyped
 ifTemp$5 = v.is_a?(<constant:Hash>$8) : untyped
@@ -38,7 +38,7 @@ returnMethodTemp$3 = statTemp$9.sort() : untyped
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_2" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
-    "bb::<constant:Test>#normalize_params_3" [label = "block[id=3](v, <constant:Array>$16)
+    "bb::<constant:Test>#normalize_params_3" [label = "block[id=3](<constant:Array>$16, v)
 ifTemp$13 = v.is_a?(<constant:Array>$16) : untyped
 ifTemp$13"];
 
@@ -79,9 +79,9 @@ returnMethodTemp$3 = statTemp$17.map() : AppliedType {
     "bb::<constant:Test>#normalize_params_7" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
     "bb::<constant:Test>#normalize_params_8" [label = "block[id=8](statTemp$17)
 outerLoops: 1
-<block-nested: e> = load_arg(statTemp$17#map, 0) : Proc
+e$5813 = load_arg(statTemp$17#map, 0) : Proc
 statTemp$19 = self : Test
-blockReturnTemp$18 = statTemp$19.normalize_params(<block-nested: e>) : untyped
+blockReturnTemp$18 = statTemp$19.normalize_params(e$5813) : untyped
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_8" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];

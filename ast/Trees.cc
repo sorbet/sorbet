@@ -236,7 +236,7 @@ EmptyTree::EmptyTree(core::Loc loc) : Expression(loc) {
     categoryCounterInc("trees", "emptytree");
 }
 
-template <class T> void printElems(core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
+template <class T> void printElems(const core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
     bool first = true;
     bool didshadow = false;
     for (auto &a : args) {
@@ -253,18 +253,18 @@ template <class T> void printElems(core::GlobalState &gs, stringstream &buf, T &
     }
 };
 
-template <class T> void printArgs(core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
+template <class T> void printArgs(const core::GlobalState &gs, stringstream &buf, T &args, int tabs) {
     buf << "(";
     printElems(gs, buf, args, tabs);
     buf << ")";
 }
 
-string ConstDef::toString(core::GlobalState &gs, int tabs) {
+string ConstDef::toString(const core::GlobalState &gs, int tabs) {
     return "constdef " + this->symbol.info(gs, true).name.name(gs).toString(gs) + " = " +
            this->rhs->toString(gs, tabs + 1);
 }
 
-string ConstDef::showRaw(core::GlobalState &gs, int tabs) {
+string ConstDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -274,7 +274,7 @@ string ConstDef::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string ClassDef::toString(core::GlobalState &gs, int tabs) {
+string ClassDef::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     if (kind == ClassDefKind::Module) {
         buf << "module ";
@@ -295,7 +295,7 @@ string ClassDef::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string ClassDef::showRaw(core::GlobalState &gs, int tabs) {
+string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "ClassDef{" << endl;
     printTabs(buf, tabs + 1);
@@ -330,7 +330,7 @@ string ClassDef::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string InsSeq::toString(core::GlobalState &gs, int tabs) {
+string InsSeq::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "begin" << endl;
     for (auto &a : this->stats) {
@@ -345,7 +345,7 @@ string InsSeq::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string InsSeq::showRaw(core::GlobalState &gs, int tabs) {
+string InsSeq::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -364,7 +364,7 @@ string InsSeq::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string MethodDef::toString(core::GlobalState &gs, int tabs) {
+string MethodDef::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     if (isSelf) {
@@ -401,7 +401,7 @@ string MethodDef::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string MethodDef::showRaw(core::GlobalState &gs, int tabs) {
+string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "MethodDef{" << endl;
     printTabs(buf, tabs + 1);
@@ -428,7 +428,7 @@ string MethodDef::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string If::toString(core::GlobalState &gs, int tabs) {
+string If::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "if " << this->cond->toString(gs, tabs + 1) << endl;
@@ -443,7 +443,7 @@ string If::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string If::showRaw(core::GlobalState &gs, int tabs) {
+string If::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "If{" << endl;
@@ -458,7 +458,7 @@ string If::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Assign::showRaw(core::GlobalState &gs, int tabs) {
+string Assign::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "Assign{" << endl;
@@ -471,7 +471,7 @@ string Assign::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string While::toString(core::GlobalState &gs, int tabs) {
+string While::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "while " << this->cond->toString(gs, tabs + 1) << endl;
@@ -482,7 +482,7 @@ string While::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string While::showRaw(core::GlobalState &gs, int tabs) {
+string While::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "While{" << endl;
@@ -495,23 +495,23 @@ string While::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string EmptyTree::toString(core::GlobalState &gs, int tabs) {
+string EmptyTree::toString(const core::GlobalState &gs, int tabs) {
     return "<emptyTree>";
 }
 
-string StringLit::toString(core::GlobalState &gs, int tabs) {
+string StringLit::toString(const core::GlobalState &gs, int tabs) {
     return "\"" + this->value.name(gs).toString(gs) + "\"";
 }
 
-string StringLit::showRaw(core::GlobalState &gs, int tabs) {
+string StringLit::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->value.name(gs).toString(gs) + " }";
 }
 
-string ConstantLit::toString(core::GlobalState &gs, int tabs) {
+string ConstantLit::toString(const core::GlobalState &gs, int tabs) {
     return this->scope->toString(gs, tabs) + "::" + this->cnst.name(gs).toString(gs);
 }
 
-string ConstantLit::showRaw(core::GlobalState &gs, int tabs) {
+string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
     buf << "ConstantLit{" << endl;
@@ -524,19 +524,19 @@ string ConstantLit::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Ident::toString(core::GlobalState &gs, int tabs) {
+string Ident::toString(const core::GlobalState &gs, int tabs) {
     return this->symbol.info(gs, true).fullName(gs);
 }
 
-std::string Local::toString(core::GlobalState &gs, int tabs) {
-    return this->localVariable.name.toString(gs);
+std::string Local::toString(const core::GlobalState &gs, int tabs) {
+    return this->localVariable.toString(gs);
 }
 
 std::string Local::nodeName() {
     return "Local";
 }
 
-string Ident::showRaw(core::GlobalState &gs, int tabs) {
+string Ident::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "Ident{" << endl;
     printTabs(buf, tabs + 1);
@@ -546,21 +546,21 @@ string Ident::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Local::showRaw(core::GlobalState &gs, int tabs) {
+string Local::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "Local{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "localVariable = " << this->localVariable.name.toString(gs) << endl;
+    buf << "localVariable = " << this->localVariable.toString(gs) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
 }
 
-string UnresolvedIdent::toString(core::GlobalState &gs, int tabs) {
+string UnresolvedIdent::toString(const core::GlobalState &gs, int tabs) {
     return this->name.toString(gs);
 }
 
-string UnresolvedIdent::showRaw(core::GlobalState &gs, int tabs) {
+string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "UnresolvedIdent{" << endl;
     printTabs(buf, tabs + 1);
@@ -588,55 +588,55 @@ string UnresolvedIdent::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string HashSplat::toString(core::GlobalState &gs, int tabs) {
+string HashSplat::toString(const core::GlobalState &gs, int tabs) {
     return "**" + this->arg->toString(gs, tabs + 1);
 }
 
-string ArraySplat::toString(core::GlobalState &gs, int tabs) {
+string ArraySplat::toString(const core::GlobalState &gs, int tabs) {
     return "*" + this->arg->toString(gs, tabs + 1);
 }
 
-string ArraySplat::showRaw(core::GlobalState &gs, int tabs) {
+string ArraySplat::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ arg = " + this->arg->showRaw(gs, tabs + 1) + " }";
 }
 
-string HashSplat::showRaw(core::GlobalState &gs, int tabs) {
+string HashSplat::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ arg = " + this->arg->showRaw(gs, tabs + 1) + " }";
 }
 
-string Return::showRaw(core::GlobalState &gs, int tabs) {
+string Return::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Yield::showRaw(core::GlobalState &gs, int tabs) {
+string Yield::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Next::showRaw(core::GlobalState &gs, int tabs) {
+string Next::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Break::showRaw(core::GlobalState &gs, int tabs) {
+string Break::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Retry::showRaw(core::GlobalState &gs, int tabs) {
+string Retry::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{}";
 }
 
-string Return::toString(core::GlobalState &gs, int tabs) {
+string Return::toString(const core::GlobalState &gs, int tabs) {
     return "return " + this->expr->toString(gs, tabs + 1);
 }
 
-string Yield::toString(core::GlobalState &gs, int tabs) {
+string Yield::toString(const core::GlobalState &gs, int tabs) {
     return "yield(" + this->expr->toString(gs, tabs + 1) + ")";
 }
 
-string Next::toString(core::GlobalState &gs, int tabs) {
+string Next::toString(const core::GlobalState &gs, int tabs) {
     return "next(" + this->expr->toString(gs, tabs + 1) + ")";
 }
 
-string Self::toString(core::GlobalState &gs, int tabs) {
+string Self::toString(const core::GlobalState &gs, int tabs) {
     if (this->claz.exists()) {
         return "self(" + this->claz.info(gs).name.name(gs).toString(gs) + ")";
     } else {
@@ -644,35 +644,35 @@ string Self::toString(core::GlobalState &gs, int tabs) {
     }
 }
 
-string Break::toString(core::GlobalState &gs, int tabs) {
+string Break::toString(const core::GlobalState &gs, int tabs) {
     return "break(" + this->expr->toString(gs, tabs + 1) + ")";
 }
 
-string Retry::toString(core::GlobalState &gs, int tabs) {
+string Retry::toString(const core::GlobalState &gs, int tabs) {
     return "retry";
 }
 
-string IntLit::toString(core::GlobalState &gs, int tabs) {
+string IntLit::toString(const core::GlobalState &gs, int tabs) {
     return to_string(this->value);
 }
 
-string IntLit::showRaw(core::GlobalState &gs, int tabs) {
+string IntLit::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
 }
 
-string FloatLit::showRaw(core::GlobalState &gs, int tabs) {
+string FloatLit::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
 }
 
-string BoolLit::showRaw(core::GlobalState &gs, int tabs) {
+string BoolLit::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
 }
 
-string FloatLit::toString(core::GlobalState &gs, int tabs) {
+string FloatLit::toString(const core::GlobalState &gs, int tabs) {
     return to_string(this->value);
 }
 
-string BoolLit::toString(core::GlobalState &gs, int tabs) {
+string BoolLit::toString(const core::GlobalState &gs, int tabs) {
     if (this->value) {
         return "true";
     } else {
@@ -680,11 +680,11 @@ string BoolLit::toString(core::GlobalState &gs, int tabs) {
     }
 }
 
-string Assign::toString(core::GlobalState &gs, int tabs) {
+string Assign::toString(const core::GlobalState &gs, int tabs) {
     return this->lhs->toString(gs, tabs) + " = " + this->rhs->toString(gs, tabs);
 }
 
-string RescueCase::toString(core::GlobalState &gs, int tabs) {
+string RescueCase::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "rescue";
     bool first = true;
@@ -704,7 +704,7 @@ string RescueCase::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string RescueCase::showRaw(core::GlobalState &gs, int tabs) {
+string RescueCase::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -724,7 +724,7 @@ string RescueCase::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Rescue::toString(core::GlobalState &gs, int tabs) {
+string Rescue::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << this->body->toString(gs, tabs);
     for (auto &rescueCase : this->rescueCases) {
@@ -749,7 +749,7 @@ string Rescue::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Rescue::showRaw(core::GlobalState &gs, int tabs) {
+string Rescue::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -771,7 +771,7 @@ string Rescue::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Send::toString(core::GlobalState &gs, int tabs) {
+string Send::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << this->recv->toString(gs, tabs) << "." << this->fun.name(gs).toString(gs);
     printArgs(gs, buf, this->args, tabs);
@@ -782,7 +782,7 @@ string Send::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Send::showRaw(core::GlobalState &gs, int tabs) {
+string Send::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -810,7 +810,7 @@ string Send::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Cast::toString(core::GlobalState &gs, int tabs) {
+string Cast::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     if (this->assertType) {
         buf << "T.assert_type!";
@@ -822,7 +822,7 @@ string Cast::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Cast::showRaw(core::GlobalState &gs, int tabs) {
+string Cast::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 2);
@@ -837,11 +837,11 @@ string Cast::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string ZSuperArgs::showRaw(core::GlobalState &gs, int tabs) {
+string ZSuperArgs::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ }";
 }
 
-string Hash::showRaw(core::GlobalState &gs, int tabs) {
+string Hash::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -868,7 +868,7 @@ string Hash::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Array::showRaw(core::GlobalState &gs, int tabs) {
+string Array::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 1);
@@ -885,11 +885,11 @@ string Array::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string ZSuperArgs::toString(core::GlobalState &gs, int tabs) {
+string ZSuperArgs::toString(const core::GlobalState &gs, int tabs) {
     return "ZSuperArgs";
 }
 
-string Hash::toString(core::GlobalState &gs, int tabs) {
+string Hash::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "{";
     bool first = true;
@@ -909,7 +909,7 @@ string Hash::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Array::toString(core::GlobalState &gs, int tabs) {
+string Array::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "[";
     printElems(gs, buf, this->elems, tabs);
@@ -917,7 +917,7 @@ string Array::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Block::toString(core::GlobalState &gs, int tabs) {
+string Block::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << " do |";
     printElems(gs, buf, this->args, tabs + 1);
@@ -929,7 +929,7 @@ string Block::toString(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string Block::showRaw(core::GlobalState &gs, int tabs) {
+string Block::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "Block {" << endl;
     printTabs(buf, tabs + 1);
@@ -947,31 +947,31 @@ string Block::showRaw(core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string SymbolLit::toString(core::GlobalState &gs, int tabs) {
+string SymbolLit::toString(const core::GlobalState &gs, int tabs) {
     return ":" + this->name.name(gs).toString(gs);
 }
 
-string SymbolLit::showRaw(core::GlobalState &gs, int tabs) {
+string SymbolLit::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ name = " + this->name.name(gs).toString(gs) + " }";
 }
 
-string RestArg::toString(core::GlobalState &gs, int tabs) {
+string RestArg::toString(const core::GlobalState &gs, int tabs) {
     return "*" + this->expr->toString(gs, tabs);
 }
 
-string KeywordArg::toString(core::GlobalState &gs, int tabs) {
+string KeywordArg::toString(const core::GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs) + ":";
 }
 
-string OptionalArg::toString(core::GlobalState &gs, int tabs) {
+string OptionalArg::toString(const core::GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs) + " = " + this->default_->toString(gs, tabs);
 }
 
-string ShadowArg::toString(core::GlobalState &gs, int tabs) {
+string ShadowArg::toString(const core::GlobalState &gs, int tabs) {
     return this->expr->toString(gs, tabs);
 }
 
-string BlockArg::toString(core::GlobalState &gs, int tabs) {
+string BlockArg::toString(const core::GlobalState &gs, int tabs) {
     return "&" + this->expr->toString(gs, tabs);
 }
 
@@ -1091,11 +1091,11 @@ string EmptyTree::nodeName() {
     return "EmptyTree";
 }
 
-string EmptyTree::showRaw(core::GlobalState &gs, int tabs) {
+string EmptyTree::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName();
 }
 
-string RestArg::showRaw(core::GlobalState &gs, int tabs) {
+string RestArg::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
@@ -1103,10 +1103,10 @@ string RestArg::nodeName() {
     return "RestArg";
 }
 
-string Self::showRaw(core::GlobalState &gs, int tabs) {
+string Self::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ claz = " + this->claz.info(gs).fullName(gs) + " }";
 }
-string KeywordArg::showRaw(core::GlobalState &gs, int tabs) {
+string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
@@ -1114,7 +1114,7 @@ string KeywordArg::nodeName() {
     return "KeywordArg";
 }
 
-string OptionalArg::showRaw(core::GlobalState &gs, int tabs) {
+string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
@@ -1122,11 +1122,11 @@ string OptionalArg::nodeName() {
     return "OptionalArg";
 }
 
-string ShadowArg::showRaw(core::GlobalState &gs, int tabs) {
+string ShadowArg::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 
-string BlockArg::showRaw(core::GlobalState &gs, int tabs) {
+string BlockArg::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
 }
 

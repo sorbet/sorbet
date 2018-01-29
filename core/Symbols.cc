@@ -46,7 +46,7 @@ std::shared_ptr<core::Type> Symbol::selfType(GlobalState &gs) {
     }
 }
 
-bool Symbol::derivesFrom(GlobalState &gs, SymbolRef sym) {
+bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
     // TODO: add baseClassSet
     for (SymbolRef a : argumentsOrMixins) {
         if (a == sym || a.info(gs).derivesFrom(gs, sym)) {
@@ -73,11 +73,20 @@ Symbol &SymbolRef::info(GlobalState &gs, bool allowNone) const {
     return gs.symbols[this->_id];
 }
 
+const Symbol &SymbolRef::info(const GlobalState &gs, bool allowNone) const {
+    ENFORCE(_id < gs.symbols.size());
+    if (!allowNone) {
+        ENFORCE(this->exists());
+    }
+
+    return gs.symbols[this->_id];
+}
+
 bool SymbolRef::isSynthetic() const {
     return this->_id < GlobalState::MAX_SYNTHETIC_SYMBOLS;
 }
 
-bool SymbolRef::isHiddenFromPrinting(GlobalState &gs) const {
+bool SymbolRef::isHiddenFromPrinting(const GlobalState &gs) const {
     if (isSynthetic()) {
         return true;
     }
@@ -93,9 +102,9 @@ void printTabs(ostringstream &to, int count) {
     }
 }
 
-string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
+string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) const {
     ostringstream os;
-    Symbol &myInfo = info(gs, true);
+    const Symbol &myInfo = info(gs, true);
     string name = myInfo.name.toString(gs);
     auto &members = myInfo.members;
 
@@ -211,7 +220,7 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
         os << ">";
     }
     if (myInfo.resultType) {
-        os << " -> " << myInfo.resultType->toString(Context(gs, gs.defn_root()), tabs);
+        os << " -> " << myInfo.resultType->toString(gs, tabs);
     }
     os << endl;
 
@@ -225,7 +234,7 @@ string SymbolRef::toString(GlobalState &gs, int tabs, bool showHidden) const {
 SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {}
 SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {}
 
-SymbolRef Symbol::findMember(GlobalState &gs, NameRef name) {
+SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
     histogramInc("find_member_scope_size", members.size());
     for (auto &member : members) {
         if (member.first == name) {
@@ -235,7 +244,7 @@ SymbolRef Symbol::findMember(GlobalState &gs, NameRef name) {
     return GlobalState::noSymbol();
 }
 
-SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDepth) {
+SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int maxDepth) const {
     ENFORCE(this->isClass());
     if (maxDepth == 0) {
         gs.logger.critical("findMemberTransitive hit a loop while resolving {} in {}. Parents are: ", name.toString(gs),
@@ -272,7 +281,7 @@ SymbolRef Symbol::findMemberTransitive(GlobalState &gs, NameRef name, int maxDep
     return GlobalState::noSymbol();
 }
 
-string Symbol::fullName(GlobalState &gs) const {
+string Symbol::fullName(const GlobalState &gs) const {
     string owner_str;
     if (this->owner.exists() && this->owner != gs.defn_root()) {
         owner_str = this->owner.info(gs).fullName(gs);
@@ -312,7 +321,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     return singleton;
 }
 
-SymbolRef Symbol::attachedClass(GlobalState &gs) {
+SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
     ENFORCE(this->isClass());
     if (this->ref(gs) == GlobalState::defn_untyped()) {
         return GlobalState::defn_untyped();
@@ -322,7 +331,7 @@ SymbolRef Symbol::attachedClass(GlobalState &gs) {
     return singleton;
 }
 
-SymbolRef Symbol::dealias(GlobalState &gs) {
+SymbolRef Symbol::dealias(const GlobalState &gs) const {
     if (auto alias = cast_type<AliasType>(resultType.get())) {
         return alias->symbol.info(gs).dealias(gs);
     }
@@ -390,26 +399,42 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
 }
 
-LocalVariable::LocalVariable(NameRef name) : name(name) {}
-LocalVariable::LocalVariable() : name() {}
-bool LocalVariable::exists() {
-    return name._id > 0;
+LocalVariable::LocalVariable(NameRef name, u4 unique) : _name(name), unique(unique) {}
+LocalVariable::LocalVariable() : _name() {}
+bool LocalVariable::exists() const {
+    return _name._id > 0;
 }
 
 bool LocalVariable::isSyntheticTemporary(GlobalState &gs) const {
-    return name.name(gs).kind == NameKind::UNIQUE;
+    if (_name.name(gs).kind == NameKind::UNIQUE)
+        return true;
+    if (unique == 0) {
+        return false;
+    }
+    return _name == core::Names::whileTemp() || _name == core::Names::ifTemp() || _name == core::Names::returnTemp() ||
+           _name == core::Names::statTemp() || _name == core::Names::assignTemp() ||
+           _name == core::Names::returnMethodTemp() || _name == core::Names::blockReturnTemp() ||
+           _name == core::Names::selfMethodTemp() || _name == core::Names::hashTemp() ||
+           _name == core::Names::arrayTemp() || _name == core::Names::rescueTemp() ||
+           _name == core::Names::castTemp() || _name == core::Names::finalReturn();
 }
 
 bool LocalVariable::isAliasForGlobal(GlobalState &gs) const {
-    return name.name(gs).kind == NameKind::UNIQUE && name.name(gs).unique.uniqueNameKind == UniqueNameKind::CFGAlias;
+    return _name == core::Names::cfgAlias();
 }
 
 bool LocalVariable::operator==(const LocalVariable &rhs) const {
-    return this->name == rhs.name;
+    return this->_name == rhs._name && this->unique == rhs.unique;
 }
 
 bool LocalVariable::operator!=(const LocalVariable &rhs) const {
-    return this->name != rhs.name;
+    return !this->operator==(rhs);
+}
+std::string LocalVariable::toString(const core::GlobalState &gs) const {
+    if (unique == 0) {
+        return this->_name.toString(gs);
+    }
+    return this->_name.toString(gs) + "$" + std::to_string(this->unique);
 }
 
 } // namespace core

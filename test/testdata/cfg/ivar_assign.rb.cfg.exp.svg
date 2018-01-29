@@ -19,10 +19,10 @@
 <title>bb::&lt;constant:TestIVar&gt;#test_0</title>
 <polygon fill="none" stroke="#000000" points="15.6245,-179.5901 274,-124.089 532.3755,-179.5901 532.1344,-269.3928 15.8656,-269.3928 15.6245,-179.5901"/>
 <text text-anchor="middle" x="274" y="-235.2109" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="274" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@foo$4 = alias @foo : Integer</text>
-<text text-anchor="middle" x="274" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:nil&gt;$5 = alias &lt;constant:nil&gt; : NilClass</text>
+<text text-anchor="middle" x="274" y="-221.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:nil&gt;$5 = alias &lt;constant:nil&gt; : NilClass</text>
+<text text-anchor="middle" x="274" y="-207.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@foo$4 = alias @foo : Integer</text>
 <text text-anchor="middle" x="274" y="-193.2109" font-family="Times,serif" font-size="14.00" fill="#000000">@foo$4 = &lt;constant:nil&gt;$5 : untyped</text>
-<text text-anchor="middle" x="274" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return &lt;constant:nil&gt;$5 : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="274" y="-179.2109" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return @foo$4 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="274" y="-165.2109" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:TestIVar&gt;#test_1 -->
@@ -46,4 +46,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 410fc32df8d152d2345adeb96ecb3a4fdde8c36822eeb3c489017cdd0285c2ff -->
+<!-- ruby-types:sha256: 5029fff9dfd82a1436629a72669bcbc83cec5e01ed0c19aef52ad3b41d6888ae -->

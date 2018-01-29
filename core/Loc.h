@@ -34,13 +34,13 @@ public:
         u4 line, column;
     };
 
-    std::pair<Detail, Detail> position(core::GlobalState &gs);
-    std::string toString(core::GlobalState &gs, int tabs = 0);
+    std::pair<Detail, Detail> position(const core::GlobalState &gs);
+    std::string toString(const core::GlobalState &gs, int tabs = 0);
 
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static Detail offset2Pos(core::FileRef source, u4 off, core::GlobalState &gs);
+    static Detail offset2Pos(core::FileRef source, u4 off, const core::GlobalState &gs);
 };
 } // namespace core
 } // namespace ruby_typer

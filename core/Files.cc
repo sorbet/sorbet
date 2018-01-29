@@ -23,6 +23,12 @@ File::File(std::string &&path_, std::string &&source_, Type source_type)
 
 FileRef::FileRef(const GlobalState &gs, unsigned int id) : _id(id) {}
 
+const File &FileRef::file(const GlobalState &gs) const {
+    ENFORCE(_id < gs.filesUsed());
+    ENFORCE(gs.files[_id]->source_type != File::TombStone);
+    return *(gs.files[_id]);
+}
+
 File &FileRef::file(GlobalState &gs) const {
     ENFORCE(_id < gs.filesUsed());
     ENFORCE(gs.files[_id]->source_type != File::TombStone);

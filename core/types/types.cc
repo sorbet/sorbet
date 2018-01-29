@@ -172,8 +172,8 @@ ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : sym
 }
 
 namespace {
-string classNameToString(GlobalState &gs, core::NameRef nm) {
-    core::Name &name = nm.name(gs);
+string classNameToString(const GlobalState &gs, core::NameRef nm) {
+    const core::Name &name = nm.name(gs);
     if (name.kind == core::CONSTANT) {
         return name.cnst.original.toString(gs);
     } else {
@@ -184,7 +184,7 @@ string classNameToString(GlobalState &gs, core::NameRef nm) {
 }
 }; // namespace
 
-string ruby_typer::core::ClassType::toString(GlobalState &gs, int tabs) {
+string ruby_typer::core::ClassType::toString(const GlobalState &gs, int tabs) {
     return classNameToString(gs, this->symbol.info(gs).name);
 }
 
@@ -232,7 +232,7 @@ string LiteralType::typeName() {
     return "LiteralType";
 }
 
-string LiteralType::toString(GlobalState &gs, int tabs) {
+string LiteralType::toString(const GlobalState &gs, int tabs) {
     string value;
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
     if (undSymbol == GlobalState::defn_String()) {
@@ -292,7 +292,7 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
-string TupleType::toString(GlobalState &gs, int tabs) {
+string TupleType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "TupleType {" << endl;
     int i = -1;
@@ -315,7 +315,7 @@ ruby_typer::core::ShapeType::ShapeType() : ProxyType(core::Types::hashOfUntyped(
 ruby_typer::core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
     : ProxyType(core::Types::hashOfUntyped()), keys(move(keys)), values(move(values)) {}
 
-string ShapeType::toString(GlobalState &gs, int tabs) {
+string ShapeType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "ShapeType {" << endl;
     auto valueIterator = this->values.begin();
@@ -342,7 +342,7 @@ void ShapeType::_sanityCheck(core::Context ctx) {
 
 MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Magic())) {}
 
-string MagicType::toString(GlobalState &gs, int tabs) {
+string MagicType::toString(const GlobalState &gs, int tabs) {
     return underlying->toString(gs, tabs);
 }
 
@@ -352,13 +352,13 @@ void MagicType::_sanityCheck(core::Context ctx) {
 
 AliasType::AliasType(core::SymbolRef other) : symbol(other) {}
 
-string AliasType::toString(GlobalState &gs, int tabs) {
+string AliasType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "AliasType { symbol = " << this->symbol.info(gs).fullName(gs) << " }";
     return buf.str();
 }
 
-string AndType::toString(GlobalState &gs, int tabs) {
+string AndType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     bool leftBrace = isa_type<OrType>(this->left.get());
     bool rightBrace = isa_type<OrType>(this->right.get());
@@ -381,7 +381,7 @@ string AndType::toString(GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string OrType::toString(GlobalState &gs, int tabs) {
+string OrType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     bool leftBrace = isa_type<AndType>(this->left.get());
     bool rightBrace = isa_type<AndType>(this->right.get());
@@ -588,7 +588,7 @@ bool TypeVar::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return instantiation->derivesFrom(ctx, klass);
 }
 
-std::string TypeVar::toString(GlobalState &gs, int tabs) {
+std::string TypeVar::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "TypeVar(" + name.toString(gs) + ") {" << endl;
     printTabs(buf, tabs + 1);
@@ -744,7 +744,7 @@ std::shared_ptr<Type> AndType::instantiate(core::Context ctx, std::vector<Symbol
     return nullptr;
 }
 
-std::string AppliedType::toString(GlobalState &gs, int tabs) {
+std::string AppliedType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "AppliedType {" << endl;
     printTabs(buf, tabs + 1);
@@ -846,11 +846,11 @@ bool AppliedType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {}
 SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition) {}
 
-std::string LambdaParam::toString(GlobalState &gs, int tabs) {
+std::string LambdaParam::toString(const GlobalState &gs, int tabs) {
     return "LambdaParam(" + this->definition.info(gs).fullName(gs) + ")";
 }
 
-std::string SelfTypeParam::toString(GlobalState &gs, int tabs) {
+std::string SelfTypeParam::toString(const GlobalState &gs, int tabs) {
     return "SelfTypeParam(" + this->definition.info(gs).fullName(gs) + ")";
 }
 

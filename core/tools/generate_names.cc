@@ -59,20 +59,21 @@ NameDef names[] = {
     {"each", Desugar},
 
     // used in CFG for temporaries
-    {"whileTemp", CFG},
-    {"ifTemp", CFG},
-    {"returnTemp", CFG},
-    {"statTemp", CFG},
-    {"assignTemp", Desugar | Infer},
-    {"returnMethodTemp", CFG},
-    {"debugEnvironmentTemp", CFG | Infer},
-    {"blockReturnTemp", CFG},
-    {"selfMethodTemp", CFG},
-    {"hashTemp", CFG},
-    {"arrayTemp", CFG},
-    {"rescueTemp", Desugar | CFG},
-    {"castTemp", Resolver | CFG},
-    {"finalReturn", CFG | Infer},
+    {"whileTemp", "whileTemp", CFG | Core},
+    {"ifTemp", "ifTemp", CFG | Core},
+    {"returnTemp", "returnTemp", CFG | Core},
+    {"statTemp", "statTemp", CFG | Core},
+    {"assignTemp", "assignTemp", Desugar | Infer | Core},
+    {"returnMethodTemp", "returnMethodTemp", CFG | Core},
+    {"debugEnvironmentTemp", "debugEnvironmentTemp", CFG | Infer | Core},
+    {"blockReturnTemp", "blockReturnTemp", CFG | Core},
+    {"selfMethodTemp", "selfMethodTemp", CFG | Core},
+    {"hashTemp", "hashTemp", CFG | Core},
+    {"arrayTemp", "arrayTemp", CFG | Core},
+    {"rescueTemp", "rescueTemp", Desugar | CFG | Core},
+    {"castTemp", "castTemp", Resolver | CFG | Core},
+    {"finalReturn", "finalReturn", CFG | Infer | Core},
+    {"cfgAlias", "cfgAlias", CFG | Infer | Core},
     // end CFG temporaries
 
     {"include", Namer | Resolver},
@@ -146,7 +147,7 @@ NameDef names[] = {
     {"blockPassTemp", "<block-pass>", Desugar},
     {"forTemp", Desugar},
     {"new_", "new", Desugar | Infer},
-    {"blockCall", "<block-call>", CFG | Infer},
+    {"blockCall", "<block-call>", CFG | Infer | Core},
     {"blkArg", "<blk>", Namer},
 
     // Used to generate temporary names for destructuring arguments ala proc do
@@ -155,6 +156,7 @@ NameDef names[] = {
 
     {"lambda", Parser},
     {"nil_p", "nil?", Desugar | Infer},
+    {"nil", "nil", Infer},
     {"super", Desugar | Infer},
     {"empty", "", Desugar},
 
@@ -169,10 +171,13 @@ NameDef names[] = {
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
+    out << "#ifndef NAME_" << name.srcName << endl;
+    out << "#define NAME_" << name.srcName << endl;
     out << "    // \"" << name.val << "\"" << endl;
     out << "    static inline constexpr NameRef " << name.srcName << "() {" << endl;
     out << "        return NameRef(NameRef::WellKnown{}, " << name.id << ");" << endl;
     out << "    }" << endl;
+    out << "#endif" << endl;
     out << endl;
 }
 
@@ -276,7 +281,10 @@ int main(int argc, char **argv) {
         }
 
         if (phase == "core") {
+            header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << endl;
+            header << "#define NAME_LAST_WELL_KNOWN_NAME" << endl;
             header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << endl;
+            header << "#endif" << endl;
         }
 
         header << "};" << endl;

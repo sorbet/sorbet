@@ -46,7 +46,7 @@ unsigned int Name::hash(const GlobalState &gs) const {
     }
 }
 
-string Name::toString(GlobalState &gs) const {
+string Name::toString(const GlobalState &gs) const {
     switch (this->kind) {
         case UTF8:
             return string(raw.utf8.begin(), raw.utf8.end());
@@ -123,14 +123,22 @@ Name &NameRef::name(GlobalState &gs) const {
 #endif
     return gs.names[_id];
 }
-string NameRef::toString(GlobalState &gs) const {
+
+const Name &NameRef::name(const GlobalState &gs) const {
+    ENFORCE(_id < gs.names.size(), "name id out of bounds");
+    ENFORCE(exists(), "non existing name");
+#ifdef DEBUG_MODE
+    ENFORCE(isWellKnownName() || globalStateId == gs.globalStateId);
+#endif
+    return gs.names[_id];
+}
+string NameRef::toString(const GlobalState &gs) const {
     return name(gs).toString(gs);
 }
 
 bool NameRef::isBlockClashSafe(GlobalState &gs) const {
     Name &nm = this->name(gs);
-    return nm.kind == NameKind ::UNIQUE && (nm.unique.uniqueNameKind == UniqueNameKind ::CFG ||
-                                            nm.unique.uniqueNameKind == UniqueNameKind ::NestedScope);
+    return nm.kind == NameKind ::UNIQUE && nm.unique.uniqueNameKind == UniqueNameKind ::NestedScope;
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {

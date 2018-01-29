@@ -18,7 +18,7 @@ foo"];
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_2" [label = "block[id=2](foo, <constant:StandardError>$9)
+    "bb::<constant:Object>#foo_2" [label = "block[id=2](<constant:StandardError>$9, foo)
 bar = foo.is_a?(<constant:StandardError>$9) : untyped
 bar"];
 

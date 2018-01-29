@@ -34,8 +34,8 @@
 <title>bb::&lt;constant:Main&gt;#basic_0</title>
 <polygon fill="none" stroke="#000000" points="15.5179,-542.7626 361,-436.5865 706.4821,-542.7626 706.1596,-714.5591 15.8404,-714.5591 15.5179,-542.7626"/>
 <text text-anchor="middle" x="361" y="-663.0459" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0]()</text>
-<text text-anchor="middle" x="361" y="-649.0459" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:String&gt;$9 = alias &lt;constant:String&gt; : &lt;class:String&gt;</text>
-<text text-anchor="middle" x="361" y="-635.0459" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:nil&gt;$12 = alias &lt;constant:nil&gt; : NilClass</text>
+<text text-anchor="middle" x="361" y="-649.0459" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:nil&gt;$12 = alias &lt;constant:nil&gt; : NilClass</text>
+<text text-anchor="middle" x="361" y="-635.0459" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:String&gt;$9 = alias &lt;constant:String&gt; : &lt;class:String&gt;</text>
 <text text-anchor="middle" x="361" y="-621.0459" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$3 = self : Main</text>
 <text text-anchor="middle" x="361" y="-607.0459" font-family="Times,serif" font-size="14.00" fill="#000000">a = load_arg(selfMethodTemp$3#basic, 0) : Integer | String</text>
 <text text-anchor="middle" x="361" y="-593.0459" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$5 = self : Main</text>
@@ -117,7 +117,7 @@
 <g id="node7" class="node">
 <title>bb::&lt;constant:Main&gt;#with_and_2</title>
 <ellipse fill="none" stroke="#000000" cx="1672" cy="-345.262" rx="286.2165" ry="55.3091"/>
-<text text-anchor="middle" x="1672" y="-369.062" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](a, statTemp$5, &lt;constant:nil&gt;$14)</text>
+<text text-anchor="middle" x="1672" y="-369.062" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=2](statTemp$5, &lt;constant:nil&gt;$14, a)</text>
 <text text-anchor="middle" x="1672" y="-355.062" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="1672" y="-341.062" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$11 = 1 : Integer(1)</text>
 <text text-anchor="middle" x="1672" y="-327.062" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = statTemp$10.==(statTemp$11) : TrueClass | FalseClass</text>
@@ -133,7 +133,7 @@
 <g id="node8" class="node">
 <title>bb::&lt;constant:Main&gt;#with_and_3</title>
 <ellipse fill="none" stroke="#000000" cx="2204" cy="-345.262" rx="227.5439" ry="35.2113"/>
-<text text-anchor="middle" x="2204" y="-355.062" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](a, &amp;&amp;$2, statTemp$5, &lt;constant:nil&gt;$14)</text>
+<text text-anchor="middle" x="2204" y="-355.062" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=3](statTemp$5, &lt;constant:nil&gt;$14, a, &amp;&amp;$2)</text>
 <text text-anchor="middle" x="2204" y="-341.062" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$6 = &amp;&amp;$2 : FalseClass</text>
 <text text-anchor="middle" x="2204" y="-327.062" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -160,7 +160,7 @@
 <g id="node9" class="node">
 <title>bb::&lt;constant:Main&gt;#with_and_4</title>
 <ellipse fill="none" stroke="#000000" cx="1924" cy="-189.0538" rx="255.8694" ry="65.1077"/>
-<text text-anchor="middle" x="1924" y="-219.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](a, statTemp$5, statTemp$6, &lt;constant:nil&gt;$14)</text>
+<text text-anchor="middle" x="1924" y="-219.8538" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](statTemp$5, statTemp$6, &lt;constant:nil&gt;$14, a)</text>
 <text text-anchor="middle" x="1924" y="-205.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$4 = statTemp$5.hard_assert(statTemp$6) : NilClass</text>
 <text text-anchor="middle" x="1924" y="-191.8538" font-family="Times,serif" font-size="14.00" fill="#000000">castTemp$13 = a : NilClass</text>
 <text text-anchor="middle" x="1924" y="-177.8538" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$12 = cast(castTemp$13, NilClass); : NilClass</text>
@@ -223,4 +223,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 9329c5a60758ec6ff9d48435c51a2ee389bb07f8fe301b83b3319916fc1e7826 -->
+<!-- ruby-types:sha256: 24e8df59eeba0390c0adae127141cf577db9bad765d8b91c2c3be32bba5bba8e -->

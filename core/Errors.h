@@ -33,9 +33,9 @@ struct BasicError {
     bool isCritical;
     BasicError(Loc loc, ErrorClass what, std::string formatted)
         : loc(loc), what(what), formatted(formatted), isCritical(false) {}
-    virtual std::string toString(GlobalState &gs);
+    virtual std::string toString(const GlobalState &gs);
     virtual ~BasicError() = default;
-    static std::string filePosToString(GlobalState &gs, Loc loc);
+    static std::string filePosToString(const GlobalState &gs, Loc loc);
 };
 
 struct ErrorLine {
@@ -47,7 +47,7 @@ struct ErrorLine {
         std::string formatted = fmt::format(msg, args...);
         return ErrorLine(loc, formatted);
     }
-    std::string toString(GlobalState &gs);
+    std::string toString(const GlobalState &gs);
 };
 
 struct ErrorSection {
@@ -56,12 +56,12 @@ struct ErrorSection {
     ErrorSection(std::string header) : header(header) {}
     ErrorSection(std::string header, std::initializer_list<ErrorLine> messages) : header(header), messages(messages) {}
     ErrorSection(std::string header, std::vector<ErrorLine> messages) : header(header), messages(messages) {}
-    std::string toString(GlobalState &gs);
+    std::string toString(const GlobalState &gs);
 };
 
 struct ComplexError : public BasicError {
     std::vector<ErrorSection> sections;
-    virtual std::string toString(GlobalState &gs);
+    virtual std::string toString(const GlobalState &gs);
     ComplexError(Loc loc, ErrorClass what, std::string header, std::initializer_list<ErrorSection> sections)
         : BasicError(loc, what, header), sections(sections) {}
     ComplexError(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections)

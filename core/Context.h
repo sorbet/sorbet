@@ -17,6 +17,10 @@ public:
         return state;
     }
 
+    operator const GlobalState &() const {
+        return state;
+    }
+
     Context(GlobalState &state, SymbolRef owner) : state(state), owner(owner) {}
     Context(const Context &other) : state(other.state), owner(other.owner) {}
 

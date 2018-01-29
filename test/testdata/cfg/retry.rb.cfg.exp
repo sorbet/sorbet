@@ -16,14 +16,14 @@ returnMethodTemp$2 = 1
 <unconditional>"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_2" [label = "block[id=2](try, <constant:StandardError>$16)
+    "bb::<constant:Object>#main_2" [label = "block[id=2](<constant:StandardError>$16, try)
 rescueTemp$5 = <unanalyzable> : untyped
 rescueTemp$5"];
 
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_3" [style="bold"];
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="tapered"];
 
-    "bb::<constant:Object>#main_3" [label = "block[id=3](try, rescueTemp$5, <constant:StandardError>$16)
+    "bb::<constant:Object>#main_3" [label = "block[id=3](rescueTemp$5, <constant:StandardError>$16, try)
 rescueTemp$17 = rescueTemp$5.is_a?(<constant:StandardError>$16) : untyped
 rescueTemp$17"];
 
@@ -53,7 +53,7 @@ finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_10" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_11" [label = "block[id=11](try, rescueTemp$5, <constant:StandardError>$16)
+    "bb::<constant:Object>#main_11" [label = "block[id=11](rescueTemp$5, <constant:StandardError>$16, try)
 statTemp$19 = self : Object
 statTemp$20 = rescue : String(\"rescue\")
 statTemp$18 = statTemp$19.puts(statTemp$20) : NilClass

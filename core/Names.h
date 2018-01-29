@@ -74,6 +74,7 @@ public:
     }
 
     Name &name(GlobalState &gs) const;
+    const Name &name(const GlobalState &gs) const;
 
     // Returns the `0` NameRef, used to indicate non-existence of a name
     static NameRef noName() {
@@ -88,7 +89,7 @@ public:
 
     NameRef addEq(GlobalState &gs) const;
 
-    std::string toString(GlobalState &gs) const;
+    std::string toString(const GlobalState &gs) const;
 
     bool isWellKnownName() const;
 
@@ -111,8 +112,6 @@ enum UniqueNameKind : u2 {
     Parser,
     Desugar,
     Namer,
-    CFG,
-    CFGAlias,    // Used in the CFG to establish local aliases for global variables
     NestedScope, // used by freshName to make sure blocks local variables do not collapse into method variables
     Singleton,
     Overload
@@ -162,7 +161,7 @@ public:
     bool operator!=(const Name &rhs) const;
     bool isClassName(GlobalState &gs) const;
 
-    std::string toString(GlobalState &gs) const;
+    std::string toString(const GlobalState &gs) const;
     void sanityCheck(const GlobalState &gs) const;
     NameRef ref(const GlobalState &gs) const;
 

@@ -56,7 +56,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
-                } else if (thenb->bexit.cond.name != core::Names::blockCall() && thenb->exprs.empty()) {
+                } else if (thenb->bexit.cond != core::LocalVariable::blockCall() && thenb->exprs.empty()) {
                     // Don't remove block headers
                     bb->bexit = thenb->bexit;
                     thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
@@ -382,8 +382,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
                 it->args.push_back(el);
             }
         }
-        sort(it->args.begin(), it->args.end(),
-             [](core::LocalVariable a, core::LocalVariable b) -> bool { return a.name._id < b.name._id; });
+        sort(it->args.begin(), it->args.end());
         histogramInc("cfgbuilder.blockArguments", it->args.size());
     }
 

@@ -53,9 +53,9 @@ finalReturn = return returnMethodTemp$3 : <bottom>
     "bb::<constant:Bar>#baz_3" -> "bb::<constant:Bar>#baz_1" [style="bold"];
     "bb::<constant:Bar>#baz_4" [label = "block[id=4](statTemp$5, statTemp$6)
 outerLoops: 1
-<block-nested: a> = load_arg(statTemp$5#super, 0) : untyped
+a$5817 = load_arg(statTemp$5#super, 0) : untyped
 statTemp$8 = self : Bar
-blockReturnTemp$7 = statTemp$8.puts(<block-nested: a>) : NilClass
+blockReturnTemp$7 = statTemp$8.puts(a$5817) : NilClass
 <unconditional>"];
 
     "bb::<constant:Bar>#baz_4" -> "bb::<constant:Bar>#baz_2" [style="bold"];

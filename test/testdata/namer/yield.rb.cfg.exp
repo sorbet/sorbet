@@ -95,9 +95,9 @@ finalReturn = return returnMethodTemp$3 : <bottom>
     "bb::<constant:Main>#blockyield_3" -> "bb::<constant:Main>#blockyield_1" [style="bold"];
     "bb::<constant:Main>#blockyield_4" [label = "block[id=4](statTemp$5)
 outerLoops: 1
-<block-nested: i> = load_arg(statTemp$5#yielder, 0) : untyped
-<block-nested: <blk>> = load_arg(statTemp$5#yielder, 1) : untyped
-blockReturnTemp$6 = <block-nested: <blk>>.call(<block-nested: i>) : untyped
+i$5818 = load_arg(statTemp$5#yielder, 0) : untyped
+<blk>$5818 = load_arg(statTemp$5#yielder, 1) : untyped
+blockReturnTemp$6 = <blk>$5818.call(i$5818) : untyped
 <unconditional>"];
 
     "bb::<constant:Main>#blockyield_4" -> "bb::<constant:Main>#blockyield_2" [style="bold"];
@@ -134,82 +134,82 @@ statTemp$16 = self : Main
     "bb::<constant:Main>#main_3" -> "bb::<constant:Main>#main_5" [style="bold"];
     "bb::<constant:Main>#main_4" [label = "block[id=4](statTemp$10, <constant:<Magic>>$22)
 outerLoops: 1
-<block-nested: x> = load_arg(statTemp$10#lambda, 0) : untyped
+x$5822 = load_arg(statTemp$10#lambda, 0) : untyped
 statTemp$13 = self : Main
-statTemp$12 = statTemp$13.puts(<block-nested: x>) : NilClass
+statTemp$12 = statTemp$13.puts(x$5822) : NilClass
 <unconditional>"];
 
     "bb::<constant:Main>#main_4" -> "bb::<constant:Main>#main_2" [style="bold"];
-    "bb::<constant:Main>#main_5" [label = "block[id=5](l, statTemp$16, <constant:<Magic>>$22)
+    "bb::<constant:Main>#main_5" [label = "block[id=5](statTemp$16, <constant:<Magic>>$22, l)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Main>#main_5" -> "bb::<constant:Main>#main_7" [style="bold"];
     "bb::<constant:Main>#main_5" -> "bb::<constant:Main>#main_6" [style="tapered"];
 
-    "bb::<constant:Main>#main_6" [label = "block[id=6](l, statTemp$16, <constant:<Magic>>$22)
+    "bb::<constant:Main>#main_6" [label = "block[id=6](statTemp$16, <constant:<Magic>>$22, l)
 statTemp$15 = statTemp$16.yielder() : untyped
 statTemp$26 = self : Main
 <unconditional>"];
 
     "bb::<constant:Main>#main_6" -> "bb::<constant:Main>#main_8" [style="bold"];
-    "bb::<constant:Main>#main_7" [label = "block[id=7](l, statTemp$16, <constant:<Magic>>$22)
+    "bb::<constant:Main>#main_7" [label = "block[id=7](statTemp$16, <constant:<Magic>>$22, l)
 outerLoops: 1
-<block-nested: <block-pass>$2> = load_arg(statTemp$16#yielder, 0) : untyped
+<block-pass>$2$5824 = load_arg(statTemp$16#yielder, 0) : untyped
 statTemp$18 = l.to_proc() : untyped
-statTemp$23 = <block-nested: <block-pass>$2>.to_a() : untyped
+statTemp$23 = <block-pass>$2$5824.to_a() : untyped
 statTemp$20 = <constant:<Magic>>$22.<splat>(statTemp$23) : untyped
 blockReturnTemp$17 = statTemp$18.call(statTemp$20) : untyped
 <unconditional>"];
 
     "bb::<constant:Main>#main_7" -> "bb::<constant:Main>#main_5" [style="bold"];
-    "bb::<constant:Main>#main_8" [label = "block[id=8](l, <constant:<Magic>>$22, statTemp$26)
+    "bb::<constant:Main>#main_8" [label = "block[id=8](statTemp$26, <constant:<Magic>>$22, l)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Main>#main_8" -> "bb::<constant:Main>#main_10" [style="bold"];
     "bb::<constant:Main>#main_8" -> "bb::<constant:Main>#main_9" [style="tapered"];
 
-    "bb::<constant:Main>#main_9" [label = "block[id=9](l, <constant:<Magic>>$22, statTemp$26)
+    "bb::<constant:Main>#main_9" [label = "block[id=9](statTemp$26, <constant:<Magic>>$22, l)
 statTemp$25 = statTemp$26.blockpass() : untyped
 statTemp$35 = self : Main
 <unconditional>"];
 
     "bb::<constant:Main>#main_9" -> "bb::<constant:Main>#main_11" [style="bold"];
-    "bb::<constant:Main>#main_10" [label = "block[id=10](l, <constant:<Magic>>$22, statTemp$26)
+    "bb::<constant:Main>#main_10" [label = "block[id=10](statTemp$26, <constant:<Magic>>$22, l)
 outerLoops: 1
-<block-nested: <block-pass>$3> = load_arg(statTemp$26#blockpass, 0) : untyped
+<block-pass>$3$5826 = load_arg(statTemp$26#blockpass, 0) : untyped
 statTemp$28 = l.to_proc() : untyped
-statTemp$32 = <block-nested: <block-pass>$3>.to_a() : untyped
+statTemp$32 = <block-pass>$3$5826.to_a() : untyped
 statTemp$30 = <constant:<Magic>>$22.<splat>(statTemp$32) : untyped
 blockReturnTemp$27 = statTemp$28.call(statTemp$30) : untyped
 <unconditional>"];
 
     "bb::<constant:Main>#main_10" -> "bb::<constant:Main>#main_8" [style="bold"];
-    "bb::<constant:Main>#main_11" [label = "block[id=11](l, <constant:<Magic>>$22, statTemp$35)
+    "bb::<constant:Main>#main_11" [label = "block[id=11](statTemp$35, <constant:<Magic>>$22, l)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Main>#main_11" -> "bb::<constant:Main>#main_13" [style="bold"];
     "bb::<constant:Main>#main_11" -> "bb::<constant:Main>#main_12" [style="tapered"];
 
-    "bb::<constant:Main>#main_12" [label = "block[id=12](l, <constant:<Magic>>$22, statTemp$35)
+    "bb::<constant:Main>#main_12" [label = "block[id=12](statTemp$35, <constant:<Magic>>$22, l)
 statTemp$34 = statTemp$35.mixed() : untyped
 statTemp$43 = self : Main
 <unconditional>"];
 
     "bb::<constant:Main>#main_12" -> "bb::<constant:Main>#main_14" [style="bold"];
-    "bb::<constant:Main>#main_13" [label = "block[id=13](l, <constant:<Magic>>$22, statTemp$35)
+    "bb::<constant:Main>#main_13" [label = "block[id=13](statTemp$35, <constant:<Magic>>$22, l)
 outerLoops: 1
-<block-nested: <block-pass>$4> = load_arg(statTemp$35#mixed, 0) : untyped
+<block-pass>$4$5828 = load_arg(statTemp$35#mixed, 0) : untyped
 statTemp$37 = l.to_proc() : untyped
-statTemp$41 = <block-nested: <block-pass>$4>.to_a() : untyped
+statTemp$41 = <block-pass>$4$5828.to_a() : untyped
 statTemp$39 = <constant:<Magic>>$22.<splat>(statTemp$41) : untyped
 blockReturnTemp$36 = statTemp$37.call(statTemp$39) : untyped
 <unconditional>"];
 
     "bb::<constant:Main>#main_13" -> "bb::<constant:Main>#main_11" [style="bold"];
-    "bb::<constant:Main>#main_14" [label = "block[id=14](l, <constant:<Magic>>$22, statTemp$43)
+    "bb::<constant:Main>#main_14" [label = "block[id=14](statTemp$43, <constant:<Magic>>$22, l)
 outerLoops: 1
 <block-call>"];
 
@@ -222,11 +222,11 @@ finalReturn = return returnMethodTemp$7 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Main>#main_15" -> "bb::<constant:Main>#main_1" [style="bold"];
-    "bb::<constant:Main>#main_16" [label = "block[id=16](l, <constant:<Magic>>$22, statTemp$43)
+    "bb::<constant:Main>#main_16" [label = "block[id=16](statTemp$43, <constant:<Magic>>$22, l)
 outerLoops: 1
-<block-nested: <block-pass>$5> = load_arg(statTemp$43#blockyield, 0) : untyped
+<block-pass>$5$5830 = load_arg(statTemp$43#blockyield, 0) : untyped
 statTemp$45 = l.to_proc() : untyped
-statTemp$49 = <block-nested: <block-pass>$5>.to_a() : untyped
+statTemp$49 = <block-pass>$5$5830.to_a() : untyped
 statTemp$47 = <constant:<Magic>>$22.<splat>(statTemp$49) : untyped
 blockReturnTemp$44 = statTemp$45.call(statTemp$47) : untyped
 <unconditional>"];

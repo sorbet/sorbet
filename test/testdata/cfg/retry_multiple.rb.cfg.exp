@@ -18,21 +18,21 @@ returnMethodTemp$2 = 2
 <unconditional>"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_2" [label = "block[id=2](try, <constant:A>$15, <constant:B>$25)
+    "bb::<constant:Object>#main_2" [label = "block[id=2](<constant:A>$15, <constant:B>$25, try)
 rescueTemp$5 = <unanalyzable> : untyped
 rescueTemp$5"];
 
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_3" [style="bold"];
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="tapered"];
 
-    "bb::<constant:Object>#main_3" [label = "block[id=3](try, rescueTemp$5, <constant:A>$15, <constant:B>$25)
+    "bb::<constant:Object>#main_3" [label = "block[id=3](rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 rescueTemp$28 = rescueTemp$5.is_a?(<constant:A>$15) : untyped
 rescueTemp$28"];
 
     "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_14" [style="bold"];
     "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_15" [style="tapered"];
 
-    "bb::<constant:Object>#main_4" [label = "block[id=4](try, <constant:A>$15, <constant:B>$25)
+    "bb::<constant:Object>#main_4" [label = "block[id=4](<constant:A>$15, <constant:B>$25, try)
 statTemp$8 = 3 : Integer(3)
 ifTemp$6 = try.<(statTemp$8) : untyped
 ifTemp$6"];
@@ -40,7 +40,7 @@ ifTemp$6"];
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_5" [style="bold"];
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_6" [style="tapered"];
 
-    "bb::<constant:Object>#main_5" [label = "block[id=5](try, <constant:A>$15)
+    "bb::<constant:Object>#main_5" [label = "block[id=5](<constant:A>$15, try)
 statTemp$10 = try : NilClass | Integer
 statTemp$11 = 1 : Integer(1)
 try = statTemp$10.+(statTemp$11) : untyped
@@ -50,7 +50,7 @@ returnMethodTemp$2 = statTemp$12.raise(statTemp$13) : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#main_5" -> "bb::<constant:Object>#main_13" [style="bold"];
-    "bb::<constant:Object>#main_6" [label = "block[id=6](try, <constant:B>$25)
+    "bb::<constant:Object>#main_6" [label = "block[id=6](<constant:B>$25, try)
 statTemp$18 = 6 : Integer(6)
 ifTemp$16 = try.<(statTemp$18) : untyped
 ifTemp$16"];
@@ -58,7 +58,7 @@ ifTemp$16"];
     "bb::<constant:Object>#main_6" -> "bb::<constant:Object>#main_7" [style="bold"];
     "bb::<constant:Object>#main_6" -> "bb::<constant:Object>#main_13" [style="tapered"];
 
-    "bb::<constant:Object>#main_7" [label = "block[id=7](try, <constant:B>$25)
+    "bb::<constant:Object>#main_7" [label = "block[id=7](<constant:B>$25, try)
 statTemp$20 = try : NilClass | Integer
 statTemp$21 = 1 : Integer(1)
 try = statTemp$20.+(statTemp$21) : untyped
@@ -73,21 +73,21 @@ finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_13" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_14" [label = "block[id=14](try, rescueTemp$5, <constant:A>$15, <constant:B>$25)
+    "bb::<constant:Object>#main_14" [label = "block[id=14](rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 statTemp$30 = self : Object
 statTemp$31 = rescue A  : String(\"rescue A \")
 statTemp$29 = statTemp$30.puts(statTemp$31) : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#main_14" -> "bb::<constant:Object>#main_2" [style="bold"];
-    "bb::<constant:Object>#main_15" [label = "block[id=15](try, rescueTemp$5, <constant:A>$15, <constant:B>$25)
+    "bb::<constant:Object>#main_15" [label = "block[id=15](rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 rescueTemp$34 = rescueTemp$5.is_a?(<constant:B>$25) : untyped
 rescueTemp$34"];
 
     "bb::<constant:Object>#main_15" -> "bb::<constant:Object>#main_16" [style="bold"];
     "bb::<constant:Object>#main_15" -> "bb::<constant:Object>#main_1" [style="tapered"];
 
-    "bb::<constant:Object>#main_16" [label = "block[id=16](try, rescueTemp$5, <constant:A>$15, <constant:B>$25)
+    "bb::<constant:Object>#main_16" [label = "block[id=16](rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 statTemp$36 = self : Object
 statTemp$37 = rescue B  : String(\"rescue B \")
 statTemp$35 = statTemp$36.puts(statTemp$37) : NilClass

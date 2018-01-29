@@ -32,7 +32,7 @@ finalReturn = return returnMethodTemp$3 : <bottom>
     "bb::<constant:BlockTest>#block_pass_3" -> "bb::<constant:BlockTest>#block_pass_1" [style="bold"];
     "bb::<constant:BlockTest>#block_pass_4" [label = "block[id=4](statTemp$5, statTemp$6, statTemp$7, statTemp$8)
 outerLoops: 1
-<block-nested: x> = load_arg(statTemp$5#foo, 0) : untyped
+x$5812 = load_arg(statTemp$5#foo, 0) : untyped
 <unconditional>"];
 
     "bb::<constant:BlockTest>#block_pass_4" -> "bb::<constant:BlockTest>#block_pass_2" [style="bold"];

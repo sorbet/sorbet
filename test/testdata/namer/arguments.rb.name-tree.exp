@@ -3,8 +3,8 @@ class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)
     begin
       [a, b, c, d, e, f, g]
       h = 1
-      self(<constant:A>).proc() do |<block-nested: a>, <block-nested: b>, <block-nested: c>, <block-nested: d>, <block-nested: e>, <block-nested: f>, <block-nested: g>, <block-nested: h>|
-        [<block-nested: a>, <block-nested: b>, <block-nested: c>, <block-nested: d>, <block-nested: e>, <block-nested: f>, <block-nested: g>, <block-nested: h>]
+      self(<constant:A>).proc() do |a$5819, b$5819, c$5819, d$5819, e$5819, f$5819, g$5819, h$5819|
+        [a$5819, b$5819, c$5819, d$5819, e$5819, f$5819, g$5819, h$5819]
       end
     end
   end

@@ -9,13 +9,13 @@ class <emptyTree>::<constant:Destructure><<constant:Destructure>> < (::<constant
       end
       begin
         x.+(y)
-        self(<constant:Destructure>).lambda() do |<block-nested: <destructure>$4>|
+        self(<constant:Destructure>).lambda() do |<destructure>$4$5814|
           begin
             begin
-              <block-nested: assignTemp$5> = <block-nested: <destructure>$4>
-              <block-nested: a> = <block-nested: assignTemp$5>.[](0)
-              <block-nested: b> = <block-nested: assignTemp$5>.[](1)
-              <block-nested: assignTemp$5>
+              assignTemp$5$5814 = <destructure>$4$5814
+              a$5814 = assignTemp$5$5814.[](0)
+              b$5814 = assignTemp$5$5814.[](1)
+              assignTemp$5$5814
             end
             <emptyTree>
           end

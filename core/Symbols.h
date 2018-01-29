@@ -4,6 +4,7 @@
 #include "Loc.h"
 #include "Names.h"
 #include "common/common.h"
+#include "core/Names/core.h"
 #include <memory>
 #include <vector>
 
@@ -12,6 +13,7 @@ namespace core {
 class Symbol;
 class GlobalState;
 class Type;
+class Context;
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
@@ -58,11 +60,12 @@ public:
     bool isSynthetic() const;
 
     /** Not printed when showing name table */
-    bool isHiddenFromPrinting(GlobalState &gs) const;
+    bool isHiddenFromPrinting(const GlobalState &gs) const;
 
     bool isPrimitive() const;
 
     Symbol &info(GlobalState &gs, bool allowNone = false) const;
+    const Symbol &info(const GlobalState &gs, bool allowNone = false) const;
 
     bool operator==(const SymbolRef &rhs) const;
 
@@ -72,7 +75,7 @@ public:
         return !_id;
     }
 
-    std::string toString(GlobalState &gs, int tabs = 0, bool showHidden = false) const;
+    std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
     SymbolRef dealiasAt(GlobalState &gs, core::SymbolRef klass);
 
     u4 _id;
@@ -85,10 +88,11 @@ CheckSize(SymbolRef, 4, 4);
 
 class LocalVariable final {
 public:
-    NameRef name;
-    LocalVariable(NameRef name);
+    NameRef _name;
+    u4 unique;
+    LocalVariable(NameRef name, u4 unique);
     LocalVariable();
-    bool exists();
+    bool exists() const;
     bool isSyntheticTemporary(GlobalState &gs) const;
     bool isAliasForGlobal(GlobalState &gs) const;
     LocalVariable(const LocalVariable &) = default;
@@ -99,6 +103,24 @@ public:
     bool operator==(const LocalVariable &rhs) const;
 
     bool operator!=(const LocalVariable &rhs) const;
+    inline bool operator<(const LocalVariable &rhs) const {
+        if (this->_name.id() < rhs._name.id()) {
+            return true;
+        }
+        if (this->_name.id() > rhs._name.id()) {
+            return false;
+        }
+        return this->unique < rhs.unique;
+    }
+
+    static inline LocalVariable noVariable() {
+        return LocalVariable(core::NameRef::noName(), 0);
+    };
+
+    static inline LocalVariable blockCall() {
+        return LocalVariable(core::Names::blockCall(), 0);
+    }
+    std::string toString(const core::GlobalState &gs) const;
 };
 
 namespace serialize {
@@ -172,10 +194,20 @@ public:
         return argumentsOrMixins;
     }
 
+    inline const std::vector<SymbolRef> &arguments() const {
+        ENFORCE(!isClass());
+        return argumentsOrMixins;
+    }
+
     std::vector<std::shared_ptr<Type>> selfTypeArgs(GlobalState &gs);
     std::shared_ptr<Type> selfType(GlobalState &gs);
 
     inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
+        ENFORCE(isClass());
+        return argumentsOrMixins;
+    }
+
+    inline const std::vector<SymbolRef> &mixins(GlobalState &gs) const {
         ENFORCE(isClass());
         return argumentsOrMixins;
     }
@@ -185,14 +217,24 @@ public:
         return typeParams;
     }
 
+    inline const std::vector<SymbolRef> &typeMembers() const {
+        ENFORCE(isClass());
+        return typeParams;
+    }
+
     inline std::vector<SymbolRef> &typeArguments() {
         ENFORCE(isMethod());
         return typeParams;
     }
 
-    bool derivesFrom(GlobalState &gs, SymbolRef sym);
+    inline const std::vector<SymbolRef> &typeArguments() const {
+        ENFORCE(isMethod());
+        return typeParams;
+    }
 
-    inline SymbolRef parent(GlobalState &gs) {
+    bool derivesFrom(const GlobalState &gs, SymbolRef sym) const;
+
+    inline SymbolRef parent(GlobalState &gs) const {
         ENFORCE(isClass());
         return superClass;
     }
@@ -299,7 +341,7 @@ public:
 
     bool isBlockSymbol(GlobalState &gs) const;
 
-    inline bool isClassModule() {
+    inline bool isClassModule() const {
         ENFORCE(isClass());
         if (flags & Symbol::Flags::CLASS_MODULE)
             return true;
@@ -313,7 +355,7 @@ public:
         return flags & (Symbol::Flags::CLASS_MODULE | Symbol::Flags::CLASS_CLASS);
     }
 
-    inline bool isClassClass() {
+    inline bool isClassClass() const {
         return !isClassModule();
     }
 
@@ -422,19 +464,19 @@ public:
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
 
-    SymbolRef findMember(GlobalState &gs, NameRef name);
-    SymbolRef findMemberTransitive(GlobalState &gs, NameRef name, int MaxDepth = 100);
+    SymbolRef findMember(const GlobalState &gs, NameRef name) const;
+    SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name, int MaxDepth = 100) const;
 
-    std::string fullName(GlobalState &gs) const;
+    std::string fullName(const GlobalState &gs) const;
 
     // Returns the singleton class for this class, lazily instantiating it if it
     // doesn't exist.
     SymbolRef singletonClass(GlobalState &gs);
 
     // Returns attached class or noSymbol if it does not exist
-    SymbolRef attachedClass(GlobalState &gs);
+    SymbolRef attachedClass(const GlobalState &gs) const;
 
-    SymbolRef dealias(GlobalState &gs);
+    SymbolRef dealias(const GlobalState &gs) const;
 
     NameRef name; // todo: move out? it should not matter but it's important for
     // name resolution
@@ -454,7 +496,7 @@ private:
     std::vector<SymbolRef> typeParams;
 };
 
-// CheckSize(Symbol, 88, 8); // This is under too much churn to be worth checking
+// CheckSize(Symbol, 152, 8); // This is under too much churn to be worth checking
 
 } // namespace core
 } // namespace ruby_typer
@@ -468,7 +510,7 @@ template <> struct hash<ruby_typer::core::SymbolRef> {
 
 template <> struct hash<ruby_typer::core::LocalVariable> {
     std::size_t operator()(const ruby_typer::core::LocalVariable k) const {
-        return k.name._id;
+        return k._name._id * 63 + k.unique;
     }
 };
 } // namespace std

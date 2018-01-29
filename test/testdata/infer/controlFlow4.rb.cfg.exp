@@ -20,7 +20,7 @@ rescueTemp$5"];
 <unconditional>"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_1" -> "bb::<constant:ModuleMethods>#instrumented_request_1" [style="bold"];
-    "bb::<constant:ModuleMethods>#instrumented_request_3" [label = "block[id=3](final_attempt, foo, rescueTemp$5, <constant:StandardError>$8)
+    "bb::<constant:ModuleMethods>#instrumented_request_3" [label = "block[id=3](rescueTemp$5, <constant:StandardError>$8, final_attempt, foo)
 rescueTemp$9 = rescueTemp$5.is_a?(<constant:StandardError>$8) : untyped
 rescueTemp$9"];
 
@@ -34,7 +34,7 @@ is_successful"];
     "bb::<constant:ModuleMethods>#instrumented_request_7" -> "bb::<constant:ModuleMethods>#instrumented_request_10" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_7" -> "bb::<constant:ModuleMethods>#instrumented_request_11" [style="tapered"];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_8" [label = "block[id=8](final_attempt, foo, rescueTemp$5)
+    "bb::<constant:ModuleMethods>#instrumented_request_8" [label = "block[id=8](rescueTemp$5, final_attempt, foo)
 e = rescueTemp$5 : StandardError
 err = e : StandardError
 <unconditional>"];

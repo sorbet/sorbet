@@ -14,10 +14,8 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
-    core::LocalVariable retSym =
-        ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::returnMethodTemp(), md.symbol);
-    core::LocalVariable selfSym =
-        ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::selfMethodTemp(), md.symbol);
+    core::LocalVariable retSym = ctx.state.newTemporary(core::Names::returnMethodTemp(), md.symbol);
+    core::LocalVariable selfSym = ctx.state.newTemporary(core::Names::selfMethodTemp(), md.symbol);
 
     BasicBlock *entry = res->entry();
 
@@ -28,12 +26,12 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     std::unordered_map<core::SymbolRef, core::LocalVariable> aliases;
     for (core::SymbolRef argSym : md.symbol.info(ctx).arguments()) {
         i++;
-        core::LocalVariable arg(argSym.info(ctx).name);
+        core::LocalVariable arg(argSym.info(ctx).name, 0);
         entry->exprs.emplace_back(arg, argSym.info(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
         aliases[argSym] = arg;
     }
     auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, nullptr, aliases), md.rhs.get(), entry);
-    core::LocalVariable retSym1(core::Names::finalReturn());
+    core::LocalVariable retSym1(core::Names::finalReturn(), 0);
 
     auto rvLoc = cont->exprs.empty() ? md.rhs->loc : cont->exprs.back().loc;
     cont->exprs.emplace_back(retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
@@ -54,7 +52,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     auto basicBlockCreated = res->basicBlocks.size();
     histogramInc("cfgbuilder.basicBlocksCreated", basicBlockCreated);
     std::sort(aliasesPrefix.begin(), aliasesPrefix.end(),
-              [](const Binding &l, const Binding &r) -> bool { return l.bind.name._id < r.bind.name._id; });
+              [](const Binding &l, const Binding &r) -> bool { return l.bind < r.bind; });
 
     entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
                         make_move_iterator(aliasesPrefix.end()));
@@ -116,8 +114,7 @@ unique_ptr<CFG> CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CF
         if (bb->exprs.empty()) {
             continue;
         }
-        core::LocalVariable bind =
-            ctx.state.newTemporary(core::UniqueNameKind::CFG, core::Names::debugEnvironmentTemp(), cfg->symbol);
+        core::LocalVariable bind = ctx.state.newTemporary(core::Names::debugEnvironmentTemp(), cfg->symbol);
         auto &firstExpr = bb->exprs[0];
         bb->exprs.emplace(bb->exprs.begin(), bind, firstExpr.loc,
                           make_unique<cfg::DebugEnvironment>(core::GlobalState::AnnotationPos::BEFORE));

@@ -21,9 +21,10 @@ class KnowledgeFilter {
     unordered_set<core::LocalVariable> used_vars;
 
 public:
-    KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
+    KnowledgeFilter(const core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
         for (auto &bb : cfg->basicBlocks) {
-            if (bb->bexit.cond.name != core::NameRef::noName() && bb->bexit.cond.name != core::Names::blockCall()) {
+            if (bb->bexit.cond != core::LocalVariable::noVariable() &&
+                bb->bexit.cond != core::LocalVariable::blockCall()) {
                 used_vars.insert(bb->bexit.cond);
             }
             for (auto &bind : bb->exprs) {
@@ -136,14 +137,14 @@ struct KnowledgeFact {
         }
     }
 
-    string toString(core::Context ctx) const {
+    string toString(const core::Context ctx) const {
         stringstream buf;
 
         for (auto &el : yesTypeTests) {
-            buf << "    " << el.first.name.toString(ctx) << " to be " << el.second->toString(ctx, 0) << endl;
+            buf << "    " << el.first.toString(ctx) << " to be " << el.second->toString(ctx, 0) << endl;
         }
         for (auto &el : noTypeTests) {
-            buf << "    " << el.first.name.toString(ctx) << " NOT to be " << el.second->toString(ctx, 0) << endl;
+            buf << "    " << el.first.toString(ctx) << " NOT to be " << el.second->toString(ctx, 0) << endl;
         }
         return buf.str();
     }
@@ -320,7 +321,7 @@ public:
     bool seenTruthyOption; // Only used during environment merge. Used to indicate "all-knowing" truthy option.
     bool seenFalsyOption;  // Same for falsy
 
-    string toString(core::Context ctx) {
+    string toString(const core::Context ctx) {
         stringstream buf;
         if (!truthy->noTypeTests.empty() || !truthy->yesTypeTests.empty()) {
             buf << "  Being truthy entails:" << endl;
@@ -362,7 +363,7 @@ public:
     vector<core::TypeAndOrigins> types;
     vector<TestedKnowledge> knowledge;
 
-    string toString(core::Context ctx) {
+    string toString(const core::Context ctx) {
         stringstream buf;
         if (isDead) {
             buf << "dead=" << isDead << endl;
@@ -370,11 +371,10 @@ public:
         int i = -1;
         for (auto var : vars) {
             i++;
-            auto &name = var.name.name(ctx);
-            if (name.kind == core::NameKind::UNIQUE && name.unique.original == core::Names::debugEnvironmentTemp()) {
+            if (var._name == core::Names::debugEnvironmentTemp()) {
                 continue;
             }
-            buf << var.name.toString(ctx) << ": " << types[i].type->toString(ctx, 0) << endl;
+            buf << var.toString(ctx) << ": " << types[i].type->toString(ctx, 0) << endl;
             buf << knowledge[i].toString(ctx) << endl;
         }
         return buf.str();
@@ -444,22 +444,18 @@ public:
             if (knowledgeFilter.isNeeded(this->vars[i])) {
                 auto &truthy = k.truthy.mutate();
                 auto &falsy = k.falsy.mutate();
-                truthy.yesTypeTests.erase(
-                    remove_if(truthy.yesTypeTests.begin(), truthy.yesTypeTests.end(),
-                              [&](auto const &c) -> bool { return c.first.name == reassigned.name; }),
-                    truthy.yesTypeTests.end());
-                falsy.yesTypeTests.erase(
-                    remove_if(falsy.yesTypeTests.begin(), falsy.yesTypeTests.end(),
-                              [&](auto const &c) -> bool { return c.first.name == reassigned.name; }),
-                    falsy.yesTypeTests.end());
-                truthy.noTypeTests.erase(
-                    remove_if(truthy.noTypeTests.begin(), truthy.noTypeTests.end(),
-                              [&](auto const &c) -> bool { return c.first.name == reassigned.name; }),
-                    truthy.noTypeTests.end());
-                falsy.noTypeTests.erase(
-                    remove_if(falsy.noTypeTests.begin(), falsy.noTypeTests.end(),
-                              [&](auto const &c) -> bool { return c.first.name == reassigned.name; }),
-                    falsy.noTypeTests.end());
+                truthy.yesTypeTests.erase(remove_if(truthy.yesTypeTests.begin(), truthy.yesTypeTests.end(),
+                                                    [&](auto const &c) -> bool { return c.first == reassigned; }),
+                                          truthy.yesTypeTests.end());
+                falsy.yesTypeTests.erase(remove_if(falsy.yesTypeTests.begin(), falsy.yesTypeTests.end(),
+                                                   [&](auto const &c) -> bool { return c.first == reassigned; }),
+                                         falsy.yesTypeTests.end());
+                truthy.noTypeTests.erase(remove_if(truthy.noTypeTests.begin(), truthy.noTypeTests.end(),
+                                                   [&](auto const &c) -> bool { return c.first == reassigned; }),
+                                         truthy.noTypeTests.end());
+                falsy.noTypeTests.erase(remove_if(falsy.noTypeTests.begin(), falsy.noTypeTests.end(),
+                                                  [&](auto const &c) -> bool { return c.first == reassigned; }),
+                                        falsy.noTypeTests.end());
                 k.sanityCheck();
             }
         }
@@ -592,7 +588,7 @@ public:
      */
     static const Environment &withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
                                        const vector<core::LocalVariable> &filter) {
-        if (!env.bb->bexit.cond.exists() || env.bb->bexit.cond.name == core::Names::blockCall()) {
+        if (!env.bb->bexit.cond.exists() || env.bb->bexit.cond == core::LocalVariable::blockCall()) {
             return env;
         }
         copy.cloneFrom(env);
@@ -1114,9 +1110,11 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
     return copy;
 }
 bool isSyntheticReturn(core::Context ctx, cfg::Binding &bind) {
-    if (bind.bind.name == core::Names::finalReturn()) {
+    if (bind.bind._name == core::Names::finalReturn()) {
         if (auto *ret = dynamic_cast<cfg::Return *>(bind.value.get())) {
-            return ret->what.isSyntheticTemporary(ctx);
+            return ret->what.isSyntheticTemporary(ctx) ||
+                   (ret->what._name.name(ctx).kind == core::NameKind::CONSTANT &&
+                    ret->what._name.name(ctx).cnst.original == core::Names::nil());
         }
     }
     return false;

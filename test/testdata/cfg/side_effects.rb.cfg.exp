@@ -30,7 +30,7 @@ a = 2 : Integer(2)
 <unconditional>"];
 
     "bb::<constant:Side>#foo_3" -> "bb::<constant:Side>#foo_4" [style="bold"];
-    "bb::<constant:Side>#foo_4" [label = "block[id=4](a, statTemp$5, statTemp$6)
+    "bb::<constant:Side>#foo_4" [label = "block[id=4](statTemp$5, statTemp$6, a)
 returnMethodTemp$2 = statTemp$5.foo(statTemp$6, a) : untyped
 finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
