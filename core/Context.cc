@@ -26,31 +26,7 @@ SymbolRef Context::selfClass() {
     return this->contextClass();
 }
 
-SymbolRef Context::enclosingMethod() {
-    SymbolRef owner = this->owner;
-    while (owner != GlobalState::defn_root() && !owner.info(this->state, false).isMethod()) {
-        ENFORCE(owner.exists(), "non-existing owner in enclosingMethod");
-        owner = owner.info(this->state).owner;
-    }
-    if (owner == GlobalState::defn_root()) {
-        return GlobalState::noSymbol();
-    }
-    return owner;
-}
-
-SymbolRef Context::enclosingClass() {
-    SymbolRef owner = this->owner;
-    while (owner != GlobalState::defn_root() && !owner.info(this->state, false).isClass()) {
-        ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
-        owner = owner.info(this->state).owner;
-    }
-    if (owner == GlobalState::defn_root()) {
-        return GlobalState::noSymbol();
-    }
-    return owner;
-}
-
-bool Context::permitOverloadDefinitions() {
+bool Context::permitOverloadDefinitions() const {
     if (!owner.exists()) {
         return false;
     }
@@ -61,7 +37,7 @@ bool Context::permitOverloadDefinitions() {
            ::ruby_typer::File::getFileName(path) == whitelistedTest;
 }
 
-SymbolRef Context::contextClass() {
+SymbolRef Context::contextClass() const {
     SymbolRef owner = this->owner;
     while (!owner.info(this->state, false).isClass()) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");

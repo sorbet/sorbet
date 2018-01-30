@@ -136,8 +136,8 @@ string NameRef::toString(const GlobalState &gs) const {
     return name(gs).toString(gs);
 }
 
-bool NameRef::isBlockClashSafe(GlobalState &gs) const {
-    Name &nm = this->name(gs);
+bool NameRef::isBlockClashSafe(const GlobalState &gs) const {
+    const Name &nm = this->name(gs);
     return nm.kind == NameKind ::UNIQUE && nm.unique.uniqueNameKind == UniqueNameKind ::NestedScope;
 }
 

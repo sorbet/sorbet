@@ -11,7 +11,7 @@ namespace cfg {
 
 void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
 
-unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
+unique_ptr<CFG> CFGBuilder::buildFor(const core::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
     core::LocalVariable retSym = ctx.state.newTemporary(core::Names::returnMethodTemp(), md.symbol);
@@ -72,7 +72,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     return res;
 }
 
-void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
+void CFGBuilder::fillInTopoSorts(const core::Context ctx, CFG &cfg) {
     // needed to find loop headers.
     for (auto &bb : cfg.basicBlocks) {
         std::sort(bb->backEdges.begin(), bb->backEdges.end(),

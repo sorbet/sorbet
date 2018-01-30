@@ -30,14 +30,12 @@ public:
     // their singleton classes for most purposes)
     SymbolRef selfClass();
 
-    SymbolRef enclosingMethod();
-    SymbolRef enclosingClass();
-    bool permitOverloadDefinitions();
+    bool permitOverloadDefinitions() const;
 
     // Returns the SymbolRef corresponding to the class `self.class`, unless the
     // context is a class, in which case return it. This class is most notably
     // the class in which to look up class variables.
-    SymbolRef contextClass();
+    SymbolRef contextClass() const;
 
     Context withOwner(SymbolRef sym) {
         Context r = Context(*this);
@@ -50,7 +48,6 @@ public:
         r.frozenConstraint = true;
         return r;
     }
-    SymbolRef newTemporary(UniqueNameKind kind, NameRef name, SymbolRef owner);
 };
 
 class GlobalSubstitution {

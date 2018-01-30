@@ -85,7 +85,7 @@ public:
         return _id != 0;
     }
 
-    bool isBlockClashSafe(GlobalState &gs) const;
+    bool isBlockClashSafe(const GlobalState &gs) const;
 
     NameRef addEq(GlobalState &gs) const;
 

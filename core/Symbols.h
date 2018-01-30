@@ -76,7 +76,7 @@ public:
     }
 
     std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
-    SymbolRef dealiasAt(GlobalState &gs, core::SymbolRef klass);
+    SymbolRef dealiasAt(GlobalState &gs, core::SymbolRef klass) const;
 
     u4 _id;
 
@@ -93,8 +93,8 @@ public:
     LocalVariable(NameRef name, u4 unique);
     LocalVariable();
     bool exists() const;
-    bool isSyntheticTemporary(GlobalState &gs) const;
-    bool isAliasForGlobal(GlobalState &gs) const;
+    bool isSyntheticTemporary(const GlobalState &gs) const;
+    bool isAliasForGlobal(const GlobalState &gs) const;
     LocalVariable(const LocalVariable &) = default;
     LocalVariable(LocalVariable &&) = default;
     LocalVariable &operator=(LocalVariable &&) = default;
@@ -199,8 +199,8 @@ public:
         return argumentsOrMixins;
     }
 
-    std::vector<std::shared_ptr<Type>> selfTypeArgs(GlobalState &gs);
-    std::shared_ptr<Type> selfType(GlobalState &gs);
+    std::vector<std::shared_ptr<Type>> selfTypeArgs(const GlobalState &gs) const;
+    std::shared_ptr<Type> selfType(const GlobalState &gs) const;
 
     inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
         ENFORCE(isClass());
@@ -239,7 +239,7 @@ public:
 
     bool derivesFrom(const GlobalState &gs, SymbolRef sym) const;
 
-    inline SymbolRef parent(GlobalState &gs) const {
+    inline SymbolRef parent(const GlobalState &gs) const {
         ENFORCE(isClass());
         return superClass;
     }
@@ -344,7 +344,7 @@ public:
         return (flags & Symbol::Flags::METHOD_PRIVATE) != 0;
     }
 
-    bool isBlockSymbol(GlobalState &gs) const;
+    bool isBlockSymbol(const GlobalState &gs) const;
 
     inline bool isClassModule() const {
         ENFORCE(isClass());
@@ -491,6 +491,8 @@ public:
 
     Symbol deepCopy(const GlobalState &to) const;
     void sanityCheck(const GlobalState &gs) const;
+    SymbolRef enclosingMethod(const GlobalState &gs) const;
+    SymbolRef enclosingClass(const GlobalState &gs) const;
 
 private:
     friend class serialize::GlobalStateSerializer;
