@@ -282,7 +282,7 @@ public:
 
     int globalStateId;
 
-    std::unique_ptr<GlobalState> deepCopy() const;
+    std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
 
 private:
     static constexpr int MAX_SYNTHETIC_SYMBOLS = 100;

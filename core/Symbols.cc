@@ -377,6 +377,8 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     result.name = NameRef(to, this->name.id());
     result.definitionLoc = this->definitionLoc;
     result.definitionLoc.file = FileRef(to, this->definitionLoc.file.id());
+    result.typeParams = this->typeParams;
+    result.typeAliases = this->typeAliases;
 
     result.members.reserve(this->members.size());
     for (auto &mem : this->members) {
