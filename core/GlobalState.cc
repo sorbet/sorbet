@@ -854,9 +854,13 @@ bool GlobalState::unfreezeSymbolTable() {
     return old;
 }
 
-std::unique_ptr<GlobalState> GlobalState::deepCopy() const {
+std::unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->logger);
+
+    if (keepId) {
+        result->globalStateId = this->globalStateId;
+    }
 
     result->strings = this->strings;
     result->strings_last_page_used = STRINGS_PAGE_SIZE;

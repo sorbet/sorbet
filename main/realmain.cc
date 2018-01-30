@@ -294,7 +294,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
 }
 
 unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast::Expression> resolved, Options opts,
-                                          progressbar *progress, bool silenceErrors = false) {
+                                          bool silenceErrors = false) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
     bool forceTypedSource = !opts.typedSource.empty() && f.file(gs).path().find(opts.typedSource) != std::string::npos;
@@ -320,9 +320,6 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "}" << endl << endl;
         }
-        if (opts.showProgress) {
-            progressbar_inc(progress);
-        }
     } catch (...) {
         console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
     }
@@ -332,9 +329,17 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
     return result;
 }
 
-vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
-                                              const Options &opts, bool silenceErrors = false) {
-    vector<unique_ptr<ast::Expression>> result;
+struct typecheck_thread_result {
+    vector<unique_ptr<ast::Expression>> trees;
+    unique_ptr<core::GlobalState> gs;
+    CounterState counters;
+};
+
+// If ever given a result type, it should be something along the lines of
+// vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
+void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
+               bool silenceErrors = false) {
+    vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>> typecheck_result;
     unique_ptr<progressbar> progress;
     unique_ptr<statusbar> status;
 
@@ -371,19 +376,60 @@ vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<uniq
         progress.reset(progressbar_new("CFG+Typechecking", what.size()));
     }
 
-    for (auto &resolved : what) {
-        result.emplace_back(typecheckFile(gs, move(resolved), opts, progress.get(), silenceErrors));
+    ThreadQueue<unique_ptr<ast::Expression>> fileq;
+    ThreadQueue<typecheck_thread_result> resultq;
+    gs.sanityCheck();
+    const auto cgs = gs.deepCopy(true);
+
+    {
+        ENFORCE(opts.threads > 0);
+        vector<unique_ptr<Joinable>> threads;
+        for (int i = 0; i < opts.threads; ++i) {
+            threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq, silenceErrors]() {
+                auto lgs = cgs->deepCopy(true);
+                typecheck_thread_result result;
+                unique_ptr<ast::Expression> job;
+
+                {
+                    core::ErrorRegion errs(*lgs, silenceErrors);
+
+                    while (fileq.pop(&job)) {
+                        core::FileRef file = job->loc.file;
+                        try {
+                            result.trees.emplace_back(typecheckFile(*lgs, move(job), opts, silenceErrors));
+                        } catch (...) {
+                            console_err->error("Exception typing file: {} (backtrace is above)",
+                                               file.file(*lgs).path());
+                        }
+                    }
+                }
+
+                result.counters = getAndClearThreadCounters();
+                result.gs = move(lgs);
+                resultq.push(move(result));
+            }));
+        }
+        for (auto &resolved : what) {
+            tracer->trace("enqueue-typer {}", resolved->loc.file.file(gs).path());
+            fileq.push(move(resolved));
+        }
+        fileq.close();
+
+        typecheck_thread_result result;
+        for (int i = 0; i < opts.threads; ++i) {
+            resultq.pop(&result);
+            counterConsume(move(result.counters));
+            typecheck_result.emplace_back(move(result.trees), move(result.gs));
+        }
     }
-    if (opts.showProgress) {
-        progressbar_finish(progress.get());
-    }
+
     if (opts.print.NameTable) {
         cout << gs.toString() << endl;
     }
     if (opts.print.NameTableFull) {
         cout << gs.toString(true) << endl;
     }
-    return result;
+    return;
 }
 
 std::vector<std::string> split(const std::string &s, char delimiter) {
