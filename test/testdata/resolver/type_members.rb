@@ -5,11 +5,12 @@ class CovariantNotAllowed
 end
 
 class Invalids
-  Exp = T.type(1+1) # error: Invalid type definition
+  Exp = T.type(1+1) # error: Invalid param, must be a :symbol
   Baz = T.type(:baz) # error: Invalid variance kind, only :out and :in are supported
-  Mama = T.type("mama") # error: Invalid type definition
-  One = T.type(1) # error: Invalid type definition
-  ArrOne = T.type([1]) # error: Invalid type definition
+  Mama = T.type("mama") # error: Invalid param, must be a :symbol
+  One = T.type(1) # error: Invalid param, must be a :symbol
+  ArrOne = T.type([1]) # error: Invalid param, must be a :symbol
+  BadArg = T.type(junk: 1) # error: Missing required param :fixed
 end
 
 

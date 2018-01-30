@@ -789,13 +789,31 @@ public:
 
         auto &info = id->symbol.info(ctx);
         if (info.isTypeMember()) {
-            ENFORCE(info.isAlias());
+            ENFORCE(info.isFixed());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
             auto recv = ast::cast_tree<ast::Ident>(send->recv.get());
             ENFORCE(recv->symbol == core::GlobalState::defn_T());
-            ENFORCE(send->fun == core::Names::typeAlias());
-            ENFORCE(send->args.size() == 1);
-            info.resultType = getResultType(ctx, send->args[0]);
+            ENFORCE(send->fun == core::Names::typeDecl());
+            int arg;
+            if (send->args.size() == 1) {
+                arg = 0;
+            } else if (send->args.size() == 2) {
+                arg = 1;
+            } else {
+                Error::raise("Wrong arg count");
+            }
+
+            auto *hash = ast::cast_tree<ast::Hash>(send->args[arg].get());
+            if (hash) {
+                int i = -1;
+                for (auto &keyExpr : hash->keys) {
+                    i++;
+                    auto *key = ast::cast_tree<ast::SymbolLit>(keyExpr.get());
+                    if (key && key->name == core::Names::fixed()) {
+                        info.resultType = getResultType(ctx, hash->values[i]);
+                    }
+                }
+            }
         } else if (info.isStaticField()) {
             if (info.resultType != nullptr) {
                 return asgn;

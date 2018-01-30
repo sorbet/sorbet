@@ -159,7 +159,7 @@ std::shared_ptr<core::Type> allocateBySymbol(core::Context ctx, core::SymbolRef 
         targs.reserve(symbol.info(ctx).typeMembers().size());
         for (auto tmRef : symbol.info(ctx).typeMembers()) {
             auto &tm = tmRef.info(ctx);
-            if (tm.isAlias()) {
+            if (tm.isFixed()) {
                 targs.emplace_back(tm.resultType);
             } else {
                 targs.emplace_back(core::Types::dynamic());
@@ -208,7 +208,7 @@ shared_ptr<core::Type> runTypeConstructor(core::Context ctx, core::TypeConstruct
         int i = 0;
         for (auto tmRef : typeConstructor->protoType.info(ctx).typeMembers()) {
             auto &tm = tmRef.info(ctx);
-            if (tm.isAlias()) {
+            if (tm.isFixed()) {
                 targs.emplace_back(tm.resultType);
             } else {
                 targs.emplace_back(typeConstructor->targs[i++]);

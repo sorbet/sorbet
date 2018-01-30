@@ -391,7 +391,7 @@ int Symbol::typeArity(const GlobalState &gs) const {
     ENFORCE(this->isClass());
     int arity = 0;
     for (auto &ty : this->typeMembers()) {
-        if (!ty.info(gs).isAlias()) {
+        if (!ty.info(gs).isFixed()) {
             ++arity;
         }
     }

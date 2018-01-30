@@ -2,7 +2,7 @@
 require_relative '../../t'
 
 class PreChild < Parent
-  Elem = T.type_alias(String)
+  Elem = T.type(fixed: String)
 end
 
 class Parent
@@ -15,7 +15,7 @@ class Parent
 end
 
 class Child < Parent
-  Elem = T.type_alias(String)
+  Elem = T.type(fixed: String)
 end
 
 module Mixin
@@ -29,7 +29,7 @@ end
 
 class WithMixin
   include Mixin
-  Elem = T.type_alias(String)
+  Elem = T.type(fixed: String)
 end
 
 class NotATypeVar
@@ -48,18 +48,18 @@ class ParentWithMultiple
 end
 
 class HalfChild < ParentWithMultiple
-  K = T.type_alias(Integer)
+  K = T.type(fixed: Integer)
   V = T.type
 end
 
 class HalfChildOther < ParentWithMultiple
   K = T.type
-  V = T.type_alias(Integer)
+  V = T.type(fixed: Integer)
 end
 
 class FullChild < HalfChild
-  K = T.type_alias(Integer)
-  V = T.type_alias(String)
+  K = T.type(fixed: Integer)
+  V = T.type(fixed: String)
 end
 
 class ParentEnumerable
@@ -69,7 +69,7 @@ class ParentEnumerable
 end
 
 class ChildEnumerable < ParentEnumerable
-  K = T.type_alias(String)
+  K = T.type(fixed: String)
   V = T.type
 end
 

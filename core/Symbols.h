@@ -164,7 +164,7 @@ public:
         static constexpr int TYPE_COVARIANT = 0x0100;
         static constexpr int TYPE_INVARIANT = 0x0080;
         static constexpr int TYPE_CONTRAVARIANT = 0x0040;
-        static constexpr int TYPE_ALIAS = 0x0020;
+        static constexpr int TYPE_FIXED = 0x0020;
     };
 
     SymbolRef owner;
@@ -314,9 +314,9 @@ public:
         return (flags & Symbol::Flags::TYPE_CONTRAVARIANT) != 0;
     }
 
-    inline bool isAlias() const {
+    inline bool isFixed() const {
         ENFORCE(isTypeArgument() || isTypeMember());
-        return (flags & Symbol::Flags::TYPE_ALIAS) != 0;
+        return (flags & Symbol::Flags::TYPE_FIXED) != 0;
     }
 
     core::Variance variance() const {
@@ -423,9 +423,9 @@ public:
         flags |= Symbol::Flags::TYPE_INVARIANT;
     }
 
-    inline void setAlias() {
+    inline void setFixed() {
         ENFORCE(isTypeArgument() || isTypeMember());
-        flags |= Symbol::Flags::TYPE_ALIAS;
+        flags |= Symbol::Flags::TYPE_FIXED;
     }
 
     inline void setOptional() {

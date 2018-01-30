@@ -445,43 +445,58 @@ public:
         }
 
         switch (send->fun._id) {
-            case core::Names::typeDecl()._id:
-                core::Variance variance;
-                if (send->args.empty()) {
-                    variance = core::Variance::Invariant;
-                } else {
-                    auto *symbol = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
-                    if (send->args.size() > 1 || symbol == nullptr) {
-                        ctx.state.error(asgn->loc, core::errors::Namer::InvalidTypeDefinition,
-                                        "Invalid type definition");
+            case core::Names::typeDecl()._id: {
+                core::Variance variance = core::Variance::Invariant;
+
+                if (!send->args.empty()) {
+                    if (send->args.size() > 2) {
+                        ctx.state.error(send->loc, core::errors::Namer::InvalidTypeDefinition,
+                                        "Too many args in type definition");
                         return new ast::EmptyTree(asgn->loc);
                     }
-                    if (symbol->name == core::Names::covariant()) {
-                        variance = core::Variance::CoVariant;
-                    } else if (symbol->name == core::Names::contravariant()) {
-                        variance = core::Variance::ContraVariant;
-                    } else if (symbol->name == core::Names::invariant()) {
-                        variance = core::Variance::Invariant;
+                    auto *symbol = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
+                    if (symbol) {
+                        if (symbol->name == core::Names::covariant()) {
+                            variance = core::Variance::CoVariant;
+                        } else if (symbol->name == core::Names::contravariant()) {
+                            variance = core::Variance::ContraVariant;
+                        } else if (symbol->name == core::Names::invariant()) {
+                            variance = core::Variance::Invariant;
+                        } else {
+                            ctx.state.error(symbol->loc, core::errors::Namer::InvalidTypeDefinition,
+                                            "Invalid variance kind, only :{} and :{} are supported",
+                                            core::Names::covariant().toString(ctx),
+                                            core::Names::contravariant().toString(ctx));
+                        }
                     } else {
-                        ctx.state.error(asgn->loc, core::errors::Namer::InvalidTypeDefinition,
-                                        "Invalid variance kind, only :{} and :{} are supported",
-                                        core::Names::covariant().toString(ctx),
-                                        core::Names::contravariant().toString(ctx));
-                        variance = core::Variance::Invariant;
+                        if (send->args.size() != 1 || ast::cast_tree<ast::Hash>(send->args[0].get()) == nullptr) {
+                            ctx.state.error(send->args[0]->loc, core::errors::Namer::InvalidTypeDefinition,
+                                            "Invalid param, must be a :symbol");
+                        }
                     }
                 }
-                ctx.state.enterTypeMember(asgn->loc, ctx.enclosingClass(), typeName->cnst, variance);
-                return new ast::EmptyTree(asgn->loc);
 
-            case core::Names::typeAlias()._id: {
-                if (send->args.size() != 1) {
-                    return fillAssign(ctx, lhs, asgn);
+                auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.enclosingClass(), typeName->cnst, variance);
+
+                if (!send->args.empty()) {
+                    auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
+                    if (hash) {
+                        int i = -1;
+                        for (auto &keyExpr : hash->keys) {
+                            i++;
+                            auto *key = ast::cast_tree<ast::SymbolLit>(keyExpr.get());
+                            if (key && key->name == core::Names::fixed()) {
+                                // Leave it in the tree for the resolver to chew on.
+                                sym.info(ctx).setFixed();
+                                asgn->lhs = make_unique<ast::Ident>(asgn->lhs->loc, sym);
+                                return asgn;
+                            }
+                        }
+                        ctx.state.error(send->loc, core::errors::Namer::InvalidTypeDefinition,
+                                        "Missing required param :fixed");
+                    }
                 }
-                auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.enclosingClass(), typeName->cnst,
-                                                     core::Variance::Invariant);
-                sym.info(ctx).setAlias();
-                asgn->lhs = make_unique<ast::Ident>(asgn->lhs->loc, sym);
-                return asgn;
+                return new ast::EmptyTree(asgn->loc);
             }
             default:
                 return fillAssign(ctx, lhs, asgn);
