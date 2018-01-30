@@ -64,8 +64,8 @@ public:
 
     bool isPrimitive() const;
 
-    Symbol &info(GlobalState &gs, bool allowNone = false) const;
-    const Symbol &info(const GlobalState &gs, bool allowNone = false) const;
+    Symbol &data(GlobalState &gs, bool allowNone = false) const;
+    const Symbol &data(const GlobalState &gs, bool allowNone = false) const;
 
     bool operator==(const SymbolRef &rhs) const;
 

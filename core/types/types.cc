@@ -133,7 +133,7 @@ std::shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, std::shared_ptr<T
              },
              [&](Type *) { result = from; });
     ENFORCE(Types::isSubType(ctx, result, from), "dropSubtypesOf(" + from->toString(ctx) + "," +
-                                                     klass.info(ctx).fullName(ctx) + ") returned " +
+                                                     klass.data(ctx).fullName(ctx) + ") returned " +
                                                      result->toString(ctx) + ", which is not a subtype of the input");
     return result;
 }
@@ -173,7 +173,7 @@ ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : sym
 
 namespace {
 string classNameToString(const GlobalState &gs, core::NameRef nm) {
-    const core::Name &name = nm.name(gs);
+    const core::Name &name = nm.data(gs);
     if (name.kind == core::CONSTANT) {
         return name.cnst.original.toString(gs);
     } else {
@@ -185,11 +185,11 @@ string classNameToString(const GlobalState &gs, core::NameRef nm) {
 }; // namespace
 
 string ruby_typer::core::ClassType::toString(const GlobalState &gs, int tabs) {
-    return classNameToString(gs, this->symbol.info(gs).name);
+    return classNameToString(gs, this->symbol.data(gs).name);
 }
 
 string ruby_typer::core::ClassType::show(const GlobalState &gs) {
-    return classNameToString(gs, this->symbol.info(gs).name);
+    return classNameToString(gs, this->symbol.data(gs).name);
 }
 
 string ruby_typer::core::ClassType::typeName() {
@@ -406,7 +406,7 @@ AliasType::AliasType(core::SymbolRef other) : symbol(other) {}
 
 string AliasType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "AliasType { symbol = " << this->symbol.info(gs).fullName(gs) << " }";
+    buf << "AliasType { symbol = " << this->symbol.data(gs).fullName(gs) << " }";
     return buf.str();
 }
 
@@ -602,24 +602,24 @@ ruby_typer::core::TypeVar::TypeVar(NameRef name) : name(name) {}
 std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::SymbolRef what,
                                                       const std::vector<std::shared_ptr<Type>> &targs,
                                                       core::SymbolRef asIf) {
-    ENFORCE(asIf.info(ctx).isClass());
-    ENFORCE(what.info(ctx).isClass());
-    ENFORCE(what == asIf || what.info(ctx).derivesFrom(ctx, asIf) || asIf.info(ctx).derivesFrom(ctx, what),
-            what.info(ctx).name.toString(ctx), asIf.info(ctx).name.toString(ctx));
+    ENFORCE(asIf.data(ctx).isClass());
+    ENFORCE(what.data(ctx).isClass());
+    ENFORCE(what == asIf || what.data(ctx).derivesFrom(ctx, asIf) || asIf.data(ctx).derivesFrom(ctx, what),
+            what.data(ctx).name.toString(ctx), asIf.data(ctx).name.toString(ctx));
     std::vector<core::SymbolRef> currentAlignment;
     if (targs.empty()) {
         return currentAlignment;
     }
 
-    if (what == asIf || (asIf.info(ctx).isClassClass() && what.info(ctx).isClassClass())) {
-        currentAlignment = what.info(ctx).typeMembers();
+    if (what == asIf || (asIf.data(ctx).isClassClass() && what.data(ctx).isClassClass())) {
+        currentAlignment = what.data(ctx).typeMembers();
     } else {
-        for (auto originalTp : asIf.info(ctx).typeMembers()) {
-            auto name = originalTp.info(ctx).name;
+        for (auto originalTp : asIf.data(ctx).typeMembers()) {
+            auto name = originalTp.data(ctx).name;
             core::SymbolRef align;
             int i = 0;
-            for (auto x : what.info(ctx).typeMembers()) {
-                if (x.info(ctx).name == name) {
+            for (auto x : what.data(ctx).typeMembers()) {
+                if (x.data(ctx).name == name) {
                     align = x;
                     currentAlignment.push_back(x);
                     break;
@@ -636,10 +636,10 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
 
 std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
                                                   const std::vector<std::shared_ptr<Type>> &targs) {
-    core::Symbol &original = what.info(ctx);
-    core::SymbolRef originalOwner = what.info(ctx).enclosingClass(ctx);
+    core::Symbol &original = what.data(ctx);
+    core::SymbolRef originalOwner = what.data(ctx).enclosingClass(ctx);
 
-    if (originalOwner.info(ctx).typeMembers().empty() || (original.resultType == nullptr)) {
+    if (originalOwner.data(ctx).typeMembers().empty() || (original.resultType == nullptr)) {
         return original.resultType;
     }
 
@@ -834,7 +834,7 @@ std::string AppliedType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "AppliedType {" << endl;
     printTabs(buf, tabs + 1);
-    buf << "klass = " << this->klass.info(gs).fullName(gs) << endl;
+    buf << "klass = " << this->klass.data(gs).fullName(gs) << endl;
 
     printTabs(buf, tabs + 1);
     buf << "targs = [" << endl;
@@ -842,8 +842,8 @@ std::string AppliedType::toString(const GlobalState &gs, int tabs) {
     for (auto &targ : this->targs) {
         ++i;
         printTabs(buf, tabs + 2);
-        auto tyMem = this->klass.info(gs).typeMembers()[i];
-        buf << tyMem.info(gs).name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << endl;
+        auto tyMem = this->klass.data(gs).typeMembers()[i];
+        buf << tyMem.data(gs).name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << endl;
     }
     printTabs(buf, tabs + 1);
     buf << "]" << endl;
@@ -860,7 +860,7 @@ std::string AppliedType::show(const GlobalState &gs) {
     } else if (this->klass == core::GlobalState::defn_Hash()) {
         buf << "T::Hash";
     } else {
-        buf << classNameToString(gs, this->klass.info(gs).name);
+        buf << classNameToString(gs, this->klass.data(gs).name);
     }
     buf << "[";
 
@@ -892,8 +892,8 @@ std::string AppliedType::typeName() {
 }
 
 void AppliedType::_sanityCheck(core::Context ctx) {
-    ENFORCE(this->klass.info(ctx).isClass());
-    ENFORCE(this->klass.info(ctx).typeMembers().size() == this->targs.size());
+    ENFORCE(this->klass.data(ctx).isClass());
+    ENFORCE(this->klass.data(ctx).typeMembers().size() == this->targs.size());
     for (auto &targ : this->targs) {
         targ->sanityCheck(ctx);
     }
@@ -929,14 +929,14 @@ std::shared_ptr<Type> AppliedType::instantiate(core::Context ctx, std::vector<Sy
 }
 
 std::shared_ptr<Type> AppliedType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    core::SymbolRef method = this->klass.info(ctx).findMemberTransitive(ctx, name);
+    core::SymbolRef method = this->klass.data(ctx).findMemberTransitive(ctx, name);
 
     if (method.exists()) {
-        core::Symbol &info = method.info(ctx);
+        core::Symbol &data = method.data(ctx);
 
-        if (info.arguments().size() > i) { // todo: this should become actual argument matching
+        if (data.arguments().size() > i) { // todo: this should become actual argument matching
             shared_ptr<Type> resultType =
-                Types::resultTypeAsSeenFrom(ctx, info.arguments()[i], this->klass, this->targs);
+                Types::resultTypeAsSeenFrom(ctx, data.arguments()[i], this->klass, this->targs);
             if (!resultType) {
                 resultType = Types::dynamic();
             }
@@ -958,19 +958,19 @@ LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {}
 SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition) {}
 
 std::string LambdaParam::toString(const GlobalState &gs, int tabs) {
-    return "LambdaParam(" + this->definition.info(gs).fullName(gs) + ")";
+    return "LambdaParam(" + this->definition.data(gs).fullName(gs) + ")";
 }
 
 std::string LambdaParam::show(const GlobalState &gs) {
-    return classNameToString(gs, this->definition.info(gs).name);
+    return classNameToString(gs, this->definition.data(gs).name);
 }
 
 std::string SelfTypeParam::toString(const GlobalState &gs, int tabs) {
-    return "SelfTypeParam(" + this->definition.info(gs).fullName(gs) + ")";
+    return "SelfTypeParam(" + this->definition.data(gs).fullName(gs) + ")";
 }
 
 std::string SelfTypeParam::show(const GlobalState &gs) {
-    return classNameToString(gs, this->definition.info(gs).name);
+    return classNameToString(gs, this->definition.data(gs).name);
 }
 
 std::string LambdaParam::typeName() {

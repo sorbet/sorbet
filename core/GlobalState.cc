@@ -102,16 +102,16 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
     // These will be added to defn_root().members later.
     SymbolRef symRef = SymbolRef(this, symbols.size());
     symbols.emplace_back();
-    Symbol &info = symRef.info(*this, true); // allowing noSymbol is needed because this enters noSymbol.
-    info.name = nameId;
-    info.owner = defn_root();
-    info.superClass = SymbolRef(this, superclass);
-    info.flags = 0;
-    info.setClass();
-    info.setIsModule(isModule);
+    Symbol &data = symRef.data(*this, true); // allowing noSymbol is needed because this enters noSymbol.
+    data.name = nameId;
+    data.owner = defn_root();
+    data.superClass = SymbolRef(this, superclass);
+    data.flags = 0;
+    data.setClass();
+    data.setIsModule(isModule);
 
     if (symRef._id > GlobalState::defn_root()._id) {
-        GlobalState::defn_root().info(*this, true).members.push_back(make_pair(nameId, symRef));
+        GlobalState::defn_root().data(*this, true).members.push_back(make_pair(nameId, symRef));
     }
     return symRef;
 }
@@ -140,10 +140,10 @@ void GlobalState::initEmpty() {
     SymbolRef bottom_id = synthesizeClass(bottom_str, 0);
     SymbolRef root_id = synthesizeClass(root_str, 0);
     GlobalState::defn_root()
-        .info(*this, true)
+        .data(*this, true)
         .members.push_back(make_pair(enterNameConstant(no_symbol_str), no_symbol_id));
-    GlobalState::defn_root().info(*this, true).members.push_back(make_pair(enterNameConstant(top_str), top_id));
-    GlobalState::defn_root().info(*this, true).members.push_back(make_pair(enterNameConstant(bottom_str), bottom_id));
+    GlobalState::defn_root().data(*this, true).members.push_back(make_pair(enterNameConstant(top_str), top_id));
+    GlobalState::defn_root().data(*this, true).members.push_back(make_pair(enterNameConstant(bottom_str), bottom_id));
     SymbolRef nil_id = synthesizeClass(nil_str);
     SymbolRef todo_id = synthesizeClass(todo_str, 0);
     SymbolRef object_id = synthesizeClass(object_str, core::GlobalState::defn_BasicObject()._id);
@@ -161,7 +161,7 @@ void GlobalState::initEmpty() {
     SymbolRef opus_id = synthesizeClass(opus_str, 0, true);
 
     SymbolRef T_id = synthesizeClass(T_str, core::GlobalState::defn_todo()._id, true);
-    T_id.info(*this).setIsModule(true);
+    T_id.data(*this).setIsModule(true);
 
     SymbolRef class_id = synthesizeClass(class_str, 0);
     SymbolRef basicObject_id = synthesizeClass(basicObject_str, 0);
@@ -230,36 +230,36 @@ void GlobalState::initEmpty() {
     ENFORCE(file_id = defn_File());
 
     // Synthesize nil = NilClass()
-    defn_nil().info(*this).resultType = core::Types::nil();
+    defn_nil().data(*this).resultType = core::Types::nil();
 
     // Synthesize untyped = dynamic()
-    defn_untyped().info(*this).resultType = core::Types::dynamic();
+    defn_untyped().data(*this).resultType = core::Types::dynamic();
 
     // <Magic> has a special Type
-    defn_Magic().info(*this).resultType = make_shared<MagicType>();
+    defn_Magic().data(*this).resultType = make_shared<MagicType>();
 
     // Synthesize <Magic>#build_hash(*vs : Object) => Hash
     SymbolRef method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.info(*this).setRepeated();
-    arg.info(*this).resultType = core::Types::Object();
-    method.info(*this).arguments().push_back(arg);
-    method.info(*this).resultType = core::Types::hashOfUntyped();
+    arg.data(*this).setRepeated();
+    arg.data(*this).resultType = core::Types::Object();
+    method.data(*this).arguments().push_back(arg);
+    method.data(*this).resultType = core::Types::hashOfUntyped();
 
     // Synthesize <Magic>#build_array(*vs : Object) => Array
     method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::buildArray());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.info(*this).setRepeated();
-    arg.info(*this).resultType = core::Types::Object();
-    method.info(*this).arguments().push_back(arg);
-    method.info(*this).resultType = core::Types::arrayOfUntyped();
+    arg.data(*this).setRepeated();
+    arg.data(*this).resultType = core::Types::Object();
+    method.data(*this).arguments().push_back(arg);
+    method.data(*this).resultType = core::Types::arrayOfUntyped();
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.info(*this).resultType = core::Types::arrayOfUntyped();
-    method.info(*this).arguments().push_back(arg);
-    method.info(*this).resultType = core::Types::dynamic();
+    arg.data(*this).resultType = core::Types::arrayOfUntyped();
+    method.data(*this).arguments().push_back(arg);
+    method.data(*this).resultType = core::Types::dynamic();
 
     // TODO(pay-server) Synthesize ::M = ::Opus::DB::Model
     //
@@ -268,18 +268,18 @@ void GlobalState::initEmpty() {
     // namer+resolver.
 
     SymbolRef db = enterClassSymbol(Loc::none(), defn_Opus(), enterNameConstant(DB_str));
-    db.info(*this).setIsModule(true);
+    db.data(*this).setIsModule(true);
 
     SymbolRef model = enterClassSymbol(Loc::none(), db, enterNameConstant(model_str));
-    model.info(*this).setIsModule(true);
+    model.data(*this).setIsModule(true);
 
     SymbolRef m = enterStaticFieldSymbol(Loc::none(), defn_root(), enterNameConstant(m_str));
-    m.info(*this).resultType = make_unique<AliasType>(model);
+    m.data(*this).resultType = make_unique<AliasType>(model);
 
     // Allow T::Array[Int] to work as an an alias for Array[Int]
-    T_Array_id.info(*this).resultType = make_shared<ClassType>(T_Array_id);
+    T_Array_id.data(*this).resultType = make_shared<ClassType>(T_Array_id);
     // same for hash.
-    T_Hash_id.info(*this).resultType = make_shared<ClassType>(T_Hash_id);
+    T_Hash_id.data(*this).resultType = make_shared<ClassType>(T_Hash_id);
 
     int reservedCount = 0;
 
@@ -287,19 +287,19 @@ void GlobalState::initEmpty() {
     // Does it in two passes since the singletonClass will go in the defn_root() members which will invalidate the
     // iterator
     vector<SymbolRef> needsResultType;
-    for (auto &info : symbols) {
-        auto ref = info.ref(*this);
+    for (auto &data : symbols) {
+        auto ref = data.ref(*this);
         if (ref._id < defn_root()._id) {
             // These aren't real classes and won't have singleton classes
             continue;
         }
-        if (info.isClass() && !info.resultType) {
-            needsResultType.emplace_back(info.ref(*this));
+        if (data.isClass() && !data.resultType) {
+            needsResultType.emplace_back(data.ref(*this));
         }
     }
     for (auto sym : needsResultType) {
-        Symbol &info = sym.info(*this);
-        info.resultType = make_unique<core::ClassType>(info.singletonClass(*this));
+        Symbol &data = sym.data(*this);
+        data.resultType = make_unique<core::ClassType>(data.singletonClass(*this));
     }
 
     while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
@@ -325,7 +325,7 @@ constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZ
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(name.exists(), "entering symbol with non-existing name");
-    Symbol &ownerScope = owner.info(*this, true);
+    Symbol &ownerScope = owner.data(*this, true);
     auto from = ownerScope.members.begin();
     auto to = ownerScope.members.end();
     histogramInc("symbol_enter_by_name", ownerScope.members.size());
@@ -333,7 +333,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     while (from != to) {
         auto &el = *from;
         if (el.first == name) {
-            ENFORCE((from->second.info(*this).flags & flags) == flags, "existing symbol has wrong flags");
+            ENFORCE((from->second.data(*this).flags & flags) == flags, "existing symbol has wrong flags");
             counterInc("symbols.hit");
             return from->second;
         }
@@ -345,41 +345,41 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 
     SymbolRef ret = SymbolRef(this, symbols.size());
     symbols.emplace_back();
-    Symbol &info = ret.info(*this, true);
-    info.name = name;
-    info.flags = flags;
-    info.owner = owner;
-    info.definitionLoc = loc;
-    if (info.isBlockSymbol(*this)) {
+    Symbol &data = ret.data(*this, true);
+    data.name = name;
+    data.flags = flags;
+    data.owner = owner;
+    data.definitionLoc = loc;
+    if (data.isBlockSymbol(*this)) {
         categoryCounterInc("symbols", "block");
-    } else if (info.isClass()) {
+    } else if (data.isClass()) {
         categoryCounterInc("symbols", "class");
-    } else if (info.isMethod()) {
+    } else if (data.isMethod()) {
         categoryCounterInc("symbols", "method");
-    } else if (info.isField()) {
+    } else if (data.isField()) {
         categoryCounterInc("symbols", "field");
-    } else if (info.isStaticField()) {
+    } else if (data.isStaticField()) {
         categoryCounterInc("symbols", "static_field");
-    } else if (info.isMethodArgument()) {
+    } else if (data.isMethodArgument()) {
         categoryCounterInc("symbols", "argument");
     }
 
     if (!reallocate) {
         ownerScope.members.push_back(make_pair(name, ret));
     } else {
-        owner.info(*this, true).members.push_back(make_pair(name, ret));
+        owner.data(*this, true).members.push_back(make_pair(name, ret));
     }
     return ret;
 }
 
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(name.name(*this).isClassName(*this));
+    ENFORCE(name.data(*this).isClassName(*this));
     return enterSymbol(loc, owner, name, Symbol::Flags::CLASS);
 }
 
 SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance) {
     u4 flags;
-    ENFORCE(owner.info(*this).isClass());
+    ENFORCE(owner.data(*this).isClass());
     if (variance == Variance::Invariant) {
         flags = Symbol::Flags::TYPE_INVARIANT;
     } else if (variance == Variance::CoVariant) {
@@ -392,7 +392,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
 
     flags = flags | Symbol::Flags::TYPE_MEMBER;
     SymbolRef result = enterSymbol(loc, owner, name, flags);
-    owner.info(*this).typeMembers().emplace_back(result);
+    owner.data(*this).typeMembers().emplace_back(result);
     return result;
 }
 
@@ -410,32 +410,32 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 
     flags = flags | Symbol::Flags::TYPE_ARGUMENT;
     SymbolRef result = enterSymbol(loc, owner, name, flags);
-    owner.info(*this).typeMembers().emplace_back(result);
+    owner.data(*this).typeMembers().emplace_back(result);
     return result;
 }
 
 SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    bool isBlock = name.name(*this).kind == NameKind::UNIQUE && name.name(*this).unique.original == Names::blockTemp();
-    ENFORCE(isBlock || owner.info(*this).isClass(), "entering method symbol into not-a-class");
+    bool isBlock = name.data(*this).kind == NameKind::UNIQUE && name.data(*this).unique.original == Names::blockTemp();
+    ENFORCE(isBlock || owner.data(*this).isClass(), "entering method symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD);
 }
 
 SymbolRef GlobalState::enterNewMethodOverload(Loc loc, SymbolRef original, u2 num) {
-    NameRef name = freshNameUnique(UniqueNameKind::Overload, original.info(*this).name, num);
-    SymbolRef res = enterMethodSymbol(loc, original.info(*this).owner, name);
-    res.info(*this).argumentsOrMixins.reserve(original.info(*this).argumentsOrMixins.size());
-    for (auto &arg : original.info(*this).argumentsOrMixins) {
-        Loc loc = arg.info(*this).definitionLoc;
-        NameRef nm = arg.info(*this).name;
+    NameRef name = freshNameUnique(UniqueNameKind::Overload, original.data(*this).name, num);
+    SymbolRef res = enterMethodSymbol(loc, original.data(*this).owner, name);
+    res.data(*this).argumentsOrMixins.reserve(original.data(*this).argumentsOrMixins.size());
+    for (auto &arg : original.data(*this).argumentsOrMixins) {
+        Loc loc = arg.data(*this).definitionLoc;
+        NameRef nm = arg.data(*this).name;
         SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
-        newArg.info(*this).flags = arg.info(*this).flags;
-        res.info(*this).argumentsOrMixins.push_back(newArg);
+        newArg.data(*this).flags = arg.data(*this).flags;
+        res.data(*this).argumentsOrMixins.push_back(newArg);
     }
     return res;
 }
 
 SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.info(*this).isClass(), "entering field symbol into not-a-class");
+    ENFORCE(owner.data(*this).isClass(), "entering field symbol into not-a-class");
     return enterSymbol(loc, owner, name, Symbol::Flags::FIELD);
 }
 
@@ -444,15 +444,15 @@ SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef 
 }
 
 SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name) {
-    ENFORCE(owner.info(*this).isMethod(), "entering method argument symbol into not-a-method");
+    ENFORCE(owner.data(*this).isMethod(), "entering method argument symbol into not-a-method");
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD_ARGUMENT);
 }
 
 LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) const {
     // THIS IS NOT TRUE. Top level code is still a thing
-    // ENFORCE(owner.info(*this).isMethod());
+    // ENFORCE(owner.data(*this).isMethod());
     categoryCounterInc("symbols", "local");
-    if (owner.info(*this).isBlockSymbol(*this) && !name.isBlockClashSafe(*this)) {
+    if (owner.data(*this).isBlockSymbol(*this) && !name.isBlockClashSafe(*this)) {
         // Reproducibly create a name that depends on the owners scope.
         // This is used to distinguish between name "foo" defined in a block
         // and name "foo" defined by outer function.
@@ -461,7 +461,7 @@ LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) const
         // this is fine until method has more than 64k blocks + nested methods + nested classes
         constexpr u2 rangeSize = (256 * 256 - 1);
         LocalVariable ret(name, 1 + owner._id % rangeSize);
-        ENFORCE(owner._id - owner.info(*this).enclosingMethod(*this)._id < rangeSize);
+        ENFORCE(owner._id - owner.data(*this).enclosingMethod(*this)._id < rangeSize);
         // check that did not overflow
         return ret;
     }
@@ -543,7 +543,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-exiting name");
-    ENFORCE(original.name(*this).kind == UTF8, "making a constant name over wrong name kind");
+    ENFORCE(original.data(*this).kind == UTF8, "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(CONSTANT, original.id());
     unsigned int hashTableSize = names_by_hash.size();
@@ -760,9 +760,9 @@ FileRef GlobalState::enterFileAt(std::shared_ptr<File> file, int id) {
 }
 
 LocalVariable GlobalState::newTemporary(NameRef name, SymbolRef owner) {
-    Symbol &info = owner.info(*this);
-    ENFORCE(info.isMethod(), "entering temporary outside of a method");
-    int id = ++(info.uniqueCounter);
+    Symbol &data = owner.data(*this);
+    ENFORCE(data.isMethod(), "entering temporary outside of a method");
+    int id = ++(data.uniqueCounter);
 
     LocalVariable ret(name, id);
     return ret;
@@ -907,7 +907,7 @@ string GlobalState::showAnnotatedSource(FileRef file) {
     };
     sort(annotations.begin(), annotations.end(), compare);
 
-    auto source = file.file(*this).source();
+    auto source = file.data(*this).source();
     string outline(source.begin(), source.end());
     for (auto annotation : annotations) {
         if (annotation.loc.file != file) {
@@ -971,7 +971,7 @@ int GlobalState::totalErrors() const {
 void GlobalState::_error(unique_ptr<BasicError> error) const {
     File::Type source_type = File::Typed;
     if (error->loc.file.exists()) {
-        source_type = error->loc.file.file(*this).source_type;
+        source_type = error->loc.file.data(*this).source_type;
     }
 
     switch (error->what.code) {

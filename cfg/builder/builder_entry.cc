@@ -19,15 +19,15 @@ unique_ptr<CFG> CFGBuilder::buildFor(const core::Context ctx, ast::MethodDef &md
 
     BasicBlock *entry = res->entry();
 
-    entry->exprs.emplace_back(selfSym, md.loc, make_unique<Self>(md.symbol.info(ctx).owner));
-    auto methodName = md.symbol.info(ctx).name;
+    entry->exprs.emplace_back(selfSym, md.loc, make_unique<Self>(md.symbol.data(ctx).owner));
+    auto methodName = md.symbol.data(ctx).name;
 
     int i = -1;
     std::unordered_map<core::SymbolRef, core::LocalVariable> aliases;
-    for (core::SymbolRef argSym : md.symbol.info(ctx).arguments()) {
+    for (core::SymbolRef argSym : md.symbol.data(ctx).arguments()) {
         i++;
-        core::LocalVariable arg(argSym.info(ctx).name, 0);
-        entry->exprs.emplace_back(arg, argSym.info(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
+        core::LocalVariable arg(argSym.data(ctx).name, 0);
+        entry->exprs.emplace_back(arg, argSym.data(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
         aliases[argSym] = arg;
     }
     auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, nullptr, aliases), md.rhs.get(), entry);
@@ -41,10 +41,10 @@ unique_ptr<CFG> CFGBuilder::buildFor(const core::Context ctx, ast::MethodDef &md
     for (auto kv : aliases) {
         core::SymbolRef global = kv.first;
         core::LocalVariable local = kv.second;
-        if (global.info(ctx).isMethodArgument()) {
+        if (global.data(ctx).isMethodArgument()) {
             res->minLoops[local] = 0; // method arguments are pinned only in loops
         } else {
-            aliasesPrefix.emplace_back(local, md.symbol.info(ctx).definitionLoc, make_unique<Alias>(global));
+            aliasesPrefix.emplace_back(local, md.symbol.data(ctx).definitionLoc, make_unique<Alias>(global));
             res->minLoops[local] = -1; // globals are pinned always
         }
     }

@@ -59,7 +59,7 @@ TEST(ASTTest, SymbolRef) { // NOLINT
     core::GlobalState gs(*console);
     gs.initEmpty();
     core::SymbolRef ref = gs.defn_Object();
-    EXPECT_EQ(ref, ref.info(gs).ref(gs));
+    EXPECT_EQ(ref, ref.data(gs).ref(gs));
 }
 
 extern bool fileIsTyped(absl::string_view source);
@@ -110,7 +110,7 @@ TEST(CoreTest, Substitute) { // NOLINT
 
     auto other2 = subst.substitute(other1);
     ASSERT_TRUE(other2.exists());
-    ASSERT_TRUE(other2.name(gs2).kind == core::UTF8);
+    ASSERT_TRUE(other2.data(gs2).kind == core::UTF8);
     ASSERT_EQ("other", other2.toString(gs2));
 }
 

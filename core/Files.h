@@ -40,8 +40,8 @@ public:
         return _id > 0;
     }
 
-    const File &file(const GlobalState &gs) const;
-    File &file(GlobalState &gs) const;
+    const File &data(const GlobalState &gs) const;
+    File &data(GlobalState &gs) const;
 
 private:
     int _id;

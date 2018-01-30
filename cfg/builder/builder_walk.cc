@@ -56,8 +56,8 @@ core::LocalVariable global2Local(core::Context ctx, core::SymbolRef what, CFG &i
                                  std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases) {
     core::LocalVariable &alias = aliases[what];
     if (!alias.exists()) {
-        core::Symbol &info = what.info(ctx);
-        alias = ctx.state.newTemporary(info.name, inWhat.symbol);
+        core::Symbol &data = what.data(ctx);
+        alias = ctx.state.newTemporary(data.name, inWhat.symbol);
     }
     return alias;
 }
@@ -209,14 +209,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops, headerBlock);
                     auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, headerBlock);
                     core::SymbolRef sym = s->block->symbol;
-                    const core::Symbol &info = sym.info(cctx.ctx);
+                    const core::Symbol &data = sym.data(cctx.ctx);
 
-                    for (int i = 0; i < info.argumentsOrMixins.size(); ++i) {
+                    for (int i = 0; i < data.argumentsOrMixins.size(); ++i) {
                         auto &arg = s->block->args[i];
 
                         if (auto id = ast::cast_tree<ast::Local>(arg.get())) {
                             core::LocalVariable argLoc = id->localVariable;
-                            cctx.aliases[info.argumentsOrMixins[i]] = argLoc;
+                            cctx.aliases[data.argumentsOrMixins[i]] = argLoc;
                             bodyBlock->exprs.emplace_back(argLoc, arg->loc, make_unique<LoadArg>(recv, s->fun, i));
                         } else {
                             Error::raise("Should have been removed by namer");

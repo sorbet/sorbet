@@ -264,13 +264,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto file = resolvedTree->loc.file;
         auto checkTree = [&]() {
             if (resolvedTree == nullptr) {
-                auto path = file.file(ctx).path();
+                auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.file(ctx).source_type != ruby_typer::core::File::Typed) {
-                auto path = file.file(ctx).path();
+            if (file.data(ctx).source_type != ruby_typer::core::File::Typed) {
+                auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `@typed` pragma. Sources with ." << ext << ".exp expectations must specify @typed.";
             }
@@ -372,7 +372,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     regex commendOut("^[ ]*#");
 
     for (auto file : files) {
-        string src(file.file(gs).source().begin(), file.file(gs).source().end());
+        string src(file.data(gs).source().begin(), file.data(gs).source().end());
         stringstream ss(src);
         string line;
         int linenum = 1;
@@ -386,7 +386,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 string match = matches[1].str();
                 int len = match.size();
                 if (len < 10 && match.find("MULTI") == string::npos) {
-                    ADD_FAILURE_AT(file.file(gs).path().data(), linenum)
+                    ADD_FAILURE_AT(file.data(gs).path().data(), linenum)
                         << "Too short of a error message at " << len
                         << " characters. Use MULTI or write something longer than: " << match;
                 }
@@ -394,7 +394,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             } else if (regex_match(line, matches, errorPosRegex)) {
                 auto expectedError = expectedErrors.find(make_pair(file, linenum - 1));
                 if (expectedError == expectedErrors.end()) {
-                    ADD_FAILURE_AT(file.file(gs).path().data(), linenum)
+                    ADD_FAILURE_AT(file.data(gs).path().data(), linenum)
                         << "Position comment must come right after a line with a `error:` comment. Found position "
                            "comment on line "
                         << linenum << " matching " << matches[0].str();
@@ -409,7 +409,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     map<pair<ruby_typer::core::FileRef, int>, int> seenErrorLines;
     int unknownLocErrorLine = 1;
     for (auto &error : errors) {
-        auto filePath = error->loc.file.file(gs).path();
+        auto filePath = error->loc.file.data(gs).path();
         if (error->loc.is_none()) {
             // The convention is to put `error: Unknown Location Error` at
             // the top of the file for each of these so that they are eaten
@@ -468,7 +468,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     for (auto &error : expectedErrors) {
-        auto filePath = error.first.first.file(gs).path();
+        auto filePath = error.first.first.data(gs).path();
         if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
             ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected error did not happen.";
         }

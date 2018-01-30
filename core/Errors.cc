@@ -19,7 +19,7 @@ string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
         buf << "???:";
     } else {
         auto pos = loc.position(gs);
-        buf << loc.file.file(gs).path() << ":";
+        buf << loc.file.data(gs).path() << ":";
         buf << pos.first.line;
         if (pos.second.line != pos.first.line) {
             buf << "-";

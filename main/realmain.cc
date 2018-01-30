@@ -105,7 +105,7 @@ public:
     CFG_Collector_and_Typer(const Printers &print) : print(print){};
 
     ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *m) {
-        if (m->loc.file.file(ctx).source_type == core::File::Untyped) {
+        if (m->loc.file.data(ctx).source_type == core::File::Untyped) {
             return m;
         }
 
@@ -135,7 +135,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
     try {
         std::unique_ptr<parser::Node> nodes;
         {
-            tracer->trace("Parsing: {}", file.file(lgs).path());
+            tracer->trace("Parsing: {}", file.data(lgs).path());
             core::ErrorRegion errs(lgs, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
             nodes = parser::Parser::run(lgs, file);
@@ -147,7 +147,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         core::Context ctx(lgs, lgs.defn_root());
         std::unique_ptr<ast::Expression> ast;
         {
-            tracer->trace("Desugaring: {}", file.file(lgs).path());
+            tracer->trace("Desugaring: {}", file.data(lgs).path());
             core::ErrorRegion errs(lgs, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
             ast = ast::desugar::node2Tree(ctx, move(nodes));
@@ -161,7 +161,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         }
         return ast;
     } catch (...) {
-        console_err->error("Exception parsing file: {} (backtrace is above)", file.file(lgs).path());
+        console_err->error("Exception parsing file: {} (backtrace is above)", file.data(lgs).path());
         return make_unique<ast::EmptyTree>(core::Loc::none(file));
     }
 }
@@ -221,9 +221,9 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         }
 
                         if (opts.forceTyped) {
-                            file.file(*lgs).source_type = core::File::Typed;
+                            file.data(*lgs).source_type = core::File::Typed;
                         } else if (opts.forceUntyped) {
-                            file.file(*lgs).source_type = core::File::Untyped;
+                            file.data(*lgs).source_type = core::File::Untyped;
                         }
 
                         tracer->trace("{}", fileName);
@@ -272,7 +272,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                 unique_ptr<ast::Expression> ast;
                 {
                     core::Context ctx(gs, gs.defn_root());
-                    tracer->trace("Naming: {}", file.file(gs).path());
+                    tracer->trace("Naming: {}", file.data(gs).path());
                     core::ErrorRegion errs(gs, silenceErrors);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
@@ -283,7 +283,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                     progressbar_inc(progress.get());
                 }
             } catch (...) {
-                console_err->error("Exception on file: {} (backtrace is above)", file.file(gs).path());
+                console_err->error("Exception on file: {} (backtrace is above)", file.data(gs).path());
             }
         }
         if (opts.showProgress) {
@@ -297,20 +297,20 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
                                           progressbar *progress, bool silenceErrors = false) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
-    bool forceTypedSource = !opts.typedSource.empty() && f.file(gs).path().find(opts.typedSource) != std::string::npos;
+    bool forceTypedSource = !opts.typedSource.empty() && f.data(gs).path().find(opts.typedSource) != std::string::npos;
     if (forceTypedSource) {
         ENFORCE(!opts.print.TypedSource);
         opts.print.TypedSource = true;
-        f.file(gs).source_type = ruby_typer::core::File::Typed;
+        f.data(gs).source_type = ruby_typer::core::File::Typed;
     }
     try {
         core::Context ctx(gs, gs.defn_root());
         if (opts.print.CFG || opts.print.CFGRaw) {
-            cout << "digraph \"" << File::getFileName(f.file(gs).path()) << "\"{" << endl;
+            cout << "digraph \"" << File::getFileName(f.data(gs).path()) << "\"{" << endl;
         }
         CFG_Collector_and_Typer collector(opts.print);
         {
-            tracer->trace("CFG+Infer: {}", f.file(gs).path());
+            tracer->trace("CFG+Infer: {}", f.data(gs).path());
             core::ErrorRegion errs(gs, silenceErrors);
             result = ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolved));
         }
@@ -324,7 +324,7 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
             progressbar_inc(progress);
         }
     } catch (...) {
-        console_err->error("Exception resolving: {} (backtrace is above)", f.file(gs).path());
+        console_err->error("Exception resolving: {} (backtrace is above)", f.data(gs).path());
     }
     if (forceTypedSource) {
         opts.print.TypedSource = false;
@@ -657,7 +657,7 @@ int realmain(int argc, char **argv) {
                 console->error("`-e` implies `--typed always` and you passed `--typed never`");
                 return 1;
             }
-            file.file(gs).source_type = core::File::Typed;
+            file.data(gs).source_type = core::File::Typed;
         }
     }
 
