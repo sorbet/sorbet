@@ -950,14 +950,14 @@ public:
                         ctx.state.error(core::ComplexError(
                             bind.loc, core::errors::Infer::ReturnTypeMismatch,
                             "Returning value that does not conform to method result type",
-                            {core::ErrorSection("Expected " + expectedType->toString(ctx),
+                            {core::ErrorSection("Expected " + expectedType->show(ctx),
                                                 {
                                                     core::ErrorLine::from(ctx.owner.info(ctx).definitionLoc,
                                                                           "Method `{}` has return type `{}`",
                                                                           ctx.owner.info(ctx).name.toString(ctx),
-                                                                          expectedType->toString(ctx)),
+                                                                          expectedType->show(ctx)),
                                                 }),
-                             core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
+                             core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
                                                 typeAndOrigin.origins2Explanations(ctx))}));
                     }
                     tp.type = core::Types::bottom();
@@ -996,9 +996,8 @@ public:
                         } else if (!core::Types::isSubType(ctx, ty.type, c->type)) {
                             ctx.state.error(core::ComplexError(
                                 bind.loc, core::errors::Infer::CastTypeMismatch,
-                                "assert_type!: argument does not have asserted type",
-                                {core::ErrorSection("Expected " + c->type->toString(ctx), {}),
-                                 core::ErrorSection("Got " + ty.type->toString(ctx) + " originating from:",
+                                "assert_type!: argument does not have asserted type " + c->type->show(ctx),
+                                {core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
                                                     ty.origins2Explanations(ctx))}));
                         }
                     }
@@ -1027,8 +1026,8 @@ public:
             } else {
                 if (!core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {
                     ctx.state.error(bind.loc, core::errors::Infer::PinnedVariableMismatch,
-                                    "Changing type of pinned argument, {} is not a subtype of {}",
-                                    tp.type->toString(ctx), cur.type->toString(ctx));
+                                    "Changing type of pinned argument, {} is not a subtype of {}", tp.type->show(ctx),
+                                    cur.type->show(ctx));
                     tp.type = core::Types::dynamic();
                 }
                 clearKnowledge(ctx, bind.bind, knowledgeFilter);

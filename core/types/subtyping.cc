@@ -415,7 +415,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(const core::Context ctx, shared_ptr
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
-        if (sym1.info(ctx).isClass() && sym2.info(ctx).isClass()) {
+        if (sym1.info(ctx).isClassClass() && sym2.info(ctx).isClassClass()) {
             categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
@@ -987,6 +987,10 @@ std::shared_ptr<Type> AliasType::instantiate(const core::Context ctx, std::vecto
 
 std::string TypeConstructor::toString(const GlobalState &gs, int tabs) {
     return "TypeConstructor";
+}
+
+std::string TypeConstructor::show(const GlobalState &gs) {
+    Error::raise("should never happen");
 }
 
 std::string TypeConstructor::typeName() {

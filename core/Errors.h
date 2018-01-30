@@ -56,6 +56,8 @@ struct ErrorSection {
     ErrorSection(std::string header) : header(header) {}
     ErrorSection(std::string header, std::initializer_list<ErrorLine> messages) : header(header), messages(messages) {}
     ErrorSection(std::string header, std::vector<ErrorLine> messages) : header(header), messages(messages) {}
+    ErrorSection(std::initializer_list<ErrorLine> messages) : ErrorSection("", messages) {}
+    ErrorSection(std::vector<ErrorLine> messages) : ErrorSection("", messages) {}
     std::string toString(const GlobalState &gs);
 };
 
@@ -67,7 +69,7 @@ struct ComplexError : public BasicError {
     ComplexError(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections)
         : BasicError(loc, what, header), sections(sections) {}
     ComplexError(Loc loc, ErrorClass what, std::string header, ErrorLine other_line)
-        : BasicError(loc, what, header), sections({ErrorSection("", {other_line})}) {}
+        : BasicError(loc, what, header), sections({ErrorSection({other_line})}) {}
 };
 
 /*

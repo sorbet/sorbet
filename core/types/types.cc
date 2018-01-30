@@ -188,6 +188,10 @@ string ruby_typer::core::ClassType::toString(const GlobalState &gs, int tabs) {
     return classNameToString(gs, this->symbol.info(gs).name);
 }
 
+string ruby_typer::core::ClassType::show(const GlobalState &gs) {
+    return classNameToString(gs, this->symbol.info(gs).name);
+}
+
 string ruby_typer::core::ClassType::typeName() {
     return "ClassType";
 }
@@ -253,6 +257,10 @@ string LiteralType::toString(const GlobalState &gs, int tabs) {
     return this->underlying->toString(gs, tabs) + "(" + value + ")";
 }
 
+string LiteralType::show(const GlobalState &gs) {
+    return this->underlying->show(gs);
+}
+
 ruby_typer::core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
     : ProxyType(Types::arrayOfUntyped()), elems(move(elements)) {}
 
@@ -306,6 +314,22 @@ string TupleType::toString(const GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+string TupleType::show(const GlobalState &gs) {
+    stringstream buf;
+    buf << "[";
+    bool first = true;
+    for (auto &el : this->elems) {
+        if (first) {
+            first = false;
+        } else {
+            buf << ", ";
+        }
+        buf << el->show(gs);
+    }
+    buf << "]";
+    return buf.str();
+}
+
 void TupleType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
 }
@@ -329,6 +353,30 @@ string ShapeType::toString(const GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+string ShapeType::show(const GlobalState &gs) {
+    stringstream buf;
+    buf << "{";
+    auto valueIterator = this->values.begin();
+    bool first = true;
+    for (auto &key : this->keys) {
+        if (first) {
+            first = false;
+        } else {
+            buf << ", ";
+        }
+        SymbolRef undSymbol = cast_type<ClassType>(key->underlying.get())->symbol;
+        if (undSymbol == GlobalState::defn_Symbol()) {
+            buf << NameRef(gs, key->value).toString(gs) << ": ";
+        } else {
+            buf << key->show(gs) << " => ";
+        }
+        buf << (*valueIterator)->show(gs);
+        ++valueIterator;
+    }
+    buf << "}";
+    return buf.str();
+}
+
 void ShapeType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
     ENFORCE(this->values.size() == this->keys.size());
@@ -346,6 +394,10 @@ string MagicType::toString(const GlobalState &gs, int tabs) {
     return underlying->toString(gs, tabs);
 }
 
+string MagicType::show(const GlobalState &gs) {
+    return underlying->show(gs);
+}
+
 void MagicType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
 }
@@ -356,6 +408,10 @@ string AliasType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "AliasType { symbol = " << this->symbol.info(gs).fullName(gs) << " }";
     return buf.str();
+}
+
+string AliasType::show(const GlobalState &gs) {
+    Error::raise("should never happen");
 }
 
 string AndType::toString(const GlobalState &gs, int tabs) {
@@ -381,6 +437,17 @@ string AndType::toString(const GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+string AndType::show(const GlobalState &gs) {
+    stringstream buf;
+
+    buf << "T.all(";
+    buf << this->left->show(gs);
+    buf << ", ";
+    buf << this->right->show(gs);
+    buf << ")";
+    return buf.str();
+}
+
 string OrType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
     bool leftBrace = isa_type<AndType>(this->left.get());
@@ -401,6 +468,17 @@ string OrType::toString(const GlobalState &gs, int tabs) {
     if (rightBrace) {
         buf << ")";
     }
+    return buf.str();
+}
+
+string OrType::show(const GlobalState &gs) {
+    stringstream buf;
+
+    buf << "T.any(";
+    buf << this->left->show(gs);
+    buf << ", ";
+    buf << this->right->show(gs);
+    buf << ")";
     return buf.str();
 }
 
@@ -624,6 +702,14 @@ std::string TypeVar::toString(const GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+std::string TypeVar::show(const GlobalState &gs) {
+    if (isInstantiated) {
+        return this->instantiation->show(gs);
+    } else {
+        return name.toString(gs);
+    }
+}
+
 std::string TypeVar::typeName() {
     return "TypeVar";
 }
@@ -767,6 +853,31 @@ std::string AppliedType::toString(const GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+std::string AppliedType::show(const GlobalState &gs) {
+    stringstream buf;
+    if (this->klass == core::GlobalState::defn_Array()) {
+        buf << "T::Array";
+    } else if (this->klass == core::GlobalState::defn_Hash()) {
+        buf << "T::Hash";
+    } else {
+        buf << classNameToString(gs, this->klass.info(gs).name);
+    }
+    buf << "[";
+
+    bool first = true;
+    for (auto &targ : this->targs) {
+        if (first) {
+            first = false;
+        } else {
+            buf << ", ";
+        }
+        buf << targ->show(gs);
+    }
+
+    buf << "]";
+    return buf.str();
+}
+
 bool AppliedType::isFullyDefined() {
     for (auto &targ : this->targs) {
         if (!targ->isFullyDefined()) {
@@ -850,8 +961,16 @@ std::string LambdaParam::toString(const GlobalState &gs, int tabs) {
     return "LambdaParam(" + this->definition.info(gs).fullName(gs) + ")";
 }
 
+std::string LambdaParam::show(const GlobalState &gs) {
+    return classNameToString(gs, this->definition.info(gs).name);
+}
+
 std::string SelfTypeParam::toString(const GlobalState &gs, int tabs) {
     return "SelfTypeParam(" + this->definition.info(gs).fullName(gs) + ")";
+}
+
+std::string SelfTypeParam::show(const GlobalState &gs) {
+    return classNameToString(gs, this->definition.info(gs).name);
 }
 
 std::string LambdaParam::typeName() {

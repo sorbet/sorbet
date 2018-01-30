@@ -117,15 +117,13 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass,
     }
     ctx.state.error(core::ComplexError(
         callLoc, core::errors::Infer::MethodArgumentMismatch,
-        "Argument " + argSym.name.toString(ctx) + " does not match expected type.",
-        {core::ErrorSection(
-             "Expected " + expectedType->toString(ctx),
-             {
-                 core::ErrorLine::from(argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
-                                       method.info(ctx).name.toString(ctx), argSym.name.toString(ctx),
-                                       expectedType->toString(ctx)),
-             }),
-         core::ErrorSection("Got " + argTpe.type->toString(ctx) + " originating from:",
+        "Argument " + argSym.name.toString(ctx) + " does not match expected type " + expectedType->show(ctx),
+        {core::ErrorSection({
+             core::ErrorLine::from(argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
+                                   method.info(ctx).name.toString(ctx), argSym.name.toString(ctx),
+                                   expectedType->show(ctx)),
+         }),
+         core::ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:",
                             argTpe.origins2Explanations(ctx))}));
 }
 
@@ -268,10 +266,10 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     if (!mayBeOverloaded.exists()) {
         string maybeComponent;
         if (fullType.get() != this) {
-            maybeComponent = " component of " + fullType->toString(ctx);
+            maybeComponent = " component of " + fullType->show(ctx);
         }
         ctx.state.error(callLoc, core::errors::Infer::UnknownMethod, "Method {} does not exist on {}{}",
-                        fun.name(ctx).toString(ctx), this->toString(ctx), maybeComponent);
+                        fun.name(ctx).toString(ctx), this->show(ctx), maybeComponent);
         return Types::dynamic();
     }
 
@@ -404,7 +402,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
             --aend;
             ctx.state.error(core::ComplexError(
                 callLoc, core::errors::Infer::MethodArgumentMismatch, "Passing an untyped hash to keyword arguments",
-                {core::ErrorSection("Got " + hashArg.type->toString(ctx) + " originating from:",
+                {core::ErrorSection("Got " + hashArg.type->show(ctx) + " originating from:",
                                     hashArg.origins2Explanations(ctx))}));
         }
     }

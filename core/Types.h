@@ -92,7 +92,10 @@ public:
     Type() = default;
     Type(const Type &obj) = delete;
     virtual ~Type() = default;
+    // Internal printer.
     virtual std::string toString(const GlobalState &gs, int tabs = 0) = 0;
+    // User visible type. Should exactly match what the user can write.
+    virtual std::string show(const GlobalState &gs) = 0;
     virtual std::string typeName() = 0;
     virtual std::shared_ptr<Type> instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                               const std::vector<std::shared_ptr<Type>> &targs) = 0;
@@ -149,6 +152,7 @@ public:
     virtual int kind() final;
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
@@ -172,6 +176,7 @@ public:
     virtual int kind() final;
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
@@ -217,6 +222,7 @@ public:
     virtual int kind() final;
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
@@ -258,6 +264,7 @@ public:
     LiteralType(bool val);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0);
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName();
     virtual bool isFullyDefined() final;
 
@@ -274,6 +281,7 @@ public:
     ShapeType(std::vector<std::shared_ptr<LiteralType>> &keys, std::vector<std::shared_ptr<Type>> &values);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0);
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
@@ -292,6 +300,7 @@ public:
     TupleType(std::vector<std::shared_ptr<Type>> &elems);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0);
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName();
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -309,6 +318,7 @@ class MagicType final : public ProxyType {
 public:
     MagicType();
     virtual std::string toString(const GlobalState &gs, int tabs = 0);
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
@@ -330,6 +340,7 @@ public:
     NameRef name;
     TypeVar(NameRef name);
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
@@ -352,6 +363,7 @@ public:
     AppliedType(core::SymbolRef klass, std::vector<std::shared_ptr<Type>> targs) : klass(klass), targs(targs){};
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
@@ -376,6 +388,7 @@ public:
     TypeConstructor(core::SymbolRef proto, const std::vector<std::shared_ptr<Type>> &targs);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
 
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
@@ -398,6 +411,7 @@ public:
 
     LambdaParam(const SymbolRef definition);
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
 
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
@@ -420,6 +434,7 @@ public:
 
     SelfTypeParam(const SymbolRef definition);
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
 
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
@@ -440,6 +455,7 @@ class AliasType final : public Type {
 public:
     AliasType(SymbolRef other);
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
+    virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
