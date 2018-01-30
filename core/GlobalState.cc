@@ -448,7 +448,7 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD_ARGUMENT);
 }
 
-LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
+LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) const {
     // THIS IS NOT TRUE. Top level code is still a thing
     // ENFORCE(owner.info(*this).isMethod());
     categoryCounterInc("symbols", "local");
@@ -461,7 +461,7 @@ LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) {
         // this is fine until method has more than 64k blocks + nested methods + nested classes
         constexpr u2 rangeSize = (256 * 256 - 1);
         LocalVariable ret(name, 1 + owner._id % rangeSize);
-        ENFORCE(owner._id - Context(*this, owner).enclosingMethod()._id < rangeSize);
+        ENFORCE(owner._id - owner.info(*this).enclosingMethod(*this)._id < rangeSize);
         // check that did not overflow
         return ret;
     }
@@ -768,7 +768,7 @@ LocalVariable GlobalState::newTemporary(NameRef name, SymbolRef owner) {
     return ret;
 }
 
-unsigned int GlobalState::symbolsUsed() {
+unsigned int GlobalState::symbolsUsed() const {
     return symbols.size();
 }
 
@@ -776,11 +776,11 @@ unsigned int GlobalState::filesUsed() const {
     return files.size();
 }
 
-unsigned int GlobalState::namesUsed() {
+unsigned int GlobalState::namesUsed() const {
     return names.size();
 }
 
-string GlobalState::toString(bool showHidden) {
+string GlobalState::toString(bool showHidden) const {
     return defn_root().toString(*this, 0, showHidden);
 }
 
@@ -960,7 +960,7 @@ string GlobalState::showAnnotatedSource(FileRef file) {
     return outline;
 }
 
-int GlobalState::totalErrors() {
+int GlobalState::totalErrors() const {
     int sum = 0;
     for (const auto &e : this->errors.histogram) {
         sum += e.second;
@@ -968,7 +968,7 @@ int GlobalState::totalErrors() {
     return sum;
 }
 
-void GlobalState::_error(unique_ptr<BasicError> error) {
+void GlobalState::_error(unique_ptr<BasicError> error) const {
     File::Type source_type = File::Typed;
     if (error->loc.file.exists()) {
         source_type = error->loc.file.file(*this).source_type;

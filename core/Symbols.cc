@@ -7,6 +7,7 @@
 
 template class std::vector<ruby_typer::core::TypeAndOrigins>;
 template class std::vector<ruby_typer::core::LocalVariable>;
+template class std::vector<std::pair<ruby_typer::core::NameRef, ruby_typer::core::SymbolRef>>;
 
 namespace ruby_typer {
 namespace core {
@@ -28,7 +29,7 @@ bool Symbol::isConstructor(GlobalState &gs) const {
     return this->name._id == 1;
 }
 
-std::vector<std::shared_ptr<core::Type>> Symbol::selfTypeArgs(GlobalState &gs) {
+std::vector<std::shared_ptr<core::Type>> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClass()); // should be removed when we have generic methods
     std::vector<shared_ptr<core::Type>> targs;
     for (auto tm : typeMembers()) {
@@ -36,7 +37,7 @@ std::vector<std::shared_ptr<core::Type>> Symbol::selfTypeArgs(GlobalState &gs) {
     }
     return targs;
 }
-std::shared_ptr<core::Type> Symbol::selfType(GlobalState &gs) {
+std::shared_ptr<core::Type> Symbol::selfType(const GlobalState &gs) const {
     ENFORCE(isClass());
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
@@ -338,12 +339,12 @@ SymbolRef Symbol::dealias(const GlobalState &gs) const {
     return this->ref(gs);
 }
 
-bool Symbol::isBlockSymbol(GlobalState &gs) const {
-    core::Name &nm = name.name(gs);
+bool Symbol::isBlockSymbol(const GlobalState &gs) const {
+    const core::Name &nm = name.name(gs);
     return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
 }
 
-SymbolRef SymbolRef::dealiasAt(GlobalState &gs, core::SymbolRef klass) {
+SymbolRef SymbolRef::dealiasAt(GlobalState &gs, core::SymbolRef klass) const {
     ENFORCE(info(gs).isTypeMember());
     if (info(gs).owner == klass) {
         return *this;
@@ -410,13 +411,37 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
 }
 
+SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
+    if (isMethod()) {
+        return ref(gs);
+    }
+    SymbolRef owner = this->owner;
+    while (owner != GlobalState::defn_root() && !owner.info(gs, false).isMethod()) {
+        ENFORCE(owner.exists(), "non-existing owner in enclosingMethod");
+        owner = owner.info(gs).owner;
+    }
+    return owner;
+}
+
+SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
+    SymbolRef owner = ref(gs);
+    while (owner != GlobalState::defn_root() && !owner.info(gs, false).isClass()) {
+        ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
+        owner = owner.info(gs).owner;
+    }
+    if (owner == GlobalState::defn_root()) {
+        return GlobalState::noSymbol();
+    }
+    return owner;
+}
+
 LocalVariable::LocalVariable(NameRef name, u4 unique) : _name(name), unique(unique) {}
 LocalVariable::LocalVariable() : _name() {}
 bool LocalVariable::exists() const {
     return _name._id > 0;
 }
 
-bool LocalVariable::isSyntheticTemporary(GlobalState &gs) const {
+bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
     if (_name.name(gs).kind == NameKind::UNIQUE)
         return true;
     if (unique == 0) {
@@ -430,7 +455,7 @@ bool LocalVariable::isSyntheticTemporary(GlobalState &gs) const {
            _name == core::Names::castTemp() || _name == core::Names::finalReturn();
 }
 
-bool LocalVariable::isAliasForGlobal(GlobalState &gs) const {
+bool LocalVariable::isAliasForGlobal(const GlobalState &gs) const {
     return _name == core::Names::cfgAlias();
 }
 

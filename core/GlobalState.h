@@ -52,7 +52,7 @@ public:
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
-    LocalVariable enterLocalSymbol(SymbolRef owner, NameRef name);
+    LocalVariable enterLocalSymbol(SymbolRef owner, NameRef name) const;
 
     LocalVariable newTemporary(NameRef name, SymbolRef owner);
 
@@ -68,14 +68,14 @@ public:
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef enterFileAt(std::shared_ptr<File> file, int id);
 
-    unsigned int namesUsed();
+    unsigned int namesUsed() const;
 
-    unsigned int symbolsUsed();
+    unsigned int symbolsUsed() const;
     unsigned int filesUsed() const;
 
     void sanityCheck() const;
 
-    std::string toString(bool showHidden = false);
+    std::string toString(bool showHidden = false) const;
     std::string showAnnotatedSource(FileRef file);
     enum AnnotationPos { BEFORE, AFTER };
     struct Annotation {
@@ -88,19 +88,20 @@ public:
         annotations.emplace_back(loc, str, pos);
     }
 
-    bool hadCriticalError() {
+    bool hadCriticalError() const {
         return errors.hadCritical;
     };
 
-    template <typename... Args> void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) {
+    template <typename... Args>
+    void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) const {
         std::string formatted = fmt::format(msg, args...);
         _error(std::make_unique<BasicError>(BasicError(loc, what, formatted)));
     }
-    void error(ComplexError error) {
+    void error(ComplexError error) const {
         _error(std::make_unique<ComplexError>(error));
     }
 
-    int totalErrors();
+    int totalErrors() const;
     void flushErrors();
     std::vector<std::unique_ptr<BasicError>> drainErrors();
     std::vector<std::pair<int, int>> errorHistogram() {
@@ -295,7 +296,7 @@ private:
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;
     std::vector<Annotation> annotations;
-    struct {
+    mutable struct {
         std::vector<std::unique_ptr<BasicError>> buffer;
         std::vector<std::pair<int, int>> histogram;
         bool hadCritical = false;
@@ -311,13 +312,9 @@ private:
     bool symbolTableFrozen = false;
     bool fileTableFrozen = false;
 
-    void _error(std::unique_ptr<BasicError> error);
+    void _error(std::unique_ptr<BasicError> error) const;
 
     void expandNames();
-
-    void expandSymbols();
-
-    void complete(SymbolRef id, Symbol &currentInfo);
 
     SymbolRef synthesizeClass(absl::string_view name, u4 superclass = core::GlobalState::defn_todo()._id,
                               bool isModule = false);

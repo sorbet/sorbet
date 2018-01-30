@@ -209,7 +209,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops, headerBlock);
                     auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1, headerBlock);
                     core::SymbolRef sym = s->block->symbol;
-                    core::Symbol &info = sym.info(cctx.ctx);
+                    const core::Symbol &info = sym.info(cctx.ctx);
 
                     for (int i = 0; i < info.argumentsOrMixins.size(); ++i) {
                         auto &arg = s->block->args[i];

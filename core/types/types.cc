@@ -637,7 +637,7 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
 std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
                                                   const std::vector<std::shared_ptr<Type>> &targs) {
     core::Symbol &original = what.info(ctx);
-    core::SymbolRef originalOwner = ctx.withOwner(what).enclosingClass();
+    core::SymbolRef originalOwner = what.info(ctx).enclosingClass(ctx);
 
     if (originalOwner.info(ctx).typeMembers().empty() || (original.resultType == nullptr)) {
         return original.resultType;

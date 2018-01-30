@@ -1,4 +1,5 @@
 #include "namer/namer.h"
+#include "../core/Context.h"
 #include "../core/Symbols.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -135,7 +136,7 @@ class NameInserter {
     }
 
     core::SymbolRef methodOwner(core::Context ctx) {
-        core::SymbolRef owner = ctx.enclosingClass();
+        core::SymbolRef owner = ctx.owner.info(ctx).enclosingClass(ctx);
         if (owner == core::GlobalState::noSymbol()) {
             // Root methods end up going on object
             owner = core::GlobalState::defn_Object();
@@ -215,9 +216,9 @@ public:
     ast::Expression *postTransformSend(core::Context ctx, ast::Send *original) {
         if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
             original->args.clear();
-            core::SymbolRef method = ctx.enclosingMethod();
+            core::SymbolRef method = ctx.owner.info(ctx).enclosingMethod(ctx);
             if (method.exists()) {
-                for (auto arg : ctx.enclosingMethod().info(ctx).argumentsOrMixins) {
+                for (auto arg : ctx.owner.info(ctx).enclosingMethod(ctx).info(ctx).argumentsOrMixins) {
                     original->args.emplace_back(make_unique<ast::Ident>(original->loc, arg));
                 }
             } else {
@@ -476,7 +477,8 @@ public:
                     }
                 }
 
-                auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.enclosingClass(), typeName->cnst, variance);
+                auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.owner.info(ctx).enclosingClass(ctx), typeName->cnst,
+                                                     variance);
 
                 if (!send->args.empty()) {
                     auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
@@ -504,7 +506,7 @@ public:
     }
 
     ast::Expression *postTransformYield(core::Context ctx, ast::Yield *yield) {
-        auto method = ctx.enclosingMethod();
+        auto method = ctx.owner.info(ctx).enclosingMethod(ctx);
         core::SymbolRef blockArg;
         for (auto arg : method.info(ctx).arguments()) {
             if (arg.info(ctx).isBlockArgument()) {
