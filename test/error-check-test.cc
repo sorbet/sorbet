@@ -24,11 +24,11 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     ruby_typer::core::UnfreezeNameTable nt(gs);
     ruby_typer::core::UnfreezeSymbolTable st(gs);
     ruby_typer::core::UnfreezeFileTable ft(gs);
-    ruby_typer::core::Context context(gs, gs.defn_root());
+    ruby_typer::core::Context ctx(gs, gs.defn_root());
     auto ast = ruby_typer::parser::Parser::run(gs, "<test input>", "a");
 
     try {
-        auto desugared = ruby_typer::ast::desugar::node2Tree(context, move(ast));
+        auto desugared = ruby_typer::ast::desugar::node2Tree(ctx, move(ast));
     } catch (...) {
     }
 

@@ -157,7 +157,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
     ruby_typer::core::GlobalState gs(*console);
     ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
-    ruby_typer::core::Context context(gs, gs.defn_root());
+    ruby_typer::core::Context ctx(gs, gs.defn_root());
 
     // Parser
     vector<ruby_typer::core::FileRef> files;
@@ -199,7 +199,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            desugared = ruby_typer::ast::desugar::node2Tree(context, move(nodes));
+            desugared = ruby_typer::ast::desugar::node2Tree(ctx, move(nodes));
         }
 
         expectation = test.expectations.find("ast");
@@ -223,7 +223,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = ruby_typer::namer::Namer::run(context, move(desugared));
+            namedTree = ruby_typer::namer::Namer::run(ctx, move(desugared));
         }
         trees.emplace_back(move(namedTree));
     }
@@ -231,7 +231,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     {
         ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
         ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-        trees = ruby_typer::resolver::Resolver::run(context, move(trees));
+        trees = ruby_typer::resolver::Resolver::run(ctx, move(trees));
     }
 
     auto expectation = test.expectations.find("name-table");
@@ -264,13 +264,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto file = resolvedTree->loc.file;
         auto checkTree = [&]() {
             if (resolvedTree == nullptr) {
-                auto path = file.file(context).path();
+                auto path = file.file(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.file(context).source_type != ruby_typer::core::File::Typed) {
-                auto path = file.file(context).path();
+            if (file.file(ctx).source_type != ruby_typer::core::File::Typed) {
+                auto path = file.file(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `@typed` pragma. Sources with ." << ext << ".exp expectations must specify @typed.";
             }
@@ -282,7 +282,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg");
             CFG_Collector_and_Typer collector;
-            auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
+            auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
             dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
@@ -302,7 +302,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg-raw");
             CFG_Collector_and_Typer collector(true);
-            auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
+            auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
             dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
@@ -322,7 +322,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("typed-source");
             CFG_Collector_and_Typer collector(false, true);
-            ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
+            ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolvedTree));
 
             got["typed-source"].append(gs.showAnnotatedSource(file));
 
@@ -336,7 +336,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("infer");
             CFG_Collector_and_Typer collector;
-            ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolvedTree));
+            ruby_typer::ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolvedTree));
             auto checker = test.folder + expectation->second;
             SCOPED_TRACE(checker);
 

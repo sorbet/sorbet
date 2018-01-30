@@ -144,13 +144,13 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
             cout << nodes->toString(lgs, 0) << endl;
         }
 
-        core::Context context(lgs, lgs.defn_root());
+        core::Context ctx(lgs, lgs.defn_root());
         std::unique_ptr<ast::Expression> ast;
         {
             tracer->trace("Desugaring: {}", file.file(lgs).path());
             core::ErrorRegion errs(lgs, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
-            ast = ast::desugar::node2Tree(context, move(nodes));
+            ast = ast::desugar::node2Tree(ctx, move(nodes));
         }
         if (print.Desugared) {
             cout << ast->toString(lgs, 0) << endl;
@@ -254,9 +254,9 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             resultq.pop(&result);
             core::GlobalSubstitution substitution(*result.gs, gs);
             counterConsume(move(result.counters));
-            core::Context context(gs, gs.defn_root());
+            core::Context ctx(gs, gs.defn_root());
             for (auto &tree : result.trees) {
-                trees.emplace_back(ast::Substitute::run(context, substitution, move(tree)));
+                trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
             }
         }
     }
@@ -271,12 +271,12 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             try {
                 unique_ptr<ast::Expression> ast;
                 {
-                    core::Context context(gs, gs.defn_root());
+                    core::Context ctx(gs, gs.defn_root());
                     tracer->trace("Naming: {}", file.file(gs).path());
                     core::ErrorRegion errs(gs, silenceErrors);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-                    ast = namer::Namer::run(context, move(tree));
+                    ast = namer::Namer::run(ctx, move(tree));
                 }
                 result.emplace_back(move(ast));
                 if (opts.showProgress) {
@@ -304,7 +304,7 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
         f.file(gs).source_type = ruby_typer::core::File::Typed;
     }
     try {
-        core::Context context(gs, gs.defn_root());
+        core::Context ctx(gs, gs.defn_root());
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "digraph \"" << File::getFileName(f.file(gs).path()) << "\"{" << endl;
         }
@@ -312,7 +312,7 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
         {
             tracer->trace("CFG+Infer: {}", f.file(gs).path());
             core::ErrorRegion errs(gs, silenceErrors);
-            result = ast::TreeMap<CFG_Collector_and_Typer>::apply(context, collector, move(resolved));
+            result = ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolved));
         }
         if (opts.print.TypedSource) {
             cout << gs.showAnnotatedSource(f);
@@ -342,14 +342,14 @@ vector<unique_ptr<ast::Expression>> typecheck(core::GlobalState &gs, vector<uniq
         status.reset(statusbar_new("Resolving"));
     }
     try {
-        core::Context context(gs, gs.defn_root());
+        core::Context ctx(gs, gs.defn_root());
         {
             Timer timeit(console_err, "Resolving");
             tracer->trace("Resolving (global pass)...");
             core::ErrorRegion errs(gs, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-            what = resolver::Resolver::run(context, move(what));
+            what = resolver::Resolver::run(ctx, move(what));
         }
     } catch (...) {
         console_err->error("Exception resolving (backtrace is above)");
