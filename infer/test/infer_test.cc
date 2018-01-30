@@ -73,12 +73,12 @@ TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
 TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo < Bar; end");
-    auto &rootScope = core::GlobalState::defn_root().info(ctx);
+    auto &rootScope = core::GlobalState::defn_root().data(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 4];
     auto fooPair = rootScope.members[rootScope.members.size() - 2];
-    ASSERT_EQ("<constant:Foo>", fooPair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo>", fooPair.first.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Bar>", barPair.first.data(ctx).toString(ctx));
 
     auto fooType = make_shared<core::ClassType>(fooPair.second);
     auto barType = make_shared<core::ClassType>(barPair.second);
@@ -92,14 +92,14 @@ TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
 TEST_F(InferFixture, ClassesLubs) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    auto &rootScope = core::GlobalState::defn_root().info(ctx);
+    auto &rootScope = core::GlobalState::defn_root().data(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 6];
     auto foo1Pair = rootScope.members[rootScope.members.size() - 4];
     auto foo2Pair = rootScope.members[rootScope.members.size() - 2];
-    ASSERT_EQ("<constant:Foo2>", foo2Pair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo1>", foo1Pair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo2>", foo2Pair.first.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo1>", foo1Pair.first.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Bar>", barPair.first.data(ctx).toString(ctx));
 
     auto foo1Type = make_shared<core::ClassType>(foo1Pair.second);
     auto foo2Type = make_shared<core::ClassType>(foo2Pair.second);
@@ -142,14 +142,14 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
 TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    auto &rootScope = core::GlobalState::defn_root().info(ctx);
+    auto &rootScope = core::GlobalState::defn_root().data(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 6];
     auto foo1Pair = rootScope.members[rootScope.members.size() - 4];
     auto foo2Pair = rootScope.members[rootScope.members.size() - 2];
-    ASSERT_EQ("<constant:Foo2>", foo2Pair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo1>", foo1Pair.first.name(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Bar>", barPair.first.name(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo2>", foo2Pair.first.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo1>", foo1Pair.first.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Bar>", barPair.first.data(ctx).toString(ctx));
 
     auto foo1Type = make_shared<core::ClassType>(foo1Pair.second);
     auto foo2Type = make_shared<core::ClassType>(foo2Pair.second);

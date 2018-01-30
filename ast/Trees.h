@@ -48,11 +48,11 @@ enum ClassDefKind : u1 { Module, Class };
 class ClassDef final : public Declaration {
 public:
     inline core::SymbolRef parent(core::Context ctx) {
-        return symbol.info(ctx).parent(ctx);
+        return symbol.data(ctx).parent(ctx);
     }
 
     inline std::vector<core::SymbolRef> &mixins(core::Context ctx) {
-        return symbol.info(ctx).mixins(ctx);
+        return symbol.data(ctx).mixins(ctx);
     }
 
     static constexpr int EXPECTED_RHS_COUNT = 4;

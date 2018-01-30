@@ -927,14 +927,14 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
             },
             [&](parser::Complex *complex) {
                 auto kernel = mkIdent(loc, core::GlobalState::defn_Kernel());
-                core::NameRef complex_name = core::GlobalState::defn_Complex().info(ctx).name;
+                core::NameRef complex_name = core::GlobalState::defn_Complex().data(ctx).name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->value);
                 auto send = mkSend1(loc, move(kernel), complex_name, make_unique<StringLit>(loc, value));
                 result.swap(send);
             },
             [&](parser::Rational *complex) {
                 auto kernel = mkIdent(loc, core::GlobalState::defn_Kernel());
-                core::NameRef complex_name = core::GlobalState::defn_Rational().info(ctx).name;
+                core::NameRef complex_name = core::GlobalState::defn_Rational().data(ctx).name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->val);
                 auto send = mkSend1(loc, move(kernel), complex_name, make_unique<StringLit>(loc, value));
                 result.swap(send);
@@ -1051,7 +1051,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::IRange *ret) {
-                core::NameRef range_name = core::GlobalState::defn_Range().info(ctx).name;
+                core::NameRef range_name = core::GlobalState::defn_Range().data(ctx).name;
                 unique_ptr<Expression> range = mkConstant(loc, mkEmptyTree(loc), range_name);
                 auto from = node2TreeImpl(ctx, move(ret->from), uniqueCounter);
                 auto to = node2TreeImpl(ctx, move(ret->to), uniqueCounter);

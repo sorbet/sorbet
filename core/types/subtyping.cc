@@ -180,8 +180,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
             }
             return OrType::make_shared(t1, t2);
         }
-        bool rtl = a1->klass == a2->klass || a1->klass.info(ctx).derivesFrom(ctx, a2->klass);
-        bool ltr = !rtl && a2->klass.info(ctx).derivesFrom(ctx, a1->klass);
+        bool rtl = a1->klass == a2->klass || a1->klass.data(ctx).derivesFrom(ctx, a2->klass);
+        bool ltr = !rtl && a2->klass.data(ctx).derivesFrom(ctx, a1->klass);
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
@@ -195,20 +195,20 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
         newTargs.reserve(indexes.size());
         // code below inverts permutation of type params
         int j = 0;
-        for (SymbolRef idx : a2->klass.info(ctx).typeMembers()) {
+        for (SymbolRef idx : a2->klass.data(ctx).typeMembers()) {
             int i = 0;
-            while (indexes[j] != a1->klass.info(ctx).typeMembers()[i]) {
+            while (indexes[j] != a1->klass.data(ctx).typeMembers()[i]) {
                 i++;
             }
-            ENFORCE(i < a1->klass.info(ctx).typeMembers().size());
-            if (idx.info(ctx).isCovariant()) {
+            ENFORCE(i < a1->klass.data(ctx).typeMembers().size());
+            if (idx.data(ctx).isCovariant()) {
                 newTargs.push_back(Types::lub(ctx, a1->targs[i], a2->targs[j]));
-            } else if (idx.info(ctx).isInvariant()) {
+            } else if (idx.data(ctx).isInvariant()) {
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1, t2);
                 }
                 newTargs.push_back(a1->targs[i]);
-            } else if (idx.info(ctx).isContravariant()) {
+            } else if (idx.data(ctx).isContravariant()) {
                 newTargs.push_back(Types::glb(ctx, a1->targs[i], a2->targs[j]));
             }
             j++;
@@ -362,10 +362,10 @@ shared_ptr<ruby_typer::core::Type> lubGround(const core::Context ctx, shared_ptr
 
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
-    if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
+    if (sym1 == sym2 || sym1.data(ctx).derivesFrom(ctx, sym2)) {
         categoryCounterInc("lub.<class>.collapsed", "yes");
         return t2;
-    } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
+    } else if (sym2.data(ctx).derivesFrom(ctx, sym1)) {
         categoryCounterInc("lub.<class>.collapsed", "yes");
         return t1;
     } else {
@@ -408,14 +408,14 @@ shared_ptr<ruby_typer::core::Type> glbGround(const core::Context ctx, shared_ptr
 
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
-    if (sym1 == sym2 || sym1.info(ctx).derivesFrom(ctx, sym2)) {
+    if (sym1 == sym2 || sym1.data(ctx).derivesFrom(ctx, sym2)) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t1;
-    } else if (sym2.info(ctx).derivesFrom(ctx, sym1)) {
+    } else if (sym2.data(ctx).derivesFrom(ctx, sym1)) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
-        if (sym1.info(ctx).isClassClass() && sym2.info(ctx).isClassClass()) {
+        if (sym1.data(ctx).isClassClass() && sym2.data(ctx).isClassClass()) {
             categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
@@ -656,8 +656,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
         if (a2 == nullptr) {
             return AndType::make_shared(t1, t2);
         }
-        bool rtl = a1->klass == a2->klass || a1->klass.info(ctx).derivesFrom(ctx, a2->klass);
-        bool ltr = !rtl && a2->klass.info(ctx).derivesFrom(ctx, a1->klass);
+        bool rtl = a1->klass == a2->klass || a1->klass.data(ctx).derivesFrom(ctx, a2->klass);
+        bool ltr = !rtl && a2->klass.data(ctx).derivesFrom(ctx, a1->klass);
         if (!rtl && !ltr) {
             return AndType::make_shared(t1, t2); // we can as well return nothing here?
         }
@@ -671,17 +671,17 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
         int i = 0;
         for (SymbolRef idx : indexes) {
             int j = 0;
-            while (a2->klass.info(ctx).typeMembers()[i] != idx) {
+            while (a2->klass.data(ctx).typeMembers()[i] != idx) {
                 j++;
             }
-            if (idx.info(ctx).isCovariant()) {
+            if (idx.data(ctx).isCovariant()) {
                 newTargs.push_back(Types::glb(ctx, a1->targs[i], a2->targs[j]));
-            } else if (idx.info(ctx).isInvariant()) {
+            } else if (idx.data(ctx).isInvariant()) {
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
                     return AndType::make_shared(t1, t2); // we can as well return nothing here?
                 }
                 newTargs.push_back(a1->targs[i]);
-            } else if (idx.info(ctx).isContravariant()) {
+            } else if (idx.data(ctx).isContravariant()) {
                 newTargs.push_back(Types::lub(ctx, a1->targs[i], a2->targs[j]));
             }
             i++;
@@ -693,9 +693,9 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
 }
 
 bool classSymbolIsAsGoodAs(const core::Context ctx, core::SymbolRef c1, core::SymbolRef c2) {
-    ENFORCE(c1.info(ctx).isClass());
-    ENFORCE(c2.info(ctx).isClass());
-    return c1 == c2 || c1.info(ctx).derivesFrom(ctx, c2);
+    ENFORCE(c1.data(ctx).isClass());
+    ENFORCE(c2.data(ctx).isClass());
+    return c1 == c2 || c1.data(ctx).derivesFrom(ctx, c2);
 }
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
@@ -807,19 +807,19 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
             vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
             // code below inverts permutation of type params
             int j = 0;
-            for (SymbolRef idx : a2->klass.info(ctx).typeMembers()) {
+            for (SymbolRef idx : a2->klass.data(ctx).typeMembers()) {
                 int i = 0;
-                while (indexes[j] != a1->klass.info(ctx).typeMembers()[i]) {
+                while (indexes[j] != a1->klass.data(ctx).typeMembers()[i]) {
                     i++;
                 }
 
-                ENFORCE(i < a1->klass.info(ctx).typeMembers().size());
+                ENFORCE(i < a1->klass.data(ctx).typeMembers().size());
 
-                if (idx.info(ctx).isCovariant()) {
+                if (idx.data(ctx).isCovariant()) {
                     result = Types::isSubType(ctx, a1->targs[i], a2->targs[j]);
-                } else if (idx.info(ctx).isInvariant()) {
+                } else if (idx.data(ctx).isInvariant()) {
                     result = Types::equiv(ctx, a1->targs[i], a2->targs[j]);
-                } else if (idx.info(ctx).isContravariant()) {
+                } else if (idx.data(ctx).isContravariant()) {
                     result = Types::isSubType(ctx, a2->targs[j], a1->targs[i]);
                 }
                 if (!result) {
@@ -961,7 +961,7 @@ bool ClassType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
     if (symbol == ctx.state.defn_untyped() || symbol == klass) {
         return true;
     }
-    return symbol.info(ctx).derivesFrom(ctx, klass);
+    return symbol.data(ctx).derivesFrom(ctx, klass);
 }
 
 bool OrType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
@@ -998,8 +998,8 @@ std::string TypeConstructor::typeName() {
 }
 
 void TypeConstructor::_sanityCheck(const core::Context ctx) {
-    ENFORCE(this->protoType.info(ctx).isClass());
-    ENFORCE(this->targs.empty() || this->protoType.info(ctx).typeArity(ctx) == this->targs.size());
+    ENFORCE(this->protoType.data(ctx).isClass());
+    ENFORCE(this->targs.empty() || this->protoType.data(ctx).typeArity(ctx) == this->targs.size());
 }
 
 bool TypeConstructor::isFullyDefined() {

@@ -73,8 +73,8 @@ public:
         return _id;
     }
 
-    Name &name(GlobalState &gs) const;
-    const Name &name(const GlobalState &gs) const;
+    Name &data(GlobalState &gs) const;
+    const Name &data(const GlobalState &gs) const;
 
     // Returns the `0` NameRef, used to indicate non-existence of a name
     static NameRef noName() {

@@ -24,7 +24,7 @@ Loc Loc::join(Loc other) {
 Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalState &gs) {
     Loc::Detail pos;
 
-    const core::File &file = source.file(gs);
+    const core::File &file = source.data(gs);
     ENFORCE(off <= file.source().size(), "file offset out of bounds");
     auto it = std::lower_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
     if (it == file.line_breaks.begin()) {
@@ -54,7 +54,7 @@ void printTabs(stringstream &to, int count) {
 
 string Loc::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    absl::string_view source = this->file.file(gs).source();
+    absl::string_view source = this->file.data(gs).source();
     auto pos = this->position(gs);
     auto endstart = make_reverse_iterator(source.begin() + this->begin_pos);
     auto beginstart = make_reverse_iterator(source.begin());

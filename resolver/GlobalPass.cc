@@ -7,21 +7,21 @@ namespace resolver {
 
 bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef parentTypeMember,
                        core::SymbolRef sym) {
-    core::NameRef name = parentTypeMember.info(gs).name;
-    auto parentVariance = parentTypeMember.info(gs).variance();
-    auto &inSym = sym.info(gs);
+    core::NameRef name = parentTypeMember.data(gs).name;
+    auto parentVariance = parentTypeMember.data(gs).variance();
+    auto &inSym = sym.data(gs);
     core::SymbolRef my = inSym.findMember(gs, name);
     if (!my.exists()) {
         gs.error(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared,
                  "Type {} declared by parent {} should be declared again", name.toString(gs),
-                 parent.info(gs).fullName(gs));
+                 parent.data(gs).fullName(gs));
         return false;
     }
-    auto myVariance = my.info(gs).variance();
+    auto myVariance = my.data(gs).variance();
     if (!inSym.derivesFrom(gs, core::GlobalState::defn_Class()) && (myVariance != parentVariance)) {
         // this requirement can be loosened. You can go from variant to invariant.
-        gs.error(my.info(gs).definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
-                 "Type variance mismatch with parent {}", parent.info(gs).fullName(gs));
+        gs.error(my.data(gs).definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
+                 "Type variance mismatch with parent {}", parent.data(gs).fullName(gs));
         return true;
     }
     inSym.typeAliases.emplace_back(parentTypeMember, my);
@@ -29,13 +29,13 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
 }
 
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
-    auto &inSym = sym.info(gs);
+    auto &inSym = sym.data(gs);
     ENFORCE(inSym.isClass());
     if (inSym.isClassClass()) {
         for (core::SymbolRef tp : inSym.typeMembers()) {
-            auto myVariance = tp.info(gs).variance();
+            auto myVariance = tp.data(gs).variance();
             if (myVariance != core::Variance::Invariant) {
-                gs.error(tp.info(gs).definitionLoc, core::errors::Resolver::VariantTypeMemberInClass,
+                gs.error(tp.data(gs).definitionLoc, core::errors::Resolver::VariantTypeMemberInClass,
                          "Classes can only have invariant type members");
                 return;
             }
@@ -44,7 +44,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
 
     if (inSym.superClass.exists()) {
         auto parent = inSym.superClass;
-        auto tps = parent.info(gs).typeMembers();
+        auto tps = parent.data(gs).typeMembers();
         bool foundAll = true;
         for (core::SymbolRef tp : tps) {
             bool foundThis = resolveTypeMember(gs, parent, tp, sym);
@@ -57,7 +57,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
                 core::SymbolRef my = tp.dealiasAt(gs, sym);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (inSym.typeMembers()[i] != my) {
-                    gs.error(my.info(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder,
+                    gs.error(my.data(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder,
                              "Type members in wrong order");
                     int foundIdx = 0;
                     while (foundIdx < inSym.typeMembers().size() && inSym.typeMembers()[foundIdx] != my) {
@@ -73,7 +73,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
     }
 
     for (core::SymbolRef mixin : inSym.mixins(gs)) {
-        for (core::SymbolRef tp : mixin.info(gs).typeMembers()) {
+        for (core::SymbolRef tp : mixin.data(gs).typeMembers()) {
             resolveTypeMember(gs, mixin, tp, sym);
         }
     }
@@ -83,36 +83,36 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
 
 void Resolver::finalizeResolution(core::GlobalState &gs) {
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto &info = core::SymbolRef(&gs, i).info(gs);
-        if (!info.isClass()) {
+        auto &data = core::SymbolRef(&gs, i).data(gs);
+        if (!data.isClass()) {
             continue;
         }
-        if (!info.isClassModuleSet()) {
+        if (!data.isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
-            info.setIsModule(true);
+            data.setIsModule(true);
         }
-        if (info.superClass != core::GlobalState::defn_todo()) {
+        if (data.superClass != core::GlobalState::defn_todo()) {
             continue;
         }
 
-        auto attached = info.attachedClass(gs);
+        auto attached = data.attachedClass(gs);
         bool isSingleton = attached.exists() && attached != core::GlobalState::defn_untyped();
         if (isSingleton) {
             if (attached == core::GlobalState::defn_BasicObject()) {
-                info.superClass = core::GlobalState::defn_Class();
-            } else if (!attached.info(gs).superClass.exists()) {
-                info.superClass = core::GlobalState::defn_Module();
+                data.superClass = core::GlobalState::defn_Class();
+            } else if (!attached.data(gs).superClass.exists()) {
+                data.superClass = core::GlobalState::defn_Module();
             } else {
-                ENFORCE(attached.info(gs).superClass != core::GlobalState::defn_todo());
-                info.superClass = attached.info(gs).superClass.info(gs).singletonClass(gs);
+                ENFORCE(attached.data(gs).superClass != core::GlobalState::defn_todo());
+                data.superClass = attached.data(gs).superClass.data(gs).singletonClass(gs);
             }
         } else {
-            info.superClass = core::GlobalState::defn_Object();
+            data.superClass = core::GlobalState::defn_Object();
         }
     }
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
-        if (sym.info(gs).isClass()) {
+        if (sym.data(gs).isClass()) {
             resolveTypeMembers(gs, sym);
         }
     }

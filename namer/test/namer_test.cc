@@ -54,13 +54,13 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
         namer::Namer::run(ctx, move(tree));
     }
 
-    auto &objectScope = core::GlobalState::defn_Object().info(ctx);
+    auto &objectScope = core::GlobalState::defn_Object().data(ctx);
     ASSERT_EQ(core::GlobalState::defn_root(), objectScope.owner);
 
     ASSERT_EQ(2, objectScope.members.size());
     auto methodPair = objectScope.members[1];
-    ASSERT_EQ("hello_world", methodPair.first.name(ctx).toString(ctx));
-    auto &symbol = methodPair.second.info(ctx);
+    ASSERT_EQ("hello_world", methodPair.first.data(ctx).toString(ctx));
+    auto &symbol = methodPair.second.data(ctx);
     ASSERT_EQ(core::GlobalState::defn_Object(), symbol.owner);
     ASSERT_EQ(0, symbol.arguments().size());
 }
@@ -98,12 +98,12 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
         namer::Namer::run(ctx, move(tree));
     }
     auto &rootScope =
-        core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).info(ctx);
+        core::GlobalState::defn_root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
     ASSERT_EQ(3, rootScope.members.size());
     auto fooPair = rootScope.members[1];
-    ASSERT_EQ("<constant:Foo>", fooPair.first.name(ctx).toString(ctx));
-    auto &fooInfo = fooPair.second.info(ctx);
+    ASSERT_EQ("<constant:Foo>", fooPair.first.data(ctx).toString(ctx));
+    auto &fooInfo = fooPair.second.data(ctx);
     ASSERT_EQ(1, fooInfo.members.size());
 }
 
@@ -116,16 +116,16 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
         namer::Namer::run(ctx, move(tree));
     }
     auto &rootScope =
-        core::GlobalState::defn_root().info(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).info(ctx);
+        core::GlobalState::defn_root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
     ASSERT_EQ(3, rootScope.members.size());
     auto fooSym = rootScope.members[1].second;
-    auto &fooInfo = fooSym.info(ctx);
+    auto &fooInfo = fooSym.data(ctx);
     ASSERT_EQ(2, fooInfo.members.size());
 
     auto barPair = fooInfo.members[1];
-    ASSERT_EQ("bar", barPair.first.name(ctx).toString(ctx));
-    ASSERT_EQ(fooSym, barPair.second.info(ctx).owner);
+    ASSERT_EQ("bar", barPair.first.data(ctx).toString(ctx));
+    ASSERT_EQ(fooSym, barPair.second.data(ctx).owner);
 }
 
 } // namespace test

@@ -51,12 +51,12 @@ string Ident::toString(const core::Context ctx) {
 }
 
 string Alias::toString(const core::Context ctx) {
-    return "alias " + this->what.info(ctx).name.name(ctx).toString(ctx);
+    return "alias " + this->what.data(ctx).name.data(ctx).toString(ctx);
 }
 
 string Send::toString(const core::Context ctx) {
     stringstream buf;
-    buf << this->recv.toString(ctx) << "." << this->fun.name(ctx).toString(ctx) << "(";
+    buf << this->recv.toString(ctx) << "." << this->fun.data(ctx).toString(ctx) << "(";
     bool isFirst = true;
     for (auto arg : this->args) {
         if (!isFirst) {
@@ -70,11 +70,11 @@ string Send::toString(const core::Context ctx) {
 }
 
 string StringLit::toString(const core::Context ctx) {
-    return this->value.name(ctx).toString(ctx);
+    return this->value.data(ctx).toString(ctx);
 }
 
 string SymbolLit::toString(const core::Context ctx) {
-    return "<symbol:" + this->value.name(ctx).toString(ctx) + ">";
+    return "<symbol:" + this->value.data(ctx).toString(ctx) + ">";
 }
 
 string BoolLit::toString(const core::Context ctx) {
@@ -102,7 +102,7 @@ string LoadArg::toString(const core::Context ctx) {
     buf << "load_arg(";
     buf << this->receiver.toString(ctx);
     buf << "#";
-    buf << this->method.name(ctx).toString(ctx);
+    buf << this->method.data(ctx).toString(ctx);
     buf << ", " << this->arg << ")";
     return buf.str();
 }

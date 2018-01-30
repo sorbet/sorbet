@@ -52,14 +52,14 @@ string Name::toString(const GlobalState &gs) const {
             return string(raw.utf8.begin(), raw.utf8.end());
         case UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-                return "<singleton class:" + this->unique.original.name(gs).toString(gs) + ">";
+                return "<singleton class:" + this->unique.original.data(gs).toString(gs) + ">";
             } else if (this->unique.uniqueNameKind == UniqueNameKind::NestedScope) {
-                return "<block-nested: " + this->unique.original.name(gs).toString(gs) + ">";
+                return "<block-nested: " + this->unique.original.data(gs).toString(gs) + ">";
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return "<overload N." + to_string(this->unique.num) + " : " +
-                       this->unique.original.name(gs).toString(gs) + ">";
+                       this->unique.original.data(gs).toString(gs) + ">";
             }
-            return this->unique.original.name(gs).toString(gs) + "$" + to_string(this->unique.num);
+            return this->unique.original.data(gs).toString(gs) + "$" + to_string(this->unique.num);
         case CONSTANT:
             return "<constant:" + this->cnst.original.toString(gs) + ">";
         default:
@@ -105,17 +105,17 @@ bool Name::isClassName(GlobalState &gs) const {
         case UTF8:
             return false;
         case UNIQUE: {
-            return this->unique.uniqueNameKind == core::Singleton && this->unique.original.name(gs).isClassName(gs);
+            return this->unique.uniqueNameKind == core::Singleton && this->unique.original.data(gs).isClassName(gs);
         }
         case CONSTANT:
-            ENFORCE(this->cnst.original.name(gs).kind == UTF8);
+            ENFORCE(this->cnst.original.data(gs).kind == UTF8);
             return true;
         default:
             Error::notImplemented();
     }
 }
 
-Name &NameRef::name(GlobalState &gs) const {
+Name &NameRef::data(GlobalState &gs) const {
     ENFORCE(_id < gs.names.size(), "name id out of bounds");
     ENFORCE(exists(), "non existing name");
 #ifdef DEBUG_MODE
@@ -124,7 +124,7 @@ Name &NameRef::name(GlobalState &gs) const {
     return gs.names[_id];
 }
 
-const Name &NameRef::name(const GlobalState &gs) const {
+const Name &NameRef::data(const GlobalState &gs) const {
     ENFORCE(_id < gs.names.size(), "name id out of bounds");
     ENFORCE(exists(), "non existing name");
 #ifdef DEBUG_MODE
@@ -133,16 +133,16 @@ const Name &NameRef::name(const GlobalState &gs) const {
     return gs.names[_id];
 }
 string NameRef::toString(const GlobalState &gs) const {
-    return name(gs).toString(gs);
+    return data(gs).toString(gs);
 }
 
 bool NameRef::isBlockClashSafe(const GlobalState &gs) const {
-    const Name &nm = this->name(gs);
+    const Name &nm = this->data(gs);
     return nm.kind == NameKind ::UNIQUE && nm.unique.uniqueNameKind == UniqueNameKind ::NestedScope;
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {
-    Name &name = this->name(gs);
+    Name &name = this->data(gs);
     ENFORCE(name.kind == UTF8, "addEq over non-utf8 name");
     string nameEq = string(name.raw.utf8.begin(), name.raw.utf8.end()) + "=";
     return gs.enterNameUTF8(nameEq);

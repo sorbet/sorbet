@@ -30,7 +30,7 @@ private:
     core::SymbolRef resolveLhs(core::Context ctx, core::NameRef name) {
         Nesting *scope = nesting_.get();
         while (scope != nullptr) {
-            auto lookup = scope->scope.info(ctx).findMember(ctx, name);
+            auto lookup = scope->scope.data(ctx).findMember(ctx, name);
             if (lookup.exists()) {
                 return lookup;
             }
@@ -46,8 +46,8 @@ private:
                 ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant {}",
                                 c->toString(ctx));
                 result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
-                result.info(ctx).resultType = core::Types::dynamic();
-                result.info(ctx).setIsModule(false);
+                result.data(ctx).resultType = core::Types::dynamic();
+                result.data(ctx).setIsModule(false);
             }
             return result;
 
@@ -61,15 +61,15 @@ private:
 
         if (ast::Ident *id = ast::cast_tree<ast::Ident>(c->scope.get())) {
             core::SymbolRef resolved = id->symbol;
-            core::SymbolRef result = resolved.info(ctx).findMember(ctx, c->cnst);
+            core::SymbolRef result = resolved.data(ctx).findMember(ctx, c->cnst);
             if (!result.exists()) {
-                if (resolved.info(ctx).resultType.get() == nullptr || !resolved.info(ctx).resultType->isDynamic()) {
+                if (resolved.data(ctx).resultType.get() == nullptr || !resolved.data(ctx).resultType->isDynamic()) {
                     ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant {}",
                                     c->toString(ctx));
                 }
                 result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
-                result.info(ctx).resultType = core::Types::dynamic();
-                result.info(ctx).setIsModule(false);
+                result.data(ctx).resultType = core::Types::dynamic();
+                result.data(ctx).setIsModule(false);
             }
 
             return result;
@@ -105,21 +105,21 @@ public:
                 ancst.swap(resolved);
             }
         }
-        core::Symbol &info = original->symbol.info(ctx);
-        if (original->kind == ast::Module && info.mixins(ctx).empty()) {
-            info.mixins(ctx).emplace_back(core::GlobalState::defn_BasicObject());
+        core::Symbol &data = original->symbol.data(ctx);
+        if (original->kind == ast::Module && data.mixins(ctx).empty()) {
+            data.mixins(ctx).emplace_back(core::GlobalState::defn_BasicObject());
         }
         for (auto &ancst : original->ancestors) {
             ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
-            if (id == nullptr || !id->symbol.info(ctx).isClass()) {
+            if (id == nullptr || !id->symbol.data(ctx).isClass()) {
                 ctx.state.error(ancst->loc, core::errors::Resolver::DynamicSuperclass,
                                 "Superclasses and mixins must be statically resolved.");
                 continue;
             }
-            if (id->symbol == original->symbol || id->symbol.info(ctx).derivesFrom(ctx, original->symbol)) {
+            if (id->symbol == original->symbol || id->symbol.data(ctx).derivesFrom(ctx, original->symbol)) {
                 ctx.state.error(id->loc, core::errors::Resolver::CircularDependency,
                                 "Circular dependency: {} and {} are declared as parents of each other",
-                                original->symbol.info(ctx).name.toString(ctx), id->symbol.info(ctx).name.toString(ctx));
+                                original->symbol.data(ctx).name.toString(ctx), id->symbol.data(ctx).name.toString(ctx));
                 continue;
             }
 
@@ -127,16 +127,16 @@ public:
                 if (id->symbol == core::GlobalState::defn_todo()) {
                     continue;
                 }
-                if (!info.superClass.exists() || info.superClass == core::GlobalState::defn_todo() ||
-                    info.superClass == id->symbol) {
-                    info.superClass = id->symbol;
+                if (!data.superClass.exists() || data.superClass == core::GlobalState::defn_todo() ||
+                    data.superClass == id->symbol) {
+                    data.superClass = id->symbol;
                 } else {
                     ctx.state.error(id->loc, core::errors::Resolver::RedefinitionOfParents,
                                     "Class parents redefined for class {}",
-                                    original->symbol.info(ctx).name.toString(ctx));
+                                    original->symbol.data(ctx).name.toString(ctx));
                 }
             } else {
-                info.argumentsOrMixins.emplace_back(id->symbol);
+                data.argumentsOrMixins.emplace_back(id->symbol);
             }
         }
 
@@ -155,16 +155,16 @@ public:
 
     ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
-        if (id == nullptr || !id->symbol.info(ctx).isStaticField()) {
+        if (id == nullptr || !id->symbol.data(ctx).isStaticField()) {
             return asgn;
         }
 
         auto *rhs = ast::cast_tree<ast::Ident>(asgn->rhs.get());
-        if (rhs == nullptr || !rhs->symbol.info(ctx).isClass()) {
+        if (rhs == nullptr || !rhs->symbol.data(ctx).isClass()) {
             return asgn;
         }
 
-        id->symbol.info(ctx).resultType = make_unique<core::ClassType>(rhs->symbol.info(ctx).singletonClass(ctx));
+        id->symbol.data(ctx).resultType = make_unique<core::ClassType>(rhs->symbol.data(ctx).singletonClass(ctx));
         return asgn;
     }
 
@@ -206,8 +206,8 @@ private:
 
             auto str = sym->name.toString(ctx);
             if (str.substr(0, 2) == "@@") {
-                core::Symbol &info = ctx.owner.info(ctx);
-                var = info.findMember(ctx, sym->name);
+                core::Symbol &data = ctx.owner.data(ctx);
+                var = data.findMember(ctx, sym->name);
                 if (var.exists()) {
                     ctx.state.error(key->loc, core::errors::Resolver::DuplicateVariableDeclaration,
                                     "Redeclaring variable `{}'", str);
@@ -215,8 +215,8 @@ private:
                     var = ctx.state.enterStaticFieldSymbol(sym->loc, ctx.owner, sym->name);
                 }
             } else if (str.substr(0, 1) == "@") {
-                core::Symbol &info = ctx.owner.info(ctx);
-                var = info.findMember(ctx, sym->name);
+                core::Symbol &data = ctx.owner.data(ctx);
+                var = data.findMember(ctx, sym->name);
                 if (var.exists()) {
                     ctx.state.error(key->loc, core::errors::Resolver::DuplicateVariableDeclaration,
                                     "Redeclaring variable `{}'", str);
@@ -229,7 +229,7 @@ private:
             }
 
             if (var.exists()) {
-                var.info(ctx).resultType = typ;
+                var.data(ctx).resultType = typ;
             }
         }
     }
@@ -248,7 +248,7 @@ private:
             }
 
             core::NameRef varName = ctx.state.enterNameUTF8("@" + name.toString(ctx));
-            core::SymbolRef sym = ctx.owner.info(ctx).findMemberTransitive(ctx, varName);
+            core::SymbolRef sym = ctx.owner.data(ctx).findMemberTransitive(ctx, varName);
             if (!sym.exists()) {
                 ctx.state.error(arg->loc, core::errors::Resolver::UndeclaredVariable,
                                 "Accessor for undeclared variable `{}'", varName.toString(ctx));
@@ -257,19 +257,19 @@ private:
 
             if (r) {
                 core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name);
-                meth.info(ctx).resultType = sym.info(ctx).resultType;
+                meth.data(ctx).resultType = sym.data(ctx).resultType;
             }
             if (w) {
                 core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name.addEq(ctx));
                 core::SymbolRef arg0 = ctx.state.enterMethodArgumentSymbol(arg->loc, meth, core::Names::arg0());
 
-                auto ty = sym.info(ctx).resultType;
+                auto ty = sym.data(ctx).resultType;
                 if (ty == nullptr) {
                     ty = core::Types::dynamic();
                 }
-                arg0.info(ctx).resultType = ty;
-                meth.info(ctx).arguments().push_back(arg0);
-                meth.info(ctx).resultType = ty;
+                arg0.data(ctx).resultType = ty;
+                meth.data(ctx).arguments().push_back(arg0);
+                meth.data(ctx).resultType = ty;
             }
         }
     }
@@ -402,12 +402,12 @@ private:
                          i->symbol == core::GlobalState::defn_File();
                      // TODO: reduce this^^^ set.
                      auto sym = dealiasSym(ctx, i->symbol);
-                     if (sym.info(ctx).isClass()) {
-                         if (sym.info(ctx).typeMembers().empty()) {
+                     if (sym.data(ctx).isClass()) {
+                         if (sym.data(ctx).typeMembers().empty()) {
                              result = make_shared<core::ClassType>(sym);
                          } else {
                              std::vector<shared_ptr<core::Type>> targs;
-                             for (auto &UNUSED(arg) : sym.info(ctx).typeMembers()) {
+                             for (auto &UNUSED(arg) : sym.data(ctx).typeMembers()) {
                                  targs.emplace_back(core::Types::dynamic());
                              }
                              result = make_shared<core::AppliedType>(sym, targs);
@@ -417,7 +417,7 @@ private:
                                                  i->toString(ctx));
                              }
                          }
-                     } else if (sym.info(ctx).isTypeMember()) {
+                     } else if (sym.data(ctx).isTypeMember()) {
                          result = make_shared<core::LambdaParam>(sym);
                      } else {
                          ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
@@ -476,11 +476,11 @@ private:
                      } else if (recvi->symbol == core::GlobalState::defn_T_Proc()) {
                          result = core::Types::procClass();
                      } else {
-                         auto &info = recvi->symbol.info(ctx);
-                         if (s->args.size() != info.typeMembers().size()) {
+                         auto &data = recvi->symbol.data(ctx);
+                         if (s->args.size() != data.typeMembers().size()) {
                              ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
                                              "Malformed {}[]: Expected %d type arguments, got %d",
-                                             info.name.toString(ctx), info.typeMembers().size(), s->args.size());
+                                             data.name.toString(ctx), data.typeMembers().size(), s->args.size());
                              result = core::Types::dynamic();
                              return;
                          }
@@ -504,7 +504,7 @@ private:
 
     void fillInInfoFromSig(core::Context ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
         auto exprLoc = send->loc;
-        auto &methodInfo = method.info(ctx);
+        auto &methodInfo = method.data(ctx);
 
         struct {
             bool sig = false;
@@ -543,14 +543,14 @@ private:
                         if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
                             auto fnd = find_if(
                                 methodInfo.arguments().begin(), methodInfo.arguments().end(),
-                                [&](core::SymbolRef sym) -> bool { return sym.info(ctx).name == symbolLit->name; });
+                                [&](core::SymbolRef sym) -> bool { return sym.data(ctx).name == symbolLit->name; });
                             if (fnd == methodInfo.arguments().end()) {
                                 ctx.state.error(key->loc, core::errors::Resolver::InvalidMethodSignature,
                                                 "Malformed `sig`. Unknown argument name {}", key->toString(ctx));
                             } else {
                                 core::SymbolRef arg = *fnd;
-                                arg.info(ctx).resultType = getResultType(ctx, value);
-                                arg.info(ctx).definitionLoc = key->loc;
+                                arg.data(ctx).resultType = getResultType(ctx, value);
+                                arg.data(ctx).definitionLoc = key->loc;
                             }
                         }
                     }
@@ -600,23 +600,23 @@ private:
 
         for (auto it = methodInfo.arguments().begin(); it != methodInfo.arguments().end(); /* nothing */) {
             core::SymbolRef arg = *it;
-            if (isOverloaded && arg.info(ctx).isKeyword()) {
-                ctx.state.error(arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
+            if (isOverloaded && arg.data(ctx).isKeyword()) {
+                ctx.state.error(arg.data(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
                                 "Malformed sig. Overloaded functions cannot have keyword arguments:  {}",
-                                arg.info(ctx).name.toString(ctx));
+                                arg.data(ctx).name.toString(ctx));
             }
-            if (arg.info(ctx).resultType.get() != nullptr) {
+            if (arg.data(ctx).resultType.get() != nullptr) {
                 ++it;
             } else {
                 if (isOverloaded) {
                     it = methodInfo.arguments().erase(it);
                 } else {
-                    arg.info(ctx).resultType = core::Types::dynamic();
+                    arg.data(ctx).resultType = core::Types::dynamic();
                     if (seen.args || seen.returns) {
                         // Only error if we have any types
-                        ctx.state.error(arg.info(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
+                        ctx.state.error(arg.data(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
                                         "Malformed sig. Type not specified for argument {}",
-                                        arg.info(ctx).name.toString(ctx));
+                                        arg.data(ctx).name.toString(ctx));
                     }
                 }
             }
@@ -685,7 +685,7 @@ private:
                                  lastSig.size() > 1 && ctx.withOwner(klass->symbol).permitOverloadDefinitions();
 
                              if (isOverloaded) {
-                                 mdef->symbol.info(ctx).setOverloaded();
+                                 mdef->symbol.data(ctx).setOverloaded();
                                  int i = 1;
 
                                  while (i < lastSig.size()) {
@@ -693,7 +693,7 @@ private:
                                      fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i].get()),
                                                        isOverloaded);
                                      if (i + 1 < lastSig.size()) {
-                                         overload.info(ctx).setOverloaded();
+                                         overload.data(ctx).setOverloaded();
                                      }
                                      i++;
                                  }
@@ -713,7 +713,7 @@ private:
 
                      [&](ast::Assign *assgn) {
                          if (ast::Ident *id = ast::cast_tree<ast::Ident>(assgn->lhs.get())) {
-                             if (id->symbol.info(ctx).name.name(ctx).kind == core::CONSTANT) {
+                             if (id->symbol.data(ctx).name.data(ctx).kind == core::CONSTANT) {
                                  stat.reset(nullptr);
                              }
                          }
@@ -736,12 +736,12 @@ private:
     }
 
     core::SymbolRef dealiasSym(core::Context ctx, core::SymbolRef sym) {
-        while (sym.info(ctx).isStaticField()) {
-            auto *ct = core::cast_type<core::ClassType>(sym.info(ctx).resultType.get());
+        while (sym.data(ctx).isStaticField()) {
+            auto *ct = core::cast_type<core::ClassType>(sym.data(ctx).resultType.get());
             if (ct == nullptr) {
                 break;
             }
-            auto klass = ct->symbol.info(ctx).attachedClass(ctx);
+            auto klass = ct->symbol.data(ctx).attachedClass(ctx);
             if (!klass.exists()) {
                 break;
             }
@@ -787,9 +787,9 @@ public:
             return asgn;
         }
 
-        auto &info = id->symbol.info(ctx);
-        if (info.isTypeMember()) {
-            ENFORCE(info.isFixed());
+        auto &data = id->symbol.data(ctx);
+        if (data.isTypeMember()) {
+            ENFORCE(data.isFixed());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
             auto recv = ast::cast_tree<ast::Ident>(send->recv.get());
             ENFORCE(recv->symbol == core::GlobalState::defn_T());
@@ -810,15 +810,15 @@ public:
                     i++;
                     auto *key = ast::cast_tree<ast::SymbolLit>(keyExpr.get());
                     if (key && key->name == core::Names::fixed()) {
-                        info.resultType = getResultType(ctx, hash->values[i]);
+                        data.resultType = getResultType(ctx, hash->values[i]);
                     }
                 }
             }
-        } else if (info.isStaticField()) {
-            if (info.resultType != nullptr) {
+        } else if (data.isStaticField()) {
+            if (data.resultType != nullptr) {
                 return asgn;
             }
-            info.resultType = resolveConstantType(ctx, asgn->rhs);
+            data.resultType = resolveConstantType(ctx, asgn->rhs);
         }
 
         return asgn;
@@ -1040,7 +1040,7 @@ public:
                 Error::notImplemented();
         }
 
-        core::SymbolRef sym = klass.info(ctx).findMemberTransitive(ctx, id->name);
+        core::SymbolRef sym = klass.data(ctx).findMemberTransitive(ctx, id->name);
         if (!sym.exists()) {
             ctx.state.error(id->loc, core::errors::Resolver::UndeclaredVariable, "Use of undeclared variable `{}'",
                             id->name.toString(ctx));
@@ -1049,7 +1049,7 @@ public:
             } else {
                 sym = ctx.state.enterFieldSymbol(id->loc, klass, id->name);
             }
-            sym.info(ctx).resultType = core::Types::dynamic();
+            sym.data(ctx).resultType = core::Types::dynamic();
         }
 
         return new ast::Ident(id->loc, sym);

@@ -50,12 +50,12 @@ std::shared_ptr<core::Type> Symbol::selfType(const GlobalState &gs) const {
 bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
     // TODO: add baseClassSet
     for (SymbolRef a : argumentsOrMixins) {
-        if (a == sym || a.info(gs).derivesFrom(gs, sym)) {
+        if (a == sym || a.data(gs).derivesFrom(gs, sym)) {
             return true;
         }
     }
     if (this->superClass.exists()) {
-        return sym == this->superClass || this->superClass.info(gs).derivesFrom(gs, sym);
+        return sym == this->superClass || this->superClass.data(gs).derivesFrom(gs, sym);
     }
     return false;
 }
@@ -65,7 +65,7 @@ SymbolRef Symbol::ref(const GlobalState &gs) const {
     return SymbolRef(gs, distance);
 }
 
-Symbol &SymbolRef::info(GlobalState &gs, bool allowNone) const {
+Symbol &SymbolRef::data(GlobalState &gs, bool allowNone) const {
     ENFORCE(_id < gs.symbols.size());
     if (!allowNone) {
         ENFORCE(this->exists());
@@ -74,7 +74,7 @@ Symbol &SymbolRef::info(GlobalState &gs, bool allowNone) const {
     return gs.symbols[this->_id];
 }
 
-const Symbol &SymbolRef::info(const GlobalState &gs, bool allowNone) const {
+const Symbol &SymbolRef::data(const GlobalState &gs, bool allowNone) const {
     ENFORCE(_id < gs.symbols.size());
     if (!allowNone) {
         ENFORCE(this->exists());
@@ -91,8 +91,8 @@ bool SymbolRef::isHiddenFromPrinting(const GlobalState &gs) const {
     if (isSynthetic()) {
         return true;
     }
-    auto loc = info(gs).definitionLoc;
-    return loc.file.id() < 0 || loc.file.file(gs).source_type == File::Payload;
+    auto loc = data(gs).definitionLoc;
+    return loc.file.id() < 0 || loc.file.data(gs).source_type == File::Payload;
 }
 
 void printTabs(ostringstream &to, int count) {
@@ -105,7 +105,7 @@ void printTabs(ostringstream &to, int count) {
 
 string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) const {
     ostringstream os;
-    const Symbol &myInfo = info(gs, true);
+    const Symbol &myInfo = data(gs, true);
     string name = myInfo.name.toString(gs);
     auto &members = myInfo.members;
 
@@ -179,13 +179,13 @@ string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) con
                 } else {
                     os << ", ";
                 }
-                os << thing.info(gs).name.toString(gs);
+                os << thing.data(gs).name.toString(gs);
             }
             os << "]";
         }
 
         if (myInfo.superClass.exists()) {
-            os << " < " << myInfo.superClass.info(gs).fullName(gs);
+            os << " < " << myInfo.superClass.data(gs).fullName(gs);
         }
         os << " (";
         bool first = true;
@@ -195,7 +195,7 @@ string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) con
             } else {
                 os << ", ";
             }
-            os << thing.info(gs).name.toString(gs);
+            os << thing.data(gs).name.toString(gs);
         }
         os << ")";
     }
@@ -239,7 +239,7 @@ SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
     histogramInc("find_member_scope_size", members.size());
     for (auto &member : members) {
         if (member.first == name) {
-            return member.second.info(gs).dealias(gs);
+            return member.second.data(gs).dealias(gs);
         }
     }
     return GlobalState::noSymbol();
@@ -253,11 +253,11 @@ SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int 
         int i = -1;
         for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
             i++;
-            gs.logger.critical("{}:- {}", i, it->info(gs).fullName(gs));
+            gs.logger.critical("{}:- {}", i, it->data(gs).fullName(gs));
             int j = 0;
-            for (auto it2 = it->info(gs).argumentsOrMixins.rbegin(); it2 != it->info(gs).argumentsOrMixins.rend();
+            for (auto it2 = it->data(gs).argumentsOrMixins.rbegin(); it2 != it->data(gs).argumentsOrMixins.rend();
                  ++it2) {
-                gs.logger.critical("{}:{} {}", i, j, it2->info(gs).fullName(gs));
+                gs.logger.critical("{}:{} {}", i, j, it2->data(gs).fullName(gs));
                 j++;
             }
         }
@@ -271,13 +271,13 @@ SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int 
     }
     for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
         ENFORCE(it->exists());
-        result = it->info(gs).findMemberTransitive(gs, name, maxDepth - 1);
+        result = it->data(gs).findMemberTransitive(gs, name, maxDepth - 1);
         if (result.exists()) {
             return result;
         }
     }
     if (this->superClass.exists()) {
-        return this->superClass.info(gs).findMemberTransitive(gs, name, maxDepth - 1);
+        return this->superClass.data(gs).findMemberTransitive(gs, name, maxDepth - 1);
     }
     return GlobalState::noSymbol();
 }
@@ -285,7 +285,7 @@ SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int 
 string Symbol::fullName(const GlobalState &gs) const {
     string owner_str;
     if (this->owner.exists() && this->owner != gs.defn_root()) {
-        owner_str = this->owner.info(gs).fullName(gs);
+        owner_str = this->owner.data(gs).fullName(gs);
     }
 
     if (this->isClass()) {
@@ -297,7 +297,7 @@ string Symbol::fullName(const GlobalState &gs) const {
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
     ENFORCE(this->isClass());
-    ENFORCE(this->name.name(gs).isClassName(gs));
+    ENFORCE(this->name.data(gs).isClassName(gs));
 
     SymbolRef selfRef = this->ref(gs);
     if (selfRef == GlobalState::defn_untyped()) {
@@ -311,14 +311,14 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
-    Symbol &singletonInfo = singleton.info(gs);
+    Symbol &singletonInfo = singleton.data(gs);
 
     counterInc("singleton_classes");
     singletonInfo.members.push_back(make_pair(Names::attachedClass(), selfRef));
     singletonInfo.superClass = core::GlobalState::defn_todo();
     singletonInfo.setIsModule(false);
 
-    selfRef.info(gs).members.push_back(make_pair(Names::singletonClass(), singleton));
+    selfRef.data(gs).members.push_back(make_pair(Names::singletonClass(), singleton));
     return singleton;
 }
 
@@ -334,37 +334,37 @@ SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
 
 SymbolRef Symbol::dealias(const GlobalState &gs) const {
     if (auto alias = cast_type<AliasType>(resultType.get())) {
-        return alias->symbol.info(gs).dealias(gs);
+        return alias->symbol.data(gs).dealias(gs);
     }
     return this->ref(gs);
 }
 
 bool Symbol::isBlockSymbol(const GlobalState &gs) const {
-    const core::Name &nm = name.name(gs);
+    const core::Name &nm = name.data(gs);
     return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
 }
 
 SymbolRef SymbolRef::dealiasAt(GlobalState &gs, core::SymbolRef klass) const {
-    ENFORCE(info(gs).isTypeMember());
-    if (info(gs).owner == klass) {
+    ENFORCE(data(gs).isTypeMember());
+    if (data(gs).owner == klass) {
         return *this;
     } else {
         SymbolRef cursor;
-        if (info(gs).owner.info(gs).derivesFrom(gs, klass)) {
-            cursor = info(gs).owner;
-        } else if (klass.info(gs).derivesFrom(gs, info(gs).owner)) {
+        if (data(gs).owner.data(gs).derivesFrom(gs, klass)) {
+            cursor = data(gs).owner;
+        } else if (klass.data(gs).derivesFrom(gs, data(gs).owner)) {
             cursor = klass;
         }
         while (true) {
             if (!cursor.exists()) {
                 return cursor;
             }
-            for (auto aliasPair : cursor.info(gs).typeAliases) {
+            for (auto aliasPair : cursor.data(gs).typeAliases) {
                 if (aliasPair.first == *this) {
                     return aliasPair.second.dealiasAt(gs, klass);
                 }
             }
-            cursor = cursor.info(gs).superClass;
+            cursor = cursor.data(gs).superClass;
         }
     }
 }
@@ -394,7 +394,7 @@ int Symbol::typeArity(const GlobalState &gs) const {
     ENFORCE(this->isClass());
     int arity = 0;
     for (auto &ty : this->typeMembers()) {
-        if (!ty.info(gs).isFixed()) {
+        if (!ty.data(gs).isFixed()) {
             ++arity;
         }
     }
@@ -418,18 +418,18 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
         return ref(gs);
     }
     SymbolRef owner = this->owner;
-    while (owner != GlobalState::defn_root() && !owner.info(gs, false).isMethod()) {
+    while (owner != GlobalState::defn_root() && !owner.data(gs, false).isMethod()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingMethod");
-        owner = owner.info(gs).owner;
+        owner = owner.data(gs).owner;
     }
     return owner;
 }
 
 SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
-    while (owner != GlobalState::defn_root() && !owner.info(gs, false).isClass()) {
+    while (owner != GlobalState::defn_root() && !owner.data(gs, false).isClass()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
-        owner = owner.info(gs).owner;
+        owner = owner.data(gs).owner;
     }
     if (owner == GlobalState::defn_root()) {
         return GlobalState::noSymbol();
@@ -444,7 +444,7 @@ bool LocalVariable::exists() const {
 }
 
 bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
-    if (_name.name(gs).kind == NameKind::UNIQUE)
+    if (_name.data(gs).kind == NameKind::UNIQUE)
         return true;
     if (unique == 0) {
         return false;

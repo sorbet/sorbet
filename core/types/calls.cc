@@ -120,7 +120,7 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass,
         "Argument " + argSym.name.toString(ctx) + " does not match expected type " + expectedType->show(ctx),
         {core::ErrorSection({
              core::ErrorLine::from(argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
-                                   method.info(ctx).name.toString(ctx), argSym.name.toString(ctx),
+                                   method.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
                                    expectedType->show(ctx)),
          }),
          core::ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:",
@@ -129,7 +129,7 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass,
 
 void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
     ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                    "Missing required keyword argument {} for method {}.", arg.info(ctx).name.toString(ctx),
+                    "Missing required keyword argument {} for method {}.", arg.data(ctx).name.toString(ctx),
                     method.toString(ctx));
 }
 }; // namespace
@@ -147,11 +147,11 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
     { // create candidates and sort them by number of arguments(stable by symbol id)
         int i = 0;
         core::SymbolRef current = primary;
-        while (current.info(ctx).isOverloaded()) {
+        while (current.data(ctx).isOverloaded()) {
             i++;
             core::NameRef overloadName =
-                ctx.state.freshNameUnique(core::UniqueNameKind::Overload, primary.info(ctx).name, i);
-            core::SymbolRef overload = primary.info(ctx).owner.info(ctx).findMember(ctx, overloadName);
+                ctx.state.freshNameUnique(core::UniqueNameKind::Overload, primary.data(ctx).name, i);
+            core::SymbolRef overload = primary.data(ctx).owner.data(ctx).findMember(ctx, overloadName);
             if (!overload.exists()) {
                 Error::raise("Corruption of overloads?");
             } else {
@@ -161,10 +161,10 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
         }
 
         sort(allCandidates.begin(), allCandidates.end(), [&](core::SymbolRef s1, core::SymbolRef s2) -> bool {
-            if (s1.info(ctx).argumentsOrMixins.size() < s2.info(ctx).argumentsOrMixins.size()) {
+            if (s1.data(ctx).argumentsOrMixins.size() < s2.data(ctx).argumentsOrMixins.size()) {
                 return true;
             }
-            if (s1.info(ctx).argumentsOrMixins.size() == s2.info(ctx).argumentsOrMixins.size()) {
+            if (s1.data(ctx).argumentsOrMixins.size() == s2.data(ctx).argumentsOrMixins.size()) {
                 return s1._id < s2._id;
             }
             return false;
@@ -180,12 +180,12 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
             i++;
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 core::SymbolRef candidate = *it;
-                if (i >= candidate.info(ctx).argumentsOrMixins.size()) {
+                if (i >= candidate.data(ctx).argumentsOrMixins.size()) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
 
-                auto argType = candidate.info(ctx).argumentsOrMixins[i].info(ctx).resultType;
+                auto argType = candidate.data(ctx).argumentsOrMixins[i].data(ctx).resultType;
                 if (argType->isFullyDefined() && !Types::isSubType(ctx, arg.type, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -203,14 +203,14 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             core::SymbolRef candidate = *it;
-            auto args = candidate.info(ctx).argumentsOrMixins;
+            auto args = candidate.data(ctx).argumentsOrMixins;
             if (args.empty()) {
                 if (hasBlock) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
             } else {
-                auto &lastArg = args.back().info(ctx);
+                auto &lastArg = args.back().data(ctx);
                 if (lastArg.isBlockArgument() != hasBlock) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -225,10 +225,10 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
             core::Context ctx;
 
             bool operator()(core::SymbolRef s, int i) const {
-                return s.info(ctx.state).argumentsOrMixins.size() < i;
+                return s.data(ctx.state).argumentsOrMixins.size() < i;
             }
             bool operator()(int i, core::SymbolRef s) const {
-                return i < s.info(ctx.state).argumentsOrMixins.size();
+                return i < s.data(ctx.state).argumentsOrMixins.size();
             }
             Comp(core::Context ctx) : ctx(ctx){};
         } cmp(ctx);
@@ -261,7 +261,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     if (isDynamic()) {
         return Types::dynamic();
     }
-    core::SymbolRef mayBeOverloaded = this->symbol.info(ctx).findMemberTransitive(ctx, fun);
+    core::SymbolRef mayBeOverloaded = this->symbol.data(ctx).findMemberTransitive(ctx, fun);
 
     if (!mayBeOverloaded.exists()) {
         string maybeComponent;
@@ -269,24 +269,24 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
             maybeComponent = " component of " + fullType->show(ctx);
         }
         ctx.state.error(callLoc, core::errors::Infer::UnknownMethod, "Method {} does not exist on {}{}",
-                        fun.name(ctx).toString(ctx), this->show(ctx), maybeComponent);
+                        fun.data(ctx).toString(ctx), this->show(ctx), maybeComponent);
         return Types::dynamic();
     }
 
     core::SymbolRef method =
-        mayBeOverloaded.info(ctx).isOverloaded()
+        mayBeOverloaded.data(ctx).isOverloaded()
             ? guessOverload(ctx.withOwner(mayBeOverloaded), mayBeOverloaded, args, fullType, hasBlock)
             : mayBeOverloaded;
 
-    core::Symbol &info = method.info(ctx);
+    core::Symbol &data = method.data(ctx);
 
-    bool hasKwargs = std::any_of(info.arguments().begin(), info.arguments().end(),
-                                 [&ctx](core::SymbolRef arg) { return arg.info(ctx).isKeyword(); });
+    bool hasKwargs = std::any_of(data.arguments().begin(), data.arguments().end(),
+                                 [&ctx](core::SymbolRef arg) { return arg.data(ctx).isKeyword(); });
 
-    auto pit = info.arguments().begin();
-    auto pend = info.arguments().end();
+    auto pit = data.arguments().begin();
+    auto pend = data.arguments().end();
 
-    if (pit != pend && (pend - 1)->info(ctx).isBlockArgument()) {
+    if (pit != pend && (pend - 1)->data(ctx).isBlockArgument()) {
         --pend;
     }
 
@@ -294,7 +294,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     auto aend = args.end();
 
     while (pit != pend && ait != aend) {
-        core::Symbol &spec = pit->info(ctx);
+        core::Symbol &spec = pit->data(ctx);
         auto &arg = *ait;
         if (spec.isKeyword()) {
             break;
@@ -312,15 +312,15 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     }
 
     if (pit != pend) {
-        if (!(pit->info(ctx).isKeyword() || pit->info(ctx).isOptional() || pit->info(ctx).isRepeated() ||
-              pit->info(ctx).isBlockArgument())) {
+        if (!(pit->data(ctx).isKeyword() || pit->data(ctx).isOptional() || pit->data(ctx).isRepeated() ||
+              pit->data(ctx).isBlockArgument())) {
             ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
                             "Not enough arguments provided for method {}. Expected: {}, provided: {}",
                             fun.toString(ctx),
 
                             // TODO(nelhage): report actual counts of required arguments,
                             // and account for keyword arguments
-                            info.arguments().size(),
+                            data.arguments().size(),
                             args.size()); // TODO: should use position and print the source tree, not the cfg one.
         }
     }
@@ -332,7 +332,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         // find keyword arguments and advance `pend` before them; We'll walk
         // `kwit` ahead below
         auto kwit = pit;
-        while (!kwit->info(ctx).isKeyword()) {
+        while (!kwit->data(ctx).isKeyword()) {
             kwit++;
         }
         pend = kwit;
@@ -343,8 +343,8 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         } else if (ShapeType *hash = cast_type<ShapeType>(hashArg.type.get())) {
             --aend;
 
-            while (kwit != info.arguments().end()) {
-                core::Symbol &spec = kwit->info(ctx);
+            while (kwit != data.arguments().end()) {
+                core::Symbol &spec = kwit->data(ctx);
                 if (spec.isBlockArgument()) {
                     break;
                 } else if (spec.isRepeated()) {
@@ -409,8 +409,8 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     if (hasKwargs && aend == args.end()) {
         // We have keyword arguments, but we didn't consume a hash at the
         // end. Report an error for each missing required keyword arugment.
-        for (auto &spec : info.arguments()) {
-            if (!spec.info(ctx).isKeyword() || spec.info(ctx).isOptional() || spec.info(ctx).isRepeated()) {
+        for (auto &spec : data.arguments()) {
+            if (!spec.data(ctx).isKeyword() || spec.data(ctx).isOptional() || spec.data(ctx).isRepeated()) {
                 continue;
             }
             missingArg(ctx, callLoc, fun, spec);
@@ -423,7 +423,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
 
                         // TODO(nelhage): report actual counts of required arguments,
                         // and account for keyword arguments
-                        info.arguments().size(),
+                        data.arguments().size(),
                         aend - args.begin()); // TODO: should use position and print the source tree, not the cfg one.
     }
 
@@ -444,13 +444,13 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
     if (isDynamic()) {
         return Types::dynamic();
     }
-    core::SymbolRef method = this->symbol.info(ctx).findMemberTransitive(ctx, name);
+    core::SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);
 
     if (method.exists()) {
-        core::Symbol &info = method.info(ctx);
+        core::Symbol &data = method.data(ctx);
 
-        if (info.arguments().size() > i) { // todo: this should become actual argument matching
-            shared_ptr<Type> resultType = info.arguments()[i].info(ctx).resultType;
+        if (data.arguments().size() > i) { // todo: this should become actual argument matching
+            shared_ptr<Type> resultType = data.arguments()[i].data(ctx).resultType;
             if (!resultType) {
                 resultType = Types::dynamic();
             }

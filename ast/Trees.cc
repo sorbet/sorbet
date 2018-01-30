@@ -260,7 +260,7 @@ template <class T> void printArgs(const core::GlobalState &gs, stringstream &buf
 }
 
 string ConstDef::toString(const core::GlobalState &gs, int tabs) {
-    return "constdef " + this->symbol.info(gs, true).name.name(gs).toString(gs) + " = " +
+    return "constdef " + this->symbol.data(gs, true).name.data(gs).toString(gs) + " = " +
            this->rhs->toString(gs, tabs + 1);
 }
 
@@ -281,7 +281,7 @@ string ClassDef::toString(const core::GlobalState &gs, int tabs) {
     } else {
         buf << "class ";
     }
-    buf << name->toString(gs, tabs) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs) << "> < ";
+    buf << name->toString(gs, tabs) << "<" << this->symbol.data(gs, true).name.data(gs).toString(gs) << "> < ";
     printArgs(gs, buf, this->ancestors, tabs);
 
     for (auto &a : this->rhs) {
@@ -299,7 +299,7 @@ string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "ClassDef{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "name = " << name->showRaw(gs, tabs + 1) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs)
+    buf << "name = " << name->showRaw(gs, tabs + 1) << "<" << this->symbol.data(gs, true).name.data(gs).toString(gs)
         << ">" << endl;
     printTabs(buf, tabs + 1);
     buf << "ancestors = [";
@@ -372,8 +372,8 @@ string MethodDef::toString(const core::GlobalState &gs, int tabs) {
     } else {
         buf << "def ";
     }
-    auto &info = this->symbol.info(gs, true);
-    buf << name.name(gs).toString(gs) << "<" << info.name.name(gs).toString(gs) << ">";
+    auto &data = this->symbol.data(gs, true);
+    buf << name.data(gs).toString(gs) << "<" << data.name.data(gs).toString(gs) << ">";
     buf << "(";
     bool first = true;
     if (this->symbol == core::GlobalState::defn_todo()) {
@@ -385,12 +385,12 @@ string MethodDef::toString(const core::GlobalState &gs, int tabs) {
             buf << a->toString(gs, tabs + 1);
         }
     } else {
-        for (auto &a : info.arguments()) {
+        for (auto &a : data.arguments()) {
             if (!first) {
                 buf << ", ";
             }
             first = false;
-            buf << a.info(gs).name.toString(gs);
+            buf << a.data(gs).name.toString(gs);
         }
     }
     buf << ")" << endl;
@@ -408,7 +408,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
 
     buf << "self = " << isSelf << endl;
     printTabs(buf, tabs + 1);
-    buf << "name = " << name.name(gs).toString(gs) << "<" << this->symbol.info(gs, true).name.name(gs).toString(gs)
+    buf << "name = " << name.data(gs).toString(gs) << "<" << this->symbol.data(gs, true).name.data(gs).toString(gs)
         << ">" << endl;
     printTabs(buf, tabs + 1);
     buf << "args = [";
@@ -500,15 +500,15 @@ string EmptyTree::toString(const core::GlobalState &gs, int tabs) {
 }
 
 string StringLit::toString(const core::GlobalState &gs, int tabs) {
-    return "\"" + this->value.name(gs).toString(gs) + "\"";
+    return "\"" + this->value.data(gs).toString(gs) + "\"";
 }
 
 string StringLit::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ value = " + this->value.name(gs).toString(gs) + " }";
+    return nodeName() + "{ value = " + this->value.data(gs).toString(gs) + " }";
 }
 
 string ConstantLit::toString(const core::GlobalState &gs, int tabs) {
-    return this->scope->toString(gs, tabs) + "::" + this->cnst.name(gs).toString(gs);
+    return this->scope->toString(gs, tabs) + "::" + this->cnst.data(gs).toString(gs);
 }
 
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
@@ -518,14 +518,14 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "scope = " << this->scope->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
-    buf << "cnst = " << this->cnst.name(gs).toString(gs) << endl;
+    buf << "cnst = " << this->cnst.data(gs).toString(gs) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
 }
 
 string Ident::toString(const core::GlobalState &gs, int tabs) {
-    return this->symbol.info(gs, true).fullName(gs);
+    return this->symbol.data(gs, true).fullName(gs);
 }
 
 std::string Local::toString(const core::GlobalState &gs, int tabs) {
@@ -540,7 +540,7 @@ string Ident::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "Ident{" << endl;
     printTabs(buf, tabs + 1);
-    buf << "symbol = " << this->symbol.info(gs, true).name.name(gs).toString(gs) << endl;
+    buf << "symbol = " << this->symbol.data(gs, true).name.data(gs).toString(gs) << endl;
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -638,7 +638,7 @@ string Next::toString(const core::GlobalState &gs, int tabs) {
 
 string Self::toString(const core::GlobalState &gs, int tabs) {
     if (this->claz.exists()) {
-        return "self(" + this->claz.info(gs).name.name(gs).toString(gs) + ")";
+        return "self(" + this->claz.data(gs).name.data(gs).toString(gs) + ")";
     } else {
         return "self(TODO)";
     }
@@ -773,7 +773,7 @@ string Rescue::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Send::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << this->recv->toString(gs, tabs) << "." << this->fun.name(gs).toString(gs);
+    buf << this->recv->toString(gs, tabs) << "." << this->fun.data(gs).toString(gs);
     printArgs(gs, buf, this->args, tabs);
     if (this->block != nullptr) {
         buf << this->block->toString(gs, tabs);
@@ -788,7 +788,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "recv = " << this->recv->showRaw(gs, tabs + 1) << endl;
     printTabs(buf, tabs + 1);
-    buf << "name = " << this->fun.name(gs).toString(gs) << endl;
+    buf << "name = " << this->fun.data(gs).toString(gs) << endl;
     printTabs(buf, tabs + 1);
     buf << "block = ";
     if (this->block) {
@@ -948,11 +948,11 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string SymbolLit::toString(const core::GlobalState &gs, int tabs) {
-    return ":" + this->name.name(gs).toString(gs);
+    return ":" + this->name.data(gs).toString(gs);
 }
 
 string SymbolLit::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ name = " + this->name.name(gs).toString(gs) + " }";
+    return nodeName() + "{ name = " + this->name.data(gs).toString(gs) + " }";
 }
 
 string RestArg::toString(const core::GlobalState &gs, int tabs) {
@@ -1104,7 +1104,7 @@ string RestArg::nodeName() {
 }
 
 string Self::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ claz = " + this->claz.info(gs).fullName(gs) + " }";
+    return nodeName() + "{ claz = " + this->claz.data(gs).fullName(gs) + " }";
 }
 string KeywordArg::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";

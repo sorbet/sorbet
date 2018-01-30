@@ -20,7 +20,7 @@ public:
         if (diagnostics.empty()) {
             return;
         }
-        u4 max_off = file.file(gs).source().size();
+        u4 max_off = file.data(gs).source().size();
 
         for (auto &diag : diagnostics) {
             std::string level = "unknown";
@@ -48,7 +48,7 @@ public:
 
 std::unique_ptr<Node> Parser::run(ruby_typer::core::GlobalState &gs, core::FileRef file) {
     Builder builder(gs, file);
-    auto source = file.file(gs).source();
+    auto source = file.data(gs).source();
     ruby_parser::typedruby24 driver(string(source.begin(), source.end()), Builder::interface);
     auto ast = unique_ptr<Node>(builder.build(&driver));
     DiagnosticToError::run(gs, file, driver.diagnostics);

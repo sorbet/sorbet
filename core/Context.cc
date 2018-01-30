@@ -19,9 +19,9 @@ namespace ruby_typer {
 namespace core {
 
 SymbolRef Context::selfClass() {
-    Symbol &info = this->owner.info(this->state);
-    if (info.isClass()) {
-        return info.singletonClass(this->state);
+    Symbol &data = this->owner.data(this->state);
+    if (data.isClass()) {
+        return data.singletonClass(this->state);
     }
     return this->contextClass();
 }
@@ -30,7 +30,7 @@ bool Context::permitOverloadDefinitions() const {
     if (!owner.exists()) {
         return false;
     }
-    auto path = owner.info(*this).definitionLoc.file.file(*this).path();
+    auto path = owner.data(*this).definitionLoc.file.data(*this).path();
     constexpr char const *whitelisted = "stdlib.rbi";
     constexpr char const *whitelistedTest = "overloads_test.rb";
     return ::ruby_typer::File::getFileName(path) == whitelisted ||
@@ -39,9 +39,9 @@ bool Context::permitOverloadDefinitions() const {
 
 SymbolRef Context::contextClass() const {
     SymbolRef owner = this->owner;
-    while (!owner.info(this->state, false).isClass()) {
+    while (!owner.data(this->state, false).isClass()) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");
-        owner = owner.info(this->state).owner;
+        owner = owner.data(this->state).owner;
     }
     return owner;
 }
