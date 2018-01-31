@@ -36,7 +36,7 @@ if [ ! -x "$(which buildifier)" ]; then
   fi
 fi
 if [ "$1" == "-t" ]; then
-  OUTPUT=$(find . -name BUILD -not -path "./bazel-*" -print0 | xargs -0 buildifier -v -mode=check || :)
+  OUTPUT=$(find . -name BUILD -not -path "./bazel-*" -print0 | xargs -0 buildifier -v -mode=diff || :)
   if [ -n "$OUTPUT" ]; then
     echo -ne "\\e[1;31m"
     echo "☢️☢️  Some bazel files need to be reformatted! ☢️☢️"

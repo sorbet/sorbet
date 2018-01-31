@@ -9,24 +9,27 @@ public:
     static void load(GlobalState &gs, const u4 *const p);
 
     class Pickler {
-    public:
         std::vector<ruby_typer::u4> data;
+
+    public:
         void putU4(const u4 u);
         void put4U1(u1 v1, u1 v2, u1 v3, u1 v4);
         void putS8(const int64_t i);
         void putStr(const absl::string_view s);
+        std::vector<ruby_typer::u4> result();
         Pickler() = default;
     };
     class UnPickler {
-    public:
         int pos;
         u4 zeroCounter = 0;
-        const u4 *const data;
+        std::vector<ruby_typer::u4> data;
+
+    public:
         u4 getU4();
         void get4U1(u1 &v1, u1 &v2, u1 &v3, u1 &v4);
         int64_t getS8();
         std::string getStr();
-        explicit UnPickler(const u4 *const data) : pos(0), data(data){};
+        explicit UnPickler(const u4 *const data);
     };
     static Pickler pickle(GlobalState &gs);
     static void pickle(Pickler &p, File &what);
