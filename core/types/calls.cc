@@ -270,7 +270,6 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
 //
 // Known incompleteness or inconsistencies with Ruby:
 //  - Missing coercion to keyword arguments via `#to_hash`
-//  - Missing handling of block arguments
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : dynamic
 //    (with a subtype check on the key type, once we have generics)
