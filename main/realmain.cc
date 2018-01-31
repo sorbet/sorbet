@@ -399,7 +399,7 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
                             result.trees.emplace_back(typecheckFile(*lgs, move(job), opts, silenceErrors));
                         } catch (...) {
                             console_err->error("Exception typing file: {} (backtrace is above)",
-                                               file.file(*lgs).path());
+                                               file.data(*lgs).path());
                         }
                     }
                 }
@@ -410,7 +410,7 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
             }));
         }
         for (auto &resolved : what) {
-            tracer->trace("enqueue-typer {}", resolved->loc.file.file(gs).path());
+            tracer->trace("enqueue-typer {}", resolved->loc.file.data(gs).path());
             fileq.push(move(resolved));
         }
         fileq.close();
