@@ -999,13 +999,13 @@ std::shared_ptr<Type> SelfTypeParam::getCallArgumentType(core::Context ctx, core
 
 std::shared_ptr<Type> LambdaParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                 std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                                bool hasBlock) {
+                                                shared_ptr<Type> *block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 std::shared_ptr<Type> SelfTypeParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                   std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                                  bool hasBlock) {
+                                                  shared_ptr<Type> *block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 

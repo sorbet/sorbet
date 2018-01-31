@@ -16,8 +16,16 @@ string Return::toString(const core::Context ctx) {
     return "return " + this->what.toString(ctx);
 }
 
-Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args, bool hasBlock)
-    : recv(recv), fun(fun), args(move(args)), hasBlock(hasBlock) {
+BlockReturn::BlockReturn(core::SymbolRef block, core::LocalVariable what) : block(block), what(what) {
+    categoryCounterInc("cfg", "blockreturn");
+}
+
+string BlockReturn::toString(core::Context ctx) {
+    return "blockreturn<" + this->block.data(ctx).fullName(ctx) + "> " + this->what.toString(ctx);
+}
+
+Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args, core::SymbolRef block)
+    : recv(recv), fun(fun), args(move(args)), block(block) {
     categoryCounterInc("cfg", "send");
     histogramInc("cfg.send.args", this->args.size());
 }
@@ -103,6 +111,14 @@ string LoadArg::toString(const core::Context ctx) {
     buf << this->receiver.toString(ctx);
     buf << "#";
     buf << this->method.data(ctx).toString(ctx);
+    buf << ", " << this->arg << ")";
+    return buf.str();
+}
+
+string LoadYieldParam::toString(const core::Context ctx) {
+    stringstream buf;
+    buf << "load_yield_param(";
+    buf << this->block.data(ctx).fullName(ctx);
     buf << ", " << this->arg << ")";
     return buf.str();
 }

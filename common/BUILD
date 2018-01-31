@@ -14,6 +14,10 @@ cc_library(
         "typecase.h",
     ],
     copts = ["--std=c++14"],
+    linkopts = select({
+        "//tools/config:linux": ["-lm"],
+        "//conditions:default": [],
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "@com_google_absl//absl/container:inlined_vector",

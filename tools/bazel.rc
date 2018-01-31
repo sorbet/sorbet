@@ -13,6 +13,8 @@ build --cxxopt=-Werror
 
 build --host_cxxopt=-O0
 build --host_copt=-O0
+build --host_cxxopt=-DFORCE_DEBUG
+build --host_copt=-DFORCE_DEBUG
 
 # fix build on mac. For some reason path stopped being propagated.
 build --action_env PATH

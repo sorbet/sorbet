@@ -363,6 +363,7 @@ public:
     vector<core::LocalVariable> vars;
     vector<core::TypeAndOrigins> types;
     vector<TestedKnowledge> knowledge;
+    unordered_map<core::SymbolRef, shared_ptr<core::Type>> blockTypes;
 
     string toString(const core::Context ctx) {
         stringstream buf;
@@ -725,6 +726,15 @@ public:
                 }
             }
         }
+
+        for (auto &blk : other.blockTypes) {
+            auto mine = this->blockTypes.find(blk.first);
+            if (mine == this->blockTypes.end()) {
+                this->blockTypes[blk.first] = blk.second;
+            } else {
+                ENFORCE(mine->second == blk.second);
+            }
+        }
     }
 
     void populateFrom(core::Context ctx, const Environment &other) {
@@ -739,6 +749,8 @@ public:
             auto &otherKnowledge = other.getKnowledge(var, false);
             thisKnowledge = otherKnowledge;
         }
+
+        this->blockTypes = other.blockTypes;
     }
     shared_ptr<core::Type> dispatchNew(core::Context ctx, core::TypeAndOrigins recvType, cfg::Send *send,
                                        vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
@@ -749,23 +761,29 @@ public:
                 ENFORCE(!typeConstructor->targs.empty());
                 return runTypeConstructor(ctx, typeConstructor);
             }
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
+                                               send->block.exists() ? &this->blockTypes[send->block] : nullptr);
         }
 
         if (classType->symbol == core::Symbols::untyped()) {
+            if (send->block.exists()) {
+                this->blockTypes[send->block] = core::Types::dynamic();
+            }
             return recvType.type;
         }
 
         core::SymbolRef newSymbol = classType->symbol.data(ctx).findMemberTransitive(ctx, core::Names::new_());
         if (newSymbol.exists() && newSymbol.data(ctx).owner != core::Symbols::BasicObject()) {
             // custom `new` was defined
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
+                                               send->block.exists() ? &this->blockTypes[send->block] : nullptr);
         }
 
         core::SymbolRef attachedClass = classType->symbol.data(ctx).attachedClass(ctx);
         if (!attachedClass.exists()) {
             // `foo`.new() but `foo` isn't a Class
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
+            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
+                                               send->block.exists() ? &this->blockTypes[send->block] : nullptr);
         }
 
         auto type = allocateBySymbol(ctx, attachedClass);
@@ -773,12 +791,15 @@ public:
         // call constructor
         newSymbol = attachedClass.data(ctx).findMemberTransitive(ctx, core::Names::initialize());
         if (newSymbol.exists()) {
-            auto initializeResult =
-                type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, recvType.type, send->hasBlock);
+            auto initializeResult = type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, type,
+                                                       send->block.exists() ? &this->blockTypes[send->block] : nullptr);
         } else {
             if (!args.empty()) {
                 ctx.state.error(bind.loc, core::errors::Infer::MethodArgumentCountMismatch,
                                 "Wrong number of arguments for constructor. Expected: 0, found: {}", args.size());
+            }
+            if (send->block.exists()) {
+                this->blockTypes[send->block] = core::Types::dynamic();
             }
         }
         return type;
@@ -789,6 +810,20 @@ public:
             return a->underlying;
         }
         return tp;
+    }
+
+    // Extract the return value type from a proc. This should potentially be a
+    // method on `Type` or otherwise handled there.
+    shared_ptr<core::Type> getReturnType(core::Context ctx, shared_ptr<core::Type> procType) {
+        if (!procType->derivesFrom(ctx, core::Symbols::Proc())) {
+            return core::Types::dynamic();
+        }
+        auto *applied = core::cast_type<core::AppliedType>(procType.get());
+        if (applied == nullptr || applied->targs.empty()) {
+            return core::Types::dynamic();
+        }
+        // Proc types have their return type as the first targ
+        return applied->targs.front();
     }
 
     shared_ptr<core::Type> processBinding(const core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
@@ -871,10 +906,16 @@ public:
                         tp.type = make_shared<core::TypeConstructor>(attached, targs);
                     } else if (send->fun == core::Names::super()) {
                         // TODO
+                        if (send->block.exists()) {
+                            this->blockTypes[send->block] = core::Types::dynamic();
+                        }
                         tp.type = core::Types::dynamic();
                     } else {
-                        tp.type =
-                            recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, send->hasBlock);
+                        shared_ptr<core::Type> *blockTy = nullptr;
+                        if (send->block.exists()) {
+                            blockTy = &this->blockTypes[send->block];
+                        }
+                        tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, blockTy);
                     }
                     tp.origins.push_back(bind.loc);
                 },
@@ -935,6 +976,18 @@ public:
                     tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
                     tp.origins.push_back(bind.loc);
                 },
+                [&](cfg::LoadYieldParam *i) {
+                    auto it = this->blockTypes.find(i->block);
+                    ENFORCE(it != this->blockTypes.end(), "Inside a block we never entered!");
+                    auto &procType = it->second;
+                    if (procType == nullptr) {
+                        tp.type = core::Types::dynamic();
+                    } else {
+                        tp.type = procType->getCallArgumentType(ctx, core::Names::call(), i->arg);
+                    }
+
+                    tp.origins.push_back(bind.loc);
+                },
                 [&](cfg::Return *i) {
                     auto expectedType = ctx.owner.data(ctx).resultType;
                     if (!expectedType) {
@@ -959,6 +1012,29 @@ public:
                              core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
                                                 typeAndOrigin.origins2Explanations(ctx))}));
                     }
+                    tp.type = core::Types::bottom();
+                    tp.origins.push_back(bind.loc);
+                },
+                [&](cfg::BlockReturn *i) {
+                    auto it = this->blockTypes.find(i->block);
+                    ENFORCE(it != this->blockTypes.end(), "Returning from a block we never entered!");
+                    auto &procType = it->second;
+                    if (procType != nullptr) {
+                        auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
+                        auto expectedType = getReturnType(ctx, procType);
+                        if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
+                            // TODO(nelhage): We should somehow report location
+                            // information about the `send` and/or the
+                            // definition of the block type
+                            ctx.state.error(core::ComplexError(
+                                bind.loc, core::errors::Infer::ReturnTypeMismatch,
+                                "Returning value that does not conform to block result type",
+                                {core::ErrorSection("Expected " + expectedType->toString(ctx)),
+                                 core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
+                                                    typeAndOrigin.origins2Explanations(ctx))}));
+                        }
+                    }
+
                     tp.type = core::Types::bottom();
                     tp.origins.push_back(bind.loc);
                 },
@@ -1010,7 +1086,13 @@ public:
             ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: ", bind.value->toString(ctx));
             tp.type->sanityCheck(ctx);
             ENFORCE(tp.type->isFullyDefined(), "Inferencer did not assign a fully defined type");
+            tp.type->sanityCheck(ctx);
             ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
+            if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+                if (send->block.exists()) {
+                    ENFORCE(this->blockTypes.find(send->block) != this->blockTypes.end());
+                }
+            }
 
             core::TypeAndOrigins cur = getOrCreateTypeAndOrigin(ctx, bind.bind);
 

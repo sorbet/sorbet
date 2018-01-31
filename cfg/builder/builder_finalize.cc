@@ -225,13 +225,17 @@ void CFGBuilder::removeDeadAssigns(const core::Context ctx, const CFG::ReadsAndW
 
             auto fnd = RnW.reads.find(bind.bind);
             if (fnd == RnW.reads.end()) {
-                // This should be !New && !Send && !Return, but I prefer to list explicitly in case we start adding
-                // nodes.
+                // These are all instructions with no side effects, which can be
+                // deleted if the assignment is dead. It would be slightly
+                // shorter to list the converse set -- those which *do* have
+                // side effects -- but doing it this way is more robust to us
+                // adding more instruction types in the future.
                 if (isa_instruction<Ident>(bind.value.get()) || isa_instruction<ArraySplat>(bind.value.get()) ||
                     isa_instruction<HashSplat>(bind.value.get()) || isa_instruction<BoolLit>(bind.value.get()) ||
                     isa_instruction<StringLit>(bind.value.get()) || isa_instruction<SymbolLit>(bind.value.get()) ||
                     isa_instruction<IntLit>(bind.value.get()) || isa_instruction<FloatLit>(bind.value.get()) ||
-                    isa_instruction<Self>(bind.value.get()) || isa_instruction<LoadArg>(bind.value.get())) {
+                    isa_instruction<Self>(bind.value.get()) || isa_instruction<LoadArg>(bind.value.get()) ||
+                    isa_instruction<LoadYieldParam>(bind.value.get())) {
                     expIt = it->exprs.erase(expIt);
                 } else {
                     ++expIt;

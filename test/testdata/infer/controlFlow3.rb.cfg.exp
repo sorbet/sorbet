@@ -46,7 +46,7 @@ ifTemp$13"];
     "bb::<constant:Test>#normalize_params_3" -> "bb::<constant:Test>#normalize_params_5" [style="tapered"];
 
     "bb::<constant:Test>#normalize_params_4" [label = "block[id=4](v)
-statTemp$17 = v : AppliedType {
+returnMethodTemp$3 = v.map() : AppliedType {
   klass = ::<constant:Array>
   targs = [
     <constant:Elem> = untyped
@@ -60,28 +60,21 @@ returnMethodTemp$3 = v : untyped
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_5" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
-    "bb::<constant:Test>#normalize_params_6" [label = "block[id=6](statTemp$17)
+    "bb::<constant:Test>#normalize_params_6" [label = "block[id=6](returnMethodTemp$3)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_8" [style="bold"];
-    "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_7" [style="tapered"];
+    "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_10" [style="tapered"];
 
-    "bb::<constant:Test>#normalize_params_7" [label = "block[id=7](statTemp$17)
-returnMethodTemp$3 = statTemp$17.map() : AppliedType {
-  klass = ::<constant:Array>
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-<unconditional>"];
-
-    "bb::<constant:Test>#normalize_params_7" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
-    "bb::<constant:Test>#normalize_params_8" [label = "block[id=8](statTemp$17)
+    "bb::<constant:Test>#normalize_params_8" [label = "block[id=8](returnMethodTemp$3)
 outerLoops: 1
-e$5813 = load_arg(statTemp$17#map, 0) : Proc
+e$6056 = load_yield_param(::<constant:Test>#normalize_params#<block>$2, 0) : TupleType {
+  0 = untyped
+}
 statTemp$19 = self : Test
-blockReturnTemp$18 = statTemp$19.normalize_params(e$5813) : untyped
+blockReturnTemp$18 = statTemp$19.normalize_params(e$6056) : untyped
+blockReturnTemp$21 = blockreturn<::<constant:Test>#normalize_params#<block>$2> blockReturnTemp$18 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_8" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];

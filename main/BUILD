@@ -68,28 +68,3 @@ cc_library(
         "@cxxopts",
     ],
 )
-
-cc_test(
-    name = "stdlib_test",
-    size = "small",
-    srcs = glob([
-        "test/*.cc",
-    ]),
-    copts = ["-Iexternal/gtest/include"],
-    data = [
-        "//rbi",
-        "//test:gerald",
-    ],
-    linkstatic = select({
-        "//tools/config:fastbuild": 0,
-        "//conditions:default": 1,
-    }),
-    visibility = ["//tools:__pkg__"],
-    deps = [
-        "realmain",
-        "//payload/binary:empty",
-        "@cxxopts",
-        "@gtest",
-        "@gtest//:gtest_main",
-    ],
-)

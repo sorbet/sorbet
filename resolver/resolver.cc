@@ -470,7 +470,54 @@ private:
                     targs.emplace_back(move(value));
                     result = make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
                 } else if (recvi->symbol == core::Symbols::T_Proc()) {
-                    result = core::Types::procClass();
+                    if (s->args.empty()) {
+                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed T::Proc[]: Expected a return type");
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    auto arity = s->args.size() - 1;
+                    if (arity > core::Symbols::MAX_PROC_ARITY) {
+                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed T::Proc[]: Too many arguments (max {})",
+                                        core::Symbols::MAX_PROC_ARITY);
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    auto sym = core::Symbols::Proc(arity);
+                    vector<shared_ptr<core::Type>> targs;
+
+                    auto &back = s->args.back();
+                    // extract return
+                    shared_ptr<core::Type> returnType;
+                    auto hash = ast::cast_tree<ast::Hash>(back.get());
+                    if (hash != nullptr) {
+                        const auto &r = find_if(hash->keys.begin(), hash->keys.end(), [](auto &expr) {
+                            auto sym = ast::cast_tree<ast::SymbolLit>(expr.get());
+                            return sym != nullptr && sym->name == core::Names::returns();
+                        });
+                        if (r != hash->keys.end()) {
+                            auto idx = &*r - &hash->keys.front();
+                            auto &val = hash->values[idx];
+                            returnType = getResultType(ctx, val);
+                        }
+                    }
+                    if (returnType == nullptr) {
+                        ctx.state.error(back->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed type declaration. Expected `returns: <type>`");
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    targs.emplace_back(move(returnType));
+
+                    for (auto &arg : s->args) {
+                        if (&arg == &s->args.back()) {
+                            continue;
+                        }
+                        targs.emplace_back(getResultType(ctx, arg));
+                    }
+
+                    result = make_shared<core::AppliedType>(sym, targs);
                 } else {
                     auto &data = recvi->symbol.data(ctx);
                     if (s->args.size() != data.typeMembers().size()) {

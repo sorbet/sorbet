@@ -214,21 +214,21 @@ outerLoops: 1
 whileTemp$7 = true : TrueClass(true)
 whileTemp$7"];
 
-    "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_6" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_7" [style="tapered"];
+    "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_7" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_6" [style="tapered"];
 
-    "bb::<constant:Examples>#variables_and_loop_6" [label = "block[id=6](<constant:nil>$10, b, cond)
-outerLoops: 1
-cond"];
-
-    "bb::<constant:Examples>#variables_and_loop_6" -> "bb::<constant:Examples>#variables_and_loop_8" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_6" -> "bb::<constant:Examples>#variables_and_loop_9" [style="tapered"];
-
-    "bb::<constant:Examples>#variables_and_loop_7" [label = "block[id=7](<constant:nil>$10, b)
+    "bb::<constant:Examples>#variables_and_loop_6" [label = "block[id=6](<constant:nil>$10, b)
 finalReturn = return b
 <unconditional>"];
 
-    "bb::<constant:Examples>#variables_and_loop_7" -> "bb::<constant:Examples>#variables_and_loop_1" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_6" -> "bb::<constant:Examples>#variables_and_loop_1" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_7" [label = "block[id=7](<constant:nil>$10, b, cond)
+outerLoops: 1
+cond"];
+
+    "bb::<constant:Examples>#variables_and_loop_7" -> "bb::<constant:Examples>#variables_and_loop_8" [style="bold"];
+    "bb::<constant:Examples>#variables_and_loop_7" -> "bb::<constant:Examples>#variables_and_loop_9" [style="tapered"];
+
     "bb::<constant:Examples>#variables_and_loop_8" [label = "block[id=8](<constant:nil>$10, b, cond)
 outerLoops: 1
 b = 1 : untyped
@@ -265,21 +265,21 @@ outerLoops: 1
 whileTemp$5 = true : TrueClass(true)
 whileTemp$5"];
 
-    "bb::<constant:Examples>#variables_loop_if_2" -> "bb::<constant:Examples>#variables_loop_if_3" [style="bold"];
-    "bb::<constant:Examples>#variables_loop_if_2" -> "bb::<constant:Examples>#variables_loop_if_4" [style="tapered"];
+    "bb::<constant:Examples>#variables_loop_if_2" -> "bb::<constant:Examples>#variables_loop_if_4" [style="bold"];
+    "bb::<constant:Examples>#variables_loop_if_2" -> "bb::<constant:Examples>#variables_loop_if_3" [style="tapered"];
 
-    "bb::<constant:Examples>#variables_loop_if_3" [label = "block[id=3](<constant:nil>$8, b, cond)
-outerLoops: 1
-cond"];
-
-    "bb::<constant:Examples>#variables_loop_if_3" -> "bb::<constant:Examples>#variables_loop_if_5" [style="bold"];
-    "bb::<constant:Examples>#variables_loop_if_3" -> "bb::<constant:Examples>#variables_loop_if_6" [style="tapered"];
-
-    "bb::<constant:Examples>#variables_loop_if_4" [label = "block[id=4](<constant:nil>$8, b)
+    "bb::<constant:Examples>#variables_loop_if_3" [label = "block[id=3](<constant:nil>$8, b)
 finalReturn = return b
 <unconditional>"];
 
-    "bb::<constant:Examples>#variables_loop_if_4" -> "bb::<constant:Examples>#variables_loop_if_1" [style="bold"];
+    "bb::<constant:Examples>#variables_loop_if_3" -> "bb::<constant:Examples>#variables_loop_if_1" [style="bold"];
+    "bb::<constant:Examples>#variables_loop_if_4" [label = "block[id=4](<constant:nil>$8, b, cond)
+outerLoops: 1
+cond"];
+
+    "bb::<constant:Examples>#variables_loop_if_4" -> "bb::<constant:Examples>#variables_loop_if_5" [style="bold"];
+    "bb::<constant:Examples>#variables_loop_if_4" -> "bb::<constant:Examples>#variables_loop_if_6" [style="tapered"];
+
     "bb::<constant:Examples>#variables_loop_if_5" [label = "block[id=5](<constant:nil>$8, b, cond)
 outerLoops: 1
 b = 1 : untyped

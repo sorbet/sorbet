@@ -30,7 +30,7 @@ subgraph "cluster_::<constant:Bar>#baz" {
 selfMethodTemp$4 = self : Bar
 b = load_arg(selfMethodTemp$4#baz, 0) : untyped
 statTemp$5 = self : Bar
-statTemp$6 = b : untyped
+returnMethodTemp$3 = statTemp$5.super(b) : untyped
 <unconditional>"];
 
     "bb::<constant:Bar>#baz_0" -> "bb::<constant:Bar>#baz_2" [style="bold"];
@@ -38,24 +38,24 @@ statTemp$6 = b : untyped
 <unconditional>"];
 
     "bb::<constant:Bar>#baz_1" -> "bb::<constant:Bar>#baz_1" [style="bold"];
-    "bb::<constant:Bar>#baz_2" [label = "block[id=2](statTemp$5, statTemp$6)
+    "bb::<constant:Bar>#baz_2" [label = "block[id=2](returnMethodTemp$3)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Bar>#baz_2" -> "bb::<constant:Bar>#baz_4" [style="bold"];
     "bb::<constant:Bar>#baz_2" -> "bb::<constant:Bar>#baz_3" [style="tapered"];
 
-    "bb::<constant:Bar>#baz_3" [label = "block[id=3](statTemp$5, statTemp$6)
-returnMethodTemp$3 = statTemp$5.super(statTemp$6) : untyped
+    "bb::<constant:Bar>#baz_3" [label = "block[id=3](returnMethodTemp$3)
 finalReturn = return returnMethodTemp$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Bar>#baz_3" -> "bb::<constant:Bar>#baz_1" [style="bold"];
-    "bb::<constant:Bar>#baz_4" [label = "block[id=4](statTemp$5, statTemp$6)
+    "bb::<constant:Bar>#baz_4" [label = "block[id=4](returnMethodTemp$3)
 outerLoops: 1
-a$5817 = load_arg(statTemp$5#super, 0) : untyped
+a$6060 = load_yield_param(::<constant:Bar>#baz#<block>$2, 0) : untyped
 statTemp$8 = self : Bar
-blockReturnTemp$7 = statTemp$8.puts(a$5817) : NilClass
+blockReturnTemp$7 = statTemp$8.puts(a$6060) : NilClass
+blockReturnTemp$10 = blockreturn<::<constant:Bar>#baz#<block>$2> blockReturnTemp$7 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Bar>#baz_4" -> "bb::<constant:Bar>#baz_2" [style="bold"];

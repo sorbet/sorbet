@@ -5,16 +5,16 @@ class <emptyTree>::<constant:TestLocals><<constant:TestLocals>> < (::<constant:<
       c = 4
       self(<constant:TestLocals>).proc() do ||
         begin
-          b$5812 = 2
-          a.+(b$5812)
+          b$6055 = 2
+          a.+(b$6055)
           self(<constant:TestLocals>).proc() do ||
-            b$5812.+(c)
+            b$6055.+(c)
           end
         end
       end
       b = 3
-      self(<constant:TestLocals>).proc() do |a$5814, b$5814|
-        a$5814.+(b$5814)
+      self(<constant:TestLocals>).proc() do |a$6057, b$6057|
+        a$6057.+(b$6057)
       end
     end
   end

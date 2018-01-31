@@ -31,13 +31,15 @@ public:
     CFG &inWhat;
     core::LocalVariable target;
     int loops;
+    core::SymbolRef rubyBlock;
     BasicBlock *nextScope;
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
     std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
 
     CFGContext withTarget(core::LocalVariable target);
-    CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope);
+    CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope,
+                             core::SymbolRef rubyBlock = core::Symbols::noSymbol());
 
 private:
     friend std::unique_ptr<CFG> CFGBuilder::buildFor(const core::Context ctx, ast::MethodDef &md);

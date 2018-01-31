@@ -55,9 +55,10 @@ public:
     core::LocalVariable recv;
     core::NameRef fun;
     std::vector<core::LocalVariable> args;
-    bool hasBlock;
+    core::SymbolRef block;
 
-    Send(core::LocalVariable recv, core::NameRef fun, std::vector<core::LocalVariable> &args, bool hasBlock);
+    Send(core::LocalVariable recv, core::NameRef fun, std::vector<core::LocalVariable> &args,
+         core::SymbolRef block = core::Symbols::noSymbol());
 
     virtual std::string toString(core::Context ctx);
 };
@@ -67,6 +68,15 @@ public:
     core::LocalVariable what;
 
     Return(core::LocalVariable what);
+    virtual std::string toString(core::Context ctx);
+};
+
+class BlockReturn final : public Instruction {
+public:
+    core::SymbolRef block;
+    core::LocalVariable what;
+
+    BlockReturn(core::SymbolRef block, core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
 
@@ -171,6 +181,17 @@ public:
     u4 arg;
 
     LoadArg(core::LocalVariable receiver, core::NameRef method, u4 arg) : receiver(receiver), method(method), arg(arg) {
+        categoryCounterInc("cfg", "loadarg");
+    };
+    virtual std::string toString(core::Context ctx);
+};
+
+class LoadYieldParam final : public Instruction {
+public:
+    core::SymbolRef block;
+    u4 arg;
+
+    LoadYieldParam(core::SymbolRef block, u4 arg) : block(block), arg(arg) {
         categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);

@@ -1,5 +1,5 @@
 # @typed
-class Proc1
+class MyProc1
   Return = T.type
   Arg0 = T.type
 
@@ -15,7 +15,7 @@ end
 class UseProc1
   sig.returns(NilClass)
   def callit
-    p = Proc1[String, Integer].new
+    p = MyProc1[String, Integer].new
 
     T.assert_type!(p.call(7), String)
 

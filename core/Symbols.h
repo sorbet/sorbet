@@ -653,12 +653,28 @@ public:
         return SymbolRef(nullptr, 41);
     }
 
+    static constexpr int MAX_PROC_ARITY = 10;
+    static SymbolRef Proc0() {
+        return SymbolRef(nullptr, 42);
+    }
+
+    static SymbolRef Proc(int argc) {
+        if (argc > MAX_PROC_ARITY) {
+            return noSymbol();
+        }
+        return SymbolRef(nullptr, Proc0()._id + argc);
+    }
+
+    static SymbolRef last_proc() {
+        return SymbolRef(nullptr, Proc0()._id + MAX_PROC_ARITY + 1);
+    }
+
     // Keep as last and update to match the last entry
     static SymbolRef last_synthetic_sym() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - 1);
     }
 
-    static constexpr int MAX_SYNTHETIC_SYMBOLS = 100;
+    static constexpr int MAX_SYNTHETIC_SYMBOLS = 200;
 };
 
 } // namespace core

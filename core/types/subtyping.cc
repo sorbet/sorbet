@@ -1007,7 +1007,7 @@ bool TypeConstructor::isFullyDefined() {
 }
 std::shared_ptr<Type> TypeConstructor::dispatchCall(const core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                     std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                                    bool hasBlock) {
+                                                    shared_ptr<Type> *block) {
     Error::raise("should never happen");
 }
 

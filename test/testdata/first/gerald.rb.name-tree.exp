@@ -28,8 +28,8 @@ begin
     def initialize<initialize>()
       begin
         begin
-          assignTemp$3 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-pass>$2$5822|
-            <block-pass>$2$5822.valid?()
+          assignTemp$3 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-pass>$2$6065|
+            <block-pass>$2$6065.valid?()
           end
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTemp$3.[](0)
           invalid_rules = assignTemp$3.[](1)
@@ -37,8 +37,8 @@ begin
         end
         if invalid_rules.empty?().!()
           begin
-            invalid_rule_ids = invalid_rules.map() do |<block-pass>$4$5824|
-              <block-pass>$4$5824.token()
+            invalid_rule_ids = invalid_rules.map() do |<block-pass>$4$6067|
+              <block-pass>$4$6067.token()
             end.join(",")
             self(<constant:Matcher>).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
           end
@@ -61,9 +61,9 @@ begin
           <emptyTree>
         end
         budget = ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>.new()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules.select() do |r$5828|
-          budget.time_rule(r$5828) do ||
-            r$5828.matches?(match_context)
+        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules.select() do |r$6071|
+          budget.time_rule(r$6071) do ||
+            r$6071.matches?(match_context)
           end
         end
       end
@@ -173,38 +173,38 @@ begin
     end
 
     def added_files<added_files>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$5858|
-        part$5858.[](:a_name).==("/dev/null")
-      end.map() do |part$5860|
-        part$5860.[](:b_name)
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$6101|
+        part$6101.[](:a_name).==("/dev/null")
+      end.map() do |part$6103|
+        part$6103.[](:b_name)
       end
     end
 
     def deleted_files<deleted_files>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$5863|
-        part$5863.[](:b_name).==("/dev/null")
-      end.map() do |part$5865|
-        part$5865.[](:a_name)
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$6106|
+        part$6106.[](:b_name).==("/dev/null")
+      end.map() do |part$6108|
+        part$6108.[](:a_name)
       end
     end
 
     def changed_files<changed_files>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$5868|
-        part$5868.[](:a_name).==(part$5868.[](:b_name))
-      end.map() do |part$5870|
-        part$5870.[](:b_name)
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$6111|
+        part$6111.[](:a_name).==(part$6111.[](:b_name))
+      end.map() do |part$6113|
+        part$6113.[](:b_name)
       end
     end
 
     def added_lines<added_lines>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |part$5873|
-        part$5873.[](:added_lines)
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |part$6116|
+        part$6116.[](:added_lines)
       end.flatten()
     end
 
     def removed_lines<removed_lines>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |part$5876|
-        part$5876.[](:removed_lines)
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |part$6119|
+        part$6119.[](:removed_lines)
       end.flatten()
     end
 
@@ -224,50 +224,50 @@ begin
         else
           parts = []
         end
-        parts.map() do |part$5882|
+        parts.map() do |part$6125|
           begin
-            lines$5882 = part$5882.split("
+            lines$6125 = part$6125.split("
 ")
-            a_name$5882 = b_name$5882 = ::<constant:nil>
-            added_lines$5882 = []
-            removed_lines$5882 = []
-            lines$5882.each() do |line$5884|
-              if line$5884.start_with?("index ", "@@", "new file mode")
+            a_name$6125 = b_name$6125 = ::<constant:nil>
+            added_lines$6125 = []
+            removed_lines$6125 = []
+            lines$6125.each() do |line$6127|
+              if line$6127.start_with?("index ", "@@", "new file mode")
                 next(<emptyTree>)
               else
-                if line$5884.start_with?("---")
+                if line$6127.start_with?("---")
                   begin
-                    a_name$5882 = line$5884.[](::<constant:Range>.new(4, -1))
-                    if if a_name$5882
-                        a_name$5882.start_with?("a/")
+                    a_name$6125 = line$6127.[](::<constant:Range>.new(4, -1))
+                    if if a_name$6125
+                        a_name$6125.start_with?("a/")
                       else
-                        a_name$5882
+                        a_name$6125
                       end
-                      a_name$5882 = a_name$5882.[](::<constant:Range>.new(2, -1))
+                      a_name$6125 = a_name$6125.[](::<constant:Range>.new(2, -1))
                     else
                       <emptyTree>
                     end
                   end
                 else
-                  if line$5884.start_with?("+++")
+                  if line$6127.start_with?("+++")
                     begin
-                      b_name$5882 = line$5884.[](::<constant:Range>.new(4, -1))
-                      if if b_name$5882
-                          b_name$5882.start_with?("b/")
+                      b_name$6125 = line$6127.[](::<constant:Range>.new(4, -1))
+                      if if b_name$6125
+                          b_name$6125.start_with?("b/")
                         else
-                          b_name$5882
+                          b_name$6125
                         end
-                        b_name$5882 = b_name$5882.[](::<constant:Range>.new(2, -1))
+                        b_name$6125 = b_name$6125.[](::<constant:Range>.new(2, -1))
                       else
                         <emptyTree>
                       end
                     end
                   else
-                    if line$5884.start_with?("+")
-                      added_lines$5882.<<(line$5884.[](::<constant:Range>.new(1, -1)))
+                    if line$6127.start_with?("+")
+                      added_lines$6125.<<(line$6127.[](::<constant:Range>.new(1, -1)))
                     else
-                      if line$5884.start_with?("-")
-                        removed_lines$5882.<<(line$5884.[](::<constant:Range>.new(1, -1)))
+                      if line$6127.start_with?("-")
+                        removed_lines$6125.<<(line$6127.[](::<constant:Range>.new(1, -1)))
                       else
                         <emptyTree>
                       end
@@ -276,12 +276,12 @@ begin
                 end
               end
             end
-            if a_name$5882.nil?()
+            if a_name$6125.nil?()
               next(<emptyTree>)
             else
               <emptyTree>
             end
-            {:a_name => a_name$5882, :b_name => b_name$5882, :added_lines => added_lines$5882, :removed_lines => removed_lines$5882}
+            {:a_name => a_name$6125, :b_name => b_name$6125, :added_lines => added_lines$6125, :removed_lines => removed_lines$6125}
           end
         end.compact()
       end

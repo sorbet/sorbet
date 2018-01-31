@@ -68,6 +68,8 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
                 }
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
                 reads[v->what].insert(bb.get());
+            } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
+                reads[v->what].insert(bb.get());
             } else if (auto *v = cast_instruction<LoadArg>(bind.value.get())) {
                 reads[v->receiver].insert(bb.get());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {

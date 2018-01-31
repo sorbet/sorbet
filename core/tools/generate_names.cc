@@ -42,7 +42,7 @@ NameDef names[] = {
     {"to_proc", Desugar},
     {"concat", Desugar},
     {"intern", Desugar},
-    {"call", Desugar | Namer},
+    {"call", Desugar | Namer | Infer},
     {"bang", "!", Desugar | Infer | Parser},
     {"squareBrackets", "[]", Desugar | Parser | Infer | Resolver},
     {"squareBracketsEq", "[]=", Parser},

@@ -1,0 +1,40 @@
+class <constant:<root>> () -> <class:<root>>
+  class <constant:TestProc> < ::<constant:Object> () -> <class:TestProc>
+    method bad (x, y, z) -> NilClass
+      argument x<> -> untyped
+      argument y<> -> untyped
+      argument z<> -> AppliedType {
+        klass = ::<constant:Proc1>
+        targs = [
+          <constant:Return> = Integer
+          <constant:Arg0> = untyped
+        ]
+      }
+    method good1 (blk) -> Integer
+      argument blk<block> -> AppliedType {
+        klass = ::<constant:Proc1>
+        targs = [
+          <constant:Return> = Integer
+          <constant:Arg0> = Integer
+        ]
+      }
+    method good2 (blk) -> Integer
+      argument blk<block> -> AppliedType {
+        klass = ::<constant:Proc1>
+        targs = [
+          <constant:Return> = AppliedType {
+              klass = ::<constant:Array>
+              targs = [
+                <constant:Elem> = Integer
+              ]
+            }
+          <constant:Arg0> = AppliedType {
+              klass = ::<constant:Array>
+              targs = [
+                <constant:Elem> = String
+              ]
+            }
+        ]
+      }
+  class <singleton class:<constant:TestProc>> < ::<singleton class:<constant:Object>> ()
+

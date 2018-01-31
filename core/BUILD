@@ -19,10 +19,8 @@ cc_library(
             "types/*.cc",
         ],
         exclude = [
-            "*_test.cc",
-
             # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
-            "flycheck_*",
+            "**/flycheck_*",
         ],
     ) + [
         "Names_gen.h",

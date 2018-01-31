@@ -208,20 +208,20 @@ outerLoops: 1
 whileTemp$4 = true : TrueClass(true)
 whileTemp$4"];
 
-    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_3" [style="bold"];
-    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_4" [style="tapered"];
+    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_4" [style="bold"];
+    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_3" [style="tapered"];
 
     "bb::<constant:Object>#baz8_3" [label = "block[id=3](<constant:nil>$6)
+finalReturn = return <constant:nil>$6
+<unconditional>"];
+
+    "bb::<constant:Object>#baz8_3" -> "bb::<constant:Object>#baz8_1" [style="bold"];
+    "bb::<constant:Object>#baz8_4" [label = "block[id=4](<constant:nil>$6)
 outerLoops: 1
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_3" -> "bb::<constant:Object>#baz8_2" [style="bold"];
-    "bb::<constant:Object>#baz8_4" [label = "block[id=4](<constant:nil>$6)
-finalReturn = return <constant:nil>$6
-<unconditional>"];
-
-    "bb::<constant:Object>#baz8_4" -> "bb::<constant:Object>#baz8_1" [style="bold"];
+    "bb::<constant:Object>#baz8_4" -> "bb::<constant:Object>#baz8_2" [style="bold"];
 }
 
 }

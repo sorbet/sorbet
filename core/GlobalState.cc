@@ -4,6 +4,7 @@
 #include "core/errors/errors.h"
 #include <regex>
 
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
@@ -117,6 +118,7 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
 }
 
 int globalStateIdCounter = 1;
+const int Symbols::MAX_PROC_ARITY;
 
 GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), globalStateId(globalStateIdCounter++) {
     unsigned int max_name_count = 262144;   // 6MB
@@ -226,6 +228,11 @@ void GlobalState::initEmpty() {
     ENFORCE(set_id = Symbols::Set());
     ENFORCE(struct_id = Symbols::Struct());
     ENFORCE(file_id = Symbols::File());
+
+    for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
+        auto id = synthesizeClass(absl::StrCat("Proc", arity), Symbols::Proc()._id);
+        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: ", arity);
+    }
 
     // Synthesize nil = NilClass()
     Symbols::nil().data(*this).resultType = core::Types::nil();

@@ -11,6 +11,7 @@ using namespace std;
 string sourceName2funcName(string sourceName) {
     replace(sourceName.begin(), sourceName.end(), '.', '_');
     replace(sourceName.begin(), sourceName.end(), '/', '_');
+    replace(sourceName.begin(), sourceName.end(), '-', '_');
     return sourceName;
 }
 
