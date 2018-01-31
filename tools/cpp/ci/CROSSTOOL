@@ -28,12 +28,13 @@ toolchain {
   tool_path { name: "ar" path: "/usr/lib/llvm-4.0/bin/llvm-ar" }
   tool_path { name: "compat-ld" path: "/usr/bin/ld" }
   tool_path { name: "cpp" path: "/usr/lib/llvm-4.0/bin/clang-cpp" }
-  tool_path { name: "dwp" path: "/usr/bin/dwp" }
+  tool_path { name: "dwp" path: "/usr/lib/llvm-4.0/bin/llvm-dwp" }
   tool_path { name: "gcc" path: "/usr/lib/llvm-4.0/bin/clang" }
   cxx_flag: "-std=c++14"
   linker_flag: "-lstdc++"
   linker_flag: "-B/usr/bin/"
   linker_flag: "-lubsan"
+  linker_flag: "-flto=thin"
 
   # TODO(bazel-team): In theory, the path here ought to exactly match the path
   # used by gcc. That works because bazel currently doesn't track files at
@@ -50,11 +51,11 @@ toolchain {
   # to find libraries), but we provide LD so other rules can invoke the linker.
   tool_path { name: "ld" path: "/usr/bin/ld" }
 
-  tool_path { name: "nm" path: "/usr/bin/nm" }
+  tool_path { name: "nm" path: "/usr/lib/llvm-4.0/bin/llvm-nm" }
   tool_path { name: "objcopy" path: "/usr/bin/objcopy" }
   objcopy_embed_flag: "-I"
   objcopy_embed_flag: "binary"
-  tool_path { name: "objdump" path: "/usr/bin/objdump" }
+  tool_path { name: "objdump" path: "/usr/lib/llvm-4.0/bin/llvm-objdump" }
   tool_path { name: "strip" path: "/usr/bin/strip" }
 
   # Anticipated future default.
