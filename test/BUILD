@@ -97,6 +97,27 @@ cc_binary(
     deps = ["//common"],
 )
 
+sh_test(
+    name = "end-to-end-test",
+    size = "small",
+    srcs = ["end-to-end-test.sh"],
+    data = [
+        "end-to-end-test.out",
+        "end-to-end-test-input.rb",
+        "//main:ruby-typer",
+    ],
+)
+
+sh_test(
+    name = "dash-e-test",
+    size = "small",
+    srcs = ["dash-e-test.sh"],
+    data = [
+        "dash-e-test.out",
+        "//main:ruby-typer",
+    ],
+)
+
 SHARDS = 8
 
 [
