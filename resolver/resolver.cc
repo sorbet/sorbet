@@ -361,9 +361,11 @@ private:
                 if (!fail) {
                     auto key = getResultType(ctx, hash->values[keyIndex]);
                     auto value = getResultType(ctx, hash->values[valueIndex]);
+
                     std::vector<shared_ptr<core::Type>> targs;
                     targs.emplace_back(move(key));
                     targs.emplace_back(move(value));
+                    targs.emplace_back(core::Types::dynamic());
                     return make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
                 }
 
@@ -405,6 +407,11 @@ private:
                         std::vector<shared_ptr<core::Type>> targs;
                         for (auto &UNUSED(arg) : sym.data(ctx).typeMembers()) {
                             targs.emplace_back(core::Types::dynamic());
+                        }
+                        if (sym == core::Symbols::Hash()) {
+                            while (targs.size() < 3) {
+                                targs.emplace_back(core::Types::dynamic());
+                            }
                         }
                         result = make_shared<core::AppliedType>(sym, targs);
                         if (!silenceGenericError) {
@@ -466,8 +473,10 @@ private:
                     auto key = getResultType(ctx, s->args[0]);
                     auto value = getResultType(ctx, s->args[1]);
                     std::vector<shared_ptr<core::Type>> targs;
+
                     targs.emplace_back(move(key));
                     targs.emplace_back(move(value));
+                    targs.emplace_back(core::Types::dynamic());
                     result = make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
                 } else if (recvi->symbol == core::Symbols::T_Proc()) {
                     if (s->args.empty()) {

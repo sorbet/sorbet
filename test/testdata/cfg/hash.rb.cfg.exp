@@ -35,8 +35,9 @@ hashTemp$8 = 2 : Integer(2)
 returnMethodTemp$2 = <constant:<Magic>>$11.<build-hash>(hashTemp$4, hashTemp$5, hashTemp$7, hashTemp$8) : AppliedType {
   klass = ::<constant:Hash>
   targs = [
-    <constant:Key> = untyped
-    <constant:Value> = untyped
+    <constant:K> = untyped
+    <constant:V> = untyped
+    <constant:Elem> = untyped
   ]
 }
 finalReturn = return returnMethodTemp$2 : <bottom>

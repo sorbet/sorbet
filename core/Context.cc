@@ -30,11 +30,9 @@ bool Context::permitOverloadDefinitions() const {
     if (!owner.exists()) {
         return false;
     }
-    auto path = owner.data(*this).definitionLoc.file.data(*this).path();
-    constexpr char const *whitelisted = "stdlib.rbi";
+    auto &file = owner.data(*this).definitionLoc.file.data(*this);
     constexpr char const *whitelistedTest = "overloads_test.rb";
-    return ::ruby_typer::File::getFileName(path) == whitelisted ||
-           ::ruby_typer::File::getFileName(path) == whitelistedTest;
+    return file.isStdLib() || ::ruby_typer::File::getFileName(file.path()) == whitelistedTest;
 }
 
 SymbolRef Context::contextClass() const {

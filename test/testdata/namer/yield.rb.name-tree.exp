@@ -40,30 +40,30 @@ begin
     end
 
     def blockyield<blockyield>()
-      self(<constant:Main>).yielder() do |i$6076, <blk>$6076|
-        <blk>$6076.call(i$6076)
+      self(<constant:Main>).yielder() do |i$6103, <blk>$6103|
+        <blk>$6103.call(i$6103)
       end
     end
 
     def main<main>()
       begin
-        l = self(<constant:Main>).lambda() do |x$6080|
+        l = self(<constant:Main>).lambda() do |x$6107|
           begin
-            self(<constant:Main>).puts(x$6080)
+            self(<constant:Main>).puts(x$6107)
             3
           end
         end
-        self(<constant:Main>).yielder() do |<block-pass>$2$6082|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$2$6082.to_a()))
+        self(<constant:Main>).yielder() do |<block-pass>$2$6109|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$2$6109.to_a()))
         end
-        self(<constant:Main>).blockpass() do |<block-pass>$3$6084|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$3$6084.to_a()))
+        self(<constant:Main>).blockpass() do |<block-pass>$3$6111|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$3$6111.to_a()))
         end
-        self(<constant:Main>).mixed() do |<block-pass>$4$6086|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$4$6086.to_a()))
+        self(<constant:Main>).mixed() do |<block-pass>$4$6113|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$4$6113.to_a()))
         end
-        self(<constant:Main>).blockyield() do |<block-pass>$5$6088|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$5$6088.to_a()))
+        self(<constant:Main>).blockyield() do |<block-pass>$5$6115|
+          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$5$6115.to_a()))
         end
       end
     end

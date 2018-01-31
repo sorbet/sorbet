@@ -62,6 +62,8 @@ public:
     absl::string_view source() const;
     Type source_type;
 
+    bool isStdLib() const;
+
     File(std::string &&path_, std::string &&source_, Type sourcetype);
     File(File &&other) = default;
     File(const File &other) = delete;

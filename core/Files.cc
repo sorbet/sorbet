@@ -42,5 +42,11 @@ absl::string_view File::path() const {
 absl::string_view File::source() const {
     return this->source_;
 }
+
+bool File::isStdLib() const {
+    constexpr char const *whitelisted = "stdlib.rbi";
+    return ::ruby_typer::File::getFileName(path()) == whitelisted;
+}
+
 } // namespace core
 } // namespace ruby_typer

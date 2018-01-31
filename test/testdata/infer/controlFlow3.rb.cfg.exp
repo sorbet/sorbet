@@ -69,11 +69,11 @@ outerLoops: 1
 
     "bb::<constant:Test>#normalize_params_8" [label = "block[id=8](returnMethodTemp$3)
 outerLoops: 1
-e$6071 = load_yield_param(::<constant:Test>#normalize_params#<block>$2, 0) : TupleType {
+e$6098 = load_yield_param(::<constant:Test>#normalize_params#<block>$2, 0) : TupleType {
   0 = untyped
 }
 statTemp$19 = self : Test
-blockReturnTemp$18 = statTemp$19.normalize_params(e$6071) : untyped
+blockReturnTemp$18 = statTemp$19.normalize_params(e$6098) : untyped
 blockReturnTemp$21 = blockreturn<::<constant:Test>#normalize_params#<block>$2> blockReturnTemp$18 : <bottom>
 <unconditional>"];
 

@@ -9,13 +9,13 @@ class <emptyTree>::<constant:Destructure><<constant:Destructure>> < (::<constant
       end
       begin
         x.+(y)
-        self(<constant:Destructure>).lambda() do |<destructure>$4$6072|
+        self(<constant:Destructure>).lambda() do |<destructure>$4$6099|
           begin
             begin
-              assignTemp$5$6072 = <destructure>$4$6072
-              a$6072 = assignTemp$5$6072.[](0)
-              b$6072 = assignTemp$5$6072.[](1)
-              assignTemp$5$6072
+              assignTemp$5$6099 = <destructure>$4$6099
+              a$6099 = assignTemp$5$6099.[](0)
+              b$6099 = assignTemp$5$6099.[](1)
+              assignTemp$5$6099
             end
             <emptyTree>
           end

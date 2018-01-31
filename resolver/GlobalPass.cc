@@ -12,10 +12,14 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     auto &inSym = sym.data(gs);
     core::SymbolRef my = inSym.findMember(gs, name);
     if (!my.exists()) {
-        gs.error(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared,
-                 "Type {} declared by parent {} should be declared again", name.toString(gs),
-                 parent.data(gs).fullName(gs));
-        return false;
+        if (parent == core::Symbols::Enumerable() || parent.data(gs).derivesFrom(gs, core::Symbols::Enumerable())) {
+            my = gs.enterTypeMember(inSym.definitionLoc, sym, name, parentVariance);
+        } else {
+            gs.error(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared,
+                     +"Type {} declared by parent {} should be declared again", name.toString(gs),
+                     parent.data(gs).fullName(gs));
+            return false;
+        }
     }
     auto myVariance = my.data(gs).variance();
     if (!inSym.derivesFrom(gs, core::Symbols::Class()) && (myVariance != parentVariance)) {
@@ -35,9 +39,12 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
         for (core::SymbolRef tp : inSym.typeMembers()) {
             auto myVariance = tp.data(gs).variance();
             if (myVariance != core::Variance::Invariant) {
-                gs.error(tp.data(gs).definitionLoc, core::errors::Resolver::VariantTypeMemberInClass,
-                         "Classes can only have invariant type members");
-                return;
+                auto loc = tp.data(gs).definitionLoc;
+                if (!loc.file.data(gs).isStdLib()) {
+                    gs.error(tp.data(gs).definitionLoc, core::errors::Resolver::VariantTypeMemberInClass,
+                             "Classes can only have invariant type members");
+                    return;
+                }
             }
         }
     }
@@ -117,6 +124,6 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         }
     }
 }
+}; // namespace resolver
 
-} // namespace resolver
 } // namespace ruby_typer

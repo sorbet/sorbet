@@ -33,8 +33,9 @@ class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
       argument g<> -> AppliedType {
         klass = ::<constant:Hash>
         targs = [
-          <constant:Key> = T1
-          <constant:Value> = T2
+          <constant:K> = T1
+          <constant:V> = T2
+          <constant:Elem> = untyped
         ]
       }
       argument h<> -> FalseClass | Integer | Float | String | Symbol

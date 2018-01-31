@@ -16,7 +16,6 @@ end
 module Enumerable
 end
 class Array < Object
-  Elem = T.type
   include Enumerable
 end
 module Benchmark
@@ -530,8 +529,6 @@ class Gem::Version < Object
   include Comparable
 end
 class Hash < Object
-  Key = T.type
-  Value = T.type
   include Enumerable
 end
 module IO::WaitReadable
@@ -760,6 +757,9 @@ class ArgumentError
 end
 
 class Array
+  extend T::Generic
+  Elem = T.type
+
   sig(
     stuff: T.untyped
   )
@@ -767,15 +767,15 @@ class Array
   def self.[](*stuff); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def <<(arg0); end
 
   sig(
-      arg0: Range,
+      arg0: Range[Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: T.any(Integer, Float),
   )
@@ -784,19 +784,19 @@ class Array
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def [](arg0, arg1=_); end
 
   sig(
       arg0: T::Array[BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def &(arg0); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: String,
   )
@@ -804,175 +804,175 @@ class Array
   def *(arg0); end
 
   sig(
-      arg0: Enumerable,
+      arg0: Enumerable[BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.any(T.untyped, Elem)])
   sig(
       arg0: T::Array[BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.any(T.untyped, Elem)])
   def +(arg0); end
 
   sig(
       arg0: T::Array[BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.any(T.untyped, Elem)])
   def -(arg0); end
 
   sig(
       arg0: Integer,
-      arg1: BasicObject,
+      arg1: Elem,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
       arg0: Integer,
       arg1: Integer,
-      arg2: BasicObject,
+      arg2: Elem,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
-      arg0: Range,
-      arg1: BasicObject,
+      arg0: Range[Integer],
+      arg1: Elem,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   def []=(arg0, arg1, arg2=_); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def assoc(arg0); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   def at(arg0); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def clear(); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def map(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def map!(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def collect(&blk); end
 
   sig(
       arg0: Integer,
-      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
+      blk: T::Proc[[T::Array[Elem]], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def combination(arg0, &blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def push(*arg0); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def compact(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def compact!(); end
 
   sig(
-      arg0: T::Array[BasicObject],
+      arg0: T::Array[Elem],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def concat(arg0); end
 
   sig.returns(Integer)
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
   .returns(Integer)
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(Integer)
   def count(arg0=_, &blk); end
 
   sig(
       arg0: Integer,
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(T.untyped)
   sig(
       arg0: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def cycle(arg0=_, &blk); end
 
   sig(
       arg0: BasicObject,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
       arg0: BasicObject,
       blk: T::Proc[[], returns: BasicObject],
   )
-  .returns(T.untyped)
+  .returns(T.any(Elem, T.untyped))
   def delete(arg0, &blk); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def delete_at(arg0); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def delete_if(&blk); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def drop(arg0); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def drop_while(&blk); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def each(&blk); end
 
   sig(
       blk: T::Proc[[Integer], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def each_index(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -981,7 +981,7 @@ class Array
   sig(
       arg0: Integer,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
       arg0: Integer,
       arg1: BasicObject,
@@ -991,39 +991,39 @@ class Array
       arg0: Integer,
       blk: T::Proc[[Integer], returns: BasicObject],
   )
-  .returns(T.untyped)
+  .returns(T.any(Elem, T.untyped))
   def fetch(arg0, arg1=_, &blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
       arg1: Integer,
       arg2: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
-      arg0: BasicObject,
-      arg1: Range,
+      arg0: Elem,
+      arg1: Range[Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
-      blk: T::Proc[[Integer], returns: BasicObject],
+      blk: T::Proc[[Integer], returns: Elem],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: Integer,
       arg1: Integer,
-      blk: T::Proc[[Integer], returns: BasicObject],
+      blk: T::Proc[[Integer], returns: Elem],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
-      arg0: Range,
-      blk: T::Proc[[Integer], returns: BasicObject],
+      arg0: Range[Integer],
+      blk: T::Proc[[Integer], returns: Elem],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def fill(arg0=_, arg1=_, arg2=_, &blk); end
 
   sig.returns(T::Array[T.untyped])
@@ -1034,17 +1034,17 @@ class Array
   )
   .returns(Integer)
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(Integer)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def index(arg0=_, &blk); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def first(arg0=_); end
 
   sig(
@@ -1060,16 +1060,16 @@ class Array
   .returns(Object)
   sig(
       arg0: Integer,
-      arg1: BasicObject,
+      arg1: Elem,
   )
   .returns(Object)
   def initialize(arg0=_, arg1=_); end
 
   sig(
       arg0: Integer,
-      arg1: BasicObject,
+      arg1: Elem,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def insert(arg0, *arg1); end
 
   sig.returns(String)
@@ -1082,16 +1082,16 @@ class Array
   def join(arg0=_); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def keep_if(&blk); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def last(arg0=_); end
 
   sig(
@@ -1106,225 +1106,225 @@ class Array
   sig(
       arg0: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   sig(
       arg0: Integer,
-      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
+      blk: T::Proc[[T::Array[Elem]], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def permutation(arg0=_, &blk); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(T.untyped)
+  .returns(T::Array[Elem])
+  sig.returns(Elem)
   def pop(arg0=_); end
 
   sig(
       arg0: T::Array[BasicObject],
   )
-  .returns(T::Array[T::Array[T.untyped]])
+  .returns(T::Array[T::Array[T.any(Elem, T.untyped)]])
   def product(*arg0); end
 
   sig(
       arg0: BasicObject,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   def rassoc(arg0); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def reject(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def reject!(&blk); end
 
   sig(
       arg0: Integer,
-      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
+      blk: T::Proc[[T::Array[Elem]], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def repeated_combination(arg0, &blk); end
 
   sig(
       arg0: Integer,
-      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
+      blk: T::Proc[[T::Array[Elem]], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def repeated_permutation(arg0, &blk); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def reverse(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def reverse!(); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def reverse_each(&blk); end
 
   sig(
       arg0: BasicObject,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(Integer)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def rindex(arg0=_, &blk); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def rotate(arg0=_); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def rotate!(arg0=_); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def sample(arg0=_); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def select(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def select!(&blk); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def shift(arg0=_); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def shuffle(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def shuffle!(); end
 
   sig(
-      arg0: Range,
+      arg0: Range[Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: T.any(Integer, Float),
   )
-  .returns(T.untyped)
+  .returns(Elem)
   def slice!(arg0, arg1=_); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def sort(&blk); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def sort!(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def sort_by!(&blk); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def take(arg0); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def take_while(&blk); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def to_a(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def to_ary(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def transpose(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def uniq(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def uniq!(); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def unshift(*arg0); end
 
   sig(
-      arg0: T.any(Range, Integer),
+      arg0: T.any(Range[Integer], Integer),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def values_at(*arg0); end
 
   sig(
       arg0: T::Array[BasicObject],
   )
-  .returns(T::Array[T::Array[T.untyped]])
+  .returns(T::Array[T::Array[T.any(Elem, T.untyped)]])
   def zip(*arg0); end
 
   sig(
       arg0: T::Array[BasicObject],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.any(Elem, T.untyped)])
   def |(arg0); end
 
   sig.returns(Array)
@@ -1352,18 +1352,18 @@ class Array
   def size(); end
 
   sig(
-      arg0: Range,
+      arg0: Range[Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: T.any(Integer, Float),
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def slice(arg0, arg1=_); end
 
   sig.returns(String)
@@ -2635,7 +2635,7 @@ class Dir
       dir: String,
       arg0: Encoding,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   def self.foreach(dir, arg0=_, &blk); end
 
   sig.returns(String)
@@ -2702,7 +2702,7 @@ class Dir
       blk: T::Proc[[String], returns: BasicObject],
   )
   .returns(Dir)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[String])
   def each(&blk); end
 
   sig.returns(Integer)
@@ -2925,29 +2925,32 @@ class EncodingError
 end
 
 module Enumerable
+  extend T::Generic
+  Elem = T.type
+
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(T.any(TrueClass, FalseClass))
   def all?(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(T.any(TrueClass, FalseClass))
   def any?(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def collect(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: Enumerator],
+      blk: T::Proc[[Elem], returns: Enumerator[BasicObject]],
   )
   .returns(T::Array[T.untyped])
   def collect_concat(&blk); end
@@ -2958,72 +2961,72 @@ module Enumerable
   )
   .returns(Integer)
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(Integer)
   def count(arg0=_, &blk); end
 
   sig(
       n: Integer,
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(NilClass)
   sig(
       n: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def cycle(n=_, &blk); end
 
   sig(
       ifnone: Proc,
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T.any(T.untyped, NilClass))
+  .returns(T.any(Elem, NilClass))
   sig(
       ifnone: Proc,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def detect(ifnone=_, &blk); end
 
   sig(
       n: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def drop(n); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def drop_while(&blk); end
 
   sig(
       n: Integer,
-      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
+      blk: T::Proc[[T::Array[Elem]], returns: BasicObject],
   )
   .returns(NilClass)
   sig(
       n: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def each_cons(n, &blk); end
 
   sig(
-      blk: T::Proc[[T.untyped, Integer], returns: BasicObject],
+      blk: T::Proc[[Elem, Integer], returns: BasicObject],
   )
-  .returns(Enumerable)
-  sig.returns(Enumerable)
+  .returns(Enumerable[Elem])
+  sig.returns(Enumerable[Elem])
   def each_with_index(&blk); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def entries(); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def find_all(&blk); end
 
   sig(
@@ -3031,35 +3034,35 @@ module Enumerable
   )
   .returns(T.any(Integer, NilClass))
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(T.any(Integer, NilClass))
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def find_index(value=_, &blk); end
 
-  sig.returns(T.any(T.untyped, NilClass))
+  sig.returns(T.any(Elem, NilClass))
   sig(
       n: Integer,
   )
-  .returns(T.any(T::Array[T.untyped], NilClass))
+  .returns(T.any(T::Array[Elem], NilClass))
   def first(n=_); end
 
   sig(
       arg0: BasicObject,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   sig(
       arg0: BasicObject,
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(T::Array[T.untyped])
   def grep(arg0, &blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
-  .returns(T::Hash[T.untyped, T::Array[T.untyped]])
-  sig.returns(Enumerator)
+  .returns(T::Hash[T.untyped, T::Array[Elem]])
+  sig.returns(Enumerator[Elem])
   def group_by(&blk); end
 
   sig(
@@ -3079,191 +3082,191 @@ module Enumerable
   .returns(T.untyped)
   sig(
       initial: BasicObject,
-      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[T.untyped, Elem], returns: BasicObject],
   )
   .returns(T.untyped)
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem, Elem], returns: Elem],
   )
-  .returns(T.untyped)
+  .returns(Elem)
   def inject(initial=_, arg0=_, &blk); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T.untyped)
-  sig(
-      arg0: Integer,
-  )
-  .returns(T::Array[T.untyped])
+  .returns(Elem)
   sig(
       arg0: Integer,
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
+  sig(
+      arg0: Integer,
+      blk: T::Proc[[Elem, Elem], returns: Integer],
+  )
+  .returns(T::Array[Elem])
   def max(arg0=_, &blk); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T.untyped)
-  sig(
-      arg0: Integer,
-  )
-  .returns(Enumerator)
+  .returns(Elem)
   sig(
       arg0: Integer,
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(Enumerator[Elem])
+  sig(
+      arg0: Integer,
+      blk: T::Proc[[Elem, Elem], returns: Integer],
+  )
+  .returns(T::Array[Elem])
   def max_by(arg0=_, &blk); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T.untyped)
-  sig(
-      arg0: Integer,
-  )
-  .returns(T::Array[T.untyped])
+  .returns(Elem)
   sig(
       arg0: Integer,
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
+  sig(
+      arg0: Integer,
+      blk: T::Proc[[Elem, Elem], returns: Integer],
+  )
+  .returns(T::Array[Elem])
   def min(arg0=_, &blk); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T.untyped)
-  sig(
-      arg0: Integer,
-  )
-  .returns(Enumerator)
+  .returns(Elem)
   sig(
       arg0: Integer,
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(Enumerator[Elem])
+  sig(
+      arg0: Integer,
+      blk: T::Proc[[Elem, Elem], returns: Integer],
+  )
+  .returns(T::Array[Elem])
   def min_by(arg0=_, &blk); end
 
-  sig.returns([T.untyped, T.untyped])
+  sig.returns([Elem, Elem])
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns([T.untyped, T.untyped])
+  .returns([Elem, Elem])
   def minmax(&blk); end
 
-  sig.returns([T.untyped, T.untyped])
+  sig.returns([Elem, Elem])
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def minmax_by(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(T.any(TrueClass, FalseClass))
   def none?(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(T.any(TrueClass, FalseClass))
   def one?(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns([T::Array[T.untyped], T::Array[T.untyped]])
-  sig.returns(Enumerator)
+  .returns([T::Array[Elem], T::Array[Elem]])
+  sig.returns(Enumerator[Elem])
   def partition(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def reject(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
-  .returns(Enumerator)
-  sig.returns(Enumerator)
+  .returns(Enumerator[Elem])
+  sig.returns(Enumerator[Elem])
   def reverse_each(&blk); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def sort(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def sort_by(&blk); end
 
   sig(
       n: Integer,
   )
-  .returns(T.any(T::Array[T.untyped], NilClass))
+  .returns(T.any(T::Array[Elem], NilClass))
   def take(n); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def take_while(&blk); end
 
-  sig.returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(T::Hash[Elem, Elem])
   def to_h(); end
 
   sig(
       n: Integer,
-      blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
+      blk: T::Proc[[T::Array[Elem]], returns: BasicObject],
   )
   .returns(NilClass)
   sig(
       n: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def each_slice(n, &blk); end
 
   sig(
       ifnone: Proc,
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T.any(T.untyped, NilClass))
+  .returns(T.any(Elem, NilClass))
   sig(
       ifnone: Proc,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def find(ifnone=_, &blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: Enumerator],
+      blk: T::Proc[[Elem], returns: Enumerator[BasicObject]],
   )
   .returns(T::Array[T.untyped])
   def flat_map(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def map(&blk); end
 
   sig(
@@ -3283,27 +3286,30 @@ module Enumerable
   .returns(T.untyped)
   sig(
       initial: BasicObject,
-      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[T.untyped, Elem], returns: BasicObject],
   )
   .returns(T.untyped)
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem, Elem], returns: Elem],
   )
-  .returns(T.untyped)
+  .returns(Elem)
   def reduce(initial=_, arg0=_, &blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
   def select(&blk); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def to_a(); end
 end
 
 class Enumerator
+  extend T::Generic
+  Elem = T.type
+
   sig(
       arg0: Integer,
       blk: T::Proc[[T::Array[T.untyped]], returns: BasicObject],
@@ -3317,32 +3323,32 @@ class Enumerator
   def initialize(arg0=_, &blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(T.untyped)
   sig.returns(Enumerator)
   def each(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped, Integer], returns: BasicObject],
+      blk: T::Proc[[Elem, Integer], returns: BasicObject],
   )
   .returns(T.untyped)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[[Elem, Integer]])
   def each_with_index(&blk); end
 
   sig(
       arg0: BasicObject,
-      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem, T.untyped], returns: BasicObject],
   )
   .returns(T.untyped)
   sig(
       arg0: BasicObject,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[[Elem, T.untyped]])
   def each_with_object(arg0, &blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
   .returns(NilClass)
   def feed(arg0); end
@@ -3350,16 +3356,16 @@ class Enumerator
   sig.returns(String)
   def inspect(); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   def next(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def next_values(); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   def peek(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def peek_values(); end
 
   sig.returns(Enumerator)
@@ -3390,21 +3396,21 @@ class Enumerator
   def untrust(); end
 
   sig(
-      blk: T::Proc[[T.untyped, Integer], returns: BasicObject],
+      blk: T::Proc[[Elem, Integer], returns: BasicObject],
   )
   .returns(T.untyped)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[[Elem, Integer]])
   def with_index(&blk); end
 
   sig(
       arg0: BasicObject,
-      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem, T.untyped], returns: BasicObject],
   )
   .returns(T.untyped)
   sig(
       arg0: BasicObject,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[[Elem, T.untyped]])
   def with_object(arg0, &blk); end
 end
 
@@ -4805,127 +4811,131 @@ module Gem
 end
 
 class Hash
-  sig(
-    stuff: T.untyped
-  )
-  .returns(T::Array[T.untyped])
-  def self.[](*stuff); end
+  extend T::Generic
+  K = T.type
+  V = T.type
+
+   sig(
+      stuff: T.untyped
+    )
+    .returns(T::Hash[T.untyped, T.untyped])
+    def self.[](*stuff); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T.untyped)
+  .returns(V)
   def [](arg0); end
 
   sig(
-      arg0: BasicObject,
-      arg1: BasicObject,
+      arg0: K,
+      arg1: V,
   )
-  .returns(T.untyped)
+  .returns(V)
   def []=(arg0, arg1); end
 
   sig(
-      arg0: BasicObject,
-      arg1: BasicObject,
+      arg0: K,
+      arg1: V,
   )
-  .returns(T.untyped)
+  .returns(V)
   def store(arg0, arg1); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.any(K, V)])
   def assoc(arg0); end
 
-  sig.returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(T::Hash[K, V])
   def clear(); end
 
-  sig.returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(T::Hash[K, V])
   def compare_by_identity(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def compare_by_identity?(); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T.untyped)
+  .returns(V)
   sig(
-      arg0: BasicObject,
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      arg0: K,
+      blk: T::Proc[[K], returns: V],
   )
-  .returns(T.untyped)
+  .returns(V)
   def default(arg0=_, &blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: V,
   )
-  .returns(T.untyped)
+  .returns(V)
   def default=(arg0); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T.untyped)
+  .returns(V)
   sig(
-      arg0: BasicObject,
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      arg0: K,
+      blk: T::Proc[[K], returns: BasicObject],
   )
-  .returns(T.untyped)
+  .returns(T.any(T.untyped, V))
   def delete(arg0, &blk); end
 
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[K, V], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
   def delete_if(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[K, V], returns: BasicObject],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
   def each(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[K, V], returns: BasicObject],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
   def each_pair(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[K], returns: BasicObject],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
   def each_key(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[V], returns: BasicObject],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
   def each_value(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def empty?(); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T.untyped)
+  .returns(V)
   sig(
-      arg0: BasicObject,
+      arg0: K,
       arg1: BasicObject,
   )
-  .returns(T.untyped)
+  .returns(T.any(T.untyped, V))
   sig(
-      arg0: BasicObject,
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      arg0: K,
+      blk: T::Proc[[K], returns: BasicObject],
   )
-  .returns(T.untyped)
+  .returns(T.any(T.untyped, V))
   def fetch(arg0, arg1=_, &blk); end
 
   sig(
@@ -4964,23 +4974,23 @@ class Hash
   sig.returns(String)
   def inspect(); end
 
-  sig.returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(T::Hash[V, K])
   def invert(); end
 
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[K, V], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
-  sig.returns(Enumerator)
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
   def keep_if(&blk); end
 
   sig(
       arg0: BasicObject,
   )
-  .returns(T.untyped)
+  .returns(K)
   def key(arg0); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[K])
   def keys(); end
 
   sig.returns(Integer)
@@ -4992,64 +5002,64 @@ class Hash
   sig(
       arg0: T::Hash[BasicObject, BasicObject],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[T.any(T.untyped, K), T.any(T.untyped, V)])
   sig(
       arg0: T::Hash[BasicObject, BasicObject],
-      blk: T::Proc[[T.untyped, T.untyped, T.untyped], returns: BasicObject],
+      blk: T::Proc[[K, V, T.untyped], returns: T.any(V, BasicObject)],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[T.any(T.untyped, K), T.any(T.untyped, V)])
   def merge(arg0, &blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.any(K, V)])
   def rassoc(arg0); end
 
-  sig.returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(T::Hash[K, V])
   def rehash(); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[[K, V]])
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[K, V], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[K, V])
   def reject(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[K, V], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[K, V])
   def reject!(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[K, V], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[K, V])
   def select(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[K, V], returns: T.any(TrueClass, FalseClass)],
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[K, V])
   def select!(&blk); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[T.any(K, V)])
   def shift(); end
 
-  sig.returns(T::Array[T::Array[T.untyped]])
+  sig.returns(T::Array[T::Array[T.any(K, V)]])
   def to_a(); end
 
-  sig.returns(T::Hash[T.untyped, T.untyped])
+  sig.returns(T::Hash[K, V])
   def to_hash(); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[V])
   def values(); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[V])
   def values_at(*arg0); end
 
   sig.returns(Hash)
@@ -5143,28 +5153,28 @@ class IO
       sep: String,
       limit: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   def each(sep=_, limit=_, &blk); end
 
   sig(
       blk: T::Proc[[Integer], returns: BasicObject],
   )
   .returns(IO)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Integer])
   def each_byte(&blk); end
 
   sig(
       blk: T::Proc[[String], returns: BasicObject],
   )
   .returns(IO)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[String])
   def each_char(&blk); end
 
   sig(
       blk: T::Proc[[Integer], returns: BasicObject],
   )
   .returns(IO)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Integer])
   def each_codepoint(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -5483,7 +5493,7 @@ class IO
       autoclose: BasicObject,
       mode: String,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   def self.foreach(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
   sig(
@@ -5643,21 +5653,21 @@ class IO
       blk: T::Proc[[Integer], returns: BasicObject],
   )
   .returns(IO)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Integer])
   def bytes(&blk); end
 
   sig(
       blk: T::Proc[[String], returns: BasicObject],
   )
   .returns(IO)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[String])
   def chars(&blk); end
 
   sig(
       blk: T::Proc[[Integer], returns: BasicObject],
   )
   .returns(IO)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Integer])
   def codepoints(&blk); end
 
   sig(
@@ -5670,7 +5680,7 @@ class IO
       sep: String,
       limit: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   def each_line(sep=_, limit=_, &blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -5686,7 +5696,7 @@ class IO
       sep: String,
       limit: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   def lines(sep=_, limit=_, &blk); end
 
   sig.returns(Integer)
@@ -6184,7 +6194,7 @@ class Integer
   sig(
       limit: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Integer])
   def downto(arg0, &blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -6286,7 +6296,7 @@ class Integer
       blk: T::Proc[[Integer], returns: BasicObject],
   )
   .returns(Integer)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Integer])
   def times(&blk); end
 
   sig.returns(Complex)
@@ -6315,7 +6325,7 @@ class Integer
   sig(
       arg0: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Integer])
   def upto(arg0, &blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -7093,7 +7103,7 @@ class MatchData
   )
   .returns(T::Array[String])
   sig(
-      range: Range,
+      range: Range[Integer],
   )
   .returns(T::Array[String])
   sig(
@@ -8165,7 +8175,7 @@ class Numeric
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  .returns(Enumerator)
+  .returns(Enumerator[T.any(Integer, Float, Rational, BigDecimal, Complex)])
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
       arg1: T.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -8176,7 +8186,7 @@ class Numeric
       arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
       arg1: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  .returns(Enumerator)
+  .returns(Enumerator[T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def step(arg0, arg1=_, &blk); end
 
   sig.returns(Complex)
@@ -8257,13 +8267,13 @@ class Object
       method: Symbol,
       args: BasicObject,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[T.untyped])
   sig(
       method: Symbol,
       args: BasicObject,
       blk: BasicObject,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[T.untyped])
   def enum_for(method=_, *args, &blk); end
 
   sig(
@@ -8414,13 +8424,13 @@ class Object
       method: Symbol,
       args: BasicObject,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[T.untyped])
   sig(
       method: Symbol,
       args: BasicObject,
       blk: BasicObject,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[T.untyped])
   def to_enum(method=_, *args, &blk); end
 
   sig.returns(Object)
@@ -8572,7 +8582,7 @@ class Pathname
       blk: T::Proc[[String], returns: BasicObject],
   )
   .returns(T.untyped)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[String])
   def each_filename(&blk); end
 
   sig(
@@ -8585,7 +8595,7 @@ class Pathname
       sep: String,
       limit: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   def each_line(sep=_, limit=_, &blk); end
 
   sig.returns(T::Array[Pathname])
@@ -8626,7 +8636,7 @@ class Pathname
   sig(
       ignore_error: T.any(TrueClass, FalseClass),
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Pathname])
   def find(ignore_error, &blk); end
 
   sig(
@@ -9433,11 +9443,11 @@ class Random
   def bytes(size); end
 
   sig(
-      max: T.any(Integer, Range),
+      max: T.any(Integer, Range[Integer]),
   )
   .returns(Integer)
   sig(
-      max: T.any(Float, Range),
+      max: T.any(Float, Range[Float]),
   )
   .returns(Float)
   def rand(max=_); end
@@ -9483,6 +9493,9 @@ class Random
 end
 
 class Range
+  extend T::Generic
+  Elem = T.type
+
   sig(
       _begin: Integer,
       _end: Integer,
@@ -9503,11 +9516,11 @@ class Range
   .returns(T.any(TrueClass, FalseClass))
   def ===(obj); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   def begin(); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(T.any(T.untyped, NilClass))
   def bsearch(&blk); end
@@ -9519,23 +9532,23 @@ class Range
   def cover?(obj); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(Range)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def each(&blk); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   def end(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def exclude_end?(); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
       n: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def first(n=_); end
 
   sig.returns(Integer)
@@ -9550,43 +9563,43 @@ class Range
   sig.returns(String)
   def inspect(); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
       n: Integer,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
   def last(n=_); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T.untyped)
-  sig(
-      n: Integer,
-  )
-  .returns(T::Array[T.untyped])
+  .returns(Elem)
   sig(
       n: Integer,
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
+  sig(
+      n: Integer,
+      blk: T::Proc[[Elem, Elem], returns: Integer],
+  )
+  .returns(T::Array[Elem])
   def max(n=_, &blk); end
 
-  sig.returns(T.untyped)
+  sig.returns(Elem)
   sig(
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
+      blk: T::Proc[[Elem, Elem], returns: Integer],
   )
-  .returns(T.untyped)
-  sig(
-      n: Integer,
-  )
-  .returns(T::Array[T.untyped])
+  .returns(Elem)
   sig(
       n: Integer,
-      blk: T::Proc[[T.untyped, T.untyped], returns: Integer],
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[Elem])
+  sig(
+      n: Integer,
+      blk: T::Proc[[Elem, Elem], returns: Integer],
+  )
+  .returns(T::Array[Elem])
   def min(n=_, &blk); end
 
   sig.returns(T.any(Integer, NilClass))
@@ -9594,13 +9607,13 @@ class Range
 
   sig(
       n: Integer,
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(Range)
   sig(
       n: Integer,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[Elem])
   def step(n=_, &blk); end
 
   sig.returns(String)
@@ -10376,86 +10389,89 @@ class SecurityError
 end
 
 class Set
+  extend T::Generic
+  Elem = T.type
+
   sig(
       ary: BasicObject,
   )
-  .returns(Set)
+  .returns(Set[T.untyped])
   def self.[](*ary); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[BasicObject],
   )
   .returns(Object)
   def initialize(enum=_); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def +(enum); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def ^(enum); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(Set)
   def add(o); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(T.any(T.untyped, NilClass))
   def add?(o); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[T.untyped], returns: Elem],
   )
-  .returns(T::Hash[T.untyped, Set])
+  .returns(T::Hash[T.untyped, Set[Elem]])
   def classify(&blk); end
 
   sig.returns(Set)
   def clear(); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(Set)
   def delete(o); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(T.any(T.untyped, NilClass))
   def delete?(o); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(Set)
   def delete_if(&blk); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def difference(enum); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def disjoint?(set); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(Set)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def each(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -10468,67 +10484,67 @@ class Set
   def flatten(); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def intersect?(set); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def intersection(enum); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(Set)
   def keep_if(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
-  .returns(Set)
+  .returns(Set[T.untyped])
   def map!(&blk); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(T.any(TrueClass, FalseClass))
   def member?(o); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
   .returns(Set)
   def merge(enum); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def proper_subset?(set); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def proper_superset?(set); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(T.any(T.untyped, NilClass))
   def reject!(&blk); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[BasicObject],
   )
-  .returns(Set)
+  .returns(Set[T.untyped])
   def replace(enum); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(T.any(T.untyped, NilClass))
   def select!(&blk); end
@@ -10537,24 +10553,24 @@ class Set
   def size(); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def subset?(set); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
   .returns(Set)
   def subtract(enum); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def superset?(set); end
 
-  sig.returns(T::Array[T.untyped])
+  sig.returns(T::Array[Elem])
   def to_a(); end
 
   sig.returns(Set)
@@ -10579,55 +10595,55 @@ class Set
   def untrust(); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def &(enum); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def -(enum); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def <(set); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(Set)
   def <<(o); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def <=(set); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def >(set); end
 
   sig(
-      set: Set,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
   def >=(set); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
-  .returns(Set)
+  .returns(Set[T.untyped])
   def collect!(&blk); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(T.any(TrueClass, FalseClass))
   def include?(o); end
@@ -10636,15 +10652,15 @@ class Set
   def length(); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def |(enum); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def union(enum); end
 end
 
@@ -10672,11 +10688,13 @@ class SignalException
 end
 
 class SortedSet
+  Elem = T.type
+
   sig.returns(SortedSet)
   def clone(); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(SortedSet)
   def add(o); end
@@ -10685,37 +10703,37 @@ class SortedSet
   def clear(); end
 
   sig(
-      o: BasicObject,
+      o: Elem,
   )
   .returns(SortedSet)
   def delete(o); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(SortedSet)
   def delete_if(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: BasicObject],
+      blk: T::Proc[[Elem], returns: BasicObject],
   )
   .returns(SortedSet)
   def each(&blk); end
 
   sig(
-      blk: T::Proc[[T.untyped], returns: T.any(TrueClass, FalseClass)],
+      blk: T::Proc[[Elem], returns: T.any(TrueClass, FalseClass)],
   )
   .returns(SortedSet)
   def keep_if(&blk); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
   .returns(SortedSet)
   def merge(enum); end
 
   sig(
-      enum: Enumerable,
+      enum: Enumerable[Elem],
   )
   .returns(SortedSet)
   def subtract(enum); end
@@ -10846,7 +10864,7 @@ class String
   )
   .returns(T.any(String, NilClass))
   sig(
-      arg0: T.any(Range, Regexp),
+      arg0: T.any(Range[Integer], Regexp),
   )
   .returns(T.any(String, NilClass))
   sig(
@@ -10883,7 +10901,7 @@ class String
   )
   .returns(T.any(String, NilClass))
   sig(
-      arg0: Range,
+      arg0: Range[Integer],
   )
   .returns(T.any(String, NilClass))
   def byteslice(arg0, arg1=_); end
@@ -11259,7 +11277,7 @@ class String
   )
   .returns(T.any(String, NilClass))
   sig(
-      arg0: T.any(Range, Regexp),
+      arg0: T.any(Range[Integer], Regexp),
   )
   .returns(T.any(String, NilClass))
   sig(
@@ -11465,7 +11483,7 @@ class String
   )
   .returns(T.any(String, NilClass))
   sig(
-      arg0: T.any(Range, Regexp),
+      arg0: T.any(Range[Integer], Regexp),
   )
   .returns(T.any(String, NilClass))
   sig(
@@ -11584,7 +11602,7 @@ class Symbol
   )
   .returns(String)
   sig(
-      arg0: Range,
+      arg0: Range[Integer],
   )
   .returns(String)
   def [](idx, n=_); end
@@ -11671,7 +11689,7 @@ class Symbol
   )
   .returns(String)
   sig(
-      arg0: Range,
+      arg0: Range[Integer],
   )
   .returns(String)
   def slice(idx, n=_); end

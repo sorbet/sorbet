@@ -66,11 +66,13 @@ class ParentEnumerable
   include Enumerable
   K = T.type
   V = T.type
+  Elem = T.type
 end
 
 class ChildEnumerable < ParentEnumerable
   K = T.type(fixed: String)
   V = T.type
+  Elem = T.type
 end
 
 def main
@@ -95,7 +97,7 @@ def main
   a = FullChild.new.foo(1, 'b')
   T.assert_type!(a, Integer)
 
-  a = ChildEnumerable[Integer].new.min
-  T.assert_type!(a, T.untyped) # error: The typechecker was unable to infer the type of the argument to assert_type
+  a = ChildEnumerable[Integer, String].new.min
+  T.assert_type!(a, String)
 end
 main
