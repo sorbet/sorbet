@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:Destructure> < ::<constant:Object> () -> <class:Destructure>
     method f (<destructure>$2, z)
       argument <destructure>$2<>

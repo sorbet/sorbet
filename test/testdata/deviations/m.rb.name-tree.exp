@@ -1,6 +1,13 @@
 begin
-  <emptyTree>
-  ::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:MyModel>
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$6>()
+      begin
+        <emptyTree>
+        ::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:MyModel>
+        #<constant:M> = ::<constant:Opus>::<constant:DB>::<constant:Model>
+      end
+    end
+  end
   class <emptyTree>::<constant:M>::<constant:MyModel><<constant:MyModel>> < (::<constant:<todo sym>>)  end
-  #<constant:M> = ::<constant:Opus>::<constant:DB>::<constant:Model>
+  <emptyTree>
 end

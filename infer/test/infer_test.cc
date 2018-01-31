@@ -75,13 +75,13 @@ TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
     processSource(ctx, "class Bar; end; class Foo < Bar; end");
     auto &rootScope = core::Symbols::root().data(ctx);
 
-    auto barPair = rootScope.members[rootScope.members.size() - 4];
-    auto fooPair = rootScope.members[rootScope.members.size() - 2];
-    ASSERT_EQ("<constant:Foo>", fooPair.first.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Bar>", barPair.first.data(ctx).toString(ctx));
+    auto barSymbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Bar"));
+    auto fooSymbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo"));
+    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx).name.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo>", fooSymbol.data(ctx).name.data(ctx).toString(ctx));
 
-    auto fooType = make_shared<core::ClassType>(fooPair.second);
-    auto barType = make_shared<core::ClassType>(barPair.second);
+    auto barType = make_shared<core::ClassType>(barSymbol);
+    auto fooType = make_shared<core::ClassType>(fooSymbol);
 
     ASSERT_TRUE(core::Types::isSubType(ctx, fooType, barType));
     ASSERT_TRUE(core::Types::isSubType(ctx, fooType, fooType));
@@ -94,16 +94,16 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     auto &rootScope = core::Symbols::root().data(ctx);
 
-    auto barPair = rootScope.members[rootScope.members.size() - 6];
-    auto foo1Pair = rootScope.members[rootScope.members.size() - 4];
-    auto foo2Pair = rootScope.members[rootScope.members.size() - 2];
-    ASSERT_EQ("<constant:Foo2>", foo2Pair.first.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo1>", foo1Pair.first.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Bar>", barPair.first.data(ctx).toString(ctx));
+    auto barSymbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Bar"));
+    auto foo1Symbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo1"));
+    auto foo2Symbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo2"));
+    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx).name.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo1>", foo1Symbol.data(ctx).name.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo2>", foo2Symbol.data(ctx).name.data(ctx).toString(ctx));
 
-    auto foo1Type = make_shared<core::ClassType>(foo1Pair.second);
-    auto foo2Type = make_shared<core::ClassType>(foo2Pair.second);
-    auto barType = make_shared<core::ClassType>(barPair.second);
+    auto barType = make_shared<core::ClassType>(barSymbol);
+    auto foo1Type = make_shared<core::ClassType>(foo1Symbol);
+    auto foo2Type = make_shared<core::ClassType>(foo2Symbol);
 
     auto barNfoo1 = core::Types::lub(ctx, barType, foo1Type);
     auto foo1Nbar = core::Types::lub(ctx, foo1Type, barType);
@@ -144,16 +144,16 @@ TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
     auto &rootScope = core::Symbols::root().data(ctx);
 
-    auto barPair = rootScope.members[rootScope.members.size() - 6];
-    auto foo1Pair = rootScope.members[rootScope.members.size() - 4];
-    auto foo2Pair = rootScope.members[rootScope.members.size() - 2];
-    ASSERT_EQ("<constant:Foo2>", foo2Pair.first.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo1>", foo1Pair.first.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Bar>", barPair.first.data(ctx).toString(ctx));
+    auto barSymbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Bar"));
+    auto foo1Symbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo1"));
+    auto foo2Symbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo2"));
+    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx).name.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo1>", foo1Symbol.data(ctx).name.data(ctx).toString(ctx));
+    ASSERT_EQ("<constant:Foo2>", foo2Symbol.data(ctx).name.data(ctx).toString(ctx));
 
-    auto foo1Type = make_shared<core::ClassType>(foo1Pair.second);
-    auto foo2Type = make_shared<core::ClassType>(foo2Pair.second);
-    auto barType = make_shared<core::ClassType>(barPair.second);
+    auto barType = make_shared<core::ClassType>(barSymbol);
+    auto foo1Type = make_shared<core::ClassType>(foo1Symbol);
+    auto foo2Type = make_shared<core::ClassType>(foo2Symbol);
 
     auto barOrfoo1 = core::Types::glb(ctx, barType, foo1Type);
     auto foo1Orbar = core::Types::glb(ctx, foo1Type, barType);

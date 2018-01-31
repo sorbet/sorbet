@@ -1,3 +1,5 @@
-def test_large_int<<constant:<todo sym>>>()
-  [9223372036854775807, -9223372036854775808, 0, 51966]
+class <emptyTree><<constant:<root>>> < ()
+  def test_large_int<<constant:<todo sym>>>()
+    [9223372036854775807, -9223372036854775808, 0, 51966]
+  end
 end

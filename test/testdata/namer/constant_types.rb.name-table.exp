@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:Constants> (<constant:BasicObject>) -> <class:Constants>
     static-field <constant:A> -> Integer
     static-field <constant:B> -> String

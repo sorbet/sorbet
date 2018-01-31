@@ -1,7 +1,9 @@
-def foo<foo>()
-  begin
-    <emptyTree>
-  rescue ::<constant:NotAClass> => e
-    <emptyTree>
+class <emptyTree><<constant:<root>>> < ()
+  def foo<foo>()
+    begin
+      <emptyTree>
+    rescue ::<constant:NotAClass> => e
+      <emptyTree>
+    end
   end
 end

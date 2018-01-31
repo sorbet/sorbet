@@ -1,6 +1,12 @@
-ConstantLit{
-  scope = Ident{
-    symbol = <constant:<root>>
-  }
-  cnst = <constant:TopLevelConst>
+ClassDef{
+  name = EmptyTree<<constant:<root>>>
+  ancestors = []
+  rhs = [
+    ConstantLit{
+      scope = Ident{
+        symbol = <constant:<root>>
+      }
+      cnst = <constant:TopLevelConst>
+    }
+  ]
 }

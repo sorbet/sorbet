@@ -1,16 +1,42 @@
 begin
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  #$c = ::<constant:Object>.new()
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
+  class <emptyTree><<constant:<root>>> < ()
+    <emptyTree>
+
+    def self.<static-init><<static-init>$6>()
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        #$c = ::<constant:Object>.new()
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        self(<singleton class:<constant:<root>>>).main()
+      end
+    end
+
+    def declare_variables<declare_variables>(a)
+      <emptyTree>
+    end
+
+    def main<main>()
+      begin
+        self(<constant:Object>).puts(::<constant:A>.a())
+        self(<constant:Object>).puts(::<constant:B>.b())
+        self(<constant:Object>).puts(#$c.c())
+        self(<constant:Object>).puts(::<constant:D>.singleton_class().d())
+        self(<constant:Object>).puts(::<constant:E>.e())
+        self(<constant:Object>).puts(::<constant:F>.f=(91))
+        self(<constant:Object>).puts(::<constant:G>.new().wrapper())
+        self(<constant:Object>).puts(::<constant:untyped>.h())
+      end
+    end
+  end
   class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)  end
   class <emptyTree>::<constant:B><<constant:B>> < (::<constant:<todo sym>>)
     <emptyTree>
@@ -34,7 +60,11 @@ begin
   class <emptyTree>::<constant:E><<constant:E>> < (::<constant:<todo sym>>)
     <emptyTree>
 
-    self(<singleton class:<constant:E>>).wrapper()
+    <emptyTree>
+
+    def self.<static-init><<static-init>>()
+      self(<singleton class:<constant:E>>).wrapper()
+    end
   end
   class <singleton class><<singleton class:<constant:E>>> < ()
     <emptyTree>
@@ -83,20 +113,5 @@ begin
       "h"
     end
   end
-  def declare_variables<declare_variables>(a)
-    <emptyTree>
-  end
-  def main<main>()
-    begin
-      self(<constant:Object>).puts(::<constant:A>.a())
-      self(<constant:Object>).puts(::<constant:B>.b())
-      self(<constant:Object>).puts(#$c.c())
-      self(<constant:Object>).puts(::<constant:D>.singleton_class().d())
-      self(<constant:Object>).puts(::<constant:E>.e())
-      self(<constant:Object>).puts(::<constant:F>.f=(91))
-      self(<constant:Object>).puts(::<constant:G>.new().wrapper())
-      self(<constant:Object>).puts(::<constant:untyped>.h())
-    end
-  end
-  self(<singleton class:<constant:<root>>>).main()
+  <emptyTree>
 end

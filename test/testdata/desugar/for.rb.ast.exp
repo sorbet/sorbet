@@ -1,83 +1,103 @@
-begin
-  class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-    def self.each<<constant:<todo sym>>>()
-      begin
-        yield([1, 2, 3, 4, 5])
-        yield([6, 7, 8, 9, 0])
+class <emptyTree><<constant:<root>>> < ()
+  begin
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      def self.each<<constant:<todo sym>>>()
+        begin
+          yield([1, 2, 3, 4, 5])
+          yield([6, 7, 8, 9, 0])
+        end
       end
     end
-  end
-  class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-    def self.e=<<constant:<todo sym>>>(e)
-      @e = e
-    end
+    class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      def self.e=<<constant:<todo sym>>>(e)
+        @e = e
+      end
 
-    def self.e<<constant:<todo sym>>>()
-      @e
+      def self.e<<constant:<todo sym>>>()
+        @e
+      end
     end
-  end
-  class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-    def self.main<<constant:<todo sym>>>()
-      begin
-        <emptyTree>::<constant:A>.each() do |*forTemp$2|
-          begin
+    class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      def self.main<<constant:<todo sym>>>()
+        begin
+          <emptyTree>::<constant:A>.each() do |*forTemp$2|
             begin
-              assignTemp$3 = forTemp$2
-              a = assignTemp$3.[](0)
-              assignTemp$3
+              begin
+                assignTemp$3 = forTemp$2
+                a = assignTemp$3.[](0)
+                assignTemp$3
+              end
+              self(<constant:<todo sym>>).puts(a.inspect())
             end
-            self(<constant:<todo sym>>).puts(a.inspect())
           end
-        end
-        <emptyTree>::<constant:A>.each() do |*forTemp|
-          begin
+          <emptyTree>::<constant:A>.each() do |*forTemp|
             begin
-              assignTemp$4 = forTemp.to_a()
-              a = assignTemp$4.[](0)
-              assignTemp$4
+              begin
+                assignTemp$4 = forTemp.to_a()
+                a = assignTemp$4.[](0)
+                assignTemp$4
+              end
+              self(<constant:<todo sym>>).puts(a.inspect())
             end
-            self(<constant:<todo sym>>).puts(a.inspect())
           end
-        end
-        <emptyTree>::<constant:A>.each() do |*forTemp$5|
-          begin
+          <emptyTree>::<constant:A>.each() do |*forTemp$5|
             begin
-              assignTemp$6 = forTemp$5
-              a = assignTemp$6.[](0)
-              b = assignTemp$6.[](1)
-              assignTemp$6
+              begin
+                assignTemp$6 = forTemp$5
+                a = assignTemp$6.[](0)
+                b = assignTemp$6.[](1)
+                assignTemp$6
+              end
+              begin
+                self(<constant:<todo sym>>).puts(a.inspect())
+                self(<constant:<todo sym>>).puts(b.inspect())
+              end
             end
+          end
+          <emptyTree>::<constant:A>.each() do |*forTemp|
             begin
+              begin
+                assignTemp$7 = forTemp.to_a()
+                a = assignTemp$7.[](0)
+                b = assignTemp$7.[](1)
+                assignTemp$7
+              end
               self(<constant:<todo sym>>).puts(a.inspect())
               self(<constant:<todo sym>>).puts(b.inspect())
             end
           end
-        end
-        <emptyTree>::<constant:A>.each() do |*forTemp|
-          begin
+          self(<constant:<todo sym>>).puts("main")
+          <emptyTree>::<constant:A>.each() do |*forTemp$8|
             begin
-              assignTemp$7 = forTemp.to_a()
-              a = assignTemp$7.[](0)
-              b = assignTemp$7.[](1)
-              assignTemp$7
+              begin
+                assignTemp$9 = forTemp$8
+                @a = assignTemp$9.[](0)
+                @@b = assignTemp$9.[](1)
+                $c = assignTemp$9.[](2)
+                d = assignTemp$9.[](3)
+                <emptyTree>::<constant:E>.e=(assignTemp$9.[](4))
+                assignTemp$9
+              end
+              begin
+                self(<constant:<todo sym>>).puts(@a.inspect())
+                self(<constant:<todo sym>>).puts(@@b.inspect())
+                self(<constant:<todo sym>>).puts($c.inspect())
+                self(<constant:<todo sym>>).puts(d.inspect())
+                self(<constant:<todo sym>>).puts(<emptyTree>::<constant:E>.e().inspect())
+              end
             end
-            self(<constant:<todo sym>>).puts(a.inspect())
-            self(<constant:<todo sym>>).puts(b.inspect())
           end
-        end
-        self(<constant:<todo sym>>).puts("main")
-        <emptyTree>::<constant:A>.each() do |*forTemp$8|
-          begin
+          <emptyTree>::<constant:A>.each() do |*forTemp|
             begin
-              assignTemp$9 = forTemp$8
-              @a = assignTemp$9.[](0)
-              @@b = assignTemp$9.[](1)
-              $c = assignTemp$9.[](2)
-              d = assignTemp$9.[](3)
-              <emptyTree>::<constant:E>.e=(assignTemp$9.[](4))
-              assignTemp$9
-            end
-            begin
+              begin
+                assignTemp$10 = forTemp.to_a()
+                @a = assignTemp$10.[](0)
+                @@b = assignTemp$10.[](1)
+                $c = assignTemp$10.[](2)
+                d = assignTemp$10.[](3)
+                <emptyTree>::<constant:E>.e=(assignTemp$10.[](4))
+                assignTemp$10
+              end
               self(<constant:<todo sym>>).puts(@a.inspect())
               self(<constant:<todo sym>>).puts(@@b.inspect())
               self(<constant:<todo sym>>).puts($c.inspect())
@@ -86,26 +106,8 @@ begin
             end
           end
         end
-        <emptyTree>::<constant:A>.each() do |*forTemp|
-          begin
-            begin
-              assignTemp$10 = forTemp.to_a()
-              @a = assignTemp$10.[](0)
-              @@b = assignTemp$10.[](1)
-              $c = assignTemp$10.[](2)
-              d = assignTemp$10.[](3)
-              <emptyTree>::<constant:E>.e=(assignTemp$10.[](4))
-              assignTemp$10
-            end
-            self(<constant:<todo sym>>).puts(@a.inspect())
-            self(<constant:<todo sym>>).puts(@@b.inspect())
-            self(<constant:<todo sym>>).puts($c.inspect())
-            self(<constant:<todo sym>>).puts(d.inspect())
-            self(<constant:<todo sym>>).puts(<emptyTree>::<constant:E>.e().inspect())
-          end
-        end
       end
     end
+    <emptyTree>::<constant:Main>.main()
   end
-  <emptyTree>::<constant:Main>.main()
 end

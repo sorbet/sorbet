@@ -92,9 +92,9 @@
 <ellipse fill="none" stroke="#000000" cx="1049" cy="-207.9031" rx="419.1287" ry="79.8063"/>
 <text text-anchor="middle" x="1049" y="-249.2031" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$3)</text>
 <text text-anchor="middle" x="1049" y="-234.2031" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="1049" y="-219.2031" font-family="Times,serif" font-size="14.00" fill="#000000">r$6057 = load_yield_param(::&lt;constant:Foo&gt;#baz#&lt;block&gt;$2, 0) : untyped</text>
+<text text-anchor="middle" x="1049" y="-219.2031" font-family="Times,serif" font-size="14.00" fill="#000000">r$6072 = load_yield_param(::&lt;constant:Foo&gt;#baz#&lt;block&gt;$2, 0) : untyped</text>
 <text text-anchor="middle" x="1049" y="-204.2031" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$7 = self : Foo</text>
-<text text-anchor="middle" x="1049" y="-189.2031" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$6 = statTemp$7.puts(r$6057) : NilClass</text>
+<text text-anchor="middle" x="1049" y="-189.2031" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$6 = statTemp$7.puts(r$6072) : NilClass</text>
 <text text-anchor="middle" x="1049" y="-174.2031" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$9 = blockreturn&lt;::&lt;constant:Foo&gt;#baz#&lt;block&gt;$2&gt; blockReturnTemp$6 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="1049" y="-159.2031" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -132,4 +132,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: 13068993bad1ccbde2d2fdb4adbccc5b4bf77551067de59010fd58b92c95d511 -->
+<!-- ruby-types:sha256: cdc294ec0de3a107ee887bc5a045bcf16d6bd94395547fc4aad25fbd0f4cccf1 -->

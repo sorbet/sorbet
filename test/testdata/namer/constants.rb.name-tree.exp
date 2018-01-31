@@ -1,12 +1,21 @@
 begin
-  <emptyTree>
-  ::<constant:A>::<constant:B>#<constant:C>
-  ::<constant:A>::<constant:B>#<constant:D>
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$6>()
+      begin
+        <emptyTree>
+        ::<constant:A>::<constant:B>#<constant:C>
+        ::<constant:A>::<constant:B>#<constant:D>
+        ::<constant:A>
+      end
+    end
+  end
   module <emptyTree>::<constant:A><<constant:A>> < ()
     <emptyTree>
   end
   module <emptyTree>::<constant:B><<constant:B>> < ()
-    ::<constant:A>::<constant:B>#<constant:C>
+    def self.<static-init><<static-init>>()
+      ::<constant:A>::<constant:B>#<constant:C>
+    end
   end
-  ::<constant:A>
+  <emptyTree>
 end

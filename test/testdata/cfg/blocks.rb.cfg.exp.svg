@@ -59,8 +59,8 @@
 <ellipse fill="none" stroke="#000000" cx="493" cy="-197.2965" rx="477.0942" ry="69.0935"/>
 <text text-anchor="middle" x="493" y="-231.0965" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$3)</text>
 <text text-anchor="middle" x="493" y="-216.0965" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="493" y="-201.0965" font-family="Times,serif" font-size="14.00" fill="#000000">x$6055 = load_yield_param(::&lt;constant:BlockTest&gt;#block_pass#&lt;block&gt;$2, 0) : untyped</text>
-<text text-anchor="middle" x="493" y="-186.0965" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$9 = x$6055 : untyped</text>
+<text text-anchor="middle" x="493" y="-201.0965" font-family="Times,serif" font-size="14.00" fill="#000000">x$6070 = load_yield_param(::&lt;constant:BlockTest&gt;#block_pass#&lt;block&gt;$2, 0) : untyped</text>
+<text text-anchor="middle" x="493" y="-186.0965" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$9 = x$6070 : untyped</text>
 <text text-anchor="middle" x="493" y="-171.0965" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$10 = blockreturn&lt;::&lt;constant:BlockTest&gt;#block_pass#&lt;block&gt;$2&gt; blockReturnTemp$9 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="493" y="-156.0965" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -98,4 +98,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: bbd9414a875c5e67b6e46265c76236acdb1dd69ca943a3c489485a3a2ad95c3c -->
+<!-- ruby-types:sha256: 25e495306fbdf99ad85512aaa2df5c610f277f9081be25525b9bac6b7fca8e5e -->

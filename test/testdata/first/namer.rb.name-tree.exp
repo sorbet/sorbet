@@ -1,10 +1,17 @@
 begin
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$6>()
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+  end
   class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<constant:<todo sym>>)
     <emptyTree>
 
@@ -33,15 +40,17 @@ begin
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()  end
   module <emptyTree>::<constant:OtherMixin><<constant:OtherMixin>> < ()  end
   class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
-    self(<singleton class:<constant:Child>>).include(::<constant:Mixin>, ::<constant:Mixin>)
-
-    self(<singleton class:<constant:Child>>).include(3)
-
-    self(<singleton class:<constant:Child>>).include(::<constant:Mixin>) do ||
-      <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        self(<singleton class:<constant:Child>>).include(::<constant:Mixin>, ::<constant:Mixin>)
+        self(<singleton class:<constant:Child>>).include(3)
+        self(<singleton class:<constant:Child>>).include(::<constant:Mixin>) do ||
+          <emptyTree>
+        end
+        self(<singleton class:<constant:Child>>).whatever().include(::<constant:OtherMixin>)
+        <emptyTree>
+      end
     end
-
-    self(<singleton class:<constant:Child>>).whatever().include(::<constant:OtherMixin>)
   end
   <emptyTree>
 end

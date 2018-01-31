@@ -1,7 +1,14 @@
 begin
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$6>()
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+  end
   module <emptyTree>::<constant:Mixin1><<constant:Mixin1>> < ()  end
   module <emptyTree>::<constant:Mixin2><<constant:Mixin2>> < ()  end
   class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>, ::<constant:Mixin1>)  end

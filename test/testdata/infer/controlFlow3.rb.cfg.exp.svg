@@ -165,11 +165,11 @@
 <ellipse fill="none" stroke="#000000" cx="971" cy="-229.1163" rx="488.7216" ry="101.2327"/>
 <text text-anchor="middle" x="971" y="-285.4163" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=8](returnMethodTemp$3)</text>
 <text text-anchor="middle" x="971" y="-270.4163" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="971" y="-255.4163" font-family="Times,serif" font-size="14.00" fill="#000000">e$6056 = load_yield_param(::&lt;constant:Test&gt;#normalize_params#&lt;block&gt;$2, 0) : TupleType {</text>
+<text text-anchor="middle" x="971" y="-255.4163" font-family="Times,serif" font-size="14.00" fill="#000000">e$6071 = load_yield_param(::&lt;constant:Test&gt;#normalize_params#&lt;block&gt;$2, 0) : TupleType {</text>
 <text text-anchor="middle" x="971" y="-240.4163" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;0 = untyped</text>
 <text text-anchor="middle" x="971" y="-225.4163" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="971" y="-210.4163" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$19 = self : Test</text>
-<text text-anchor="middle" x="971" y="-195.4163" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$18 = statTemp$19.normalize_params(e$6056) : untyped</text>
+<text text-anchor="middle" x="971" y="-195.4163" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$18 = statTemp$19.normalize_params(e$6071) : untyped</text>
 <text text-anchor="middle" x="971" y="-180.4163" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$21 = blockreturn&lt;::&lt;constant:Test&gt;#normalize_params#&lt;block&gt;$2&gt; blockReturnTemp$18 : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="971" y="-165.4163" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
@@ -187,4 +187,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: a2b70e088744073c06fe0a88e69c1618cd5200902276f00bb9428a99282e5097 -->
+<!-- ruby-types:sha256: f380a5444d96bcda7934028f8883eab4303a381d414cc26927a27000aa56724e -->

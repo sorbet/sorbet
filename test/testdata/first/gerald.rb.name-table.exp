@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:Opus> () -> <class:Opus>
     class <constant:AutogenLoader> () -> untyped
     class <constant:CIBot> () -> <class:CIBot>
@@ -107,4 +107,5 @@ class <constant:<root>> () -> <class:<root>>
         class <constant:GeraldRule> () -> untyped
       class <singleton class:<constant:Gerald>> < ::<constant:Module> ()
     class <singleton class:<constant:CIBot>> < ::<constant:Module> ()
+  method <static-init>$6 ()
 

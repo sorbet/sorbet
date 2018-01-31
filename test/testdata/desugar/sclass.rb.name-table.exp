@@ -1,8 +1,9 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:A> < ::<constant:Object> () -> <class:A>
   class <constant:B> < ::<constant:Object> () -> <class:B>
   class <constant:D> < ::<constant:Object> () -> <class:D>
   class <constant:E> < ::<constant:Object> () -> <class:E>
+    method <static-init> ()
   class <constant:F> < ::<constant:Object> () -> <class:F>
   class <constant:G> < ::<constant:Object> () -> <class:G>
     method wrapper ()
@@ -38,4 +39,5 @@ class <constant:<root>> () -> <class:<root>>
   class <singleton class:<singleton class:<constant:H>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
   class <singleton class:<singleton class:<singleton class:<constant:D>>>> < ::<singleton class:<singleton class:<singleton class:<constant:Object>>>> ()
   field $c
+  method <static-init>$6 ()
 

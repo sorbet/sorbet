@@ -1,7 +1,8 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:C> < ::<constant:Object> (<constant:Funcs>) -> <class:C>
     method test_calls ()
   class <constant:Funcs> (<constant:BasicObject>) -> <class:Funcs>
+    method <static-init> ()
     method f (x) -> Integer
       argument x<> -> Integer
     method g (s) -> Symbol
@@ -13,4 +14,5 @@ class <constant:<root>> () -> <class:<root>>
     method f () -> AliasType { symbol = ::<constant:Funcs>#f }
     method g () -> AliasType { symbol = ::<constant:Funcs>#g }
     method h () -> AliasType { symbol = ::<constant:Funcs>#h }
+  method <static-init>$6 ()
 

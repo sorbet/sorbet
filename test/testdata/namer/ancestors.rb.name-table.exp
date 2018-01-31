@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:Child> < ::<constant:Parent> (<constant:Mixin2>) -> <class:Child>
   class <constant:Mixin1> (<constant:BasicObject>) -> <class:Mixin1>
   class <constant:Mixin2> (<constant:BasicObject>) -> <class:Mixin2>
@@ -7,4 +7,5 @@ class <constant:<root>> () -> <class:<root>>
   class <singleton class:<constant:Mixin1>> < ::<constant:Module> ()
   class <singleton class:<constant:Mixin2>> < ::<constant:Module> ()
   class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
+  method <static-init>$6 ()
 

@@ -1,14 +1,27 @@
 begin
-  #$a = 1
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$6>()
+      begin
+        #$a = 1
+        <emptyTree>
+      end
+    end
+  end
   class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)
-    #$b = 2
-
-    #$a
+    <emptyTree>
 
     <emptyTree>
 
     def meth<meth>()
       [#$a, #$b, #$c]
+    end
+
+    def self.<static-init><<static-init>>()
+      begin
+        #$b = 2
+        #$a
+        <emptyTree>
+      end
     end
   end
   <emptyTree>

@@ -1,6 +1,7 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:A> < ::<constant:B> () -> <class:A>
   class <constant:B> < ::<constant:Object> () -> <class:B>
   class <singleton class:<constant:A>> < ::<singleton class:<constant:B>> ()
   class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> ()
+  method <static-init>$6 ()
 

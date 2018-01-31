@@ -1,4 +1,21 @@
 digraph "module_function.rb"{
+subgraph "cluster_#<static-init>$6" {
+    label = "#<static-init>$6";
+    color = blue;
+    "bb#<static-init>$6_0" [shape = invhouse];
+    "bb#<static-init>$6_1" [shape = parallelogram];
+
+    "bb#<static-init>$6_0" [label = "block[id=0]()
+finalReturn = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+
+    "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
+    "bb#<static-init>$6_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb#<static-init>$6_1" -> "bb#<static-init>$6_1" [style="bold"];
+}
+
 subgraph "cluster_::<constant:Funcs>#f" {
     label = "::<constant:Funcs>#f";
     color = blue;
@@ -54,6 +71,28 @@ finalReturn = return s : <bottom>
 <unconditional>"];
 
     "bb::<constant:Funcs>#h_1" -> "bb::<constant:Funcs>#h_1" [style="bold"];
+}
+
+subgraph "cluster_::<constant:Funcs>#<static-init>" {
+    label = "::<constant:Funcs>#<static-init>";
+    color = blue;
+    "bb::<constant:Funcs>#<static-init>_0" [shape = invhouse];
+    "bb::<constant:Funcs>#<static-init>_1" [shape = parallelogram];
+
+    "bb::<constant:Funcs>#<static-init>_0" [label = "block[id=0]()
+statTemp$5 = self : <class:Funcs>
+statTemp$6 = <symbol:f> : Symbol(:\"f\")
+statTemp$4 = statTemp$5.module_function(statTemp$6) : Module
+statTemp$8 = self : <class:Funcs>
+statTemp$7 = statTemp$8.module_function() : Module
+finalReturn = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Funcs>#<static-init>_0" -> "bb::<constant:Funcs>#<static-init>_1" [style="bold"];
+    "bb::<constant:Funcs>#<static-init>_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Funcs>#<static-init>_1" -> "bb::<constant:Funcs>#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:C>#test_calls" {

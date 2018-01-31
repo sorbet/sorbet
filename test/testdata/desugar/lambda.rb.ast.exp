@@ -1,5 +1,7 @@
-def test_lambda<<constant:<todo sym>>>()
-  self(<constant:<todo sym>>).lambda() do |x|
-    x.*(x)
+class <emptyTree><<constant:<root>>> < ()
+  def test_lambda<<constant:<todo sym>>>()
+    self(<constant:<todo sym>>).lambda() do |x|
+      x.*(x)
+    end
   end
 end

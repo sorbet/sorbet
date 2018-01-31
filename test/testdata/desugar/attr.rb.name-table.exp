@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:TestAttr> < ::<constant:Object> () -> <class:TestAttr>
     field @v1 -> Integer
     field @v2 -> String

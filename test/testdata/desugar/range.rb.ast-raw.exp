@@ -1,58 +1,64 @@
-MethodDef{
-  self = 0
-  name = foo<<constant:<todo sym>>>
-  args = []
-  rhs = InsSeq{
-    stats = [
-      Send{
-        recv = ConstantLit{
-          scope = EmptyTree
-          cnst = <constant:Range>
+ClassDef{
+  name = EmptyTree<<constant:<root>>>
+  ancestors = []
+  rhs = [
+    MethodDef{
+      self = 0
+      name = foo<<constant:<todo sym>>>
+      args = []
+      rhs = InsSeq{
+        stats = [
+          Send{
+            recv = ConstantLit{
+              scope = EmptyTree
+              cnst = <constant:Range>
+            }
+            name = new
+            block = nullptr
+            args = [
+              IntLit{ value = 1 }
+              IntLit{ value = 2 }
+            ]
+          }
+          Send{
+            recv = ConstantLit{
+              scope = EmptyTree
+              cnst = <constant:Range>
+            }
+            name = new
+            block = nullptr
+            args = [
+              IntLit{ value = 1 }
+              IntLit{ value = 2 }
+            ]
+          }
+          Send{
+            recv = Ident{
+              symbol = <constant:Range>
+            }
+            name = new
+            block = nullptr
+            args = [
+              IntLit{ value = 1 }
+              IntLit{ value = 2 }
+              BoolLit{ value = true }
+            ]
+          }
+        ],
+        expr = Send{
+          recv = ConstantLit{
+            scope = EmptyTree
+            cnst = <constant:Range>
+          }
+          name = new
+          block = nullptr
+          args = [
+            IntLit{ value = 1 }
+            IntLit{ value = 2 }
+            BoolLit{ value = true }
+          ]
         }
-        name = new
-        block = nullptr
-        args = [
-          IntLit{ value = 1 }
-          IntLit{ value = 2 }
-        ]
       }
-      Send{
-        recv = ConstantLit{
-          scope = EmptyTree
-          cnst = <constant:Range>
-        }
-        name = new
-        block = nullptr
-        args = [
-          IntLit{ value = 1 }
-          IntLit{ value = 2 }
-        ]
-      }
-      Send{
-        recv = Ident{
-          symbol = <constant:Range>
-        }
-        name = new
-        block = nullptr
-        args = [
-          IntLit{ value = 1 }
-          IntLit{ value = 2 }
-          BoolLit{ value = true }
-        ]
-      }
-    ],
-    expr = Send{
-      recv = ConstantLit{
-        scope = EmptyTree
-        cnst = <constant:Range>
-      }
-      name = new
-      block = nullptr
-      args = [
-        IntLit{ value = 1 }
-        IntLit{ value = 2 }
-        BoolLit{ value = true }
-      ]
     }
-  }
+  ]
 }

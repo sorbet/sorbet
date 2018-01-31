@@ -1,4 +1,24 @@
 digraph "yield.rb"{
+subgraph "cluster_#<static-init>$6" {
+    label = "#<static-init>$6";
+    color = blue;
+    "bb#<static-init>$6_0" [shape = invhouse];
+    "bb#<static-init>$6_1" [shape = parallelogram];
+
+    "bb#<static-init>$6_0" [label = "block[id=0]()
+<constant:Main>$7 = alias <constant:Main> : <class:Main>
+statTemp$5 = <constant:Main>$7.new() : Main
+returnMethodTemp$2 = statTemp$5.main() : untyped
+finalReturn = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+
+    "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
+    "bb#<static-init>$6_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb#<static-init>$6_1" -> "bb#<static-init>$6_1" [style="bold"];
+}
+
 subgraph "cluster_::<constant:Main>#yielder" {
     label = "::<constant:Main>#yielder";
     color = blue;
@@ -95,9 +115,9 @@ finalReturn = return returnMethodTemp$3 : <bottom>
     "bb::<constant:Main>#blockyield_3" -> "bb::<constant:Main>#blockyield_1" [style="bold"];
     "bb::<constant:Main>#blockyield_4" [label = "block[id=4](returnMethodTemp$3)
 outerLoops: 1
-i$6061 = load_yield_param(::<constant:Main>#blockyield#<block>$2, 0) : untyped
-<blk>$6061 = load_yield_param(::<constant:Main>#blockyield#<block>$2, 1) : untyped
-blockReturnTemp$6 = <blk>$6061.call(i$6061) : untyped
+i$6076 = load_yield_param(::<constant:Main>#blockyield#<block>$2, 0) : untyped
+<blk>$6076 = load_yield_param(::<constant:Main>#blockyield#<block>$2, 1) : untyped
+blockReturnTemp$6 = <blk>$6076.call(i$6076) : untyped
 blockReturnTemp$9 = blockreturn<::<constant:Main>#blockyield#<block>$2> blockReturnTemp$6 : <bottom>
 <unconditional>"];
 
@@ -136,9 +156,9 @@ statTemp$16 = statTemp$17.yielder() : untyped
     "bb::<constant:Main>#main_3" -> "bb::<constant:Main>#main_5" [style="bold"];
     "bb::<constant:Main>#main_4" [label = "block[id=4](<constant:<Magic>>$23, l)
 outerLoops: 1
-x$6065 = load_yield_param(::<constant:Main>#main#<block>$2, 0) : untyped
+x$6080 = load_yield_param(::<constant:Main>#main#<block>$2, 0) : untyped
 statTemp$13 = self : Main
-statTemp$12 = statTemp$13.puts(x$6065) : NilClass
+statTemp$12 = statTemp$13.puts(x$6080) : NilClass
 blockReturnTemp$11 = 3 : Integer(3)
 blockReturnTemp$15 = blockreturn<::<constant:Main>#main#<block>$2> blockReturnTemp$11 : <bottom>
 <unconditional>"];
@@ -159,9 +179,9 @@ statTemp$27 = statTemp$28.blockpass() : untyped
     "bb::<constant:Main>#main_6" -> "bb::<constant:Main>#main_8" [style="bold"];
     "bb::<constant:Main>#main_7" [label = "block[id=7](<constant:<Magic>>$23, l)
 outerLoops: 1
-<block-pass>$2$6067 = load_yield_param(::<constant:Main>#main#<block>$3, 0) : untyped
+<block-pass>$2$6082 = load_yield_param(::<constant:Main>#main#<block>$3, 0) : untyped
 statTemp$19 = l.to_proc() : untyped
-statTemp$24 = <block-pass>$2$6067.to_a() : untyped
+statTemp$24 = <block-pass>$2$6082.to_a() : untyped
 statTemp$21 = <constant:<Magic>>$23.<splat>(statTemp$24) : untyped
 blockReturnTemp$18 = statTemp$19.call(statTemp$21) : untyped
 blockReturnTemp$26 = blockreturn<::<constant:Main>#main#<block>$3> blockReturnTemp$18 : <bottom>
@@ -183,9 +203,9 @@ statTemp$37 = statTemp$38.mixed() : untyped
     "bb::<constant:Main>#main_9" -> "bb::<constant:Main>#main_11" [style="bold"];
     "bb::<constant:Main>#main_10" [label = "block[id=10](<constant:<Magic>>$23, l)
 outerLoops: 1
-<block-pass>$3$6069 = load_yield_param(::<constant:Main>#main#<block>$4, 0) : untyped
+<block-pass>$3$6084 = load_yield_param(::<constant:Main>#main#<block>$4, 0) : untyped
 statTemp$30 = l.to_proc() : untyped
-statTemp$34 = <block-pass>$3$6069.to_a() : untyped
+statTemp$34 = <block-pass>$3$6084.to_a() : untyped
 statTemp$32 = <constant:<Magic>>$23.<splat>(statTemp$34) : untyped
 blockReturnTemp$29 = statTemp$30.call(statTemp$32) : untyped
 blockReturnTemp$36 = blockreturn<::<constant:Main>#main#<block>$4> blockReturnTemp$29 : <bottom>
@@ -207,9 +227,9 @@ returnMethodTemp$7 = statTemp$47.blockyield() : untyped
     "bb::<constant:Main>#main_12" -> "bb::<constant:Main>#main_14" [style="bold"];
     "bb::<constant:Main>#main_13" [label = "block[id=13](<constant:<Magic>>$23, l)
 outerLoops: 1
-<block-pass>$4$6071 = load_yield_param(::<constant:Main>#main#<block>$5, 0) : untyped
+<block-pass>$4$6086 = load_yield_param(::<constant:Main>#main#<block>$5, 0) : untyped
 statTemp$40 = l.to_proc() : untyped
-statTemp$44 = <block-pass>$4$6071.to_a() : untyped
+statTemp$44 = <block-pass>$4$6086.to_a() : untyped
 statTemp$42 = <constant:<Magic>>$23.<splat>(statTemp$44) : untyped
 blockReturnTemp$39 = statTemp$40.call(statTemp$42) : untyped
 blockReturnTemp$46 = blockreturn<::<constant:Main>#main#<block>$5> blockReturnTemp$39 : <bottom>
@@ -230,9 +250,9 @@ finalReturn = return returnMethodTemp$7 : <bottom>
     "bb::<constant:Main>#main_15" -> "bb::<constant:Main>#main_1" [style="bold"];
     "bb::<constant:Main>#main_16" [label = "block[id=16](returnMethodTemp$7, <constant:<Magic>>$23, l)
 outerLoops: 1
-<block-pass>$5$6073 = load_yield_param(::<constant:Main>#main#<block>$6, 0) : untyped
+<block-pass>$5$6088 = load_yield_param(::<constant:Main>#main#<block>$6, 0) : untyped
 statTemp$49 = l.to_proc() : untyped
-statTemp$53 = <block-pass>$5$6073.to_a() : untyped
+statTemp$53 = <block-pass>$5$6088.to_a() : untyped
 statTemp$51 = <constant:<Magic>>$23.<splat>(statTemp$53) : untyped
 blockReturnTemp$48 = statTemp$49.call(statTemp$51) : untyped
 blockReturnTemp$55 = blockreturn<::<constant:Main>#main#<block>$6> blockReturnTemp$48 : <bottom>

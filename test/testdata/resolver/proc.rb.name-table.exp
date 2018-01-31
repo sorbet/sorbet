@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:TestProc> < ::<constant:Object> () -> <class:TestProc>
     method bad (x, y, z) -> NilClass
       argument x<> -> untyped

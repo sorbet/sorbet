@@ -1,1 +1,3 @@
-<emptyTree>
+class <emptyTree><<constant:<root>>> < ()
+  <emptyTree>
+end

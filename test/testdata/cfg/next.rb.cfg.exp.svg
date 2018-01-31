@@ -67,12 +67,12 @@
 <ellipse fill="none" stroke="#000000" cx="454" cy="-320.9361" rx="438.3124" ry="132.8722"/>
 <text text-anchor="middle" x="454" y="-399.7361" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](returnMethodTemp$3)</text>
 <text text-anchor="middle" x="454" y="-384.7361" font-family="Times,serif" font-size="14.00" fill="#000000">outerLoops: 1</text>
-<text text-anchor="middle" x="454" y="-369.7361" font-family="Times,serif" font-size="14.00" fill="#000000">x$6053 = load_yield_param(::&lt;constant:Object&gt;#foo#&lt;block&gt;$2, 0) : TupleType {</text>
+<text text-anchor="middle" x="454" y="-369.7361" font-family="Times,serif" font-size="14.00" fill="#000000">x$6068 = load_yield_param(::&lt;constant:Object&gt;#foo#&lt;block&gt;$2, 0) : TupleType {</text>
 <text text-anchor="middle" x="454" y="-354.7361" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;0 = untyped</text>
 <text text-anchor="middle" x="454" y="-339.7361" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="454" y="-324.7361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$10 = self : Object</text>
 <text text-anchor="middle" x="454" y="-309.7361" font-family="Times,serif" font-size="14.00" fill="#000000">statTemp$9 = statTemp$10.good() : untyped</text>
-<text text-anchor="middle" x="454" y="-294.7361" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$12 = x$6053 : TupleType {</text>
+<text text-anchor="middle" x="454" y="-294.7361" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$12 = x$6068 : TupleType {</text>
 <text text-anchor="middle" x="454" y="-279.7361" font-family="Times,serif" font-size="14.00" fill="#000000"> &#160;0 = untyped</text>
 <text text-anchor="middle" x="454" y="-264.7361" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
 <text text-anchor="middle" x="454" y="-249.7361" font-family="Times,serif" font-size="14.00" fill="#000000">blockReturnTemp$13 = blockreturn&lt;::&lt;constant:Object&gt;#foo#&lt;block&gt;$2&gt; blockReturnTemp$12 : &lt;bottom&gt;</text>
@@ -112,4 +112,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: ba043ab23f287f7279b4bbd34e2e64c50cdfcc679f64f70abc4fa0020d079500 -->
+<!-- ruby-types:sha256: d9c52afa41cf0ab553d31c6af5a48b0bc348e44e5f730c509cb48bb35a17b161 -->

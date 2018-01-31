@@ -1,4 +1,6 @@
-self(<constant:<todo sym>>).puts("
+class <emptyTree><<constant:<root>>> < ()
+  self(<constant:<todo sym>>).puts("
 ".concat(begin
-      2
-    end.to_s()).to_s())
+        2
+      end.to_s()).to_s())
+end

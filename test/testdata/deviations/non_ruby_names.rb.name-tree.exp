@@ -1,5 +1,12 @@
 begin
-  <emptyTree>
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$6>()
+      begin
+        <emptyTree>
+        <emptyTree>
+      end
+    end
+  end
   module <emptyTree>::<constant:B><<constant:B>> < ()  end
   module <emptyTree>::<constant:A><<constant:A>> < ()
     <emptyTree>

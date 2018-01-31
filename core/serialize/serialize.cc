@@ -387,13 +387,21 @@ GlobalStateSerializer::Pickler GlobalStateSerializer::pickle(GlobalState &gs) {
     Pickler result;
     result.putU4(VERSION);
     result.putU4(gs.files.size());
+    int i = -1;
     for (auto &f : gs.files) {
-        pickle(result, *f);
+        ++i;
+        if (i != 0) {
+            pickle(result, *f);
+        }
     }
 
     result.putU4(gs.names.size());
+    i = -1;
     for (Name &n : gs.names) {
-        pickle(result, n);
+        ++i;
+        if (i != 0) {
+            pickle(result, n);
+        }
     }
 
     result.putU4(gs.symbols.size());
@@ -434,14 +442,24 @@ void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
     int filesSize = p.getU4();
     files.reserve(filesSize);
     for (int i = 0; i < filesSize; i++) {
-        files.emplace_back(unpickleFile(p));
+        if (i == 0) {
+            files.emplace_back();
+        } else {
+            files.emplace_back(unpickleFile(p));
+        }
     }
 
     int namesSize = p.getU4();
     ENFORCE(namesSize > 0);
     names.reserve(nearestPowerOf2(namesSize));
     for (int i = 0; i < namesSize; i++) {
-        names.emplace_back(unpickleName(p, result));
+        if (i == 0) {
+            names.emplace_back();
+            names.back().kind = NameKind::UTF8;
+            names.back().raw.utf8 = absl::string_view();
+        } else {
+            names.emplace_back(unpickleName(p, result));
+        }
     }
 
     int symbolSize = p.getU4();

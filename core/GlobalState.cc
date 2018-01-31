@@ -314,6 +314,9 @@ void GlobalState::initEmpty() {
         reservedCount++;
     }
 
+    // First file is used to indicate absence of a file
+    files.emplace_back();
+
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();

@@ -1,7 +1,8 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:A> < ::<constant:Object> () -> <class:A>
     field @foo -> Integer
     field @llamas -> untyped
     method <block>$2 ()
+    method <static-init> ()
   class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
 

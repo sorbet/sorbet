@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:Main> < ::<constant:Object> () -> <class:Main>
     method blockpass (blk)
       argument blk<block>
@@ -22,4 +22,5 @@ class <constant:<root>> () -> <class:<root>>
     method yielder (<blk>)
       argument <blk><block> -> untyped
   class <singleton class:<constant:Main>> < ::<singleton class:<constant:Object>> ()
+  method <static-init>$6 ()
 

@@ -1,20 +1,23 @@
 digraph "rescue_var_expression.rb"{
-subgraph "cluster_::<constant:MyClass>#foo=" {
-    label = "::<constant:MyClass>#foo=";
+subgraph "cluster_#<static-init>$6" {
+    label = "#<static-init>$6";
     color = blue;
-    "bb::<constant:MyClass>#foo=_0" [shape = invhouse];
-    "bb::<constant:MyClass>#foo=_1" [shape = parallelogram];
+    "bb#<static-init>$6_0" [shape = invhouse];
+    "bb#<static-init>$6_1" [shape = parallelogram];
 
-    "bb::<constant:MyClass>#foo=_0" [label = "block[id=0]()
-selfMethodTemp$3 = self : MyClass
+    "bb#<static-init>$6_0" [label = "block[id=0]()
+statTemp$6 = self : <class:<root>>
+statTemp$8 = self : <class:<root>>
+statTemp$7 = statTemp$8.foo() : untyped
+returnMethodTemp$2 = statTemp$6.puts(statTemp$7) : NilClass
 finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:MyClass>#foo=_0" -> "bb::<constant:MyClass>#foo=_1" [style="bold"];
-    "bb::<constant:MyClass>#foo=_1" [label = "block[id=1]()
+    "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
+    "bb#<static-init>$6_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:MyClass>#foo=_1" -> "bb::<constant:MyClass>#foo=_1" [style="bold"];
+    "bb#<static-init>$6_1" -> "bb#<static-init>$6_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#foo" {
@@ -62,6 +65,24 @@ returnMethodTemp$2 = 3 : Integer(3)
 <unconditional>"];
 
     "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_7" [style="bold"];
+}
+
+subgraph "cluster_::<constant:MyClass>#foo=" {
+    label = "::<constant:MyClass>#foo=";
+    color = blue;
+    "bb::<constant:MyClass>#foo=_0" [shape = invhouse];
+    "bb::<constant:MyClass>#foo=_1" [shape = parallelogram];
+
+    "bb::<constant:MyClass>#foo=_0" [label = "block[id=0]()
+selfMethodTemp$3 = self : MyClass
+finalReturn = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:MyClass>#foo=_0" -> "bb::<constant:MyClass>#foo=_1" [style="bold"];
+    "bb::<constant:MyClass>#foo=_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:MyClass>#foo=_1" -> "bb::<constant:MyClass>#foo=_1" [style="bold"];
 }
 
 }

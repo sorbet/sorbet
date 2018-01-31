@@ -1,5 +1,6 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:A> < ::<constant:Object> () -> <class:A>
+    method <static-init> ()
     static-field <constant:N> -> <class:NS>
       class <constant:Inner> () -> untyped
   class <constant:NS> (<constant:BasicObject>) -> <class:NS>
@@ -7,4 +8,5 @@ class <constant:<root>> () -> <class:<root>>
     class <singleton class:<constant:Inner>> < ::<constant:Module> ()
   class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
   class <singleton class:<constant:NS>> < ::<constant:Module> ()
+  method <static-init>$6 ()
 

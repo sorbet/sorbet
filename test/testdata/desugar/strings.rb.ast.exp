@@ -1,9 +1,11 @@
-def test_strings<<constant:<todo sym>>>()
-  begin
-    ""
-    "foo"
-    "foo".concat(begin
-        1
-      end.to_s()).to_s()
+class <emptyTree><<constant:<root>>> < ()
+  def test_strings<<constant:<todo sym>>>()
+    begin
+      ""
+      "foo"
+      "foo".concat(begin
+          1
+        end.to_s()).to_s()
+    end
   end
 end

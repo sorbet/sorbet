@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:BlockTest> < ::<constant:Object> () -> <class:BlockTest>
     method block_pass ()
       method <block>$2 (x, y)

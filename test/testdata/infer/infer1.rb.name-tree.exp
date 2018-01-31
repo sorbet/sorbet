@@ -1,29 +1,41 @@
-begin
+class <emptyTree><<constant:<root>>> < ()
   <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
+
+  def self.<static-init><<static-init>$6>()
+    begin
+      <emptyTree>
+      <emptyTree>
+      <emptyTree>
+      <emptyTree>
+      <emptyTree>
+      <emptyTree>
+      <emptyTree>
+      <emptyTree>
+    end
+  end
+
   def baz1<baz1>()
     begin
       a = "foo"
       b = a.getbyte(a)
     end
   end
+
   def baz2<baz2>()
     begin
       a = "foo"
       b = a.getbyte("foo")
     end
   end
+
   def baz3<baz3>()
     b = "foo".getbyte("foo")
   end
+
   def baz4<baz4>()
     b = self(<constant:Object>).a().getbyte("foo")
   end
+
   def baz5<baz5>(cond)
     begin
       if begin
@@ -36,6 +48,7 @@ begin
       b = b.getbyte(1)
     end
   end
+
   def baz6<baz6>(cond)
     begin
       if begin
@@ -48,6 +61,7 @@ begin
       b = "foo".getbyte(b)
     end
   end
+
   def baz7<baz7>(cond)
     begin
       if begin
@@ -60,6 +74,7 @@ begin
       b = "foo".getbyte(b)
     end
   end
+
   def baz8<baz8>()
     while begin
         true
@@ -67,5 +82,4 @@ begin
       b = 1
     end
   end
-  <emptyTree>
 end

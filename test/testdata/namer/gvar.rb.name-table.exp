@@ -1,8 +1,10 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:A> < ::<constant:Object> () -> <class:A>
+    method <static-init> ()
     method meth ()
   class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
   field $a
   field $b
   field $c
+  method <static-init>$6 ()
 

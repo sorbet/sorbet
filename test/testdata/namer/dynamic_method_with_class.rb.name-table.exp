@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:F> < ::<constant:Object> () -> <class:F>
     method bar (baz)
       argument baz<>

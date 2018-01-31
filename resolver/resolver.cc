@@ -903,6 +903,42 @@ public:
 }; // namespace namer
 
 class FlattenWalk {
+private:
+    bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
+        if (ast::isa_tree<ast::MethodDef>(what.get())) {
+            return true;
+        }
+        if (ast::isa_tree<ast::ClassDef>(what.get())) {
+            return true;
+        }
+
+        if (auto asgn = ast::cast_tree<ast::Assign>(what.get())) {
+            return ast::isa_tree<ast::ConstantLit>(asgn->lhs.get());
+        }
+        return false;
+    }
+
+    unique_ptr<ast::Expression> extractClassInit(core::Context ctx, ast::ClassDef *klass) {
+        ast::InsSeq::STATS_store inits;
+
+        for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
+            if (isDefinition(ctx, *it)) {
+                ++it;
+                continue;
+            }
+            inits.emplace_back(move(*it));
+            it = klass->rhs.erase(it);
+        }
+
+        if (inits.empty()) {
+            return nullptr;
+        }
+        if (inits.size() == 1) {
+            return move(inits.front());
+        }
+        return make_unique<ast::InsSeq>(klass->loc, move(inits), make_unique<ast::EmptyTree>(core::Loc::none()));
+    }
+
 public:
     FlattenWalk() {
         newMethodSet();
@@ -917,6 +953,28 @@ public:
         newMethodSet();
         classStack.emplace_back(classes.size());
         classes.emplace_back();
+
+        auto inits = extractClassInit(ctx, classDef);
+        if (inits == nullptr) {
+            return classDef;
+        }
+
+        auto nm = core::Names::staticInit();
+        if (classDef->symbol == core::Symbols::root()) {
+            // Every file may have its own top-level code, so uniqify the names.
+            //
+            // NOTE(nelhage): In general, we potentially need to do this for
+            // every class, since Ruby allows reopening classes. However, since
+            // pay-server bans that behavior, this should be OK here.
+            nm = ctx.state.freshNameUnique(core::UniqueNameKind::Namer, nm, classDef->loc.file.id());
+        }
+
+        auto sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol, nm);
+
+        auto init = make_unique<ast::MethodDef>(inits->loc, sym, core::Names::staticInit(),
+                                                ast::MethodDef::ARGS_store(), move(inits), true);
+        classDef->rhs.emplace_back(move(init));
+
         return classDef;
     }
 
@@ -1019,7 +1077,7 @@ private:
             return rhs;
         }
         for (auto &method : popCurMethodDefs()) {
-            ENFORCE(!!method);
+            ENFORCE(method.get() != nullptr);
             rhs.emplace_back(move(method));
         }
         return rhs;

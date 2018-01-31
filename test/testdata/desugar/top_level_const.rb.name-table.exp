@@ -1,3 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:TopLevelConst> () -> untyped
+  method <static-init>$6 ()
 

@@ -1,10 +1,18 @@
-begin
+class <emptyTree><<constant:<root>>> < ()
   <emptyTree>
+
+  def self.<static-init><<static-init>$6>()
+    begin
+      <emptyTree>
+      <emptyTree>
+    end
+  end
+
   def foo<foo>(a, b)
     <emptyTree>
   end
+
   def foo<foo>(a, b)
     <emptyTree>
   end
-  <emptyTree>
 end

@@ -300,6 +300,20 @@ unique_ptr<Expression> desugarMlhs(core::Context ctx, core::Loc loc, parser::Mlh
 
 bool locReported = false;
 
+ClassDef::RHS_store scopeNodeToBody(core::Context ctx, unique_ptr<parser::Node> node) {
+    ClassDef::RHS_store body;
+    u2 uniqueCounter = 1;
+    if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
+        body.reserve(begin->stmts.size());
+        for (auto &stat : begin->stmts) {
+            body.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+        };
+    } else {
+        body.emplace_back(node2TreeImpl(ctx, move(node), uniqueCounter));
+    }
+    return body;
+}
+
 unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node> what, u2 &uniqueCounter) {
     try {
         if (what.get() == nullptr) {
@@ -619,16 +633,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
             },
             [&](parser::Module *module) {
-                ClassDef::RHS_store body;
-                u2 uniqueCounter1 = 1;
-                if (auto *begin = parser::cast_node<parser::Begin>(module->body.get())) {
-                    body.reserve(begin->stmts.size());
-                    for (auto &stat : begin->stmts) {
-                        body.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter1));
-                    };
-                } else {
-                    body.emplace_back(node2TreeImpl(ctx, move(module->body), uniqueCounter1));
-                }
+                ClassDef::RHS_store body = scopeNodeToBody(ctx, move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
                 unique_ptr<Expression> res = make_unique<ClassDef>(
                     loc, core::Symbols::todo(), node2TreeImpl(ctx, move(module->name), uniqueCounter), move(ancestors),
@@ -636,16 +641,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Class *claz) {
-                ClassDef::RHS_store body;
-                u2 uniqueCounter1 = 1;
-                if (auto *begin = parser::cast_node<parser::Begin>(claz->body.get())) {
-                    body.reserve(begin->stmts.size());
-                    for (auto &stat : begin->stmts) {
-                        body.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter1));
-                    };
-                } else {
-                    body.emplace_back(node2TreeImpl(ctx, move(claz->body), uniqueCounter1));
-                }
+                ClassDef::RHS_store body = scopeNodeToBody(ctx, move(claz->body));
                 ClassDef::ANCESTORS_store ancestors;
                 if (claz->superclass == nullptr) {
                     ancestors.emplace_back(make_unique<Ident>(loc, core::Symbols::todo()));
@@ -723,20 +719,12 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 if (self == nullptr) {
                     ctx.state.error(sclass->loc, core::errors::Desugar::InvalidSingletonDef,
                                     "`class << EXPRESSION' is only supported for `class << self'");
-                    unique_ptr<Expression> res = make_unique<EmptyTree>(what->loc);
+                    unique_ptr<Expression> res = mkEmptyTree(what->loc);
                     result.swap(res);
                     return;
                 }
 
-                ClassDef::RHS_store body;
-                if (auto *begin = parser::cast_node<parser::Begin>(sclass->body.get())) {
-                    body.reserve(begin->stmts.size());
-                    for (auto &stat : begin->stmts) {
-                        body.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
-                    };
-                } else {
-                    body.emplace_back(node2TreeImpl(ctx, move(sclass->body), uniqueCounter));
-                }
+                ClassDef::RHS_store body = scopeNodeToBody(ctx, move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
                 unique_ptr<Expression> res =
                     make_unique<ClassDef>(what->loc, core::Symbols::todo(),
@@ -1395,12 +1383,26 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
         throw;
     }
 }
+
+unique_ptr<Expression> liftTopLevel(core::Context ctx, unique_ptr<Expression> what) {
+    if (isa_tree<ClassDef>(what.get())) {
+        return what;
+    }
+
+    auto loc = what->loc;
+
+    ClassDef::RHS_store rhs;
+    rhs.emplace_back(move(what));
+    return make_unique<ClassDef>(loc, core::Symbols::root(), mkEmptyTree(core::Loc::none()),
+                                 ClassDef::ANCESTORS_store(), move(rhs), Class);
+}
 } // namespace
 
 unique_ptr<Expression> node2Tree(core::Context ctx, unique_ptr<parser::Node> what) {
     try {
         u2 uniqueCounter = 1;
         auto result = node2TreeImpl(ctx, move(what), uniqueCounter);
+        result = liftTopLevel(ctx, move(result));
         auto verifiedResult = Verifier::run(ctx, move(result));
         return verifiedResult;
     } catch (...) {

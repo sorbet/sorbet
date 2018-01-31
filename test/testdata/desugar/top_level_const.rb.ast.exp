@@ -1,1 +1,3 @@
-::<constant:<root>>::<constant:TopLevelConst>
+class <emptyTree><<constant:<root>>> < ()
+  ::<constant:<root>>::<constant:TopLevelConst>
+end

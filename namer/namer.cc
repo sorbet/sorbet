@@ -146,7 +146,13 @@ class NameInserter {
 
 public:
     ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *klass) {
-        klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+        if (klass->symbol == core::Symbols::todo()) {
+            klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+        } else {
+            // Desugar populates a top-level root() ClassDef. Nothing else
+            // should have been resolved by now.
+            ENFORCE(klass->symbol == core::Symbols::root());
+        }
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
         if ((ident != nullptr) && ident->name == core::Names::singletonClass()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Class);

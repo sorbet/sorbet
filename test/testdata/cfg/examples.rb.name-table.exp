@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:Examples> < ::<constant:Object> () -> <class:Examples>
     method i_like_exps ()
     method i_like_ifs ()

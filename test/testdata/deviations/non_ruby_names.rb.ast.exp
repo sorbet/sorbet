@@ -1,10 +1,12 @@
-begin
-  module <emptyTree>::<constant:B><<constant:<todo sym>>> < ()
-    <emptyTree>
-  end
-  module <emptyTree>::<constant:A><<constant:<todo sym>>> < ()
-    class <emptyTree>::<constant:B>::<constant:C><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+class <emptyTree><<constant:<root>>> < ()
+  begin
+    module <emptyTree>::<constant:B><<constant:<todo sym>>> < ()
       <emptyTree>
+    end
+    module <emptyTree>::<constant:A><<constant:<todo sym>>> < ()
+      class <emptyTree>::<constant:B>::<constant:C><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+        <emptyTree>
+      end
     end
   end
 end

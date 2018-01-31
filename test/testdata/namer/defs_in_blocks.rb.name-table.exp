@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <class:Object>
     method a_method ()
     method a_method_with_param (a)
@@ -6,4 +6,5 @@ class <constant:<root>> () -> <class:<root>>
   class <singleton class:<constant:Object>> < ::<singleton class:<constant:BasicObject>> ()
     method a_static_method ()
   method <block>$2 ()
+  method <static-init>$6 ()
 

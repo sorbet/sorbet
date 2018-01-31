@@ -168,6 +168,8 @@ NameDef names[] = {
     {"is_a_p", "is_a?", Infer | CFG},
     {"kind_of", "kind_of?", Infer},
     {"eqeq", "==", Infer},
+
+    {"staticInit", "<static-init>", Resolver},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

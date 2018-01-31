@@ -52,7 +52,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
     const_cast<GlobalState &>(from).sanityCheck();
     {
         UnfreezeFileTable unfreezeFiles(to);
-        int fileIdx = -1;
+        int fileIdx = 0; // Skip file 0
         while (fileIdx + 1 < from.filesUsed()) {
             fileIdx++;
             if (from.files[fileIdx]->source_type == core::File::TombStone) {

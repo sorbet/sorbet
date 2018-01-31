@@ -1,10 +1,17 @@
 begin
-  <emptyTree>
-  <emptyTree>
-  <emptyTree>
-  #<constant:Alias> = ::<constant:Parent>
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$6>()
+      begin
+        <emptyTree>
+        <emptyTree>
+        <emptyTree>
+        #<constant:Alias> = ::<constant:Parent>
+        <emptyTree>
+      end
+    end
+  end
   class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
-    ::<constant:Parent>#@@class_var = "hi"
+    <emptyTree>
 
     <emptyTree>
 
@@ -14,16 +21,18 @@ begin
         ::<constant:Parent>#@ivar2
       end
     end
+
+    def self.<static-init><<static-init>>()
+      ::<constant:Parent>#@@class_var = "hi"
+    end
   end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
-    ::<constant:Mixin>#@@mixin_cvar
+    def self.<static-init><<static-init>>()
+      ::<constant:Mixin>#@@mixin_cvar
+    end
   end
   class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
-    ::<constant:Parent>#@@class_var
-
-    ::<constant:Mixin>#@@mixin_cvar
-
-    ::<constant:Child>#@@undefined_cvar
+    <emptyTree>
 
     <emptyTree>
 
@@ -35,9 +44,20 @@ begin
         ::<constant:Child>#@undefinedivar
       end
     end
+
+    def self.<static-init><<static-init>>()
+      begin
+        ::<constant:Parent>#@@class_var
+        ::<constant:Mixin>#@@mixin_cvar
+        ::<constant:Child>#@@undefined_cvar
+        <emptyTree>
+      end
+    end
   end
   class <emptyTree>::<constant:Child1><<constant:Child1>> < (#<constant:Alias>)
-    ::<constant:Child1>#@@class_var
+    def self.<static-init><<static-init>>()
+      ::<constant:Child1>#@@class_var
+    end
   end
   <emptyTree>
 end

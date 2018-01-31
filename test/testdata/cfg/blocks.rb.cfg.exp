@@ -32,8 +32,8 @@ finalReturn = return returnMethodTemp$3 : <bottom>
     "bb::<constant:BlockTest>#block_pass_3" -> "bb::<constant:BlockTest>#block_pass_1" [style="bold"];
     "bb::<constant:BlockTest>#block_pass_4" [label = "block[id=4](returnMethodTemp$3)
 outerLoops: 1
-x$6055 = load_yield_param(::<constant:BlockTest>#block_pass#<block>$2, 0) : untyped
-blockReturnTemp$9 = x$6055 : untyped
+x$6070 = load_yield_param(::<constant:BlockTest>#block_pass#<block>$2, 0) : untyped
+blockReturnTemp$9 = x$6070 : untyped
 blockReturnTemp$10 = blockreturn<::<constant:BlockTest>#block_pass#<block>$2> blockReturnTemp$9 : <bottom>
 <unconditional>"];
 

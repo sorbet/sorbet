@@ -1,26 +1,28 @@
-begin
-  def main<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).a()
-    rescue => rescueTemp$2
-      self(<constant:<todo sym>>).b()
-    else
-      self(<constant:<todo sym>>).c()
-    ensure
-      self(<constant:<todo sym>>).d()
+class <emptyTree><<constant:<root>>> < ()
+  begin
+    def main<<constant:<todo sym>>>()
+      begin
+        self(<constant:<todo sym>>).a()
+      rescue => rescueTemp$2
+        self(<constant:<todo sym>>).b()
+      else
+        self(<constant:<todo sym>>).c()
+      ensure
+        self(<constant:<todo sym>>).d()
+      end
     end
+    def a<<constant:<todo sym>>>()
+      <emptyTree>
+    end
+    def b<<constant:<todo sym>>>()
+      <emptyTree>
+    end
+    def c<<constant:<todo sym>>>()
+      <emptyTree>
+    end
+    def d<<constant:<todo sym>>>()
+      <emptyTree>
+    end
+    self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).foo())
   end
-  def a<<constant:<todo sym>>>()
-    <emptyTree>
-  end
-  def b<<constant:<todo sym>>>()
-    <emptyTree>
-  end
-  def c<<constant:<todo sym>>>()
-    <emptyTree>
-  end
-  def d<<constant:<todo sym>>>()
-    <emptyTree>
-  end
-  self(<constant:<todo sym>>).puts(self(<constant:<todo sym>>).foo())
 end

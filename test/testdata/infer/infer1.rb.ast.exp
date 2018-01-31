@@ -1,63 +1,65 @@
-begin
-  def baz1<<constant:<todo sym>>>()
-    begin
-      a = "foo"
-      b = a.getbyte(a)
+class <emptyTree><<constant:<root>>> < ()
+  begin
+    def baz1<<constant:<todo sym>>>()
+      begin
+        a = "foo"
+        b = a.getbyte(a)
+      end
     end
-  end
-  def baz2<<constant:<todo sym>>>()
-    begin
-      a = "foo"
-      b = a.getbyte("foo")
+    def baz2<<constant:<todo sym>>>()
+      begin
+        a = "foo"
+        b = a.getbyte("foo")
+      end
     end
-  end
-  def baz3<<constant:<todo sym>>>()
-    b = "foo".getbyte("foo")
-  end
-  def baz4<<constant:<todo sym>>>()
-    b = self(<constant:<todo sym>>).a().getbyte("foo")
-  end
-  def baz5<<constant:<todo sym>>>(cond)
-    begin
-      if begin
-          cond
+    def baz3<<constant:<todo sym>>>()
+      b = "foo".getbyte("foo")
+    end
+    def baz4<<constant:<todo sym>>>()
+      b = self(<constant:<todo sym>>).a().getbyte("foo")
+    end
+    def baz5<<constant:<todo sym>>>(cond)
+      begin
+        if begin
+            cond
+          end
+          b = 1
+        else
+          b = "foo"
+        end
+        b = b.getbyte(1)
+      end
+    end
+    def baz6<<constant:<todo sym>>>(cond)
+      begin
+        if begin
+            cond
+          end
+          b = 1
+        else
+          b = "foo"
+        end
+        b = "foo".getbyte(b)
+      end
+    end
+    def baz7<<constant:<todo sym>>>(cond)
+      begin
+        if begin
+            cond
+          end
+          b = 1
+        else
+          <emptyTree>
+        end
+        b = "foo".getbyte(b)
+      end
+    end
+    def baz8<<constant:<todo sym>>>()
+      while begin
+          true
         end
         b = 1
-      else
-        b = "foo"
       end
-      b = b.getbyte(1)
-    end
-  end
-  def baz6<<constant:<todo sym>>>(cond)
-    begin
-      if begin
-          cond
-        end
-        b = 1
-      else
-        b = "foo"
-      end
-      b = "foo".getbyte(b)
-    end
-  end
-  def baz7<<constant:<todo sym>>>(cond)
-    begin
-      if begin
-          cond
-        end
-        b = 1
-      else
-        <emptyTree>
-      end
-      b = "foo".getbyte(b)
-    end
-  end
-  def baz8<<constant:<todo sym>>>()
-    while begin
-        true
-      end
-      b = 1
     end
   end
 end

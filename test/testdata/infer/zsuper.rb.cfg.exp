@@ -1,4 +1,21 @@
 digraph "zsuper.rb"{
+subgraph "cluster_#<static-init>$6" {
+    label = "#<static-init>$6";
+    color = blue;
+    "bb#<static-init>$6_0" [shape = invhouse];
+    "bb#<static-init>$6_1" [shape = parallelogram];
+
+    "bb#<static-init>$6_0" [label = "block[id=0]()
+finalReturn = return returnMethodTemp$2 : <bottom>
+<unconditional>"];
+
+    "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
+    "bb#<static-init>$6_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb#<static-init>$6_1" -> "bb#<static-init>$6_1" [style="bold"];
+}
+
 subgraph "cluster_::<constant:Foo>#baz" {
     label = "::<constant:Foo>#baz";
     color = blue;
@@ -52,9 +69,9 @@ finalReturn = return returnMethodTemp$3 : <bottom>
     "bb::<constant:Bar>#baz_3" -> "bb::<constant:Bar>#baz_1" [style="bold"];
     "bb::<constant:Bar>#baz_4" [label = "block[id=4](returnMethodTemp$3)
 outerLoops: 1
-a$6060 = load_yield_param(::<constant:Bar>#baz#<block>$2, 0) : untyped
+a$6075 = load_yield_param(::<constant:Bar>#baz#<block>$2, 0) : untyped
 statTemp$8 = self : Bar
-blockReturnTemp$7 = statTemp$8.puts(a$6060) : NilClass
+blockReturnTemp$7 = statTemp$8.puts(a$6075) : NilClass
 blockReturnTemp$10 = blockreturn<::<constant:Bar>#baz#<block>$2> blockReturnTemp$7 : <bottom>
 <unconditional>"];
 

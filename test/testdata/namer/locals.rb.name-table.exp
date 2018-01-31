@@ -1,4 +1,4 @@
-class <constant:<root>> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
   class <constant:TestLocals> < ::<constant:Object> () -> <class:TestLocals>
     method method ()
       method <block>$2 ()
