@@ -24,7 +24,7 @@ public:
         ctxPtr->initEmpty();
     }
     core::Context getCtx() {
-        return core::Context(*ctxPtr, ctxPtr->defn_root());
+        return core::Context(*ctxPtr, core::Symbols::root());
     }
 
 private:
@@ -37,7 +37,7 @@ unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
     ruby_typer::core::UnfreezeFileTable ft(gs);              // enters original strings
     auto ast = parser::Parser::run(gs, "<test>", str);
-    ruby_typer::core::Context ctx(gs, gs.defn_root());
+    ruby_typer::core::Context ctx(gs, core::Symbols::root());
     return ast::desugar::node2Tree(ctx, move(ast));
 }
 
@@ -54,14 +54,14 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
         namer::Namer::run(ctx, move(tree));
     }
 
-    auto &objectScope = core::GlobalState::defn_Object().data(ctx);
-    ASSERT_EQ(core::GlobalState::defn_root(), objectScope.owner);
+    auto &objectScope = core::Symbols::Object().data(ctx);
+    ASSERT_EQ(core::Symbols::root(), objectScope.owner);
 
     ASSERT_EQ(2, objectScope.members.size());
     auto methodPair = objectScope.members[1];
     ASSERT_EQ("hello_world", methodPair.first.data(ctx).toString(ctx));
     auto &symbol = methodPair.second.data(ctx);
-    ASSERT_EQ(core::GlobalState::defn_Object(), symbol.owner);
+    ASSERT_EQ(core::Symbols::Object(), symbol.owner);
     ASSERT_EQ(0, symbol.arguments().size());
 }
 
@@ -98,7 +98,7 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
         namer::Namer::run(ctx, move(tree));
     }
     auto &rootScope =
-        core::GlobalState::defn_root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
+        core::Symbols::root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
     ASSERT_EQ(3, rootScope.members.size());
     auto fooPair = rootScope.members[1];
@@ -116,7 +116,7 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
         namer::Namer::run(ctx, move(tree));
     }
     auto &rootScope =
-        core::GlobalState::defn_root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
+        core::Symbols::root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
     ASSERT_EQ(3, rootScope.members.size());
     auto fooSym = rootScope.members[1].second;

@@ -299,7 +299,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         if (spec.isKeyword()) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs && arg.type->derivesFrom(ctx, ctx.state.defn_Hash()) &&
+        if (ait + 1 == aend && hasKwargs && arg.type->derivesFrom(ctx, core::Symbols::Hash()) &&
             (spec.isOptional() || spec.isRepeated())) {
             break;
         }
@@ -351,7 +351,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = *it;
                         SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
-                        if (klass != ctx.state.defn_Symbol()) {
+                        if (klass != core::Symbols::Symbol()) {
                             continue;
                         }
 
@@ -371,7 +371,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                 ++kwit;
 
                 auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<LiteralType> lit) {
-                    return cast_type<ClassType>(lit->underlying.get())->symbol == ctx.state.defn_Symbol() &&
+                    return cast_type<ClassType>(lit->underlying.get())->symbol == core::Symbols::Symbol() &&
                            lit->value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
@@ -388,7 +388,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
             }
             for (auto &key : hash->keys) {
                 SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
-                if (klass == ctx.state.defn_Symbol() &&
+                if (klass == core::Symbols::Symbol() &&
                     consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
                     continue;
                 }
@@ -398,7 +398,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                                 "Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),
                                 fun.toString(ctx));
             }
-        } else if (hashArg.type->derivesFrom(ctx, ctx.state.defn_Hash())) {
+        } else if (hashArg.type->derivesFrom(ctx, core::Symbols::Hash())) {
             --aend;
             ctx.state.error(core::ComplexError(
                 callLoc, core::errors::Infer::MethodArgumentMismatch, "Passing an untyped hash to keyword arguments",

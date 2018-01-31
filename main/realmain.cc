@@ -141,7 +141,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
             cout << nodes->toString(lgs, 0) << endl;
         }
 
-        core::Context ctx(lgs, lgs.defn_root());
+        core::Context ctx(lgs, core::Symbols::root());
         std::unique_ptr<ast::Expression> ast;
         {
             tracer->trace("Desugaring: {}", file.data(lgs).path());
@@ -244,7 +244,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             resultq.pop(&result);
             core::GlobalSubstitution substitution(*result.gs, gs);
             counterConsume(move(result.counters));
-            core::Context ctx(gs, gs.defn_root());
+            core::Context ctx(gs, core::Symbols::root());
             for (auto &tree : result.trees) {
                 trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
             }
@@ -261,7 +261,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             try {
                 unique_ptr<ast::Expression> ast;
                 {
-                    core::Context ctx(gs, gs.defn_root());
+                    core::Context ctx(gs, core::Symbols::root());
                     tracer->trace("Naming: {}", file.data(gs).path());
                     core::ErrorRegion errs(gs, silenceErrors);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
@@ -288,7 +288,7 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
         f.data(gs).source_type = ruby_typer::core::File::Typed;
     }
     try {
-        core::Context ctx(gs, gs.defn_root());
+        core::Context ctx(gs, core::Symbols::root());
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "digraph \"" << File::getFileName(f.data(gs).path()) << "\"{" << endl;
         }
@@ -326,7 +326,7 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
     vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>> typecheck_result;
 
     try {
-        core::Context ctx(gs, gs.defn_root());
+        core::Context ctx(gs, core::Symbols::root());
         {
             Timer timeit(console_err, "Resolving");
             tracer->trace("Resolving (global pass)...");

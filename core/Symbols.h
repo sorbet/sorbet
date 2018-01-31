@@ -153,9 +153,9 @@ public:
      *   `argumentsOrMixins` list. `superClass` may not exist even if
      *   `isClass()`, which implies that this symbol is either a module or one
      *   of our magic synthetic classes. During parsing+naming, `superClass ==
-     *   defn_todo()` iff every definition we've seen for this class has had an
+     *   todo()` iff every definition we've seen for this class has had an
      *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
-     *   Resolver::finalize(), these will be rewritten to `defn_Object()`.
+     *   Resolver::finalize(), these will be rewritten to `Object()`.
      */
     // TODO: make into tiny
     std::vector<SymbolRef> argumentsOrMixins;
@@ -480,6 +480,186 @@ private:
 };
 
 // CheckSize(Symbol, 152, 8); // This is under too much churn to be worth checking
+
+class Symbols {
+    Symbols() = delete;
+
+public:
+    static SymbolRef noSymbol() {
+        return SymbolRef(nullptr, 0);
+    }
+
+    static SymbolRef top() {
+        return SymbolRef(nullptr, 1);
+    }
+
+    static SymbolRef bottom() {
+        return SymbolRef(nullptr, 2);
+    }
+
+    static SymbolRef root() {
+        return SymbolRef(nullptr, 3);
+    }
+
+    static SymbolRef nil() {
+        return SymbolRef(nullptr, 4);
+    }
+
+    static SymbolRef todo() {
+        return SymbolRef(nullptr, 5);
+    }
+
+    static SymbolRef Object() {
+        return SymbolRef(nullptr, 6);
+    }
+
+    static SymbolRef junk() {
+        return SymbolRef(nullptr, 7);
+    }
+
+    static SymbolRef Integer() {
+        return SymbolRef(nullptr, 8);
+    }
+
+    static SymbolRef Float() {
+        return SymbolRef(nullptr, 9);
+    }
+
+    static SymbolRef String() {
+        return SymbolRef(nullptr, 10);
+    }
+
+    static SymbolRef Symbol() {
+        return SymbolRef(nullptr, 11);
+    }
+
+    static SymbolRef Array() {
+        return SymbolRef(nullptr, 12);
+    }
+
+    static SymbolRef Hash() {
+        return SymbolRef(nullptr, 13);
+    }
+
+    static SymbolRef TrueClass() {
+        return SymbolRef(nullptr, 14);
+    }
+
+    static SymbolRef FalseClass() {
+        return SymbolRef(nullptr, 15);
+    }
+
+    static SymbolRef NilClass() {
+        return SymbolRef(nullptr, 16);
+    }
+
+    static SymbolRef untyped() {
+        return SymbolRef(nullptr, 17);
+    }
+
+    static SymbolRef Opus() {
+        return SymbolRef(nullptr, 18);
+    }
+
+    static SymbolRef T() {
+        return SymbolRef(nullptr, 19);
+    }
+
+    static SymbolRef Class() {
+        return SymbolRef(nullptr, 20);
+    }
+
+    static SymbolRef BasicObject() {
+        return SymbolRef(nullptr, 21);
+    }
+
+    static SymbolRef Kernel() {
+        return SymbolRef(nullptr, 22);
+    }
+
+    static SymbolRef Range() {
+        return SymbolRef(nullptr, 23);
+    }
+
+    static SymbolRef Regexp() {
+        return SymbolRef(nullptr, 24);
+    }
+
+    static SymbolRef Magic() {
+        return SymbolRef(nullptr, 25);
+    }
+
+    static SymbolRef Module() {
+        return SymbolRef(nullptr, 26);
+    }
+
+    static SymbolRef StandardError() {
+        return SymbolRef(nullptr, 27);
+    }
+
+    static SymbolRef Complex() {
+        return SymbolRef(nullptr, 28);
+    }
+
+    static SymbolRef Rational() {
+        return SymbolRef(nullptr, 29);
+    }
+
+    static SymbolRef T_Array() {
+        return SymbolRef(nullptr, 30);
+    }
+
+    static SymbolRef T_Hash() {
+        return SymbolRef(nullptr, 31);
+    }
+
+    static SymbolRef T_Proc() {
+        return SymbolRef(nullptr, 32);
+    }
+
+    static SymbolRef Proc() {
+        return SymbolRef(nullptr, 33);
+    }
+
+    static SymbolRef T_any() {
+        return SymbolRef(nullptr, 34);
+    }
+
+    static SymbolRef T_all() {
+        return SymbolRef(nullptr, 35);
+    }
+
+    static SymbolRef T_untyped() {
+        return SymbolRef(nullptr, 36);
+    }
+
+    static SymbolRef T_nilable() {
+        return SymbolRef(nullptr, 37);
+    }
+
+    static SymbolRef Enumerable() {
+        return SymbolRef(nullptr, 38);
+    }
+
+    static SymbolRef Set() {
+        return SymbolRef(nullptr, 39);
+    }
+
+    static SymbolRef Struct() {
+        return SymbolRef(nullptr, 40);
+    }
+
+    static SymbolRef File() {
+        return SymbolRef(nullptr, 41);
+    }
+
+    // Keep as last and update to match the last entry
+    static SymbolRef last_synthetic_sym() {
+        return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - 1);
+    }
+
+    static constexpr int MAX_SYNTHETIC_SYMBOLS = 100;
+};
 
 } // namespace core
 } // namespace ruby_typer

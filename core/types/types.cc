@@ -13,83 +13,83 @@ template class std::shared_ptr<ruby_typer::core::Type>;
 template class std::vector<core::Loc>;
 
 shared_ptr<Type> Types::top() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_top());
+    static auto res = make_shared<ClassType>(core::Symbols::top());
     return res;
 }
 
 shared_ptr<Type> Types::bottom() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_bottom());
+    static auto res = make_shared<ClassType>(core::Symbols::bottom());
     return res;
 }
 
 shared_ptr<Type> Types::nil() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_NilClass());
+    static auto res = make_shared<ClassType>(core::Symbols::NilClass());
     return res;
 }
 
 shared_ptr<Type> Types::dynamic() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_untyped());
+    static auto res = make_shared<ClassType>(core::Symbols::untyped());
     return res;
 }
 std::shared_ptr<Type> Types::trueClass() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_TrueClass());
+    static auto res = make_shared<ClassType>(core::Symbols::TrueClass());
     return res;
 }
 
 std::shared_ptr<Type> Types::falseClass() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_FalseClass());
+    static auto res = make_shared<ClassType>(core::Symbols::FalseClass());
     return res;
 }
 
 std::shared_ptr<Type> Types::Integer() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_Integer());
+    static auto res = make_shared<ClassType>(core::Symbols::Integer());
     return res;
 }
 
 std::shared_ptr<Type> Types::Float() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_Float());
+    static auto res = make_shared<ClassType>(core::Symbols::Float());
     return res;
 }
 
 std::shared_ptr<Type> Types::arrayClass() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_Array());
+    static auto res = make_shared<ClassType>(core::Symbols::Array());
     return res;
 }
 
 std::shared_ptr<Type> Types::hashClass() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_Hash());
+    static auto res = make_shared<ClassType>(core::Symbols::Hash());
     return res;
 }
 
 std::shared_ptr<Type> Types::arrayOfUntyped() {
     static vector<shared_ptr<Type>> targs{core::Types::dynamic()};
-    static auto res = make_shared<core::AppliedType>(core::GlobalState::defn_Array(), targs);
+    static auto res = make_shared<core::AppliedType>(core::Symbols::Array(), targs);
     return res;
 }
 
 std::shared_ptr<Type> Types::hashOfUntyped() {
     static vector<shared_ptr<Type>> targs{core::Types::dynamic(), core::Types::dynamic()};
-    static auto res = make_shared<core::AppliedType>(core::GlobalState::defn_Hash(), targs);
+    static auto res = make_shared<core::AppliedType>(core::Symbols::Hash(), targs);
     return res;
 }
 
 std::shared_ptr<Type> Types::procClass() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_Proc());
+    static auto res = make_shared<ClassType>(core::Symbols::Proc());
     return res;
 }
 
 std::shared_ptr<Type> Types::String() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_String());
+    static auto res = make_shared<ClassType>(core::Symbols::String());
     return res;
 }
 
 std::shared_ptr<Type> Types::Symbol() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_Symbol());
+    static auto res = make_shared<ClassType>(core::Symbols::Symbol());
     return res;
 }
 
 std::shared_ptr<Type> Types::Object() {
-    static auto res = make_shared<ClassType>(core::GlobalState::defn_Object());
+    static auto res = make_shared<ClassType>(core::Symbols::Object());
     return res;
 }
 
@@ -142,8 +142,8 @@ bool Types::canBeTruthy(core::Context ctx, std::shared_ptr<Type> what) {
     if (what->isDynamic()) {
         return true;
     }
-    auto truthyPart = Types::dropSubtypesOf(ctx, Types::dropSubtypesOf(ctx, what, GlobalState::defn_NilClass()),
-                                            GlobalState::defn_FalseClass());
+    auto truthyPart =
+        Types::dropSubtypesOf(ctx, Types::dropSubtypesOf(ctx, what, Symbols::NilClass()), Symbols::FalseClass());
     return !truthyPart->isBottom(); // check if truthyPart is empty
 }
 
@@ -206,17 +206,17 @@ void ProxyType::_sanityCheck(core::Context ctx) {
 
 bool Type::isDynamic() {
     auto *t = cast_type<ClassType>(this);
-    return t != nullptr && t->symbol == core::GlobalState::defn_untyped();
+    return t != nullptr && t->symbol == core::Symbols::untyped();
 }
 
 bool Type::isTop() {
     auto *t = dynamic_cast<ClassType *>(this);
-    return t != nullptr && t->symbol == core::GlobalState::defn_top();
+    return t != nullptr && t->symbol == core::Symbols::top();
 }
 
 bool Type::isBottom() {
     auto *t = cast_type<ClassType>(this);
-    return t != nullptr && t->symbol == core::GlobalState::defn_bottom();
+    return t != nullptr && t->symbol == core::Symbols::bottom();
 }
 
 ruby_typer::core::LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {}
@@ -225,8 +225,8 @@ ruby_typer::core::LiteralType::LiteralType(double val)
     : ProxyType(Types::Float()), value(*reinterpret_cast<u8 *>(&val)) {}
 
 ruby_typer::core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
-    : ProxyType(klass == core::GlobalState::defn_String() ? Types::String() : Types::Symbol()), value(val._id) {
-    ENFORCE(klass == core::GlobalState::defn_String() || klass == core::GlobalState::defn_Symbol());
+    : ProxyType(klass == core::Symbols::String() ? Types::String() : Types::Symbol()), value(val._id) {
+    ENFORCE(klass == core::Symbols::String() || klass == core::Symbols::Symbol());
 }
 
 ruby_typer::core::LiteralType::LiteralType(bool val)
@@ -239,17 +239,17 @@ string LiteralType::typeName() {
 string LiteralType::toString(const GlobalState &gs, int tabs) {
     string value;
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
-    if (undSymbol == GlobalState::defn_String()) {
+    if (undSymbol == Symbols::String()) {
         value = "\"" + NameRef(gs, this->value).toString(gs) + "\"";
-    } else if (undSymbol == GlobalState::defn_Symbol()) {
+    } else if (undSymbol == Symbols::Symbol()) {
         value = ":\"" + NameRef(gs, this->value).toString(gs) + "\"";
-    } else if (undSymbol == GlobalState::defn_Integer()) {
+    } else if (undSymbol == Symbols::Integer()) {
         value = to_string(this->value);
-    } else if (undSymbol == GlobalState::defn_Float()) {
+    } else if (undSymbol == Symbols::Float()) {
         value = to_string(*reinterpret_cast<double *>(&(this->value)));
-    } else if (undSymbol == GlobalState::defn_TrueClass()) {
+    } else if (undSymbol == Symbols::TrueClass()) {
         value = "true";
-    } else if (undSymbol == GlobalState::defn_FalseClass()) {
+    } else if (undSymbol == Symbols::FalseClass()) {
         value = "false";
     } else {
         Error::raise("should not be reachable");
@@ -365,7 +365,7 @@ string ShapeType::show(const GlobalState &gs) {
             buf << ", ";
         }
         SymbolRef undSymbol = cast_type<ClassType>(key->underlying.get())->symbol;
-        if (undSymbol == GlobalState::defn_Symbol()) {
+        if (undSymbol == Symbols::Symbol()) {
             buf << NameRef(gs, key->value).toString(gs) << ": ";
         } else {
             buf << key->show(gs) << " => ";
@@ -388,7 +388,7 @@ void ShapeType::_sanityCheck(core::Context ctx) {
     }
 }
 
-MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::GlobalState::defn_Magic())) {}
+MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::Symbols::Magic())) {}
 
 string MagicType::toString(const GlobalState &gs, int tabs) {
     return underlying->toString(gs, tabs);
@@ -627,7 +627,7 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
                 i++;
             }
             if (!align.exists()) {
-                currentAlignment.push_back(GlobalState::noSymbol());
+                currentAlignment.push_back(Symbols::noSymbol());
             }
         }
     }
@@ -855,9 +855,9 @@ std::string AppliedType::toString(const GlobalState &gs, int tabs) {
 
 std::string AppliedType::show(const GlobalState &gs) {
     stringstream buf;
-    if (this->klass == core::GlobalState::defn_Array()) {
+    if (this->klass == core::Symbols::Array()) {
         buf << "T::Array";
-    } else if (this->klass == core::GlobalState::defn_Hash()) {
+    } else if (this->klass == core::Symbols::Hash()) {
         buf << "T::Hash";
     } else {
         buf << classNameToString(gs, this->klass.data(gs).name);

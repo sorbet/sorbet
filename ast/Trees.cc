@@ -376,7 +376,7 @@ string MethodDef::toString(const core::GlobalState &gs, int tabs) {
     buf << name.data(gs).toString(gs) << "<" << data.name.data(gs).toString(gs) << ">";
     buf << "(";
     bool first = true;
-    if (this->symbol == core::GlobalState::defn_todo()) {
+    if (this->symbol == core::Symbols::todo()) {
         for (auto &a : this->args) {
             if (!first) {
                 buf << ", ";

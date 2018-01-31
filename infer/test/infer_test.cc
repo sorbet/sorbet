@@ -27,7 +27,7 @@ public:
         ctxPtr->initEmpty();
     }
     core::Context getCtx() {
-        return core::Context(*ctxPtr, ctxPtr->defn_root());
+        return core::Context(*ctxPtr, core::Symbols::root());
     }
 
 private:
@@ -39,7 +39,7 @@ void processSource(core::GlobalState &cb, string str) {
     ruby_typer::core::UnfreezeSymbolTable st(cb);
     ruby_typer::core::UnfreezeFileTable ft(cb);
     auto ast = parser::Parser::run(cb, "<test>", str);
-    ruby_typer::core::Context ctx(cb, cb.defn_root());
+    ruby_typer::core::Context ctx(cb, core::Symbols::root());
     auto tree = ast::desugar::node2Tree(ctx, move(ast));
     tree = namer::Namer::run(ctx, move(tree));
     vector<unique_ptr<ast::Expression>> trees;
@@ -50,13 +50,13 @@ void processSource(core::GlobalState &cb, string str) {
 TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
     auto ctx = getCtx();
     auto intLit = make_shared<core::LiteralType>(int64_t(1));
-    auto intClass = make_shared<core::ClassType>(core::GlobalState::defn_Integer());
+    auto intClass = make_shared<core::ClassType>(core::Symbols::Integer());
     auto floatLit = make_shared<core::LiteralType>(1.0f);
-    auto floatClass = make_shared<core::ClassType>(core::GlobalState::defn_Float());
+    auto floatClass = make_shared<core::ClassType>(core::Symbols::Float());
     auto trueLit = make_shared<core::LiteralType>(true);
-    auto trueClass = make_shared<core::ClassType>(core::GlobalState::defn_TrueClass());
-    auto stringLit = make_shared<core::LiteralType>(core::GlobalState::defn_String(), core::Names::assignTemp());
-    auto stringClass = make_shared<core::ClassType>(core::GlobalState::defn_String());
+    auto trueClass = make_shared<core::ClassType>(core::Symbols::TrueClass());
+    auto stringLit = make_shared<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
+    auto stringClass = make_shared<core::ClassType>(core::Symbols::String());
     EXPECT_TRUE(core::Types::isSubType(ctx, intLit, intClass));
     EXPECT_TRUE(core::Types::isSubType(ctx, floatLit, floatClass));
     EXPECT_TRUE(core::Types::isSubType(ctx, trueLit, trueClass));
@@ -73,7 +73,7 @@ TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
 TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo < Bar; end");
-    auto &rootScope = core::GlobalState::defn_root().data(ctx);
+    auto &rootScope = core::Symbols::root().data(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 4];
     auto fooPair = rootScope.members[rootScope.members.size() - 2];
@@ -92,7 +92,7 @@ TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
 TEST_F(InferFixture, ClassesLubs) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    auto &rootScope = core::GlobalState::defn_root().data(ctx);
+    auto &rootScope = core::Symbols::root().data(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 6];
     auto foo1Pair = rootScope.members[rootScope.members.size() - 4];
@@ -129,7 +129,7 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
     ASSERT_TRUE(core::Types::equiv(ctx, barNfoo1, foo1Nbar));
     ASSERT_TRUE(core::Types::equiv(ctx, foo1Nfoo2, foo2Nfoo1));
 
-    auto intType = make_shared<core::ClassType>(ctx.state.defn_Integer());
+    auto intType = make_shared<core::ClassType>(core::Symbols::Integer());
     auto intNfoo1 = core::Types::lub(ctx, foo1Type, intType);
     auto intNbar = core::Types::lub(ctx, barType, intType);
     auto intNfoo1Nbar = core::Types::lub(ctx, intNfoo1, barType);
@@ -142,7 +142,7 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
 TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    auto &rootScope = core::GlobalState::defn_root().data(ctx);
+    auto &rootScope = core::Symbols::root().data(ctx);
 
     auto barPair = rootScope.members[rootScope.members.size() - 6];
     auto foo1Pair = rootScope.members[rootScope.members.size() - 4];

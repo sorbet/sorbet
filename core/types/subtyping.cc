@@ -106,30 +106,30 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
     }
 
     if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
+        if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
             categoryCounterInc("lub", "<untyped");
             return t1;
         }
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
+        if (mayBeSpecial1->symbol == core::Symbols::bottom()) {
             categoryCounterInc("lub", "<bottom");
             return t2;
         }
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
+        if (mayBeSpecial1->symbol == core::Symbols::top()) {
             categoryCounterInc("lub", "<top");
             return t1;
         }
     }
 
     if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
+        if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
             categoryCounterInc("lub", "untyped>");
             return t2;
         }
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
+        if (mayBeSpecial2->symbol == core::Symbols::bottom()) {
             categoryCounterInc("lub", "bottom>");
             return t1;
         }
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
+        if (mayBeSpecial2->symbol == core::Symbols::top()) {
             categoryCounterInc("lub", "top>");
             return t2;
         }
@@ -445,30 +445,30 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
     }
 
     if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
+        if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
             categoryCounterInc("glb", "<untyped");
             return t1;
         }
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
+        if (mayBeSpecial1->symbol == core::Symbols::bottom()) {
             categoryCounterInc("glb", "<bottom");
             return t1;
         }
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
+        if (mayBeSpecial1->symbol == core::Symbols::top()) {
             categoryCounterInc("glb", "<top");
             return t2;
         }
     }
 
     if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
+        if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
             categoryCounterInc("glb", "untyped>");
             return t2;
         }
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
+        if (mayBeSpecial2->symbol == core::Symbols::bottom()) {
             categoryCounterInc("glb", "bottom>");
             return t2;
         }
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
+        if (mayBeSpecial2->symbol == core::Symbols::top()) {
             categoryCounterInc("glb", "top>");
             return t1;
         }
@@ -705,15 +705,15 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
         return true;
     }
     if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_untyped()) {
+        if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
             return true;
         }
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_bottom()) {
+        if (mayBeSpecial1->symbol == core::Symbols::bottom()) {
             return true;
         }
-        if (mayBeSpecial1->symbol == core::GlobalState::defn_top()) {
+        if (mayBeSpecial1->symbol == core::Symbols::top()) {
             if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-                return mayBeSpecial2->symbol == core::GlobalState::defn_top();
+                return mayBeSpecial2->symbol == core::Symbols::top();
             } else {
                 return false;
             }
@@ -721,13 +721,13 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
     }
 
     if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_untyped()) {
+        if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
             return true;
         }
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_bottom()) {
+        if (mayBeSpecial2->symbol == core::Symbols::bottom()) {
             return false; // (bot, bot) is handled above.
         }
-        if (mayBeSpecial2->symbol == core::GlobalState::defn_top()) {
+        if (mayBeSpecial2->symbol == core::Symbols::top()) {
             return true;
         }
     }
@@ -958,7 +958,7 @@ bool ProxyType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
 }
 
 bool ClassType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
-    if (symbol == ctx.state.defn_untyped() || symbol == klass) {
+    if (symbol == core::Symbols::untyped() || symbol == klass) {
         return true;
     }
     return symbol.data(ctx).derivesFrom(ctx, klass);

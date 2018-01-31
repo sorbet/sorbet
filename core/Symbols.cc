@@ -77,7 +77,7 @@ const Symbol &SymbolRef::data(const GlobalState &gs, bool allowNone) const {
 }
 
 bool SymbolRef::isSynthetic() const {
-    return this->_id < GlobalState::MAX_SYNTHETIC_SYMBOLS;
+    return this->_id < Symbols::MAX_SYNTHETIC_SYMBOLS;
 }
 
 bool SymbolRef::isHiddenFromPrinting(const GlobalState &gs) const {
@@ -235,7 +235,7 @@ SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
             return member.second.data(gs).dealias(gs);
         }
     }
-    return GlobalState::noSymbol();
+    return Symbols::noSymbol();
 }
 
 SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int maxDepth) const {
@@ -272,12 +272,12 @@ SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int 
     if (this->superClass.exists()) {
         return this->superClass.data(gs).findMemberTransitive(gs, name, maxDepth - 1);
     }
-    return GlobalState::noSymbol();
+    return Symbols::noSymbol();
 }
 
 string Symbol::fullName(const GlobalState &gs) const {
     string owner_str;
-    if (this->owner.exists() && this->owner != gs.defn_root()) {
+    if (this->owner.exists() && this->owner != core::Symbols::root()) {
         owner_str = this->owner.data(gs).fullName(gs);
     }
 
@@ -293,8 +293,8 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     ENFORCE(this->name.data(gs).isClassName(gs));
 
     SymbolRef selfRef = this->ref(gs);
-    if (selfRef == GlobalState::defn_untyped()) {
-        return GlobalState::defn_untyped();
+    if (selfRef == Symbols::untyped()) {
+        return Symbols::untyped();
     }
 
     SymbolRef singleton = findMember(gs, Names::singletonClass());
@@ -308,7 +308,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
     counterInc("singleton_classes");
     singletonInfo.members.push_back(make_pair(Names::attachedClass(), selfRef));
-    singletonInfo.superClass = core::GlobalState::defn_todo();
+    singletonInfo.superClass = core::Symbols::todo();
     singletonInfo.setIsModule(false);
 
     selfRef.data(gs).members.push_back(make_pair(Names::singletonClass(), singleton));
@@ -317,8 +317,8 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
 SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
     ENFORCE(this->isClass());
-    if (this->ref(gs) == GlobalState::defn_untyped()) {
-        return GlobalState::defn_untyped();
+    if (this->ref(gs) == Symbols::untyped()) {
+        return Symbols::untyped();
     }
 
     SymbolRef singleton = findMember(gs, Names::attachedClass());
@@ -399,7 +399,7 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
         return;
     }
     SymbolRef current = this->ref(gs);
-    if (current != GlobalState::defn_root()) {
+    if (current != Symbols::root()) {
         SymbolRef current2 =
             const_cast<GlobalState &>(gs).enterSymbol(this->definitionLoc, this->owner, this->name, this->flags);
         ENFORCE(current == current2);
@@ -411,7 +411,7 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
         return ref(gs);
     }
     SymbolRef owner = this->owner;
-    while (owner != GlobalState::defn_root() && !owner.data(gs, false).isMethod()) {
+    while (owner != Symbols::root() && !owner.data(gs, false).isMethod()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingMethod");
         owner = owner.data(gs).owner;
     }
@@ -420,12 +420,12 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
 
 SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
-    while (owner != GlobalState::defn_root() && !owner.data(gs, false).isClass()) {
+    while (owner != Symbols::root() && !owner.data(gs, false).isClass()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
         owner = owner.data(gs).owner;
     }
-    if (owner == GlobalState::defn_root()) {
-        return GlobalState::noSymbol();
+    if (owner == Symbols::root()) {
+        return Symbols::noSymbol();
     }
     return owner;
 }

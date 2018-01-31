@@ -58,7 +58,7 @@ TEST(ASTTest, Errors) { // NOLINT
 TEST(ASTTest, SymbolRef) { // NOLINT
     core::GlobalState gs(*console);
     gs.initEmpty();
-    core::SymbolRef ref = gs.defn_Object();
+    core::SymbolRef ref = core::Symbols::Object();
     EXPECT_EQ(ref, ref.data(gs).ref(gs));
 }
 

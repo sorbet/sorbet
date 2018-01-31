@@ -98,8 +98,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 continueBlock->exprs.emplace_back(
                     cctx.target, a->loc,
-                    make_unique<Ident>(
-                        global2Local(cctx.ctx, core::GlobalState::defn_nil(), cctx.inWhat, cctx.aliases)));
+                    make_unique<Ident>(global2Local(cctx.ctx, core::Symbols::nil(), cctx.inWhat, cctx.aliases)));
                 ret = continueBlock;
             },
             [&](ast::Return *a) {
@@ -178,7 +177,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 } else {
                     // TODO(nelhage): Once namer is complete this should be a
                     // fatal error
-                    // lhs = cctx.ctx.state.defn_todo();
+                    // lhs = core::Symbols::todo();
                     Error::raise("should never be reached");
                 }
                 auto rhsCont = walk(cctx.withTarget(lhs), a->rhs.get(), current);
@@ -323,7 +322,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
                         exceptions.emplace_back(
-                            make_unique<ast::Ident>(rescueCase->var->loc, cctx.ctx.state.defn_StandardError()));
+                            make_unique<ast::Ident>(rescueCase->var->loc, core::Symbols::StandardError()));
                         added = true;
                     }
                     for (auto &ex : exceptions) {
@@ -379,8 +378,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     vars.push_back(keyTmp);
                     vars.push_back(valTmp);
                 }
-                core::LocalVariable magic =
-                    global2Local(cctx.ctx, core::GlobalState::defn_Magic(), cctx.inWhat, cctx.aliases);
+                core::LocalVariable magic = global2Local(cctx.ctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
                 current->exprs.emplace_back(cctx.target, h->loc,
                                             make_unique<Send>(magic, core::Names::buildHash(), vars, false));
                 ret = current;
@@ -393,8 +391,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     current = walk(cctx.withTarget(tmp), elem.get(), current);
                     vars.push_back(tmp);
                 }
-                core::LocalVariable magic =
-                    global2Local(cctx.ctx, core::GlobalState::defn_Magic(), cctx.inWhat, cctx.aliases);
+                core::LocalVariable magic = global2Local(cctx.ctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
                 current->exprs.emplace_back(cctx.target, a->loc,
                                             make_unique<Send>(magic, core::Names::buildArray(), vars, false));
                 ret = current;

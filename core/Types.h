@@ -310,7 +310,7 @@ public:
     virtual int kind() final;
 };
 
-// MagicType is the type of the built-in core::GlobalState::defn_Magic()
+// MagicType is the type of the built-in core::Symbols::Magic()
 // object. Its `dispatchCall` knows how to handle a number of special methods
 // that are used when building CFGs to desugar features that can't be described
 // purely within our existing type system and IR.

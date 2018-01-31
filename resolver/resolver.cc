@@ -36,7 +36,7 @@ private:
             }
             scope = scope->parent.get();
         }
-        return core::GlobalState::noSymbol();
+        return core::Symbols::noSymbol();
     }
 
     core::SymbolRef resolveConstant(core::Context ctx, ast::ConstantLit *c) {
@@ -53,7 +53,7 @@ private:
 
         } else if (ast::ConstantLit *scope = ast::cast_tree<ast::ConstantLit>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, scope);
-            if (!resolved.exists() || resolved == core::GlobalState::defn_untyped()) {
+            if (!resolved.exists() || resolved == core::Symbols::untyped()) {
                 return resolved;
             }
             c->scope = make_unique<ast::Ident>(c->loc, resolved);
@@ -76,7 +76,7 @@ private:
         } else {
             ctx.state.error(c->loc, core::errors::Resolver::DynamicConstant,
                             "Dynamic constant references are unsupported {}", c->toString(ctx));
-            return core::GlobalState::defn_untyped();
+            return core::Symbols::untyped();
         }
     }
 
@@ -91,7 +91,7 @@ private:
     }
 
 public:
-    ResolveConstantsWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, ctx.state.defn_root())) {}
+    ResolveConstantsWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
 
     ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *original) {
         nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
@@ -107,7 +107,7 @@ public:
         }
         core::Symbol &data = original->symbol.data(ctx);
         if (original->kind == ast::Module && data.mixins(ctx).empty()) {
-            data.mixins(ctx).emplace_back(core::GlobalState::defn_BasicObject());
+            data.mixins(ctx).emplace_back(core::Symbols::BasicObject());
         }
         for (auto &ancst : original->ancestors) {
             ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
@@ -124,10 +124,10 @@ public:
             }
 
             if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
-                if (id->symbol == core::GlobalState::defn_todo()) {
+                if (id->symbol == core::Symbols::todo()) {
                     continue;
                 }
-                if (!data.superClass.exists() || data.superClass == core::GlobalState::defn_todo() ||
+                if (!data.superClass.exists() || data.superClass == core::Symbols::todo() ||
                     data.superClass == id->symbol) {
                     data.superClass = id->symbol;
                 } else {
@@ -276,20 +276,16 @@ private:
 
     shared_ptr<core::Type> getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
-        typecase(expr.get(), [&](ast::IntLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
-                 [&](ast::FloatLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
-                 [&](ast::BoolLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
-                 [&](ast::StringLit *lit) {
-                     result = make_shared<core::LiteralType>(core::GlobalState::defn_String(), lit->value);
-                 },
-                 [&](ast::SymbolLit *lit) {
-                     result = make_shared<core::LiteralType>(core::GlobalState::defn_Symbol(), lit->name);
-                 },
-                 [&](ast::Expression *expr) {
-                     ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                     "Unsupported type literal");
-                     result = core::Types::dynamic();
-                 });
+        typecase(
+            expr.get(), [&](ast::IntLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
+            [&](ast::FloatLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
+            [&](ast::BoolLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
+            [&](ast::StringLit *lit) { result = make_shared<core::LiteralType>(core::Symbols::String(), lit->value); },
+            [&](ast::SymbolLit *lit) { result = make_shared<core::LiteralType>(core::Symbols::Symbol(), lit->name); },
+            [&](ast::Expression *expr) {
+                ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unsupported type literal");
+                result = core::Types::dynamic();
+            });
         ENFORCE(result.get() != nullptr);
         result->sanityCheck(ctx);
         return result;
@@ -350,7 +346,7 @@ private:
                 auto elem = getResultType(ctx, send->args[0]);
                 std::vector<shared_ptr<core::Type>> targs;
                 targs.emplace_back(move(elem));
-                return make_shared<core::AppliedType>(core::GlobalState::defn_Array(), move(targs));
+                return make_shared<core::AppliedType>(core::Symbols::Array(), move(targs));
             }
             case core::Names::hashOf()._id: {
                 bool fail = (send->args.size() != 1);
@@ -368,7 +364,7 @@ private:
                     std::vector<shared_ptr<core::Type>> targs;
                     targs.emplace_back(move(key));
                     targs.emplace_back(move(value));
-                    return make_shared<core::AppliedType>(core::GlobalState::defn_Hash(), move(targs));
+                    return make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
                 }
 
                 ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "Malformed hash type");
@@ -387,116 +383,115 @@ private:
 
     shared_ptr<core::Type> getResultType(core::Context ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
-        typecase(expr.get(),
-                 [&](ast::Array *arr) {
-                     vector<shared_ptr<core::Type>> elems;
-                     for (auto &el : arr->elems) {
-                         elems.emplace_back(getResultType(ctx, el));
-                     }
-                     result = make_shared<core::TupleType>(elems);
-                 },
-                 [&](ast::Ident *i) {
-                     bool silenceGenericError =
-                         i->symbol == core::GlobalState::defn_Hash() || i->symbol == core::GlobalState::defn_Array() ||
-                         i->symbol == core::GlobalState::defn_Set() || i->symbol == core::GlobalState::defn_Struct() ||
-                         i->symbol == core::GlobalState::defn_File();
-                     // TODO: reduce this^^^ set.
-                     auto sym = dealiasSym(ctx, i->symbol);
-                     if (sym.data(ctx).isClass()) {
-                         if (sym.data(ctx).typeMembers().empty()) {
-                             result = make_shared<core::ClassType>(sym);
-                         } else {
-                             std::vector<shared_ptr<core::Type>> targs;
-                             for (auto &UNUSED(arg) : sym.data(ctx).typeMembers()) {
-                                 targs.emplace_back(core::Types::dynamic());
-                             }
-                             result = make_shared<core::AppliedType>(sym, targs);
-                             if (!silenceGenericError) {
-                                 ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                                 "Malformed type declaration. Generic class without type arguments {}",
-                                                 i->toString(ctx));
-                             }
-                         }
-                     } else if (sym.data(ctx).isTypeMember()) {
-                         result = make_shared<core::LambdaParam>(sym);
-                     } else {
-                         ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                         "Malformed type declaration. Not a class type {}", i->toString(ctx));
-                         result = core::Types::dynamic();
-                     }
-                 },
-                 [&](ast::Send *s) {
-                     auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
-                     if (recvi == nullptr) {
-                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                         "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
-                         result = core::Types::dynamic();
-                         return;
-                     }
-                     if (recvi->symbol == core::GlobalState::defn_T()) {
-                         result = interpretTCombinator(ctx, s);
-                         return;
-                     }
+        typecase(
+            expr.get(),
+            [&](ast::Array *arr) {
+                vector<shared_ptr<core::Type>> elems;
+                for (auto &el : arr->elems) {
+                    elems.emplace_back(getResultType(ctx, el));
+                }
+                result = make_shared<core::TupleType>(elems);
+            },
+            [&](ast::Ident *i) {
+                bool silenceGenericError = i->symbol == core::Symbols::Hash() || i->symbol == core::Symbols::Array() ||
+                                           i->symbol == core::Symbols::Set() || i->symbol == core::Symbols::Struct() ||
+                                           i->symbol == core::Symbols::File();
+                // TODO: reduce this^^^ set.
+                auto sym = dealiasSym(ctx, i->symbol);
+                if (sym.data(ctx).isClass()) {
+                    if (sym.data(ctx).typeMembers().empty()) {
+                        result = make_shared<core::ClassType>(sym);
+                    } else {
+                        std::vector<shared_ptr<core::Type>> targs;
+                        for (auto &UNUSED(arg) : sym.data(ctx).typeMembers()) {
+                            targs.emplace_back(core::Types::dynamic());
+                        }
+                        result = make_shared<core::AppliedType>(sym, targs);
+                        if (!silenceGenericError) {
+                            ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                            "Malformed type declaration. Generic class without type arguments {}",
+                                            i->toString(ctx));
+                        }
+                    }
+                } else if (sym.data(ctx).isTypeMember()) {
+                    result = make_shared<core::LambdaParam>(sym);
+                } else {
+                    ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                    "Malformed type declaration. Not a class type {}", i->toString(ctx));
+                    result = core::Types::dynamic();
+                }
+            },
+            [&](ast::Send *s) {
+                auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
+                if (recvi == nullptr) {
+                    ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                    "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                    result = core::Types::dynamic();
+                    return;
+                }
+                if (recvi->symbol == core::Symbols::T()) {
+                    result = interpretTCombinator(ctx, s);
+                    return;
+                }
 
-                     if (recvi->symbol == core::GlobalState::defn_Magic() && s->fun == core::Names::splat()) {
-                         // TODO(pay-server) remove this block
-                         result = core::Types::bottom();
-                         return;
-                     }
+                if (recvi->symbol == core::Symbols::Magic() && s->fun == core::Names::splat()) {
+                    // TODO(pay-server) remove this block
+                    result = core::Types::bottom();
+                    return;
+                }
 
-                     if (s->fun != core::Names::squareBrackets()) {
-                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                         "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
-                     }
+                if (s->fun != core::Names::squareBrackets()) {
+                    ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                    "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                }
 
-                     if (recvi->symbol == core::GlobalState::defn_T_Array()) {
-                         if (s->args.size() != 1) {
-                             ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                             "Malformed T::Array[]: Expected 1 type argument");
-                             result = core::Types::dynamic();
-                             return;
-                         }
-                         auto elem = getResultType(ctx, s->args[0]);
-                         std::vector<shared_ptr<core::Type>> targs;
-                         targs.emplace_back(move(elem));
-                         result = make_shared<core::AppliedType>(core::GlobalState::defn_Array(), move(targs));
-                     } else if (recvi->symbol == core::GlobalState::defn_T_Hash()) {
-                         if (s->args.size() != 2) {
-                             ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                             "Malformed T::Hash[]: Expected 2 type arguments");
-                             result = core::Types::dynamic();
-                             return;
-                         }
-                         auto key = getResultType(ctx, s->args[0]);
-                         auto value = getResultType(ctx, s->args[1]);
-                         std::vector<shared_ptr<core::Type>> targs;
-                         targs.emplace_back(move(key));
-                         targs.emplace_back(move(value));
-                         result = make_shared<core::AppliedType>(core::GlobalState::defn_Hash(), move(targs));
-                     } else if (recvi->symbol == core::GlobalState::defn_T_Proc()) {
-                         result = core::Types::procClass();
-                     } else {
-                         auto &data = recvi->symbol.data(ctx);
-                         if (s->args.size() != data.typeMembers().size()) {
-                             ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                             "Malformed {}[]: Expected %d type arguments, got %d",
-                                             data.name.toString(ctx), data.typeMembers().size(), s->args.size());
-                             result = core::Types::dynamic();
-                             return;
-                         }
-                         std::vector<shared_ptr<core::Type>> targs;
-                         for (auto &arg : s->args) {
-                             auto elem = getResultType(ctx, arg);
-                             targs.emplace_back(move(elem));
-                         }
-                         result = make_shared<core::AppliedType>(recvi->symbol, move(targs));
-                     }
-                 },
-                 [&](ast::Expression *expr) {
-                     ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                     "Unsupported type syntax");
-                     result = core::Types::dynamic();
-                 });
+                if (recvi->symbol == core::Symbols::T_Array()) {
+                    if (s->args.size() != 1) {
+                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed T::Array[]: Expected 1 type argument");
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    auto elem = getResultType(ctx, s->args[0]);
+                    std::vector<shared_ptr<core::Type>> targs;
+                    targs.emplace_back(move(elem));
+                    result = make_shared<core::AppliedType>(core::Symbols::Array(), move(targs));
+                } else if (recvi->symbol == core::Symbols::T_Hash()) {
+                    if (s->args.size() != 2) {
+                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed T::Hash[]: Expected 2 type arguments");
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    auto key = getResultType(ctx, s->args[0]);
+                    auto value = getResultType(ctx, s->args[1]);
+                    std::vector<shared_ptr<core::Type>> targs;
+                    targs.emplace_back(move(key));
+                    targs.emplace_back(move(value));
+                    result = make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
+                } else if (recvi->symbol == core::Symbols::T_Proc()) {
+                    result = core::Types::procClass();
+                } else {
+                    auto &data = recvi->symbol.data(ctx);
+                    if (s->args.size() != data.typeMembers().size()) {
+                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed {}[]: Expected %d type arguments, got %d", data.name.toString(ctx),
+                                        data.typeMembers().size(), s->args.size());
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    std::vector<shared_ptr<core::Type>> targs;
+                    for (auto &arg : s->args) {
+                        auto elem = getResultType(ctx, arg);
+                        targs.emplace_back(move(elem));
+                    }
+                    result = make_shared<core::AppliedType>(recvi->symbol, move(targs));
+                }
+            },
+            [&](ast::Expression *expr) {
+                ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unsupported type syntax");
+                result = core::Types::dynamic();
+            });
         ENFORCE(result.get() != nullptr);
         result->sanityCheck(ctx);
         return result;
@@ -792,7 +787,7 @@ public:
             ENFORCE(data.isFixed());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
             auto recv = ast::cast_tree<ast::Ident>(send->recv.get());
-            ENFORCE(recv->symbol == core::GlobalState::defn_T());
+            ENFORCE(recv->symbol == core::Symbols::T());
             ENFORCE(send->fun == core::Names::typeDecl());
             int arg;
             if (send->args.size() == 1) {
@@ -834,7 +829,7 @@ public:
         if (id == nullptr) {
             return send;
         }
-        if (id->symbol != core::GlobalState::defn_T()) {
+        if (id->symbol != core::Symbols::T()) {
             return send;
         }
         bool checked = false;
@@ -1059,30 +1054,30 @@ public:
 class ResolveSanityCheckWalk {
 public:
     ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
-        ENFORCE(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
     ast::Expression *postTransformMethodDef(core::Context ctx, ast::MethodDef *original) {
-        ENFORCE(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
     ast::Expression *postTransformConstDef(core::Context ctx, ast::ConstDef *original) {
-        ENFORCE(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
     ast::Expression *postTransformIdent(core::Context ctx, ast::Ident *original) {
-        ENFORCE(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
     ast::Expression *postTransformUnresolvedIdent(core::Context ctx, ast::UnresolvedIdent *original) {
         Error::raise("These should have all been removed");
     }
     ast::Expression *postTransformSelf(core::Context ctx, ast::Self *original) {
-        ENFORCE(original->claz != core::GlobalState::defn_todo());
+        ENFORCE(original->claz != core::Symbols::todo());
         return original;
     }
     ast::Expression *postTransformBlock(core::Context ctx, ast::Block *original) {
-        ENFORCE(original->symbol != core::GlobalState::defn_todo());
+        ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
 };

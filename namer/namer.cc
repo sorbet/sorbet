@@ -137,9 +137,9 @@ class NameInserter {
 
     core::SymbolRef methodOwner(core::Context ctx) {
         core::SymbolRef owner = ctx.owner.data(ctx).enclosingClass(ctx);
-        if (owner == core::GlobalState::noSymbol()) {
+        if (owner == core::Symbols::noSymbol()) {
             // Root methods end up going on object
-            owner = core::GlobalState::defn_Object();
+            owner = core::Symbols::Object();
         }
         return owner;
     }
@@ -168,8 +168,8 @@ public:
     ast::ClassDef *postTransformClassDef(core::Context ctx, ast::ClassDef *klass) {
         scopeStack.pop_back();
         if (klass->kind == ast::Class && !klass->symbol.data(ctx).superClass.exists() &&
-            klass->symbol != core::GlobalState::defn_BasicObject()) {
-            klass->symbol.data(ctx).superClass = core::GlobalState::defn_todo();
+            klass->symbol != core::Symbols::BasicObject()) {
+            klass->symbol.data(ctx).superClass = core::Symbols::todo();
         }
 
         auto toRemove =
@@ -353,9 +353,9 @@ public:
 
     ast::Block *preTransformBlock(core::Context ctx, ast::Block *blk) {
         core::SymbolRef owner = ctx.owner;
-        if (owner == core::GlobalState::noSymbol()) {
+        if (owner == core::Symbols::noSymbol()) {
             // Root methods end up going on object
-            owner = core::GlobalState::defn_Object();
+            owner = core::Symbols::Object();
         }
         blk->symbol =
             ctx.state.enterMethodSymbol(blk->loc, owner,
@@ -398,10 +398,10 @@ public:
                 return new ast::Local(nm->loc, cur);
             }
             case ast::UnresolvedIdent::Global: {
-                core::Symbol &root = ctx.state.defn_root().data(ctx);
+                core::Symbol &root = core::Symbols::root().data(ctx);
                 core::SymbolRef sym = root.findMember(ctx, nm->name);
                 if (!sym.exists()) {
-                    sym = ctx.state.enterFieldSymbol(nm->loc, ctx.state.defn_root(), nm->name);
+                    sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
                 }
                 return new ast::Ident(nm->loc, sym);
             }

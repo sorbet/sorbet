@@ -95,7 +95,7 @@ unique_ptr<Expression> mkEmptyTree(core::Loc loc) {
 }
 
 unique_ptr<Expression> mkSelf(core::Loc loc) {
-    return make_unique<Self>(loc, core::GlobalState::defn_todo());
+    return make_unique<Self>(loc, core::Symbols::todo());
 }
 
 unique_ptr<Expression> mkInsSeq(core::Loc loc, InsSeq::STATS_store stats, unique_ptr<Expression> expr) {
@@ -104,7 +104,7 @@ unique_ptr<Expression> mkInsSeq(core::Loc loc, InsSeq::STATS_store stats, unique
 
 unique_ptr<Expression> mkSplat(core::Loc loc, unique_ptr<Expression> arg) {
     auto to_a = mkSend0(loc, move(arg), core::Names::to_a());
-    return mkSend1(loc, mkIdent(loc, core::GlobalState::defn_Magic()), core::Names::splat(), move(to_a));
+    return mkSend1(loc, mkIdent(loc, core::Symbols::Magic()), core::Names::splat(), move(to_a));
 }
 
 unique_ptr<Expression> mkInsSeq1(core::Loc loc, unique_ptr<Expression> stat, unique_ptr<Expression> expr) {
@@ -201,7 +201,7 @@ unique_ptr<MethodDef> buildMethod(core::Context ctx, core::Loc loc, core::NameRe
                                   unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body,
                                   u2 &uniqueCounter) {
     auto argsAndBody = desugarArgsAndBody(ctx, loc, argnode, body, uniqueCounter);
-    return make_unique<MethodDef>(loc, ctx.state.defn_todo(), name, move(argsAndBody.first), move(argsAndBody.second),
+    return make_unique<MethodDef>(loc, core::Symbols::todo(), name, move(argsAndBody.first), move(argsAndBody.second),
                                   false);
 }
 
@@ -275,9 +275,8 @@ unique_ptr<Expression> desugarMlhs(core::Context ctx, core::Loc loc, parser::Mlh
                     right = 1;
                     exclusive = mkFalse(lh->loc);
                 }
-                auto index =
-                    mkSend3(lh->loc, make_unique<Ident>(lh->loc, core::GlobalState::defn_Range()), core::Names::new_(),
-                            mkInt(lh->loc, left), mkInt(lh->loc, -right), move(exclusive));
+                auto index = mkSend3(lh->loc, make_unique<Ident>(lh->loc, core::Symbols::Range()), core::Names::new_(),
+                                     mkInt(lh->loc, left), mkInt(lh->loc, -right), move(exclusive));
                 stats.emplace_back(mkAssign(lh->loc, move(lh),
                                             mkSend1(loc, mkLocal(loc, tempName), core::Names::slice(), move(index))));
             }
@@ -546,7 +545,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                     loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, move(csend->args));
                 auto send = node2TreeImpl(ctx, move(sendNode), uniqueCounter);
 
-                unique_ptr<Expression> nil = mkIdent(loc, core::GlobalState::defn_nil());
+                unique_ptr<Expression> nil = mkIdent(loc, core::Symbols::nil());
                 auto iff = mkIf(loc, move(cond), move(nil), move(send));
                 InsSeq::STATS_store stats;
                 stats.emplace_back(move(assgn));
@@ -597,7 +596,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Cbase *cbase) {
-                unique_ptr<Expression> res = mkIdent(loc, core::GlobalState::defn_root());
+                unique_ptr<Expression> res = mkIdent(loc, core::Symbols::root());
                 result.swap(res);
             },
             [&](parser::Kwbegin *kwbegin) {
@@ -632,7 +631,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
                 ClassDef::ANCESTORS_store ancestors;
                 unique_ptr<Expression> res = make_unique<ClassDef>(
-                    loc, ctx.state.defn_todo(), node2TreeImpl(ctx, move(module->name), uniqueCounter), move(ancestors),
+                    loc, core::Symbols::todo(), node2TreeImpl(ctx, move(module->name), uniqueCounter), move(ancestors),
                     move(body), ClassDefKind::Module);
                 result.swap(res);
             },
@@ -649,12 +648,12 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
                 ClassDef::ANCESTORS_store ancestors;
                 if (claz->superclass == nullptr) {
-                    ancestors.emplace_back(make_unique<Ident>(loc, ctx.state.defn_todo()));
+                    ancestors.emplace_back(make_unique<Ident>(loc, core::Symbols::todo()));
                 } else {
                     ancestors.emplace_back(node2TreeImpl(ctx, move(claz->superclass), uniqueCounter));
                 }
 
-                unique_ptr<Expression> res = make_unique<ClassDef>(loc, ctx.state.defn_todo(),
+                unique_ptr<Expression> res = make_unique<ClassDef>(loc, core::Symbols::todo(),
                                                                    node2TreeImpl(ctx, move(claz->name), uniqueCounter),
                                                                    move(ancestors), move(body), ClassDefKind::Class);
                 result.swap(res);
@@ -740,7 +739,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 }
                 ClassDef::ANCESTORS_store emptyAncestors;
                 unique_ptr<Expression> res =
-                    make_unique<ClassDef>(what->loc, ctx.state.defn_todo(),
+                    make_unique<ClassDef>(what->loc, core::Symbols::todo(),
                                           make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Class,
                                                                        core::Names::singletonClass()),
                                           move(emptyAncestors), move(body), ClassDefKind::Class);
@@ -793,7 +792,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Nil *wl) {
-                unique_ptr<Expression> res = mkIdent(loc, core::GlobalState::defn_nil());
+                unique_ptr<Expression> res = mkIdent(loc, core::Symbols::nil());
                 result.swap(res);
             },
             [&](parser::IVar *var) {
@@ -926,15 +925,15 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Complex *complex) {
-                auto kernel = mkIdent(loc, core::GlobalState::defn_Kernel());
-                core::NameRef complex_name = core::GlobalState::defn_Complex().data(ctx).name;
+                auto kernel = mkIdent(loc, core::Symbols::Kernel());
+                core::NameRef complex_name = core::Symbols::Complex().data(ctx).name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->value);
                 auto send = mkSend1(loc, move(kernel), complex_name, make_unique<StringLit>(loc, value));
                 result.swap(send);
             },
             [&](parser::Rational *complex) {
-                auto kernel = mkIdent(loc, core::GlobalState::defn_Kernel());
-                core::NameRef complex_name = core::GlobalState::defn_Rational().data(ctx).name;
+                auto kernel = mkIdent(loc, core::Symbols::Kernel());
+                core::NameRef complex_name = core::Symbols::Rational().data(ctx).name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->val);
                 auto send = mkSend1(loc, move(kernel), complex_name, make_unique<StringLit>(loc, value));
                 result.swap(send);
@@ -1051,7 +1050,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::IRange *ret) {
-                core::NameRef range_name = core::GlobalState::defn_Range().data(ctx).name;
+                core::NameRef range_name = core::Symbols::Range().data(ctx).name;
                 unique_ptr<Expression> range = mkConstant(loc, mkEmptyTree(loc), range_name);
                 auto from = node2TreeImpl(ctx, move(ret->from), uniqueCounter);
                 auto to = node2TreeImpl(ctx, move(ret->to), uniqueCounter);
@@ -1059,7 +1058,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(send);
             },
             [&](parser::ERange *ret) {
-                unique_ptr<Expression> range = mkIdent(loc, core::GlobalState::defn_Range());
+                unique_ptr<Expression> range = mkIdent(loc, core::Symbols::Range());
                 auto from = node2TreeImpl(ctx, move(ret->from), uniqueCounter);
                 auto to = node2TreeImpl(ctx, move(ret->to), uniqueCounter);
                 auto true_ = mkTrue(loc);
@@ -1067,7 +1066,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(send);
             },
             [&](parser::Regexp *regexpNode) {
-                unique_ptr<Expression> regexp = mkIdent(loc, core::GlobalState::defn_Regexp());
+                unique_ptr<Expression> regexp = mkIdent(loc, core::Symbols::Regexp());
                 auto regex = desugarDString(ctx, loc, move(regexpNode->regex), uniqueCounter);
                 auto opts = node2TreeImpl(ctx, move(regexpNode->opts), uniqueCounter);
                 auto send = mkSend2(loc, move(regexp), core::Names::new_(), move(regex), move(opts));

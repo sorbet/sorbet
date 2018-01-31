@@ -18,7 +18,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         return false;
     }
     auto myVariance = my.data(gs).variance();
-    if (!inSym.derivesFrom(gs, core::GlobalState::defn_Class()) && (myVariance != parentVariance)) {
+    if (!inSym.derivesFrom(gs, core::Symbols::Class()) && (myVariance != parentVariance)) {
         // this requirement can be loosened. You can go from variant to invariant.
         gs.error(my.data(gs).definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
                  "Type variance mismatch with parent {}", parent.data(gs).fullName(gs));
@@ -91,23 +91,23 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             data.setIsModule(true);
         }
-        if (data.superClass != core::GlobalState::defn_todo()) {
+        if (data.superClass != core::Symbols::todo()) {
             continue;
         }
 
         auto attached = data.attachedClass(gs);
-        bool isSingleton = attached.exists() && attached != core::GlobalState::defn_untyped();
+        bool isSingleton = attached.exists() && attached != core::Symbols::untyped();
         if (isSingleton) {
-            if (attached == core::GlobalState::defn_BasicObject()) {
-                data.superClass = core::GlobalState::defn_Class();
+            if (attached == core::Symbols::BasicObject()) {
+                data.superClass = core::Symbols::Class();
             } else if (!attached.data(gs).superClass.exists()) {
-                data.superClass = core::GlobalState::defn_Module();
+                data.superClass = core::Symbols::Module();
             } else {
-                ENFORCE(attached.data(gs).superClass != core::GlobalState::defn_todo());
+                ENFORCE(attached.data(gs).superClass != core::Symbols::todo());
                 data.superClass = attached.data(gs).superClass.data(gs).singletonClass(gs);
             }
         } else {
-            data.superClass = core::GlobalState::defn_Object();
+            data.superClass = core::Symbols::Object();
         }
     }
     for (int i = 1; i < gs.symbolsUsed(); ++i) {

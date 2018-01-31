@@ -144,7 +144,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
 
     ruby_typer::core::GlobalState cb(*console);
     cb.initEmpty();
-    ruby_typer::core::Context ctx(cb, cb.defn_root());
+    ruby_typer::core::Context ctx(cb, core::Symbols::root());
     static const char *foo_str = "Foo";
     ruby_typer::core::Loc loc(ruby_typer::core::FileRef(), 42, 91);
     ruby_typer::core::UnfreezeNameTable nt(ctx);
@@ -152,7 +152,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
 
     auto name = ctx.state.enterNameUTF8(foo_str);
     auto classSym =
-        ctx.state.enterClassSymbol(loc, ruby_typer::core::GlobalState::defn_root(), ctx.state.enterNameConstant(name));
+        ctx.state.enterClassSymbol(loc, ruby_typer::core::Symbols::root(), ctx.state.enterNameConstant(name));
     auto methodSym = ctx.state.enterMethodSymbol(loc, classSym, name);
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = ctx.state.enterLocalSymbol(methodSym, name);

@@ -99,19 +99,19 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
     NameRef nameId = enterNameConstant(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
-    // These will be added to defn_root().members later.
+    // These will be added to Symbols::root().members later.
     SymbolRef symRef = SymbolRef(this, symbols.size());
     symbols.emplace_back();
     Symbol &data = symRef.data(*this, true); // allowing noSymbol is needed because this enters noSymbol.
     data.name = nameId;
-    data.owner = defn_root();
+    data.owner = Symbols::root();
     data.superClass = SymbolRef(this, superclass);
     data.flags = 0;
     data.setClass();
     data.setIsModule(isModule);
 
-    if (symRef._id > GlobalState::defn_root()._id) {
-        GlobalState::defn_root().data(*this, true).members.push_back(make_pair(nameId, symRef));
+    if (symRef._id > Symbols::root()._id) {
+        Symbols::root().data(*this, true).members.push_back(make_pair(nameId, symRef));
     }
     return symRef;
 }
@@ -139,14 +139,12 @@ void GlobalState::initEmpty() {
     SymbolRef top_id = synthesizeClass(top_str, 0);
     SymbolRef bottom_id = synthesizeClass(bottom_str, 0);
     SymbolRef root_id = synthesizeClass(root_str, 0);
-    GlobalState::defn_root()
-        .data(*this, true)
-        .members.push_back(make_pair(enterNameConstant(no_symbol_str), no_symbol_id));
-    GlobalState::defn_root().data(*this, true).members.push_back(make_pair(enterNameConstant(top_str), top_id));
-    GlobalState::defn_root().data(*this, true).members.push_back(make_pair(enterNameConstant(bottom_str), bottom_id));
+    Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(no_symbol_str), no_symbol_id));
+    Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(top_str), top_id));
+    Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(bottom_str), bottom_id));
     SymbolRef nil_id = synthesizeClass(nil_str);
     SymbolRef todo_id = synthesizeClass(todo_str, 0);
-    SymbolRef object_id = synthesizeClass(object_str, core::GlobalState::defn_BasicObject()._id);
+    SymbolRef object_id = synthesizeClass(object_str, core::Symbols::BasicObject()._id);
     SymbolRef junk_id = synthesizeClass(junk_str, 0);
     SymbolRef integer_id = synthesizeClass(integer_str);
     SymbolRef float_id = synthesizeClass(float_str);
@@ -160,7 +158,7 @@ void GlobalState::initEmpty() {
     SymbolRef untyped_id = synthesizeClass(untyped_str, 0);
     SymbolRef opus_id = synthesizeClass(opus_str, 0, true);
 
-    SymbolRef T_id = synthesizeClass(T_str, core::GlobalState::defn_todo()._id, true);
+    SymbolRef T_id = synthesizeClass(T_str, core::Symbols::todo()._id, true);
     T_id.data(*this).setIsModule(true);
 
     SymbolRef class_id = synthesizeClass(class_str, 0);
@@ -173,73 +171,73 @@ void GlobalState::initEmpty() {
     SymbolRef standardError_id = synthesizeClass(standardError_str);
     SymbolRef complex_id = synthesizeClass(complex_str);
     SymbolRef rational_id = synthesizeClass(rational_str);
-    SymbolRef T_Array_id = enterClassSymbol(Loc::none(), defn_T(), enterNameConstant(array_str));
-    SymbolRef T_Hash_id = enterClassSymbol(Loc::none(), defn_T(), enterNameConstant(hash_str));
-    SymbolRef T_Proc_id = enterClassSymbol(Loc::none(), defn_T(), enterNameConstant(proc_str));
+    SymbolRef T_Array_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(array_str));
+    SymbolRef T_Hash_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(hash_str));
+    SymbolRef T_Proc_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(proc_str));
     SymbolRef proc_id = synthesizeClass(proc_str);
-    SymbolRef T_any_id = enterMethodSymbol(Loc::none(), defn_T(), Names::any());
-    SymbolRef T_all_id = enterMethodSymbol(Loc::none(), defn_T(), Names::all());
-    SymbolRef T_untyped_id = enterMethodSymbol(Loc::none(), defn_T(), Names::untyped());
-    SymbolRef T_nilable_id = enterMethodSymbol(Loc::none(), defn_T(), Names::nilable());
+    SymbolRef T_any_id = enterMethodSymbol(Loc::none(), Symbols::T(), Names::any());
+    SymbolRef T_all_id = enterMethodSymbol(Loc::none(), Symbols::T(), Names::all());
+    SymbolRef T_untyped_id = enterMethodSymbol(Loc::none(), Symbols::T(), Names::untyped());
+    SymbolRef T_nilable_id = enterMethodSymbol(Loc::none(), Symbols::T(), Names::nilable());
     SymbolRef enumerable_id = synthesizeClass(enumerable_str, 0, true);
     SymbolRef set_id = synthesizeClass(set_str);
     SymbolRef struct_id = synthesizeClass(struct_str);
     SymbolRef file_id = synthesizeClass(file_str);
 
-    ENFORCE(no_symbol_id == noSymbol(), "no symbol creation failed");
-    ENFORCE(top_id == defn_top(), "top symbol creation failed");
-    ENFORCE(bottom_id == defn_bottom(), "bottom symbol creation failed");
-    ENFORCE(root_id == defn_root(), "root symbol creation failed");
-    ENFORCE(nil_id == defn_nil(), "nil symbol creation failed");
-    ENFORCE(todo_id == defn_todo(), "todo symbol creation failed");
-    ENFORCE(object_id == defn_Object(), "object symbol creation failed");
-    ENFORCE(junk_id == defn_junk(), "junk symbol creation failed");
-    ENFORCE(integer_id == defn_Integer(), "Integer symbol creation failed");
-    ENFORCE(float_id == defn_Float(), "Float symbol creation failed");
-    ENFORCE(string_id == defn_String(), "String symbol creation failed");
-    ENFORCE(symbol_id == defn_Symbol(), "Symbol symbol creation failed");
-    ENFORCE(array_id == defn_Array(), "Array symbol creation failed");
-    ENFORCE(hash_id == defn_Hash(), "Hash symbol creation failed");
-    ENFORCE(trueClass_id == defn_TrueClass(), "TrueClass symbol creation failed");
-    ENFORCE(falseClass_id == defn_FalseClass(), "FalseClass symbol creation failed");
-    ENFORCE(nilClass_id == defn_NilClass(), "NilClass symbol creation failed");
-    ENFORCE(untyped_id == defn_untyped(), "untyped symbol creation failed");
-    ENFORCE(opus_id == defn_Opus(), "Opus symbol creation failed");
-    ENFORCE(T_id == defn_T(), "T symbol creation failed");
-    ENFORCE(class_id == defn_Class(), "Class symbol creation failed");
-    ENFORCE(basicObject_id == defn_BasicObject(), "BasicObject symbol creation failed");
-    ENFORCE(kernel_id == defn_Kernel(), "Kernel symbol creation failed");
-    ENFORCE(range_id == defn_Range(), "Range symbol creation failed");
-    ENFORCE(regexp_id == defn_Regexp(), "Regexp symbol creation failed");
-    ENFORCE(magic_id == defn_Magic(), "Magic symbol creation failed");
-    ENFORCE(module_id == defn_Module(), "Module symbol creation failed");
-    ENFORCE(standardError_id == defn_StandardError(), "StandardError symbol creation failed");
-    ENFORCE(complex_id == defn_Complex(), "Complex symbol creation failed");
-    ENFORCE(rational_id == defn_Rational(), "Rational symbol creation failed");
-    ENFORCE(T_Array_id = defn_T_Array(), "T::Array symbol creation failed");
-    ENFORCE(T_Hash_id = defn_T_Hash(), "T::Hash symbol creation failed");
-    ENFORCE(T_Proc_id = defn_T_Proc(), "T::Proc symbol creation failed");
-    ENFORCE(proc_id = defn_Proc(), "Proc symbol creation failed");
-    ENFORCE(T_any_id = defn_T_any());
-    ENFORCE(T_all_id = defn_T_all());
-    ENFORCE(T_untyped_id = defn_T_untyped());
-    ENFORCE(T_nilable_id = defn_T_nilable());
-    ENFORCE(enumerable_id = defn_Enumerable());
-    ENFORCE(set_id = defn_Set());
-    ENFORCE(struct_id = defn_Struct());
-    ENFORCE(file_id = defn_File());
+    ENFORCE(no_symbol_id == Symbols::noSymbol(), "no symbol creation failed");
+    ENFORCE(top_id == Symbols::top(), "top symbol creation failed");
+    ENFORCE(bottom_id == Symbols::bottom(), "bottom symbol creation failed");
+    ENFORCE(root_id == Symbols::root(), "root symbol creation failed");
+    ENFORCE(nil_id == Symbols::nil(), "nil symbol creation failed");
+    ENFORCE(todo_id == Symbols::todo(), "todo symbol creation failed");
+    ENFORCE(object_id == Symbols::Object(), "object symbol creation failed");
+    ENFORCE(junk_id == Symbols::junk(), "junk symbol creation failed");
+    ENFORCE(integer_id == Symbols::Integer(), "Integer symbol creation failed");
+    ENFORCE(float_id == Symbols::Float(), "Float symbol creation failed");
+    ENFORCE(string_id == Symbols::String(), "String symbol creation failed");
+    ENFORCE(symbol_id == Symbols::Symbol(), "Symbol symbol creation failed");
+    ENFORCE(array_id == Symbols::Array(), "Array symbol creation failed");
+    ENFORCE(hash_id == Symbols::Hash(), "Hash symbol creation failed");
+    ENFORCE(trueClass_id == Symbols::TrueClass(), "TrueClass symbol creation failed");
+    ENFORCE(falseClass_id == Symbols::FalseClass(), "FalseClass symbol creation failed");
+    ENFORCE(nilClass_id == Symbols::NilClass(), "NilClass symbol creation failed");
+    ENFORCE(untyped_id == Symbols::untyped(), "untyped symbol creation failed");
+    ENFORCE(opus_id == Symbols::Opus(), "Opus symbol creation failed");
+    ENFORCE(T_id == Symbols::T(), "T symbol creation failed");
+    ENFORCE(class_id == Symbols::Class(), "Class symbol creation failed");
+    ENFORCE(basicObject_id == Symbols::BasicObject(), "BasicObject symbol creation failed");
+    ENFORCE(kernel_id == Symbols::Kernel(), "Kernel symbol creation failed");
+    ENFORCE(range_id == Symbols::Range(), "Range symbol creation failed");
+    ENFORCE(regexp_id == Symbols::Regexp(), "Regexp symbol creation failed");
+    ENFORCE(magic_id == Symbols::Magic(), "Magic symbol creation failed");
+    ENFORCE(module_id == Symbols::Module(), "Module symbol creation failed");
+    ENFORCE(standardError_id == Symbols::StandardError(), "StandardError symbol creation failed");
+    ENFORCE(complex_id == Symbols::Complex(), "Complex symbol creation failed");
+    ENFORCE(rational_id == Symbols::Rational(), "Rational symbol creation failed");
+    ENFORCE(T_Array_id = Symbols::T_Array(), "T::Array symbol creation failed");
+    ENFORCE(T_Hash_id = Symbols::T_Hash(), "T::Hash symbol creation failed");
+    ENFORCE(T_Proc_id = Symbols::T_Proc(), "T::Proc symbol creation failed");
+    ENFORCE(proc_id = Symbols::Proc(), "Proc symbol creation failed");
+    ENFORCE(T_any_id = Symbols::T_any());
+    ENFORCE(T_all_id = Symbols::T_all());
+    ENFORCE(T_untyped_id = Symbols::T_untyped());
+    ENFORCE(T_nilable_id = Symbols::T_nilable());
+    ENFORCE(enumerable_id = Symbols::Enumerable());
+    ENFORCE(set_id = Symbols::Set());
+    ENFORCE(struct_id = Symbols::Struct());
+    ENFORCE(file_id = Symbols::File());
 
     // Synthesize nil = NilClass()
-    defn_nil().data(*this).resultType = core::Types::nil();
+    Symbols::nil().data(*this).resultType = core::Types::nil();
 
     // Synthesize untyped = dynamic()
-    defn_untyped().data(*this).resultType = core::Types::dynamic();
+    Symbols::untyped().data(*this).resultType = core::Types::dynamic();
 
     // <Magic> has a special Type
-    defn_Magic().data(*this).resultType = make_shared<MagicType>();
+    Symbols::Magic().data(*this).resultType = make_shared<MagicType>();
 
     // Synthesize <Magic>#build_hash(*vs : Object) => Hash
-    SymbolRef method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::buildHash());
+    SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
     arg.data(*this).resultType = core::Types::Object();
@@ -247,7 +245,7 @@ void GlobalState::initEmpty() {
     method.data(*this).resultType = core::Types::hashOfUntyped();
 
     // Synthesize <Magic>#build_array(*vs : Object) => Array
-    method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::buildArray());
+    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildArray());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
     arg.data(*this).resultType = core::Types::Object();
@@ -255,7 +253,7 @@ void GlobalState::initEmpty() {
     method.data(*this).resultType = core::Types::arrayOfUntyped();
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
-    method = enterMethodSymbol(Loc::none(), defn_Magic(), Names::splat());
+    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).resultType = core::Types::arrayOfUntyped();
     method.data(*this).arguments().push_back(arg);
@@ -267,13 +265,13 @@ void GlobalState::initEmpty() {
     // handling will require substantial additional sophistication in the
     // namer+resolver.
 
-    SymbolRef db = enterClassSymbol(Loc::none(), defn_Opus(), enterNameConstant(DB_str));
+    SymbolRef db = enterClassSymbol(Loc::none(), Symbols::Opus(), enterNameConstant(DB_str));
     db.data(*this).setIsModule(true);
 
     SymbolRef model = enterClassSymbol(Loc::none(), db, enterNameConstant(model_str));
     model.data(*this).setIsModule(true);
 
-    SymbolRef m = enterStaticFieldSymbol(Loc::none(), defn_root(), enterNameConstant(m_str));
+    SymbolRef m = enterStaticFieldSymbol(Loc::none(), Symbols::root(), enterNameConstant(m_str));
     m.data(*this).resultType = make_unique<AliasType>(model);
 
     // Allow T::Array[Int] to work as an an alias for Array[Int]
@@ -284,12 +282,12 @@ void GlobalState::initEmpty() {
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes
-    // Does it in two passes since the singletonClass will go in the defn_root() members which will invalidate the
+    // Does it in two passes since the singletonClass will go in the Symbols::root() members which will invalidate the
     // iterator
     vector<SymbolRef> needsResultType;
     for (auto &data : symbols) {
         auto ref = data.ref(*this);
-        if (ref._id < defn_root()._id) {
+        if (ref._id < Symbols::root()._id) {
             // These aren't real classes and won't have singleton classes
             continue;
         }
@@ -302,7 +300,7 @@ void GlobalState::initEmpty() {
         data.resultType = make_unique<core::ClassType>(data.singletonClass(*this));
     }
 
-    while (symbols.size() < GlobalState::MAX_SYNTHETIC_SYMBOLS) {
+    while (symbols.size() < Symbols::MAX_SYNTHETIC_SYMBOLS) {
         std::string res(reserved_str);
         res = res + to_string(reservedCount);
         synthesizeClass(res);
@@ -312,7 +310,7 @@ void GlobalState::initEmpty() {
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
-    ENFORCE(symbols.size() == defn_last_synthetic_sym()._id + 1, "Too many synthetic symbols?");
+    ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1, "Too many synthetic symbols?");
     sanityCheck();
 }
 
@@ -781,7 +779,7 @@ unsigned int GlobalState::namesUsed() const {
 }
 
 string GlobalState::toString(bool showHidden) const {
-    return defn_root().toString(*this, 0, showHidden);
+    return Symbols::root().toString(*this, 0, showHidden);
 }
 
 void GlobalState::sanityCheck() const {

@@ -157,7 +157,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto console = spd::stderr_color_mt("fixtures: " + inputPath);
     ruby_typer::core::GlobalState gs(*console);
     ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
-    ruby_typer::core::Context ctx(gs, gs.defn_root());
+    ruby_typer::core::Context ctx(gs, ruby_typer::core::Symbols::root());
 
     // Parser
     vector<ruby_typer::core::FileRef> files;
