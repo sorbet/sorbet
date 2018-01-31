@@ -651,7 +651,9 @@ int realmain(int argc, char **argv) {
     }
 
     core::GlobalState gs(*console);
+    tracer->trace("building initial global state");
     createInitialGlobalState(gs, opts);
+    tracer->trace("done building initial global state");
 
     Timer timeall(console_err, "Done in");
     vector<core::FileRef> inputFiles;

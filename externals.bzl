@@ -22,6 +22,13 @@ def externals():
     )
 
     new_git_repository(
+            name="lizard",
+            remote="https://github.com/inikep/lizard.git",
+            commit="6a1ed71450148c8aed57de3179b1bdd81800bada",
+            build_file="//:lizard.BUILD",
+        )
+
+    new_git_repository(
             name="jemalloc",
             remote="https://github.com/jemalloc/jemalloc.git",
             commit="f78d4ca3fbff6cab0c704c787706a53ddafcbe13",

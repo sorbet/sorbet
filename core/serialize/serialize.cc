@@ -1,11 +1,16 @@
 #include "serialize.h"
 #include "../Symbols.h"
+#include "lib/lizard_compress.h"
+#include "lib/lizard_decompress.h"
+
+template class std::vector<ruby_typer::u4>;
 
 namespace ruby_typer {
 namespace core {
 namespace serialize {
 
 const u4 VERSION = 2;
+const u1 COMPRESSION_DEGREE = 19; // >20 introduce decompression slowdown
 
 void GlobalStateSerializer::Pickler::putStr(const absl::string_view s) {
     putU4(s.size());
@@ -27,6 +32,41 @@ void GlobalStateSerializer::Pickler::putStr(const absl::string_view s) {
 
 char u4tochar(u4 u) {
     return *reinterpret_cast<char *>(&u);
+}
+
+std::vector<u4> GlobalStateSerializer::Pickler::result() {
+    const size_t max_dst_size = Lizard_compressBound(data.size() * sizeof(u4));
+    std::vector<u4> compressed_data;
+    compressed_data.resize(512 + max_dst_size / sizeof(u4)); // give extra room for compression
+                                                             // Lizard_compressBound returns size of data if compression
+                                                             // succeeds. It seems to be written for big inputs
+                                                             // and returns too small sizes for small inputs,
+                                                             // where compressed size is bigger than original size
+    int resultCode =
+        Lizard_compress((const char *)data.data(), (char *)(compressed_data.data() + 2), data.size() * sizeof(u4),
+                        (compressed_data.size() - 2) * sizeof(u4), COMPRESSION_DEGREE);
+    if (resultCode == 0) {
+        // did not compress!
+        Error::raise("uncompressable picker?");
+    } else {
+        compressed_data[0] = resultCode;                        // ~200K of our stdlib
+        compressed_data[1] = data.size();                       // 172817 ints(x4), ~675K of our stdlib
+        int actualCompressedSize = 1 + resultCode / sizeof(u4); // 1 left for rounding
+        compressed_data.resize(actualCompressedSize + 2);       // two are for header bytes
+    }
+    return compressed_data;
+}
+
+GlobalStateSerializer::UnPickler::UnPickler(const u4 *const compressed) : pos(0) {
+    u4 compressedSize = compressed[0];
+    u4 uncompressedSize = compressed[1];
+    data.resize(uncompressedSize);
+
+    int resultCode = Lizard_decompress_safe((const char *)(compressed + 2), (char *)this->data.data(), compressedSize,
+                                            uncompressedSize * sizeof(u4));
+    if (resultCode != uncompressedSize * sizeof(u4)) {
+        Error::raise("incomplete decompression");
+    }
 }
 
 std::string GlobalStateSerializer::UnPickler::getStr() {
@@ -427,7 +467,7 @@ void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
 
 std::vector<u4> GlobalStateSerializer::store(GlobalState &gs) {
     Pickler p = pickle(gs);
-    return move(p.data);
+    return p.result();
 }
 
 void GlobalStateSerializer::load(GlobalState &gs, const u4 *const data) {
