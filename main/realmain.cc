@@ -12,8 +12,6 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
-#include "progressbar/progressbar.h"
-#include "progressbar/statusbar.h"
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 #include "spdlog/spdlog.h"
@@ -46,7 +44,6 @@ struct Printers {
 
 struct Options {
     Printers print;
-    bool showProgress = false;
     bool noStdlib = false;
     bool forceTyped = false;
     bool forceUntyped = false;
@@ -171,13 +168,6 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                                           bool silenceErrors = false) {
     vector<unique_ptr<ast::Expression>> result;
     vector<unique_ptr<ast::Expression>> empty;
-
-    unique_ptr<progressbar> progress;
-
-    if (opts.showProgress) {
-        progress.reset(progressbar_new("Indexing", frs.size()));
-    }
-
     vector<unique_ptr<ast::Expression>> trees;
 
     ThreadQueue<std::pair<int, std::string>> fileq;
@@ -279,15 +269,9 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                     ast = namer::Namer::run(ctx, move(tree));
                 }
                 result.emplace_back(move(ast));
-                if (opts.showProgress) {
-                    progressbar_inc(progress.get());
-                }
             } catch (...) {
                 console_err->error("Exception on file: {} (backtrace is above)", file.data(gs).path());
             }
-        }
-        if (opts.showProgress) {
-            progressbar_finish(progress.get());
         }
     }
     return result;
@@ -340,12 +324,7 @@ struct typecheck_thread_result {
 void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
                bool silenceErrors = false) {
     vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>> typecheck_result;
-    unique_ptr<progressbar> progress;
-    unique_ptr<statusbar> status;
 
-    if (opts.showProgress) {
-        status.reset(statusbar_new("Resolving"));
-    }
     try {
         core::Context ctx(gs, gs.defn_root());
         {
@@ -359,9 +338,6 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
     } catch (...) {
         console_err->error("Exception resolving (backtrace is above)");
     }
-    if (opts.showProgress) {
-        statusbar_finish(status.get());
-    }
 
     for (auto &resolved : what) {
         if (opts.print.NameTree) {
@@ -370,10 +346,6 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
         if (opts.print.NameTreeRaw) {
             cout << resolved->showRaw(gs) << endl;
         }
-    }
-
-    if (opts.showProgress) {
-        progress.reset(progressbar_new("CFG+Typechecking", what.size()));
     }
 
     ThreadQueue<unique_ptr<ast::Expression>> fileq;
@@ -495,7 +467,6 @@ cxxopts::Options buildOptions() {
     options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
-    options.add_options()("P,progress", "Draw progressbar");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
 
@@ -658,10 +629,6 @@ int realmain(int argc, char **argv) {
 
     if (options.count("q") != 0) {
         console->set_level(spd::level::critical);
-    }
-
-    if (options.count("P") != 0) {
-        opts.showProgress = true;
     }
 
     if (options.count("trace") != 0) {
