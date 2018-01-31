@@ -110,6 +110,9 @@ void CFGBuilder::sanityCheck(const core::Context ctx, CFG &cfg) {
         if (bb.get() == cfg.deadBlock()) {
             continue;
         }
+        if (bb.get() != cfg.entry()) {
+            ENFORCE((bb->flags & CFG::WAS_JUMP_DESTINATION) != 0, "block ", bb->id, " was never linked into cfg");
+        }
         auto thenFnd = std::find(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get());
         auto elseFnd = std::find(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get());
         ENFORCE(thenFnd != bb->bexit.thenb->backEdges.end(), "backedge unset for thenb");
@@ -138,7 +141,7 @@ core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
 void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
     vector<unordered_map<core::LocalVariable, core::LocalVariable>> outAliases;
 
-    outAliases.resize(cfg.basicBlocks.size());
+    outAliases.resize(cfg.maxBasicBlockId);
     for (BasicBlock *bb : cfg.backwardsTopoSort) {
         if (bb == cfg.deadBlock()) {
             continue;
@@ -284,9 +287,9 @@ void CFGBuilder::fillInBlockArguments(const core::Context ctx, CFG::ReadsAndWrit
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    vector<unordered_set<core::LocalVariable>> reads_by_block(cfg.basicBlocks.size());
-    vector<unordered_set<core::LocalVariable>> writes_by_block(cfg.basicBlocks.size());
-    vector<unordered_set<core::LocalVariable>> kills_by_block(cfg.basicBlocks.size());
+    vector<unordered_set<core::LocalVariable>> reads_by_block(cfg.maxBasicBlockId);
+    vector<unordered_set<core::LocalVariable>> writes_by_block(cfg.maxBasicBlockId);
+    vector<unordered_set<core::LocalVariable>> kills_by_block(cfg.maxBasicBlockId);
 
     for (auto &rds : RnW.reads) {
         auto &wts = RnW.writes[rds.first];
@@ -320,7 +323,7 @@ void CFGBuilder::fillInBlockArguments(const core::Context ctx, CFG::ReadsAndWrit
     }
 
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
-    vector<unordered_set<core::LocalVariable>> upper_bounds1(cfg.basicBlocks.size());
+    vector<unordered_set<core::LocalVariable>> upper_bounds1(cfg.maxBasicBlockId);
     bool changed = true;
 
     while (changed) {
@@ -352,7 +355,7 @@ void CFGBuilder::fillInBlockArguments(const core::Context ctx, CFG::ReadsAndWrit
         }
     }
 
-    vector<unordered_set<core::LocalVariable>> upper_bounds2(cfg.basicBlocks.size());
+    vector<unordered_set<core::LocalVariable>> upper_bounds2(cfg.maxBasicBlockId);
 
     changed = true;
     while (changed) {

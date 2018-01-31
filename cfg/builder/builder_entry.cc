@@ -82,9 +82,26 @@ void CFGBuilder::fillInTopoSorts(const core::Context ctx, CFG &cfg) {
     auto &target1 = cfg.forwardsTopoSort;
     target1.resize(cfg.basicBlocks.size());
     int count = topoSortFwd(target1, 0, cfg.entry());
-    ENFORCE(count == cfg.basicBlocks.size(),
-            "Some block was unreachable from the top. Total blocks: ", cfg.basicBlocks.size(),
-            ", Reachable blocks: ", count);
+    cfg.forwardsTopoSort.resize(count);
+
+    // Remove unreachable blocks (which were not found by the toposort)
+    for (auto &bb : cfg.basicBlocks) {
+        if ((bb->flags & CFG::FORWARD_TOPO_SORT_VISITED) == 0) {
+            for (auto &prev : bb->backEdges) {
+                ENFORCE((prev->flags & CFG::FORWARD_TOPO_SORT_VISITED) == 0);
+            }
+
+            bb->bexit.thenb->backEdges.erase(
+                remove(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get()),
+                bb->bexit.thenb->backEdges.end());
+            bb->bexit.elseb->backEdges.erase(
+                remove(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get()),
+                bb->bexit.elseb->backEdges.end());
+        }
+    }
+    cfg.basicBlocks.erase(remove_if(cfg.basicBlocks.begin(), cfg.basicBlocks.end(),
+                                    [](auto &bb) -> bool { return (bb->flags & CFG::FORWARD_TOPO_SORT_VISITED) == 0; }),
+                          cfg.basicBlocks.end());
 
     auto &target2 = cfg.backwardsTopoSort;
     target2.resize(cfg.basicBlocks.size());

@@ -93,6 +93,7 @@ public:
     static int FORWARD_TOPO_SORT_VISITED;
     static int BACKWARD_TOPO_SORT_VISITED;
     static int LOOP_HEADER;
+    static int WAS_JUMP_DESTINATION;
     std::unordered_map<core::LocalVariable, int> minLoops;
     std::unordered_map<core::LocalVariable, int> maxLoopWrite;
 
@@ -107,7 +108,7 @@ public:
 
 private:
     CFG();
-    BasicBlock *freshBlock(int outerLoops, BasicBlock *from);
+    BasicBlock *freshBlock(int outerLoops);
 };
 
 } // namespace cfg

@@ -22,7 +22,7 @@ rescueTemp$5"];
 rescueTemp$10 = rescueTemp$5.is_a?(<constant:StandardError>$9) : untyped
 rescueTemp$10"];
 
-    "bb::<constant:Object>#a_3" -> "bb::<constant:Object>#a_5" [style="bold"];
+    "bb::<constant:Object>#a_3" -> "bb::<constant:Object>#a_8" [style="bold"];
     "bb::<constant:Object>#a_3" -> "bb::<constant:Object>#a_1" [style="tapered"];
 
     "bb::<constant:Object>#a_4" [label = "block[id=4]()
@@ -31,14 +31,14 @@ statTemp$4 = return returnTemp$6 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#a_4" -> "bb::<constant:Object>#a_1" [style="bold"];
-    "bb::<constant:Object>#a_5" [label = "block[id=5](rescueTemp$5)
+    "bb::<constant:Object>#a_8" [label = "block[id=8](rescueTemp$5)
 a = 2 : Integer(2)
 statTemp$12 = 3 : Integer(3)
 returnMethodTemp$2 = a.+(statTemp$12) : Integer
 finalReturn = return returnMethodTemp$2 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#a_5" -> "bb::<constant:Object>#a_1" [style="bold"];
+    "bb::<constant:Object>#a_8" -> "bb::<constant:Object>#a_1" [style="bold"];
 }
 
 }
