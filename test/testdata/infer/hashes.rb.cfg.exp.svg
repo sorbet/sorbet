@@ -20,8 +20,8 @@
 <polygon fill="none" stroke="#000000" points="179.7268,-471.8717 505,-424.6434 830.2732,-471.8717 829.9696,-548.2887 180.0304,-548.2887 179.7268,-471.8717"/>
 <text text-anchor="middle" x="505" y="-516.7928" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=0](&lt;constant:&lt;Magic&gt;&gt;$6)</text>
 <text text-anchor="middle" x="505" y="-502.7928" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;constant:&lt;Magic&gt;&gt;$6 = alias &lt;constant:&lt;Magic&gt;&gt; : &lt;Magic&gt;</text>
-<text text-anchor="middle" x="505" y="-488.7928" font-family="Times,serif" font-size="14.00" fill="#000000">selfMethodTemp$3 = self : Foo</text>
-<text text-anchor="middle" x="505" y="-474.7928" font-family="Times,serif" font-size="14.00" fill="#000000">cond = load_arg(selfMethodTemp$3#bar, 0) : untyped</text>
+<text text-anchor="middle" x="505" y="-488.7928" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;selfMethodTemp&gt;$3 = self : Foo</text>
+<text text-anchor="middle" x="505" y="-474.7928" font-family="Times,serif" font-size="14.00" fill="#000000">cond = load_arg(&lt;selfMethodTemp&gt;$3#bar, 0) : untyped</text>
 <text text-anchor="middle" x="505" y="-460.7928" font-family="Times,serif" font-size="14.00" fill="#000000">cond</text>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#bar_2 -->
@@ -57,38 +57,38 @@
 <!-- bb::&lt;constant:Foo&gt;#bar_1 -->
 <g id="node2" class="node">
 <title>bb::&lt;constant:Foo&gt;#bar_1</title>
-<polygon fill="none" stroke="#000000" points="758.5793,-116 340.8744,-116 233.4207,-16 651.1256,-16 758.5793,-116"/>
-<text text-anchor="middle" x="496" y="-75.8" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1](returnMethodTemp$2)</text>
-<text text-anchor="middle" x="496" y="-61.8" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return returnMethodTemp$2</text>
+<polygon fill="none" stroke="#000000" points="791.5647,-116 321.3874,-116 200.4353,-16 670.6126,-16 791.5647,-116"/>
+<text text-anchor="middle" x="496" y="-75.8" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=1](&lt;returnMethodTemp&gt;$2)</text>
+<text text-anchor="middle" x="496" y="-61.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;finalReturn&gt; = return &lt;returnMethodTemp&gt;$2</text>
 <text text-anchor="middle" x="496" y="-47.8" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#bar_1&#45;&gt;bb::&lt;constant:Foo&gt;#bar_1 -->
 <g id="edge3" class="edge">
 <title>bb::&lt;constant:Foo&gt;#bar_1&#45;&gt;bb::&lt;constant:Foo&gt;#bar_1</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M729.4627,-88.7108C758.0491,-84.6445 776.7896,-77.0742 776.7896,-66 776.7896,-50.0733 738.0278,-41.3941 686.962,-39.9622"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="687.0058,-36.4625 676.9423,-39.7756 686.8754,-43.4613 687.0058,-36.4625"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M758.4486,-88.4813C789.3745,-84.3629 809.5324,-76.8691 809.5324,-66 809.5324,-50.1032 766.413,-41.4267 709.5511,-39.9703"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="709.6117,-36.4709 699.5502,-39.7901 709.4855,-43.4698 709.6117,-36.4709"/>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#bar_4 -->
 <g id="node5" class="node">
 <title>bb::&lt;constant:Foo&gt;#bar_4</title>
-<ellipse fill="none" stroke="#000000" cx="496" cy="-207.1543" rx="184.8058" ry="55.3091"/>
+<ellipse fill="none" stroke="#000000" cx="496" cy="-207.1543" rx="196.1377" ry="55.3091"/>
 <text text-anchor="middle" x="496" y="-230.9543" font-family="Times,serif" font-size="14.00" fill="#000000">block[id=4](s)</text>
 <text text-anchor="middle" x="496" y="-216.9543" font-family="Times,serif" font-size="14.00" fill="#000000">r = s : ShapeType {</text>
 <text text-anchor="middle" x="496" y="-202.9543" font-family="Times,serif" font-size="14.00" fill="#000000">}</text>
-<text text-anchor="middle" x="496" y="-188.9543" font-family="Times,serif" font-size="14.00" fill="#000000">returnMethodTemp$2 = return r : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="496" y="-188.9543" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;returnMethodTemp&gt;$2 = return r : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="496" y="-174.9543" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#bar_2&#45;&gt;bb::&lt;constant:Foo&gt;#bar_4 -->
 <g id="edge4" class="edge">
 <title>bb::&lt;constant:Foo&gt;#bar_2&#45;&gt;bb::&lt;constant:Foo&gt;#bar_4</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M331.6081,-300.59C353.6602,-288.0562 378.0406,-274.1991 401.1228,-261.0799"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="402.9337,-264.0765 409.8981,-256.0922 399.4747,-257.9907 402.9337,-264.0765"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M331.6081,-300.59C353.1992,-288.3182 377.0222,-274.7779 399.6734,-261.9036"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="401.6594,-264.8007 408.6238,-256.8165 398.2005,-258.715 401.6594,-264.8007"/>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#bar_3&#45;&gt;bb::&lt;constant:Foo&gt;#bar_4 -->
 <g id="edge5" class="edge">
 <title>bb::&lt;constant:Foo&gt;#bar_3&#45;&gt;bb::&lt;constant:Foo&gt;#bar_4</title>
-<path fill="none" stroke="#000000" stroke-width="2" d="M673.0751,-300.777C648.6193,-287.8469 621.4736,-273.4944 595.9316,-259.99"/>
-<polygon fill="#000000" stroke="#000000" stroke-width="2" points="597.4474,-256.8323 586.9711,-255.2523 594.1756,-263.0206 597.4474,-256.8323"/>
+<path fill="none" stroke="#000000" stroke-width="2" d="M673.0751,-300.777C649.121,-288.1121 622.5861,-274.0826 597.5054,-260.822"/>
+<polygon fill="#000000" stroke="#000000" stroke-width="2" points="598.8148,-257.5553 588.3384,-255.9753 595.5429,-263.7436 598.8148,-257.5553"/>
 </g>
 <!-- bb::&lt;constant:Foo&gt;#bar_4&#45;&gt;bb::&lt;constant:Foo&gt;#bar_1 -->
 <g id="edge6" class="edge">
@@ -98,4 +98,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: e6ef4398ab21c621c2cf066f65ae6e703240c3ddd44414ac2895619234b1c464 -->
+<!-- ruby-types:sha256: ce42261d436e1e293c30c2e08827c313288f74e213ebfd44d4c758b864c90bfa -->

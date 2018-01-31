@@ -12,7 +12,7 @@ class <emptyTree><<constant:<root>>> < ()
           else
             <emptyTree>
           end
-        rescue => rescueTemp$2
+        rescue => <rescueTemp$2
           begin
             self(<constant:<todo sym>>).puts("rescue")
             retry

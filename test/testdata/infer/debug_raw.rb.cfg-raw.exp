@@ -6,9 +6,9 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
     "bb::<constant:Object>#main_0" [label = "block[id=0]()
-selfMethodTemp$3 = self : Object
-a = load_arg(selfMethodTemp$3#main, 0) : untyped
-selfMethodTemp$3: Object
+<selfMethodTemp>$3 = self : Object
+a = load_arg(<selfMethodTemp>$3#main, 0) : untyped
+<selfMethodTemp>$3: Object
 
 a: untyped
 
@@ -23,21 +23,21 @@ a"];
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_2" [label = "block[id=2]()
 a = 2 : Integer(2)
-returnMethodTemp$2 = a : Integer(2)
+<returnMethodTemp>$2 = a : Integer(2)
 a: Integer(2)
 
-returnMethodTemp$2: Integer(2)
+<returnMethodTemp>$2: Integer(2)
 
 <unconditional>"];
 
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="bold"];
-    "bb::<constant:Object>#main_4" [label = "block[id=4](returnMethodTemp$2)
-returnMethodTemp$2: NilClass | Integer
+    "bb::<constant:Object>#main_4" [label = "block[id=4](<returnMethodTemp>$2)
+<returnMethodTemp>$2: NilClass | Integer
 
-finalReturn = return returnMethodTemp$2 : <bottom>
-returnMethodTemp$2: NilClass | Integer
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<returnMethodTemp>$2: NilClass | Integer
 
-finalReturn: <bottom>
+<finalReturn>: <bottom>
 
 <unconditional>"];
 

@@ -6,11 +6,11 @@ subgraph "cluster_::<constant:BlockTest>#block_pass" {
     "bb::<constant:BlockTest>#block_pass_1" [shape = parallelogram];
 
     "bb::<constant:BlockTest>#block_pass_0" [label = "block[id=0]()
-statTemp$5 = self : BlockTest
-statTemp$6 = 1 : Integer(1)
-statTemp$7 = 2 : Integer(2)
-statTemp$8 = 3 : Integer(3)
-returnMethodTemp$3 = statTemp$5.foo(statTemp$6, statTemp$7, statTemp$8) : untyped
+<statTemp>$5 = self : BlockTest
+<statTemp>$6 = 1 : Integer(1)
+<statTemp>$7 = 2 : Integer(2)
+<statTemp>$8 = 3 : Integer(3)
+<returnMethodTemp>$3 = <statTemp>$5.foo(<statTemp>$6, <statTemp>$7, <statTemp>$8) : untyped
 <unconditional>"];
 
     "bb::<constant:BlockTest>#block_pass_0" -> "bb::<constant:BlockTest>#block_pass_2" [style="bold"];
@@ -18,23 +18,23 @@ returnMethodTemp$3 = statTemp$5.foo(statTemp$6, statTemp$7, statTemp$8) : untype
 <unconditional>"];
 
     "bb::<constant:BlockTest>#block_pass_1" -> "bb::<constant:BlockTest>#block_pass_1" [style="bold"];
-    "bb::<constant:BlockTest>#block_pass_2" [label = "block[id=2](returnMethodTemp$3)
+    "bb::<constant:BlockTest>#block_pass_2" [label = "block[id=2](<returnMethodTemp>$3)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:BlockTest>#block_pass_2" -> "bb::<constant:BlockTest>#block_pass_4" [style="bold"];
     "bb::<constant:BlockTest>#block_pass_2" -> "bb::<constant:BlockTest>#block_pass_3" [style="tapered"];
 
-    "bb::<constant:BlockTest>#block_pass_3" [label = "block[id=3](returnMethodTemp$3)
-finalReturn = return returnMethodTemp$3 : <bottom>
+    "bb::<constant:BlockTest>#block_pass_3" [label = "block[id=3](<returnMethodTemp>$3)
+<finalReturn> = return <returnMethodTemp>$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:BlockTest>#block_pass_3" -> "bb::<constant:BlockTest>#block_pass_1" [style="bold"];
-    "bb::<constant:BlockTest>#block_pass_4" [label = "block[id=4](returnMethodTemp$3)
+    "bb::<constant:BlockTest>#block_pass_4" [label = "block[id=4](<returnMethodTemp>$3)
 outerLoops: 1
 x$6097 = load_yield_param(::<constant:BlockTest>#block_pass#<block>$2, 0) : untyped
-blockReturnTemp$9 = x$6097 : untyped
-blockReturnTemp$10 = blockreturn<::<constant:BlockTest>#block_pass#<block>$2> blockReturnTemp$9 : <bottom>
+<blockReturnTemp>$9 = x$6097 : untyped
+<blockReturnTemp>$10 = blockreturn<::<constant:BlockTest>#block_pass#<block>$2> <blockReturnTemp>$9 : <bottom>
 <unconditional>"];
 
     "bb::<constant:BlockTest>#block_pass_4" -> "bb::<constant:BlockTest>#block_pass_2" [style="bold"];

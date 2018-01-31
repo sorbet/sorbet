@@ -6,11 +6,11 @@ subgraph "cluster_::<constant:Side>#foo" {
     "bb::<constant:Side>#foo_1" [shape = parallelogram];
 
     "bb::<constant:Side>#foo_0" [label = "block[id=0]()
-selfMethodTemp$3 = self : Side
-cond = load_arg(selfMethodTemp$3#foo, 0) : untyped
+<selfMethodTemp>$3 = self : Side
+cond = load_arg(<selfMethodTemp>$3#foo, 0) : untyped
 a = 1 : Integer(1)
-statTemp$5 = a : Integer(1)
-statTemp$6 = a : Integer(1)
+<statTemp>$5 = a : Integer(1)
+<statTemp>$6 = a : Integer(1)
 cond"];
 
     "bb::<constant:Side>#foo_0" -> "bb::<constant:Side>#foo_2" [style="bold"];
@@ -20,19 +20,19 @@ cond"];
 <unconditional>"];
 
     "bb::<constant:Side>#foo_1" -> "bb::<constant:Side>#foo_1" [style="bold"];
-    "bb::<constant:Side>#foo_2" [label = "block[id=2](statTemp$5, statTemp$6)
+    "bb::<constant:Side>#foo_2" [label = "block[id=2](<statTemp>$5, <statTemp>$6)
 a = true : TrueClass(true)
 <unconditional>"];
 
     "bb::<constant:Side>#foo_2" -> "bb::<constant:Side>#foo_4" [style="bold"];
-    "bb::<constant:Side>#foo_3" [label = "block[id=3](statTemp$5, statTemp$6)
+    "bb::<constant:Side>#foo_3" [label = "block[id=3](<statTemp>$5, <statTemp>$6)
 a = 2 : Integer(2)
 <unconditional>"];
 
     "bb::<constant:Side>#foo_3" -> "bb::<constant:Side>#foo_4" [style="bold"];
-    "bb::<constant:Side>#foo_4" [label = "block[id=4](statTemp$5, statTemp$6, a)
-returnMethodTemp$2 = statTemp$5.foo(statTemp$6, a) : untyped
-finalReturn = return returnMethodTemp$2 : <bottom>
+    "bb::<constant:Side>#foo_4" [label = "block[id=4](<statTemp>$5, <statTemp>$6, a)
+<returnMethodTemp>$2 = <statTemp>$5.foo(<statTemp>$6, a) : untyped
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Side>#foo_4" -> "bb::<constant:Side>#foo_1" [style="bold"];

@@ -16,14 +16,14 @@ subgraph "cluster_::<constant:HasLoops>#variable_only_inside_loop" {
     "bb::<constant:HasLoops>#variable_only_inside_loop_1" -> "bb::<constant:HasLoops>#variable_only_inside_loop_1" [style="bold"];
     "bb::<constant:HasLoops>#variable_only_inside_loop_2" [label = "block[id=2](<constant:nil>$6)
 outerLoops: 1
-whileTemp$4 = true : TrueClass(true)
-whileTemp$4"];
+<whileTemp>$4 = true : TrueClass(true)
+<whileTemp>$4"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_2" -> "bb::<constant:HasLoops>#variable_only_inside_loop_4" [style="bold"];
     "bb::<constant:HasLoops>#variable_only_inside_loop_2" -> "bb::<constant:HasLoops>#variable_only_inside_loop_3" [style="tapered"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_3" [label = "block[id=3](<constant:nil>$6)
-finalReturn = return <constant:nil>$6
+<finalReturn> = return <constant:nil>$6
 <unconditional>"];
 
     "bb::<constant:HasLoops>#variable_only_inside_loop_3" -> "bb::<constant:HasLoops>#variable_only_inside_loop_1" [style="bold"];
@@ -53,14 +53,14 @@ a = s : String(\"s\")
     "bb::<constant:HasLoops>#incorrect_assignment_1" -> "bb::<constant:HasLoops>#incorrect_assignment_1" [style="bold"];
     "bb::<constant:HasLoops>#incorrect_assignment_2" [label = "block[id=2](<constant:nil>$7, a)
 outerLoops: 1
-whileTemp$5 = false : FalseClass(false)
-whileTemp$5"];
+<whileTemp>$5 = false : FalseClass(false)
+<whileTemp>$5"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_2" -> "bb::<constant:HasLoops>#incorrect_assignment_4" [style="bold"];
     "bb::<constant:HasLoops>#incorrect_assignment_2" -> "bb::<constant:HasLoops>#incorrect_assignment_3" [style="tapered"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_3" [label = "block[id=3](<constant:nil>$7)
-finalReturn = return <constant:nil>$7 : <bottom>
+<finalReturn> = return <constant:nil>$7 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_3" -> "bb::<constant:HasLoops>#incorrect_assignment_1" [style="bold"];
@@ -90,14 +90,14 @@ a = s : String(\"s\")
     "bb::<constant:HasLoops>#correct_assignment_1" -> "bb::<constant:HasLoops>#correct_assignment_1" [style="bold"];
     "bb::<constant:HasLoops>#correct_assignment_2" [label = "block[id=2](<constant:nil>$7, a)
 outerLoops: 1
-whileTemp$5 = false : FalseClass(false)
-whileTemp$5"];
+<whileTemp>$5 = false : FalseClass(false)
+<whileTemp>$5"];
 
     "bb::<constant:HasLoops>#correct_assignment_2" -> "bb::<constant:HasLoops>#correct_assignment_4" [style="bold"];
     "bb::<constant:HasLoops>#correct_assignment_2" -> "bb::<constant:HasLoops>#correct_assignment_3" [style="tapered"];
 
     "bb::<constant:HasLoops>#correct_assignment_3" [label = "block[id=3](<constant:nil>$7)
-finalReturn = return <constant:nil>$7 : <bottom>
+<finalReturn> = return <constant:nil>$7 : <bottom>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_3" -> "bb::<constant:HasLoops>#correct_assignment_1" [style="bold"];

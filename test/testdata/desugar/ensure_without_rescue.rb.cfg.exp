@@ -6,9 +6,9 @@ subgraph "cluster_#<static-init>$6" {
     "bb#<static-init>$6_1" [shape = parallelogram];
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
-statTemp$7 = self : <class:<root>>
-returnMethodTemp$2 = statTemp$7.main() : untyped
-finalReturn = return returnMethodTemp$2 : <bottom>
+<statTemp>$7 = self : <class:<root>>
+<returnMethodTemp>$2 = <statTemp>$7.main() : untyped
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
@@ -25,8 +25,8 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
     "bb::<constant:Object>#main_0" [label = "block[id=0]()
-rescueTemp$4 = <unanalyzable> : untyped
-rescueTemp$4"];
+<rescueTemp$4 = <unanalyzable> : untyped
+<rescueTemp$4"];
 
     "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_4" [style="tapered"];
@@ -36,11 +36,11 @@ rescueTemp$4"];
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_4" [label = "block[id=4]()
-statTemp$5 = self : Object
-returnMethodTemp$2 = statTemp$5.a() : untyped
-statTemp$7 = self : Object
-rescueTemp$6 = statTemp$7.b() : untyped
-finalReturn = return returnMethodTemp$2 : <bottom>
+<statTemp>$5 = self : Object
+<returnMethodTemp>$2 = <statTemp>$5.a() : untyped
+<statTemp>$7 = self : Object
+<rescueTemp$6 = <statTemp>$7.b() : untyped
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_1" [style="bold"];
@@ -53,7 +53,7 @@ subgraph "cluster_::<constant:Object>#a" {
     "bb::<constant:Object>#a_1" [shape = parallelogram];
 
     "bb::<constant:Object>#a_0" [label = "block[id=0]()
-finalReturn = return returnMethodTemp$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#a_0" -> "bb::<constant:Object>#a_1" [style="bold"];
@@ -70,7 +70,7 @@ subgraph "cluster_::<constant:Object>#b" {
     "bb::<constant:Object>#b_1" [shape = parallelogram];
 
     "bb::<constant:Object>#b_0" [label = "block[id=0]()
-finalReturn = return returnMethodTemp$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#b_0" -> "bb::<constant:Object>#b_1" [style="bold"];

@@ -2,14 +2,14 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<constant:<todo s
   def test_case<<constant:<todo sym>>>()
     begin
       begin
-        assignTemp$2 = self(<constant:<todo sym>>).a()
-        if self(<constant:<todo sym>>).foo1().===(assignTemp$2)
+        <assignTemp$2 = self(<constant:<todo sym>>).a()
+        if self(<constant:<todo sym>>).foo1().===(<assignTemp$2)
           :a
         else
-          if if self(<constant:<todo sym>>).foo3().===(assignTemp$2)
+          if if self(<constant:<todo sym>>).foo3().===(<assignTemp$2)
               true
             else
-              self(<constant:<todo sym>>).foo2().===(assignTemp$2)
+              self(<constant:<todo sym>>).foo2().===(<assignTemp$2)
             end
             :b
           else

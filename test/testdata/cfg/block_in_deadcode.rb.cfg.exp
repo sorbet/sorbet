@@ -6,27 +6,27 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
     "bb::<constant:Object>#foo_0" [label = "block[id=0]()
-statTemp$5 = self : Object
-returnMethodTemp$3 = statTemp$5.outer() : untyped
+<statTemp>$5 = self : Object
+<returnMethodTemp>$3 = <statTemp>$5.outer() : untyped
 <block-call>"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_4" [style="bold"];
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_3" [style="tapered"];
 
     "bb::<constant:Object>#foo_1" [label = "block[id=1]()
-statTemp$9 = self
-blockReturnTemp$6 = statTemp$9.inner()
+<statTemp>$9 = self
+<blockReturnTemp>$6 = <statTemp>$9.inner()
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](returnMethodTemp$3)
-finalReturn = return returnMethodTemp$3 : <bottom>
+    "bb::<constant:Object>#foo_3" [label = "block[id=3](<returnMethodTemp>$3)
+<finalReturn> = return <returnMethodTemp>$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_4" [label = "block[id=4]()
 outerLoops: 1
-statTemp$7 = return returnTemp$8 : <bottom>
+<statTemp>$7 = return <returnTemp>$8 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1" [style="bold"];

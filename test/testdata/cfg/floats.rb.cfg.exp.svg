@@ -30,7 +30,7 @@
 <text text-anchor="middle" x="3942" y="-263.1025" font-family="Times,serif" font-size="14.00" fill="#000000">a = nan : Float(nan)</text>
 <text text-anchor="middle" x="3942" y="-249.1025" font-family="Times,serif" font-size="14.00" fill="#000000">a = nan : Float(nan)</text>
 <text text-anchor="middle" x="3942" y="-235.1025" font-family="Times,serif" font-size="14.00" fill="#000000">a = nan : Float(nan)</text>
-<text text-anchor="middle" x="3942" y="-221.1025" font-family="Times,serif" font-size="14.00" fill="#000000">finalReturn = return a : &lt;bottom&gt;</text>
+<text text-anchor="middle" x="3942" y="-221.1025" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;finalReturn&gt; = return a : &lt;bottom&gt;</text>
 <text text-anchor="middle" x="3942" y="-207.1025" font-family="Times,serif" font-size="14.00" fill="#000000">&lt;unconditional&gt;</text>
 </g>
 <!-- bb::&lt;constant:Object&gt;#test_large_float_1 -->
@@ -54,4 +54,4 @@
 </g>
 </g>
 </svg>
-<!-- ruby-types:sha256: c5193a4e8df8e994bbe72ad5eca5c05dc0fb71342ac3aa11590550873f564c8b -->
+<!-- ruby-types:sha256: f06eae136cb1ea1e0ac5a4502aa22d682a1e4d964b151c26e6078c7251b8b548 -->

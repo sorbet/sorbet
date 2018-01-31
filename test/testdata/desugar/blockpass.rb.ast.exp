@@ -65,11 +65,11 @@ class <emptyTree><<constant:<root>>> < ()
           <block-pass>$6.meth()
         end
         begin
-          assignTemp$7 = <emptyTree>::<constant:CallsWithObject>
-          if assignTemp$7.nil?()
+          <assignTemp$7 = <emptyTree>::<constant:CallsWithObject>
+          if <assignTemp$7.nil?()
             ::<constant:nil>
           else
-            assignTemp$7.calls_with_object() do |<block-pass>$8|
+            <assignTemp$7.calls_with_object() do |<block-pass>$8|
               <block-pass>$8.meth()
             end
           end

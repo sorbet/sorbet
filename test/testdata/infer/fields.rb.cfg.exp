@@ -9,7 +9,7 @@ subgraph "cluster_::<constant:Foo>#foo" {
 @ivar$5 = alias @ivar : Integer
 @ivar$5 = 2 : Integer(2)
 @ivar$5 = ss : untyped
-finalReturn = return @ivar$5 : <bottom>
+<finalReturn> = return @ivar$5 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Foo>#foo_0" -> "bb::<constant:Foo>#foo_1" [style="bold"];

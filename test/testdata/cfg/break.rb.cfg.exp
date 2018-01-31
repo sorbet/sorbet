@@ -6,11 +6,11 @@ subgraph "cluster_#<static-init>$6" {
     "bb#<static-init>$6_1" [shape = parallelogram];
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
-statTemp$5 = self : <class:<root>>
-statTemp$7 = self : <class:<root>>
-statTemp$6 = statTemp$7.foo() : untyped
-returnMethodTemp$2 = statTemp$5.puts(statTemp$6) : NilClass
-finalReturn = return returnMethodTemp$2 : <bottom>
+<statTemp>$5 = self : <class:<root>>
+<statTemp>$7 = self : <class:<root>>
+<statTemp>$6 = <statTemp>$7.foo() : untyped
+<returnMethodTemp>$2 = <statTemp>$5.puts(<statTemp>$6) : NilClass
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
@@ -28,13 +28,13 @@ subgraph "cluster_::<constant:Object>#foo" {
 
     "bb::<constant:Object>#foo_0" [label = "block[id=0]()
 <constant:<Magic>>$8 = alias <constant:<Magic>> : <Magic>
-arrayTemp$6 = 1 : Integer(1)
-arrayTemp$7 = 2 : Integer(2)
-statTemp$5 = <constant:<Magic>>$8.<build-array>(arrayTemp$6, arrayTemp$7) : TupleType {
+<arrayTemp>$6 = 1 : Integer(1)
+<arrayTemp>$7 = 2 : Integer(2)
+<statTemp>$5 = <constant:<Magic>>$8.<build-array>(<arrayTemp>$6, <arrayTemp>$7) : TupleType {
   0 = Integer(1)
   1 = Integer(2)
 }
-returnMethodTemp$3 = statTemp$5.map() : AppliedType {
+<returnMethodTemp>$3 = <statTemp>$5.map() : AppliedType {
   klass = ::<constant:Array>
   targs = [
     <constant:Elem> = untyped
@@ -49,12 +49,12 @@ returnMethodTemp$3 = statTemp$5.map() : AppliedType {
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](returnMethodTemp$3)
-finalReturn = return returnMethodTemp$3 : <bottom>
+    "bb::<constant:Object>#foo_3" [label = "block[id=3](<returnMethodTemp>$3)
+<finalReturn> = return <returnMethodTemp>$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_4" [label = "block[id=4](returnMethodTemp$3)
+    "bb::<constant:Object>#foo_4" [label = "block[id=4](<returnMethodTemp>$3)
 outerLoops: 1
 x$6095 = load_yield_param(::<constant:Object>#foo#<block>$2, 0) : TupleType {
   0 = untyped

@@ -7,9 +7,9 @@ subgraph "cluster_::<constant:Object>#a" {
 
     "bb::<constant:Object>#a_0" [label = "block[id=0](<constant:StandardError>$9)
 <constant:StandardError>$9 = alias <constant:StandardError> : <class:StandardError>
-selfMethodTemp$3 = self : Object
-rescueTemp$5 = <unanalyzable> : untyped
-rescueTemp$5"];
+<selfMethodTemp>$3 = self : Object
+<rescueTemp$5 = <unanalyzable> : untyped
+<rescueTemp$5"];
 
     "bb::<constant:Object>#a_0" -> "bb::<constant:Object>#a_3" [style="bold"];
     "bb::<constant:Object>#a_0" -> "bb::<constant:Object>#a_4" [style="tapered"];
@@ -18,24 +18,24 @@ rescueTemp$5"];
 <unconditional>"];
 
     "bb::<constant:Object>#a_1" -> "bb::<constant:Object>#a_1" [style="bold"];
-    "bb::<constant:Object>#a_3" [label = "block[id=3](rescueTemp$5, <constant:StandardError>$9)
-rescueTemp$10 = rescueTemp$5.is_a?(<constant:StandardError>$9) : untyped
-rescueTemp$10"];
+    "bb::<constant:Object>#a_3" [label = "block[id=3](<rescueTemp$5, <constant:StandardError>$9)
+<rescueTemp$10 = <rescueTemp$5.is_a?(<constant:StandardError>$9) : untyped
+<rescueTemp$10"];
 
     "bb::<constant:Object>#a_3" -> "bb::<constant:Object>#a_8" [style="bold"];
     "bb::<constant:Object>#a_3" -> "bb::<constant:Object>#a_1" [style="tapered"];
 
     "bb::<constant:Object>#a_4" [label = "block[id=4]()
-returnTemp$6 = 1 : Integer(1)
-statTemp$4 = return returnTemp$6 : <bottom>
+<returnTemp>$6 = 1 : Integer(1)
+<statTemp>$4 = return <returnTemp>$6 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#a_4" -> "bb::<constant:Object>#a_1" [style="bold"];
-    "bb::<constant:Object>#a_8" [label = "block[id=8](rescueTemp$5)
+    "bb::<constant:Object>#a_8" [label = "block[id=8](<rescueTemp$5)
 a = 2 : Integer(2)
-statTemp$12 = 3 : Integer(3)
-returnMethodTemp$2 = a.+(statTemp$12) : Integer
-finalReturn = return returnMethodTemp$2 : <bottom>
+<statTemp>$12 = 3 : Integer(3)
+<returnMethodTemp>$2 = a.+(<statTemp>$12) : Integer
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#a_8" -> "bb::<constant:Object>#a_1" [style="bold"];

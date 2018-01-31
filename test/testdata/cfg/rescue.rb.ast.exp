@@ -3,7 +3,7 @@ class <emptyTree><<constant:<root>>> < ()
     def main<<constant:<todo sym>>>()
       begin
         self(<constant:<todo sym>>).a()
-      rescue => rescueTemp$2
+      rescue => <rescueTemp$2
         self(<constant:<todo sym>>).b()
       else
         self(<constant:<todo sym>>).c()

@@ -6,7 +6,7 @@ subgraph "cluster_::<constant:Test>::<constant:Baz>#foo" {
     "bb::<constant:Test>::<constant:Baz>#foo_1" [shape = parallelogram];
 
     "bb::<constant:Test>::<constant:Baz>#foo_0" [label = "block[id=0]()
-finalReturn = return returnMethodTemp$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Test>::<constant:Baz>#foo_0" -> "bb::<constant:Test>::<constant:Baz>#foo_1" [style="bold"];
@@ -25,10 +25,10 @@ subgraph "cluster_::<constant:Test>::<constant:Diff>#parse" {
     "bb::<constant:Test>::<constant:Diff>#parse_0" [label = "block[id=0](<constant:Baz>$13)
 <constant:nil>$6 = alias <constant:nil> : NilClass
 <constant:Baz>$13 = alias <constant:Baz> : <class:Baz>
-selfMethodTemp$4 = self : Diff
+<selfMethodTemp>$4 = self : Diff
 b_name = <constant:nil>$6 : NilClass
-statTemp$7 = self : Diff
-returnMethodTemp$3 = statTemp$7.each() : untyped
+<statTemp>$7 = self : Diff
+<returnMethodTemp>$3 = <statTemp>$7.each() : untyped
 <unconditional>"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_0" -> "bb::<constant:Test>::<constant:Diff>#parse_2" [style="bold"];
@@ -36,51 +36,51 @@ returnMethodTemp$3 = statTemp$7.each() : untyped
 <unconditional>"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_1" -> "bb::<constant:Test>::<constant:Diff>#parse_1" [style="bold"];
-    "bb::<constant:Test>::<constant:Diff>#parse_2" [label = "block[id=2](returnMethodTemp$3, blockReturnTemp$8, <constant:Baz>$13, b_name)
+    "bb::<constant:Test>::<constant:Diff>#parse_2" [label = "block[id=2](<returnMethodTemp>$3, <blockReturnTemp>$8, <constant:Baz>$13, b_name)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_2" -> "bb::<constant:Test>::<constant:Diff>#parse_4" [style="bold"];
     "bb::<constant:Test>::<constant:Diff>#parse_2" -> "bb::<constant:Test>::<constant:Diff>#parse_3" [style="tapered"];
 
-    "bb::<constant:Test>::<constant:Diff>#parse_3" [label = "block[id=3](returnMethodTemp$3)
-finalReturn = return returnMethodTemp$3 : <bottom>
+    "bb::<constant:Test>::<constant:Diff>#parse_3" [label = "block[id=3](<returnMethodTemp>$3)
+<finalReturn> = return <returnMethodTemp>$3 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_3" -> "bb::<constant:Test>::<constant:Diff>#parse_1" [style="bold"];
-    "bb::<constant:Test>::<constant:Diff>#parse_4" [label = "block[id=4](returnMethodTemp$3, blockReturnTemp$8, <constant:Baz>$13, b_name)
+    "bb::<constant:Test>::<constant:Diff>#parse_4" [label = "block[id=4](<returnMethodTemp>$3, <blockReturnTemp>$8, <constant:Baz>$13, b_name)
 outerLoops: 1
 b_name"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_4" -> "bb::<constant:Test>::<constant:Diff>#parse_5" [style="bold"];
     "bb::<constant:Test>::<constant:Diff>#parse_4" -> "bb::<constant:Test>::<constant:Diff>#parse_6" [style="tapered"];
 
-    "bb::<constant:Test>::<constant:Diff>#parse_5" [label = "block[id=5](returnMethodTemp$3, blockReturnTemp$8, <constant:Baz>$13, b_name)
+    "bb::<constant:Test>::<constant:Diff>#parse_5" [label = "block[id=5](<returnMethodTemp>$3, <blockReturnTemp>$8, <constant:Baz>$13, b_name)
 outerLoops: 1
-ifTemp$9 = b_name.foo() : untyped
-ifTemp$9"];
+<ifTemp>$9 = b_name.foo() : untyped
+<ifTemp>$9"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_5" -> "bb::<constant:Test>::<constant:Diff>#parse_8" [style="bold"];
     "bb::<constant:Test>::<constant:Diff>#parse_5" -> "bb::<constant:Test>::<constant:Diff>#parse_10" [style="tapered"];
 
-    "bb::<constant:Test>::<constant:Diff>#parse_6" [label = "block[id=6](returnMethodTemp$3, blockReturnTemp$8, <constant:Baz>$13, b_name)
+    "bb::<constant:Test>::<constant:Diff>#parse_6" [label = "block[id=6](<returnMethodTemp>$3, <blockReturnTemp>$8, <constant:Baz>$13, b_name)
 outerLoops: 1
-ifTemp$9 = b_name : NilClass
-ifTemp$9"];
+<ifTemp>$9 = b_name : NilClass
+<ifTemp>$9"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_6" -> "bb::<constant:Test>::<constant:Diff>#parse_8" [style="bold"];
     "bb::<constant:Test>::<constant:Diff>#parse_6" -> "bb::<constant:Test>::<constant:Diff>#parse_10" [style="tapered"];
 
-    "bb::<constant:Test>::<constant:Diff>#parse_8" [label = "block[id=8](returnMethodTemp$3, <constant:Baz>$13, b_name)
+    "bb::<constant:Test>::<constant:Diff>#parse_8" [label = "block[id=8](<returnMethodTemp>$3, <constant:Baz>$13, b_name)
 outerLoops: 1
 b_name = <constant:Baz>$13.new() : untyped
-blockReturnTemp$8 = b_name : untyped
+<blockReturnTemp>$8 = b_name : untyped
 <unconditional>"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_8" -> "bb::<constant:Test>::<constant:Diff>#parse_10" [style="bold"];
-    "bb::<constant:Test>::<constant:Diff>#parse_10" [label = "block[id=10](returnMethodTemp$3, blockReturnTemp$8, <constant:Baz>$13, b_name)
+    "bb::<constant:Test>::<constant:Diff>#parse_10" [label = "block[id=10](<returnMethodTemp>$3, <blockReturnTemp>$8, <constant:Baz>$13, b_name)
 outerLoops: 1
-blockReturnTemp$14 = blockreturn<::<constant:Test>::<constant:Diff>#parse#<block>$2> blockReturnTemp$8 : <bottom>
+<blockReturnTemp>$14 = blockreturn<::<constant:Test>::<constant:Diff>#parse#<block>$2> <blockReturnTemp>$8 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Test>::<constant:Diff>#parse_10" -> "bb::<constant:Test>::<constant:Diff>#parse_2" [style="bold"];

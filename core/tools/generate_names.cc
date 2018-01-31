@@ -28,7 +28,11 @@ struct NameDef {
     string val;
     int phases;
 
-    NameDef(const char *srcName, const char *val, int phases) : srcName(srcName), val(val), phases(phases) {}
+    NameDef(const char *srcName, const char *val, int phases) : srcName(srcName), val(val), phases(phases) {
+        if (strcmp(srcName, val) == 0) {
+            ruby_typer::Error::raise("Only pass one arg for '", val, "'");
+        }
+    }
     NameDef(const char *srcName, int phases) : srcName(srcName), val(srcName), phases(phases) {}
 };
 
@@ -59,21 +63,21 @@ NameDef names[] = {
     {"each", Desugar},
 
     // used in CFG for temporaries
-    {"whileTemp", "whileTemp", CFG | Core},
-    {"ifTemp", "ifTemp", CFG | Core},
-    {"returnTemp", "returnTemp", CFG | Core},
-    {"statTemp", "statTemp", CFG | Core},
-    {"assignTemp", "assignTemp", Desugar | Infer | Core},
-    {"returnMethodTemp", "returnMethodTemp", CFG | Core},
-    {"debugEnvironmentTemp", "debugEnvironmentTemp", CFG | Infer | Core},
-    {"blockReturnTemp", "blockReturnTemp", CFG | Core},
-    {"selfMethodTemp", "selfMethodTemp", CFG | Core},
-    {"hashTemp", "hashTemp", CFG | Core},
-    {"arrayTemp", "arrayTemp", CFG | Core},
-    {"rescueTemp", "rescueTemp", Desugar | CFG | Core},
-    {"castTemp", "castTemp", Resolver | CFG | Core},
-    {"finalReturn", "finalReturn", CFG | Infer | Core},
-    {"cfgAlias", "cfgAlias", CFG | Infer | Core},
+    {"whileTemp", "<whileTemp>", CFG | Core},
+    {"ifTemp", "<ifTemp>", CFG | Core},
+    {"returnTemp", "<returnTemp>", CFG | Core},
+    {"statTemp", "<statTemp>", CFG | Core},
+    {"assignTemp", "<assignTemp", Desugar | Infer | Core},
+    {"returnMethodTemp", "<returnMethodTemp>", CFG | Core},
+    {"debugEnvironmentTemp", "<debugEnvironmentTemp>", CFG | Infer | Core},
+    {"blockReturnTemp", "<blockReturnTemp>", CFG | Core},
+    {"selfMethodTemp", "<selfMethodTemp>", CFG | Core},
+    {"hashTemp", "<hashTemp>", CFG | Core},
+    {"arrayTemp", "<arrayTemp>", CFG | Core},
+    {"rescueTemp", "<rescueTemp", Desugar | CFG | Core},
+    {"castTemp", "<castTemp", Resolver | CFG | Core},
+    {"finalReturn", "<finalReturn>", CFG | Infer | Core},
+    {"cfgAlias", "<cfgAlias>", CFG | Infer | Core},
     // end CFG temporaries
 
     {"include", Namer | Resolver},
@@ -124,7 +128,7 @@ NameDef names[] = {
     {"covariant", "out", Namer},
     {"contravariant", "in", Namer},
     {"invariant", "<invariant>", Namer},
-    {"fixed", "fixed", Namer | Resolver},
+    {"fixed", Namer | Resolver},
     // end DSL methods
 
     // Our own special methods which have special meaning
@@ -156,7 +160,7 @@ NameDef names[] = {
 
     {"lambda", Parser},
     {"nil_p", "nil?", Desugar | Infer},
-    {"nil", "nil", Infer},
+    {"nil", Infer},
     {"super", Desugar | Infer},
     {"empty", "", Desugar},
 

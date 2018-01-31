@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>$6" {
     "bb#<static-init>$6_1" [shape = parallelogram];
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
-finalReturn = return returnMethodTemp$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::<constant:Trigger>#trigger" {
 
     "bb::<constant:Trigger>#trigger_0" [label = "block[id=0]()
 @__fake_logger$4 = alias @__fake_logger : untyped
-finalReturn = return @__fake_logger$4 : <bottom>
+<finalReturn> = return @__fake_logger$4 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Trigger>#trigger_0" -> "bb::<constant:Trigger>#trigger_1" [style="bold"];

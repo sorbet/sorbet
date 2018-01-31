@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>$6" {
     "bb#<static-init>$6_1" [shape = parallelogram];
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
-finalReturn = return returnMethodTemp$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
@@ -43,17 +43,17 @@ subgraph "cluster_::<singleton class:<constant:A>>#send_beta_invitation" {
 <constant:C18>$77 = alias <constant:C18> : <class:C18>
 <constant:C19>$81 = alias <constant:C19> : <class:C19>
 <constant:C20>$85 = alias <constant:C20> : <class:C20>
-selfMethodTemp$3 = self : <class:A>
-invite = load_arg(selfMethodTemp$3#send_beta_invitation, 0) : untyped
-statTemp$7 = 1 : Integer(1)
-ifTemp$6 = statTemp$7.===(invite) : TrueClass | FalseClass
-ifTemp$6"];
+<selfMethodTemp>$3 = self : <class:A>
+invite = load_arg(<selfMethodTemp>$3#send_beta_invitation, 0) : untyped
+<statTemp>$7 = 1 : Integer(1)
+<ifTemp>$6 = <statTemp>$7.===(invite) : TrueClass | FalseClass
+<ifTemp>$6"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_0" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_2" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_0" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_3" [style="tapered"];
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [label = "block[id=1](returnMethodTemp$2)
-finalReturn = return returnMethodTemp$2
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [label = "block[id=1](<returnMethodTemp>$2)
+<finalReturn> = return <returnMethodTemp>$2
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_1" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [style="bold"];
@@ -63,9 +63,9 @@ r = <constant:C1>$9 : <class:C1>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_2" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_3" [label = "block[id=3](<constant:C2>$13, <constant:C3>$17, <constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$11 = 2 : Integer(2)
-ifTemp$10 = statTemp$11.===(invite) : TrueClass | FalseClass
-ifTemp$10"];
+<statTemp>$11 = 2 : Integer(2)
+<ifTemp>$10 = <statTemp>$11.===(invite) : TrueClass | FalseClass
+<ifTemp>$10"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_3" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_4" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_3" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_5" [style="tapered"];
@@ -76,9 +76,9 @@ r = <constant:C2>$13 : <class:C2>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_4" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_5" [label = "block[id=5](<constant:C3>$17, <constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$15 = 3 : Integer(3)
-ifTemp$14 = statTemp$15.===(invite) : TrueClass | FalseClass
-ifTemp$14"];
+<statTemp>$15 = 3 : Integer(3)
+<ifTemp>$14 = <statTemp>$15.===(invite) : TrueClass | FalseClass
+<ifTemp>$14"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_5" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_6" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_5" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_7" [style="tapered"];
@@ -89,9 +89,9 @@ r = <constant:C3>$17 : <class:C3>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_6" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_7" [label = "block[id=7](<constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$19 = 4 : Integer(4)
-ifTemp$18 = statTemp$19.===(invite) : TrueClass | FalseClass
-ifTemp$18"];
+<statTemp>$19 = 4 : Integer(4)
+<ifTemp>$18 = <statTemp>$19.===(invite) : TrueClass | FalseClass
+<ifTemp>$18"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_7" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_8" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_7" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_9" [style="tapered"];
@@ -102,9 +102,9 @@ r = <constant:C4>$21 : <class:C4>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_8" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_9" [label = "block[id=9](<constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$23 = 5 : Integer(5)
-ifTemp$22 = statTemp$23.===(invite) : TrueClass | FalseClass
-ifTemp$22"];
+<statTemp>$23 = 5 : Integer(5)
+<ifTemp>$22 = <statTemp>$23.===(invite) : TrueClass | FalseClass
+<ifTemp>$22"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_9" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_10" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_9" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_11" [style="tapered"];
@@ -115,9 +115,9 @@ r = <constant:C5>$25 : <class:C5>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_10" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_11" [label = "block[id=11](<constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$27 = 6 : Integer(6)
-ifTemp$26 = statTemp$27.===(invite) : TrueClass | FalseClass
-ifTemp$26"];
+<statTemp>$27 = 6 : Integer(6)
+<ifTemp>$26 = <statTemp>$27.===(invite) : TrueClass | FalseClass
+<ifTemp>$26"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_11" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_12" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_11" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_13" [style="tapered"];
@@ -128,9 +128,9 @@ r = <constant:C6>$29 : <class:C6>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_12" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_13" [label = "block[id=13](<constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$31 = 7 : Integer(7)
-ifTemp$30 = statTemp$31.===(invite) : TrueClass | FalseClass
-ifTemp$30"];
+<statTemp>$31 = 7 : Integer(7)
+<ifTemp>$30 = <statTemp>$31.===(invite) : TrueClass | FalseClass
+<ifTemp>$30"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_13" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_14" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_13" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_15" [style="tapered"];
@@ -141,9 +141,9 @@ r = <constant:C7>$33 : <class:C7>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_14" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_15" [label = "block[id=15](<constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$35 = 8 : Integer(8)
-ifTemp$34 = statTemp$35.===(invite) : TrueClass | FalseClass
-ifTemp$34"];
+<statTemp>$35 = 8 : Integer(8)
+<ifTemp>$34 = <statTemp>$35.===(invite) : TrueClass | FalseClass
+<ifTemp>$34"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_15" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_16" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_15" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_17" [style="tapered"];
@@ -154,9 +154,9 @@ r = <constant:C8>$37 : <class:C8>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_16" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_17" [label = "block[id=17](<constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$39 = 9 : Integer(9)
-ifTemp$38 = statTemp$39.===(invite) : TrueClass | FalseClass
-ifTemp$38"];
+<statTemp>$39 = 9 : Integer(9)
+<ifTemp>$38 = <statTemp>$39.===(invite) : TrueClass | FalseClass
+<ifTemp>$38"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_17" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_18" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_17" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_19" [style="tapered"];
@@ -167,9 +167,9 @@ r = <constant:C9>$41 : <class:C9>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_18" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_19" [label = "block[id=19](<constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$43 = 10 : Integer(10)
-ifTemp$42 = statTemp$43.===(invite) : TrueClass | FalseClass
-ifTemp$42"];
+<statTemp>$43 = 10 : Integer(10)
+<ifTemp>$42 = <statTemp>$43.===(invite) : TrueClass | FalseClass
+<ifTemp>$42"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_19" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_20" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_19" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_21" [style="tapered"];
@@ -180,9 +180,9 @@ r = <constant:C10>$45 : <class:C10>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_20" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_21" [label = "block[id=21](<constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$47 = 11 : Integer(11)
-ifTemp$46 = statTemp$47.===(invite) : TrueClass | FalseClass
-ifTemp$46"];
+<statTemp>$47 = 11 : Integer(11)
+<ifTemp>$46 = <statTemp>$47.===(invite) : TrueClass | FalseClass
+<ifTemp>$46"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_21" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_22" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_21" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_23" [style="tapered"];
@@ -193,9 +193,9 @@ r = <constant:C11>$49 : <class:C11>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_22" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_23" [label = "block[id=23](<constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$51 = 12 : Integer(12)
-ifTemp$50 = statTemp$51.===(invite) : TrueClass | FalseClass
-ifTemp$50"];
+<statTemp>$51 = 12 : Integer(12)
+<ifTemp>$50 = <statTemp>$51.===(invite) : TrueClass | FalseClass
+<ifTemp>$50"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_23" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_24" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_23" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_25" [style="tapered"];
@@ -206,9 +206,9 @@ r = <constant:C12>$53 : <class:C12>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_24" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_25" [label = "block[id=25](<constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$55 = 13 : Integer(13)
-ifTemp$54 = statTemp$55.===(invite) : TrueClass | FalseClass
-ifTemp$54"];
+<statTemp>$55 = 13 : Integer(13)
+<ifTemp>$54 = <statTemp>$55.===(invite) : TrueClass | FalseClass
+<ifTemp>$54"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_25" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_26" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_25" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_27" [style="tapered"];
@@ -219,9 +219,9 @@ r = <constant:C13>$57 : <class:C13>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_26" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_27" [label = "block[id=27](<constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$59 = 14 : Integer(14)
-ifTemp$58 = statTemp$59.===(invite) : TrueClass | FalseClass
-ifTemp$58"];
+<statTemp>$59 = 14 : Integer(14)
+<ifTemp>$58 = <statTemp>$59.===(invite) : TrueClass | FalseClass
+<ifTemp>$58"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_27" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_28" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_27" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_29" [style="tapered"];
@@ -232,9 +232,9 @@ r = <constant:C14>$61 : <class:C14>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_28" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_29" [label = "block[id=29](<constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$63 = 15 : Integer(15)
-ifTemp$62 = statTemp$63.===(invite) : TrueClass | FalseClass
-ifTemp$62"];
+<statTemp>$63 = 15 : Integer(15)
+<ifTemp>$62 = <statTemp>$63.===(invite) : TrueClass | FalseClass
+<ifTemp>$62"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_29" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_30" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_29" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_31" [style="tapered"];
@@ -245,9 +245,9 @@ r = <constant:C15>$65 : <class:C15>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_30" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_31" [label = "block[id=31](<constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$67 = 16 : Integer(16)
-ifTemp$66 = statTemp$67.===(invite) : TrueClass | FalseClass
-ifTemp$66"];
+<statTemp>$67 = 16 : Integer(16)
+<ifTemp>$66 = <statTemp>$67.===(invite) : TrueClass | FalseClass
+<ifTemp>$66"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_31" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_32" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_31" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_33" [style="tapered"];
@@ -258,9 +258,9 @@ r = <constant:C16>$69 : <class:C16>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_32" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_33" [label = "block[id=33](<constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$71 = 17 : Integer(17)
-ifTemp$70 = statTemp$71.===(invite) : TrueClass | FalseClass
-ifTemp$70"];
+<statTemp>$71 = 17 : Integer(17)
+<ifTemp>$70 = <statTemp>$71.===(invite) : TrueClass | FalseClass
+<ifTemp>$70"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_33" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_34" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_33" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_35" [style="tapered"];
@@ -271,9 +271,9 @@ r = <constant:C17>$73 : <class:C17>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_34" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_35" [label = "block[id=35](<constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-statTemp$75 = 18 : Integer(18)
-ifTemp$74 = statTemp$75.===(invite) : TrueClass | FalseClass
-ifTemp$74"];
+<statTemp>$75 = 18 : Integer(18)
+<ifTemp>$74 = <statTemp>$75.===(invite) : TrueClass | FalseClass
+<ifTemp>$74"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_35" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_36" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_35" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_37" [style="tapered"];
@@ -284,9 +284,9 @@ r = <constant:C18>$77 : <class:C18>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_36" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_37" [label = "block[id=37](<constant:C19>$81, <constant:C20>$85, invite)
-statTemp$79 = 19 : Integer(19)
-ifTemp$78 = statTemp$79.===(invite) : TrueClass | FalseClass
-ifTemp$78"];
+<statTemp>$79 = 19 : Integer(19)
+<ifTemp>$78 = <statTemp>$79.===(invite) : TrueClass | FalseClass
+<ifTemp>$78"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_37" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_38" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_37" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_39" [style="tapered"];
@@ -297,9 +297,9 @@ r = <constant:C19>$81 : <class:C19>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_38" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_39" [label = "block[id=39](<constant:C20>$85, invite)
-statTemp$83 = 20 : Integer(20)
-ifTemp$82 = statTemp$83.===(invite) : TrueClass | FalseClass
-ifTemp$82"];
+<statTemp>$83 = 20 : Integer(20)
+<ifTemp>$82 = <statTemp>$83.===(invite) : TrueClass | FalseClass
+<ifTemp>$82"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_39" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_40" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_39" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_41" [style="tapered"];
@@ -310,15 +310,15 @@ r = <constant:C20>$85 : <class:C20>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_40" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" [label = "block[id=41]()
-statTemp$86 = self : <class:A>
-statTemp$87 = Bla bla bla : String(\"Bla bla bla\")
-statTemp$4 = statTemp$86.raise(statTemp$87) : NilClass
+<statTemp>$86 = self : <class:A>
+<statTemp>$87 = Bla bla bla : String(\"Bla bla bla\")
+<statTemp>$4 = <statTemp>$86.raise(<statTemp>$87) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [label = "block[id=61](r)
 s = r : <class:C1> | <class:C2> | <class:C3> | <class:C4> | <class:C5> | <class:C6> | <class:C7> | <class:C8> | <class:C9> | <class:C10> | <class:C11> | <class:C12> | <class:C13> | <class:C14> | <class:C15> | <class:C16> | <class:C17> | <class:C18> | <class:C19> | <class:C20> | NilClass
-returnMethodTemp$2 = return s : <bottom>
+<returnMethodTemp>$2 = return s : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_61" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [style="bold"];

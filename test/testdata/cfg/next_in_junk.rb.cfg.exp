@@ -10,7 +10,7 @@ subgraph "cluster_::<constant:Object>#foo" {
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_1" [label = "block[id=1]()
-finalReturn = return returnMethodTemp$2
+<finalReturn> = return <returnMethodTemp>$2
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];

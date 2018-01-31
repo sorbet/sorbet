@@ -7,8 +7,8 @@ subgraph "cluster_::<constant:Object>#foo" {
 
     "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:StandardError>$8)
 <constant:StandardError>$8 = alias <constant:StandardError> : <class:StandardError>
-rescueTemp$4 = <unanalyzable> : untyped
-rescueTemp$4"];
+<rescueTemp$4 = <unanalyzable> : untyped
+<rescueTemp$4"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_3" [style="bold"];
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_4" [style="tapered"];
@@ -17,28 +17,28 @@ rescueTemp$4"];
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](rescueTemp$4, <constant:StandardError>$8)
-rescueTemp$9 = rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped
-rescueTemp$9"];
+    "bb::<constant:Object>#foo_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)
+<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped
+<rescueTemp$9"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_10" [style="bold"];
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="tapered"];
 
     "bb::<constant:Object>#foo_4" [label = "block[id=4]()
-returnMethodTemp$2 = 1 : Integer(1)
-ifTemp$5 = 2 : Integer(2)
-ifTemp$5"];
+<returnMethodTemp>$2 = 1 : Integer(1)
+<ifTemp>$5 = 2 : Integer(2)
+<ifTemp>$5"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_6" [style="bold"];
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_10" [style="tapered"];
 
     "bb::<constant:Object>#foo_6" [label = "block[id=6]()
-returnMethodTemp$2 = 3 : Integer(3)
+<returnMethodTemp>$2 = 3 : Integer(3)
 <unconditional>"];
 
     "bb::<constant:Object>#foo_6" -> "bb::<constant:Object>#foo_10" [style="bold"];
-    "bb::<constant:Object>#foo_10" [label = "block[id=10](returnMethodTemp$2)
-finalReturn = return returnMethodTemp$2 : <bottom>
+    "bb::<constant:Object>#foo_10" [label = "block[id=10](<returnMethodTemp>$2)
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_10" -> "bb::<constant:Object>#foo_1" [style="bold"];

@@ -25,7 +25,7 @@ ClassDef{
                   ]
                   var = UnresolvedIdent{
                     kind = Local
-                    name = rescueTemp$2
+                    name = <rescueTemp$2
                   }
                   body = Send{
                     recv = Self{ claz = ::<constant:<todo sym>> }

@@ -6,7 +6,7 @@ subgraph "cluster_::<singleton class:<constant:A>>#foo" {
     "bb::<singleton class:<constant:A>>#foo_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:A>>#foo_0" [label = "block[id=0]()
-finalReturn = return returnMethodTemp$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#foo_0" -> "bb::<singleton class:<constant:A>>#foo_1" [style="bold"];
@@ -23,8 +23,8 @@ subgraph "cluster_::<singleton class:<singleton class:<constant:A>>>#bar" {
     "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" [shape = parallelogram];
 
     "bb::<singleton class:<singleton class:<constant:A>>>#bar_0" [label = "block[id=0]()
-returnMethodTemp$2 = self : <class:<class:A>>
-finalReturn = return returnMethodTemp$2 : <bottom>
+<returnMethodTemp>$2 = self : <class:<class:A>>
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<singleton class:<constant:A>>>#bar_0" -> "bb::<singleton class:<singleton class:<constant:A>>>#bar_1" [style="bold"];

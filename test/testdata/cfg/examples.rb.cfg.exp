@@ -6,26 +6,26 @@ subgraph "cluster_::<constant:Examples>#i_like_ifs" {
     "bb::<constant:Examples>#i_like_ifs_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#i_like_ifs_0" [label = "block[id=0]()
-ifTemp$4 = true : TrueClass(true)
-ifTemp$4"];
+<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4"];
 
     "bb::<constant:Examples>#i_like_ifs_0" -> "bb::<constant:Examples>#i_like_ifs_2" [style="bold"];
     "bb::<constant:Examples>#i_like_ifs_0" -> "bb::<constant:Examples>#i_like_ifs_3" [style="tapered"];
 
-    "bb::<constant:Examples>#i_like_ifs_1" [label = "block[id=1](returnMethodTemp$2)
-finalReturn = return returnMethodTemp$2
+    "bb::<constant:Examples>#i_like_ifs_1" [label = "block[id=1](<returnMethodTemp>$2)
+<finalReturn> = return <returnMethodTemp>$2
 <unconditional>"];
 
     "bb::<constant:Examples>#i_like_ifs_1" -> "bb::<constant:Examples>#i_like_ifs_1" [style="bold"];
     "bb::<constant:Examples>#i_like_ifs_2" [label = "block[id=2]()
-returnTemp$5 = 1 : Integer(1)
-returnMethodTemp$2 = return returnTemp$5 : <bottom>
+<returnTemp>$5 = 1 : Integer(1)
+<returnMethodTemp>$2 = return <returnTemp>$5 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Examples>#i_like_ifs_2" -> "bb::<constant:Examples>#i_like_ifs_1" [style="bold"];
     "bb::<constant:Examples>#i_like_ifs_3" [label = "block[id=3]()
-returnTemp$6 = 2
-returnMethodTemp$2 = return returnTemp$6
+<returnTemp>$6 = 2
+<returnMethodTemp>$2 = return <returnTemp>$6
 <unconditional>"];
 
     "bb::<constant:Examples>#i_like_ifs_3" -> "bb::<constant:Examples>#i_like_ifs_1" [style="bold"];
@@ -38,8 +38,8 @@ subgraph "cluster_::<constant:Examples>#i_like_exps" {
     "bb::<constant:Examples>#i_like_exps_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#i_like_exps_0" [label = "block[id=0]()
-ifTemp$4 = true : TrueClass(true)
-ifTemp$4"];
+<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4"];
 
     "bb::<constant:Examples>#i_like_exps_0" -> "bb::<constant:Examples>#i_like_exps_2" [style="bold"];
     "bb::<constant:Examples>#i_like_exps_0" -> "bb::<constant:Examples>#i_like_exps_3" [style="tapered"];
@@ -49,17 +49,17 @@ ifTemp$4"];
 
     "bb::<constant:Examples>#i_like_exps_1" -> "bb::<constant:Examples>#i_like_exps_1" [style="bold"];
     "bb::<constant:Examples>#i_like_exps_2" [label = "block[id=2]()
-returnMethodTemp$2 = 1 : Integer(1)
+<returnMethodTemp>$2 = 1 : Integer(1)
 <unconditional>"];
 
     "bb::<constant:Examples>#i_like_exps_2" -> "bb::<constant:Examples>#i_like_exps_4" [style="bold"];
     "bb::<constant:Examples>#i_like_exps_3" [label = "block[id=3]()
-returnMethodTemp$2 = 2
+<returnMethodTemp>$2 = 2
 <unconditional>"];
 
     "bb::<constant:Examples>#i_like_exps_3" -> "bb::<constant:Examples>#i_like_exps_4" [style="bold"];
-    "bb::<constant:Examples>#i_like_exps_4" [label = "block[id=4](returnMethodTemp$2)
-finalReturn = return returnMethodTemp$2 : <bottom>
+    "bb::<constant:Examples>#i_like_exps_4" [label = "block[id=4](<returnMethodTemp>$2)
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Examples>#i_like_exps_4" -> "bb::<constant:Examples>#i_like_exps_1" [style="bold"];
@@ -72,8 +72,8 @@ subgraph "cluster_::<constant:Examples>#return_in_one_branch1" {
     "bb::<constant:Examples>#return_in_one_branch1_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#return_in_one_branch1_0" [label = "block[id=0]()
-ifTemp$4 = true : TrueClass(true)
-ifTemp$4"];
+<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4"];
 
     "bb::<constant:Examples>#return_in_one_branch1_0" -> "bb::<constant:Examples>#return_in_one_branch1_2" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch1_0" -> "bb::<constant:Examples>#return_in_one_branch1_3" [style="tapered"];
@@ -83,14 +83,14 @@ ifTemp$4"];
 
     "bb::<constant:Examples>#return_in_one_branch1_1" -> "bb::<constant:Examples>#return_in_one_branch1_1" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch1_2" [label = "block[id=2]()
-returnTemp$5 = 1 : Integer(1)
-returnMethodTemp$2 = return returnTemp$5 : <bottom>
+<returnTemp>$5 = 1 : Integer(1)
+<returnMethodTemp>$2 = return <returnTemp>$5 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Examples>#return_in_one_branch1_2" -> "bb::<constant:Examples>#return_in_one_branch1_1" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch1_3" [label = "block[id=3]()
-returnMethodTemp$2 = 2
-finalReturn = return returnMethodTemp$2
+<returnMethodTemp>$2 = 2
+<finalReturn> = return <returnMethodTemp>$2
 <unconditional>"];
 
     "bb::<constant:Examples>#return_in_one_branch1_3" -> "bb::<constant:Examples>#return_in_one_branch1_1" [style="bold"];
@@ -103,8 +103,8 @@ subgraph "cluster_::<constant:Examples>#return_in_one_branch2" {
     "bb::<constant:Examples>#return_in_one_branch2_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#return_in_one_branch2_0" [label = "block[id=0]()
-ifTemp$4 = true : TrueClass(true)
-ifTemp$4"];
+<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4"];
 
     "bb::<constant:Examples>#return_in_one_branch2_0" -> "bb::<constant:Examples>#return_in_one_branch2_2" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch2_0" -> "bb::<constant:Examples>#return_in_one_branch2_3" [style="tapered"];
@@ -114,14 +114,14 @@ ifTemp$4"];
 
     "bb::<constant:Examples>#return_in_one_branch2_1" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch2_2" [label = "block[id=2]()
-returnMethodTemp$2 = 1 : Integer(1)
-finalReturn = return returnMethodTemp$2 : <bottom>
+<returnMethodTemp>$2 = 1 : Integer(1)
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Examples>#return_in_one_branch2_2" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch2_3" [label = "block[id=3]()
-returnTemp$5 = 2
-returnMethodTemp$2 = return returnTemp$5
+<returnTemp>$5 = 2
+<returnMethodTemp>$2 = return <returnTemp>$5
 <unconditional>"];
 
     "bb::<constant:Examples>#return_in_one_branch2_3" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
@@ -134,8 +134,8 @@ subgraph "cluster_::<constant:Examples>#variables" {
     "bb::<constant:Examples>#variables_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#variables_0" [label = "block[id=0]()
-ifTemp$5 = true : TrueClass(true)
-ifTemp$5"];
+<ifTemp>$5 = true : TrueClass(true)
+<ifTemp>$5"];
 
     "bb::<constant:Examples>#variables_0" -> "bb::<constant:Examples>#variables_2" [style="bold"];
     "bb::<constant:Examples>#variables_0" -> "bb::<constant:Examples>#variables_3" [style="tapered"];
@@ -155,8 +155,8 @@ a = 2
 
     "bb::<constant:Examples>#variables_3" -> "bb::<constant:Examples>#variables_4" [style="bold"];
     "bb::<constant:Examples>#variables_4" [label = "block[id=4](a)
-ifTemp$7 = false : FalseClass(false)
-ifTemp$7"];
+<ifTemp>$7 = false : FalseClass(false)
+<ifTemp>$7"];
 
     "bb::<constant:Examples>#variables_4" -> "bb::<constant:Examples>#variables_5" [style="bold"];
     "bb::<constant:Examples>#variables_4" -> "bb::<constant:Examples>#variables_6" [style="tapered"];
@@ -172,8 +172,8 @@ b = 2 : Integer(2)
 
     "bb::<constant:Examples>#variables_6" -> "bb::<constant:Examples>#variables_7" [style="bold"];
     "bb::<constant:Examples>#variables_7" [label = "block[id=7](b, a)
-returnMethodTemp$2 = a.+(b) : Integer
-finalReturn = return returnMethodTemp$2 : <bottom>
+<returnMethodTemp>$2 = a.+(b) : Integer
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_7" -> "bb::<constant:Examples>#variables_1" [style="bold"];
@@ -187,10 +187,10 @@ subgraph "cluster_::<constant:Examples>#variables_and_loop" {
 
     "bb::<constant:Examples>#variables_and_loop_0" [label = "block[id=0](<constant:nil>$10)
 <constant:nil>$10 = alias <constant:nil> : NilClass
-selfMethodTemp$3 = self : Examples
-cond = load_arg(selfMethodTemp$3#variables_and_loop, 0) : untyped
-ifTemp$5 = true : TrueClass(true)
-ifTemp$5"];
+<selfMethodTemp>$3 = self : Examples
+cond = load_arg(<selfMethodTemp>$3#variables_and_loop, 0) : untyped
+<ifTemp>$5 = true : TrueClass(true)
+<ifTemp>$5"];
 
     "bb::<constant:Examples>#variables_and_loop_0" -> "bb::<constant:Examples>#variables_and_loop_2" [style="bold"];
     "bb::<constant:Examples>#variables_and_loop_0" -> "bb::<constant:Examples>#variables_and_loop_3" [style="tapered"];
@@ -211,14 +211,14 @@ a = 2
     "bb::<constant:Examples>#variables_and_loop_3" -> "bb::<constant:Examples>#variables_and_loop_5" [style="bold"];
     "bb::<constant:Examples>#variables_and_loop_5" [label = "block[id=5](<constant:nil>$10, b, cond)
 outerLoops: 1
-whileTemp$7 = true : TrueClass(true)
-whileTemp$7"];
+<whileTemp>$7 = true : TrueClass(true)
+<whileTemp>$7"];
 
     "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_7" [style="bold"];
     "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_6" [style="tapered"];
 
     "bb::<constant:Examples>#variables_and_loop_6" [label = "block[id=6](<constant:nil>$10, b)
-finalReturn = return b
+<finalReturn> = return b
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_and_loop_6" -> "bb::<constant:Examples>#variables_and_loop_1" [style="bold"];
@@ -251,8 +251,8 @@ subgraph "cluster_::<constant:Examples>#variables_loop_if" {
 
     "bb::<constant:Examples>#variables_loop_if_0" [label = "block[id=0](<constant:nil>$8)
 <constant:nil>$8 = alias <constant:nil> : NilClass
-selfMethodTemp$3 = self : Examples
-cond = load_arg(selfMethodTemp$3#variables_loop_if, 0) : untyped
+<selfMethodTemp>$3 = self : Examples
+cond = load_arg(<selfMethodTemp>$3#variables_loop_if, 0) : untyped
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_loop_if_0" -> "bb::<constant:Examples>#variables_loop_if_2" [style="bold"];
@@ -262,14 +262,14 @@ cond = load_arg(selfMethodTemp$3#variables_loop_if, 0) : untyped
     "bb::<constant:Examples>#variables_loop_if_1" -> "bb::<constant:Examples>#variables_loop_if_1" [style="bold"];
     "bb::<constant:Examples>#variables_loop_if_2" [label = "block[id=2](<constant:nil>$8, b, cond)
 outerLoops: 1
-whileTemp$5 = true : TrueClass(true)
-whileTemp$5"];
+<whileTemp>$5 = true : TrueClass(true)
+<whileTemp>$5"];
 
     "bb::<constant:Examples>#variables_loop_if_2" -> "bb::<constant:Examples>#variables_loop_if_4" [style="bold"];
     "bb::<constant:Examples>#variables_loop_if_2" -> "bb::<constant:Examples>#variables_loop_if_3" [style="tapered"];
 
     "bb::<constant:Examples>#variables_loop_if_3" [label = "block[id=3](<constant:nil>$8, b)
-finalReturn = return b
+<finalReturn> = return b
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_loop_if_3" -> "bb::<constant:Examples>#variables_loop_if_1" [style="bold"];
@@ -301,10 +301,10 @@ subgraph "cluster_::<constant:Examples>#take_arguments" {
     "bb::<constant:Examples>#take_arguments_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#take_arguments_0" [label = "block[id=0]()
-selfMethodTemp$3 = self : Examples
-i = load_arg(selfMethodTemp$3#take_arguments, 0) : untyped
-ifTemp$4 = false : FalseClass(false)
-ifTemp$4"];
+<selfMethodTemp>$3 = self : Examples
+i = load_arg(<selfMethodTemp>$3#take_arguments, 0) : untyped
+<ifTemp>$4 = false : FalseClass(false)
+<ifTemp>$4"];
 
     "bb::<constant:Examples>#take_arguments_0" -> "bb::<constant:Examples>#take_arguments_2" [style="bold"];
     "bb::<constant:Examples>#take_arguments_0" -> "bb::<constant:Examples>#take_arguments_3" [style="tapered"];
@@ -314,17 +314,17 @@ ifTemp$4"];
 
     "bb::<constant:Examples>#take_arguments_1" -> "bb::<constant:Examples>#take_arguments_1" [style="bold"];
     "bb::<constant:Examples>#take_arguments_2" [label = "block[id=2]()
-returnMethodTemp$2 = 2 : Integer(2)
+<returnMethodTemp>$2 = 2 : Integer(2)
 <unconditional>"];
 
     "bb::<constant:Examples>#take_arguments_2" -> "bb::<constant:Examples>#take_arguments_4" [style="bold"];
     "bb::<constant:Examples>#take_arguments_3" [label = "block[id=3](i)
-returnMethodTemp$2 = i : untyped
+<returnMethodTemp>$2 = i : untyped
 <unconditional>"];
 
     "bb::<constant:Examples>#take_arguments_3" -> "bb::<constant:Examples>#take_arguments_4" [style="bold"];
-    "bb::<constant:Examples>#take_arguments_4" [label = "block[id=4](returnMethodTemp$2)
-finalReturn = return returnMethodTemp$2 : <bottom>
+    "bb::<constant:Examples>#take_arguments_4" [label = "block[id=4](<returnMethodTemp>$2)
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Examples>#take_arguments_4" -> "bb::<constant:Examples>#take_arguments_1" [style="bold"];

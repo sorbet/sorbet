@@ -7,8 +7,8 @@ subgraph "cluster_::<constant:Object>#foo" {
 
     "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:StandardError>$9)
 <constant:StandardError>$9 = alias <constant:StandardError> : <class:StandardError>
-selfMethodTemp$3 = self : Object
-foo = load_arg(selfMethodTemp$3#foo, 0) : untyped
+<selfMethodTemp>$3 = self : Object
+foo = load_arg(<selfMethodTemp>$3#foo, 0) : untyped
 foo"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
@@ -39,12 +39,12 @@ err"];
     "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_10" [style="tapered"];
 
     "bb::<constant:Object>#foo_8" [label = "block[id=8]()
-returnMethodTemp$2 = 1 : Integer(1)
+<returnMethodTemp>$2 = 1 : Integer(1)
 <unconditional>"];
 
     "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_10" [style="bold"];
-    "bb::<constant:Object>#foo_10" [label = "block[id=10](returnMethodTemp$2)
-finalReturn = return returnMethodTemp$2 : <bottom>
+    "bb::<constant:Object>#foo_10" [label = "block[id=10](<returnMethodTemp>$2)
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_10" -> "bb::<constant:Object>#foo_1" [style="bold"];

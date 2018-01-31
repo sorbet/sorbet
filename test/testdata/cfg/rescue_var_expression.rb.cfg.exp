@@ -6,11 +6,11 @@ subgraph "cluster_#<static-init>$6" {
     "bb#<static-init>$6_1" [shape = parallelogram];
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
-statTemp$6 = self : <class:<root>>
-statTemp$8 = self : <class:<root>>
-statTemp$7 = statTemp$8.foo() : untyped
-returnMethodTemp$2 = statTemp$6.puts(statTemp$7) : NilClass
-finalReturn = return returnMethodTemp$2 : <bottom>
+<statTemp>$6 = self : <class:<root>>
+<statTemp>$8 = self : <class:<root>>
+<statTemp>$7 = <statTemp>$8.foo() : untyped
+<returnMethodTemp>$2 = <statTemp>$6.puts(<statTemp>$7) : NilClass
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
@@ -29,8 +29,8 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:Exception>$9, <constant:MyClass>$14)
 <constant:Exception>$9 = alias <constant:Exception> : <class:Exception>
 <constant:MyClass>$14 = alias <constant:MyClass> : <class:MyClass>
-rescueTemp$4 = <unanalyzable> : untyped
-rescueTemp$4"];
+<rescueTemp$4 = <unanalyzable> : untyped
+<rescueTemp$4"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_3" [style="bold"];
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_4" [style="tapered"];
@@ -39,29 +39,29 @@ rescueTemp$4"];
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](rescueTemp$4, <constant:Exception>$9, <constant:MyClass>$14)
-rescueTemp$10 = rescueTemp$4.is_a?(<constant:Exception>$9) : untyped
-rescueTemp$10"];
+    "bb::<constant:Object>#foo_3" [label = "block[id=3](<rescueTemp$4, <constant:Exception>$9, <constant:MyClass>$14)
+<rescueTemp$10 = <rescueTemp$4.is_a?(<constant:Exception>$9) : untyped
+<rescueTemp$10"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_8" [style="bold"];
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="tapered"];
 
     "bb::<constant:Object>#foo_4" [label = "block[id=4]()
-statTemp$5 = self : Object
-statTemp$6 = boop : String(\"boop\")
-returnMethodTemp$2 = statTemp$5.raise(statTemp$6) : NilClass
+<statTemp>$5 = self : Object
+<statTemp>$6 = boop : String(\"boop\")
+<returnMethodTemp>$2 = <statTemp>$5.raise(<statTemp>$6) : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_7" [style="bold"];
-    "bb::<constant:Object>#foo_7" [label = "block[id=7](returnMethodTemp$2)
-finalReturn = return returnMethodTemp$2 : <bottom>
+    "bb::<constant:Object>#foo_7" [label = "block[id=7](<returnMethodTemp>$2)
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_8" [label = "block[id=8](rescueTemp$4, <constant:MyClass>$14)
-statTemp$12 = <constant:MyClass>$14.new() : MyClass
-statTemp$11 = statTemp$12.foo=(rescueTemp$4) : untyped
-returnMethodTemp$2 = 3 : Integer(3)
+    "bb::<constant:Object>#foo_8" [label = "block[id=8](<rescueTemp$4, <constant:MyClass>$14)
+<statTemp>$12 = <constant:MyClass>$14.new() : MyClass
+<statTemp>$11 = <statTemp>$12.foo=(<rescueTemp$4) : untyped
+<returnMethodTemp>$2 = 3 : Integer(3)
 <unconditional>"];
 
     "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_7" [style="bold"];
@@ -74,8 +74,8 @@ subgraph "cluster_::<constant:MyClass>#foo=" {
     "bb::<constant:MyClass>#foo=_1" [shape = parallelogram];
 
     "bb::<constant:MyClass>#foo=_0" [label = "block[id=0]()
-selfMethodTemp$3 = self : MyClass
-finalReturn = return returnMethodTemp$2 : <bottom>
+<selfMethodTemp>$3 = self : MyClass
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:MyClass>#foo=_0" -> "bb::<constant:MyClass>#foo=_1" [style="bold"];

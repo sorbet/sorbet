@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>$6" {
     "bb#<static-init>$6_1" [shape = parallelogram];
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
-finalReturn = return returnMethodTemp$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
@@ -23,8 +23,8 @@ subgraph "cluster_::<singleton class:<constant:Foo>>#bar" {
     "bb::<singleton class:<constant:Foo>>#bar_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:Foo>>#bar_0" [label = "block[id=0]()
-returnMethodTemp$2 = 1 : Integer(1)
-finalReturn = return returnMethodTemp$2 : <bottom>
+<returnMethodTemp>$2 = 1 : Integer(1)
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Foo>>#bar_0" -> "bb::<singleton class:<constant:Foo>>#bar_1" [style="bold"];
@@ -42,8 +42,8 @@ subgraph "cluster_::<constant:Bar>#baz" {
 
     "bb::<constant:Bar>#baz_0" [label = "block[id=0]()
 <constant:Foo>$5 = alias <constant:Foo> : <class:Foo>
-returnMethodTemp$2 = <constant:Foo>$5.bar() : untyped
-finalReturn = return returnMethodTemp$2 : <bottom>
+<returnMethodTemp>$2 = <constant:Foo>$5.bar() : untyped
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Bar>#baz_0" -> "bb::<constant:Bar>#baz_1" [style="bold"];

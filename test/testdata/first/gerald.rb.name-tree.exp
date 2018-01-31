@@ -35,12 +35,12 @@ begin
     def initialize<initialize>()
       begin
         begin
-          assignTemp$3 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-pass>$2$6107|
+          <assignTemp$3 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-pass>$2$6107|
             <block-pass>$2$6107.valid?()
           end
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = assignTemp$3.[](0)
-          invalid_rules = assignTemp$3.[](1)
-          assignTemp$3
+          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = <assignTemp$3.[](0)
+          invalid_rules = <assignTemp$3.[](1)
+          <assignTemp$3
         end
         if invalid_rules.empty?().!()
           begin
