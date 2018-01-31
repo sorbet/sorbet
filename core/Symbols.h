@@ -26,26 +26,6 @@ public:
     SymbolRef(const GlobalState &from, u4 _id);
     SymbolRef() : _id(0){};
 
-    unsigned inline int classId() const {
-        ENFORCE((_id & 3) == 3, "not a classId");
-        return _id >> 2;
-    }
-
-    unsigned inline int defId() const {
-        ENFORCE((_id & 3) == 2, "not a defId");
-        return _id >> 2;
-    }
-
-    unsigned inline int valId() const {
-        ENFORCE((_id & 3) == 1, "not a valId");
-        return _id >> 2;
-    }
-
-    unsigned inline int typeId() const {
-        ENFORCE((_id & 3) == 0, "not a valId");
-        return _id >> 2;
-    }
-
     bool inline exists() const {
         return _id;
     }
@@ -61,8 +41,6 @@ public:
 
     /** Not printed when showing name table */
     bool isHiddenFromPrinting(const GlobalState &gs) const;
-
-    bool isPrimitive() const;
 
     Symbol &data(GlobalState &gs, bool allowNone = false) const;
     const Symbol &data(const GlobalState &gs, bool allowNone = false) const;
@@ -132,8 +110,6 @@ public:
     Symbol(const Symbol &) = delete;
     Symbol() = default;
     Symbol(Symbol &&) noexcept = default;
-
-    bool isConstructor(GlobalState &gs) const;
 
     class Flags {
     public:

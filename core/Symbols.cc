@@ -22,13 +22,6 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
     return !(rhs == *this);
 }
 
-bool SymbolRef::isPrimitive() const {
-    Error::notImplemented();
-}
-bool Symbol::isConstructor(GlobalState &gs) const {
-    return this->name._id == 1;
-}
-
 std::vector<std::shared_ptr<core::Type>> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClass()); // should be removed when we have generic methods
     std::vector<shared_ptr<core::Type>> targs;
