@@ -25,12 +25,6 @@ ruby_typer::core::Name::~Name() noexcept {
     }
 }
 
-unsigned int Name::hashNames(vector<NameRef> &lhs, GlobalState &gs) {
-    return accumulate(lhs.begin(), lhs.end(), 0, [](int acc, NameRef &necc) -> int { return mix(acc, necc.id()); }) *
-               8 +
-           lhs.size();
-}
-
 unsigned int Name::hash(const GlobalState &gs) const {
     // TODO: use https://github.com/Cyan4973/xxHash
     // !!! keep this in sync with GlobalState.enter*

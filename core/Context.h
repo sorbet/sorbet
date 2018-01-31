@@ -61,7 +61,6 @@ public:
 
 private:
     std::vector<NameRef> nameSubstitution;
-    std::vector<FileRef> fileSubstitution;
 };
 
 } // namespace core

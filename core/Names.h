@@ -169,9 +169,6 @@ public:
 
 private:
     unsigned int hash(const GlobalState &gs) const;
-
-public:
-    static unsigned int hashNames(std::vector<NameRef> &lhs, GlobalState &gs);
 };
 
 CheckSize(Name, 24, 8);
