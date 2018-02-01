@@ -25,6 +25,7 @@ string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
             buf << "-";
             buf << pos.second.line;
         }
+        buf << ":";
     }
     return buf.str();
 }

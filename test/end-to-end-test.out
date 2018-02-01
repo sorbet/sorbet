@@ -1,27 +1,27 @@
-test/end-to-end-test-input.rb:4 Stubbing out unknown constant <emptyTree>::<constant:MissingConstant> [5002]
+test/end-to-end-test-input.rb:4: Stubbing out unknown constant <emptyTree>::<constant:MissingConstant> [5002]
     MissingConstant
     ^^^^^^^^^^^^^^^
-test/end-to-end-test-input.rb:12 Argument arg0 does not match expected type String [7002]
+test/end-to-end-test-input.rb:12: Argument arg0 does not match expected type String [7002]
     raise arg # raise is defined by stdlib
     ^^^^^^^^^
-    rbi/stdlib.rbi:__LINE__ Method <overload N.1 : raise> has specified type of argument arg0 as String
+    rbi/stdlib.rbi:__LINE__: Method <overload N.1 : raise> has specified type of argument arg0 as String
       arg0: String,
       ^^^^^
 
   Got Integer originating from:
-    test/end-to-end-test-input.rb:9 
+    test/end-to-end-test-input.rb:9: 
   sig(arg: Integer).returns(NilClass)
       ^^^^
 
-test/end-to-end-test-input.rb:16 Argument arg does not match expected type Integer [7002]
+test/end-to-end-test-input.rb:16: Argument arg does not match expected type Integer [7002]
     foo("foo")
     ^^^^^^^^^^
-    test/end-to-end-test-input.rb:9 Method foo has specified type of argument arg as Integer
+    test/end-to-end-test-input.rb:9: Method foo has specified type of argument arg as Integer
   sig(arg: Integer).returns(NilClass)
       ^^^^
 
   Got String originating from:
-    test/end-to-end-test-input.rb:16 
+    test/end-to-end-test-input.rb:16: 
     foo("foo")
         ^^^^^
 

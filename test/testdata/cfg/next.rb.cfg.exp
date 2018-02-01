@@ -40,14 +40,10 @@ outerLoops: 1
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_4" [label = "block[id=4](<returnMethodTemp>$3)
 outerLoops: 1
-x$6095 = load_yield_param(::<constant:Object>#foo#<block>$2, 0) : TupleType {
-  0 = untyped
-}
+x$6095 = load_yield_param(::<constant:Object>#foo#<block>$2, 0) : untyped
 <statTemp>$10 = self : Object
 <statTemp>$9 = <statTemp>$10.good() : untyped
-<blockReturnTemp>$12 = x$6095 : TupleType {
-  0 = untyped
-}
+<blockReturnTemp>$12 = x$6095 : untyped
 <blockReturnTemp>$13 = blockreturn<::<constant:Object>#foo#<block>$2> <blockReturnTemp>$12 : <bottom>
 <unconditional>"];
 

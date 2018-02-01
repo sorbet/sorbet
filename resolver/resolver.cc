@@ -454,15 +454,6 @@ private:
                         result = core::Types::dynamic();
                         return;
                     }
-                    auto arity = s->args.size() - 1;
-                    if (arity > core::Symbols::MAX_PROC_ARITY) {
-                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                        "Malformed T::Proc[]: Too many arguments (max {})",
-                                        core::Symbols::MAX_PROC_ARITY);
-                        result = core::Types::dynamic();
-                        return;
-                    }
-                    auto sym = core::Symbols::Proc(arity);
                     vector<shared_ptr<core::Type>> targs;
 
                     auto &back = s->args.back();
@@ -488,19 +479,35 @@ private:
                     }
                     targs.emplace_back(move(returnType));
 
-                    for (auto &arg : s->args) {
-                        if (&arg == &s->args.back()) {
-                            continue;
+                    if (s->args.size() > 1) {
+                        ast::Array *arr = ast::cast_tree<ast::Array>(s->args.front().get());
+                        if (arr == nullptr) {
+                            ctx.state.error(s->args.front()->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                            "Malformed type declaration. Expected parameter list");
+                            result = core::Types::dynamic();
+                            return;
                         }
-                        targs.emplace_back(getResultType(ctx, arg));
+                        for (auto &el : arr->elems) {
+                            targs.emplace_back(getResultType(ctx, el));
+                        }
                     }
+
+                    auto arity = targs.size() - 1;
+                    if (arity > core::Symbols::MAX_PROC_ARITY) {
+                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed T::Proc[]: Too many arguments (max {})",
+                                        core::Symbols::MAX_PROC_ARITY);
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    auto sym = core::Symbols::Proc(arity);
 
                     result = make_shared<core::AppliedType>(sym, targs);
                 } else {
                     auto &data = recvi->symbol.data(ctx);
                     if (s->args.size() != data.typeMembers().size()) {
                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                        "Malformed {}[]: Expected %d type arguments, got %d", data.name.toString(ctx),
+                                        "Malformed {}[]: Expected {} type arguments, got {}", data.name.toString(ctx),
                                         data.typeMembers().size(), s->args.size());
                         result = core::Types::dynamic();
                         return;

@@ -3,13 +3,7 @@ class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
     method bad (x, y, z) -> NilClass
       argument x<> -> untyped
       argument y<> -> untyped
-      argument z<> -> AppliedType {
-        klass = ::<constant:Proc1>
-        targs = [
-          <constant:Return> = Integer
-          <constant:Arg0> = untyped
-        ]
-      }
+      argument z<> -> untyped
     method good1 (blk) -> Integer
       argument blk<block> -> AppliedType {
         klass = ::<constant:Proc1>
