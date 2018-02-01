@@ -159,6 +159,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         return ast;
     } catch (...) {
         console_err->error("Exception parsing file: {} (backtrace is above)", file.data(lgs).path());
+        returnCode = 12;
         return make_unique<ast::EmptyTree>(core::Loc::none(file));
     }
 }
@@ -270,7 +271,8 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                 }
                 result.emplace_back(move(ast));
             } catch (...) {
-                console_err->error("Exception on file: {} (backtrace is above)", file.data(gs).path());
+                returnCode = 13;
+                console_err->error("Exception naming file: {} (backtrace is above)", file.data(gs).path());
             }
         }
     }
@@ -305,7 +307,8 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
             cout << "}" << endl << endl;
         }
     } catch (...) {
-        console_err->error("Exception resolving: {} (backtrace is above)", f.data(gs).path());
+        console_err->error("Exception in cfg+infer: {} (backtrace is above)", f.data(gs).path());
+        returnCode = 15;
     }
     if (forceTypedSource) {
         opts.print.TypedSource = false;
@@ -337,6 +340,7 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
         }
     } catch (...) {
         console_err->error("Exception resolving (backtrace is above)");
+        returnCode = 14;
     }
 
     for (auto &resolved : what) {
@@ -372,6 +376,7 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
                         } catch (...) {
                             console_err->error("Exception typing file: {} (backtrace is above)",
                                                file.data(*lgs).path());
+                            returnCode = 16;
                         }
                     }
                 }

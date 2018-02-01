@@ -164,13 +164,13 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
         auto t1filteredL = dropLubComponents(ctx, t1d, a2->left);
         if (t1filteredL != t1d) {
             categoryCounterInc("lub.and>simplified", "left");
-            return AndType::make_shared(lub(ctx, t1filteredL, a2->right), a2->left);
+            return Types::buildAnd(ctx, lub(ctx, t1filteredL, a2->right), a2->left);
         }
 
         auto t1filteredR = dropLubComponents(ctx, t1d, a2->right);
         if (t1filteredR != t1d) {
             categoryCounterInc("lub.and>simplified", "left");
-            return AndType::make_shared(lub(ctx, t1filteredR, a2->left), a2->right);
+            return Types::buildAnd(ctx, lub(ctx, t1filteredR, a2->left), a2->right);
         }
 
         categoryCounterInc("lub.and>simplified", "none");
