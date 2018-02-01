@@ -8,10 +8,10 @@ def main
       begin
         if try < 3 # error: Method < does not exist on NilClass component of T.any(NilClass, Integer)
             try += 1 # error: Method + does not exist on NilClass component of T.any(NilClass, Integer)
-            raise A.new # error: MULTI
+            raise A.new
         elsif try < 6 # error: Method < does not exist on NilClass component of T.any(NilClass, Integer)
             try += 1 # error: Method + does not exist on NilClass component of T.any(NilClass, Integer)
-            raise B.new # error: MULTI
+            raise B.new
         end
       rescue A
         puts "rescue A"

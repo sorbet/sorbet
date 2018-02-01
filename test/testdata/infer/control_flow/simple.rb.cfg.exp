@@ -1,4 +1,4 @@
-digraph "controlFlow.rb"{
+digraph "simple.rb"{
 subgraph "cluster_::<constant:ControlFlow>#orZero0" {
     label = "::<constant:ControlFlow>#orZero0";
     color = blue;

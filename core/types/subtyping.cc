@@ -985,46 +985,35 @@ std::shared_ptr<Type> AliasType::instantiate(const core::Context ctx, std::vecto
     Error::raise("should never happen");
 }
 
-std::string TypeConstructor::toString(const GlobalState &gs, int tabs) {
-    return "TypeConstructor";
+std::string MetaType::toString(const GlobalState &gs, int tabs) {
+    return "MetaType";
 }
 
-std::string TypeConstructor::show(const GlobalState &gs) {
+std::string MetaType::show(const GlobalState &gs) {
     Error::raise("should never happen");
 }
 
-std::string TypeConstructor::typeName() {
-    return "TypeConstructor";
+std::string MetaType::typeName() {
+    return "MetaType";
 }
 
-void TypeConstructor::_sanityCheck(const core::Context ctx) {
-    ENFORCE(this->protoType.data(ctx).isClass());
-    ENFORCE(this->targs.empty() || this->protoType.data(ctx).typeArity(ctx) == this->targs.size());
+void MetaType::_sanityCheck(const core::Context ctx) {
+    this->wrapped->sanityCheck(ctx);
 }
 
-bool TypeConstructor::isFullyDefined() {
+bool MetaType::isFullyDefined() {
     return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.
 }
-std::shared_ptr<Type> TypeConstructor::dispatchCall(const core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                                    std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                                    shared_ptr<Type> *block) {
-    Error::raise("should never happen");
-}
 
-std::shared_ptr<Type> TypeConstructor::getCallArgumentType(const core::Context ctx, core::NameRef name, int i) {
-    Error::raise("should never happen");
-}
-
-bool TypeConstructor::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
+bool MetaType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
     return false;
 }
 
-std::shared_ptr<Type> TypeConstructor::instantiate(const core::Context ctx, std::vector<SymbolRef> params,
-                                                   const std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> MetaType::instantiate(const core::Context ctx, std::vector<SymbolRef> params,
+                                            const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
-TypeConstructor::TypeConstructor(core::SymbolRef protoType, const std::vector<std::shared_ptr<Type>> &targs)
-    : protoType(protoType), targs(targs) {}
+MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(wrapped) {}
 } // namespace core
 } // namespace ruby_typer

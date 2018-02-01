@@ -150,25 +150,6 @@ struct KnowledgeFact {
     }
 };
 
-std::shared_ptr<core::Type> allocateBySymbol(const core::Context ctx, core::SymbolRef symbol) {
-    ENFORCE(symbol.data(ctx).isClass());
-    if (symbol.data(ctx).typeMembers().empty()) {
-        return make_shared<core::ClassType>(symbol);
-    } else {
-        vector<std::shared_ptr<core::Type>> targs;
-        targs.reserve(symbol.data(ctx).typeMembers().size());
-        for (auto tmRef : symbol.data(ctx).typeMembers()) {
-            auto &tm = tmRef.data(ctx);
-            if (tm.isFixed()) {
-                targs.emplace_back(tm.resultType);
-            } else {
-                targs.emplace_back(core::Types::dynamic());
-            }
-        }
-        return make_shared<core::AppliedType>(symbol, move(targs));
-    }
-}
-
 shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
     if (auto *a = core::cast_type<core::LiteralType>(tp.get())) {
         return a->underlying;
@@ -176,108 +157,9 @@ shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
     return tp;
 }
 
-shared_ptr<core::Type> runTypeConstructor(const core::Context ctx, core::TypeConstructor *typeConstructor) {
-    ENFORCE(typeConstructor->protoType.data(ctx).isClass());
-    if (typeConstructor->protoType == core::Symbols::T_all()) {
-        int i = 1;
-        shared_ptr<core::Type> result = typeConstructor->targs[0];
-        while (i < typeConstructor->targs.size()) {
-            result = core::Types::buildAnd(ctx, result, typeConstructor->targs[i]);
-            i++;
-        }
-        return result;
-    }
-    if (typeConstructor->protoType == core::Symbols::T_any()) {
-        int i = 1;
-        shared_ptr<core::Type> result = typeConstructor->targs[0];
-        while (i < typeConstructor->targs.size()) {
-            result = core::Types::buildOr(ctx, result, typeConstructor->targs[i]);
-            i++;
-        }
-        return result;
-    }
-    if (typeConstructor->protoType == core::Symbols::T_Array()) {
-        return make_shared<core::AppliedType>(core::Symbols::Array(), typeConstructor->targs);
-    }
-    if (typeConstructor->protoType == core::Symbols::T_Hash()) {
-        return make_shared<core::AppliedType>(core::Symbols::Hash(), typeConstructor->targs);
-    }
-
-    if (typeConstructor->targs.size() != typeConstructor->protoType.data(ctx).typeMembers().size()) {
-        vector<std::shared_ptr<core::Type>> targs;
-        int i = 0;
-        for (auto tmRef : typeConstructor->protoType.data(ctx).typeMembers()) {
-            auto &tm = tmRef.data(ctx);
-            if (tm.isFixed()) {
-                targs.emplace_back(tm.resultType);
-            } else {
-                targs.emplace_back(typeConstructor->targs[i++]);
-            }
-        }
-        ENFORCE(i == typeConstructor->targs.size());
-        return make_shared<core::AppliedType>(typeConstructor->protoType, targs);
-    }
-    return make_shared<core::AppliedType>(typeConstructor->protoType, typeConstructor->targs);
-}
-
-bool isTypeConstructor(const core::Context ctx, std::shared_ptr<core::Type> recv,
-                       const vector<core::TypeAndOrigins> &args) {
-    if (dynamic_cast<core::TypeConstructor *>(recv.get()) != nullptr) {
-        return true;
-    }
-    auto asClass = dynamic_cast<core::ClassType *>(recv.get());
-    if (asClass == nullptr) {
-        return false;
-    }
-    core::SymbolRef klass = asClass->symbol;
-    // Consider using a flag for this?
-    auto attached = klass.data(ctx).attachedClass(ctx);
-    bool canBeGeneric = attached.exists() && !attached.data(ctx).typeMembers().empty() &&
-                        !klass.data(ctx).findMemberTransitive(ctx, core::Names::squareBrackets()).exists();
-    if (!canBeGeneric) {
-        return false;
-    }
-
-    if (attached == core::Symbols::Array() || attached == core::Symbols::Hash()) {
-        // they are generic but we dont' allow [] on them
-        return false;
-    }
-
-    for (auto &a : args) {
-        if (!a.type->derivesFrom(ctx, core::Symbols::Class())) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-shared_ptr<core::Type> unwrapConstructor(const core::Context ctx, core::Loc loc, shared_ptr<core::Type> &tp) {
-    if (auto *tc = dynamic_cast<core::TypeConstructor *>(tp.get())) {
-        if (!tc->targs.empty()) {
-            return runTypeConstructor(ctx, tc);
-        } else {
-            if (tc->protoType != core::Symbols::untyped()) {
-                ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
-            }
-            return core::Types::dynamic();
-        }
-    }
-    if (core::ClassType *classType = dynamic_cast<core::ClassType *>(tp.get())) {
-        core::SymbolRef attachedClass = classType->symbol.data(ctx).attachedClass(ctx);
-        if (!attachedClass.exists()) {
-            ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
-            return core::Types::dynamic();
-        }
-
-        return make_shared<core::ClassType>(attachedClass);
-    }
-    return tp;
-}
-
 shared_ptr<core::Type> dropConstructor(const core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
-    if (auto *tc = dynamic_cast<core::TypeConstructor *>(tp.get())) {
-        if (tc->protoType != core::Symbols::untyped()) {
+    if (auto *mt = dynamic_cast<core::MetaType *>(tp.get())) {
+        if (!mt->wrapped->isDynamic()) {
             ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
         }
         return core::Types::dynamic();
@@ -501,16 +383,16 @@ public:
             }
             auto &whoKnows = getKnowledge(local);
             core::TypeAndOrigins klass = getTypeAndOrigin(ctx, send->args[0]);
-            if (klass.type->derivesFrom(ctx, core::Symbols::Class())) {
+            if (klass.type->derivesFrom(ctx, core::Symbols::Module())) {
                 auto *s = core::cast_type<core::ClassType>(klass.type.get());
                 if (s == nullptr) {
                     return;
                 }
                 core::SymbolRef attachedClass = s->symbol.data(ctx).attachedClass(ctx);
                 if (attachedClass.exists()) {
-                    whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv,
-                                                                       allocateBySymbol(ctx, attachedClass));
-                    whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, allocateBySymbol(ctx, attachedClass));
+                    auto ty = attachedClass.data(ctx).externalType(ctx);
+                    whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, ty);
+                    whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, ty);
                 }
                 whoKnows.sanityCheck();
             }
@@ -536,7 +418,7 @@ public:
             }
             auto &whoKnows = getKnowledge(local);
             core::TypeAndOrigins recvKlass = getTypeAndOrigin(ctx, send->recv);
-            if (!recvKlass.type->derivesFrom(ctx, core::Symbols::Class())) {
+            if (!recvKlass.type->derivesFrom(ctx, core::Symbols::Module())) {
                 return;
             }
 
@@ -547,8 +429,9 @@ public:
 
             core::SymbolRef attachedClass = s->symbol.data(ctx).attachedClass(ctx);
             if (attachedClass.exists()) {
-                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], allocateBySymbol(ctx, attachedClass));
-                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0], allocateBySymbol(ctx, attachedClass));
+                auto ty = attachedClass.data(ctx).externalType(ctx);
+                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], ty);
+                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0], ty);
             }
             whoKnows.sanityCheck();
 
@@ -752,58 +635,6 @@ public:
 
         this->blockTypes = other.blockTypes;
     }
-    shared_ptr<core::Type> dispatchNew(core::Context ctx, core::TypeAndOrigins recvType, cfg::Send *send,
-                                       vector<core::TypeAndOrigins> &args, cfg::Binding &bind) {
-        core::ClassType *classType = core::cast_type<core::ClassType>(recvType.type.get());
-        if (classType == nullptr) {
-            core::TypeConstructor *typeConstructor = dynamic_cast<core::TypeConstructor *>(recvType.type.get());
-            if (typeConstructor != nullptr) {
-                ENFORCE(!typeConstructor->targs.empty());
-                return runTypeConstructor(ctx, typeConstructor);
-            }
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
-                                               send->block.exists() ? &this->blockTypes[send->block] : nullptr);
-        }
-
-        if (classType->symbol == core::Symbols::untyped()) {
-            if (send->block.exists()) {
-                this->blockTypes[send->block] = core::Types::dynamic();
-            }
-            return recvType.type;
-        }
-
-        core::SymbolRef newSymbol = classType->symbol.data(ctx).findMemberTransitive(ctx, core::Names::new_());
-        if (newSymbol.exists() && newSymbol.data(ctx).owner != core::Symbols::BasicObject()) {
-            // custom `new` was defined
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
-                                               send->block.exists() ? &this->blockTypes[send->block] : nullptr);
-        }
-
-        core::SymbolRef attachedClass = classType->symbol.data(ctx).attachedClass(ctx);
-        if (!attachedClass.exists()) {
-            // `foo`.new() but `foo` isn't a Class
-            return recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
-                                               send->block.exists() ? &this->blockTypes[send->block] : nullptr);
-        }
-
-        auto type = allocateBySymbol(ctx, attachedClass);
-
-        // call constructor
-        newSymbol = attachedClass.data(ctx).findMemberTransitive(ctx, core::Names::initialize());
-        if (newSymbol.exists()) {
-            auto initializeResult = type->dispatchCall(ctx, core::Names::initialize(), bind.loc, args, type,
-                                                       send->block.exists() ? &this->blockTypes[send->block] : nullptr);
-        } else {
-            if (!args.empty()) {
-                ctx.state.error(bind.loc, core::errors::Infer::MethodArgumentCountMismatch,
-                                "Wrong number of arguments for constructor. Expected: 0, found: {}", args.size());
-            }
-            if (send->block.exists()) {
-                this->blockTypes[send->block] = core::Types::dynamic();
-            }
-        }
-        return type;
-    }
 
     shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
         if (auto *a = core::cast_type<core::LiteralType>(tp.get())) {
@@ -844,67 +675,7 @@ public:
 
                     auto recvType = getTypeAndOrigin(ctx, send->recv);
 
-                    switch (send->fun.id()) {
-                        case core::Names::untyped()._id: {
-                            if (!recvType.type->derivesFrom(ctx, core::Symbols::T()) || recvType.type->isDynamic()) {
-                                break;
-                            }
-                            vector<shared_ptr<core::Type>> empty;
-                            tp.origins.push_back(bind.loc);
-                            tp.type = make_shared<core::TypeConstructor>(core::Symbols::untyped(), empty);
-                            return;
-                        }
-                        case core::Names::any()._id:
-                        case core::Names::all()._id: {
-                            if (!recvType.type->derivesFrom(ctx, core::Symbols::T()) || recvType.type->isDynamic()) {
-                                break;
-                            }
-                            tp.origins.push_back(bind.loc);
-                            ENFORCE(!send->args.empty());
-                            vector<shared_ptr<core::Type>> targs;
-                            for (auto &arg : send->args) {
-                                auto tp = getTypeAndOrigin(ctx, arg);
-                                targs.push_back(unwrapConstructor(ctx, tp.origins[0], tp.type));
-                            }
-                            tp.origins.push_back(bind.loc);
-
-                            tp.type = make_shared<core::TypeConstructor>(
-                                core::Symbols::T().data(ctx).findMember(ctx, send->fun), targs);
-                            return;
-                        }
-                        default:
-                            break;
-                    }
-                    if (send->fun == core::Names::new_()) {
-                        tp.type = dispatchNew(ctx, recvType, send, args, bind);
-                    } else if (send->fun == core::Names::squareBrackets() &&
-                               isTypeConstructor(ctx, recvType.type, args)) {
-                        core::SymbolRef attached;
-                        auto *asClass = dynamic_cast<core::ClassType *>(recvType.type.get());
-                        if (asClass != nullptr) {
-                            core::SymbolRef klass = asClass->symbol;
-                            // Consider using a flag for this?
-                            attached = klass.data(ctx).attachedClass(ctx);
-                        } else {
-                            auto *tc = dynamic_cast<core::TypeConstructor *>(recvType.type.get());
-                            ENFORCE(tc != nullptr);
-                            ENFORCE(tc->targs.empty());
-                            attached = tc->protoType;
-                        }
-                        vector<shared_ptr<core::Type>> targs;
-                        // TODO match arguments
-                        for (auto arg : args) {
-                            targs.emplace_back(unwrapConstructor(ctx, arg.origins[0], arg.type));
-                        }
-                        auto arity = attached.data(ctx).typeArity(ctx);
-                        if (targs.size() != arity) {
-                            ctx.state.error(bind.loc, core::errors::Infer::GenericArgumentCountMismatch,
-                                            "Wrong number of type parameters for {}. Expected {}, got {}",
-                                            attached.data(ctx).fullName(ctx), arity, targs.size());
-                            targs.resize(arity, core::Types::dynamic());
-                        }
-                        tp.type = make_shared<core::TypeConstructor>(attached, targs);
-                    } else if (send->fun == core::Names::super()) {
+                    if (send->fun == core::Names::super()) {
                         // TODO
                         if (send->block.exists()) {
                             this->blockTypes[send->block] = core::Types::dynamic();
@@ -928,16 +699,7 @@ public:
                 [&](cfg::Alias *a) {
                     core::SymbolRef symbol = a->what;
                     const core::Symbol &data = symbol.data(ctx);
-                    if (a->what == core::Symbols::T_Array()) {
-                        vector<shared_ptr<core::Type>> empty;
-                        tp.type = make_shared<core::TypeConstructor>(core::Symbols::Array(), empty);
-                        tp.origins.push_back(symbol.data(ctx).definitionLoc);
-
-                    } else if (a->what == core::Symbols::T_Hash()) {
-                        vector<shared_ptr<core::Type>> empty;
-                        tp.type = make_shared<core::TypeConstructor>(core::Symbols::Hash(), empty);
-                        tp.origins.push_back(symbol.data(ctx).definitionLoc);
-                    } else if (data.isClass()) {
+                    if (data.isClass()) {
                         ENFORCE(data.resultType.get(), "Type should have been filled in by the namer");
                         tp.type = data.resultType;
                         tp.origins.push_back(symbol.data(ctx).definitionLoc);

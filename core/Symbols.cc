@@ -26,7 +26,11 @@ std::vector<std::shared_ptr<core::Type>> Symbol::selfTypeArgs(const GlobalState 
     ENFORCE(isClass()); // should be removed when we have generic methods
     std::vector<shared_ptr<core::Type>> targs;
     for (auto tm : typeMembers()) {
-        targs.emplace_back(make_shared<core::SelfTypeParam>(tm));
+        if (tm.data(gs).isFixed()) {
+            targs.emplace_back(tm.data(gs).resultType);
+        } else {
+            targs.emplace_back(make_shared<core::SelfTypeParam>(tm));
+        }
     }
     return targs;
 }
@@ -37,6 +41,24 @@ std::shared_ptr<core::Type> Symbol::selfType(const GlobalState &gs) const {
         return make_shared<core::ClassType>(ref(gs));
     } else {
         return make_shared<core::AppliedType>(ref(gs), selfTypeArgs(gs));
+    }
+}
+
+std::shared_ptr<core::Type> Symbol::externalType(const GlobalState &gs) const {
+    ENFORCE(isClass());
+    // todo: also cache these?
+    if (typeMembers().empty()) {
+        return make_shared<ClassType>(ref(gs));
+    } else {
+        std::vector<shared_ptr<Type>> targs;
+        for (auto tm : typeMembers()) {
+            if (tm.data(gs).isFixed()) {
+                targs.emplace_back(tm.data(gs).resultType);
+            } else {
+                targs.emplace_back(Types::dynamic());
+            }
+        }
+        return make_shared<AppliedType>(ref(gs), targs);
     }
 }
 

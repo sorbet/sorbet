@@ -281,11 +281,6 @@ void GlobalState::initEmpty() {
     SymbolRef m = enterStaticFieldSymbol(Loc::none(), Symbols::root(), enterNameConstant(m_str));
     m.data(*this).resultType = make_unique<AliasType>(model);
 
-    // Allow T::Array[Int] to work as an an alias for Array[Int]
-    T_Array_id.data(*this).resultType = make_shared<ClassType>(T_Array_id);
-    // same for hash.
-    T_Hash_id.data(*this).resultType = make_shared<ClassType>(T_Hash_id);
-
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

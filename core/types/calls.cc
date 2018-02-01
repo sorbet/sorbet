@@ -265,6 +265,122 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
     return fallback;
 }
 
+shared_ptr<Type> unwrapType(const Context ctx, Loc loc, shared_ptr<Type> tp) {
+    if (auto *tc = dynamic_cast<MetaType *>(tp.get())) {
+        return tc->wrapped;
+    }
+    if (ClassType *classType = dynamic_cast<ClassType *>(tp.get())) {
+        SymbolRef attachedClass = classType->symbol.data(ctx).attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            ctx.state.error(loc, errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
+            return Types::dynamic();
+        }
+
+        return attachedClass.data(ctx).externalType(ctx);
+    }
+    return tp;
+}
+
+// This method handles a number of special-case methods that are implemented as
+// intrinsics in C++. If it recognizes the method call, it handles it and
+// returns a type; otherwise, it returns `nullptr.
+std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                                       std::vector<TypeAndOrigins> &args,
+                                                       std::shared_ptr<Type> fullType,
+                                                       std::vector<std::shared_ptr<Type>> &targs,
+                                                       shared_ptr<Type> *block) {
+    switch (name._id) {
+        case core::Names::new_()._id: {
+            auto attachedClass = this->symbol.data(ctx).attachedClass(ctx);
+            if (!attachedClass.exists()) {
+                // `foo.new(...)`, but foo isn't a Class
+                return nullptr;
+            }
+
+            auto instanceTy = attachedClass.data(ctx).externalType(ctx);
+            instanceTy->dispatchCall(ctx, core::Names::initialize(), callLoc, args, instanceTy, block);
+            return instanceTy;
+        }
+
+        case core::Names::initialize()._id: {
+            // Default initialize() implementation if the class doesn't provide
+            // one in userland
+            if (!args.empty()) {
+                ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
+                                "Wrong number of arguments for constructor. Expected: 0, found: {}", args.size());
+            }
+            return core::Types::dynamic();
+        }
+
+        case core::Names::squareBrackets()._id: {
+            core::SymbolRef attachedClass;
+
+            attachedClass = this->symbol.data(ctx).attachedClass(ctx);
+
+            if (!attachedClass.exists()) {
+                return nullptr;
+            }
+
+            if (attachedClass == core::Symbols::T_Array()) {
+                attachedClass = core::Symbols::Array();
+            } else if (attachedClass == core::Symbols::T_Hash()) {
+                attachedClass = core::Symbols::Hash();
+            }
+
+            if (attachedClass.data(ctx).typeMembers().empty()) {
+                return nullptr;
+            }
+
+            auto arity = attachedClass.data(ctx).typeArity(ctx);
+            if (args.size() != arity) {
+                ctx.state.error(callLoc, core::errors::Infer::GenericArgumentCountMismatch,
+                                "Wrong number of type parameters for {}. Expected {}, got {}",
+                                attachedClass.data(ctx).fullName(ctx), arity, targs.size());
+            }
+
+            vector<shared_ptr<core::Type>> targs;
+            auto it = args.begin();
+            for (auto mem : attachedClass.data(ctx).typeMembers()) {
+                if (mem.data(ctx).isFixed()) {
+                    targs.emplace_back(mem.data(ctx).resultType);
+                } else if (it != args.end()) {
+                    targs.emplace_back(unwrapType(ctx, it->origins[0], it->type));
+                    ++it;
+                } else {
+                    targs.emplace_back(core::Types::dynamic());
+                }
+            }
+
+            return make_shared<core::MetaType>(make_shared<core::AppliedType>(attachedClass, targs));
+        }
+
+        case core::Names::untyped()._id:
+        case core::Names::any()._id:
+        case core::Names::all()._id:
+            if (this->symbol != core::Symbols::T()) {
+                return nullptr;
+            }
+            if (name == core::Names::untyped()) {
+                return Types::dynamic();
+            } else {
+                shared_ptr<Type> res = (name == core::Names::all()) ? core::Types::top() : core::Types::bottom();
+                for (auto &arg : args) {
+                    auto ty = unwrapType(ctx, arg.origins[0], arg.type);
+                    if (name == core::Names::any()) {
+                        res = Types::buildOr(ctx, res, ty);
+                    } else {
+                        res = Types::buildAnd(ctx, res, ty);
+                    }
+                }
+
+                return make_shared<core::MetaType>(res);
+            }
+
+        default:
+            return nullptr;
+    }
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -283,6 +399,11 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     core::SymbolRef mayBeOverloaded = this->symbol.data(ctx).findMemberTransitive(ctx, fun);
 
     if (!mayBeOverloaded.exists()) {
+        auto special = dispatchCallIntrinsic(ctx, fun, callLoc, args, fullType, targs, block);
+        if (special != nullptr) {
+            return special;
+        }
+
         string maybeComponent;
         if (fullType.get() != this) {
             maybeComponent = " component of " + fullType->show(ctx);
@@ -503,4 +624,23 @@ std::shared_ptr<Type> AliasType::dispatchCall(core::Context ctx, core::NameRef n
 
 std::shared_ptr<Type> AliasType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     Error::raise("AliasType::getCallArgumentType");
+}
+
+std::shared_ptr<Type> MetaType::dispatchCall(const core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                             std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                             shared_ptr<Type> *block) {
+    switch (name._id) {
+        case core::Names::new_()._id: {
+            wrapped->dispatchCall(ctx, core::Names::initialize(), callLoc, args, wrapped, block);
+            return wrapped;
+        }
+        default: {
+            ctx.state.error(callLoc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
+            return Types::dynamic();
+        }
+    }
+}
+
+std::shared_ptr<Type> MetaType::getCallArgumentType(const core::Context ctx, core::NameRef name, int i) {
+    Error::raise("should never happen");
 }

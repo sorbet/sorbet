@@ -165,6 +165,10 @@ public:
                                                 std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                 std::vector<std::shared_ptr<Type>> &targs,
                                                 std::shared_ptr<Type> *block);
+    std::shared_ptr<Type> dispatchCallIntrinsic(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
+                                                std::vector<std::shared_ptr<Type>> &targs,
+                                                std::shared_ptr<Type> *block);
 
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
@@ -385,12 +389,19 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 };
 
-class TypeConstructor final : public Type {
+// MetaType is the type of a Type. You can think of it as generalization of
+// Ruby's singleton classes to Types; Just as `A.singleton_class` is the *type*
+// of the *value* `A`, MetaType[T] is the *type* of a *value* that holds the
+// type T during execution. For instance, the type of `T.untyped` is
+// `MetaType(Types::dynamic())`.
+//
+// These are used within the inferencer in places where we need to track
+// user-written types in the source code.
+class MetaType final : public Type {
 public:
-    core::SymbolRef protoType;
-    std::vector<std::shared_ptr<Type>> targs;
+    std::shared_ptr<Type> wrapped;
 
-    TypeConstructor(core::SymbolRef proto, const std::vector<std::shared_ptr<Type>> &targs);
+    MetaType(std::shared_ptr<Type> wrapped);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
     virtual std::string show(const GlobalState &gs) final;

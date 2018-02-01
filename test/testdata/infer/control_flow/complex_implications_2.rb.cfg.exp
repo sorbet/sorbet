@@ -1,4 +1,4 @@
-digraph "controlFlow5.rb"{
+digraph "complex_implications_2.rb"{
 subgraph "cluster_::<constant:Object>#foo" {
     label = "::<constant:Object>#foo";
     color = blue;

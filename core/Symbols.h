@@ -176,7 +176,12 @@ public:
     }
 
     std::vector<std::shared_ptr<Type>> selfTypeArgs(const GlobalState &gs) const;
+
+    // selfType and externalType return the type of an instance of this Symbol
+    // (which must be isClass()), if instantiated without specific type
+    // parameters, as seen from inside or outside of the class, respectively.
     std::shared_ptr<Type> selfType(const GlobalState &gs) const;
+    std::shared_ptr<Type> externalType(const GlobalState &gs) const;
 
     inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
         ENFORCE(isClass());

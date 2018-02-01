@@ -37,7 +37,7 @@ struct NameDef {
 };
 
 NameDef names[] = {
-    {"initialize", Infer},
+    {"initialize", Core},
     {"andAnd", "&&", Desugar},
     {"orOr", "||", Desugar},
     {"to_s", Desugar},
@@ -48,7 +48,7 @@ NameDef names[] = {
     {"intern", Desugar},
     {"call", Desugar | Namer | Infer},
     {"bang", "!", Desugar | Infer | Parser},
-    {"squareBrackets", "[]", Desugar | Parser | Infer | Resolver},
+    {"squareBrackets", "[]", Core | Desugar | Parser | Infer | Resolver},
     {"squareBracketsEq", "[]=", Parser},
     {"unaryPlus", "@+", Parser | Namer},
     {"unaryMinus", "@-", Parser | Namer},
@@ -150,7 +150,7 @@ NameDef names[] = {
     {"blockTemp", "<block>", Core | Namer | Resolver},
     {"blockPassTemp", "<block-pass>", Desugar},
     {"forTemp", Desugar},
-    {"new_", "new", Desugar | Infer},
+    {"new_", "new", Core | Desugar},
     {"blockCall", "<block-call>", CFG | Infer | Core},
     {"blkArg", "<blk>", Namer},
 

@@ -538,7 +538,7 @@ int SelfTypeParam::kind() {
     return 6;
 }
 
-int TypeConstructor::kind() {
+int MetaType::kind() {
     return 7;
 }
 

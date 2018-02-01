@@ -16,6 +16,10 @@ end
 
 class Child < Parent
   Elem = T.type(fixed: String)
+
+  def use_foo
+    T.assert_type!(foo("foo"), String)
+  end
 end
 
 module Mixin
