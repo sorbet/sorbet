@@ -992,7 +992,7 @@ bool SelfTypeParam::derivesFrom(core::Context ctx, core::SymbolRef klass) {
 }
 
 std::shared_ptr<Type> LambdaParam::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    return Types::dynamic()->getCallArgumentType(ctx, name, i);
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 std::shared_ptr<Type> SelfTypeParam::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
@@ -1002,7 +1002,7 @@ std::shared_ptr<Type> SelfTypeParam::getCallArgumentType(core::Context ctx, core
 std::shared_ptr<Type> LambdaParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                 std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                 shared_ptr<Type> *block) {
-    return Types::dynamic()->dispatchCall(ctx, name, callLoc, args, fullType, block);
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 std::shared_ptr<Type> SelfTypeParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,

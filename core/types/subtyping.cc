@@ -944,18 +944,18 @@ bool ruby_typer::core::Types::isSubType(const core::Context ctx, shared_ptr<Type
     auto *a2 = cast_type<OrType>(t2.get());
     auto *a1 = cast_type<AndType>(t1.get());
 
-    if (a2 != nullptr) { // 3
+    if (a2 != nullptr) {
         // this will be incorrect if\when we have Type members
-        if (a1 != nullptr) {
+        if (a1 != nullptr) { // 6
             // dropping either of parts eagerly make subtype test be too strict.
             // we have to try all 4 cases, when we normaly try only 2
             return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right) ||
                    Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
         }
-        return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
+        return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right); // 3
     }
 
-    if (a1 != nullptr) { // 4, 6
+    if (a1 != nullptr) { // 4
         // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
     }
