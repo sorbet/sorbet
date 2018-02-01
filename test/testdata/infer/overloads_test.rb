@@ -41,6 +41,16 @@ class HasOverloads
   end
 end
 
+class OverloadAndGenerics
+  Elem = T.type
+
+  def _; end
+
+  sig(x: Elem).returns(Elem)
+  sig(x: String).returns(String)
+  def overloaded(x); _; end
+end
+
 class Foo
   def test
     h = HasOverloads.new
@@ -51,5 +61,9 @@ class Foo
     h.overloaded(1) # error: does not match expected type
                     # should ask for string
     h.overloaded("1", 2) # error: does not match expected type
+
+    g = OverloadAndGenerics[Integer].new
+    T.assert_type!(g.overloaded("hi"), String)
+    T.assert_type!(g.overloaded(4), Integer)
   end
 end

@@ -154,10 +154,22 @@ void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
 }
 }; // namespace
 
+int getArity(core::Context ctx, core::SymbolRef method) {
+    int arity = method.data(ctx).arguments().size();
+    if (arity == 0) {
+        return 0;
+    }
+    if (method.data(ctx).arguments().back().data(ctx).isBlockArgument()) {
+        --arity;
+    }
+    return arity;
+}
+
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
-core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector<TypeAndOrigins> &args,
-                              shared_ptr<Type> fullType, bool hasBlock) {
+core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::SymbolRef primary,
+                              vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
+                              std::vector<std::shared_ptr<Type>> &targs, bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(ctx.permitOverloadDefinitions(), "overload not permitted here");
     core::SymbolRef fallback = primary;
@@ -181,10 +193,10 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
         }
 
         sort(allCandidates.begin(), allCandidates.end(), [&](core::SymbolRef s1, core::SymbolRef s2) -> bool {
-            if (s1.data(ctx).argumentsOrMixins.size() < s2.data(ctx).argumentsOrMixins.size()) {
+            if (getArity(ctx, s1) < getArity(ctx, s2)) {
                 return true;
             }
-            if (s1.data(ctx).argumentsOrMixins.size() == s2.data(ctx).argumentsOrMixins.size()) {
+            if (getArity(ctx, s1) == getArity(ctx, s2)) {
                 return s1._id < s2._id;
             }
             return false;
@@ -200,12 +212,13 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
             i++;
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
                 core::SymbolRef candidate = *it;
-                if (i >= candidate.data(ctx).argumentsOrMixins.size()) {
+                if (i >= getArity(ctx, candidate)) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
 
-                auto argType = candidate.data(ctx).argumentsOrMixins[i].data(ctx).resultType;
+                auto argType =
+                    core::Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx).arguments()[i], inClass, targs);
                 if (argType->isFullyDefined() && !Types::isSubType(ctx, arg.type, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -245,10 +258,10 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef primary, vector
             core::Context ctx;
 
             bool operator()(core::SymbolRef s, int i) const {
-                return s.data(ctx.state).argumentsOrMixins.size() < i;
+                return getArity(ctx, s) < i;
             }
             bool operator()(int i, core::SymbolRef s) const {
-                return i < s.data(ctx.state).argumentsOrMixins.size();
+                return i < getArity(ctx, s);
             }
             Comp(core::Context ctx) : ctx(ctx){};
         } cmp(ctx);
@@ -413,10 +426,10 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         return Types::dynamic();
     }
 
-    core::SymbolRef method =
-        mayBeOverloaded.data(ctx).isOverloaded()
-            ? guessOverload(ctx.withOwner(mayBeOverloaded), mayBeOverloaded, args, fullType, block != nullptr)
-            : mayBeOverloaded;
+    core::SymbolRef method = mayBeOverloaded.data(ctx).isOverloaded()
+                                 ? guessOverload(ctx.withOwner(mayBeOverloaded), this->symbol, mayBeOverloaded, args,
+                                                 fullType, targs, block != nullptr)
+                                 : mayBeOverloaded;
 
     core::Symbol &data = method.data(ctx);
 
