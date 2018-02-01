@@ -180,7 +180,7 @@ CounterImpl CounterImpl::canonicalize() {
     }
 
     for (auto &e : this->counters) {
-        counterAdd(internKey(e.first), e.second);
+        out.counterAdd(internKey(e.first), e.second);
     }
     return out;
 }
