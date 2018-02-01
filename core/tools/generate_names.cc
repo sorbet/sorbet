@@ -100,11 +100,6 @@ NameDef names[] = {
     {"untyped", Resolver | Infer | Core},
     {"Array", Infer},
     {"Hash", Infer},
-    {"arrayOf", "array_of", Resolver},
-    {"Elem", Resolver},  // Array Type parameter name
-    {"Key", Resolver},   // Hash Type parameter name
-    {"Value", Resolver}, // Hash Type parameter name
-    {"hashOf", "hash_of", Resolver},
     {"noreturn", Resolver},
     {"declareVariables", "declare_variables", Resolver},
 

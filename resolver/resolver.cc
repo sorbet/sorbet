@@ -342,37 +342,6 @@ private:
             case core::Names::untyped()._id:
                 return core::Types::dynamic();
 
-            case core::Names::arrayOf()._id: {
-                auto elem = getResultType(ctx, send->args[0]);
-                std::vector<shared_ptr<core::Type>> targs;
-                targs.emplace_back(move(elem));
-                return make_shared<core::AppliedType>(core::Symbols::Array(), move(targs));
-            }
-            case core::Names::hashOf()._id: {
-                bool fail = (send->args.size() != 1);
-                ast::Hash *hash;
-                if (!fail) {
-                    hash = ast::cast_tree<ast::Hash>(send->args[0].get());
-                    fail = hash == nullptr;
-                }
-                int keyIndex = 0;
-                int valueIndex = 1;
-                // TODO: detect them(or not, as new syntax would not need this)
-                if (!fail) {
-                    auto key = getResultType(ctx, hash->values[keyIndex]);
-                    auto value = getResultType(ctx, hash->values[valueIndex]);
-
-                    std::vector<shared_ptr<core::Type>> targs;
-                    targs.emplace_back(move(key));
-                    targs.emplace_back(move(value));
-                    targs.emplace_back(core::Types::dynamic());
-                    return make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
-                }
-
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "Malformed hash type");
-                return core::Types::dynamic();
-            }
-
             case core::Names::noreturn()._id:
                 return core::Types::bottom();
 
