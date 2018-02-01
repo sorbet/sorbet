@@ -94,6 +94,22 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(const core::Context ctx, sha
     return AndType::make_shared(t1, t2);
 }
 
+// only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
+shared_ptr<ruby_typer::core::Type> dropLubComponents(const core::Context ctx, shared_ptr<Type> t1,
+                                                     shared_ptr<Type> t2) {
+    if (AndType *a1 = dynamic_cast<AndType *>(t1.get())) {
+        auto a1a = dropLubComponents(ctx, a1->left, t2);
+        auto a1b = dropLubComponents(ctx, a1->right, t2);
+        if (a1a != a1->left || a1b != a1->right) {
+            return Types::buildAnd(ctx, a1a, a1b);
+        }
+    }
+    if (Types::isSubTypeWhenFrozen(ctx, t1, t2)) {
+        return Types::top();
+    }
+    return t1;
+}
+
 shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Context ctx, shared_ptr<Type> t1,
                                                                  shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
@@ -145,30 +161,19 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
         categoryCounterInc("lub", "and>");
         auto t1d = underlying(t1);
 
-        bool returnT1 = Types::isSubTypeWhenFrozen(ctx, t2, t1);
-        if (returnT1) {
-            categoryCounterInc("lub.and.t1", "f");
-            return t1;
-        }
-        bool returnT2L = Types::isSubTypeWhenFrozen(ctx, t1d, a2->left);
-        bool returnT2R = Types::isSubTypeWhenFrozen(ctx, t1d, a2->right);
-        if (returnT2L) {
-            categoryCounterInc("lub.and.t2", "l");
-            if (returnT2R) {
-                return t2;
-            }
-            // why recourse?
-            // `A & (B | C) lub C` is not   `A & (B | C)` because A is not a supertype of C.
-            return lub(ctx, a2->left, a2->right);
+        auto t1filteredL = dropLubComponents(ctx, t1d, a2->left);
+        if (t1filteredL != t1d) {
+            categoryCounterInc("lub.and>simplified", "left");
+            return AndType::make_shared(lub(ctx, t1filteredL, a2->right), a2->left);
         }
 
-        if (returnT2R) {
-            categoryCounterInc("lub.and.t2", "r");
-            // see comment in returnT2L branch
-            return lub(ctx, a2->left, a2->right);
+        auto t1filteredR = dropLubComponents(ctx, t1d, a2->right);
+        if (t1filteredR != t1d) {
+            categoryCounterInc("lub.and>simplified", "left");
+            return AndType::make_shared(lub(ctx, t1filteredR, a2->left), a2->right);
         }
 
-        categoryCounterInc("lub.and>collapsed", "none");
+        categoryCounterInc("lub.and>simplified", "none");
         return OrType::make_shared(t1, t2);
     }
 
@@ -936,14 +941,23 @@ bool ruby_typer::core::Types::isSubType(const core::Context ctx, shared_ptr<Type
         return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
     }
 
-    if (auto *a1 = cast_type<AndType>(t1.get())) { // 4, 6
+    auto *a2 = cast_type<OrType>(t2.get());
+    auto *a1 = cast_type<AndType>(t1.get());
+
+    if (a2 != nullptr) { // 3
         // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
+        if (a1 != nullptr) {
+            // dropping either of parts eagerly make subtype test be too strict.
+            // we have to try all 4 cases, when we normaly try only 2
+            return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right) ||
+                   Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
+        }
+        return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
     }
 
-    if (auto *a2 = cast_type<OrType>(t2.get())) { // 3
+    if (a1 != nullptr) { // 4, 6
         // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right);
+        return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
     }
 
     return isSubTypeSingle(ctx, t1, t2); // 1
