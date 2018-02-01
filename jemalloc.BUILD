@@ -26,7 +26,6 @@ genrule(
                            "@com_stripe_ruby_typer//tools/config:darwin": # os x bazel has wrapper scripts around CC, and makes does not link shebangs
                                       "export CC=\"sh $$(realpath $(CC))\" && \
                                        export CXX=\"sh $$(realpath $(CC))\" && \
-                                       export AR=\"sh $$(realpath $(AR))\" && \
                                        export NM=$$(realpath $(NM)) && \
                                        export OBJCOPY=$$(realpath $(OBJCOPY)) && \
                                        export MY_LOCATION=$$(pwd)/external/local_config_cc/ && \
