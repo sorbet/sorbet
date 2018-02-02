@@ -291,6 +291,135 @@ private:
         return result;
     }
 
+    struct ParsedSig {
+        struct ArgSpec {
+            core::Loc loc;
+            core::NameRef name;
+            shared_ptr<core::Type> type;
+        };
+        vector<ArgSpec> argTypes;
+        shared_ptr<core::Type> returns;
+
+        struct {
+            bool sig = false;
+            bool proc = false;
+            bool args = false;
+            bool abstract = false;
+            bool override_ = false;
+            bool overridable = false;
+            bool implementation = false;
+            bool returns = false;
+            bool checked = false;
+        } seen;
+    };
+
+    ParsedSig parseSig(core::Context ctx, ast::Send *send) {
+        ParsedSig sig;
+
+        while (send != nullptr) {
+            switch (send->fun._id) {
+                case core::Names::sig()._id:
+                case core::Names::proc()._id: {
+                    if (sig.seen.sig || sig.seen.proc) {
+                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                        "Malformed `{}`: Found multiple argument lists", send->fun.toString(ctx));
+                        sig.argTypes.clear();
+                    }
+                    if (send->fun == core::Names::sig()) {
+                        sig.seen.sig = true;
+                    } else {
+                        sig.seen.proc = true;
+                    }
+
+                    if (send->args.empty()) {
+                        break;
+                    }
+                    sig.seen.args = true;
+
+                    if (send->args.size() > 1) {
+                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                        "Wrong number of args to `{}`. Got {}, expected 0-1", send->fun.toString(ctx),
+                                        send->args.size());
+                    }
+                    auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
+                    if (hash == nullptr) {
+                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                        "Malformed `{}`; Expected a hash of arguments => types.",
+                                        send->fun.toString(ctx), send->args.size());
+                        break;
+                    }
+
+                    int i = 0;
+                    for (auto &key : hash->keys) {
+                        auto &value = hash->values[i++];
+                        if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
+                            sig.argTypes.emplace_back(
+                                ParsedSig::ArgSpec{key->loc, symbolLit->name, getResultType(ctx, value)});
+                        }
+                    }
+                    break;
+                }
+                case core::Names::abstract()._id:
+                    sig.seen.abstract = true;
+                    break;
+                case core::Names::override_()._id:
+                    sig.seen.override_ = true;
+                    break;
+                case core::Names::implementation()._id:
+                    sig.seen.implementation = true;
+                    break;
+                case core::Names::overridable()._id:
+                    sig.seen.overridable = true;
+                    break;
+                case core::Names::returns()._id:
+                    sig.seen.returns = true;
+                    if (send->args.size() != 1) {
+                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                        "Wrong number of args to `sig.returns`. Got {}, expected 1", send->args.size());
+                    }
+                    if (!send->args.empty()) {
+                        sig.returns = getResultType(ctx, send->args.front());
+                    }
+
+                    break;
+                case core::Names::checked()._id:
+                    sig.seen.checked = true;
+                    break;
+                default:
+                    ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
+                                    "Unknown `sig` builder method {}.", send->fun.toString(ctx));
+            }
+            send = ast::cast_tree<ast::Send>(send->recv.get());
+        }
+        ENFORCE(sig.seen.sig || sig.seen.proc);
+
+        return sig;
+    }
+
+    bool isSig(core::Context ctx, ast::Send *send) {
+        while (send != nullptr) {
+            if (send->fun == core::Names::sig() && ast::cast_tree<ast::Self>(send->recv.get()) != nullptr) {
+                return true;
+            }
+            send = ast::cast_tree<ast::Send>(send->recv.get());
+        }
+        return false;
+    }
+
+    bool isTProc(core::Context ctx, ast::Send *send) {
+        while (send != nullptr) {
+            if (send->fun == core::Names::proc()) {
+                if (auto *rcv = ast::cast_tree<ast::Ident>(send->recv.get())) {
+                    if (rcv->symbol == core::Symbols::T()) {
+                        return true;
+                    }
+                }
+            }
+            send = ast::cast_tree<ast::Send>(send->recv.get());
+        }
+        return false;
+    }
+
     shared_ptr<core::Type> interpretTCombinator(core::Context ctx, ast::Send *send) {
         switch (send->fun._id) {
             case core::Names::nilable()._id:
@@ -398,6 +527,36 @@ private:
                 }
             },
             [&](ast::Send *s) {
+                if (isTProc(ctx, s)) {
+                    auto sig = parseSig(ctx, s);
+
+                    vector<shared_ptr<core::Type>> targs;
+
+                    if (sig.returns == nullptr) {
+                        ctx.state.error(s->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed T.proc: You must specify a return type.");
+                        targs.emplace_back(core::Types::dynamic());
+                    } else {
+                        targs.emplace_back(sig.returns);
+                    }
+
+                    for (auto &arg : sig.argTypes) {
+                        targs.push_back(arg.type);
+                    }
+
+                    auto arity = targs.size() - 1;
+                    if (arity > core::Symbols::MAX_PROC_ARITY) {
+                        ctx.state.error(s->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed T.proc: Too many arguments (max {})", core::Symbols::MAX_PROC_ARITY);
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    auto sym = core::Symbols::Proc(arity);
+
+                    result = make_shared<core::AppliedType>(sym, targs);
+                    return;
+                }
+
                 auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
                 if (recvi == nullptr) {
                     ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
@@ -447,62 +606,6 @@ private:
                     targs.emplace_back(move(value));
                     targs.emplace_back(core::Types::dynamic());
                     result = make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
-                } else if (recvi->symbol == core::Symbols::T_Proc()) {
-                    if (s->args.empty()) {
-                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                        "Malformed T::Proc[]: Expected a return type");
-                        result = core::Types::dynamic();
-                        return;
-                    }
-                    vector<shared_ptr<core::Type>> targs;
-
-                    auto &back = s->args.back();
-                    // extract return
-                    shared_ptr<core::Type> returnType;
-                    auto hash = ast::cast_tree<ast::Hash>(back.get());
-                    if (hash != nullptr) {
-                        const auto &r = find_if(hash->keys.begin(), hash->keys.end(), [](auto &expr) {
-                            auto sym = ast::cast_tree<ast::SymbolLit>(expr.get());
-                            return sym != nullptr && sym->name == core::Names::returns();
-                        });
-                        if (r != hash->keys.end()) {
-                            auto idx = &*r - &hash->keys.front();
-                            auto &val = hash->values[idx];
-                            returnType = getResultType(ctx, val);
-                        }
-                    }
-                    if (returnType == nullptr) {
-                        ctx.state.error(back->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                        "Malformed type declaration. Expected `returns: <type>`");
-                        result = core::Types::dynamic();
-                        return;
-                    }
-                    targs.emplace_back(move(returnType));
-
-                    if (s->args.size() > 1) {
-                        ast::Array *arr = ast::cast_tree<ast::Array>(s->args.front().get());
-                        if (arr == nullptr) {
-                            ctx.state.error(s->args.front()->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                            "Malformed type declaration. Expected parameter list");
-                            result = core::Types::dynamic();
-                            return;
-                        }
-                        for (auto &el : arr->elems) {
-                            targs.emplace_back(getResultType(ctx, el));
-                        }
-                    }
-
-                    auto arity = targs.size() - 1;
-                    if (arity > core::Symbols::MAX_PROC_ARITY) {
-                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                        "Malformed T::Proc[]: Too many arguments (max {})",
-                                        core::Symbols::MAX_PROC_ARITY);
-                        result = core::Types::dynamic();
-                        return;
-                    }
-                    auto sym = core::Symbols::Proc(arity);
-
-                    result = make_shared<core::AppliedType>(sym, targs);
                 } else {
                     auto &data = recvi->symbol.data(ctx);
                     if (s->args.size() != data.typeMembers().size()) {
@@ -533,131 +636,54 @@ private:
         auto exprLoc = send->loc;
         auto &methodInfo = method.data(ctx);
 
-        struct {
-            bool sig = false;
-            bool args = false;
-            bool abstract = false;
-            bool override_ = false;
-            bool overridable = false;
-            bool implementation = false;
-            bool returns = false;
-            bool checked = false;
-        } seen;
+        auto sig = parseSig(ctx, send);
 
-        while (send != nullptr) {
-            switch (send->fun._id) {
-                case core::Names::sig()._id: {
-                    seen.sig = true;
-                    if (send->args.empty()) {
-                        break;
-                    }
-                    seen.args = true;
-
-                    if (send->args.size() > 1) {
-                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                        "Wrong number of args to `sig`. Got {}, expected 0-1", send->args.size());
-                    }
-                    auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
-                    if (hash == nullptr) {
-                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                        "Malformed `sig`; Expected a hash of arguments => types.", send->args.size());
-                        break;
-                    }
-
-                    int i = 0;
-                    for (auto &key : hash->keys) {
-                        auto &value = hash->values[i++];
-                        if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
-                            auto fnd = find_if(
-                                methodInfo.arguments().begin(), methodInfo.arguments().end(),
-                                [&](core::SymbolRef sym) -> bool { return sym.data(ctx).name == symbolLit->name; });
-                            if (fnd == methodInfo.arguments().end()) {
-                                ctx.state.error(key->loc, core::errors::Resolver::InvalidMethodSignature,
-                                                "Malformed `sig`. Unknown argument name {}", key->toString(ctx));
-                            } else {
-                                core::SymbolRef arg = *fnd;
-                                arg.data(ctx).resultType = getResultType(ctx, value);
-                                arg.data(ctx).definitionLoc = key->loc;
-                            }
-                        }
-                    }
-                    break;
-                }
-                case core::Names::abstract()._id:
-                    seen.abstract = true;
-                    break;
-                case core::Names::override_()._id:
-                    seen.override_ = true;
-                    break;
-                case core::Names::implementation()._id:
-                    seen.implementation = true;
-                    break;
-                case core::Names::overridable()._id:
-                    seen.overridable = true;
-                    break;
-                case core::Names::returns()._id:
-                    seen.returns = true;
-                    if (send->args.size() != 1) {
-                        ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                        "Wrong number of args to `sig.returns`. Got {}, expected 1", send->args.size());
-                    }
-                    if (!send->args.empty()) {
-                        methodInfo.resultType = getResultType(ctx, send->args.front());
-                    }
-
-                    break;
-                case core::Names::checked()._id:
-                    seen.checked = true;
-                    break;
-                default:
-                    ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                    "Unknown `sig` builder method {}.", send->fun.toString(ctx));
-            }
-            send = ast::cast_tree<ast::Send>(send->recv.get());
-        }
-        ENFORCE(seen.sig);
-
-        if (!seen.returns) {
-            if (seen.args ||
-                !(seen.abstract || seen.override_ || seen.implementation || seen.overridable || seen.abstract)) {
+        if (!sig.seen.returns) {
+            if (sig.seen.args || !(sig.seen.abstract || sig.seen.override_ || sig.seen.implementation ||
+                                   sig.seen.overridable || sig.seen.abstract)) {
                 ctx.state.error(exprLoc, core::errors::Resolver::InvalidMethodSignature,
                                 "Malformed `sig`: No return type specified. Specify one with .returns()");
             }
         }
 
+        methodInfo.resultType = sig.returns;
+
         for (auto it = methodInfo.arguments().begin(); it != methodInfo.arguments().end(); /* nothing */) {
             core::SymbolRef arg = *it;
+            auto spec = find_if(sig.argTypes.begin(), sig.argTypes.end(),
+                                [&](auto &spec) { return spec.name == arg.data(ctx).name; });
+            if (spec != sig.argTypes.end()) {
+                ENFORCE(spec->type != nullptr);
+                arg.data(ctx).resultType = spec->type;
+                arg.data(ctx).definitionLoc = spec->loc;
+                sig.argTypes.erase(spec);
+                ++it;
+            } else if (isOverloaded) {
+                it = methodInfo.arguments().erase(it);
+            } else if (arg.data(ctx).resultType != nullptr) {
+                ++it;
+            } else {
+                arg.data(ctx).resultType = core::Types::dynamic();
+                if (sig.seen.args || sig.seen.returns) {
+                    // Only error if we have any types
+                    ctx.state.error(arg.data(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
+                                    "Malformed sig. Type not specified for argument {}",
+                                    arg.data(ctx).name.toString(ctx));
+                }
+                ++it;
+            }
+
             if (isOverloaded && arg.data(ctx).isKeyword()) {
                 ctx.state.error(arg.data(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
                                 "Malformed sig. Overloaded functions cannot have keyword arguments:  {}",
                                 arg.data(ctx).name.toString(ctx));
             }
-            if (arg.data(ctx).resultType.get() != nullptr) {
-                ++it;
-            } else {
-                if (isOverloaded) {
-                    it = methodInfo.arguments().erase(it);
-                } else {
-                    arg.data(ctx).resultType = core::Types::dynamic();
-                    if (seen.args || seen.returns) {
-                        // Only error if we have any types
-                        ctx.state.error(arg.data(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
-                                        "Malformed sig. Type not specified for argument {}",
-                                        arg.data(ctx).name.toString(ctx));
-                    }
-                }
-            }
         }
-    }
 
-    bool isSig(core::Context ctx, ast::Send *send) {
-        while (send != nullptr) {
-            if (send->fun == core::Names::sig() && ast::cast_tree<ast::Self>(send->recv.get()) != nullptr) {
-                return true;
-            }
-            send = ast::cast_tree<ast::Send>(send->recv.get());
+        for (auto spec : sig.argTypes) {
+            ctx.state.error(spec.loc, core::errors::Resolver::InvalidMethodSignature, "Unknown argument name {}",
+                            spec.name.toString(ctx));
         }
-        return false;
     }
 
     void processClassBody(core::Context ctx, ast::ClassDef *klass) {

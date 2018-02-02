@@ -9,7 +9,7 @@ class TestNext
     end
   end
 
-  sig(blk: T::Proc[returns: String]).returns(String)
+  sig(blk: T.proc.returns(String)).returns(String)
   def yields(&blk)
     blk.call
   end

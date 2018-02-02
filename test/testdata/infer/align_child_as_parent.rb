@@ -2,7 +2,7 @@
 module Mod
   A = T.type
    sig(
-      blk: T::Proc[[A], returns: A],
+      blk: T.proc(a: A).returns(A),
   )
   .returns(NilClass)
   def foo(&blk)

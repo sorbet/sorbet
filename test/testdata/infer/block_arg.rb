@@ -2,7 +2,7 @@
 class A
   def _; end
 
-  sig(blk: T::Proc[[Integer, Float], returns: String]).returns(String)
+  sig(blk: T.proc(a: Integer, b: Float).returns(String)).returns(String)
   def yields(&blk)
     blk.call(13, 1.0)
   end
@@ -45,7 +45,7 @@ class A
   end
 
   class ConstructorBlock
-    sig(blk: T::Proc[[Symbol], returns: String]).returns(NilClass)
+    sig(blk: T.proc(s: Symbol).returns(String)).returns(NilClass)
     def initialize(&blk)
     end
   end

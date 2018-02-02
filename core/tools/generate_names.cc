@@ -97,6 +97,7 @@ NameDef names[] = {
     {"any", Resolver | Infer | Core},
     {"enum_", "enum", Resolver},
     {"nilable", Resolver | Desugar | Infer | Core},
+    {"proc", Resolver},
     {"untyped", Resolver | Infer | Core},
     {"Array", Infer},
     {"Hash", Infer},
