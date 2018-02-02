@@ -761,10 +761,10 @@ class Array
   Elem = T.type
 
   sig(
-    stuff: T.untyped
+      arg0: BasicObject,
   )
   .returns(T::Array[T.untyped])
-  def self.[](*stuff); end
+  def self.[](*arg0); end
 
   sig(
       arg0: Elem,
@@ -788,7 +788,7 @@ class Array
   def [](arg0, arg1=_); end
 
   sig(
-      arg0: T::Array[BasicObject],
+      arg0: T::Array[Elem],
   )
   .returns(T::Array[Elem])
   def &(arg0); end
@@ -804,19 +804,19 @@ class Array
   def *(arg0); end
 
   sig(
-      arg0: Enumerable[BasicObject],
+      arg0: Enumerable[Elem],
   )
-  .returns(T::Array[T.any(T.untyped, Elem)])
+  .returns(T::Array[Elem])
   sig(
-      arg0: T::Array[BasicObject],
+      arg0: T::Array[Elem],
   )
-  .returns(T::Array[T.any(T.untyped, Elem)])
+  .returns(T::Array[Elem])
   def +(arg0); end
 
   sig(
-      arg0: T::Array[BasicObject],
+      arg0: T::Array[Elem],
   )
-  .returns(T::Array[T.any(T.untyped, Elem)])
+  .returns(T::Array[Elem])
   def -(arg0); end
 
   sig(
@@ -925,15 +925,14 @@ class Array
   def cycle(arg0=_, &blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
   .returns(Elem)
   sig(
-      arg0: BasicObject,
-      blk: T.proc().returns(BasicObject),
+      blk: T.proc().returns(Elem),
   )
-  .returns(T.any(Elem, T.untyped))
-  def delete(arg0, &blk); end
+  .returns(Elem)
+  def delete(arg0=_, &blk); end
 
   sig(
       arg0: Integer,
@@ -984,14 +983,14 @@ class Array
   .returns(Elem)
   sig(
       arg0: Integer,
-      arg1: BasicObject,
+      arg1: Elem,
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
       arg0: Integer,
-      blk: T.proc(arg0: Integer).returns(BasicObject),
+      blk: T.proc(arg0: Integer).returns(Elem),
   )
-  .returns(T.any(Elem, T.untyped))
+  .returns(Elem)
   def fetch(arg0, arg1=_, &blk); end
 
   sig(
@@ -1095,7 +1094,7 @@ class Array
   def last(arg0=_); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
   .returns(T.any(TrueClass, FalseClass))
   def member?(arg0); end
@@ -1183,7 +1182,7 @@ class Array
   def reverse_each(&blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: Elem,
   )
   .returns(Elem)
   sig(
@@ -1322,9 +1321,9 @@ class Array
   def zip(*arg0); end
 
   sig(
-      arg0: T::Array[BasicObject],
+      arg0: T::Array[Elem],
   )
-  .returns(T::Array[T.any(Elem, T.untyped)])
+  .returns(T::Array[Elem])
   def |(arg0); end
 
   sig.returns(Array)
@@ -3081,10 +3080,10 @@ module Enumerable
   )
   .returns(T.untyped)
   sig(
-      initial: BasicObject,
-      blk: T.proc(arg0: T.untyped, arg1: Elem).returns(BasicObject),
+      initial: Elem,
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
   )
@@ -3285,10 +3284,10 @@ module Enumerable
   )
   .returns(T.untyped)
   sig(
-      initial: BasicObject,
-      blk: T.proc(arg0: T.untyped, arg1: Elem).returns(BasicObject),
+      initial: Elem,
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
   )
-  .returns(T.untyped)
+  .returns(Elem)
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
   )
@@ -4815,11 +4814,11 @@ class Hash
   K = T.type
   V = T.type
 
-   sig(
-      stuff: T.untyped
-    )
-    .returns(T::Hash[T.untyped, T.untyped])
-    def self.[](*stuff); end
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  def self.[](*arg0); end
 
   sig(
       arg0: K,
@@ -4928,14 +4927,14 @@ class Hash
   .returns(V)
   sig(
       arg0: K,
-      arg1: BasicObject,
+      arg1: V,
   )
-  .returns(T.any(T.untyped, V))
+  .returns(V)
   sig(
       arg0: K,
-      blk: T.proc(arg0: K).returns(BasicObject),
+      blk: T.proc(arg0: K).returns(V),
   )
-  .returns(T.any(T.untyped, V))
+  .returns(V)
   def fetch(arg0, arg1=_, &blk); end
 
   sig(
@@ -10688,6 +10687,7 @@ class SignalException
 end
 
 class SortedSet
+  extend T::Generic
   Elem = T.type
 
   sig(
