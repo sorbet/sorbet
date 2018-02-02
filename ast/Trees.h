@@ -18,6 +18,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
+
+    virtual void _sanityCheck() = 0;
+
     core::Loc loc;
 };
 
@@ -74,8 +77,10 @@ public:
 
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class MethodDef final : public Declaration {
@@ -94,6 +99,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class ConstDef final : public Declaration {
@@ -104,6 +112,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class If final : public Expression {
@@ -111,11 +122,15 @@ public:
     std::unique_ptr<Expression> cond;
     std::unique_ptr<Expression> thenp;
     std::unique_ptr<Expression> elsep;
+
     If(core::Loc loc, std::unique_ptr<Expression> cond, std::unique_ptr<Expression> thenp,
        std::unique_ptr<Expression> elsep);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class While final : public Expression {
@@ -127,6 +142,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Break final : public Expression {
@@ -137,6 +155,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Retry final : public Expression {
@@ -145,6 +166,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Next final : public Expression {
@@ -155,6 +179,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Return final : public Expression {
@@ -165,6 +192,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Yield final : public Expression {
@@ -175,6 +205,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class RescueCase final : public Expression {
@@ -194,6 +227,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Rescue final : public Expression {
@@ -211,6 +247,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Ident final : public Reference {
@@ -221,6 +260,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Local final : public Expression {
@@ -231,6 +273,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class UnresolvedIdent final : public Reference {
@@ -248,6 +293,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class RestArg final : public Reference {
@@ -258,6 +306,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class KeywordArg final : public Reference {
@@ -268,6 +319,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class OptionalArg final : public Reference {
@@ -279,6 +333,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class BlockArg final : public Reference {
@@ -289,6 +346,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class ShadowArg final : public Reference {
@@ -299,6 +359,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class SymbolLit final : public Expression {
@@ -310,6 +373,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Assign final : public Expression {
@@ -321,6 +387,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Block;
@@ -345,6 +414,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Cast final : public Expression {
@@ -357,6 +429,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Hash final : public Expression {
@@ -372,6 +447,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Array final : public Expression {
@@ -386,6 +464,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class FloatLit final : public Expression {
@@ -396,6 +477,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class IntLit final : public Expression {
@@ -406,6 +490,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class StringLit final : public Expression {
@@ -416,6 +503,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class BoolLit final : public Expression {
@@ -426,6 +516,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class ConstantLit final : public Expression {
@@ -437,6 +530,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class ArraySplat final : public Expression {
@@ -447,6 +543,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class HashSplat final : public Expression {
@@ -457,16 +556,21 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class ZSuperArgs final : public Expression {
 public:
     // null if no block passed
     ZSuperArgs(core::Loc loc);
-
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Self final : public Expression {
@@ -477,6 +581,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class Block final : public Expression {
@@ -489,6 +596,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class InsSeq final : public Expression {
@@ -503,6 +613,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 class EmptyTree final : public Expression {
@@ -511,6 +624,9 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+
+private:
+    virtual void _sanityCheck();
 };
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
