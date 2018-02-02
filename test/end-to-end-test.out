@@ -1,4 +1,4 @@
-test/end-to-end-test-input.rb:4: Stubbing out unknown constant <emptyTree>::<constant:MissingConstant> [5002]
+test/end-to-end-test-input.rb:4: Stubbing out unknown constant [5002]
     MissingConstant
     ^^^^^^^^^^^^^^^
 test/end-to-end-test-input.rb:12: Argument arg0 does not match expected type String [7002]

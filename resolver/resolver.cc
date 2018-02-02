@@ -43,8 +43,7 @@ private:
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (!result.exists()) {
-                ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant {}",
-                                c->toString(ctx));
+                ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant");
                 result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
                 result.data(ctx).resultType = core::Types::dynamic();
                 result.data(ctx).setIsModule(false);
@@ -64,8 +63,7 @@ private:
             core::SymbolRef result = resolved.data(ctx).findMember(ctx, c->cnst);
             if (!result.exists()) {
                 if (resolved.data(ctx).resultType.get() == nullptr || !resolved.data(ctx).resultType->isDynamic()) {
-                    ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant {}",
-                                    c->toString(ctx));
+                    ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant");
                 }
                 result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
                 result.data(ctx).resultType = core::Types::dynamic();
