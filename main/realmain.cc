@@ -158,7 +158,8 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         }
         return ast;
     } catch (...) {
-        console_err->error("Exception parsing file: {} (backtrace is above)", file.data(lgs).path());
+        lgs.error(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError,
+                  "Exception parsing file: {} (backtrace is above)", file.data(lgs).path());
         returnCode = 12;
         return make_unique<ast::EmptyTree>(core::Loc::none(file));
     }
@@ -195,7 +196,8 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         try {
                             src = File::read(fileName.c_str());
                         } catch (FileNotFoundException e) {
-                            console->error("File Not Found: {}", fileName);
+                            lgs->error(ruby_typer::core::Loc::none(ruby_typer::core::FileRef()),
+                                       core::errors::Internal::InternalError, "File Not Found: {}", fileName);
                             returnCode = 11;
                             // continue with an empty source, because the
                             // assertion below requires every input file to map
@@ -272,7 +274,8 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                 result.emplace_back(move(ast));
             } catch (...) {
                 returnCode = 13;
-                console_err->error("Exception naming file: {} (backtrace is above)", file.data(gs).path());
+                gs.error(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError,
+                         "Exception naming file: {} (backtrace is above)", file.data(gs).path());
             }
         }
     }
@@ -307,7 +310,8 @@ unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast:
             cout << "}" << endl << endl;
         }
     } catch (...) {
-        console_err->error("Exception in cfg+infer: {} (backtrace is above)", f.data(gs).path());
+        gs.error(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError,
+                 "Exception in cfg+infer: {} (backtrace is above)", f.data(gs).path());
         returnCode = 15;
     }
     if (forceTypedSource) {
@@ -339,7 +343,8 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
             what = resolver::Resolver::run(ctx, move(what));
         }
     } catch (...) {
-        console_err->error("Exception resolving (backtrace is above)");
+        gs.error(ruby_typer::core::Loc::none(ruby_typer::core::FileRef()), core::errors::Internal::InternalError,
+                 "Exception resolving (backtrace is above)");
         returnCode = 14;
     }
 
