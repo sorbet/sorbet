@@ -88,6 +88,7 @@ class NameInserter {
     };
 
     vector<LocalFrame> scopeStack;
+    u4 scopeId;
 
     unique_ptr<ast::Expression> addAncestor(core::Context ctx, ast::ClassDef *klass,
                                             unique_ptr<ast::Expression> &node) {
@@ -168,6 +169,7 @@ public:
             }
         }
         scopeStack.emplace_back();
+        scopeId = 0;
         return klass;
     }
 
@@ -193,6 +195,13 @@ public:
         return klass;
     }
 
+    core::LocalVariable enterLocal(core::Context ctx, core::NameRef name) {
+        if (!ctx.owner.data(ctx).isBlockSymbol(ctx)) {
+            return core::LocalVariable(name, 0);
+        }
+        return core::LocalVariable(name, scopeId);
+    }
+
     void fillInArgs(core::Context ctx, ast::MethodDef::ARGS_store &args) {
         bool inShadows = false;
 
@@ -211,7 +220,7 @@ public:
                 name = sym.data(ctx).name;
             }
 
-            core::LocalVariable local = ctx.state.enterLocalSymbol(ctx.owner, name);
+            core::LocalVariable local = enterLocal(ctx, name);
             scopeStack.back().locals[name] = local;
 
             unique_ptr<ast::Expression> localExpr = make_unique<ast::Local>(arg->loc, local);
@@ -314,6 +323,7 @@ public:
 
     ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
         scopeStack.emplace_back();
+        ++scopeId;
         core::SymbolRef owner = methodOwner(ctx);
 
         if (method->isSelf) {
@@ -369,6 +379,7 @@ public:
                                                                   ++(owner.data(ctx).uniqueCounter)));
 
         scopeStack.emplace_back();
+        ++scopeId;
         auto &parent = *(scopeStack.end() - 2);
         auto &frame = scopeStack.back();
 
@@ -398,7 +409,7 @@ public:
                 auto &frame = scopeStack.back();
                 core::LocalVariable &cur = frame.locals[nm->name];
                 if (!cur.exists()) {
-                    cur = ctx.state.enterLocalSymbol(ctx.owner, nm->name);
+                    cur = enterLocal(ctx, nm->name);
                     frame.locals[nm->name] = cur;
                 }
                 return new ast::Local(nm->loc, cur);
@@ -528,14 +539,14 @@ public:
             method.data(ctx).argumentsOrMixins.push_back(blockArg);
 
             // Also put it in the MethodDef since we rely on that being correct for blocks
-            core::LocalVariable local = ctx.state.enterLocalSymbol(ctx.owner, name);
+            core::LocalVariable local = enterLocal(ctx, name);
             scopeStack.back().locals[name] = local;
             auto localExpr = make_unique<ast::Local>(yield->loc, local);
             peekEnclosingArgs().emplace_back(move(localExpr));
         }
 
         auto name = blockArg.data(ctx).name;
-        core::LocalVariable local = ctx.state.enterLocalSymbol(ctx.owner, name);
+        core::LocalVariable local = enterLocal(ctx, name);
         scopeStack.back().locals[name] = local;
         auto recv = make_unique<ast::Local>(yield->loc, local);
         ast::Send::ARGS_store nargs;
@@ -547,6 +558,7 @@ public:
 private:
     NameInserter() {
         scopeStack.emplace_back();
+        scopeId = 0;
     }
 
     vector<ast::MethodDef::ARGS_store> enclosingArgsStack;

@@ -451,27 +451,6 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD_ARGUMENT);
 }
 
-LocalVariable GlobalState::enterLocalSymbol(SymbolRef owner, NameRef name) const {
-    // THIS IS NOT TRUE. Top level code is still a thing
-    // ENFORCE(owner.data(*this).isMethod());
-    categoryCounterInc("symbols", "local");
-    if (owner.data(*this).isBlockSymbol(*this) && !name.isBlockClashSafe(*this)) {
-        // Reproducibly create a name that depends on the owners scope.
-        // This is used to distinguish between name "foo" defined in a block
-        // and name "foo" defined by outer function.
-        // We can't use block nesting level, otherwise there may be crosstalk
-        // currently we use lower bits of owner id
-        // this is fine until method has more than 64k blocks + nested methods + nested classes
-        constexpr u2 rangeSize = (256 * 256 - 1);
-        LocalVariable ret(name, 1 + owner._id % rangeSize);
-        ENFORCE(owner._id - owner.data(*this).enclosingMethod(*this)._id < rangeSize);
-        // check that did not overflow
-        return ret;
-    }
-    LocalVariable r(name, 0);
-    return r;
-}
-
 absl::string_view GlobalState::enterString(absl::string_view nm) {
     char *from = nullptr;
     if (nm.size() > GlobalState::STRINGS_PAGE_SIZE) {

@@ -47,8 +47,6 @@ string Name::toString(const GlobalState &gs) const {
         case UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
                 return "<singleton class:" + this->unique.original.data(gs).toString(gs) + ">";
-            } else if (this->unique.uniqueNameKind == UniqueNameKind::NestedScope) {
-                return "<block-nested: " + this->unique.original.data(gs).toString(gs) + ">";
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return "<overload N." + to_string(this->unique.num) + " : " +
                        this->unique.original.data(gs).toString(gs) + ">";
@@ -128,11 +126,6 @@ const Name &NameRef::data(const GlobalState &gs) const {
 }
 string NameRef::toString(const GlobalState &gs) const {
     return data(gs).toString(gs);
-}
-
-bool NameRef::isBlockClashSafe(const GlobalState &gs) const {
-    const Name &nm = this->data(gs);
-    return nm.kind == NameKind ::UNIQUE && nm.unique.uniqueNameKind == UniqueNameKind ::NestedScope;
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {

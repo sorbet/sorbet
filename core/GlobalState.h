@@ -52,7 +52,6 @@ public:
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
-    LocalVariable enterLocalSymbol(SymbolRef owner, NameRef name) const;
 
     LocalVariable newTemporary(NameRef name, SymbolRef owner);
 

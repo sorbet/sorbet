@@ -155,7 +155,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
         ctx.state.enterClassSymbol(loc, ruby_typer::core::Symbols::root(), ctx.state.enterNameConstant(name));
     auto methodSym = ctx.state.enterMethodSymbol(loc, classSym, name);
     auto empty = vector<core::SymbolRef>();
-    auto argumentSym = ctx.state.enterLocalSymbol(methodSym, name);
+    auto argumentSym = core::LocalVariable(name, 0);
     unique_ptr<Expression> rhs(new IntLit(loc, 5));
     auto arg = unique_ptr<Expression>(new Local(loc, argumentSym));
     MethodDef::ARGS_store args;
