@@ -36,6 +36,20 @@ def externals():
         )
 
     new_git_repository(
+            name="progressbar",
+            remote="https://github.com/doches/progressbar.git",
+            commit="c4c54f891ab05cfc411ec5c2ed147dd4cad1ccf3",
+            build_file="//:progressbar.BUILD",
+        )
+
+    new_git_repository(
+                name="concurrentqueue",
+                remote="https://github.com/DarkDimius/concurrentqueue.git",
+                commit="d40e4e754dad40510ae6b8613c7ce94d6918527a",
+                build_file="//:concurrentqueue.BUILD",
+            )
+
+    new_git_repository(
             name="statsd",
             remote="https://github.com/romanbsd/statsd-c-client",
             commit="0bfa3d59e29ad7eff332c9e2506a23d311ff8db4",

@@ -136,7 +136,6 @@ std::string strprintf(const char *__restrict, ...) __attribute__((format(printf,
 std::string demangle(const char *mangled);
 
 #include "Error.h"
-#include "ThreadQueue.h"
 #include "counters.h"
 #include "typecase.h"
 
