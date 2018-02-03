@@ -4,6 +4,9 @@
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
+#include "common/ConcurrentQueue.h"
+#include "common/ProgressIndicator.h"
+#include "common/WorkerPool.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
@@ -47,6 +50,7 @@ struct Options {
     bool noStdlib = false;
     bool forceTyped = false;
     bool forceUntyped = false;
+    bool showProgress = false;
     int threads = 0;
     string typedSource = "";
 };
@@ -54,6 +58,8 @@ struct Options {
 shared_ptr<spd::logger> console_err;
 shared_ptr<spd::logger> tracer;
 shared_ptr<spd::logger> console;
+
+const auto PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
 
 int returnCode = 0;
 
@@ -167,29 +173,40 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
 
 vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std::string> frs,
                                           std::vector<core::FileRef> mainThreadFiles, const Options &opts,
-                                          bool silenceErrors = false) {
+                                          WorkerPool &workers, bool silenceErrors = false) {
     vector<unique_ptr<ast::Expression>> result;
     vector<unique_ptr<ast::Expression>> empty;
     vector<unique_ptr<ast::Expression>> trees;
 
-    ThreadQueue<std::pair<int, std::string>> fileq;
-    ThreadQueue<thread_result> resultq;
+    shared_ptr<ConcurrentBoundedQueue<std::pair<int, std::string>>> fileq =
+        make_shared<ConcurrentBoundedQueue<std::pair<int, std::string>>>(frs.size());
+    shared_ptr<BlockingBoundedQueue<thread_result>> resultq =
+        make_shared<BlockingBoundedQueue<thread_result>>(frs.size());
+
+    int i = gs.filesUsed();
+    for (auto f : frs) {
+        tracer->trace("enqueue: {}", f);
+        std::pair<int, std::string> job(i++, f);
+        fileq->push(move(job), 1);
+    }
 
     gs.sanityCheck();
-    const auto cgs = gs.deepCopy();
+    const std::shared_ptr<core::GlobalState> cgs{gs.deepCopy()};
     {
-        ENFORCE(opts.threads > 0);
-        vector<unique_ptr<Joinable>> threads;
-        for (int i = 0; i < opts.threads; ++i) {
-            threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq, silenceErrors]() {
-                auto lgs = cgs->deepCopy();
-                thread_result result;
-                std::pair<int, std::string> job;
+        ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
 
-                {
-                    core::ErrorRegion errs(*lgs, silenceErrors);
+        workers.multiplexJob([cgs, opts, fileq, resultq, silenceErrors]() {
+            auto lgs = cgs->deepCopy();
+            thread_result threadResult;
+            int processedByThread = 0;
+            std::pair<int, std::string> job;
 
-                    while (fileq.pop(&job)) {
+            {
+                core::ErrorRegion errs(*lgs, silenceErrors);
+
+                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    if (result.gotItem()) {
+                        processedByThread++;
                         std::string fileName = job.second;
                         int fileId = job.first;
                         string src;
@@ -221,35 +238,35 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
 
                         tracer->trace("{}", fileName);
 
-                        result.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
+                        threadResult.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
                     }
                 }
+            }
 
-                result.counters = getAndClearThreadCounters();
-                result.gs = move(lgs);
-                resultq.push(move(result));
-            }));
-        }
-        int i = gs.filesUsed();
-        for (auto f : frs) {
-            tracer->trace("enqueue: {}", f);
-            std::pair<int, std::string> job(i++, f);
-            fileq.push(job);
-        }
-        fileq.close();
+            if (processedByThread > 0) {
+                threadResult.counters = getAndClearThreadCounters();
+                threadResult.gs = move(lgs);
+                resultq->push(move(threadResult), processedByThread);
+            }
+        });
 
         for (auto f : mainThreadFiles) {
             trees.emplace_back(indexOne(opts.print, gs, f, silenceErrors));
         }
 
-        thread_result result;
-        for (int i = 0; i < opts.threads; ++i) {
-            resultq.pop(&result);
-            core::GlobalSubstitution substitution(*result.gs, gs);
-            counterConsume(move(result.counters));
-            core::Context ctx(gs, core::Symbols::root());
-            for (auto &tree : result.trees) {
-                trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
+        thread_result threadResult;
+        {
+            for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
+                 result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+                if (result.gotItem()) {
+                    core::GlobalSubstitution substitution(*threadResult.gs, gs);
+                    counterConsume(move(threadResult.counters));
+                    core::Context ctx(gs, core::Symbols::root());
+                    for (auto &tree : threadResult.trees) {
+                        trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
+                    }
+                }
+                indexingProgress.reportProgress(fileq->doneEstimate());
             }
         }
     }
@@ -257,8 +274,9 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
     ENFORCE(mainThreadFiles.size() + frs.size() == trees.size());
 
     {
-        Timer timeit(console_err, "naming");
+        ProgressIndicator namingProgress(opts.showProgress, "Naming", frs.size());
 
+        Timer timeit(console_err, "naming");
         for (auto &tree : trees) {
             auto file = tree->loc.file;
             try {
@@ -272,6 +290,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                     ast = namer::Namer::run(ctx, move(tree));
                 }
                 result.emplace_back(move(ast));
+                namingProgress.reportProgress(result.size());
             } catch (...) {
                 returnCode = 13;
                 gs.error(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError,
@@ -329,11 +348,12 @@ struct typecheck_thread_result {
 // If ever given a result type, it should be something along the lines of
 // vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
 void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
-               bool silenceErrors = false) {
+               WorkerPool &workers, bool silenceErrors = false) {
     vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>> typecheck_result;
 
     try {
         core::Context ctx(gs, core::Symbols::root());
+        ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
             Timer timeit(console_err, "Resolving");
             tracer->trace("Resolving (global pass)...");
@@ -357,51 +377,58 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
         }
     }
 
-    ThreadQueue<unique_ptr<ast::Expression>> fileq;
-    ThreadQueue<typecheck_thread_result> resultq;
+    shared_ptr<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>> fileq =
+        make_shared<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>>(what.size());
+    shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq =
+        make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
+
     gs.sanityCheck();
-    const auto cgs = gs.deepCopy(true);
+    const std::shared_ptr<core::GlobalState> cgs{gs.deepCopy(true)};
+    for (auto &resolved : what) {
+        tracer->trace("enqueue-typer {}", resolved->loc.file.data(gs).path());
+        fileq->push(move(resolved), 1);
+    }
 
     {
-        ENFORCE(opts.threads > 0);
-        vector<unique_ptr<Joinable>> threads;
-        for (int i = 0; i < opts.threads; ++i) {
-            threads.emplace_back(runInAThread([&cgs, &opts, &fileq, &resultq, silenceErrors]() {
-                auto lgs = cgs->deepCopy(true);
-                typecheck_thread_result result;
-                unique_ptr<ast::Expression> job;
+        ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
+        workers.multiplexJob([cgs, opts, fileq, resultq, silenceErrors]() {
+            auto lgs = cgs->deepCopy(true);
+            typecheck_thread_result threadResult;
+            unique_ptr<ast::Expression> job;
+            int processedByThread = 0;
 
-                {
-                    core::ErrorRegion errs(*lgs, silenceErrors);
-
-                    while (fileq.pop(&job)) {
+            {
+                core::ErrorRegion errs(*lgs, silenceErrors);
+                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                    if (result.gotItem()) {
+                        processedByThread++;
                         core::FileRef file = job->loc.file;
                         try {
-                            result.trees.emplace_back(typecheckFile(*lgs, move(job), opts, silenceErrors));
+                            threadResult.trees.emplace_back(typecheckFile(*lgs, move(job), opts, silenceErrors));
                         } catch (...) {
                             console_err->error("Exception typing file: {} (backtrace is above)",
                                                file.data(*lgs).path());
-                            returnCode = 16;
                         }
                     }
                 }
+            }
+            if (processedByThread > 0) {
+                threadResult.counters = getAndClearThreadCounters();
+                threadResult.gs = move(lgs);
+                resultq->push(move(threadResult), processedByThread);
+            }
+        });
 
-                result.counters = getAndClearThreadCounters();
-                result.gs = move(lgs);
-                resultq.push(move(result));
-            }));
-        }
-        for (auto &resolved : what) {
-            tracer->trace("enqueue-typer {}", resolved->loc.file.data(gs).path());
-            fileq.push(move(resolved));
-        }
-        fileq.close();
-
-        typecheck_thread_result result;
-        for (int i = 0; i < opts.threads; ++i) {
-            resultq.pop(&result);
-            counterConsume(move(result.counters));
-            typecheck_result.emplace_back(move(result.trees), move(result.gs));
+        typecheck_thread_result threadResult;
+        {
+            for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
+                 result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+                if (result.gotItem()) {
+                    counterConsume(move(threadResult.counters));
+                    typecheck_result.emplace_back(move(threadResult.trees), move(threadResult.gs));
+                }
+                cfgInferProgress.reportProgress(fileq->doneEstimate());
+            }
         }
     }
 
@@ -477,6 +504,7 @@ cxxopts::Options buildOptions() {
     options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
+    options.add_options()("P,progress", "Draw progressbar");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
 
@@ -532,9 +560,11 @@ void createInitialGlobalState(core::GlobalState &gs, const Options &options) {
         }
         Options emptyOpts;
         emptyOpts.threads = 1;
+        WorkerPool workers(emptyOpts.threads);
         vector<std::string> empty;
 
-        typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, true), emptyOpts, true); // result is thrown away
+        typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, workers, true), emptyOpts, workers,
+                  true); // result is thrown away
     } else {
         Timer timeit(console_err, "Read serialized payload");
         core::serialize::GlobalStateSerializer::load(gs, nameTablePayload);
@@ -609,6 +639,8 @@ int realmain(int argc, char **argv) {
         }
     }
 
+    WorkerPool workers(opts.threads);
+
     if (files.size() > 10) {
         //        spd::set_async_mode(1024); // makes logging asyncronous but adds 60ms to startup time.
     }
@@ -650,6 +682,7 @@ int realmain(int argc, char **argv) {
     string typed = options["typed"].as<string>();
     opts.forceTyped = typed == "always";
     opts.forceUntyped = typed == "never";
+    opts.showProgress = options.count("P") != 0;
     if (typed != "always" && typed != "never" && typed != "auto") {
         console->error("Invalid value for `--typed`: {}", typed);
     }
@@ -689,12 +722,12 @@ int realmain(int argc, char **argv) {
     vector<unique_ptr<ast::Expression>> indexed;
     {
         Timer timeit(console_err, "index");
-        indexed = index(gs, files, inputFiles, opts);
+        indexed = index(gs, files, inputFiles, opts, workers);
     }
 
     {
         Timer timeit(console_err, "typecheck");
-        typecheck(gs, move(indexed), opts);
+        typecheck(gs, move(indexed), opts, workers);
     }
     tracer->trace("done");
 
