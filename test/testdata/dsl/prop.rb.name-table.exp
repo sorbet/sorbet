@@ -1,0 +1,130 @@
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:AdvancedODM> < ::<constant:Object> () -> <Class:AdvancedODM>
+    method array () -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    method array= (arg0) -> NilClass
+      argument arg0<> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+    method array_of () -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = String
+      ]
+    }
+    method array_of= (arg0) -> NilClass
+      argument arg0<> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = String
+        ]
+      }
+    method array_of_explicit () -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    method array_of_explicit= (arg0) -> NilClass
+      argument arg0<> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+    method const () -> String
+    method const_explicit () -> String
+    method default () -> String
+    method default= (arg0) -> NilClass
+      argument arg0<> -> String
+    method factory () -> String
+    method factory= (arg0) -> NilClass
+      argument arg0<> -> String
+    method hash_of () -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = Symbol
+        <constant:V> = String
+        <constant:Elem> = untyped
+      ]
+    }
+    method hash_of= (arg0) -> NilClass
+      argument arg0<> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = Symbol
+          <constant:V> = String
+          <constant:Elem> = untyped
+        ]
+      }
+    method no_class_arg () -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    method nodefault () -> String | NilClass
+    method nodefault= (arg0) -> NilClass
+      argument arg0<> -> String
+    method object () -> Object
+    method object= (arg0) -> NilClass
+      argument arg0<> -> Object
+    method optional () -> String
+    method optional= (arg0) -> NilClass
+      argument arg0<> -> String | NilClass
+    method optional_existing () -> String
+    method optional_existing= (arg0) -> NilClass
+      argument arg0<> -> String | NilClass
+    method optional_explicit () -> String
+    method optional_explicit= (arg0) -> NilClass
+      argument arg0<> -> String | NilClass
+    method optional_false () -> String
+    method optional_false= (arg0) -> NilClass
+      argument arg0<> -> String
+    method t_array () -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = String
+      ]
+    }
+    method t_array= (arg0) -> NilClass
+      argument arg0<> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = String
+        ]
+      }
+    method type () -> String
+    method type= (arg0) -> NilClass
+      argument arg0<> -> String
+  class <constant:NotAODM> < ::<constant:Object> () -> <Class:NotAODM>
+    class <constant:Default> () -> untyped
+    class <constant:IntegerParam> () -> untyped
+    method <static-init> ()
+  class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object>
+    method main ()
+  class <constant:Opus> () -> <Class:Opus>
+    class <constant:Param> () -> untyped
+      class <constant:CaseParam> () -> untyped
+      class <constant:ParamSpecsParam> () -> untyped
+  class <constant:SomeODM> < ::<constant:Object> () -> <Class:SomeODM>
+    method foo () -> String | NilClass
+    method foo2 () -> String | NilClass
+    method foo2= (arg0) -> NilClass
+      argument arg0<> -> String
+    method foo= (arg0) -> NilClass
+      argument arg0<> -> String
+  class <singleton class:<constant:AdvancedODM>> < ::<singleton class:<constant:Object>> ()
+  class <singleton class:<constant:NotAODM>> < ::<singleton class:<constant:Object>> ()
+    method prop (args)
+      argument args<repeated>
+  class <singleton class:<constant:SomeODM>> < ::<singleton class:<constant:Object>> ()
+  method <static-init>$6 ()
+

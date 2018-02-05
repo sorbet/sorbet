@@ -59,6 +59,7 @@ cc_library(
         "//cfg/builder",
         "//core",
         "//core/serialize",
+        "//dsl",
         "//infer",
         "//namer",
         "//parser",

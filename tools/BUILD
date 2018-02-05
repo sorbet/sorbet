@@ -33,6 +33,7 @@ compilation_database(
         "//resolver:resolver",
         "//namer:namer",
         "//infer:infer",
+        "//dsl:dsl",
         "//core/serialize:serialize_test",
         "//core/serialize:serialize",
         "//core:generate_names",

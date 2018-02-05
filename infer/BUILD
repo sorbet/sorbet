@@ -34,6 +34,7 @@ cc_test(
         "infer",
         "//ast/desugar",
         "//cfg",
+        "//dsl",
         "//namer",
         "//resolver",
         "@gtest",

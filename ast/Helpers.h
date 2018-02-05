@@ -16,6 +16,11 @@ public:
         return move(send);
     }
 
+    static std::unique_ptr<Expression> Send0(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun) {
+        Send::ARGS_store nargs;
+        return std::make_unique<ast::Send>(loc, move(recv), fun, move(nargs));
+    }
+
     static std::unique_ptr<Expression> Send1(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
                                              std::unique_ptr<Expression> arg1) {
         Send::ARGS_store nargs;
@@ -38,11 +43,6 @@ public:
         nargs.emplace_back(move(arg1));
         nargs.emplace_back(move(arg2));
         nargs.emplace_back(move(arg3));
-        return std::make_unique<ast::Send>(loc, move(recv), fun, move(nargs));
-    }
-
-    static std::unique_ptr<Expression> Send0(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun) {
-        Send::ARGS_store nargs;
         return std::make_unique<ast::Send>(loc, move(recv), fun, move(nargs));
     }
 

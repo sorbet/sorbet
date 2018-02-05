@@ -3,6 +3,7 @@
 #include "common/common.h"
 #include "core/Names/infer.h"
 #include "core/Unfreeze.h"
+#include "dsl/dsl.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
@@ -41,6 +42,7 @@ void processSource(core::GlobalState &cb, string str) {
     auto ast = parser::Parser::run(cb, "<test>", str);
     ruby_typer::core::Context ctx(cb, core::Symbols::root());
     auto tree = ast::desugar::node2Tree(ctx, move(ast));
+    tree = dsl::DSL::run(ctx, move(tree));
     tree = namer::Namer::run(ctx, move(tree));
     vector<unique_ptr<ast::Expression>> trees;
     trees.emplace_back(move(tree));

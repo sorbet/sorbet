@@ -17,6 +17,7 @@ cc_binary(
         "//cfg/builder",
         "//core",
         "//core/serialize",
+        "//dsl",
         "//infer",
         "//namer",
         "//payload/binary",

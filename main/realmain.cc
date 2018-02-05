@@ -10,6 +10,7 @@
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
+#include "dsl/dsl.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -36,6 +37,8 @@ struct Printers {
     bool ParseTree = false;
     bool Desugared = false;
     bool DesugaredRaw = false;
+    bool DSLTree = false;
+    bool DSLTreeRaw = false;
     bool NameTree = false;
     bool NameTreeRaw = false;
     bool NameTable = false;
@@ -70,6 +73,8 @@ struct {
     {"parse-tree", &Printers::ParseTree},
     {"ast", &Printers::Desugared},
     {"ast-raw", &Printers::DesugaredRaw},
+    {"dsl-tree", &Printers::DSLTree},
+    {"dsl-tree-raw", &Printers::DSLTreeRaw},
     {"name-table", &Printers::NameTable},
     {"name-table-full", &Printers::NameTableFull},
     {"name-tree", &Printers::NameTree},
@@ -162,6 +167,20 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         if (print.DesugaredRaw) {
             cout << ast->showRaw(lgs) << endl;
         }
+
+        {
+            tracer->trace("Inlining DSLs: {}", file.data(lgs).path());
+            core::ErrorRegion errs(lgs, silenceErrors);
+            ast = dsl::DSL::run(ctx, move(ast));
+        }
+        if (print.DSLTree) {
+            cout << ast->toString(lgs, 0) << endl;
+        }
+
+        if (print.DSLTreeRaw) {
+            cout << ast->showRaw(lgs) << endl;
+        }
+
         return ast;
     } catch (...) {
         lgs.error(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError,

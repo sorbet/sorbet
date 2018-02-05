@@ -2,6 +2,7 @@
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
 #include "core/Unfreeze.h"
+#include "dsl/dsl.h"
 #include "namer/namer.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
@@ -36,10 +37,12 @@ static const char *testClass_str = "Test";
 unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
     ruby_typer::core::UnfreezeFileTable ft(gs);              // enters original strings
-    auto ast = parser::Parser::run(gs, "<test>", str);
-    ast->loc.file.data(gs).source_type = core::File::Typed;
+    auto tree = parser::Parser::run(gs, "<test>", str);
+    tree->loc.file.data(gs).source_type = core::File::Typed;
     ruby_typer::core::Context ctx(gs, core::Symbols::root());
-    return ast::desugar::node2Tree(ctx, move(ast));
+    auto ast = ast::desugar::node2Tree(ctx, move(tree));
+    ast = dsl::DSL::run(ctx, move(ast));
+    return ast;
 }
 
 unique_ptr<ast::Expression> hello_world(core::GlobalState &gs) {

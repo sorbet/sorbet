@@ -11,15 +11,16 @@ enum Phase {
     Core = (1 << 0),
     Parser = (1 << 1),
     Desugar = (1 << 2),
-    Namer = (1 << 3),
-    Resolver = (1 << 4),
-    CFG = (1 << 5),
-    Infer = (1 << 6),
+    DSL = (1 << 3),
+    Namer = (1 << 4),
+    Resolver = (1 << 5),
+    CFG = (1 << 6),
+    Infer = (1 << 7),
 };
 
 const map<string, int> phaseNames = {
-    {"core", Core},         {"parser", Parser}, {"desugar", Desugar}, {"namer", Namer},
-    {"resolver", Resolver}, {"cfg", CFG},       {"infer", Infer},
+    {"core", Core},   {"parser", Parser},     {"desugar", Desugar}, {"dsl", DSL},
+    {"namer", Namer}, {"resolver", Resolver}, {"cfg", CFG},         {"infer", Infer},
 };
 
 struct NameDef {
@@ -48,7 +49,7 @@ NameDef names[] = {
     {"intern", Desugar},
     {"call", Desugar | Namer | Infer},
     {"bang", "!", Desugar | Infer | Parser},
-    {"squareBrackets", "[]", Core | Desugar | Parser | Infer | Resolver},
+    {"squareBrackets", "[]", Core | Desugar | DSL | Parser | Infer | Resolver},
     {"squareBracketsEq", "[]=", Parser},
     {"unaryPlus", "@+", Parser | Namer},
     {"unaryMinus", "@-", Parser | Namer},
@@ -85,13 +86,13 @@ NameDef names[] = {
     {"merge", Desugar},
 
     // T keywords
-    {"sig", Resolver},
+    {"sig", Resolver | DSL},
     {"abstract", Resolver},
     {"implementation", Resolver},
     {"override_", "override", Resolver},
     {"overridable", Resolver},
 
-    {"returns", Resolver},
+    {"returns", Resolver | DSL},
     {"checked", Resolver},
     {"all", Resolver | Infer | Core},
     {"any", Resolver | Infer | Core},
@@ -105,7 +106,7 @@ NameDef names[] = {
     {"declareVariables", "declare_variables", Desugar | Resolver},
 
     {"assertType", "assert_type!", Resolver},
-    {"cast", Resolver},
+    {"cast", DSL | Resolver},
     // end T keywords
 
     // Ruby DSL methods which we understand
@@ -119,12 +120,21 @@ NameDef names[] = {
     {"privateClassMethod", "private_class_method", Namer | Resolver},
     {"moduleFunction", "module_function", Namer | Resolver},
     {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
-    {"typeDecl", "type", Namer | Resolver},
-    {"T", Namer},
+    {"typeDecl", "type", DSL | Namer | Resolver},
+    {"T", DSL | Namer},
     {"covariant", "out", Namer},
     {"contravariant", "in", Namer},
     {"invariant", "<invariant>", Namer},
     {"fixed", Namer | Resolver},
+
+    {"prop", DSL},
+    {"array", DSL},
+    {"optional", DSL},
+    {"existing", DSL},
+    {"immutable", DSL},
+    {"default_", "default", DSL},
+    {"factory", DSL},
+    {"const_", "const", DSL},
     // end DSL methods
 
     // Our own special methods which have special meaning
@@ -156,14 +166,14 @@ NameDef names[] = {
 
     {"lambda", Parser},
     {"nil_p", "nil?", Desugar | Infer},
-    {"nil", Infer},
+    {"nil", DSL | Infer},
     {"super", Desugar | Infer},
     {"empty", "", Desugar},
 
     {"buildHash", "<build-hash>", CFG | Core},
     {"buildArray", "<build-array>", CFG | Core},
     {"splat", "<splat>", Desugar | Core | Resolver},
-    {"arg0", Core | Resolver},
+    {"arg0", Core | Resolver | DSL},
 
     {"is_a_p", "is_a?", Infer | CFG},
     {"kind_of", "kind_of?", Infer},

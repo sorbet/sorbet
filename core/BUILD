@@ -2,6 +2,7 @@ NAME_PHASES = [
     "core",
     "parser",
     "desugar",
+    "dsl",
     "namer",
     "resolver",
     "cfg",

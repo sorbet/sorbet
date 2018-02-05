@@ -6,6 +6,7 @@
 #include "common/common.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
+#include "dsl/dsl.h"
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -118,8 +119,9 @@ public:
     int endPos = -1;
 };
 
-unordered_set<string> knownPasses = {"parse-tree",    "ast", "ast-raw", "name-table", "name-tree",
-                                     "name-tree-raw", "cfg", "cfg-raw", "infer",      "typed-source"};
+unordered_set<string> knownPasses = {"parse-tree",   "ast",        "ast-raw",   "dsl-tree",
+                                     "dsl-tree-raw", "name-table", "name-tree", "name-tree-raw",
+                                     "cfg",          "cfg-raw",    "infer",     "typed-source"};
 
 TEST(CorpusTest, CloneSubstitutePayload) {
     auto console = spd::stderr_color_mt("ClonePayload");
@@ -218,12 +220,36 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                           std::make_move_iterator(newErrors.end()));
         }
 
+        // DSL
+        std::unique_ptr<ruby_typer::ast::Expression> dslUnwound;
+        {
+            ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+
+            dslUnwound = ruby_typer::dsl::DSL::run(ctx, move(desugared));
+        }
+
+        expectation = test.expectations.find("dsl-tree");
+        if (expectation != test.expectations.end()) {
+            got["dsl-tree"].append(dslUnwound->toString(gs)).append("\n");
+            auto newErrors = gs.drainErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("dsl-tree-raw");
+        if (expectation != test.expectations.end()) {
+            got["dsl-tree-raw"].append(dslUnwound->showRaw(gs)).append("\n");
+            auto newErrors = gs.drainErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
         // Namer
         std::unique_ptr<ruby_typer::ast::Expression> namedTree;
         {
             ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = ruby_typer::namer::Namer::run(ctx, move(desugared));
+            namedTree = ruby_typer::namer::Namer::run(ctx, move(dslUnwound));
         }
         trees.emplace_back(move(namedTree));
     }
