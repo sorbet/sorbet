@@ -124,6 +124,7 @@ SHARDS = 8
 [
     sh_test(
         name = "test_corpus{}".format(shard),
+        size = "small",
         srcs = ["test_corpus_forwarder.sh"],
         args = [
             "--shards_total={}".format(SHARDS),
