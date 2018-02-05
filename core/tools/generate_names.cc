@@ -103,6 +103,7 @@ NameDef names[] = {
     {"Array", Infer},
     {"Hash", Infer},
     {"noreturn", Resolver},
+    {"singletonClass", "singleton_class", Resolver},
     {"declareVariables", "declare_variables", Desugar | Resolver},
 
     {"assertType", "assert_type!", Resolver},
@@ -150,8 +151,8 @@ NameDef names[] = {
     // The "attached class" terminology is borrowed from MRI, which refers
     // to the unique instance attached to a singleton class as the "attached
     // object"
-    {"singletonClass", "<singleton class>", Core | Desugar | Namer},
-    {"attachedClass", "<attached class>", Core},
+    {"singleton", "<singleton class>", Core | Desugar | Namer},
+    {"attached", "<attached class>", Core},
 
     {"blockTemp", "<block>", Core | Namer | Resolver},
     {"blockPassTemp", "<block-pass>", Desugar},

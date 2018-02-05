@@ -155,7 +155,7 @@ public:
             ENFORCE(klass->symbol == core::Symbols::root());
         }
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
-        if ((ident != nullptr) && ident->name == core::Names::singletonClass()) {
+        if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
             klass->symbol = ctx.contextClass().data(ctx).singletonClass(ctx);
         } else {

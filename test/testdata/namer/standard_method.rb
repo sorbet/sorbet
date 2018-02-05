@@ -14,9 +14,11 @@ class A
     g: T::Hash[T1, T2],
     h: T.enum([false, 1, 3.14, "foo", :bar]),
     i: A1,
+    j: T1.singleton_class,
+    k: A1.singleton_class,
   )
   .returns(T2)
-  def good(a, b, c, d, e, f, g, h, i)
+  def good(a, b, c, d, e, f, g, h, i, j, k)
   end
 
   sig(

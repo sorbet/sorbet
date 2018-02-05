@@ -658,11 +658,10 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
 
                 ClassDef::RHS_store body = scopeNodeToBody(ctx, move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
-                unique_ptr<Expression> res =
-                    make_unique<ClassDef>(what->loc, core::Symbols::todo(),
-                                          make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Class,
-                                                                       core::Names::singletonClass()),
-                                          move(emptyAncestors), move(body), ClassDefKind::Class);
+                unique_ptr<Expression> res = make_unique<ClassDef>(
+                    what->loc, core::Symbols::todo(),
+                    make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Class, core::Names::singleton()),
+                    move(emptyAncestors), move(body), ClassDefKind::Class);
                 result.swap(res);
             },
             [&](parser::Block *block) {

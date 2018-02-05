@@ -573,6 +573,15 @@ private:
                     return;
                 }
 
+                if (s->fun == core::Names::singletonClass()) {
+                    auto sym = dealiasSym(ctx, recvi->symbol);
+                    auto singleton = sym.data(ctx).singletonClass(ctx);
+                    if (singleton.exists()) {
+                        result = make_shared<core::ClassType>(singleton);
+                        return;
+                    }
+                }
+
                 if (s->fun != core::Names::squareBrackets()) {
                     ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
                                     "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));

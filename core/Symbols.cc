@@ -127,7 +127,7 @@ string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) con
     vector<string> children;
     children.reserve(members.size());
     for (auto pair : members) {
-        if (pair.first == Names::singletonClass() || pair.first == Names::attachedClass()) {
+        if (pair.first == Names::singleton() || pair.first == Names::attached()) {
             continue;
         }
 
@@ -319,7 +319,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
         return Symbols::untyped();
     }
 
-    SymbolRef singleton = findMember(gs, Names::singletonClass());
+    SymbolRef singleton = findMember(gs, Names::singleton());
     if (singleton.exists()) {
         return singleton;
     }
@@ -329,11 +329,11 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Symbol &singletonInfo = singleton.data(gs);
 
     counterInc("singleton_classes");
-    singletonInfo.members.push_back(make_pair(Names::attachedClass(), selfRef));
+    singletonInfo.members.push_back(make_pair(Names::attached(), selfRef));
     singletonInfo.superClass = core::Symbols::todo();
     singletonInfo.setIsModule(false);
 
-    selfRef.data(gs).members.push_back(make_pair(Names::singletonClass(), singleton));
+    selfRef.data(gs).members.push_back(make_pair(Names::singleton(), singleton));
     return singleton;
 }
 
@@ -343,7 +343,7 @@ SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
         return Symbols::untyped();
     }
 
-    SymbolRef singleton = findMember(gs, Names::attachedClass());
+    SymbolRef singleton = findMember(gs, Names::attached());
     return singleton;
 }
 

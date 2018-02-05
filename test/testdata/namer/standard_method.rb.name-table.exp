@@ -15,7 +15,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method f3 () -> T1
     method f4 (y) -> T1
       argument y<> -> T1
-    method good (a, b, c, d, e, f, g, h, i) -> T2
+    method good (a, b, c, d, e, f, g, h, i, j, k) -> T2
       argument a<> -> TupleType {
         0 = T1
         1 = T2
@@ -40,6 +40,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       }
       argument h<> -> FalseClass | Integer | Float | String | Symbol
       argument i<> -> T1
+      argument j<> -> <Class:T1>
+      argument k<> -> <Class:T1>
     method no_params () -> T1
     method noreturn () -> <bottom>
     method private : private (x) -> T1
