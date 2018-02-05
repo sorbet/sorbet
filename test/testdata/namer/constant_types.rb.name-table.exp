@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:Constants> (<constant:BasicObject>) -> <class:Constants>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:Constants> (<constant:BasicObject>) -> <Class:Constants>
     static-field <constant:A> -> Integer
     static-field <constant:B> -> String
     static-field <constant:C> -> Symbol

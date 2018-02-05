@@ -6,7 +6,7 @@ subgraph "cluster_::<constant:Object>#a" {
     "bb::<constant:Object>#a_1" [shape = parallelogram];
 
     "bb::<constant:Object>#a_0" [label = "block[id=0](<constant:StandardError>$8)
-<constant:StandardError>$8 = alias <constant:StandardError> : <class:StandardError>
+<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
 

@@ -179,7 +179,7 @@ string classNameToString(const GlobalState &gs, core::NameRef nm) {
     } else {
         ENFORCE(name.kind == core::UNIQUE);
         ENFORCE(name.unique.uniqueNameKind == core::Singleton);
-        return "<class:" + classNameToString(gs, name.unique.original) + ">";
+        return "<Class:" + classNameToString(gs, name.unique.original) + ">";
     }
 }
 }; // namespace

@@ -1,6 +1,6 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:A> (<constant:BasicObject>) -> <class:A>
-    class <constant:B> (<constant:BasicObject>) -> <class:B>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:A> (<constant:BasicObject>) -> <Class:A>
+    class <constant:B> (<constant:BasicObject>) -> <Class:B>
       method <static-init> ()
       static-field <constant:C> -> Integer
       static-field <constant:D> -> Integer

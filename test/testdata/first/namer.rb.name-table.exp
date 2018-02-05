@@ -1,21 +1,21 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:ANamespace> (<constant:BasicObject>) -> <class:ANamespace>
-    class <constant:ClassInNamespace> < ::<constant:Object> () -> <class:ClassInNamespace>
-    class <constant:ObviousChild> < ::<constant:Object> () -> <class:ObviousChild>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:ANamespace> (<constant:BasicObject>) -> <Class:ANamespace>
+    class <constant:ClassInNamespace> < ::<constant:Object> () -> <Class:ClassInNamespace>
+    class <constant:ObviousChild> < ::<constant:Object> () -> <Class:ObviousChild>
     class <singleton class:<constant:ClassInNamespace>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:ObviousChild>> < ::<singleton class:<constant:Object>> ()
-  class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <class:Child>
+  class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <Class:Child>
     method <block>$2 ()
     method <static-init> ()
-  class <constant:Mixin> (<constant:BasicObject>) -> <class:Mixin>
-  class <constant:NormalClass> < ::<constant:Object> () -> <class:NormalClass>
-    class <constant:InnerClass> < ::<constant:Object> () -> <class:InnerClass>
-    class <constant:InnerModule> (<constant:BasicObject>) -> <class:InnerModule>
+  class <constant:Mixin> (<constant:BasicObject>) -> <Class:Mixin>
+  class <constant:NormalClass> < ::<constant:Object> () -> <Class:NormalClass>
+    class <constant:InnerClass> < ::<constant:Object> () -> <Class:InnerClass>
+    class <constant:InnerModule> (<constant:BasicObject>) -> <Class:InnerModule>
     class <singleton class:<constant:InnerClass>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:InnerModule>> < ::<constant:Module> ()
     method normal_method ()
-  class <constant:OtherMixin> (<constant:BasicObject>) -> <class:OtherMixin>
-  class <constant:Parent> < ::<constant:Object> () -> <class:Parent>
+  class <constant:OtherMixin> (<constant:BasicObject>) -> <Class:OtherMixin>
+  class <constant:Parent> < ::<constant:Object> () -> <Class:Parent>
   class <singleton class:<constant:ANamespace>> < ::<constant:Module> ()
   class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> ()
   class <singleton class:<constant:Mixin>> < ::<constant:Module> ()

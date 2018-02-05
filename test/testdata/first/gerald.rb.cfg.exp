@@ -7,7 +7,7 @@ subgraph "cluster_#<static-init>$6" {
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
 <constant:AutogenLoader>$9 = alias <constant:AutogenLoader> : untyped
-<statTemp>$5 = self : <class:<root>>
+<statTemp>$5 = self : <Class:<root>>
 <statTemp>$6 = ../../../extn : String(\"../../../extn\")
 <statTemp>$4 = <statTemp>$5.require_relative(<statTemp>$6) : TrueClass | FalseClass
 <statTemp>$10 = __FILE__ : String(\"__FILE__\")
@@ -144,7 +144,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 <constant:<Magic>>$27 = alias <constant:<Magic>> : <Magic>
 <constant:MAX_AFFECTED_FILES>$12 = alias <constant:MAX_AFFECTED_FILES> : Integer
 @rules$32 = alias @rules : untyped
-<constant:MatchTimeBudget>$30 = alias <constant:MatchTimeBudget> : <class:MatchTimeBudget>
+<constant:MatchTimeBudget>$30 = alias <constant:MatchTimeBudget> : <Class:MatchTimeBudget>
 <selfMethodTemp>$4 = self : Matcher
 match_context = load_arg(<selfMethodTemp>$4#match, 0) : untyped
 <statTemp>$9 = match_context.diff() : untyped
@@ -296,7 +296,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#initialize_0" [label = "block[id=0]()
-<constant:Time>$6 = alias <constant:Time> : <class:Time>
+<constant:Time>$6 = alias <constant:Time> : <Class:Time>
 @start$4 = alias @start : untyped
 @start$4 = <constant:Time>$6.now() : Time
 <finalReturn> = return @start$4 : <bottom>
@@ -316,8 +316,8 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" [label = "block[id=0](<constant:MatchTimeout>$19, <constant:TOTAL_TIME_MS>$15)
-<constant:Time>$8 = alias <constant:Time> : <class:Time>
-<constant:MatchTimeout>$19 = alias <constant:MatchTimeout> : <class:MatchTimeout>
+<constant:Time>$8 = alias <constant:Time> : <Class:Time>
+<constant:MatchTimeout>$19 = alias <constant:MatchTimeout> : <Class:MatchTimeout>
 <constant:TOTAL_TIME_MS>$15 = alias <constant:TOTAL_TIME_MS> : Integer
 @start$10 = alias @start : untyped
 <statTemp>$6 = <constant:Time>$8.now() : Time
@@ -362,8 +362,8 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" [label = "block[id=0](<constant:<Magic>>$48, <constant:MatchTimeout>$24, <constant:PER_RULE_MS>$20)
 <constant:<Magic>>$48 = alias <constant:<Magic>> : <Magic>
-<constant:Time>$6 = alias <constant:Time> : <class:Time>
-<constant:MatchTimeout>$24 = alias <constant:MatchTimeout> : <class:MatchTimeout>
+<constant:Time>$6 = alias <constant:Time> : <Class:Time>
+<constant:MatchTimeout>$24 = alias <constant:MatchTimeout> : <Class:MatchTimeout>
 <constant:PER_RULE_MS>$20 = alias <constant:PER_RULE_MS> : Integer
 <selfMethodTemp>$3 = self : MatchTimeBudget
 rule = load_arg(<selfMethodTemp>$3#time_rule, 0) : untyped
@@ -788,8 +788,8 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse_0" [label = "block[id=0](<constant:nil>$30, <constant:Range>$17, <constant:<Magic>>$22)
 <constant:nil>$30 = alias <constant:nil> : NilClass
-<constant:Range>$17 = alias <constant:Range> : <class:Range>
-<constant:Regexp>$10 = alias <constant:Regexp> : <class:Regexp>
+<constant:Range>$17 = alias <constant:Range> : <Class:Range>
+<constant:Regexp>$10 = alias <constant:Regexp> : <Class:Regexp>
 <constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>
 <selfMethodTemp>$4 = self : Diff
 diff = load_arg(<selfMethodTemp>$4#parse, 0) : untyped

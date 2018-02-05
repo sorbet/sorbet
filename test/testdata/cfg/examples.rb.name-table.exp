@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:Examples> < ::<constant:Object> () -> <class:Examples>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:Examples> < ::<constant:Object> () -> <Class:Examples>
     method i_like_exps ()
     method i_like_ifs ()
     method return_in_one_branch1 ()

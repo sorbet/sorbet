@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:TestProc> < ::<constant:Object> () -> <class:TestProc>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:TestProc> < ::<constant:Object> () -> <Class:TestProc>
     method bad (x, y, z, w) -> NilClass
       argument w<> -> AppliedType {
         klass = ::<constant:Proc1>

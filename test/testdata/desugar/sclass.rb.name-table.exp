@@ -1,37 +1,37 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:A> < ::<constant:Object> () -> <class:A>
-  class <constant:B> < ::<constant:Object> () -> <class:B>
-  class <constant:D> < ::<constant:Object> () -> <class:D>
-  class <constant:E> < ::<constant:Object> () -> <class:E>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:A> < ::<constant:Object> () -> <Class:A>
+  class <constant:B> < ::<constant:Object> () -> <Class:B>
+  class <constant:D> < ::<constant:Object> () -> <Class:D>
+  class <constant:E> < ::<constant:Object> () -> <Class:E>
     method <static-init> ()
-  class <constant:F> < ::<constant:Object> () -> <class:F>
-  class <constant:G> < ::<constant:Object> () -> <class:G>
+  class <constant:F> < ::<constant:Object> () -> <Class:F>
+  class <constant:G> < ::<constant:Object> () -> <Class:G>
     method wrapper ()
-  class <constant:H> < ::<constant:Object> () -> <class:H>
-  class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <class:Object>
+  class <constant:H> < ::<constant:Object> () -> <Class:H>
+  class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object>
     method declare_variables (a)
       argument a<>
     method main ()
   class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () -> <class:<class:B>>
+  class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:B>>
     method b ()
-  class <singleton class:<constant:D>> < ::<singleton class:<constant:Object>> () -> <class:<class:D>>
-  class <singleton class:<constant:E>> < ::<singleton class:<constant:Object>> () -> <class:<class:E>>
+  class <singleton class:<constant:D>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:D>>
+  class <singleton class:<constant:E>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:E>>
     method e ()
     method wrapper ()
-  class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () -> <class:<class:F>>
+  class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:F>>
     field @f -> Integer
     method f= (arg0) -> Integer
       argument arg0<> -> Integer
-  class <singleton class:<constant:G>> < ::<singleton class:<constant:Object>> () -> <class:<class:G>>
+  class <singleton class:<constant:G>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:G>>
     method g ()
     method inner ()
-  class <singleton class:<constant:H>> < ::<singleton class:<constant:Object>> () -> <class:<class:H>>
-    class <constant:H2> < ::<constant:Object> () -> <class:H2>
+  class <singleton class:<constant:H>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:H>>
+    class <constant:H2> < ::<constant:Object> () -> <Class:H2>
     class <singleton class:<constant:H2>> < ::<singleton class:<constant:Object>> ()
       method h ()
   class <singleton class:<singleton class:<constant:B>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
-  class <singleton class:<singleton class:<constant:D>>> < ::<singleton class:<singleton class:<constant:Object>>> () -> <class:<class:<class:D>>>
+  class <singleton class:<singleton class:<constant:D>>> < ::<singleton class:<singleton class:<constant:Object>>> () -> <Class:<Class:<Class:D>>>
     method d ()
   class <singleton class:<singleton class:<constant:E>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
   class <singleton class:<singleton class:<constant:F>>> < ::<singleton class:<singleton class:<constant:Object>>> ()

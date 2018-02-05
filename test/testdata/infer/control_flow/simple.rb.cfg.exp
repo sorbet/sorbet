@@ -103,7 +103,7 @@ subgraph "cluster_::<constant:ControlFlow>#orZero1n" {
     "bb::<constant:ControlFlow>#orZero1n_1" [shape = parallelogram];
 
     "bb::<constant:ControlFlow>#orZero1n_0" [label = "block[id=0]()
-<constant:Integer>$8 = alias <constant:Integer> : <class:Integer>
+<constant:Integer>$8 = alias <constant:Integer> : <Class:Integer>
 <selfMethodTemp>$3 = self : ControlFlow
 a = load_arg(<selfMethodTemp>$3#orZero1n, 0) : Integer | NilClass
 <statTemp>$5 = a.is_a?(<constant:Integer>$8) : TrueClass | FalseClass

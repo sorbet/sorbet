@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:A> < ::<constant:Object> () -> <class:A>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:A> < ::<constant:Object> () -> <Class:A>
     method take_arguments (a, b, c, d, e, f, g)
       argument a<>
       argument b<optional>

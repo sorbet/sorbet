@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:Main> < ::<constant:Object> () -> <class:Main>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:Main> < ::<constant:Object> () -> <Class:Main>
     method blockpass (blk)
       argument blk<block>
     method blockyield ()

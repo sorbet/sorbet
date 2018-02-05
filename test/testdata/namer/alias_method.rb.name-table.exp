@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:Alias> (<constant:BasicObject>) -> <class:Alias>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:Alias> (<constant:BasicObject>) -> <Class:Alias>
     method <static-init> ()
     method f ()
     method f_alias () -> AliasType { symbol = ::<constant:Alias>#f }

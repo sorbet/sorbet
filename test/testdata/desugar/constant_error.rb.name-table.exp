@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:Foo> < ::<constant:Object> () -> <class:Foo>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:Foo> < ::<constant:Object> () -> <Class:Foo>
     static-field <constant:BAR> -> Integer
   class <singleton class:<constant:Foo>> < ::<singleton class:<constant:Object>> ()
 

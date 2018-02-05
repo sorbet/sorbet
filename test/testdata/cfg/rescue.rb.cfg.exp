@@ -6,8 +6,8 @@ subgraph "cluster_#<static-init>$6" {
     "bb#<static-init>$6_1" [shape = parallelogram];
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
-<statTemp>$9 = self : <class:<root>>
-<statTemp>$11 = self : <class:<root>>
+<statTemp>$9 = self : <Class:<root>>
+<statTemp>$11 = self : <Class:<root>>
 <statTemp>$10 = <statTemp>$11.foo() : untyped
 <returnMethodTemp>$2 = <statTemp>$9.puts(<statTemp>$10) : NilClass
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
@@ -27,7 +27,7 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
     "bb::<constant:Object>#main_0" [label = "block[id=0](<constant:StandardError>$10)
-<constant:StandardError>$10 = alias <constant:StandardError> : <class:StandardError>
+<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
 

@@ -23,27 +23,27 @@ subgraph "cluster_::<singleton class:<constant:A>>#send_beta_invitation" {
     "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [shape = parallelogram];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_0" [label = "block[id=0](<constant:C1>$9, <constant:C2>$13, <constant:C3>$17, <constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85)
-<constant:C1>$9 = alias <constant:C1> : <class:C1>
-<constant:C2>$13 = alias <constant:C2> : <class:C2>
-<constant:C3>$17 = alias <constant:C3> : <class:C3>
-<constant:C4>$21 = alias <constant:C4> : <class:C4>
-<constant:C5>$25 = alias <constant:C5> : <class:C5>
-<constant:C6>$29 = alias <constant:C6> : <class:C6>
-<constant:C7>$33 = alias <constant:C7> : <class:C7>
-<constant:C8>$37 = alias <constant:C8> : <class:C8>
-<constant:C9>$41 = alias <constant:C9> : <class:C9>
-<constant:C10>$45 = alias <constant:C10> : <class:C10>
-<constant:C11>$49 = alias <constant:C11> : <class:C11>
-<constant:C12>$53 = alias <constant:C12> : <class:C12>
-<constant:C13>$57 = alias <constant:C13> : <class:C13>
-<constant:C14>$61 = alias <constant:C14> : <class:C14>
-<constant:C15>$65 = alias <constant:C15> : <class:C15>
-<constant:C16>$69 = alias <constant:C16> : <class:C16>
-<constant:C17>$73 = alias <constant:C17> : <class:C17>
-<constant:C18>$77 = alias <constant:C18> : <class:C18>
-<constant:C19>$81 = alias <constant:C19> : <class:C19>
-<constant:C20>$85 = alias <constant:C20> : <class:C20>
-<selfMethodTemp>$3 = self : <class:A>
+<constant:C1>$9 = alias <constant:C1> : <Class:C1>
+<constant:C2>$13 = alias <constant:C2> : <Class:C2>
+<constant:C3>$17 = alias <constant:C3> : <Class:C3>
+<constant:C4>$21 = alias <constant:C4> : <Class:C4>
+<constant:C5>$25 = alias <constant:C5> : <Class:C5>
+<constant:C6>$29 = alias <constant:C6> : <Class:C6>
+<constant:C7>$33 = alias <constant:C7> : <Class:C7>
+<constant:C8>$37 = alias <constant:C8> : <Class:C8>
+<constant:C9>$41 = alias <constant:C9> : <Class:C9>
+<constant:C10>$45 = alias <constant:C10> : <Class:C10>
+<constant:C11>$49 = alias <constant:C11> : <Class:C11>
+<constant:C12>$53 = alias <constant:C12> : <Class:C12>
+<constant:C13>$57 = alias <constant:C13> : <Class:C13>
+<constant:C14>$61 = alias <constant:C14> : <Class:C14>
+<constant:C15>$65 = alias <constant:C15> : <Class:C15>
+<constant:C16>$69 = alias <constant:C16> : <Class:C16>
+<constant:C17>$73 = alias <constant:C17> : <Class:C17>
+<constant:C18>$77 = alias <constant:C18> : <Class:C18>
+<constant:C19>$81 = alias <constant:C19> : <Class:C19>
+<constant:C20>$85 = alias <constant:C20> : <Class:C20>
+<selfMethodTemp>$3 = self : <Class:A>
 invite = load_arg(<selfMethodTemp>$3#send_beta_invitation, 0) : untyped
 <statTemp>$7 = 1 : Integer(1)
 <ifTemp>$6 = <statTemp>$7.===(invite) : TrueClass | FalseClass
@@ -58,7 +58,7 @@ invite = load_arg(<selfMethodTemp>$3#send_beta_invitation, 0) : untyped
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_1" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_2" [label = "block[id=2](<constant:C1>$9)
-r = <constant:C1>$9 : <class:C1>
+r = <constant:C1>$9 : <Class:C1>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_2" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -71,7 +71,7 @@ r = <constant:C1>$9 : <class:C1>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_3" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_5" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_4" [label = "block[id=4](<constant:C2>$13)
-r = <constant:C2>$13 : <class:C2>
+r = <constant:C2>$13 : <Class:C2>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_4" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -84,7 +84,7 @@ r = <constant:C2>$13 : <class:C2>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_5" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_7" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_6" [label = "block[id=6](<constant:C3>$17)
-r = <constant:C3>$17 : <class:C3>
+r = <constant:C3>$17 : <Class:C3>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_6" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -97,7 +97,7 @@ r = <constant:C3>$17 : <class:C3>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_7" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_9" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_8" [label = "block[id=8](<constant:C4>$21)
-r = <constant:C4>$21 : <class:C4>
+r = <constant:C4>$21 : <Class:C4>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_8" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -110,7 +110,7 @@ r = <constant:C4>$21 : <class:C4>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_9" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_11" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_10" [label = "block[id=10](<constant:C5>$25)
-r = <constant:C5>$25 : <class:C5>
+r = <constant:C5>$25 : <Class:C5>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_10" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -123,7 +123,7 @@ r = <constant:C5>$25 : <class:C5>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_11" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_13" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_12" [label = "block[id=12](<constant:C6>$29)
-r = <constant:C6>$29 : <class:C6>
+r = <constant:C6>$29 : <Class:C6>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_12" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -136,7 +136,7 @@ r = <constant:C6>$29 : <class:C6>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_13" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_15" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_14" [label = "block[id=14](<constant:C7>$33)
-r = <constant:C7>$33 : <class:C7>
+r = <constant:C7>$33 : <Class:C7>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_14" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -149,7 +149,7 @@ r = <constant:C7>$33 : <class:C7>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_15" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_17" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_16" [label = "block[id=16](<constant:C8>$37)
-r = <constant:C8>$37 : <class:C8>
+r = <constant:C8>$37 : <Class:C8>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_16" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -162,7 +162,7 @@ r = <constant:C8>$37 : <class:C8>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_17" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_19" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_18" [label = "block[id=18](<constant:C9>$41)
-r = <constant:C9>$41 : <class:C9>
+r = <constant:C9>$41 : <Class:C9>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_18" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -175,7 +175,7 @@ r = <constant:C9>$41 : <class:C9>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_19" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_21" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_20" [label = "block[id=20](<constant:C10>$45)
-r = <constant:C10>$45 : <class:C10>
+r = <constant:C10>$45 : <Class:C10>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_20" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -188,7 +188,7 @@ r = <constant:C10>$45 : <class:C10>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_21" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_23" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_22" [label = "block[id=22](<constant:C11>$49)
-r = <constant:C11>$49 : <class:C11>
+r = <constant:C11>$49 : <Class:C11>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_22" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -201,7 +201,7 @@ r = <constant:C11>$49 : <class:C11>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_23" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_25" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_24" [label = "block[id=24](<constant:C12>$53)
-r = <constant:C12>$53 : <class:C12>
+r = <constant:C12>$53 : <Class:C12>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_24" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -214,7 +214,7 @@ r = <constant:C12>$53 : <class:C12>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_25" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_27" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_26" [label = "block[id=26](<constant:C13>$57)
-r = <constant:C13>$57 : <class:C13>
+r = <constant:C13>$57 : <Class:C13>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_26" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -227,7 +227,7 @@ r = <constant:C13>$57 : <class:C13>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_27" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_29" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_28" [label = "block[id=28](<constant:C14>$61)
-r = <constant:C14>$61 : <class:C14>
+r = <constant:C14>$61 : <Class:C14>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_28" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -240,7 +240,7 @@ r = <constant:C14>$61 : <class:C14>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_29" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_31" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_30" [label = "block[id=30](<constant:C15>$65)
-r = <constant:C15>$65 : <class:C15>
+r = <constant:C15>$65 : <Class:C15>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_30" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -253,7 +253,7 @@ r = <constant:C15>$65 : <class:C15>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_31" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_33" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_32" [label = "block[id=32](<constant:C16>$69)
-r = <constant:C16>$69 : <class:C16>
+r = <constant:C16>$69 : <Class:C16>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_32" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -266,7 +266,7 @@ r = <constant:C16>$69 : <class:C16>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_33" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_35" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_34" [label = "block[id=34](<constant:C17>$73)
-r = <constant:C17>$73 : <class:C17>
+r = <constant:C17>$73 : <Class:C17>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_34" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -279,7 +279,7 @@ r = <constant:C17>$73 : <class:C17>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_35" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_37" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_36" [label = "block[id=36](<constant:C18>$77)
-r = <constant:C18>$77 : <class:C18>
+r = <constant:C18>$77 : <Class:C18>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_36" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -292,7 +292,7 @@ r = <constant:C18>$77 : <class:C18>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_37" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_39" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_38" [label = "block[id=38](<constant:C19>$81)
-r = <constant:C19>$81 : <class:C19>
+r = <constant:C19>$81 : <Class:C19>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_38" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
@@ -305,19 +305,19 @@ r = <constant:C19>$81 : <class:C19>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_39" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_41" [style="tapered"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_40" [label = "block[id=40](<constant:C20>$85)
-r = <constant:C20>$85 : <class:C20>
+r = <constant:C20>$85 : <Class:C20>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_40" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" [label = "block[id=41]()
-<statTemp>$86 = self : <class:A>
+<statTemp>$86 = self : <Class:A>
 <statTemp>$87 = Bla bla bla : String(\"Bla bla bla\")
 <statTemp>$4 = <statTemp>$86.raise(<statTemp>$87) : NilClass
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [label = "block[id=61](r)
-s = r : <class:C1> | <class:C2> | <class:C3> | <class:C4> | <class:C5> | <class:C6> | <class:C7> | <class:C8> | <class:C9> | <class:C10> | <class:C11> | <class:C12> | <class:C13> | <class:C14> | <class:C15> | <class:C16> | <class:C17> | <class:C18> | <class:C19> | <class:C20> | NilClass
+s = r : <Class:C1> | <Class:C2> | <Class:C3> | <Class:C4> | <Class:C5> | <Class:C6> | <Class:C7> | <Class:C8> | <Class:C9> | <Class:C10> | <Class:C11> | <Class:C12> | <Class:C13> | <Class:C14> | <Class:C15> | <Class:C16> | <Class:C17> | <Class:C18> | <Class:C19> | <Class:C20> | NilClass
 <returnMethodTemp>$2 = return s : <bottom>
 <unconditional>"];
 

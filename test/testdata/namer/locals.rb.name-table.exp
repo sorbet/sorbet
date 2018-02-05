@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:TestLocals> < ::<constant:Object> () -> <class:TestLocals>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:TestLocals> < ::<constant:Object> () -> <Class:TestLocals>
     method method ()
       method <block>$2 ()
         method <block>$2 ()

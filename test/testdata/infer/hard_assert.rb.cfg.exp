@@ -7,7 +7,7 @@ subgraph "cluster_::<constant:Main>#basic" {
 
     "bb::<constant:Main>#basic_0" [label = "block[id=0]()
 <constant:nil>$12 = alias <constant:nil> : NilClass
-<constant:String>$9 = alias <constant:String> : <class:String>
+<constant:String>$9 = alias <constant:String> : <Class:String>
 <selfMethodTemp>$3 = self : Main
 a = load_arg(<selfMethodTemp>$3#basic, 0) : Integer | String
 <statTemp>$5 = self : Main

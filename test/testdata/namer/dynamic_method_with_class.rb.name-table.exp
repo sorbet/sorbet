@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:F> < ::<constant:Object> () -> <class:F>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:F> < ::<constant:Object> () -> <Class:F>
     method bar (baz)
       argument baz<>
     method bla ()

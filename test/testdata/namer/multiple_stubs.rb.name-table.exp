@@ -1,4 +1,4 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:Foo> () -> untyped
     class <constant:Bar> () -> untyped
   method <static-init>$6 ()

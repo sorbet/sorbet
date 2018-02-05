@@ -78,7 +78,7 @@ class H
 end
 
 def main
-    puts A.a # error: Method a does not exist on <class:A>
+    puts A.a # error: Method a does not exist on <Class:A>
     puts B.b
     puts $c.c
     puts D.singleton_class.d # error: Method d does not exist on Class

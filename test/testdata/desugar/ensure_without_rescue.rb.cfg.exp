@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>$6" {
     "bb#<static-init>$6_1" [shape = parallelogram];
 
     "bb#<static-init>$6_0" [label = "block[id=0]()
-<statTemp>$7 = self : <class:<root>>
+<statTemp>$7 = self : <Class:<root>>
 <returnMethodTemp>$2 = <statTemp>$7.main() : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];

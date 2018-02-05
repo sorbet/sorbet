@@ -80,10 +80,10 @@ subgraph "cluster_::<constant:Funcs>#<static-init>" {
     "bb::<constant:Funcs>#<static-init>_1" [shape = parallelogram];
 
     "bb::<constant:Funcs>#<static-init>_0" [label = "block[id=0]()
-<statTemp>$5 = self : <class:Funcs>
+<statTemp>$5 = self : <Class:Funcs>
 <statTemp>$6 = <symbol:f> : Symbol(:\"f\")
 <statTemp>$4 = <statTemp>$5.module_function(<statTemp>$6) : Module
-<statTemp>$8 = self : <class:Funcs>
+<statTemp>$8 = self : <Class:Funcs>
 <statTemp>$7 = <statTemp>$8.module_function() : Module
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
@@ -102,8 +102,8 @@ subgraph "cluster_::<constant:C>#test_calls" {
     "bb::<constant:C>#test_calls_1" [shape = parallelogram];
 
     "bb::<constant:C>#test_calls_0" [label = "block[id=0]()
-<constant:Funcs>$9 = alias <constant:Funcs> : <class:Funcs>
-<constant:C>$24 = alias <constant:C> : <class:C>
+<constant:Funcs>$9 = alias <constant:Funcs> : <Class:Funcs>
+<constant:C>$24 = alias <constant:C> : <Class:C>
 <statTemp>$5 = self : C
 <statTemp>$6 = 0 : Integer(0)
 <statTemp>$4 = <statTemp>$5.f(<statTemp>$6) : Integer

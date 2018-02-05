@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <class:<root>>
-  class <constant:C> < ::<constant:Object> () -> <class:C>
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:C> < ::<constant:Object> () -> <Class:C>
     method <block>$2 (x)
       argument x<>
     static-field <constant:L> -> untyped
