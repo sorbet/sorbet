@@ -763,166 +763,31 @@ class Array
   sig(
       arg0: BasicObject,
   )
-  .returns(T::Array[T.untyped])
-  def self.[](*arg0); end
-
-  sig(
-      arg0: Elem,
-  )
-  .returns(T::Array[Elem])
-  def <<(arg0); end
-
-  sig(
-      arg0: Range[Integer],
-  )
-  .returns(T::Array[Elem])
-  sig(
-      arg0: T.any(Integer, Float),
-  )
   .returns(Elem)
-  sig(
-      arg0: Integer,
-      arg1: Integer,
-  )
-  .returns(T::Array[Elem])
-  def [](arg0, arg1=_); end
+  def rassoc(arg0); end
 
   sig(
-      arg0: T::Array[Elem],
-  )
-  .returns(T::Array[Elem])
-  def &(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(T::Array[Elem])
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def *(arg0); end
-
-  sig(
-      arg0: Enumerable[Elem],
-  )
-  .returns(T::Array[Elem])
-  sig(
-      arg0: T::Array[Elem],
-  )
-  .returns(T::Array[Elem])
-  def +(arg0); end
-
-  sig(
-      arg0: T::Array[Elem],
-  )
-  .returns(T::Array[Elem])
-  def -(arg0); end
-
-  sig(
-      arg0: Integer,
-      arg1: Elem,
-  )
-  .returns(Elem)
-  sig(
-      arg0: Integer,
-      arg1: Integer,
-      arg2: Elem,
-  )
-  .returns(Elem)
-  sig(
-      arg0: Range[Integer],
-      arg1: Elem,
-  )
-  .returns(Elem)
-  def []=(arg0, arg1, arg2=_); end
-
-  sig(
-      arg0: Elem,
-  )
-  .returns(T::Array[Elem])
-  def assoc(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Elem)
-  def at(arg0); end
-
-  sig.returns(T::Array[Elem])
-  def clear(); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator[Elem])
-  def map(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator[Elem])
-  def map!(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator[Elem])
-  def collect(&blk); end
-
-  sig(
-      arg0: Integer,
-      blk: T.proc(arg0: T::Array[Elem]).returns(BasicObject),
-  )
-  .returns(T::Array[Elem])
-  sig(
-      arg0: Integer,
-  )
-  .returns(Enumerator[Elem])
-  def combination(arg0, &blk); end
-
-  sig(
-      arg0: Elem,
-  )
-  .returns(T::Array[Elem])
-  def push(*arg0); end
-
-  sig.returns(T::Array[Elem])
-  def compact(); end
-
-  sig.returns(T::Array[Elem])
-  def compact!(); end
-
-  sig(
-      arg0: T::Array[Elem],
-  )
-  .returns(T::Array[Elem])
-  def concat(arg0); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: Elem,
+      arg0: BasicObject,
   )
   .returns(Integer)
   sig(
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
   .returns(Integer)
-  def count(arg0=_, &blk); end
+  sig.returns(Enumerator[Elem])
+  def index(arg0=_, &blk); end
 
   sig(
-      arg0: Integer,
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+      arg0: BasicObject,
   )
-  .returns(T.untyped)
+  .returns(T.any(TrueClass, FalseClass))
+  def include?(arg0); end
+
   sig(
-      arg0: Integer,
+      arg0: BasicObject,
   )
-  .returns(Enumerator[Elem])
-  def cycle(arg0=_, &blk); end
+  .returns(T::Array[T.untyped])
+  def self.[](*arg0); end
 
   sig(
       arg0: Elem,
@@ -935,63 +800,45 @@ class Array
   def delete(arg0=_, &blk); end
 
   sig(
-      arg0: Integer,
+      arg0: Elem,
   )
-  .returns(T::Array[Elem])
-  def delete_at(arg0); end
-
+  .returns(Elem)
   sig(
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T::Array[Elem])
+  .returns(Integer)
   sig.returns(Enumerator[Elem])
-  def delete_if(&blk); end
+  def rindex(arg0=_, &blk); end
 
   sig(
-      arg0: Integer,
+      arg0: Elem,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def member?(arg0); end
+
+  sig(
+      arg0: Elem,
   )
   .returns(T::Array[Elem])
-  def drop(arg0); end
+  def <<(arg0); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      arg0: Elem,
   )
   .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def drop_while(&blk); end
+  def assoc(arg0); end
 
-  sig.returns(Enumerator[Elem])
   sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+      arg0: Elem,
   )
   .returns(T::Array[Elem])
-  def each(&blk); end
+  def push(*arg0); end
 
   sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
+      arg0: Elem,
   )
   .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def each_index(&blk); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def empty?(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Elem)
-  sig(
-      arg0: Integer,
-      arg1: Elem,
-  )
-  .returns(Elem)
-  sig(
-      arg0: Integer,
-      blk: T.proc(arg0: Integer).returns(Elem),
-  )
-  .returns(Elem)
-  def fetch(arg0, arg1=_, &blk); end
+  def unshift(*arg0); end
 
   sig(
       arg0: Elem,
@@ -1025,44 +872,33 @@ class Array
   .returns(T::Array[Elem])
   def fill(arg0=_, arg1=_, arg2=_, &blk); end
 
-  sig.returns(T::Array[T.untyped])
-  def flatten(); end
-
   sig(
-      arg0: BasicObject,
-  )
-  .returns(Integer)
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(Integer)
-  sig.returns(Enumerator[Elem])
-  def index(arg0=_, &blk); end
-
-  sig.returns(Elem)
-  sig(
-      arg0: Integer,
+      arg0: Enumerable[Elem],
   )
   .returns(T::Array[Elem])
-  def first(arg0=_); end
-
   sig(
-      arg0: BasicObject,
+      arg0: T::Array[Elem],
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def include?(arg0); end
+  .returns(T::Array[Elem])
+  def +(arg0); end
 
-  sig.returns(Object)
-  sig(
-      arg0: Integer,
-  )
-  .returns(Object)
   sig(
       arg0: Integer,
       arg1: Elem,
   )
-  .returns(Object)
-  def initialize(arg0=_, arg1=_); end
+  .returns(Elem)
+  sig(
+      arg0: Integer,
+      arg1: Integer,
+      arg2: Elem,
+  )
+  .returns(Elem)
+  sig(
+      arg0: Range[Integer],
+      arg1: Elem,
+  )
+  .returns(Elem)
+  def []=(arg0, arg1, arg2=_); end
 
   sig(
       arg0: Integer,
@@ -1071,80 +907,27 @@ class Array
   .returns(T::Array[Elem])
   def insert(arg0, *arg1); end
 
-  sig.returns(String)
-  def inspect(); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def join(arg0=_); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  def keep_if(&blk); end
-
-  sig.returns(Elem)
   sig(
       arg0: Integer,
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T::Array[Elem])
-  def last(arg0=_); end
-
-  sig(
-      arg0: Elem,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def member?(arg0); end
-
-  sig.returns(Integer)
-  def length(); end
-
+  .returns(T.untyped)
   sig(
       arg0: Integer,
   )
   .returns(Enumerator[Elem])
+  def cycle(arg0=_, &blk); end
+
   sig(
       arg0: Integer,
       blk: T.proc(arg0: T::Array[Elem]).returns(BasicObject),
   )
   .returns(T::Array[Elem])
-  def permutation(arg0=_, &blk); end
-
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[Elem])
-  sig.returns(Elem)
-  def pop(arg0=_); end
-
-  sig(
-      arg0: T::Array[BasicObject],
-  )
-  .returns(T::Array[T::Array[T.any(Elem, T.untyped)]])
-  def product(*arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(Elem)
-  def rassoc(arg0); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def reject(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def reject!(&blk); end
+  .returns(Enumerator[Elem])
+  def combination(arg0, &blk); end
 
   sig(
       arg0: Integer,
@@ -1168,29 +951,56 @@ class Array
   .returns(Enumerator[Elem])
   def repeated_permutation(arg0, &blk); end
 
-  sig.returns(T::Array[Elem])
-  def reverse(); end
-
-  sig.returns(T::Array[Elem])
-  def reverse!(); end
-
   sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+      arg0: Integer,
   )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def reverse_each(&blk); end
+  .returns(Elem)
+  def at(arg0); end
 
   sig(
-      arg0: Elem,
+      arg0: Integer,
   )
   .returns(Elem)
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      arg0: Integer,
+      arg1: Elem,
   )
-  .returns(Integer)
-  sig.returns(Enumerator[Elem])
-  def rindex(arg0=_, &blk); end
+  .returns(Elem)
+  sig(
+      arg0: Integer,
+      blk: T.proc(arg0: Integer).returns(Elem),
+  )
+  .returns(Elem)
+  def fetch(arg0, arg1=_, &blk); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Enumerator[Elem])
+  sig(
+      arg0: Integer,
+      blk: T.proc(arg0: T::Array[Elem]).returns(BasicObject),
+  )
+  .returns(T::Array[Elem])
+  def permutation(arg0=_, &blk); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(T::Array[Elem])
+  def delete_at(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(T::Array[Elem])
+  def drop(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(T::Array[Elem])
+  def rotate!(arg0=_); end
 
   sig(
       arg0: Integer,
@@ -1202,41 +1012,24 @@ class Array
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def rotate!(arg0=_); end
+  def take(arg0); end
 
-  sig.returns(Elem)
   sig(
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def sample(arg0=_); end
-
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      arg0: String,
   )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def select(&blk); end
+  .returns(String)
+  def *(arg0); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def select!(&blk); end
-
-  sig.returns(Elem)
   sig(
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def shift(arg0=_); end
-
-  sig.returns(T::Array[Elem])
-  def shuffle(); end
-
-  sig.returns(T::Array[Elem])
-  def shuffle!(); end
+  sig.returns(Elem)
+  def pop(arg0=_); end
 
   sig(
       arg0: Range[Integer],
@@ -1253,60 +1046,41 @@ class Array
   .returns(Elem)
   def slice!(arg0, arg1=_); end
 
-  sig.returns(T::Array[Elem])
   sig(
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
+      arg0: Range[Integer],
   )
   .returns(T::Array[Elem])
-  def sort(&blk); end
-
-  sig.returns(T::Array[Elem])
   sig(
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
+      arg0: T.any(Integer, Float),
   )
-  .returns(T::Array[Elem])
-  def sort!(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def sort_by!(&blk); end
-
+  .returns(Elem)
   sig(
       arg0: Integer,
+      arg1: Integer,
   )
   .returns(T::Array[Elem])
-  def take(arg0); end
+  def [](arg0, arg1=_); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      arg0: Range[Integer],
   )
   .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def take_while(&blk); end
-
-  sig.returns(T::Array[Elem])
-  def to_a(); end
-
-  sig.returns(T::Array[Elem])
-  def to_ary(); end
-
-  sig.returns(T::Array[Elem])
-  def transpose(); end
-
-  sig.returns(T::Array[Elem])
-  def uniq(); end
-
-  sig.returns(T::Array[Elem])
-  def uniq!(); end
+  sig(
+      arg0: T.any(Integer, Float),
+  )
+  .returns(Elem)
+  sig(
+      arg0: Integer,
+      arg1: Integer,
+  )
+  .returns(T::Array[Elem])
+  def slice(arg0, arg1=_); end
 
   sig(
-      arg0: Elem,
+      arg0: String,
   )
-  .returns(T::Array[Elem])
-  def unshift(*arg0); end
+  .returns(String)
+  def join(arg0=_); end
 
   sig(
       arg0: T.any(Range[Integer], Integer),
@@ -1318,13 +1092,134 @@ class Array
       arg0: T::Array[BasicObject],
   )
   .returns(T::Array[T::Array[T.any(Elem, T.untyped)]])
+  def product(*arg0); end
+
+  sig(
+      arg0: T::Array[BasicObject],
+  )
+  .returns(T::Array[T::Array[T.any(Elem, T.untyped)]])
   def zip(*arg0); end
 
   sig(
       arg0: T::Array[Elem],
   )
   .returns(T::Array[Elem])
+  def &(arg0); end
+
+  sig(
+      arg0: T::Array[Elem],
+  )
+  .returns(T::Array[Elem])
+  def -(arg0); end
+
+  sig(
+      arg0: T::Array[Elem],
+  )
+  .returns(T::Array[Elem])
+  def concat(arg0); end
+
+  sig(
+      arg0: T::Array[Elem],
+  )
+  .returns(T::Array[Elem])
   def |(arg0); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def reverse_each(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def sort_by!(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator[Elem])
+  def collect(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator[Elem])
+  def map!(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator[Elem])
+  def map(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  def keep_if(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def delete_if(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def drop_while(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def reject!(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def reject(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def select!(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def select(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def take_while(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def each_index(&blk); end
 
   sig.returns(Array)
   def clone(); end
@@ -1347,46 +1242,139 @@ class Array
   sig.returns(Array)
   def untrust(); end
 
+  sig.returns(Elem)
+  sig(
+      arg0: Integer,
+  )
+  .returns(T::Array[Elem])
+  def first(arg0=_); end
+
+  sig.returns(Elem)
+  sig(
+      arg0: Integer,
+  )
+  .returns(T::Array[Elem])
+  def last(arg0=_); end
+
+  sig.returns(Elem)
+  sig(
+      arg0: Integer,
+  )
+  .returns(T::Array[Elem])
+  def sample(arg0=_); end
+
+  sig.returns(Elem)
+  sig(
+      arg0: Integer,
+  )
+  .returns(T::Array[Elem])
+  def shift(arg0=_); end
+
+  sig.returns(Enumerator[Elem])
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[Elem])
+  def each(&blk); end
+
+  sig.returns(Integer)
+  def length(); end
+
   sig.returns(Integer)
   def size(); end
 
+  sig.returns(Integer)
   sig(
-      arg0: Range[Integer],
+      arg0: Elem,
   )
-  .returns(T::Array[Elem])
+  .returns(Integer)
   sig(
-      arg0: T.any(Integer, Float),
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(Elem)
+  .returns(Integer)
+  def count(arg0=_, &blk); end
+
+  sig.returns(Object)
   sig(
       arg0: Integer,
-      arg1: Integer,
   )
-  .returns(T::Array[Elem])
-  def slice(arg0, arg1=_); end
+  .returns(Object)
+  sig(
+      arg0: Integer,
+      arg1: Elem,
+  )
+  .returns(Object)
+  def initialize(arg0=_, arg1=_); end
+
+  sig.returns(String)
+  def inspect(); end
 
   sig.returns(String)
   def to_s(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def empty?(); end
+
+  sig.returns(T::Array[Elem])
+  def clear(); end
+
+  sig.returns(T::Array[Elem])
+  def compact!(); end
+
+  sig.returns(T::Array[Elem])
+  def compact(); end
+
+  sig.returns(T::Array[Elem])
+  def reverse!(); end
+
+  sig.returns(T::Array[Elem])
+  def reverse(); end
+
+  sig.returns(T::Array[Elem])
+  def shuffle!(); end
+
+  sig.returns(T::Array[Elem])
+  def shuffle(); end
+
+  sig.returns(T::Array[Elem])
+  def to_a(); end
+
+  sig.returns(T::Array[Elem])
+  def to_ary(); end
+
+  sig.returns(T::Array[Elem])
+  def transpose(); end
+
+  sig.returns(T::Array[Elem])
+  def uniq!(); end
+
+  sig.returns(T::Array[Elem])
+  def uniq(); end
+
+  sig.returns(T::Array[Elem])
+  sig(
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
+  )
+  .returns(T::Array[Elem])
+  def sort!(&blk); end
+
+  sig.returns(T::Array[Elem])
+  sig(
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
+  )
+  .returns(T::Array[Elem])
+  def sort(&blk); end
+
+  sig.returns(T::Array[T.untyped])
+  def flatten(); end
 end
 
 module Base64
-  sig(
-      str: String,
-  )
-  .returns(String)
-  def self.decode64(str); end
-
   sig(
       bin: String,
   )
   .returns(String)
   def self.encode64(bin); end
-
-  sig(
-      str: String,
-  )
-  .returns(String)
-  def self.strict_decode64(str); end
 
   sig(
       bin: String,
@@ -1395,40 +1383,31 @@ module Base64
   def self.strict_encode64(bin); end
 
   sig(
-      str: String,
-  )
-  .returns(String)
-  def self.urlsafe_decode64(str); end
-
-  sig(
       bin: String,
   )
   .returns(String)
   def self.urlsafe_encode64(bin); end
+
+  sig(
+      str: String,
+  )
+  .returns(String)
+  def self.decode64(str); end
+
+  sig(
+      str: String,
+  )
+  .returns(String)
+  def self.strict_decode64(str); end
+
+  sig(
+      str: String,
+  )
+  .returns(String)
+  def self.urlsafe_decode64(str); end
 end
 
 class BasicObject
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ==(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def equal?(other); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def !(); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def !=(other); end
-
   sig(
       arg0: String,
       filename: String,
@@ -1442,6 +1421,13 @@ class BasicObject
   def instance_eval(arg0=_, filename=_, lineno=_, &blk); end
 
   sig(
+      arg0: Symbol,
+      arg1: BasicObject,
+  )
+  .returns(T.untyped)
+  def __send__(arg0, *arg1); end
+
+  sig(
       args: BasicObject,
       blk: BasicObject,
   )
@@ -1449,17 +1435,37 @@ class BasicObject
   def instance_exec(*args, &blk); end
 
   sig(
-      arg0: Symbol,
-      arg1: BasicObject,
+      other: BasicObject,
   )
-  .returns(T.untyped)
-  def __send__(arg0, *arg1); end
+  .returns(T.any(TrueClass, FalseClass))
+  def !=(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ==(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def equal?(other); end
 
   sig.returns(Integer)
   def __id__(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def !(); end
 end
 
 module Benchmark
+  sig(
+      blk: BasicObject,
+  )
+  .returns(Integer)
+  def self.realtime(&blk); end
+
   sig(
       caption: String,
       label_width: Integer,
@@ -1468,6 +1474,12 @@ module Benchmark
   )
   .returns(T::Array[Benchmark::Tms])
   def self.benchmark(caption, label_width=_, format=_, *labels); end
+
+  sig(
+      label: String,
+  )
+  .returns(Benchmark::Tms)
+  def self.measure(label=_); end
 
   sig(
       label_width: Integer,
@@ -1483,98 +1495,14 @@ module Benchmark
   )
   .returns(T::Array[Benchmark::Tms])
   def self.bmbm(width=_, &blk); end
-
-  sig(
-      label: String,
-  )
-  .returns(Benchmark::Tms)
-  def self.measure(label=_); end
-
-  sig(
-      blk: BasicObject,
-  )
-  .returns(Integer)
-  def self.realtime(&blk); end
 end
 
 class BigDecimal
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(BigDecimal)
-  def %(arg0); end
-
-  sig(
       arg0: Integer,
   )
   .returns(BigDecimal)
-  sig(
-      arg0: Float,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Rational,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def +(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Float,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Rational,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def -(arg0); end
-
-  sig.returns(BigDecimal)
-  def -@(); end
-
-  sig.returns(BigDecimal)
-  def +@(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Float,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Rational,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def *(arg0); end
+  def sqrt(arg0); end
 
   sig(
       arg0: Integer,
@@ -1610,11 +1538,175 @@ class BigDecimal
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
+  def power(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Float,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Rational,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def *(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Float,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Rational,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def +(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Float,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Rational,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def -(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Float,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Rational,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
   sig(
       arg0: Complex,
   )
   .returns(Complex)
   def /(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Float,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Rational,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def quo(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Float)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Float)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def fdiv(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  sig(
+      arg0: Float,
+  )
+  .returns(Integer)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Integer)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(Integer)
+  def div(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Object)
+  sig(
+      arg0: Float,
+  )
+  .returns(Object)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Object)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(Object)
+  def <=>(arg0); end
 
   sig(
       arg0: Integer,
@@ -1701,260 +1793,16 @@ class BigDecimal
   def ===(arg0); end
 
   sig(
-      arg0: Integer,
-  )
-  .returns(Object)
-  sig(
-      arg0: Float,
-  )
-  .returns(Object)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Object)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Object)
-  def <=>(arg0); end
-
-  sig.returns(BigDecimal)
-  def abs(); end
-
-  sig.returns(BigDecimal)
-  def abs2(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def angle(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def arg(); end
-
-  sig.returns(Integer)
-  def ceil(); end
-
-  sig.returns(BigDecimal)
-  def conj(); end
-
-  sig.returns(BigDecimal)
-  def conjugate(); end
-
-  sig.returns(Integer)
-  def denominator(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Float,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Integer)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Integer)
-  def div(arg0); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
-  def divmod(arg0); end
-
-  sig(
-      arg0: Object,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def equal?(arg0); end
-
-  sig(
       arg0: Object,
   )
   .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
   sig(
-      arg0: Integer,
+      arg0: Object,
   )
-  .returns(Float)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Float)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def fdiv(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def finite?(); end
-
-  sig.returns(Integer)
-  def floor(); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(Integer)
-  def imag(); end
-
-  sig.returns(Integer)
-  def imaginary(); end
-
-  sig.returns(T.any(NilClass, Integer))
-  def infinite?(); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(BigDecimal)
-  def magnitude(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(BigDecimal)
-  def modulo(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def nan?(); end
-
-  sig.returns(Integer)
-  def numerator(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def phase(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Float,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Rational,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def quo(arg0); end
-
-  sig.returns(BigDecimal)
-  def real(); end
-
-  sig.returns(TrueClass)
-  def real?(); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: Integer,
-  )
-  .returns(BigDecimal)
-  def round(arg0=_); end
-
-  sig.returns(Float)
-  def to_f(); end
-
-  sig.returns(Integer)
-  def to_i(); end
-
-  sig.returns(Integer)
-  def to_int(); end
-
-  sig.returns(Rational)
-  def to_r(); end
-
-  sig.returns(Complex)
-  def to_c(); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: Integer,
-  )
-  .returns(Rational)
-  def truncate(arg0=_); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def zero?(); end
-
-  sig.returns([Integer, Integer])
-  def precs(); end
-
-  sig.returns([Integer, String, Integer, Integer])
-  def split(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns(BigDecimal)
-  def remainder(arg0); end
-
-  sig.returns(BigDecimal)
-  def fix(); end
-
-  sig.returns(BigDecimal)
-  def frac(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Float,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Rational,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  def power(arg0); end
-
-  sig.returns(Object)
-  def nonzero?(); end
-
-  sig.returns(Integer)
-  def exponent(); end
-
-  sig.returns(Integer)
-  def sign(); end
-
-  sig.returns(String)
-  def _dump(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(BigDecimal)
-  def sqrt(arg0); end
+  .returns(T.any(TrueClass, FalseClass))
+  def equal?(arg0); end
 
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal),
@@ -1968,14 +1816,20 @@ class BigDecimal
       arg1: Integer,
   )
   .returns(BigDecimal)
-  def sub(arg0, arg1); end
+  def mult(arg0, arg1); end
 
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal),
       arg1: Integer,
   )
   .returns(BigDecimal)
-  def mult(arg0, arg1); end
+  def sub(arg0, arg1); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns(BigDecimal)
+  def remainder(arg0); end
 
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal),
@@ -1983,14 +1837,62 @@ class BigDecimal
   .returns([BigDecimal, BigDecimal])
   def coerce(arg0); end
 
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+  def divmod(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(BigDecimal)
+  def %(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(BigDecimal)
+  def modulo(arg0); end
+
+  sig.returns(BigDecimal)
+  def +@(); end
+
+  sig.returns(BigDecimal)
+  def -@(); end
+
+  sig.returns(BigDecimal)
+  def abs(); end
+
+  sig.returns(BigDecimal)
+  def abs2(); end
+
   sig.returns(BigDecimal)
   def clone(); end
+
+  sig.returns(BigDecimal)
+  def conj(); end
+
+  sig.returns(BigDecimal)
+  def conjugate(); end
 
   sig.returns(BigDecimal)
   def dup(); end
 
   sig.returns(BigDecimal)
+  def fix(); end
+
+  sig.returns(BigDecimal)
+  def frac(); end
+
+  sig.returns(BigDecimal)
   def freeze(); end
+
+  sig.returns(BigDecimal)
+  def magnitude(); end
+
+  sig.returns(BigDecimal)
+  def real(); end
 
   sig.returns(BigDecimal)
   def taint(); end
@@ -2003,6 +1905,104 @@ class BigDecimal
 
   sig.returns(BigDecimal)
   def untrust(); end
+
+  sig.returns(Complex)
+  def to_c(); end
+
+  sig.returns(Float)
+  def to_f(); end
+
+  sig.returns(Integer)
+  def ceil(); end
+
+  sig.returns(Integer)
+  def denominator(); end
+
+  sig.returns(Integer)
+  def exponent(); end
+
+  sig.returns(Integer)
+  def floor(); end
+
+  sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(Integer)
+  def imag(); end
+
+  sig.returns(Integer)
+  def imaginary(); end
+
+  sig.returns(Integer)
+  def numerator(); end
+
+  sig.returns(Integer)
+  def sign(); end
+
+  sig.returns(Integer)
+  def to_i(); end
+
+  sig.returns(Integer)
+  def to_int(); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: Integer,
+  )
+  .returns(BigDecimal)
+  def round(arg0=_); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: Integer,
+  )
+  .returns(Rational)
+  def truncate(arg0=_); end
+
+  sig.returns(Object)
+  def nonzero?(); end
+
+  sig.returns(Rational)
+  def to_r(); end
+
+  sig.returns(String)
+  def _dump(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def angle(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def arg(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def phase(); end
+
+  sig.returns(T.any(NilClass, Integer))
+  def infinite?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def finite?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def nan?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def zero?(); end
+
+  sig.returns(TrueClass)
+  def real?(); end
+
+  sig.returns([Integer, Integer])
+  def precs(); end
+
+  sig.returns([Integer, String, Integer, Integer])
+  def split(); end
 end
 
 module BigMath
@@ -2116,18 +2116,47 @@ class CSV
 end
 
 class Class
-  sig.returns(T.untyped)
-  def allocate(); end
-
   sig(
       arg0: Class,
   )
   .returns(T.untyped)
   def inherited(arg0); end
 
-  sig.returns(T.any(Class, NilClass))
-  sig.returns(Class)
-  def superclass(); end
+  sig(
+      arg0: Module,
+  )
+  .returns(Class)
+  def include(*arg0); end
+
+  sig(
+      arg0: Module,
+  )
+  .returns(Class)
+  def prepend(*arg0); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(Class)
+  def private_constant(*arg0); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(Class)
+  def public_constant(*arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(Class)
+  def private_class_method(*arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(Class)
+  def public_class_method(*arg0); end
 
   sig(
       arg0: T.any(TrueClass, FalseClass),
@@ -2137,9 +2166,6 @@ class Class
 
   sig.returns(Class)
   def class(); end
-
-  sig.returns(String)
-  def name(); end
 
   sig.returns(Class)
   def clone(); end
@@ -2162,41 +2188,15 @@ class Class
   sig.returns(Class)
   def untrust(); end
 
-  sig(
-      arg0: Module,
-  )
-  .returns(Class)
-  def include(*arg0); end
+  sig.returns(String)
+  def name(); end
 
-  sig(
-      arg0: Module,
-  )
-  .returns(Class)
-  def prepend(*arg0); end
+  sig.returns(T.any(Class, NilClass))
+  sig.returns(Class)
+  def superclass(); end
 
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(Class)
-  def private_class_method(*arg0); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(Class)
-  def private_constant(*arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(Class)
-  def public_class_method(*arg0); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(Class)
-  def public_constant(*arg0); end
+  sig.returns(T.untyped)
+  def allocate(); end
 end
 
 class ClosedQueueError
@@ -2223,6 +2223,28 @@ class ClosedQueueError
 end
 
 class Complex
+  sig(
+      arg0: Integer,
+  )
+  .returns(Complex)
+  sig(
+      arg0: Float,
+  )
+  .returns(Complex)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Complex)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def quo(arg0); end
+
   sig(
       arg0: Integer,
   )
@@ -2311,12 +2333,6 @@ class Complex
   .returns(Complex)
   def -(arg0); end
 
-  sig.returns(Complex)
-  def -@(); end
-
-  sig.returns(Complex)
-  def +@(); end
-
   sig(
       arg0: Integer,
   )
@@ -2345,26 +2361,11 @@ class Complex
   .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def abs(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def abs2(); end
-
-  sig.returns(Float)
-  def angle(); end
-
-  sig.returns(Float)
-  def arg(); end
-
-  sig.returns(Complex)
-  def conj(); end
-
-  sig.returns(Complex)
-  def conjugate(); end
-
-  sig.returns(Integer)
-  def denominator(); end
+  sig(
+      arg0: Object,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(arg0); end
 
   sig(
       arg0: Object,
@@ -2373,99 +2374,10 @@ class Complex
   def equal?(arg0); end
 
   sig(
-      arg0: Object,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(arg0); end
-
-  sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
   .returns(Complex)
   def fdiv(arg0); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
-  def imag(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
-  def imaginary(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
-  def magnitude(); end
-
-  sig.returns(Complex)
-  def numerator(); end
-
-  sig.returns(Float)
-  def phase(); end
-
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
-  def polar(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Complex)
-  sig(
-      arg0: Float,
-  )
-  .returns(Complex)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Complex)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def quo(arg0); end
-
-  sig.returns(Rational)
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(Rational)
-  def rationalize(arg0=_); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
-  def real(); end
-
-  sig.returns(FalseClass)
-  def real?(); end
-
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
-  def rect(); end
-
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
-  def rectangular(); end
-
-  sig.returns(Complex)
-  def to_c(); end
-
-  sig.returns(Float)
-  def to_f(); end
-
-  sig.returns(Integer)
-  def to_i(); end
-
-  sig.returns(Rational)
-  def to_r(); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def zero?(); end
 
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
@@ -2474,7 +2386,19 @@ class Complex
   def coerce(arg0); end
 
   sig.returns(Complex)
+  def +@(); end
+
+  sig.returns(Complex)
+  def -@(); end
+
+  sig.returns(Complex)
   def clone(); end
+
+  sig.returns(Complex)
+  def conj(); end
+
+  sig.returns(Complex)
+  def conjugate(); end
 
   sig.returns(Complex)
   def dup(); end
@@ -2483,7 +2407,13 @@ class Complex
   def freeze(); end
 
   sig.returns(Complex)
+  def numerator(); end
+
+  sig.returns(Complex)
   def taint(); end
+
+  sig.returns(Complex)
+  def to_c(); end
 
   sig.returns(Complex)
   def trust(); end
@@ -2493,6 +2423,76 @@ class Complex
 
   sig.returns(Complex)
   def untrust(); end
+
+  sig.returns(FalseClass)
+  def real?(); end
+
+  sig.returns(Float)
+  def angle(); end
+
+  sig.returns(Float)
+  def arg(); end
+
+  sig.returns(Float)
+  def phase(); end
+
+  sig.returns(Float)
+  def to_f(); end
+
+  sig.returns(Integer)
+  def denominator(); end
+
+  sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(Integer)
+  def to_i(); end
+
+  sig.returns(Rational)
+  def to_r(); end
+
+  sig.returns(Rational)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(Rational)
+  def rationalize(arg0=_); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
+  def imag(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
+  def imaginary(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
+  def magnitude(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal))
+  def real(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def abs(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def abs2(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def zero?(); end
+
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+  def polar(); end
+
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+  def rect(); end
+
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+  def rectangular(); end
 end
 
 module Coverage
@@ -2589,15 +2589,50 @@ end
 
 class Dir
   sig(
-      arg0: T.any(String, Pathname),
+      arg0: Integer,
+  )
+  .returns(Dir)
+  def seek(arg0); end
+
+  sig(
+      arg0: Integer,
   )
   .returns(Integer)
+  def pos=(arg0); end
+
   sig(
-      arg0: T.any(String, Pathname),
-      blk: T.proc(arg0: String).returns(BasicObject),
+      arg0: String,
+      arg1: Encoding,
+  )
+  .returns(Dir)
+  sig(
+      arg0: String,
+      arg1: Encoding,
+      blk: T.proc(arg0: Dir).returns(BasicObject),
   )
   .returns(T.untyped)
-  def self.chdir(arg0=_, &blk); end
+  def self.open(arg0, arg1=_, &blk); end
+
+  sig(
+      arg0: String,
+      arg1: Encoding,
+  )
+  .returns(Object)
+  def initialize(arg0, arg1=_); end
+
+  sig(
+      arg0: String,
+      arg1: Encoding,
+  )
+  .returns(T::Array[String])
+  def self.entries(arg0, arg1=_); end
+
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(Integer)
+  def self.mkdir(arg0, arg1=_); end
 
   sig(
       arg0: String,
@@ -2613,16 +2648,39 @@ class Dir
 
   sig(
       arg0: String,
-      arg1: Encoding,
   )
-  .returns(T::Array[String])
-  def self.entries(arg0, arg1=_); end
+  .returns(Integer)
+  def self.rmdir(arg0); end
 
   sig(
-      file: String,
+      arg0: String,
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.exist?(file); end
+  .returns(Integer)
+  def self.unlink(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def self.home(arg0=_); end
+
+  sig(
+      arg0: T.any(String, Pathname),
+  )
+  .returns(Integer)
+  sig(
+      arg0: T.any(String, Pathname),
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def self.chdir(arg0=_, &blk); end
+
+  sig(
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(Dir)
+  sig.returns(Enumerator[String])
+  def each(&blk); end
 
   sig(
       dir: String,
@@ -2637,8 +2695,24 @@ class Dir
   .returns(Enumerator[String])
   def self.foreach(dir, arg0=_, &blk); end
 
-  sig.returns(String)
-  def self.getwd(); end
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.exist?(file); end
+
+  sig(
+      pattern: T.any(String, T::Array[String]),
+      flags: Integer,
+  )
+  .returns(T::Array[String])
+  sig(
+      pattern: T.any(String, T::Array[String]),
+      flags: Integer,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(NilClass)
+  def self.[](pattern, flags=_, &blk); end
 
   sig(
       pattern: T.any(String, T::Array[String]),
@@ -2653,100 +2727,6 @@ class Dir
   .returns(NilClass)
   def self.glob(pattern, flags=_, &blk); end
 
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def self.home(arg0=_); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(Integer)
-  def self.mkdir(arg0, arg1=_); end
-
-  sig(
-      arg0: String,
-      arg1: Encoding,
-  )
-  .returns(Dir)
-  sig(
-      arg0: String,
-      arg1: Encoding,
-      blk: T.proc(arg0: Dir).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def self.open(arg0, arg1=_, &blk); end
-
-  sig.returns(String)
-  def self.pwd(); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def self.rmdir(arg0); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def self.unlink(arg0); end
-
-  sig.returns(NilClass)
-  def close(); end
-
-  sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(Dir)
-  sig.returns(Enumerator[String])
-  def each(&blk); end
-
-  sig.returns(Integer)
-  def fileno(); end
-
-  sig(
-      arg0: String,
-      arg1: Encoding,
-  )
-  .returns(Object)
-  def initialize(arg0, arg1=_); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(T.any(String, NilClass))
-  def path(); end
-
-  sig.returns(Integer)
-  def pos(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def pos=(arg0); end
-
-  sig.returns(T.any(String, NilClass))
-  def read(); end
-
-  sig.returns(Dir)
-  def rewind(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Dir)
-  def seek(arg0); end
-
-  sig.returns(Integer)
-  def tell(); end
-
-  sig.returns(T.any(String, NilClass))
-  def to_path(); end
-
   sig.returns(Dir)
   def clone(); end
 
@@ -2755,6 +2735,9 @@ class Dir
 
   sig.returns(Dir)
   def freeze(); end
+
+  sig.returns(Dir)
+  def rewind(); end
 
   sig.returns(Dir)
   def taint(); end
@@ -2768,18 +2751,35 @@ class Dir
   sig.returns(Dir)
   def untrust(); end
 
-  sig(
-      pattern: T.any(String, T::Array[String]),
-      flags: Integer,
-  )
-  .returns(T::Array[String])
-  sig(
-      pattern: T.any(String, T::Array[String]),
-      flags: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(NilClass)
-  def self.[](pattern, flags=_, &blk); end
+  sig.returns(Integer)
+  def fileno(); end
+
+  sig.returns(Integer)
+  def pos(); end
+
+  sig.returns(Integer)
+  def tell(); end
+
+  sig.returns(NilClass)
+  def close(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def self.getwd(); end
+
+  sig.returns(String)
+  def self.pwd(); end
+
+  sig.returns(T.any(String, NilClass))
+  def path(); end
+
+  sig.returns(T.any(String, NilClass))
+  def read(); end
+
+  sig.returns(T.any(String, NilClass))
+  def to_path(); end
 end
 
 class EOFError
@@ -2806,19 +2806,6 @@ class EOFError
 end
 
 class Encoding
-  sig.returns(T::Hash[String, String])
-  def self.aliases(); end
-
-  sig(
-      obj1: BasicObject,
-      obj2: BasicObject,
-  )
-  .returns(T.any(Encoding, NilClass))
-  def self.compatible?(obj1, obj2); end
-
-  sig.returns(Encoding)
-  def self.default_external(); end
-
   sig(
       arg0: String,
   )
@@ -2828,9 +2815,6 @@ class Encoding
   )
   .returns(Encoding)
   def self.default_external=(arg0); end
-
-  sig.returns(Encoding)
-  def self.default_internal(); end
 
   sig(
       arg0: String,
@@ -2848,32 +2832,18 @@ class Encoding
   .returns(Encoding)
   def self.find(arg0); end
 
-  sig.returns(T::Array[Encoding])
-  def self.list(); end
-
-  sig.returns(T::Array[String])
-  def self.name_list(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def ascii_compatible?(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def dummy?(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(String)
-  def name(); end
-
-  sig.returns(T::Array[String])
-  def names(); end
-
   sig(
       name: String,
   )
   .returns(Encoding)
   def replicate(name); end
+
+  sig(
+      obj1: BasicObject,
+      obj2: BasicObject,
+  )
+  .returns(T.any(Encoding, NilClass))
+  def self.compatible?(obj1, obj2); end
 
   sig.returns(Encoding)
   def clone(); end
@@ -2883,6 +2853,12 @@ class Encoding
 
   sig.returns(Encoding)
   def freeze(); end
+
+  sig.returns(Encoding)
+  def self.default_external(); end
+
+  sig.returns(Encoding)
+  def self.default_internal(); end
 
   sig.returns(Encoding)
   def taint(); end
@@ -2897,7 +2873,31 @@ class Encoding
   def untrust(); end
 
   sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def name(); end
+
+  sig.returns(String)
   def to_s(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def ascii_compatible?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def dummy?(); end
+
+  sig.returns(T::Array[Encoding])
+  def self.list(); end
+
+  sig.returns(T::Array[String])
+  def names(); end
+
+  sig.returns(T::Array[String])
+  def self.name_list(); end
+
+  sig.returns(T::Hash[String, String])
+  def self.aliases(); end
 end
 
 class EncodingError
@@ -2927,124 +2927,17 @@ module Enumerable
   extend T::Generic
   Elem = T.type
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def all?(&blk); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def any?(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator[Elem])
-  def collect(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(Enumerator[BasicObject]),
-  )
-  .returns(T::Array[T.untyped])
-  def collect_concat(&blk); end
-
-  sig.returns(Integer)
   sig(
       arg0: BasicObject,
   )
-  .returns(Integer)
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(Integer)
-  def count(arg0=_, &blk); end
+  .returns(T.any(TrueClass, FalseClass))
+  def include?(arg0); end
 
   sig(
-      n: Integer,
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+      arg0: BasicObject,
   )
-  .returns(NilClass)
-  sig(
-      n: Integer,
-  )
-  .returns(Enumerator[Elem])
-  def cycle(n=_, &blk); end
-
-  sig(
-      ifnone: Proc,
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T.any(Elem, NilClass))
-  sig(
-      ifnone: Proc,
-  )
-  .returns(Enumerator[Elem])
-  def detect(ifnone=_, &blk); end
-
-  sig(
-      n: Integer,
-  )
-  .returns(T::Array[Elem])
-  def drop(n); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def drop_while(&blk); end
-
-  sig(
-      n: Integer,
-      blk: T.proc(arg0: T::Array[Elem]).returns(BasicObject),
-  )
-  .returns(NilClass)
-  sig(
-      n: Integer,
-  )
-  .returns(Enumerator[Elem])
-  def each_cons(n, &blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem, arg1: Integer).returns(BasicObject),
-  )
-  .returns(Enumerable[Elem])
-  sig.returns(Enumerable[Elem])
-  def each_with_index(&blk); end
-
-  sig.returns(T::Array[Elem])
-  def entries(); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def find_all(&blk); end
-
-  sig(
-      value: BasicObject,
-  )
-  .returns(T.any(Integer, NilClass))
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T.any(Integer, NilClass))
-  sig.returns(Enumerator[Elem])
-  def find_index(value=_, &blk); end
-
-  sig.returns(T.any(Elem, NilClass))
-  sig(
-      n: Integer,
-  )
-  .returns(T.any(T::Array[Elem], NilClass))
-  def first(n=_); end
+  .returns(T.any(TrueClass, FalseClass))
+  def member?(arg0); end
 
   sig(
       arg0: BasicObject,
@@ -3060,15 +2953,120 @@ module Enumerable
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
+  .returns(Enumerator[Elem])
+  sig.returns(Enumerator[Elem])
+  def reverse_each(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def sort_by(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator[Elem])
+  def collect(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(T::Array[T.untyped])
+  sig.returns(Enumerator[Elem])
+  def map(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
   .returns(T::Hash[T.untyped, T::Array[Elem]])
   sig.returns(Enumerator[Elem])
   def group_by(&blk); end
 
   sig(
-      arg0: BasicObject,
+      blk: T.proc(arg0: Elem).returns(Enumerator[BasicObject]),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def include?(arg0); end
+  .returns(T::Array[T.untyped])
+  def collect_concat(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(Enumerator[BasicObject]),
+  )
+  .returns(T::Array[T.untyped])
+  def flat_map(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def drop_while(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def find_all(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def reject(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def select(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Array[Elem])
+  sig.returns(Enumerator[Elem])
+  def take_while(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns([T::Array[Elem], T::Array[Elem]])
+  sig.returns(Enumerator[Elem])
+  def partition(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem, arg1: Integer).returns(BasicObject),
+  )
+  .returns(Enumerable[Elem])
+  sig.returns(Enumerable[Elem])
+  def each_with_index(&blk); end
+
+  sig(
+      ifnone: Proc,
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T.any(Elem, NilClass))
+  sig(
+      ifnone: Proc,
+  )
+  .returns(Enumerator[Elem])
+  def detect(ifnone=_, &blk); end
+
+  sig(
+      ifnone: Proc,
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T.any(Elem, NilClass))
+  sig(
+      ifnone: Proc,
+  )
+  .returns(Enumerator[Elem])
+  def find(ifnone=_, &blk); end
 
   sig(
       initial: BasicObject,
@@ -3090,6 +3088,82 @@ module Enumerable
   .returns(Elem)
   def inject(initial=_, arg0=_, &blk); end
 
+  sig(
+      initial: BasicObject,
+      arg0: Symbol,
+  )
+  .returns(T.untyped)
+  sig(
+      arg0: Symbol,
+  )
+  .returns(T.untyped)
+  sig(
+      initial: Elem,
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
+  )
+  .returns(Elem)
+  sig(
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
+  )
+  .returns(Elem)
+  def reduce(initial=_, arg0=_, &blk); end
+
+  sig(
+      n: Integer,
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(NilClass)
+  sig(
+      n: Integer,
+  )
+  .returns(Enumerator[Elem])
+  def cycle(n=_, &blk); end
+
+  sig(
+      n: Integer,
+      blk: T.proc(arg0: T::Array[Elem]).returns(BasicObject),
+  )
+  .returns(NilClass)
+  sig(
+      n: Integer,
+  )
+  .returns(Enumerator[Elem])
+  def each_cons(n, &blk); end
+
+  sig(
+      n: Integer,
+      blk: T.proc(arg0: T::Array[Elem]).returns(BasicObject),
+  )
+  .returns(NilClass)
+  sig(
+      n: Integer,
+  )
+  .returns(Enumerator[Elem])
+  def each_slice(n, &blk); end
+
+  sig(
+      n: Integer,
+  )
+  .returns(T.any(T::Array[Elem], NilClass))
+  def take(n); end
+
+  sig(
+      n: Integer,
+  )
+  .returns(T::Array[Elem])
+  def drop(n); end
+
+  sig(
+      value: BasicObject,
+  )
+  .returns(T.any(Integer, NilClass))
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T.any(Integer, NilClass))
+  sig.returns(Enumerator[Elem])
+  def find_index(value=_, &blk); end
+
   sig.returns(Elem)
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
@@ -3105,22 +3179,6 @@ module Enumerable
   )
   .returns(T::Array[Elem])
   def max(arg0=_, &blk); end
-
-  sig.returns(Enumerator[Elem])
-  sig(
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
-  )
-  .returns(Elem)
-  sig(
-      arg0: Integer,
-  )
-  .returns(Enumerator[Elem])
-  sig(
-      arg0: Integer,
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
-  )
-  .returns(T::Array[Elem])
-  def max_by(arg0=_, &blk); end
 
   sig.returns(Elem)
   sig(
@@ -3152,21 +3210,55 @@ module Enumerable
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
   .returns(T::Array[Elem])
-  def min_by(arg0=_, &blk); end
+  def max_by(arg0=_, &blk); end
 
-  sig.returns([Elem, Elem])
+  sig.returns(Enumerator[Elem])
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
-  .returns([Elem, Elem])
-  def minmax(&blk); end
-
-  sig.returns([Elem, Elem])
+  .returns(Elem)
   sig(
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
+      arg0: Integer,
   )
   .returns(Enumerator[Elem])
-  def minmax_by(&blk); end
+  sig(
+      arg0: Integer,
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
+  )
+  .returns(T::Array[Elem])
+  def min_by(arg0=_, &blk); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(Integer)
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(Integer)
+  def count(arg0=_, &blk); end
+
+  sig.returns(T.any(Elem, NilClass))
+  sig(
+      n: Integer,
+  )
+  .returns(T.any(T::Array[Elem], NilClass))
+  def first(n=_); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def all?(&blk); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def any?(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
@@ -3182,26 +3274,11 @@ module Enumerable
   .returns(T.any(TrueClass, FalseClass))
   def one?(&blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns([T::Array[Elem], T::Array[Elem]])
-  sig.returns(Enumerator[Elem])
-  def partition(&blk); end
+  sig.returns(T::Array[Elem])
+  def entries(); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def reject(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(Enumerator[Elem])
-  sig.returns(Enumerator[Elem])
-  def reverse_each(&blk); end
+  sig.returns(T::Array[Elem])
+  def to_a(); end
 
   sig.returns(T::Array[Elem])
   sig(
@@ -3210,104 +3287,55 @@ module Enumerable
   .returns(T::Array[Elem])
   def sort(&blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def sort_by(&blk); end
-
-  sig(
-      n: Integer,
-  )
-  .returns(T.any(T::Array[Elem], NilClass))
-  def take(n); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def take_while(&blk); end
-
   sig.returns(T::Hash[Elem, Elem])
   def to_h(); end
 
+  sig.returns([Elem, Elem])
   sig(
-      n: Integer,
-      blk: T.proc(arg0: T::Array[Elem]).returns(BasicObject),
-  )
-  .returns(NilClass)
-  sig(
-      n: Integer,
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
   .returns(Enumerator[Elem])
-  def each_slice(n, &blk); end
+  def minmax_by(&blk); end
 
+  sig.returns([Elem, Elem])
   sig(
-      ifnone: Proc,
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
-  .returns(T.any(Elem, NilClass))
-  sig(
-      ifnone: Proc,
-  )
-  .returns(Enumerator[Elem])
-  def find(ifnone=_, &blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(Enumerator[BasicObject]),
-  )
-  .returns(T::Array[T.untyped])
-  def flat_map(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T::Array[T.untyped])
-  sig.returns(Enumerator[Elem])
-  def map(&blk); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def member?(arg0); end
-
-  sig(
-      initial: BasicObject,
-      arg0: Symbol,
-  )
-  .returns(T.untyped)
-  sig(
-      arg0: Symbol,
-  )
-  .returns(T.untyped)
-  sig(
-      initial: Elem,
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
-  )
-  .returns(Elem)
-  sig(
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
-  )
-  .returns(Elem)
-  def reduce(initial=_, arg0=_, &blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Array[Elem])
-  sig.returns(Enumerator[Elem])
-  def select(&blk); end
-
-  sig.returns(T::Array[Elem])
-  def to_a(); end
+  .returns([Elem, Elem])
+  def minmax(&blk); end
 end
 
 class Enumerator
   extend T::Generic
   Elem = T.type
+
+  sig(
+      arg0: BasicObject,
+      blk: T.proc(arg0: Elem, arg1: T.untyped).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(Enumerator[[Elem, T.untyped]])
+  def each_with_object(arg0, &blk); end
+
+  sig(
+      arg0: BasicObject,
+      blk: T.proc(arg0: Elem, arg1: T.untyped).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(Enumerator[[Elem, T.untyped]])
+  def with_object(arg0, &blk); end
+
+  sig(
+      arg0: Elem,
+  )
+  .returns(NilClass)
+  def feed(arg0); end
 
   sig(
       arg0: Integer,
@@ -3336,42 +3364,17 @@ class Enumerator
   def each_with_index(&blk); end
 
   sig(
-      arg0: BasicObject,
-      blk: T.proc(arg0: Elem, arg1: T.untyped).returns(BasicObject),
+      blk: T.proc(arg0: Elem, arg1: Integer).returns(BasicObject),
   )
   .returns(T.untyped)
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(Enumerator[[Elem, T.untyped]])
-  def each_with_object(arg0, &blk); end
-
-  sig(
-      arg0: Elem,
-  )
-  .returns(NilClass)
-  def feed(arg0); end
-
-  sig.returns(String)
-  def inspect(); end
+  sig.returns(Enumerator[[Elem, Integer]])
+  def with_index(&blk); end
 
   sig.returns(Elem)
   def next(); end
 
-  sig.returns(T::Array[Elem])
-  def next_values(); end
-
   sig.returns(Elem)
   def peek(); end
-
-  sig.returns(T::Array[Elem])
-  def peek_values(); end
-
-  sig.returns(Enumerator)
-  def rewind(); end
-
-  sig.returns(T.any(Integer, Float, NilClass))
-  def size(); end
 
   sig.returns(Enumerator)
   def clone(); end
@@ -3381,6 +3384,9 @@ class Enumerator
 
   sig.returns(Enumerator)
   def freeze(); end
+
+  sig.returns(Enumerator)
+  def rewind(); end
 
   sig.returns(Enumerator)
   def taint(); end
@@ -3394,23 +3400,17 @@ class Enumerator
   sig.returns(Enumerator)
   def untrust(); end
 
-  sig(
-      blk: T.proc(arg0: Elem, arg1: Integer).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  sig.returns(Enumerator[[Elem, Integer]])
-  def with_index(&blk); end
+  sig.returns(String)
+  def inspect(); end
 
-  sig(
-      arg0: BasicObject,
-      blk: T.proc(arg0: Elem, arg1: T.untyped).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(Enumerator[[Elem, T.untyped]])
-  def with_object(arg0, &blk); end
+  sig.returns(T.any(Integer, Float, NilClass))
+  def size(); end
+
+  sig.returns(T::Array[Elem])
+  def next_values(); end
+
+  sig.returns(T::Array[Elem])
+  def peek_values(); end
 end
 
 class Exception
@@ -3419,15 +3419,6 @@ class Exception
   )
   .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
-
-  sig.returns(T::Array[String])
-  def backtrace(); end
-
-  sig.returns(T::Array[Thread::Backtrace::Location])
-  def backtrace_locations(); end
-
-  sig.returns(NilClass)
-  def cause(); end
 
   sig(
       arg0: String,
@@ -3441,20 +3432,11 @@ class Exception
   .returns(Object)
   def initialize(arg0=_); end
 
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(String)
-  def message(); end
-
   sig(
       arg0: T.any(String, T::Array[String]),
   )
   .returns(T::Array[String])
   def set_backtrace(arg0); end
-
-  sig.returns(String)
-  def to_s(); end
 
   sig.returns(Exception)
   def clone(); end
@@ -3476,6 +3458,24 @@ class Exception
 
   sig.returns(Exception)
   def untrust(); end
+
+  sig.returns(NilClass)
+  def cause(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def message(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T::Array[String])
+  def backtrace(); end
+
+  sig.returns(T::Array[Thread::Backtrace::Location])
+  def backtrace_locations(); end
 end
 
 class FalseClass
@@ -3549,24 +3549,34 @@ end
 
 class File
   sig(
-      file: String,
-      dir: String,
+      arg0: BasicObject,
   )
-  .returns(String)
-  def self.absolute_path(file, dir=_); end
+  .returns(File)
+  def <<(arg0); end
 
   sig(
-      file: BasicObject,
-  )
-  .returns(Time)
-  def self.atime(file); end
-
-  sig(
-      file: String,
-      suffix: String,
+      arg0: BasicObject,
   )
   .returns(String)
-  def self.basename(file, suffix=_); end
+  def self.join(*arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def self.umask(arg0=_); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def truncate(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(T.any(Integer, TrueClass, FalseClass))
+  def flock(arg0); end
 
   sig(
       arg0: String,
@@ -3586,79 +3596,41 @@ class File
   def self.binread(arg0, arg1=_, arg2=_); end
 
   sig(
-      file: BasicObject,
-  )
-  .returns(Time)
-  def self.birthtime(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.blockdev?(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.chardev?(file); end
-
-  sig(
-      mode: Integer,
+      atime: Time,
+      mtime: Time,
       files: String,
   )
   .returns(Integer)
-  def self.chmod(mode, *files); end
+  def self.utime(atime, mtime, *files); end
 
   sig(
-      owner: Integer,
-      group: Integer,
-      files: String,
+      blk: T.proc(arg0: Integer).returns(BasicObject),
   )
-  .returns(Integer)
-  def self.chown(owner, group, *files); end
+  .returns(File)
+  def each_byte(&blk); end
 
   sig(
-      file: BasicObject,
+      blk: T.proc(arg0: Integer).returns(BasicObject),
   )
-  .returns(Time)
-  def self.ctime(file); end
+  .returns(File)
+  def each_codepoint(&blk); end
 
   sig(
-      files: String,
+      blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(Integer)
-  def self.delete(*files); end
+  .returns(File)
+  def each_char(&blk); end
 
   sig(
-      file: T.any(String, IO),
+      ext_or_ext_int_enc: T.any(String, Encoding),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.directory?(file); end
-
+  .returns(File)
   sig(
-      file: String,
+      ext_enc: T.any(String, Encoding),
+      int_enc: T.any(String, Encoding),
   )
-  .returns(String)
-  def self.dirname(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.executable?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.executable_real?(file); end
-
-  sig(
-      file: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.exist?(file); end
+  .returns(File)
+  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
 
   sig(
       file: BasicObject,
@@ -3668,83 +3640,63 @@ class File
   def self.expand_path(file, dir=_); end
 
   sig(
-      path: String,
-  )
-  .returns(String)
-  def self.extname(path); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.file?(file); end
-
-  sig(
-      pattern: String,
-      path: String,
-      flags: Integer,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.fnmatch(pattern, path, flags=_); end
-
-  sig(
-      file: String,
-  )
-  .returns(String)
-  def self.ftype(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.grpowned?(file); end
-
-  sig(
-      file_1: T.any(String, IO),
-      file_2: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.identical?(file_1, file_2); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(String)
-  def self.join(*arg0); end
-
-  sig(
-      mode: Integer,
-      files: String,
-  )
-  .returns(Integer)
-  def self.lchmod(mode, *files); end
-
-  sig(
-      owner: Integer,
-      group: Integer,
-      files: String,
-  )
-  .returns(Integer)
-  def self.lchown(owner, group, *files); end
-
-  sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
-  def self.link(old, new); end
-
-  sig(
-      file: String,
+      file: BasicObject,
   )
   .returns(File::Stat)
-  def self.lstat(file); end
+  def self.stat(file); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.exist?(file); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(Time)
+  def self.atime(file); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(Time)
+  def self.birthtime(file); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(Time)
+  def self.ctime(file); end
 
   sig(
       file: BasicObject,
   )
   .returns(Time)
   def self.mtime(file); end
+
+  sig(
+      file: String,
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def self.truncate(file, arg0); end
+
+  sig(
+      file: String,
+      dir: String,
+  )
+  .returns(String)
+  def self.absolute_path(file, dir=_); end
+
+  sig(
+      file: String,
+      mode: String,
+      perm: String,
+      opt: Integer,
+  )
+  .returns(Object)
+  def initialize(file, mode=_, perm=_, opt=_); end
 
   sig(
       file: String,
@@ -3778,15 +3730,58 @@ class File
 
   sig(
       file: String,
+      suffix: String,
+  )
+  .returns(String)
+  def self.basename(file, suffix=_); end
+
+  sig(
+      file: String,
+  )
+  .returns(File::Stat)
+  def self.lstat(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(String)
+  def self.dirname(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(String)
+  def self.ftype(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.writable?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.writable_real?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.executable?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.executable_real?(file); end
+
+  sig(
+      file: String,
   )
   .returns(T.any(TrueClass, FalseClass))
   def self.owned?(file); end
-
-  sig(
-      path: String,
-  )
-  .returns(String)
-  def self.path(path); end
 
   sig(
       file: String,
@@ -3807,33 +3802,6 @@ class File
   def self.readable_real?(file); end
 
   sig(
-      link: String,
-  )
-  .returns(String)
-  def self.readlink(link); end
-
-  sig(
-      pathname: String,
-      dir: String,
-  )
-  .returns(String)
-  def self.realdirpath(pathname, dir=_); end
-
-  sig(
-      pathname: String,
-      dir: String,
-  )
-  .returns(String)
-  def self.realpath(pathname, dir=_); end
-
-  sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
-  def self.rename(old, new); end
-
-  sig(
       file: String,
   )
   .returns(T.any(TrueClass, FalseClass))
@@ -3844,6 +3812,24 @@ class File
   )
   .returns(T.any(TrueClass, FalseClass))
   def self.setuid?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.sticky?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.symlink?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns([String, String])
+  def self.split(file); end
 
   sig(
       file: T.any(String, IO),
@@ -3860,64 +3846,6 @@ class File
   sig(
       file: T.any(String, IO),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.socket?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns([String, String])
-  def self.split(file); end
-
-  sig(
-      file: BasicObject,
-  )
-  .returns(File::Stat)
-  def self.stat(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.sticky?(file); end
-
-  sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
-  def self.symlink(old, new); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.symlink?(file); end
-
-  sig(
-      file: String,
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def self.truncate(file, arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def self.umask(arg0=_); end
-
-  sig(
-      atime: Time,
-      mtime: Time,
-      files: String,
-  )
-  .returns(Integer)
-  def self.utime(atime, mtime, *files); end
-
-  sig(
-      file: T.any(String, IO),
-  )
   .returns(T.any(Integer, NilClass))
   def self.world_readable?(file); end
 
@@ -3928,28 +3856,85 @@ class File
   def self.world_writable?(file); end
 
   sig(
-      file: String,
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.writable?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.writable_real?(file); end
-
-  sig(
       file: T.any(String, IO),
   )
   .returns(T.any(Integer, NilClass))
   def self.zero?(file); end
 
-  sig.returns(Time)
-  def atime(); end
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.blockdev?(file); end
 
-  sig.returns(Time)
-  def birthtime(); end
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.chardev?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.directory?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.file?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.grpowned?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.socket?(file); end
+
+  sig(
+      file_1: T.any(String, IO),
+      file_2: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.identical?(file_1, file_2); end
+
+  sig(
+      files: String,
+  )
+  .returns(Integer)
+  def self.delete(*files); end
+
+  sig(
+      files: String,
+  )
+  .returns(Integer)
+  def self.unlink(*files); end
+
+  sig(
+      link: String,
+  )
+  .returns(String)
+  def self.readlink(link); end
+
+  sig(
+      mode: Integer,
+      files: String,
+  )
+  .returns(Integer)
+  def self.chmod(mode, *files); end
+
+  sig(
+      mode: Integer,
+      files: String,
+  )
+  .returns(Integer)
+  def self.lchmod(mode, *files); end
 
   sig(
       mode: Integer,
@@ -3958,120 +3943,82 @@ class File
   def chmod(mode); end
 
   sig(
+      old: String,
+      new: String,
+  )
+  .returns(Integer)
+  def self.link(old, new); end
+
+  sig(
+      old: String,
+      new: String,
+  )
+  .returns(Integer)
+  def self.rename(old, new); end
+
+  sig(
+      old: String,
+      new: String,
+  )
+  .returns(Integer)
+  def self.symlink(old, new); end
+
+  sig(
+      owner: Integer,
+      group: Integer,
+      files: String,
+  )
+  .returns(Integer)
+  def self.chown(owner, group, *files); end
+
+  sig(
+      owner: Integer,
+      group: Integer,
+      files: String,
+  )
+  .returns(Integer)
+  def self.lchown(owner, group, *files); end
+
+  sig(
       owner: Integer,
       group: Integer,
   )
   .returns(Integer)
   def chown(owner, group); end
 
-  sig.returns(Time)
-  def ctime(); end
+  sig(
+      path: String,
+  )
+  .returns(String)
+  def self.extname(path); end
 
   sig(
-      arg0: Integer,
+      path: String,
   )
-  .returns(T.any(Integer, TrueClass, FalseClass))
-  def flock(arg0); end
+  .returns(String)
+  def self.path(path); end
 
   sig(
-      file: String,
-      mode: String,
-      perm: String,
-      opt: Integer,
+      pathname: String,
+      dir: String,
   )
-  .returns(Object)
-  def initialize(file, mode=_, perm=_, opt=_); end
-
-  sig.returns(File::Stat)
-  def lstat(); end
-
-  sig.returns(Time)
-  def mtime(); end
-
-  sig.returns(String)
-  def path(); end
-
-  sig.returns(Integer)
-  def size(); end
+  .returns(String)
+  def self.realdirpath(pathname, dir=_); end
 
   sig(
-      arg0: Integer,
+      pathname: String,
+      dir: String,
   )
-  .returns(Integer)
-  def truncate(arg0); end
-
-  sig.returns(File)
-  def clone(); end
-
-  sig.returns(File)
-  def dup(); end
-
-  sig.returns(File)
-  def freeze(); end
-
-  sig.returns(File)
-  def taint(); end
-
-  sig.returns(File)
-  def trust(); end
-
-  sig.returns(File)
-  def untaint(); end
-
-  sig.returns(File)
-  def untrust(); end
+  .returns(String)
+  def self.realpath(pathname, dir=_); end
 
   sig(
-      arg0: BasicObject,
+      pattern: String,
+      path: String,
+      flags: Integer,
   )
-  .returns(File)
-  def <<(arg0); end
-
-  sig.returns(File)
-  def binmode(); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(File)
-  def each(sep=_, limit=_, &blk); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(File)
-  def each_byte(&blk); end
-
-  sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(File)
-  def each_char(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(File)
-  def each_codepoint(&blk); end
-
-  sig.returns(File)
-  def flush(); end
-
-  sig(
-      ext_or_ext_int_enc: T.any(String, Encoding),
-  )
-  .returns(File)
-  sig(
-      ext_enc: T.any(String, Encoding),
-      int_enc: T.any(String, Encoding),
-  )
-  .returns(File)
-  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
-
-  sig.returns(File)
-  def to_io(); end
+  .returns(T.any(TrueClass, FalseClass))
+  def self.fnmatch(pattern, path, flags=_); end
 
   sig(
       pattern: String,
@@ -4082,21 +4029,54 @@ class File
   def self.fnmatch?(pattern, path, flags=_); end
 
   sig(
-      files: String,
+      sep: String,
+      limit: Integer,
+      blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(Integer)
-  def self.unlink(*files); end
+  .returns(File)
+  def each(sep=_, limit=_, &blk); end
+
+  sig.returns(File)
+  def binmode(); end
+
+  sig.returns(File)
+  def clone(); end
+
+  sig.returns(File)
+  def dup(); end
+
+  sig.returns(File)
+  def flush(); end
+
+  sig.returns(File)
+  def freeze(); end
+
+  sig.returns(File)
+  def taint(); end
+
+  sig.returns(File)
+  def to_io(); end
+
+  sig.returns(File)
+  def trust(); end
+
+  sig.returns(File)
+  def untaint(); end
+
+  sig.returns(File)
+  def untrust(); end
+
+  sig.returns(File::Stat)
+  def lstat(); end
+
+  sig.returns(Integer)
+  def size(); end
+
+  sig.returns(String)
+  def path(); end
 
   sig.returns(String)
   def to_path(); end
-end
-
-class File::Stat
-  sig(
-      other: File::Stat,
-  )
-  .returns(T.any(Integer, NilClass))
-  def <=>(other); end
 
   sig.returns(Time)
   def atime(); end
@@ -4104,20 +4084,25 @@ class File::Stat
   sig.returns(Time)
   def birthtime(); end
 
-  sig.returns(T.any(Integer, NilClass))
-  def blksize(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def blockdev?(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def blocks(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def chardev?(); end
-
   sig.returns(Time)
   def ctime(); end
+
+  sig.returns(Time)
+  def mtime(); end
+end
+
+class File::Stat
+  sig(
+      file: String,
+  )
+  .returns(Object)
+  def initialize(file); end
+
+  sig(
+      other: File::Stat,
+  )
+  .returns(T.any(Integer, NilClass))
+  def <=>(other); end
 
   sig.returns(Integer)
   def dev(); end
@@ -4127,6 +4112,57 @@ class File::Stat
 
   sig.returns(Integer)
   def dev_minor(); end
+
+  sig.returns(Integer)
+  def gid(); end
+
+  sig.returns(Integer)
+  def ino(); end
+
+  sig.returns(Integer)
+  def mode(); end
+
+  sig.returns(Integer)
+  def nlink(); end
+
+  sig.returns(Integer)
+  def rdev_major(); end
+
+  sig.returns(Integer)
+  def rdev_minor(); end
+
+  sig.returns(Integer)
+  def size(); end
+
+  sig.returns(Integer)
+  def uid(); end
+
+  sig.returns(String)
+  def ftype(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def blksize(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def blocks(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def rdev(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def world_readable?(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def world_writable?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def blockdev?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def chardev?(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def directory?(); end
@@ -4140,50 +4176,14 @@ class File::Stat
   sig.returns(T.any(TrueClass, FalseClass))
   def file?(); end
 
-  sig.returns(String)
-  def ftype(); end
-
-  sig.returns(Integer)
-  def gid(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def grpowned?(); end
-
-  sig.returns(Integer)
-  def ino(); end
-
-  sig(
-      file: String,
-  )
-  .returns(Object)
-  def initialize(file); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(Integer)
-  def mode(); end
-
-  sig.returns(Time)
-  def mtime(); end
-
-  sig.returns(Integer)
-  def nlink(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def owned?(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def pipe?(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def rdev(); end
-
-  sig.returns(Integer)
-  def rdev_major(); end
-
-  sig.returns(Integer)
-  def rdev_minor(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def readable?(); end
@@ -4197,9 +4197,6 @@ class File::Stat
   sig.returns(T.any(TrueClass, FalseClass))
   def setuid?(); end
 
-  sig.returns(Integer)
-  def size(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def socket?(); end
 
@@ -4209,15 +4206,6 @@ class File::Stat
   sig.returns(T.any(TrueClass, FalseClass))
   def symlink?(); end
 
-  sig.returns(Integer)
-  def uid(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def world_readable?(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def world_writable?(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def writable?(); end
 
@@ -4226,9 +4214,28 @@ class File::Stat
 
   sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
+
+  sig.returns(Time)
+  def atime(); end
+
+  sig.returns(Time)
+  def birthtime(); end
+
+  sig.returns(Time)
+  def ctime(); end
+
+  sig.returns(Time)
+  def mtime(); end
 end
 
 module FileUtils
+  sig(
+      list: T.any(String, Pathname),
+      mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
+  )
+  .returns(T::Array[String])
+  def self.mkdir_p(list, mode=_); end
+
   sig(
       src: T.any(String, Pathname),
       dest: T.any(String, Pathname),
@@ -4236,13 +4243,6 @@ module FileUtils
   )
   .returns(T::Array[String])
   def self.cp_r(src, dest, preserve=_); end
-
-  sig(
-      list: T.any(String, Pathname),
-      mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
-  )
-  .returns(T::Array[String])
-  def self.mkdir_p(list, mode=_); end
 end
 
 class Float
@@ -4280,11 +4280,7 @@ class Float
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def *(arg0); end
+  def modulo(arg0); end
 
   sig(
       arg0: Integer,
@@ -4293,11 +4289,11 @@ class Float
   sig(
       arg0: Float,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Float)
   sig(
       arg0: Rational,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Float)
   sig(
       arg0: BigDecimal,
   )
@@ -4306,7 +4302,7 @@ class Float
       arg0: Complex,
   )
   .returns(Complex)
-  def **(arg0); end
+  def *(arg0); end
 
   sig(
       arg0: Integer,
@@ -4352,12 +4348,6 @@ class Float
   .returns(Complex)
   def -(arg0); end
 
-  sig.returns(Float)
-  def -@(); end
-
-  sig.returns(Float)
-  def +@(); end
-
   sig(
       arg0: Integer,
   )
@@ -4379,6 +4369,108 @@ class Float
   )
   .returns(Complex)
   def /(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Float)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Float)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def fdiv(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Float)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Float)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def quo(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Float)
+  sig(
+      arg0: Float,
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: Rational,
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def **(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  sig(
+      arg0: Float,
+  )
+  .returns(Integer)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Integer)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(Integer)
+  def div(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Object)
+  sig(
+      arg0: Float,
+  )
+  .returns(Object)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Object)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(Object)
+  def <=>(arg0); end
 
   sig(
       arg0: Integer,
@@ -4419,36 +4511,6 @@ class Float
   sig(
       arg0: Integer,
   )
-  .returns(Object)
-  sig(
-      arg0: Float,
-  )
-  .returns(Object)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Object)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Object)
-  def <=>(arg0); end
-
-  sig(
-      arg0: Object,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ==(arg0); end
-
-  sig(
-      arg0: Object,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ===(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
   .returns(T.any(TrueClass, FalseClass))
   sig(
       arg0: Float,
@@ -4482,44 +4544,29 @@ class Float
   .returns(T.any(TrueClass, FalseClass))
   def >=(arg0); end
 
-  sig.returns(Float)
-  def abs(); end
-
-  sig.returns(Float)
-  def abs2(); end
+  sig(
+      arg0: Object,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ==(arg0); end
 
   sig(
-      arg0: Integer,
+      arg0: Object,
   )
-  .returns(Integer)
-  sig(
-      arg0: Float,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Integer)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Integer)
-  def div(arg0); end
+  .returns(T.any(TrueClass, FalseClass))
+  def ===(arg0); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal),
+      arg0: Object,
   )
-  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
-  def divmod(arg0); end
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(arg0); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def angle(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def arg(); end
-
-  sig.returns(Integer)
-  def ceil(); end
+  sig(
+      arg0: Object,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def equal?(arg0); end
 
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal),
@@ -4531,174 +4578,35 @@ class Float
   .returns([Float, Float])
   def coerce(arg0); end
 
-  sig.returns(Integer)
-  def denominator(); end
-
   sig(
-      arg0: Object,
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def equal?(arg0); end
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+  def divmod(arg0); end
 
-  sig(
-      arg0: Object,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Float)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Float)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def fdiv(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def finite?(); end
-
-  sig.returns(Integer)
-  def floor(); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(Object)
-  def infinite?(); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(String)
-  def inspect(); end
+  sig.returns(Complex)
+  def to_c(); end
 
   sig.returns(Float)
-  def magnitude(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Float)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Float)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  def modulo(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def nan?(); end
+  def +@(); end
 
   sig.returns(Float)
-  def next_float(); end
-
-  sig.returns(Integer)
-  def numerator(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def phase(); end
+  def -@(); end
 
   sig.returns(Float)
-  def prev_float(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Float)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Float)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def quo(arg0); end
-
-  sig.returns(Rational)
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(Rational)
-  def rationalize(arg0=_); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def round(arg0=_); end
+  def abs(); end
 
   sig.returns(Float)
-  def to_f(); end
+  def abs2(); end
 
-  sig.returns(Integer)
-  def to_i(); end
-
-  sig.returns(Integer)
-  def to_int(); end
-
-  sig.returns(Rational)
-  def to_r(); end
-
-  sig.returns(Integer)
-  def truncate(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def zero?(); end
+  sig.returns(Float)
+  def clone(); end
 
   sig.returns(Float)
   def conj(); end
 
   sig.returns(Float)
   def conjugate(); end
-
-  sig.returns(Integer)
-  def imag(); end
-
-  sig.returns(Integer)
-  def imaginary(); end
-
-  sig.returns(Float)
-  def real(); end
-
-  sig.returns(TrueClass)
-  def real?(); end
-
-  sig.returns(Complex)
-  def to_c(); end
-
-  sig.returns(Float)
-  def clone(); end
 
   sig.returns(Float)
   def dup(); end
@@ -4707,7 +4615,22 @@ class Float
   def freeze(); end
 
   sig.returns(Float)
+  def magnitude(); end
+
+  sig.returns(Float)
+  def next_float(); end
+
+  sig.returns(Float)
+  def prev_float(); end
+
+  sig.returns(Float)
+  def real(); end
+
+  sig.returns(Float)
   def taint(); end
+
+  sig.returns(Float)
+  def to_f(); end
 
   sig.returns(Float)
   def trust(); end
@@ -4717,6 +4640,83 @@ class Float
 
   sig.returns(Float)
   def untrust(); end
+
+  sig.returns(Integer)
+  def ceil(); end
+
+  sig.returns(Integer)
+  def denominator(); end
+
+  sig.returns(Integer)
+  def floor(); end
+
+  sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(Integer)
+  def imag(); end
+
+  sig.returns(Integer)
+  def imaginary(); end
+
+  sig.returns(Integer)
+  def numerator(); end
+
+  sig.returns(Integer)
+  def to_i(); end
+
+  sig.returns(Integer)
+  def to_int(); end
+
+  sig.returns(Integer)
+  def truncate(); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def round(arg0=_); end
+
+  sig.returns(Object)
+  def infinite?(); end
+
+  sig.returns(Rational)
+  def to_r(); end
+
+  sig.returns(Rational)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(Rational)
+  def rationalize(arg0=_); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def angle(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def arg(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def phase(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def finite?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def nan?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def zero?(); end
+
+  sig.returns(TrueClass)
+  def real?(); end
 end
 
 class FloatDomainError
@@ -4744,35 +4744,6 @@ end
 
 module Gem
   sig(
-      name: String,
-      args: String,
-      requirements: Gem::Requirement,
-  )
-  .returns(String)
-  def self.bin_path(name, args=_, *requirements); end
-
-  sig.returns(String)
-  def self.binary_mode(); end
-
-  sig(
-      install_dir: String,
-  )
-  .returns(String)
-  def self.bindir(install_dir=_); end
-
-  sig.returns(Hash)
-  def self.clear_default_specs(); end
-
-  sig.returns(NilClass)
-  def self.clear_paths(); end
-
-  sig.returns(String)
-  def self.config_file(); end
-
-  sig.returns(Gem::ConfigFile)
-  def self.configuration(); end
-
-  sig(
       config: BasicObject,
   )
   .returns(T.untyped)
@@ -4783,6 +4754,35 @@ module Gem
   )
   .returns(T.any(String, NilClass))
   def self.datadir(gem_name); end
+
+  sig(
+      install_dir: String,
+  )
+  .returns(String)
+  def self.bindir(install_dir=_); end
+
+  sig(
+      name: String,
+      args: String,
+      requirements: Gem::Requirement,
+  )
+  .returns(String)
+  def self.bin_path(name, args=_, *requirements); end
+
+  sig.returns(Gem::ConfigFile)
+  def self.configuration(); end
+
+  sig.returns(Hash)
+  def self.clear_default_specs(); end
+
+  sig.returns(NilClass)
+  def self.clear_paths(); end
+
+  sig.returns(String)
+  def self.binary_mode(); end
+
+  sig.returns(String)
+  def self.config_file(); end
 
   sig.returns(T.any(String, NilClass))
   def self.default_bindir(); end
@@ -4817,14 +4817,44 @@ class Hash
   sig(
       arg0: BasicObject,
   )
-  .returns(T::Hash[T.untyped, T.untyped])
-  def self.[](*arg0); end
+  .returns(K)
+  def key(arg0); end
 
   sig(
-      arg0: K,
+      arg0: BasicObject,
   )
-  .returns(V)
-  def [](arg0); end
+  .returns(T.any(TrueClass, FalseClass))
+  def has_key?(arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def has_value?(arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def key?(arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def member?(arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def value?(arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  def self.[](*arg0); end
 
   sig(
       arg0: K,
@@ -4846,80 +4876,23 @@ class Hash
   .returns(T::Array[T.any(K, V)])
   def assoc(arg0); end
 
-  sig.returns(T::Hash[K, V])
-  def clear(); end
+  sig(
+      arg0: K,
+  )
+  .returns(T::Array[T.any(K, V)])
+  def rassoc(arg0); end
 
-  sig.returns(T::Hash[K, V])
-  def compare_by_identity(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def compare_by_identity?(); end
+  sig(
+      arg0: K,
+  )
+  .returns(T::Array[V])
+  def values_at(*arg0); end
 
   sig(
       arg0: K,
   )
   .returns(V)
-  sig(
-      arg0: K,
-      blk: T.proc(arg0: K).returns(V),
-  )
-  .returns(V)
-  def default(arg0=_, &blk); end
-
-  sig(
-      arg0: V,
-  )
-  .returns(V)
-  def default=(arg0); end
-
-  sig(
-      arg0: K,
-  )
-  .returns(V)
-  sig(
-      arg0: K,
-      blk: T.proc(arg0: K).returns(BasicObject),
-  )
-  .returns(T.any(T.untyped, V))
-  def delete(arg0, &blk); end
-
-  sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
-  def delete_if(&blk); end
-
-  sig(
-      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
-  )
-  .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
-  def each(&blk); end
-
-  sig(
-      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
-  )
-  .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
-  def each_pair(&blk); end
-
-  sig(
-      blk: T.proc(arg0: K).returns(BasicObject),
-  )
-  .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
-  def each_key(&blk); end
-
-  sig(
-      blk: T.proc(arg0: V).returns(BasicObject),
-  )
-  .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
-  def each_value(&blk); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def empty?(); end
+  def [](arg0); end
 
   sig(
       arg0: K,
@@ -4938,65 +4911,26 @@ class Hash
   def fetch(arg0, arg1=_, &blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def member?(arg0); end
+  .returns(V)
+  sig(
+      arg0: K,
+      blk: T.proc(arg0: K).returns(BasicObject),
+  )
+  .returns(T.any(T.untyped, V))
+  def delete(arg0, &blk); end
 
   sig(
-      arg0: BasicObject,
+      arg0: K,
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def has_key?(arg0); end
-
+  .returns(V)
   sig(
-      arg0: BasicObject,
+      arg0: K,
+      blk: T.proc(arg0: K).returns(V),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def key?(arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def has_value?(arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def value?(arg0); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(T::Hash[V, K])
-  def invert(); end
-
-  sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
-  def keep_if(&blk); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(K)
-  def key(arg0); end
-
-  sig.returns(T::Array[K])
-  def keys(); end
-
-  sig.returns(Integer)
-  def length(); end
-
-  sig.returns(Integer)
-  def size(); end
+  .returns(V)
+  def default(arg0=_, &blk); end
 
   sig(
       arg0: T::Hash[BasicObject, BasicObject],
@@ -5010,20 +4944,31 @@ class Hash
   def merge(arg0, &blk); end
 
   sig(
-      arg0: K,
+      arg0: V,
   )
-  .returns(T::Array[T.any(K, V)])
-  def rassoc(arg0); end
+  .returns(V)
+  def default=(arg0); end
 
-  sig.returns(T::Hash[K, V])
-  def rehash(); end
-
-  sig.returns(Enumerator[[K, V]])
   sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: K).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
-  def reject(&blk); end
+  sig.returns(Enumerator[[K, V]])
+  def each_key(&blk); end
+
+  sig(
+      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
+  )
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
+  def each(&blk); end
+
+  sig(
+      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
+  )
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
+  def each_pair(&blk); end
 
   sig(
       blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
@@ -5035,31 +4980,41 @@ class Hash
       blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
   )
   .returns(T::Hash[K, V])
+  def select!(&blk); end
+
+  sig(
+      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Hash[K, V])
   def select(&blk); end
 
   sig(
       blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
   )
   .returns(T::Hash[K, V])
-  def select!(&blk); end
-
-  sig.returns(T::Array[T.any(K, V)])
-  def shift(); end
-
-  sig.returns(T::Array[T::Array[T.any(K, V)]])
-  def to_a(); end
-
-  sig.returns(T::Hash[K, V])
-  def to_hash(); end
-
-  sig.returns(T::Array[V])
-  def values(); end
+  sig.returns(Enumerator[[K, V]])
+  def delete_if(&blk); end
 
   sig(
-      arg0: K,
+      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T::Array[V])
-  def values_at(*arg0); end
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
+  def keep_if(&blk); end
+
+  sig(
+      blk: T.proc(arg0: V).returns(BasicObject),
+  )
+  .returns(T::Hash[K, V])
+  sig.returns(Enumerator[[K, V]])
+  def each_value(&blk); end
+
+  sig.returns(Enumerator[[K, V]])
+  sig(
+      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T::Hash[K, V])
+  def reject(&blk); end
 
   sig.returns(Hash)
   def clone(); end
@@ -5081,22 +5036,121 @@ class Hash
 
   sig.returns(Hash)
   def untrust(); end
+
+  sig.returns(Integer)
+  def length(); end
+
+  sig.returns(Integer)
+  def size(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def compare_by_identity?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def empty?(); end
+
+  sig.returns(T::Array[K])
+  def keys(); end
+
+  sig.returns(T::Array[T.any(K, V)])
+  def shift(); end
+
+  sig.returns(T::Array[T::Array[T.any(K, V)]])
+  def to_a(); end
+
+  sig.returns(T::Array[V])
+  def values(); end
+
+  sig.returns(T::Hash[K, V])
+  def clear(); end
+
+  sig.returns(T::Hash[K, V])
+  def compare_by_identity(); end
+
+  sig.returns(T::Hash[K, V])
+  def rehash(); end
+
+  sig.returns(T::Hash[K, V])
+  def to_hash(); end
+
+  sig.returns(T::Hash[V, K])
+  def invert(); end
 end
 
 class IO
   sig(
-      fd: Integer,
-      mode: Integer,
-      opt: Integer,
+      amount: Integer,
+      whence: Integer,
   )
-  .returns(Object)
-  def initialize(fd, mode=_, opt=_); end
+  .returns(Integer)
+  def seek(amount, whence=_); end
+
+  sig(
+      amount: Integer,
+      whence: Integer,
+  )
+  .returns(Integer)
+  def sysseek(amount, whence=_); end
 
   sig(
       arg0: BasicObject,
   )
   .returns(IO)
   def <<(arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(NilClass)
+  def print(*arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(NilClass)
+  def puts(*arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T.any(IO, NilClass))
+  def self.try_convert(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def lineno=(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def pos=(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(Integer)
+  def syswrite(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(Integer)
+  def write(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(NilClass)
+  def ungetc(arg0); end
 
   sig(
       arg0: Symbol,
@@ -5107,22 +5161,22 @@ class IO
   def advise(arg0, offset=_, len=_); end
 
   sig(
+      arg0: T.any(Numeric, String),
+  )
+  .returns(T.untyped)
+  def putc(arg0); end
+
+  sig(
+      arg0: T.any(String, Integer),
+  )
+  .returns(NilClass)
+  def ungetbyte(arg0); end
+
+  sig(
       arg0: T.any(TrueClass, FalseClass),
   )
   .returns(T.any(TrueClass, FalseClass))
   def autoclose=(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def autoclose?(); end
-
-  sig.returns(IO)
-  def binmode(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def binmode?(); end
-
-  sig.returns(NilClass)
-  def close(); end
 
   sig(
       arg0: T.any(TrueClass, FalseClass),
@@ -5130,30 +5184,25 @@ class IO
   .returns(T.any(TrueClass, FalseClass))
   def close_on_exec=(arg0); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def close_on_exec?(); end
-
-  sig.returns(NilClass)
-  def close_read(); end
-
-  sig.returns(NilClass)
-  def close_write(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def closed?(); end
+  sig(
+      arg0: T.any(TrueClass, FalseClass),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def sync=(arg0); end
 
   sig(
-      sep: String,
-      limit: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
+      blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(IO)
+  sig.returns(Enumerator[Integer])
+  def bytes(&blk); end
+
   sig(
-      sep: String,
-      limit: Integer,
+      blk: T.proc(arg0: Integer).returns(BasicObject),
   )
-  .returns(Enumerator[String])
-  def each(sep=_, limit=_, &blk); end
+  .returns(IO)
+  sig.returns(Enumerator[Integer])
+  def codepoints(&blk); end
 
   sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
@@ -5163,364 +5212,25 @@ class IO
   def each_byte(&blk); end
 
   sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(IO)
-  sig.returns(Enumerator[String])
-  def each_char(&blk); end
-
-  sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(IO)
   sig.returns(Enumerator[Integer])
   def each_codepoint(&blk); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def eof(); end
-
   sig(
-      integer_cmd: Integer,
-      arg: T.any(String, Integer),
-  )
-  .returns(Integer)
-  def fcntl(integer_cmd, arg); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def fdatasync(); end
-
-  sig.returns(Integer)
-  def fileno(); end
-
-  sig.returns(IO)
-  def flush(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def fsync(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def getbyte(); end
-
-  sig.returns(T.any(String, NilClass))
-  def getc(); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(T.any(String, NilClass))
-  def gets(sep=_, limit=_); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(Encoding)
-  def internal_encoding(); end
-
-  sig(
-      integer_cmd: Integer,
-      arg: T.any(String, Integer),
-  )
-  .returns(Integer)
-  def ioctl(integer_cmd, arg); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def isatty(); end
-
-  sig.returns(Integer)
-  def lineno(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def lineno=(arg0); end
-
-  sig.returns(Integer)
-  def pid(); end
-
-  sig.returns(Integer)
-  def pos(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def pos=(arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(NilClass)
-  def print(*arg0); end
-
-  sig(
-      format_string: String,
-      arg0: BasicObject,
-  )
-  .returns(NilClass)
-  def printf(format_string, *arg0); end
-
-  sig(
-      arg0: T.any(Numeric, String),
-  )
-  .returns(T.untyped)
-  def putc(arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(NilClass)
-  def puts(*arg0); end
-
-  sig(
-      length: Integer,
-      outbuf: String,
-  )
-  .returns(T.any(String, NilClass))
-  def read(length=_, outbuf=_); end
-
-  sig(
-      len: Integer,
-  )
-  .returns(String)
-  sig(
-      len: Integer,
-      buf: String,
-  )
-  .returns(String)
-  def read_nonblock(len, buf=_); end
-
-  sig.returns(Integer)
-  def readbyte(); end
-
-  sig.returns(String)
-  def readchar(); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(String)
-  def readline(sep=_, limit=_); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(T::Array[String])
-  def readlines(sep=_, limit=_); end
-
-  sig(
-      maxlen: Integer,
-  )
-  .returns(String)
-  sig(
-      maxlen: Integer,
-      outbuf: String,
-  )
-  .returns(String)
-  def readpartial(maxlen, outbuf=_); end
-
-  sig(
-      other_IO: IO,
-  )
-  .returns(IO)
-  sig(
-      path: String,
-      mode_str: String,
-  )
-  .returns(IO)
-  def reopen(other_IO, mode_str=_); end
-
-  sig.returns(Integer)
-  def rewind(); end
-
-  sig(
-      amount: Integer,
-      whence: Integer,
-  )
-  .returns(Integer)
-  def seek(amount, whence=_); end
-
-  sig(
-      ext_or_ext_int_enc: T.any(String, Encoding),
-  )
-  .returns(IO)
-  sig(
-      ext_enc: T.any(String, Encoding),
-      int_enc: T.any(String, Encoding),
-  )
-  .returns(IO)
-  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
-
-  sig.returns(File::Stat)
-  def stat(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def sync(); end
-
-  sig(
-      arg0: T.any(TrueClass, FalseClass),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def sync=(arg0); end
-
-  sig(
-      maxlen: Integer,
-      outbuf: String,
-  )
-  .returns(String)
-  def sysread(maxlen, outbuf); end
-
-  sig(
-      amount: Integer,
-      whence: Integer,
-  )
-  .returns(Integer)
-  def sysseek(amount, whence=_); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def syswrite(arg0); end
-
-  sig.returns(Integer)
-  def tell(); end
-
-  sig.returns(IO)
-  def to_io(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def tty?(); end
-
-  sig(
-      arg0: T.any(String, Integer),
-  )
-  .returns(NilClass)
-  def ungetbyte(arg0); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(NilClass)
-  def ungetc(arg0); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def write(arg0); end
-
-  sig.returns(IO)
-  def clone(); end
-
-  sig.returns(IO)
-  def dup(); end
-
-  sig.returns(IO)
-  def freeze(); end
-
-  sig.returns(IO)
-  def taint(); end
-
-  sig.returns(IO)
-  def trust(); end
-
-  sig.returns(IO)
-  def untaint(); end
-
-  sig.returns(IO)
-  def untrust(); end
-
-  sig(
-      name: String,
-      length: Integer,
-      offset: Integer,
-  )
-  .returns(String)
-  def self.binread(name, length=_, offset=_); end
-
-  sig(
-      name: String,
-      arg0: String,
-      offset: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(Integer)
-  def self.binwrite(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
-
-  sig(
-      src: T.any(String, IO),
-      dst: T.any(String, IO),
-      copy_length: Integer,
-      src_offset: Integer,
-  )
-  .returns(Integer)
-  def self.copy_stream(src, dst, copy_length=_, src_offset=_); end
-
-  sig(
-      name: String,
-      sep: String,
-      limit: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(NilClass)
-  sig(
-      name: String,
-      sep: String,
-      limit: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(Enumerator[String])
-  def self.foreach(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
+  .returns(IO)
+  sig.returns(Enumerator[String])
+  def chars(&blk); end
 
   sig(
-      fd: Integer,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
+      blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(IO)
-  sig(
-      fd: Integer,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: IO).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def self.open(fd, mode=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
+  sig.returns(Enumerator[String])
+  def each_char(&blk); end
 
   sig(
       ext_or_ext_int_enc: String,
@@ -5573,8 +5283,119 @@ class IO
   def self.pipe(ext_or_ext_int_enc=_, int_enc=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
   sig(
-      name: String,
+      ext_or_ext_int_enc: T.any(String, Encoding),
+  )
+  .returns(IO)
+  sig(
+      ext_enc: T.any(String, Encoding),
+      int_enc: T.any(String, Encoding),
+  )
+  .returns(IO)
+  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
+
+  sig(
+      fd: Integer,
+      mode: Integer,
+      opt: Integer,
+  )
+  .returns(IO)
+  def self.for_fd(fd, mode=_, opt=_); end
+
+  sig(
+      fd: Integer,
+      mode: Integer,
+      opt: Integer,
+  )
+  .returns(Object)
+  def initialize(fd, mode=_, opt=_); end
+
+  sig(
+      fd: Integer,
+      mode: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(IO)
+  sig(
+      fd: Integer,
+      mode: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+      blk: T.proc(arg0: IO).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def self.open(fd, mode=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
+
+  sig(
+      format_string: String,
+      arg0: BasicObject,
+  )
+  .returns(NilClass)
+  def printf(format_string, *arg0); end
+
+  sig(
+      integer_cmd: Integer,
+      arg: T.any(String, Integer),
+  )
+  .returns(Integer)
+  def fcntl(integer_cmd, arg); end
+
+  sig(
+      integer_cmd: Integer,
+      arg: T.any(String, Integer),
+  )
+  .returns(Integer)
+  def ioctl(integer_cmd, arg); end
+
+  sig(
+      len: Integer,
+  )
+  .returns(String)
+  sig(
+      len: Integer,
+      buf: String,
+  )
+  .returns(String)
+  def read_nonblock(len, buf=_); end
+
+  sig(
       length: Integer,
+      outbuf: String,
+  )
+  .returns(T.any(String, NilClass))
+  def read(length=_, outbuf=_); end
+
+  sig(
+      maxlen: Integer,
+      outbuf: String,
+  )
+  .returns(String)
+  def sysread(maxlen, outbuf); end
+
+  sig(
+      maxlen: Integer,
+  )
+  .returns(String)
+  sig(
+      maxlen: Integer,
+      outbuf: String,
+  )
+  .returns(String)
+  def readpartial(maxlen, outbuf=_); end
+
+  sig(
+      name: String,
+      arg0: String,
       offset: Integer,
       external_encoding: String,
       internal_encoding: String,
@@ -5584,46 +5405,8 @@ class IO
       autoclose: BasicObject,
       mode: String,
   )
-  .returns(String)
-  def self.read(name, length=_, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
-
-  sig(
-      name: String,
-      sep: String,
-      limit: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(T::Array[String])
-  def self.readlines(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
-
-  sig(
-      read_array: T::Array[IO],
-      write_array: T::Array[IO],
-      error_array: T::Array[IO],
-      timeout: Integer,
-  )
-  .returns(T.any(T::Array[IO], NilClass))
-  def self.select(read_array, write_array=_, error_array=_, timeout=_); end
-
-  sig(
-      path: String,
-      mode: String,
-      perm: String,
-  )
   .returns(Integer)
-  def self.sysopen(path, mode=_, perm=_); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(IO, NilClass))
-  def self.try_convert(arg0); end
+  def self.binwrite(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
   sig(
       name: String,
@@ -5641,33 +5424,112 @@ class IO
   def self.write(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
   sig(
-      fd: Integer,
-      mode: Integer,
-      opt: Integer,
+      name: String,
+      length: Integer,
+      offset: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
   )
-  .returns(IO)
-  def self.for_fd(fd, mode=_, opt=_); end
+  .returns(String)
+  def self.read(name, length=_, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
 
   sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
+      name: String,
+      length: Integer,
+      offset: Integer,
   )
-  .returns(IO)
-  sig.returns(Enumerator[Integer])
-  def bytes(&blk); end
+  .returns(String)
+  def self.binread(name, length=_, offset=_); end
 
   sig(
+      name: String,
+      sep: String,
+      limit: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(NilClass)
+  sig(
+      name: String,
+      sep: String,
+      limit: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(Enumerator[String])
+  def self.foreach(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
+
+  sig(
+      name: String,
+      sep: String,
+      limit: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(T::Array[String])
+  def self.readlines(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+
+  sig(
+      other_IO: IO,
+  )
+  .returns(IO)
+  sig(
+      path: String,
+      mode_str: String,
+  )
+  .returns(IO)
+  def reopen(other_IO, mode_str=_); end
+
+  sig(
+      path: String,
+      mode: String,
+      perm: String,
+  )
+  .returns(Integer)
+  def self.sysopen(path, mode=_, perm=_); end
+
+  sig(
+      read_array: T::Array[IO],
+      write_array: T::Array[IO],
+      error_array: T::Array[IO],
+      timeout: Integer,
+  )
+  .returns(T.any(T::Array[IO], NilClass))
+  def self.select(read_array, write_array=_, error_array=_, timeout=_); end
+
+  sig(
+      sep: String,
+      limit: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(IO)
-  sig.returns(Enumerator[String])
-  def chars(&blk); end
-
   sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
+      sep: String,
+      limit: Integer,
   )
-  .returns(IO)
-  sig.returns(Enumerator[Integer])
-  def codepoints(&blk); end
+  .returns(Enumerator[String])
+  def each(sep=_, limit=_, &blk); end
 
   sig(
       sep: String,
@@ -5682,9 +5544,6 @@ class IO
   .returns(Enumerator[String])
   def each_line(sep=_, limit=_, &blk); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def eof?(); end
-
   sig(
       sep: String,
       limit: Integer,
@@ -5698,8 +5557,149 @@ class IO
   .returns(Enumerator[String])
   def lines(sep=_, limit=_, &blk); end
 
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(String)
+  def readline(sep=_, limit=_); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(T.any(String, NilClass))
+  def gets(sep=_, limit=_); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(T::Array[String])
+  def readlines(sep=_, limit=_); end
+
+  sig(
+      src: T.any(String, IO),
+      dst: T.any(String, IO),
+      copy_length: Integer,
+      src_offset: Integer,
+  )
+  .returns(Integer)
+  def self.copy_stream(src, dst, copy_length=_, src_offset=_); end
+
+  sig.returns(Encoding)
+  def internal_encoding(); end
+
+  sig.returns(File::Stat)
+  def stat(); end
+
+  sig.returns(IO)
+  def binmode(); end
+
+  sig.returns(IO)
+  def clone(); end
+
+  sig.returns(IO)
+  def dup(); end
+
+  sig.returns(IO)
+  def flush(); end
+
+  sig.returns(IO)
+  def freeze(); end
+
+  sig.returns(IO)
+  def taint(); end
+
+  sig.returns(IO)
+  def to_io(); end
+
+  sig.returns(IO)
+  def trust(); end
+
+  sig.returns(IO)
+  def untaint(); end
+
+  sig.returns(IO)
+  def untrust(); end
+
+  sig.returns(Integer)
+  def fileno(); end
+
+  sig.returns(Integer)
+  def lineno(); end
+
+  sig.returns(Integer)
+  def pid(); end
+
+  sig.returns(Integer)
+  def pos(); end
+
+  sig.returns(Integer)
+  def readbyte(); end
+
+  sig.returns(Integer)
+  def rewind(); end
+
+  sig.returns(Integer)
+  def tell(); end
+
   sig.returns(Integer)
   def to_i(); end
+
+  sig.returns(NilClass)
+  def close(); end
+
+  sig.returns(NilClass)
+  def close_read(); end
+
+  sig.returns(NilClass)
+  def close_write(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def readchar(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def fdatasync(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def fsync(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def getbyte(); end
+
+  sig.returns(T.any(String, NilClass))
+  def getc(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def autoclose?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def binmode?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def close_on_exec?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def closed?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def eof(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def eof?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def isatty(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def sync(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def tty?(); end
 end
 
 class IOError
@@ -5750,6 +5750,98 @@ end
 
 class Integer
   sig(
+      arg0: Encoding,
+  )
+  .returns(String)
+  def chr(arg0); end
+
+  sig(
+      arg0: Integer,
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(Integer)
+  sig(
+      arg0: Integer,
+  )
+  .returns(Enumerator[Integer])
+  def upto(arg0, &blk); end
+
+  sig(
+      arg0: Integer,
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(Integer)
+  sig(
+      limit: Integer,
+  )
+  .returns(Enumerator[Integer])
+  def downto(arg0, &blk); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Float)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Float)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def fdiv(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def &(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def <<(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def >>(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def ^(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def gcd(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def lcm(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def |(arg0); end
+
+  sig(
       arg0: Integer,
   )
   .returns(Integer)
@@ -5771,7 +5863,37 @@ class Integer
       arg0: Integer,
   )
   .returns(Integer)
-  def &(arg0); end
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Rational)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  def modulo(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Rational)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  def remainder(arg0); end
 
   sig(
       arg0: Integer,
@@ -5794,28 +5916,6 @@ class Integer
   )
   .returns(Complex)
   def *(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  sig(
-      arg0: Float,
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  sig(
-      arg0: Rational,
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def **(arg0); end
 
   sig(
       arg0: Integer,
@@ -5861,12 +5961,6 @@ class Integer
   .returns(Complex)
   def -(arg0); end
 
-  sig.returns(Integer)
-  def -@(); end
-
-  sig.returns(Integer)
-  def +@(); end
-
   sig(
       arg0: Integer,
   )
@@ -5892,44 +5986,38 @@ class Integer
   sig(
       arg0: Integer,
   )
-  .returns(T.any(TrueClass, FalseClass))
+  .returns(Integer)
   sig(
       arg0: Float,
   )
-  .returns(T.any(TrueClass, FalseClass))
+  .returns(Integer)
   sig(
       arg0: Rational,
   )
-  .returns(T.any(TrueClass, FalseClass))
+  .returns(Integer)
   sig(
       arg0: BigDecimal,
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def <(arg0); end
+  .returns(Integer)
+  def div(arg0); end
 
   sig(
       arg0: Integer,
   )
   .returns(Integer)
-  def <<(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  sig(
-      arg0: Float,
-  )
-  .returns(T.any(TrueClass, FalseClass))
   sig(
       arg0: Rational,
   )
-  .returns(T.any(TrueClass, FalseClass))
+  .returns(Integer)
+  sig(
+      arg0: Float,
+  )
+  .returns(Integer)
   sig(
       arg0: BigDecimal,
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def <=(arg0); end
+  .returns(Integer)
+  def [](arg0); end
 
   sig(
       arg0: Integer,
@@ -5950,16 +6038,84 @@ class Integer
   def <=>(arg0); end
 
   sig(
-      arg0: Object,
+      arg0: Integer,
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def ==(arg0); end
+  .returns(Rational)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Rational)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def quo(arg0); end
 
   sig(
-      arg0: Object,
+      arg0: Integer,
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: Float,
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: Rational,
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def **(arg0); end
+
+  sig(
+      arg0: Integer,
   )
   .returns(T.any(TrueClass, FalseClass))
-  def ===(arg0); end
+  sig(
+      arg0: Float,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
+      arg0: Rational,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def <(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
+      arg0: Float,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
+      arg0: Rational,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def <=(arg0); end
 
   sig(
       arg0: Integer,
@@ -6000,151 +6156,26 @@ class Integer
   sig(
       arg0: Integer,
   )
-  .returns(Integer)
-  def >>(arg0); end
+  .returns([Integer, Integer])
+  def gcdlcm(arg0); end
 
   sig(
-      arg0: Integer,
+      arg0: Object,
   )
-  .returns(Integer)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Float,
-  )
-  .returns(Integer)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Integer)
-  def [](arg0); end
+  .returns(T.any(TrueClass, FalseClass))
+  def ==(arg0); end
 
   sig(
-      arg0: Integer,
+      arg0: Object,
   )
-  .returns(Integer)
-  def ^(arg0); end
+  .returns(T.any(TrueClass, FalseClass))
+  def ===(arg0); end
 
   sig(
-      arg0: Integer,
+      arg0: Object,
   )
-  .returns(Integer)
-  def |(arg0); end
-
-  sig.returns(Integer)
-  def ~(); end
-
-  sig.returns(Integer)
-  def abs(); end
-
-  sig.returns(Integer)
-  def bit_length(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Float,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Integer)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Integer)
-  def div(arg0); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
-  def divmod(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Float)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Float)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def fdiv(arg0); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(Integer)
-  def magnitude(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Rational)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  def modulo(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Rational)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Rational)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def quo(arg0); end
-
-  sig.returns(Integer)
-  def abs2(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def angle(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def arg(); end
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(arg0); end
 
   sig(
       arg0: Object,
@@ -6153,143 +6184,16 @@ class Integer
   def equal?(arg0); end
 
   sig(
-      arg0: Object,
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(arg0); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(Integer)
-  def ceil(); end
-
-  sig(
-      arg0: Encoding,
-  )
-  .returns(String)
-  def chr(arg0); end
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+  def divmod(arg0); end
 
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
   .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def coerce(arg0); end
-
-  sig.returns(Integer)
-  def conj(); end
-
-  sig.returns(Integer)
-  def conjugate(); end
-
-  sig.returns(Integer)
-  def denominator(); end
-
-  sig(
-      arg0: Integer,
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(Integer)
-  sig(
-      limit: Integer,
-  )
-  .returns(Enumerator[Integer])
-  def downto(arg0, &blk); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def even?(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def gcd(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns([Integer, Integer])
-  def gcdlcm(arg0); end
-
-  sig.returns(Integer)
-  def floor(); end
-
-  sig.returns(Integer)
-  def imag(); end
-
-  sig.returns(Integer)
-  def imaginary(); end
-
-  sig.returns(TrueClass)
-  def integer?(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def lcm(arg0); end
-
-  sig.returns(Integer)
-  def next(); end
-
-  sig.returns(Integer)
-  def numerator(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def odd?(); end
-
-  sig.returns(Integer)
-  def ord(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def phase(); end
-
-  sig.returns(Integer)
-  def pred(); end
-
-  sig.returns(Rational)
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(Rational)
-  def rationalize(arg0=_); end
-
-  sig.returns(Integer)
-  def real(); end
-
-  sig.returns(TrueClass)
-  def real?(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Rational)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  def remainder(arg0); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def round(arg0=_); end
-
-  sig.returns(Integer)
-  def size(); end
-
-  sig.returns(Integer)
-  def succ(); end
 
   sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
@@ -6305,42 +6209,88 @@ class Integer
   def to_f(); end
 
   sig.returns(Integer)
-  def to_i(); end
+  def +@(); end
 
   sig.returns(Integer)
-  def to_int(); end
-
-  sig.returns(Rational)
-  def to_r(); end
+  def -@(); end
 
   sig.returns(Integer)
-  def truncate(); end
+  def abs(); end
 
-  sig(
-      arg0: Integer,
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(Integer)
-  sig(
-      arg0: Integer,
-  )
-  .returns(Enumerator[Integer])
-  def upto(arg0, &blk); end
+  sig.returns(Integer)
+  def abs2(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def zero?(); end
+  sig.returns(Integer)
+  def bit_length(); end
+
+  sig.returns(Integer)
+  def ceil(); end
 
   sig.returns(Integer)
   def clone(); end
 
   sig.returns(Integer)
+  def conj(); end
+
+  sig.returns(Integer)
+  def conjugate(); end
+
+  sig.returns(Integer)
+  def denominator(); end
+
+  sig.returns(Integer)
   def dup(); end
+
+  sig.returns(Integer)
+  def floor(); end
 
   sig.returns(Integer)
   def freeze(); end
 
   sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(Integer)
+  def imag(); end
+
+  sig.returns(Integer)
+  def imaginary(); end
+
+  sig.returns(Integer)
+  def magnitude(); end
+
+  sig.returns(Integer)
+  def next(); end
+
+  sig.returns(Integer)
+  def numerator(); end
+
+  sig.returns(Integer)
+  def ord(); end
+
+  sig.returns(Integer)
+  def pred(); end
+
+  sig.returns(Integer)
+  def real(); end
+
+  sig.returns(Integer)
+  def size(); end
+
+  sig.returns(Integer)
+  def succ(); end
+
+  sig.returns(Integer)
   def taint(); end
+
+  sig.returns(Integer)
+  def to_i(); end
+
+  sig.returns(Integer)
+  def to_int(); end
+
+  sig.returns(Integer)
+  def truncate(); end
 
   sig.returns(Integer)
   def trust(); end
@@ -6350,6 +6300,56 @@ class Integer
 
   sig.returns(Integer)
   def untrust(); end
+
+  sig.returns(Integer)
+  def ~(); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def round(arg0=_); end
+
+  sig.returns(Rational)
+  def to_r(); end
+
+  sig.returns(Rational)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(Rational)
+  def rationalize(arg0=_); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def angle(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def arg(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def phase(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def even?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def odd?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def zero?(); end
+
+  sig.returns(TrueClass)
+  def integer?(); end
+
+  sig.returns(TrueClass)
+  def real?(); end
 end
 
 class Interrupt
@@ -6377,84 +6377,11 @@ end
 
 module Kernel
   sig(
-      x: Object,
-  )
-  .returns(T::Array[T.untyped])
-  def self.Array(x); end
-
-  sig(
-      x: Numeric,
-      y: Numeric,
-  )
-  .returns(Complex)
-  sig(
-      x: String,
-  )
-  .returns(Complex)
-  def self.Complex(x, y=_); end
-
-  sig(
-      x: Numeric,
-  )
-  .returns(Float)
-  def self.Float(x); end
-
-  sig(
-      x: Object,
-  )
-  .returns(T::Hash[T.untyped, T.untyped])
-  def self.Hash(x); end
-
-  sig(
-      arg: T.any(Numeric, String),
-      base: Integer,
-  )
-  .returns(Integer)
-  def self.Integer(arg, base=_); end
-
-  sig(
-      x: Numeric,
-      y: Numeric,
-  )
-  .returns(Rational)
-  sig(
-      x: Object,
-  )
-  .returns(Rational)
-  def self.Rational(x, y=_); end
-
-  sig(
-      x: Object,
-  )
-  .returns(String)
-  def self.String(x); end
-
-  sig.returns(T.any(Symbol, NilClass))
-  def self.__callee__(); end
-
-  sig.returns(T.any(String, NilClass))
-  def self.__dir__(); end
-
-  sig.returns(T.any(Symbol, NilClass))
-  def self.__method__(); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def self.`(arg0); end
-
-  sig(
-      msg: String,
+      _module: T.any(String, Symbol),
+      filename: String,
   )
   .returns(NilClass)
-  def self.abort(msg=_); end
-
-  sig(
-      blk: T.proc().returns(BasicObject),
-  )
-  .returns(Proc)
-  def self.at_exit(&blk); end
+  def autoload(_module, filename); end
 
   sig(
       _module: T.any(String, Symbol),
@@ -6464,16 +6391,348 @@ module Kernel
   def self.autoload(_module, filename); end
 
   sig(
+      arg0: BasicObject,
+  )
+  .returns(NilClass)
+  def puts(*arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(NilClass)
+  def self.puts(*arg0); end
+
+  sig(
+      arg0: IO,
+      arg1: String,
+      arg2: BasicObject,
+  )
+  .returns(NilClass)
+  def printf(arg0=_, arg1=_, *arg2); end
+
+  sig(
+      arg0: IO,
+      arg1: String,
+      arg2: BasicObject,
+  )
+  .returns(NilClass)
+  def self.printf(arg0=_, arg1=_, *arg2); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def putc(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def self.putc(arg0); end
+
+  sig(
+      arg0: String,
+      arg1: Binding,
+      filename: String,
+      lineno: Integer,
+  )
+  .returns(T.untyped)
+  def self.eval(arg0, arg1=_, filename=_, lineno=_); end
+
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(String)
+  def gets(arg0=_, arg1=_); end
+
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(String)
+  def readline(arg0=_, arg1=_); end
+
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(String)
+  def self.gets(arg0=_, arg1=_); end
+
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(String)
+  def self.readline(arg0=_, arg1=_); end
+
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(T::Array[String])
+  def readlines(arg0=_, arg1=_); end
+
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(T::Array[String])
+  def self.readlines(arg0=_, arg1=_); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def `(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def self.`(arg0); end
+
+  sig(
+      arg0: T.any(String, Symbol),
+      arg1: BasicObject,
+  )
+  .returns(T.untyped)
+  sig(
+      arg0: T.any(String, Symbol),
+      arg1: BasicObject,
+      blk: BasicObject,
+  )
+  .returns(T.untyped)
+  def send(arg0, *arg1, &blk); end
+
+  sig(
+      arg: T.any(Numeric, String),
+      base: Integer,
+  )
+  .returns(Integer)
+  def Integer(arg, base=_); end
+
+  sig(
+      arg: T.any(Numeric, String),
+      base: Integer,
+  )
+  .returns(Integer)
+  def self.Integer(arg, base=_); end
+
+  sig(
+      blk: BasicObject,
+  )
+  .returns(Proc)
+  def proc(&blk); end
+
+  sig(
+      blk: BasicObject,
+  )
+  .returns(Proc)
+  def self.proc(&blk); end
+
+  sig(
+      blk: T.proc().returns(BasicObject),
+  )
+  .returns(Proc)
+  def at_exit(&blk); end
+
+  sig(
+      blk: T.proc().returns(BasicObject),
+  )
+  .returns(Proc)
+  def self.at_exit(&blk); end
+
+  sig(
+      cmd: String,
+      file1: String,
+      file2: String,
+  )
+  .returns(T.any(TrueClass, FalseClass, Time))
+  def self.test(cmd, file1, file2=_); end
+
+  sig(
+      cmd: String,
+      file1: String,
+      file2: String,
+  )
+  .returns(T.any(TrueClass, FalseClass, Time))
+  def test(cmd, file1, file2=_); end
+
+  sig(
+      duration: Numeric,
+  )
+  .returns(Integer)
+  def self.sleep(duration); end
+
+  sig(
+      duration: Numeric,
+  )
+  .returns(Integer)
+  def sleep(duration); end
+
+  sig(
+      feature: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def require_relative(feature); end
+
+  sig(
+      filename: String,
+      arg0: T.any(TrueClass, FalseClass),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def load(filename, arg0=_); end
+
+  sig(
+      filename: String,
+      arg0: T.any(TrueClass, FalseClass),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.load(filename, arg0=_); end
+
+  sig(
+      format: String,
+      args: BasicObject,
+  )
+  .returns(String)
+  def format(format, *args); end
+
+  sig(
+      format: String,
+      args: BasicObject,
+  )
+  .returns(String)
+  def self.format(format, *args); end
+
+  sig(
+      format: String,
+      args: BasicObject,
+  )
+  .returns(String)
+  def self.sprintf(format, *args); end
+
+  sig(
+      format: String,
+      args: BasicObject,
+  )
+  .returns(String)
+  def sprintf(format, *args); end
+
+  sig(
+      max: T.any(Integer, Range),
+  )
+  .returns(Numeric)
+  def self.rand(max); end
+
+  sig(
+      msg: String,
+  )
+  .returns(NilClass)
+  def abort(msg=_); end
+
+  sig(
+      msg: String,
+  )
+  .returns(NilClass)
+  def self.abort(msg=_); end
+
+  sig(
+      msg: String,
+  )
+  .returns(NilClass)
+  def self.warn(*msg); end
+
+  sig(
+      msg: String,
+  )
+  .returns(NilClass)
+  def warn(*msg); end
+
+  sig(
+      name: String,
+      rest: T.any(String, Integer),
+      block: String,
+  )
+  .returns(T.any(IO, NilClass))
+  def open(name, rest=_, block=_); end
+
+  sig(
+      name: String,
+      rest: T.any(String, Integer),
+      block: String,
+  )
+  .returns(T.any(IO, NilClass))
+  def self.open(name, rest=_, block=_); end
+
+  sig(
+      name: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.require(name); end
+
+  sig(
+      name: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.require_relative(name); end
+
+  sig(
+      name: T.any(Symbol, String),
+  )
+  .returns(T.any(String, NilClass))
+  def autoload?(name); end
+
+  sig(
       name: T.any(Symbol, String),
   )
   .returns(T.any(String, NilClass))
   def self.autoload?(name); end
 
-  sig.returns(Binding)
-  def self.binding(); end
+  sig(
+      num: Integer,
+      args: BasicObject,
+  )
+  .returns(T.untyped)
+  def self.syscall(num, *args); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def self.block_given?(); end
+  sig(
+      num: Integer,
+      args: BasicObject,
+  )
+  .returns(T.untyped)
+  def syscall(num, *args); end
+
+  sig(
+      number: Numeric,
+  )
+  .returns(Numeric)
+  def self.srand(number); end
+
+  sig(
+      path: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def require(path); end
+
+  sig(
+      read: T::Array[IO],
+      write: T::Array[IO],
+      error: T::Array[IO],
+      timeout: Integer,
+  )
+  .returns(T::Array[String])
+  def select(read, write=_, error=_, timeout=_); end
+
+  sig(
+      read: T::Array[IO],
+      write: T::Array[IO],
+      error: T::Array[IO],
+      timeout: Integer,
+  )
+  .returns(T::Array[String])
+  def self.select(read, write=_, error=_, timeout=_); end
 
   sig(
       start: Integer,
@@ -6498,20 +6757,10 @@ module Kernel
   def self.caller_locations(start=_, length=_); end
 
   sig(
-      arg0: String,
-      arg1: Binding,
-      filename: String,
-      lineno: Integer,
-  )
-  .returns(T.untyped)
-  def self.eval(arg0, arg1=_, filename=_, lineno=_); end
-
-  sig.returns(NilClass)
-  sig(
       status: T.any(Integer, TrueClass, FalseClass),
   )
   .returns(NilClass)
-  def self.exit(status=_); end
+  def exit!(status); end
 
   sig(
       status: T.any(Integer, TrueClass, FalseClass),
@@ -6519,14 +6768,110 @@ module Kernel
   .returns(NilClass)
   def self.exit!(status); end
 
+  sig(
+      x: Numeric,
+      y: Numeric,
+  )
+  .returns(Complex)
+  sig(
+      x: String,
+  )
+  .returns(Complex)
+  def Complex(x, y=_); end
+
+  sig(
+      x: Numeric,
+      y: Numeric,
+  )
+  .returns(Complex)
+  sig(
+      x: String,
+  )
+  .returns(Complex)
+  def self.Complex(x, y=_); end
+
+  sig(
+      x: Numeric,
+      y: Numeric,
+  )
+  .returns(Rational)
+  sig(
+      x: Object,
+  )
+  .returns(Rational)
+  def Rational(x, y=_); end
+
+  sig(
+      x: Numeric,
+      y: Numeric,
+  )
+  .returns(Rational)
+  sig(
+      x: Object,
+  )
+  .returns(Rational)
+  def self.Rational(x, y=_); end
+
+  sig(
+      x: Numeric,
+  )
+  .returns(Float)
+  def Float(x); end
+
+  sig(
+      x: Numeric,
+  )
+  .returns(Float)
+  def self.Float(x); end
+
+  sig(
+      x: Object,
+  )
+  .returns(String)
+  def String(x); end
+
+  sig(
+      x: Object,
+  )
+  .returns(String)
+  def self.String(x); end
+
+  sig(
+      x: Object,
+  )
+  .returns(T::Array[T.untyped])
+  def Array(x); end
+
+  sig(
+      x: Object,
+  )
+  .returns(T::Array[T.untyped])
+  def self.Array(x); end
+
+  sig(
+      x: Object,
+  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  def Hash(x); end
+
+  sig(
+      x: Object,
+  )
+  .returns(T::Hash[T.untyped, T.untyped])
+  def self.Hash(x); end
+
+  sig.returns(Binding)
+  def binding(); end
+
+  sig.returns(Binding)
+  def self.binding(); end
+
+  sig.returns(Kernel)
+  def clone(); end
+
   sig.returns(NilClass)
   sig(
       arg0: String,
-  )
-  .returns(NilClass)
-  sig(
-      arg0: Class,
-      arg1: T::Array[String],
   )
   .returns(NilClass)
   sig(
@@ -6535,145 +6880,13 @@ module Kernel
       arg2: T::Array[String],
   )
   .returns(NilClass)
-  def self.fail(arg0=_, arg1=_, arg2=_); end
-
   sig(
-      format: String,
-      args: BasicObject,
-  )
-  .returns(String)
-  def self.format(format, *args); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(String)
-  def self.gets(arg0=_, arg1=_); end
-
-  sig.returns(T::Array[Symbol])
-  def self.global_variables(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def self.iterator?(); end
-
-  sig(
-      filename: String,
-      arg0: T.any(TrueClass, FalseClass),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.load(filename, arg0=_); end
-
-  sig.returns(T::Array[Symbol])
-  def self.local_variables(); end
-
-  sig(
-      name: String,
-      rest: T.any(String, Integer),
-      block: String,
-  )
-  .returns(T.any(IO, NilClass))
-  def self.open(name, rest=_, block=_); end
-
-  sig(
-      arg0: IO,
+      arg0: Exception,
       arg1: String,
-      arg2: BasicObject,
+      arg2: T::Array[String],
   )
   .returns(NilClass)
-  def self.printf(arg0=_, arg1=_, *arg2); end
-
-  sig(
-      blk: BasicObject,
-  )
-  .returns(Proc)
-  def self.proc(&blk); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def self.putc(arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(NilClass)
-  def self.puts(*arg0); end
-
-  sig(
-      max: T.any(Integer, Range),
-  )
-  .returns(Numeric)
-  def self.rand(max); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(String)
-  def self.readline(arg0=_, arg1=_); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(T::Array[String])
-  def self.readlines(arg0=_, arg1=_); end
-
-  sig(
-      name: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.require(name); end
-
-  sig(
-      name: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.require_relative(name); end
-
-  sig(
-      read: T::Array[IO],
-      write: T::Array[IO],
-      error: T::Array[IO],
-      timeout: Integer,
-  )
-  .returns(T::Array[String])
-  def self.select(read, write=_, error=_, timeout=_); end
-
-  sig(
-      duration: Numeric,
-  )
-  .returns(Integer)
-  def self.sleep(duration); end
-
-  sig(
-      number: Numeric,
-  )
-  .returns(Numeric)
-  def self.srand(number); end
-
-  sig(
-      num: Integer,
-      args: BasicObject,
-  )
-  .returns(T.untyped)
-  def self.syscall(num, *args); end
-
-  sig(
-      cmd: String,
-      file1: String,
-      file2: String,
-  )
-  .returns(T.any(TrueClass, FalseClass, Time))
-  def self.test(cmd, file1, file2=_); end
-
-  sig(
-      msg: String,
-  )
-  .returns(NilClass)
-  def self.warn(*msg); end
+  def raise(arg0=_, arg1=_, arg2=_); end
 
   sig.returns(NilClass)
   sig(
@@ -6694,134 +6907,6 @@ module Kernel
   .returns(NilClass)
   def self.raise(arg0=_, arg1=_, arg2=_); end
 
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(Kernel)
-  def clone(); end
-
-  sig(
-      arg0: T.any(String, Symbol),
-      arg1: BasicObject,
-  )
-  .returns(T.untyped)
-  sig(
-      arg0: T.any(String, Symbol),
-      arg1: BasicObject,
-      blk: BasicObject,
-  )
-  .returns(T.untyped)
-  def send(arg0, *arg1, &blk); end
-
-  sig(
-      x: Object,
-  )
-  .returns(T::Array[T.untyped])
-  def Array(x); end
-
-  sig(
-      x: Numeric,
-      y: Numeric,
-  )
-  .returns(Complex)
-  sig(
-      x: String,
-  )
-  .returns(Complex)
-  def Complex(x, y=_); end
-
-  sig(
-      x: Numeric,
-  )
-  .returns(Float)
-  def Float(x); end
-
-  sig(
-      x: Object,
-  )
-  .returns(T::Hash[T.untyped, T.untyped])
-  def Hash(x); end
-
-  sig(
-      arg: T.any(Numeric, String),
-      base: Integer,
-  )
-  .returns(Integer)
-  def Integer(arg, base=_); end
-
-  sig(
-      x: Numeric,
-      y: Numeric,
-  )
-  .returns(Rational)
-  sig(
-      x: Object,
-  )
-  .returns(Rational)
-  def Rational(x, y=_); end
-
-  sig(
-      x: Object,
-  )
-  .returns(String)
-  def String(x); end
-
-  sig.returns(T.any(Symbol, NilClass))
-  def __callee__(); end
-
-  sig.returns(T.any(String, NilClass))
-  def __dir__(); end
-
-  sig.returns(T.any(Symbol, NilClass))
-  def __method__(); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def `(arg0); end
-
-  sig(
-      msg: String,
-  )
-  .returns(NilClass)
-  def abort(msg=_); end
-
-  sig(
-      blk: T.proc().returns(BasicObject),
-  )
-  .returns(Proc)
-  def at_exit(&blk); end
-
-  sig(
-      _module: T.any(String, Symbol),
-      filename: String,
-  )
-  .returns(NilClass)
-  def autoload(_module, filename); end
-
-  sig(
-      name: T.any(Symbol, String),
-  )
-  .returns(T.any(String, NilClass))
-  def autoload?(name); end
-
-  sig.returns(Binding)
-  def binding(); end
-
-  sig.returns(NilClass)
-  sig(
-      status: T.any(Integer, TrueClass, FalseClass),
-  )
-  .returns(NilClass)
-  def exit(status=_); end
-
-  sig(
-      status: T.any(Integer, TrueClass, FalseClass),
-  )
-  .returns(NilClass)
-  def exit!(status); end
-
   sig.returns(NilClass)
   sig(
       arg0: String,
@@ -6840,143 +6925,14 @@ module Kernel
   .returns(NilClass)
   def fail(arg0=_, arg1=_, arg2=_); end
 
-  sig(
-      format: String,
-      args: BasicObject,
-  )
-  .returns(String)
-  def format(format, *args); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(String)
-  def gets(arg0=_, arg1=_); end
-
-  sig.returns(T::Array[Symbol])
-  def global_variables(); end
-
-  sig(
-      filename: String,
-      arg0: T.any(TrueClass, FalseClass),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def load(filename, arg0=_); end
-
-  sig(
-      name: String,
-      rest: T.any(String, Integer),
-      block: String,
-  )
-  .returns(T.any(IO, NilClass))
-  def open(name, rest=_, block=_); end
-
-  sig(
-      arg0: IO,
-      arg1: String,
-      arg2: BasicObject,
-  )
-  .returns(NilClass)
-  def printf(arg0=_, arg1=_, *arg2); end
-
-  sig(
-      blk: BasicObject,
-  )
-  .returns(Proc)
-  def proc(&blk); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def putc(arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(NilClass)
-  def puts(*arg0); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(String)
-  def readline(arg0=_, arg1=_); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(T::Array[String])
-  def readlines(arg0=_, arg1=_); end
-
-  sig(
-      path: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def require(path); end
-
-  sig(
-      feature: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def require_relative(feature); end
-
-  sig(
-      read: T::Array[IO],
-      write: T::Array[IO],
-      error: T::Array[IO],
-      timeout: Integer,
-  )
-  .returns(T::Array[String])
-  def select(read, write=_, error=_, timeout=_); end
-
-  sig(
-      duration: Numeric,
-  )
-  .returns(Integer)
-  def sleep(duration); end
-
-  sig(
-      format: String,
-      args: BasicObject,
-  )
-  .returns(String)
-  def self.sprintf(format, *args); end
-
-  sig(
-      format: String,
-      args: BasicObject,
-  )
-  .returns(String)
-  def sprintf(format, *args); end
-
-  sig(
-      num: Integer,
-      args: BasicObject,
-  )
-  .returns(T.untyped)
-  def syscall(num, *args); end
-
-  sig(
-      cmd: String,
-      file1: String,
-      file2: String,
-  )
-  .returns(T.any(TrueClass, FalseClass, Time))
-  def test(cmd, file1, file2=_); end
-
-  sig(
-      msg: String,
-  )
-  .returns(NilClass)
-  def warn(*msg); end
-
   sig.returns(NilClass)
   sig(
       arg0: String,
+  )
+  .returns(NilClass)
+  sig(
+      arg0: Class,
+      arg1: T::Array[String],
   )
   .returns(NilClass)
   sig(
@@ -6985,13 +6941,57 @@ module Kernel
       arg2: T::Array[String],
   )
   .returns(NilClass)
+  def self.fail(arg0=_, arg1=_, arg2=_); end
+
+  sig.returns(NilClass)
   sig(
-      arg0: Exception,
-      arg1: String,
-      arg2: T::Array[String],
+      status: T.any(Integer, TrueClass, FalseClass),
   )
   .returns(NilClass)
-  def raise(arg0=_, arg1=_, arg2=_); end
+  def exit(status=_); end
+
+  sig.returns(NilClass)
+  sig(
+      status: T.any(Integer, TrueClass, FalseClass),
+  )
+  .returns(NilClass)
+  def self.exit(status=_); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(String, NilClass))
+  def __dir__(); end
+
+  sig.returns(T.any(String, NilClass))
+  def self.__dir__(); end
+
+  sig.returns(T.any(Symbol, NilClass))
+  def __callee__(); end
+
+  sig.returns(T.any(Symbol, NilClass))
+  def __method__(); end
+
+  sig.returns(T.any(Symbol, NilClass))
+  def self.__callee__(); end
+
+  sig.returns(T.any(Symbol, NilClass))
+  def self.__method__(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def self.block_given?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def self.iterator?(); end
+
+  sig.returns(T::Array[Symbol])
+  def global_variables(); end
+
+  sig.returns(T::Array[Symbol])
+  def self.global_variables(); end
+
+  sig.returns(T::Array[Symbol])
+  def self.local_variables(); end
 end
 
 class KeyError
@@ -7065,13 +7065,6 @@ end
 
 module Marshal
   sig(
-      arg0: String,
-      arg1: Proc,
-  )
-  .returns(Object)
-  def self.load(arg0, arg1=_); end
-
-  sig(
       arg0: Object,
       arg1: IO,
       arg2: Integer,
@@ -7083,6 +7076,13 @@ module Marshal
   )
   .returns(Object)
   def self.dump(arg0, arg1=_, arg2=_); end
+
+  sig(
+      arg0: String,
+      arg1: Proc,
+  )
+  .returns(Object)
+  def self.load(arg0, arg1=_); end
 end
 
 class MatchData
@@ -7112,19 +7112,28 @@ class MatchData
   def [](i, length=_); end
 
   sig(
+      indexes: Integer,
+  )
+  .returns(T::Array[String])
+  def values_at(*indexes); end
+
+  sig(
       n: Integer,
   )
   .returns(Integer)
   def begin(n); end
-
-  sig.returns(T::Array[String])
-  def captures(); end
 
   sig(
       n: Integer,
   )
   .returns(Integer)
   def end(n); end
+
+  sig(
+      n: Integer,
+  )
+  .returns(T::Array[Integer])
+  def offset(n); end
 
   sig(
       other: BasicObject,
@@ -7135,47 +7144,11 @@ class MatchData
   sig.returns(Integer)
   def hash(); end
 
-  sig.returns(String)
-  def inspect(); end
-
   sig.returns(Integer)
   def length(); end
 
-  sig.returns(T::Array[String])
-  def names(); end
-
-  sig(
-      n: Integer,
-  )
-  .returns(T::Array[Integer])
-  def offset(n); end
-
-  sig.returns(String)
-  def post_match(); end
-
-  sig.returns(String)
-  def pre_match(); end
-
-  sig.returns(Regexp)
-  def regexp(); end
-
   sig.returns(Integer)
   def size(); end
-
-  sig.returns(String)
-  def string(); end
-
-  sig.returns(T::Array[String])
-  def to_a(); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig(
-      indexes: Integer,
-  )
-  .returns(T::Array[String])
-  def values_at(*indexes); end
 
   sig.returns(MatchData)
   def clone(); end
@@ -7197,9 +7170,57 @@ class MatchData
 
   sig.returns(MatchData)
   def untrust(); end
+
+  sig.returns(Regexp)
+  def regexp(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def post_match(); end
+
+  sig.returns(String)
+  def pre_match(); end
+
+  sig.returns(String)
+  def string(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T::Array[String])
+  def captures(); end
+
+  sig.returns(T::Array[String])
+  def names(); end
+
+  sig.returns(T::Array[String])
+  def to_a(); end
 end
 
 module Math
+  sig(
+      fraction: T.any(Integer, Float, Rational, BigDecimal),
+      exponent: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns(Float)
+  def self.ldexp(fraction, exponent); end
+
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
+      base: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns(Float)
+  def self.log(x, base=_); end
+
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
+      y: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns(Float)
+  def self.hypot(x, y); end
+
   sig(
       x: T.any(Integer, Float, Rational, BigDecimal),
   )
@@ -7229,13 +7250,6 @@ module Math
   )
   .returns(Float)
   def self.atan(x); end
-
-  sig(
-      y: T.any(Integer, Float, Rational, BigDecimal),
-      x: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns(Float)
-  def self.atan2(y, x); end
 
   sig(
       x: T.any(Integer, Float, Rational, BigDecimal),
@@ -7282,41 +7296,8 @@ module Math
   sig(
       x: T.any(Integer, Float, Rational, BigDecimal),
   )
-  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
-  def self.frexp(x); end
-
-  sig(
-      x: T.any(Integer, Float, Rational, BigDecimal),
-  )
   .returns(Float)
   def self.gamma(x); end
-
-  sig(
-      x: T.any(Integer, Float, Rational, BigDecimal),
-      y: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns(Float)
-  def self.hypot(x, y); end
-
-  sig(
-      fraction: T.any(Integer, Float, Rational, BigDecimal),
-      exponent: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns(Float)
-  def self.ldexp(fraction, exponent); end
-
-  sig(
-      x: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns(T.any(Integer, Float))
-  def self.lgamma(x); end
-
-  sig(
-      x: T.any(Integer, Float, Rational, BigDecimal),
-      base: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns(Float)
-  def self.log(x, base=_); end
 
   sig(
       x: T.any(Integer, Float, Rational, BigDecimal),
@@ -7359,6 +7340,25 @@ module Math
   )
   .returns(Float)
   def self.tanh(x); end
+
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns(T.any(Integer, Float))
+  def self.lgamma(x); end
+
+  sig(
+      x: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+  def self.frexp(x); end
+
+  sig(
+      y: T.any(Integer, Float, Rational, BigDecimal),
+      x: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns(Float)
+  def self.atan2(y, x); end
 end
 
 class Method
@@ -7385,76 +7385,6 @@ class Method
 end
 
 class Module
-  sig.returns(T::Array[Integer])
-  def self.constants(); end
-
-  sig.returns(T::Array[Module])
-  def self.nesting(); end
-
-  sig.returns(Object)
-  sig(
-      blk: T.proc(arg0: Module).returns(BasicObject),
-  )
-  .returns(Object)
-  def initialize(&blk); end
-
-  sig(
-      other: Module,
-  )
-  .returns(T.any(TrueClass, FalseClass, NilClass))
-  def <(other); end
-
-  sig(
-      other: Module,
-  )
-  .returns(T.any(TrueClass, FalseClass, NilClass))
-  def <=(other); end
-
-  sig(
-      other: Module,
-  )
-  .returns(T.any(Integer, NilClass))
-  def <=>(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ==(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def equal?(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ===(other); end
-
-  sig(
-      other: Module,
-  )
-  .returns(T.any(TrueClass, FalseClass, NilClass))
-  def >(other); end
-
-  sig(
-      other: Module,
-  )
-  .returns(T.any(TrueClass, FalseClass, NilClass))
-  def >=(other); end
-
-  sig.returns(T::Array[Module])
-  def ancestors(); end
-
   sig(
       _module: Symbol,
       filename: String,
@@ -7463,10 +7393,53 @@ class Module
   def autoload(_module, filename); end
 
   sig(
-      name: Symbol,
+      arg0: BasicObject,
   )
-  .returns(T.any(String, NilClass))
-  def autoload?(name); end
+  .returns(T.untyped)
+  def extend_object(arg0); end
+
+  sig(
+      arg0: Class,
+      blk: T.proc(arg0: T.untyped).returns(BasicObject),
+  )
+  .returns(Module)
+  def refine(arg0, &blk); end
+
+  sig(
+      arg0: Module,
+  )
+  .returns(Module)
+  def append_features(arg0); end
+
+  sig(
+      arg0: Module,
+  )
+  .returns(Module)
+  def include(*arg0); end
+
+  sig(
+      arg0: Module,
+  )
+  .returns(Module)
+  def prepend(*arg0); end
+
+  sig(
+      arg0: Module,
+  )
+  .returns(Module)
+  def prepend_features(arg0); end
+
+  sig(
+      arg0: Module,
+  )
+  .returns(Module)
+  def using(arg0); end
+
+  sig(
+      arg0: Module,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def include?(arg0); end
 
   sig(
       arg0: String,
@@ -7477,23 +7450,66 @@ class Module
   def class_eval(arg0, filename=_, lineno=_); end
 
   sig(
-      args: BasicObject,
+      arg0: String,
+      filename: String,
+      lineno: Integer,
+  )
+  .returns(T.untyped)
+  def module_eval(arg0, filename=_, lineno=_); end
+
+  sig(
+      arg0: Symbol,
+      arg1: Method,
+  )
+  .returns(Symbol)
+  sig(
+      arg0: Symbol,
       blk: BasicObject,
   )
-  .returns(T.untyped)
-  def class_exec(*args, &blk); end
+  .returns(Symbol)
+  def define_method(arg0, arg1=_, &blk); end
 
   sig(
-      arg0: T.any(Symbol, String),
+      arg0: Symbol,
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def class_variable_defined?(arg0); end
+  .returns(Module)
+  def private_constant(*arg0); end
 
   sig(
-      arg0: T.any(Symbol, String),
+      arg0: Symbol,
+  )
+  .returns(Module)
+  def public_constant(*arg0); end
+
+  sig(
+      arg0: Symbol,
   )
   .returns(T.untyped)
-  def class_variable_get(arg0); end
+  def const_missing(arg0); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(T.untyped)
+  def remove_class_variable(arg0); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(T.untyped)
+  def remove_const(arg0); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(UnboundMethod)
+  def instance_method(arg0); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(UnboundMethod)
+  def public_instance_method(arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
@@ -7503,10 +7519,11 @@ class Module
   def class_variable_set(arg0, arg1); end
 
   sig(
-      inherit: T.any(TrueClass, FalseClass),
+      arg0: T.any(Symbol, String),
+      arg1: BasicObject,
   )
-  .returns(T::Array[Symbol])
-  def class_variables(inherit=_); end
+  .returns(T.untyped)
+  def const_set(arg0, arg1); end
 
   sig(
       arg0: T.any(Symbol, String),
@@ -7523,83 +7540,16 @@ class Module
   def const_get(arg0, inherit=_); end
 
   sig(
-      arg0: Symbol,
-  )
-  .returns(T.untyped)
-  def const_missing(arg0); end
-
-  sig(
       arg0: T.any(Symbol, String),
-      arg1: BasicObject,
-  )
-  .returns(T.untyped)
-  def const_set(arg0, arg1); end
-
-  sig(
-      inherit: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def constants(inherit=_); end
-
-  sig.returns(Module)
-  def freeze(); end
-
-  sig(
-      arg0: Module,
   )
   .returns(Module)
-  def include(*arg0); end
-
-  sig(
-      arg0: Module,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def include?(arg0); end
-
-  sig.returns(T::Array[Module])
-  def included_modules(); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(UnboundMethod)
-  def instance_method(arg0); end
-
-  sig(
-      include_super: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def instance_methods(include_super=_); end
+  def module_function(*arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def method_defined?(arg0); end
-
-  sig(
-      arg0: String,
-      filename: String,
-      lineno: Integer,
-  )
-  .returns(T.untyped)
-  def module_eval(arg0, filename=_, lineno=_); end
-
-  sig(
-      args: BasicObject,
-      blk: BasicObject,
-  )
-  .returns(T.untyped)
-  def module_exec(*args, &blk); end
-
-  sig.returns(String)
-  def name(); end
-
-  sig(
-      arg0: Module,
-  )
   .returns(Module)
-  def prepend(*arg0); end
+  def private(*arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
@@ -7608,34 +7558,16 @@ class Module
   def private_class_method(*arg0); end
 
   sig(
-      arg0: Symbol,
+      arg0: T.any(Symbol, String),
   )
   .returns(Module)
-  def private_constant(*arg0); end
-
-  sig(
-      include_super: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def private_instance_methods(include_super=_); end
+  def protected(*arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def private_method_defined?(arg0); end
-
-  sig(
-      include_super: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def protected_instance_methods(include_super=_); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def protected_method_defined?(arg0); end
+  .returns(Module)
+  def public(*arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
@@ -7644,53 +7576,22 @@ class Module
   def public_class_method(*arg0); end
 
   sig(
-      arg0: Symbol,
+      arg0: T.any(Symbol, String),
   )
   .returns(Module)
-  def public_constant(*arg0); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(UnboundMethod)
-  def public_instance_method(arg0); end
-
-  sig(
-      include_super: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def public_instance_methods(include_super=_); end
+  def remove_method(arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def public_method_defined?(arg0); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(T.untyped)
-  def remove_class_variable(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def singleton_class?(); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig(
-      new_name: Symbol,
-      old_name: Symbol,
-  )
   .returns(Module)
-  def alias_method(new_name, old_name); end
+  def undef_method(arg0); end
 
   sig(
-      arg0: Module,
+      arg0: T.any(Symbol, String),
   )
-  .returns(Module)
-  def append_features(arg0); end
+  .returns(NilClass)
+  def attr(*arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
@@ -7711,34 +7612,90 @@ class Module
   def attr_writer(*arg0); end
 
   sig(
-      arg0: Symbol,
-      arg1: Method,
+      arg0: T.any(Symbol, String),
   )
-  .returns(Symbol)
+  .returns(T.any(TrueClass, FalseClass))
+  def class_variable_defined?(arg0); end
+
   sig(
-      arg0: Symbol,
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def method_defined?(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def private_method_defined?(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def protected_method_defined?(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def public_method_defined?(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.untyped)
+  def class_variable_get(arg0); end
+
+  sig(
+      args: BasicObject,
       blk: BasicObject,
   )
-  .returns(Symbol)
-  def define_method(arg0, arg1=_, &blk); end
+  .returns(T.untyped)
+  def class_exec(*args, &blk); end
 
   sig(
-      arg0: BasicObject,
+      args: BasicObject,
+      blk: BasicObject,
   )
   .returns(T.untyped)
-  def extend_object(arg0); end
+  def module_exec(*args, &blk); end
 
   sig(
-      othermod: Module,
+      include_super: T.any(TrueClass, FalseClass),
   )
-  .returns(T.untyped)
-  def extended(othermod); end
+  .returns(T::Array[Symbol])
+  def instance_methods(include_super=_); end
 
   sig(
-      othermod: Module,
+      include_super: T.any(TrueClass, FalseClass),
   )
-  .returns(T.untyped)
-  def included(othermod); end
+  .returns(T::Array[Symbol])
+  def private_instance_methods(include_super=_); end
+
+  sig(
+      include_super: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def protected_instance_methods(include_super=_); end
+
+  sig(
+      include_super: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def public_instance_methods(include_super=_); end
+
+  sig(
+      inherit: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def class_variables(inherit=_); end
+
+  sig(
+      inherit: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def constants(inherit=_); end
 
   sig(
       meth: Symbol,
@@ -7753,16 +7710,83 @@ class Module
   def method_removed(method_name); end
 
   sig(
-      arg0: T.any(Symbol, String),
+      name: Symbol,
   )
-  .returns(Module)
-  def module_function(*arg0); end
+  .returns(T.any(String, NilClass))
+  def autoload?(name); end
 
   sig(
-      arg0: Module,
+      new_name: Symbol,
+      old_name: Symbol,
   )
   .returns(Module)
-  def prepend_features(arg0); end
+  def alias_method(new_name, old_name); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ==(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ===(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def equal?(other); end
+
+  sig(
+      other: Module,
+  )
+  .returns(T.any(Integer, NilClass))
+  def <=>(other); end
+
+  sig(
+      other: Module,
+  )
+  .returns(T.any(TrueClass, FalseClass, NilClass))
+  def <(other); end
+
+  sig(
+      other: Module,
+  )
+  .returns(T.any(TrueClass, FalseClass, NilClass))
+  def <=(other); end
+
+  sig(
+      other: Module,
+  )
+  .returns(T.any(TrueClass, FalseClass, NilClass))
+  def >(other); end
+
+  sig(
+      other: Module,
+  )
+  .returns(T.any(TrueClass, FalseClass, NilClass))
+  def >=(other); end
+
+  sig(
+      othermod: Module,
+  )
+  .returns(T.untyped)
+  def extended(othermod); end
+
+  sig(
+      othermod: Module,
+  )
+  .returns(T.untyped)
+  def included(othermod); end
 
   sig(
       othermod: Module,
@@ -7770,60 +7794,14 @@ class Module
   .returns(T.untyped)
   def prepended(othermod); end
 
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(Module)
-  def private(*arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(Module)
-  def protected(*arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(Module)
-  def public(*arg0); end
-
-  sig(
-      arg0: Class,
-      blk: T.proc(arg0: T.untyped).returns(BasicObject),
-  )
-  .returns(Module)
-  def refine(arg0, &blk); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(T.untyped)
-  def remove_const(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(Module)
-  def remove_method(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(Module)
-  def undef_method(arg0); end
-
-  sig(
-      arg0: Module,
-  )
-  .returns(Module)
-  def using(arg0); end
-
   sig.returns(Module)
   def clone(); end
 
   sig.returns(Module)
   def dup(); end
+
+  sig.returns(Module)
+  def freeze(); end
 
   sig.returns(Module)
   def taint(); end
@@ -7837,14 +7815,36 @@ class Module
   sig.returns(Module)
   def untrust(); end
 
+  sig.returns(Object)
+  sig(
+      blk: T.proc(arg0: Module).returns(BasicObject),
+  )
+  .returns(Object)
+  def initialize(&blk); end
+
   sig.returns(String)
   def inspect(); end
 
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(NilClass)
-  def attr(*arg0); end
+  sig.returns(String)
+  def name(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def singleton_class?(); end
+
+  sig.returns(T::Array[Integer])
+  def self.constants(); end
+
+  sig.returns(T::Array[Module])
+  def ancestors(); end
+
+  sig.returns(T::Array[Module])
+  def included_modules(); end
+
+  sig.returns(T::Array[Module])
+  def self.nesting(); end
 end
 
 class Monitor
@@ -7912,23 +7912,11 @@ class NilClass
   .returns(T.any(TrueClass, FalseClass))
   def |(obj); end
 
-  sig.returns(Rational)
-  def rationalize(); end
-
-  sig.returns([])
-  def to_a(); end
-
   sig.returns(Complex)
   def to_c(); end
 
   sig.returns(Float)
   def to_f(); end
-
-  sig.returns(T.untyped)
-  def to_h(); end
-
-  sig.returns(Rational)
-  def to_r(); end
 
   sig.returns(NilClass)
   def clone(); end
@@ -7950,6 +7938,18 @@ class NilClass
 
   sig.returns(NilClass)
   def untrust(); end
+
+  sig.returns(Rational)
+  def rationalize(); end
+
+  sig.returns(Rational)
+  def to_r(); end
+
+  sig.returns(T.untyped)
+  def to_h(); end
+
+  sig.returns([])
+  def to_a(); end
 end
 
 class NoMemoryError
@@ -8023,144 +8023,6 @@ end
 
 class Numeric
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def %(arg0); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def -@(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def +@(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(Object)
-  def <=>(arg0); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def abs(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def abs2(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def angle(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def arg(); end
-
-  sig.returns(Integer)
-  def ceil(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
-  def coerce(arg0); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def conj(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def conjugate(); end
-
-  sig.returns(Integer)
-  def denominator(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(Integer)
-  def div(arg0); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
-  def divmod(arg0); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(arg0); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def fdiv(arg0); end
-
-  sig.returns(Integer)
-  def floor(); end
-
-  sig.returns(Complex)
-  def i(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def imag(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def imaginary(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def integer?(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def magnitude(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal))
-  def modulo(arg0); end
-
-  sig.returns(T.any(T.untyped, NilClass))
-  def nonzero?(); end
-
-  sig.returns(Integer)
-  def numerator(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def phase(); end
-
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
-  def polar(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def quo(arg0); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def real(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def real?(); end
-
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
-  def rect(); end
-
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
-  def rectangular(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal))
-  def remainder(arg0); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def round(arg0); end
-
-  sig(
       arg0: Symbol,
   )
   .returns(TypeError)
@@ -8188,17 +8050,95 @@ class Numeric
   .returns(Enumerator[T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def step(arg0, arg1=_, &blk); end
 
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(Integer)
+  def div(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(Object)
+  def <=>(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal))
+  def modulo(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal))
+  def remainder(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def %(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def fdiv(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def quo(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def round(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  def coerce(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  def divmod(arg0); end
+
+  sig.returns(Complex)
+  def i(); end
+
   sig.returns(Complex)
   def to_c(); end
+
+  sig.returns(Integer)
+  def ceil(); end
+
+  sig.returns(Integer)
+  def denominator(); end
+
+  sig.returns(Integer)
+  def floor(); end
+
+  sig.returns(Integer)
+  def numerator(); end
 
   sig.returns(Integer)
   def to_int(); end
 
   sig.returns(Integer)
   def truncate(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def zero?(); end
 
   sig.returns(Numeric)
   def clone(); end
@@ -8220,47 +8160,167 @@ class Numeric
 
   sig.returns(Numeric)
   def untrust(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def +@(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def -@(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def abs(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def abs2(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def angle(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def arg(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def conj(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def conjugate(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def imag(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def imaginary(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def magnitude(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def phase(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def real(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def real?(); end
+
+  sig.returns(T.any(T.untyped, NilClass))
+  def nonzero?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def integer?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def zero?(); end
+
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  def polar(); end
+
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  def rect(); end
+
+  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  def rectangular(); end
 end
 
 class Object
   sig(
-      other: BasicObject,
+      all: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def private_methods(all=_); end
+
+  sig(
+      all: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def protected_methods(all=_); end
+
+  sig(
+      all: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def public_methods(all=_); end
+
+  sig(
+      all: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def singleton_methods(all=_); end
+
+  sig(
+      arg0: Class,
   )
   .returns(T.any(TrueClass, FalseClass))
-  def !~(other); end
+  def instance_of?(arg0); end
 
   sig(
-      other: BasicObject,
-  )
-  .returns(T.any(Integer, NilClass))
-  def <=>(other); end
-
-  sig(
-      other: BasicObject,
+      arg0: Class,
   )
   .returns(T.any(TrueClass, FalseClass))
-  def ===(other); end
+  def kind_of?(arg0); end
 
   sig(
-      other: BasicObject,
+      arg0: Symbol,
   )
-  .returns(NilClass)
-  def =~(other); end
-
-  sig.returns(Class)
-  def class(); end
-
-  sig.returns(Object)
-  def clone(); end
+  .returns(Method)
+  def method(arg0); end
 
   sig(
-      port: IO,
+      arg0: Symbol,
   )
-  .returns(NilClass)
-  def display(port); end
+  .returns(Method)
+  def public_method(arg0); end
 
-  sig.returns(Object)
-  def dup(); end
+  sig(
+      arg0: Symbol,
+  )
+  .returns(Method)
+  def singleton_method(arg0); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(T.untyped)
+  def remove_instance_variable(arg0); end
+
+  sig(
+      arg0: T.any(Class, Module),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def is_a?(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+      arg1: BasicObject,
+  )
+  .returns(T.untyped)
+  def instance_variable_set(arg0, arg1); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+      args: BasicObject,
+  )
+  .returns(T.untyped)
+  def public_send(arg0, *args); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+      args: BasicObject,
+  )
+  .returns(T.untyped)
+  def send(arg0, *args); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def instance_variable_defined?(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.untyped)
+  def instance_variable_get(arg0); end
 
   sig(
       method: Symbol,
@@ -8276,150 +8336,6 @@ class Object
   def enum_for(method=_, *args, &blk); end
 
   sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(other); end
-
-  sig(
-      mod: Module,
-  )
-  .returns(NilClass)
-  def extend(mod); end
-
-  sig.returns(Object)
-  def freeze(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def frozen?(); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig(
-      arg0: Class,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def instance_of?(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def instance_variable_defined?(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(T.untyped)
-  def instance_variable_get(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-      arg1: BasicObject,
-  )
-  .returns(T.untyped)
-  def instance_variable_set(arg0, arg1); end
-
-  sig.returns(T::Array[Symbol])
-  def instance_variables(); end
-
-  sig(
-      arg0: T.any(Class, Module),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def is_a?(arg0); end
-
-  sig(
-      arg0: Class,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def kind_of?(arg0); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(Method)
-  def method(arg0); end
-
-  sig(
-      regular: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def methods(regular=_); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def nil?(); end
-
-  sig(
-      all: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def private_methods(all=_); end
-
-  sig(
-      all: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def protected_methods(all=_); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(Method)
-  def public_method(arg0); end
-
-  sig(
-      all: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def public_methods(all=_); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-      args: BasicObject,
-  )
-  .returns(T.untyped)
-  def public_send(arg0, *args); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(T.untyped)
-  def remove_instance_variable(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-      args: BasicObject,
-  )
-  .returns(T.untyped)
-  def send(arg0, *args); end
-
-  sig.returns(Class)
-  def singleton_class(); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(Method)
-  def singleton_method(arg0); end
-
-  sig(
-      all: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def singleton_methods(all=_); end
-
-  sig.returns(Object)
-  def taint(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def tainted?(); end
-
-  sig(
       method: Symbol,
       args: BasicObject,
   )
@@ -8432,6 +8348,75 @@ class Object
   .returns(Enumerator[T.untyped])
   def to_enum(method=_, *args, &blk); end
 
+  sig(
+      mod: Module,
+  )
+  .returns(NilClass)
+  def extend(mod); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(NilClass)
+  def =~(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(Integer, NilClass))
+  def <=>(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def !~(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ===(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(other); end
+
+  sig(
+      port: IO,
+  )
+  .returns(NilClass)
+  def display(port); end
+
+  sig(
+      regular: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def methods(regular=_); end
+
+  sig.returns(Class)
+  def class(); end
+
+  sig.returns(Class)
+  def singleton_class(); end
+
+  sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(Object)
+  def clone(); end
+
+  sig.returns(Object)
+  def dup(); end
+
+  sig.returns(Object)
+  def freeze(); end
+
+  sig.returns(Object)
+  def taint(); end
+
   sig.returns(Object)
   def trust(); end
 
@@ -8441,26 +8426,218 @@ class Object
   sig.returns(Object)
   def untrust(); end
 
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def frozen?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def nil?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def tainted?(); end
+
   sig.returns(T.any(TrueClass, FalseClass))
   def untrusted?(); end
+
+  sig.returns(T::Array[Symbol])
+  def instance_variables(); end
 end
 
 class Pathname
-  sig.returns(Pathname)
-  def self.getwd(); end
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(arg0); end
 
   sig(
-      p1: String,
-      p2: String,
+      arg0: Encoding,
   )
-  .returns(T::Array[Pathname])
-  def self.glob(p1, p2=_); end
+  .returns(Dir)
+  sig(
+      arg0: Encoding,
+      blk: T.proc(arg0: Dir).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def opendir(arg0=_, &blk); end
+
+  sig(
+      arg0: String,
+      offset: Integer,
+      open_args: Integer,
+  )
+  .returns(Integer)
+  def write(arg0, offset=_, open_args=_); end
+
+  sig(
+      arg0: String,
+      offset: Integer,
+  )
+  .returns(Integer)
+  def binwrite(arg0, offset=_); end
+
+  sig(
+      args: String,
+  )
+  .returns(Pathname)
+  def sub(*args); end
+
+  sig(
+      args: T.any(String, Pathname),
+  )
+  .returns(Pathname)
+  def join(*args); end
+
+  sig(
+      atime: Time,
+      mtime: Time,
+  )
+  .returns(Integer)
+  def utime(atime, mtime); end
+
+  sig(
+      base_directory: T.any(String, Pathname),
+  )
+  .returns(Pathname)
+  def relative_path_from(base_directory); end
+
+  sig(
+      blk: T.proc(arg0: Pathname).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def ascend(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Pathname).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def descend(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Pathname).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def each_entry(&blk); end
+
+  sig(
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  sig.returns(Enumerator[String])
+  def each_filename(&blk); end
+
+  sig(
+      consider_symlink: T.any(TrueClass, FalseClass),
+  )
+  .returns(T.untyped)
+  def cleanpath(consider_symlink=_); end
+
+  sig(
+      ignore_error: T.any(TrueClass, FalseClass),
+      blk: T.proc(arg0: Pathname).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  sig(
+      ignore_error: T.any(TrueClass, FalseClass),
+  )
+  .returns(Enumerator[Pathname])
+  def find(ignore_error, &blk); end
+
+  sig(
+      length: Integer,
+      offset: Integer,
+      open_args: Integer,
+  )
+  .returns(String)
+  def read(length=_, offset=_, open_args=_); end
+
+  sig(
+      length: Integer,
+      offset: Integer,
+  )
+  .returns(String)
+  def binread(length=_, offset=_); end
+
+  sig(
+      length: Integer,
+  )
+  .returns(Integer)
+  def truncate(length); end
+
+  sig(
+      mode: Integer,
+      perm: Integer,
+  )
+  .returns(Integer)
+  def sysopen(mode=_, perm=_); end
+
+  sig(
+      mode: Integer,
+  )
+  .returns(Integer)
+  def chmod(mode); end
+
+  sig(
+      mode: Integer,
+  )
+  .returns(Integer)
+  def lchmod(mode); end
+
+  sig(
+      mode: String,
+      perm: String,
+      opt: Integer,
+  )
+  .returns(File)
+  sig(
+      mode: String,
+      perm: String,
+      opt: Integer,
+      blk: T.proc(arg0: File).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def open(mode=_, perm=_, opt=_, &blk); end
+
+  sig(
+      old: String,
+  )
+  .returns(Integer)
+  def make_link(old); end
+
+  sig(
+      old: String,
+  )
+  .returns(Integer)
+  sig.returns(T.any(TrueClass, FalseClass))
+  def symlink?(old=_); end
 
   sig(
       other: T.any(String, Pathname),
   )
   .returns(Pathname)
   def +(other); end
+
+  sig(
+      other: T.any(String, Pathname),
+  )
+  .returns(Pathname)
+  def /(other); end
+
+  sig(
+      owner: Integer,
+      group: Integer,
+  )
+  .returns(Integer)
+  def chown(owner, group); end
+
+  sig(
+      owner: Integer,
+      group: Integer,
+  )
+  .returns(Integer)
+  def lchown(owner, group); end
 
   sig(
       p1: BasicObject,
@@ -8480,17 +8657,24 @@ class Pathname
   .returns(T.any(TrueClass, FalseClass))
   def ===(p1); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def absolute?(); end
+  sig(
+      p1: String,
+      p2: String,
+  )
+  .returns(T::Array[Pathname])
+  def self.glob(p1, p2=_); end
 
   sig(
-      blk: T.proc(arg0: Pathname).returns(BasicObject),
+      p1: String,
   )
-  .returns(T.untyped)
-  def ascend(&blk); end
+  .returns(Integer)
+  def mkdir(p1); end
 
-  sig.returns(Time)
-  def atime(); end
+  sig(
+      p1: String,
+  )
+  .returns(Integer)
+  def rename(p1); end
 
   sig(
       p1: String,
@@ -8499,90 +8683,35 @@ class Pathname
   def basename(p1=_); end
 
   sig(
-      length: Integer,
-      offset: Integer,
+      p1: String,
+  )
+  .returns(Pathname)
+  def sub_ext(p1); end
+
+  sig(
+      p1: String,
   )
   .returns(String)
-  def binread(length=_, offset=_); end
+  def realdirpath(p1=_); end
 
   sig(
-      arg0: String,
-      offset: Integer,
+      p1: String,
   )
-  .returns(Integer)
-  def binwrite(arg0, offset=_); end
-
-  sig.returns(Time)
-  def birthtime(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def blockdev?(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def chardev?(); end
+  .returns(String)
+  def realpath(p1=_); end
 
   sig(
-      with_directory: T.any(TrueClass, FalseClass),
+      p1: T.any(String, Pathname),
   )
-  .returns(T::Array[Pathname])
-  def children(with_directory); end
+  .returns(Pathname)
+  def expand_path(p1=_); end
 
   sig(
-      mode: Integer,
+      pattern: String,
+      flags: Integer,
   )
-  .returns(Integer)
-  def chmod(mode); end
-
-  sig(
-      owner: Integer,
-      group: Integer,
-  )
-  .returns(Integer)
-  def chown(owner, group); end
-
-  sig(
-      consider_symlink: T.any(TrueClass, FalseClass),
-  )
-  .returns(T.untyped)
-  def cleanpath(consider_symlink=_); end
-
-  sig.returns(Time)
-  def ctime(); end
-
-  sig.returns(T.untyped)
-  def delete(); end
-
-  sig(
-      blk: T.proc(arg0: Pathname).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def descend(&blk); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def directory?(); end
-
-  sig.returns(Pathname)
-  def dirname(); end
-
-  sig(
-      with_directory: T.any(TrueClass, FalseClass),
-      blk: T.proc(arg0: Pathname).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def each_child(with_directory, &blk); end
-
-  sig(
-      blk: T.proc(arg0: Pathname).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def each_entry(&blk); end
-
-  sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  sig.returns(Enumerator[String])
-  def each_filename(&blk); end
+  .returns(T.any(TrueClass, FalseClass))
+  def fnmatch(pattern, flags=_); end
 
   sig(
       sep: String,
@@ -8597,14 +8726,92 @@ class Pathname
   .returns(Enumerator[String])
   def each_line(sep=_, limit=_, &blk); end
 
-  sig.returns(T::Array[Pathname])
-  def entries(); end
+  sig(
+      sep: String,
+      limit: Integer,
+      open_args: Integer,
+  )
+  .returns(T::Array[String])
+  def readlines(sep=_, limit=_, open_args=_); end
 
   sig(
-      arg0: BasicObject,
+      with_directory: T.any(TrueClass, FalseClass),
+      blk: T.proc(arg0: Pathname).returns(BasicObject),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(arg0); end
+  .returns(T.untyped)
+  def each_child(with_directory, &blk); end
+
+  sig(
+      with_directory: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Pathname])
+  def children(with_directory); end
+
+  sig.returns(File::Stat)
+  def lstat(); end
+
+  sig.returns(File::Stat)
+  def stat(); end
+
+  sig.returns(Integer)
+  def rmdir(); end
+
+  sig.returns(Integer)
+  def rmtree(); end
+
+  sig.returns(Integer)
+  def size(); end
+
+  sig.returns(Integer)
+  def unlink(); end
+
+  sig.returns(Pathname)
+  def dirname(); end
+
+  sig.returns(Pathname)
+  def freeze(); end
+
+  sig.returns(Pathname)
+  def parent(); end
+
+  sig.returns(Pathname)
+  def self.getwd(); end
+
+  sig.returns(Pathname)
+  def self.pwd(); end
+
+  sig.returns(Pathname)
+  def taint(); end
+
+  sig.returns(Pathname)
+  def untaint(); end
+
+  sig.returns(String)
+  def extname(); end
+
+  sig.returns(String)
+  def ftype(); end
+
+  sig.returns(String)
+  def readlink(); end
+
+  sig.returns(String)
+  def to_path(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def absolute?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def blockdev?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def chardev?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def directory?(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def executable?(); end
@@ -8615,137 +8822,20 @@ class Pathname
   sig.returns(T.any(TrueClass, FalseClass))
   def exist?(); end
 
-  sig(
-      p1: T.any(String, Pathname),
-  )
-  .returns(Pathname)
-  def expand_path(p1=_); end
-
-  sig.returns(String)
-  def extname(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def file?(); end
-
-  sig(
-      ignore_error: T.any(TrueClass, FalseClass),
-      blk: T.proc(arg0: Pathname).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  sig(
-      ignore_error: T.any(TrueClass, FalseClass),
-  )
-  .returns(Enumerator[Pathname])
-  def find(ignore_error, &blk); end
-
-  sig(
-      pattern: String,
-      flags: Integer,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def fnmatch(pattern, flags=_); end
-
-  sig.returns(Pathname)
-  def freeze(); end
-
-  sig.returns(String)
-  def ftype(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def grpowned?(); end
 
-  sig(
-      args: T.any(String, Pathname),
-  )
-  .returns(Pathname)
-  def join(*args); end
-
-  sig(
-      mode: Integer,
-  )
-  .returns(Integer)
-  def lchmod(mode); end
-
-  sig(
-      owner: Integer,
-      group: Integer,
-  )
-  .returns(Integer)
-  def lchown(owner, group); end
-
-  sig.returns(File::Stat)
-  def lstat(); end
-
-  sig(
-      old: String,
-  )
-  .returns(Integer)
-  def make_link(old); end
-
-  sig(
-      old: String,
-  )
-  .returns(Integer)
-  sig.returns(T.any(TrueClass, FalseClass))
-  def symlink?(old=_); end
-
-  sig(
-      p1: String,
-  )
-  .returns(Integer)
-  def mkdir(p1); end
-
-  sig.returns(T.untyped)
-  def mkpath(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def mountpoint?(); end
-
-  sig.returns(Time)
-  def mtime(); end
-
-  sig(
-      mode: String,
-      perm: String,
-      opt: Integer,
-  )
-  .returns(File)
-  sig(
-      mode: String,
-      perm: String,
-      opt: Integer,
-      blk: T.proc(arg0: File).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def open(mode=_, perm=_, opt=_, &blk); end
-
-  sig(
-      arg0: Encoding,
-  )
-  .returns(Dir)
-  sig(
-      arg0: Encoding,
-      blk: T.proc(arg0: Dir).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def opendir(arg0=_, &blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def owned?(); end
 
-  sig.returns(Pathname)
-  def parent(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def pipe?(); end
-
-  sig(
-      length: Integer,
-      offset: Integer,
-      open_args: Integer,
-  )
-  .returns(String)
-  def read(length=_, offset=_, open_args=_); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def readable?(); end
@@ -8753,49 +8843,8 @@ class Pathname
   sig.returns(T.any(TrueClass, FalseClass))
   def readable_real?(); end
 
-  sig(
-      sep: String,
-      limit: Integer,
-      open_args: Integer,
-  )
-  .returns(T::Array[String])
-  def readlines(sep=_, limit=_, open_args=_); end
-
-  sig.returns(String)
-  def readlink(); end
-
-  sig(
-      p1: String,
-  )
-  .returns(String)
-  def realdirpath(p1=_); end
-
-  sig(
-      p1: String,
-  )
-  .returns(String)
-  def realpath(p1=_); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def relative?(); end
-
-  sig(
-      base_directory: T.any(String, Pathname),
-  )
-  .returns(Pathname)
-  def relative_path_from(base_directory); end
-
-  sig(
-      p1: String,
-  )
-  .returns(Integer)
-  def rename(p1); end
-
-  sig.returns(Integer)
-  def rmdir(); end
-
-  sig.returns(Integer)
-  def rmtree(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def root?(); end
@@ -8806,67 +8855,14 @@ class Pathname
   sig.returns(T.any(TrueClass, FalseClass))
   def setuid?(); end
 
-  sig.returns(Integer)
-  def size(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def size?(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def socket?(); end
 
-  sig.returns([Pathname, Pathname])
-  def split(); end
-
-  sig.returns(File::Stat)
-  def stat(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def sticky?(); end
-
-  sig(
-      args: String,
-  )
-  .returns(Pathname)
-  def sub(*args); end
-
-  sig(
-      p1: String,
-  )
-  .returns(Pathname)
-  def sub_ext(p1); end
-
-  sig(
-      mode: Integer,
-      perm: Integer,
-  )
-  .returns(Integer)
-  def sysopen(mode=_, perm=_); end
-
-  sig.returns(Pathname)
-  def taint(); end
-
-  sig.returns(String)
-  def to_path(); end
-
-  sig(
-      length: Integer,
-  )
-  .returns(Integer)
-  def truncate(length); end
-
-  sig.returns(Integer)
-  def unlink(); end
-
-  sig.returns(Pathname)
-  def untaint(); end
-
-  sig(
-      atime: Time,
-      mtime: Time,
-  )
-  .returns(Integer)
-  def utime(atime, mtime); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def world_readable?(); end
@@ -8880,60 +8876,49 @@ class Pathname
   sig.returns(T.any(TrueClass, FalseClass))
   def writable_real?(); end
 
-  sig(
-      arg0: String,
-      offset: Integer,
-      open_args: Integer,
-  )
-  .returns(Integer)
-  def write(arg0, offset=_, open_args=_); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 
-  sig.returns(Pathname)
-  def self.pwd(); end
+  sig.returns(T.untyped)
+  def delete(); end
 
-  sig(
-      other: T.any(String, Pathname),
-  )
-  .returns(Pathname)
-  def /(other); end
+  sig.returns(T.untyped)
+  def mkpath(); end
 
-  sig.returns(String)
-  def to_s(); end
+  sig.returns(T::Array[Pathname])
+  def entries(); end
+
+  sig.returns(Time)
+  def atime(); end
+
+  sig.returns(Time)
+  def birthtime(); end
+
+  sig.returns(Time)
+  def ctime(); end
+
+  sig.returns(Time)
+  def mtime(); end
+
+  sig.returns([Pathname, Pathname])
+  def split(); end
 end
 
 class Proc
-  sig.returns(Integer)
-  def arity(); end
-
-  sig.returns(Binding)
-  def binding(); end
-
   sig(
       arity: Integer,
   )
   .returns(Proc)
   def curry(arity=_); end
 
+  sig.returns(Binding)
+  def binding(); end
+
+  sig.returns(Integer)
+  def arity(); end
+
   sig.returns(Integer)
   def hash(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def lambda(); end
-
-  sig.returns(T::Array[[Symbol, Symbol]])
-  def parameters(); end
-
-  sig.returns([String, Integer])
-  def source_location(); end
-
-  sig.returns(Proc)
-  def to_proc(); end
-
-  sig.returns(String)
-  def to_s(); end
 
   sig.returns(Proc)
   def clone(); end
@@ -8948,6 +8933,9 @@ class Proc
   def taint(); end
 
   sig.returns(Proc)
+  def to_proc(); end
+
+  sig.returns(Proc)
   def trust(); end
 
   sig.returns(Proc)
@@ -8958,17 +8946,56 @@ class Proc
 
   sig.returns(String)
   def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def lambda(); end
+
+  sig.returns(T::Array[[Symbol, Symbol]])
+  def parameters(); end
+
+  sig.returns([String, Integer])
+  def source_location(); end
 end
 
 module Process
   sig(
-      msg: String,
+      arg0: Integer,
   )
-  .returns(T.untyped)
-  def self.abort(msg=_); end
+  .returns(Integer)
+  def self.egid=(arg0); end
 
-  sig.returns(String)
-  def self.argv0(); end
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def self.euid=(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def self.gid=(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def self.maxgroups=(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def self.setproctitle(arg0); end
+
+  sig(
+      arg0: T::Array[Integer],
+  )
+  .returns(T::Array[Integer])
+  def self.groups=(arg0); end
 
   sig(
       clock_id: T.any(Symbol, Integer),
@@ -8985,63 +9012,12 @@ module Process
   def self.clock_gettime(clock_id, unit=_); end
 
   sig(
-      nochdir: BasicObject,
-      noclose: BasicObject,
-  )
-  .returns(Integer)
-  def self.daemon(nochdir=_, noclose=_); end
-
-  sig(
-      pid: Integer,
-  )
-  .returns(Thread)
-  def self.detach(pid); end
-
-  sig.returns(Integer)
-  def self.egid(); end
-
-  sig(
+      kind: Integer,
       arg0: Integer,
+      priority: Integer,
   )
   .returns(Integer)
-  def self.egid=(arg0); end
-
-  sig.returns(Integer)
-  def self.euid(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def self.euid=(arg0); end
-
-  sig(
-      status: Integer,
-  )
-  .returns(T.untyped)
-  def self.exit(status=_); end
-
-  sig(
-      status: Integer,
-  )
-  .returns(T.untyped)
-  def self.exit!(status=_); end
-
-  sig.returns(T.any(Integer, NilClass))
-  sig(
-      blk: T.proc().returns(BasicObject),
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.fork(&blk); end
-
-  sig(
-      pid: Integer,
-  )
-  .returns(Integer)
-  def self.getpgid(pid); end
-
-  sig.returns(Integer)
-  def self.getpgrp(); end
+  def self.setpriority(kind, arg0, priority); end
 
   sig(
       kind: Integer,
@@ -9051,85 +9027,17 @@ module Process
   def self.getpriority(kind, arg0); end
 
   sig(
-      resource: T.any(Symbol, String, Integer),
+      msg: String,
   )
-  .returns([Integer, Integer])
-  def self.getrlimit(resource); end
+  .returns(T.untyped)
+  def self.abort(msg=_); end
 
   sig(
-      pid: Integer,
+      nochdir: BasicObject,
+      noclose: BasicObject,
   )
   .returns(Integer)
-  def self.getsid(pid=_); end
-
-  sig.returns(Integer)
-  def self.gid(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def self.gid=(arg0); end
-
-  sig.returns(T::Array[Integer])
-  def self.groups(); end
-
-  sig(
-      arg0: T::Array[Integer],
-  )
-  .returns(T::Array[Integer])
-  def self.groups=(arg0); end
-
-  sig(
-      username: String,
-      gid: Integer,
-  )
-  .returns(T::Array[Integer])
-  def self.initgroups(username, gid); end
-
-  sig(
-      signal: T.any(Integer, Symbol, String),
-      pids: Integer,
-  )
-  .returns(Integer)
-  def self.kill(signal, *pids); end
-
-  sig.returns(Integer)
-  def self.maxgroups(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def self.maxgroups=(arg0); end
-
-  sig.returns(Integer)
-  def self.pid(); end
-
-  sig.returns(Integer)
-  def self.ppid(); end
-
-  sig(
-      kind: Integer,
-      arg0: Integer,
-      priority: Integer,
-  )
-  .returns(Integer)
-  def self.setpriority(kind, arg0, priority); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def self.setproctitle(arg0); end
-
-  sig(
-      resource: T.any(Symbol, String, Integer),
-      cur_limit: Integer,
-      max_limit: Integer,
-  )
-  .returns(NilClass)
-  def self.setrlimit(resource, cur_limit, max_limit=_); end
+  def self.daemon(nochdir=_, noclose=_); end
 
   sig(
       pid: Integer,
@@ -9138,37 +9046,12 @@ module Process
   .returns(Integer)
   def self.setpgid(pid, arg0); end
 
-  sig.returns(Integer)
-  def self.setsid(); end
-
-  sig.returns(Process::Tms)
-  def self.times(); end
-
-  sig.returns(Integer)
-  def self.uid(); end
-
-  sig(
-      user: Integer,
-  )
-  .returns(Integer)
-  def self.uid=(user); end
-
   sig(
       pid: Integer,
       flags: Integer,
   )
   .returns(Integer)
   def self.wait(pid=_, flags=_); end
-
-  sig(
-      pid: Integer,
-      flags: Integer,
-  )
-  .returns([Integer, Integer])
-  def self.wait2(pid=_, flags=_); end
-
-  sig.returns(T::Array[[Integer, Integer]])
-  def self.waitall(); end
 
   sig(
       pid: Integer,
@@ -9182,7 +9065,124 @@ module Process
       flags: Integer,
   )
   .returns([Integer, Integer])
+  def self.wait2(pid=_, flags=_); end
+
+  sig(
+      pid: Integer,
+      flags: Integer,
+  )
+  .returns([Integer, Integer])
   def self.waitpid2(pid=_, flags=_); end
+
+  sig(
+      pid: Integer,
+  )
+  .returns(Integer)
+  def self.getpgid(pid); end
+
+  sig(
+      pid: Integer,
+  )
+  .returns(Integer)
+  def self.getsid(pid=_); end
+
+  sig(
+      pid: Integer,
+  )
+  .returns(Thread)
+  def self.detach(pid); end
+
+  sig(
+      resource: T.any(Symbol, String, Integer),
+      cur_limit: Integer,
+      max_limit: Integer,
+  )
+  .returns(NilClass)
+  def self.setrlimit(resource, cur_limit, max_limit=_); end
+
+  sig(
+      resource: T.any(Symbol, String, Integer),
+  )
+  .returns([Integer, Integer])
+  def self.getrlimit(resource); end
+
+  sig(
+      signal: T.any(Integer, Symbol, String),
+      pids: Integer,
+  )
+  .returns(Integer)
+  def self.kill(signal, *pids); end
+
+  sig(
+      status: Integer,
+  )
+  .returns(T.untyped)
+  def self.exit!(status=_); end
+
+  sig(
+      status: Integer,
+  )
+  .returns(T.untyped)
+  def self.exit(status=_); end
+
+  sig(
+      user: Integer,
+  )
+  .returns(Integer)
+  def self.uid=(user); end
+
+  sig(
+      username: String,
+      gid: Integer,
+  )
+  .returns(T::Array[Integer])
+  def self.initgroups(username, gid); end
+
+  sig.returns(Integer)
+  def self.egid(); end
+
+  sig.returns(Integer)
+  def self.euid(); end
+
+  sig.returns(Integer)
+  def self.getpgrp(); end
+
+  sig.returns(Integer)
+  def self.gid(); end
+
+  sig.returns(Integer)
+  def self.maxgroups(); end
+
+  sig.returns(Integer)
+  def self.pid(); end
+
+  sig.returns(Integer)
+  def self.ppid(); end
+
+  sig.returns(Integer)
+  def self.setsid(); end
+
+  sig.returns(Integer)
+  def self.uid(); end
+
+  sig.returns(Process::Tms)
+  def self.times(); end
+
+  sig.returns(String)
+  def self.argv0(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  sig(
+      blk: T.proc().returns(BasicObject),
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.fork(&blk); end
+
+  sig.returns(T::Array[Integer])
+  def self.groups(); end
+
+  sig.returns(T::Array[[Integer, Integer]])
+  def self.waitall(); end
 end
 
 module Process::GID
@@ -9192,14 +9192,11 @@ module Process::GID
   .returns(Integer)
   def self.change_privilege(group); end
 
-  sig.returns(Integer)
-  def self.eid(); end
-
   sig(
-      name: String,
+      group: Integer,
   )
   .returns(Integer)
-  def self.from_name(name); end
+  def self.eid=(group); end
 
   sig(
       group: Integer,
@@ -9207,17 +9204,20 @@ module Process::GID
   .returns(Integer)
   def self.grant_privilege(group); end
 
+  sig(
+      name: String,
+  )
+  .returns(Integer)
+  def self.from_name(name); end
+
+  sig.returns(Integer)
+  def self.eid(); end
+
   sig.returns(Integer)
   def self.re_exchange(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def self.re_exchangeable?(); end
-
   sig.returns(Integer)
   def self.rid(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def self.sid_available?(); end
 
   sig.returns(Integer)
   sig(
@@ -9226,11 +9226,11 @@ module Process::GID
   .returns(T.untyped)
   def self.switch(&blk); end
 
-  sig(
-      group: Integer,
-  )
-  .returns(Integer)
-  def self.eid=(group); end
+  sig.returns(T.any(TrueClass, FalseClass))
+  def self.re_exchangeable?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def self.sid_available?(); end
 end
 
 class Process::Status
@@ -9241,16 +9241,37 @@ class Process::Status
   def &(num); end
 
   sig(
+      num: Integer,
+  )
+  .returns(Integer)
+  def >>(num); end
+
+  sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ==(other); end
 
-  sig(
-      num: Integer,
-  )
-  .returns(Integer)
-  def >>(num); end
+  sig.returns(Integer)
+  def pid(); end
+
+  sig.returns(Integer)
+  def to_i(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def exitstatus(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def stopsig(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def termsig(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def coredump?(); end
@@ -9258,61 +9279,22 @@ class Process::Status
   sig.returns(T.any(TrueClass, FalseClass))
   def exited?(); end
 
-  sig.returns(T.any(Integer, NilClass))
-  def exitstatus(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(Integer)
-  def pid(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def signaled?(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def stopped?(); end
 
-  sig.returns(T.any(Integer, NilClass))
-  def stopsig(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def success?(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def termsig(); end
-
-  sig.returns(Integer)
-  def to_i(); end
-
-  sig.returns(String)
-  def to_s(); end
 end
 
 module Process::Sys
-  sig.returns(Integer)
-  def self.geteuid(); end
-
-  sig.returns(Integer)
-  def self.getgid(); end
-
-  sig.returns(Integer)
-  def self.getuid(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def self.issetugid(); end
-
   sig(
       group: Integer,
   )
   .returns(NilClass)
   def self.setegid(group); end
-
-  sig(
-      user: Integer,
-  )
-  .returns(NilClass)
-  def self.seteuid(user); end
 
   sig(
       group: Integer,
@@ -9321,11 +9303,10 @@ module Process::Sys
   def self.setgid(group); end
 
   sig(
-      rid: Integer,
-      eid: Integer,
+      group: Integer,
   )
   .returns(NilClass)
-  def self.setregid(rid, eid); end
+  def self.setrgid(group); end
 
   sig(
       rid: Integer,
@@ -9348,13 +9329,20 @@ module Process::Sys
       eid: Integer,
   )
   .returns(NilClass)
+  def self.setregid(rid, eid); end
+
+  sig(
+      rid: Integer,
+      eid: Integer,
+  )
+  .returns(NilClass)
   def self.setreuid(rid, eid); end
 
   sig(
-      group: Integer,
+      user: Integer,
   )
   .returns(NilClass)
-  def self.setrgid(group); end
+  def self.seteuid(user); end
 
   sig(
       user: Integer,
@@ -9367,18 +9355,21 @@ module Process::Sys
   )
   .returns(NilClass)
   def self.setuid(user); end
+
+  sig.returns(Integer)
+  def self.geteuid(); end
+
+  sig.returns(Integer)
+  def self.getgid(); end
+
+  sig.returns(Integer)
+  def self.getuid(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def self.issetugid(); end
 end
 
 module Process::UID
-  sig(
-      user: Integer,
-  )
-  .returns(Integer)
-  def self.change_privilege(user); end
-
-  sig.returns(Integer)
-  def self.eid(); end
-
   sig(
       name: String,
   )
@@ -9389,19 +9380,28 @@ module Process::UID
       user: Integer,
   )
   .returns(Integer)
+  def self.change_privilege(user); end
+
+  sig(
+      user: Integer,
+  )
+  .returns(Integer)
+  def self.eid=(user); end
+
+  sig(
+      user: Integer,
+  )
+  .returns(Integer)
   def self.grant_privilege(user); end
+
+  sig.returns(Integer)
+  def self.eid(); end
 
   sig.returns(Integer)
   def self.re_exchange(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def self.re_exchangeable?(); end
-
   sig.returns(Integer)
   def self.rid(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def self.sid_available?(); end
 
   sig.returns(Integer)
   sig(
@@ -9410,11 +9410,11 @@ module Process::UID
   .returns(T.untyped)
   def self.switch(&blk); end
 
-  sig(
-      user: Integer,
-  )
-  .returns(Integer)
-  def self.eid=(user); end
+  sig.returns(T.any(TrueClass, FalseClass))
+  def self.re_exchangeable?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def self.sid_available?(); end
 end
 
 class Process::Waiter
@@ -9424,22 +9424,16 @@ end
 
 class Random
   sig(
-      seed: Integer,
-  )
-  .returns(Object)
-  def initialize(seed=_); end
-
-  sig(
       arg0: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
   sig(
-      size: Integer,
+      max: Integer,
   )
-  .returns(String)
-  def bytes(size); end
+  .returns(Numeric)
+  def self.rand(max=_); end
 
   sig(
       max: T.any(Integer, Range[Integer]),
@@ -9451,8 +9445,29 @@ class Random
   .returns(Float)
   def rand(max=_); end
 
+  sig(
+      number: Integer,
+  )
+  .returns(Numeric)
+  def self.srand(number=_); end
+
+  sig(
+      seed: Integer,
+  )
+  .returns(Object)
+  def initialize(seed=_); end
+
+  sig(
+      size: Integer,
+  )
+  .returns(String)
+  def bytes(size); end
+
   sig.returns(Integer)
   def seed(); end
+
+  sig.returns(Integer)
+  def self.new_seed(); end
 
   sig.returns(Random)
   def clone(); end
@@ -9474,21 +9489,6 @@ class Random
 
   sig.returns(Random)
   def untrust(); end
-
-  sig.returns(Integer)
-  def self.new_seed(); end
-
-  sig(
-      max: Integer,
-  )
-  .returns(Numeric)
-  def self.rand(max=_); end
-
-  sig(
-      number: Integer,
-  )
-  .returns(Numeric)
-  def self.srand(number=_); end
 end
 
 class Range
@@ -9504,6 +9504,30 @@ class Range
   def initialize(_begin, _end, exclude_end=_); end
 
   sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(Range)
+  sig.returns(Enumerator[Elem])
+  def each(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T.any(T.untyped, NilClass))
+  def bsearch(&blk); end
+
+  sig(
+      n: Integer,
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(Range)
+  sig(
+      n: Integer,
+  )
+  .returns(Enumerator[Elem])
+  def step(n=_, &blk); end
+
+  sig(
       obj: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
@@ -9515,15 +9539,6 @@ class Range
   .returns(T.any(TrueClass, FalseClass))
   def ===(obj); end
 
-  sig.returns(Elem)
-  def begin(); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T.any(T.untyped, NilClass))
-  def bsearch(&blk); end
-
   sig(
       obj: BasicObject,
   )
@@ -9531,27 +9546,10 @@ class Range
   def cover?(obj); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+      obj: BasicObject,
   )
-  .returns(Range)
-  sig.returns(Enumerator[Elem])
-  def each(&blk); end
-
-  sig.returns(Elem)
-  def end(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def exclude_end?(); end
-
-  sig.returns(Elem)
-  sig(
-      n: Integer,
-  )
-  .returns(T::Array[Elem])
-  def first(n=_); end
-
-  sig.returns(Integer)
-  def hash(); end
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(obj); end
 
   sig(
       obj: BasicObject,
@@ -9559,15 +9557,17 @@ class Range
   .returns(T.any(TrueClass, FalseClass))
   def include?(obj); end
 
-  sig.returns(String)
-  def inspect(); end
+  sig(
+      obj: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def member?(obj); end
 
   sig.returns(Elem)
-  sig(
-      n: Integer,
-  )
-  .returns(T::Array[Elem])
-  def last(n=_); end
+  def begin(); end
+
+  sig.returns(Elem)
+  def end(); end
 
   sig.returns(Elem)
   sig(
@@ -9601,22 +9601,22 @@ class Range
   .returns(T::Array[Elem])
   def min(n=_, &blk); end
 
-  sig.returns(T.any(Integer, NilClass))
-  def size(); end
-
-  sig(
-      n: Integer,
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(Range)
+  sig.returns(Elem)
   sig(
       n: Integer,
   )
-  .returns(Enumerator[Elem])
-  def step(n=_, &blk); end
+  .returns(T::Array[Elem])
+  def first(n=_); end
 
-  sig.returns(String)
-  def to_s(); end
+  sig.returns(Elem)
+  sig(
+      n: Integer,
+  )
+  .returns(T::Array[Elem])
+  def last(n=_); end
+
+  sig.returns(Integer)
+  def hash(); end
 
   sig.returns(Range)
   def clone(); end
@@ -9639,17 +9639,17 @@ class Range
   sig.returns(Range)
   def untrust(); end
 
-  sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(obj); end
+  sig.returns(String)
+  def inspect(); end
 
-  sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def member?(obj); end
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def size(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def exclude_end?(); end
 end
 
 class RangeError
@@ -9679,6 +9679,64 @@ class Rational
   sig(
       arg0: Integer,
   )
+  .returns(Float)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Float)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(Float)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Float)
+  def fdiv(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  sig(
+      arg0: Float,
+  )
+  .returns(Integer)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Integer)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(Integer)
+  def div(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Object)
+  sig(
+      arg0: Float,
+  )
+  .returns(Object)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Object)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(Object)
+  def <=>(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
   .returns(Rational)
   sig(
       arg0: Float,
@@ -9693,6 +9751,24 @@ class Rational
   )
   .returns(BigDecimal)
   def %(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Rational)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Rational)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  def modulo(arg0); end
 
   sig(
       arg0: Integer,
@@ -9760,11 +9836,49 @@ class Rational
   .returns(Complex)
   def -(arg0); end
 
-  sig.returns(Rational)
-  def -@(); end
+  sig(
+      arg0: Integer,
+  )
+  .returns(Rational)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Rational)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def /(arg0); end
 
-  sig.returns(Rational)
-  def +@(); end
+  sig(
+      arg0: Integer,
+  )
+  .returns(Rational)
+  sig(
+      arg0: Float,
+  )
+  .returns(Float)
+  sig(
+      arg0: Rational,
+  )
+  .returns(Rational)
+  sig(
+      arg0: BigDecimal,
+  )
+  .returns(BigDecimal)
+  sig(
+      arg0: Complex,
+  )
+  .returns(Complex)
+  def quo(arg0); end
 
   sig(
       arg0: Integer,
@@ -9787,28 +9901,6 @@ class Rational
   )
   .returns(Complex)
   def **(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Rational)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Rational)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def /(arg0); end
 
   sig(
       arg0: Integer,
@@ -9885,220 +9977,6 @@ class Rational
   sig(
       arg0: Integer,
   )
-  .returns(Object)
-  sig(
-      arg0: Float,
-  )
-  .returns(Object)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Object)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Object)
-  def <=>(arg0); end
-
-  sig(
-      arg0: Object,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ==(arg0); end
-
-  sig.returns(Rational)
-  def abs(); end
-
-  sig.returns(Rational)
-  def abs2(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def angle(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def arg(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Float,
-  )
-  .returns(Integer)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Integer)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Integer)
-  def div(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Rational)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Rational)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  def modulo(arg0); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: Integer,
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def ceil(arg0=_); end
-
-  sig.returns(Integer)
-  def denominator(); end
-
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal),
-  )
-  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
-  def divmod(arg0); end
-
-  sig(
-      arg0: Object,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def equal?(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Float)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Float)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(Float)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Float)
-  def fdiv(arg0); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: Integer,
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def floor(arg0=_); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(Integer)
-  def numerator(); end
-
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def phase(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Rational)
-  sig(
-      arg0: Float,
-  )
-  .returns(Float)
-  sig(
-      arg0: Rational,
-  )
-  .returns(Rational)
-  sig(
-      arg0: BigDecimal,
-  )
-  .returns(BigDecimal)
-  sig(
-      arg0: Complex,
-  )
-  .returns(Complex)
-  def quo(arg0); end
-
-  sig.returns(Rational)
-  sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-  )
-  .returns(Rational)
-  def rationalize(arg0=_); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: Integer,
-  )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
-  def round(arg0=_); end
-
-  sig.returns(Float)
-  def to_f(); end
-
-  sig.returns(Integer)
-  def to_i(); end
-
-  sig.returns(Rational)
-  def to_r(); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(Integer)
-  sig(
-      arg0: Integer,
-  )
-  .returns(Rational)
-  def truncate(arg0=_); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def zero?(); end
-
-  sig.returns(Rational)
-  def conj(); end
-
-  sig.returns(Rational)
-  def conjugate(); end
-
-  sig.returns(Integer)
-  def imag(); end
-
-  sig.returns(Integer)
-  def imaginary(); end
-
-  sig.returns(Rational)
-  def real(); end
-
-  sig.returns(TrueClass)
-  def real?(); end
-
-  sig.returns(Complex)
-  def to_c(); end
-
-  sig(
-      arg0: Integer,
-  )
   .returns([Rational, Rational])
   sig(
       arg0: Float,
@@ -10114,8 +9992,96 @@ class Rational
   .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
   def coerce(arg0); end
 
+  sig(
+      arg0: Object,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ==(arg0); end
+
+  sig(
+      arg0: Object,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def equal?(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal),
+  )
+  .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
+  def divmod(arg0); end
+
+  sig.returns(Complex)
+  def to_c(); end
+
+  sig.returns(Float)
+  def to_f(); end
+
+  sig.returns(Integer)
+  def denominator(); end
+
+  sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(Integer)
+  def imag(); end
+
+  sig.returns(Integer)
+  def imaginary(); end
+
+  sig.returns(Integer)
+  def numerator(); end
+
+  sig.returns(Integer)
+  def to_i(); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: Integer,
+  )
+  .returns(Rational)
+  def truncate(arg0=_); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: Integer,
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def ceil(arg0=_); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: Integer,
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def floor(arg0=_); end
+
+  sig.returns(Integer)
+  sig(
+      arg0: Integer,
+  )
+  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def round(arg0=_); end
+
+  sig.returns(Rational)
+  def +@(); end
+
+  sig.returns(Rational)
+  def -@(); end
+
+  sig.returns(Rational)
+  def abs(); end
+
+  sig.returns(Rational)
+  def abs2(); end
+
   sig.returns(Rational)
   def clone(); end
+
+  sig.returns(Rational)
+  def conj(); end
+
+  sig.returns(Rational)
+  def conjugate(); end
 
   sig.returns(Rational)
   def dup(); end
@@ -10124,7 +10090,13 @@ class Rational
   def freeze(); end
 
   sig.returns(Rational)
+  def real(); end
+
+  sig.returns(Rational)
   def taint(); end
+
+  sig.returns(Rational)
+  def to_r(); end
 
   sig.returns(Rational)
   def trust(); end
@@ -10134,27 +10106,43 @@ class Rational
 
   sig.returns(Rational)
   def untrust(); end
+
+  sig.returns(Rational)
+  sig(
+      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+  )
+  .returns(Rational)
+  def rationalize(arg0=_); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def angle(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def arg(); end
+
+  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  def phase(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def zero?(); end
+
+  sig.returns(TrueClass)
+  def real?(); end
 end
 
 class Regexp
   sig(
-      arg0: T.any(String, Symbol),
+      arg0: String,
+      arg1: Integer,
   )
-  .returns(String)
-  def self.escape(arg0); end
-
-  sig.returns(MatchData)
-  sig(
-      arg0: Integer,
-  )
-  .returns(String)
-  def self.last_match(arg0=_); end
-
-  sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(Regexp, NilClass))
-  def self.try_convert(obj); end
+  .returns(T.any(MatchData, NilClass))
+  def match(arg0, arg1=_); end
 
   sig(
       arg0: String,
@@ -10167,85 +10155,6 @@ class Regexp
   )
   .returns(Object)
   def initialize(arg0, options=_, kcode=_); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ==(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ===(other); end
-
-  sig(
-      str: String,
-  )
-  .returns(T.any(Integer, NilClass))
-  def =~(str); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def casefold?(); end
-
-  sig.returns(Encoding)
-  def encoding(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def fixed_encoding?(); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(T.any(MatchData, NilClass))
-  def match(arg0, arg1=_); end
-
-  sig.returns(T::Hash[String, T::Array[Integer]])
-  def named_captures(); end
-
-  sig.returns(T::Array[String])
-  def names(); end
-
-  sig.returns(Integer)
-  def options(); end
-
-  sig.returns(String)
-  def source(); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def ~(); end
-
-  sig.returns(Regexp)
-  def clone(); end
-
-  sig.returns(Regexp)
-  def dup(); end
-
-  sig.returns(Regexp)
-  def freeze(); end
-
-  sig.returns(Regexp)
-  def taint(); end
-
-  sig.returns(Regexp)
-  def trust(); end
-
-  sig.returns(Regexp)
-  def untaint(); end
-
-  sig.returns(Regexp)
-  def untrust(); end
 
   sig(
       arg0: String,
@@ -10263,13 +10172,104 @@ class Regexp
       arg0: T.any(String, Symbol),
   )
   .returns(String)
+  def self.escape(arg0); end
+
+  sig(
+      arg0: T.any(String, Symbol),
+  )
+  .returns(String)
   def self.quote(arg0); end
+
+  sig(
+      obj: BasicObject,
+  )
+  .returns(T.any(Regexp, NilClass))
+  def self.try_convert(obj); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ==(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ===(other); end
 
   sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def eql?(other); end
+
+  sig(
+      str: String,
+  )
+  .returns(T.any(Integer, NilClass))
+  def =~(str); end
+
+  sig.returns(Encoding)
+  def encoding(); end
+
+  sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(Integer)
+  def options(); end
+
+  sig.returns(MatchData)
+  sig(
+      arg0: Integer,
+  )
+  .returns(String)
+  def self.last_match(arg0=_); end
+
+  sig.returns(Regexp)
+  def clone(); end
+
+  sig.returns(Regexp)
+  def dup(); end
+
+  sig.returns(Regexp)
+  def freeze(); end
+
+  sig.returns(Regexp)
+  def taint(); end
+
+  sig.returns(Regexp)
+  def trust(); end
+
+  sig.returns(Regexp)
+  def untaint(); end
+
+  sig.returns(Regexp)
+  def untrust(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def source(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def ~(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def casefold?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def fixed_encoding?(); end
+
+  sig.returns(T::Array[String])
+  def names(); end
+
+  sig.returns(T::Hash[String, T::Array[Integer]])
+  def named_captures(); end
 end
 
 class RegexpError
@@ -10398,107 +10398,17 @@ class Set
   def self.[](*ary); end
 
   sig(
-      enum: Enumerable[BasicObject],
-  )
-  .returns(Object)
-  def initialize(enum=_); end
-
-  sig(
-      enum: Enumerable[Elem],
-  )
-  .returns(Set[Elem])
-  def +(enum); end
-
-  sig(
-      enum: Enumerable[Elem],
-  )
-  .returns(Set[Elem])
-  def ^(enum); end
-
-  sig(
-      o: Elem,
-  )
-  .returns(Set)
-  def add(o); end
-
-  sig(
-      o: Elem,
-  )
-  .returns(T.any(T.untyped, NilClass))
-  def add?(o); end
-
-  sig(
-      blk: T.proc(arg0: T.untyped).returns(Elem),
-  )
-  .returns(T::Hash[T.untyped, Set[Elem]])
-  def classify(&blk); end
-
-  sig.returns(Set)
-  def clear(); end
-
-  sig(
-      o: Elem,
-  )
-  .returns(Set)
-  def delete(o); end
-
-  sig(
-      o: Elem,
-  )
-  .returns(T.any(T.untyped, NilClass))
-  def delete?(o); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(Set)
-  def delete_if(&blk); end
-
-  sig(
-      enum: Enumerable[Elem],
-  )
-  .returns(Set[Elem])
-  def difference(enum); end
-
-  sig(
-      set: Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def disjoint?(set); end
-
-  sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Set)
   sig.returns(Enumerator[Elem])
   def each(&blk); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def empty?(); end
-
-  sig.returns(T.any(T.untyped, NilClass))
-  def flatten!(); end
-
-  sig.returns(Set)
-  def flatten(); end
-
   sig(
-      set: Set[Elem],
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def intersect?(set); end
-
-  sig(
-      enum: Enumerable[Elem],
-  )
-  .returns(Set[Elem])
-  def intersection(enum); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(Set)
-  def keep_if(&blk); end
+  .returns(Set[T.untyped])
+  def collect!(&blk); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
@@ -10507,28 +10417,16 @@ class Set
   def map!(&blk); end
 
   sig(
-      o: Elem,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def member?(o); end
-
-  sig(
-      enum: Enumerable[Elem],
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
   .returns(Set)
-  def merge(enum); end
+  def delete_if(&blk); end
 
   sig(
-      set: Set[Elem],
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def proper_subset?(set); end
-
-  sig(
-      set: Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def proper_superset?(set); end
+  .returns(Set)
+  def keep_if(&blk); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
@@ -10537,61 +10435,40 @@ class Set
   def reject!(&blk); end
 
   sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(T.any(T.untyped, NilClass))
+  def select!(&blk); end
+
+  sig(
+      blk: T.proc(arg0: T.untyped).returns(Elem),
+  )
+  .returns(T::Hash[T.untyped, Set[Elem]])
+  def classify(&blk); end
+
+  sig(
+      enum: Enumerable[BasicObject],
+  )
+  .returns(Object)
+  def initialize(enum=_); end
+
+  sig(
       enum: Enumerable[BasicObject],
   )
   .returns(Set[T.untyped])
   def replace(enum); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      enum: Enumerable[Elem],
   )
-  .returns(T.any(T.untyped, NilClass))
-  def select!(&blk); end
-
-  sig.returns(Integer)
-  def size(); end
-
-  sig(
-      set: Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def subset?(set); end
+  .returns(Set)
+  def merge(enum); end
 
   sig(
       enum: Enumerable[Elem],
   )
   .returns(Set)
   def subtract(enum); end
-
-  sig(
-      set: Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def superset?(set); end
-
-  sig.returns(T::Array[Elem])
-  def to_a(); end
-
-  sig.returns(Set)
-  def clone(); end
-
-  sig.returns(Set)
-  def dup(); end
-
-  sig.returns(Set)
-  def freeze(); end
-
-  sig.returns(Set)
-  def taint(); end
-
-  sig.returns(Set)
-  def trust(); end
-
-  sig.returns(Set)
-  def untaint(); end
-
-  sig.returns(Set)
-  def untrust(); end
 
   sig(
       enum: Enumerable[Elem],
@@ -10603,19 +10480,91 @@ class Set
       enum: Enumerable[Elem],
   )
   .returns(Set[Elem])
+  def +(enum); end
+
+  sig(
+      enum: Enumerable[Elem],
+  )
+  .returns(Set[Elem])
   def -(enum); end
 
   sig(
-      set: Set[Elem],
+      enum: Enumerable[Elem],
   )
-  .returns(T.any(TrueClass, FalseClass))
-  def <(set); end
+  .returns(Set[Elem])
+  def ^(enum); end
+
+  sig(
+      enum: Enumerable[Elem],
+  )
+  .returns(Set[Elem])
+  def difference(enum); end
+
+  sig(
+      enum: Enumerable[Elem],
+  )
+  .returns(Set[Elem])
+  def intersection(enum); end
+
+  sig(
+      enum: Enumerable[Elem],
+  )
+  .returns(Set[Elem])
+  def union(enum); end
+
+  sig(
+      enum: Enumerable[Elem],
+  )
+  .returns(Set[Elem])
+  def |(enum); end
 
   sig(
       o: Elem,
   )
   .returns(Set)
   def <<(o); end
+
+  sig(
+      o: Elem,
+  )
+  .returns(Set)
+  def add(o); end
+
+  sig(
+      o: Elem,
+  )
+  .returns(Set)
+  def delete(o); end
+
+  sig(
+      o: Elem,
+  )
+  .returns(T.any(T.untyped, NilClass))
+  def add?(o); end
+
+  sig(
+      o: Elem,
+  )
+  .returns(T.any(T.untyped, NilClass))
+  def delete?(o); end
+
+  sig(
+      o: Elem,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def include?(o); end
+
+  sig(
+      o: Elem,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def member?(o); end
+
+  sig(
+      set: Set[Elem],
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def <(set); end
 
   sig(
       set: Set[Elem],
@@ -10636,31 +10585,82 @@ class Set
   def >=(set); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(Set[T.untyped])
-  def collect!(&blk); end
-
-  sig(
-      o: Elem,
+      set: Set[Elem],
   )
   .returns(T.any(TrueClass, FalseClass))
-  def include?(o); end
+  def disjoint?(set); end
+
+  sig(
+      set: Set[Elem],
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def intersect?(set); end
+
+  sig(
+      set: Set[Elem],
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def proper_subset?(set); end
+
+  sig(
+      set: Set[Elem],
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def proper_superset?(set); end
+
+  sig(
+      set: Set[Elem],
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def subset?(set); end
+
+  sig(
+      set: Set[Elem],
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def superset?(set); end
 
   sig.returns(Integer)
   def length(); end
 
-  sig(
-      enum: Enumerable[Elem],
-  )
-  .returns(Set[Elem])
-  def |(enum); end
+  sig.returns(Integer)
+  def size(); end
 
-  sig(
-      enum: Enumerable[Elem],
-  )
-  .returns(Set[Elem])
-  def union(enum); end
+  sig.returns(Set)
+  def clear(); end
+
+  sig.returns(Set)
+  def clone(); end
+
+  sig.returns(Set)
+  def dup(); end
+
+  sig.returns(Set)
+  def flatten(); end
+
+  sig.returns(Set)
+  def freeze(); end
+
+  sig.returns(Set)
+  def taint(); end
+
+  sig.returns(Set)
+  def trust(); end
+
+  sig.returns(Set)
+  def untaint(); end
+
+  sig.returns(Set)
+  def untrust(); end
+
+  sig.returns(T.any(T.untyped, NilClass))
+  def flatten!(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def empty?(); end
+
+  sig.returns(T::Array[Elem])
+  def to_a(); end
 end
 
 class SignalException
@@ -10690,6 +10690,51 @@ class SortedSet
   extend T::Generic
   Elem = T.type
 
+  sig(
+      blk: T.proc(arg0: Elem).returns(BasicObject),
+  )
+  .returns(SortedSet)
+  def each(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(SortedSet)
+  def delete_if(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+  )
+  .returns(SortedSet)
+  def keep_if(&blk); end
+
+  sig(
+      enum: Enumerable[Elem],
+  )
+  .returns(SortedSet)
+  def merge(enum); end
+
+  sig(
+      enum: Enumerable[Elem],
+  )
+  .returns(SortedSet)
+  def subtract(enum); end
+
+  sig(
+      o: Elem,
+  )
+  .returns(SortedSet)
+  def add(o); end
+
+  sig(
+      o: Elem,
+  )
+  .returns(SortedSet)
+  def delete(o); end
+
+  sig.returns(SortedSet)
+  def clear(); end
+
   sig.returns(SortedSet)
   def clone(); end
 
@@ -10710,51 +10755,6 @@ class SortedSet
 
   sig.returns(SortedSet)
   def untrust(); end
-
-  sig(
-      o: Elem,
-  )
-  .returns(SortedSet)
-  def add(o); end
-
-  sig.returns(SortedSet)
-  def clear(); end
-
-  sig(
-      o: Elem,
-  )
-  .returns(SortedSet)
-  def delete(o); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(SortedSet)
-  def delete_if(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(SortedSet)
-  def each(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(SortedSet)
-  def keep_if(&blk); end
-
-  sig(
-      enum: Enumerable[Elem],
-  )
-  .returns(SortedSet)
-  def merge(enum); end
-
-  sig(
-      enum: Enumerable[Elem],
-  )
-  .returns(SortedSet)
-  def subtract(enum); end
 end
 
 class StandardError
@@ -10805,42 +10805,6 @@ end
 
 class String
   sig(
-      str: String,
-  )
-  .returns(Object)
-  def initialize(str=_); end
-
-  sig(
-      arg0: Object,
-  )
-  .returns(String)
-  def %(arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(String)
-  def *(arg0); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def +(arg0); end
-
-  sig(
-      arg0: Object,
-  )
-  .returns(String)
-  def <<(arg0); end
-
-  sig(
-      other: String,
-  )
-  .returns(T.any(Integer, NilClass))
-  def <=>(other); end
-
-  sig(
       arg0: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
@@ -10853,10 +10817,22 @@ class String
   def ===(arg0); end
 
   sig(
-      arg0: Object,
+      arg0: Integer,
+      arg1: Integer,
   )
-  .returns(T.any(Integer, NilClass))
-  def =~(arg0); end
+  .returns(Integer)
+  def setbyte(arg0, arg1); end
+
+  sig(
+      arg0: Integer,
+      arg1: Integer,
+  )
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: Range[Integer],
+  )
+  .returns(T.any(String, NilClass))
+  def byteslice(arg0, arg1=_); end
 
   sig(
       arg0: Integer,
@@ -10883,17 +10859,30 @@ class String
   .returns(T.any(String, NilClass))
   def [](arg0, arg1=_); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def ascii_only?(); end
-
-  sig.returns(String)
-  def b(); end
-
-  sig.returns(Array)
-  def bytes(); end
-
-  sig.returns(Integer)
-  def bytesize(); end
+  sig(
+      arg0: Integer,
+      arg1: Integer,
+  )
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: T.any(Range[Integer], Regexp),
+  )
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: Regexp,
+      arg1: Integer,
+  )
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: Regexp,
+      arg1: String,
+  )
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: String,
+  )
+  .returns(T.any(String, NilClass))
+  def slice!(arg0, arg1=_); end
 
   sig(
       arg0: Integer,
@@ -10901,22 +10890,24 @@ class String
   )
   .returns(T.any(String, NilClass))
   sig(
-      arg0: Range[Integer],
+      arg0: T.any(Range[Integer], Regexp),
   )
   .returns(T.any(String, NilClass))
-  def byteslice(arg0, arg1=_); end
-
-  sig.returns(String)
-  def capitalize(); end
-
-  sig.returns(T.any(String, NilClass))
-  def capitalize!(); end
-
+  sig(
+      arg0: Regexp,
+      arg1: Integer,
+  )
+  .returns(T.any(String, NilClass))
+  sig(
+      arg0: Regexp,
+      arg1: String,
+  )
+  .returns(T.any(String, NilClass))
   sig(
       arg0: String,
   )
-  .returns(T.any(NilClass, Integer))
-  def casecmp(arg0); end
+  .returns(T.any(String, NilClass))
+  def slice(arg0, arg1=_); end
 
   sig(
       arg0: Integer,
@@ -10925,45 +10916,81 @@ class String
   .returns(String)
   def center(arg0, arg1=_); end
 
-  sig.returns(Array)
-  def chars(); end
+  sig(
+      arg0: Integer,
+      arg1: String,
+  )
+  .returns(String)
+  def insert(arg0, arg1); end
+
+  sig(
+      arg0: Integer,
+      arg1: String,
+  )
+  .returns(String)
+  def ljust(arg0, arg1=_); end
+
+  sig(
+      arg0: Integer,
+      arg1: String,
+  )
+  .returns(String)
+  def rjust(arg0, arg1=_); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def sum(arg0=_); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def to_i(arg0=_); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(String)
+  def *(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(T.any(Integer, NilClass))
+  def getbyte(arg0); end
+
+  sig(
+      arg0: Object,
+  )
+  .returns(String)
+  def %(arg0); end
+
+  sig(
+      arg0: Object,
+  )
+  .returns(String)
+  def <<(arg0); end
+
+  sig(
+      arg0: Object,
+  )
+  .returns(T.any(Integer, NilClass))
+  def =~(arg0); end
 
   sig(
       arg0: String,
+      arg1: BasicObject,
   )
-  .returns(String)
-  def chomp(arg0=_); end
-
+  .returns(Enumerator)
   sig(
       arg0: String,
-  )
-  .returns(T.any(String, NilClass))
-  def chomp!(arg0=_); end
-
-  sig.returns(String)
-  def chop(); end
-
-  sig.returns(T.any(String, NilClass))
-  def chop!(); end
-
-  sig.returns(String)
-  def chr(); end
-
-  sig.returns(String)
-  def clear(); end
-
-  sig.returns(T::Array[Integer])
-  sig(
-      blk: BasicObject,
-  )
-  .returns(T::Array[Integer])
-  def codepoints(&blk); end
-
-  sig(
-      arg0: T.any(Integer, Object),
+      arg1: BasicObject,
+      blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(String)
-  def concat(arg0); end
+  def upto(arg0, arg1=_, &blk); end
 
   sig(
       arg0: String,
@@ -10971,12 +10998,6 @@ class String
   )
   .returns(Integer)
   def count(arg0, *arg1); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def crypt(arg0); end
 
   sig(
       arg0: String,
@@ -10989,38 +11010,36 @@ class String
       arg0: String,
       arg1: String,
   )
+  .returns(String)
+  def tr(arg0, arg1); end
+
+  sig(
+      arg0: String,
+      arg1: String,
+  )
+  .returns(String)
+  def tr_s(arg0, arg1); end
+
+  sig(
+      arg0: String,
+      arg1: String,
+  )
   .returns(T.any(String, NilClass))
   def delete!(arg0, *arg1); end
 
-  sig.returns(String)
-  def downcase(); end
-
-  sig.returns(T.any(String, NilClass))
-  def downcase!(); end
-
-  sig.returns(String)
-  def dump(); end
+  sig(
+      arg0: String,
+      arg1: String,
+  )
+  .returns(T.any(String, NilClass))
+  def tr!(arg0, arg1); end
 
   sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
+      arg0: String,
+      arg1: String,
   )
-  .returns(String)
-  sig.returns(Enumerator)
-  def each_byte(&blk); end
-
-  sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(String)
-  sig.returns(Enumerator)
-  def each_char(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(String)
-  sig.returns(Enumerator)
-  def each_codepoint(&blk); end
+  .returns(T.any(String, NilClass))
+  def tr_s!(arg0, arg1); end
 
   sig(
       arg0: String,
@@ -11033,11 +11052,81 @@ class String
   .returns(Enumerator)
   def each_line(arg0=_, &blk); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def empty?(); end
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def +(arg0); end
 
-  sig.returns(Encoding)
-  def encoding(); end
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def chomp(arg0=_); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def crypt(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def prepend(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def replace(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def squeeze!(arg0=_); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def squeeze(arg0=_); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  sig(
+      arg0: String,
+      blk: T.proc(arg0: T.untyped).returns(BasicObject),
+  )
+  .returns(String)
+  def scrub!(arg0=_, &blk); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  sig(
+      arg0: String,
+      blk: T.proc(arg0: T.untyped).returns(BasicObject),
+  )
+  .returns(String)
+  def scrub(arg0=_, &blk); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(T.any(NilClass, Integer))
+  def casecmp(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(T.any(String, NilClass))
+  def chomp!(arg0=_); end
 
   sig(
       arg0: String,
@@ -11052,16 +11141,52 @@ class String
   def eql?(arg0); end
 
   sig(
-      arg0: T.any(String, Encoding),
+      arg0: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def include?(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def start_with?(*arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(T::Array[String])
+  def lines(arg0=_); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(T::Array[String])
+  def unpack(arg0); end
+
+  sig(
+      arg0: T.any(Integer, Object),
   )
   .returns(String)
-  def force_encoding(arg0); end
+  def concat(arg0); end
 
+  sig(
+      arg0: T.any(Regexp, String),
+      arg1: Integer,
+  )
+  .returns(T.any(Integer, NilClass))
+  def index(arg0, arg1=_); end
+
+  sig(
+      arg0: T.any(Regexp, String),
+      arg1: Integer,
+  )
+  .returns(T::Array[String])
   sig(
       arg0: Integer,
   )
-  .returns(T.any(Integer, NilClass))
-  def getbyte(arg0); end
+  .returns(T::Array[String])
+  def split(arg0=_, arg1=_); end
 
   sig(
       arg0: T.any(Regexp, String),
@@ -11092,6 +11217,18 @@ class String
       arg0: T.any(Regexp, String),
       arg1: String,
   )
+  .returns(String)
+  sig(
+      arg0: T.any(Regexp, String),
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(String)
+  def sub!(arg0, arg1=_, &blk); end
+
+  sig(
+      arg0: T.any(Regexp, String),
+      arg1: String,
+  )
   .returns(T.any(String, NilClass))
   sig(
       arg0: T.any(Regexp, String),
@@ -11103,233 +11240,6 @@ class String
   )
   .returns(Enumerator)
   def gsub!(arg0, arg1=_, &blk); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(Integer)
-  def hex(); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def include?(arg0); end
-
-  sig(
-      arg0: T.any(Regexp, String),
-      arg1: Integer,
-  )
-  .returns(T.any(Integer, NilClass))
-  def index(arg0, arg1=_); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def replace(arg0); end
-
-  sig(
-      arg0: Integer,
-      arg1: String,
-  )
-  .returns(String)
-  def insert(arg0, arg1); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(Symbol)
-  def intern(); end
-
-  sig.returns(Integer)
-  def length(); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(T::Array[String])
-  def lines(arg0=_); end
-
-  sig(
-      arg0: Integer,
-      arg1: String,
-  )
-  .returns(String)
-  def ljust(arg0, arg1=_); end
-
-  sig.returns(String)
-  def lstrip(); end
-
-  sig.returns(T.any(String, NilClass))
-  def lstrip!(); end
-
-  sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(MatchData)
-  sig(
-      arg0: T.any(Regexp, String),
-      arg1: Integer,
-  )
-  .returns(MatchData)
-  def match(arg0, arg1=_); end
-
-  sig.returns(String)
-  def next(); end
-
-  sig.returns(String)
-  def next!(); end
-
-  sig.returns(Integer)
-  def oct(); end
-
-  sig.returns(Integer)
-  def ord(); end
-
-  sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(T::Array[String])
-  def partition(arg0); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def prepend(arg0); end
-
-  sig.returns(String)
-  def reverse(); end
-
-  sig(
-      arg0: T.any(String, Regexp),
-      arg1: Integer,
-  )
-  .returns(T.any(Integer, NilClass))
-  def rindex(arg0, arg1=_); end
-
-  sig(
-      arg0: Integer,
-      arg1: String,
-  )
-  .returns(String)
-  def rjust(arg0, arg1=_); end
-
-  sig(
-      arg0: T.any(String, Regexp),
-  )
-  .returns(T::Array[String])
-  def rpartition(arg0); end
-
-  sig.returns(String)
-  def rstrip(); end
-
-  sig.returns(String)
-  def rstrip!(); end
-
-  sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(T::Array[T.any(String, T::Array[String])])
-  sig(
-      arg0: T.any(Regexp, String),
-      blk: BasicObject,
-  )
-  .returns(T::Array[T.any(String, T::Array[String])])
-  def scan(arg0, &blk); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  sig(
-      arg0: String,
-      blk: T.proc(arg0: T.untyped).returns(BasicObject),
-  )
-  .returns(String)
-  def scrub(arg0=_, &blk); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  sig(
-      arg0: String,
-      blk: T.proc(arg0: T.untyped).returns(BasicObject),
-  )
-  .returns(String)
-  def scrub!(arg0=_, &blk); end
-
-  sig(
-      arg0: Integer,
-      arg1: Integer,
-  )
-  .returns(Integer)
-  def setbyte(arg0, arg1); end
-
-  sig.returns(Integer)
-  def size(); end
-
-  sig(
-      arg0: Integer,
-      arg1: Integer,
-  )
-  .returns(T.any(String, NilClass))
-  sig(
-      arg0: T.any(Range[Integer], Regexp),
-  )
-  .returns(T.any(String, NilClass))
-  sig(
-      arg0: Regexp,
-      arg1: Integer,
-  )
-  .returns(T.any(String, NilClass))
-  sig(
-      arg0: Regexp,
-      arg1: String,
-  )
-  .returns(T.any(String, NilClass))
-  sig(
-      arg0: String,
-  )
-  .returns(T.any(String, NilClass))
-  def slice!(arg0, arg1=_); end
-
-  sig(
-      arg0: T.any(Regexp, String),
-      arg1: Integer,
-  )
-  .returns(T::Array[String])
-  sig(
-      arg0: Integer,
-  )
-  .returns(T::Array[String])
-  def split(arg0=_, arg1=_); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def squeeze(arg0=_); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def squeeze!(arg0=_); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def start_with?(*arg0); end
-
-  sig.returns(String)
-  def strip(); end
-
-  sig.returns(String)
-  def strip!(); end
 
   sig(
       arg0: T.any(Regexp, String),
@@ -11345,113 +11255,152 @@ class String
 
   sig(
       arg0: T.any(Regexp, String),
-      arg1: String,
   )
-  .returns(String)
+  .returns(MatchData)
   sig(
       arg0: T.any(Regexp, String),
+      arg1: Integer,
+  )
+  .returns(MatchData)
+  def match(arg0, arg1=_); end
+
+  sig(
+      arg0: T.any(Regexp, String),
+  )
+  .returns(T::Array[String])
+  def partition(arg0); end
+
+  sig(
+      arg0: T.any(Regexp, String),
+  )
+  .returns(T::Array[T.any(String, T::Array[String])])
+  sig(
+      arg0: T.any(Regexp, String),
+      blk: BasicObject,
+  )
+  .returns(T::Array[T.any(String, T::Array[String])])
+  def scan(arg0, &blk); end
+
+  sig(
+      arg0: T.any(String, Encoding),
+  )
+  .returns(String)
+  def force_encoding(arg0); end
+
+  sig(
+      arg0: T.any(String, Regexp),
+      arg1: Integer,
+  )
+  .returns(T.any(Integer, NilClass))
+  def rindex(arg0, arg1=_); end
+
+  sig(
+      arg0: T.any(String, Regexp),
+  )
+  .returns(T::Array[String])
+  def rpartition(arg0); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(String)
+  sig.returns(Enumerator)
+  def each_byte(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(String)
+  sig.returns(Enumerator)
+  def each_codepoint(&blk); end
+
+  sig(
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(String)
-  def sub!(arg0, arg1=_, &blk); end
-
-  sig.returns(String)
-  def succ(); end
+  sig.returns(Enumerator)
+  def each_char(&blk); end
 
   sig(
-      arg0: Integer,
+      obj: Object,
   )
-  .returns(Integer)
-  def sum(arg0=_); end
+  .returns(T.any(String, NilClass))
+  def self.try_convert(obj); end
 
-  sig.returns(String)
-  def swapcase(); end
+  sig(
+      other: String,
+  )
+  .returns(T.any(Integer, NilClass))
+  def <=>(other); end
 
-  sig.returns(T.any(String, NilClass))
-  def swapcase!(); end
+  sig(
+      str: String,
+  )
+  .returns(Object)
+  def initialize(str=_); end
+
+  sig.returns(Array)
+  def bytes(); end
+
+  sig.returns(Array)
+  def chars(); end
 
   sig.returns(Complex)
   def to_c(); end
 
+  sig.returns(Encoding)
+  def encoding(); end
+
   sig.returns(Float)
   def to_f(); end
 
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def to_i(arg0=_); end
+  sig.returns(Integer)
+  def bytesize(); end
+
+  sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(Integer)
+  def hex(); end
+
+  sig.returns(Integer)
+  def length(); end
+
+  sig.returns(Integer)
+  def oct(); end
+
+  sig.returns(Integer)
+  def ord(); end
+
+  sig.returns(Integer)
+  def size(); end
 
   sig.returns(Rational)
   def to_r(); end
 
   sig.returns(String)
-  def to_s(); end
+  def b(); end
 
   sig.returns(String)
-  def to_str(); end
-
-  sig.returns(Symbol)
-  def to_sym(); end
-
-  sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(String)
-  def tr(arg0, arg1); end
-
-  sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(T.any(String, NilClass))
-  def tr!(arg0, arg1); end
-
-  sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(String)
-  def tr_s(arg0, arg1); end
-
-  sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(T.any(String, NilClass))
-  def tr_s!(arg0, arg1); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(T::Array[String])
-  def unpack(arg0); end
+  def capitalize(); end
 
   sig.returns(String)
-  def upcase(); end
+  def chop(); end
 
-  sig.returns(T.any(String, NilClass))
-  def upcase!(); end
+  sig.returns(String)
+  def chr(); end
 
-  sig(
-      arg0: String,
-      arg1: BasicObject,
-  )
-  .returns(Enumerator)
-  sig(
-      arg0: String,
-      arg1: BasicObject,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(String)
-  def upto(arg0, arg1=_, &blk); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def valid_encoding?(); end
+  sig.returns(String)
+  def clear(); end
 
   sig.returns(String)
   def clone(); end
+
+  sig.returns(String)
+  def downcase(); end
+
+  sig.returns(String)
+  def dump(); end
 
   sig.returns(String)
   def dup(); end
@@ -11460,7 +11409,46 @@ class String
   def freeze(); end
 
   sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def lstrip(); end
+
+  sig.returns(String)
+  def next!(); end
+
+  sig.returns(String)
+  def next(); end
+
+  sig.returns(String)
+  def reverse(); end
+
+  sig.returns(String)
+  def rstrip!(); end
+
+  sig.returns(String)
+  def rstrip(); end
+
+  sig.returns(String)
+  def strip!(); end
+
+  sig.returns(String)
+  def strip(); end
+
+  sig.returns(String)
+  def succ(); end
+
+  sig.returns(String)
+  def swapcase(); end
+
+  sig.returns(String)
   def taint(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(String)
+  def to_str(); end
 
   sig.returns(String)
   def trust(); end
@@ -11471,36 +11459,48 @@ class String
   sig.returns(String)
   def untrust(); end
 
-  sig(
-      obj: Object,
-  )
-  .returns(T.any(String, NilClass))
-  def self.try_convert(obj); end
+  sig.returns(String)
+  def upcase(); end
 
+  sig.returns(Symbol)
+  def intern(); end
+
+  sig.returns(Symbol)
+  def to_sym(); end
+
+  sig.returns(T.any(String, NilClass))
+  def capitalize!(); end
+
+  sig.returns(T.any(String, NilClass))
+  def chop!(); end
+
+  sig.returns(T.any(String, NilClass))
+  def downcase!(); end
+
+  sig.returns(T.any(String, NilClass))
+  def lstrip!(); end
+
+  sig.returns(T.any(String, NilClass))
+  def swapcase!(); end
+
+  sig.returns(T.any(String, NilClass))
+  def upcase!(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def ascii_only?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def empty?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def valid_encoding?(); end
+
+  sig.returns(T::Array[Integer])
   sig(
-      arg0: Integer,
-      arg1: Integer,
+      blk: BasicObject,
   )
-  .returns(T.any(String, NilClass))
-  sig(
-      arg0: T.any(Range[Integer], Regexp),
-  )
-  .returns(T.any(String, NilClass))
-  sig(
-      arg0: Regexp,
-      arg1: Integer,
-  )
-  .returns(T.any(String, NilClass))
-  sig(
-      arg0: Regexp,
-      arg1: String,
-  )
-  .returns(T.any(String, NilClass))
-  sig(
-      arg0: String,
-  )
-  .returns(T.any(String, NilClass))
-  def slice(arg0, arg1=_); end
+  .returns(T::Array[Integer])
+  def codepoints(&blk); end
 end
 
 class StringIO
@@ -11528,23 +11528,23 @@ end
 
 class StringScanner
   sig(
+      arg0: Regexp,
+  )
+  .returns(String)
+  def scan(arg0); end
+
+  sig(
       arg0: String,
       arg1: T.any(TrueClass, FalseClass),
   )
   .returns(StringScanner)
   def self.new(arg0, arg1=_); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def eos?(); end
-
-  sig(
-      arg0: Regexp,
-  )
-  .returns(String)
-  def scan(arg0); end
-
   sig.returns(String)
   def getch(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def eos?(); end
 end
 
 class Struct
@@ -11578,27 +11578,6 @@ class Struct
 end
 
 class Symbol
-  sig.returns(T::Array[Symbol])
-  def self.all_symbols(); end
-
-  sig(
-      other: Symbol,
-  )
-  .returns(T.any(Integer, NilClass))
-  def <=>(other); end
-
-  sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ==(obj); end
-
-  sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(Integer, NilClass))
-  def =~(obj); end
-
   sig(
       idx: Integer,
   )
@@ -11613,78 +11592,6 @@ class Symbol
   )
   .returns(String)
   def [](idx, n=_); end
-
-  sig.returns(Symbol)
-  def capitalize(); end
-
-  sig(
-      other: Symbol,
-  )
-  .returns(T.any(Integer, NilClass))
-  def casecmp(other); end
-
-  sig.returns(Symbol)
-  def downcase(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def empty?(); end
-
-  sig.returns(Encoding)
-  def encoding(); end
-
-  sig.returns(String)
-  def id2name(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(Symbol)
-  def intern(); end
-
-  sig.returns(Integer)
-  def length(); end
-
-  sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(Integer, NilClass))
-  def match(obj); end
-
-  sig.returns(Symbol)
-  def succ(); end
-
-  sig.returns(Symbol)
-  def swapcase(); end
-
-  sig.returns(Proc)
-  def to_proc(); end
-
-  sig.returns(Symbol)
-  def upcase(); end
-
-  sig.returns(Symbol)
-  def clone(); end
-
-  sig.returns(Symbol)
-  def dup(); end
-
-  sig.returns(Symbol)
-  def freeze(); end
-
-  sig.returns(Symbol)
-  def taint(); end
-
-  sig.returns(Symbol)
-  def trust(); end
-
-  sig.returns(Symbol)
-  def untaint(); end
-
-  sig.returns(Symbol)
-  def untrust(); end
-
-  sig.returns(Integer)
-  def size(); end
 
   sig(
       idx: Integer,
@@ -11701,11 +11608,104 @@ class Symbol
   .returns(String)
   def slice(idx, n=_); end
 
+  sig(
+      obj: BasicObject,
+  )
+  .returns(T.any(Integer, NilClass))
+  def =~(obj); end
+
+  sig(
+      obj: BasicObject,
+  )
+  .returns(T.any(Integer, NilClass))
+  def match(obj); end
+
+  sig(
+      obj: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ==(obj); end
+
+  sig(
+      other: Symbol,
+  )
+  .returns(T.any(Integer, NilClass))
+  def <=>(other); end
+
+  sig(
+      other: Symbol,
+  )
+  .returns(T.any(Integer, NilClass))
+  def casecmp(other); end
+
+  sig.returns(Encoding)
+  def encoding(); end
+
+  sig.returns(Integer)
+  def length(); end
+
+  sig.returns(Integer)
+  def size(); end
+
+  sig.returns(Proc)
+  def to_proc(); end
+
+  sig.returns(String)
+  def id2name(); end
+
+  sig.returns(String)
+  def inspect(); end
+
   sig.returns(String)
   def to_s(); end
 
   sig.returns(Symbol)
+  def capitalize(); end
+
+  sig.returns(Symbol)
+  def clone(); end
+
+  sig.returns(Symbol)
+  def downcase(); end
+
+  sig.returns(Symbol)
+  def dup(); end
+
+  sig.returns(Symbol)
+  def freeze(); end
+
+  sig.returns(Symbol)
+  def intern(); end
+
+  sig.returns(Symbol)
+  def succ(); end
+
+  sig.returns(Symbol)
+  def swapcase(); end
+
+  sig.returns(Symbol)
+  def taint(); end
+
+  sig.returns(Symbol)
   def to_sym(); end
+
+  sig.returns(Symbol)
+  def trust(); end
+
+  sig.returns(Symbol)
+  def untaint(); end
+
+  sig.returns(Symbol)
+  def untrust(); end
+
+  sig.returns(Symbol)
+  def upcase(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def empty?(); end
+
+  sig.returns(T::Array[Symbol])
+  def self.all_symbols(); end
 end
 
 class SyntaxError
@@ -11871,6 +11871,40 @@ end
 
 class Time
   sig(
+      arg0: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Time)
+  def round(arg0); end
+
+  sig(
+      arg0: Numeric,
+  )
+  .returns(Time)
+  def +(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def strftime(arg0); end
+
+  sig(
+      arg0: Time,
+  )
+  .returns(Float)
+  sig(
+      arg0: Numeric,
+  )
+  .returns(Time)
+  def -(arg0); end
+
+  sig(
       arg0: Time,
   )
   .returns(Time)
@@ -11884,6 +11918,36 @@ class Time
   )
   .returns(Time)
   def self.at(arg0, microseconds_with_frac=_); end
+
+  sig(
+      other: Time,
+  )
+  .returns(T.any(Integer, NilClass))
+  def <=>(other); end
+
+  sig(
+      utc_offset: Integer,
+  )
+  .returns(Time)
+  def getlocal(utc_offset=_); end
+
+  sig(
+      utc_offset: String,
+  )
+  .returns(Time)
+  def localtime(utc_offset=_); end
+
+  sig(
+      year: Integer,
+      month: T.any(Integer, String),
+      day: Integer,
+      hour: Integer,
+      min: Integer,
+      sec: Numeric,
+      usec_with_frac: Numeric,
+  )
+  .returns(Object)
+  def initialize(year=_, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
   sig(
       year: Integer,
@@ -11909,8 +11973,17 @@ class Time
   .returns(Time)
   def self.local(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  sig.returns(Time)
-  def self.now(); end
+  sig(
+      year: Integer,
+      month: T.any(Integer, String),
+      day: Integer,
+      hour: Integer,
+      min: Integer,
+      sec: Numeric,
+      usec_with_frac: Numeric,
+  )
+  .returns(Time)
+  def self.mktime(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
   sig(
       year: Integer,
@@ -11924,99 +11997,23 @@ class Time
   .returns(Time)
   def self.utc(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  sig(
-      year: Integer,
-      month: T.any(Integer, String),
-      day: Integer,
-      hour: Integer,
-      min: Integer,
-      sec: Numeric,
-      usec_with_frac: Numeric,
-  )
-  .returns(Object)
-  def initialize(year=_, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
-
-  sig(
-      arg0: Numeric,
-  )
-  .returns(Time)
-  def +(arg0); end
-
-  sig(
-      arg0: Time,
-  )
-  .returns(Float)
-  sig(
-      arg0: Numeric,
-  )
-  .returns(Time)
-  def -(arg0); end
-
-  sig(
-      other: Time,
-  )
-  .returns(T.any(Integer, NilClass))
-  def <=>(other); end
-
-  sig.returns(String)
-  def asctime(); end
-
-  sig.returns(String)
-  def ctime(); end
+  sig.returns(Float)
+  def to_f(); end
 
   sig.returns(Integer)
   def day(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def dst?(); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def friday?(); end
-
-  sig.returns(Time)
-  def getgm(); end
-
-  sig(
-      utc_offset: Integer,
-  )
-  .returns(Time)
-  def getlocal(utc_offset=_); end
-
-  sig.returns(Time)
-  def getutc(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def gmt?(); end
-
   sig.returns(Integer)
   def gmt_offset(); end
 
-  sig.returns(Time)
-  def gmtime(); end
+  sig.returns(Integer)
+  def gmtoff(); end
 
   sig.returns(Integer)
   def hash(); end
 
   sig.returns(Integer)
   def hour(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def isdst(); end
-
-  sig(
-      utc_offset: String,
-  )
-  .returns(Time)
-  def localtime(utc_offset=_); end
 
   sig.returns(Integer)
   def mday(); end
@@ -12027,59 +12024,32 @@ class Time
   sig.returns(Integer)
   def mon(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def monday?(); end
+  sig.returns(Integer)
+  def month(); end
 
   sig.returns(Integer)
   def nsec(); end
 
-  sig(
-      arg0: Integer,
-  )
-  .returns(Time)
-  def round(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def saturday?(); end
-
   sig.returns(Integer)
   def sec(); end
 
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def strftime(arg0); end
+  sig.returns(Integer)
+  def utc_offset(); end
+
+  sig.returns(Integer)
+  def wday(); end
+
+  sig.returns(Integer)
+  def yday(); end
+
+  sig.returns(Integer)
+  def year(); end
 
   sig.returns(Numeric)
   def subsec(); end
 
-  sig.returns(Time)
-  def succ(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def sunday?(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def thursday?(); end
-
-  sig.returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T.any(TrueClass, FalseClass), String])
-  def to_a(); end
-
-  sig.returns(Float)
-  def to_f(); end
-
   sig.returns(Numeric)
   def to_i(); end
-
-  sig.returns(Rational)
-  def to_r(); end
-
-  sig.returns(String)
-  def to_s(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def tuesday?(); end
 
   sig.returns(Numeric)
   def tv_nsec(); end
@@ -12093,29 +12063,56 @@ class Time
   sig.returns(Numeric)
   def usec(); end
 
-  sig.returns(Time)
-  def utc(); end
+  sig.returns(Rational)
+  def to_r(); end
+
+  sig.returns(String)
+  def asctime(); end
+
+  sig.returns(String)
+  def ctime(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(String)
+  def to_s(); end
+
+  sig.returns(String)
+  def zone(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def dst?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def friday?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def gmt?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def isdst(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def monday?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def saturday?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def sunday?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def thursday?(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def tuesday?(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def utc?(); end
 
-  sig.returns(Integer)
-  def utc_offset(); end
-
-  sig.returns(Integer)
-  def wday(); end
-
   sig.returns(T.any(TrueClass, FalseClass))
   def wednesday?(); end
-
-  sig.returns(Integer)
-  def yday(); end
-
-  sig.returns(Integer)
-  def year(); end
-
-  sig.returns(String)
-  def zone(); end
 
   sig.returns(Time)
   def clone(); end
@@ -12125,6 +12122,21 @@ class Time
 
   sig.returns(Time)
   def freeze(); end
+
+  sig.returns(Time)
+  def getgm(); end
+
+  sig.returns(Time)
+  def getutc(); end
+
+  sig.returns(Time)
+  def gmtime(); end
+
+  sig.returns(Time)
+  def self.now(); end
+
+  sig.returns(Time)
+  def succ(); end
 
   sig.returns(Time)
   def taint(); end
@@ -12138,23 +12150,11 @@ class Time
   sig.returns(Time)
   def untrust(); end
 
-  sig(
-      year: Integer,
-      month: T.any(Integer, String),
-      day: Integer,
-      hour: Integer,
-      min: Integer,
-      sec: Numeric,
-      usec_with_frac: Numeric,
-  )
-  .returns(Time)
-  def self.mktime(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
+  sig.returns(Time)
+  def utc(); end
 
-  sig.returns(Integer)
-  def gmtoff(); end
-
-  sig.returns(Integer)
-  def month(); end
+  sig.returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T.any(TrueClass, FalseClass), String])
+  def to_a(); end
 end
 
 class TracePoint
@@ -12228,6 +12228,48 @@ end
 
 module URI
   sig(
+      arg: String,
+      arg0: Regexp,
+  )
+  .returns(String)
+  sig(
+      arg: String,
+      arg0: String,
+  )
+  .returns(String)
+  def self.encode(arg, *arg0); end
+
+  sig(
+      arg: String,
+      arg0: Regexp,
+  )
+  .returns(String)
+  sig(
+      arg: String,
+      arg0: String,
+  )
+  .returns(String)
+  def self.escape(arg, *arg0); end
+
+  sig(
+      arg: String,
+  )
+  .returns(String)
+  def self.decode(*arg); end
+
+  sig(
+      arg: String,
+  )
+  .returns(String)
+  def self.unescape(*arg); end
+
+  sig(
+      schemes: Array,
+  )
+  .returns(T::Array[String])
+  def self.regexp(schemes=_); end
+
+  sig(
       str: String,
       enc: Encoding,
   )
@@ -12251,59 +12293,17 @@ module URI
   sig(
       uri: String,
   )
-  .returns(URI::HTTP)
-  def self.parse(uri); end
-
-  sig(
-      schemes: Array,
-  )
-  .returns(T::Array[String])
-  def self.regexp(schemes=_); end
-
-  sig.returns(T::Hash[String, Class])
-  def self.scheme_list(); end
-
-  sig(
-      uri: String,
-  )
   .returns(T::Array[T.any(String, NilClass)])
   def self.split(uri); end
 
   sig(
-      arg: String,
-      arg0: Regexp,
+      uri: String,
   )
-  .returns(String)
-  sig(
-      arg: String,
-      arg0: String,
-  )
-  .returns(String)
-  def self.escape(arg, *arg0); end
+  .returns(URI::HTTP)
+  def self.parse(uri); end
 
-  sig(
-      arg: String,
-  )
-  .returns(String)
-  def self.unescape(*arg); end
-
-  sig(
-      arg: String,
-      arg0: Regexp,
-  )
-  .returns(String)
-  sig(
-      arg: String,
-      arg0: String,
-  )
-  .returns(String)
-  def self.encode(arg, *arg0); end
-
-  sig(
-      arg: String,
-  )
-  .returns(String)
-  def self.decode(*arg); end
+  sig.returns(T::Hash[String, Class])
+  def self.scheme_list(); end
 end
 
 class UnboundMethod
