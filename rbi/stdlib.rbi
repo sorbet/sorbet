@@ -2142,7 +2142,25 @@ class Class
   def name(); end
 
   sig.returns(Class)
+  def clone(); end
+
+  sig.returns(Class)
+  def dup(); end
+
+  sig.returns(Class)
   def freeze(); end
+
+  sig.returns(Class)
+  def taint(); end
+
+  sig.returns(Class)
+  def trust(); end
+
+  sig.returns(Class)
+  def untaint(); end
+
+  sig.returns(Class)
+  def untrust(); end
 
   sig(
       arg0: Module,
@@ -2179,24 +2197,6 @@ class Class
   )
   .returns(Class)
   def public_constant(*arg0); end
-
-  sig.returns(Class)
-  def clone(); end
-
-  sig.returns(Class)
-  def dup(); end
-
-  sig.returns(Class)
-  def taint(); end
-
-  sig.returns(Class)
-  def trust(); end
-
-  sig.returns(Class)
-  def untaint(); end
-
-  sig.returns(Class)
-  def untrust(); end
 end
 
 class ClosedQueueError
@@ -10690,6 +10690,27 @@ class SortedSet
   extend T::Generic
   Elem = T.type
 
+  sig.returns(SortedSet)
+  def clone(); end
+
+  sig.returns(SortedSet)
+  def dup(); end
+
+  sig.returns(SortedSet)
+  def freeze(); end
+
+  sig.returns(SortedSet)
+  def taint(); end
+
+  sig.returns(SortedSet)
+  def trust(); end
+
+  sig.returns(SortedSet)
+  def untaint(); end
+
+  sig.returns(SortedSet)
+  def untrust(); end
+
   sig(
       o: Elem,
   )
@@ -10734,27 +10755,6 @@ class SortedSet
   )
   .returns(SortedSet)
   def subtract(enum); end
-
-  sig.returns(SortedSet)
-  def clone(); end
-
-  sig.returns(SortedSet)
-  def dup(); end
-
-  sig.returns(SortedSet)
-  def freeze(); end
-
-  sig.returns(SortedSet)
-  def taint(); end
-
-  sig.returns(SortedSet)
-  def trust(); end
-
-  sig.returns(SortedSet)
-  def untaint(); end
-
-  sig.returns(SortedSet)
-  def untrust(); end
 end
 
 class StandardError
@@ -11548,6 +11548,13 @@ class StringScanner
 end
 
 class Struct
+  sig(
+      arg0: BasicObject,
+      arg1: BasicObject,
+  )
+  .returns(Class)
+  def self.new(arg0, *arg1); end
+
   sig.returns(Struct)
   def clone(); end
 
