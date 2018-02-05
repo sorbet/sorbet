@@ -123,6 +123,30 @@ public:
     static std::unique_ptr<Expression> Int(core::Loc loc, int64_t val) {
         return std::make_unique<ast::IntLit>(loc, val);
     }
+
+    static std::unique_ptr<Expression> Symbol(core::Loc loc, core::NameRef name) {
+        return std::make_unique<ast::SymbolLit>(loc, name);
+    }
+
+    static std::unique_ptr<MethodDef> Method(core::Loc loc, core::NameRef name, MethodDef::ARGS_store args,
+                                             std::unique_ptr<Expression> rhs) {
+        return std::make_unique<MethodDef>(loc, core::Symbols::todo(), name, move(args), move(rhs), false);
+    }
+
+    static std::unique_ptr<Expression> Method0(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> rhs) {
+        return Method(loc, name, {}, move(rhs));
+    }
+
+    static std::unique_ptr<Expression> Method1(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> arg0,
+                                               std::unique_ptr<Expression> rhs) {
+        ast::MethodDef::ARGS_store args;
+        args.emplace_back(move(arg0));
+        return Method(loc, name, move(args), move(rhs));
+    }
+
+    static std::unique_ptr<Expression> Constant(core::Context ctx, core::Loc loc, core::SymbolRef sym) {
+        return std::make_unique<ast::ConstantLit>(loc, EmptyTree(loc), sym.data(ctx).name);
+    }
 };
 
 } // namespace ast

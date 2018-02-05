@@ -3,6 +3,8 @@ class T
   end
   def self.assert_type!(*args)
   end
+  def self.untyped
+  end
 end
 class T::Sig
   def returns(*args)
@@ -10,6 +12,8 @@ class T::Sig
 end
 def sig(*args)
   T::Sig.new
+end
+def declare_variables(*args)
 end
 
 class Module

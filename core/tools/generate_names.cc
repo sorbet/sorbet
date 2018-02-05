@@ -102,7 +102,7 @@ NameDef names[] = {
     {"Array", Infer},
     {"Hash", Infer},
     {"noreturn", Resolver},
-    {"declareVariables", "declare_variables", Resolver},
+    {"declareVariables", "declare_variables", Desugar | Resolver},
 
     {"assertType", "assert_type!", Resolver},
     {"cast", Resolver},
@@ -110,7 +110,7 @@ NameDef names[] = {
 
     // Ruby DSL methods which we understand
     {"attr", Resolver},
-    {"attrAccessor", "attr_accessor", Resolver},
+    {"attrAccessor", "attr_accessor", Desugar | Resolver},
     {"attrWriter", "attr_writer", Resolver},
     {"attrReader", "attr_reader", Resolver},
     {"private_", "private", Namer | Resolver},
