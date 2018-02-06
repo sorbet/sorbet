@@ -47,16 +47,21 @@ end
 
 def main
     T.assert_type!(SomeODM.new.foo, T.nilable(String))
+    T.assert_type!(SomeODM.new.foo, String) # error: argument does not have asserted type
     T.assert_type!(SomeODM.new.foo = 'b', NilClass)
     T.assert_type!(SomeODM.new.foo2, T.nilable(String))
+    T.assert_type!(SomeODM.new.foo2, String) # error: argument does not have asserted type
     T.assert_type!(SomeODM.new.foo2 = 'b', NilClass)
 
     T.assert_type!(AdvancedODM.new.default, String)
     T.assert_type!(AdvancedODM.new.nodefault, T.nilable(String))
+    T.assert_type!(AdvancedODM.new.nodefault, String) # error: argument does not have asserted type
     T.assert_type!(AdvancedODM.new.factory, String)
 
     T.assert_type!(AdvancedODM.new.type, String)
     T.assert_type!(AdvancedODM.new.object, T.nilable(Object))
+    # Sadly I can't check this for allowed nillnes since NilClass is an Object
+    # T.assert_type!(AdvancedODM.new.object, Object) # not-a-error: argument does not have asserted type
     T.assert_type!(AdvancedODM.new.array, Array)
     T.assert_type!(AdvancedODM.new.array_of, T::Array[String])
     T.assert_type!(AdvancedODM.new.array_of_explicit, T::Array[String])
@@ -65,6 +70,8 @@ def main
 
     T.assert_type!(AdvancedODM.new.optional_explicit, T.nilable(String))
     T.assert_type!(AdvancedODM.new.optional_existing, T.nilable(String))
+    AdvancedODM.new.optional_existing = 'b'
+    AdvancedODM.new.optional_existing = nil # error: Argument arg0 does not match expected type
     T.assert_type!(AdvancedODM.new.optional_false, String)
     T.assert_type!(AdvancedODM.new.optional, T.nilable(String))
     AdvancedODM.new.optional = 'b'

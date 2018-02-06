@@ -131,7 +131,6 @@ NameDef names[] = {
     {"prop", DSL},
     {"array", DSL},
     {"optional", DSL},
-    {"existing", DSL},
     {"immutable", DSL},
     {"default_", "default", DSL},
     {"factory", DSL},

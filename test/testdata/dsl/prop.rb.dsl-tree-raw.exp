@@ -1588,19 +1588,9 @@ ClassDef{
                     pairs = [
                       [
                         key = SymbolLit{ name = arg0 }
-                        value = Send{
-                          recv = ConstantLit{
-                            scope = EmptyTree
-                            cnst = <constant:T>
-                          }
-                          name = nilable
-                          block = nullptr
-                          args = [
-                            ConstantLit{
-                              scope = EmptyTree
-                              cnst = <constant:String>
-                            }
-                          ]
+                        value = ConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
                         }
                       ]
                     ]
@@ -2012,6 +2002,36 @@ ClassDef{
                     args = [
                     ]
                   }
+                  name = foo
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:SomeODM>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
                   name = foo=
                   block = nullptr
                   args = [
@@ -2061,6 +2081,36 @@ ClassDef{
                       cnst = <constant:String>
                     }
                   ]
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:SomeODM>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = foo2
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -2162,6 +2212,36 @@ ClassDef{
                       cnst = <constant:String>
                     }
                   ]
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:AdvancedODM>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = nodefault
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -2548,6 +2628,42 @@ ClassDef{
                       cnst = <constant:String>
                     }
                   ]
+                }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:AdvancedODM>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = optional_existing=
+              block = nullptr
+              args = [
+                StringLit{ value = b }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:AdvancedODM>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = optional_existing=
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:nil>
                 }
               ]
             }

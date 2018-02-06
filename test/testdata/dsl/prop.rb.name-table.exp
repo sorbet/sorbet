@@ -81,7 +81,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument arg0<> -> String | NilClass
     method optional_existing () -> String
     method optional_existing= (arg0) -> NilClass
-      argument arg0<> -> String | NilClass
+      argument arg0<> -> String
     method optional_explicit () -> String
     method optional_explicit= (arg0) -> NilClass
       argument arg0<> -> String | NilClass

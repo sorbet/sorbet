@@ -156,11 +156,6 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         auto boolOptional = ast::cast_tree<ast::BoolLit>(optional);
         if (boolOptional && boolOptional->value) {
             isOptional = true;
-        } else {
-            auto symbolOptional = ast::cast_tree<ast::SymbolLit>(optional);
-            if (symbolOptional && symbolOptional->name == core::Names::existing()) {
-                isOptional = true;
-            }
         }
 
         auto immutable = ast::cast_tree<ast::BoolLit>(getHashValue(rules, core::Names::immutable()));
