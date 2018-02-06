@@ -100,12 +100,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
                     return core::Types::hashOfUntyped();
                 }
 
-                // HACK(nelhage): clone the LiteralType by hand, since there's no way to go
-                // from shared_ptr<Type> to shared_ptr<LiteralType>
-                auto lit = make_unique<LiteralType>(key->value);
-                lit->underlying = key->underlying;
-
-                keys.push_back(move(lit));
+                keys.push_back(shared_ptr<LiteralType>(args[1].type, key));
                 values.push_back(args[i + 1].type);
             }
             return make_unique<ShapeType>(keys, values);
