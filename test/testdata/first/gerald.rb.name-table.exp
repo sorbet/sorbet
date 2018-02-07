@@ -6,7 +6,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
         class <constant:OpenAPI> () -> untyped
           class <constant:SPEC_PATH> () -> untyped
       class <constant:Gerald> (<constant:BasicObject>) -> <Class:Gerald>
-        class <constant:Chalk> () -> untyped
+        class <constant:Chalk> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped
           class <constant:Log> () -> untyped
         class <constant:Diff> < ::<constant:Object> () -> <Class:Diff>
           field @parsed -> untyped

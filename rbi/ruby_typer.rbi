@@ -20,3 +20,6 @@ class RubyTyper::DynamicStruct < Struct
   .returns(RubyTyper::DynamicStruct)
   def self.new(*arg1); end
 end
+
+class RubyTyper::StubClass
+end

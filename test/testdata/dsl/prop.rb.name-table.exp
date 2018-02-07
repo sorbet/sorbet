@@ -132,8 +132,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method type= (arg0) -> String
       argument arg0<> -> String
   class <constant:NotAODM> < ::<constant:Object> () -> <Class:NotAODM>
-    class <constant:Default> () -> untyped
-    class <constant:IntegerParam> () -> untyped
+    class <constant:Default> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped
+    class <constant:IntegerParam> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped
     method <static-init> ()
   class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object>
     method main ()

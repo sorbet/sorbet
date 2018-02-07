@@ -18,82 +18,46 @@ namespace core {
 
 namespace {
 const char *top_str = "<top>";
-
 const char *bottom_str = "<bottom>";
-
 const char *untyped_str = "untyped";
-
 const char *root_str = "<root>";
-
 const char *nil_str = "nil";
-
 const char *object_str = "Object";
-
 const char *junk_str = "<<JUNK>>";
-
 const char *string_str = "String";
-
 const char *integer_str = "Integer";
-
 const char *float_str = "Float";
-
 const char *symbol_str = "Symbol";
-
 const char *array_str = "Array";
-
 const char *hash_str = "Hash";
-
 const char *proc_str = "Proc";
-
 const char *trueClass_str = "TrueClass";
-
 const char *falseClass_str = "FalseClass";
-
 const char *nilClass_str = "NilClass";
-
 const char *class_str = "Class";
-
 const char *module_str = "Module";
-
 const char *todo_str = "<todo sym>";
-
 const char *no_symbol_str = "<none>";
-
 const char *opus_str = "Opus";
-
 const char *T_str = "T";
-
 const char *basicObject_str = "BasicObject";
-
 const char *kernel_str = "Kernel";
-
 const char *range_str = "Range";
-
 const char *regexp_str = "Regexp";
-
 const char *standardError_str = "StandardError";
-
 const char *complex_str = "Complex";
-
 const char *rational_str = "Rational";
-
 // A magic non user-creatable class with methods to keep state between passes
 const char *magic_str = "<Magic>";
-
 const char *DB_str = "DB";
-
 const char *model_str = "Model";
-
 const char *m_str = "M";
-
 const char *enumerable_str = "Enumerable";
-
 const char *set_str = "Set";
-
 const char *struct_str = "Struct";
-
 const char *file_str = "File";
-
+const char *ruby_typer_str = "RubyTyper";
+const char *stub_str = "StubClass";
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
@@ -188,6 +152,8 @@ void GlobalState::initEmpty() {
     SymbolRef set_id = synthesizeClass(set_str);
     SymbolRef struct_id = synthesizeClass(struct_str);
     SymbolRef file_id = synthesizeClass(file_str);
+    SymbolRef ruby_typer_id = synthesizeClass(ruby_typer_str, 0, true);
+    SymbolRef stub_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(stub_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol(), "no symbol creation failed");
     ENFORCE(top_id == Symbols::top(), "top symbol creation failed");
@@ -231,12 +197,8 @@ void GlobalState::initEmpty() {
     ENFORCE(set_id = Symbols::Set());
     ENFORCE(struct_id = Symbols::Struct());
     ENFORCE(file_id = Symbols::File());
-
-    for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
-        auto id = synthesizeClass(absl::StrCat("Proc", arity), Symbols::Proc()._id);
-        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: ", arity);
-    }
-
+    ENFORCE(ruby_typer_id = Symbols::RubyTyper());
+    ENFORCE(stub_id = Symbols::StubClass());
     // Synthesize nil = NilClass()
     Symbols::nil().data(*this).resultType = core::Types::nil();
 
@@ -305,11 +267,16 @@ void GlobalState::initEmpty() {
         data.resultType = make_unique<core::ClassType>(data.singletonClass(*this));
     }
 
-    while (symbols.size() < Symbols::MAX_SYNTHETIC_SYMBOLS) {
+    while (symbols.size() < Symbols::MAX_SYNTHETIC_SYMBOLS - Symbols::MAX_PROC_ARITY - 1) {
         std::string res(reserved_str);
         res = res + to_string(reservedCount);
         synthesizeClass(res);
         reservedCount++;
+    }
+
+    for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
+        auto id = synthesizeClass(absl::StrCat("Proc", arity), Symbols::Proc()._id);
+        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: ", arity);
     }
 
     // First file is used to indicate absence of a file
