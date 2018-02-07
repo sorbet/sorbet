@@ -19,14 +19,14 @@ public:
 
     static std::unique_ptr<Expression> Send0(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun) {
         Send::ARGS_store nargs;
-        return std::make_unique<ast::Send>(loc, move(recv), fun, move(nargs));
+        return Send(loc, move(recv), fun, move(nargs));
     }
 
     static std::unique_ptr<Expression> Send1(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
                                              std::unique_ptr<Expression> arg1) {
         Send::ARGS_store nargs;
         nargs.emplace_back(move(arg1));
-        return std::make_unique<ast::Send>(loc, move(recv), fun, move(nargs));
+        return Send(loc, move(recv), fun, move(nargs));
     }
 
     static std::unique_ptr<Expression> Send2(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
@@ -34,7 +34,7 @@ public:
         Send::ARGS_store nargs;
         nargs.emplace_back(move(arg1));
         nargs.emplace_back(move(arg2));
-        return std::make_unique<ast::Send>(loc, move(recv), fun, move(nargs));
+        return Send(loc, move(recv), fun, move(nargs));
     }
 
     static std::unique_ptr<Expression> Send3(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
@@ -44,7 +44,7 @@ public:
         nargs.emplace_back(move(arg1));
         nargs.emplace_back(move(arg2));
         nargs.emplace_back(move(arg3));
-        return std::make_unique<ast::Send>(loc, move(recv), fun, move(nargs));
+        return Send(loc, move(recv), fun, move(nargs));
     }
 
     static std::unique_ptr<Expression> Ident(core::Loc loc, core::SymbolRef symbol) {
@@ -52,19 +52,19 @@ public:
     }
 
     static std::unique_ptr<Reference> Local(core::Loc loc, core::NameRef name) {
-        return std::make_unique<ast::UnresolvedIdent>(loc, UnresolvedIdent::Local, name);
+        return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, name);
     }
 
     static std::unique_ptr<Reference> Instance(core::Loc loc, core::NameRef name) {
-        return std::make_unique<ast::UnresolvedIdent>(loc, UnresolvedIdent::Instance, name);
+        return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Instance, name);
     }
 
     static std::unique_ptr<Expression> cpRef(core::Loc loc, Reference &name) {
-        if (UnresolvedIdent *nm = cast_tree<ast::UnresolvedIdent>(&name)) {
-            return std::make_unique<ast::UnresolvedIdent>(loc, nm->kind, nm->name);
+        if (auto *nm = cast_tree<UnresolvedIdent>(&name)) {
+            return std::make_unique<UnresolvedIdent>(loc, nm->kind, nm->name);
         }
-        if (ast::Ident *id = cast_tree<ast::Ident>(&name)) {
-            return std::make_unique<ast::Ident>(loc, id->symbol);
+        if (auto *id = cast_tree<ast::Ident>(&name)) {
+            return Ident(loc, id->symbol);
         }
         Error::notImplemented();
     }
@@ -114,23 +114,23 @@ public:
     }
 
     static std::unique_ptr<Expression> True(core::Loc loc) {
-        return std::make_unique<ast::BoolLit>(loc, true);
+        return std::make_unique<BoolLit>(loc, true);
     }
 
     static std::unique_ptr<Expression> False(core::Loc loc) {
-        return std::make_unique<ast::BoolLit>(loc, false);
+        return std::make_unique<BoolLit>(loc, false);
     }
 
     static std::unique_ptr<Expression> Constant(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef name) {
-        return std::make_unique<ast::ConstantLit>(loc, move(scope), name);
+        return std::make_unique<ConstantLit>(loc, move(scope), name);
     }
 
     static std::unique_ptr<Expression> Int(core::Loc loc, int64_t val) {
-        return std::make_unique<ast::IntLit>(loc, val);
+        return std::make_unique<IntLit>(loc, val);
     }
 
     static std::unique_ptr<Expression> Symbol(core::Loc loc, core::NameRef name) {
-        return std::make_unique<ast::SymbolLit>(loc, name);
+        return std::make_unique<SymbolLit>(loc, name);
     }
 
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::NameRef name, MethodDef::ARGS_store args,
@@ -144,40 +144,39 @@ public:
 
     static std::unique_ptr<Expression> Method1(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> arg0,
                                                std::unique_ptr<Expression> rhs) {
-        ast::MethodDef::ARGS_store args;
+        MethodDef::ARGS_store args;
         args.emplace_back(move(arg0));
         return Method(loc, name, move(args), move(rhs));
     }
 
-    static std::unique_ptr<ast::Expression> Hash(core::Loc loc, ast::Hash::ENTRY_store keys,
-                                                 ast::Hash::ENTRY_store values) {
+    static std::unique_ptr<Expression> Hash(core::Loc loc, Hash::ENTRY_store keys, Hash::ENTRY_store values) {
         return std::make_unique<ast::Hash>(loc, move(keys), move(values));
     }
 
-    static std::unique_ptr<ast::Expression> Hash0(core::Loc loc) {
-        ast::Hash::ENTRY_store keys;
-        ast::Hash::ENTRY_store values;
+    static std::unique_ptr<Expression> Hash0(core::Loc loc) {
+        Hash::ENTRY_store keys;
+        Hash::ENTRY_store values;
         return Hash(loc, move(keys), move(values));
     }
 
-    static std::unique_ptr<ast::Expression> Hash1(core::Loc loc, std::unique_ptr<ast::Expression> key,
-                                                  std::unique_ptr<ast::Expression> value) {
-        ast::Hash::ENTRY_store keys;
-        ast::Hash::ENTRY_store values;
+    static std::unique_ptr<Expression> Hash1(core::Loc loc, std::unique_ptr<Expression> key,
+                                             std::unique_ptr<Expression> value) {
+        Hash::ENTRY_store keys;
+        Hash::ENTRY_store values;
         keys.emplace_back(move(key));
         values.emplace_back(move(value));
         return Hash(loc, move(keys), move(values));
     }
 
-    static std::unique_ptr<ast::Expression> Sig(core::Loc loc, std::unique_ptr<ast::Expression> hash,
-                                                std::unique_ptr<ast::Expression> ret) {
-        auto sig = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::sig(), move(hash));
-        return ast::MK::Send1(loc, move(sig), core::Names::returns(), move(ret));
+    static std::unique_ptr<Expression> Sig(core::Loc loc, std::unique_ptr<Expression> hash,
+                                           std::unique_ptr<Expression> ret) {
+        auto sig = Send1(loc, Self(loc), core::Names::sig(), move(hash));
+        return Send1(loc, move(sig), core::Names::returns(), move(ret));
     }
 
-    static std::unique_ptr<ast::Expression> Cast(core::Loc loc, std::unique_ptr<ast::Expression> type) {
-        return ast::MK::Send2(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::cast(),
-                              ast::MK::Ident(loc, core::Symbols::nil()), move(type));
+    static std::unique_ptr<Expression> Cast(core::Loc loc, std::unique_ptr<Expression> type) {
+        return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Ident(loc, core::Symbols::nil()),
+                     move(type));
     }
 };
 
