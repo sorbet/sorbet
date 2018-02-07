@@ -24,18 +24,6 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).optional(:optional_param, <emptyTree>::<constant:IntegerParam>.new())
     end
     class <emptyTree>::<constant:SomeODM><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-
-      def foo2<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-      end
-
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
-
-      def foo2=<<constant:<todo sym>>>(arg0)
-        <emptyTree>::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
-      end
-
       self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
 
       def foo<<constant:<todo sym>>>()
@@ -46,6 +34,18 @@ class <emptyTree><<constant:<root>>> < ()
 
       def foo=<<constant:<todo sym>>>(arg0)
         ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
+      end
+
+      self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+
+      def foo2<<constant:<todo sym>>>()
+        <emptyTree>::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      end
+
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+
+      def foo2=<<constant:<todo sym>>>(arg0)
+        <emptyTree>::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
     end
     class <emptyTree>::<constant:AdvancedODM><<constant:<todo sym>>> < (::<constant:<todo sym>>)

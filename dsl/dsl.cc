@@ -12,32 +12,36 @@ class DSLReplacer {
 
 public:
     ast::ClassDef *postTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
-        vector<unique_ptr<ast::Expression>> newNodes;
+        unordered_map<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(stat.get(),
                      [&](ast::Send *send) {
 
                          auto nodes = ChalkODMProp::replaceDSL(ctx, send);
-
                          if (!nodes.empty()) {
-                             for (auto &node : nodes) {
-                                 newNodes.emplace_back(move(node));
-                             }
-                             stat.reset(nullptr);
+                             replaceNodes[stat.get()] = move(nodes);
+                             return;
                          }
                      },
 
                      [&](ast::Expression *e) {});
         }
-
-        for (auto &node : newNodes) {
-            classDef->rhs.emplace_back(move(node));
+        if (replaceNodes.empty()) {
+            return classDef;
         }
 
-        auto toRemove = remove_if(classDef->rhs.begin(), classDef->rhs.end(),
-                                  [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
+        auto oldRHS = move(classDef->rhs);
+        classDef->rhs.clear();
 
-        classDef->rhs.erase(toRemove, classDef->rhs.end());
+        for (auto &stat : oldRHS) {
+            if (replaceNodes.find(stat.get()) != replaceNodes.end()) {
+                for (auto &newNode : replaceNodes.at(stat.get())) {
+                    classDef->rhs.emplace_back(move(newNode));
+                }
+            } else {
+                classDef->rhs.emplace_back(move(stat));
+            }
+        }
         return classDef;
     }
 

@@ -218,122 +218,6 @@ ClassDef{
                 name = sig
                 block = nullptr
                 args = [
-                ]
-              }
-              name = returns
-              block = nullptr
-              args = [
-                Send{
-                  recv = ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:T>
-                  }
-                  name = nilable
-                  block = nullptr
-                  args = [
-                    ConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
-                }
-              ]
-            }
-
-            MethodDef{
-              self = 0
-              name = foo2<<constant:<todo sym>>>
-              args = []
-              rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
-                }
-                name = cast
-                block = nullptr
-                args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
-                  Send{
-                    recv = ConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:T>
-                    }
-                    name = nilable
-                    block = nullptr
-                    args = [
-                      ConstantLit{
-                        scope = EmptyTree
-                        cnst = <constant:String>
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-
-            Send{
-              recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
-                name = sig
-                block = nullptr
-                args = [
-                  Hash{
-                    pairs = [
-                      [
-                        key = SymbolLit{ name = arg0 }
-                        value = ConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:String>
-                        }
-                      ]
-                    ]
-                  }
-                ]
-              }
-              name = returns
-              block = nullptr
-              args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
-                }
-              ]
-            }
-
-            MethodDef{
-              self = 0
-              name = foo2=<<constant:<todo sym>>>
-              args = [UnresolvedIdent{
-                  kind = Local
-                  name = arg0
-                }]
-              rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
-                }
-                name = cast
-                block = nullptr
-                args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:String>
-                  }
-                ]
-              }
-            }
-
-            Send{
-              recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
-                name = sig
-                block = nullptr
-                args = [
                   Hash{
                     pairs = [
                     ]
@@ -429,6 +313,122 @@ ClassDef{
               rhs = Send{
                 recv = Ident{
                   symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foo2<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:T>
+                    }
+                    name = nilable
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = SymbolLit{ name = arg0 }
+                        value = ConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foo2=<<constant:<todo sym>>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = arg0
+                }]
+              rhs = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:T>
                 }
                 name = cast
                 block = nullptr
