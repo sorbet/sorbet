@@ -5,7 +5,7 @@ class <emptyTree>::<constant:TestSig><<constant:TestSig>> < (::<constant:<todo s
 end
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$8>()
+    def self.<static-init><<static-init>$9>()
       begin
         <emptyTree>
         #<constant:T2> = ::<constant:T1>

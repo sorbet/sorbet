@@ -4,6 +4,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method test_resolve () -> T1
   class <singleton class:<constant:T1>> < ::<singleton class:<constant:Object>> ()
   class <singleton class:<constant:TestSig>> < ::<singleton class:<constant:Object>> ()
-  method <static-init>$8 ()
+  method <static-init>$9 ()
   static-field <constant:T2> -> <Class:T1>
 

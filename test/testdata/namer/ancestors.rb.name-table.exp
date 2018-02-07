@@ -7,5 +7,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <singleton class:<constant:Mixin1>> < ::<constant:Module> ()
   class <singleton class:<constant:Mixin2>> < ::<constant:Module> ()
   class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
-  method <static-init>$7 ()
+  method <static-init>$8 ()
 

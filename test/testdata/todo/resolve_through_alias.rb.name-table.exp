@@ -8,5 +8,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <singleton class:<constant:Inner>> < ::<constant:Module> ()
   class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
   class <singleton class:<constant:NS>> < ::<constant:Module> ()
-  method <static-init>$7 ()
+  method <static-init>$8 ()
 

@@ -1,4 +1,4 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:TopLevelConst> () -> untyped
-  method <static-init>$7 ()
+  method <static-init>$8 ()
 

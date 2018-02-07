@@ -1,0 +1,2 @@
+module T::Generic
+end

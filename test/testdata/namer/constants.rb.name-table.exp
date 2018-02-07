@@ -6,5 +6,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       static-field <constant:D> -> Integer
     class <singleton class:<constant:B>> < ::<constant:Module> ()
   class <singleton class:<constant:A>> < ::<constant:Module> ()
-  method <static-init>$7 ()
+  method <static-init>$8 ()
 

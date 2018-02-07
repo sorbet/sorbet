@@ -1,21 +1,21 @@
 digraph "for.rb"{
-subgraph "cluster_#<static-init>$7" {
-    label = "#<static-init>$7";
+subgraph "cluster_#<static-init>$8" {
+    label = "#<static-init>$8";
     color = blue;
-    "bb#<static-init>$7_0" [shape = invhouse];
-    "bb#<static-init>$7_1" [shape = parallelogram];
+    "bb#<static-init>$8_0" [shape = invhouse];
+    "bb#<static-init>$8_1" [shape = parallelogram];
 
-    "bb#<static-init>$7_0" [label = "block[id=0]()
+    "bb#<static-init>$8_0" [label = "block[id=0]()
 <constant:Main>$8 = alias <constant:Main> : <Class:Main>
 <returnMethodTemp>$2 = <constant:Main>$8.main() : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
-    "bb#<static-init>$7_0" -> "bb#<static-init>$7_1" [style="bold"];
-    "bb#<static-init>$7_1" [label = "block[id=1]()
+    "bb#<static-init>$8_0" -> "bb#<static-init>$8_1" [style="bold"];
+    "bb#<static-init>$8_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$7_1" -> "bb#<static-init>$7_1" [style="bold"];
+    "bb#<static-init>$8_1" -> "bb#<static-init>$8_1" [style="bold"];
 }
 
 subgraph "cluster_::<singleton class:<constant:A>>#each" {

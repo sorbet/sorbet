@@ -14,5 +14,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method f () -> AliasType { symbol = ::<constant:Funcs>#f }
     method g () -> AliasType { symbol = ::<constant:Funcs>#g }
     method h () -> AliasType { symbol = ::<constant:Funcs>#h }
-  method <static-init>$7 ()
+  method <static-init>$8 ()
 

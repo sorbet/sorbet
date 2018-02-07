@@ -2,7 +2,7 @@ begin
   class <emptyTree><<constant:<root>>> < ()
     <emptyTree>
 
-    def self.<static-init><<static-init>$7>()
+    def self.<static-init><<static-init>$8>()
       begin
         <emptyTree>
         <emptyTree>
