@@ -13,7 +13,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
     class <emptyTree>::<constant:RealStruct><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       class <emptyTree>::<constant:A><<constant:<todo sym>>> < ()
-        self(<constant:<todo sym>>).declare_variables({:@foo => <emptyTree>::<constant:T>.untyped(), :@bar => <emptyTree>::<constant:T>.untyped()})
+        self(<constant:<todo sym>>).declare_variables({:@foo => ::<constant:T>.untyped(), :@bar => ::<constant:T>.untyped()})
 
         self(<constant:<todo sym>>).attr_accessor(:foo)
 
@@ -39,7 +39,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
     class <emptyTree>::<constant:TwoStructs><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       class <emptyTree>::<constant:A><<constant:<todo sym>>> < ()
-        self(<constant:<todo sym>>).declare_variables({:@foo => <emptyTree>::<constant:T>.untyped()})
+        self(<constant:<todo sym>>).declare_variables({:@foo => ::<constant:T>.untyped()})
 
         self(<constant:<todo sym>>).attr_accessor(:foo)
 
@@ -49,7 +49,7 @@ class <emptyTree><<constant:<root>>> < ()
       end
 
       class <emptyTree>::<constant:B><<constant:<todo sym>>> < ()
-        self(<constant:<todo sym>>).declare_variables({:@foo => <emptyTree>::<constant:T>.untyped()})
+        self(<constant:<todo sym>>).declare_variables({:@foo => ::<constant:T>.untyped()})
 
         self(<constant:<todo sym>>).attr_accessor(:foo)
 
@@ -60,7 +60,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
     class <emptyTree>::<constant:AccidentallyStruct><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       class <emptyTree>::<constant:A><<constant:<todo sym>>> < ()
-        self(<constant:<todo sym>>).declare_variables({:@foo => <emptyTree>::<constant:T>.untyped(), :@bar => <emptyTree>::<constant:T>.untyped()})
+        self(<constant:<todo sym>>).declare_variables({:@foo => ::<constant:T>.untyped(), :@bar => ::<constant:T>.untyped()})
 
         self(<constant:<todo sym>>).attr_accessor(:foo)
 

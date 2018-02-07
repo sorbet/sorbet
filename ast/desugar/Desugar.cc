@@ -235,7 +235,7 @@ unique_ptr<ast::Expression> maybeHandleStruct(core::Context ctx, core::Loc loc, 
         body.emplace_back(MK::Send1(loc, MK::Self(loc), core::Names::attrAccessor(), MK::Symbol(loc, sym->val)));
         auto key = ctx.state.enterNameUTF8("@" + sym->val.toString(ctx));
         keys.emplace_back(MK::Symbol(loc, key));
-        values.emplace_back(MK::Send0(loc, MK::Constant(ctx, loc, core::Symbols::T()), core::Names::untyped()));
+        values.emplace_back(MK::Send0(loc, MK::Ident(loc, core::Symbols::T()), core::Names::untyped()));
         methodArgs.emplace_back(MK::Local(loc, sym->val));
     }
     ClassDef::ANCESTORS_store ancestors;

@@ -36,13 +36,13 @@ class <emptyTree><<constant:<root>>> < ()
         <emptyTree>
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
 
       def foo<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::<constant:T>.cast(::<constant:nil>, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
 
       def foo=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -52,22 +52,22 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def default<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
 
       def default=<<constant:<todo sym>>>(arg0)
         <emptyTree>
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
 
       def nodefault<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::<constant:T>.cast(::<constant:nil>, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
 
       def nodefault=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -76,10 +76,10 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def factory<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
 
       def factory=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -88,22 +88,22 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def type<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
 
       def type=<<constant:<todo sym>>>(arg0)
         <emptyTree>
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Object>))
+      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(::<constant:Object>))
 
       def object<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Object>))
+        ::<constant:T>.cast(::<constant:nil>, ::<constant:T>.nilable(::<constant:Object>))
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:Object>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => ::<constant:Object>}).returns(::<constant:NilClass>)
 
       def object=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -112,22 +112,22 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:Array>)
 
       def array<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:Array>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:Array>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:Array>}).returns(::<constant:NilClass>)
 
       def array=<<constant:<todo sym>>>(arg0)
         <emptyTree>
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:Array>.[](<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
 
       def array_of<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:Array>.[](<emptyTree>::<constant:String>))
+        ::<constant:T>.cast(::<constant:nil>, ::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => ::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(::<constant:NilClass>)
 
       def array_of=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -136,10 +136,10 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:Array>)
 
       def array_of_explicit<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:Array>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:Array>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:Array>}).returns(::<constant:NilClass>)
 
       def array_of_explicit=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -148,10 +148,10 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
 
       def t_array<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(::<constant:NilClass>)
 
       def t_array=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -160,10 +160,10 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
 
       def hash_of<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>)}).returns(::<constant:NilClass>)
 
       def hash_of=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -172,10 +172,10 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def optional_explicit<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => ::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(::<constant:NilClass>)
 
       def optional_explicit=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -184,10 +184,10 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def optional_existing<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
 
       def optional_existing=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -196,10 +196,10 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def optional_false<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
 
       def optional_false=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -208,10 +208,10 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def optional<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:arg0 => ::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(::<constant:NilClass>)
 
       def optional=<<constant:<todo sym>>>(arg0)
         <emptyTree>
@@ -220,19 +220,19 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def const_explicit<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def const<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:String>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:Array>)
 
       def no_class_arg<<constant:<todo sym>>>()
-        <emptyTree>::<constant:T>.cast(<emptyTree>::<constant:nil>, <emptyTree>::<constant:Array>)
+        ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:Array>)
       end
     end
     def main<<constant:<todo sym>>>()

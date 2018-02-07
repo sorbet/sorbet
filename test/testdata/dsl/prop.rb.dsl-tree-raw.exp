@@ -328,9 +328,8 @@ ClassDef{
               block = nullptr
               args = [
                 Send{
-                  recv = ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:T>
+                  recv = Ident{
+                    symbol = <constant:T>
                   }
                   name = nilable
                   block = nullptr
@@ -349,21 +348,18 @@ ClassDef{
               name = foo<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   Send{
-                    recv = ConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:T>
+                    recv = Ident{
+                      symbol = <constant:T>
                     }
                     name = nilable
                     block = nullptr
@@ -400,9 +396,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -454,16 +449,14 @@ ClassDef{
               name = default<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -495,9 +488,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -528,9 +520,8 @@ ClassDef{
               block = nullptr
               args = [
                 Send{
-                  recv = ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:T>
+                  recv = Ident{
+                    symbol = <constant:T>
                   }
                   name = nilable
                   block = nullptr
@@ -549,21 +540,18 @@ ClassDef{
               name = nodefault<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   Send{
-                    recv = ConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:T>
+                    recv = Ident{
+                      symbol = <constant:T>
                     }
                     name = nilable
                     block = nullptr
@@ -600,9 +588,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -644,16 +631,14 @@ ClassDef{
               name = factory<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -685,9 +670,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -729,16 +713,14 @@ ClassDef{
               name = type<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -770,9 +752,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -803,16 +784,14 @@ ClassDef{
               block = nullptr
               args = [
                 Send{
-                  recv = ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:T>
+                  recv = Ident{
+                    symbol = <constant:T>
                   }
                   name = nilable
                   block = nullptr
                   args = [
-                    ConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:Object>
+                    Ident{
+                      symbol = <constant:Object>
                     }
                   ]
                 }
@@ -824,28 +803,24 @@ ClassDef{
               name = object<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   Send{
-                    recv = ConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:T>
+                    recv = Ident{
+                      symbol = <constant:T>
                     }
                     name = nilable
                     block = nullptr
                     args = [
-                      ConstantLit{
-                        scope = EmptyTree
-                        cnst = <constant:Object>
+                      Ident{
+                        symbol = <constant:Object>
                       }
                     ]
                   }
@@ -863,9 +838,8 @@ ClassDef{
                     pairs = [
                       [
                         key = SymbolLit{ name = arg0 }
-                        value = ConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:Object>
+                        value = Ident{
+                          symbol = <constant:Object>
                         }
                       ]
                     ]
@@ -875,9 +849,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -919,16 +892,14 @@ ClassDef{
               name = array<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -960,9 +931,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -993,9 +963,8 @@ ClassDef{
               block = nullptr
               args = [
                 Send{
-                  recv = ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:Array>
+                  recv = Ident{
+                    symbol = <constant:Array>
                   }
                   name = []
                   block = nullptr
@@ -1014,21 +983,18 @@ ClassDef{
               name = array_of<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   Send{
-                    recv = ConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:Array>
+                    recv = Ident{
+                      symbol = <constant:Array>
                     }
                     name = []
                     block = nullptr
@@ -1054,9 +1020,8 @@ ClassDef{
                       [
                         key = SymbolLit{ name = arg0 }
                         value = Send{
-                          recv = ConstantLit{
-                            scope = EmptyTree
-                            cnst = <constant:Array>
+                          recv = Ident{
+                            symbol = <constant:Array>
                           }
                           name = []
                           block = nullptr
@@ -1075,9 +1040,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -1119,16 +1083,14 @@ ClassDef{
               name = array_of_explicit<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -1160,9 +1122,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -1217,16 +1178,14 @@ ClassDef{
               name = t_array<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   Send{
                     recv = ConstantLit{
@@ -1284,9 +1243,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -1345,16 +1303,14 @@ ClassDef{
               name = hash_of<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   Send{
                     recv = ConstantLit{
@@ -1420,9 +1376,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -1464,16 +1419,14 @@ ClassDef{
               name = optional_explicit<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -1494,9 +1447,8 @@ ClassDef{
                       [
                         key = SymbolLit{ name = arg0 }
                         value = Send{
-                          recv = ConstantLit{
-                            scope = EmptyTree
-                            cnst = <constant:T>
+                          recv = Ident{
+                            symbol = <constant:T>
                           }
                           name = nilable
                           block = nullptr
@@ -1515,9 +1467,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -1559,16 +1510,14 @@ ClassDef{
               name = optional_existing<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -1600,9 +1549,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -1644,16 +1592,14 @@ ClassDef{
               name = optional_false<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -1685,9 +1631,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -1729,16 +1674,14 @@ ClassDef{
               name = optional<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -1759,9 +1702,8 @@ ClassDef{
                       [
                         key = SymbolLit{ name = arg0 }
                         value = Send{
-                          recv = ConstantLit{
-                            scope = EmptyTree
-                            cnst = <constant:T>
+                          recv = Ident{
+                            symbol = <constant:T>
                           }
                           name = nilable
                           block = nullptr
@@ -1780,9 +1722,8 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:NilClass>
+                Ident{
+                  symbol = <constant:NilClass>
                 }
               ]
             }
@@ -1824,16 +1765,14 @@ ClassDef{
               name = const_explicit<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -1870,16 +1809,14 @@ ClassDef{
               name = const<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree
@@ -1916,16 +1853,14 @@ ClassDef{
               name = no_class_arg<<constant:<todo sym>>>
               args = []
               rhs = Send{
-                recv = ConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
+                recv = Ident{
+                  symbol = <constant:T>
                 }
                 name = cast
                 block = nullptr
                 args = [
-                  ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:nil>
+                  Ident{
+                    symbol = <constant:nil>
                   }
                   ConstantLit{
                     scope = EmptyTree

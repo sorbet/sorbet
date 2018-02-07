@@ -143,10 +143,6 @@ public:
         args.emplace_back(move(arg0));
         return Method(loc, name, move(args), move(rhs));
     }
-
-    static std::unique_ptr<Expression> Constant(core::Context ctx, core::Loc loc, core::SymbolRef sym) {
-        return std::make_unique<ast::ConstantLit>(loc, EmptyTree(loc), sym.data(ctx).name);
-    }
 };
 
 } // namespace ast
