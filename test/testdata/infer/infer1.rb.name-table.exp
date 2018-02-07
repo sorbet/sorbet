@@ -11,5 +11,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method baz7 (cond)
       argument cond<>
     method baz8 ()
-  method <static-init>$6 ()
+  method <static-init>$7 ()
 

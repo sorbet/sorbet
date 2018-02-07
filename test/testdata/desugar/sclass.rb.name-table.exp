@@ -39,5 +39,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <singleton class:<singleton class:<constant:H>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
   class <singleton class:<singleton class:<singleton class:<constant:D>>>> < ::<singleton class:<singleton class:<singleton class:<constant:Object>>>> ()
   field $c
-  method <static-init>$6 ()
+  method <static-init>$7 ()
 

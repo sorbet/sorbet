@@ -19,11 +19,6 @@ unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, unique_ptr<
     return ast::MK::Method1(loc, name, ast::MK::Local(loc, core::Names::arg0()), move(rhs));
 }
 
-unique_ptr<ast::Expression> mkCast(core::Loc loc, unique_ptr<ast::Expression> type) {
-    return ast::MK::Send2(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::cast(),
-                          ast::MK::Ident(loc, core::Symbols::nil()), move(type));
-}
-
 unique_ptr<ast::Expression> mkNilable(core::Loc loc, unique_ptr<ast::Expression> type) {
     return ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::nilable(), move(type));
 }
@@ -177,7 +172,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         getType = mkNilable(loc, move(getType));
     }
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), dupType(getType.get())));
-    stats.emplace_back(mkGet(loc, name->name, mkCast(loc, move(getType))));
+    stats.emplace_back(mkGet(loc, name->name, ast::MK::Cast(loc, move(getType))));
 
     // Compute the setters
 
@@ -191,7 +186,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
             ast::MK::Sig(loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), dupType(setType.get())),
                          dupType(setType.get())));
         core::NameRef setName = ctx.state.enterNameUTF8(name->name.toString(ctx) + "=");
-        stats.emplace_back(mkSet(loc, setName, mkCast(loc, move(setType))));
+        stats.emplace_back(mkSet(loc, setName, ast::MK::Cast(loc, move(setType))));
     }
 
     return stats;

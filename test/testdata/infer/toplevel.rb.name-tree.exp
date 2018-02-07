@@ -1,5 +1,5 @@
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$6>()
+  def self.<static-init><<static-init>$7>()
     1.+("hi")
   end
 end

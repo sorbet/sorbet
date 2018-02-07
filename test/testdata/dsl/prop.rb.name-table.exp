@@ -153,5 +153,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method prop (args)
       argument args<repeated>
   class <singleton class:<constant:SomeODM>> < ::<singleton class:<constant:Object>> ()
-  method <static-init>$6 ()
+  method <static-init>$7 ()
 

@@ -11548,13 +11548,6 @@ class StringScanner
 end
 
 class Struct
-  sig(
-      arg0: BasicObject,
-      arg1: BasicObject,
-  )
-  .returns(Class)
-  def self.new(arg0, *arg1); end
-
   sig.returns(Struct)
   def clone(); end
 

@@ -204,48 +204,6 @@ ClassDef::RHS_store scopeNodeToBody(core::Context ctx, unique_ptr<parser::Node> 
     return body;
 }
 
-unique_ptr<ast::Expression> maybeHandleStruct(core::Context ctx, core::Loc loc, parser::Assign *asgn,
-                                              u2 &uniqueCounter) {
-    auto lhs = parser::cast_node<parser::ConstLhs>(asgn->lhs.get());
-    if (lhs == nullptr) {
-        return nullptr;
-    }
-
-    auto send = parser::cast_node<parser::Send>(asgn->rhs.get());
-    if (send == nullptr) {
-        return nullptr;
-    }
-
-    auto recv = parser::cast_node<parser::Const>(send->receiver.get());
-    if (!recv || recv->scope || recv->name != core::Symbols::Struct().data(ctx).name ||
-        send->method != core::Names::new_() || send->args.empty()) {
-        return nullptr;
-    }
-
-    ClassDef::RHS_store body;
-    MethodDef::ARGS_store methodArgs;
-    Hash::ENTRY_store keys;
-    Hash::ENTRY_store values;
-
-    for (auto &arg : send->args) {
-        auto sym = parser::cast_node<parser::Symbol>(arg.get());
-        if (!sym) {
-            return nullptr;
-        }
-        body.emplace_back(MK::Send1(loc, MK::Self(loc), core::Names::attrAccessor(), MK::Symbol(loc, sym->val)));
-        auto key = ctx.state.enterNameUTF8("@" + sym->val.toString(ctx));
-        keys.emplace_back(MK::Symbol(loc, key));
-        values.emplace_back(MK::Send0(loc, MK::Ident(loc, core::Symbols::T()), core::Names::untyped()));
-        methodArgs.emplace_back(MK::Local(loc, sym->val));
-    }
-    ClassDef::ANCESTORS_store ancestors;
-    body.emplace(body.begin(), MK::Send1(loc, MK::Self(loc), core::Names::declareVariables(),
-                                         make_unique<Hash>(loc, move(keys), move(values))));
-    body.emplace_back(MK::Method(loc, core::Names::initialize(), move(methodArgs), MK::EmptyTree(loc)));
-    return make_unique<ClassDef>(loc, core::Symbols::todo(), node2TreeImpl(ctx, move(asgn->lhs), uniqueCounter),
-                                 move(ancestors), move(body), ClassDefKind::Class);
-}
-
 unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node> what, u2 &uniqueCounter) {
     try {
         if (what.get() == nullptr) {
@@ -748,10 +706,6 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
                 result.swap(res);
             },
             [&](parser::Assign *asgn) {
-                if (auto claz = maybeHandleStruct(ctx, loc, asgn, uniqueCounter)) {
-                    result.swap(claz);
-                    return;
-                }
                 auto lhs = node2TreeImpl(ctx, move(asgn->lhs), uniqueCounter);
                 auto rhs = node2TreeImpl(ctx, move(asgn->rhs), uniqueCounter);
                 auto res = MK::Assign(loc, move(lhs), move(rhs));

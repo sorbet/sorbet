@@ -6,5 +6,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   field $a
   field $b
   field $c
-  method <static-init>$6 ()
+  method <static-init>$7 ()
 

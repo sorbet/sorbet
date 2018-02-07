@@ -107,5 +107,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
         class <constant:GeraldRule> () -> untyped
       class <singleton class:<constant:Gerald>> < ::<constant:Module> ()
     class <singleton class:<constant:CIBot>> < ::<constant:Module> ()
-  method <static-init>$6 ()
+  method <static-init>$7 ()
 

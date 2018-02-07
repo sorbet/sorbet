@@ -134,8 +134,8 @@ public:
     }
 
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::NameRef name, MethodDef::ARGS_store args,
-                                             std::unique_ptr<Expression> rhs) {
-        return std::make_unique<MethodDef>(loc, core::Symbols::todo(), name, move(args), move(rhs), false);
+                                             std::unique_ptr<Expression> rhs, bool self = false) {
+        return std::make_unique<MethodDef>(loc, core::Symbols::todo(), name, move(args), move(rhs), self);
     }
 
     static std::unique_ptr<Expression> Method0(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> rhs) {
@@ -173,6 +173,11 @@ public:
                                                 std::unique_ptr<ast::Expression> ret) {
         auto sig = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::sig(), move(hash));
         return ast::MK::Send1(loc, move(sig), core::Names::returns(), move(ret));
+    }
+
+    static std::unique_ptr<ast::Expression> Cast(core::Loc loc, std::unique_ptr<ast::Expression> type) {
+        return ast::MK::Send2(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::cast(),
+                              ast::MK::Ident(loc, core::Symbols::nil()), move(type));
     }
 };
 

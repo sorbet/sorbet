@@ -1,21 +1,21 @@
 digraph "retry_multiple.rb"{
-subgraph "cluster_#<static-init>$6" {
-    label = "#<static-init>$6";
+subgraph "cluster_#<static-init>$7" {
+    label = "#<static-init>$7";
     color = blue;
-    "bb#<static-init>$6_0" [shape = invhouse];
-    "bb#<static-init>$6_1" [shape = parallelogram];
+    "bb#<static-init>$7_0" [shape = invhouse];
+    "bb#<static-init>$7_1" [shape = parallelogram];
 
-    "bb#<static-init>$6_0" [label = "block[id=0]()
+    "bb#<static-init>$7_0" [label = "block[id=0]()
 <statTemp>$7 = self : <Class:<root>>
 <returnMethodTemp>$2 = <statTemp>$7.main() : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
-    "bb#<static-init>$6_0" -> "bb#<static-init>$6_1" [style="bold"];
-    "bb#<static-init>$6_1" [label = "block[id=1]()
+    "bb#<static-init>$7_0" -> "bb#<static-init>$7_1" [style="bold"];
+    "bb#<static-init>$7_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$6_1" -> "bb#<static-init>$6_1" [style="bold"];
+    "bb#<static-init>$7_1" -> "bb#<static-init>$7_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#main" {

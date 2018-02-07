@@ -1,6 +1,7 @@
 #include "dsl/dsl.h"
 #include "ast/treemap/treemap.h"
 #include "dsl/ChalkODMProp.h"
+#include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
 
 using namespace std;
@@ -16,6 +17,15 @@ public:
         unordered_map<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(stat.get(),
+                     [&](ast::Assign *assign) {
+
+                         auto nodes = Struct::replaceDSL(ctx, assign);
+                         if (!nodes.empty()) {
+                             replaceNodes[stat.get()] = move(nodes);
+                             return;
+                         }
+                     },
+
                      [&](ast::Send *send) {
 
                          auto nodes = ChalkODMProp::replaceDSL(ctx, send);

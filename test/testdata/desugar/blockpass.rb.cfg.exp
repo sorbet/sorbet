@@ -1,39 +1,39 @@
 digraph "blockpass.rb"{
-subgraph "cluster_#<static-init>$6" {
-    label = "#<static-init>$6";
+subgraph "cluster_#<static-init>$7" {
+    label = "#<static-init>$7";
     color = blue;
-    "bb#<static-init>$6_0" [shape = invhouse];
-    "bb#<static-init>$6_1" [shape = parallelogram];
+    "bb#<static-init>$7_0" [shape = invhouse];
+    "bb#<static-init>$7_1" [shape = parallelogram];
 
-    "bb#<static-init>$6_0" [label = "block[id=0]()
+    "bb#<static-init>$7_0" [label = "block[id=0]()
 <statTemp>$12 = self : <Class:<root>>
 <returnMethodTemp>$2 = <statTemp>$12.foo() : untyped
 <unconditional>"];
 
-    "bb#<static-init>$6_0" -> "bb#<static-init>$6_2" [style="bold"];
-    "bb#<static-init>$6_1" [label = "block[id=1]()
+    "bb#<static-init>$7_0" -> "bb#<static-init>$7_2" [style="bold"];
+    "bb#<static-init>$7_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$6_1" -> "bb#<static-init>$6_1" [style="bold"];
-    "bb#<static-init>$6_2" [label = "block[id=2](<returnMethodTemp>$2)
+    "bb#<static-init>$7_1" -> "bb#<static-init>$7_1" [style="bold"];
+    "bb#<static-init>$7_2" [label = "block[id=2](<returnMethodTemp>$2)
 outerLoops: 1
 <block-call>"];
 
-    "bb#<static-init>$6_2" -> "bb#<static-init>$6_4" [style="bold"];
-    "bb#<static-init>$6_2" -> "bb#<static-init>$6_3" [style="tapered"];
+    "bb#<static-init>$7_2" -> "bb#<static-init>$7_4" [style="bold"];
+    "bb#<static-init>$7_2" -> "bb#<static-init>$7_3" [style="tapered"];
 
-    "bb#<static-init>$6_3" [label = "block[id=3](<returnMethodTemp>$2)
+    "bb#<static-init>$7_3" [label = "block[id=3](<returnMethodTemp>$2)
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
-    "bb#<static-init>$6_3" -> "bb#<static-init>$6_1" [style="bold"];
-    "bb#<static-init>$6_4" [label = "block[id=4](<returnMethodTemp>$2)
+    "bb#<static-init>$7_3" -> "bb#<static-init>$7_1" [style="bold"];
+    "bb#<static-init>$7_4" [label = "block[id=4](<returnMethodTemp>$2)
 outerLoops: 1
 <blockReturnTemp>$13 = foo : String(\"foo\")
 <blockReturnTemp>$14 = blockreturn<#<block>$2> <blockReturnTemp>$13 : <bottom>
 <unconditional>"];
 
-    "bb#<static-init>$6_4" -> "bb#<static-init>$6_2" [style="bold"];
+    "bb#<static-init>$7_4" -> "bb#<static-init>$7_2" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Object>#returns_lambda" {

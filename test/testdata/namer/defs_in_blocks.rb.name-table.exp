@@ -6,5 +6,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <singleton class:<constant:Object>> < ::<singleton class:<constant:BasicObject>> ()
     method a_static_method ()
   method <block>$2 ()
-  method <static-init>$6 ()
+  method <static-init>$7 ()
 

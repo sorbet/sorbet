@@ -23,5 +23,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method normal_static_method ()
   class <singleton class:<constant:OtherMixin>> < ::<constant:Module> ()
   class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> ()
-  method <static-init>$6 ()
+  method <static-init>$7 ()
 

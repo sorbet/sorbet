@@ -22,5 +22,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method yielder (<blk>)
       argument <blk><block> -> untyped
   class <singleton class:<constant:Main>> < ::<singleton class:<constant:Object>> ()
-  method <static-init>$6 ()
+  method <static-init>$7 ()
 
