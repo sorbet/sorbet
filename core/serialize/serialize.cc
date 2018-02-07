@@ -1,5 +1,5 @@
 #include "serialize.h"
-#include "../Symbols.h"
+#include "core/Symbols.h"
 #include "lib/lizard_compress.h"
 #include "lib/lizard_decompress.h"
 
@@ -377,7 +377,7 @@ Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     }
     result.resultType = unpickleType(p, gs);
 
-    result.definitionLoc.file = FileRef(*gs, p.getU4());
+    result.definitionLoc.file = FileRef(p.getU4());
     result.definitionLoc.begin_pos = p.getU4();
     result.definitionLoc.end_pos = p.getU4();
     return result;

@@ -2,6 +2,7 @@
 #include "Context.h"
 #include "Types.h"
 #include "core/Names/core.h"
+#include "core/errors/internal.h"
 #include <sstream>
 #include <string>
 
@@ -263,16 +264,19 @@ SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
 SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int maxDepth) const {
     ENFORCE(this->isClass());
     if (maxDepth == 0) {
-        gs.logger.critical("findMemberTransitive hit a loop while resolving {} in {}. Parents are: ", name.toString(gs),
-                           this->fullName(gs));
+        gs.error(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError,
+                 "findMemberTransitive hit a loop while resolving {} in {}. Parents are: ", name.toString(gs),
+                 this->fullName(gs));
         int i = -1;
         for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
             i++;
-            gs.logger.critical("{}:- {}", i, it->data(gs).fullName(gs));
+            gs.error(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError, "{}:- {}", i,
+                     it->data(gs).fullName(gs));
             int j = 0;
             for (auto it2 = it->data(gs).argumentsOrMixins.rbegin(); it2 != it->data(gs).argumentsOrMixins.rend();
                  ++it2) {
-                gs.logger.critical("{}:{} {}", i, j, it2->data(gs).fullName(gs));
+                gs.error(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError, "{}:{} {}", i, j,
+                         it2->data(gs).fullName(gs));
                 j++;
             }
         }
@@ -392,7 +396,6 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     result.resultType = this->resultType;
     result.name = NameRef(to, this->name.id());
     result.definitionLoc = this->definitionLoc;
-    result.definitionLoc.file = FileRef(to, this->definitionLoc.file.id());
     result.typeParams = this->typeParams;
     result.typeAliases = this->typeAliases;
 

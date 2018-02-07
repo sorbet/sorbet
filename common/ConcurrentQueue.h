@@ -24,6 +24,8 @@ template <class Elem, class Queue> class AbstractConcurrentBoundedQueue {
 
 public:
     AbstractConcurrentBoundedQueue(int bound) : bound(bound), elementsLeftToPush(bound), elementsPopped(0) {}
+    AbstractConcurrentBoundedQueue(const AbstractConcurrentBoundedQueue &other) = delete;
+    AbstractConcurrentBoundedQueue(AbstractConcurrentBoundedQueue &&other) = delete;
 
     inline void push(Elem &&elem, int count) {
         _queue.enqueue(std::move(elem));
@@ -60,10 +62,21 @@ public:
     int doneEstimate() {
         return elementsPopped.load(std::memory_order_relaxed);
     }
+
+    int enqueuedEstimate() {
+        return bound - elementsLeftToPush.load(std::memory_order_relaxed);
+    }
 };
 
 template <class Elem>
 using ConcurrentBoundedQueue = AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>>;
+
+template <class Elem>
+class ConcurrentUnBoundedQueue : public AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>> {
+public:
+    ConcurrentUnBoundedQueue() : AbstractConcurrentBoundedQueue<Elem, moodycamel::ConcurrentQueue<Elem>>(INT_MAX){};
+};
+
 template <class Elem>
 using BlockingBoundedQueue = AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>>;
 

@@ -1,5 +1,5 @@
 #include "core/errors/resolver.h"
-#include "../ast/Trees.h"
+#include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "core/Names/resolver.h"

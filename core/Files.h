@@ -13,7 +13,7 @@ class File;
 class FileRef final {
 public:
     FileRef() : _id(-1){};
-    FileRef(const GlobalState &gs, unsigned int id);
+    FileRef(unsigned int id);
 
     FileRef(const FileRef &f) = default;
     FileRef(FileRef &&f) = default;
@@ -79,5 +79,11 @@ public:
 };
 } // namespace core
 } // namespace ruby_typer
-
+namespace std {
+template <> struct hash<ruby_typer::core::FileRef> {
+    std::size_t operator()(const ruby_typer::core::FileRef k) const {
+        return k.id();
+    }
+};
+} // namespace std
 #endif // SRUBY_AST_FILES_H

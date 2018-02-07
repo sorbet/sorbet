@@ -6,7 +6,6 @@
 #include "Loc.h"
 #include "Names.h"
 #include "Symbols.h"
-#include "spdlog/spdlog.h"
 #include <memory>
 
 namespace ruby_typer {
@@ -17,6 +16,8 @@ class NameRef;
 class Symbol;
 class SymbolRef;
 class GlobalSubstitution;
+class ErrorRegion;
+struct ErrorQueue;
 
 namespace serialize {
 class GlobalStateSerializer;
@@ -30,13 +31,14 @@ class GlobalState final {
     friend File;
     friend FileRef;
     friend GlobalSubstitution;
+    friend ErrorRegion;
     friend serialize::GlobalStateSerializer;
     friend class UnfreezeNameTable;
     friend class UnfreezeSymbolTable;
     friend class UnfreezeFileTable;
 
 public:
-    GlobalState(spdlog::logger &logger);
+    GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
     void initEmpty();
 
     GlobalState(const GlobalState &) = delete;
@@ -89,9 +91,7 @@ public:
         annotations.emplace_back(loc, str, pos);
     }
 
-    bool hadCriticalError() const {
-        return errors.hadCritical;
-    };
+    bool hadCriticalError() const;
 
     template <typename... Args>
     void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) const {
@@ -104,12 +104,7 @@ public:
 
     int totalErrors() const;
     void flushErrors();
-    std::vector<std::unique_ptr<BasicError>> drainErrors();
-    std::vector<std::pair<int, int>> errorHistogram() {
-        return this->errors.histogram;
-    }
 
-    spdlog::logger &logger;
     int globalStateId;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
@@ -124,11 +119,7 @@ private:
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;
     std::vector<Annotation> annotations;
-    mutable struct {
-        std::vector<std::unique_ptr<BasicError>> buffer;
-        std::vector<std::pair<int, int>> histogram;
-        bool hadCritical = false;
-    } errors;
+    mutable std::shared_ptr<ErrorQueue> errorQueue;
 
     bool freezeSymbolTable();
     bool freezeNameTable();

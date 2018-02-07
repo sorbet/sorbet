@@ -1,6 +1,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
+#include "core/ErrorQueue.h"
 #include "core/Names/infer.h"
 #include "core/Unfreeze.h"
 #include "dsl/dsl.h"
@@ -19,12 +20,13 @@ namespace ruby_typer {
 namespace infer {
 namespace test {
 
-auto console = spd::stderr_color_mt("infer");
+auto logger = spd::stderr_color_mt("infer_test");
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
 
 class InferFixture : public ::testing::Test {
 public:
     void SetUp() override {
-        ctxPtr = make_unique<core::GlobalState>(*console);
+        ctxPtr = make_unique<core::GlobalState>(errorQueue);
         ctxPtr->initEmpty();
     }
     core::Context getCtx() {

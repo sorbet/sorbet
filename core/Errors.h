@@ -83,12 +83,22 @@ struct ComplexError : public BasicError {
  */
 class ErrorRegion {
 public:
-    ErrorRegion(GlobalState &gs, bool silenceErrors = false) : gs(gs), silenceErrors(silenceErrors){};
+    ErrorRegion(const GlobalState &gs, FileRef f, bool silenceErrors = false)
+        : gs(gs), f(f), silenceErrors(silenceErrors){};
     ~ErrorRegion();
 
 private:
-    GlobalState &gs;
+    const GlobalState &gs;
+    FileRef f;
     bool silenceErrors;
+};
+
+struct ErrorQueueMessage {
+    enum class Kind { Error, Flush, Drop };
+    Kind kind;
+    FileRef whatFile;
+    std::string text;
+    std::unique_ptr<BasicError> error;
 };
 
 } // namespace core

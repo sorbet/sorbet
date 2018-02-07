@@ -1,5 +1,6 @@
 #include "core/errors/errors.h"
 #include "Context.h"
+#include "ErrorQueue.h"
 #include "spdlog/fmt/ostr.h"
 #include <algorithm>
 
@@ -77,11 +78,10 @@ string ComplexError::toString(const GlobalState &gs) {
 }
 
 ErrorRegion::~ErrorRegion() {
-    if (silenceErrors) {
-        gs.drainErrors();
-    } else {
-        gs.flushErrors();
-    }
+    ErrorQueueMessage msg;
+    msg.kind = silenceErrors ? ErrorQueueMessage::Kind::Drop : ErrorQueueMessage::Kind::Flush;
+    msg.whatFile = this->f;
+    gs.errorQueue->queue.push(move(msg), 1);
 }
 
 } // namespace core

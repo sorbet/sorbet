@@ -1,11 +1,10 @@
 #include "namer/namer.h"
-#include "../core/Context.h"
-#include "../core/Symbols.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
 #include "core/Context.h"
 #include "core/Names/namer.h"
+#include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/namer.h"
 

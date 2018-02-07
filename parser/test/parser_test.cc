@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
 #include "parser/Dedenter.h"
@@ -13,9 +14,11 @@ namespace spd = spdlog;
 using ruby_typer::u4;
 using namespace std;
 
+auto logger = spd::stderr_color_mt("parser_test");
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+
 TEST(ParserTest, SimpleParse) { // NOLINT
-    auto console = spd::stderr_color_mt("parse");
-    ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);
     ruby_typer::core::UnfreezeFileTable ft(gs);

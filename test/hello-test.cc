@@ -1,6 +1,7 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/common.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
@@ -8,6 +9,11 @@
 #include <cxxopts.hpp>
 
 using namespace std;
+
+namespace spd = spdlog;
+
+auto logger = spd::stderr_color_mt("hello-test");
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
 
 namespace ruby_typer {
 using namespace ast;
@@ -18,10 +24,8 @@ TEST(HelloTest, GetGreet) { // NOLINT
 
 namespace spd = spdlog;
 
-auto console = spd::stderr_color_mt("console");
-
 TEST(HelloTest, GetSpdlog) { // NOLINT
-    console->info("Welcome to spdlog!");
+    logger->info("Welcome to spdlog!");
 }
 
 TEST(HelloTest, GetCXXopts) { // NOLINT
@@ -142,7 +146,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
         }
     };
 
-    ruby_typer::core::GlobalState cb(*console);
+    ruby_typer::core::GlobalState cb(errorQueue);
     cb.initEmpty();
     ruby_typer::core::Context ctx(cb, core::Symbols::root());
     static const char *foo_str = "Foo";

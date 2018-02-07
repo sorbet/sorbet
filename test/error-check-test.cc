@@ -1,12 +1,18 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 
 using namespace std;
+
+namespace spd = spdlog;
+
+auto logger = spd::stderr_color_mt("error-check-test");
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
 
 namespace ruby_typer {
 
@@ -18,8 +24,7 @@ TEST(ErrorTest, RawCheck) { // NOLINT
 }
 
 TEST(ErrorTest, ParserCheck) { // NOLINT
-    auto console = spdlog::stderr_color_mt("Error Test");
-    ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     ruby_typer::core::UnfreezeNameTable nt(gs);
     ruby_typer::core::UnfreezeSymbolTable st(gs);
@@ -32,7 +37,7 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     } catch (...) {
     }
 
-    EXPECT_EQ(0, gs.drainErrors().size());
+    EXPECT_EQ(0, errorQueue->drainErrors().size());
 }
 
 } // namespace ruby_typer

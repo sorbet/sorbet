@@ -7,6 +7,7 @@
 #include "common/ConcurrentQueue.h"
 #include "common/ProgressIndicator.h"
 #include "common/WorkerPool.h"
+#include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
@@ -144,7 +145,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         std::unique_ptr<parser::Node> nodes;
         {
             tracer->trace("Parsing: {}", file.data(lgs).path());
-            core::ErrorRegion errs(lgs, silenceErrors);
+            core::ErrorRegion errs(lgs, file, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
             nodes = parser::Parser::run(lgs, file);
         }
@@ -156,7 +157,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         std::unique_ptr<ast::Expression> ast;
         {
             tracer->trace("Desugaring: {}", file.data(lgs).path());
-            core::ErrorRegion errs(lgs, silenceErrors);
+            core::ErrorRegion errs(lgs, file, silenceErrors);
             core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
             ast = ast::desugar::node2Tree(ctx, move(nodes));
         }
@@ -221,10 +222,9 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             std::pair<int, std::string> job;
 
             {
-                core::ErrorRegion errs(*lgs, silenceErrors);
-
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                     if (result.gotItem()) {
+                        core::ErrorRegion errs(*lgs, core::FileRef(job.first), silenceErrors);
                         processedByThread++;
                         std::string fileName = job.second;
                         int fileId = job.first;
@@ -247,6 +247,11 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         {
                             core::UnfreezeFileTable unfreezeFiles(*lgs);
                             file = lgs->enterFileAt(fileName, src, fileId);
+                            bool forceTypedSource = !opts.typedSource.empty() &&
+                                                    file.data(*lgs).path().find(opts.typedSource) != std::string::npos;
+                            if (forceTypedSource) {
+                                file.data(*lgs).source_type = ruby_typer::core::File::Typed;
+                            }
                         }
 
                         if (opts.forceTyped) {
@@ -285,6 +290,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
                     }
                 }
+                gs.flushErrors();
                 indexingProgress.reportProgress(fileq->doneEstimate());
             }
         }
@@ -303,12 +309,13 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                 {
                     core::Context ctx(gs, core::Symbols::root());
                     tracer->trace("Naming: {}", file.data(gs).path());
-                    core::ErrorRegion errs(gs, silenceErrors);
+                    core::ErrorRegion errs(gs, file, silenceErrors);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
                     ast = namer::Namer::run(ctx, move(tree));
                 }
                 result.emplace_back(move(ast));
+                gs.flushErrors();
                 namingProgress.reportProgress(result.size());
             } catch (...) {
                 returnCode = 13;
@@ -320,79 +327,70 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
     return result;
 }
 
-unique_ptr<ast::Expression> typecheckFile(core::GlobalState &gs, unique_ptr<ast::Expression> resolved, Options opts,
+unique_ptr<ast::Expression> typecheckFile(const core::Context ctx, unique_ptr<ast::Expression> resolved, Options opts,
                                           bool silenceErrors = false) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
-    bool forceTypedSource = !opts.typedSource.empty() && f.data(gs).path().find(opts.typedSource) != std::string::npos;
-    if (forceTypedSource) {
-        ENFORCE(!opts.print.TypedSource);
-        opts.print.TypedSource = true;
-        f.data(gs).source_type = ruby_typer::core::File::Typed;
-    }
+
     try {
-        core::Context ctx(gs, core::Symbols::root());
         if (opts.print.CFG || opts.print.CFGRaw) {
-            cout << "digraph \"" << File::getFileName(f.data(gs).path()) << "\"{" << endl;
+            cout << "digraph \"" << File::getFileName(f.data(ctx).path()) << "\"{" << endl;
         }
         CFG_Collector_and_Typer collector(opts.print);
         {
-            tracer->trace("CFG+Infer: {}", f.data(gs).path());
-            core::ErrorRegion errs(gs, silenceErrors);
+            tracer->trace("CFG+Infer: {}", f.data(ctx).path());
+            core::ErrorRegion errs(ctx, f, silenceErrors);
             result = ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolved));
         }
-        if (opts.print.TypedSource) {
-            cout << gs.showAnnotatedSource(f);
-        }
+        //        if (opts.print.TypedSource) { //TODO: bring back
+        //            cout << gs.showAnnotatedSource(f);
+        //        }
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "}" << endl << endl;
         }
     } catch (...) {
-        gs.error(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError,
-                 "Exception in cfg+infer: {} (backtrace is above)", f.data(gs).path());
+        ctx.state.error(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError,
+                        "Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
         returnCode = 15;
-    }
-    if (forceTypedSource) {
-        opts.print.TypedSource = false;
     }
     return result;
 }
 
 struct typecheck_thread_result {
     vector<unique_ptr<ast::Expression>> trees;
-    unique_ptr<core::GlobalState> gs;
     CounterState counters;
 };
 
 // If ever given a result type, it should be something along the lines of
 // vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
-void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
+void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
                WorkerPool &workers, bool silenceErrors = false) {
-    vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>> typecheck_result;
+    vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
 
     try {
-        core::Context ctx(gs, core::Symbols::root());
+        core::Context ctx(*gs, core::Symbols::root());
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
             Timer timeit(console_err, "Resolving");
             tracer->trace("Resolving (global pass)...");
-            core::ErrorRegion errs(gs, silenceErrors);
-            core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
-            core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+            core::ErrorRegion errs(*gs, ruby_typer::core::FileRef(), silenceErrors);
+            core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
+            core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what));
         }
     } catch (...) {
-        gs.error(ruby_typer::core::Loc::none(ruby_typer::core::FileRef()), core::errors::Internal::InternalError,
-                 "Exception resolving (backtrace is above)");
+        gs->error(ruby_typer::core::Loc::none(ruby_typer::core::FileRef()), core::errors::Internal::InternalError,
+                  "Exception resolving (backtrace is above)");
         returnCode = 14;
     }
+    gs->flushErrors();
 
     for (auto &resolved : what) {
         if (opts.print.NameTree) {
-            cout << resolved->toString(gs, 0) << endl;
+            cout << resolved->toString(*gs, 0) << endl;
         }
         if (opts.print.NameTreeRaw) {
-            cout << resolved->showRaw(gs) << endl;
+            cout << resolved->showRaw(*gs) << endl;
         }
     }
 
@@ -401,39 +399,35 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
     shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq =
         make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
 
-    gs.sanityCheck();
-    const std::shared_ptr<core::GlobalState> cgs{gs.deepCopy(true)};
+    const core::Context ctx(*gs, core::Symbols::root());
     for (auto &resolved : what) {
-        tracer->trace("enqueue-typer {}", resolved->loc.file.data(gs).path());
+        tracer->trace("enqueue-typer {}", resolved->loc.file.data(*gs).path());
         fileq->push(move(resolved), 1);
     }
 
     {
         ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-        workers.multiplexJob([cgs, opts, fileq, resultq, silenceErrors]() {
-            auto lgs = cgs->deepCopy(true);
+        workers.multiplexJob([ctx, opts, fileq, resultq, silenceErrors]() {
             typecheck_thread_result threadResult;
             unique_ptr<ast::Expression> job;
             int processedByThread = 0;
 
             {
-                core::ErrorRegion errs(*lgs, silenceErrors);
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                     if (result.gotItem()) {
                         processedByThread++;
                         core::FileRef file = job->loc.file;
+                        core::ErrorRegion errs(ctx, file, silenceErrors);
                         try {
-                            threadResult.trees.emplace_back(typecheckFile(*lgs, move(job), opts, silenceErrors));
+                            threadResult.trees.emplace_back(typecheckFile(ctx, move(job), opts, silenceErrors));
                         } catch (...) {
-                            console_err->error("Exception typing file: {} (backtrace is above)",
-                                               file.data(*lgs).path());
+                            console_err->error("Exception typing file: {} (backtrace is above)", file.data(ctx).path());
                         }
                     }
                 }
             }
             if (processedByThread > 0) {
                 threadResult.counters = getAndClearThreadCounters();
-                threadResult.gs = move(lgs);
                 resultq->push(move(threadResult), processedByThread);
             }
         });
@@ -444,18 +438,19 @@ void typecheck(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what, 
                  result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
                 if (result.gotItem()) {
                     counterConsume(move(threadResult.counters));
-                    typecheck_result.emplace_back(move(threadResult.trees), move(threadResult.gs));
+                    typecheck_result.emplace_back(move(threadResult.trees));
                 }
                 cfgInferProgress.reportProgress(fileq->doneEstimate());
+                gs->flushErrors();
             }
         }
     }
 
     if (opts.print.NameTable) {
-        cout << gs.toString() << endl;
+        cout << gs->toString() << endl;
     }
     if (opts.print.NameTableFull) {
-        cout << gs.toString(true) << endl;
+        cout << gs->toString(true) << endl;
     }
     return;
 }
@@ -559,22 +554,22 @@ cxxopts::Options buildOptions() {
     return options;
 }
 
-void createInitialGlobalState(core::GlobalState &gs, const Options &options) {
+void createInitialGlobalState(std::shared_ptr<core::GlobalState> gs, const Options &options) {
     if (options.noStdlib) {
-        gs.initEmpty();
+        gs->initEmpty();
         return;
     }
 
     const u4 *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
-        gs.initEmpty();
+        gs->initEmpty();
         Timer timeit(console_err, "Indexed payload");
 
         vector<core::FileRef> payloadFiles;
         {
-            core::UnfreezeFileTable fileTableAccess(gs);
+            core::UnfreezeFileTable fileTableAccess(*gs);
             for (auto &p : rbi::all()) {
-                payloadFiles.push_back(gs.enterFile(p.first, p.second));
+                payloadFiles.push_back(gs->enterFile(p.first, p.second));
             }
         }
         Options emptyOpts;
@@ -582,11 +577,11 @@ void createInitialGlobalState(core::GlobalState &gs, const Options &options) {
         WorkerPool workers(emptyOpts.threads);
         vector<std::string> empty;
 
-        typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, workers, true), emptyOpts, workers,
+        typecheck(gs, index(*gs, empty, payloadFiles, emptyOpts, workers, true), emptyOpts, workers,
                   true); // result is thrown away
     } else {
         Timer timeit(console_err, "Read serialized payload");
-        core::serialize::GlobalStateSerializer::load(gs, nameTablePayload);
+        core::serialize::GlobalStateSerializer::load(*gs, nameTablePayload);
     }
 }
 
@@ -712,7 +707,7 @@ int realmain(int argc, char **argv) {
         return 1;
     }
 
-    core::GlobalState gs(*console);
+    shared_ptr<core::GlobalState> gs = make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*console)));
     tracer->trace("building initial global state");
     createInitialGlobalState(gs, opts);
     tracer->trace("done building initial global state");
@@ -722,26 +717,26 @@ int realmain(int argc, char **argv) {
     tracer->trace("Files: ");
     {
         Timer timeit(console_err, "reading files");
-        core::UnfreezeFileTable fileTableAccess(gs);
+        core::UnfreezeFileTable fileTableAccess(*gs);
         if (options.count("e") != 0) {
             string src = options["e"].as<string>();
             counterAdd("types.input.bytes", src.size());
             counterInc("types.input.lines");
             counterInc("types.input.files");
-            auto file = gs.enterFile(string("-e"), src);
+            auto file = gs->enterFile(string("-e"), src);
             inputFiles.push_back(file);
             if (opts.forceUntyped) {
                 console->error("`-e` implies `--typed always` and you passed `--typed never`");
                 return 1;
             }
-            file.data(gs).source_type = core::File::Typed;
+            file.data(*gs).source_type = core::File::Typed;
         }
     }
 
     vector<unique_ptr<ast::Expression>> indexed;
     {
         Timer timeit(console_err, "index");
-        indexed = index(gs, files, inputFiles, opts, workers);
+        indexed = index(*gs, files, inputFiles, opts, workers);
     }
 
     {
@@ -752,13 +747,10 @@ int realmain(int argc, char **argv) {
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
-        File::write(outfile.c_str(), core::serialize::GlobalStateSerializer::store(gs));
+        File::write(outfile.c_str(), core::serialize::GlobalStateSerializer::store(*gs));
     }
 
     if (options.count("counters") != 0) {
-        for (auto e : gs.errorHistogram()) {
-            histogramAdd("error", e.first, e.second);
-        }
         console_err->warn("" + getCounterStatistics());
     }
 
@@ -767,7 +759,8 @@ int realmain(int argc, char **argv) {
                                options["statsd-prefix"].as<string>() + ".counters");
     }
 
-    return gs.hadCriticalError() ? 10 : returnCode;
+    // je_malloc_stats_print(NULL, NULL, NULL); // uncomment this to print jemalloc statistics
+    return gs->hadCriticalError() ? 10 : returnCode;
 };
 
 } // namespace ruby_typer

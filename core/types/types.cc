@@ -1,8 +1,8 @@
 #include "core/Types.h"
-#include "../Context.h"
-#include "../Names.h"
-#include "../Types.h"
 #include "common/common.h"
+#include "core/Context.h"
+#include "core/Names.h"
+#include "core/Types.h"
 
 using namespace ruby_typer;
 using namespace ruby_typer::core;

@@ -21,7 +21,7 @@ vector<int> findLineBreaks(const std::string &s) {
 File::File(std::string &&path_, std::string &&source_, Type source_type)
     : source_type(source_type), path_(path_), source_(source_), line_breaks(findLineBreaks(this->source_)) {}
 
-FileRef::FileRef(const GlobalState &gs, unsigned int id) : _id(id) {}
+FileRef::FileRef(unsigned int id) : _id(id) {}
 
 const File &FileRef::data(const GlobalState &gs) const {
     ENFORCE(_id < gs.filesUsed());

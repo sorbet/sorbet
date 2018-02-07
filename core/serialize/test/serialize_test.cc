@@ -1,7 +1,6 @@
 #include "core/serialize/serialize.h"
 #include "gtest/gtest.h"
 
-namespace spd = spdlog;
 using namespace std;
 
 namespace ruby_typer {

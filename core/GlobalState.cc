@@ -1,4 +1,5 @@
 #include "GlobalState.h"
+#include "ErrorQueue.h"
 #include "Types.h"
 #include "core/Names/core.h"
 #include "core/errors/errors.h"
@@ -8,6 +9,7 @@
 #include "absl/strings/str_split.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
+template class std::shared_ptr<ruby_typer::core::GlobalState>;
 
 using namespace std;
 
@@ -120,7 +122,8 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
 int globalStateIdCounter = 1;
 const int Symbols::MAX_PROC_ARITY;
 
-GlobalState::GlobalState(spdlog::logger &logger) : logger(logger), globalStateId(globalStateIdCounter++) {
+GlobalState::GlobalState(std::shared_ptr<ErrorQueue> errorQueue)
+    : globalStateId(globalStateIdCounter++), errorQueue(errorQueue) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
@@ -319,9 +322,7 @@ void GlobalState::initEmpty() {
     sanityCheck();
 }
 
-GlobalState::~GlobalState() {
-    ENFORCE(errors.buffer.empty());
-};
+GlobalState::~GlobalState(){};
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
@@ -698,7 +699,7 @@ FileRef GlobalState::enterFile(std::shared_ptr<File> file) {
     ENFORCE(!fileTableFrozen);
     auto idx = files.size();
     files.emplace_back(file);
-    return FileRef(*this, idx);
+    return FileRef(idx);
 }
 
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
@@ -736,7 +737,7 @@ FileRef GlobalState::enterFileAt(std::shared_ptr<File> file, int id) {
     } else {
         // was a tombstone before.
         this->files[id] = file;
-        core::FileRef result(*this, id);
+        core::FileRef result(id);
         return result;
     }
 }
@@ -855,7 +856,7 @@ bool GlobalState::unfreezeSymbolTable() {
 
 std::unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     this->sanityCheck();
-    auto result = make_unique<GlobalState>(this->logger);
+    auto result = make_unique<GlobalState>(this->errorQueue);
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -964,11 +965,7 @@ string GlobalState::showAnnotatedSource(FileRef file) {
 }
 
 int GlobalState::totalErrors() const {
-    int sum = 0;
-    for (const auto &e : this->errors.histogram) {
-        sum += e.second;
-    }
-    return sum;
+    return errorQueue->queue.enqueuedEstimate();
 }
 
 void GlobalState::_error(unique_ptr<BasicError> error) const {
@@ -980,7 +977,7 @@ void GlobalState::_error(unique_ptr<BasicError> error) const {
     switch (error->what.code) {
         case errors::Internal::InternalError.code:
             error->isCritical = true;
-            this->errors.hadCritical = true;
+            errorQueue->hadCritical = true;
             break;
         case errors::Parser::ParserError.code:
         case errors::Resolver::InvalidMethodSignature.code:
@@ -996,43 +993,21 @@ void GlobalState::_error(unique_ptr<BasicError> error) const {
             }
     }
 
-    auto f = find_if(this->errors.histogram.begin(), this->errors.histogram.end(),
-                     [&](auto &el) -> bool { return el.first == error->what.code; });
-    if (f != this->errors.histogram.end()) {
-        (*f).second++;
-    } else {
-        this->errors.histogram.push_back(std::make_pair((int)error->what.code, 1));
-    }
-    this->errors.buffer.emplace_back(move(error));
+    histogramAdd("error", error->what.code, 1);
+    ErrorQueueMessage msg;
+    msg.kind = ErrorQueueMessage::Kind::Error;
+    msg.whatFile = error->loc.file;
+    msg.text = error->toString(*this);
+    msg.error = move(error);
+    errorQueue->queue.push(move(msg), 1);
+}
+
+bool GlobalState::hadCriticalError() const {
+    return errorQueue->hadCritical;
 }
 
 void GlobalState::flushErrors() {
-    if (this->errors.buffer.empty()) {
-        return;
-    }
-    stringstream critical;
-    stringstream nonCritical;
-    for (auto &error : this->errors.buffer) {
-        auto &out = error->isCritical ? critical : nonCritical;
-        if (out.tellp() != 0) {
-            out << '\n';
-        }
-        out << error->toString(*this);
-    }
-
-    if (critical.tellp() != 0) {
-        this->logger.log(spdlog::level::critical, "{}", critical.str());
-    }
-    if (nonCritical.tellp() != 0) {
-        this->logger.log(spdlog::level::err, "{}", nonCritical.str());
-    }
-    this->errors.buffer.clear();
-}
-
-std::vector<std::unique_ptr<BasicError>> GlobalState::drainErrors() {
-    std::vector<std::unique_ptr<BasicError>> res;
-    swap(res, this->errors.buffer);
-    return res;
+    this->errorQueue->flushErrors();
 }
 
 } // namespace core

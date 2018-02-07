@@ -1,6 +1,7 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
 #include "spdlog/spdlog.h"
@@ -11,10 +12,11 @@
 #include <vector>
 
 namespace spd = spdlog;
+auto logger = spd::stderr_color_mt("desugar_test");
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
 
 TEST(DesugarTest, SimpleDesugar) { // NOLINT
-    auto console = spd::stderr_color_mt("console");
-    ruby_typer::core::GlobalState gs(*console);
+    ruby_typer::core::GlobalState gs(errorQueue);
     gs.initEmpty();
     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);
     ruby_typer::core::UnfreezeFileTable ft(gs);

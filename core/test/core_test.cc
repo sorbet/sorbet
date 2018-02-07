@@ -1,3 +1,4 @@
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
@@ -9,7 +10,8 @@ using namespace std;
 
 namespace ruby_typer {
 namespace core {
-auto console = spd::stderr_color_mt("parse");
+auto logger = spd::stderr_color_mt("parse");
+auto errorQueue = make_shared<core::ErrorQueue>(*logger);
 
 struct Offset2PosTest {
     string src;
@@ -19,7 +21,7 @@ struct Offset2PosTest {
 };
 
 TEST(ASTTest, TestOffset2Pos) { // NOLINT
-    core::GlobalState gs(*console);
+    core::GlobalState gs(errorQueue);
     gs.initEmpty();
     ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
 
@@ -45,18 +47,18 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
 }
 
 TEST(ASTTest, Errors) { // NOLINT
-    core::GlobalState gs(*console);
+    core::GlobalState gs(errorQueue);
     gs.initEmpty();
     ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
     core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
     gs.error(core::Loc{f, 0, 3}, core::errors::Internal::InternalError, "Use of metavariable: {}", "foo");
     ASSERT_TRUE(gs.hadCriticalError());
-    auto errors = gs.drainErrors();
+    auto errors = errorQueue->drainErrors();
     ASSERT_EQ(1, errors.size());
 }
 
 TEST(ASTTest, SymbolRef) { // NOLINT
-    core::GlobalState gs(*console);
+    core::GlobalState gs(errorQueue);
     gs.initEmpty();
     core::SymbolRef ref = core::Symbols::Object();
     EXPECT_EQ(ref, ref.data(gs).ref(gs));
@@ -82,10 +84,10 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
 }
 
 TEST(CoreTest, Substitute) { // NOLINT
-    core::GlobalState gs1(*console);
+    core::GlobalState gs1(errorQueue);
     gs1.initEmpty();
 
-    core::GlobalState gs2(*console);
+    core::GlobalState gs2(errorQueue);
     gs2.initEmpty();
 
     core::NameRef foo1, bar1, other1;

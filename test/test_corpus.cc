@@ -4,6 +4,7 @@
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
 #include "common/common.h"
+#include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
@@ -27,7 +28,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-
 namespace spd = spdlog;
 using namespace std;
 
@@ -124,8 +124,10 @@ unordered_set<string> knownPasses = {"parse-tree",   "ast",        "ast-raw",   
                                      "cfg",          "cfg-raw",    "infer",     "typed-source"};
 
 TEST(CorpusTest, CloneSubstitutePayload) {
-    auto console = spd::stderr_color_mt("ClonePayload");
-    ruby_typer::core::GlobalState gs(*console);
+    auto logger = spd::stderr_color_mt("ClonePayload");
+    auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+
+    ruby_typer::core::GlobalState gs(errorQueue);
     ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
 
     auto c1 = gs.deepCopy();
@@ -156,8 +158,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
     }
 
-    auto console = spd::stderr_color_mt("fixtures: " + inputPath);
-    ruby_typer::core::GlobalState gs(*console);
+    auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
+    auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+    ruby_typer::core::GlobalState gs(errorQueue);
     ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
     ruby_typer::core::Context ctx(gs, ruby_typer::core::Symbols::root());
 
@@ -183,7 +186,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             nodes = ruby_typer::parser::Parser::run(gs, file);
         }
         {
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -191,7 +194,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expectation = test.expectations.find("parse-tree");
         if (expectation != test.expectations.end()) {
             got["parse-tree"].append(nodes->toString(gs)).append("\n");
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -207,7 +210,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("ast");
         if (expectation != test.expectations.end()) {
             got["ast"].append(desugared->toString(gs)).append("\n");
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -215,7 +218,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("ast-raw");
         if (expectation != test.expectations.end()) {
             got["ast-raw"].append(desugared->showRaw(gs)).append("\n");
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -231,7 +234,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("dsl-tree");
         if (expectation != test.expectations.end()) {
             got["dsl-tree"].append(dslUnwound->toString(gs)).append("\n");
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -239,7 +242,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("dsl-tree-raw");
         if (expectation != test.expectations.end()) {
             got["dsl-tree-raw"].append(dslUnwound->showRaw(gs)).append("\n");
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -263,7 +266,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
         got["name-table"] = gs.toString() + "\n";
-        auto newErrors = gs.drainErrors();
+        auto newErrors = errorQueue->drainErrors();
         errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                       std::make_move_iterator(newErrors.end()));
     }
@@ -272,7 +275,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("name-tree");
         if (expectation != test.expectations.end()) {
             got["name-tree"].append(resolvedTree->toString(gs)).append("\n");
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -280,7 +283,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("name-tree-raw");
         if (expectation != test.expectations.end()) {
             got["name-tree-raw"].append(resolvedTree->showRaw(gs));
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -318,7 +321,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             dot << "}" << endl << endl;
             got["cfg"].append(dot.str());
 
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -338,7 +341,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             dot << "}" << endl << endl;
             got["cfg-raw"].append(dot.str());
 
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -352,7 +355,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
             got["typed-source"].append(gs.showAnnotatedSource(file));
 
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -367,7 +370,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             SCOPED_TRACE(checker);
 
             got["infer"] = "";
-            auto newErrors = gs.drainErrors();
+            auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));
         }
@@ -504,7 +507,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     // Allow later phases to have errors that we didn't test for
-    gs.drainErrors();
+    errorQueue->drainErrors();
 
     TEST_COUT << "errors OK" << endl;
 }
