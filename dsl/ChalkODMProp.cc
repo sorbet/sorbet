@@ -26,13 +26,13 @@ unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name) {
     return ast::MK::Method1(loc, name, ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree(loc));
 }
 
-unique_ptr<ast::Expression> mkCast(core::Context ctx, core::Loc loc, unique_ptr<ast::Expression> type) {
-    return ast::MK::Send2(loc, ast::MK::Constant(ctx, loc, core::Symbols::T()), core::Names::cast(),
-                          ast::MK::Constant(ctx, loc, core::Symbols::nil()), move(type));
+unique_ptr<ast::Expression> mkCast(core::Loc loc, unique_ptr<ast::Expression> type) {
+    return ast::MK::Send2(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::cast(),
+                          ast::MK::Ident(loc, core::Symbols::nil()), move(type));
 }
 
-unique_ptr<ast::Expression> mkNilable(core::Context ctx, core::Loc loc, unique_ptr<ast::Expression> type) {
-    return ast::MK::Send1(loc, ast::MK::Constant(ctx, loc, core::Symbols::T()), core::Names::nilable(), move(type));
+unique_ptr<ast::Expression> mkNilable(core::Loc loc, unique_ptr<ast::Expression> type) {
+    return ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::nilable(), move(type));
 }
 
 unique_ptr<ast::Expression> dupType(ast::Expression *orig) {
@@ -52,6 +52,11 @@ unique_ptr<ast::Expression> dupType(ast::Expression *orig) {
             args.emplace_back(move(dupArg));
         }
         return ast::MK::Send(send->loc, move(dupRecv), send->fun, move(args));
+    }
+
+    auto ident = ast::cast_tree<ast::Ident>(orig);
+    if (ident) {
+        return ast::MK::Ident(ident->loc, ident->symbol);
     }
 
     auto cons = ast::cast_tree<ast::ConstantLit>(orig);
@@ -107,7 +112,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
     // This section's goal is to populate this type Expression
     unique_ptr<ast::Expression> type;
     if (send->args.size() == 1) {
-        type = ast::MK::Constant(ctx, loc, core::Symbols::Object());
+        type = ast::MK::Ident(loc, core::Symbols::Object());
     } else {
         type = dupType(send->args[1].get());
     }
@@ -129,8 +134,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         }
         auto arrayType = dupType(getHashValue(rules, core::Names::array()));
         if (arrayType) {
-            type = ast::MK::Send1(loc, ast::MK::Constant(ctx, loc, core::Symbols::T_Array()),
-                                  core::Names::squareBrackets(), move(arrayType));
+            type = ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T_Array()), core::Names::squareBrackets(),
+                                  move(arrayType));
         }
     }
 
@@ -179,10 +184,10 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
 
     auto getType = dupType(type.get());
     if (isNilable) {
-        getType = mkNilable(ctx, loc, move(getType));
+        getType = mkNilable(loc, move(getType));
     }
     stats.emplace_back(mkSig(loc, move(noKeys), move(noValues), dupType(getType.get())));
-    stats.emplace_back(mkGet(loc, name->name, mkCast(ctx, loc, move(getType))));
+    stats.emplace_back(mkGet(loc, name->name, mkCast(loc, move(getType))));
 
     // Compute the setters
 
@@ -192,12 +197,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         keys.emplace_back(ast::MK::Symbol(loc, core::Names::arg0()));
         auto setType = move(type); // This is the last use so we can move() not dupType()
         if (isOptional) {
-            setType = mkNilable(ctx, loc, move(setType));
+            setType = mkNilable(loc, move(setType));
         }
         values.emplace_back(move(setType));
 
-        stats.emplace_back(
-            mkSig(loc, move(keys), move(values), ast::MK::Constant(ctx, loc, core::Symbols::NilClass())));
+        stats.emplace_back(mkSig(loc, move(keys), move(values), ast::MK::Ident(loc, core::Symbols::NilClass())));
         core::NameRef setName = ctx.state.enterNameUTF8(name->name.toString(ctx) + "=");
         stats.emplace_back(mkSet(loc, setName));
     }
