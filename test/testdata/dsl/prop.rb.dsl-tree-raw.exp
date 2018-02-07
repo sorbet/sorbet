@@ -297,7 +297,7 @@ ClassDef{
               args = [
                 ConstantLit{
                   scope = EmptyTree
-                  cnst = <constant:NilClass>
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -309,7 +309,23 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -396,8 +412,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -409,7 +426,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
             }
           ]
         }
@@ -488,8 +520,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -501,7 +534,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -588,8 +636,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -601,7 +650,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -670,8 +734,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -683,7 +748,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -752,8 +832,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -765,7 +846,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -850,7 +946,7 @@ ClassDef{
               block = nullptr
               args = [
                 Ident{
-                  symbol = <constant:NilClass>
+                  symbol = <constant:Object>
                 }
               ]
             }
@@ -862,7 +958,21 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Ident{
+                    symbol = <constant:Object>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -931,8 +1041,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Array>
                 }
               ]
             }
@@ -944,7 +1055,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:Array>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1040,8 +1166,18 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                Send{
+                  recv = Ident{
+                    symbol = <constant:Array>
+                  }
+                  name = []
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
@@ -1053,7 +1189,31 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Send{
+                    recv = Ident{
+                      symbol = <constant:Array>
+                    }
+                    name = []
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1122,8 +1282,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Array>
                 }
               ]
             }
@@ -1135,7 +1296,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:Array>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1243,8 +1419,22 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                Send{
+                  recv = ConstantLit{
+                    scope = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:T>
+                    }
+                    cnst = <constant:Array>
+                  }
+                  name = []
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
@@ -1256,7 +1446,35 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Send{
+                    recv = ConstantLit{
+                      scope = ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:T>
+                      }
+                      cnst = <constant:Array>
+                    }
+                    name = []
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1376,8 +1594,26 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                Send{
+                  recv = ConstantLit{
+                    scope = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:T>
+                    }
+                    cnst = <constant:Hash>
+                  }
+                  name = []
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:Symbol>
+                    }
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
@@ -1389,7 +1625,39 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Send{
+                    recv = ConstantLit{
+                      scope = ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:T>
+                      }
+                      cnst = <constant:Hash>
+                    }
+                    name = []
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:Symbol>
+                      }
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1467,8 +1735,18 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
@@ -1480,7 +1758,31 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Send{
+                    recv = Ident{
+                      symbol = <constant:T>
+                    }
+                    name = nilable
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1549,8 +1851,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -1562,7 +1865,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1631,8 +1949,9 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -1644,7 +1963,22 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1722,8 +2056,18 @@ ClassDef{
               name = returns
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:NilClass>
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
@@ -1735,7 +2079,31 @@ ClassDef{
                   kind = Local
                   name = arg0
                 }]
-              rhs = EmptyTree
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Send{
+                    recv = Ident{
+                      symbol = <constant:T>
+                    }
+                    name = nilable
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
             }
 
             Send{
@@ -1975,7 +2343,7 @@ ClassDef{
                 }
                 ConstantLit{
                   scope = EmptyTree
-                  cnst = <constant:NilClass>
+                  cnst = <constant:String>
                 }
               ]
             }
@@ -2076,7 +2444,7 @@ ClassDef{
                 }
                 ConstantLit{
                   scope = EmptyTree
-                  cnst = <constant:NilClass>
+                  cnst = <constant:String>
                 }
               ]
             }

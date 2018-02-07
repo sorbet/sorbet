@@ -22,8 +22,8 @@ unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, unique_ptr<
     return ast::MK::Method0(loc, name, move(rhs));
 }
 
-unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name) {
-    return ast::MK::Method1(loc, name, ast::MK::Local(loc, core::Names::arg0()), ast::MK::EmptyTree(loc));
+unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
+    return ast::MK::Method1(loc, name, ast::MK::Local(loc, core::Names::arg0()), move(rhs));
 }
 
 unique_ptr<ast::Expression> mkCast(core::Loc loc, unique_ptr<ast::Expression> type) {
@@ -199,11 +199,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         if (isOptional) {
             setType = mkNilable(loc, move(setType));
         }
-        values.emplace_back(move(setType));
+        values.emplace_back(dupType(setType.get()));
 
-        stats.emplace_back(mkSig(loc, move(keys), move(values), ast::MK::Ident(loc, core::Symbols::NilClass())));
+        stats.emplace_back(mkSig(loc, move(keys), move(values), dupType(setType.get())));
         core::NameRef setName = ctx.state.enterNameUTF8(name->name.toString(ctx) + "=");
-        stats.emplace_back(mkSet(loc, setName));
+        stats.emplace_back(mkSet(loc, setName, mkCast(loc, move(setType))));
     }
 
     return stats;
