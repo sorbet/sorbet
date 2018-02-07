@@ -658,9 +658,17 @@ public:
         return SymbolRef(nullptr, 41);
     }
 
+    static SymbolRef RubyTyper() {
+        return SymbolRef(nullptr, 42);
+    }
+
+    static SymbolRef StubClass() {
+        return SymbolRef(nullptr, 43);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
-        return SymbolRef(nullptr, 42);
+        return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY - 1);
     }
 
     static SymbolRef Proc(int argc) {

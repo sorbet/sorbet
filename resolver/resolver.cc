@@ -45,6 +45,7 @@ private:
             if (!result.exists()) {
                 ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant");
                 result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
+                result.data(ctx).superClass = core::Symbols::StubClass();
                 result.data(ctx).resultType = core::Types::dynamic();
                 result.data(ctx).setIsModule(false);
             }

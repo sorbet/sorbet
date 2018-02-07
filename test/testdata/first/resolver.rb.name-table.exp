@@ -5,7 +5,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <constant:Inner1> < ::<constant:Object> () -> <Class:Inner1>
       class <constant:A> < ::<constant:Object> () -> <Class:A>
       class <constant:Inner2> < ::<constant:Object> () -> <Class:Inner2>
-        class <constant:A> () -> untyped
+        class <constant:A> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped
         method <static-init> ()
       class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
       class <singleton class:<constant:Inner2>> < ::<singleton class:<constant:Object>> ()

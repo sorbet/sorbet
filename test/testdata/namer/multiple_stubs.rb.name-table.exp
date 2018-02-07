@@ -1,5 +1,5 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Foo> () -> untyped
+  class <constant:Foo> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped
     class <constant:Bar> () -> untyped
   method <static-init>$8 ()
 
