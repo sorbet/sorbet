@@ -17,8 +17,8 @@ class SomeODM
 
     sig.returns(T.nilable(String))
     def foo2; T.cast(nil, T.nilable(String)); end
-    sig(arg0: String).returns(NilClass)
-    def foo2=(arg0); end
+    sig(arg0: String).returns(String)
+    def foo2=(arg0); T.cast(nil, String); end
 end
 
 class AdvancedODM
@@ -48,10 +48,10 @@ end
 def main
     T.assert_type!(SomeODM.new.foo, T.nilable(String))
     T.assert_type!(SomeODM.new.foo, String) # error: argument does not have asserted type
-    T.assert_type!(SomeODM.new.foo = 'b', NilClass)
+    T.assert_type!(SomeODM.new.foo = 'b', String)
     T.assert_type!(SomeODM.new.foo2, T.nilable(String))
     T.assert_type!(SomeODM.new.foo2, String) # error: argument does not have asserted type
-    T.assert_type!(SomeODM.new.foo2 = 'b', NilClass)
+    T.assert_type!(SomeODM.new.foo2 = 'b', String)
 
     T.assert_type!(AdvancedODM.new.default, String)
     T.assert_type!(AdvancedODM.new.nodefault, T.nilable(String))
