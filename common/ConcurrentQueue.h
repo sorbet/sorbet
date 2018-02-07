@@ -46,13 +46,12 @@ public:
     template <typename Rep, typename Period>
     inline DequeueResult wait_pop_timed(Elem &elem, std::chrono::duration<Rep, Period> const &timeout) {
         DequeueResult ret;
-        if (doneEstimate() == bound) { // early return if we know for sure that we're done.
-            ret.returned = false;
-            ret.shouldRetry = false;
-            return ret;
-        }
         ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
-        ret.returned = _queue.wait_dequeue_timed(elem, timeout);
+        if (ret.shouldRetry) {
+            ret.returned = _queue.wait_dequeue_timed(elem, timeout);
+        } else { // all elements has been pushed, no need to wait.
+            ret.returned = _queue.try_dequeue(elem);
+        }
         if (ret.returned) {
             elementsPopped.fetch_add(1, std::memory_order_relaxed);
         }

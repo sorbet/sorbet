@@ -4,8 +4,10 @@
 #include "blockingconcurrentqueue.h"
 #include "common.h"
 #include "os/os.h"
+#include "spdlog/spdlog.h"
 #include <memory>
 #include <vector>
+namespace spd = spdlog;
 
 class WorkerPool {
     int size;
@@ -79,9 +81,10 @@ class WorkerPool {
     // ORDER IS IMPORTANT. threads must be killed before Queues.
     std::vector<std::unique_ptr<Queue>> threadQueues;
     std::vector<std::unique_ptr<Joinable>> threads;
+    std::shared_ptr<spd::logger> logger;
 
 public:
-    WorkerPool(int size);
+    WorkerPool(int size, std::shared_ptr<spd::logger> logger);
     ~WorkerPool();
 
     void multiplexJob(Task t);

@@ -58,9 +58,23 @@ struct Options {
     int threads = 0;
     string typedSource = "";
 };
+shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> make_stderr_color_sink() {
+    auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
+    color_sink->set_color(spd::level::info, color_sink->white);
+    color_sink->set_color(spd::level::debug, color_sink->magenta);
+    return color_sink;
+}
+shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr_color_sink();
+
+shared_ptr<spd::logger> make_tracer() {
+    auto tracer = spd::details::registry::instance().create("tracer", stderr_color_sink);
+    tracer->set_pattern("[T%t][%Y-%m-%dT%T.%f] %v");
+    tracer->set_level(spd::level::off);
+    return tracer;
+}
 
 shared_ptr<spd::logger> console_err;
-shared_ptr<spd::logger> tracer;
+shared_ptr<spd::logger> tracer = make_tracer();
 shared_ptr<spd::logger> console;
 
 const auto PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
@@ -280,19 +294,25 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
 
         thread_result threadResult;
         {
+            tracer->trace("Collecting results from indexing threads");
             for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
                  result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
                 if (result.gotItem()) {
+                    tracer->trace("Building global substitution");
                     core::GlobalSubstitution substitution(*threadResult.gs, gs);
+                    tracer->trace("Consuming counters");
                     counterConsume(move(threadResult.counters));
                     core::Context ctx(gs, core::Symbols::root());
+                    tracer->trace("Running tree substitution");
                     for (auto &tree : threadResult.trees) {
                         trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
                     }
+                    tracer->trace("Tree substitution done");
                 }
                 gs.flushErrors();
                 indexingProgress.reportProgress(fileq->doneEstimate());
             }
+            tracer->trace("Done collecting results from indexing threads");
         }
     }
 
@@ -574,7 +594,7 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> gs, const Optio
         }
         Options emptyOpts;
         emptyOpts.threads = 1;
-        WorkerPool workers(emptyOpts.threads);
+        WorkerPool workers(emptyOpts.threads, tracer);
         vector<std::string> empty;
 
         typecheck(gs, index(*gs, empty, payloadFiles, emptyOpts, workers, true), emptyOpts, workers,
@@ -614,13 +634,7 @@ bool extractPrinters(cxxopts::Options &opts, Printers &print) {
 int realmain(int argc, char **argv) {
     FileFlatMapper flatMapper(argc, argv);
 
-    auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
-    color_sink->set_color(spd::level::info, color_sink->white);
-    color_sink->set_color(spd::level::debug, color_sink->magenta);
-    tracer = spd::details::registry::instance().create("tracer", color_sink);
-    tracer->set_pattern("[T%t][%Y-%m-%dT%T.%f] %v");
-
-    console = spd::details::registry::instance().create("console", color_sink);
+    console = spd::details::registry::instance().create("console", stderr_color_sink);
     console->set_pattern("%v");
     console_err = spd::stderr_color_mt("");
     console_err->set_pattern("%v");
@@ -653,8 +667,6 @@ int realmain(int argc, char **argv) {
         }
     }
 
-    WorkerPool workers(opts.threads);
-
     if (files.size() > 10) {
         //        spd::set_async_mode(1024); // makes logging asyncronous but adds 60ms to startup time.
     }
@@ -681,16 +693,12 @@ int realmain(int argc, char **argv) {
             break;
     }
 
-    console_err->debug("Using {} threads", opts.threads);
-
     if (options.count("q") != 0) {
         console->set_level(spd::level::critical);
     }
 
     if (options.count("trace") != 0) {
         tracer->set_level(spd::level::trace);
-    } else {
-        tracer->set_level(spd::level::off);
     }
 
     string typed = options["typed"].as<string>();
@@ -707,7 +715,9 @@ int realmain(int argc, char **argv) {
         return 1;
     }
 
+    WorkerPool workers(opts.threads, tracer);
     shared_ptr<core::GlobalState> gs = make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*console)));
+
     tracer->trace("building initial global state");
     createInitialGlobalState(gs, opts);
     tracer->trace("done building initial global state");
@@ -743,7 +753,7 @@ int realmain(int argc, char **argv) {
         Timer timeit(console_err, "typecheck");
         typecheck(gs, move(indexed), opts, workers);
     }
-    tracer->trace("done");
+    tracer->trace("ruby-typer done");
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
