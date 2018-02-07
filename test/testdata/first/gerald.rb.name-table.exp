@@ -44,14 +44,14 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
             method <block>$2 (part)
               argument part<>
         class <constant:MatchContext> < ::<constant:Object> () -> <Class:MatchContext>
-          field @assignee
-          field @body
-          field @diff
-          field @gh_user
-          field @merge_branch
-          field @openapi_diff
-          field @repo
-          field @title
+          field @assignee -> untyped
+          field @body -> untyped
+          field @diff -> untyped
+          field @gh_user -> untyped
+          field @merge_branch -> untyped
+          field @openapi_diff -> untyped
+          field @repo -> untyped
+          field @title -> untyped
           method assignee ()
           method body ()
           method diff ()
@@ -80,7 +80,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
           static-field <constant:PER_RULE_MS> -> Integer
           static-field <constant:TOTAL_TIME_MS> -> Integer
         class <constant:MatchTimeout> < ::<constant:StandardError> () -> <Class:MatchTimeout>
-          field @rule_token
+          field @rule_token -> untyped
           method initialize (message, rule_token)
             argument message<>
             argument rule_token<optional, keyword>

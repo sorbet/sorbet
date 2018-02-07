@@ -6,7 +6,7 @@ module Opus::CIBot::Gerald
 
   class MatchTimeout < StandardError
 
-    attr_reader :rule_token # error: Accessor for undeclared variable
+    attr_reader :rule_token # error: Use of undeclared variable
 
     def initialize(message, rule_token: '')
       super(message)
@@ -49,14 +49,14 @@ module Opus::CIBot::Gerald
   end
 
   class MatchContext
-    attr_reader :repo           # error: Accessor for undeclared variable
-    attr_reader :assignee       # error: Accessor for undeclared variable
-    attr_reader :gh_user        # error: Accessor for undeclared variable
-    attr_reader :merge_branch   # error: Accessor for undeclared variable
-    attr_reader :body           # error: Accessor for undeclared variable
-    attr_reader :title          # error: Accessor for undeclared variable
-    attr_reader :diff           # error: Accessor for undeclared variable
-    attr_reader :openapi_diff   # error: Accessor for undeclared variable
+    attr_reader :repo           # error: Use of undeclared variable
+    attr_reader :assignee       # error: Use of undeclared variable
+    attr_reader :gh_user        # error: Use of undeclared variable
+    attr_reader :merge_branch   # error: Use of undeclared variable
+    attr_reader :body           # error: Use of undeclared variable
+    attr_reader :title          # error: Use of undeclared variable
+    attr_reader :diff           # error: Use of undeclared variable
+    attr_reader :openapi_diff   # error: Use of undeclared variable
 
     def initialize(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
       @repo = repo

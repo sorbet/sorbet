@@ -11,13 +11,6 @@ using namespace std;
 namespace ruby_typer {
 namespace dsl {
 
-unique_ptr<ast::Expression> mkSig(core::Loc loc, ast::Hash::ENTRY_store keys, ast::Hash::ENTRY_store values,
-                                  unique_ptr<ast::Expression> ret) {
-    auto hash = make_unique<ast::Hash>(loc, move(keys), move(values));
-    auto sig = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::sig(), move(hash));
-    return ast::MK::Send1(loc, move(sig), core::Names::returns(), move(ret));
-}
-
 unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
     return ast::MK::Method0(loc, name, move(rhs));
 }
@@ -179,29 +172,24 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         // we don't falsify any booleans here
     }
 
-    ast::Hash::ENTRY_store noKeys;
-    ast::Hash::ENTRY_store noValues;
-
     auto getType = dupType(type.get());
     if (isNilable) {
         getType = mkNilable(loc, move(getType));
     }
-    stats.emplace_back(mkSig(loc, move(noKeys), move(noValues), dupType(getType.get())));
+    stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), dupType(getType.get())));
     stats.emplace_back(mkGet(loc, name->name, mkCast(loc, move(getType))));
 
     // Compute the setters
 
     if (!isImmutable) {
-        ast::Hash::ENTRY_store keys;
-        ast::Hash::ENTRY_store values;
-        keys.emplace_back(ast::MK::Symbol(loc, core::Names::arg0()));
         auto setType = move(type); // This is the last use so we can move() not dupType()
         if (isOptional) {
             setType = mkNilable(loc, move(setType));
         }
-        values.emplace_back(dupType(setType.get()));
 
-        stats.emplace_back(mkSig(loc, move(keys), move(values), dupType(setType.get())));
+        stats.emplace_back(
+            ast::MK::Sig(loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), dupType(setType.get())),
+                         dupType(setType.get())));
         core::NameRef setName = ctx.state.enterNameUTF8(name->name.toString(ctx) + "=");
         stats.emplace_back(mkSet(loc, setName, mkCast(loc, move(setType))));
     }

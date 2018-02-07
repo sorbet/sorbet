@@ -40,6 +40,8 @@ class <emptyTree><<constant:<root>>> < ()
       class <singleton class><<constant:<todo sym>>> < ()
         self(<constant:<todo sym>>).declare_variables({:@f => <emptyTree>::<constant:Integer>})
 
+        self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:Integer>)
+
         self(<constant:<todo sym>>).attr_writer(:f)
       end
     end

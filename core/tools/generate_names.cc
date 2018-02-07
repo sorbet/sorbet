@@ -104,17 +104,17 @@ NameDef names[] = {
     {"Hash", Infer},
     {"noreturn", Resolver},
     {"singletonClass", "singleton_class", Resolver},
-    {"declareVariables", "declare_variables", Desugar | Resolver},
+    {"declareVariables", "declare_variables", Desugar | DSL | Resolver},
 
     {"assertType", "assert_type!", Resolver},
     {"cast", DSL | Resolver},
     // end T keywords
 
     // Ruby DSL methods which we understand
-    {"attr", Resolver},
-    {"attrAccessor", "attr_accessor", Desugar | Resolver},
-    {"attrWriter", "attr_writer", Resolver},
-    {"attrReader", "attr_reader", Resolver},
+    {"attr", DSL},
+    {"attrAccessor", "attr_accessor", Desugar | DSL},
+    {"attrWriter", "attr_writer", DSL},
+    {"attrReader", "attr_reader", DSL},
     {"private_", "private", Namer | Resolver},
     {"protected_", "protected", Namer | Resolver},
     {"public_", "public", Namer | Resolver},
@@ -167,6 +167,7 @@ NameDef names[] = {
     {"lambda", Parser},
     {"nil_p", "nil?", Desugar | Infer},
     {"nil", DSL | Infer},
+    {"NilClass", DSL},
     {"super", Desugar | Infer},
     {"empty", "", Desugar},
 

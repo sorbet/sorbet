@@ -2,17 +2,19 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:TestAttr> < ::<constant:Object> () -> <Class:TestAttr>
     field @v1 -> Integer
     field @v2 -> String
-    field @v3
-    field @v4
-    field @v5
+    field @v3 -> untyped
+    field @v4 -> untyped
+    field @v5 -> untyped
     method v1 () -> Integer
+    method v1= (arg0) -> Integer
+      argument arg0<> -> Integer
     method v2 () -> String
-    method v2= (arg0) -> String
-      argument arg0<> -> String
-    method v3 ()
-    method v4= (arg0) -> untyped
-      argument arg0<> -> untyped
-    method v5= (arg0) -> untyped
-      argument arg0<> -> untyped
+    method v2= (arg0)
+      argument arg0<>
+    method v3 () -> String
+    method v4= (arg0)
+      argument arg0<>
+    method v5= (arg0)
+      argument arg0<>
   class <singleton class:<constant:TestAttr>> < ::<singleton class:<constant:Object>> ()
 

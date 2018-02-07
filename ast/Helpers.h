@@ -3,6 +3,7 @@
 
 #include "ast/ast.h"
 #include "core/Names/desugar.h"
+#include "core/Names/dsl.h"
 
 namespace ruby_typer {
 namespace ast {
@@ -52,6 +53,10 @@ public:
 
     static std::unique_ptr<Reference> Local(core::Loc loc, core::NameRef name) {
         return std::make_unique<ast::UnresolvedIdent>(loc, UnresolvedIdent::Local, name);
+    }
+
+    static std::unique_ptr<Reference> Instance(core::Loc loc, core::NameRef name) {
+        return std::make_unique<ast::UnresolvedIdent>(loc, UnresolvedIdent::Instance, name);
     }
 
     static std::unique_ptr<Expression> cpRef(core::Loc loc, Reference &name) {
@@ -142,6 +147,32 @@ public:
         ast::MethodDef::ARGS_store args;
         args.emplace_back(move(arg0));
         return Method(loc, name, move(args), move(rhs));
+    }
+
+    static std::unique_ptr<ast::Expression> Hash(core::Loc loc, ast::Hash::ENTRY_store keys,
+                                                 ast::Hash::ENTRY_store values) {
+        return std::make_unique<ast::Hash>(loc, move(keys), move(values));
+    }
+
+    static std::unique_ptr<ast::Expression> Hash0(core::Loc loc) {
+        ast::Hash::ENTRY_store keys;
+        ast::Hash::ENTRY_store values;
+        return Hash(loc, move(keys), move(values));
+    }
+
+    static std::unique_ptr<ast::Expression> Hash1(core::Loc loc, std::unique_ptr<ast::Expression> key,
+                                                  std::unique_ptr<ast::Expression> value) {
+        ast::Hash::ENTRY_store keys;
+        ast::Hash::ENTRY_store values;
+        keys.emplace_back(move(key));
+        values.emplace_back(move(value));
+        return Hash(loc, move(keys), move(values));
+    }
+
+    static std::unique_ptr<ast::Expression> Sig(core::Loc loc, std::unique_ptr<ast::Expression> hash,
+                                                std::unique_ptr<ast::Expression> ret) {
+        auto sig = ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::sig(), move(hash));
+        return ast::MK::Send1(loc, move(sig), core::Names::returns(), move(ret));
     }
 };
 

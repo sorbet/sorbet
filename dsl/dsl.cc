@@ -1,6 +1,7 @@
 #include "dsl/dsl.h"
 #include "ast/treemap/treemap.h"
 #include "dsl/ChalkODMProp.h"
+#include "dsl/attr_reader.h"
 
 using namespace std;
 
@@ -18,6 +19,12 @@ public:
                      [&](ast::Send *send) {
 
                          auto nodes = ChalkODMProp::replaceDSL(ctx, send);
+                         if (!nodes.empty()) {
+                             replaceNodes[stat.get()] = move(nodes);
+                             return;
+                         }
+
+                         nodes = AttrReader::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = move(nodes);
                              return;

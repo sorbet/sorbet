@@ -20,6 +20,14 @@ begin
     <emptyTree>
   end
   class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::<constant:StandardError>)
+    <emptyTree>
+
+    <emptyTree>
+
+    def rule_token<rule_token>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#@rule_token
+    end
+
     def initialize<initialize>(message, rule_token)
       begin
         self(<constant:MatchTimeout>).super(message)
@@ -80,6 +88,54 @@ begin
     <emptyTree>
 
     <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def repo<repo>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo
+    end
+
+    def assignee<assignee>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@assignee
+    end
+
+    def gh_user<gh_user>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@gh_user
+    end
+
+    def merge_branch<merge_branch>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@merge_branch
+    end
+
+    def body<body>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@body
+    end
+
+    def title<title>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@title
+    end
+
+    def diff<diff>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@diff
+    end
+
+    def openapi_diff<openapi_diff>()
+      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@openapi_diff
+    end
 
     def initialize<initialize>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
       begin

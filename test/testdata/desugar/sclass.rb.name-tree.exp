@@ -80,7 +80,11 @@ begin
   class <emptyTree>::<constant:F><<constant:F>> < (::<constant:<todo sym>>)
     <emptyTree>
   end
-  class <singleton class><<singleton class:<constant:F>>> < ()  end
+  class <singleton class><<singleton class:<constant:F>>> < ()
+    def f=<f=>(arg0)
+      ::<singleton class:<constant:F>>#@f = arg0
+    end
+  end
   class <emptyTree>::<constant:G><<constant:G>> < (::<constant:<todo sym>>)
     <emptyTree>
 

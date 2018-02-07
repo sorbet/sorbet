@@ -232,46 +232,6 @@ private:
         }
     }
 
-    void defineAttr(core::Context ctx, ast::Send *send, bool r, bool w) {
-        for (auto &arg : send->args) {
-            auto name = core::NameRef::noName();
-            if (auto *sym = ast::cast_tree<ast::SymbolLit>(arg.get())) {
-                name = sym->name;
-            } else if (auto *str = ast::cast_tree<ast::StringLit>(arg.get())) {
-                name = str->value;
-            } else {
-                ctx.state.error(arg->loc, core::errors::Resolver::InvalidAttr,
-                                "{} argument must be a string or symbol literal", send->fun.toString(ctx));
-                continue;
-            }
-
-            core::NameRef varName = ctx.state.enterNameUTF8("@" + name.toString(ctx));
-            core::SymbolRef sym = ctx.owner.data(ctx).findMemberTransitive(ctx, varName);
-            if (!sym.exists()) {
-                ctx.state.error(arg->loc, core::errors::Resolver::UndeclaredVariable,
-                                "Accessor for undeclared variable `{}'", varName.toString(ctx));
-                sym = ctx.state.enterFieldSymbol(arg->loc, ctx.owner, varName);
-            }
-
-            if (r) {
-                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name);
-                meth.data(ctx).resultType = sym.data(ctx).resultType;
-            }
-            if (w) {
-                core::SymbolRef meth = ctx.state.enterMethodSymbol(send->loc, ctx.owner, name.addEq(ctx));
-                core::SymbolRef arg0 = ctx.state.enterMethodArgumentSymbol(arg->loc, meth, core::Names::arg0());
-
-                auto ty = sym.data(ctx).resultType;
-                if (ty == nullptr) {
-                    ty = core::Types::dynamic();
-                }
-                arg0.data(ctx).resultType = ty;
-                meth.data(ctx).arguments().push_back(arg0);
-                meth.data(ctx).resultType = ty;
-            }
-        }
-    }
-
     shared_ptr<core::Type> getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
         typecase(
@@ -719,17 +679,6 @@ private:
                          switch (send->fun._id) {
                              case core::Names::declareVariables()._id:
                                  processDeclareVariables(ctx.withOwner(klass->symbol), send);
-                                 break;
-                             case core::Names::attr()._id:
-                             case core::Names::attrReader()._id:
-                                 defineAttr(ctx.withOwner(klass->symbol), send, true, false);
-                                 break;
-                             case core::Names::attrWriter()._id:
-                                 defineAttr(ctx.withOwner(klass->symbol), send, false, true);
-                                 break;
-
-                             case core::Names::attrAccessor()._id:
-                                 defineAttr(ctx.withOwner(klass->symbol), send, true, true);
                                  break;
                              default:
                                  return;

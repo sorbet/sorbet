@@ -49,6 +49,7 @@ end
 class F
     class << self
         declare_variables({:@f => Integer})
+        sig(arg0: Integer).returns(Integer)
         attr_writer :f
     end
 end
