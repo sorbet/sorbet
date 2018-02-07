@@ -1,18 +1,19 @@
-class <emptyTree><<constant:<root>>> < ()
+class <emptyTree>::<constant:Main><<constant:Main>> < (::<constant:<todo sym>>)
   <emptyTree>
 
-  def self.<static-init><<static-init>$6>()
-    begin
-      <emptyTree>
-      <emptyTree>
-    end
+  <emptyTree>
+
+  <emptyTree>
+
+  def foo<foo$1>(a)
+    a
   end
 
-  def foo<foo>(a, b)
+  def foo<foo$2>(a, b)
     <emptyTree>
   end
 
-  def foo<foo>(a, b)
+  def foo<foo>(a, b, c)
     <emptyTree>
   end
 end

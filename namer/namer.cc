@@ -335,14 +335,19 @@ public:
 
         auto sym = owner.data(ctx).findMember(ctx, method->name);
         if (sym.exists()) {
+            if (method->loc == sym.data(ctx).definitionLoc) {
+                // Reparsing the same file
+                method->symbol = sym;
+                pushEnclosingArgs(move(method->args));
+                return method;
+            }
             ctx.state.error(
                 core::ComplexError(method->loc, core::errors::Namer::RedefinitionOfMethod,
                                    method->name.toString(ctx) + ": Method redefined",
-                                   core::ErrorLine::from(sym.data(ctx).definitionLoc, "Original definition")));
-            method->symbol = sym;
+                                   core::ErrorLine::from(sym.data(ctx).definitionLoc, "Previous definition")));
             // TODO Check that the previous args match the new ones instead of
-            // just wiping the original ones
-            sym.data(ctx).arguments().clear();
+            // just moving the original one to the side
+            ctx.state.mangleRenameSymbol(sym, method->name, core::UniqueNameKind::Namer);
         }
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
         fillInArgs(ctx.withOwner(method->symbol), method->args);

@@ -67,6 +67,8 @@ public:
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef enterFileAt(std::shared_ptr<File> file, int id);
 
+    void mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind);
+
     unsigned int namesUsed() const;
 
     unsigned int symbolsUsed() const;

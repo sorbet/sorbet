@@ -88,9 +88,6 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     namer::Namer::run(ctx, move(newtree));
     ASSERT_EQ(baseSymbols + 1, ctx.state.symbolsUsed());
     ASSERT_EQ(baseNames + 1, ctx.state.namesUsed());
-
-    auto errors = ctx.state.drainErrors();
-    ASSERT_EQ(1, errors.size()); // Method redeclaration
 }
 
 TEST_F(NamerFixture, NameClass) { // NOLINT

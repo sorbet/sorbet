@@ -741,6 +741,23 @@ FileRef GlobalState::enterFileAt(std::shared_ptr<File> file, int id) {
     }
 }
 
+void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind) {
+    auto &owner = what.data(*this).owner;
+    auto &members = owner.data(*this).members;
+    for (auto it = members.begin(); it != members.end(); ++it) {
+        if (it->first == origName) {
+            int collisionCount = 1;
+            core::NameRef name;
+            do {
+                name = freshNameUnique(kind, origName, collisionCount++);
+            } while (owner.data(*this).findMember(*this, name).exists());
+            it->first = name;
+            it->second.data(*this).name = it->first;
+            break;
+        }
+    }
+}
+
 LocalVariable GlobalState::newTemporary(NameRef name, SymbolRef owner) {
     Symbol &data = owner.data(*this);
     ENFORCE(data.isMethod(), "entering temporary outside of a method");
