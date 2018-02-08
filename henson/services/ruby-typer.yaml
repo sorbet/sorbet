@@ -1,0 +1,16 @@
+service_name: ruby-typer
+description: "Ruby Typechecker"
+repo: stripe-internal/ruby-typer
+contact:
+  responsible_team: ruby-platform
+deploy:
+  clusters:
+  - northwest
+  host_types:
+  - mydev
+  environments:
+  - qa
+  disable_autobootstrap: true
+announce:
+  slack_channels:
+  - ruby-typer
