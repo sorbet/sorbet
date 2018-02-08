@@ -1,8 +1,5 @@
 cc_library(
     name = "binary",
-    srcs = [
-        "binary.cc",
-    ],
     hdrs = [
         "binary.h",
     ],
@@ -18,18 +15,18 @@ cc_library(
     srcs = [
         "empty.cc",
     ],
-    hdrs = [
-        "binary.h",
-    ],
     copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
-        "//common",
+        "binary",
     ],
 )
 
 cc_library(
     name = "some",
+    srcs = [
+        "binary.cc",
+    ],
     hdrs = [
         "binary.h",
     ],

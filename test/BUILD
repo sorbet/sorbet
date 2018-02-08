@@ -20,7 +20,7 @@ cc_binary(
         "//dsl",
         "//infer",
         "//namer",
-        "//payload/binary",
+        "//payload/binary:some",
         "//resolver",
         "@cxxopts",
         "@gtest",

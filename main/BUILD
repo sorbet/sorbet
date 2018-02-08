@@ -23,7 +23,8 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         "realmain",
-        "//payload/binary",
+        "//payload/binary:some",
+        "//payload/text:empty",
     ],
 )
 
@@ -41,6 +42,7 @@ cc_binary(
     deps = [
         "realmain",
         "//payload/binary:empty",
+        "//payload/text:some",
     ],
 )
 
@@ -63,7 +65,7 @@ cc_library(
         "//infer",
         "//namer",
         "//parser",
-        "//payload/binary:some",
+        "//payload/binary",
         "//payload/text",
         "//resolver",
         "@cxxopts",
