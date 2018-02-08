@@ -31,3 +31,7 @@ end
 class BadChild2 < Parent # error: should be declared again
   My = T.type
 end
+
+class BadChild3 < Parent
+  Elem = 3 # error: Type variable <constant:Elem> needs to be declared as `= T.type(SOMETHING)`
+end

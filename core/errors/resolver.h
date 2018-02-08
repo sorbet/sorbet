@@ -21,8 +21,9 @@ constexpr ErrorClass RedefinitionOfParents = 5012;
 constexpr ErrorClass ConstantAssertType = 5013;
 constexpr ErrorClass ParentTypeNotDeclared = 5014;
 constexpr ErrorClass ParentVarianceMismatch = 5015;
-constexpr ErrorClass VariantTypeMemberInClass = 5015;
-constexpr ErrorClass TypeMembersInWrongOrder = 5015;
+constexpr ErrorClass VariantTypeMemberInClass = 5016;
+constexpr ErrorClass TypeMembersInWrongOrder = 5017;
+constexpr ErrorClass NotATypeVariable = 5018;
 } // namespace Resolver
 } // namespace errors
 } // namespace core

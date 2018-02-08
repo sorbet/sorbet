@@ -16,15 +16,21 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
             my = gs.enterTypeMember(inSym.definitionLoc, sym, name, parentVariance);
         } else {
             gs.error(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared,
-                     +"Type {} declared by parent {} should be declared again", name.toString(gs),
+                     "Type {} declared by parent {} should be declared again", name.toString(gs),
                      parent.data(gs).fullName(gs));
             return false;
         }
     }
-    auto myVariance = my.data(gs).variance();
+    auto &data = my.data(gs);
+    if (!data.isTypeMember() && !data.isTypeArgument()) {
+        gs.error(inSym.definitionLoc, core::errors::Resolver::NotATypeVariable,
+                 "Type variable {} needs to be declared as `= T.type(SOMETHING)`", name.toString(gs));
+        return false;
+    }
+    auto myVariance = data.variance();
     if (!inSym.derivesFrom(gs, core::Symbols::Class()) && (myVariance != parentVariance)) {
         // this requirement can be loosened. You can go from variant to invariant.
-        gs.error(my.data(gs).definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
+        gs.error(data.definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
                  "Type variance mismatch with parent {}", parent.data(gs).fullName(gs));
         return true;
     }
