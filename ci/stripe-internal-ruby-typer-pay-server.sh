@@ -11,7 +11,11 @@ maxrss: %M
 '
 
 # This is what we'll ship to our users
-bazel build main:ruby-typer -c opt
+bazel build main:ruby-typer -c opt --config=lto --stamp
+
+mkdir -p /build/bin
+cp bazel-bin/main/ruby-typer /build/bin
+
 PATH=$PATH:"$(pwd)/bazel-bin/main/"
 export PATH
 
