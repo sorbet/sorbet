@@ -20,6 +20,7 @@
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 #include "spdlog/spdlog.h"
+#include "version/version.h"
 #include <algorithm> // find
 #include <ctime>
 #include <cxxopts.hpp>
@@ -541,6 +542,7 @@ cxxopts::Options buildOptions() {
     options.add_options()("P,progress", "Draw progressbar");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
+    options.add_options()("version", "Show version");
 
     stringstream all_prints;
     all_prints << "Print: [";
@@ -673,6 +675,11 @@ int realmain(int argc, char **argv) {
 
     if (options["h"].as<bool>()) {
         console->info("{}", options.help({"", "dev"}));
+        return 0;
+    }
+    if (options["version"].as<bool>()) {
+        console->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
+                      Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
         return 0;
     }
     if (options.count("e") == 0 && files.empty()) {

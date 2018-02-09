@@ -29,6 +29,7 @@ compilation_database(
         "//payload/text:empty",
         "//payload/binary:some",
         "//main:realmain",
+        "//version:version",
         "//payload/text:text",
         "//payload/binary:binary",
         "//infer:infer_test",

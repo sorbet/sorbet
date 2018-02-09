@@ -68,6 +68,7 @@ cc_library(
         "//payload/binary",
         "//payload/text",
         "//resolver",
+        "//version",
         "@cxxopts",
     ],
 )

@@ -39,6 +39,9 @@ build:ci --copt=-g3
 build:ci --cxxopt=-DFORCE_DEBUG
 build:ci --cxxopt=-g3
 
+# Used to build --stamp build that contains version and build time.
+build --workspace_status_command=tools/buildstamp/get_workspace_status
+
 # LTO build. Much longer compilation time. Smaller size and better perf.
 build:lto --copt=-flto=thin
 build:lto --cxxopt=-flto=thin
