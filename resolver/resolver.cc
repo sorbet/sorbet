@@ -574,6 +574,17 @@ private:
                     targs.emplace_back(move(value));
                     targs.emplace_back(core::Types::dynamic());
                     result = make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
+                } else if (recvi->symbol == core::Symbols::T_Enumerable()) {
+                    if (s->args.size() != 1) {
+                        ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                        "Malformed T::Enumerable[]: Expected 1 type argument");
+                        result = core::Types::dynamic();
+                        return;
+                    }
+                    auto elem = getResultType(ctx, s->args[0]);
+                    std::vector<shared_ptr<core::Type>> targs;
+                    targs.emplace_back(move(elem));
+                    result = make_shared<core::AppliedType>(core::Symbols::Enumerable(), move(targs));
                 } else {
                     auto &data = recvi->symbol.data(ctx);
                     if (s->args.size() != data.typeMembers().size()) {

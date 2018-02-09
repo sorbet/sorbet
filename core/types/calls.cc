@@ -333,6 +333,8 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
                 attachedClass = core::Symbols::Array();
             } else if (attachedClass == core::Symbols::T_Hash()) {
                 attachedClass = core::Symbols::Hash();
+            } else if (attachedClass == core::Symbols::T_Enumerable()) {
+                attachedClass = core::Symbols::Enumerable();
             }
 
             if (attachedClass.data(ctx).typeMembers().empty()) {

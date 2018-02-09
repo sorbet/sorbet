@@ -154,6 +154,7 @@ void GlobalState::initEmpty() {
     SymbolRef file_id = synthesizeClass(file_str);
     SymbolRef ruby_typer_id = synthesizeClass(ruby_typer_str, 0, true);
     SymbolRef stub_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(stub_str));
+    SymbolRef T_Enumerable_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(enumerable_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
     ENFORCE(top_id == Symbols::top());
@@ -199,6 +200,8 @@ void GlobalState::initEmpty() {
     ENFORCE(file_id = Symbols::File());
     ENFORCE(ruby_typer_id = Symbols::RubyTyper());
     ENFORCE(stub_id = Symbols::StubClass());
+    ENFORCE(T_Enumerable_id = Symbols::T_Enumerable());
+
     // Synthesize nil = NilClass()
     Symbols::nil().data(*this).resultType = core::Types::nil();
 
