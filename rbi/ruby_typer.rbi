@@ -1,7 +1,7 @@
 # These are extensions to the Ruby language that we added to make the type systems easier
 
 class Struct
-  Elem = T.type(fixed: T.untyped)
+  Elem = type_member(fixed: T.untyped)
 
   sig(
       arg0: T.any(Symbol, String),
@@ -12,7 +12,7 @@ class Struct
 end
 
 class RubyTyper::DynamicStruct < Struct
-  Elem = T.type(fixed: T.untyped)
+  Elem = type_member(fixed: T.untyped)
 
   sig(
       args: BasicObject,

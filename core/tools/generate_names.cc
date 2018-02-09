@@ -121,7 +121,7 @@ NameDef names[] = {
     {"privateClassMethod", "private_class_method", Namer | Resolver},
     {"moduleFunction", "module_function", Namer | Resolver},
     {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
-    {"typeDecl", "type", DSL | Namer | Resolver},
+    {"typeMember", "type_member", DSL | Namer | Resolver},
     {"T", DSL | Namer},
     {"covariant", "out", Namer},
     {"contravariant", "in", Namer},
@@ -130,6 +130,7 @@ NameDef names[] = {
 
     {"prop", DSL},
     {"array", DSL},
+    {"type", DSL},
     {"optional", DSL},
     {"immutable", DSL},
     {"default_", "default", DSL},

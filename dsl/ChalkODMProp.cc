@@ -113,7 +113,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         if (rules == nullptr) {
             return empty;
         }
-        type = dupType(getHashValue(rules, core::Names::typeDecl()));
+        type = dupType(getHashValue(rules, core::Names::type()));
     }
 
     if (type == nullptr) {

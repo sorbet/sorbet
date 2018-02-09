@@ -1,7 +1,7 @@
 # @typed
 
 class Box
-    Elem = T.type
+    Elem = type_member
 end
 
 module A

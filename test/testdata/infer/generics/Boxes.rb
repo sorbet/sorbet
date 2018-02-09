@@ -1,7 +1,7 @@
 # @typed
 
 class Box
-  A = T.type
+  A = type_member
 
   declare_variables(
     :@value => A,
@@ -20,7 +20,7 @@ class Box
 end
 
 class BoxChild < Box
-  A = T.type
+  A = type_member
 
   sig(v: A).returns(A)
   def put(v)

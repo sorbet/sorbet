@@ -812,9 +812,9 @@ public:
         if (data.isTypeMember()) {
             ENFORCE(data.isFixed());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
-            auto recv = ast::cast_tree<ast::Ident>(send->recv.get());
-            ENFORCE(recv->symbol == core::Symbols::T());
-            ENFORCE(send->fun == core::Names::typeDecl());
+            auto recv = ast::cast_tree<ast::Self>(send->recv.get());
+            ENFORCE(recv);
+            ENFORCE(send->fun == core::Names::typeMember());
             int arg;
             if (send->args.size() == 1) {
                 arg = 0;

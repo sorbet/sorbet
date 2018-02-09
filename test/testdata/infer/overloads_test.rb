@@ -42,7 +42,7 @@ class HasOverloads
 end
 
 class OverloadAndGenerics
-  Elem = T.type
+  Elem = type_member
 
   def _; end
 

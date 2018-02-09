@@ -1,7 +1,7 @@
 # @typed
 
 class Box
-  A = T.type
+  A = type_member
 
   declare_variables(
     :@value => A,

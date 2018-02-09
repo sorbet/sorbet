@@ -455,9 +455,8 @@ public:
         if (send == nullptr) {
             return fillAssign(ctx, lhs, asgn);
         }
-        auto *shouldBeT = ast::cast_tree<ast::ConstantLit>(send->recv.get());
-        if (shouldBeT == nullptr || !(shouldBeT->cnst.data(ctx).kind == core::NameKind::CONSTANT &&
-                                      shouldBeT->cnst.data(ctx).cnst.original == core::Names::T())) {
+        auto *shouldBeSelf = ast::cast_tree<ast::Self>(send->recv.get());
+        if (shouldBeSelf == nullptr) {
             return fillAssign(ctx, lhs, asgn);
         }
 
@@ -467,7 +466,7 @@ public:
         }
 
         switch (send->fun._id) {
-            case core::Names::typeDecl()._id: {
+            case core::Names::typeMember()._id: {
                 core::Variance variance = core::Variance::Invariant;
 
                 if (!send->args.empty()) {

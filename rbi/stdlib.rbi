@@ -758,7 +758,7 @@ end
 
 class Array
   extend T::Generic
-  Elem = T.type
+  Elem = type_member
 
   sig(
       arg0: BasicObject,
@@ -2925,7 +2925,7 @@ end
 
 module Enumerable
   extend T::Generic
-  Elem = T.type
+  Elem = type_member
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
@@ -3307,7 +3307,7 @@ end
 
 class Enumerator
   extend T::Generic
-  Elem = T.type
+  Elem = type_member
 
   sig.returns(Enumerator)
   def clone(); end
@@ -4811,8 +4811,8 @@ end
 
 class Hash
   extend T::Generic
-  K = T.type
-  V = T.type
+  K = type_member
+  V = type_member
 
   sig(
       arg0: BasicObject,
@@ -9493,7 +9493,7 @@ end
 
 class Range
   extend T::Generic
-  Elem = T.type
+  Elem = type_member
 
   sig(
       obj: BasicObject,
@@ -10389,7 +10389,7 @@ end
 
 class Set
   extend T::Generic
-  Elem = T.type
+  Elem = type_member
 
   sig(
       ary: BasicObject,
@@ -10688,7 +10688,7 @@ end
 
 class SortedSet
   extend T::Generic
-  Elem = T.type
+  Elem = type_member
 
   sig(
       o: Elem,

@@ -1,6 +1,6 @@
  # @typed
  class Parent
-    A = T.type
+    A = type_member
     sig(a: A).returns(A)
     def foo(a)
       a
@@ -8,7 +8,7 @@
  end
 
  class Child < Parent
-    A = T.type
+    A = type_member
  end
 
  module Foo

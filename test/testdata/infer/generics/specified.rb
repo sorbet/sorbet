@@ -2,11 +2,11 @@
 require_relative '../../t'
 
 class PreChild < Parent
-  Elem = T.type(fixed: String)
+  Elem = type_member(fixed: String)
 end
 
 class Parent
-  Elem = T.type
+  Elem = type_member
 
   sig(a: Elem).returns(Elem)
   def foo(a)
@@ -15,7 +15,7 @@ class Parent
 end
 
 class Child < Parent
-  Elem = T.type(fixed: String)
+  Elem = type_member(fixed: String)
 
   def use_foo
     T.assert_type!(foo("foo"), String)
@@ -23,7 +23,7 @@ class Child < Parent
 end
 
 module Mixin
-  Elem = T.type
+  Elem = type_member
 
   sig(a: Elem).returns(Elem)
   def foo(a)
@@ -33,7 +33,7 @@ end
 
 class WithMixin
   include Mixin
-  Elem = T.type(fixed: String)
+  Elem = type_member(fixed: String)
 end
 
 class NotATypeVar
@@ -42,8 +42,8 @@ end
 
 
 class ParentWithMultiple
-  K = T.type
-  V = T.type
+  K = type_member
+  V = type_member
 
   sig(k: K, v: V).returns(K)
   def foo(k, v)
@@ -52,31 +52,31 @@ class ParentWithMultiple
 end
 
 class HalfChild < ParentWithMultiple
-  K = T.type(fixed: Integer)
-  V = T.type
+  K = type_member(fixed: Integer)
+  V = type_member
 end
 
 class HalfChildOther < ParentWithMultiple
-  K = T.type
-  V = T.type(fixed: Integer)
+  K = type_member
+  V = type_member(fixed: Integer)
 end
 
 class FullChild < HalfChild
-  K = T.type(fixed: Integer)
-  V = T.type(fixed: String)
+  K = type_member(fixed: Integer)
+  V = type_member(fixed: String)
 end
 
 class ParentEnumerable
   include Enumerable
-  K = T.type
-  V = T.type
-  Elem = T.type
+  K = type_member
+  V = type_member
+  Elem = type_member
 end
 
 class ChildEnumerable < ParentEnumerable
-  K = T.type(fixed: String)
-  V = T.type
-  Elem = T.type
+  K = type_member(fixed: String)
+  V = type_member
+  Elem = type_member
 end
 
 def main

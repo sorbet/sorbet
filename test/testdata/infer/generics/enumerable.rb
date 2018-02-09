@@ -1,6 +1,6 @@
  # @typed
  module MyEnumerable
-    A = T.type
+    A = type_member
     sig(a: MyEnumerable[A]).returns(MyEnumerable[A])
     def -(a)
       self
@@ -9,7 +9,7 @@
 
  class MySet
     include MyEnumerable
-    A = T.type
+    A = type_member
  end
 
  module Foo

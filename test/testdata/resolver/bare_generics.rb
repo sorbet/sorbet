@@ -1,6 +1,6 @@
 # @typed
 class Foo
-  A = T.type
+  A = type_member
 end
 
 module Test

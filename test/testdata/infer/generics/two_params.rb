@@ -1,7 +1,7 @@
 # @typed
 class MyProc1
-  Return = T.type
-  Arg0 = T.type
+  Return = type_member
+  Arg0 = type_member
 
 
   sig(arg0: Arg0).returns(Return)

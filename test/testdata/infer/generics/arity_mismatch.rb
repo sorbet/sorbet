@@ -1,7 +1,7 @@
 # @typed
 class Generic
-  T1 = T.type
-  T2 = T.type
+  T1 = type_member
+  T2 = type_member
 end
 
 def use_it
