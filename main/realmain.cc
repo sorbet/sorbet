@@ -563,7 +563,14 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("typed-source", "Print the specified file with type annotations",
                                cxxopts::value<string>(), "file");
     options.add_options("dev")("trace", "Trace phases");
-    options.add_options("dev")("threads", "Set number of threads", cxxopts::value<int>(), "int");
+
+    int defaultThreads = std::thread::hardware_concurrency();
+    if (defaultThreads == 0) {
+        defaultThreads = 2;
+    }
+
+    options.add_options("dev")("max-threads", "Set number of threads",
+                               cxxopts::value<int>()->default_value(to_string(defaultThreads)), "int");
     options.add_options("dev")("counters", "Print internal counters");
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
@@ -667,16 +674,10 @@ int realmain(int argc, char **argv) {
         return 1;
     }
     opts.noStdlib = options["no-stdlib"].as<bool>();
-    opts.threads = options["threads"].as<int>();
-    if (opts.threads <= 0) {
-        int ncpu = std::thread::hardware_concurrency();
-        if (ncpu == 0) {
-            ncpu = 4;
-        }
-        opts.threads = min(ncpu, int(files.size() / 2));
-        if (opts.threads == 0) {
-            opts.threads = 1;
-        }
+
+    opts.threads = min(options["max-threads"].as<int>(), int(files.size() / 2));
+    if (opts.threads == 0) {
+        opts.threads = 1;
     }
 
     if (files.size() > 10) {
