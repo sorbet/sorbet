@@ -21,6 +21,17 @@ def externals():
         build_file="//:spdlog.BUILD",
     )
 
+    # proto_library, cc_proto_library, and java_proto_library rules implicitly
+    # depend on @com_google_protobuf for protoc and proto runtimes.
+    # This statement defines the @com_google_protobuf repo.
+    native.http_archive(
+        name = "com_google_protobuf",
+        sha256 = "1f8b9b202e9a4e467ff0b0f25facb1642727cdf5e69092038f15b37c75b99e45",
+        strip_prefix = "protobuf-3.5.1",
+        urls = ["https://github.com/google/protobuf/archive/v3.5.1.zip"],
+    )
+
+
     new_git_repository(
             name="lizard",
             remote="https://github.com/inikep/lizard.git",
@@ -71,7 +82,7 @@ def externals():
 
     new_git_repository(
         name = "compdb",
-        commit = "02c33ed2c0e86053073080fd215f44356ef5b543",
+        commit = "f9febfc7091e2585bafb1a96599ff517e169c3c4",
         remote = "https://github.com/grailbio/bazel-compilation-database.git",
         build_file_content = (
             """

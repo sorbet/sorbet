@@ -17,8 +17,9 @@ using namespace std;
 #define MAX_STACK_FRAMES 128
 static void *stack_traces[MAX_STACK_FRAMES];
 
-string ruby_typer::File::read(const char *filename) {
-    ifstream fin(filename);
+string ruby_typer::File::read(const absl::string_view filename) {
+    string fileNameStr(filename.data(), filename.size());
+    ifstream fin(fileNameStr);
     if (!fin.good()) {
         throw ruby_typer::FileNotFoundException();
     }
@@ -32,14 +33,22 @@ string ruby_typer::File::read(const char *filename) {
     return src;
 }
 
-void ruby_typer::File::write(const char *filename, const vector<ruby_typer::u4> &data) {
-    ofstream fout(filename, ios::out | ios::binary);
+void ruby_typer::File::write(const absl::string_view filename, const vector<ruby_typer::u4> &data) {
+    string fileNameStr(filename.data(), filename.size());
+    ofstream fout(fileNameStr, ios::out | ios::binary);
     if (!fout.good()) {
         throw ruby_typer::FileNotFoundException();
     }
     fout.write((const char *)data.data(), data.size() * sizeof(ruby_typer::u4));
+}
 
-    return;
+void ruby_typer::File::write(const absl::string_view filename, const absl::string_view text) {
+    string fileNameStr(filename.data(), filename.size());
+    ofstream fout(fileNameStr);
+    if (!fout.good()) {
+        throw ruby_typer::FileNotFoundException();
+    }
+    fout << text;
 }
 
 string ruby_typer::Strings::escapeCString(absl::string_view what) {

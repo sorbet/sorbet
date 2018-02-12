@@ -29,7 +29,8 @@ if [ ! -f "../ci/stripe-internal-ruby-typer-pay-server-sha" ]; then
     echo "ci/stripe-internal-ruby-typer-pay-server-sha doesn't exist"
     exit 1
 fi
-git checkout "$(cat ../ci/stripe-internal-ruby-typer-pay-server-sha)"
+PAY_SERVER_SHA="$(cat ../ci/stripe-internal-ruby-typer-pay-server-sha)"
+git checkout "$PAY_SERVER_SHA"
 
 # Make sure these specific files are typed
 while IFS= read -r f; do
@@ -72,10 +73,10 @@ TIMEFILE2=$(mktemp)
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
 env ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-4.0/bin/llvm-symbolizer \
-    ASAN_OPTIONS=detect_leaks=0 \
+    ASAN_OPTIONS=detect_leaks=0:detect_odr_violation=0 \
     LSAN_OPTIONS=verbosity=1:log_threads=1 \
     /usr/bin/time -o "$TIMEFILE2" \
-    ./scripts/ruby-types/typecheck --quiet --typed=always --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters
+    ./scripts/ruby-types/typecheck --quiet --typed=always --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver. --metrics-repo=payserver --metrics-sha="$PAY_SERVER_SHA"
 
 cat "$TIMEFILE2"
 
@@ -84,4 +85,6 @@ if [ "$RECORD_STATS" ]; then
     t_wall="$(grep wall "$TIMEFILE2" | cut -d ' ' -f 2)"
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_wall"s -name ruby_typer.payserver.full_run.seconds
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_user"s -name ruby_typer.payserver.full_run.cpu_seconds
+    mkdir -p /log/persisted
+    cp metrics.json /log/persisted
 fi

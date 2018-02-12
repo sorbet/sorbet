@@ -70,5 +70,7 @@ void histogramInc(ConstExprStr histogram, int key);
 void histogramAdd(ConstExprStr histogram, int key, unsigned int value);
 std::string getCounterStatistics();
 bool submitCountersToStatsd(std::string host, int port, std::string prefix);
+bool storeCountersToProtoFile(const std::string &fileName, const std::string &prefix, const std::string &repo,
+                              const std::string &branch, const std::string &sha, const std::string &status);
 } // namespace ruby_typer
 #endif // SRUBY_COUNTERS_H

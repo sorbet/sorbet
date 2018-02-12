@@ -14,7 +14,7 @@ err=0
 
 export ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-4.0/bin/llvm-symbolizer
 
-bazel test --config=ci --config=dbg --config=sanitize //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0" || err=$?
+bazel test --config=ci --config=dbg --config=sanitize //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0:detect_odr_violation=0" || err=$?
 
 mkdir -p /log/junit
 find bazel-testlogs/ -name '*.xml' | while read -r line; do

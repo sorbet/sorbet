@@ -566,9 +566,19 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("threads", "Set number of threads", cxxopts::value<int>(), "int");
     options.add_options("dev")("counters", "Print internal counters");
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
-    options.add_options("dev")("statsd-prefix", "StatsD prefix", cxxopts::value<string>(), "prefix");
+    options.add_options("dev")("statsd-prefix", "StatsD prefix",
+                               cxxopts::value<string>()->default_value("ruby_typer.unknown"), "prefix");
     options.add_options("dev")("statsd-port", "StatsD sever port", cxxopts::value<int>()->default_value("8200"),
                                "port");
+    options.add_options("dev")("metrics-file", "File to export metrics to", cxxopts::value<string>(), "file");
+    options.add_options("dev")("metrics-prefix", "Prefix to use in metrics",
+                               cxxopts::value<string>()->default_value("ruby_typer.unknown."), "file");
+    options.add_options("dev")("metrics-branch", "Branch to report in metrics export",
+                               cxxopts::value<string>()->default_value("none"), "branch");
+    options.add_options("dev")("metrics-sha", "Sha1 to report in metrics export",
+                               cxxopts::value<string>()->default_value("none"), "sha1");
+    options.add_options("dev")("metrics-repo", "Repo to report in metrics export",
+                               cxxopts::value<string>()->default_value("none"), "repo");
 
     // Positional params
     options.parse_positional("files");
@@ -774,6 +784,21 @@ int realmain(int argc, char **argv) {
     if (options.count("statsd-host") != 0) {
         submitCountersToStatsd(options["statsd-host"].as<string>(), options["statsd-port"].as<int>(),
                                options["statsd-prefix"].as<string>() + ".counters");
+    }
+
+    if (options.count("metrics-file") != 0) {
+        string status;
+        if (gs->hadCriticalError()) {
+            status = "Error";
+        } else if (returnCode != 0) {
+            status = "Failure";
+        } else {
+            status = "Success";
+        }
+
+        storeCountersToProtoFile(options["metrics-file"].as<string>(), options["metrics-prefix"].as<string>(),
+                                 options["metrics-repo"].as<string>(), options["metrics-branch"].as<string>(),
+                                 options["metrics-sha"].as<string>(), status);
     }
 
     // je_malloc_stats_print(NULL, NULL, NULL); // uncomment this to print jemalloc statistics

@@ -3,8 +3,11 @@ extern "C" {
 #include "statsd-client.h"
 }
 #include "absl/strings/str_cat.h"
+#include "proto/SourceMetrics.pb.h"
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <google/protobuf/util/json_util.h>
 #include <iomanip> // setw
 #include <map>
 #include <sstream>
@@ -328,6 +331,65 @@ bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
         statsd.gauge(e.first, e.second);
     }
 
+    return true;
+}
+
+bool storeCountersToProtoFile(const std::string &fileName, const std::string &prefix, const std::string &repo,
+                              const std::string &branch, const std::string &sha, const std::string &status) {
+    if (!enable_counters) {
+        return false;
+    }
+    com::stripe::payserver::events::cibot::SourceMetrics metrics;
+    metrics.set_repo(repo);
+    metrics.set_branch(branch);
+    metrics.set_sha(sha);
+    metrics.set_status(status);
+    auto unix_timestamp = std::chrono::seconds(std::time(NULL));
+    metrics.set_timestamp(unix_timestamp.count());
+
+    auto canon = counterState.canonicalize();
+    for (auto &cat : canon.counters_by_category) {
+        CounterImpl::CounterType sum = 0;
+        for (auto &e : cat.second) {
+            sum += e.second;
+            com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
+            metric->set_name(absl::StrCat(prefix, ".", cat.first, ".", e.first));
+            metric->set_value(e.second);
+        }
+
+        com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
+        metric->set_name(absl::StrCat(prefix, ".", cat.first, ".total"));
+        metric->set_value(sum);
+    }
+
+    for (auto &hist : canon.histograms) {
+        CounterImpl::CounterType sum = 0;
+        for (auto &e : hist.second) {
+            sum += e.second;
+            com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
+            metric->set_name(absl::StrCat(prefix, ".", hist.first, ".", e.first));
+            metric->set_value(e.second);
+        }
+        com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
+        metric->set_name(absl::StrCat(prefix, ".", hist.first, ".total"));
+        metric->set_value(sum);
+    }
+
+    for (auto &e : canon.counters) {
+        com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
+        metric->set_name(absl::StrCat(prefix, ".", e.first));
+        metric->set_value(e.second);
+    }
+
+    std::string json_string;
+
+    // Create a json_string from sr.
+    google::protobuf::util::JsonPrintOptions options;
+    options.add_whitespace = true;
+    options.always_print_primitive_fields = true;
+    options.preserve_proto_field_names = true;
+    google::protobuf::util::MessageToJsonString(metrics, &json_string, options);
+    File::write(fileName, json_string);
     return true;
 }
 

@@ -8,7 +8,6 @@ clang_tool("clang-tidy")
 compilation_database(
     name = "compdb",
     testonly = True,
-    exec_root_marker = True,
     targets = [
         # BEGIN compile_commands targets
         "//test:test_corpus_sharded",
