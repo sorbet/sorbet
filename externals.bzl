@@ -108,9 +108,9 @@ package(default_visibility = ["//visibility:public"])
 
     native.new_http_archive(
         name="clang_5_0_0_linux",
-        url="https://releases.llvm.org/5.0.0/clang+llvm-5.0.0-linux-x86_64-ubuntu16.04.tar.xz",
+        url="http://releases.llvm.org/5.0.1/clang+llvm-5.0.1-x86_64-linux-gnu-ubuntu-14.04.tar.xz",
         build_file="//:clang.BUILD",
-        sha256="171968549a12d8cf1e308004a1c31450f663359731e1524b952665f80149284b",
+        sha256="9e61c6669991e2f0d065348c95917b2c6b697d75098b60ec1c2e9f17093ce012",
         type="tar.xz",
-        strip_prefix="clang+llvm-5.0.0-linux-x86_64-ubuntu16.04/",
+        strip_prefix="clang+llvm-5.0.1-x86_64-linux-gnu-ubuntu-14.04/",
     )

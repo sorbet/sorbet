@@ -1,4 +1,4 @@
-FROM 030465607062.dkr.ecr.us-west-2.amazonaws.com/stripe/build/ubuntu-16.04:latest
+FROM 030465607062.dkr.ecr.us-west-2.amazonaws.com/stripe/build/ubuntu-14.04:latest
 
 RUN add-apt-repository ppa:openjdk-r/ppa && apt-get update && apt-get install -y openjdk-8-jdk zip
 RUN update-java-alternatives -s java-1.8.0-openjdk-amd64
@@ -6,7 +6,9 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 ENV PATH $JAVA_HOME/bin:$PATH
 RUN export JAVA_HOME
 
-RUN apt-get update && apt-get install -y clang-4.0 clang-format-4.0 time libncurses5-dev shellcheck
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get update
+
+RUN apt-get update && apt-get install -y g++-7 libncurses5-dev shellcheck build-essential realpath time
 
 # Dependencies for the parser
 RUN apt-get update && apt-get install -y ragel bison ruby autoconf

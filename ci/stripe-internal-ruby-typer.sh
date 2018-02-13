@@ -12,7 +12,8 @@ err=0
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
 
-export ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-4.0/bin/llvm-symbolizer
+ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_5_0_0_linux/bin/llvm-symbolizer"
+export ASAN_SYMBOLIZER_PATH
 
 bazel test --config=ci --config=dbg --config=sanitize //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0:detect_odr_violation=0" || err=$?
 

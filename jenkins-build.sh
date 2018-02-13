@@ -5,7 +5,8 @@ set -eux
 
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
-export BAZEL_BIN_LOC=/cache/bazel_binary
+BAZEL_BIN_LOC="/cache/$(lsb_release -sr)/bazel_binary"
+export BAZEL_BIN_LOC
 
 cp bazelrc-jenkins .bazelrc
 

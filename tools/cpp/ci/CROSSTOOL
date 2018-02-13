@@ -25,25 +25,21 @@ toolchain {
   target_system_name: "local"
   toolchain_identifier: "local_linux"
 
-  tool_path { name: "ar" path: "/usr/lib/llvm-4.0/bin/llvm-ar" }
+  tool_path { name: "ar" path: "bin/shim-llvm-ar" }
   tool_path { name: "compat-ld" path: "/usr/bin/ld" }
-  tool_path { name: "cpp" path: "/usr/lib/llvm-4.0/bin/clang-cpp" }
-  tool_path { name: "dwp" path: "/usr/lib/llvm-4.0/bin/llvm-dwp" }
-  tool_path { name: "gcc" path: "/usr/lib/llvm-4.0/bin/clang" }
+  tool_path { name: "cpp" path: "bin/shim-clang-cpp" }
+  tool_path { name: "dwp" path: "bin/shim-llvm-dwp" }
+  tool_path { name: "gcc" path: "bin/shim-clang" }
   cxx_flag: "-std=c++14"
-  linker_flag: "-lstdc++"
   linker_flag: "-B/usr/bin/"
-  linker_flag: "-lubsan"
-  linker_flag: "-flto=thin"
 
   # TODO(bazel-team): In theory, the path here ought to exactly match the path
   # used by gcc. That works because bazel currently doesn't track files at
   # absolute locations and has no remote execution, yet. However, this will need
   # to be fixed, maybe with auto-detection?
-  cxx_builtin_include_directory: "/usr/lib/gcc/"
-  cxx_builtin_include_directory: "/usr/local/include"
+  cxx_builtin_include_directory: "%package(@clang_5_0_0_linux//include)%"
+  cxx_builtin_include_directory: "%package(@clang_5_0_0_linux//lib/clang)%"
   cxx_builtin_include_directory: "/usr/include"
-  cxx_builtin_include_directory: "/usr/lib/llvm-4.0/lib/clang/4.0.0/include"
 
   tool_path { name: "gcov" path: "/usr/bin/gcov" }
 
@@ -51,15 +47,15 @@ toolchain {
   # to find libraries), but we provide LD so other rules can invoke the linker.
   tool_path { name: "ld" path: "/usr/bin/ld" }
 
-  tool_path { name: "nm" path: "/usr/lib/llvm-4.0/bin/llvm-nm" }
+  tool_path { name: "nm" path: "bin/shim-llvm-nm" }
   tool_path { name: "objcopy" path: "/usr/bin/objcopy" }
   objcopy_embed_flag: "-I"
   objcopy_embed_flag: "binary"
-  tool_path { name: "objdump" path: "/usr/lib/llvm-4.0/bin/llvm-objdump" }
+  tool_path { name: "objdump" path: "bin/shim-llvm-objdump" }
   tool_path { name: "strip" path: "/usr/bin/strip" }
 
   # Anticipated future default.
-#  unfiltered_cxx_flag: "-no-canonical-prefixes"
+  unfiltered_cxx_flag: "-no-canonical-prefixes"
 #  unfiltered_cxx_flag: "-fno-canonical-system-headers"
 
   # Make C++ compilation deterministic. Use linkstamping instead of these
@@ -140,6 +136,20 @@ toolchain {
     compiler_flag:  "-fno-omit-frame-pointer"
 
     linker_flag: "-Wl,--gc-sections"
+    linker_flag: "-flto=thin"
+    linker_flag: "-fuse-ld=lld"
   }
-  linking_mode_flags { mode: DYNAMIC }
+
+  linking_mode_flags {
+    mode: DYNAMIC
+    linker_flag: "-lstdc++"
+  }
+  linking_mode_flags {
+    mode: FULLY_STATIC
+    linker_flag: "-lstdc++"
+  }
+  linking_mode_flags {
+    mode: MOSTLY_STATIC
+    linker_flag: "-l:libstdc++.a"
+  }
 }

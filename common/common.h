@@ -17,6 +17,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include <string>
 #include <type_traits>
 #include <typeinfo>
+#include <vector>
 
 #if !defined(NDEBUG)
 // So you can use `cout` when debugging. Not included in production as it is a
