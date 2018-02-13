@@ -45,7 +45,7 @@ fi
 OUT=$(mktemp)
 TIMEFILE1=$(mktemp)
 
-/usr/bin/time -o "$TIMEFILE1" ./scripts/ruby-types/typecheck 2>&1 | tee "$OUT"
+/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ -s "$OUT" ]; then
     exit 1
 fi
@@ -76,7 +76,7 @@ env ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_5_0_0_linux/b
     ASAN_OPTIONS=detect_leaks=0:detect_odr_violation=0 \
     LSAN_OPTIONS=verbosity=1:log_threads=1 \
     /usr/bin/time -o "$TIMEFILE2" \
-    ./scripts/ruby-types/typecheck --quiet --typed=always --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver. --metrics-repo=payserver --metrics-sha="$PAY_SERVER_SHA"
+    ./scripts/bin/typecheck --quiet --typed=always --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver. --metrics-repo=payserver --metrics-sha="$PAY_SERVER_SHA"
 
 cat "$TIMEFILE2"
 
