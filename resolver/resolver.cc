@@ -602,6 +602,10 @@ private:
                     result = make_shared<core::AppliedType>(recvi->symbol, move(targs));
                 }
             },
+            [&](ast::Self *slf) {
+                core::SymbolRef klass = ctx.owner.data(ctx).enclosingClass(ctx);
+                result = klass.data(ctx).selfType(ctx);
+            },
             [&](ast::Expression *expr) {
                 ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unsupported type syntax");
                 result = core::Types::dynamic();
@@ -846,7 +850,7 @@ public:
     }
 
     ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
-        processClassBody(ctx, original);
+        processClassBody(ctx.withOwner(original->symbol), original);
         return original;
     }
 

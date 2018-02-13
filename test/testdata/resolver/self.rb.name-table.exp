@@ -1,0 +1,30 @@
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:TestSelf> < ::<constant:Object> () -> <Class:TestSelf>
+    method good1 (s) -> TestSelf
+      argument s<> -> TestSelf
+    method pass () -> TestSelf
+  class <constant:TestSelfGeneric>[<constant:Elem>] < ::<constant:Object> () -> <Class:TestSelfGeneric>
+    method <static-init> ()
+    method good1 (s) -> AppliedType {
+      klass = ::<constant:TestSelfGeneric>
+      targs = [
+        <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>#<constant:Elem>)
+      ]
+    }
+      argument s<> -> AppliedType {
+        klass = ::<constant:TestSelfGeneric>
+        targs = [
+          <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>#<constant:Elem>)
+        ]
+      }
+    method pass () -> AppliedType {
+      klass = ::<constant:TestSelfGeneric>
+      targs = [
+        <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>#<constant:Elem>)
+      ]
+    }
+    typeMember(=) <constant:Elem>
+  class <singleton class:<constant:TestSelf>> < ::<singleton class:<constant:Object>> ()
+  class <singleton class:<constant:TestSelfGeneric>> < ::<singleton class:<constant:Object>> ()
+  method <static-init>$8 ()
+
