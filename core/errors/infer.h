@@ -14,6 +14,7 @@ constexpr ErrorClass CastTypeMismatch = 7007;
 constexpr ErrorClass OverloadedArgumentCountMismatch = 7008;
 constexpr ErrorClass BareTypeUsage = 7009;
 constexpr ErrorClass GenericArgumentCountMismatch = 7010;
+constexpr ErrorClass IncompleteType = 7011;
 
 } // namespace Infer
 } // namespace errors

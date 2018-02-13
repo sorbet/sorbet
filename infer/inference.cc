@@ -703,7 +703,8 @@ public:
                         ENFORCE(data.resultType.get(), "Type should have been filled in by the namer");
                         tp.type = data.resultType;
                         tp.origins.push_back(symbol.data(ctx).definitionLoc);
-                    } else if (data.isField() || data.isStaticField() || data.isMethodArgument()) {
+                    } else if (data.isField() || data.isStaticField() || data.isMethodArgument() ||
+                               data.isTypeMember()) {
                         if (data.resultType.get() != nullptr) {
                             if (data.isField()) {
                                 tp.type = core::Types::resultTypeAsSeenFrom(
@@ -847,8 +848,13 @@ public:
 
             ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: ", bind.value->toString(ctx));
             tp.type->sanityCheck(ctx);
-            ENFORCE(tp.type->isFullyDefined(), "Inferencer did not assign a fully defined type");
-            tp.type->sanityCheck(ctx);
+
+            if (!tp.type->isFullyDefined()) {
+                ctx.state.error(
+                    bind.loc, core::errors::Infer::IncompleteType,
+                    "Expression does not have a fully-defined type (Did you reference another class's type members?)");
+                tp.type = core::Types::dynamic();
+            }
             ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
             if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                 if (send->block.exists()) {
