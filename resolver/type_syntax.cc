@@ -195,6 +195,26 @@ shared_ptr<core::Type> interpretTCombinator(core::Context ctx, ast::Send *send) 
             }
             return result;
         }
+        case core::Names::classOf()._id: {
+            if (send->args.size() != 1) {
+                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                "T.class_of only takes a single argument");
+                return core::Types::dynamic();
+            }
+            auto *obj = ast::cast_tree<ast::Ident>(send->args[0].get());
+            if (!obj) {
+                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                "T.class_of needs a Class as its argument");
+                return core::Types::dynamic();
+            }
+            auto sym = dealiasSym(ctx, obj->symbol);
+            auto singleton = sym.data(ctx).singletonClass(ctx);
+            if (!singleton.exists()) {
+                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unknown class");
+                return core::Types::dynamic();
+            }
+            return make_shared<core::ClassType>(singleton);
+        }
         case core::Names::untyped()._id:
             return core::Types::dynamic();
 

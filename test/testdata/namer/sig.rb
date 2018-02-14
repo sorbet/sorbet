@@ -1,6 +1,7 @@
 # @typed
 class T1; end
 class T2; end
+module M1; end
 A1 = T1
 
 class A
@@ -16,9 +17,12 @@ class A
     i: A1,
     j: T1.singleton_class,
     k: A1.singleton_class,
+    l: T.class_of(T1),
+    m: T.class_of(A1),
+    n: T.class_of(M1),
   )
   .returns(T2)
-  def good(a, b, c, d, e, f, g, h, i, j, k)
+  def good(a, b, c, d, e, f, g, h, i, j, k, l, m, n)
   end
 
   sig(
@@ -30,9 +34,12 @@ class A
     f: 0, # error: Unsupported type syntax
     g: T.any(*[1,2]),
     h: T.junk, # error: Unsupported method T.junk
+    i: T.class_of(T1, T2), # error: class_of only takes a single argument
+    j: T.class_of(T.nilable(Integer)), # error: T.class_of needs a Class as its argument
+    k: T.class_of(1), # error: T.class_of needs a Class as its argument
   )
   .returns(T2)
-  def bad(a, b, c, d, e, f, g, h)
+  def bad(a, b, c, d, e, f, g, h, i, j, k)
   end
 
   sig.returns(T.noreturn)
