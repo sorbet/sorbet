@@ -22,14 +22,14 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(const core::Cont
 }
 
 shared_ptr<ruby_typer::core::Type> underlying(shared_ptr<Type> t1) {
-    if (auto *f = dynamic_cast<ProxyType *>(t1.get())) {
+    if (auto *f = cast_type<ProxyType>(t1.get())) {
         return f->underlying;
     }
     return t1;
 }
 
 shared_ptr<ruby_typer::core::Type> lubDistributeOr(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    OrType *o1 = dynamic_cast<OrType *>(t1.get());
+    OrType *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
@@ -61,7 +61,7 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(const core::Context ctx, shar
 }
 
 shared_ptr<ruby_typer::core::Type> glbDistributeAnd(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    AndType *a1 = dynamic_cast<AndType *>(t1.get());
+    AndType *a1 = cast_type<AndType>(t1.get());
     ENFORCE(t1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
@@ -96,7 +96,7 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(const core::Context ctx, sha
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
 shared_ptr<ruby_typer::core::Type> dropLubComponents(const core::Context ctx, shared_ptr<Type> t1,
                                                      shared_ptr<Type> t2) {
-    if (AndType *a1 = dynamic_cast<AndType *>(t1.get())) {
+    if (AndType *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
         if (a1a != a1->left || a1b != a1->right) {
@@ -120,7 +120,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
         return _lub(ctx, t2, t1);
     }
 
-    if (ClassType *mayBeSpecial1 = dynamic_cast<ClassType *>(t1.get())) {
+    if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
             categoryCounterInc("lub", "<untyped");
             return t1;
@@ -150,13 +150,13 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
         }
     }
 
-    if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 5, 6
+    if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(ctx, t2, t1);
-    } else if (dynamic_cast<OrType *>(t1.get()) != nullptr) {
+    } else if (cast_type<OrType>(t1.get()) != nullptr) {
         categoryCounterInc("lub", "<or");
         return lubDistributeOr(ctx, t1, t2);
-    } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2, 4
+    } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 4
         categoryCounterInc("lub", "and>");
         auto t1d = underlying(t1);
 
@@ -176,8 +176,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
         return OrType::make_shared(t1, t2);
     }
 
-    if (AppliedType *a1 = dynamic_cast<AppliedType *>(t1.get())) {
-        AppliedType *a2 = dynamic_cast<AppliedType *>(t2.get());
+    if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
+        AppliedType *a2 = cast_type<AppliedType>(t2.get());
         if (a2 == nullptr) {
             if (isSubType(ctx, t2, t1)) {
                 return t1;
@@ -486,10 +486,10 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
     if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
         return _glb(ctx, t2, t1);
     }
-    if (auto *a1 = dynamic_cast<AndType *>(t1.get())) { // 4, 5
+    if (auto *a1 = cast_type<AndType>(t1.get())) { // 4, 5
         categoryCounterInc("glb", "<and");
         return glbDistributeAnd(ctx, t1, t2);
-    } else if (auto *a2 = dynamic_cast<AndType *>(t2.get())) { // 2
+    } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2
         categoryCounterInc("glb", "and>");
         return glbDistributeAnd(ctx, t2, t1);
     }
@@ -594,7 +594,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
         }
     }
 
-    if (auto *o2 = dynamic_cast<OrType *>(t2.get())) { // 3, 6
+    if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 6
         bool collapseInLeft = Types::isSubTypeWhenFrozen(ctx, t1, t2);
         if (collapseInLeft) {
             categoryCounterInc("glb", "Zor");
@@ -607,7 +607,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
             return t2;
         }
 
-        if (auto *c1 = dynamic_cast<ClassType *>(t1.get())) {
+        if (auto *c1 = cast_type<ClassType>(t1.get())) {
             auto lft = Types::glb(ctx, t1, o2->left);
             if (Types::isSubTypeWhenFrozen(ctx, lft, o2->right)) {
                 categoryCounterInc("glb", "ZZZorClass");
@@ -626,7 +626,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
             }
         }
 
-        if (auto *o1 = dynamic_cast<OrType *>(t1.get())) { // 6
+        if (auto *o1 = cast_type<OrType>(t1.get())) { // 6
             // try hard to collapse
             bool subt11 = Types::isSubTypeWhenFrozen(ctx, o1->left, o2->left) ||
                           Types::isSubTypeWhenFrozen(ctx, o1->left, o2->right);
@@ -660,8 +660,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
         }
     }
 
-    if (AppliedType *a1 = dynamic_cast<AppliedType *>(t1.get())) {
-        AppliedType *a2 = dynamic_cast<AppliedType *>(t2.get());
+    if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
+        AppliedType *a2 = cast_type<AppliedType>(t2.get());
         if (a2 == nullptr) {
             return AndType::make_shared(t1, t2);
         }
@@ -756,7 +756,7 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
         }
     }
 
-    if (TypeVar *tv1 = dynamic_cast<TypeVar *>(t1.get())) {
+    if (TypeVar *tv1 = cast_type<TypeVar>(t1.get())) {
         if (tv1->isInstantiated) {
             return Types::isSubType(ctx, tv1->instantiation, t2);
         }
@@ -798,7 +798,7 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
         return self1->definition == self2->definition;
     }
 
-    if (TypeVar *tv2 = dynamic_cast<TypeVar *>(t2.get())) {
+    if (TypeVar *tv2 = cast_type<TypeVar>(t2.get())) {
         if (tv2->isInstantiated) {
             return Types::isSubType(ctx, t1, tv2->instantiation);
         }
@@ -816,11 +816,11 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
         tv2->lowerConstraints.push_back(t1);
         return true;
     }
-    if (AppliedType *a1 = dynamic_cast<AppliedType *>(t1.get())) {
-        AppliedType *a2 = dynamic_cast<AppliedType *>(t2.get());
+    if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
+        AppliedType *a2 = cast_type<AppliedType>(t2.get());
         bool result;
         if (a2 == nullptr) {
-            if (ClassType *c2 = dynamic_cast<ClassType *>(t2.get())) {
+            if (ClassType *c2 = cast_type<ClassType>(t2.get())) {
                 return classSymbolIsAsGoodAs(ctx, a1->klass, c2->symbol);
             }
             return false;
@@ -855,8 +855,8 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
         }
         return result;
     }
-    if (AppliedType *a2 = dynamic_cast<AppliedType *>(t2.get())) {
-        if (ProxyType *pt = dynamic_cast<ProxyType *>(t1.get())) {
+    if (AppliedType *a2 = cast_type<AppliedType>(t2.get())) {
+        if (ProxyType *pt = cast_type<ProxyType>(t1.get())) {
             return Types::isSubType(ctx, pt->underlying, t2);
         }
         return false;

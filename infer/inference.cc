@@ -158,7 +158,7 @@ shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
 }
 
 shared_ptr<core::Type> dropConstructor(const core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
-    if (auto *mt = dynamic_cast<core::MetaType *>(tp.get())) {
+    if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
         if (!mt->wrapped->isDynamic()) {
             ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
         }
