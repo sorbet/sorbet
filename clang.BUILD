@@ -14,3 +14,8 @@ filegroup(
     name = "libclang",
     srcs = glob(["lib/clang/**/*"]),
 )
+
+filegroup(
+    name = "lib",
+    srcs = glob(["lib/*"]),
+)

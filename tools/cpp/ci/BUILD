@@ -6,6 +6,7 @@ filegroup(
         "//tools/cpp/ci/bin:wrappers",
         "@clang_5_0_0_linux//:bin",
         "@clang_5_0_0_linux//:includes",
+        "@clang_5_0_0_linux//:lib",
         "@clang_5_0_0_linux//:libclang",
     ],
 )
@@ -16,6 +17,7 @@ filegroup(
         "//tools/cpp/ci/bin:wrappers",
         "@clang_5_0_0_linux//:bin",
         "@clang_5_0_0_linux//:includes",
+        "@clang_5_0_0_linux//:lib",
         "@clang_5_0_0_linux//:libclang",
     ],
 )

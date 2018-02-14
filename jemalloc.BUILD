@@ -19,7 +19,7 @@ genrule(
                                        export CFLAGS=$(CC_FLAGS) && \
                                        export CXXFLAGS=$(CC_FLAGS) && \
                                        pushd $$(dirname $(location autogen.sh))  && \
-                                       EXTRA_CFLAGS=-flto=thin EXTRA_CXXFLAGS=-flto=thin LDFLAGS='-flto=thin -fuse-ld=lld' ./autogen.sh --without-export && \
+                                       EXTRA_CFLAGS=-flto=thin EXTRA_CXXFLAGS='-flto=thin -stdlib=libc++' LDFLAGS='-flto=thin -fuse-ld=lld' ./autogen.sh --without-export && \
                                        make build_lib_static -j4  && \
                                        popd &&\
                                        mv $$(dirname $(location autogen.sh))/lib/libjemalloc.a $(location lib/libjemalloc.a) && \
