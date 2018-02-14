@@ -29,9 +29,10 @@ class A
     e: T.enum([meth]), # error: Unsupported type literal
     f: 0, # error: Unsupported type syntax
     g: T.any(*[1,2]),
+    h: T.junk, # error: Unsupported method T.junk
   )
   .returns(T2)
-  def bad(a, b, c, d, e, f, g)
+  def bad(a, b, c, d, e, f, g, h)
   end
 
   sig.returns(T.noreturn)

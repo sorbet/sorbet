@@ -1,6 +1,6 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:A> < ::<constant:Object> () -> <Class:A>
-    method bad (a, b, c, d, e, f, g) -> T2
+    method bad (a, b, c, d, e, f, g, h) -> T2
       argument a<> -> untyped
       argument b<> -> untyped
       argument c<> -> <bottom>
@@ -8,6 +8,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument e<> -> untyped
       argument f<> -> untyped
       argument g<> -> <bottom>
+      argument h<> -> untyped
     method f1 (x) -> T1
       argument x<> -> untyped
     method f2 (x) -> T2

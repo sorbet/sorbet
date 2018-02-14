@@ -434,8 +434,8 @@ private:
                 return core::Types::bottom();
 
             default:
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                "Unsupported type combinator {}", send->fun.toString(ctx));
+                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unsupported method T.{}",
+                                send->fun.toString(ctx));
                 return core::Types::dynamic();
         }
     }
