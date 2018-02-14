@@ -13,6 +13,7 @@
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
 #include "infer/infer.h"
+#include "namer/configatron/configatron.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
@@ -58,6 +59,8 @@ struct Options {
     bool showProgress = false;
     int threads = 0;
     string typedSource = "";
+    std::vector<string> configatronDirs;
+    std::vector<string> configatronFiles;
 };
 shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> make_stderr_color_sink() {
     auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
@@ -318,6 +321,12 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
     }
 
     ENFORCE(mainThreadFiles.size() + frs.size() == trees.size());
+    {
+        core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
+        core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
+        ProgressIndicator namingProgress(opts.showProgress, "Configatron", 1);
+        namer::configatron::fillInFromFileSystem(gs, opts.configatronDirs, opts.configatronFiles);
+    }
 
     {
         ProgressIndicator namingProgress(opts.showProgress, "Naming", frs.size());
@@ -539,6 +548,10 @@ cxxopts::Options buildOptions() {
     options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
+    options.add_options()("configatronDir", "Path to configatron yaml folders", cxxopts::value<vector<string>>(),
+                          "path");
+    options.add_options()("configatronFile", "Path to configatron yaml files", cxxopts::value<vector<string>>(),
+                          "path");
     options.add_options()("P,progress", "Draw progressbar");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
@@ -723,6 +736,8 @@ int realmain(int argc, char **argv) {
     opts.forceTyped = typed == "always";
     opts.forceUntyped = typed == "never";
     opts.showProgress = options.count("P") != 0;
+    opts.configatronDirs = options["configatronDir"].as<vector<string>>();
+    opts.configatronFiles = options["configatronFile"].as<vector<string>>();
     if (typed != "always" && typed != "never" && typed != "auto") {
         console->error("Invalid value for `--typed`: {}", typed);
     }

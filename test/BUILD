@@ -103,6 +103,7 @@ sh_test(
     size = "small",
     srcs = ["end-to-end-test.sh"],
     data = [
+        "configatron.yaml",
         "end-to-end-test.out",
         "end-to-end-test-input.rb",
         "//main:ruby-typer",

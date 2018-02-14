@@ -31,6 +31,7 @@ compilation_database(
         "//version:version",
         "//payload/text:text",
         "//payload/binary:binary",
+        "//namer/configatron:configatron",
         "//infer:infer_test",
         "//resolver:resolver",
         "//namer:namer",

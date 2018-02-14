@@ -1,0 +1,236 @@
+#include "configatron.h"
+#include "yaml-cpp/yaml.h"
+#include <cctype>
+#include <dirent.h>
+#include <iostream>
+#include <sys/types.h>
+
+using namespace std;
+using namespace ruby_typer;
+
+bool endsWith(const string &a, const string &b) {
+    if (b.size() > a.size()) {
+        return false;
+    }
+    return equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
+}
+
+vector<string> listDir(const char *name) {
+    vector<string> result;
+    DIR *dir;
+    struct dirent *entry;
+    vector<string> names;
+
+    if ((dir = opendir(name)) == nullptr) {
+        return result;
+    }
+
+    while ((entry = readdir(dir)) != nullptr) {
+        if (entry->d_type == DT_DIR) {
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                continue;
+            }
+            char path[1024];
+            snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
+            auto nested = listDir(path);
+            result.insert(result.end(), nested.begin(), nested.end());
+        } else if (endsWith(entry->d_name, ".yaml")) {
+            names.emplace_back(entry->d_name);
+        }
+    }
+    sort(names.begin(), names.end());
+
+    closedir(dir);
+    return names;
+}
+
+enum class StringKind { String, Integer, Float, Symbol };
+
+StringKind classifyString(const string &str) {
+    int dotCount = 0;
+    if (!str.empty() && str[0] == ':') {
+        return StringKind::Symbol;
+    }
+    for (const auto &c : str) {
+        if (c == '.') {
+            dotCount++;
+        } else {
+            if (c != '_' && !isdigit(c)) {
+                return StringKind::String;
+            }
+        }
+    }
+    switch (dotCount) {
+        case 0:
+            return StringKind ::Integer;
+        case 1:
+            return StringKind ::Float;
+        default:
+            return StringKind ::String;
+    }
+}
+
+shared_ptr<core::Type> getType(core::GlobalState &gs, const YAML::Node &node) {
+    ENFORCE(node.IsScalar());
+    string value = node.as<string>();
+    if (value == "true" || value == "false") {
+        return core::Types::Boolean();
+    }
+    switch (classifyString(value)) {
+        case StringKind ::Integer:
+            return core::Types::Integer();
+        case StringKind ::Float:
+            return core::Types::Float();
+        case StringKind ::String:
+            return core::Types::String();
+        case StringKind ::Symbol:
+            return core::Types::Symbol();
+    }
+}
+
+struct Path {
+    Path *parent;
+    string selector;
+    shared_ptr<core::Type> myType;
+    Path(Path *parent, string selector) : parent(parent), selector(selector){};
+    string toString() {
+        if (parent) {
+            return parent->toString() + "." + selector;
+        };
+        return selector;
+    }
+    string show(core::GlobalState &gs) {
+        stringstream result;
+        if (myType) {
+            result << toString() + " -> " + myType->toString(gs) << endl;
+        }
+        for (auto child : children) {
+            result << child->show(gs);
+        }
+        return result.str();
+    }
+    std::vector<shared_ptr<Path>> children;
+    shared_ptr<Path> getChild(const string &name) {
+        if (!name.empty() && name[0] == ':') {
+            string withoutColon(name.c_str() + 1, name.size() - 1);
+            return getChild(withoutColon);
+        }
+        for (auto &child : children) {
+            if (child->selector == name) {
+                return child;
+            }
+        }
+        children.emplace_back(make_shared<Path>(this, name));
+        return children.back();
+    }
+
+    void setType(core::GlobalState &gs, shared_ptr<core::Type> tp) {
+        if (myType) {
+            myType = core::Types::buildOr(core::Context(gs, core::Symbols::root()), myType, tp);
+        } else {
+            myType = tp;
+        }
+    }
+
+    void enter(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef owner) {
+        if (children.empty()) {
+            parent.data(gs).resultType = myType;
+        } else {
+            auto classSym =
+                gs.enterClassSymbol(core::Loc::none(), owner, gs.enterNameConstant("Configatron" + this->toString()));
+            parent.data(gs).resultType = make_shared<core::ClassType>(classSym);
+            auto squareBrackets = gs.enterMethodSymbol(core::Loc::none(), classSym, core::Names::squareBrackets());
+            squareBrackets.data(gs).resultType = core::Types::dynamic();
+            auto to_h = gs.enterMethodSymbol(core::Loc::none(), classSym, core::Names::to_h());
+            to_h.data(gs).resultType = core::Types::dynamic();
+            auto arg = gs.enterMethodArgumentSymbol(core::Loc::none(), squareBrackets, core::Names::arg0());
+            arg.data(gs).resultType = core::Types::dynamic();
+            squareBrackets.data(gs).argumentsOrMixins.emplace_back(arg);
+
+            for (auto &child : children) {
+                auto method = gs.enterMethodSymbol(core::Loc::none(), classSym, gs.enterNameUTF8(child->selector));
+                child->enter(gs, method, owner);
+            }
+            //            cout << classSym.toString(gs, 1, 1);
+        }
+    }
+};
+template class std::shared_ptr<Path>;
+
+void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> prefix) {
+    switch (node.Type()) {
+        case YAML::NodeType::Null:
+            prefix->setType(gs, core::Types::nil());
+            break;
+        case YAML::NodeType::Scalar:
+            prefix->setType(gs, getType(gs, node));
+            break;
+        case YAML::NodeType::Sequence: {
+            shared_ptr<core::Type> elemType;
+            for (const auto &child : node) {
+                auto thisElemType = child.IsScalar() ? getType(gs, child) : core::Types::dynamic();
+                if (elemType) {
+                    elemType = core::Types::buildOr(core::Context(gs, core::Symbols::root()), elemType, thisElemType);
+                } else {
+                    elemType = thisElemType;
+                }
+            }
+            if (!elemType) {
+                elemType = core::Types::bottom();
+            }
+            vector<shared_ptr<core::Type>> elems{elemType};
+            prefix->setType(gs, make_shared<core::AppliedType>(core::Symbols::Array(), elems));
+            break;
+        }
+        case YAML::NodeType::Map:
+            for (const auto &child : node) {
+                auto key = child.first.as<string>();
+                if (key != "<<") {
+                    recurse(gs, child.second, prefix->getChild(key));
+                } else {
+                    recurse(gs, child.second, prefix);
+                }
+            }
+
+            break;
+        case YAML::NodeType::Undefined:
+            break;
+    }
+}
+
+void handleFile(core::GlobalState &gs, std::string file, shared_ptr<Path> rootNode) {
+    YAML::Node config = YAML::LoadFile(file);
+    switch (config.Type()) {
+        case YAML::NodeType::Map:
+            for (const auto &child : config) {
+                auto key = child.first.as<string>();
+                recurse(gs, child.second, rootNode);
+            }
+        default:
+            break;
+    }
+}
+
+void ruby_typer::namer::configatron::fillInFromFileSystem(core::GlobalState &gs, std::vector<std::string> folders,
+                                                          std::vector<std::string> files) {
+    auto rootNode = make_shared<Path>(nullptr, "");
+    for (auto &folder : folders) {
+        auto files = listDir(folder.c_str());
+        for (const auto &file : files) {
+            constexpr int extLen = 5; // strlen(".yaml");
+            string fileName(file.c_str(), file.size() - extLen);
+            auto innerNode = rootNode->getChild(fileName);
+            handleFile(gs, folder + "/" + file, innerNode);
+        }
+    }
+    for (auto &file : files) {
+        handleFile(gs, file, rootNode);
+    }
+
+    //    cout << rootNode->show(gs) << endl;
+    core::SymbolRef configatron =
+        gs.enterMethodSymbol(core::Loc::none(), core::Symbols::Kernel(), gs.enterNameUTF8("configatron"));
+    rootNode->enter(gs, configatron, core::Symbols::root());
+
+    //    cout << configatron.toString(gs, 1, 1);
+}

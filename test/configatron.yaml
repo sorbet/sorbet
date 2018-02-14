@@ -1,0 +1,6 @@
+default: &default
+  test_bool: true
+  test_int: 42
+  test_string: Mamba
+  test_float: 42.42
+

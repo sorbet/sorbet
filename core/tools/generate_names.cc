@@ -43,6 +43,7 @@ NameDef names[] = {
     {"orOr", "||", Desugar},
     {"to_s", Desugar},
     {"to_a", Desugar},
+    {"to_h", Core},
     {"to_hash", Desugar},
     {"to_proc", Desugar},
     {"concat", Desugar},

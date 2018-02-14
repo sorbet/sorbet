@@ -13,6 +13,14 @@ def externals():
         strip_prefix = "googletest-release-1.8.0",
     )
 
+    native.new_http_archive(
+            name = "yaml_cpp",
+            url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.1.zip",
+            sha256 = "2faaf686c140d9e690100a2e98ca0f4d325b0c13a67a26fd4b3b3a27fc476798",
+            build_file = "//:yaml_cpp.BUILD",
+            strip_prefix = "yaml-cpp-yaml-cpp-0.6.1",
+        )
+
     # their zip archive has symlinks that bazel does not like
     new_git_repository(
         name="spdlog",

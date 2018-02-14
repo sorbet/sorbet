@@ -41,6 +41,11 @@ std::shared_ptr<Type> Types::falseClass() {
     return res;
 }
 
+std::shared_ptr<Type> Types::Boolean() {
+    static auto res = OrType::make_shared(trueClass(), falseClass());
+    return res;
+}
+
 std::shared_ptr<Type> Types::Integer() {
     static auto res = make_shared<ClassType>(core::Symbols::Integer());
     return res;

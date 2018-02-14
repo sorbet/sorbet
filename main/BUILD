@@ -64,6 +64,7 @@ cc_library(
         "//dsl",
         "//infer",
         "//namer",
+        "//namer/configatron",
         "//parser",
         "//payload/binary",
         "//payload/text",

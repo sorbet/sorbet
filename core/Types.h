@@ -48,6 +48,7 @@ public:
     static std::shared_ptr<Type> String();
     static std::shared_ptr<Type> Symbol();
     static std::shared_ptr<Type> Float();
+    static std::shared_ptr<Type> Boolean();
     static std::shared_ptr<Type> Object();
     static std::shared_ptr<Type> arrayClass();
     static std::shared_ptr<Type> hashClass();
@@ -211,6 +212,7 @@ private:
      * `make_shared` helper here.
      */
     friend std::shared_ptr<Type> Types::falsyTypes();
+    friend std::shared_ptr<Type> Types::Boolean();
     friend class ruby_typer::core::GlobalSubstitution;
     friend class ruby_typer::core::serialize::GlobalStateSerializer;
     friend std::shared_ptr<Type> lubDistributeOr(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
