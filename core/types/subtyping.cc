@@ -211,7 +211,12 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1, t2);
                 }
-                newTargs.push_back(a1->targs[i]);
+                if (a2->targs[j]->isDynamic()) {
+                    newTargs.push_back(a2->targs[j]);
+                } else {
+                    newTargs.push_back(a1->targs[i]);
+                }
+
             } else if (idx.data(ctx).isContravariant()) {
                 newTargs.push_back(Types::glb(ctx, a1->targs[i], a2->targs[j]));
             }
@@ -668,29 +673,44 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
         if (ltr) { // swap
             std::swap(a1, a2);
         }
+        // a1 <:< a2
 
-        vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
+        vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a2->klass, a2->targs, a1->klass);
+
+        // code below inverts permutation of type params
+
         vector<shared_ptr<Type>> newTargs;
-        newTargs.reserve(indexes.size());
-        int i = 0;
-        for (SymbolRef idx : indexes) {
-            int j = 0;
-            while (a2->klass.data(ctx).typeMembers()[i] != idx) {
-                j++;
+        newTargs.reserve(a1->klass.data(ctx).typeMembers().size());
+        int j = 0;
+        for (SymbolRef idx : a1->klass.data(ctx).typeMembers()) {
+            int i = 0;
+            if (j >= indexes.size()) {
+                i = INT_MAX;
             }
-            if (idx.data(ctx).isCovariant()) {
-                newTargs.push_back(Types::glb(ctx, a1->targs[i], a2->targs[j]));
-            } else if (idx.data(ctx).isInvariant()) {
-                if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
-                    return AndType::make_shared(t1, t2); // we can as well return nothing here?
+            while (i < a2->klass.data(ctx).typeMembers().size() && indexes[j] != a2->klass.data(ctx).typeMembers()[i]) {
+                i++;
+            }
+            if (i >= a2->klass.data(ctx).typeMembers().size()) { // a1 has more tparams, this is fine, it's a child
+                newTargs.push_back(a1->targs[j]);
+            } else {
+                if (idx.data(ctx).isCovariant()) {
+                    newTargs.push_back(Types::glb(ctx, a1->targs[j], a2->targs[i]));
+                } else if (idx.data(ctx).isInvariant()) {
+                    if (!Types::equiv(ctx, a1->targs[j], a2->targs[i])) {
+                        return AndType::make_shared(t1, t2);
+                    }
+                    if (a1->targs[j]->isDynamic()) {
+                        newTargs.push_back(a2->targs[i]);
+                    } else {
+                        newTargs.push_back(a1->targs[j]);
+                    }
+                } else if (idx.data(ctx).isContravariant()) {
+                    newTargs.push_back(Types::lub(ctx, a1->targs[j], a2->targs[i]));
                 }
-                newTargs.push_back(a1->targs[i]);
-            } else if (idx.data(ctx).isContravariant()) {
-                newTargs.push_back(Types::lub(ctx, a1->targs[i], a2->targs[j]));
             }
-            i++;
+            j++;
         }
-        return make_shared<AppliedType>(a2->klass, newTargs);
+        return make_shared<AppliedType>(a1->klass, newTargs);
     }
 
     return glbGround(ctx, t1, t2);
