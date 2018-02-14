@@ -5,7 +5,7 @@ begin
         <emptyTree>
         <emptyTree>
         <emptyTree>
-        #<constant:Alias> = ::<constant:Parent>
+        <emptyTree>
         <emptyTree>
       end
     end
@@ -54,9 +54,9 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Child1><<constant:Child1>> < (#<constant:Alias>)
+  class <emptyTree>::<constant:Child1><<constant:Child1>> < (::<constant:Parent>)
     def self.<static-init><<static-init>>()
-      ::<constant:Child1>#@@class_var
+      ::<constant:Parent>#@@class_var
     end
   end
   <emptyTree>

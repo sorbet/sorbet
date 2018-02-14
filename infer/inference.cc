@@ -697,7 +697,7 @@ public:
                     ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
                 },
                 [&](cfg::Alias *a) {
-                    core::SymbolRef symbol = a->what;
+                    core::SymbolRef symbol = a->what.data(ctx).dealias(ctx);
                     const core::Symbol &data = symbol.data(ctx);
                     if (data.isClass()) {
                         ENFORCE(data.resultType.get(), "Type should have been filled in by the namer");

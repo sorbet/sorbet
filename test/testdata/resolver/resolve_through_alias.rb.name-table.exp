@@ -1,8 +1,7 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:A> < ::<constant:Object> () -> <Class:A>
     method <static-init> ()
-    static-field <constant:N> -> <Class:NS>
-      class <constant:Inner> () -> untyped
+    static-field <constant:N> -> AliasType { symbol = ::<constant:NS> }
   class <constant:NS> (<constant:BasicObject>) -> <Class:NS>
     class <constant:Inner> (<constant:BasicObject>) -> <Class:Inner>
     class <singleton class:<constant:Inner>> < ::<constant:Module> ()

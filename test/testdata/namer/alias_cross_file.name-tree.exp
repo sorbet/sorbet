@@ -8,7 +8,7 @@ begin
     def self.<static-init><<static-init>$9>()
       begin
         <emptyTree>
-        #<constant:T2> = ::<constant:T1>
+        <emptyTree>
       end
     end
   end

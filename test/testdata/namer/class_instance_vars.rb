@@ -36,6 +36,6 @@ class Child < Parent
 end
 
 Alias = Parent
-class Child1 < Alias # error: must be statically resolved
-  @@class_var # error: undeclared variable
+class Child1 < Alias
+  @@class_var
 end

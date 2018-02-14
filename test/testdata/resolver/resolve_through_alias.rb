@@ -7,5 +7,5 @@ end
 
 class A
   N = NS
-  N::Inner # error: Stubbing out unknown constant
+  N::Inner
 end

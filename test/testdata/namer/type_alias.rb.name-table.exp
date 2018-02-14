@@ -4,6 +4,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <singleton class:<constant:C1>> < ::<singleton class:<constant:Object>> ()
     method f (x) -> NilClass
       argument x<> -> C1
-    static-field <constant:C2> -> <Class:C1>
+    static-field <constant:C2> -> AliasType { symbol = ::<constant:A>::<constant:C1> }
   class <singleton class:<constant:A>> < ::<constant:Module> ()
 

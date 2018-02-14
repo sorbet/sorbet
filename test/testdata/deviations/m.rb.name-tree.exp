@@ -4,7 +4,7 @@ begin
       begin
         <emptyTree>
         ::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:MyModel>
-        #<constant:M> = ::<constant:Opus>::<constant:DB>::<constant:Model>
+        <emptyTree>
       end
     end
   end

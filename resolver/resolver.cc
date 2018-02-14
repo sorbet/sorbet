@@ -153,7 +153,7 @@ public:
         return new ast::Ident(c->loc, resolved);
     }
 
-    ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
+    ast::Expression *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
         if (id == nullptr || !id->symbol.data(ctx).isStaticField()) {
             return asgn;
@@ -164,8 +164,8 @@ public:
             return asgn;
         }
 
-        id->symbol.data(ctx).resultType = make_unique<core::ClassType>(rhs->symbol.data(ctx).singletonClass(ctx));
-        return asgn;
+        id->symbol.data(ctx).resultType = make_unique<core::AliasType>(rhs->symbol);
+        return new ast::EmptyTree(asgn->loc);
     }
 
     unique_ptr<Nesting> nesting_;

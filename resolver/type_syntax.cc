@@ -8,22 +8,6 @@ using namespace std;
 namespace ruby_typer {
 namespace resolver {
 
-core::SymbolRef dealiasSym(core::Context ctx, core::SymbolRef sym) {
-    while (sym.data(ctx).isStaticField()) {
-        auto *ct = core::cast_type<core::ClassType>(sym.data(ctx).resultType.get());
-        if (ct == nullptr) {
-            break;
-        }
-        auto klass = ct->symbol.data(ctx).attachedClass(ctx);
-        if (!klass.exists()) {
-            break;
-        }
-
-        sym = klass;
-    }
-    return sym;
-}
-
 shared_ptr<core::Type> getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
     shared_ptr<core::Type> result;
     typecase(expr.get(), [&](ast::IntLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
@@ -207,7 +191,7 @@ shared_ptr<core::Type> interpretTCombinator(core::Context ctx, ast::Send *send) 
                                 "T.class_of needs a Class as its argument");
                 return core::Types::dynamic();
             }
-            auto sym = dealiasSym(ctx, obj->symbol);
+            auto sym = obj->symbol.data(ctx).dealias(ctx);
             auto singleton = sym.data(ctx).singletonClass(ctx);
             if (!singleton.exists()) {
                 ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unknown class");
@@ -243,7 +227,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::Context ctx, unique_ptr<a
                                             i->symbol == core::Symbols::Set() || i->symbol == core::Symbols::Struct() ||
                                             i->symbol == core::Symbols::File();
                  // TODO: reduce this^^^ set.
-                 auto sym = dealiasSym(ctx, i->symbol);
+                 auto sym = i->symbol.data(ctx).dealias(ctx);
                  if (sym.data(ctx).isClass()) {
                      if (sym.data(ctx).typeMembers().empty()) {
                          result = make_shared<core::ClassType>(sym);
@@ -323,7 +307,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::Context ctx, unique_ptr<a
                  }
 
                  if (s->fun == core::Names::singletonClass()) {
-                     auto sym = dealiasSym(ctx, recvi->symbol);
+                     auto sym = recvi->symbol.data(ctx).dealias(ctx);
                      auto singleton = sym.data(ctx).singletonClass(ctx);
                      if (singleton.exists()) {
                          result = make_shared<core::ClassType>(singleton);
