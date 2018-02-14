@@ -1,7 +1,10 @@
 cc_library(
     name = "resolver",
     srcs = glob(
-        ["*.cc"],
+        [
+            "*.cc",
+            "*.h",
+        ],
         exclude = [
             "*_test.cc",
             "flycheck_*",
