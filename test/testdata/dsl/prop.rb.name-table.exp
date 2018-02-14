@@ -141,6 +141,18 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <constant:Param> () -> untyped
       class <constant:CaseParam> () -> untyped
       class <constant:ParamSpecsParam> () -> untyped
+  class <constant:PropHelpers2> < ::<constant:Object> () -> <Class:PropHelpers2>
+    method created () -> Float
+    method token () -> String
+    method token= (arg0) -> String
+      argument arg0<> -> String
+  class <constant:PropHelpers> < ::<constant:Object> () -> <Class:PropHelpers>
+    method created () -> Float
+    method created= (arg0) -> Float
+      argument arg0<> -> Float
+    method token () -> String
+    method token= (arg0) -> String
+      argument arg0<> -> String
   class <constant:SomeODM> < ::<constant:Object> () -> <Class:SomeODM>
     method foo () -> String | NilClass
     method foo2 () -> String | NilClass
@@ -152,6 +164,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <singleton class:<constant:NotAODM>> < ::<singleton class:<constant:Object>> ()
     method prop (args)
       argument args<repeated>
+  class <singleton class:<constant:PropHelpers2>> < ::<singleton class:<constant:Object>> ()
+  class <singleton class:<constant:PropHelpers>> < ::<singleton class:<constant:Object>> ()
   class <singleton class:<constant:SomeODM>> < ::<singleton class:<constant:Object>> ()
   method <static-init>$8 ()
 

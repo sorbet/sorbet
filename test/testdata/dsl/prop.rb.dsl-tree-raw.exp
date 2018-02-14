@@ -2239,6 +2239,347 @@ ClassDef{
             }
           ]
         }
+        ClassDef{
+          name = ConstantLit{
+            scope = EmptyTree
+            cnst = <constant:PropHelpers>
+          }<<constant:<todo sym>>>
+          ancestors = [Ident{
+              symbol = <constant:<todo sym>>
+            }]
+          rhs = [
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = token<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Ident{
+                    symbol = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = SymbolLit{ name = arg0 }
+                        value = Ident{
+                          symbol = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = token=<<constant:<todo sym>>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = arg0
+                }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Ident{
+                    symbol = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:Float>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = created<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Ident{
+                    symbol = <constant:Float>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = SymbolLit{ name = arg0 }
+                        value = Ident{
+                          symbol = <constant:Float>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:Float>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = created=<<constant:<todo sym>>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = arg0
+                }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Ident{
+                    symbol = <constant:Float>
+                  }
+                ]
+              }
+            }
+          ]
+        }
+        ClassDef{
+          name = ConstantLit{
+            scope = EmptyTree
+            cnst = <constant:PropHelpers2>
+          }<<constant:<todo sym>>>
+          ancestors = [Ident{
+              symbol = <constant:<todo sym>>
+            }]
+          rhs = [
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = token<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Ident{
+                    symbol = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = SymbolLit{ name = arg0 }
+                        value = Ident{
+                          symbol = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = token=<<constant:<todo sym>>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = arg0
+                }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Ident{
+                    symbol = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:Float>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = created<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Ident{
+                    symbol = <constant:nil>
+                  }
+                  Ident{
+                    symbol = <constant:Float>
+                  }
+                ]
+              }
+            }
+          ]
+        }
       ],
       expr = MethodDef{
         self = 0
@@ -3223,26 +3564,271 @@ ClassDef{
                 }
               ]
             }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:AdvancedODM>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = no_class_arg=
+              block = nullptr
+              args = [
+                Array{
+                  elems = [
+                    StringLit{ value = b }
+                  ]
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:PropHelpers>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = token
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:PropHelpers>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = token=
+              block = nullptr
+              args = [
+                StringLit{ value = tok_token }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:PropHelpers>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = token=
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:nil>
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:PropHelpers>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = created
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Float>
+                }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:PropHelpers>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = created=
+              block = nullptr
+              args = [
+                FloatLit{ value = 0.000000 }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:PropHelpers>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = created=
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:nil>
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:PropHelpers2>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = token
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:PropHelpers2>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = token=
+              block = nullptr
+              args = [
+                StringLit{ value = tok_token }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:PropHelpers2>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = token=
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:nil>
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:PropHelpers2>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = created
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Float>
+                }
+              ]
+            }
           ],
           expr = Send{
             recv = Send{
               recv = ConstantLit{
                 scope = EmptyTree
-                cnst = <constant:AdvancedODM>
+                cnst = <constant:PropHelpers2>
               }
               name = new
               block = nullptr
               args = [
               ]
             }
-            name = no_class_arg=
+            name = created=
             block = nullptr
             args = [
-              Array{
-                elems = [
-                  StringLit{ value = b }
-                ]
-              }
+              FloatLit{ value = 0.000000 }
             ]
           }
         }

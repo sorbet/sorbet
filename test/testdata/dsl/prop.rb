@@ -45,6 +45,16 @@ class AdvancedODM
     prop :no_class_arg, type: Array, immutable: true, optional: true, array: String, default: ""
 end
 
+class PropHelpers
+  token_prop
+  created_prop
+end
+
+class PropHelpers2
+  timestamped_token_prop
+  created_prop(immutable: true)
+end
+
 def main
     T.assert_type!(SomeODM.new.foo, T.nilable(String))
     T.assert_type!(SomeODM.new.foo, String) # error: argument does not have asserted type
@@ -84,4 +94,19 @@ def main
 
     T.assert_type!(AdvancedODM.new.no_class_arg, T.nilable(T::Array[String]))
     AdvancedODM.new.no_class_arg = ['b'] # error: Method no_class_arg= does not exist on AdvancedODM
+
+    T.assert_type!(PropHelpers.new.token, String)
+    PropHelpers.new.token = "tok_token"
+    PropHelpers.new.token = nil # error: Argument arg0 does not match expected type
+
+    T.assert_type!(PropHelpers.new.created, Float)
+    PropHelpers.new.created = 0.0
+    PropHelpers.new.created = nil # error: Argument arg0 does not match expected type
+
+    T.assert_type!(PropHelpers2.new.token, String)
+    PropHelpers2.new.token = "tok_token"
+    PropHelpers2.new.token = nil # error: Argument arg0 does not match expected type
+
+    T.assert_type!(PropHelpers2.new.created, Float)
+    PropHelpers2.new.created = 0.0 # error: Method created= does not exist
 end

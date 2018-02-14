@@ -77,6 +77,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
     bool isImmutable = false; // Are there no setters?
     bool isNilable = true;    // Can the getter return nil?
     vector<unique_ptr<ast::Expression>> empty;
+    unique_ptr<ast::Expression> type;
+    core::NameRef name = core::NameRef::noName();
 
     if (send->fun == core::Names::optional()) {
         isOptional = true;
@@ -84,28 +86,43 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         isImmutable = true;
     } else if (send->fun == core::Names::prop()) {
         // Nothing special
+    } else if (send->fun == core::Names::token_prop() || send->fun == core::Names::timestamped_token_prop()) {
+        isNilable = false;
+        name = core::Names::token();
+        type = ast::MK::Ident(send->loc, core::Symbols::String());
+    } else if (send->fun == core::Names::created_prop()) {
+        isNilable = false;
+        name = core::Names::created();
+        type = ast::MK::Ident(send->loc, core::Symbols::Float());
     } else {
         return empty;
     }
-    if (send->args.size() < 1 || send->args.size() > 3) {
+
+    if ((!name.exists() && send->args.empty()) || send->args.size() > 3) {
         return empty;
     }
     auto loc = send->loc;
 
-    ast::SymbolLit *name = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
-    if (name == nullptr) {
-        return empty;
+    if (!name.exists()) {
+        auto *sym = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
+        if (sym == nullptr) {
+            return empty;
+        }
+        name = sym->name;
     }
 
-    // This section's goal is to populate this type Expression
-    unique_ptr<ast::Expression> type;
-    if (send->args.size() == 1) {
-        type = ast::MK::Ident(loc, core::Symbols::Object());
-    } else {
-        type = dupType(send->args[1].get());
+    if (type == nullptr) {
+        if (send->args.size() == 1) {
+            type = ast::MK::Ident(loc, core::Symbols::Object());
+        } else {
+            type = dupType(send->args[1].get());
+        }
     }
 
-    ast::Hash *rules = ast::cast_tree<ast::Hash>(send->args.back().get());
+    ast::Hash *rules = nullptr;
+    if (!send->args.empty()) {
+        rules = ast::cast_tree<ast::Hash>(send->args.back().get());
+    }
     if (send->args.size() == 3 && !rules) {
         return empty;
     }
@@ -172,7 +189,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         getType = mkNilable(loc, move(getType));
     }
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), dupType(getType.get())));
-    stats.emplace_back(mkGet(loc, name->name, ast::MK::Cast(loc, move(getType))));
+    stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, move(getType))));
 
     // Compute the setters
 
@@ -185,7 +202,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, 
         stats.emplace_back(
             ast::MK::Sig(loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), dupType(setType.get())),
                          dupType(setType.get())));
-        core::NameRef setName = ctx.state.enterNameUTF8(name->name.toString(ctx) + "=");
+        core::NameRef setName = ctx.state.enterNameUTF8(name.toString(ctx) + "=");
         stats.emplace_back(mkSet(loc, setName, ast::MK::Cast(loc, move(setType))));
     }
 

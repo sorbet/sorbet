@@ -131,6 +131,9 @@ NameDef names[] = {
     {"fixed", Namer | Resolver},
 
     {"prop", DSL},
+    {"token_prop", DSL},
+    {"timestamped_token_prop", DSL},
+    {"created_prop", DSL},
     {"array", DSL},
     {"type", DSL},
     {"optional", DSL},
@@ -138,6 +141,8 @@ NameDef names[] = {
     {"default_", "default", DSL},
     {"factory", DSL},
     {"const_", "const", DSL},
+    {"token", DSL},
+    {"created", DSL},
     // end DSL methods
 
     // Our own special methods which have special meaning
