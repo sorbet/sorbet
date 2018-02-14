@@ -4,12 +4,10 @@ syntax = "proto3";
 
 package com.stripe.payserver.events.cibot;
 
-import "proto/extensions.proto";
-
 
 // Data reported to Redshift for the purpose of tracking master "uptime"
 message SourceMetrics {
-    option (ext.owning_project) = "dev_productivity";
+//    option (ext.owning_project) = "dev_productivity";
     /* option (ext.kafka_topic) = "cibot.master_status"; // TODO */
     /* option (ext.kafka_publish_config).sync = false; */
     /* option (ext.kafka_publish_config).wire_format = BSON; */
