@@ -234,10 +234,10 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
     } else if (auto *alias = cast_type<AliasType>(what)) {
         p.putU4(8);
         p.putU4(alias->symbol._id);
-    } else if (auto *lp = dynamic_cast<LambdaParam *>(what)) {
+    } else if (auto *lp = cast_type<LambdaParam>(what)) {
         p.putU4(9);
         p.putU4(lp->definition._id);
-    } else if (auto *at = dynamic_cast<AppliedType *>(what)) {
+    } else if (auto *at = cast_type<AppliedType>(what)) {
         p.putU4(10);
         p.putU4(at->klass._id);
         p.putU4(at->targs.size());

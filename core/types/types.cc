@@ -215,7 +215,7 @@ bool Type::isDynamic() {
 }
 
 bool Type::isTop() {
-    auto *t = dynamic_cast<ClassType *>(this);
+    auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == core::Symbols::top();
 }
 

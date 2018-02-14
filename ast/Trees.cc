@@ -770,14 +770,14 @@ string Rescue::toString(const core::GlobalState &gs, int tabs) {
         printTabs(buf, tabs - 1);
         buf << rescueCase->toString(gs, tabs);
     }
-    if (dynamic_cast<EmptyTree *>(this->else_.get()) == nullptr) {
+    if (cast_tree<EmptyTree>(this->else_.get()) == nullptr) {
         buf << endl;
         printTabs(buf, tabs - 1);
         buf << "else" << endl;
         printTabs(buf, tabs);
         buf << this->else_->toString(gs, tabs);
     }
-    if (dynamic_cast<EmptyTree *>(this->ensure.get()) == nullptr) {
+    if (cast_tree<EmptyTree>(this->ensure.get()) == nullptr) {
         buf << endl;
         printTabs(buf, tabs - 1);
         buf << "ensure" << endl;
