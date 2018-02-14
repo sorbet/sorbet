@@ -274,10 +274,10 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
 }
 
 shared_ptr<Type> unwrapType(const Context ctx, Loc loc, shared_ptr<Type> tp) {
-    if (auto *tc = dynamic_cast<MetaType *>(tp.get())) {
+    if (auto *tc = cast_type<MetaType>(tp.get())) {
         return tc->wrapped;
     }
-    if (ClassType *classType = dynamic_cast<ClassType *>(tp.get())) {
+    if (ClassType *classType = cast_type<ClassType>(tp.get())) {
         SymbolRef attachedClass = classType->symbol.data(ctx).attachedClass(ctx);
         if (!attachedClass.exists()) {
             ctx.state.error(loc, errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
