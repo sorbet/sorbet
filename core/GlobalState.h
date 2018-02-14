@@ -7,6 +7,7 @@
 #include "Names.h"
 #include "Symbols.h"
 #include <memory>
+#include <mutex>
 
 namespace ruby_typer {
 namespace core {
@@ -79,7 +80,7 @@ public:
     void sanityCheck() const;
 
     std::string toString(bool showHidden = false) const;
-    std::string showAnnotatedSource(FileRef file);
+    std::string showAnnotatedSource(FileRef file) const;
     enum AnnotationPos { BEFORE, AFTER };
     struct Annotation {
         Loc loc;
@@ -87,9 +88,7 @@ public:
         AnnotationPos pos;
         Annotation(Loc loc, std::string str, AnnotationPos pos) : loc(loc), str(str), pos(pos){};
     };
-    void addAnnotation(Loc loc, std::string str, AnnotationPos pos = AnnotationPos::BEFORE) {
-        annotations.emplace_back(loc, str, pos);
-    }
+    void addAnnotation(Loc loc, std::string str, AnnotationPos pos = AnnotationPos::BEFORE) const;
 
     bool hadCriticalError() const;
 
@@ -118,7 +117,10 @@ private:
     std::vector<Symbol> symbols;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;
-    std::vector<Annotation> annotations;
+
+    mutable std::mutex annotations_mtx;
+    mutable std::vector<Annotation> annotations;
+
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
     bool freezeSymbolTable();

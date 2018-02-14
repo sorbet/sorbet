@@ -37,7 +37,7 @@ public:
     // the class in which to look up class variables.
     SymbolRef contextClass() const;
 
-    Context withOwner(SymbolRef sym) {
+    Context withOwner(SymbolRef sym) const {
         Context r = Context(*this);
         r.owner = sym;
         return r;

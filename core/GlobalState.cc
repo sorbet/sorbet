@@ -852,7 +852,12 @@ std::unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     return result;
 }
 
-string GlobalState::showAnnotatedSource(FileRef file) {
+void GlobalState::addAnnotation(Loc loc, std::string str, AnnotationPos pos) const {
+    unique_lock<mutex> lk(annotations_mtx);
+    annotations.emplace_back(loc, str, pos);
+}
+
+string GlobalState::showAnnotatedSource(FileRef file) const {
     if (annotations.empty()) {
         return "";
     }
@@ -879,11 +884,12 @@ string GlobalState::showAnnotatedSource(FileRef file) {
         }
         return false;
     };
-    sort(annotations.begin(), annotations.end(), compare);
+    auto sorted = annotations;
+    sort(sorted.begin(), sorted.end(), compare);
 
     auto source = file.data(*this).source();
     string outline(source.begin(), source.end());
-    for (auto annotation : annotations) {
+    for (auto annotation : sorted) {
         if (annotation.loc.file != file) {
             continue;
         }

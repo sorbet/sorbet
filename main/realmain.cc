@@ -131,7 +131,7 @@ class CFG_Collector_and_Typer {
 public:
     CFG_Collector_and_Typer(const Printers &print) : print(print){};
 
-    ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *m) {
+    ast::MethodDef *preTransformMethodDef(const core::Context ctx, ast::MethodDef *m) {
         if (m->loc.file.data(ctx).source_type == core::File::Untyped) {
             return m;
         }
@@ -372,9 +372,9 @@ unique_ptr<ast::Expression> typecheckFile(const core::Context ctx, unique_ptr<as
             core::ErrorRegion errs(ctx, f, silenceErrors);
             result = ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolved));
         }
-        //        if (opts.print.TypedSource) { //TODO: bring back
-        //            cout << gs.showAnnotatedSource(f);
-        //        }
+        if (opts.print.TypedSource) {
+            cout << ctx.state.showAnnotatedSource(f);
+        }
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "}" << endl << endl;
         }
