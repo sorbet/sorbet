@@ -548,10 +548,6 @@ cxxopts::Options buildOptions() {
     options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
-    options.add_options()("configatronDir", "Path to configatron yaml folders", cxxopts::value<vector<string>>(),
-                          "path");
-    options.add_options()("configatronFile", "Path to configatron yaml files", cxxopts::value<vector<string>>(),
-                          "path");
     options.add_options()("P,progress", "Draw progressbar");
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
@@ -566,6 +562,12 @@ cxxopts::Options buildOptions() {
         all_prints << pr.option;
     }
     all_prints << "]";
+
+    // Advanced options
+    options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
+                                    cxxopts::value<vector<string>>(), "path");
+    options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
+                                    cxxopts::value<vector<string>>(), "path");
 
     // Developer options
     options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
@@ -676,7 +678,7 @@ int realmain(int argc, char **argv) {
     try {
         options.parse(argc, argv);
     } catch (cxxopts::OptionParseException &e) {
-        console->info("{}\n\n{}", e.what(), options.help({"", "dev"}));
+        console->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
         return 1;
     }
 
@@ -698,7 +700,7 @@ int realmain(int argc, char **argv) {
     }
 
     if (options["h"].as<bool>()) {
-        console->info("{}", options.help({"", "dev"}));
+        console->info("{}", options.help({"", "advanced", "dev"}));
         return 0;
     }
     if (options["version"].as<bool>()) {
@@ -736,8 +738,8 @@ int realmain(int argc, char **argv) {
     opts.forceTyped = typed == "always";
     opts.forceUntyped = typed == "never";
     opts.showProgress = options.count("P") != 0;
-    opts.configatronDirs = options["configatronDir"].as<vector<string>>();
-    opts.configatronFiles = options["configatronFile"].as<vector<string>>();
+    opts.configatronDirs = options["configatron-dir"].as<vector<string>>();
+    opts.configatronFiles = options["configatron-file"].as<vector<string>>();
     if (typed != "always" && typed != "never" && typed != "auto") {
         console->error("Invalid value for `--typed`: {}", typed);
     }
