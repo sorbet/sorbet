@@ -21,12 +21,15 @@ public:
     }
     virtual ~Node() = default;
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0) = 0;
+    virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     Loc loc;
 
 protected:
     void printTabs(std::stringstream &to, int count);
     void printNode(std::stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
+    void printNodeJSON(std::stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
+    std::string escapeJSON(std::string from);
 };
 
 template <class To> To *cast_node(Node *what) {

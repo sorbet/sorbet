@@ -38,6 +38,7 @@ namespace ruby_typer {
 
 struct Printers {
     bool ParseTree = false;
+    bool ParseTreeJSON = false;
     bool Desugared = false;
     bool DesugaredRaw = false;
     bool DSLTree = false;
@@ -90,6 +91,7 @@ struct {
     bool Printers::*flag;
 } print_options[] = {
     {"parse-tree", &Printers::ParseTree},
+    {"parse-tree-json", &Printers::ParseTreeJSON},
     {"ast", &Printers::Desugared},
     {"ast-raw", &Printers::DesugaredRaw},
     {"dsl-tree", &Printers::DSLTree},
@@ -169,6 +171,9 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         }
         if (print.ParseTree) {
             cout << nodes->toString(lgs, 0) << endl;
+        }
+        if (print.ParseTreeJSON) {
+            cout << nodes->toJSON(lgs, 0) << endl;
         }
 
         core::Context ctx(lgs, core::Symbols::root());

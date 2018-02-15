@@ -262,6 +262,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
     }
     out << endl;
     out << "  virtual std::string toString(const core::GlobalState &gs, int tabs = 0);" << endl;
+    out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << endl;
     out << "  virtual std::string nodeName();" << endl;
 
     out << "};" << endl;
@@ -292,17 +293,75 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
                 out << "    buf << \"" << arg.name << " = [\" << std::endl;" << endl;
                 out << "    for (auto &&a: " << arg.name << ") {" << endl;
                 out << "      printTabs(buf, tabs + 2);" << endl;
-                out << "      printNode(buf, a, gs, tabs + 2); " << endl;
+                out << "      printNode(buf, a, gs, tabs + 2);" << endl;
                 out << "    }" << endl;
-                out << "    printTabs(buf, tabs + 1);";
+                out << "    printTabs(buf, tabs + 1);" << endl;
                 out << "    buf << \"]\" << std::endl;" << endl;
                 break;
             case String:
-                out << "    buf << \"" << arg.name << " = \\\"\" << " << arg.name << "<< \"\\\"\" << std::endl;"
+                out << "    buf << \"" << arg.name << " = \\\"\" << " << arg.name << " << \"\\\"\" << std::endl;"
                     << endl;
                 break;
             case Uint:
                 out << "    buf << \"" << arg.name << " = \" << " << arg.name << " << std::endl;" << endl;
+                break;
+        }
+    }
+    out << "    printTabs(buf, tabs);" << endl;
+    out << "    buf << \"}\";" << endl;
+    out << "    return buf.str();" << endl;
+    out << "  }" << endl;
+    out << endl;
+
+    out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << endl
+        << "    std::stringstream buf;" << endl;
+    out << "    buf << \"{\" << std::endl;" << endl;
+    out << "    printTabs(buf, tabs + 1);" << endl;
+    auto maybeComma = "";
+    if (node.fields.size() > 0) {
+        maybeComma = ",";
+    }
+    out << "    buf << \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma << "\" << std::endl;" << endl;
+    int i = -1;
+    // Generate fields
+    for (auto &arg : node.fields) {
+        maybeComma = "";
+        if (++i + 1 < node.fields.size()) {
+            maybeComma = ",";
+        }
+        out << "    printTabs(buf, tabs + 1);" << endl;
+        switch (arg.type) {
+            case Name:
+                out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << escapeJSON(" << arg.name
+                    << ".data(gs).toString(gs)) << \"\\\"" << maybeComma << "\" << std::endl;" << endl;
+                break;
+            case Node:
+                out << "    buf << \"\\\"" << arg.name << "\\\" : \";" << endl;
+                out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);" << endl;
+                out << "    buf << \"" << maybeComma << "\" << std::endl;" << endl;
+                break;
+            case NodeVec:
+                out << "    buf << \"\\\"" << arg.name << "\\\" : [\" << std::endl;" << endl;
+                out << "    int i = -1;" << endl;
+                out << "    for (auto &&a: " << arg.name << ") {" << endl;
+                out << "      i++;" << endl;
+                out << "      printTabs(buf, tabs + 2);" << endl;
+                out << "      printNodeJSON(buf, a, gs, tabs + 2);" << endl;
+                out << "      if (i + 1 < " << arg.name << ".size()) {" << endl;
+                out << "        buf << \",\";" << endl;
+                out << "      }" << endl;
+                out << "      buf << std::endl;" << endl;
+                out << "    }" << endl;
+                out << "    printTabs(buf, tabs + 1);" << endl;
+                out << "    buf << \"]" << maybeComma << "\" << std::endl;" << endl;
+                break;
+            case String:
+                out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << " << arg.name << " << \"\\\"" << maybeComma
+                    << "\" << std::endl;" << endl;
+                break;
+            case Uint:
+                out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << " << arg.name << " << \"\\\"" << maybeComma
+                    << "\" << std::endl;" << endl;
                 break;
         }
     }

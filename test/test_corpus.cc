@@ -119,9 +119,9 @@ public:
     int endPos = -1;
 };
 
-unordered_set<string> knownPasses = {"parse-tree",   "ast",        "ast-raw",   "dsl-tree",
-                                     "dsl-tree-raw", "name-table", "name-tree", "name-tree-raw",
-                                     "cfg",          "cfg-raw",    "infer",     "typed-source"};
+unordered_set<string> knownPasses = {"parse-tree",   "parse-tree-json", "ast",         "ast-raw",       "dsl-tree",
+                                     "dsl-tree-raw", "name-table",      "name-tree",   "name-tree-raw", "cfg",
+                                     "cfg-raw",      "infer",           "typed-source"};
 
 TEST(CorpusTest, CloneSubstitutePayload) {
     auto logger = spd::stderr_color_mt("ClonePayload");
@@ -194,6 +194,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expectation = test.expectations.find("parse-tree");
         if (expectation != test.expectations.end()) {
             got["parse-tree"].append(nodes->toString(gs)).append("\n");
+            auto newErrors = errorQueue->drainErrors();
+            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
+                          std::make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("parse-tree-json");
+        if (expectation != test.expectations.end()) {
+            got["parse-tree-json"].append(nodes->toJSON(gs)).append("\n");
             auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
                           std::make_move_iterator(newErrors.end()));

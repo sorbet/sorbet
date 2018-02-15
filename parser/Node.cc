@@ -26,5 +26,50 @@ void Node::printNode(stringstream &to, unique_ptr<Node> &node, const core::Globa
     }
 }
 
+void Node::printNodeJSON(stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs) {
+    if (node) {
+        to << node->toJSON(gs, tabs);
+    } else {
+        to << "null";
+    }
+}
+
+// https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
+std::string Node::escapeJSON(std::string from) {
+    std::ostringstream ss;
+    for (auto ch : from) {
+        switch (ch) {
+            case '\\':
+                ss << "\\\\";
+                break;
+            case '"':
+                ss << "\\\"";
+                break;
+            case '/':
+                ss << "\\/";
+                break;
+            case '\b':
+                ss << "\\b";
+                break;
+            case '\f':
+                ss << "\\f";
+                break;
+            case '\n':
+                ss << "\\n";
+                break;
+            case '\r':
+                ss << "\\r";
+                break;
+            case '\t':
+                ss << "\\t";
+                break;
+            default:
+                ss << ch;
+                break;
+        }
+    }
+    return ss.str();
+}
+
 }; // namespace parser
 } // namespace ruby_typer

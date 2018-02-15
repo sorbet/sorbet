@@ -1,0 +1,2405 @@
+{
+  "type" : "Begin",
+  "stmts" : [
+    {
+      "type" : "Send",
+      "receiver" : null,
+      "method" : "require_relative",
+      "args" : [
+        {
+          "type" : "DString",
+          "nodes" : [
+            {
+              "type" : "String",
+              "val" : "..\/..\/..\/extn"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type" : "Send",
+      "receiver" : {
+        "type" : "Const",
+        "scope" : {
+          "type" : "Const",
+          "scope" : null,
+          "name" : "<constant:Opus>"
+        },
+        "name" : "<constant:AutogenLoader>"
+      },
+      "method" : "init",
+      "args" : [
+        {
+          "type" : "FileLiteral"
+        }
+      ]
+    },
+    {
+      "type" : "Module",
+      "name" : {
+        "type" : "Const",
+        "scope" : {
+          "type" : "Const",
+          "scope" : {
+            "type" : "Const",
+            "scope" : null,
+            "name" : "<constant:Opus>"
+          },
+          "name" : "<constant:CIBot>"
+        },
+        "name" : "<constant:Gerald>"
+      },
+      "body" : {
+        "type" : "Begin",
+        "stmts" : [
+          {
+            "type" : "Class",
+            "name" : {
+              "type" : "Const",
+              "scope" : null,
+              "name" : "<constant:MatchTimeout>"
+            },
+            "superclass" : {
+              "type" : "Const",
+              "scope" : null,
+              "name" : "<constant:StandardError>"
+            },
+            "body" : {
+              "type" : "Begin",
+              "stmts" : [
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "rule_token"
+                    }
+                  ]
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "initialize",
+                  "args" : {
+                    "type" : "Args",
+                    "args" : [
+                      {
+                        "type" : "Arg",
+                        "name" : "message"
+                      },
+                      {
+                        "type" : "Kwoptarg",
+                        "name" : "rule_token",
+                        "default_" : {
+                          "type" : "DString",
+                          "nodes" : [
+                            {
+                              "type" : "String",
+                              "val" : ""
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "body" : {
+                    "type" : "Begin",
+                    "stmts" : [
+                      {
+                        "type" : "Super",
+                        "args" : [
+                          {
+                            "type" : "LVar",
+                            "name" : "message"
+                          }
+                        ]
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@rule_token"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "rule_token"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type" : "Class",
+            "name" : {
+              "type" : "Const",
+              "scope" : null,
+              "name" : "<constant:Matcher>"
+            },
+            "superclass" : null,
+            "body" : {
+              "type" : "Begin",
+              "stmts" : [
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "include",
+                  "args" : [
+                    {
+                      "type" : "Const",
+                      "scope" : {
+                        "type" : "Const",
+                        "scope" : null,
+                        "name" : "<constant:Chalk>"
+                      },
+                      "name" : "<constant:Log>"
+                    }
+                  ]
+                },
+                {
+                  "type" : "Assign",
+                  "lhs" : {
+                    "type" : "ConstLhs",
+                    "scope" : null,
+                    "name" : "<constant:MAX_AFFECTED_FILES>"
+                  },
+                  "rhs" : {
+                    "type" : "Integer",
+                    "val" : "100"
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "initialize",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Begin",
+                    "stmts" : [
+                      {
+                        "type" : "Masgn",
+                        "lhs" : {
+                          "type" : "Mlhs",
+                          "exprs" : [
+                            {
+                              "type" : "IVarLhs",
+                              "name" : "@rules"
+                            },
+                            {
+                              "type" : "LVarLhs",
+                              "name" : "invalid_rules"
+                            }
+                          ]
+                        },
+                        "rhs" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "Const",
+                                "scope" : {
+                                  "type" : "Const",
+                                  "scope" : {
+                                    "type" : "Const",
+                                    "scope" : {
+                                      "type" : "Const",
+                                      "scope" : null,
+                                      "name" : "<constant:Opus>"
+                                    },
+                                    "name" : "<constant:CIBot>"
+                                  },
+                                  "name" : "<constant:Model>"
+                                },
+                                "name" : "<constant:GeraldRule>"
+                              },
+                              "method" : "query_by",
+                              "args" : [
+                                {
+                                  "type" : "Symbol",
+                                  "val" : "deleted_at_is_nil"
+                                }
+                              ]
+                            },
+                            "method" : "load_all",
+                            "args" : [
+                              {
+                                "type" : "Hash",
+                                "pairs" : [
+                                ]
+                              }
+                            ]
+                          },
+                          "method" : "partition",
+                          "args" : [
+                            {
+                              "type" : "BlockPass",
+                              "block" : {
+                                "type" : "Symbol",
+                                "val" : "valid?"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type" : "If",
+                        "condition" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "LVar",
+                              "name" : "invalid_rules"
+                            },
+                            "method" : "empty?",
+                            "args" : [
+                            ]
+                          },
+                          "method" : "!",
+                          "args" : [
+                          ]
+                        },
+                        "then_" : {
+                          "type" : "Begin",
+                          "stmts" : [
+                            {
+                              "type" : "Assign",
+                              "lhs" : {
+                                "type" : "LVarLhs",
+                                "name" : "invalid_rule_ids"
+                              },
+                              "rhs" : {
+                                "type" : "Send",
+                                "receiver" : {
+                                  "type" : "Send",
+                                  "receiver" : {
+                                    "type" : "LVar",
+                                    "name" : "invalid_rules"
+                                  },
+                                  "method" : "map",
+                                  "args" : [
+                                    {
+                                      "type" : "BlockPass",
+                                      "block" : {
+                                        "type" : "Symbol",
+                                        "val" : "token"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "method" : "join",
+                                "args" : [
+                                  {
+                                    "type" : "DString",
+                                    "nodes" : [
+                                      {
+                                        "type" : "String",
+                                        "val" : ","
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "Send",
+                                "receiver" : null,
+                                "method" : "log",
+                                "args" : [
+                                ]
+                              },
+                              "method" : "warn",
+                              "args" : [
+                                {
+                                  "type" : "Send",
+                                  "receiver" : {
+                                    "type" : "DString",
+                                    "nodes" : [
+                                      {
+                                        "type" : "String",
+                                        "val" : "Gerald skipping invalid rules: "
+                                      }
+                                    ]
+                                  },
+                                  "method" : "+",
+                                  "args" : [
+                                    {
+                                      "type" : "LVar",
+                                      "name" : "invalid_rule_ids"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "else_" : null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "match",
+                  "args" : {
+                    "type" : "Args",
+                    "args" : [
+                      {
+                        "type" : "Arg",
+                        "name" : "match_context"
+                      }
+                    ]
+                  },
+                  "body" : {
+                    "type" : "Begin",
+                    "stmts" : [
+                      {
+                        "type" : "If",
+                        "condition" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "Send",
+                                "receiver" : {
+                                  "type" : "LVar",
+                                  "name" : "match_context"
+                                },
+                                "method" : "diff",
+                                "args" : [
+                                ]
+                              },
+                              "method" : "affected_files",
+                              "args" : [
+                              ]
+                            },
+                            "method" : "count",
+                            "args" : [
+                            ]
+                          },
+                          "method" : ">",
+                          "args" : [
+                            {
+                              "type" : "Const",
+                              "scope" : null,
+                              "name" : "<constant:MAX_AFFECTED_FILES>"
+                            }
+                          ]
+                        },
+                        "then_" : {
+                          "type" : "Begin",
+                          "stmts" : [
+                            {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "Send",
+                                "receiver" : null,
+                                "method" : "log",
+                                "args" : [
+                                ]
+                              },
+                              "method" : "warn",
+                              "args" : [
+                                {
+                                  "type" : "DString",
+                                  "nodes" : [
+                                    {
+                                      "type" : "DString",
+                                      "nodes" : [
+                                        {
+                                          "type" : "String",
+                                          "val" : "Gerald skipping large PR with "
+                                        },
+                                        {
+                                          "type" : "Begin",
+                                          "stmts" : [
+                                            {
+                                              "type" : "Send",
+                                              "receiver" : {
+                                                "type" : "Send",
+                                                "receiver" : {
+                                                  "type" : "Send",
+                                                  "receiver" : {
+                                                    "type" : "LVar",
+                                                    "name" : "match_context"
+                                                  },
+                                                  "method" : "diff",
+                                                  "args" : [
+                                                  ]
+                                                },
+                                                "method" : "affected_files",
+                                                "args" : [
+                                                ]
+                                              },
+                                              "method" : "count",
+                                              "args" : [
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type" : "String",
+                                          "val" : " affected files"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type" : "Return",
+                              "exprs" : [
+                                {
+                                  "type" : "Array",
+                                  "elts" : [
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "else_" : null
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "LVarLhs",
+                          "name" : "budget"
+                        },
+                        "rhs" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Const",
+                            "scope" : null,
+                            "name" : "<constant:MatchTimeBudget>"
+                          },
+                          "method" : "new",
+                          "args" : [
+                          ]
+                        }
+                      },
+                      {
+                        "type" : "Block",
+                        "send" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "IVar",
+                            "name" : "@rules"
+                          },
+                          "method" : "select",
+                          "args" : [
+                          ]
+                        },
+                        "args" : {
+                          "type" : "Args",
+                          "args" : [
+                            {
+                              "type" : "Arg",
+                              "name" : "r"
+                            }
+                          ]
+                        },
+                        "body" : {
+                          "type" : "Block",
+                          "send" : {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "LVar",
+                              "name" : "budget"
+                            },
+                            "method" : "time_rule",
+                            "args" : [
+                              {
+                                "type" : "LVar",
+                                "name" : "r"
+                              }
+                            ]
+                          },
+                          "args" : null,
+                          "body" : {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "LVar",
+                              "name" : "r"
+                            },
+                            "method" : "matches?",
+                            "args" : [
+                              {
+                                "type" : "LVar",
+                                "name" : "match_context"
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type" : "Class",
+            "name" : {
+              "type" : "Const",
+              "scope" : null,
+              "name" : "<constant:MatchContext>"
+            },
+            "superclass" : null,
+            "body" : {
+              "type" : "Begin",
+              "stmts" : [
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "repo"
+                    }
+                  ]
+                },
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "assignee"
+                    }
+                  ]
+                },
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "gh_user"
+                    }
+                  ]
+                },
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "merge_branch"
+                    }
+                  ]
+                },
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "body"
+                    }
+                  ]
+                },
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "title"
+                    }
+                  ]
+                },
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "diff"
+                    }
+                  ]
+                },
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "attr_reader",
+                  "args" : [
+                    {
+                      "type" : "Symbol",
+                      "val" : "openapi_diff"
+                    }
+                  ]
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "initialize",
+                  "args" : {
+                    "type" : "Args",
+                    "args" : [
+                      {
+                        "type" : "Arg",
+                        "name" : "repo"
+                      },
+                      {
+                        "type" : "Arg",
+                        "name" : "assignee"
+                      },
+                      {
+                        "type" : "Arg",
+                        "name" : "gh_user"
+                      },
+                      {
+                        "type" : "Arg",
+                        "name" : "merge_branch"
+                      },
+                      {
+                        "type" : "Arg",
+                        "name" : "body"
+                      },
+                      {
+                        "type" : "Arg",
+                        "name" : "title"
+                      },
+                      {
+                        "type" : "Arg",
+                        "name" : "diff"
+                      },
+                      {
+                        "type" : "Arg",
+                        "name" : "openapi_diff"
+                      }
+                    ]
+                  },
+                  "body" : {
+                    "type" : "Begin",
+                    "stmts" : [
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@repo"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "repo"
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@assignee"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "assignee"
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@gh_user"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "gh_user"
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@merge_branch"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "merge_branch"
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@body"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "body"
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@title"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "title"
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@diff"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "diff"
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@openapi_diff"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "openapi_diff"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "user_stripe_suffix?",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Send",
+                    "receiver" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "IVar",
+                        "name" : "@repo"
+                      },
+                      "method" : "start_with?",
+                      "args" : [
+                        {
+                          "type" : "DString",
+                          "nodes" : [
+                            {
+                              "type" : "String",
+                              "val" : "stripe-internal\/"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "method" : "!",
+                    "args" : [
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type" : "Class",
+            "name" : {
+              "type" : "Const",
+              "scope" : null,
+              "name" : "<constant:MatchTimeBudget>"
+            },
+            "superclass" : null,
+            "body" : {
+              "type" : "Begin",
+              "stmts" : [
+                {
+                  "type" : "Assign",
+                  "lhs" : {
+                    "type" : "ConstLhs",
+                    "scope" : null,
+                    "name" : "<constant:TOTAL_TIME_MS>"
+                  },
+                  "rhs" : {
+                    "type" : "Integer",
+                    "val" : "10000"
+                  }
+                },
+                {
+                  "type" : "Assign",
+                  "lhs" : {
+                    "type" : "ConstLhs",
+                    "scope" : null,
+                    "name" : "<constant:PER_RULE_MS>"
+                  },
+                  "rhs" : {
+                    "type" : "Integer",
+                    "val" : "2000"
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "initialize",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Assign",
+                    "lhs" : {
+                      "type" : "IVarLhs",
+                      "name" : "@start"
+                    },
+                    "rhs" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "Const",
+                        "scope" : null,
+                        "name" : "<constant:Time>"
+                      },
+                      "method" : "now",
+                      "args" : [
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "check!",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Begin",
+                    "stmts" : [
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "LVarLhs",
+                          "name" : "dur_ms"
+                        },
+                        "rhs" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Begin",
+                            "stmts" : [
+                              {
+                                "type" : "Send",
+                                "receiver" : {
+                                  "type" : "Send",
+                                  "receiver" : {
+                                    "type" : "Const",
+                                    "scope" : null,
+                                    "name" : "<constant:Time>"
+                                  },
+                                  "method" : "now",
+                                  "args" : [
+                                  ]
+                                },
+                                "method" : "-",
+                                "args" : [
+                                  {
+                                    "type" : "IVar",
+                                    "name" : "@start"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "method" : "*",
+                          "args" : [
+                            {
+                              "type" : "Integer",
+                              "val" : "1000"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type" : "If",
+                        "condition" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "LVar",
+                            "name" : "dur_ms"
+                          },
+                          "method" : ">",
+                          "args" : [
+                            {
+                              "type" : "Const",
+                              "scope" : null,
+                              "name" : "<constant:TOTAL_TIME_MS>"
+                            }
+                          ]
+                        },
+                        "then_" : {
+                          "type" : "Send",
+                          "receiver" : null,
+                          "method" : "raise",
+                          "args" : [
+                            {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "Const",
+                                "scope" : null,
+                                "name" : "<constant:MatchTimeout>"
+                              },
+                              "method" : "new",
+                              "args" : [
+                                {
+                                  "type" : "DString",
+                                  "nodes" : [
+                                    {
+                                      "type" : "DString",
+                                      "nodes" : [
+                                        {
+                                          "type" : "String",
+                                          "val" : "Gerald match time budged exceeded "
+                                        },
+                                        {
+                                          "type" : "Begin",
+                                          "stmts" : [
+                                            {
+                                              "type" : "Const",
+                                              "scope" : null,
+                                              "name" : "<constant:TOTAL_TIME_MS>"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type" : "String",
+                                          "val" : "ms"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "else_" : null
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "time_rule",
+                  "args" : {
+                    "type" : "Args",
+                    "args" : [
+                      {
+                        "type" : "Arg",
+                        "name" : "rule"
+                      }
+                    ]
+                  },
+                  "body" : {
+                    "type" : "Begin",
+                    "stmts" : [
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "LVarLhs",
+                          "name" : "rule_start"
+                        },
+                        "rhs" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Const",
+                            "scope" : null,
+                            "name" : "<constant:Time>"
+                          },
+                          "method" : "now",
+                          "args" : [
+                          ]
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "LVarLhs",
+                          "name" : "res"
+                        },
+                        "rhs" : {
+                          "type" : "Yield",
+                          "exprs" : [
+                          ]
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "LVarLhs",
+                          "name" : "dur_ms"
+                        },
+                        "rhs" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Begin",
+                            "stmts" : [
+                              {
+                                "type" : "Send",
+                                "receiver" : {
+                                  "type" : "Send",
+                                  "receiver" : {
+                                    "type" : "Const",
+                                    "scope" : null,
+                                    "name" : "<constant:Time>"
+                                  },
+                                  "method" : "now",
+                                  "args" : [
+                                  ]
+                                },
+                                "method" : "-",
+                                "args" : [
+                                  {
+                                    "type" : "LVar",
+                                    "name" : "rule_start"
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          "method" : "*",
+                          "args" : [
+                            {
+                              "type" : "Integer",
+                              "val" : "1000"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "type" : "If",
+                        "condition" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "LVar",
+                            "name" : "dur_ms"
+                          },
+                          "method" : ">",
+                          "args" : [
+                            {
+                              "type" : "Const",
+                              "scope" : null,
+                              "name" : "<constant:PER_RULE_MS>"
+                            }
+                          ]
+                        },
+                        "then_" : {
+                          "type" : "Send",
+                          "receiver" : null,
+                          "method" : "raise",
+                          "args" : [
+                            {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "Const",
+                                "scope" : null,
+                                "name" : "<constant:MatchTimeout>"
+                              },
+                              "method" : "new",
+                              "args" : [
+                                {
+                                  "type" : "DString",
+                                  "nodes" : [
+                                    {
+                                      "type" : "DString",
+                                      "nodes" : [
+                                        {
+                                          "type" : "String",
+                                          "val" : "Gerald rule '"
+                                        },
+                                        {
+                                          "type" : "Begin",
+                                          "stmts" : [
+                                            {
+                                              "type" : "Send",
+                                              "receiver" : {
+                                                "type" : "LVar",
+                                                "name" : "rule"
+                                              },
+                                              "method" : "token",
+                                              "args" : [
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type" : "String",
+                                          "val" : "' exceeded per-rule time budget actual="
+                                        },
+                                        {
+                                          "type" : "Begin",
+                                          "stmts" : [
+                                            {
+                                              "type" : "Send",
+                                              "receiver" : {
+                                                "type" : "LVar",
+                                                "name" : "dur_ms"
+                                              },
+                                              "method" : "to_i",
+                                              "args" : [
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type" : "String",
+                                          "val" : "ms budget="
+                                        },
+                                        {
+                                          "type" : "Begin",
+                                          "stmts" : [
+                                            {
+                                              "type" : "Const",
+                                              "scope" : null,
+                                              "name" : "<constant:PER_RULE_MS>"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type" : "String",
+                                          "val" : "ms"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type" : "Hash",
+                                  "pairs" : [
+                                    {
+                                      "type" : "Pair",
+                                      "key" : {
+                                        "type" : "Symbol",
+                                        "val" : "rule_token"
+                                      },
+                                      "value" : {
+                                        "type" : "Send",
+                                        "receiver" : {
+                                          "type" : "LVar",
+                                          "name" : "rule"
+                                        },
+                                        "method" : "token",
+                                        "args" : [
+                                        ]
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "else_" : null
+                      },
+                      {
+                        "type" : "Send",
+                        "receiver" : null,
+                        "method" : "check!",
+                        "args" : [
+                        ]
+                      },
+                      {
+                        "type" : "LVar",
+                        "name" : "res"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "type" : "Class",
+            "name" : {
+              "type" : "Const",
+              "scope" : null,
+              "name" : "<constant:Diff>"
+            },
+            "superclass" : null,
+            "body" : {
+              "type" : "Begin",
+              "stmts" : [
+                {
+                  "type" : "DefMethod",
+                  "name" : "initialize",
+                  "args" : {
+                    "type" : "Args",
+                    "args" : [
+                      {
+                        "type" : "Arg",
+                        "name" : "raw_diff"
+                      }
+                    ]
+                  },
+                  "body" : {
+                    "type" : "Begin",
+                    "stmts" : [
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@raw"
+                        },
+                        "rhs" : {
+                          "type" : "LVar",
+                          "name" : "raw_diff"
+                        }
+                      },
+                      {
+                        "type" : "Assign",
+                        "lhs" : {
+                          "type" : "IVarLhs",
+                          "name" : "@parsed"
+                        },
+                        "rhs" : {
+                          "type" : "Send",
+                          "receiver" : null,
+                          "method" : "parse",
+                          "args" : [
+                            {
+                              "type" : "LVar",
+                              "name" : "raw_diff"
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "affected_files",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Send",
+                    "receiver" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "Send",
+                        "receiver" : null,
+                        "method" : "added_files",
+                        "args" : [
+                        ]
+                      },
+                      "method" : "+",
+                      "args" : [
+                        {
+                          "type" : "Send",
+                          "receiver" : null,
+                          "method" : "deleted_files",
+                          "args" : [
+                          ]
+                        }
+                      ]
+                    },
+                    "method" : "+",
+                    "args" : [
+                      {
+                        "type" : "Send",
+                        "receiver" : null,
+                        "method" : "changed_files",
+                        "args" : [
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "added_files",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Block",
+                    "send" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "Block",
+                        "send" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "IVar",
+                            "name" : "@parsed"
+                          },
+                          "method" : "select",
+                          "args" : [
+                          ]
+                        },
+                        "args" : {
+                          "type" : "Args",
+                          "args" : [
+                            {
+                              "type" : "Arg",
+                              "name" : "part"
+                            }
+                          ]
+                        },
+                        "body" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "LVar",
+                              "name" : "part"
+                            },
+                            "method" : "[]",
+                            "args" : [
+                              {
+                                "type" : "Symbol",
+                                "val" : "a_name"
+                              }
+                            ]
+                          },
+                          "method" : "==",
+                          "args" : [
+                            {
+                              "type" : "DString",
+                              "nodes" : [
+                                {
+                                  "type" : "String",
+                                  "val" : "\/dev\/null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "method" : "map",
+                      "args" : [
+                      ]
+                    },
+                    "args" : {
+                      "type" : "Args",
+                      "args" : [
+                        {
+                          "type" : "Arg",
+                          "name" : "part"
+                        }
+                      ]
+                    },
+                    "body" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "LVar",
+                        "name" : "part"
+                      },
+                      "method" : "[]",
+                      "args" : [
+                        {
+                          "type" : "Symbol",
+                          "val" : "b_name"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "deleted_files",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Block",
+                    "send" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "Block",
+                        "send" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "IVar",
+                            "name" : "@parsed"
+                          },
+                          "method" : "select",
+                          "args" : [
+                          ]
+                        },
+                        "args" : {
+                          "type" : "Args",
+                          "args" : [
+                            {
+                              "type" : "Arg",
+                              "name" : "part"
+                            }
+                          ]
+                        },
+                        "body" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "LVar",
+                              "name" : "part"
+                            },
+                            "method" : "[]",
+                            "args" : [
+                              {
+                                "type" : "Symbol",
+                                "val" : "b_name"
+                              }
+                            ]
+                          },
+                          "method" : "==",
+                          "args" : [
+                            {
+                              "type" : "DString",
+                              "nodes" : [
+                                {
+                                  "type" : "String",
+                                  "val" : "\/dev\/null"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "method" : "map",
+                      "args" : [
+                      ]
+                    },
+                    "args" : {
+                      "type" : "Args",
+                      "args" : [
+                        {
+                          "type" : "Arg",
+                          "name" : "part"
+                        }
+                      ]
+                    },
+                    "body" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "LVar",
+                        "name" : "part"
+                      },
+                      "method" : "[]",
+                      "args" : [
+                        {
+                          "type" : "Symbol",
+                          "val" : "a_name"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "changed_files",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Block",
+                    "send" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "Block",
+                        "send" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "IVar",
+                            "name" : "@parsed"
+                          },
+                          "method" : "select",
+                          "args" : [
+                          ]
+                        },
+                        "args" : {
+                          "type" : "Args",
+                          "args" : [
+                            {
+                              "type" : "Arg",
+                              "name" : "part"
+                            }
+                          ]
+                        },
+                        "body" : {
+                          "type" : "Send",
+                          "receiver" : {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "LVar",
+                              "name" : "part"
+                            },
+                            "method" : "[]",
+                            "args" : [
+                              {
+                                "type" : "Symbol",
+                                "val" : "a_name"
+                              }
+                            ]
+                          },
+                          "method" : "==",
+                          "args" : [
+                            {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "LVar",
+                                "name" : "part"
+                              },
+                              "method" : "[]",
+                              "args" : [
+                                {
+                                  "type" : "Symbol",
+                                  "val" : "b_name"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      },
+                      "method" : "map",
+                      "args" : [
+                      ]
+                    },
+                    "args" : {
+                      "type" : "Args",
+                      "args" : [
+                        {
+                          "type" : "Arg",
+                          "name" : "part"
+                        }
+                      ]
+                    },
+                    "body" : {
+                      "type" : "Send",
+                      "receiver" : {
+                        "type" : "LVar",
+                        "name" : "part"
+                      },
+                      "method" : "[]",
+                      "args" : [
+                        {
+                          "type" : "Symbol",
+                          "val" : "b_name"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "added_lines",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Send",
+                    "receiver" : {
+                      "type" : "Block",
+                      "send" : {
+                        "type" : "Send",
+                        "receiver" : {
+                          "type" : "IVar",
+                          "name" : "@parsed"
+                        },
+                        "method" : "map",
+                        "args" : [
+                        ]
+                      },
+                      "args" : {
+                        "type" : "Args",
+                        "args" : [
+                          {
+                            "type" : "Arg",
+                            "name" : "part"
+                          }
+                        ]
+                      },
+                      "body" : {
+                        "type" : "Send",
+                        "receiver" : {
+                          "type" : "LVar",
+                          "name" : "part"
+                        },
+                        "method" : "[]",
+                        "args" : [
+                          {
+                            "type" : "Symbol",
+                            "val" : "added_lines"
+                          }
+                        ]
+                      }
+                    },
+                    "method" : "flatten",
+                    "args" : [
+                    ]
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "removed_lines",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Send",
+                    "receiver" : {
+                      "type" : "Block",
+                      "send" : {
+                        "type" : "Send",
+                        "receiver" : {
+                          "type" : "IVar",
+                          "name" : "@parsed"
+                        },
+                        "method" : "map",
+                        "args" : [
+                        ]
+                      },
+                      "args" : {
+                        "type" : "Args",
+                        "args" : [
+                          {
+                            "type" : "Arg",
+                            "name" : "part"
+                          }
+                        ]
+                      },
+                      "body" : {
+                        "type" : "Send",
+                        "receiver" : {
+                          "type" : "LVar",
+                          "name" : "part"
+                        },
+                        "method" : "[]",
+                        "args" : [
+                          {
+                            "type" : "Symbol",
+                            "val" : "removed_lines"
+                          }
+                        ]
+                      }
+                    },
+                    "method" : "flatten",
+                    "args" : [
+                    ]
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "changed_lines",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Send",
+                    "receiver" : {
+                      "type" : "Send",
+                      "receiver" : null,
+                      "method" : "added_lines",
+                      "args" : [
+                      ]
+                    },
+                    "method" : "+",
+                    "args" : [
+                      {
+                        "type" : "Send",
+                        "receiver" : null,
+                        "method" : "removed_lines",
+                        "args" : [
+                        ]
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type" : "DefMethod",
+                  "name" : "changed_openapi?",
+                  "args" : null,
+                  "body" : {
+                    "type" : "Send",
+                    "receiver" : {
+                      "type" : "Send",
+                      "receiver" : null,
+                      "method" : "changed_files",
+                      "args" : [
+                      ]
+                    },
+                    "method" : "include?",
+                    "args" : [
+                      {
+                        "type" : "Const",
+                        "scope" : {
+                          "type" : "Const",
+                          "scope" : {
+                            "type" : "Const",
+                            "scope" : {
+                              "type" : "Const",
+                              "scope" : {
+                                "type" : "Const",
+                                "scope" : null,
+                                "name" : "<constant:Opus>"
+                              },
+                              "name" : "<constant:CIBot>"
+                            },
+                            "name" : "<constant:Actions>"
+                          },
+                          "name" : "<constant:OpenAPI>"
+                        },
+                        "name" : "<constant:SPEC_PATH>"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type" : "Send",
+                  "receiver" : null,
+                  "method" : "private",
+                  "args" : [
+                    {
+                      "type" : "DefMethod",
+                      "name" : "parse",
+                      "args" : {
+                        "type" : "Args",
+                        "args" : [
+                          {
+                            "type" : "Arg",
+                            "name" : "diff"
+                          }
+                        ]
+                      },
+                      "body" : {
+                        "type" : "Begin",
+                        "stmts" : [
+                          {
+                            "type" : "Assign",
+                            "lhs" : {
+                              "type" : "LVarLhs",
+                              "name" : "parts"
+                            },
+                            "rhs" : {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "Send",
+                                "receiver" : {
+                                  "type" : "LVar",
+                                  "name" : "diff"
+                                },
+                                "method" : "split",
+                                "args" : [
+                                  {
+                                    "type" : "Regexp",
+                                    "regex" : [
+                                      {
+                                        "type" : "String",
+                                        "val" : "^diff [^\\n]*\\n"
+                                      }
+                                    ],
+                                    "opts" : {
+                                      "type" : "Regopt",
+                                      "opts" : "m"
+                                    }
+                                  }
+                                ]
+                              },
+                              "method" : "[]",
+                              "args" : [
+                                {
+                                  "type" : "IRange",
+                                  "from" : {
+                                    "type" : "Integer",
+                                    "val" : "1"
+                                  },
+                                  "to" : {
+                                    "type" : "Integer",
+                                    "val" : "-1"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type" : "OrAsgn",
+                            "left" : {
+                              "type" : "LVarLhs",
+                              "name" : "parts"
+                            },
+                            "right" : {
+                              "type" : "Array",
+                              "elts" : [
+                              ]
+                            }
+                          },
+                          {
+                            "type" : "Send",
+                            "receiver" : {
+                              "type" : "Block",
+                              "send" : {
+                                "type" : "Send",
+                                "receiver" : {
+                                  "type" : "LVar",
+                                  "name" : "parts"
+                                },
+                                "method" : "map",
+                                "args" : [
+                                ]
+                              },
+                              "args" : {
+                                "type" : "Args",
+                                "args" : [
+                                  {
+                                    "type" : "Arg",
+                                    "name" : "part"
+                                  }
+                                ]
+                              },
+                              "body" : {
+                                "type" : "Begin",
+                                "stmts" : [
+                                  {
+                                    "type" : "Assign",
+                                    "lhs" : {
+                                      "type" : "LVarLhs",
+                                      "name" : "lines"
+                                    },
+                                    "rhs" : {
+                                      "type" : "Send",
+                                      "receiver" : {
+                                        "type" : "LVar",
+                                        "name" : "part"
+                                      },
+                                      "method" : "split",
+                                      "args" : [
+                                        {
+                                          "type" : "DString",
+                                          "nodes" : [
+                                            {
+                                              "type" : "String",
+                                              "val" : "\n"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type" : "Assign",
+                                    "lhs" : {
+                                      "type" : "LVarLhs",
+                                      "name" : "a_name"
+                                    },
+                                    "rhs" : {
+                                      "type" : "Assign",
+                                      "lhs" : {
+                                        "type" : "LVarLhs",
+                                        "name" : "b_name"
+                                      },
+                                      "rhs" : {
+                                        "type" : "Nil"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type" : "Assign",
+                                    "lhs" : {
+                                      "type" : "LVarLhs",
+                                      "name" : "added_lines"
+                                    },
+                                    "rhs" : {
+                                      "type" : "Array",
+                                      "elts" : [
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type" : "Assign",
+                                    "lhs" : {
+                                      "type" : "LVarLhs",
+                                      "name" : "removed_lines"
+                                    },
+                                    "rhs" : {
+                                      "type" : "Array",
+                                      "elts" : [
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type" : "Block",
+                                    "send" : {
+                                      "type" : "Send",
+                                      "receiver" : {
+                                        "type" : "LVar",
+                                        "name" : "lines"
+                                      },
+                                      "method" : "each",
+                                      "args" : [
+                                      ]
+                                    },
+                                    "args" : {
+                                      "type" : "Args",
+                                      "args" : [
+                                        {
+                                          "type" : "Arg",
+                                          "name" : "line"
+                                        }
+                                      ]
+                                    },
+                                    "body" : {
+                                      "type" : "If",
+                                      "condition" : {
+                                        "type" : "Send",
+                                        "receiver" : {
+                                          "type" : "LVar",
+                                          "name" : "line"
+                                        },
+                                        "method" : "start_with?",
+                                        "args" : [
+                                          {
+                                            "type" : "DString",
+                                            "nodes" : [
+                                              {
+                                                "type" : "String",
+                                                "val" : "index "
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type" : "DString",
+                                            "nodes" : [
+                                              {
+                                                "type" : "String",
+                                                "val" : "@@"
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type" : "DString",
+                                            "nodes" : [
+                                              {
+                                                "type" : "String",
+                                                "val" : "new file mode"
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "then_" : {
+                                        "type" : "Next",
+                                        "exprs" : [
+                                        ]
+                                      },
+                                      "else_" : {
+                                        "type" : "If",
+                                        "condition" : {
+                                          "type" : "Send",
+                                          "receiver" : {
+                                            "type" : "LVar",
+                                            "name" : "line"
+                                          },
+                                          "method" : "start_with?",
+                                          "args" : [
+                                            {
+                                              "type" : "DString",
+                                              "nodes" : [
+                                                {
+                                                  "type" : "String",
+                                                  "val" : "---"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "then_" : {
+                                          "type" : "Begin",
+                                          "stmts" : [
+                                            {
+                                              "type" : "Assign",
+                                              "lhs" : {
+                                                "type" : "LVarLhs",
+                                                "name" : "a_name"
+                                              },
+                                              "rhs" : {
+                                                "type" : "Send",
+                                                "receiver" : {
+                                                  "type" : "LVar",
+                                                  "name" : "line"
+                                                },
+                                                "method" : "[]",
+                                                "args" : [
+                                                  {
+                                                    "type" : "IRange",
+                                                    "from" : {
+                                                      "type" : "Integer",
+                                                      "val" : "4"
+                                                    },
+                                                    "to" : {
+                                                      "type" : "Integer",
+                                                      "val" : "-1"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            },
+                                            {
+                                              "type" : "If",
+                                              "condition" : {
+                                                "type" : "And",
+                                                "left" : {
+                                                  "type" : "LVar",
+                                                  "name" : "a_name"
+                                                },
+                                                "right" : {
+                                                  "type" : "Send",
+                                                  "receiver" : {
+                                                    "type" : "LVar",
+                                                    "name" : "a_name"
+                                                  },
+                                                  "method" : "start_with?",
+                                                  "args" : [
+                                                    {
+                                                      "type" : "DString",
+                                                      "nodes" : [
+                                                        {
+                                                          "type" : "String",
+                                                          "val" : "a\/"
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "then_" : {
+                                                "type" : "Assign",
+                                                "lhs" : {
+                                                  "type" : "LVarLhs",
+                                                  "name" : "a_name"
+                                                },
+                                                "rhs" : {
+                                                  "type" : "Send",
+                                                  "receiver" : {
+                                                    "type" : "LVar",
+                                                    "name" : "a_name"
+                                                  },
+                                                  "method" : "[]",
+                                                  "args" : [
+                                                    {
+                                                      "type" : "IRange",
+                                                      "from" : {
+                                                        "type" : "Integer",
+                                                        "val" : "2"
+                                                      },
+                                                      "to" : {
+                                                        "type" : "Integer",
+                                                        "val" : "-1"
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              "else_" : null
+                                            }
+                                          ]
+                                        },
+                                        "else_" : {
+                                          "type" : "If",
+                                          "condition" : {
+                                            "type" : "Send",
+                                            "receiver" : {
+                                              "type" : "LVar",
+                                              "name" : "line"
+                                            },
+                                            "method" : "start_with?",
+                                            "args" : [
+                                              {
+                                                "type" : "DString",
+                                                "nodes" : [
+                                                  {
+                                                    "type" : "String",
+                                                    "val" : "+++"
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          "then_" : {
+                                            "type" : "Begin",
+                                            "stmts" : [
+                                              {
+                                                "type" : "Assign",
+                                                "lhs" : {
+                                                  "type" : "LVarLhs",
+                                                  "name" : "b_name"
+                                                },
+                                                "rhs" : {
+                                                  "type" : "Send",
+                                                  "receiver" : {
+                                                    "type" : "LVar",
+                                                    "name" : "line"
+                                                  },
+                                                  "method" : "[]",
+                                                  "args" : [
+                                                    {
+                                                      "type" : "IRange",
+                                                      "from" : {
+                                                        "type" : "Integer",
+                                                        "val" : "4"
+                                                      },
+                                                      "to" : {
+                                                        "type" : "Integer",
+                                                        "val" : "-1"
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              },
+                                              {
+                                                "type" : "If",
+                                                "condition" : {
+                                                  "type" : "And",
+                                                  "left" : {
+                                                    "type" : "LVar",
+                                                    "name" : "b_name"
+                                                  },
+                                                  "right" : {
+                                                    "type" : "Send",
+                                                    "receiver" : {
+                                                      "type" : "LVar",
+                                                      "name" : "b_name"
+                                                    },
+                                                    "method" : "start_with?",
+                                                    "args" : [
+                                                      {
+                                                        "type" : "DString",
+                                                        "nodes" : [
+                                                          {
+                                                            "type" : "String",
+                                                            "val" : "b\/"
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "then_" : {
+                                                  "type" : "Assign",
+                                                  "lhs" : {
+                                                    "type" : "LVarLhs",
+                                                    "name" : "b_name"
+                                                  },
+                                                  "rhs" : {
+                                                    "type" : "Send",
+                                                    "receiver" : {
+                                                      "type" : "LVar",
+                                                      "name" : "b_name"
+                                                    },
+                                                    "method" : "[]",
+                                                    "args" : [
+                                                      {
+                                                        "type" : "IRange",
+                                                        "from" : {
+                                                          "type" : "Integer",
+                                                          "val" : "2"
+                                                        },
+                                                        "to" : {
+                                                          "type" : "Integer",
+                                                          "val" : "-1"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                },
+                                                "else_" : null
+                                              }
+                                            ]
+                                          },
+                                          "else_" : {
+                                            "type" : "If",
+                                            "condition" : {
+                                              "type" : "Send",
+                                              "receiver" : {
+                                                "type" : "LVar",
+                                                "name" : "line"
+                                              },
+                                              "method" : "start_with?",
+                                              "args" : [
+                                                {
+                                                  "type" : "DString",
+                                                  "nodes" : [
+                                                    {
+                                                      "type" : "String",
+                                                      "val" : "+"
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "then_" : {
+                                              "type" : "Send",
+                                              "receiver" : {
+                                                "type" : "LVar",
+                                                "name" : "added_lines"
+                                              },
+                                              "method" : "<<",
+                                              "args" : [
+                                                {
+                                                  "type" : "Send",
+                                                  "receiver" : {
+                                                    "type" : "LVar",
+                                                    "name" : "line"
+                                                  },
+                                                  "method" : "[]",
+                                                  "args" : [
+                                                    {
+                                                      "type" : "IRange",
+                                                      "from" : {
+                                                        "type" : "Integer",
+                                                        "val" : "1"
+                                                      },
+                                                      "to" : {
+                                                        "type" : "Integer",
+                                                        "val" : "-1"
+                                                      }
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            },
+                                            "else_" : {
+                                              "type" : "If",
+                                              "condition" : {
+                                                "type" : "Send",
+                                                "receiver" : {
+                                                  "type" : "LVar",
+                                                  "name" : "line"
+                                                },
+                                                "method" : "start_with?",
+                                                "args" : [
+                                                  {
+                                                    "type" : "DString",
+                                                    "nodes" : [
+                                                      {
+                                                        "type" : "String",
+                                                        "val" : "-"
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              "then_" : {
+                                                "type" : "Send",
+                                                "receiver" : {
+                                                  "type" : "LVar",
+                                                  "name" : "removed_lines"
+                                                },
+                                                "method" : "<<",
+                                                "args" : [
+                                                  {
+                                                    "type" : "Send",
+                                                    "receiver" : {
+                                                      "type" : "LVar",
+                                                      "name" : "line"
+                                                    },
+                                                    "method" : "[]",
+                                                    "args" : [
+                                                      {
+                                                        "type" : "IRange",
+                                                        "from" : {
+                                                          "type" : "Integer",
+                                                          "val" : "1"
+                                                        },
+                                                        "to" : {
+                                                          "type" : "Integer",
+                                                          "val" : "-1"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              "else_" : null
+                                            }
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "type" : "If",
+                                    "condition" : {
+                                      "type" : "Send",
+                                      "receiver" : {
+                                        "type" : "LVar",
+                                        "name" : "a_name"
+                                      },
+                                      "method" : "nil?",
+                                      "args" : [
+                                      ]
+                                    },
+                                    "then_" : {
+                                      "type" : "Next",
+                                      "exprs" : [
+                                      ]
+                                    },
+                                    "else_" : null
+                                  },
+                                  {
+                                    "type" : "Hash",
+                                    "pairs" : [
+                                      {
+                                        "type" : "Pair",
+                                        "key" : {
+                                          "type" : "Symbol",
+                                          "val" : "a_name"
+                                        },
+                                        "value" : {
+                                          "type" : "LVar",
+                                          "name" : "a_name"
+                                        }
+                                      },
+                                      {
+                                        "type" : "Pair",
+                                        "key" : {
+                                          "type" : "Symbol",
+                                          "val" : "b_name"
+                                        },
+                                        "value" : {
+                                          "type" : "LVar",
+                                          "name" : "b_name"
+                                        }
+                                      },
+                                      {
+                                        "type" : "Pair",
+                                        "key" : {
+                                          "type" : "Symbol",
+                                          "val" : "added_lines"
+                                        },
+                                        "value" : {
+                                          "type" : "LVar",
+                                          "name" : "added_lines"
+                                        }
+                                      },
+                                      {
+                                        "type" : "Pair",
+                                        "key" : {
+                                          "type" : "Symbol",
+                                          "val" : "removed_lines"
+                                        },
+                                        "value" : {
+                                          "type" : "LVar",
+                                          "name" : "removed_lines"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            "method" : "compact",
+                            "args" : [
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
