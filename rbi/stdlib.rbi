@@ -2085,6 +2085,9 @@ class Binding
 end
 
 class CSV
+  extend T::Generic
+  Elem = type_member(fixed: T::Array[String])
+
   sig(
       path: T.any(String, File),
       options: T::Hash[Symbol, BasicObject],
@@ -2588,6 +2591,9 @@ class DateTime
 end
 
 class Dir
+  extend T::Generic
+  Elem = type_member(fixed: String)
+
   sig(
       arg0: T.any(String, Pathname),
   )
@@ -3548,6 +3554,9 @@ class FiberError
 end
 
 class File
+  extend T::Generic
+  Elem = type_member(fixed: String)
+
   sig(
       file: String,
       dir: String,
@@ -4813,6 +4822,7 @@ class Hash
   extend T::Generic
   K = type_member
   V = type_member
+  Elem = type_member
 
   sig(
       arg0: BasicObject,
@@ -5084,6 +5094,9 @@ class Hash
 end
 
 class IO
+  extend T::Generic
+  Elem = type_member(fixed: String)
+
   sig(
       arg0: BasicObject,
   )
@@ -11504,6 +11517,9 @@ class String
 end
 
 class StringIO
+  extend T::Generic
+  Elem = type_member(fixed: String)
+
   sig.returns(StringIO)
   def clone(); end
 
@@ -11548,6 +11564,9 @@ class StringScanner
 end
 
 class Struct
+  extend T::Generic
+  Elem = type_member(fixed: T.untyped)
+
   sig.returns(Struct)
   def clone(); end
 
