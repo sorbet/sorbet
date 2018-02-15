@@ -51,28 +51,6 @@ void ruby_typer::File::write(const absl::string_view filename, const absl::strin
     fout << text;
 }
 
-string ruby_typer::Strings::escapeCString(absl::string_view what) {
-    char escaped[] = {'\a', '\b', '\f', '\n', '\r', '\t', '\v', '\\', '\"'};
-    char non_escaped[] = {'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', '\"'};
-    static_assert(sizeof(escaped) == sizeof(non_escaped), "???");
-    stringstream buf;
-    for (char c : what) {
-        int j;
-        for (j = 0; j < sizeof(escaped); j++) {
-            if (c == escaped[j]) {
-                buf << '\\';
-                buf << non_escaped[j];
-                break;
-            }
-        }
-        if (j == sizeof(escaped)) {
-            buf << c;
-        }
-    }
-
-    return buf.str();
-}
-
 absl::string_view ruby_typer::File::getFileName(const absl::string_view path) {
     std::size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);

@@ -124,10 +124,6 @@ public:
     static absl::string_view getExtension(const absl::string_view path);
 };
 
-class Strings final {
-public:
-    static std::string escapeCString(absl::string_view what);
-};
 } // namespace ruby_typer
 std::string strprintf(const char *__restrict, va_list) __attribute__((format(printf, 1, 0)));
 ;

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <unordered_set>
 
+#include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 
 // helps debugging
@@ -120,7 +121,7 @@ string CFG::toString(const core::Context ctx) {
                 escaped << endl;
             }
             first = false;
-            escaped << Strings::escapeCString(line);
+            escaped << absl::CEscape(line);
         }
         buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [label = \"" << escaped.str() << "\"];" << endl
             << endl;

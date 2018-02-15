@@ -1,4 +1,5 @@
 #include "core/Types.h"
+#include "absl/base/casts.h"
 #include "common/common.h"
 #include "core/Context.h"
 #include "core/Names.h"
@@ -226,8 +227,7 @@ bool Type::isBottom() {
 
 ruby_typer::core::LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {}
 
-ruby_typer::core::LiteralType::LiteralType(double val)
-    : ProxyType(Types::Float()), value(*reinterpret_cast<u8 *>(&val)) {}
+ruby_typer::core::LiteralType::LiteralType(double val) : ProxyType(Types::Float()), value(absl::bit_cast<u8>(val)) {}
 
 ruby_typer::core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
     : ProxyType(klass == core::Symbols::String() ? Types::String() : Types::Symbol()), value(val._id) {
@@ -251,7 +251,7 @@ string LiteralType::toString(const GlobalState &gs, int tabs) {
     } else if (undSymbol == Symbols::Integer()) {
         value = to_string(this->value);
     } else if (undSymbol == Symbols::Float()) {
-        value = to_string(*reinterpret_cast<double *>(&(this->value)));
+        value = to_string(absl::bit_cast<double>(this->value));
     } else if (undSymbol == Symbols::TrueClass()) {
         value = "true";
     } else if (undSymbol == Symbols::FalseClass()) {

@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "absl/strings/escaping.h"
+
 using namespace std;
 
 enum Phase {
@@ -204,7 +206,7 @@ void emit_name_header(ostream &out, NameDef &name) {
 
 void emit_name_string(ostream &out, NameDef &name) {
     out << "const char *" << name.srcName << " = \"";
-    out << ruby_typer::Strings::escapeCString(name.val) << "\";" << endl;
+    out << absl::CEscape(name.val) << "\";" << endl;
 
     out << "absl::string_view " << name.srcName << "_DESC{(char*)";
     out << name.srcName << "," << name.val.size() << "};" << endl;

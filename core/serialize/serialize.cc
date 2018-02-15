@@ -1,4 +1,5 @@
 #include "serialize.h"
+#include "absl/base/casts.h"
 #include "core/Symbols.h"
 #include "lib/lizard_compress.h"
 #include "lib/lizard_decompress.h"
@@ -30,8 +31,10 @@ void GlobalStateSerializer::Pickler::putStr(const absl::string_view s) {
     }
 }
 
-char u4tochar(u4 u) {
-    return *reinterpret_cast<char *>(&u);
+char u1tochar(u4 u) {
+    u1 sm = u;
+    ENFORCE(sm == u);
+    return absl::bit_cast<char>(sm);
 }
 
 std::vector<u4> GlobalStateSerializer::Pickler::result() {
@@ -76,15 +79,15 @@ std::string GlobalStateSerializer::UnPickler::getStr() {
     std::string result(sz, '\0');
     for (int i = 0; i < end; i += step) {
         u4 el = getU4();
-        result[i + 3] = u4tochar(el & 255u);
-        result[i + 2] = u4tochar((el >> 8u) & 255u);
-        result[i + 1] = u4tochar((el >> 16u) & 255u);
-        result[i] = u4tochar((el >> 24u) & 255u);
+        result[i + 3] = u1tochar(el & 255u);
+        result[i + 2] = u1tochar((el >> 8u) & 255u);
+        result[i + 1] = u1tochar((el >> 16u) & 255u);
+        result[i] = u1tochar((el >> 24u) & 255u);
     }
     if (end != result.size()) {
         u4 acc = getU4();
         for (int i = result.size() - 1; i >= end; i--) {
-            result[i] = u4tochar(acc & 255u);
+            result[i] = u1tochar(acc & 255u);
             acc = acc >> 8;
         }
     }
@@ -140,7 +143,7 @@ int64_t GlobalStateSerializer::UnPickler::getS8() {
     u8 low = getU4();
     u8 high = getU4();
     u8 full = (high << 32) + low;
-    return *reinterpret_cast<int64_t *>(&full);
+    return absl::bit_cast<int64_t>(full);
 }
 
 void GlobalStateSerializer::pickle(Pickler &p, File &what) {
