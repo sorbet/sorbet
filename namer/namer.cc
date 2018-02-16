@@ -497,6 +497,14 @@ public:
                     }
                 }
 
+                auto members = ctx.owner.data(ctx).typeMembers();
+                auto it = find_if(members.begin(), members.end(),
+                                  [&](auto mem) { return mem.data(ctx).name == typeName->cnst; });
+                if (it != members.end()) {
+                    ctx.state.error(typeName->loc, core::errors::Namer::InvalidTypeDefinition,
+                                    "Duplicate type member {}", typeName->cnst.data(ctx).show(ctx));
+                    return new ast::EmptyTree(asgn->loc);
+                }
                 auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.owner.data(ctx).enclosingClass(ctx), typeName->cnst,
                                                      variance);
 

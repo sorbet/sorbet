@@ -366,7 +366,10 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
 
     flags = flags | Symbol::Flags::TYPE_MEMBER;
     SymbolRef result = enterSymbol(loc, owner, name, flags);
-    owner.data(*this).typeMembers().emplace_back(result);
+    auto &members = owner.data(*this).typeMembers();
+    if (find(members.begin(), members.end(), result) == members.end()) {
+        members.emplace_back(result);
+    }
     return result;
 }
 
