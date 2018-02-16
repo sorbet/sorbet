@@ -59,6 +59,24 @@ string Name::toString(const GlobalState &gs) const {
     }
 }
 
+string Name::show(const GlobalState &gs) const {
+    switch (this->kind) {
+        case UTF8:
+            return string(raw.utf8.begin(), raw.utf8.end());
+        case UNIQUE:
+            if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
+                return "<Class:" + this->unique.original.data(gs).show(gs) + ">";
+            } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
+                return this->unique.original.data(gs).toString(gs);
+            }
+            return this->unique.original.data(gs).toString(gs);
+        case CONSTANT:
+            return this->cnst.original.toString(gs);
+        default:
+            Error::notImplemented();
+    }
+}
+
 void Name::sanityCheck(const GlobalState &gs) const {
     if (!debug_mode) {
         return;

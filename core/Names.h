@@ -153,6 +153,7 @@ public:
     bool isClassName(GlobalState &gs) const;
 
     std::string toString(const GlobalState &gs) const;
+    std::string show(const GlobalState &gs) const;
     void sanityCheck(const GlobalState &gs) const;
     NameRef ref(const GlobalState &gs) const;
 

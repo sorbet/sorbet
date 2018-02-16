@@ -333,7 +333,7 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
         switch (arg.type) {
             case Name:
                 out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << escapeJSON(" << arg.name
-                    << ".data(gs).toString(gs)) << \"\\\"" << maybeComma << "\" << std::endl;" << endl;
+                    << ".data(gs).show(gs)) << \"\\\"" << maybeComma << "\" << std::endl;" << endl;
                 break;
             case Node:
                 out << "    buf << \"\\\"" << arg.name << "\\\" : \";" << endl;

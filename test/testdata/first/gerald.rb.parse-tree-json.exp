@@ -24,9 +24,9 @@
         "scope" : {
           "type" : "Const",
           "scope" : null,
-          "name" : "<constant:Opus>"
+          "name" : "Opus"
         },
-        "name" : "<constant:AutogenLoader>"
+        "name" : "AutogenLoader"
       },
       "method" : "init",
       "args" : [
@@ -44,11 +44,11 @@
           "scope" : {
             "type" : "Const",
             "scope" : null,
-            "name" : "<constant:Opus>"
+            "name" : "Opus"
           },
-          "name" : "<constant:CIBot>"
+          "name" : "CIBot"
         },
-        "name" : "<constant:Gerald>"
+        "name" : "Gerald"
       },
       "body" : {
         "type" : "Begin",
@@ -58,12 +58,12 @@
             "name" : {
               "type" : "Const",
               "scope" : null,
-              "name" : "<constant:MatchTimeout>"
+              "name" : "MatchTimeout"
             },
             "superclass" : {
               "type" : "Const",
               "scope" : null,
-              "name" : "<constant:StandardError>"
+              "name" : "StandardError"
             },
             "body" : {
               "type" : "Begin",
@@ -138,7 +138,7 @@
             "name" : {
               "type" : "Const",
               "scope" : null,
-              "name" : "<constant:Matcher>"
+              "name" : "Matcher"
             },
             "superclass" : null,
             "body" : {
@@ -154,9 +154,9 @@
                       "scope" : {
                         "type" : "Const",
                         "scope" : null,
-                        "name" : "<constant:Chalk>"
+                        "name" : "Chalk"
                       },
-                      "name" : "<constant:Log>"
+                      "name" : "Log"
                     }
                   ]
                 },
@@ -165,7 +165,7 @@
                   "lhs" : {
                     "type" : "ConstLhs",
                     "scope" : null,
-                    "name" : "<constant:MAX_AFFECTED_FILES>"
+                    "name" : "MAX_AFFECTED_FILES"
                   },
                   "rhs" : {
                     "type" : "Integer",
@@ -209,13 +209,13 @@
                                     "scope" : {
                                       "type" : "Const",
                                       "scope" : null,
-                                      "name" : "<constant:Opus>"
+                                      "name" : "Opus"
                                     },
-                                    "name" : "<constant:CIBot>"
+                                    "name" : "CIBot"
                                   },
-                                  "name" : "<constant:Model>"
+                                  "name" : "Model"
                                 },
-                                "name" : "<constant:GeraldRule>"
+                                "name" : "GeraldRule"
                               },
                               "method" : "query_by",
                               "args" : [
@@ -391,7 +391,7 @@
                             {
                               "type" : "Const",
                               "scope" : null,
-                              "name" : "<constant:MAX_AFFECTED_FILES>"
+                              "name" : "MAX_AFFECTED_FILES"
                             }
                           ]
                         },
@@ -481,7 +481,7 @@
                           "receiver" : {
                             "type" : "Const",
                             "scope" : null,
-                            "name" : "<constant:MatchTimeBudget>"
+                            "name" : "MatchTimeBudget"
                           },
                           "method" : "new",
                           "args" : [
@@ -553,7 +553,7 @@
             "name" : {
               "type" : "Const",
               "scope" : null,
-              "name" : "<constant:MatchContext>"
+              "name" : "MatchContext"
             },
             "superclass" : null,
             "body" : {
@@ -819,7 +819,7 @@
             "name" : {
               "type" : "Const",
               "scope" : null,
-              "name" : "<constant:MatchTimeBudget>"
+              "name" : "MatchTimeBudget"
             },
             "superclass" : null,
             "body" : {
@@ -830,7 +830,7 @@
                   "lhs" : {
                     "type" : "ConstLhs",
                     "scope" : null,
-                    "name" : "<constant:TOTAL_TIME_MS>"
+                    "name" : "TOTAL_TIME_MS"
                   },
                   "rhs" : {
                     "type" : "Integer",
@@ -842,7 +842,7 @@
                   "lhs" : {
                     "type" : "ConstLhs",
                     "scope" : null,
-                    "name" : "<constant:PER_RULE_MS>"
+                    "name" : "PER_RULE_MS"
                   },
                   "rhs" : {
                     "type" : "Integer",
@@ -864,7 +864,7 @@
                       "receiver" : {
                         "type" : "Const",
                         "scope" : null,
-                        "name" : "<constant:Time>"
+                        "name" : "Time"
                       },
                       "method" : "now",
                       "args" : [
@@ -897,7 +897,7 @@
                                   "receiver" : {
                                     "type" : "Const",
                                     "scope" : null,
-                                    "name" : "<constant:Time>"
+                                    "name" : "Time"
                                   },
                                   "method" : "now",
                                   "args" : [
@@ -935,7 +935,7 @@
                             {
                               "type" : "Const",
                               "scope" : null,
-                              "name" : "<constant:TOTAL_TIME_MS>"
+                              "name" : "TOTAL_TIME_MS"
                             }
                           ]
                         },
@@ -949,7 +949,7 @@
                               "receiver" : {
                                 "type" : "Const",
                                 "scope" : null,
-                                "name" : "<constant:MatchTimeout>"
+                                "name" : "MatchTimeout"
                               },
                               "method" : "new",
                               "args" : [
@@ -969,7 +969,7 @@
                                             {
                                               "type" : "Const",
                                               "scope" : null,
-                                              "name" : "<constant:TOTAL_TIME_MS>"
+                                              "name" : "TOTAL_TIME_MS"
                                             }
                                           ]
                                         },
@@ -1016,7 +1016,7 @@
                           "receiver" : {
                             "type" : "Const",
                             "scope" : null,
-                            "name" : "<constant:Time>"
+                            "name" : "Time"
                           },
                           "method" : "now",
                           "args" : [
@@ -1053,7 +1053,7 @@
                                   "receiver" : {
                                     "type" : "Const",
                                     "scope" : null,
-                                    "name" : "<constant:Time>"
+                                    "name" : "Time"
                                   },
                                   "method" : "now",
                                   "args" : [
@@ -1091,7 +1091,7 @@
                             {
                               "type" : "Const",
                               "scope" : null,
-                              "name" : "<constant:PER_RULE_MS>"
+                              "name" : "PER_RULE_MS"
                             }
                           ]
                         },
@@ -1105,7 +1105,7 @@
                               "receiver" : {
                                 "type" : "Const",
                                 "scope" : null,
-                                "name" : "<constant:MatchTimeout>"
+                                "name" : "MatchTimeout"
                               },
                               "method" : "new",
                               "args" : [
@@ -1163,7 +1163,7 @@
                                             {
                                               "type" : "Const",
                                               "scope" : null,
-                                              "name" : "<constant:PER_RULE_MS>"
+                                              "name" : "PER_RULE_MS"
                                             }
                                           ]
                                         },
@@ -1225,7 +1225,7 @@
             "name" : {
               "type" : "Const",
               "scope" : null,
-              "name" : "<constant:Diff>"
+              "name" : "Diff"
             },
             "superclass" : null,
             "body" : {
@@ -1730,15 +1730,15 @@
                               "scope" : {
                                 "type" : "Const",
                                 "scope" : null,
-                                "name" : "<constant:Opus>"
+                                "name" : "Opus"
                               },
-                              "name" : "<constant:CIBot>"
+                              "name" : "CIBot"
                             },
-                            "name" : "<constant:Actions>"
+                            "name" : "Actions"
                           },
-                          "name" : "<constant:OpenAPI>"
+                          "name" : "OpenAPI"
                         },
-                        "name" : "<constant:SPEC_PATH>"
+                        "name" : "SPEC_PATH"
                       }
                     ]
                   }
