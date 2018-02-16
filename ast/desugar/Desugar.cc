@@ -288,7 +288,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             [&](parser::And *and_) {
                 auto lhs = node2TreeImpl(ctx, move(and_->left), uniqueCounter);
                 if (auto i = cast_tree<Reference>(lhs.get())) {
-                    auto cond = MK::cpRef(loc, *i);
+                    auto cond = MK::cpRef(*i);
                     auto iff = MK::If(loc, move(cond), node2TreeImpl(ctx, move(and_->right), uniqueCounter), move(lhs));
                     result.swap(iff);
                 } else {
@@ -306,7 +306,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             [&](parser::Or *or_) {
                 auto lhs = node2TreeImpl(ctx, move(or_->left), uniqueCounter);
                 if (auto i = cast_tree<Reference>(lhs.get())) {
-                    auto cond = MK::cpRef(loc, *i);
+                    auto cond = MK::cpRef(*i);
                     auto iff = MK::If(loc, move(cond), move(lhs), node2TreeImpl(ctx, move(or_->right), uniqueCounter));
                     result.swap(iff);
                 } else {
@@ -325,6 +325,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 auto recv = node2TreeImpl(ctx, move(andAsgn->left), uniqueCounter);
                 auto arg = node2TreeImpl(ctx, move(andAsgn->right), uniqueCounter);
                 if (auto s = cast_tree<Send>(recv.get())) {
+                    auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
@@ -340,20 +341,21 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         assgnArgs.emplace_back(MK::Local(loc, name));
                     }
                     assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(loc, MK::Local(loc, tempRecv), s->fun, move(readArgs), s->flags);
+                    auto cond = MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun, move(readArgs), s->flags);
                     core::NameRef tempResult =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
                     stats.emplace_back(MK::Assign(loc, tempResult, move(cond)));
 
-                    auto body = MK::Send(loc, MK::Local(loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
+                    auto body =
+                        MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
                     auto elsep = MK::Local(loc, tempResult);
                     auto iff = MK::If(loc, MK::Local(loc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
                     result.swap(wrapped);
                 } else if (auto i = cast_tree<Reference>(recv.get())) {
-                    auto cond = MK::cpRef(loc, *i);
+                    auto cond = MK::cpRef(*i);
                     auto body = MK::Assign(loc, move(recv), move(arg));
-                    auto elsep = MK::cpRef(loc, *i);
+                    auto elsep = MK::cpRef(*i);
                     auto iff = MK::If(loc, move(cond), move(body), move(elsep));
                     result.swap(iff);
                 } else {
@@ -364,6 +366,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 auto recv = node2TreeImpl(ctx, move(orAsgn->left), uniqueCounter);
                 auto arg = node2TreeImpl(ctx, move(orAsgn->right), uniqueCounter);
                 if (auto s = cast_tree<Send>(recv.get())) {
+                    auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
@@ -379,20 +382,21 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         assgnArgs.emplace_back(MK::Local(loc, name));
                     }
                     assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(loc, MK::Local(loc, tempRecv), s->fun, move(readArgs), s->flags);
+                    auto cond = MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun, move(readArgs), s->flags);
                     core::NameRef tempResult =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
                     stats.emplace_back(MK::Assign(loc, tempResult, move(cond)));
 
-                    auto elsep = MK::Send(loc, MK::Local(loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
+                    auto elsep =
+                        MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
                     auto body = MK::Local(loc, tempResult);
                     auto iff = MK::If(loc, MK::Local(loc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
                     result.swap(wrapped);
                 } else if (auto i = cast_tree<Reference>(recv.get())) {
-                    auto cond = MK::cpRef(loc, *i);
+                    auto cond = MK::cpRef(*i);
                     auto body = MK::Assign(loc, move(recv), move(arg));
-                    auto elsep = MK::cpRef(loc, *i);
+                    auto elsep = MK::cpRef(*i);
                     auto iff = MK::If(loc, move(cond), move(elsep), move(body));
                     result.swap(iff);
 
@@ -404,6 +408,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 auto recv = node2TreeImpl(ctx, move(opAsgn->left), uniqueCounter);
                 auto rhs = node2TreeImpl(ctx, move(opAsgn->right), uniqueCounter);
                 if (auto s = cast_tree<Send>(recv.get())) {
+                    auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
@@ -418,15 +423,16 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         readArgs.emplace_back(MK::Local(loc, name));
                         assgnArgs.emplace_back(MK::Local(loc, name));
                     }
-                    auto prevValue = MK::Send(loc, MK::Local(loc, tempRecv), s->fun, move(readArgs), s->flags);
+                    auto prevValue = MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun, move(readArgs), s->flags);
                     auto newValue = MK::Send1(loc, move(prevValue), opAsgn->op, move(rhs));
                     assgnArgs.emplace_back(move(newValue));
 
-                    auto res = MK::Send(loc, MK::Local(loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
+                    auto res =
+                        MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
                     auto wrapped = MK::InsSeq(loc, move(stats), move(res));
                     result.swap(wrapped);
                 } else if (auto i = cast_tree<Reference>(recv.get())) {
-                    auto lhs = MK::cpRef(loc, *i);
+                    auto lhs = MK::cpRef(*i);
                     auto send = MK::Send1(loc, move(recv), opAsgn->op, move(rhs));
                     auto res = MK::Assign(loc, move(lhs), move(send));
                     result.swap(res);

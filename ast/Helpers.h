@@ -59,12 +59,12 @@ public:
         return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Instance, name);
     }
 
-    static std::unique_ptr<Expression> cpRef(core::Loc loc, Reference &name) {
+    static std::unique_ptr<Expression> cpRef(Reference &name) {
         if (auto *nm = cast_tree<UnresolvedIdent>(&name)) {
-            return std::make_unique<UnresolvedIdent>(loc, nm->kind, nm->name);
+            return std::make_unique<UnresolvedIdent>(name.loc, nm->kind, nm->name);
         }
         if (auto *id = cast_tree<ast::Ident>(&name)) {
-            return Ident(loc, id->symbol);
+            return Ident(name.loc, id->symbol);
         }
         Error::notImplemented();
     }
