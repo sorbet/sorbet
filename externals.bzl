@@ -50,7 +50,7 @@ def externals():
     new_git_repository(
             name="jemalloc",
             remote="https://github.com/jemalloc/jemalloc.git",
-            commit="f78d4ca3fbff6cab0c704c787706a53ddafcbe13",
+            commit="ae0f5d5c3f29beb9977148dedb58575757139586",
             build_file="//:jemalloc.BUILD",
         )
 
@@ -63,8 +63,8 @@ def externals():
 
     new_git_repository(
                 name="concurrentqueue",
-                remote="https://github.com/DarkDimius/concurrentqueue.git",
-                commit="d40e4e754dad40510ae6b8613c7ce94d6918527a",
+                remote="https://github.com/cameron314/concurrentqueue.git",
+                commit="a5d7dd873c94b52973a8a2baab204034db0799bc",
                 build_file="//:concurrentqueue.BUILD",
             )
 
@@ -85,7 +85,7 @@ def externals():
     git_repository(
             name="com_google_absl",
             remote="https://github.com/abseil/abseil-cpp.git",
-            commit="f6eea9486ae1935017f42d1f89005ddafb0bd53a"
+            commit="03c1513538584f4a04d666be5eb469e3979febba"
         )
 
     new_git_repository(
